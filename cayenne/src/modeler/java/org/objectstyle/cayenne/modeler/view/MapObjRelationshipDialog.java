@@ -156,7 +156,7 @@ public class MapObjRelationshipDialog extends SPanel {
         // assemble
         setDisplayMode(SwingView.MODAL_DIALOG);
         setTitle("Map ObjRelationship");
-        setLayout(new BorderLayout(5, 5));
+        setLayout(new BorderLayout());
 
         add(builder.getPanel(), BorderLayout.NORTH);
         add(new JScrollPane(pathTable), BorderLayout.CENTER);

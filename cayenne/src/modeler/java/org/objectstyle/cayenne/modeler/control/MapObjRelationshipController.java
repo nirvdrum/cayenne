@@ -127,14 +127,15 @@ public class MapObjRelationshipController extends BasicController {
 
     protected void saveMapping() {
         MapObjRelationshipModel model = (MapObjRelationshipModel) getModel();
-        model.savePath();
-        shutdown();
 
-        mediator.fireObjRelationshipEvent(
-            new RelationshipEvent(
-                CayenneModelerFrame.getFrame(),
-                model.getRelationship(),
-                model.getRelationship().getSourceEntity()));
+        if (model.savePath()) {
+            mediator.fireObjRelationshipEvent(
+                new RelationshipEvent(
+                    CayenneModelerFrame.getFrame(),
+                    model.getRelationship(),
+                    model.getRelationship().getSourceEntity()));
+        }
+        shutdown();
     }
 
     /**

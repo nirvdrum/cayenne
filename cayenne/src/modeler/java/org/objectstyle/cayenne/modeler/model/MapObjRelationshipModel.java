@@ -108,8 +108,17 @@ public class MapObjRelationshipModel extends BasicModel {
         this.relationship = relationship;
         this.objectTarget = (ObjEntity) relationship.getTargetEntity();
 
-        // prepare entities - create a copy and sort
-        this.objectTargets = new ArrayList(objEntities);
+        // prepare entities - copy those that have DbEntities mapped, and then sort
+
+        this.objectTargets = new ArrayList(objEntities.size());
+        Iterator entities = objEntities.iterator();
+        while (entities.hasNext()) {
+            ObjEntity entity = (ObjEntity) entities.next();
+            if (entity.getDbEntity() != null) {
+                objectTargets.add(entity);
+            }
+        }
+
         Collections.sort(objectTargets, new PropertyComparator("name", ObjEntity.class));
 
         // validate -
@@ -126,8 +135,7 @@ public class MapObjRelationshipModel extends BasicModel {
         }
 
         // add dummy last relationship if we are not connected
-        connectTail();
-
+        connectEnds();
         this.dbRelationshipPath.addModelChangeListener(this);
     }
 
@@ -161,10 +169,16 @@ public class MapObjRelationshipModel extends BasicModel {
         }
     }
 
+    /**
+     * Returns currently selected target of the ObjRelationship.
+     */
     public ObjEntity getObjectTarget() {
         return objectTarget;
     }
 
+    /** 
+     * Sets a new target 
+     */
     public void setObjectTarget(ObjEntity objectTarget) {
         if (this.objectTarget != objectTarget) {
             unlistenOldSubmodel(OBJECT_TARGET_SELECTOR);
@@ -176,6 +190,13 @@ public class MapObjRelationshipModel extends BasicModel {
             fireModelChange(
                 ModelChangeEvent.VALUE_CHANGED,
                 RELATIONSHIP_DESCRIPTION_SELECTOR);
+
+            // change the list of relationships 
+            breakChain(-1);
+            connectEnds();
+            fireModelChange(
+                ModelChangeEvent.VALUE_CHANGED,
+                DB_RELATIONSHIP_PATH_SELECTOR);
         }
     }
 
@@ -211,12 +232,41 @@ public class MapObjRelationshipModel extends BasicModel {
         breakChain(index);
 
         // connect the ends
-        connectTail();
-        dbRelationshipPath.fireModelChange(VALUE_CHANGED, null);
+        connectEnds();
+        dbRelationshipPath.fireModelChange(VALUE_CHANGED, DB_RELATIONSHIP_PATH_SELECTOR);
     }
 
-    public synchronized void savePath() {
+    /**
+     * Stores current state of the model in the internal ObjRelationship.
+     */
+    public synchronized boolean savePath() {
+        // check for modifications
+        if (relationship.getTargetEntity() == objectTarget) {
+            List oldPath = relationship.getDbRelationships();
+            if (oldPath.size() == dbRelationshipPath.size()) {
+                boolean hasChanges = false;
+                for (int i = 0; i < oldPath.size(); i++) {
+                    EntityRelationshipsModel next =
+                        (EntityRelationshipsModel) dbRelationshipPath.get(i);
+                    if (oldPath.get(i) != next.getSelectedRelationship()) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+
+                if (!hasChanges) {
+                    return false;
+                }
+            }
+        }
+
+        // detected modifications, save...
         relationship.clearDbRelationships();
+
+        // note on events notification - this needs to be propagated
+        // via old modeler events, but we leave this to the controller
+        // since model knows nothing about Modeler mediator.
+        relationship.setTargetEntity(objectTarget);
 
         Iterator it = dbRelationshipPath.iterator();
         while (it.hasNext()) {
@@ -228,6 +278,8 @@ public class MapObjRelationshipModel extends BasicModel {
 
             relationship.addDbRelationship((DbRelationship) nextPathComponent);
         }
+
+        return true;
     }
 
     private void breakChain(int index) {
@@ -245,7 +297,9 @@ public class MapObjRelationshipModel extends BasicModel {
         }
     }
 
-    private void connectTail() {
+    // Connects last selected DbRelationship in the path to the 
+    // last DbEntity, creating a dummy relationship if needed.
+    private void connectEnds() {
         Relationship last = null;
 
         int size = dbRelationshipPath.size();

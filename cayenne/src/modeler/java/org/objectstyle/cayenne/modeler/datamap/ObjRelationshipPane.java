@@ -60,8 +60,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -75,7 +73,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -84,7 +81,6 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.MapObjRelationshipController;
@@ -218,36 +214,16 @@ public class ObjRelationshipPane
 
     private void resolveRelationship() {
         int row = table.getSelectedRow();
-        if (-1 == row)
-            return;
-        ObjRelationshipTableModel model;
-        model = (ObjRelationshipTableModel) table.getModel();
-        ObjRelationship rel = model.getRelationship(row);
-        new MapObjRelationshipController(mediator, rel).startup();
-    }
-
-    /**
-     * Set obj relationship to db relationships resolution.
-     * Clear old db relationships and put new ones in their place.
-     */
-    private void copyDbRelationship(ObjRelationship rel, List list) {
-        rel.clearDbRelationships();
-        if (list == null) {
+        if (row < 0) {
             return;
         }
 
-        // Add DbRelationships to the ObjRelationship list.
-        Iterator iter = list.iterator();
-        while (iter.hasNext()) {
-            DbRelationship db_rel = (DbRelationship) iter.next();
-            rel.addDbRelationship(db_rel);
-        }
+        ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
+        new MapObjRelationshipController(mediator, model.getRelationship(row)).startup();
 
-        mediator.fireObjRelationshipEvent(
-            new RelationshipEvent(
-                CayenneModelerFrame.getFrame(),
-                rel,
-                rel.getSourceEntity()));
+        // need to refresh selected row... do this by unselecting/selecting the row
+        table.getSelectionModel().clearSelection();
+        table.select(row);
     }
 
     /** Loads obj relationships into table. */
