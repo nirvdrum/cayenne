@@ -415,7 +415,7 @@ public class MapLoader extends DefaultHandler {
         objRelationships = new ArrayList();
         dbRelationshipRefs = new ArrayList();
         dbRelationships = new ArrayList();
-        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         out.println(
             "<data-map project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\">");
         storeProcedures(out, map);

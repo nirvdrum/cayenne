@@ -170,6 +170,7 @@ public class ConfigSaver {
      * <code>info</code> object may contain full or partial information.
      */
     public void storeDataNode(PrintWriter out, DataSourceInfo info) {
+		out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         out.print(
             "<driver project-version=\""
                 + Project.CURRENT_PROJECT_VERSION
