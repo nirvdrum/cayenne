@@ -71,9 +71,9 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
-/** 
- * Model for DbEntity attributes. Allows adding/removing 
- * attributes, modifying types and names.
+/**
+ * Model for DbEntity attributes. Allows adding/removing attributes, modifying types and
+ * names.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
@@ -87,22 +87,18 @@ public class DbAttributeTableModel extends CayenneTableModel {
     private static final int DB_ATTRIBUTE_MANDATORY = 3;
     private static final int DB_ATTRIBUTE_MAX = 4;
     private static final int DB_ATTRIBUTE_PRECISION = 5;
+    private static final int DB_ATTRIBUTE_GENERATED = 6;
 
     protected DbEntity entity;
 
-    public DbAttributeTableModel(
-        DbEntity entity,
-        ProjectController mediator,
-        Object eventSource) {
+    public DbAttributeTableModel(DbEntity entity, ProjectController mediator,
+            Object eventSource) {
         this(entity, mediator, eventSource, new ArrayList(entity.getAttributes()));
         this.entity = entity;
     }
 
-    public DbAttributeTableModel(
-        DbEntity entity,
-        ProjectController mediator,
-        Object eventSource,
-        java.util.List objectList) {
+    public DbAttributeTableModel(DbEntity entity, ProjectController mediator,
+            Object eventSource, java.util.List objectList) {
         super(mediator, eventSource, objectList);
     }
 
@@ -125,44 +121,47 @@ public class DbAttributeTableModel extends CayenneTableModel {
         return DbAttribute.class;
     }
 
-    /** 
+    /**
      * Returns the number of columns in the table.
      */
     public int getColumnCount() {
-        return 6;
+        return 7;
     }
 
     public DbAttribute getAttribute(int row) {
         return (row >= 0 && row < objectList.size())
-            ? (DbAttribute) objectList.get(row)
-            : null;
+                ? (DbAttribute) objectList.get(row)
+                : null;
     }
 
     public String getColumnName(int col) {
         switch (col) {
-            case DB_ATTRIBUTE_NAME :
+            case DB_ATTRIBUTE_NAME:
                 return "Name";
-            case DB_ATTRIBUTE_TYPE :
+            case DB_ATTRIBUTE_TYPE:
                 return "Type";
-            case DB_ATTRIBUTE_PRIMARY_KEY :
+            case DB_ATTRIBUTE_PRIMARY_KEY:
                 return "PK";
-            case DB_ATTRIBUTE_PRECISION :
+            case DB_ATTRIBUTE_PRECISION:
                 return "Precision";
-            case DB_ATTRIBUTE_MANDATORY :
+            case DB_ATTRIBUTE_MANDATORY:
                 return "Mandatory";
-            case DB_ATTRIBUTE_MAX :
+            case DB_ATTRIBUTE_MAX:
                 return "Max Length";
-            default :
+            case DB_ATTRIBUTE_GENERATED:
+                return "Auto";
+            default:
                 return "";
         }
     }
 
     public Class getColumnClass(int col) {
         switch (col) {
-            case DB_ATTRIBUTE_PRIMARY_KEY :
-            case DB_ATTRIBUTE_MANDATORY :
+            case DB_ATTRIBUTE_PRIMARY_KEY:
+            case DB_ATTRIBUTE_MANDATORY:
+            case DB_ATTRIBUTE_GENERATED:
                 return Boolean.class;
-            default :
+            default:
                 return String.class;
         }
     }
@@ -175,19 +174,21 @@ public class DbAttributeTableModel extends CayenneTableModel {
         }
 
         switch (column) {
-            case DB_ATTRIBUTE_NAME :
+            case DB_ATTRIBUTE_NAME:
                 return getAttributeName(attr);
-            case DB_ATTRIBUTE_TYPE :
+            case DB_ATTRIBUTE_TYPE:
                 return getAttributeType(attr);
-            case DB_ATTRIBUTE_PRIMARY_KEY :
+            case DB_ATTRIBUTE_PRIMARY_KEY:
                 return isPrimaryKey(attr);
-            case DB_ATTRIBUTE_PRECISION :
+            case DB_ATTRIBUTE_PRECISION:
                 return getPrecision(attr);
-            case DB_ATTRIBUTE_MANDATORY :
+            case DB_ATTRIBUTE_MANDATORY:
                 return isMandatory(attr);
-            case DB_ATTRIBUTE_MAX :
+            case DB_ATTRIBUTE_MAX:
                 return getMaxLength(attr);
-            default :
+            case DB_ATTRIBUTE_GENERATED:
+                return isGenerated(attr);
+            default:
                 return "";
         }
     }
@@ -201,26 +202,29 @@ public class DbAttributeTableModel extends CayenneTableModel {
         AttributeEvent e = new AttributeEvent(eventSource, attr, entity);
 
         switch (col) {
-            case DB_ATTRIBUTE_NAME :
+            case DB_ATTRIBUTE_NAME:
                 e.setOldName(attr.getName());
                 setAttributeName((String) newVal, attr);
                 fireTableCellUpdated(row, col);
                 break;
-            case DB_ATTRIBUTE_TYPE :
+            case DB_ATTRIBUTE_TYPE:
                 setAttributeType((String) newVal, attr);
                 break;
-            case DB_ATTRIBUTE_PRIMARY_KEY :
+            case DB_ATTRIBUTE_PRIMARY_KEY:
                 if (!setPrimaryKey(((Boolean) newVal), attr, row)) {
                     return;
                 }
                 break;
-            case DB_ATTRIBUTE_PRECISION :
+            case DB_ATTRIBUTE_PRECISION:
                 setPrecision((String) newVal, attr);
                 break;
-            case DB_ATTRIBUTE_MANDATORY :
+            case DB_ATTRIBUTE_MANDATORY:
                 setMandatory((Boolean) newVal, attr);
                 break;
-            case DB_ATTRIBUTE_MAX :
+            case DB_ATTRIBUTE_GENERATED:
+                setGenerated((Boolean) newVal, attr);
+                break;
+            case DB_ATTRIBUTE_MAX:
                 setMaxLength((String) newVal, attr);
                 break;
         }
@@ -252,6 +256,10 @@ public class DbAttributeTableModel extends CayenneTableModel {
         return (attr.isMandatory()) ? Boolean.TRUE : Boolean.FALSE;
     }
 
+    public Boolean isGenerated(DbAttribute attr) {
+        return (attr.isGenerated()) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
     public void setMaxLength(String newVal, DbAttribute attr) {
         if (newVal == null || newVal.trim().length() <= 0) {
             attr.setMaxLength(-1);
@@ -262,10 +270,10 @@ public class DbAttributeTableModel extends CayenneTableModel {
             }
             catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(
-                    null,
-                    "Invalid Max Length (" + newVal + "), only numbers are allowed",
-                    "Invalid Maximum Length",
-                    JOptionPane.ERROR_MESSAGE);
+                        null,
+                        "Invalid Max Length (" + newVal + "), only numbers are allowed",
+                        "Invalid Maximum Length",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }
@@ -290,10 +298,10 @@ public class DbAttributeTableModel extends CayenneTableModel {
             }
             catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(
-                    null,
-                    "Invalid precision (" + newVal + "), only numbers are allowed.",
-                    "Invalid Precision Value",
-                    JOptionPane.ERROR_MESSAGE);
+                        null,
+                        "Invalid precision (" + newVal + "), only numbers are allowed.",
+                        "Invalid Precision Value",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -304,9 +312,10 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
         // make sure "to-dep-pk" relationships are fixed when the primary key is unset.
         if (!flag) {
-            Collection relationships =
-                ProjectUtil.getRelationshipsUsingAttributeAsTarget(attr);
-            relationships.addAll(ProjectUtil.getRelationshipsUsingAttributeAsSource(attr));
+            Collection relationships = ProjectUtil
+                    .getRelationshipsUsingAttributeAsTarget(attr);
+            relationships
+                    .addAll(ProjectUtil.getRelationshipsUsingAttributeAsSource(attr));
 
             if (relationships.size() > 0) {
                 Iterator it = relationships.iterator();
@@ -319,15 +328,15 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
                 // filtered only those that are to dep PK
                 if (relationships.size() > 0) {
-                    String message =
-                        (relationships.size() == 1)
+                    String message = (relationships.size() == 1)
                             ? "Fix \"To Dep PK\" relationship using this attribute?"
                             : "Fix "
-                                + relationships.size()
-                                + " \"To Dep PK\" relationships using this attribute?";
+                                    + relationships.size()
+                                    + " \"To Dep PK\" relationships using this attribute?";
 
-                    int answer =
-                        JOptionPane.showConfirmDialog(Application.getFrame(), message);
+                    int answer = JOptionPane.showConfirmDialog(
+                            Application.getFrame(),
+                            message);
                     if (answer != JOptionPane.YES_OPTION) {
                         // no action needed
                         return false;
@@ -353,6 +362,10 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
     public void setMandatory(Boolean newVal, DbAttribute attr) {
         attr.setMandatory(newVal.booleanValue());
+    }
+
+    public void setGenerated(Boolean newVal, DbAttribute attr) {
+        attr.setGenerated(newVal.booleanValue());
     }
 
     public boolean isCellEditable(int row, int col) {

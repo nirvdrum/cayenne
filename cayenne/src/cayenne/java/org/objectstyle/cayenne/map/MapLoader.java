@@ -492,22 +492,19 @@ public class MapLoader extends DefaultHandler {
         attrib.setType(TypesMapping.getSqlTypeByName(type));
         dbEntity.addAttribute(attrib);
 
-        String temp = atts.getValue("", "length");
-        if (temp != null) {
-            attrib.setMaxLength(Integer.parseInt(temp));
+        String length = atts.getValue("", "length");
+        if (length != null) {
+            attrib.setMaxLength(Integer.parseInt(length));
         }
-        temp = atts.getValue("", "precision");
-        if (temp != null) {
-            attrib.setPrecision(Integer.parseInt(temp));
+
+        String precision = atts.getValue("", "precision");
+        if (precision != null) {
+            attrib.setPrecision(Integer.parseInt(precision));
         }
-        temp = atts.getValue("", "isPrimaryKey");
-        if (temp != null && temp.equalsIgnoreCase(TRUE)) {
-            attrib.setPrimaryKey(true);
-        }
-        temp = atts.getValue("", "isMandatory");
-        if (temp != null && temp.equalsIgnoreCase(TRUE)) {
-            attrib.setMandatory(true);
-        }
+
+        attrib.setPrimaryKey(TRUE.equalsIgnoreCase(atts.getValue("", "isPrimaryKey")));
+        attrib.setMandatory(TRUE.equalsIgnoreCase(atts.getValue("", "isMandatory")));
+        attrib.setGenerated(TRUE.equalsIgnoreCase(atts.getValue("", "isGenerated")));
     }
 
     private void processStartDerivedDbAttribute(Attributes atts) throws SAXException {

@@ -152,6 +152,16 @@ public class DbAttributeTst extends CayenneTestCase {
 		assertEquals(0, pk.size());
 		assertSame(pk, dbe.getPrimaryKey());
 	}
-
+	
+	public void testAutoIncrement() throws Exception {
+	    DbAttribute attribute = new DbAttribute();
+	    assertFalse(attribute.isGenerated());
+	    
+	    attribute.setGenerated(true);
+	    assertTrue(attribute.isGenerated());
+	    
+	    attribute.setGenerated(false);
+	    assertFalse(attribute.isGenerated());
+	}
 }
 
