@@ -204,7 +204,7 @@ public abstract class MapClassGenerator {
             cname = fullClassName.substring(i + 1);
             pkg =
                 (superclass && superPkg != null) ? superPkg : fullClassName.substring(0, i);
-                
+
             spkg =
                 (!superclass && superPkg != null && !pkg.equals(superPkg)) ? superPkg : null;
         }
@@ -214,7 +214,6 @@ public abstract class MapClassGenerator {
         gen.setClassName(cname);
         gen.setSuperPackageName(spkg);
     }
-    
 
     /**
      * Returns "superPkg" property value -

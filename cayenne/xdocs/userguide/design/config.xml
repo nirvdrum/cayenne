@@ -24,7 +24,24 @@ Configuration conf = Configuration.getSharedConfig();
 </source>
             <p>By default shared object returned will be an instance of 
             <a href="../../api/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>.
-            A user can create her own subclass of Configuration and use it instead. 
+            Sometimes an additional line of code is needed for it to find application configuration files
+            jarred with the application. This normally happenes when cayenne.jar is placed in extensions
+            directory ($JRE_HOME/lib/ext) and application is run from the CLASSPATH location. This code is 
+            normally NOT needed when both cayenne.jar and application are loaded from the CLASSPATH
+            or when some of the custom Configuration subclasses are used, as described below.
+            </p>
+
+<source>import org.objectstyle.cayenne.conf.Configuration;
+...      
+// need this when Cayenne is coming from
+// a different ClassLoader
+Configuration.bootstrapSharedConfig(MyClass.class);
+     
+Configuration conf = Configuration.getSharedConfig();
+</source>            
+          
+            
+            <p>A user can create her own subclass of Configuration and use it instead. 
             Custom subclasses are usually created to load configuration files from 
             non-standard locations, as well as to automatically 
             configure Cayenne during different events that happen in deployment containers.

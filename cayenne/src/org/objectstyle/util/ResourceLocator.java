@@ -58,6 +58,7 @@ package org.objectstyle.util;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Logger;
 
 /** 
   * Utility class to find resources (usually files) using most common 
@@ -66,6 +67,8 @@ import java.net.URL;
   * @author Andrei Adamchik
   */
 public class ResourceLocator {
+    static Logger logObj = Logger.getLogger(ResourceLocator.class.getName());
+    
     protected boolean skipHomeDir;
     protected boolean skipCurDir;
     protected boolean skipClasspath;
@@ -309,8 +312,13 @@ public class ResourceLocator {
         return classLoader;
     }
 
+    /** 
+     * Sets ClassLoader used to locate resources. If null parameter
+     * is passed, ClassLoader of ResourceLocator class will be used.
+     */
     public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+        this.classLoader =
+            (classLoader != null) ? classLoader : this.getClass().getClassLoader();
     }
 
     /**

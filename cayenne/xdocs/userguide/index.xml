@@ -17,12 +17,13 @@
             </ul></li>
             
             
-            <li><a href="install.html">2. Installation</a>
+            <li><a href="install/index.html">2. Installation</a>
             <ul>
-                <li><a href="install.html#sys_req">2.1 System Requirements</a></li>
-                <li><a href="install.html#inst">2.2 Installation</a></li>
-                <li><a href="install.html#jar">2.3 Cayenne JAR Files</a></li>
-                <li><a href="install.html#tests">2.4 Unit Tests</a></li>
+                <li><a href="install/index.html#sys_req">2.1 System Requirements</a></li>
+                <li><a href="install/index.html#inst">2.2 Installation</a></li>
+                <li><a href="install/index.html#jar">2.3 Cayenne JAR Files</a></li>
+                <li><a href="install/index.html#tests">2.4 Unit Tests</a></li>
+                <li><a href="install/faq.html">2.5 Installation FAQ</a></li>
             </ul></li>
             
             <li><a href="quickstart/index.html">3. Quick Start</a></li>

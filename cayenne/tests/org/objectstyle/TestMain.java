@@ -56,7 +56,7 @@ package org.objectstyle;
  */
 
 import java.io.*;
-import java.sql.*;
+import java.sql.Connection;
 import java.util.Properties;
 import java.util.logging.*;
 
@@ -68,8 +68,7 @@ import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.objectstyle.cayenne.map.*;
 
 /**
  *  Root class of all test cases. When "main" is invoked, 
@@ -129,6 +128,7 @@ public class TestMain implements TestConstants {
 
         // initialize other stuff
         createTestDatabase();
+        ClassGenerator.bootstrapVelocity(ClassGenerator.class);
 
         // run tests
         boolean success = true;

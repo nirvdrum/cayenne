@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.map;
 
 import java.io.Writer;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -72,9 +73,28 @@ import org.objectstyle.util.ResourceLocator;
   * @author Andrei Adamchik
   */
 public class ClassGenerator {
-    static {
+    static Logger logObj = Logger.getLogger(ClassGenerator.class.getName());
+
+    private static boolean initDone;
+
+    /** 
+     * Allows to configure ClassGenerator to load class 
+     * templates using ClassLoader of a specified class. 
+     * It is a responsibility of a class caller to invoke this
+     * method before ClassGenerator is used.
+     * 
+     * <p>This method affects Velocity configuration when called 
+     * for the first time, since Velocity.init() is done only
+     * once. Subsequent calls have no effect on ClassLoader behavior.
+     * </p>
+     */
+    public static final void bootstrapVelocity(Class cl) {
+        if (initDone) {
+            return;
+        }
+
         try {
-            String classLoaderUrl = ResourceLocator.classBaseUrl(ClassGenerator.class);
+            String classLoaderUrl = ResourceLocator.classBaseUrl(cl);
 
             // use ClasspathResourceLoader for velocity templates lookup
             // if Cayenne URL is not null, load resource from this URL
@@ -100,14 +120,16 @@ public class ClassGenerator {
                     "class.resource.loader.class",
                     "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
             }
-            
+
             Velocity.init(props);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Can't initialize VTL", ex);
         }
+        finally {
+            initDone = true;
+        }
     }
-
 
     protected Template classTemplate;
     protected Context velCtxt;
@@ -123,6 +145,11 @@ public class ClassGenerator {
 
     /** Loads Velocity template used for class generation. */
     public ClassGenerator(String template) throws Exception {
+        if (!initDone) {
+            logObj.info(
+                "'bootstrapVelocity' wasn't called, initializing with Cayenne library ClassLoader.");
+            bootstrapVelocity(this.getClass());
+        }
         velCtxt = new VelocityContext();
         velCtxt.put("classGen", this);
         classTemplate = Velocity.getTemplate(template);

@@ -85,10 +85,29 @@ public abstract class Configuration {
         "org.objectstyle.cayenne.conf.DefaultConfiguration";
 
     private static Configuration sharedConfig;
+    protected static Level logLevel = Level.FINER;
+
+    /** 
+     * Defines ClassLoader to use for resource lookup.
+     * Configuration objects that are using ClassLoaders
+     * to locate reosurces may need to be bootstrapped
+     * explicitly.
+     */
+    private static ClassLoader resourceLoader;
 
     /** Lookup map that stores DataDomains with names as keys. */
     protected HashMap dataDomains = new HashMap();
-    protected Level logLevel = Level.FINER;
+
+
+    /** 
+     * Sets <code>cl</code> class's ClassLoader to serve
+     * as shared configuration resource ClassLoader.
+     * If shared Configuration object does not use ClassLoader,
+     * this method call will have no effect on how resources are loaded.
+     */
+    public static void bootstrapSharedConfig(Class cl) {
+        resourceLoader = cl.getClassLoader();
+    }
 
     /** Use this method as an entry point to all Cayenne access objects.
       * <p>Note that if you want to provide custom Configuration,
@@ -100,6 +119,25 @@ public abstract class Configuration {
             initSharedConfig();
         return sharedConfig;
     }
+
+    public static ClassLoader getResourceLoader() {
+        return resourceLoader;
+    }
+    
+    /** 
+     * Returns default log level for loading configuration. 
+     * Log level is made static so that applications can set it 
+     * before shared Configuration object is instantaited.
+     */
+    public static Level getLogLevel() {
+        return logLevel;
+    }
+
+    /** Sets default log level for loading configuration. */
+    public static void setLogLevel(Level logLevel) {
+        Configuration.logLevel = logLevel;
+    }
+    
 
     /** Creates and initializes shared Configuration object.
       * org.objectstyle.cayenne.conf.DefaultConfiguration will be 
@@ -148,15 +186,6 @@ public abstract class Configuration {
       * can not be found. */
     public abstract InputStream getMapConfig(String location);
 
-    /** Returns default log level of this configuration object. */
-    public Level getLogLevel() {
-        return logLevel;
-    }
-
-    /** Sets default log level of this configuration object. */
-    public void setLogLevel(Level logLevel) {
-        this.logLevel = logLevel;
-    }
 
     /** Initializes all Cayenne resources. Loads all configured domains and their
       * data maps, initializes all domain Nodes and their DataSources. */
@@ -177,10 +206,8 @@ public abstract class Configuration {
         DomainHelper helper = new DomainHelper(this, getLogLevel());
         if (!helper.loadDomains(in)) {
             StringBuffer msg = new StringBuffer();
-            msg
-                .append("[")
-                .append(this.getClass().getName())
-                .append("] : Failed to load domain and/or its maps/nodes.");
+            msg.append("[").append(this.getClass().getName()).append(
+                "] : Failed to load domain and/or its maps/nodes.");
 
             throw new ConfigException(msg.toString());
         }

@@ -62,11 +62,32 @@ import org.objectstyle.util.ResourceLocator;
 
 /**
  * Subclass of Configuration that uses System CLASSPATH to locate resources.
+ * If Cayenne classes are loaded using a different ClassLoader from
+ * the application classes, this configuration needs to be bootstrapped
+ * by calling 
+ * <code>Configuration.bootstrapSharedConfig(SomeClass.class)</code>.
  *
  * @author Andrei Adamchik
  */
 public class DefaultConfiguration extends Configuration {
     static Logger logObj = Logger.getLogger(DefaultConfiguration.class.getName());
+
+    protected ResourceLocator locator;
+
+    public DefaultConfiguration() {
+        // configure CLASSPATH-only locator
+        locator = new ResourceLocator();
+        locator.setSkipAbsPath(true);
+        locator.setSkipClasspath(false);
+        locator.setSkipCurDir(true);
+        locator.setSkipHomeDir(true);
+        
+        // Configuration superclass statically defines what 
+        // ClassLoader to use for resources. This
+        // allows applications to control where resources 
+        // are loaded from.
+        locator.setClassLoader(Configuration.getResourceLoader());
+    }
 
 
     /** Returns domain configuration as a stream or null if it
@@ -74,15 +95,25 @@ public class DefaultConfiguration extends Configuration {
       * file in locations accessible to ClassLoader (in Java CLASSPATH).
       * This can be a standalone file or an entry in a JAR file. */
     public InputStream getDomainConfig() {
-        return ResourceLocator.findResourceInClasspath(DOMAIN_FILE);
+        return locator.findResourceStream(DOMAIN_FILE);
     }
-    
+
     /** Returns DataMap configuration from a specified location or null if it
       * can not be found. This method will look for resource identified by
       * <code>location</code> in places accessible to ClassLoader (in Java CLASSPATH).
       * This can be a standalone file or an entry in a JAR file. */
     public InputStream getMapConfig(String location) {
-        return ResourceLocator.findResourceInClasspath(location);
+        return locator.findResourceStream(location);
+    }
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append('[')
+            .append(this.getClass().getName())
+            .append(": classloader=")
+            .append(locator.getClassLoader())
+            .append(']');
+        return buf.toString();
     }
 }
-

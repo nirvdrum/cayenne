@@ -82,7 +82,16 @@ public class CayenneGenerator extends Task {
      * than the map. <code>mapTimestamp</code> is used to track that. 
      */
     protected long mapTimestamp;
+    
+    public CayenneGenerator() {
+        bootstrapVelocity();
+    }
 
+    /** Initialize Velocity with class loader of the right class. */
+    protected void bootstrapVelocity() {
+        ClassGenerator.bootstrapVelocity(this.getClass());
+    }
+    
     /** The method executing the task. It will be called
      *  by ant framework. */
     public void execute() throws BuildException {
