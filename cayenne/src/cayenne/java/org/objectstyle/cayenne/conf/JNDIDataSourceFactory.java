@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.conf;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
-
 
 /** Looks up DataSource objects via JNDI.
   *
@@ -72,39 +72,44 @@ import org.objectstyle.cayenne.access.QueryLogger;
 public class JNDIDataSourceFactory implements DataSourceFactory {
     private static Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class);
 
-	protected Configuration parentConfig;
-	
-    public JNDIDataSourceFactory() throws Exception {}
+    protected Configuration parentConfig;
+
+    public JNDIDataSourceFactory() throws Exception {
+    }
 
     /** Returns DataSource object corresponding to <code>location</code>.
       * Location is expected to be a path mapped in JNDI InitialContext. */
     public DataSource getDataSource(String location) throws Exception {
         return getDataSource(location, Level.DEBUG);
     }
-    
+
     public void initializeWithParentConfiguration(Configuration conf) {
-		this.parentConfig = conf;
-	}
+        this.parentConfig = conf;
+    }
 
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
-        if(logLevel == null) {
+        if (logLevel == null) {
             logLevel = Level.DEBUG;
         }
-            
+
         try {
             QueryLogger.logConnect(logLevel, location);
-            
-            Context initCtx = new InitialContext();
-            Context envCtx = (Context) initCtx.lookup("java:comp/env");
 
-            if(envCtx == null) {
-                logObj.log(logLevel, "warning: java:comp/env context is null.");
+            Context initCtx = new InitialContext();
+            DataSource ds;
+            try {
+                Context envCtx = (Context) initCtx.lookup("java:comp/env");
+                ds = (DataSource) envCtx.lookup(location);
             }
-            
-            DataSource ds = (DataSource)envCtx.lookup(location);
+            catch (NamingException namingEx) {
+                // try looking up the location directly...
+                ds = (DataSource) initCtx.lookup(location);
+            }
+
             QueryLogger.logConnectSuccess(logLevel);
             return ds;
-        } catch(Exception ex) {
+        }
+        catch (Exception ex) {
             QueryLogger.logConnectFailure(logLevel, ex);
             throw ex;
         }
