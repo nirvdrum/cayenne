@@ -68,6 +68,12 @@
             	<li><a href="modify/data-context.html">8.1 Using DataContext</a></li>
             </ul><br/></li>
             
+            <li><a href="stored-procedures/index.html"><strong>9. Using Stored Procedures</strong></a>
+            <ul>
+            	<li><a href="stored-procedures/select.html">9.1 Selecting Objects With a Stored Procedure</a></li>
+            	<li><a href="stored-procedures/any.html">9.2 Executing an Arbitrary Stored Procedure</a></li>
+            </ul><br/></li>
+            
             <li><a href="expressions/index.html"><strong>9. Using Expressions</strong></a>
             <ul>
             	<li><a href="expressions/common.html">9.1 General Approach to Building Expressions</a></li>

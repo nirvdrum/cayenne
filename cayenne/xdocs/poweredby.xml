@@ -16,7 +16,8 @@
         
         <p>Also we developed a few web badges to enable you to endorse Cayenne technology.
         Help us to spread the word and promote Cayenne. If your site or project uses
-        Cayenne, you may put one of the following badges on the site, linking to http://objectstyle.org/cayenne/
+        Cayenne, you may put one of the following badges on the site. Badge should be configured
+        as an active link to Cayenne website: http://objectstyle.org/cayenne/
         </p>
         
         <p><img src="images/powered-by-cayenne-green1.gif" width="170" height="45"/></p>
