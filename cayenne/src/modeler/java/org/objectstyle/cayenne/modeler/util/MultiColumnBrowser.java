@@ -100,7 +100,7 @@ public class MultiColumnBrowser extends JPanel {
     protected int minColumns;
     protected ListCellRenderer renderer;
     protected TreeModel model;
-    protected TreePath selectionPath;
+    protected Object[] selectionPath;
     protected Dimension preferredColumnSize;
 
     private List columns;
@@ -133,7 +133,7 @@ public class MultiColumnBrowser extends JPanel {
      * Returns current selection path or null if no selection is made.
      */
     public TreePath getSelectionPath() {
-        return selectionPath;
+        return new TreePath(selectionPath);
     }
 
     /**
@@ -210,14 +210,13 @@ public class MultiColumnBrowser extends JPanel {
         }
 
         setLayout(new GridLayout(1, columns.size() + delta, 3, 3));
-
         if (delta > 0) {
             for (int i = 0; i < delta; i++) {
                 appendColumn();
             }
         }
         else {
-            for (int i = 0; i < delta && columns.size() > minColumns; i++) {
+            for (int i = -delta; i > 0 && columns.size() > minColumns; i--) {
                 removeLastColumn();
             }
         }
@@ -310,7 +309,7 @@ public class MultiColumnBrowser extends JPanel {
      */
     private void initFromModel() {
         Object root = model.getRoot();
-        selectionPath = new TreePath(root);
+        selectionPath = new Object[] { root };
 
         if (!model.isLeaf(model.getRoot())) {
             BrowserPanel firstPanel = (BrowserPanel) columns.get(0);
@@ -323,31 +322,29 @@ public class MultiColumnBrowser extends JPanel {
      */
     private synchronized void updateFromModel(Object selectedNode, int panelIndex) {
         // clean up extra columns
-        int lastIndex = selectionPath.getPathCount();
-        
+        int lastIndex = selectionPath.length;
+
         // check array range to handle race conditions 
-        for(int i = panelIndex + 1; i <= lastIndex && i >= 0 && i < columns.size(); i++) {
-            logObj.debug("cleanup " + i);
+        for (int i = panelIndex + 1;
+            i <= lastIndex && i >= 0 && i < columns.size();
+            i++) {
             BrowserPanel column = (BrowserPanel) columns.get(i);
             column.getSelectionModel().clearSelection();
             column.setRootNode(null);
         }
 
         // build path to selected node
-        logObj.debug("old path " + selectionPath.getPathCount());
         this.selectionPath = rebuildPath(selectionPath, selectedNode, panelIndex);
-        logObj.debug("new path " + selectionPath.getPathCount());
+
+        // a selectedNode is contained in "panelIndex" column, 
+        // but its children are in the next column.
+        panelIndex++;
+
+        // expand/contract columns as needed
+        adjustViewColumns(panelIndex + 1 - columns.size());
 
         // selectedNode becomes the root of columns[panelIndex]
         if (!model.isLeaf(selectedNode)) {
-
-            // a selectedNode is contained in "panelIndex" column, 
-            // but its children are in the next column.
-            panelIndex++;
-
-            // expand/contract columns as needed
-            adjustViewColumns(panelIndex + 1 - columns.size());
-
             BrowserPanel lastPanel = (BrowserPanel) columns.get(panelIndex);
             lastPanel.setRootNode(selectedNode);
             scrollToColumn(panelIndex);
@@ -359,17 +356,16 @@ public class MultiColumnBrowser extends JPanel {
      * of one of the path components. As the method walks the current path backwards,
      * it cleans columns that are not common with the new path.
      */
-    private TreePath rebuildPath(TreePath path, Object node, int panelIndex) {
+    private Object[] rebuildPath(Object[] path, Object node, int panelIndex) {
 
         if (panelIndex == 0) {
-            return new TreePath(getModel().getRoot());
+            return new Object[] { getModel().getRoot()};
         }
 
-        Object[] objects = path.getPath();
         Object[] newPath = new Object[panelIndex + 1];
-        System.arraycopy(objects, 0, newPath, 0, panelIndex);
+        System.arraycopy(path, 0, newPath, 0, panelIndex);
         newPath[panelIndex] = node;
-        return new TreePath(newPath);
+        return newPath;
     }
 
     // ====================================================
