@@ -61,9 +61,10 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -81,10 +82,10 @@ import org.objectstyle.cayenne.util.Util;
 class DataRowUtils {
 
     /**
-	 * Replaces all object attribute values with snapshot values. Sets object
-	 * state to COMMITTED, unless the snapshot is partial in which case the
-	 * state is set to HOLLOW
-	 */
+     * Replaces all object attribute values with snapshot values. Sets object
+     * state to COMMITTED, unless the snapshot is partial in which case the
+     * state is set to HOLLOW
+     */
     static void refreshObjectWithSnapshot(
         ObjEntity objEntity,
         DataObject object,
@@ -124,9 +125,7 @@ class DataRowUtils {
                 Object toManyList = object.readPropertyDirectly(rel.getName());
 
                 if (toManyList == null) {
-                    object.writePropertyDirectly(
-                        rel.getName(),
-                        Fault.getToManyFault());
+                    object.writePropertyDirectly(rel.getName(), Fault.getToManyFault());
                 }
                 else if (
                     invalidateToManyRelationships && toManyList instanceof ToManyList) {
@@ -139,27 +138,27 @@ class DataRowUtils {
             // set a shared fault to indicate any kind of unresolved to-one
             object.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
             /*
-			 * ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
-			 * Class targetClass = targetEntity.getJavaClass(); // handle toOne
-			 * flattened relationship if (rel.isFlattened()) { // A flattened
-			 * toOne relationship must be a series of // toOne dbRelationships.
-			 * Initialize fault for it, since // creating a hollow object won't
-			 * be right...
-			 * 
-			 * continue; }
-			 * 
-			 * DbRelationship dbRel = (DbRelationship)
-			 * rel.getDbRelationships().get(0); // dependent to one
-			 * relationship is optional // use fault, since we do not know
-			 * whether it is null or not... if (dbRel.isToDependentPK()) {
-			 * object.writePropertyDirectly(rel.getName(),
-			 * RelationshipFault.getInstance()); continue; }
-			 * 
-			 * ObjectId id = snapshot.createTargetObjectId(targetClass, dbRel);
-			 * DataObject targetObject = (id != null) ?
-			 * context.registeredObject(id) : null;
-			 *  
-			 */
+             * ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
+             * Class targetClass = targetEntity.getJavaClass(); // handle toOne
+             * flattened relationship if (rel.isFlattened()) { // A flattened
+             * toOne relationship must be a series of // toOne dbRelationships.
+             * Initialize fault for it, since // creating a hollow object won't
+             * be right...
+             * 
+             * continue; }
+             * 
+             * DbRelationship dbRel = (DbRelationship)
+             * rel.getDbRelationships().get(0); // dependent to one
+             * relationship is optional // use fault, since we do not know
+             * whether it is null or not... if (dbRel.isToDependentPK()) {
+             * object.writePropertyDirectly(rel.getName(),
+             * RelationshipFault.getInstance()); continue; }
+             * 
+             * ObjectId id = snapshot.createTargetObjectId(targetClass, dbRel);
+             * DataObject targetObject = (id != null) ?
+             * context.registeredObject(id) : null;
+             *  
+             */
         }
 
         if (isPartialSnapshot) {
@@ -232,7 +231,8 @@ class DataRowUtils {
 
                 ObjectId id =
                     snapshot.createTargetObjectId(
-                        ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
+                        ((ObjEntity) rel.getTargetEntity()).getJavaClass(
+                            Configuration.getResourceLoader()),
                         dbRelationship);
                 DataObject target = (id != null) ? context.registeredObject(id) : null;
 
@@ -242,10 +242,10 @@ class DataRowUtils {
     }
 
     /**
-	 * Merges changes reflected in snapshot map to the object. Changes made to
-	 * attributes and to-one relationships will be merged. In case an object is
-	 * already modified, modified properties will not be overwritten.
-	 */
+     * Merges changes reflected in snapshot map to the object. Changes made to
+     * attributes and to-one relationships will be merged. In case an object is
+     * already modified, modified properties will not be overwritten.
+     */
     static void mergeObjectWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
@@ -272,9 +272,9 @@ class DataRowUtils {
     }
 
     /**
-	 * Checks if a new snapshot has a modified to-one relationship compared to
-	 * the cached snapshot.
-	 */
+     * Checks if a new snapshot has a modified to-one relationship compared to
+     * the cached snapshot.
+     */
     static boolean isJoinAttributesModified(
         ObjRelationship relationship,
         Map newSnapshot,
@@ -302,9 +302,9 @@ class DataRowUtils {
     }
 
     /**
-	 * Checks if an object has its to-one relationship target modified in
-	 * memory.
-	 */
+     * Checks if an object has its to-one relationship target modified in
+     * memory.
+     */
     static boolean isToOneTargetModified(
         ObjRelationship relationship,
         DataObject object,
@@ -363,8 +363,8 @@ class DataRowUtils {
     }
 
     /**
-	 * Instantiation is not allowed.
-	 */
+     * Instantiation is not allowed.
+     */
     DataRowUtils() {
         super();
     }

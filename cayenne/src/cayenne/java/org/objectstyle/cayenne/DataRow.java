@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -169,7 +170,9 @@ public class DataRow extends HashMap {
       * CayenneRuntimeException is thrown.
       */
     public ObjectId createObjectId(ObjEntity entity) {
-        return createObjectId(entity.getJavaClass(), entity.getDbEntity());
+        return createObjectId(
+            entity.getJavaClass(Configuration.getResourceLoader()),
+            entity.getDbEntity());
     }
 
     public ObjectId createObjectId(Class objectClass, DbEntity entity) {

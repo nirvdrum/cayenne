@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.ToManyList;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -214,7 +215,9 @@ public class SelectObserver extends DefaultOperationObserver {
      * @since 1.1
      */
     static Map partitionBySource(ObjRelationship incoming, List prefetchedObjects) {
-        Class sourceObjectClass = ((ObjEntity) incoming.getSourceEntity()).getJavaClass();
+        Class sourceObjectClass =
+            ((ObjEntity) incoming.getSourceEntity()).getJavaClass(
+                Configuration.getResourceLoader());
         ObjRelationship reverseRelationship = incoming.getReverseRelationship();
 
         // Might be used later on... obtain and cast only once
