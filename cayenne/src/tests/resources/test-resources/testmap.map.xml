@@ -144,6 +144,13 @@
 	<obj-entity name="SubPainting" className="org.objectstyle.art.SubPainting" dbEntityName="PAINTING">
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
 	</obj-entity>
+	<obj-entity name="CompoundPainting" className="org.objectstyle.art.CompoundPainting" readOnly="true" dbEntityName="PAINTING">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
+		<obj-attribute name="artistName" type="java.lang.String" db-attribute-path="toArtist.ARTIST_NAME"/>
+		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="toGallery.GALLERY_NAME"/>
+		<obj-attribute name="textReview" type="java.lang.String" db-attribute-path="toPaintingInfo.TEXT_REVIEW"/>
+	</obj-entity>
 	<db-relationship name="artistExhibitArray" source="ARTIST" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
@@ -263,6 +270,9 @@
 	<obj-relationship name="toArtist" source="ROPainting" target="Artist" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
 	</obj-relationship>
+	<obj-relationship name="toArtist" source="CompoundPainting" target="Artist" toMany="false" deleteRule="Nullify">
+		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
 	<obj-relationship name="toExhibit" source="ArtistExhibit" target="Exhibit" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="ARTIST_EXHIBIT" target="EXHIBIT" name="toExhibit"/>
 	</obj-relationship>
@@ -272,7 +282,13 @@
 	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>
 	</obj-relationship>
+	<obj-relationship name="toGallery" source="CompoundPainting" target="Gallery" toMany="false" deleteRule="Nullify">
+		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>
+	</obj-relationship>
 	<obj-relationship name="toPaintingInfo" source="Painting" target="PaintingInfo" toMany="false" deleteRule="Cascade">
+		<db-relationship-ref source="PAINTING" target="PAINTING_INFO" name="toPaintingInfo"/>
+	</obj-relationship>
+	<obj-relationship name="toPaintingInfo" source="CompoundPainting" target="PaintingInfo" toMany="false" deleteRule="Cascade">
 		<db-relationship-ref source="PAINTING" target="PAINTING_INFO" name="toPaintingInfo"/>
 	</obj-relationship>
 	<obj-relationship name="toParentGroup" source="ArtGroup" target="ArtGroup" toMany="false" deleteRule="Nullify">

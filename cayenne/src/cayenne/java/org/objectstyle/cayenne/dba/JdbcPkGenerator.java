@@ -100,6 +100,9 @@ public class JdbcPkGenerator implements PkGenerator {
 	protected Map pkCache = new HashMap();
 	protected int pkCacheSize = 20;
 
+    static {
+        objDesc[0].setDbAttributePath(NEXT_ID);
+    }
 
 	public void createAutoPk(DataNode node, List dbEntities) throws Exception {
 		// check if a table exists

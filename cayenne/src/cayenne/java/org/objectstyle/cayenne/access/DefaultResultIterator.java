@@ -264,7 +264,7 @@ public class DefaultResultIterator implements ResultIterator {
                         i + 1,
                         rowDescriptor[i].getType());
 //                dataRow.put(rowDescriptor[i].getName(), val);
-                String key = (resultNames != null ?
+                String key = (resultNames != null && resultNames[i] != null ?
                               resultNames[i] :
                               rowDescriptor[i].getName());
                 dataRow.put(key, val);
