@@ -19,11 +19,11 @@
             <ul>
                 <li>Release Builds</li>
                 <li>Milestone Builds</li>
-                <li>Nightly Builds</li>
+                <li><a href="http://cayenne.sourceforge.net/nightly/">Nightly Builds</a></li>
             </ul>            
             </p>
 
-            <p>These releases can be obtained from our 
+            <p>Release download site is located at 
             <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">download site</a>.
             </p>
         </section>
