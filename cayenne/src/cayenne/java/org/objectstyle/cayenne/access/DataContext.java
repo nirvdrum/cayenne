@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -769,7 +770,7 @@ public class DataContext implements QueryEngine, Serializable {
         SelectObserver observer =
             (query.isFetchingDataRows())
                 ? new SelectObserver(query.getLoggingLevel())
-                : new SelectProcessor(query.getLoggingLevel());
+                : new ContextSelectObserver(this, query.getLoggingLevel());
 
         performQuery((Query) query, observer);
         return observer.getResults((Query) query);
@@ -913,7 +914,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         if (queries.size() > 0) {
-            this.performQueries(queries, new SelectProcessor(query.getLoggingLevel()));
+            this.performQueries(queries, new ContextSelectObserver(this, query.getLoggingLevel()));
         }
     }
 
@@ -1228,35 +1229,6 @@ public class DataContext implements QueryEngine, Serializable {
         while (it.hasNext()) {
             DataObject obj = (DataObject) it.next();
             obj.setDataContext(this);
-        }
-    }
-
-    /** 
-     * OperationObserver for select queries. Will register batches of 
-     * fetched objects with this DataContext.
-     */
-    class SelectProcessor extends SelectObserver {
-        SelectProcessor(Level logLevel) {
-            super.setLoggingLevel(logLevel);
-        }
-
-        /** 
-         * Ovwerrides superclass behavior to convert each  
-         * data row to a real object. Registers objects with 
-         * parent DataContext.
-         */
-        public void nextDataRows(Query query, List dataRows) {
-            ArrayList result = new ArrayList();
-            if (dataRows != null && dataRows.size() > 0) {
-                ObjEntity ent = DataContext.this.lookupEntity(query.getObjEntityName());
-                Iterator it = dataRows.iterator();
-                while (it.hasNext()) {
-                    result.add(
-                        DataContext.this.objectFromDataRow(ent, (Map) it.next(), true));
-                }
-            }
-
-            super.nextDataRows(query, result);
         }
     }
 
