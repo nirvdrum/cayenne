@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project.validator;
 
 import org.objectstyle.cayenne.project.FlatProjectView;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * ValidationResult encapsulates information about a single node validation
@@ -82,11 +83,11 @@ public class ValidationResult {
     }
 
     public Object getValidatedObject() {
-        return FlatProjectView.objectFromPath(treeNodePath);
+        return ProjectTraversal.objectFromPath(treeNodePath);
     }
 
     public Object getValidatedObjectParent() {
-        return FlatProjectView.objectParentFromPath(treeNodePath);
+        return ProjectTraversal.objectParentFromPath(treeNodePath);
     }
 
     public String toString() {

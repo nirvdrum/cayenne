@@ -59,6 +59,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.project.FlatProjectView;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -77,7 +78,7 @@ public class DbAttributeValidator extends TreeNodeValidator {
      * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
      */
     public void validateObject(Object[] path, Validator validator) {
-        DbAttribute attribute = (DbAttribute) FlatProjectView.objectFromPath(path);
+        DbAttribute attribute = (DbAttribute) ProjectTraversal.objectFromPath(path);
         // Must have name
         if (Util.isEmptyString(attribute.getName())) {
             validator.registerError("Unnamed DbAttribute.", path);

@@ -55,6 +55,10 @@
  */
 package org.objectstyle.cayenne.project;
 
+import java.util.List;
+
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -70,52 +74,21 @@ public class FlatProjectViewTst extends CayenneTestCase {
         super(name);
     }
 
-    public void testObjectFromPath1() throws Exception {
-        Object[] path = new Object[] { new Object(), new Object()};
-        assertSame(path[1], FlatProjectView.objectFromPath(path));
-    }
-
-    public void testObjectFromPath2() throws Exception {
-        Object[] path = new Object[] { new Object()};
-        assertSame(path[0], FlatProjectView.objectFromPath(path));
-    }
-
-    public void testObjectFromPath3() throws Exception {
-        Object[] path = new Object[] {};
-
-        try {
-            FlatProjectView.objectFromPath(path);
-            fail("Must throw exception on empty list");
-        } catch (ProjectException ex) {}
-    }
-
-    public void testBuildPath1() throws Exception {
-        Object obj1 = new Object();
-        Object[] path = FlatProjectView.buildPath(obj1, null);
-        assertNotNull(path);
-        assertEquals(1, path.length);
-        assertSame(obj1, path[0]);
-    }
-
-    public void testBuildPath2() throws Exception {
-        Object obj1 = new Object();
-        Object[] tstPath = new Object[] { new Object(), new Object()};
-
-        Object[] path = FlatProjectView.buildPath(obj1, tstPath);
-        assertNotNull(path);
-        assertEquals(3, path.length);
-        assertSame(obj1, path[2]);
-        assertSame(tstPath[1], path[1]);
-        assertSame(tstPath[0], path[0]);
-    }
-
-    public void testObjectParentFromPath1() throws Exception {
-        Object[] path = new Object[] { new Object(), new Object()};
-        assertSame(path[0], FlatProjectView.objectParentFromPath(path));
-    }
-
-    public void testObjectParentFromPath2() throws Exception {
-        Object[] path = new Object[] { new Object()};
-        assertNull(FlatProjectView.objectParentFromPath(path));
+    public void testFlattenProjectView() throws Exception {
+        DataMap map = new DataMap("m1");
+        List view = new FlatProjectView().flattenProjectTree(map);
+        assertNotNull(view);
+        assertEquals(1, view.size());
+        Object[] path10 = (Object[])view.get(0);
+        assertSame(map, path10[0]);
+        
+        ObjEntity ent = new ObjEntity("e1");
+        map.addObjEntity(ent);
+        List view1 = new FlatProjectView().flattenProjectTree(map);
+        assertNotNull(view1);
+        assertEquals(2, view1.size());
+        Object[] path21 = (Object[])view1.get(1);
+        assertSame(map, path21[0]);
+        assertSame(ent, path21[1]);
     }
 }

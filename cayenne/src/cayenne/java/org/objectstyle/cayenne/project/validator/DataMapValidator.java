@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.FlatProjectView;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -76,7 +77,7 @@ public class DataMapValidator extends TreeNodeValidator {
     }
 
     public void validateObject(Object[] path, Validator validator) {
-        DataMap map = (DataMap) FlatProjectView.objectFromPath(path);
+        DataMap map = (DataMap) ProjectTraversal.objectFromPath(path);
         validateName(map, path, validator);
 
         // check if data map is not attached to any nodes
@@ -84,7 +85,7 @@ public class DataMapValidator extends TreeNodeValidator {
     }
 
     protected void validateNodeLinks(DataMap map, Object[] path, Validator validator) {
-        DataDomain domain = (DataDomain) FlatProjectView.objectParentFromPath(path);
+        DataDomain domain = (DataDomain) ProjectTraversal.objectParentFromPath(path);
         if (domain == null) {
             return;
         }
@@ -114,7 +115,7 @@ public class DataMapValidator extends TreeNodeValidator {
             return;
         }
 
-        DataDomain domain = (DataDomain) FlatProjectView.objectParentFromPath(path);
+        DataDomain domain = (DataDomain) ProjectTraversal.objectParentFromPath(path);
         if (domain == null) {
             return;
         }

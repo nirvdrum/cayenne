@@ -60,6 +60,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.FlatProjectView;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -76,7 +77,7 @@ public class DomainValidator extends TreeNodeValidator {
     public void validateObject(Object[] path, Validator validator) {
 
         // check for empty name
-        DataDomain domain = (DataDomain) FlatProjectView.objectFromPath(path);
+        DataDomain domain = (DataDomain) ProjectTraversal.objectFromPath(path);
         String name = domain.getName();
         if (Util.isEmptyString(name)) {
             validator.registerError("Unnamed DataDomain.", path);
@@ -85,7 +86,7 @@ public class DomainValidator extends TreeNodeValidator {
             return;
         }
 
-        Configuration config = (Configuration) FlatProjectView.objectParentFromPath(path);
+        Configuration config = (Configuration) ProjectTraversal.objectParentFromPath(path);
         if (config == null) {
             return;
         }

@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.FlatProjectView;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * Validator of a single node in a project object tree. 
@@ -97,7 +98,7 @@ public abstract class TreeNodeValidator {
      * to the validator provided.
      */
     public static void validate(Object[] path, Validator validator) {
-        Object validatedObj = FlatProjectView.objectFromPath(path);
+        Object validatedObj = ProjectTraversal.objectFromPath(path);
         TreeNodeValidator validatorObj = null;
         if (validatedObj instanceof ObjAttribute) {
             validatorObj = objAttrValidator;

@@ -94,18 +94,6 @@ public class DataMapProject extends Project {
     }
 
     /**
-    * @see org.objectstyle.cayenne.project.Project#treeNodes()
-    */
-    public Iterator treeNodes() {
-        ArrayList list = new ArrayList();
-        ProjectTraversal.getInstance().addMaps(
-            list,
-            Collections.singletonList(map),
-            null);
-        return list.iterator();
-    }
-
-    /**
      * @see org.objectstyle.cayenne.project.Project#getRootNode()
      */
     public Object getRootNode() {

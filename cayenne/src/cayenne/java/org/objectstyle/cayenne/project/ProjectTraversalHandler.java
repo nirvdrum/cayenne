@@ -65,7 +65,7 @@ public interface ProjectTraversalHandler {
     /** 
      * Invoked when a node is read during project tree traversal.
      */
-    public void projectNode(Object node, Object parent);
+    public void projectNode(Object[] nodePath);
     
     /**
      * Invoked when the children of a project node are
@@ -74,5 +74,5 @@ public interface ProjectTraversalHandler {
      * allows handler to control traversal behavior by eliminating 
      * subtrees.
      */
-    public boolean shouldReadChildren(Object parent);
+    public boolean shouldReadChildren(Object node, Object[] parentPath);
 }

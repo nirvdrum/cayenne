@@ -56,13 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Entity;
 
 /**
  * FlatProjectView converts a project tree into a list of nodes,
@@ -82,64 +76,15 @@ public class FlatProjectView {
     }
 
     /**
-     * Expands path array, appending a treeNode at the end.
+     * Returns flat tree view.
      */
-    public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
-        if (parentTreeNodePath == null || parentTreeNodePath.length == 0) {
-            return new Object[] { treeNode };
-        }
-
-        Object[] newPath = new Object[parentTreeNodePath.length + 1];
-        System.arraycopy(parentTreeNodePath, 0, newPath, 0, parentTreeNodePath.length);
-        newPath[parentTreeNodePath.length] = treeNode;
-        return newPath;
-    }
-
-    /**
-     * Returns an object corresponding to the node represented
-     * by the path. This is the last object in the path.
-     */
-    public static Object objectFromPath(Object[] treeNodePath) {
-        if (treeNodePath == null) {
-            throw new NullPointerException("Null path to validated object.");
-        }
-
-        if (treeNodePath.length == 0) {
-            throw new ProjectException("Validation path is empty.");
-        }
-
-        // return last object
-        return treeNodePath[treeNodePath.length - 1];
-    }
-
-    /**
-     * Returns an object corresponding to the parent node 
-     * of the node represented by the path. This is the object 
-     * next to last object in the path.
-     */
-    public static Object objectParentFromPath(Object[] treeNodePath) {
-        if (treeNodePath == null) {
-            throw new NullPointerException("Null path to validated object.");
-        }
-
-        if (treeNodePath.length == 0) {
-            throw new ProjectException("Validation path is empty.");
-        }
-
-        // return next to last object
-        return (treeNodePath.length > 1) ? treeNodePath[treeNodePath.length - 2] : null;
-    }
-
-
-    /**
-     * Returns flat project tree view.
-     */
-   /* public List flattenProject(Project project) {
+    public List flattenProjectTree(Object rootNode) {
         ArrayList nodes = new ArrayList();
         TraversalHelper helper = new TraversalHelper(nodes);
+        new ProjectTraversal(helper).traverse(rootNode);        
         return nodes;
     }
-    */
+    
 
     /**
      * Helper class that serves as project traversal helper.
@@ -151,17 +96,14 @@ public class FlatProjectView {
             this.nodes = nodes;
         }
 
-        /**
-         * @see org.objectstyle.cayenne.project.ProjectTraversalHandler#projectNode(Object, Object)
-         */
-        public void projectNode(Object node, Object parent) {
-            nodes.add(node);
+        public void projectNode(Object[] path) {
+            nodes.add(path);
         }
 
         /**
-         * Always returns true for max depth traversal.
+         * Always returns true.
          */
-        public boolean shouldReadChildren(Object parent) {
+        public boolean shouldReadChildren(Object node, Object[] parentPath) {
             return true;
         }
     }

@@ -85,7 +85,7 @@ public class ApplicationProject extends Project {
      */
     protected void postInit(File projectFile) {
         try {
-        	File f = (projectFile != null) ? projectFile.getCanonicalFile() : null;
+            File f = (projectFile != null) ? projectFile.getCanonicalFile() : null;
             config = new ProjectConfiguration(f);
         } catch (IOException e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
@@ -121,16 +121,6 @@ public class ApplicationProject extends Project {
         }
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.Project#treeNodes()
-     */
-    public Iterator treeNodes() {
-        ArrayList list = new ArrayList();
-        ProjectTraversal.getInstance().addConfig(list, config, null);
-        return list.iterator();
-    }
-    
-    
     /**
      * @see org.objectstyle.cayenne.project.Project#getRootNode()
      */

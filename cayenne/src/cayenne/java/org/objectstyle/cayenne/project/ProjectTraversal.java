@@ -60,9 +60,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
 
 /**
  * ProjectTraversal allows to traverse Cayenne project tree in a
@@ -75,77 +78,168 @@ import org.objectstyle.cayenne.map.Entity;
  * @author Andrei Adamchik
  */
 public class ProjectTraversal {
-	
-	protected static final ProjectTraversal sharedInstance = new ProjectTraversal();
-	
-	/**
-	 * Returns ProjectTraversal singleton.
-	 */
-	public static ProjectTraversal getInstance() {
-		return sharedInstance;
-	}
-	
-    public void addConfig(List list, Configuration config, Object[] path) {
-        Object[] configPath = FlatProjectView.buildPath(config, path);
-        list.add(configPath);
-        
-        addDomains(list, config.getDomainList(), path);
+    protected ProjectTraversalHandler handler;
+
+    /**
+      * Expands path array, appending a treeNode at the end.
+      */
+    public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
+        if (parentTreeNodePath == null || parentTreeNodePath.length == 0) {
+            return new Object[] { treeNode };
+        }
+
+        Object[] newPath = new Object[parentTreeNodePath.length + 1];
+        System.arraycopy(parentTreeNodePath, 0, newPath, 0, parentTreeNodePath.length);
+        newPath[parentTreeNodePath.length] = treeNode;
+        return newPath;
     }
 
-    public void addDomains(List list, List domains, Object[] path) {
+    /**
+     * Returns an object corresponding to the node represented
+     * by the path. This is the last object in the path.
+     */
+    public static Object objectFromPath(Object[] treeNodePath) {
+        if (treeNodePath == null) {
+            throw new NullPointerException("Null path to validated object.");
+        }
+
+        if (treeNodePath.length == 0) {
+            throw new ProjectException("Validation path is empty.");
+        }
+
+        // return last object
+        return treeNodePath[treeNodePath.length - 1];
+    }
+
+    /**
+     * Returns an object corresponding to the parent node 
+     * of the node represented by the path. This is the object 
+     * next to last object in the path.
+     */
+    public static Object objectParentFromPath(Object[] treeNodePath) {
+        if (treeNodePath == null) {
+            throw new NullPointerException("Null path to validated object.");
+        }
+
+        if (treeNodePath.length == 0) {
+            throw new ProjectException("Validation path is empty.");
+        }
+
+        // return next to last object
+        return (treeNodePath.length > 1) ? treeNodePath[treeNodePath.length - 2] : null;
+    }
+
+    public ProjectTraversal(ProjectTraversalHandler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * Performs traversal starting from the root node. Root node can be
+     * of any type supported in Cayenne projects (Configuration, DataMap, DataNode, etc...)
+     */
+    public void traverse(Object rootNode) {
+        if (rootNode instanceof Configuration) {
+            traverseConfig((Configuration) rootNode, null);
+        } else if (rootNode instanceof DataDomain) {
+            traverseDomains(listWrap(rootNode), null);
+        } else if (rootNode instanceof DataMap) {
+            traverseMaps(listWrap(rootNode), null);
+        } else if (rootNode instanceof Entity) {
+            traverseEntities(listWrap(rootNode), null);
+        } else if (rootNode instanceof Attribute) {
+            traverseAttributes(listWrap(rootNode), null);
+        } else if (rootNode instanceof Relationship) {
+            traverseRelationships(listWrap(rootNode), null);
+        } else if (rootNode instanceof DataNode) {
+            traverseNodes(listWrap(rootNode), null);
+        } else {
+            String nodeClass =
+                (rootNode != null) ? rootNode.getClass().getName() : "(null)";
+            throw new IllegalArgumentException("Unsupported root node: " + nodeClass);
+        }
+    }
+
+    private List listWrap(Object object) {
+        ArrayList list = new ArrayList(1);
+        list.add(object);
+        return list;
+    }
+
+    /**
+     * Performs traversal starting from Configuration node.
+     */
+    public void traverseConfig(Configuration config, Object[] path) {
+        Object[] configPath = buildPath(config, path);
+        handler.projectNode(configPath);
+
+        if (handler.shouldReadChildren(config, path)) {
+            traverseDomains(config.getDomainList(), configPath);
+        }
+    }
+
+    /**
+      * Performs traversal starting from a list of domains.
+      */
+    public void traverseDomains(List domains, Object[] path) {
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
-            Object[] domainPath = FlatProjectView.buildPath(domain, path);
-            list.add(domainPath);
+            Object[] domainPath = buildPath(domain, path);
+            handler.projectNode(domainPath);
 
-            addNodes(list, domain.getDataNodeList(), domainPath);
-            addMaps(list, domain.getMapList(), domainPath);
+            if (handler.shouldReadChildren(domain, path)) {
+                traverseNodes(domain.getDataNodeList(), domainPath);
+                traverseMaps(domain.getMapList(), domainPath);
+            }
         }
     }
 
-    public void addNodes(List list, List nodes, Object[] path) {
+    public void traverseNodes(List nodes, Object[] path) {
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
-            list.add(FlatProjectView.buildPath(it.next(), path));
+            handler.projectNode(buildPath(it.next(), path));
         }
     }
 
-    public void addMaps(List list, List maps, Object[] path) {
+    public void traverseMaps(List maps, Object[] path) {
         Iterator it = maps.iterator();
         while (it.hasNext()) {
             DataMap map = (DataMap) it.next();
-            Object[] mapPath = FlatProjectView.buildPath(map, path);
-            list.add(mapPath);
+            Object[] mapPath = buildPath(map, path);
+            handler.projectNode(mapPath);
 
-            addEntities(list, map.getDbEntitiesAsList(), mapPath);
-            addEntities(list, map.getObjEntitiesAsList(), mapPath);
+            if (handler.shouldReadChildren(map, path)) {
+                traverseEntities(map.getDbEntitiesAsList(), mapPath);
+                traverseEntities(map.getObjEntitiesAsList(), mapPath);
+            }
         }
     }
 
-    public void addEntities(List list, List entities, Object[] path) {
+    public void traverseEntities(List entities, Object[] path) {
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             Entity ent = (Entity) it.next();
-            Object[] entPath = FlatProjectView.buildPath(ent, path);
-            list.add(entPath);
+            Object[] entPath = buildPath(ent, path);
+            handler.projectNode(entPath);
 
-            addAttributes(list, ent.getAttributeList(), entPath);
-            addRelationships(list, ent.getRelationshipList(), entPath);
+            if (handler.shouldReadChildren(ent, path)) {
+                traverseAttributes(ent.getAttributeList(), entPath);
+                traverseRelationships(ent.getRelationshipList(), entPath);
+            }
         }
     }
 
-    public void addAttributes(List list, List attributes, Object[] path) {
+    public void traverseAttributes(List attributes, Object[] path) {
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
-            list.add(FlatProjectView.buildPath(it.next(), path));
+            handler.projectNode(buildPath(it.next(), path));
         }
     }
 
-    public void addRelationships(List list, List relationships, Object[] path) {
+    public void traverseRelationships(List relationships, Object[] path) {
         Iterator it = relationships.iterator();
         while (it.hasNext()) {
-            list.add(FlatProjectView.buildPath(it.next(), path));
+            handler.projectNode(buildPath(it.next(), path));
         }
     }
 }
