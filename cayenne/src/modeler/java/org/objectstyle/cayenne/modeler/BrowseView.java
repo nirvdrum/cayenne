@@ -802,8 +802,8 @@ public class BrowseView
 
             // assume that o2 is a MapObject too, and is NOT NULL;
             // this is proven as a result of earlier delta calculation
-            String name1 = ((MapObject) o1).getName();
-            String name2 = ((MapObject) o2).getName();
+            String name1 = o1.getName();
+            String name2 = o2.getName();
 
             if (name1 == null) {
                 return (name2 != null) ? -1 : 0;

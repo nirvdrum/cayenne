@@ -196,7 +196,7 @@ public class EditDerivedParamsDialog extends CayenneDialog implements ActionList
             new AttributeEvent(
                 this,
                 attr,
-                (DbEntity) attr.getEntity(),
+                attr.getEntity(),
                 AttributeEvent.CHANGE));
 
         hide();
