@@ -108,6 +108,7 @@ public class ModelerPreferences extends ExtendedProperties {
 	public static final String EDITOR_FRAME_HEIGHT = "Editor.frameHeight";
 	public static final String EDITOR_FRAME_X  = "Editor.frameX";
 	public static final String EDITOR_FRAME_Y = "Editor.frameY";
+	public static final String EDITOR_TREE_WIDTH = "Editor.treeWidth";
 
 	protected static ModelerPreferences sharedInstance;
 
