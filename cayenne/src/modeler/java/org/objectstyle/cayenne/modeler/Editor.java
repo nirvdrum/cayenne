@@ -72,14 +72,11 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
@@ -98,6 +95,7 @@ import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
+import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
@@ -107,7 +105,6 @@ import org.objectstyle.cayenne.modeler.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DataMapEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
@@ -166,8 +163,6 @@ public class Editor
     // these all must be put in actions
     protected JMenuItem exitMenu = new JMenuItem("Exit");
     protected JMenuItem generateMenu = new JMenuItem("Generate Classes");
-    protected JMenuItem setPackageMenu =
-        new JMenuItem("Set Package Name for Obj Entities");
 
     protected XmlFilter xmlFilter = new XmlFilter();
     protected TopController controller;
@@ -251,7 +246,7 @@ public class Editor
         UIStrings.setPropertiesName(ModelerStrings.DEFAULT_MESSAGE_BUNDLE);
 
         ModelerContext.setupContext();
-        
+
         initMenus();
         initToolbar();
         initStatusBar();
@@ -319,7 +314,7 @@ public class Editor
         toolMenu.add(generateMenu);
         toolMenu.add(getAction(GenerateDbAction.ACTION_NAME).buildMenu());
         toolMenu.addSeparator();
-        toolMenu.add(setPackageMenu);
+        toolMenu.add(getAction(PackageMenuAction.ACTION_NAME).buildMenu());
 
         helpMenu.add(getAction(AboutAction.ACTION_NAME).buildMenu());
     }
@@ -331,7 +326,6 @@ public class Editor
         exitMenu.addActionListener(this);
 
         generateMenu.addActionListener(this);
-        setPackageMenu.addActionListener(this);
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(650, 550);
@@ -468,10 +462,7 @@ public class Editor
         try {
             Object src = e.getSource();
 
-            if (src == setPackageMenu) {
-                // Set the same package name for all obj entities.
-                setPackageName();
-            } else if (src == generateMenu) {
+            if (src == generateMenu) {
                 generateClasses();
             } else if (src == exitMenu) {
                 exitEditor();
@@ -479,38 +470,6 @@ public class Editor
         } catch (Exception ex) {
             ErrorDebugDialog.guiException(ex);
         }
-    }
-
-    private void setPackageName() {
-        DataMap map = controller.getEventController().getCurrentDataMap();
-        if (map == null) {
-            return;
-        }
-        String package_name;
-        package_name = JOptionPane.showInputDialog(this, "Enter the new package name");
-        if (null == package_name || package_name.trim().length() == 0)
-            return;
-        // Append period to the end of package name, if it is not there.
-        if (package_name.charAt(package_name.length() - 1) != '.')
-            package_name = package_name + ".";
-        // If user cancelled, just return
-        if (null == package_name)
-            return;
-        // Go through all obj entities in the current data map and
-        // set their package names.
-        ObjEntity[] entities = map.getObjEntities();
-        for (int i = 0; i < entities.length; i++) {
-            String name = entities[i].getClassName();
-            int idx = name.lastIndexOf('.');
-            if (idx > 0) {
-                name =
-                    (idx == name.length() - 1)
-                        ? entities[i].getName()
-                        : name.substring(idx + 1);
-            }
-            entities[i].setClassName(package_name + name);
-        }
-        controller.getEventController().fireDataMapEvent(new DataMapEvent(this, map));
     }
 
     private void generateClasses() {
@@ -601,7 +560,6 @@ public class Editor
 
         // explicitly disable "legacy" menus
         generateMenu.setEnabled(false);
-        setPackageMenu.setEnabled(false);
 
         // these are always on
         exitMenu.setEnabled(true);
@@ -631,7 +589,7 @@ public class Editor
         else
             enableDomainMenu();
 
-        setPackageMenu.setEnabled(true);
+        getAction(PackageMenuAction.ACTION_NAME).setEnabled(true);
         generateMenu.setEnabled(true);
 
         getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);

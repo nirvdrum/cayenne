@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.modeler.action.InfoAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
+import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
@@ -172,6 +173,9 @@ public class TopModel {
         CayenneAction aboutAction = new AboutAction();
         aboutAction.setEnabled(true);
         actionMap.put(aboutAction.getKey(), aboutAction);
+        
+        CayenneAction pkgAction = new PackageMenuAction();
+        actionMap.put(pkgAction.getKey(), pkgAction);
     }
 
     /**
