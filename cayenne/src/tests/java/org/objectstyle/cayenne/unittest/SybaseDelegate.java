@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.unittest;
 
+import java.sql.Connection;
+
+import org.objectstyle.cayenne.access.DataContextStoredProcTst;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
@@ -70,9 +74,69 @@ public class SybaseDelegate extends DatabaseSetupDelegate {
         super(adapter);
     }
 
-
     public boolean supportsStoredProcedures() {
         return true;
     }
 
+    public void createdTables(Connection con, DataMap map) throws Exception {
+        createSelectSP(con, DataContextStoredProcTst.SELECT_STORED_PROCEDURE);
+        createUpdateSP(con, DataContextStoredProcTst.UPDATE_STORED_PROCEDURE);
+    }
+
+    public void willDropTables(Connection con, DataMap map) throws Exception {
+        dropSP(con, DataContextStoredProcTst.SELECT_STORED_PROCEDURE);
+        dropSP(con, DataContextStoredProcTst.UPDATE_STORED_PROCEDURE);
+    }
+
+    private void createSelectSP(Connection con, String name) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append(" CREATE PROCEDURE ")
+            .append(name)
+            .append(" @aName VARCHAR(255), @paintingPrice INT AS")
+            .append(" BEGIN")
+        //
+        .append(" BEGIN TRANSACTION")
+        .append(" UPDATE PAINTING SET ESTIMATED_PRICE = ESTIMATED_PRICE * 2")
+        .append(" WHERE ESTIMATED_PRICE < @paintingPrice")
+        .append(" COMMIT")
+        //
+        .append(" SELECT DISTINCT A.ARTIST_ID, A.DATE_OF_BIRTH, A.ARTIST_NAME")
+        .append(" FROM ARTIST A, PAINTING P")
+        .append(" WHERE A.ARTIST_ID = P.ARTIST_ID AND A.ARTIST_NAME = @aName ")
+        .append(" AND P.ESTIMATED_PRICE > @paintingPrice")
+        //
+        .append(" END");
+
+        executeDDL(con, buf.toString());
+    }
+
+    private void createUpdateSP(Connection con, String name) throws Exception {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append(" CREATE PROCEDURE ")
+            .append(name)
+            .append(" @aName VARCHAR(255), @paintingPrice INT AS")
+            .append(" BEGIN")
+        //
+        .append(" BEGIN TRANSACTION")
+        .append(" UPDATE PAINTING SET ESTIMATED_PRICE = ESTIMATED_PRICE * 2")
+        .append(" WHERE ESTIMATED_PRICE < @paintingPrice")
+        .append(" COMMIT")
+        //
+        .append(" END");
+
+        executeDDL(con, buf.toString());
+    }
+
+    private void dropSP(Connection con, String name) throws Exception {
+        String sql =
+            "if exists (SELECT * FROM sysobjects WHERE name = '"
+                + name
+                + "') BEGIN DROP PROCEDURE "
+                + name
+                + " END";
+
+        executeDDL(con, sql);
+    }
 }

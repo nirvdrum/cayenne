@@ -56,15 +56,17 @@
 
 package org.objectstyle.cayenne.dba;
 
-import java.util.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.access.types.*;
-import org.objectstyle.cayenne.access.trans.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
+import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
  * BatchInterpreter performs BatchQueries in a JDBC specific fashion

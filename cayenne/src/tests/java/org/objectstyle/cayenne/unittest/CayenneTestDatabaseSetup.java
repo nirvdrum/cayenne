@@ -138,7 +138,7 @@ public class CayenneTestDatabaseSetup {
 		List list = dbEntitiesInInsertOrder();
 
 		try {
-		    delegate.willDropTables(map);
+		    delegate.willDropTables(conn, map);
 		    
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet tables = md.getTables(null, null, "%", null);
@@ -174,7 +174,7 @@ public class CayenneTestDatabaseSetup {
 				}
 			}
 			
-		    delegate.droppedTables(map);
+		    delegate.droppedTables(conn, map);
 		} finally {
 			conn.close();
 		}
@@ -188,7 +188,7 @@ public class CayenneTestDatabaseSetup {
 		Connection conn = resources.getSharedConnection();
 
 		try {
-			delegate.willCreateTables(map);
+			delegate.willCreateTables(conn, map);
 			Statement stmt = conn.createStatement();
 			Iterator it = tableCreateQueries();
 			while (it.hasNext()) {
@@ -196,7 +196,7 @@ public class CayenneTestDatabaseSetup {
 				logObj.warn("Create table: " + query);
 				stmt.execute(query);
 			}
-		    delegate.createdTables(map);
+		    delegate.createdTables(conn, map);
 		} finally {
 			conn.close();
 		}

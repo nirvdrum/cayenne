@@ -57,9 +57,12 @@
 package org.objectstyle.cayenne.unittest;
 
 import java.lang.reflect.Constructor;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
@@ -75,26 +78,33 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class DatabaseSetupDelegate {
-	protected static Map delegates = new HashMap();
-	
-	static {
-	    delegates.put(OracleAdapter.class, OracleDelegate.class);
-	    delegates.put(SybaseAdapter.class, SybaseDelegate.class);
-	}
-	
+    private static Logger logObj =
+        Logger.getLogger(DatabaseSetupDelegate.class);
+
+    protected static Map delegates = new HashMap();
+
+    static {
+        delegates.put(OracleAdapter.class, OracleDelegate.class);
+        delegates.put(SybaseAdapter.class, SybaseDelegate.class);
+    }
+
     protected DbAdapter adapter;
 
     public static DatabaseSetupDelegate createDelegate(DbAdapter adapter) {
-    	Class delegateClass = (Class)delegates.get(adapter.getClass());
-    	if(delegateClass != null) {
-    		try {
-    		    Constructor c = delegateClass.getConstructor(new Class[] {DbAdapter.class});
-    		    return (DatabaseSetupDelegate)c.newInstance(new Object[] {adapter});
-    		}
-    		catch(Exception ex) {
-    			throw new CayenneRuntimeException("Error instantiating delegate.", ex);
-    		}
-    	}
+        Class delegateClass = (Class) delegates.get(adapter.getClass());
+        if (delegateClass != null) {
+            try {
+                Constructor c =
+                    delegateClass.getConstructor(
+                        new Class[] { DbAdapter.class });
+                return (DatabaseSetupDelegate) c.newInstance(
+                    new Object[] { adapter });
+            } catch (Exception ex) {
+                throw new CayenneRuntimeException(
+                    "Error instantiating delegate.",
+                    ex);
+            }
+        }
         return new DatabaseSetupDelegate(adapter);
     }
 
@@ -102,23 +112,35 @@ public class DatabaseSetupDelegate {
         this.adapter = adapter;
     }
 
-    public void willDropTables(DataMap map) throws Exception {
+    public void willDropTables(Connection con, DataMap map) throws Exception {
 
     }
 
-    public void droppedTables(DataMap map) throws Exception {
-
-    }
-    
-    public void willCreateTables(DataMap map) throws Exception {
+    public void droppedTables(Connection con, DataMap map) throws Exception {
 
     }
 
-    public void createdTables(DataMap map) throws Exception {
+    public void willCreateTables(Connection con, DataMap map)
+        throws Exception {
+    }
+
+    public void createdTables(Connection con, DataMap map) throws Exception {
 
     }
-    
+
     public boolean supportsStoredProcedures() {
-    	return false;
+        return false;
+    }
+
+    protected void executeDDL(Connection con, String ddl) throws Exception {
+        logObj.info("DDL: " + ddl);
+
+        Statement st = con.createStatement();
+
+        try {
+            st.execute(ddl);
+        } finally {
+            st.close();
+        }
     }
 }

@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.unittest;
 
+import java.sql.Connection;
 import java.sql.Types;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -84,7 +85,7 @@ public class OracleDelegate extends DatabaseSetupDelegate {
      * Oracle 8i does not support more then 1 "LONG xx" column per table
      * PAINTING_INFO need to be fixed.
      */
-    public void willCreateTables(DataMap map) {
+    public void willCreateTables(Connection con, DataMap map) {
         DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
         DbAttribute textReview =
             (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
