@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,64 +53,79 @@
  * <http://objectstyle.org/>.
  *
  */
-
 package org.objectstyle.cayenne.access.types;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.sql.Clob;
+import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import org.apache.log4j.Logger;
-
-/** 
- * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
+/**
+ * @author Andrei Adamchik
  */
-public class CharType extends AbstractType {
-    private static Logger logObj = Logger.getLogger(CharType.class);
+public class ByteArrayType extends AbstractType {
 
     private static final int BUF_SIZE = 8 * 1024;
 
-    protected boolean trimingChars;
-    protected boolean usingClobs;
+    protected boolean trimingBytes;
+    protected boolean usingBlobs;
 
-    public CharType(boolean trimingChars, boolean usingClobs) {
-        this.trimingChars = trimingChars;
-        this.usingClobs = usingClobs;
-    }
-
-    public String getClassName() {
-        return String.class.getName();
-    }
-
-    /** Return trimmed string. */
-    public Object materializeObject(ResultSet rs, int index, int type)
-        throws Exception {
-
-        String val = null;
-
-        // CLOB handling
-        if (type == Types.CLOB) {
-            val =
-                (isUsingClobs())
-                    ? readClob(rs, index)
-                    : readCharStream(rs, index);
-        } else {
-
-            val = rs.getString(index);
-
-            // trim CHAR type
-            if (val != null && type == Types.CHAR && isTrimingChars()) {
-                val = val.trim();
+    /**
+     * Strips null bytes from the byte array, returning a potentially smaller
+     * array that contains no trailing zero bytes.
+     */
+    public static byte[] trimBytes(byte[] bytes) {
+        int bytesToTrim = 0;
+        for (int i = bytes.length - 1; i >= 0; i--) {
+            if (bytes[i] != 0) {
+                bytesToTrim = bytes.length - 1 - i;
+                break;
             }
         }
 
-        return val;
+        if (bytesToTrim == 0) {
+            return bytes;
+        }
+
+        byte[] dest = new byte[bytes.length - bytesToTrim];
+        System.arraycopy(bytes, 0, dest, 0, dest.length);
+        return dest;
+    }
+
+    public ByteArrayType(boolean trimminBytes, boolean usingBlobs) {
+        this.usingBlobs = usingBlobs;
+        this.trimingBytes = trimminBytes;
+    }
+
+    public String getClassName() {
+        return "byte[]";
+    }
+
+    public Object materializeObject(ResultSet rs, int index, int type)
+        throws Exception {
+
+        byte[] bytes = null;
+
+        if (type == Types.BLOB) {
+            bytes =
+                (isUsingBlobs())
+                    ? readBlob(rs, index)
+                    : readBinaryStream(rs, index);
+        } else {
+            bytes = rs.getBytes(index);
+
+            // trim BINARY type
+            if (bytes != null && type == Types.BINARY && isTrimingBytes()) {
+                bytes = trimBytes(bytes);
+            }
+        }
+
+        return bytes;
     }
 
     public void setJdbcObject(
@@ -121,78 +136,80 @@ public class CharType extends AbstractType {
         int precision)
         throws Exception {
 
-        // if this is a CLOB column, set the value as "String"
+        // if this is a BLOB column, set the value as "bytes"
         // instead. This should work with most drivers
-        if (type == Types.CLOB) {
-            st.setString(pos, (String) val);
+        if (type == Types.BLOB) {
+            st.setBytes(pos, (byte[]) val);
         } else {
             super.setJdbcObject(st, val, pos, type, precision);
         }
     }
 
-    protected String readClob(ResultSet rs, int index)
+    protected byte[] readBlob(ResultSet rs, int index)
         throws IOException, SQLException {
 
-        Clob clob = rs.getClob(index);
+        Blob blob = rs.getBlob(index);
 
         // sanity check on size
-        if (clob.length() > Integer.MAX_VALUE) {
+        if (blob.length() > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(
-                "CLOB is too big to be read as String in memory: "
-                    + clob.length());
+                "BLOB is too big to be read as byte[] in memory: "
+                    + blob.length());
         }
 
-        int size = (int) clob.length();
+        int size = (int) blob.length();
         int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
-
-        Reader in = new BufferedReader(clob.getCharacterStream(), bufSize);
+        InputStream in =
+            new BufferedInputStream(blob.getBinaryStream(), bufSize);
 
         return readValueStream(in, size, bufSize);
     }
 
-    protected String readCharStream(ResultSet rs, int index)
+    protected byte[] readBinaryStream(ResultSet rs, int index)
         throws IOException, SQLException {
-        return readValueStream(rs.getCharacterStream(index), -1, BUF_SIZE);
+        return readValueStream(rs.getBinaryStream(index), -1, BUF_SIZE);
     }
 
-    protected String readValueStream(Reader in, int streamSize, int bufSize)
+    protected byte[] readValueStream(
+        InputStream in,
+        int streamSize,
+        int bufSize)
         throws IOException {
-        char[] buf = new char[bufSize];
+
+        byte[] buf = new byte[bufSize];
         int read;
-        StringWriter out =
+        ByteArrayOutputStream out =
             (streamSize > 0)
-                ? new StringWriter(streamSize)
-                : new StringWriter();
+                ? new ByteArrayOutputStream(streamSize)
+                : new ByteArrayOutputStream();
 
         try {
             while ((read = in.read(buf, 0, bufSize)) >= 0) {
                 out.write(buf, 0, read);
             }
-            return out.toString();
+            return out.toByteArray();
         } finally {
             in.close();
         }
     }
 
     /**
-     * Returns <code>true</code> if 'materializeObject' method should trim
-     * trailing spaces from the CHAR columns. This addresses an issue with some
-     * JDBC drivers (e.g. Oracle), that return Strings for CHAR columsn  padded
-     * with spaces.
+     * Returns <code>true</code> if byte columns are handled as BLOBs
+     * internally.
      */
-    public boolean isTrimingChars() {
-        return trimingChars;
+    public boolean isUsingBlobs() {
+        return usingBlobs;
     }
 
-    public void setTrimingChars(boolean trimingChars) {
-        this.trimingChars = trimingChars;
+    public void setUsingBlobs(boolean usingBlobs) {
+        this.usingBlobs = usingBlobs;
     }
 
-    public boolean isUsingClobs() {
-        return usingClobs;
+    public boolean isTrimingBytes() {
+        return trimingBytes;
     }
 
-    public void setUsingClobs(boolean usingClobs) {
-        this.usingClobs = usingClobs;
+    public void setTrimingBytes(boolean trimingBytes) {
+        this.trimingBytes = trimingBytes;
     }
 }

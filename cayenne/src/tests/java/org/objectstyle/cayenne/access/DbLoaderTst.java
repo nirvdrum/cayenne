@@ -167,20 +167,20 @@ public class DbLoaderTst extends CayenneTestCase {
 
         DbAttribute blobAttr = getDbAttribute(blobEnt, "BLOB_COL");
         assertNotNull(blobAttr);
-        assertEquals(
+        assertTrue(
             msgForTypeMismatch(Types.BLOB, blobAttr),
-            Types.BLOB,
-            blobAttr.getType());
+            Types.BLOB == blobAttr.getType()
+                || Types.LONGVARBINARY == blobAttr.getType());
 
         DbEntity clobEnt = getDbEntity(map, "CLOB_TEST");
         assertNotNull(clobEnt);
 
         DbAttribute clobAttr = getDbAttribute(clobEnt, "CLOB_COL");
         assertNotNull(clobAttr);
-        assertEquals(
+        assertTrue(
             msgForTypeMismatch(Types.CLOB, clobAttr),
-            Types.CLOB,
-            clobAttr.getType());
+            Types.CLOB == clobAttr.getType()
+                || Types.LONGVARCHAR == clobAttr.getType());
     }
 
     private void assertLobObjEntities(DataMap map) {

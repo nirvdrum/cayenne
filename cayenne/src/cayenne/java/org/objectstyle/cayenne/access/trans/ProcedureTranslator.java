@@ -196,8 +196,7 @@ public class ProcedureTranslator extends QueryTranslator {
             stmt.setNull(pos, type);
         } else {
             ExtendedType typeConverter =
-                adapter.getExtendedTypes().getRegisteredType(
-                    val.getClass().getName());
+                adapter.getExtendedTypes().getRegisteredType(val.getClass());
 
             typeConverter.setJdbcObject(
                 stmt,

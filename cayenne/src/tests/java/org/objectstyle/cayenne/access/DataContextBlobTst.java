@@ -54,71 +54,67 @@
  *
  */
 
-package org.objectstyle.cayenne.dba.oracle;
+package org.objectstyle.cayenne.access;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.BatchInterpreter;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.art.BlobTest;
+import org.objectstyle.cayenne.access.types.ByteArrayTypeTst;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
- * OracleBatchInterpreter performs BatchQueries
- * in the Oracle JDBC specific fashion.
- * It makes use of addBatch too.
- *
- * @author Andriy Shapochka
+ * @author Andrei Adamchik
  */
+public class DataContextBlobTst extends CayenneTestCase {
+    protected DataContext ctxt;
 
-public class OracleBatchInterpreter extends BatchInterpreter {
-    private static Logger logObj = Logger.getLogger(OracleBatchInterpreter.class);
+    public DataContextBlobTst(String name) {
+        super(name);
+    }
 
-    public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
-        List dbAttributes = batch.getDbAttributes();
-        int attributeCount = dbAttributes.size();
-        int[] attributeTypes = new int[attributeCount];
-        int[] attributeScales = new int[attributeCount];
-        for (int i = 0; i < attributeCount; i++) {
-            DbAttribute attribute = (DbAttribute)dbAttributes.get(i);
-            attributeTypes[i] = attribute.getType();
-            attributeScales[i] = attribute.getPrecision();
+    protected void setUp() throws Exception {
+        getDatabaseSetup().cleanTableData();
+        ctxt = getDomain().createDataContext();
+    }
+
+    protected boolean skipTests() {
+        return !super.getDatabaseSetupDelegate().supportsLobs();
+    }
+
+    public void testBlob() throws Exception {
+        if (skipTests()) {
+            return;
         }
-        String query = queryBuilder.query(batch);
-        PreparedStatement st = null;
-        ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
-        try {
-            st = connection.prepareStatement(query);
-            batch.reset();
-            while (batch.next()) {
-                for (int i = 0; i < attributeCount; i++) {
-                    Object value = batch.getObject(i);
-                    int type = attributeTypes[i];
-                    if (value == null) st.setNull(i + 1, type);
-                    else {
-                        ExtendedType typeProcessor = typeConverter.getRegisteredType(value.getClass());
-                        typeProcessor.setJdbcObject(st, value, i + 1, type, attributeScales[i]);
-                    }
-                }
-                st.addBatch();
-            }
-            return st.executeBatch();
-        } catch (SQLException e) {
-            throw e;
-        } catch (CayenneException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CayenneException(e);
-        } finally {
-            try {if (st != null) st.close();}
-            catch (Exception e) {}
-        }
+
+        byte[] bytes1 = new byte[] { 1, 2, 3, 4 };
+        byte[] bytes2 = new byte[] { 'a', 'b', 'c', 'd' };
+
+        // insert new blob
+        BlobTest blobObj1 =
+            (BlobTest) ctxt.createAndRegisterNewObject("BlobTest");
+
+        blobObj1.setBlobCol(bytes1);
+        ctxt.commitChanges();
+
+        // read the BLOB in the new context
+        DataContext ctxt2 = getDomain().createDataContext();
+        List objects2 = ctxt2.performQuery(new SelectQuery(BlobTest.class));
+        assertEquals(1, objects2.size());
+
+        BlobTest blobObj2 = (BlobTest) objects2.get(0);
+        ByteArrayTypeTst.assertByteArraysEqual(blobObj1.getBlobCol(), blobObj2.getBlobCol());
+
+        // update and save Blob
+        blobObj2.setBlobCol(bytes2);
+        ctxt2.commitChanges();
+
+        // read into yet another context and check for changes
+        DataContext ctxt3 = getDomain().createDataContext();
+        List objects3 = ctxt3.performQuery(new SelectQuery(BlobTest.class));
+        assertEquals(1, objects3.size());
+
+        BlobTest blobObj3 = (BlobTest) objects3.get(0);
+        ByteArrayTypeTst.assertByteArraysEqual(blobObj2.getBlobCol(), blobObj3.getBlobCol());
     }
 }
-

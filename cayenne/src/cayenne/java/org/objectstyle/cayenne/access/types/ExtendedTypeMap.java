@@ -78,23 +78,21 @@ public class ExtendedTypeMap {
     protected Map typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();
 
-
     public ExtendedTypeMap() {
         initDefaultTypes();
     }
 
-    /** Registers default extended types. This method is called from
-      * constructor and exists mainly for the benefit of subclasses that
-      * can override it and configure their own extended types. */
+    /** 
+     * Registers default extended types. This method is called from
+     * constructor and exists mainly for the benefit of subclasses that can
+     * override it and configure their own extended types.
+     */
     protected void initDefaultTypes() {
         // register default types
         Iterator it = DefaultType.defaultTypes();
-        while(it.hasNext()) {
-            registerType(new DefaultType((String)it.next()));
+        while (it.hasNext()) {
+            registerType(new DefaultType((String) it.next()));
         }
-
-        // register java.util.Date handler
-        registerType(new UtilDateType());
     }
 
     /** Adds new type to the list of registered types. */
@@ -108,11 +106,31 @@ public class ExtendedTypeMap {
 
     /**
      * Returns a type registered for the class name. If no such type exists,
-     * returns the default type. It is guaranteed that this method retirns a
-     * non-null ExtendedType instance.
+     * returns the default type. It is guaranteed that this method returns a
+     * non-null ExtendedType instance. Note that for array types class name must
+     * be in the form 'MyClass[]'.
      */
     public ExtendedType getRegisteredType(String javaClassName) {
-        ExtendedType type = (ExtendedType)typeMap.get(javaClassName);
+        ExtendedType type = (ExtendedType) typeMap.get(javaClassName);
+        return (type != null) ? type : defaultType;
+    }
+
+    /**
+      * Returns a type registered for the class name. If no such type exists,
+      * returns the default type. It is guaranteed that this method returns a
+      * non-null ExtendedType instance.
+      */
+    public ExtendedType getRegisteredType(Class javaClass) {
+        String name = null;
+
+        if (javaClass.isArray()) {
+            // only support single dimensional arrays now
+            name = javaClass.getComponentType() + "[]";
+        } else {
+            name = javaClass.getName();
+        }
+
+        ExtendedType type = (ExtendedType) typeMap.get(name);
         return (type != null) ? type : defaultType;
     }
 
@@ -132,12 +150,12 @@ public class ExtendedTypeMap {
         Set keys = typeMap.keySet();
         int len = keys.size();
         String[] types = new String[len];
-        
+
         Iterator it = keys.iterator();
-        for(int i = 0; i < len; i++) {
-            types[i] = (String)it.next();
+        for (int i = 0; i < len; i++) {
+            types[i] = (String) it.next();
         }
-        
+
         return types;
     }
 }

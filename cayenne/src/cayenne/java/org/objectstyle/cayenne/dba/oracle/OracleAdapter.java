@@ -67,7 +67,9 @@ import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -100,7 +102,6 @@ public class OracleAdapter extends JdbcAdapter {
 
     public OracleAdapter() {
         super();
-        extendedTypes.registerType(new CharType(true, true));
         qualifierFactory.setTranslatorClass(
             org
                 .objectstyle
@@ -110,6 +111,20 @@ public class OracleAdapter extends JdbcAdapter {
                 .OracleQualifierTranslator
                 .class
                 .getName());
+    }
+
+    /**
+     * Installs appropriate ExtendedTypes as converters for passing values
+     * between JDBC and Java layers.
+     */
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+    	super.configureExtendedTypes(map);
+    	
+    	// create specially configured CharType handler
+        map.registerType(new CharType(true, true));
+        
+        // create specially configured ByteArrayType handler
+        map.registerType(new ByteArrayType(true, true));
     }
 
     /**

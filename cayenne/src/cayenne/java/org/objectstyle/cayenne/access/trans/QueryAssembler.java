@@ -170,10 +170,9 @@ public abstract class QueryAssembler extends QueryTranslator {
                     if (val == null)
                         stmt.setNull(i + 1, type);
                     else {
-                        String className = val.getClass().getName();
                         ExtendedType typeConverter =
                             adapter.getExtendedTypes().getRegisteredType(
-                                className);
+                                val.getClass());
                         try {
                             typeConverter.setJdbcObject(
                                 stmt,

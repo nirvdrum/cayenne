@@ -87,8 +87,10 @@ import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
 import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.access.types.UtilDateType;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -123,36 +125,48 @@ public class JdbcAdapter implements DbAdapter {
     protected BatchInterpreter deleteBatchInterpreter;
     protected BatchInterpreter updateBatchInterpreter;
 
-	/**
-	 * Returns an array of all available DbAdapter subclass names.
-	 * This should probably better be in DbAdapter but interfaces cannot
-	 * contain implementations..
-	 * 
-	 * @return String[] array of DbAdapter subclass names
-	 */
-	public static String[] availableAdapterClassNames() {
-		return new String[] {
-					DbAdapter.JDBC,
-					DbAdapter.HSQLDB,
-					DbAdapter.MYSQL,
-					DbAdapter.ORACLE,
-					DbAdapter.POSTGRES,
-					DbAdapter.SYBASE
-		};
-	}
+    /**
+     * Returns an array of all available DbAdapter subclass names.
+     * This should probably better be in DbAdapter but interfaces cannot
+     * contain implementations..
+     * 
+     * @return String[] array of DbAdapter subclass names
+     */
+    public static String[] availableAdapterClassNames() {
+        return new String[] {
+            DbAdapter.JDBC,
+            DbAdapter.HSQLDB,
+            DbAdapter.MYSQL,
+            DbAdapter.ORACLE,
+            DbAdapter.POSTGRES,
+            DbAdapter.SYBASE };
+    }
 
     public JdbcAdapter() {
         // create Pk generator
         pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
         extendedTypes = new ExtendedTypeMap();
-        
-        // Create a default CHAR handler with some generic settings. 
-        // Subclasses may need to install their own CharType or reconfigure 
-        // this one to work better with the target database. 
-        extendedTypes.registerType(new CharType(false, true));
-        
+        configureExtendedTypes(extendedTypes);
+
         qualifierFactory = new QualifierTranslatorFactory();
+    }
+
+    /**
+     * Installs appropriate ExtendedTypes as converters for passing values
+     * between JDBC and Java layers. Called from default constructor.
+     */
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+        // Create a default CHAR handler with some generic settings.
+        // Subclasses may need to install their own CharType or reconfigure
+        // this one to work better with the target database.
+        map.registerType(new CharType(false, true));
+
+        // enable java.util.Dates as "persistent" values
+        map.registerType(new UtilDateType());
+
+        // enable "small" BLOBs
+        map.registerType(new ByteArrayType(false, true));
     }
 
     /**
@@ -393,7 +407,7 @@ public class JdbcAdapter implements DbAdapter {
 
     public DbAttribute buildAttribute(
         String name,
-        String typeName, 
+        String typeName,
         int type,
         int size,
         int precision,
@@ -452,7 +466,7 @@ public class JdbcAdapter implements DbAdapter {
         }
         return updateBatchInterpreter;
     }
-    
+
     /**
       * @deprecated Since 1.0Beta1 'getExtendedTypes' is used since this method
       * name is confusing.

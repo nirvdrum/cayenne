@@ -124,8 +124,7 @@ public class BatchInterpreter {
                         st.setNull(i + 1, type);
                     else {
                         ExtendedType typeProcessor =
-                            typeConverter.getRegisteredType(
-                                value.getClass().getName());
+                            typeConverter.getRegisteredType(value.getClass());
                         typeProcessor.setJdbcObject(
                             st,
                             value,

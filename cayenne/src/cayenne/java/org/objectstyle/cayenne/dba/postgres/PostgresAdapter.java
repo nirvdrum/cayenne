@@ -60,7 +60,9 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -69,12 +71,21 @@ import org.objectstyle.cayenne.map.DbEntity;
 public class PostgresAdapter extends JdbcAdapter
 {
 	protected Map sorters = new HashMap();
+	
+    /**
+     * Installs appropriate ExtendedTypes as converters for passing values
+     * between JDBC and Java layers.
+     */
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+        super.configureExtendedTypes(map);
 
-	public PostgresAdapter() {
-		super();
-		// register CharType so that all CHAR types will be trimmed
-		this.getExtendedTypes().registerType(new CharType(true, true));
-	}
+        // create specially configured CharType handler
+        map.registerType(new CharType(true, true));
+        
+        // create specially configured ByteArrayType handler
+        map.registerType(new ByteArrayType(true, true));
+    }
+    
 
 	/**
 	 * Adds the CASCADE option to the DROP TABLE clause.

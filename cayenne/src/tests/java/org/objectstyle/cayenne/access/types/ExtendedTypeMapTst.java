@@ -78,6 +78,19 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
         map.unregisterType(tstType.getClassName());
         assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
     }
+    
+    
+    public void testRegisterArrayType() throws Exception {
+        ExtendedTypeMap map = new ExtendedTypeMap();
+        ByteArrayType tstType = new ByteArrayType(false, true);
+
+        map.registerType(tstType);
+        assertSame(tstType, map.getRegisteredType(tstType.getClassName()));
+        assertSame(tstType, map.getRegisteredType(byte[].class));
+
+        map.unregisterType(tstType.getClassName());
+        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+    }
 
     public void testRegisteredTypeName() throws Exception {
         ExtendedTypeMap map = new TstTypeMap();
