@@ -1,3 +1,35 @@
+1) Usage 
+It is assumed a user operates on Cayenne checked out from CVS
+- Build Cayenne distribution.
+- Build Regression like "ant -file build-regression.xml"
+- Make sure an Oracle driver is in the classpath (check for ojdbc14.jar, nls_charset12.jar or likes).
+  If it is not, an ConfigException will be thrown.
+- Create or adjust existing cayenne.xml project, 'datanode'.xml (see src/regression/samples)
+  The database schema must exist and, preferably, be empty.
+- Create or modify existing config file
+  (see src/regression/samples/schema-test.config, schema-test1.config)
+- Put the config file into the working directory (".") or pass its path to the executable.
+- Start regression.bat from the command line (to see useful output).
+  regression.bat is located in the bin directory of the Cayenne distribution.
+
+Note: Regression always tries to clean the schema up after itself. But if it is aborted from the outside,
+chances are some tables and sequences will be left in the schema. In such a case one can use the recorded
+drop_schema.sql to delete them correctly before the next launch.
+
+2) Supported Test Features
+- Random schema generation: complex referential integrity constaints, NOT NULL,
+  auto pk generation (sequences), dependent pks
+- Generation of DataMaps, new DataObject types
+- Random insertions of data objects connected via relationships (reflexive too)
+- Random deletions and related updates of referential constraints
+- Memory and time metering
+- Basic logging facilities: create_schema.sql, drop_schema.sql, DataMap.xml
+- Automatic schema clean-up
+- Various parameters to configure the above mentioned features
+
+
+3) Principles of Work
+
 Created the functional Oracle-oriented prototype of the Cayenne testing app
 dwelling in the package org.objectstyle.cayenne.test. Its purpose is to 
 automatically generate a set of random database schemas and quality of the 

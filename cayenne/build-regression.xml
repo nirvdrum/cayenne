@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+<!-- ========================================== -->
+<!-- Regression Test Application subproject buildfile.-->
+<!-- ========================================== -->
+<project name="cayenne-regression" default="compile">
+	<property name="regression.dist.src" value="${dist}/src/regression"/>
+	<property name="regression.build" value="build/regression"/>
+	<property name="regression.src" value="src/regression/java"/>
+	<property name="regression.bin" value="src/regression/bin"/>
+
+     <!-- Temporary properties, till included into main build -->
+	<property file="default.properties" />
+	<property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
+
+	
+    
+    <!-- ========================================== -->
+    <!-- Build targets.                             -->
+    <!-- ========================================== -->
+    <target name="api">
+		<ant antfile="build-subproj.xml" target="api">
+			<property name="subproj" value="regression"/>
+		</ant>
+	</target>
+	
+	<target name="compile">
+		<ant antfile="build-subproj.xml" target="compile">
+			<property name="subproj" value="regression"/>
+		</ant>
+	</target>
+	
+	<target name="dist-src" depends="dist-bin,api">
+		<copy todir="${regression.dist.src}">
+ 			<fileset dir="${regression.src}"/>
+        </copy>
+	</target>
+
+	<target name="dist-bin" depends="jar">
+	    <copy todir="${dist}/bin">
+            <fileset dir="${regression.bin}" includes="*.bat,*.sh,*.ico"/>
+        </copy>
+
+        <chmod perm="gu+x">
+            <fileset dir="${dist}/bin">
+                <include name="**/*.sh"/>
+            </fileset>
+        </chmod>
+        
+        <copy file="${otherlib.dir}/${bcel.jar}" todir="${dist}/lib/regression"/>
+	</target>
+	
+	
+	<!-- ========================================== -->
+    <!-- Build Modeler JAR file.                    -->
+    <!-- ========================================== -->
+    <target name="jar" depends="compile">
+    	<mkdir dir="${dist}/lib/regression"/>
+    	
+        <jar jarfile="${dist}/lib/regression/cayenne-regression.jar">
+ 			<fileset dir="${regression.build}/classes"/>
+			<fileset dir="${regression.src}">
+				<include name="**/*.xml"/>
+			</fileset>
+            
+            <metainf dir="doc/licenses" includes="LICENSE"/>
+            <manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
+               <attribute name="Specification-Version" value="${project.name}"/>
+               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
+               <attribute name="Implementation-Version" value="${project.version}"/>
+               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Main-Class" value="org.objectstyle.cayenne.regression.Main"/>
+               <attribute name="Class-Path" value="../cayenne.jar bcel.jar"/>
+            </manifest>
+        </jar>
+    </target>
+</project>
