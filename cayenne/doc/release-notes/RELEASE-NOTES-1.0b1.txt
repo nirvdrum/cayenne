@@ -78,4 +78,8 @@ human-readable.
 23. Added a method "DataObject.fetchFinished". This is a first 
 method in a series of lifecycel methods planned in Cayenne.
 
+24. Reengineered internal structure of a map package to be more crash-safe
+on changes.
+
+
 
