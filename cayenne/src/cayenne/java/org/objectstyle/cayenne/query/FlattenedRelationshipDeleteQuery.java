@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -117,10 +116,10 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 		DbRelationship dbRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
 
 		//First relationship - use source of joins to get a value, target of joins to get attribute name
-		ObjectId oid = this.getSource().getObjectId();
-		Map id = (oid != null) ? oid.getIdSnapshot() : null;
+		Map id = this.getSource().getObjectId().getIdSnapshot();
 		List joins = dbRel.getJoins();
 		int i;
+
 		for (i = 0; i < joins.size(); i++) {
 			DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
 			DbAttribute sourceAttribute = thisJoin.getSource();
@@ -134,8 +133,7 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 		}
 
 		//Second relationship- use target of joins to get a value, source of joins to get attribute name
-		oid = this.getDestination().getObjectId();
-		id = (oid != null) ? oid.getIdSnapshot() : null;
+		id = this.getDestination().getObjectId().getIdSnapshot();
 		dbRel = (DbRelationship) relationship.getDbRelationshipList().get(1);
 		joins = dbRel.getJoins();
 		for (i = 0; i < joins.size(); i++) {
