@@ -99,7 +99,7 @@ public class SaveAsAction extends CayenneAction {
         Project p = getCurrentProject();
 
         // obtain preference object before save, when the project path may change.....
-        Domain preference = getProjectController().getCurrentProjectPreferences();
+        Domain preference = getProjectController().getPreferenceDomainForProject();
 
         if (!chooseDestination(p)) {
             return false;

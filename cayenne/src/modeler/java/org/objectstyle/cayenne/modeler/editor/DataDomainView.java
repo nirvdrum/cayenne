@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
+import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -89,7 +90,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class DataDomainView extends JPanel implements DomainDisplayListener {
 
-    protected ProjectController eventController;
+    protected ProjectController projectController;
 
     protected TextFieldAdapter name;
     protected TextFieldAdapter cacheSize;
@@ -99,8 +100,8 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
 
-    public DataDomainView(ProjectController eventController) {
-        this.eventController = eventController;
+    public DataDomainView(ProjectController projectController) {
+        this.projectController = projectController;
 
         // Create and layout components
         initView();
@@ -161,7 +162,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     }
 
     protected void initController() {
-        eventController.addDomainDisplayListener(this);
+        projectController.addDomainDisplayListener(this);
 
         // add action listener to checkboxes
         objectValidation.addActionListener(new ActionListener() {
@@ -227,7 +228,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         configRemoteUpdates.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                new CacheSyncConfigController(eventController).startup();
+                new CacheSyncConfigController(projectController).startup();
             }
         });
     }
@@ -238,7 +239,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
      */
     protected void setDomainProperty(String property, String value, String defaultValue) {
 
-        DataDomain domain = eventController.getCurrentDataDomain();
+        DataDomain domain = projectController.getCurrentDataDomain();
         if (domain == null) {
             return;
         }
@@ -259,12 +260,12 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
             properties.put(property, value);
 
             DomainEvent e = new DomainEvent(this, domain);
-            eventController.fireDomainEvent(e);
+            projectController.fireDomainEvent(e);
         }
     }
 
     public String getDomainProperty(String property, String defaultValue) {
-        DataDomain domain = eventController.getCurrentDataDomain();
+        DataDomain domain = projectController.getCurrentDataDomain();
         if (domain == null) {
             return null;
         }
@@ -314,26 +315,28 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
                 && remoteUpdates.isSelected());
     }
 
-    void setDomainName(String text) {
-        if (text == null || text.trim().length() == 0) {
+    void setDomainName(String newName) {
+        if (newName == null || newName.trim().length() == 0) {
             throw new ValidationException("Enter name for DataDomain");
         }
 
-        Configuration configuration = ((ApplicationProject) Application
-                .getProject()).getConfiguration();
-        DataDomain domain = eventController.getCurrentDataDomain();
+        Configuration configuration = ((ApplicationProject) Application.getProject())
+                .getConfiguration();
+        DataDomain domain = projectController.getCurrentDataDomain();
 
-        DataDomain matchingDomain = configuration.getDomain(text);
+        DataDomain matchingDomain = configuration.getDomain(newName);
 
         if (matchingDomain == null) {
-            // completely new name, set new name for domain
+            Domain prefs = projectController.getPreferenceDomainForDataDomain();
+
             DomainEvent e = new DomainEvent(this, domain, domain.getName());
-            ProjectUtil.setDataDomainName(configuration, domain, text);
-            eventController.fireDomainEvent(e);
+            ProjectUtil.setDataDomainName(configuration, domain, newName);
+            prefs.rename(newName);
+            projectController.fireDomainEvent(e);
         }
         else if (matchingDomain != domain) {
             throw new ValidationException("There is another DataDomain named '"
-                    + text
+                    + newName
                     + "'. Use a different name.");
         }
     }

@@ -18,6 +18,10 @@
 		<db-attribute name="superclass_package_suffix" type="VARCHAR" length="254"/>
 		<db-attribute name="superclass_template" type="VARCHAR" length="254"/>
 	</db-entity>
+	<db-entity name="data_node_defaults">
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="local_data_source" type="VARCHAR" length="255"/>
+	</db-entity>
 	<db-entity name="db_connection_info">
 		<db-attribute name="db_adapter" type="VARCHAR" length="254"/>
 		<db-attribute name="domain_preference_id" type="INTEGER"/>
@@ -51,6 +55,9 @@
 		<obj-attribute name="subclassTemplate" type="java.lang.String" db-attribute-path="subclass_template"/>
 		<obj-attribute name="superclassPackageSuffix" type="java.lang.String" db-attribute-path="superclass_package_suffix"/>
 		<obj-attribute name="superclassTemplate" type="java.lang.String" db-attribute-path="superclass_template"/>
+	</obj-entity>
+	<obj-entity name="DataNodeDefaults" className="org.objectstyle.cayenne.modeler.pref.DataNodeDefaults" lock-type="optimistic" dbEntityName="data_node_defaults" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
+		<obj-attribute name="localDataSource" type="java.lang.String" db-attribute-path="local_data_source"/>
 	</obj-entity>
 	<obj-entity name="FSPath" className="org.objectstyle.cayenne.modeler.pref.FSPath" dbEntityName="fs_path" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
 		<obj-attribute name="path" type="java.lang.String" db-attribute-path="path"/>

@@ -60,6 +60,7 @@ import java.util.EventListener;
 
 import javax.swing.event.EventListenerList;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -116,6 +117,7 @@ import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
+import org.objectstyle.cayenne.modeler.pref.DataNodeDefaults;
 import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.Project;
@@ -136,7 +138,7 @@ public class ProjectController extends CayenneController {
     protected EventListenerList listenerList;
     protected boolean dirty;
 
-    protected Project currentProject;
+    protected Project project;
     protected Domain projectPreferences;
 
     protected DataDomain currentDomain;
@@ -161,53 +163,90 @@ public class ProjectController extends CayenneController {
         return parent.getView();
     }
 
-    public Project getCurrentProject() {
-        return currentProject;
+    public Project getProject() {
+        return project;
     }
 
-    public void setCurrentProject(Project currentProject) {
-        this.currentProject = currentProject;
+    public void setProject(Project currentProject) {
+        this.project = currentProject;
         this.projectPreferences = null;
     }
 
     /**
      * Returns top preferences Domain for the application.
      */
-    public Domain getApplicationPreferences() {
-        return getApplication().getApplicationPreferences();
+    public Domain getApplicationPreferenceDomain() {
+        return getApplication().getPreferenceDomain();
     }
 
     /**
-     * Returns top preferences Domain for the current project.
+     * Returns top preferences Domain for the current project, throwing an exception if no
+     * project is selected.
      */
-    public Domain getCurrentProjectPreferences() {
-        if (getCurrentProject() == null) {
-            return null;
+    public Domain getPreferenceDomainForProject() {
+        Project project = getProject();
+        if (project == null) {
+            throw new CayenneRuntimeException("No Project selected");
         }
+
         if (projectPreferences == null) {
-            Project project = getCurrentProject();
             String key = project.isLocationUndefined() ? new String(IDUtil
                     .pseudoUniqueByteSequence16()) : project
                     .getMainFile()
                     .getAbsolutePath();
 
-            projectPreferences = getApplicationPreferences()
-                    .getSubdomain(Project.class)
-                    .getSubdomain(key);
+            projectPreferences = getApplicationPreferenceDomain().getSubdomain(
+                    Project.class).getSubdomain(key);
         }
 
         return projectPreferences;
     }
 
-    public DataMapDefaults getCurrentDataMapPreferences() {
-        DataMap map = getCurrentDataMap();
-        if (map == null) {
-            return null;
+    /**
+     * Returns top preferences Domain for the current project, throwing an exception if no
+     * project is selected.
+     */
+    public Domain getPreferenceDomainForDataDomain() {
+        DataDomain dataDomain = getCurrentDataDomain();
+        if (dataDomain == null) {
+            throw new CayenneRuntimeException("No DataDomain selected");
         }
 
-        return (DataMapDefaults) getCurrentProjectPreferences().getPreferenceDetail(
+        return getPreferenceDomainForProject()
+                .getSubdomain(DataDomain.class)
+                .getSubdomain(dataDomain.getName());
+    }
+
+    /**
+     * Returns preferences object for the current DataMap, throwing an exception if no
+     * DataMap is selected.
+     */
+    public DataMapDefaults getDataMapPreferences() {
+        DataMap map = getCurrentDataMap();
+        if (map == null) {
+            throw new CayenneRuntimeException("No DataMap selectd");
+        }
+
+        return (DataMapDefaults) getPreferenceDomainForDataDomain().getPreferenceDetail(
                 map.getName(),
                 DataMapDefaults.class,
+                true);
+    }
+
+    /**
+     * Returns preferences object for the current DataMap, throwing an exception if no
+     * DataMap is selected.
+     */
+    public DataNodeDefaults getDataNodePreferences() {
+        DataNode node = getCurrentDataNode();
+        if (node == null) {
+            throw new CayenneRuntimeException("No DataNode selected");
+        }
+
+        // TODO: this doesn't take into account that there may be multiple domains...
+        return (DataNodeDefaults) getPreferenceDomainForDataDomain().getPreferenceDetail(
+                node.getName(),
+                DataNodeDefaults.class,
                 true);
     }
 

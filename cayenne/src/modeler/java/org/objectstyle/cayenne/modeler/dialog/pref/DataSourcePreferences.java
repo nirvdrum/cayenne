@@ -196,7 +196,7 @@ public class DataSourcePreferences extends CayenneController {
     }
 
     public Domain getDataSourceDomain() {
-        return editor.editableInstance(getApplication().getApplicationPreferences());
+        return editor.editableInstance(getApplication().getPreferenceDomain());
     }
 
     public PreferenceEditor getEditor() {

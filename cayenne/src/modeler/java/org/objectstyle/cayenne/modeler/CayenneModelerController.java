@@ -119,7 +119,7 @@ public class CayenneModelerController extends CayenneController {
             }
         });
 
-        Domain prefDomain = application.getApplicationPreferences().getSubdomain(
+        Domain prefDomain = application.getPreferenceDomain().getSubdomain(
                 frame.getClass());
         ComponentGeometry geometry = ComponentGeometry.getPreference(prefDomain);
         geometry.bind(frame, 650, 550, 30);
@@ -142,9 +142,9 @@ public class CayenneModelerController extends CayenneController {
     }
 
     public void projectModifiedAction() {
-        String title = (projectController.getCurrentProject().isLocationUndefined())
+        String title = (projectController.getProject().isLocationUndefined())
                 ? "[New]"
-                : projectController.getCurrentProject().getMainFile().getAbsolutePath();
+                : projectController.getProject().getMainFile().getAbsolutePath();
 
         frame.setTitle("* - " + ModelerConstants.TITLE + " - " + title);
     }
@@ -154,7 +154,7 @@ public class CayenneModelerController extends CayenneController {
         updateStatus("Project saved...");
         frame.setTitle(ModelerConstants.TITLE
                 + " - "
-                + projectController.getCurrentProject().getMainFile().getAbsolutePath());
+                + projectController.getProject().getMainFile().getAbsolutePath());
     }
 
     /**
@@ -176,7 +176,7 @@ public class CayenneModelerController extends CayenneController {
         frame.repaint();
         frame.setTitle(ModelerConstants.TITLE);
 
-        projectController.setCurrentProject(null);
+        projectController.setProject(null);
 
         projectController.reset();
         actionController.projectClosed();
@@ -190,7 +190,7 @@ public class CayenneModelerController extends CayenneController {
      */
     public void projectOpenedAction(Project project) {
 
-        projectController.setCurrentProject(project);
+        projectController.setProject(project);
 
         if (project.isLocationUndefined()) {
             updateStatus("New project created...");

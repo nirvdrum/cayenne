@@ -181,7 +181,7 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
         eventController.addProcedureDisplayListener(this);
         eventController.addQueryDisplayListener(this);
 
-        Domain domain = eventController.getApplicationPreferences().getSubdomain(
+        Domain domain = eventController.getApplicationPreferenceDomain().getSubdomain(
                 this.getClass());
         ComponentGeometry geometry = (ComponentGeometry) domain.getPreferenceDetail(
                 "splitPane.divider",

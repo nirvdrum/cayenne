@@ -150,7 +150,7 @@ public class OpenProjectAction extends ProjectAction {
             getApplication().getFrameController().addToLastProjListAction(file.getAbsolutePath());
 
             Project project = Project.createProject(file);
-            getProjectController().setCurrentProject(project);
+            getProjectController().setProject(project);
 
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {

@@ -402,7 +402,7 @@ public class DataMapView extends JPanel {
         }
 
         // completely new name, set new name for domain
-        DataMapDefaults pref = eventController.getCurrentDataMapPreferences();
+        DataMapDefaults pref = eventController.getDataMapPreferences();
         DataMapEvent e = new DataMapEvent(this, map, map.getName());
         ProjectUtil.setDataMapName(eventController.getCurrentDataDomain(), map, newName);
         pref.rename(newName);

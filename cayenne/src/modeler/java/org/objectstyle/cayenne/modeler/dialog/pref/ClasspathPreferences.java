@@ -99,13 +99,13 @@ public class ClasspathPreferences extends CayenneController {
     }
 
     protected Domain getViewDomain() {
-        return getApplication().getApplicationPreferences().getSubdomain(
+        return getApplication().getPreferenceDomain().getSubdomain(
                 ClasspathPreferencesView.class);
     }
 
     protected Domain getClassLoaderDomain() {
         return editor
-                .editableInstance(getApplication().getApplicationPreferences())
+                .editableInstance(getApplication().getPreferenceDomain())
                 .getSubdomain(FileClassLoadingService.class);
     }
 

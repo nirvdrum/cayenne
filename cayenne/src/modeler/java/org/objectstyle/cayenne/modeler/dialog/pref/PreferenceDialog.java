@@ -168,7 +168,7 @@ public class PreferenceDialog extends CayenneController {
         this.editor = new CayenneModelerPreferenceEditor(application);
 
         // bind own view preferences
-        Domain prefDomain = application.getApplicationPreferences().getSubdomain(
+        Domain prefDomain = application.getPreferenceDomain().getSubdomain(
                 view.getClass());
         ComponentGeometry geometry = ComponentGeometry.getPreference(prefDomain);
         geometry.bind(view, 500, 350);

@@ -117,8 +117,8 @@ import org.scopemvc.view.swing.SwingView;
  * <ul>
  * <li>cayenne.modeler.application.name - name of the application, 'CayenneModeler' is
  * default. Used to locate prerferences domain among other things.</li>
- * <li>cayenne.modeler.pref.db - a full path to the preferences HSQL database. Default is
- * "$HOME/.cayennne/pref/db".</li>
+ * <li>cayenne.modeler.pref.db - a full path to the preferences database *directory*.
+ * Default is "$HOME/.cayennne/pref".</li>
  * </ul>
  * 
  * @author Andrei Adamchik
@@ -155,7 +155,7 @@ public class Application {
         return getInstance()
                 .getFrameController()
                 .getProjectController()
-                .getCurrentProject();
+                .getProject();
     }
 
     public Application(File initialProject) {
@@ -166,9 +166,11 @@ public class Application {
         this.name = (configuredName != null) ? configuredName : DEFAULT_APPLICATION_NAME;
 
         String configuredPrefsDB = System.getProperty(PREFERENCE_DB_PROPERTY);
-        this.preferencesDB = (configuredPrefsDB != null) ? configuredPrefsDB : new File(
-                CayenneUserDir.getInstance().resolveFile("prefs"),
-                "db").getAbsolutePath();
+        File dbDir = (configuredPrefsDB != null)
+                ? new File(configuredPrefsDB)
+                : CayenneUserDir.getInstance().resolveFile("prefs");
+        dbDir.mkdirs();
+        this.preferencesDB = new File(dbDir, "db").getAbsolutePath();
     }
 
     public String getName() {
@@ -236,7 +238,7 @@ public class Application {
     /**
      * Returns top preferences Domain for the application.
      */
-    public Domain getApplicationPreferences() {
+    public Domain getPreferenceDomain() {
         return getPreferenceService().getDomain(getName(), true);
     }
 
@@ -247,7 +249,7 @@ public class Application {
         FileClassLoadingService classLoader = new FileClassLoadingService();
 
         // init from preferences...
-        Domain classLoaderDomain = getApplicationPreferences().getSubdomain(
+        Domain classLoaderDomain = getPreferenceDomain().getSubdomain(
                 FileClassLoadingService.class);
 
         Collection details = classLoaderDomain.getPreferences();
@@ -276,9 +278,9 @@ public class Application {
         service.stopOnShutdown();
         this.preferenceService = service;
         this.preferenceService.startService();
-        
+
         // test service
-        getApplicationPreferences();
+        getPreferenceDomain();
     }
 
     protected void initActions() {

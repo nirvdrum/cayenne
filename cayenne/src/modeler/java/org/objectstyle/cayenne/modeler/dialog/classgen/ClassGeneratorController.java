@@ -93,9 +93,9 @@ public class ClassGeneratorController extends BasicController {
     }
 
     protected Object prepareModel(ProjectController parent) {
-        Project project = parent.getCurrentProject();
+        Project project = parent.getProject();
         DataMap map = parent.getCurrentDataMap();
-        DataMapDefaults preferences = parent.getCurrentDataMapPreferences();
+        DataMapDefaults preferences = parent.getDataMapPreferences();
         ObjEntity selectedEntity = parent.getCurrentObjEntity();
 
         // validate entities
