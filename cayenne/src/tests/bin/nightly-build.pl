@@ -44,7 +44,7 @@ die_with_email("CVSROOT must be passed using -d option.") unless $opt_d;
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = 1900 + $year;
 $mon = 1 + $mon;
-my $label = "$mon-$mday-$year";	
+my $label = "$year-$mon-$mday";	
 my $out_file = "/tmp/cayenne-nightly-$label.txt";
 unlink $out_file if -f $out_file;
 
@@ -61,11 +61,14 @@ my $rel_path = "/var/sites/objectstyle/html/downloads/cayenne/nightly";
 print_line("\n\n===================================================\n");
 print_line("Nightly build: $label\n");
 
-# checkout source, or check the possibility to reuse existing one 
+# checkout source
 get_source();
 
 # build
 chdir "$cayenne_src/cayenne" or die_with_email("Can't change to $cayenne_src/cayenne: $!\n");
+
+set_release_label();
+
 my $status = run_command("$ant clean");
 die_with_email("Build failed, return status: $status\n") if $status;
 
@@ -81,7 +84,7 @@ my $test_failure = $status;
 # upload
 if($opt_u) {
 	# make remote upload directory
-	$status = run_command("ssh www.objectstyle.org mkdir -p $rel_path/$year-$mon-$mday");
+	$status = run_command("ssh www.objectstyle.org mkdir -p $rel_path/$label");
 	die_with_email("Can't create release directory, return status: $status\n") if $status;
 	
 	# Upload test results no matter what
@@ -142,6 +145,30 @@ sub get_source() {
                 }
 		die_with_email("CVS checkout failed, return status: $status, attempts: $i\n") if $status;
 	}
+}
+
+sub set_release_label() {
+	open(DEFAULT_PROPS, "< default.properties") or die_with_email("Can't open default.properties: $!\n");
+        open(LABELED_PROPS, "> build.properties") or die_with_email("Can't open build.properties: $!\n"); 
+	while(<DEFAULT_PROPS>) {
+		chomp;
+		if(/^project\.version\s*=\s*(.+)$/) {
+                        my $version = "$1-$label"; 
+			
+			# copy RELEASE-NOTES
+			copy("doc/release-notes/RELEASE-NOTES-$1.txt", 
+                             "doc/release-notes/RELEASE-NOTES-$version.txt") 
+                             or die_with_email("Can't copy RELEASE-NOTES: $!\n");	
+
+			print LABELED_PROPS "project.version = $version\n";
+		}
+		else {
+			print LABELED_PROPS "$_\n";
+		}
+	}
+
+	close(DEFAULT_PROPS);
+	close(LABELED_PROPS);
 }
 
 sub run_command() {
