@@ -12,7 +12,7 @@
     <section name="3. Quick Start">
     	<p>This section shows how to write a simple command-line application
     	using Cayenne. For a more detailed discussion read <a href="../appguide/index.html">"Writing 
-    	Cayenne Applications"</a> section. This tutorial follows these steps:
+    	Cayenne Applications"</a> section. The tutorial follows these steps:
     	
     	<ul>
     		<li><a href="#1">Tutorial Setup.</a></li>
@@ -25,7 +25,7 @@
     	</p>
     	
        	<subsection name="3.1 Tutorial Setup" anchor="1">
-       		<p>- Follow steps outlined in the <a href="../install/index.html">Cayenne 
+       		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
        		installation instructions</a>. In particular, JSDK 1.4 must be installed.
        		</p>
        		

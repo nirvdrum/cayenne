@@ -327,7 +327,7 @@
     <!-- ========================================== -->
     <!-- Builds API documenatation.                 -->
     <!-- ========================================== -->
-    <target name="api" depends="prepare">
+    <target name="api" depends="prepare,doc">
         <javadoc    packagenames="org.objectstyle.*"
                     sourcepath="src"
                     defaultexcludes="yes"
@@ -335,7 +335,12 @@
                     author="true"
                     use="true"
                     windowtitle="Cayenne API">
-            <doctitle><![CDATA[<h2>Cayenne API Documentation (Version ${project.version})</h2>]]></doctitle>
+            <group title="Core Packages" packages="org.objectstyle.*"/>
+            <group title="WebObjects Compatibility Packages" packages="org.objectstyle.cayenne.wocompat*"/>
+			<group title="GUI Packages" packages="org.objectstyle.cayenne.gui*"/>
+            <doctitle><![CDATA[<h2><a href="http://objectstyle.org/cayenne/" target="top">
+            		<img height="40" border="0" src="../images/cayenne_logo_small.gif"><a> 
+            		Cayenne API Documentation (Version ${project.version})</h2>]]></doctitle>
             <bottom><![CDATA[<!--SFLOGO--> &nbsp; <i>Copyright &#169; 2001-2002 <a href=
             "http://objectstyle.org">ObjectStyle.org</a> All Rights Reserved.</i>]]>
             </bottom>
