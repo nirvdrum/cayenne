@@ -171,7 +171,6 @@ public class Editor
     protected EditorView view;
     protected Mediator mediator;
     protected ActionMap actionMap;
-    protected ProjectSet projects = new ProjectSet();
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
     // these all must be put in actions
@@ -253,11 +252,7 @@ public class Editor
      * ever starts supporting multiple open projects.
      */
     public static Project getProject() {
-        return getFrame().projects.getCurrentProject();
-    }
-
-    public static ProjectSet getProjects() {
-        return getFrame().projects;
+        return getFrame().controller.getTopModel().getCurrentProject();
     }
 
     public Editor() {
@@ -495,7 +490,7 @@ public class Editor
         }
 
         setMediator(null);
-        projects.removeCurrentProject();
+        controller.getTopModel().setCurrentProject(null);
 
         disableMenu();
 
@@ -827,5 +822,14 @@ public class Editor
      */
     public EditorView getView() {
         return view;
+    }
+    
+    /**
+     * Returns the controller.
+     * 
+     * @return TopController
+     */
+    public TopController getController() {
+      return controller;
     }
 }

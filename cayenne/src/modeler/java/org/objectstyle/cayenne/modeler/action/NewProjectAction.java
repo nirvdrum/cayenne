@@ -153,8 +153,8 @@ public class NewProjectAction extends ProjectAction {
                 return;
             }
 
-            Project project =
-                Editor.getProjects().createProject(Editor.DEFAULT_PROJECT_NAME, projectFile, true);
+            Project project = new Project(Editor.DEFAULT_PROJECT_NAME, projectFile);
+            Editor.getFrame().getController().getTopModel().setCurrentProject(project);
 
             // Save dir path to the preferences
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getAbsolutePath());

@@ -157,11 +157,10 @@ public class OpenProjectAction extends ProjectAction {
             // uncomment to debug GUI
             Configuration.setLoggingLevel(Level.INFO);
 
-            Project project =
-                Editor.getProjects().createProject(
-                    Editor.DEFAULT_PROJECT_NAME,
-                    file,
-                    true);
+                    
+            Project project = new Project(Editor.DEFAULT_PROJECT_NAME, file);
+            Editor.getFrame().getController().getTopModel().setCurrentProject(project);
+
 
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
