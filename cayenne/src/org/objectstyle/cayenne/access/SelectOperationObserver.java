@@ -1,4 +1,3 @@
-
 package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
@@ -54,104 +53,60 @@ package org.objectstyle.cayenne.access;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
 
-
-/** Simple implementation of OperationObserver interface. 
- *  Useful as a superclass of other implementations of OperationObserver.
- *  This class would collect useful ststistics about the operation process. 
+/** Subclass of DefaultOperationObserver that accumulates 
+ *  select query results in internal list. This is a helper
+ *  class for classes that work with DataNode directly, bypassing DataContext. 
+ * 
+ * <p>If exceptions happen during the execution, they are immediately rethrown.
+ * </p>
+ * 
+ *  @author Andrei Adamchik
  */
-public class DefaultOperationObserver implements OperationObserver {
-    static Logger logObj = Logger.getLogger(DefaultOperationObserver.class.getName());
-    
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-    
-    protected ArrayList globalExceptions = new ArrayList();
-    protected HashMap queryExceptions = new HashMap();
-    protected boolean transactionCommitted;
-    protected boolean transactionRolledback;
+public class SelectOperationObserver extends DefaultOperationObserver {
+    protected ArrayList results = new ArrayList();
+
+    /** Returns query results accumulated during query execution with this
+     * object as an operation observer. */
+    public List getResults() {
+        return results;
+    }
+
+    /** Clears fetched objects stored in an internal list. */
+    public void clear() {
+        results.clear();
+    }
     
 
-    /** Returns a list of global exceptions that occured during data operation run. */
-    public List getGlobalExceptions() {
-        return globalExceptions;
-    }
-    
-    
-    /** Returns a list of exceptions that occured during data operation run by query. */
-    public HashMap getQueryExceptions() {
-        return queryExceptions;
-    }
-    
-    /** Returns <code>true</code> if at least one exception was registered
-      * during query execution. */
-    public boolean hasExceptions() {
-        return globalExceptions.size() > 0 || queryExceptions.size() > 0;
-    }
-    
-    
-    public boolean isTransactionCommitted() {
-        return transactionCommitted;
-    }  
-    
-    
-    public boolean isTransactionRolledback() {
-        return transactionRolledback;
-    } 
-    
-    /** Returns Level.INFO as a default logging level. */
-    public Level queryLogLevel() {
-        return DEFAULT_LOG_LEVEL;
-    }
-    
-    public void nextCount(Query query, int resultCount) {
-        logObj.fine("update count: " + resultCount);
-    }
-    
-    
+    /** Stores all objects in <code>resultSnapshots</code> in an internal
+     * result list. 
+     */
     public void nextSnapshots(Query query, List resultSnapshots) {
-        int count = (resultSnapshots == null) ? -1 : resultSnapshots.size();
-        logObj.fine("result count: " + count);
+        super.nextSnapshots(query, resultSnapshots);
+        if(resultSnapshots != null) {
+            results.addAll(resultSnapshots);
+        }
     }
     
-    
+    /** Overrides superclass implementation to rethrow an exception
+     *  immediately. */
     public void nextQueryException(Query query, Exception ex) {
-        logObj.log(Level.WARNING, "query exception", ex);
-        queryExceptions.put(query, ex);
+        super.nextQueryException(query, ex);
+        throw new CayenneRuntimeException("Query exception.", ex);
     }
     
     
+    /** Overrides superclass implementation to rethrow an exception
+     *  immediately. */
     public void nextGlobalException(Exception ex) {
-        logObj.log(Level.WARNING, "global exception", ex);
-        globalExceptions.add(ex);
-    }
-    
-    
-    public void transactionCommitted() {
-        logObj.fine("transaction committed");
-        transactionCommitted = true;
-    }
-    
-    public void transactionRolledback() {
-        logObj.fine("*** transaction rolled back");
-        transactionRolledback = true;
-    }
-    
-    
-    /** Returns <code>true</code> so that individual queries are executed in separate
-     *  transactions. */
-    public boolean useAutoCommit() {
-        return true;
-    }
-    
-    /** Returns query list without altering its ordering. */
-    public List orderQueries(DataNode aNode, List queryList) {
-        return queryList;
+        super.nextGlobalException(ex);
+        throw new CayenneRuntimeException("Global exception.", ex);
     }
 }

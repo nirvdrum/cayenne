@@ -60,8 +60,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.*;
@@ -73,7 +72,6 @@ public class PkGenerator {
 
     private static final ObjAttribute[] resultDesc =
         new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
-
 
     /** Generates database objects to provide
      *  automatic primary key support. This implementation will create
@@ -103,7 +101,6 @@ public class PkGenerator {
             if (con != null)
                 con.close();
         }
-        
 
         if (shouldCreate) {
             StringBuffer buf = new StringBuffer();
@@ -138,17 +135,37 @@ public class PkGenerator {
         }
     }
 
-    /** <p>Perform necessary database operations to do primary key generation
+    /** Performs necessary database operations to do primary key generation
      *  for a particular DbEntity.
-     *  This  requires a prior call to <code>"createAutoPkSupport"<code>
-     *  method.</p>
+     *  This may require a prior call to <code>createAutoPkSupport<code>
+     *  method.
+     * 
+     *  <p>This operation is safe in a sense that it will populate lookup tables
+     *  with the correct values for the current database. So it can be run
+     *  not only during shcema creating but at any time, for example to fix
+     *  errors in primary key lookup table.</p>
+     * 
+     *  <p>Current implementation is rather slow (to make it most generic),
+     *  but since this operation is not performed very often, this shouldn't
+     *  cause problems in the applications.</p>
      *
      *  @param node node that provides connection layer for PkGenerator.
      *  @param dbEntity DbEntity that needs an auto PK support
      */
     public void createAutoPkSupportForDbEntity(DataNode node, DbEntity dbEntity)
         throws Exception {
+
         StringBuffer buf = new StringBuffer();
+        buf.append("DELETE FROM AUTO_PK_SUPPORT ")
+        .append("WHERE TABLE_NAME = '")
+        .append(dbEntity.getName())
+        .append('\'');
+
+        // delete existing record
+        runSchemaUpdate(node, buf.toString());
+
+        // create new one
+        buf.setLength(0);
         buf
             .append("INSERT INTO AUTO_PK_SUPPORT (TABLE_NAME, NEXT_ID) ")
             .append("VALUES ('")
@@ -156,6 +173,7 @@ public class PkGenerator {
             .append("', 1)");
 
         runSchemaUpdate(node, buf.toString());
+
     }
 
     /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
@@ -169,6 +187,21 @@ public class PkGenerator {
         PkSchemaProcessor pr = new PkSchemaProcessor();
         node.performQuery(q, pr);
     }
+    
+    
+    /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
+     * to track the results of the execution.
+     * 
+     * @throws java.lang.Exception in case of query failure. */
+    private List runSelect(DataNode node, String sql) throws Exception {
+        SqlSelectQuery q = new SqlSelectQuery();
+        q.setSqlString(sql);
+
+        SelectOperationObserver observer = new SelectOperationObserver();
+        node.performQuery(q, observer);
+        return observer.getResults();
+    }
+    
 
     /**
      *  <p>Generate new (unique and non-repeating) primary key for specified dbEntity.</p>
@@ -210,6 +243,7 @@ public class PkGenerator {
         else
             return pkProcessor.nextId;
     }
+
 
     /** OperationObserver for primary key retrieval. */
     class PkRetrieveProcessor extends DefaultOperationObserver {
@@ -282,6 +316,7 @@ public class PkGenerator {
             throw new CayenneRuntimeException("Error generating PK.", ex);
         }
     }
+
 
     /** OperationObserver for schema operations. */
     class PkSchemaProcessor extends DefaultOperationObserver {

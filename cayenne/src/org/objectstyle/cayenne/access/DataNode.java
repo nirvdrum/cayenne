@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
 
-
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
   *
@@ -77,10 +76,10 @@ import org.objectstyle.cayenne.query.Query;
 public class DataNode implements QueryEngine {
     static Logger logObj = Logger.getLogger(DataNode.class.getName());
 
-    public static final String DEFAULT_ADAPTER_CLASS = "org.objectstyle.cayenne.dba.JdbcAdapter";
+    public static final String DEFAULT_ADAPTER_CLASS =
+        "org.objectstyle.cayenne.dba.JdbcAdapter";
 
     private static final DataMap[] noDataMaps = new DataMap[0];
-
 
     protected String name;
     protected DataSource dataSource;
@@ -88,7 +87,6 @@ public class DataNode implements QueryEngine {
     protected DbAdapter adapter;
     protected String dataSourceLocation;
     protected String dataSourceFactory;
-
 
     /** Creates unnamed DataNode */
     public DataNode() {}
@@ -101,7 +99,6 @@ public class DataNode implements QueryEngine {
         this.dataMaps = noDataMaps;
     }
 
-
     // setters/getters
 
     /** Returns node "name" property. */
@@ -113,7 +110,6 @@ public class DataNode implements QueryEngine {
         this.name = name;
     }
 
-
     /** Returns a location of DataSource of this node. */
     public String getDataSourceLocation() {
         return dataSourceLocation;
@@ -122,8 +118,7 @@ public class DataNode implements QueryEngine {
     public void setDataSourceLocation(String dataSourceLocation) {
         this.dataSourceLocation = dataSourceLocation;
     }
-    
-    
+
     /** Returns a name of DataSourceFactory class for this node. */
     public String getDataSourceFactory() {
         return dataSourceFactory;
@@ -132,7 +127,6 @@ public class DataNode implements QueryEngine {
     public void setDataSourceFactory(String dataSourceFactory) {
         this.dataSourceFactory = dataSourceFactory;
     }
-
 
     public DataMap[] getDataMaps() {
         return dataMaps;
@@ -146,7 +140,7 @@ public class DataNode implements QueryEngine {
         // note to self - implement it as a List
         // to avoid this ugly resizing in the future
         if (dataMaps == null)
-            dataMaps = new DataMap[] {map};
+            dataMaps = new DataMap[] { map };
         else {
             DataMap[] newMaps = new DataMap[dataMaps.length + 1];
             System.arraycopy(dataMaps, 0, newMaps, 0, dataMaps.length);
@@ -163,7 +157,6 @@ public class DataNode implements QueryEngine {
         this.dataSource = dataSource;
     }
 
-
     /** Returns DbAdapter object. This is a plugin for
       * that handles RDBMS vendor-specific features. */
     public DbAdapter getAdapter() {
@@ -173,7 +166,6 @@ public class DataNode implements QueryEngine {
     public void setAdapter(DbAdapter adapter) {
         this.adapter = adapter;
     }
-
 
     // other methods
 
@@ -189,7 +181,6 @@ public class DataNode implements QueryEngine {
         return null;
     }
 
-
     /** Run multiple queries using one of the pooled connections. */
     public void performQueries(List queries, OperationObserver opObserver) {
         Level logLevel = opObserver.queryLogLevel();
@@ -197,7 +188,7 @@ public class DataNode implements QueryEngine {
         int listSize = queries.size();
         QueryLogger.logQueryStart(logLevel, listSize);
         if (listSize == 0)
-            return ;
+            return;
 
         Connection con = null;
         boolean usesAutoCommit = opObserver.useAutoCommit();
@@ -215,25 +206,29 @@ public class DataNode implements QueryEngine {
             listSize = queries.size();
 
             for (int i = 0; i < listSize; i++) {
-                Query nextQuery = (Query)queries.get(i);
+                Query nextQuery = (Query) queries.get(i);
 
                 // catch exceptions for each individual query
                 try {
                     // 1. translate query
-                    QueryTranslator queryTranslator = QueryTranslator.queryTranslator(this, con, getAdapter(), nextQuery);
+                    QueryTranslator queryTranslator =
+                        QueryTranslator.queryTranslator(this, con, getAdapter(), nextQuery);
                     PreparedStatement prepStmt = queryTranslator.createStatement(logLevel);
                     if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                         // 2.a execute query
                         ResultSet rs = prepStmt.executeQuery();
-                        String[] snapshotLabels = ((SelectQueryAssembler)queryTranslator).getSnapshotLabels(rs);
-                        String[] resultTypes = ((SelectQueryAssembler)queryTranslator).getResultTypes(rs);
+                        String[] snapshotLabels =
+                            ((SelectQueryAssembler) queryTranslator).getSnapshotLabels(rs);
+                        String[] resultTypes =
+                            ((SelectQueryAssembler) queryTranslator).getResultTypes(rs);
                         List resultSnapshots = snapshotsFromResultSet(rs, snapshotLabels, resultTypes);
                         QueryLogger.logSelectCount(logLevel, resultSnapshots.size());
                         rs.close();
 
                         // 3.a send results back to consumer
                         opObserver.nextSnapshots(nextQuery, resultSnapshots);
-                    } else {
+                    }
+                    else {
                         // 2.b execute update
                         int count = prepStmt.executeUpdate();
                         QueryLogger.logUpdateCount(logLevel, count);
@@ -241,7 +236,8 @@ public class DataNode implements QueryEngine {
                         // 3.b send results back to consumer
                         opObserver.nextCount(nextQuery, count);
                     }
-                } catch (Exception queryEx) {
+                }
+                catch (Exception queryEx) {
                     QueryLogger.logQueryError(logLevel, queryEx);
 
                     // notify consumer of the exception,
@@ -255,7 +251,8 @@ public class DataNode implements QueryEngine {
                             con.rollback();
                             QueryLogger.logRollbackTransaction(logLevel);
                             opObserver.transactionRolledback();
-                        } catch (SQLException sqlEx) {
+                        }
+                        catch (SQLException sqlEx) {
                             opObserver.nextQueryException(nextQuery, sqlEx);
                         }
                     }
@@ -275,7 +272,7 @@ public class DataNode implements QueryEngine {
         // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
             QueryLogger.logQueryError(logLevel, globalEx);
-            
+
             if (!usesAutoCommit) {
                 // rollback failed transaction
                 rolledBackFlag = true;
@@ -284,13 +281,15 @@ public class DataNode implements QueryEngine {
                     con.rollback();
                     QueryLogger.logRollbackTransaction(logLevel);
                     opObserver.transactionRolledback();
-                } catch (SQLException ex) {
+                }
+                catch (SQLException ex) {
                     // do nothing....
                 }
             }
 
             opObserver.nextGlobalException(globalEx);
-        } finally {
+        }
+        finally {
             try {
                 // return connection to the pool if it was checked out
                 if (con != null)
@@ -309,7 +308,6 @@ public class DataNode implements QueryEngine {
         this.performQueries(qWrapper, opObserver);
     }
 
-
     /** Creates primary key support for all node DbEntities.
      *  Will use its facilities provided by DbAdapter to generate
      *  any necessary database objects and data for primary
@@ -317,7 +315,7 @@ public class DataNode implements QueryEngine {
     public void createPkSupportForMapEntities() throws Exception {
         // generate common PK support
         adapter.createAutoPkSupport(this);
-        
+
         // generate PK support for each indiv. entity.
         int len = dataMaps.length;
         for (int i = 0; i < len; i++) {
@@ -328,10 +326,13 @@ public class DataNode implements QueryEngine {
         }
     }
 
-
-
     /** Will process a result set instantiating a list of maps with data. */
-    public List snapshotsFromResultSet(ResultSet rs, String[] snapshotLabels, String[] resultTypes) throws Exception {
+    public List snapshotsFromResultSet(
+        ResultSet rs,
+        String[] snapshotLabels,
+        String[] resultTypes)
+        throws Exception {
+            
         ArrayList snapshots = new ArrayList();
         int len = snapshotLabels.length;
         ExtendedType[] converters = new ExtendedType[len];
