@@ -38,6 +38,10 @@
 		<db-attribute name="FK_ID" type="VARBINARY" length="32"/>
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="BIT_TEST">
+		<db-attribute name="BIT_COLUMN" type="BIT"/>
+		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="BLOB_TEST">
 		<db-attribute name="BLOB_COL" type="BLOB"/>
 		<db-attribute name="BLOB_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -177,6 +181,9 @@
 	</obj-entity>
 	<obj-entity name="BinaryPKTest2" className="org.objectstyle.art.BinaryPKTest2" dbEntityName="BINARY_PK_TEST2">
 		<obj-attribute name="detailName" type="java.lang.String" db-attribute-path="DETAIL_NAME"/>
+	</obj-entity>
+	<obj-entity name="BitTest" className="org.objectstyle.art.BitTest" dbEntityName="BIT_TEST">
+		<obj-attribute name="bitColumn" type="java.lang.Boolean" db-attribute-path="BIT_COLUMN"/>
 	</obj-entity>
 	<obj-entity name="BlobTest" className="org.objectstyle.art.BlobTest" dbEntityName="BLOB_TEST">
 		<obj-attribute name="blobCol" type="byte[]" db-attribute-path="BLOB_COL"/>

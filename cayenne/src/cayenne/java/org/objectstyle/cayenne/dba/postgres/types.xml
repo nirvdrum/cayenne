@@ -15,7 +15,8 @@ Broken PostgreSQL types mapping.
        <db-type name="bytea"/>
    </jdbc-type>
    <jdbc-type name="BIT">
-       <db-type name="bit"/>
+   		<!-- PostgreSQL BIT is a "bit string", so mapping it as boolean seems more appropriate -->
+       <db-type name="boolean"/>
    </jdbc-type>
    <jdbc-type name="BLOB">
        <db-type name="bytea"/>

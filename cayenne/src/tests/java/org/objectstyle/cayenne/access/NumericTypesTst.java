@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.art.BitTest;
 import org.objectstyle.art.SmallintTest;
 import org.objectstyle.art.TinyintTest;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
@@ -123,18 +124,39 @@ public class NumericTypesTst extends CayenneTestCase {
         context.performQueries(inserts, new DefaultOperationObserver());
 
         // test
-        Expression qual = ExpressionFactory.matchExp("tinyintCol", new Byte((byte)81));
+        Expression qual = ExpressionFactory.matchExp("tinyintCol", new Byte((byte) 81));
         List objects = context.performQuery(new SelectQuery(TinyintTest.class, qual));
         assertEquals(1, objects.size());
 
         TinyintTest object = (TinyintTest) objects.get(0);
-        assertEquals(new Byte((byte)81), object.getTinyintCol());
+        assertEquals(new Byte((byte) 81), object.getTinyintCol());
     }
 
     public void testTinyintInInsert() throws Exception {
         TinyintTest object =
             (TinyintTest) context.createAndRegisterNewObject("TinyintTest");
-        object.setTinyintCol(new Byte((byte)1));
+        object.setTinyintCol(new Byte((byte) 1));
         context.commitChanges();
     }
+
+    public void testBooleanBit() throws Exception {
+
+        // populate (testing insert as well)
+        BitTest trueObject = (BitTest) context.createAndRegisterNewObject("BitTest");
+        trueObject.setBitColumn(Boolean.TRUE);
+        BitTest falseObject = (BitTest) context.createAndRegisterNewObject("BitTest");
+        falseObject.setBitColumn(Boolean.FALSE);
+        context.commitChanges();
+
+        // this will clear cache as a side effect
+        context = createDataContext();
+
+        Expression qual = ExpressionFactory.matchExp("bitColumn", Boolean.TRUE);
+        List objects = context.performQuery(new SelectQuery(BitTest.class, qual));
+        assertEquals(1, objects.size());
+
+        BitTest object = (BitTest) objects.get(0);
+        assertEquals(Boolean.TRUE, object.getBitColumn());
+    }
+
 }
