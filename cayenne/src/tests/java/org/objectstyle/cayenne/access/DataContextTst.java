@@ -697,6 +697,43 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(0, queryResults.size());
     }
 
+	//Catches a bug where new objects were unregistered within an object iterator, thus modifying the 
+	// collection the iterator was iterating over (ConcurrentModificationException)
+	public void testRollbackWithMultipleNewObjects() {
+		String artistName = "rollbackTestArtist";
+		String paintingTitle = "rollbackTestPainting";
+ 		Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName(artistName);
+		
+		Painting painting =
+			(Painting) ctxt.createAndRegisterNewObject("Painting");
+		painting.setPaintingTitle(paintingTitle);
+		painting.setToArtist(artist);
+	
+		try {
+			ctxt.rollbackChanges();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("rollbackChanges should not have caused the exception "+e.getMessage());
+		}
+
+		assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+		ctxt.commitChanges();
+		//The commit should have made no changes, so 
+		//perform a fetch to ensure that this artist hasn't been persisted to the db
+
+		DataContext freshContext = getDomain().createDataContext();
+		SelectQuery query = new SelectQuery(Artist.class);
+		query.setQualifier(
+			ExpressionFactory.binaryPathExp(
+				Expression.EQUAL_TO,
+				"artistName",
+				artistName));
+		List queryResults = freshContext.performQuery(query);
+
+		assertEquals(0, queryResults.size());
+	}
+
     public void testRollbackDeletedObject() {
         String artistName = "deleteTestArtist";
         Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");

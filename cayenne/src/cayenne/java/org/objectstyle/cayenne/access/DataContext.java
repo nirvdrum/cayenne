@@ -507,6 +507,7 @@ public class DataContext implements QueryEngine, Serializable {
      *
      * @param anObject data object that we want to delete.
      */
+
     public void deleteObject(DataObject anObject) {
         if (anObject.getPersistenceState() == PersistenceState.DELETED) {
             //Drop out... we might be about to get into a horrible
@@ -667,13 +668,16 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void rollbackChanges() {
         synchronized (objectStore) {
+        	List objectsToUnregister=new ArrayList();
             Iterator it = objectStore.getObjectIterator();
             while (it.hasNext()) {
                 DataObject thisObject = (DataObject) it.next();
                 int objectState = thisObject.getPersistenceState();
                 switch (objectState) {
                     case PersistenceState.NEW :
-                        this.unregisterObject(thisObject);
+                    	//We cannot unregister at this stage, because that would modify the map upon which
+                    	// the iterator returned by objectStore.getObjectIterator() is based.  It is done outside the iterator loop
+                    	objectsToUnregister.add(thisObject);
                         break;
                     case PersistenceState.DELETED :
                         //Do the same as for modified... deleted is only a persistence state, so 
@@ -691,6 +695,10 @@ public class DataContext implements QueryEngine, Serializable {
                         break;
                 }
             }
+            for(int i=0; i<objectsToUnregister.size(); i++) {
+				this.unregisterObject((DataObject)objectsToUnregister.get(i));
+            }
+ 
         }
 
     }
