@@ -68,7 +68,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.ActionMap;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -81,6 +80,7 @@ import org.apache.log4j.SimpleLayout;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
@@ -95,7 +95,6 @@ import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
-import org.objectstyle.cayenne.modeler.action.InfoAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
@@ -169,7 +168,6 @@ public class Editor
     protected JMenuItem generateMenu = new JMenuItem("Generate Classes");
     protected JMenuItem setPackageMenu =
         new JMenuItem("Set Package Name for Obj Entities");
-    protected JMenuItem aboutMenu = new JMenuItem("About");
 
     protected XmlFilter xmlFilter = new XmlFilter();
     protected TopController controller;
@@ -323,7 +321,7 @@ public class Editor
         toolMenu.addSeparator();
         toolMenu.add(setPackageMenu);
 
-        helpMenu.add(aboutMenu);
+        helpMenu.add(getAction(AboutAction.ACTION_NAME).buildMenu());
     }
 
     protected void initOther() {
@@ -334,7 +332,6 @@ public class Editor
 
         generateMenu.addActionListener(this);
         setPackageMenu.addActionListener(this);
-        aboutMenu.addActionListener(this);
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(650, 550);
@@ -478,8 +475,6 @@ public class Editor
                 generateClasses();
             } else if (src == exitMenu) {
                 exitEditor();
-            } else if (src == aboutMenu) {
-                new AboutDialog(this);
             }
         } catch (Exception ex) {
             ErrorDebugDialog.guiException(ex);

@@ -79,116 +79,146 @@ import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
  * @author Andrei Adamchik
  */
 public abstract class CayenneAction extends AbstractAction {
-	/** Defines path to the images. */
-	public static final String RESOURCE_PATH = "org/objectstyle/cayenne/modeler/";
+    /** Defines path to the images. */
+    public static final String RESOURCE_PATH = "org/objectstyle/cayenne/modeler/";
 
-	public CayenneAction(String name) {
-		super(name);
-		super.putValue(Action.DEFAULT, name);
+    protected boolean alwaysOn;
 
-		Icon icon = createIcon();
-		if (icon != null) {
-			super.putValue(Action.SMALL_ICON, icon);
-		}
+    public CayenneAction(String name) {
+        super(name);
+        super.putValue(Action.DEFAULT, name);
 
-		KeyStroke accelerator = getAcceleratorKey();
-		if (accelerator != null) {
-			super.putValue(Action.ACCELERATOR_KEY, accelerator);
-		}
-		
-		setEnabled(false);
-	}
+        Icon icon = createIcon();
+        if (icon != null) {
+            super.putValue(Action.SMALL_ICON, icon);
+        }
 
-	/** 
-	 * Changes the name of this action, propagating the change
-	 * to all widgets using this action.
-	 */
-	public void setName(String newName) {
-		super.putValue(Action.NAME, newName);
-	}
+        KeyStroke accelerator = getAcceleratorKey();
+        if (accelerator != null) {
+            super.putValue(Action.ACCELERATOR_KEY, accelerator);
+        }
 
-	/**
-	 * Returns keyboard shortcut for this action. Default
-	 * implementation returns <code>null</code>.
-	 */
-	public KeyStroke getAcceleratorKey() {
-		return null;
-	}
+        setEnabled(false);
+    }
 
-	/**
-	 * Returns the name of the icon that should be used
-	 * for buttons. Name will be reolved relative to
-	 * <code>RESOURCE_PATH</code>. Default implementation
-	 * returns <code>null</code>.
-	 */
-	public String getIconName() {
-		return null;
-	}
+    /** 
+     * Changes the name of this action, propagating the change
+     * to all widgets using this action.
+     */
+    public void setName(String newName) {
+        super.putValue(Action.NAME, newName);
+    }
 
-	/**
-	 * Creates and returns an ImageIcon that can be used 
-	 * for buttons that rely on this action.
-	 * Returns <code>null</code> if <code>getIconName</code>
-	 * returns <code>null</code>.
-	 */
-	public Icon createIcon() {
-		String name = getIconName();
-		return (name != null)
-			? new ImageIcon(
-				getClass().getClassLoader().getResource(RESOURCE_PATH + name))
-			: null;
-	}
+    /**
+     * Returns keyboard shortcut for this action. Default
+     * implementation returns <code>null</code>.
+     */
+    public KeyStroke getAcceleratorKey() {
+        return null;
+    }
 
-	/**
-	 * Returns the key under which this action should be stored in the
-	 * ActionMap.
-	 */
-	public String getKey() {
-		return (String) super.getValue(Action.DEFAULT);
-	}
+    /**
+     * Returns the name of the icon that should be used
+     * for buttons. Name will be reolved relative to
+     * <code>RESOURCE_PATH</code>. Default implementation
+     * returns <code>null</code>.
+     */
+    public String getIconName() {
+        return null;
+    }
 
-	/**
-	 * Subclasses must implement this method instead of <code>actionPerformed</code>
-	 * to allow for exception handling.
-	 */
-	public abstract void performAction(ActionEvent e);
+    /**
+     * Creates and returns an ImageIcon that can be used 
+     * for buttons that rely on this action.
+     * Returns <code>null</code> if <code>getIconName</code>
+     * returns <code>null</code>.
+     */
+    public Icon createIcon() {
+        String name = getIconName();
+        return (name != null)
+            ? new ImageIcon(getClass().getClassLoader().getResource(RESOURCE_PATH + name))
+            : null;
+    }
 
-	/** 
-	 * Returns shared CayenneModeler mediator.
-	 */
-	public EventController getMediator() {
-		return Editor.getFrame().getController().getEventController();
-	}
-	
-	public TopModel getTopModel() {
-		return Editor.getFrame().getController().getTopModel();
-	}
+    /**
+     * Returns the key under which this action should be stored in the
+     * ActionMap.
+     */
+    public String getKey() {
+        return (String) super.getValue(Action.DEFAULT);
+    }
 
-	/**
-	 * Internally calls <code>performAction</code>.
-	 * Traps exceptions that ocurred during action processing.
-	 */
-	public void actionPerformed(ActionEvent e) {
-		try {
-			performAction(e);
-		} catch (Throwable th) {
-			ErrorDebugDialog.guiException(th);
-		}
-	}
+    /**
+     * Subclasses must implement this method instead of <code>actionPerformed</code>
+     * to allow for exception handling.
+     */
+    public abstract void performAction(ActionEvent e);
 
-	/**
-	 * Factory method that creates a menu item hooked up
-	 * to this action.
-	 */
-	public JMenuItem buildMenu() {
-		return new JMenuItem(this);
-	}
+    /** 
+     * Returns shared CayenneModeler mediator.
+     */
+    public EventController getMediator() {
+        return Editor.getFrame().getController().getEventController();
+    }
 
-	/**
-	 * Factory method that creates a button hooked up
-	 * to this action.
-	 */
-	public JButton buildButton() {
-		return new CayenneToolbarButton(this);
-	}
+    public TopModel getTopModel() {
+        return Editor.getFrame().getController().getTopModel();
+    }
+
+    /**
+     * Internally calls <code>performAction</code>.
+     * Traps exceptions that ocurred during action processing.
+     */
+    public void actionPerformed(ActionEvent e) {
+        try {
+            performAction(e);
+        } catch (Throwable th) {
+            ErrorDebugDialog.guiException(th);
+        }
+    }
+
+    /**
+     * Factory method that creates a menu item hooked up
+     * to this action.
+     */
+    public JMenuItem buildMenu() {
+        return new JMenuItem(this);
+    }
+
+    /**
+     * Factory method that creates a button hooked up
+     * to this action.
+     */
+    public JButton buildButton() {
+        return new CayenneToolbarButton(this);
+    }
+
+    /**
+     * Returns true if this action is always enabled.
+     * @return boolean
+     */
+    public boolean isAlwaysOn() {
+        return alwaysOn;
+    }
+
+    /**
+     * Sets the alwaysOn.
+     * @param alwaysOn The alwaysOn to set
+     */
+    public void setAlwaysOn(boolean alwaysOn) {
+        this.alwaysOn = alwaysOn;
+
+        if (alwaysOn) {
+            super.setEnabled(true);
+        }
+    }
+
+    /**
+     * Overrides super implementation to take into account "alwaysOn" flag.
+     */
+    public void setEnabled(boolean b) {
+        if (!isAlwaysOn()) {
+            super.setEnabled(b);
+        }
+    }
 }

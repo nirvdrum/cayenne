@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.model;
 
 import javax.swing.ActionMap;
 
+import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
@@ -105,7 +106,7 @@ public class TopModel {
     protected void initEmptyActions() {
         // build action map
         actionMap = new ActionMap();
-        
+
         CayenneAction closeProjectAction = new ProjectAction();
         actionMap.put(closeProjectAction.getKey(), closeProjectAction);
 
@@ -167,6 +168,10 @@ public class TopModel {
 
         CayenneAction genDbAction = new GenerateDbAction();
         actionMap.put(genDbAction.getKey(), genDbAction);
+
+        CayenneAction aboutAction = new AboutAction();
+        aboutAction.setEnabled(true);
+        actionMap.put(aboutAction.getKey(), aboutAction);
     }
 
     /**
