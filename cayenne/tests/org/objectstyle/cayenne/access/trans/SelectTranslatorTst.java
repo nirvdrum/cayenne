@@ -60,8 +60,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.objectstyle.TestMain;
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -94,6 +95,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
 		return t;
 	}
 
+	/**
+	 * Tests query creation with qualifier and ordering.
+	 */
 	public void testCreateSqlString1() throws Exception {
 		Connection con = getSharedConnection();
 
@@ -124,6 +128,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
 		}
 	}
 
+	/**
+	 * Tests query creation with "distinct" specified.
+	 */
 	public void testCreateSqlString2() throws java.lang.Exception {
 		Connection con = getSharedConnection();
 		try {
@@ -136,6 +143,67 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			// do some simple assertions to make sure all parts are in
 			assertNotNull(generatedSql);
 			assertTrue(generatedSql.startsWith("SELECT DISTINCT"));
+		} finally {
+			con.close();
+		}
+	}
+
+	/**
+	 * Tests query creation with relationship from derived entity.
+	 */
+	public void testCreateSqlString3() throws Exception {
+		ObjectId id = new ObjectId("Artist", "ARTIST_ID", 35);
+		Artist a1 = (Artist) createDataContext().registeredObject(id);
+		Connection con = getSharedConnection();
+
+		try {
+			// query with qualifier and ordering
+			q.setObjEntityName("ArtistAssets");
+			q.setQualifier(ExpressionFactory.matchExp("toArtist", a1));
+
+			String sql = buildTranslator(con).createSqlString();
+
+			// do some simple assertions to make sure all parts are in
+			assertNotNull(sql);
+			assertTrue(sql.startsWith("SELECT "));
+			assertTrue(sql.indexOf(" FROM ") > 0);
+			
+			// no WHERE clause
+			assertTrue(sql.indexOf(" WHERE ") < 0);
+			
+			assertTrue(sql.indexOf(" GROUP BY ") > 0);
+			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
+			assertTrue(sql.indexOf("ARTIST_ID =") > sql.indexOf(" GROUP BY "));
+		} finally {
+			con.close();
+		}
+	}
+	
+	/**
+	 * Tests query creation with relationship from derived entity.
+	 */
+	public void testCreateSqlString4() throws Exception {
+		Connection con = getSharedConnection();
+
+		try {
+			// query with qualifier and ordering
+			q.setObjEntityName("ArtistAssets");
+			q.setQualifier(ExpressionFactory.matchExp("toArtist.artistName", "abc"));
+
+			String sql = buildTranslator(con).createSqlString();
+
+			// do some simple assertions to make sure all parts are in
+			assertNotNull(sql);
+			assertTrue(sql.startsWith("SELECT "));
+			assertTrue(sql.indexOf(" FROM ") > 0);
+			
+			// no WHERE clause
+			assertTrue("WHERE clause is NOT expected", sql.indexOf(" WHERE ") < 0);
+			
+			assertTrue("GROUP BY clause is expected", sql.indexOf(" GROUP BY ") > 0);
+			assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
+			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
+			assertTrue("Relationship join must be in HAVING", sql.indexOf("ARTIST_ID =") > sql.indexOf(" HAVING "));
 		} finally {
 			con.close();
 		}

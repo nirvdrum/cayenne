@@ -121,6 +121,9 @@
 	<db-relationship source="PAINTING" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
+	<db-relationship source="ARTIST_ASSETS" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
 	<db-relationship source="PAINTING_INFO" target="PAINTING" name="painting" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
@@ -156,6 +159,9 @@
 	</obj-relationship>
 	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
 		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="ArtistAssets" target="Artist" toMany="false">
+		<db-relationship-ref source="ARTIST_ASSETS" target="ARTIST" name="toArtist"/>
 	</obj-relationship>
 	<obj-relationship name="painting" source="PaintingInfo" target="Painting" toMany="false">
 		<db-relationship-ref source="PAINTING_INFO" target="PAINTING" name="painting"/>
