@@ -78,6 +78,10 @@ public class ListExpression extends Expression {
     public ListExpression(int type) {
         this.type = type;
     }
+    
+    protected void flattenTree() {
+        
+    }
 
     protected boolean pruneNodeForPrunedChild(Object prunedChild) {
         return false;

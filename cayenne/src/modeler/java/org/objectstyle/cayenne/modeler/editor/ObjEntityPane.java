@@ -193,7 +193,7 @@ public class ObjEntityPane
 
                     try {
                         exp = (Expression) convertor.stringAsValue(text);
-                        ent.setQualifier(exp);
+                        ent.setDeclaredQualifier(exp);
                         mediator.fireObjEntityEvent(new EntityEvent(this, ent));
 
                         // TODO: this is a hack until we implement a real MVC
@@ -349,7 +349,7 @@ public class ObjEntityPane
             public void actionPerformed(ActionEvent e) {
                 ObjEntity entity = mediator.getCurrentObjEntity();
                 if (entity != null) {
-                    entity.setLockType(
+                    entity.setDeclaredLockType(
                         optimisticLocking.isSelected()
                             ? ObjEntity.LOCK_TYPE_OPTIMISTIC
                             : ObjEntity.LOCK_TYPE_NONE);
@@ -374,7 +374,7 @@ public class ObjEntityPane
         readOnly.setSelected(entity.isReadOnly());
 
         StringConvertor convertor = StringConvertors.forClass(Expression.class);
-        qualifier.setText(convertor.valueAsString(entity.getQualifier()));
+        qualifier.setText(convertor.valueAsString(entity.getDeclaredQualifier()));
 
         // TODO: fix inheritance - we should allow to select optimistic
         // lock if superclass is not already locked, 

@@ -57,10 +57,11 @@
 package org.objectstyle.cayenne.query;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -68,10 +69,10 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  */
 public class PrefetchSelectQueryTst extends CayenneTestCase {
 
-    public void testSelectPrefetchPath1() throws Exception {
-        Entity artistEntity =
+    public void testPaintings1() throws Exception {
+        ObjEntity artistEntity =
             getDomain().getEntityResolver().lookupObjEntity(Artist.class);
-        Entity paintingEntity =
+        ObjEntity paintingEntity =
             getDomain().getEntityResolver().lookupObjEntity(Painting.class);
         SelectQuery q =
             new SelectQuery(
@@ -87,10 +88,10 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
             prefetch.getQualifier());
     }
 
-    public void testSelectPrefetchPath2() throws Exception {
-        Entity artistEntity =
+    public void testPrefetchPaintings2() throws Exception {
+        ObjEntity artistEntity =
             getDomain().getEntityResolver().lookupObjEntity(Artist.class);
-        Entity paintingEntity =
+        ObjEntity paintingEntity =
             getDomain().getEntityResolver().lookupObjEntity(Painting.class);
 
         SelectQuery q =
@@ -105,6 +106,25 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
         assertEquals(
             Expression.fromString(
                 "db:toArtist.ARTIST_NAME = 'abc' or db:toArtist.ARTIST_NAME = 'xyz'"),
+            prefetch.getQualifier());
+    }
+
+    public void testGalleries() throws Exception {
+        ObjEntity artistEntity =
+            getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+        ObjEntity galleryEntity =
+            getDomain().getEntityResolver().lookupObjEntity(Gallery.class);
+        SelectQuery q =
+            new SelectQuery(
+                Artist.class,
+                ExpressionFactory.matchExp("artistName", "abc"));
+
+        PrefetchSelectQuery prefetch =
+            new PrefetchSelectQuery(artistEntity, q, "paintingArray.toGallery");
+
+        assertSame(galleryEntity, prefetch.getRoot());
+        assertEquals(
+            Expression.fromString("db:paintingArray.toArtist.ARTIST_NAME = 'abc'"),
             prefetch.getQualifier());
     }
 

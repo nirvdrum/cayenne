@@ -74,11 +74,15 @@ public class UnaryExpression extends Expression {
     public UnaryExpression(int type) {
         this.type = type;
     }
-    
+
+    protected void flattenTree() {
+
+    }
+
     protected boolean pruneNodeForPrunedChild(Object prunedChild) {
         return true;
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      * 
@@ -109,7 +113,7 @@ public class UnaryExpression extends Expression {
         throw new IllegalArgumentException(
             "Invalid operand index for UnaryExpression: " + index);
     }
-    
+
     /**
      * @since 1.1
      */

@@ -384,18 +384,19 @@ public abstract class Expression implements Serializable, XMLSerializable {
         Expression join = ExpressionFactory.expressionOfType(type);
         join.setOperand(0, this);
         join.setOperand(1, exp);
+        join.flattenTree();
         return join;
     }
 
     /**
-     * A shortcut for <code>joinExp(Expression.AND, exp)</code>.
+     * Chains this expression with another expression using "and".
      */
     public Expression andExp(Expression exp) {
         return joinExp(Expression.AND, exp);
     }
 
     /**
-     * A shortcut for <code>joinExp(Expression.OR, exp)</code>.
+     * Chains this expression with another expression using "or".
      */
     public Expression orExp(Expression exp) {
         return joinExp(Expression.OR, exp);
@@ -504,6 +505,14 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * @since 1.1
      */
     protected abstract boolean pruneNodeForPrunedChild(Object prunedChild);
+
+    /**
+     * Restructures expression to make sure that there are no children of the 
+     * same type as this expression.
+     * 
+     * @since 1.1 
+     */
+    protected abstract void flattenTree();
 
     /**
      * Traverses itself and child expressions, notifying visitor via callback

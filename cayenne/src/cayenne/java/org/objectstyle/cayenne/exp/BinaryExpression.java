@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
 import java.io.PrintWriter;
@@ -67,21 +67,26 @@ import java.io.PrintWriter;
 public class BinaryExpression extends Expression {
     protected Object leftOperand;
     protected Object rightOperand;
-    
-    public BinaryExpression() {}
-    
+
+    public BinaryExpression() {
+    }
+
     public BinaryExpression(int type) {
         this.type = type;
     }
-    
+
+    protected void flattenTree() {
+
+    }
+
     protected boolean pruneNodeForPrunedChild(Object prunedChild) {
         return true;
     }
-    
+
     public final int getOperandCount() {
         return 2;
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      * 
@@ -90,30 +95,31 @@ public class BinaryExpression extends Expression {
     public Expression shallowCopy() {
         return new BinaryExpression(type);
     }
-    
+
     public Object getOperand(int index) {
-        if(index == 0)
+        if (index == 0)
             return leftOperand;
-        else if(index == 1)
+        else if (index == 1)
             return rightOperand;
-        
-        throw new IllegalArgumentException("Invalid operand index for BinaryExpression: " + index);
+
+        throw new IllegalArgumentException(
+            "Invalid operand index for BinaryExpression: " + index);
     }
-    
-    
+
     public void setOperand(int index, Object value) {
-        if(index == 0) {
+        if (index == 0) {
             leftOperand = value;
             return;
         }
-        else if(index == 1) {
+        else if (index == 1) {
             rightOperand = value;
             return;
         }
-        
-        throw new IllegalArgumentException("Invalid operand index for BinaryExpression: " + index);
+
+        throw new IllegalArgumentException(
+            "Invalid operand index for BinaryExpression: " + index);
     }
-    
+
     /**
      * @since 1.1
      */

@@ -119,7 +119,8 @@ public class QualifierTranslator
 
         // append Entity qualifiers, taking inheritance into account
         ObjEntity entity = getObjEntity();
-        while (entity != null) {
+
+        if (entity != null) {
             Expression entityQualifier = entity.getQualifier();
             if (entityQualifier != null) {
                 qualifier =
@@ -127,8 +128,6 @@ public class QualifierTranslator
                         ? qualifier.andExp(entityQualifier)
                         : entityQualifier;
             }
-
-            entity = entity.getSuperEntity();
         }
 
         return qualifier;

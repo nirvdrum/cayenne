@@ -67,20 +67,25 @@ public class TernaryExpression extends Expression {
     protected Object operand1;
     protected Object operand2;
 
-    public TernaryExpression() {}
+    public TernaryExpression() {
+    }
 
     public TernaryExpression(int type) {
         this.type = type;
     }
 
+    protected void flattenTree() {
+
+    }
+
     protected boolean pruneNodeForPrunedChild(Object prunedChild) {
         return true;
     }
-    
+
     public final int getOperandCount() {
         return 3;
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      * 
@@ -119,7 +124,7 @@ public class TernaryExpression extends Expression {
         throw new IllegalArgumentException(
             "Invalid operand index for TernaryExpression: " + index);
     }
-    
+
     /**
      * @since 1.1
      */

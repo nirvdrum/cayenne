@@ -59,7 +59,6 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
@@ -70,9 +69,6 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Craig Miskell, Andrei Adamchik
  */
 public class PrefetchSelectQuery extends SelectQuery {
-    /** 
-     * Main query that 
-     */
     protected SelectQuery parentQuery;
 
     /** 
@@ -90,10 +86,15 @@ public class PrefetchSelectQuery extends SelectQuery {
      * 
      * @since 1.1
      */
-    public PrefetchSelectQuery(Entity entity, SelectQuery parentQuery, String prefetch) {
+    public PrefetchSelectQuery(
+        ObjEntity entity,
+        SelectQuery parentQuery,
+        String prefetch) {
         setRootQuery(parentQuery);
         setPrefetchPath(prefetch);
         Iterator it = entity.resolvePathComponents(prefetch);
+
+        // find root entity
 
         ObjRelationship r = null;
         while (it.hasNext()) {
@@ -106,8 +107,18 @@ public class PrefetchSelectQuery extends SelectQuery {
         }
 
         setRoot(r.getTargetEntity());
-        setQualifier(
-            entity.translateToRelatedEntity(parentQuery.getQualifier(), prefetchPath));
+
+        // chain query and entity qualifiers
+        Expression queryQualifier = parentQuery.getQualifier();
+        Expression entityQualifier = entity.getQualifier();
+        if (entityQualifier != null) {
+            queryQualifier =
+                (queryQualifier != null)
+                    ? queryQualifier.andExp(entityQualifier)
+                    : entityQualifier;
+        }
+
+        setQualifier(entity.translateToRelatedEntity(queryQualifier, prefetchPath));
 
         if (r.isToMany() && !r.isFlattened()) {
             setLastPrefetchHint(r);
@@ -115,49 +126,49 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
      */
     public PrefetchSelectQuery() {
         super();
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(ObjEntity root) {
         super(root);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
         super(root, qualifier);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(Class rootClass) {
         super(rootClass);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
         super(rootClass, qualifier);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(String objEntityName) {
         super(objEntityName);
     }
 
     /**
-    * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+    * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
     */
     public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
         super(objEntityName, qualifier);

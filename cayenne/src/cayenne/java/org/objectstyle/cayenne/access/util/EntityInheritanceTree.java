@@ -86,10 +86,12 @@ public class EntityInheritanceTree {
      */
     public ObjEntity entityMatchingRow(DataRow row) {
         boolean match = true;
+        
+        Expression qualifier = entity.getQualifier();
 
-        if (entity.getQualifier() != null) {
+        if (qualifier != null) {
             if (normalizedQualifier == null) {
-                normalizedQualifier = entity.translateToDbPath(entity.getQualifier());
+                normalizedQualifier = entity.translateToDbPath(qualifier);
             }
 
             match = normalizedQualifier.match(row);

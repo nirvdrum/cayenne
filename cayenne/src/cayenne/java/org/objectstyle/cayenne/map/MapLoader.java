@@ -569,7 +569,7 @@ public class MapLoader extends DefaultHandler {
 
         String lockType = atts.getValue("", "lock-type");
         if ("optimistic".equals(lockType)) {
-            objEntity.setLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
+            objEntity.setDeclaredLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
         }
 
         String superEntityName = atts.getValue("", "superEntityName");
@@ -914,7 +914,7 @@ public class MapLoader extends DefaultHandler {
 
         // qualifier can belong to ObjEntity or a query
         if (objEntity != null) {
-            objEntity.setQualifier(Expression.fromString(qualifier));
+            objEntity.setDeclaredQualifier(Expression.fromString(qualifier));
         }
         else {
             queryBuilder.setQualifier(qualifier);
