@@ -56,6 +56,7 @@ package org.objectstyle.cayenne.conf;
  */
 
 import javax.sql.DataSource;
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -71,6 +72,8 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
     /** Returns DataSource object corresponding to <code>location</code>.
       * Location is expected to be a path mapped in JNDI InitialContext. */
     public DataSource getDataSource(String location) throws Exception {
-        return (DataSource)new InitialContext().lookup(location);
+        Context initCtx = new InitialContext();
+        Context envCtx = (Context) initCtx.lookup("java:comp/env");
+        return (DataSource)envCtx.lookup(location);
     }
 }
