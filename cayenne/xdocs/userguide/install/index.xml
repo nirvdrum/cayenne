@@ -14,16 +14,17 @@
             and therefore should run out of the box on any Java-compatible platform. 
             More detailed requirements are listed below:</p>
             
-            <p><strong>- JSDK 1.4 :</strong> Cayenne requires JSDK 1.4 or newer and will not
+            <p><strong>- JSDK 1.4.</strong> Cayenne requires JSDK 1.4 or newer and will not
             run with earlier versions. To download it from Sun go to <a href="http://java.sun.com/products/">
             http://java.sun.com/products/</a> or directly to <a href="http://java.sun.com/j2se/1.4/index.html">
             http://java.sun.com/j2se/1.4/index.html</a></p>		
                 
-            <p><strong>- Operating System compatible with JSDK 1.4 :</strong> Currently this is
-            Linux, Solaris and Windows 95 / 98 / ME / 2000 / NT 4.0. MacOS support should be coming soon.</p>
+            <p><strong>- Operating System compatible with JSDK 1.4.</strong> Currently this is
+            Linux, Solaris and Windows 95 / 98 / ME / 2000 / NT 4.0. MacOS 
+            support should be coming soon.</p>
                 
             <p><strong>- Access to a relational database and JDBC driver for 
-            this database :</strong> Out of the box, Cayenne would 
+            this database.</strong> Out of the box, Cayenne would 
             support Oracle, Sybase and MySQL databases. 
             Certain level of support exists for any other database that has a 
             JDBC driver available but this is untested and not guaranteed. List of
@@ -34,11 +35,17 @@
             <i>Note that to run Cayenne unit tests you will need database privileges
             to create and drop tables.</i></p>
             
-            <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary 
-            distribution WILL NOT need Ant. Only if you plan to <a href="#compile">build it yourself</a>
-			(you don't have to!), you will need Ant. Version 1.4.1 or newer is required,
-			older versions will not work. Ant can be downloaded from
-            <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.</p>
+            <p><strong>- (Optional) Ant 1.4.1 or newer.</strong> Ant can be downloaded from
+            <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.
+            Ant is needed for:
+            <ul>
+            	<li><a href="../appguide/javagen.html#javagen"><code>cgen</code> Ant task</a>
+            	for class generation. An alternative to <code>cgen</code> is to use CayenneModeler 
+            	GUI tool.</li>
+            	<li><a href="#compile">Building Cayenne from source</a>, for instance when 
+            	changing Cayenne source code to customize it for your project.</li>
+			</ul>
+			</p>
         </subsection>
 
         <subsection name="2.2 Installation" anchor="inst">
@@ -105,12 +112,19 @@
             </p>
             
             <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by 
-			the 
-            applications that use Cayenne. This can be done in many different ways depending on
-            what you are planning to use Cayenne for. The simplest way is to copy
-            <code>cayenne.jar</code> (or <code>cayenne-nodeps.jar</code> 
-            to your JRE extensions directory 
-            ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext).</p>
+			the applications that use Cayenne. There are a few "standard" ways of doing it in Java,
+			like setting CLASSPATH variable, etc.</p>
+            
+            <panel name="Warning:">It is NOT recommended putting Cayenne JAR files under 
+            JRE extensions directory ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext),
+            though it will probably work for most cases.</panel>
+            
+            <p>The reason for the warning above is that classes loaded from extensions 
+            directory have their own ClassLoader and can't directly 
+            access resources associated with other ClassLoaders. Cayenne allows to "bootstrap"
+            other ClassLoaders for the purpose of resource lookup, but this requires extra code
+            and doesn't solve all problems.</p>
+            
         </subsection>
         
         
