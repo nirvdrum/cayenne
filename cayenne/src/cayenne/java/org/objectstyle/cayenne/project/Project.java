@@ -140,7 +140,7 @@ public abstract class Project {
      * and checks for upgrades.
      */
     protected void postInitialize(File projectFile) {
-		logObj.debug("didInitialize with: " + projectFile);
+		logObj.debug("postInitialize with: " + projectFile);
         // take a snapshot of files used by the project
         files = Collections.synchronizedList(buildFileList());
         upgradeMessages = Collections.synchronizedList(new ArrayList());
