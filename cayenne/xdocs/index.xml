@@ -5,21 +5,28 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>February 2, 2003:</i></strong> <strong>Cayenne 1.0a6 Released.</strong></u></p>
+        <p><u><strong><i>April 19, 2003:</i></strong> <strong>Cayenne Beta Released.</strong></u></p>
         
-        <p>This is a major feature enhancement in Cayenne. Also this may be the 
-        last Alpha release, as we are moving forward to Beta and final 1.0.
-        For details see the <a href="RELEASE-NOTES-1.0a6.txt">release notes</a>. 
+        <p>This is both the first Beta release of Cayenne and a major feature enhancement.
+        It adds features that were a must-have for Cayenne maturity, introduces serious performance
+        enhancements, expands the number of fully supported databases and fixes numerous bugs. 
+        For details see the <a href="RELEASE-NOTES-1.0b1.txt">release notes</a>. 
         Download the release 
-        	<a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
         here</a>. Among other things in this release:
         <ul>
-        	<li>Cascading delete rules for relationships.</li>
-        	<li>Initial event-based notification mechanism.</li>
-        	<li>Parameterized queries - ultimate reusable queries.</li>
-        	<li>Simplified Expression API.</li>
-        	<li>"Cdeploy" - Ant task for library deployment.</li>
+        	<li>Support for stored procedures.</li>
+        	<li>Support for BLOB/CLOB.</li>
+        	<li>Data operation dependency tracking based on <a href=
+        	"http://objectstyle.org/ashwood/">Ashwood</a>.</li>
+        	<li>Support for PostgreSQL and HSQLDB.</li>
+        	<li>Batched data modification operations.</li>
         </ul>
+        
+        <i>Note on deprecated API: There is lots of deprecated API in this release. All deprecated
+        code will be preserved for a while, but will NOT be included in the final 1.0 release.
+        Make sure to replace calls to the deprecated methods and classes
+        in your applications with suggested alternatives.</i>
         </p>
         
         <p><img src="images/other/nhl_logo.gif"/> 
