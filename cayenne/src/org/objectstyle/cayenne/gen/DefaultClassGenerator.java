@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.gen;
 
 import java.io.*;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
 
 /** 
  * Extends MapClassGenerator to allow target-specific filesystem locations 

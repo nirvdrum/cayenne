@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,67 +54,20 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+package org.objectstyle.cayenne.gen;
+
 import junit.framework.*;
-import org.objectstyle.cayenne.access.*;
+import junit.runner.*;
 
-public class ClassGeneratorTst extends TestCase {
-    static Logger logObj = Logger.getLogger(ClassGeneratorTst.class.getName());
-
-    protected ClassGenerator cgen;
-
-    public ClassGeneratorTst(String name) {
-        super(name);
-    }
-
-    public void setUp() throws Exception {
-        cgen = new ClassGenerator(MapClassGenerator.SUPERCLASS_TEMPLATE);
-    }
-
-    /** All tests are done in one method to avoid Velocity template parsing
-      * every time a new generator instance is made for each test. */
-    public void testAll() throws Exception {
-        // test 1
-        doClassName();
-
-        // test 2
-        doPackageName();
-
-        // test 3
-        doSuperPrefix();
-
-        // final template test
-        StringWriter out = new StringWriter();
-        ObjEntity pe = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Painting");
-        cgen.generateClass(out, pe);
-        out.flush();
-        out.close();
-
-        String classCode = out.toString();
-        assertNotNull(classCode);
-        assertTrue(classCode.length() > 0);
-    }
-
-    private void doClassName() throws Exception {
-        String className = "aaa";
-        cgen.setClassName(className);
-        assertEquals(className, cgen.getClassName());
-    }
-
-    private void doSuperPrefix() throws Exception {
-        String prefix = "pr_";
-        cgen.setSuperPrefix(prefix);
-        assertEquals(prefix, cgen.getSuperPrefix());
-    }
-
-
-    public void doPackageName() throws Exception {
-        assertTrue(!cgen.isUsingPackage());
-        String pkgName = "aaa.org";
-        cgen.setPackageName(pkgName);
-        assertEquals(pkgName, cgen.getPackageName());
-        assertTrue(cgen.isUsingPackage());
-    }
+/** Combines test cases from org.objectstyle.cayenne.gen package to 
+  * a test suite. 
+  *
+  * @author Andrei Adamchik
+  */
+public class AllTests {
+	public static TestSuite suite() {
+		TestSuite suite = new TestSuite("Class Generator (org.objectstyle.cayenne.gen)");
+        suite.addTestSuite(ClassGeneratorTst.class);
+		return suite;
+	}
 }

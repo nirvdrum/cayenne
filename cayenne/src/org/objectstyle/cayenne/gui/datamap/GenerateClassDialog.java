@@ -56,18 +56,25 @@ package org.objectstyle.cayenne.gui.datamap;
  */ 
 
 
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.table.*;
+import java.util.Hashtable;
+import java.util.Map;
 
-import org.objectstyle.util.Preferences;
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gen.MapClassGenerator;
 import org.objectstyle.cayenne.gui.PanelFactory;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.util.Preferences;
 
 
 /** Wizard for generating the classes from the data map. 

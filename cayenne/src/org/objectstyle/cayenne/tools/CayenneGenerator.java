@@ -62,6 +62,8 @@ import org.xml.sax.InputSource;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
+import org.objectstyle.cayenne.gen.ClassGenerator;
+import org.objectstyle.cayenne.gen.MapClassGenerator;
 import org.objectstyle.cayenne.map.*;
 
 /** Ant task to perform class generation from data map.

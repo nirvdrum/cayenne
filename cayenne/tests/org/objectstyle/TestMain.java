@@ -68,7 +68,9 @@ import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.gen.ClassGenerator;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoaderImpl;
 
 /**
  *  Root class of all test cases. When "main" is invoked, 

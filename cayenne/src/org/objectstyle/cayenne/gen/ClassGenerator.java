@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,8 @@ package org.objectstyle.cayenne.map;
  *
  */
 
+package org.objectstyle.cayenne.gen;
+
 import java.io.Writer;
 import java.util.Properties;
 
@@ -64,6 +65,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.util.ResourceLocator;
 
 /** Generates Java class source code using VTL (Velocity template engine) based on

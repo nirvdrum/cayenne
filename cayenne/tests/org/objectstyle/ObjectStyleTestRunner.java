@@ -96,6 +96,7 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         suites.add(org.objectstyle.cayenne.exp.AllTests.suite());
         suites.add(org.objectstyle.cayenne.conf.AllTests.suite());
         suites.add(org.objectstyle.cayenne.tools.AllTests.suite());
+        suites.add(org.objectstyle.cayenne.gen.AllTests.suite());
         
         ObjectStyleTestRunner tstRunner = new ObjectStyleTestRunner();
         for (int i = 0; i < suites.size(); i++) {
