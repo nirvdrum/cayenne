@@ -537,7 +537,14 @@ public class DataDomain implements QueryEngine {
      */
     public DataNode lookupDataNode(DataMap map) {
         synchronized (nodesByDataMapName) {
-            return (DataNode) nodesByDataMapName.get(map.getName());
+            DataNode node = (DataNode) nodesByDataMapName.get(map.getName());
+            if (node == null) {
+                reindexNodes();
+                return (DataNode) nodesByDataMapName.get(map.getName());
+            }
+            else {
+                return node;
+            }
         }
     }
     

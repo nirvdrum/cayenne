@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
 sqlserver.jdbc.username = test
 sqlserver.jdbc.password = secret
-sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;Database=cayenne;SelectMethod=cursor
+sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
 sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
 </pre>
  * 
