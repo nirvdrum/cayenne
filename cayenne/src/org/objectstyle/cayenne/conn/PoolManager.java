@@ -55,12 +55,14 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import java.util.*;
-import java.sql.*;
-import javax.sql.*;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.logging.Logger;
-import java.util.logging.Level;
+
+import javax.sql.*;
 
 
 /**

@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.conn;
  */ 
 
 import java.sql.*;
-import java.util.*;
+import java.util.Map;
 
 /**
  * <p>Cayenne specific java.sql.Connection implementation that allowes to pool

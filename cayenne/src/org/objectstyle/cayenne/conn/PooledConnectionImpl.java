@@ -55,10 +55,13 @@ package org.objectstyle.cayenne.conn;
  *
  */ 
 
-import java.util.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Logger;
+
 import javax.sql.*;
-import java.util.logging.*;
 
 /**
  *  Cayenne implementation of the pooling wrapper for the database connection

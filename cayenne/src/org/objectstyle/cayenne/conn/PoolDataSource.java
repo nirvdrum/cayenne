@@ -55,10 +55,11 @@ package org.objectstyle.cayenne.conn;
  *
  */ 
 
-import java.sql.*;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.logging.Logger;
+
 import javax.sql.*;
-import java.io.*;
-import java.util.logging.*;
 
 /**
  *   <p>This class allows to generate pooled connections.</p>

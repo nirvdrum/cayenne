@@ -55,9 +55,10 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import javax.sql.*;
-import java.sql.*;
 import java.io.PrintWriter;
+import java.sql.*;
+
+import javax.sql.DataSource;
 
 /**
  * Class that wrapps "old-style" JDBC access via Drivers
