@@ -101,6 +101,29 @@
     		of this script to recreate tables from scratch.</p>
     	</subsection>
     	
+    	<subsection name="3.2.3 Setup Cayenne Configuration Files" anchor="3">
+    		<p>Configuration files included in this tutorial are:
+    		
+    		<ul>
+    			<li><a href="../../tutorial/cayenne-cmd-app/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/driverinfo.xml">driverinfo.xml</a></li>
+    		</ul>
+    		
+    		Open <code>cayenne.xml</code> 
+    		file in CayenneModeler and make the following changes:
+    		<ul>
+    			<li>if the database used is NOT MySQL, <code>cayenne.xml</code>
+    			must be modified to use an adapter for the appropriate database.</li>
+    			<li><code>driverinfo.xml</code> must be modified to reflect connection and
+    			driver information of the test database.</li>
+    		</ul>         	
+    		</p>
+    	    <img src="/images/tutorial-cfg-node.gif" width="639" height="503" border="0" align="middle"
+			alt="Configure Node Panel"/>
+    	</subsection>
+    	
+    	
     	<subsection name="3.2.4 Create Database Primary Key Support." anchor="4">
     	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
     	objects for primary key support by following these  
