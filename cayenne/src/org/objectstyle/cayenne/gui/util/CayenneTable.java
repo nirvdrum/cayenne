@@ -57,11 +57,15 @@ package org.objectstyle.cayenne.gui.util;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.*;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 
 /**  Contains cludge to the JTable. It updates model every time
@@ -72,7 +76,7 @@ import javax.swing.text.Document;
   * @author Michael Misha Shengaout
   * @author Andrei Adamchik
   */
-public class CayenneTable extends JTable {
+public class CayenneTable extends JTable implements ActionListener {
 	public CayenneTable() {
 		super();
 		// Replace "cancel" action with custom table cancel
@@ -137,6 +141,7 @@ public class CayenneTable extends JTable {
 			boolean isSelected,
 			int temp_row,
 			int temp_col) {
+				
 			row = temp_row;
 			col = temp_col;
 			originalValue = value != null ? value.toString() : "";
@@ -146,6 +151,8 @@ public class CayenneTable extends JTable {
 			JTextField field =
 				(JTextField) TextFieldCellEditor.this.getComponent();
 			field.setText(text);
+			// field.addActionListener((CayenneTable)table);
+			
 			return field;
 		}
 
@@ -181,6 +188,15 @@ public class CayenneTable extends JTable {
 				return;
 			tableModel.setValueAt(text, row, col);
 		}
+		
+		
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e) {
+		}
+
+
 	}
 
 	static private class CayenneBooleanRenderer
@@ -234,5 +250,13 @@ public class CayenneTable extends JTable {
 			}
 			nextAction.actionPerformed(e);
 		}
+	}
+	
+	
+	/**
+	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		
 	}
 }
