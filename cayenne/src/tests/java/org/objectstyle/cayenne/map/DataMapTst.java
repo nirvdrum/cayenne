@@ -122,16 +122,29 @@ public class DataMapTst extends TestCase {
         map.addObjEntity(e);
     }
 
-    public void testDeleteObjEntity() {
+    public void testRemoveObjEntity() {
         // make sure deleting an ObjEntity & other entity's relationships to it
         // works & does not cause a ConcurrentModificationException
 
         ObjEntity e1 = new ObjEntity("1");
         ObjEntity e2 = new ObjEntity("2");
-        e1.addRelationship(new ObjRelationship("r1", e1, e2));
-        e1.addRelationship(new ObjRelationship("r2", e2, e1));
-        e2.addRelationship(new ObjRelationship("r3", e1, e2));
-        e2.addRelationship(new ObjRelationship("r4", e2, e1));
+
+        ObjRelationship r1 = new ObjRelationship("r1");
+        r1.setTargetEntityName("2");
+
+        ObjRelationship r2 = new ObjRelationship("r2");
+        r2.setTargetEntityName("1");
+
+        ObjRelationship r3 = new ObjRelationship("r3");
+        r1.setTargetEntityName("2");
+
+        ObjRelationship r4 = new ObjRelationship("r4");
+        r4.setTargetEntityName("1");
+
+        e1.addRelationship(r1);
+        e1.addRelationship(r2);
+        e2.addRelationship(r3);
+        e2.addRelationship(r4);
         map.addObjEntity(e1);
         map.addObjEntity(e2);
 

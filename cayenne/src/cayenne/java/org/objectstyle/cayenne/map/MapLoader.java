@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.map;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -73,7 +72,6 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.project.DataMapFile;
 import org.objectstyle.cayenne.query.QueryBuilder;
 import org.objectstyle.cayenne.query.SelectQueryBuilder;
-import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
@@ -577,16 +575,8 @@ public class MapLoader extends DefaultHandler {
             objEntity.setSuperEntityName(superEntityName);
         }
         else {
-            String dbEntityName = atts.getValue("", "dbEntityName");
-            if (dbEntityName != null) {
-                DbEntity dbEntity = dataMap.getDbEntity(dbEntityName);
-                objEntity.setDbEntity(dbEntity);
-            }
-
-            String superClassName = atts.getValue("", "superClassName");
-            if (superClassName != null) {
-                objEntity.setSuperClassName(superClassName);
-            }
+            objEntity.setDbEntityName(atts.getValue("", "dbEntityName"));
+            objEntity.setSuperClassName(atts.getValue("", "superClassName"));
         }
 
         dataMap.addObjEntity(objEntity);
@@ -610,62 +600,49 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processStartDbRelationship(Attributes atts) throws SAXException {
-        String temp = atts.getValue("", "source");
-        if (null == temp) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartDbRelationship(),"
-                    + " Unable to parse source. Attributes:\n"
-                    + printAttributes(atts).toString());
-        }
-
-        DbEntity source = dataMap.getDbEntity(temp);
-        if (null == source) {
-            logObj.debug(
-                "MapLoaderImpl::processStartDbRelationship(),"
-                    + " Unable to find source "
-                    + temp);
-            return;
-        }
-        temp = atts.getValue("", "target");
-        if (null == temp) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartDbRelationship(),"
-                    + " Unable to parse target. Attributes:\n"
-                    + printAttributes(atts).toString());
-        }
-
-        DbEntity target = dataMap.getDbEntity(temp, true);
-        if (null == target) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartDbRelationship(),"
-                    + " Unable to find target "
-                    + temp);
-        }
-
-        temp = atts.getValue("", "toMany");
-        boolean toMany = temp != null && temp.equalsIgnoreCase(TRUE);
-
-        temp = atts.getValue("", "toDependentPK");
-        boolean toDependentPK = temp != null && temp.equalsIgnoreCase(TRUE);
-
         String name = atts.getValue("", "name");
-        if (null == name) {
+        if (name == null) {
             throw new SAXException(
                 "MapLoaderImpl::processStartDbRelationship(),"
                     + " Unable to parse name. Attributes:\n"
                     + printAttributes(atts).toString());
         }
 
-        dbRelationship = new DbRelationship();
+        String sourceName = atts.getValue("", "source");
+        if (sourceName == null) {
+            throw new SAXException("MapLoaderImpl::processStartDbRelationship() - null source entity");
+        }
+
+        DbEntity source = dataMap.getDbEntity(sourceName);
+        if (source == null) {
+            logObj.debug(
+                "MapLoaderImpl::processStartDbRelationship() - Unable to find source "
+                    + sourceName);
+            return;
+        }
+
+        String targetName = atts.getValue("", "target");
+        if (targetName == null) {
+            throw new SAXException("MapLoaderImpl::processStartDbRelationship() - null target entity.");
+        }
+
+        String toManyString = atts.getValue("", "toMany");
+        boolean toMany = toManyString != null && toManyString.equalsIgnoreCase(TRUE);
+
+        String toDependPkString = atts.getValue("", "toDependentPK");
+        boolean toDependentPK =
+            toDependPkString != null && toDependPkString.equalsIgnoreCase(TRUE);
+
+        dbRelationship = new DbRelationship(name);
         dbRelationship.setSourceEntity(source);
-        dbRelationship.setTargetEntity(target);
+        dbRelationship.setTargetEntityName(targetName);
         dbRelationship.setToMany(toMany);
-        dbRelationship.setName(name);
         dbRelationship.setToDependentPK(toDependentPK);
+
         // Save the reference to this db relationship for later resolution
         // in the ObjRelationship
         dbRelationshipMap.put(
-            new SourceTarget(source.getName(), target.getName(), name),
+            new SourceTarget(sourceName, targetName, name),
             dbRelationship);
 
         source.addRelationship(dbRelationship);
@@ -738,10 +715,9 @@ public class MapLoader extends DefaultHandler {
                     + sourceName);
         }
 
-        ObjEntity target = null;
         String targetName = atts.getValue("", "target");
-        if (targetName != null) {
-            target = dataMap.getObjEntity(targetName, true);
+        if (targetName == null) {
+            throw new SAXException("MapLoaderImpl::processStartObjRelationship() - null target entity.");
         }
 
         String name = atts.getValue("", "name");
@@ -760,7 +736,9 @@ public class MapLoader extends DefaultHandler {
 
         String lock = atts.getValue("", "lock");
 
-        objRelationship = new ObjRelationship(name, source, target);
+        objRelationship = new ObjRelationship(name);
+        objRelationship.setSourceEntity(source);
+        objRelationship.setTargetEntityName(targetName);
         objRelationship.setDeleteRule(deleteRule);
         objRelationship.setUsedForLocking(TRUE.equalsIgnoreCase(lock));
         source.addRelationship(objRelationship);
@@ -1007,66 +985,6 @@ public class MapLoader extends DefaultHandler {
             sb.append("Name: " + name + "\tValue: " + value + "\n");
         }
         return sb;
-    }
-
-    protected List sortedProcedures(DataMap map) {
-        List list = new ArrayList(map.getProcedures());
-        Collections.sort(list, new PropertyComparator("name", Procedure.class));
-        return list;
-    }
-
-    protected List sortedRegularDbEntities(DataMap map) {
-        Iterator it = map.getDbEntities().iterator();
-        List derived = new ArrayList();
-        while (it.hasNext()) {
-            Object ent = it.next();
-            if (!(ent instanceof DerivedDbEntity)) {
-                derived.add(ent);
-            }
-        }
-        if (derived.size() > 1) {
-            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
-        }
-        return derived;
-    }
-
-    protected List sortedDerivedDbEntities(DataMap map) {
-        Iterator it = map.getDbEntities().iterator();
-        List derived = new ArrayList();
-        while (it.hasNext()) {
-            Object ent = it.next();
-            if (ent instanceof DerivedDbEntity) {
-                derived.add(ent);
-            }
-        }
-        if (derived.size() > 1) {
-            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
-        }
-        return derived;
-    }
-
-    protected List sortedObjEntities(DataMap map) {
-        List list = new ArrayList(map.getObjEntities());
-        Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
-        return list;
-    }
-
-    protected List sortedAttributes(Entity ent) {
-        List list = new ArrayList(ent.getAttributes());
-        Collections.sort(list, new PropertyComparator("name", Attribute.class));
-        return list;
-    }
-
-    protected List sortedRelationships(Entity ent) {
-        List list = new ArrayList(ent.getRelationships());
-        Collections.sort(list, new PropertyComparator("name", Relationship.class));
-        return list;
-    }
-
-    protected List sortedRelationships(List rels) {
-        List list = new ArrayList(rels);
-        Collections.sort(list, new PropertyComparator("name", Relationship.class));
-        return list;
     }
 
     public void characters(char[] text, int start, int length)

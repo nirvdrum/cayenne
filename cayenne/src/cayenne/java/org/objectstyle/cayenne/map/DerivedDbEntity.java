@@ -175,26 +175,14 @@ public class DerivedDbEntity extends DbEntity {
             return null;
         }
 
-        DataMap map = getDataMap();
-        if (map == null) {
-            return null;
-        }
-
-        return map.getDbEntity(parentEntityName, true);
+        return getNonNullNamespace().getDbEntity(parentEntityName);
     }
 
     /**
-     * Sets the parentEntity.
-     * 
-     * @param parentEntity The parentEntity to set
+     * Sets the parent entity of this derived DbEntity.
      */
     public void setParentEntity(DbEntity parentEntity) {
-        if (parentEntity == null) {
-            setParentEntityName(null);
-        }
-        else {
-            setParentEntityName(parentEntity.getName());
-        }
+        setParentEntityName(parentEntity != null ? parentEntity.getName() : null);
     }
 
     /** 

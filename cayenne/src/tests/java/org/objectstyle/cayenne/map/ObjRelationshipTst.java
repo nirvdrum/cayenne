@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjRelationshipTst extends CayenneTestCase {
@@ -72,22 +73,27 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     public void testTargetEntity() throws Exception {
         rel.setTargetEntityName("targ");
-        assertNull(rel.getTargetEntity());
 
+        try {
+            rel.getTargetEntity();
+            fail("Without a container, getTargetEntity() must fail.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // expected
+        }
+
+        // assemble container
+        DataMap map = new DataMap();
         ObjEntity src = new ObjEntity("src");
-        src.setClassName("src");
+        map.addObjEntity(src);
+
         src.addRelationship(rel);
         assertNull(rel.getTargetEntity());
 
-        DataMap map = new DataMap();
-        map.addObjEntity(src);
-        assertNull(rel.getTargetEntity());
+        ObjEntity target = new ObjEntity("targ");
+        map.addObjEntity(target);
 
-        ObjEntity targ = new ObjEntity("targ");
-        targ.setClassName("targ");
-        map.addObjEntity(targ);
-        rel.setTargetEntity(targ);
-        assertSame(targ, rel.getTargetEntity());
+        assertSame(target, rel.getTargetEntity());
     }
 
     public void testGetReverseRel1() throws Exception {

@@ -289,7 +289,9 @@ public class EntityResolver {
      * that services the specified objentity
      * 
      * @return the required DbEntity, or null if none matches the specifier
-     * @deprecated Since 1.1. Use entity.getDbEntity() instead.
+     * @deprecated Since 1.1. Use 
+     * {@link org.objectstyle.cayenne.map.EntityResolver#getDbEntity(String)}
+     * instead.
      */
     public synchronized DbEntity lookupDbEntity(ObjEntity entity) {
         return (entity != null) ? entity.getDbEntity() : null;
@@ -301,12 +303,13 @@ public class EntityResolver {
      * and shouldn't be used, since it is confusing - the key name is that of ObjEntity,
      * while lookup is done for ObjEntity.
      * 
-     * @deprecated Since 1.1 this method is deprecated. Use lookupObjEntity(String).getDbEntity()
-     * to find a DbEntity by ObjEntity name.
+     * @deprecated Since 1.1 this method is deprecated. Use 
+     * {@link org.objectstyle.cayenne.map.EntityResolver#getObjEntity(String)}
+     * to find ObjEntity, and then get a DbEntity from ObjEntity.
      */
     public synchronized DbEntity lookupDbEntity(String objEntityName) {
         ObjEntity objEntity = this._lookupObjEntity(objEntityName);
-        return (objEntity != null) ? objEntity.getDbEntity() : null;
+        return (objEntity != null) ? _lookupDbEntity(objEntity.getDbEntityName()) : null;
     }
 
     /**

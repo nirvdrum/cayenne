@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -74,17 +75,22 @@ public class DataRowTst extends CayenneTestCase {
     }
 
     public void testObjectIdFromSnapshot() throws Exception {
-        Class entityClass = Number.class;
-        ObjEntity ent = new ObjEntity();
+        // must provide a map container for the entities
+        DataMap entityContainer = new DataMap();
 
-        DbAttribute at = new DbAttribute();
-        at.setName("xyz");
-        at.setPrimaryKey(true);
+        ObjEntity objEntity = new ObjEntity("456");
+        entityContainer.addObjEntity(objEntity);
+
         DbEntity dbe = new DbEntity("123");
+        objEntity.setDbEntityName("123");
+        entityContainer.addDbEntity(dbe);
+
+        DbAttribute at = new DbAttribute("xyz");
+        at.setPrimaryKey(true);
         dbe.addAttribute(at);
-        ent.setDbEntity(dbe);
-        ent.setName("456");
-        ent.setClassName(entityClass.getName());
+
+        Class entityClass = Number.class;
+        objEntity.setClassName(entityClass.getName());
 
         // test same id created by different methods
         DataRow map = new DataRow(10);
@@ -94,7 +100,7 @@ public class DataRowTst extends CayenneTestCase {
         map2.put(at.getName(), "123");
 
         ObjectId ref = new ObjectId(entityClass, map);
-        ObjectId oid = map2.createObjectId(ent);
+        ObjectId oid = map2.createObjectId(objEntity);
 
         assertEquals(ref, oid);
     }

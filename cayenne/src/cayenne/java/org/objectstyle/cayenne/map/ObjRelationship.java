@@ -104,14 +104,10 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * @deprecated Since 1.1. To-many is derived, so use ObjRelationship(ObjEntity, ObjEntity)
+     * @deprecated Since 1.1 use any other constructor.
      */
     public ObjRelationship(ObjEntity source, ObjEntity target, boolean toMany) {
-        this(null, source, target);
-    }
-
-    public ObjRelationship(String name, ObjEntity source, ObjEntity target) {
-        super(name);
+        this();
         this.setSourceEntity(source);
         this.setTargetEntity(target);
     }
@@ -181,21 +177,12 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     public Entity getTargetEntity() {
-        if (getTargetEntityName() == null) {
+        String targetName = getTargetEntityName();
+        if (targetName == null) {
             return null;
         }
 
-        Entity src = getSourceEntity();
-        if (src == null) {
-            return null;
-        }
-
-        DataMap map = src.getDataMap();
-        if (map == null) {
-            return null;
-        }
-
-        return map.getObjEntity(getTargetEntityName(), true);
+        return getNonNullNamespace().getObjEntity(targetName);
     }
 
     /**
@@ -245,7 +232,7 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns a list of underlying DbRelationships.
+     * Returns an immutable list of underlying DbRelationships.
      */
     public List getDbRelationships() {
         return dbRelationshipsRef;
@@ -253,9 +240,9 @@ public class ObjRelationship extends Relationship implements EventListener {
 
     /** Appends a DbRelationship to the existing list of DbRelationships. */
     public void addDbRelationship(DbRelationship dbRel) {
-        //Adding a second is creating a flattened relationship.
-        //Ensure that the new relationship properly continues on the flattened
-        // path
+        // Adding a second is creating a flattened relationship.
+        // Ensure that the new relationship properly continues 
+        // on the flattened path
         int numDbRelationships = dbRelationships.size();
         if (numDbRelationships > 0) {
             DbRelationship lastRel =

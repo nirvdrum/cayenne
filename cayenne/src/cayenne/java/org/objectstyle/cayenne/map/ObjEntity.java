@@ -90,7 +90,7 @@ public class ObjEntity extends Entity {
 
     protected String superClassName;
     protected String className;
-    protected DbEntity dbEntity;
+    protected String dbEntityName;
     protected String superEntityName;
     protected Expression qualifier;
     protected boolean readOnly;
@@ -314,7 +314,7 @@ public class ObjEntity extends Entity {
      */
     public ObjEntity getSuperEntity() {
         return (superEntityName != null)
-            ? getDataMap().getObjEntity(superEntityName)
+            ? getNonNullNamespace().getObjEntity(superEntityName)
             : null;
     }
 
@@ -323,17 +323,23 @@ public class ObjEntity extends Entity {
      */
     public DbEntity getDbEntity() {
         ObjEntity superEntity = getSuperEntity();
-        return (superEntity != null) ? superEntity.getDbEntity() : dbEntity;
+        if (superEntity != null) {
+            return superEntity.getDbEntity();
+        }
+
+        return (dbEntityName != null)
+            ? getNonNullNamespace().getDbEntity(dbEntityName)
+            : null;
     }
 
     /** 
      * Sets the DbEntity used by this ObjEntity.
      * 
-     * <p><i>An attempt to set DbEntity on an inherited entity has no effect, 
+     * <p><i>Setting DbEntity on an inherited entity has no effect, 
      * since a class of the super entity is always used as a superclass.</i></p>
      */
     public void setDbEntity(DbEntity dbEntity) {
-        this.dbEntity = dbEntity;
+        this.dbEntityName = (dbEntity != null) ? dbEntity.getName() : null;
     }
 
     /**
@@ -557,7 +563,7 @@ public class ObjEntity extends Entity {
      *  Clears mapping between entities, attributes and relationships. 
      */
     public void clearDbMapping() {
-        if (dbEntity == null)
+        if (dbEntityName == null)
             return;
 
         Iterator it = getAttributeMap().values().iterator();
@@ -574,7 +580,7 @@ public class ObjEntity extends Entity {
             ((ObjRelationship) rels.next()).clearDbRelationships();
         }
 
-        dbEntity = null;
+        dbEntityName = null;
     }
 
     /**
@@ -803,5 +809,23 @@ public class ObjEntity extends Entity {
             exp.setOperand(0, converted);
             return exp;
         }
+    }
+
+    /**
+     * Returns the name of underlying DbEntity.
+     * 
+     * @since 1.1
+     */
+    public String getDbEntityName() {
+        return dbEntityName;
+    }
+
+    /**
+     * Sets the name of underlying DbEntity.
+     * 
+     * @since 1.1
+     */
+    public void setDbEntityName(String string) {
+        dbEntityName = string;
     }
 }

@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.query.Query;
@@ -290,7 +291,7 @@ public abstract class Entity extends MapObject {
         while (it.hasNext()) {
             last = it.next();
         }
-        
+
         return last;
     }
 
@@ -373,5 +374,17 @@ public abstract class Entity extends MapObject {
         public void remove() {
             throw new UnsupportedOperationException("'remove' operation is not supported.");
         }
+    }
+
+    final MappingNamespace getNonNullNamespace() {
+        MappingNamespace parent = (MappingNamespace) getParent();
+        if (parent == null) {
+            throw new CayenneRuntimeException(
+                "Entity '"
+                    + getName()
+                    + "' has no parent MappingNamespace (such as DataMap)");
+        }
+
+        return parent;
     }
 }

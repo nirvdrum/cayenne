@@ -55,60 +55,63 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+
 /** Superclass of metadata relationship classes. */
 public abstract class Relationship extends MapObject {
-	protected String targetEntityName;
-	protected boolean toMany;
+    protected String targetEntityName;
+    protected boolean toMany;
 
-	public Relationship() {
-		super();
-	}
+    public Relationship() {
+        super();
+    }
 
-	public Relationship(String name) {
-		this();
-		this.setName(name);
-	}
+    public Relationship(String name) {
+        this();
+        this.setName(name);
+    }
 
-	/** Returns relationship source entity. */
-	public Entity getSourceEntity() {
-		return (Entity)this.getParent();
-	}
+    /** Returns relationship source entity. */
+    public Entity getSourceEntity() {
+        return (Entity) this.getParent();
+    }
 
-	/** Sets relationship source entity. */
-	public void setSourceEntity(Entity sourceEntity) {
-		setParent(sourceEntity);
-	}
+    /** Sets relationship source entity. */
+    public void setSourceEntity(Entity sourceEntity) {
+        setParent(sourceEntity);
+    }
 
-	/** Returns relationship target entity. */
-	public abstract Entity getTargetEntity();
+    /** Returns relationship target entity. */
+    public abstract Entity getTargetEntity();
 
-	/** 
-	 * Sets relationship target entity. Internally
-	 * calls <code>setTargetEntityName</code>.
-	 */
-	public void setTargetEntity(Entity targetEntity) {
-		if (targetEntity != null) {
-			this.setTargetEntityName(targetEntity.getName());
-		} else {
-			this.setTargetEntityName(null);
-		}
-	}
+    /** 
+     * Sets relationship target entity. Internally
+     * calls <code>setTargetEntityName</code>.
+     */
+    public void setTargetEntity(Entity targetEntity) {
+        if (targetEntity != null) {
+            this.setTargetEntityName(targetEntity.getName());
+        }
+        else {
+            this.setTargetEntityName(null);
+        }
+    }
 
-	/**
-	 * Returns the targetEntityName.
-	 * @return String
-	 */
-	public String getTargetEntityName() {
-		return targetEntityName;
-	}
+    /**
+     * Returns the targetEntityName.
+     * @return String
+     */
+    public String getTargetEntityName() {
+        return targetEntityName;
+    }
 
-	/**
-	 * Sets the targetEntityName.
-	 * @param targetEntityName The targetEntityName to set
-	 */
-	public void setTargetEntityName(String targetEntityName) {
-		this.targetEntityName = targetEntityName;
-	}
+    /**
+     * Sets the targetEntityName.
+     * @param targetEntityName The targetEntityName to set
+     */
+    public void setTargetEntityName(String targetEntityName) {
+        this.targetEntityName = targetEntityName;
+    }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -140,16 +143,27 @@ public abstract class Relationship extends MapObject {
         sb.append("]");
         return sb.toString();
     }
-	
-	/** 
+
+    /** 
      * Tells whether relationship from source to target is to-one or to-many.
-	 * If one-to-many, getxxx() method of the data object class would 
-	 * return a list, otherwise it returns a single DataObject
-	 * There is explicitly no setToMany on Relationship.. only DbRelationship
-	 * supports such a notion, and ObjRelationship derives it's value from the
-	 * underlying DbRelationship(s) 
+     * If one-to-many, getxxx() method of the data object class would 
+     * return a list, otherwise it returns a single DataObject
+     * There is explicitly no setToMany on Relationship.. only DbRelationship
+     * supports such a notion, and ObjRelationship derives it's value from the
+     * underlying DbRelationship(s) 
      */
-	public boolean isToMany() {
-		return toMany;
-	}
+    public boolean isToMany() {
+        return toMany;
+    }
+
+    final MappingNamespace getNonNullNamespace() {
+        Entity entity = getSourceEntity();
+
+        if (entity == null) {
+            throw new CayenneRuntimeException(
+                "Relationship '" + getName() + "' has no parent Entity.");
+        }
+
+        return entity.getNonNullNamespace();
+    }
 }

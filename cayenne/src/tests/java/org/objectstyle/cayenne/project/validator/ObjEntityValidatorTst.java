@@ -66,23 +66,25 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Craig Miskell
  */
 public class ObjEntityValidatorTst extends ValidatorTestBase {
-	protected DataDomain domain;
-	protected DataMap map;
-    
-	protected void setUp() throws Exception {
-		super.setUp();
-        domain= new DataDomain("d1");
+    protected DataDomain domain;
+    protected DataMap map;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+        domain = new DataDomain("d1");
 
         map = new DataMap("m1");
         domain.addMap(map);
-		
-	}
+
+    }
 
     public void testValidateNoName() throws Exception {
         ObjEntity oe1 = new ObjEntity("oe1");
-        oe1.setDbEntity(new DbEntity("de1"));
+        DbEntity de1 = new DbEntity("de1");
+        oe1.setDbEntityName("de1");
         oe1.setClassName("java.class.name");
         map.addObjEntity(oe1);
+        map.addDbEntity(de1);
 
         validator.reset();
         new ObjEntityValidator().validateObject(
@@ -92,7 +94,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
 
         // now remove the name
         oe1.setName(null);
-        
+
         validator.reset();
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
@@ -100,38 +102,45 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         assertValidator(ValidationInfo.ERROR);
     }
 
-	public void testValidateNoClassName() throws Exception {
+    public void testValidateNoClassName() throws Exception {
         ObjEntity oe1 = new ObjEntity("oe1");
         oe1.setDbEntity(new DbEntity("de1"));
         oe1.setClassName(null);
         map.addObjEntity(oe1);
-        
+
         validator.reset();
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationInfo.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
-		
-	}
+        assertValidator(ValidationInfo.WARNING);
+        //WARNING is ok - null class name will give that, but ERROR is bad
 
-	public void testValidateMultipleNullClassNames() throws Exception  {
+    }
+
+    public void testValidateMultipleNullClassNames() throws Exception {
         ObjEntity oe1 = new ObjEntity("oe1");
         ObjEntity oe2 = new ObjEntity("oe2");
-        oe1.setDbEntity(new DbEntity("de1"));
+        DbEntity de1 = new DbEntity("de1");
+        DbEntity de2 = new DbEntity("de2");
+
+        oe1.setDbEntity(de1);
         oe1.setClassName(null);
-        
-        oe2.setDbEntity(new DbEntity("de2"));
+
+        oe2.setDbEntity(de2);
         oe2.setClassName(null);
-        
+
         map.addObjEntity(oe1);
         map.addObjEntity(oe2);
-        
+        map.addDbEntity(de1);
+        map.addDbEntity(de2);
+
         validator.reset();
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationInfo.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
-        
+        assertValidator(ValidationInfo.WARNING);
+        //WARNING is ok - null class name will give that, but ERROR is bad
+
         //Give one a class name - still valid
         oe1.setClassName("java.class.name");
         validator.reset();
@@ -146,7 +155,8 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationInfo.WARNING); // WARNING - it is OK to save multiple entities with the
-	}
+        assertValidator(ValidationInfo.WARNING);
+        // WARNING - it is OK to save multiple entities with the
+    }
 
 }

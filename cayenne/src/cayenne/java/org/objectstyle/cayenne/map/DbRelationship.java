@@ -130,21 +130,12 @@ public class DbRelationship extends Relationship {
     }
 
     public Entity getTargetEntity() {
-        if (getTargetEntityName() == null) {
+        String targetName = getTargetEntityName();
+        if (targetName == null) {
             return null;
         }
 
-        Entity src = getSourceEntity();
-        if (src == null) {
-            return null;
-        }
-
-        DataMap map = src.getDataMap();
-        if (map == null) {
-            return null;
-        }
-
-        return map.getDbEntity(getTargetEntityName(), true);
+        return getNonNullNamespace().getDbEntity(targetName);
     }
 
     /**

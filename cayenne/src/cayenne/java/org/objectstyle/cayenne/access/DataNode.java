@@ -123,7 +123,6 @@ public class DataNode implements QueryEngine {
     // DataMaps
     // ====================================================
     private Map dataMaps = new HashMap();
-    private Map dataMapsRef = Collections.unmodifiableMap(dataMaps);
     private Collection dataMapsValuesRef =
         Collections.unmodifiableCollection(dataMaps.values());
 
