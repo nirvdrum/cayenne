@@ -1,15 +1,7 @@
 package org.objectstyle.art;
 
-public class SmallintTest extends org.objectstyle.cayenne.CayenneDataObject {
+public class SmallintTest extends org.objectstyle.art.auto._SmallintTest {
 
-    public void setSmallintCol(Short smallintCol) {
-        writeProperty("smallintCol", smallintCol);
-    }
-    public Short getSmallintCol() {
-        return (Short)readProperty("smallintCol");
-    }
-    
-    
 }
 
 

@@ -1,4 +1,4 @@
-package org.objectstyle.art.oneway;
+package org.objectstyle.art.oneway.auto;
 
 import java.util.List;
 
@@ -8,6 +8,12 @@ import java.util.List;
   * If you need to make any customizations, please use subclass. 
   */
 public class _Artist extends org.objectstyle.cayenne.CayenneDataObject {
+
+    public static final String ARTIST_NAME_PROPERTY = "artistName";
+    public static final String DATE_OF_BIRTH_PROPERTY = "dateOfBirth";
+    public static final String PAINTING_ARRAY_PROPERTY = "paintingArray";
+
+    public static final String ARTIST_ID_PK_COLUMN = "ARTIST_ID";
 
     public void setArtistName(String artistName) {
         writeProperty("artistName", artistName);
@@ -25,10 +31,10 @@ public class _Artist extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void addToPaintingArray(Painting obj) {
+    public void addToPaintingArray(org.objectstyle.art.oneway.Painting obj) {
         addToManyTarget("paintingArray", obj, true);
     }
-    public void removeFromPaintingArray(Painting obj) {
+    public void removeFromPaintingArray(org.objectstyle.art.oneway.Painting obj) {
         removeToManyTarget("paintingArray", obj, true);
     }
     public List getPaintingArray() {

@@ -1,14 +1,8 @@
 package org.objectstyle.art;
 
-public class NoPkTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.art.auto._NoPkTest;
 
-    public void setAttribute1(Integer attribute1) {
-        writeProperty("attribute1", attribute1);
-    }
-    public Integer getAttribute1() {
-        return (Integer)readProperty("attribute1");
-    }
-    
+public class NoPkTest extends _NoPkTest {
     
 }
 

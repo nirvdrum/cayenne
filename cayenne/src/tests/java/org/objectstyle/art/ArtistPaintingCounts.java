@@ -1,16 +1,7 @@
 package org.objectstyle.art;
 
-public class ArtistPaintingCounts extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.art.auto._ArtistPaintingCounts;
 
-    public void setPaintingsCount(Integer paintingsCount) {
-        writeProperty("paintingsCount", paintingsCount);
-    }
-    public Integer getPaintingsCount() {
-        return (Integer)readProperty("paintingsCount");
-    }
-    
-    
+public class ArtistPaintingCounts extends _ArtistPaintingCounts {
+
 }
-
-
-

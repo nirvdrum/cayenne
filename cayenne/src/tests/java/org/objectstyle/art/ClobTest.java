@@ -1,16 +1,7 @@
 package org.objectstyle.art;
 
-public class ClobTest extends org.objectstyle.cayenne.CayenneDataObject {
+import org.objectstyle.art.auto._ClobTest;
 
-    public void setClobCol(String clobCol) {
-        writeProperty("clobCol", clobCol);
-    }
-    public String getClobCol() {
-        return (String)readProperty("clobCol");
-    }
-    
-    
+public class ClobTest extends _ClobTest {
+
 }
-
-
-
