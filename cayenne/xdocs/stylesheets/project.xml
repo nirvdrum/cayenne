@@ -28,5 +28,9 @@
         <item name="CVS"  href="/developer.html"/>
         <item name="Mailing Lists"  href="http://objectstyle.org/developer/mailinglists.html"/>
     </menu>
+    
+    <menu name="Other">
+        <item name="Search"         href="http://objectstyle.org/cgi-bin/htsearch"/>
+    </menu>
 
 </project>

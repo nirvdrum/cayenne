@@ -9,11 +9,15 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><i>March 16:</i> Cayenne at SourceForge and Freashmeat. Cayenne is still hosted 
+        <p><i>March 18:</i> <strong><font color="red">Cayenne CVS is migrated to SourceForge.net.</font></strong> 
+        Be aware that the old CVS server is no longer accessible. Go to
+        <a href="http://objectstyle.org/cayenne/developer.html">this page</a> for the new CVS instructions.</p>
+        
+        <p><i>March 16:</i> <strong>Cayenne at SourceForge and Freashmeat.</strong> Cayenne is still hosted 
         at objectstyle.org, but we also registered the project at 
         <a href="http://sourceforge.net/projects/cayenne/">SourceForge.net</a>. Bug tracking, CVS and downloads 
-        will be performed from SourceForge. Also to make release announcements, Cayenne is registered at
-        <a href="http://freshmeat.net/projects/cayenne/">Freshmeat.net</a>.</p>
+        will be performed from SourceForge. Also Cayenne is registered at
+        <a href="http://freshmeat.net/projects/cayenne/">Freshmeat.net</a> to make release announcements.</p>
         </section>
         
         <!-- Welcome section -->
