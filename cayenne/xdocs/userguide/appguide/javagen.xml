@@ -99,8 +99,8 @@
 				</tr>
 			</table>
 			
-			<h3>Examples</h3>
-			<p>Here is an example of a using <code>CayenneGen</code> to generate DataObject
+			<h3>Examples:</h3>
+			<p>Here is an example of using <code>CGen</code> to generate DataObject
 			subclass/superclass pairs from DataMap located in "src/datamap.xml". All generated
 			subclasses and superclasses will be saved in the same directory "src/java/dobj" regardless
 			of their package names:</p>
