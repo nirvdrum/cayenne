@@ -1,5 +1,7 @@
 package org.objectstyle.cayenne.project;
 
+import java.io.File;
+
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -40,8 +42,9 @@ public class DataNodeConfigInfoTst extends CayenneTestCase {
     }
     
     public void testDriverFile() throws Exception {
-        test.setDriverFile("abc");
-        assertEquals("abc", test.getDriverFile());
+    	File f = new File("abc");
+        test.setDriverFile(f);
+        assertSame(f, test.getDriverFile());
     }
     
     public void testName() throws Exception {

@@ -57,8 +57,11 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.ZipUtil;
@@ -112,7 +115,8 @@ public class ProjectConfigurator {
                 throw new IOException(
                     "Error renaming: " + tmpDest + " to " + info.getDestJar());
             }
-        } catch (Exception ex) {
+        }
+        catch (IOException ex) {
             throw new ProjectException("Error performing reconfiguration.", ex);
         } finally {
             if (tmpDir != null) {
@@ -131,17 +135,16 @@ public class ProjectConfigurator {
      * @param projectDir a directory where a working copy of the project is
      * located.
      */
-    protected void reconfigureProject(File projectDir) throws Exception {
+    protected void reconfigureProject(File projectDir) throws ProjectException {
         File projectFile = new File(projectDir, Configuration.DOMAIN_FILE);
-        
+
         // process alternative project file
         if (info.getAltProjectFile() != null) {
-            if(!Util.copy(info.getAltProjectFile(), projectFile)) {
-            	throw new Exception("Can't copy project file: " + info.getAltProjectFile());
+            if (!Util.copy(info.getAltProjectFile(), projectFile)) {
+                throw new ProjectException(
+                    "Can't copy project file: " + info.getAltProjectFile());
             }
         }
-        
-        
     }
 
     /**
@@ -225,13 +228,13 @@ public class ProjectConfigurator {
     /**
      * Validates consistency of the reconfiguration information.
      */
-    protected void validate() throws Exception {
+    protected void validate() throws IOException, ProjectException {
         if (info == null) {
-            throw new IllegalArgumentException("ProjectConfig info is not set.");
+            throw new ProjectException("ProjectConfig info is not set.");
         }
 
         if (info.getSourceJar() == null) {
-            throw new IllegalArgumentException("Source jar file is not set.");
+            throw new ProjectException("Source jar file is not set.");
         }
 
         if (!info.getSourceJar().isFile()) {

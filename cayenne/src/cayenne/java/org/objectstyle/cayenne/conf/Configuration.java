@@ -291,10 +291,13 @@ public abstract class Configuration {
 		return (DataDomain) dataDomains.get(name);
 	}
 
-	/** Returns default domain of this configuration. If no domains
-	  * are configured, null is returned. If more then 1 domain exists
-	  * in this configuration, an exception is thrown. In such cases
-	  * <code>getDomain(String name)</code> method must be used. */
+	/** 
+	 * Returns default domain of this configuration. If no domains are 
+     * configured, null is returned. If more then 1 domain exists in this
+     * configuration, an CayenneRuntimeException is thrown, indicating that
+     * domain name must be explicitly specified. In such cases
+     * <code>getDomain(String name)</code> method must be used instead.
+	 */
 	public DataDomain getDomain() {
 		int size = dataDomains.size();
 		if (size == 0) {

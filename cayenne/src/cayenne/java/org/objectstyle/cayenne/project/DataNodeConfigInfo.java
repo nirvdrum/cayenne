@@ -55,6 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
+import java.io.File;
+
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * Stores information necessary to reconfigure nodes of existing projects.
@@ -62,90 +67,130 @@ package org.objectstyle.cayenne.project;
  * @author Andrei Adamchik
  */
 public class DataNodeConfigInfo {
-	protected String name;
-	protected String domain;
-	protected String adapter;
-	protected String dataSource;
-	protected String driverFile;
-	
-	/**
-	 * Returns the adapter.
-	 * @return String
-	 */
-	public String getAdapter() {
-		return adapter;
-	}
+    protected String name;
+    protected String domain;
+    protected String adapter;
+    protected String dataSource;
+    protected File driverFile;
 
-	/**
-	 * Returns the dataSource.
-	 * @return String
-	 */
-	public String getDataSource() {
-		return dataSource;
-	}
+    /**
+     * Searches for the DataNode described by this DataNodeConfigInfo in the
+     * provided configuration object. Throws ProjectException if there is no
+     * matching DataNode.
+     */
+    public DataNode findDataNode(Configuration config)
+        throws ProjectException {
+        DataDomain domainObj = null;
 
-	/**
-	 * Returns the domain.
-	 * @return String
-	 */
-	public String getDomain() {
-		return domain;
-	}
+        // domain name is either explicit, or use default domain
+        if (domain != null) {
+            domainObj = config.getDomain(domain);
 
-	/**
-	 * Returns the driverFile.
-	 * @return String
-	 */
-	public String getDriverFile() {
-		return driverFile;
-	}
+            if (domainObj == null) {
+                throw new ProjectException("Can't find domain named " + domain);
+            }
+        } else {
+            try {
+                domainObj = config.getDomain();
+            } catch (Exception ex) {
+                throw new ProjectException("Project has no default domain.", ex);
+            }
 
-	/**
-	 * Returns the name.
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
+            if (domainObj == null) {
+                throw new ProjectException("Project has no domains configured.");
+            }
+        }
 
-	/**
-	 * Sets the adapter.
-	 * @param adapter The adapter to set
-	 */
-	public void setAdapter(String adapter) {
-		this.adapter = adapter;
-	}
+        DataNode node = domainObj.getNode(name);
+        if (node == null) {
+            throw new ProjectException(
+                "Domain "
+                    + domainObj.getName()
+                    + " has no node named '"
+                    + name
+                    + "'.");
+        }
+        return node;
+    }
 
-	/**
-	 * Sets the dataSource.
-	 * @param dataSource The dataSource to set
-	 */
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
-	}
+    /**
+     * Returns the adapter.
+     * @return String
+     */
+    public String getAdapter() {
+        return adapter;
+    }
 
-	/**
-	 * Sets the domain.
-	 * @param domain The domain to set
-	 */
-	public void setDomain(String domain) {
-		this.domain = domain;
-	}
+    /**
+     * Returns the dataSource.
+     * @return String
+     */
+    public String getDataSource() {
+        return dataSource;
+    }
 
-	/**
-	 * Sets the driverFile.
-	 * @param driverFile The driverFile to set
-	 */
-	public void setDriverFile(String driverFile) {
-		this.driverFile = driverFile;
-	}
+    /**
+     * Returns the domain.
+     * @return String
+     */
+    public String getDomain() {
+        return domain;
+    }
 
-	/**
-	 * Sets the name.
-	 * @param name The name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * Returns the driverFile.
+     * @return File
+     */
+    public File getDriverFile() {
+        return driverFile;
+    }
+
+    /**
+     * Returns the name.
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the adapter.
+     * @param adapter The adapter to set
+     */
+    public void setAdapter(String adapter) {
+        this.adapter = adapter;
+    }
+
+    /**
+     * Sets the dataSource.
+     * @param dataSource The dataSource to set
+     */
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * Sets the domain.
+     * @param domain The domain to set
+     */
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Sets the driverFile.
+     * @param driverFile The driverFile to set
+     */
+    public void setDriverFile(File driverFile) {
+        this.driverFile = driverFile;
+    }
+
+    /**
+     * Sets the name.
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }
