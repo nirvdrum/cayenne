@@ -10,17 +10,41 @@
 	<next>/modelerguide/mapschema.html</next>
 </navigator>
 <body>
- 	<section name="3. Concepts and Terminology" anchor="concepts">
-		<p>
-			CayenneModeler is a GUI tool for creating the data access classes
-			and associated data model.
-			This section describes the techniques of its use as well as the
-			deployment
-			of the files it produces.
-			Before we start describing how to create Cayenne data model with the
-			Modeler,
-			let us introduce core concepts of this model.
-		</p>
+ 	<section name="3. CayenneModeler Concepts: What the Buttons Mean"> 
+ 		<subsection name="3.1 Project">
+		<img src="/images/modeler/icon-new.gif" width="16" height="16"/>
+		<img src="/images/modeler/icon-open.gif" width="16" height="16"/>
+		<img src="/images/modeler/icon-save.gif" width="16" height="16"/>
+		
+		</subsection>
+		
+		<subsection name="3.2 DataDomain">
+		<img src="/images/modeler/icon-dom.gif" width="16" height="16"/>
+		</subsection>
+		
+		<subsection name="3.3 DataNode">
+		<img src="/images/modeler/icon-node.gif" width="16" height="16"/>
+		</subsection>
+		
+		<subsection name="3.4 DataMap">
+		<img src="/images/modeler/icon-datamap.gif" width="16" height="16"/>
+		</subsection>
+		
+		<subsection name="3.5 Entities">
+		<img src="/images/modeler/icon-dbentity.gif" width="16" height="16"/>
+		<img src="/images/modeler/icon-derived-dbentity.gif" width="16" height="16"/>
+		<img src="/images/modeler/icon-objentity.gif" width="16" height="16"/>
+		</subsection>
+		
+		<subsection name="3.7 Attributes">
+		<img src="/images/modeler/icon-attribute.gif" width="16" height="16"/>
+		</subsection>
+		
+		<subsection name="3.8 Relationships">
+		<img src="/images/modeler/icon-relationship.gif" width="16" height="16"/>
+		</subsection>
+		
+		
 		<table width="100%" border="1">
 		<tr valign="top">
 			<th width="28%">Cayenne mapping concept</th>

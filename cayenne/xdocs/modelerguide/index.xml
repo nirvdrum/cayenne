@@ -6,12 +6,18 @@
 <body>
     <section name="Table of Contents">        
         <ul>
-             <li><a href="intro.html">1. Introduction</a></li>
-             <li><a href="runmodeler.html">2. Running CayenneModeler</a></li>
-             <li><a href="modelerconcepts.html">3. Concepts and Terminology</a></li>
-             <li><a href="mapschema.html">4. DataMap First, Database Second</a></li>
-             <li><a href="schemamap.html">5. Database First, DataMap Second</a></li>
-             <li><a href="pksupport.html">6. Generating Primary Key Support in the Database</a></li>
+             <li><a href="intro.html">1. Introduction</a>
+             <br/></li>
+             <li><a href="runmodeler.html">2. Running CayenneModeler</a>
+             <br/></li>
+             <li><a href="modelerconcepts.html">3. CayenneModeler Concepts: What the Buttons Mean</a>
+             <br/></li>
+             <li><a href="mapschema.html">4. DataMap First, Database Second</a>
+             <br/></li>
+             <li><a href="schemamap.html">5. Database First, DataMap Second</a>
+             <br/></li>
+             <li><a href="pksupport.html">6. Generating Primary Key Support in the Database</a>
+             <br/></li>
         </ul>
     </section>
 </body>
