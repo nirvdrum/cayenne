@@ -503,4 +503,129 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         // check an artist
         assertEquals(newName, artist.getArtistName());
     }
+
+    public void testSnapshotEvictedForHollow() throws Exception {
+        String originalName = artist.getArtistName();
+        DataContext context = artist.getDataContext();
+
+        context.invalidateObjects(Collections.singletonList(artist));
+        assertEquals(PersistenceState.HOLLOW, artist.getPersistenceState());
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId()));
+
+        // resolve object
+        assertEquals(originalName, artist.getArtistName());
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotNull(freshSnapshot);
+        assertEquals(originalName, freshSnapshot.get("ARTIST_NAME"));
+    }
+
+    public void testSnapshotEvictedForCommitted() throws Exception {
+        String newName = "version2";
+        DataContext context = artist.getDataContext();
+
+        assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+
+        context.getObjectStore().getDataRowCache().forgetSnapshot(artist.getObjectId());
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId()));
+
+        // modify object and try to save
+        artist.setArtistName(newName);
+        context.commitChanges();
+
+        assertEquals(newName, artist.getArtistName());
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotNull(freshSnapshot);
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+    }
+
+    public void testSnapshotEvictedForModified() throws Exception {
+        String newName = "version2";
+        DataContext context = artist.getDataContext();
+
+        assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+
+        // modify object PRIOR to killing the snapshot 
+        artist.setArtistName(newName);
+
+        context.getObjectStore().getDataRowCache().forgetSnapshot(artist.getObjectId());
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId()));
+
+        context.commitChanges();
+
+        assertEquals(newName, artist.getArtistName());
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotNull(freshSnapshot);
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+    }
+
+    public void testSnapshotEvictedAndChangedForModified() throws Exception {
+        String originalName = artist.getArtistName();
+        String newName = "version2";
+        String backendName = "version3";
+        DataContext context = artist.getDataContext();
+
+        assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+
+        // modify object PRIOR to killing the snapshot 
+        artist.setArtistName(newName);
+
+        context.getObjectStore().getDataRowCache().forgetSnapshot(artist.getObjectId());
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId()));
+
+        // now replace the row in the database
+        SqlModifyQuery update =
+            new SqlModifyQuery(
+                Artist.class,
+                "UPDATE ARTIST SET ARTIST_NAME = '"
+                    + backendName
+                    + "' WHERE ARTIST_NAME = '"
+                    + originalName
+                    + "'");
+        context.performQueries(
+            Collections.singletonList(update),
+            new DefaultOperationObserver());
+
+        context.commitChanges();
+
+        assertEquals(newName, artist.getArtistName());
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotNull(freshSnapshot);
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+    }
+
+    public void testSnapshotEvictedForDeleted() throws Exception {
+        // remember ObjectId
+        ObjectId id = artist.getObjectId();
+
+        DataContext context = artist.getDataContext();
+
+        assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+
+        // delete object PRIOR to killing the snapshot 
+        context.deleteObject(artist);
+
+        context.getObjectStore().getDataRowCache().forgetSnapshot(id);
+        assertNull(context.getObjectStore().getDataRowCache().getCachedSnapshot(id));
+
+        context.commitChanges();
+
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+        assertNull(context.getObjectStore().getDataRowCache().getCachedSnapshot(id));
+    }
 }

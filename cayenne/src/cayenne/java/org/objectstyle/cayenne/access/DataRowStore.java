@@ -284,6 +284,10 @@ public class DataRowStore implements Serializable {
         if (cachedSnapshot != null) {
             return cachedSnapshot;
         }
+        
+        if(logObj.isDebugEnabled()) {
+            logObj.debug("no cached snapshot for ObjectId: " + oid);
+        }
 
         // try getting it from database
         SelectQuery select = QueryUtils.selectObjectForId(oid);
