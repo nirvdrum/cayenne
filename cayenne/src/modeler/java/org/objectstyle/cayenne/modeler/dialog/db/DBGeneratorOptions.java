@@ -116,6 +116,7 @@ public class DBGeneratorOptions extends CayenneController {
 
         tables.updateTables(dataMap);
         prepareGenerator();
+        generatorDefaults.configureGenerator(generator);
         createSQL();
         refreshView();
     }

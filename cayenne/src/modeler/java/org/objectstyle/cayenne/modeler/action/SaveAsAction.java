@@ -83,12 +83,12 @@ public class SaveAsAction extends CayenneAction {
     }
 
     public SaveAsAction(Application application) {
-        super(getActionName(), application);
-        this.fileChooser = new ProjectOpener();
+        this(getActionName(), application);
     }
 
     protected SaveAsAction(String name, Application application) {
         super(name, application);
+        this.fileChooser = new ProjectOpener();
     }
 
     /**
