@@ -84,6 +84,8 @@ import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.event.ObserverManager;
+import org.objectstyle.cayenne.event.ObserverSubject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -115,8 +117,12 @@ public class DataContext implements QueryEngine, Serializable {
     private Map flattenedInserts = new HashMap();
     private Map flattenedDeletes = new HashMap();
 
+	// DataContext events
+	public static final ObserverSubject WILL_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextWillCommit");
+	public static final ObserverSubject DID_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextDidCommit");
+
     protected transient QueryEngine parent;
-    //When deserialized, the parent domain name is stored in 
+    // When deserialized, the parent domain name is stored in 
     // this variable until the parent is actually needed.  This helps 
     // avoid an issue with certain servlet engines (e.g. Tomcat) where
     // HttpSessions with DataContext's are deserialized at startup
@@ -683,6 +689,9 @@ public class DataContext implements QueryEngine, Serializable {
 		List insObjects = new ArrayList();
 		Map updatedIds = new HashMap();
 
+		// post observer events 
+		ObserverManager.getInstance().postObserverEvent(WILL_COMMIT, this);
+
 		synchronized (objectStore) {
 			Iterator it = objectStore.getObjectIterator();
 			while (it.hasNext()) {
@@ -823,6 +832,9 @@ public class DataContext implements QueryEngine, Serializable {
 			}
 			this.clearFlattenedUpdateQueries();
 		}
+
+		// post observer event        
+		ObserverManager.getInstance().postObserverEvent(DID_COMMIT, this);
 	}
 
 	/**
