@@ -66,7 +66,8 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- *
+ * Batched UPDATE query.
+ * 
  * @author Andriy Shapochka
  */
 
@@ -88,7 +89,7 @@ public class UpdateBatchQuery extends BatchQuery {
         super(objectEntity);
         this.updatedDbAttributes =
             new ArrayList(updatedDbAttributeNames.size());
-        Map attrMap = metadata.getAttributeMap();
+        Map attrMap = getDbEntity().getAttributeMap();
         for (Iterator i = updatedDbAttributeNames.iterator(); i.hasNext();) {
             Object name = i.next();
             updatedDbAttributes.add(attrMap.get(name));
@@ -115,7 +116,7 @@ public class UpdateBatchQuery extends BatchQuery {
             (currentUpdate != null ? currentUpdate : Collections.EMPTY_MAP);
         return true;
     }
-    
+
     public Object getObject(int dbAttributeIndex) {
         DbAttribute attribute =
             (DbAttribute) dbAttributes.get(dbAttributeIndex);
@@ -126,7 +127,7 @@ public class UpdateBatchQuery extends BatchQuery {
         return (dbAttributeIndex < updatedDbAttributes.size())
             ? currentUpdate.get(name)
             : currentId.get(name);
-    } 
+    }
 
     public void add(Map dataObjectId, Map updateSnapshot) {
         dataObjectIds.add(dataObjectId);
@@ -135,10 +136,6 @@ public class UpdateBatchQuery extends BatchQuery {
 
     public int size() {
         return dataObjectIds.size();
-    }
-
-    public boolean isEmpty() {
-        return dataObjectIds.isEmpty();
     }
 
     public List getDbAttributes() {
@@ -154,7 +151,7 @@ public class UpdateBatchQuery extends BatchQuery {
     }
 
     private void prepareMetadata() {
-        idDbAttributes = metadata.getPrimaryKey();
+        idDbAttributes = getDbEntity().getPrimaryKey();
         dbAttributes =
             new ArrayList(updatedDbAttributes.size() + idDbAttributes.size());
         dbAttributes.addAll(updatedDbAttributes);

@@ -70,26 +70,38 @@ import org.objectstyle.cayenne.map.DbEntity;
  */
 
 public abstract class BatchQuery extends AbstractQuery {
-  protected DbEntity metadata;
 
-  public BatchQuery(DbEntity dbEntity) {
-    metadata = dbEntity;
-    setRoot(metadata);
-  }
+    public BatchQuery(DbEntity dbEntity) {
+        setRoot(dbEntity);
+    }
 
-  public DbEntity getMetadata() {
-    return metadata;
-  }
+    public DbEntity getDbEntity() {
+        return (DbEntity) getRoot();
+    }
 
-  public abstract List getDbAttributes();
+    public abstract List getDbAttributes();
 
-  public abstract void reset();
+    public abstract void reset();
 
-  public abstract boolean next();
+    /**
+     * Repositions batch to the next object, so that subsequent calls to
+     * getObject(int) would return the values of the next batch object. Retunrs
+     * <code>true</code> if batch has more objects to iterate over,
+     * <code>false</code> otherwise.
+     */
+    public abstract boolean next();
 
-  public abstract Object getObject(int valueIndex);
+    public abstract Object getObject(int valueIndex);
 
-  public abstract int size();
+    /**
+     * Returns the number of objects grouped in the batch query.
+     */
+    public abstract int size();
 
-  public abstract boolean isEmpty();
+    /**
+     * Returns <code>true</code> if this batch query has no associated objects.
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
 }

@@ -73,7 +73,7 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
 
   public String query(BatchQuery batch) {
     UpdateBatchQuery updateBatch = (UpdateBatchQuery)batch;
-    String table = batch.getMetadata().getFullyQualifiedName();
+    String table = batch.getDbEntity().getFullyQualifiedName();
     List idDbAttributes = updateBatch.getIdDbAttributes();
     List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
     StringBuffer query = new StringBuffer("UPDATE ");

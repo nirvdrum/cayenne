@@ -66,60 +66,58 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- *
+ * Batched delete query.
+ * 
  * @author Andriy Shapochka
  */
-
 public class DeleteBatchQuery extends BatchQuery {
-  private List dataObjectIds;
-  private List dbAttributes;
-  private Iterator idIterator = IteratorUtils.EMPTY_ITERATOR;
-  private Map currentId = Collections.EMPTY_MAP;
+    private List dataObjectIds;
+    private List dbAttributes;
+    private Iterator idIterator = IteratorUtils.EMPTY_ITERATOR;
+    private Map currentId = Collections.EMPTY_MAP;
 
-  public DeleteBatchQuery(DbEntity objectEntity, int batchCapacity) {
-    super(objectEntity);
-    dataObjectIds = new ArrayList(batchCapacity);
-    prepareMetadata();
-  }
+    public DeleteBatchQuery(DbEntity objectEntity, int batchCapacity) {
+        super(objectEntity);
+        dataObjectIds = new ArrayList(batchCapacity);
+        prepareMetadata();
+    }
 
-  public void reset() {
-    idIterator = dataObjectIds.iterator();
-    currentId = Collections.EMPTY_MAP;
-  }
+    public void reset() {
+        idIterator = dataObjectIds.iterator();
+        currentId = Collections.EMPTY_MAP;
+    }
 
-  public boolean next() {
-    if (!idIterator.hasNext()) return false;
-    currentId = (Map)idIterator.next();
-    currentId = (currentId != null ? currentId : Collections.EMPTY_MAP);
-    return true;
-  }
+    public boolean next() {
+        if (!idIterator.hasNext())
+            return false;
+        currentId = (Map) idIterator.next();
+        currentId = (currentId != null ? currentId : Collections.EMPTY_MAP);
+        return true;
+    }
 
-  public Object getObject(int dbAttributeIndex) {
-    DbAttribute attribute = (DbAttribute)dbAttributes.get(dbAttributeIndex);
-    return currentId.get(attribute.getName());
-  }
+    public Object getObject(int dbAttributeIndex) {
+        DbAttribute attribute =
+            (DbAttribute) dbAttributes.get(dbAttributeIndex);
+        return currentId.get(attribute.getName());
+    }
 
-  public void add(Map dataObjectId) {
-    dataObjectIds.add(dataObjectId);
-  }
+    public void add(Map dataObjectId) {
+        dataObjectIds.add(dataObjectId);
+    }
 
-  public int size() {
-    return dataObjectIds.size();
-  }
+    public int size() {
+        return dataObjectIds.size();
+    }
 
-  public boolean isEmpty() {
-    return dataObjectIds.isEmpty();
-  }
+    public List getDbAttributes() {
+        return Collections.unmodifiableList(dbAttributes);
+    }
 
-  public List getDbAttributes() {
-    return Collections.unmodifiableList(dbAttributes);
-  }
+    private void prepareMetadata() {
+        dbAttributes = getDbEntity().getPrimaryKey();
+    }
 
-  private void prepareMetadata() {
-    dbAttributes = metadata.getPrimaryKey();
-  }
-
-  public int getQueryType() {
-    return Query.DELETE_BATCH_QUERY;
-  }
+    public int getQueryType() {
+        return Query.DELETE_BATCH_QUERY;
+    }
 }

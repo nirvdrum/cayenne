@@ -66,60 +66,60 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- *
+ * Batched INSERT query.
+ * 
  * @author Andriy Shapochka
  */
 
 public class InsertBatchQuery extends BatchQuery {
-  private List dataObjectSnapshots;
-  private List dbAttributes;
-  private Iterator snapshotIterator = IteratorUtils.EMPTY_ITERATOR;
-  private Map currentSnapshot = Collections.EMPTY_MAP;
+    private List dataObjectSnapshots;
+    private List dbAttributes;
+    private Iterator snapshotIterator = IteratorUtils.EMPTY_ITERATOR;
+    private Map currentSnapshot = Collections.EMPTY_MAP;
 
-  public InsertBatchQuery(DbEntity objectEntity, int batchCapacity) {
-    super(objectEntity);
-    dataObjectSnapshots = new ArrayList(batchCapacity);
-    prepareMetadata();
-  }
+    public InsertBatchQuery(DbEntity objectEntity, int batchCapacity) {
+        super(objectEntity);
+        dataObjectSnapshots = new ArrayList(batchCapacity);
+        prepareMetadata();
+    }
 
-  public void reset() {
-    snapshotIterator = dataObjectSnapshots.iterator();
-    currentSnapshot = Collections.EMPTY_MAP;
-  }
+    public void reset() {
+        snapshotIterator = dataObjectSnapshots.iterator();
+        currentSnapshot = Collections.EMPTY_MAP;
+    }
 
-  public boolean next() {
-    if (!snapshotIterator.hasNext()) return false;
-    currentSnapshot = (Map)snapshotIterator.next();
-    currentSnapshot = (currentSnapshot != null ? currentSnapshot : Collections.EMPTY_MAP);
-    return true;
-  }
+    public boolean next() {
+        if (!snapshotIterator.hasNext())
+            return false;
+        currentSnapshot = (Map) snapshotIterator.next();
+        currentSnapshot =
+            (currentSnapshot != null ? currentSnapshot : Collections.EMPTY_MAP);
+        return true;
+    }
 
-  public Object getObject(int dbAttributeIndex) {
-    DbAttribute attribute = (DbAttribute)dbAttributes.get(dbAttributeIndex);
-    return currentSnapshot.get(attribute.getName());
-  }
+    public Object getObject(int dbAttributeIndex) {
+        DbAttribute attribute =
+            (DbAttribute) dbAttributes.get(dbAttributeIndex);
+        return currentSnapshot.get(attribute.getName());
+    }
 
-  public void add(Map dataObjectSnapshot) {
-    dataObjectSnapshots.add(dataObjectSnapshot);
-  }
+    public void add(Map dataObjectSnapshot) {
+        dataObjectSnapshots.add(dataObjectSnapshot);
+    }
 
-  public int size() {
-    return dataObjectSnapshots.size();
-  }
+    public int size() {
+        return dataObjectSnapshots.size();
+    }
 
-  public boolean isEmpty() {
-    return dataObjectSnapshots.isEmpty();
-  }
+    public List getDbAttributes() {
+        return Collections.unmodifiableList(dbAttributes);
+    }
 
-  public List getDbAttributes() {
-    return Collections.unmodifiableList(dbAttributes);
-  }
+    private void prepareMetadata() {
+        dbAttributes = getDbEntity().getAttributeList();
+    }
 
-  private void prepareMetadata() {
-    dbAttributes = metadata.getAttributeList();
-  }
-
-  public int getQueryType() {
-    return Query.INSERT_BATCH_QUERY;
-  }
+    public int getQueryType() {
+        return Query.INSERT_BATCH_QUERY;
+    }
 }

@@ -74,7 +74,7 @@ public class InsertBatchQueryBuilder extends BatchQueryBuilder {
     }
 
     public String query(BatchQuery batch) {
-        String table = batch.getMetadata().getFullyQualifiedName();
+        String table = batch.getDbEntity().getFullyQualifiedName();
         List dbAttributes = batch.getDbAttributes();
         StringBuffer query = new StringBuffer("INSERT INTO ");
         query.append(table).append(" (");
