@@ -12,10 +12,11 @@
 <body>
      <section name="13. Deployment">
 		<subsection name="13.3 Customizing Configuration" anchor="custom">
-			<p>A user can create her own subclass of Configuration and use it instead. 
-			Custom subclasses are usually created to load configuration files from 
-			non-standard locations, to automatically configure Cayenne during 
-			certain events that happen in deployment containers, etc.
+			<p>A user can create her own subclass of Configuration and use it
+			instead of the classes provided by Cayenne. Custom subclasses are
+			usually created to load configuration files from non-standard locations,
+			to automatically configure Cayenne during  certain events that happen
+			in deployment containers, etc.
 			Cayenne provides a few implementations of Configuration discussed later
 			in this chapter.
 			</p>
