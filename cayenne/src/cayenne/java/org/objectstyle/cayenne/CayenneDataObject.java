@@ -236,7 +236,7 @@ public class CayenneDataObject implements DataObject, XMLSerializable {
         if (getPersistenceState() == PersistenceState.HOLLOW && dataContext != null) {
             dataContext.getObjectStore().resolveHollow(this);
             if (getPersistenceState() != PersistenceState.COMMITTED) {
-                throw new CayenneRuntimeException(
+                throw new FaultFailureException(
                         "Error resolving fault, no matching row exists in the database for ObjectId: "
                                 + getObjectId());
             }
