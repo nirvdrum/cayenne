@@ -52,19 +52,29 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.map.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the DataMap */
-public interface DataMapListener extends EventListener
-{
-	/** DataMap property (usually - name) changed. */
-	public void dataMapChanged(DataMapEvent e);
-	/** New data map has been created/added.*/
-	public void dataMapAdded(DataMapEvent e);
-	/** DataMap has been removed.*/
-	public void dataMapRemoved(DataMapEvent e);
-	
+/**
+ * An interface for a listener interested in DataMap changes.
+ */
+public interface DataMapListener extends EventListener {
+
+    /**
+     * Called on DataMap property changes. 
+     */
+    public void dataMapChanged(DataMapEvent e);
+
+    /** 
+     * Called when a new DataMap is added.
+     */
+    public void dataMapAdded(DataMapEvent e);
+
+    /** 
+     * Called when a DataMap is removed.
+     */
+    public void dataMapRemoved(DataMapEvent e);
+
 }

@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.map.event;
 import org.objectstyle.cayenne.map.DataMap;
 
 /** 
- * Represents events resulted from DataMap changes 
- * in CayenneModeler.
+ * An events describing a DataMap change.
  */
 public class DataMapEvent extends MapEvent {
 	protected DataMap dataMap;

@@ -60,9 +60,6 @@ import org.objectstyle.cayenne.access.DataNode;
 /** 
  * Represents events resulted from DataNode changes 
  * in CayenneModeler.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
  */
 public class DataNodeEvent extends MapEvent {
 	protected DataNode dataNode;
