@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -169,6 +170,13 @@ public class DataPort {
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             DbEntity entity = (DbEntity) it.next();
+
+            // skip derived DbEntities. Should we consult delegate ?
+            // Using derived entities may allow things like materialized views....
+            if (entity instanceof DerivedDbEntity) {
+                continue;
+            }
+
             DeleteQuery query = new DeleteQuery();
 
             // using DbEntity as a query root is unusual but will still work with Cayenne
@@ -222,6 +230,12 @@ public class DataPort {
             insertObserver.clear();
 
             DbEntity entity = (DbEntity) it.next();
+
+            // skip derived DbEntities. Should we consult delegate ?
+            // Using derived entities may allow things like materialized views....
+            if (entity instanceof DerivedDbEntity) {
+                continue;
+            }
 
             SelectQuery select = new SelectQuery();
             select.setRoot(entity);
