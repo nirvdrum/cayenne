@@ -119,13 +119,6 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
             return "test.test.Test";
         }
 
-        /**
-         * @deprecated Since 1.0 Beta1
-         */
-        public Object toJdbcObject(Object val, int type) throws Exception {
-            return new Object();
-        }
-
         public Object materializeObject(ResultSet rs, int index, int type)
             throws Exception {
             Object val = rs.getObject(index);

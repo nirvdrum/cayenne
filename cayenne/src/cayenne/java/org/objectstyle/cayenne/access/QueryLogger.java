@@ -194,13 +194,6 @@ public class QueryLogger {
             logObj.log(logLevel, buf.toString());
         }
     }
-
-    /**
-     * @deprecated Since 1.0 Beta 1, use logPoolCreated
-     */
-    public static void logConnect(Level logLevel, DataSourceInfo dsi) {
-        logPoolCreated(logLevel, dsi);
-    }
     
     /**
      * Logs database connection event.

@@ -346,6 +346,7 @@ public class BatchQueryUtils {
                 (newValue != null && !newValue.equals(oldValue)));
     }
 
+/*
     private static String getSrcDbAttributeName(
             String targetDbAttributeName,
             DbRelationship masterDependentRel) {
@@ -356,6 +357,7 @@ public class BatchQueryUtils {
         }
         return null;
     }
+*/
 
     private static String getTargetDbAttributeName(
             String srcDbAttributeName,

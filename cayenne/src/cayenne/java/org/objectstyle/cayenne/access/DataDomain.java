@@ -207,31 +207,10 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Returns a list of registered DataMap objects.
-     * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
-     */
-    public List getDataMapsAsList() {
-        synchronized (maps) {
-            return new ArrayList(this.getDataMaps());
-        }
-    }
-
-    /**
      * Returns a collection of registered DataMaps.
      */
     public Collection getDataMaps() {
         return mapsRef.values();
-    }
-
-    /**
-     * Returns a list of DataNodes associated with this domain.
-     * List is returned by copy.
-     * @deprecated Since 1.0 Beta1; use #getDataNodes() instead.
-     */
-    public List getDataNodesAsList() {
-        synchronized (nodes) {
-            return new ArrayList(this.getDataNodes());
-        }
     }
 
     /**

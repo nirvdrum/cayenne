@@ -128,15 +128,6 @@ public class DataMap {
     private Collection procedureValuesRef =
         Collections.unmodifiableCollection(procedureMap.values());
 
-    /**
-     * Sorts an array of DataMaps in the right save order to satisfy
-     * inter-map dependencies.
-     * @deprecated Since 1.0 Beta1; use Collections.sort(List, Comparator) instead.
-     */
-    public static void sortMaps(List maps) {
-        Collections.sort(maps, new MapComparator());
-    }
-
     /** Creates an empty DataMap */
     public DataMap() {
         this("unnamed");
@@ -313,23 +304,6 @@ public class DataMap {
 
     /**
      * Returns a list of ObjEntities stored in this DataMap.
-     * @deprecated Since 1.0 Beta1; use #getObjEntities() instead.
-     */
-    public List getObjEntitiesAsList() {
-        return this.getObjEntitiesAsList(false);
-    }
-
-    /**
-     * Returns all ObjEntities in this DataMap, including entities
-     * from dependent maps if <code>includeDeps</code> is <code>true</code>.
-     * @deprecated Since 1.0 Beta1; use #getObjEntities(boolean) instead.
-     */
-    public List getObjEntitiesAsList(boolean includeDeps) {
-        return new ArrayList(this.getObjEntities(includeDeps));
-    }
-
-    /**
-     * Returns a list of ObjEntities stored in this DataMap.
      */
     public Collection getObjEntities() {
         return this.getObjEntities(false);
@@ -353,23 +327,6 @@ public class DataMap {
             }
             return allObjEnts;
         }
-    }
-
-    /**
-     * Returns all DbEntities in this DataMap.
-     * @deprecated Since 1.0 Beta1; use #getDbEntities() instead.
-     */
-    public List getDbEntitiesAsList() {
-        return this.getDbEntitiesAsList(false);
-    }
-
-    /**
-     * Returns all DbEntities in this DataMap, including entities
-     * from dependent maps if <code>includeDeps</code> is <code>true</code>.
-     * @deprecated Since 1.0 Beta1; use #getDbEntities(boolean) instead.
-     */
-    public List getDbEntitiesAsList(boolean includeDeps) {
-        return new ArrayList(this.getDbEntities(includeDeps));
     }
 
     /**

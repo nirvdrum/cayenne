@@ -60,8 +60,6 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneException;
 
-
-
 /**
  * Defines API of an iterator over the records returned as a result
  * of SelectQuery execution. Usually a ResultIterator is supported by
@@ -75,12 +73,6 @@ import org.objectstyle.cayenne.CayenneException;
  * @author Andrei Adamchik
  */
 public interface ResultIterator {
-    /**
-     * Returns all unread data rows from ResultSet and closes this iterator.
-     * 
-     * @deprecated Since 1.0 Beta1, use dataRows(boolean).
-     */
-    public List dataRows() throws CayenneException;
     
     /**
      * Returns all unread data rows from ResultSet and closes this iterator

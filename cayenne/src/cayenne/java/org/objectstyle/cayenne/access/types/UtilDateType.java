@@ -72,13 +72,6 @@ public class UtilDateType extends AbstractType {
         return java.util.Date.class.getName();
     }
 
-    /**
-     * @deprecated Since 1.0 Beta1 'setJdbcObject' is used instead.
-     */
-    public Object toJdbcObject(Object val, int type) throws Exception {
-        return convertToJdbcObject(val, type);
-    }
-
     protected Object convertToJdbcObject(Object val, int type)
         throws Exception {
         if (type == Types.DATE)

@@ -60,7 +60,6 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
 import org.objectstyle.cayenne.access.trans.FlattenedRelationshipDeleteTranslator;
@@ -68,7 +67,6 @@ import org.objectstyle.cayenne.access.trans.FlattenedRelationshipInsertTranslato
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
@@ -354,26 +352,8 @@ public class JdbcAdapter implements DbAdapter {
         return typesHandler.externalTypesForJdbcType(type);
     }
 
-    /**
-     * Returns null.
-     * 
-     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
-     * sorting. It is no longer adapter dependent.
-     */
-    public OperationSorter getOpSorter(DataNode node) {
-        return null;
-    }
-
     public ExtendedTypeMap getExtendedTypes() {
         return extendedTypes;
-    }
-
-    /**
-     * @deprecated Since 1.0 Beta 1, QualifierTranslator is created directly by
-     * DbAdapter via 'getQualifierTranslator'.
-     */
-    public QualifierTranslatorFactory getQualifierFactory() {
-        return new QualifierTranslatorFactory();
     }
 
     public DbAttribute buildAttribute(
@@ -408,14 +388,6 @@ public class JdbcAdapter implements DbAdapter {
         return "VIEW";
     }
 
-
-    /**
-      * @deprecated Since 1.0Beta1 'getExtendedTypes' is used since this method
-      * name is confusing.
-      */
-    public ExtendedTypeMap getTypeConverter() {
-        return getExtendedTypes();
-    }
 
     /**
      * Creates and returns a default implementation of a qualifier translator.

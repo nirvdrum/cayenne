@@ -152,14 +152,6 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Returns a list of DataMaps handled by this DataNode.
-     * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
-     */
-    public List getDataMapsAsList() {
-        return entityResolver.getDataMapsList();
-    }
-
-    /**
      * Returns an unmodifiable collection of DataMaps handled by this DataNode.
      */
     public Collection getDataMaps() {

@@ -57,10 +57,8 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -111,13 +109,6 @@ public abstract class Configuration {
 	protected ConfigStatus loadStatus = new ConfigStatus();
 	protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
 	protected boolean ignoringLoadFailures = false;
-
-	/** 
-	 * @deprecated Since 1.0 Beta1; use {@link #bootstrapSharedConfiguration(Class)} instead.
-	 */
-	public static void bootstrapSharedConfig(Class cl) {
-		Configuration.bootstrapSharedConfiguration(cl);
-	}
 
 	/** 
 	 * Sets <code>cl</code> class's ClassLoader to serve
@@ -184,13 +175,6 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @deprecated Since 1.0 Beta1; use {@link #getSharedConfiguration} instead.
-	 */
-	public synchronized static Configuration getSharedConfig() {
-		return Configuration.getSharedConfiguration();
-	}
-
-	/**
 	 * Use this method as an entry point to all Cayenne access objects.
 	 * <p>Note that if you want to provide a custom Configuration,
 	 * make sure you call one of the {@link #initializeSharedConfiguration} methods
@@ -227,25 +211,6 @@ public abstract class Configuration {
     public static void setLoggingLevel(Level logLevel) {
 		logObj.setLevel(logLevel);
     }
-
-	/**
-	 * @deprecated Since 1.0 Beta1; use {@link #initializeSharedConfiguration(Class)} instead.
-	 */
-	public static void initSharedConfig(String configClass) {
-		try {
-			Configuration.initializeSharedConfiguration(Class.forName(configClass));
-		} catch (Exception ex) {
-			logObj.error("Error initializing shared Configuration" + ex.getMessage(), ex);
-			throw new ConfigurationException("Error initializing shared Configuration");
-		}
-	}
-
-	/**
-	 * @deprecated Since 1.0 Beta1; use {@link #initializeSharedConfiguration(Configuration)} instead.
-	 */
-	public static void initSharedConfig(Configuration conf) {
-		Configuration.initializeSharedConfiguration(conf);
-	}
 
 	/**
 	 * Creates and initializes shared Configuration object.
@@ -302,13 +267,6 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @deprecated Since 1.0 Beta1; use {@link #initializeSharedConfiguration(Configuration)} instead.
-	 */
-	public static void setSharedConfiguration(Configuration conf) {
-		Configuration.initializeSharedConfiguration(conf);
-	}
-
-	/**
 	 * Default constructor for new Configuration instances.
 	 * Simply calls {@link Configuration#Configuration(String)}.
 	 * @see Configuration#Configuration(String)
@@ -332,7 +290,6 @@ public abstract class Configuration {
 		// set domain configuration name
 		this.setDomainConfigurationName(domainConfigurationName);
 	}
-
 
 	/**
 	 * Indicates whether {@link #initialize} can be called.
@@ -454,14 +411,6 @@ public abstract class Configuration {
         this.dataDomains.remove(name);
 		logObj.debug("removed domain: " + name);
     }
-
-	/**
-	 * Returns a list of registered DataDomain objects.
-	 * @deprecated Since 1.0 beta1; use {@link #getDomains()} instead.
-	 */
-	public List getDomainList() {
-		return new ArrayList(this.getDomains());
-	}
 
 	/**
 	 * Returns an unmodifiable collection of registered {@link DataDomain} objects.

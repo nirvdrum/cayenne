@@ -571,14 +571,6 @@ public class DbLoader {
         }
     }
 
-    /**
-     * @deprecated Since 1.0 Beta1 use <code>createDataMapFromDB</code> with table
-     * name pattern parameter.
-     */
-    public DataMap createDataMapFromDB(String schemaName) throws SQLException {
-        return createDataMapFromDB(schemaName, WILDCARD);
-    }
-
     /** 
      * Performs database reverse engineering and generates DataMap
      * that contains default mapping of the tables and views. 
@@ -609,15 +601,6 @@ public class DbLoader {
         return createDataMapFromDB(schemaName, tablePattern, types);
     }
 
-    /**
-     * @deprecated Since 1.0 Beta1 use <code>createDataMapFromDB</code> versions that takes table
-     * name pattern.
-     */
-    public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
-        throws SQLException {
-        return createDataMapFromDB(schemaName, WILDCARD, tableTypes);
-    }
-
     /** 
      * Performs database reverse engineering and generates DataMap object
      * that contains default mapping of the tables and views. 
@@ -633,18 +616,6 @@ public class DbLoader {
                 DataMap.class,
                 new DataDomain());
         return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
-    }
-
-    /**
-     * @deprecated Since 1.0 Beta1 use <code>loadDataMapFromDB</code> versions
-     * that takes table name pattern.
-     */
-    public DataMap loadDataMapFromDB(
-        String schemaName,
-        String[] tableTypes,
-        DataMap dataMap)
-        throws SQLException {
-        return loadDataMapFromDB(schemaName, WILDCARD, tableTypes, dataMap);
     }
 
     /** 

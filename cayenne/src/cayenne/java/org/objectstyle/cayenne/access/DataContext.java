@@ -1170,13 +1170,6 @@ public class DataContext implements QueryEngine, Serializable {
 		return this.postDataContextTransactionEvents;
 	}
 
-	/**
-	 * @deprecated Since 1.0 Beta 1; use getDataMaps instead.
-	 */
-	public List getDataMapsAsList() {
-		return new ArrayList(this.getDataMaps());
-	}
-
 	public Collection getDataMaps() {
 		return (parent != null) ? parent.getDataMaps() : Collections.EMPTY_LIST;
 	}

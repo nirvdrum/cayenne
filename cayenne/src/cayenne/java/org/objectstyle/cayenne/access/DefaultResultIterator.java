@@ -206,16 +206,6 @@ public class DefaultResultIterator implements ResultIterator {
     }
 
     /**
-     * Returns all unread data rows from ResultSet and closes
-     * this iterator.
-     * 
-     * @deprecated Since 1.0 Beta1, use dataRows(boolean).
-     */
-    public List dataRows() throws CayenneException {
-        return dataRows(true);
-    }
-
-    /**
      * Returns all unread data rows from ResultSet, closing
      * this iterator if needed.
      */

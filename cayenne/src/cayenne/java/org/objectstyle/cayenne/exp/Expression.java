@@ -220,24 +220,10 @@ public abstract class Expression implements Serializable {
     }
 
     /**
-     * @deprecated Since 1.0 Beta 1, use 'expWithParameters'
-     */
-    public Expression expWithParams(Map parameters) {
-        return expWithParameters(parameters, true);
-    }
-
-    /**
      * A shortcut for <code>expWithParams(params, true)</code>.
      */
     public Expression expWithParameters(Map parameters) {
         return expWithParameters(parameters, true);
-    }
-
-    /**
-     * @deprecated Since 1.0 Beta 1, use 'expWithParameters'
-     */
-    public Expression expWithParams(Map parameters, boolean pruneMissing) {
-        return expWithParameters(parameters, pruneMissing);
     }
 
     /**

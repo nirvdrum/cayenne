@@ -71,13 +71,6 @@ public interface ExtendedType {
      */
     public String getClassName();
 
-    /** 
-     * @deprecated Since 1.0 Beta1 'setJdbcObject' is used instead.
-     * @throws Exception if an object is of incorrect type, or if JDBC type is
-     * incompatible with object. 
-     */
-    public Object toJdbcObject(Object val, int type) throws Exception;
-
     /**
      * Initializes a single parameter of a PreparedStatement with object value. 
      */

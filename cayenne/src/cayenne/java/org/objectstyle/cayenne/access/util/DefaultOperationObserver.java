@@ -65,7 +65,6 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.query.Query;
@@ -216,16 +215,6 @@ public class DefaultOperationObserver implements OperationObserver {
      *  transactions. */
     public boolean useAutoCommit() {
         return true;
-    }
-
-    /**
-     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
-     * sorting. In the future we may implement other types of delegate methods
-     * to notify of the query processing start. This method is no longer called
-     * by the DataNode.
-     */
-    public List orderQueries(DataNode aNode, List queryList) {
-        return queryList;
     }
 
     /**

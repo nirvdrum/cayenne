@@ -188,14 +188,6 @@ public class ObjRelationship extends Relationship implements EventListener {
 
 	/**
 	 * Returns a list of underlying DbRelationships.
-	 * @deprecated Since 1.0 Beta1; use #getDbRelationships() instead.
-	 */
-	public List getDbRelationshipList() {
-		return this.getDbRelationships();
-	}
-
-	/**
-	 * Returns a list of underlying DbRelationships.
 	 */
 	public List getDbRelationships() {
 		return dbRelationshipsRef;

@@ -59,11 +59,8 @@ package org.objectstyle.cayenne.conf;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-
-import org.objectstyle.cayenne.access.DataContext;
 
 /**
  * WebApplicationListener utilizes Servlet specification 2.3 features to react on 
@@ -85,8 +82,8 @@ import org.objectstyle.cayenne.access.DataContext;
   * <p>Note that to set WebApplicationListener as a listener of web application events, 
   *  you must use servlet containers 
   * compatible with Servlet Specification 2.3 (such as Tomcat 4.0). Listeners were only added 
-  * to servlet specification in 2.3. If you are using an older container. You will need
-  * to configure Cayenne in you code.</p>
+  * to servlet specification in 2.3. If you are using an older container, you will need
+  * to configure Cayenne in your code.</p>
   *
   * @author Andrei Adamchik
   */
@@ -96,13 +93,6 @@ public class WebApplicationListener
 	public WebApplicationListener() {
 	}
 
-    /**
-     * @deprecated Since 1.0Beta1 use BasicServletConfiguration.getDefaultContext(HttpSession)
-     */
-	public static DataContext getDefaultContext(HttpSession session) {
-		return BasicServletConfiguration.getDefaultContext(session);
-	}
-	
 	/** Establishes a Cayenne shared Configuration object that can later be obtained by calling 
 	  * <code>Configuration.getSharedConfiguration()</code>.
 	  * This method is a part of ServletContextListener interface and is called

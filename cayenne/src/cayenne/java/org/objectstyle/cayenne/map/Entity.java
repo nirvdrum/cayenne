@@ -55,11 +55,9 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -205,14 +203,6 @@ public abstract class Entity extends MapObject {
     }
 
 	/**
-	 * Returns a list of Relationships that exist in this entity.
-	 * @deprecated Since 1.0 Beta1; use #getRelationships() instead.
-	 */
-	public List getRelationshipList() {
-		return new ArrayList(this.getRelationships());
-	}
-
-	/**
 	 * Returns a collection of Relationships that exist in this entity.
 	 */
 	public Collection getRelationships() {
@@ -225,14 +215,6 @@ public abstract class Entity extends MapObject {
     public Map getAttributeMap() {
     	return attributesMapRef;
     }
-
-	/**
-	 * Returns entity attributes as a list.
-	 * @deprecated Since 1.0 Beta1; use #getAttributes() instead.
-	 */
-	public List getAttributeList() {
-		return new ArrayList(this.getAttributes());
-	}
 
 	/**
 	 * Returns entity attributes.

@@ -148,14 +148,6 @@ public class EntityResolver {
     }
 
     /**
-     * Returns a list of internal DataMaps by copy.
-     * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
-     */
-    public List getDataMapsList() {
-        return new ArrayList(maps);
-    }
-
-    /**
      * Returns an unmodifiable collection of DataMaps.
      */
     public Collection getDataMaps() {

@@ -57,10 +57,8 @@
 package org.objectstyle.cayenne.dba;
 
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -138,27 +136,10 @@ public interface DbAdapter {
     public String[] externalTypesForJdbcType(int type);
 
     /**
-     * @deprecated Since 1.0 Beta1 'getExtendedTypes' is used since this method
-     * name is confusing.
-     */
-    public ExtendedTypeMap getTypeConverter();
-
-    /**
      * Returns a map of ExtendedTypes that is used to translate values between
      * Java and JDBC layer.
      */
     public ExtendedTypeMap getExtendedTypes();
-
-    /**
-     * Returns an operation sorter or null if no sorting
-     * is required. Operation sorter is needed for databases
-     * (like Sybase) that do not have deferred constraint checking
-     * and need appropriate operation ordering within transactions.
-     * 
-     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
-     * sorting. It is no longer adapter dependent.
-     */
-    public OperationSorter getOpSorter(DataNode node);
 
     /**
      * Returns primary key generator associated with this DbAdapter.
@@ -175,12 +156,6 @@ public interface DbAdapter {
      * </p>
      */
     public QueryTranslator getQueryTranslator(Query query) throws Exception;
-
-    /**
-     * @deprecated Since 1.0 Beta 1, QualifierTranslator is created directly by
-     * DbAdapter via 'getQualifierTranslator'.
-     */
-    public QualifierTranslatorFactory getQualifierFactory();
 
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler);
 

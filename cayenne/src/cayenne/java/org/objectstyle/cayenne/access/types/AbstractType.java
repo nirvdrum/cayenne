@@ -64,13 +64,6 @@ import java.sql.PreparedStatement;
  */
 public abstract class AbstractType implements ExtendedType {
 	
-	/**
-	 * @deprecated Since 1.0 Beta1 'setJdbcObject' is used instead.
-	 */
-    public Object toJdbcObject(Object val, int type) throws Exception {
-        return val;
-    }
-
     public void setJdbcObject(
         PreparedStatement st,
         Object val,

@@ -334,16 +334,6 @@ public abstract class QueryAssemblerHelper {
         return null;
     }
 
-    /** 
-     *  @deprecated Since 1.0Beta1 this method is no longer used.
-     */
-    protected void processRelParts(ObjRelationship rel) {
-        Iterator it = rel.getDbRelationships().iterator();
-        while (it.hasNext()) {
-            queryAssembler.dbRelationshipAdded((DbRelationship) it.next());
-        }
-    }
-
     /** Processes case when an OBJ_PATH expression ends with relationship.
       * If this is a "to many" relationship, a join is added and a column
       * expression for the target entity primary key. If this is a "to one"
