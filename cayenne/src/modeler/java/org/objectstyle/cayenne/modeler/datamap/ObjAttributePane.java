@@ -192,7 +192,7 @@ public class ObjAttributePane
 		col = table.getColumnModel().getColumn(model.OBJ_ATTRIBUTE_TYPE);
 		col.setMinWidth(150);
 
-		JComboBox combo = new JComboBox(Util.getRegisteredTypeNames());
+		JComboBox combo = new JComboBox(ModelerUtil.getRegisteredTypeNames());
 		combo.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(combo));
 
@@ -202,7 +202,7 @@ public class ObjAttributePane
 			col.setMinWidth(150);
 			combo =
 				new JComboBox(
-					Util.getDbAttributeNames(
+					ModelerUtil.getDbAttributeNames(
 						mediator,
 						mediator.getCurrentObjEntity().getDbEntity()));
 			combo.setEditable(false);

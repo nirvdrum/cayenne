@@ -52,66 +52,15 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-package org.objectstyle.cayenne.modeler.util;
+ */
+package org.objectstyle.cayenne.modeler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-
-import org.objectstyle.cayenne.access.types.DefaultType;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.modeler.event.Mediator;
-
-
-public class Util {
-	
-	/** 
-	 * Returns array of db attribute names for DbEntity mapped to 
-	 * current ObjEntity. 
-	 */
-	public static String[] getDbAttributeNames(Mediator mediator, DbEntity entity) {
-		java.util.List list = entity.getAttributeList();
-		int list_size = list.size() + 1;
-		String[] arr = new String[list_size];
-		arr[0] = "";
-		for (int i = 1; i < list_size; i++) {
-			DbAttribute attribute = (DbAttribute)list.get(i-1);
-			arr[i] = attribute.getName();
-		}
-		
-		Arrays.sort(arr);
-		return arr;
-	}
-	
-	public static String[] getRegisteredTypeNames()
-	{
-	    Iterator it = DefaultType.defaultTypes();
-	    ArrayList list = new ArrayList();
-	    while(it.hasNext()) {
-	        list.add(it.next());
-	    }
-	    
-	    // can't use this anymore, ExtendedTypes are no longer a singleton
-		// String [] arr = ExtendedTypeMap.sharedInstance().getRegisteredTypeNames();
-		
-		String[] ret_arr = new String[list.size() + 1];
-		ret_arr[0] = "";
-		for (int i = 0; i < list.size(); i++) ret_arr[i+1] = (String)list.get(i);
-		return ret_arr;
-	}
-
-	public static String[] getDatabaseTypes()
-	{
-		// FIXME!!! Need to have a reference TypesMapping instance
-		//String [] arr;
-		//arr = TypesMapping.getDatabaseTypes();
-		//String[] ret_arr = new String[arr.length + 1];
-		String[] ret_arr = new String[1];
-		ret_arr[0] = "";
-		//for (int i = 0; i < arr.length; i++) ret_arr[i+1] = arr[i];
-		return ret_arr;
-	}
+/**
+ * Defines constants used in the modeler.
+ * 
+ * @author Andrei Adamchik
+ */
+public interface ModelerConstants {
+    public static final String TITLE = "CayenneModeler";
 
 }

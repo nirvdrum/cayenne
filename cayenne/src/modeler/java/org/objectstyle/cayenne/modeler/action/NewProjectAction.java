@@ -89,6 +89,7 @@ public class NewProjectAction extends ProjectAction {
     public void performAction(ActionEvent e) {
         newProject();
     }
+    
     protected void newProject() {
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         String startDir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);

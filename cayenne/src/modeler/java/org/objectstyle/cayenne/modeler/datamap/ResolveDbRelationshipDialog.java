@@ -210,14 +210,14 @@ public class ResolveDbRelationshipDialog
 		TableColumn col = table.getColumnModel().getColumn(0);
 		col.setMinWidth(150);
 		JComboBox comboBox =
-			new JComboBox(Util.getDbAttributeNames(getMediator(), start));
+			new JComboBox(ModelerUtil.getDbAttributeNames(getMediator(), start));
 		comboBox.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 		col = table.getColumnModel().getColumn(1);
 		col.setMinWidth(150);
 		col = table.getColumnModel().getColumn(2);
 		col.setMinWidth(150);
-		comboBox = new JComboBox(Util.getDbAttributeNames(getMediator(), end));
+		comboBox = new JComboBox(ModelerUtil.getDbAttributeNames(getMediator(), end));
 		comboBox.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 		col = table.getColumnModel().getColumn(3);

@@ -53,69 +53,28 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.modeler.view;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.util.Iterator;
+import javax.swing.JFileChooser;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataMapProjectTst extends CayenneTestCase {
-    protected DataMapProject p;
-    protected File f;
+public class ProjectFileChooser extends JFileChooser {
 
     /**
-     * Constructor for DataMapProjectTst.
-     * @param name
+     * Constructor for FileChooser.
      */
-    public DataMapProjectTst(String name) {
-        super(name);
+    public ProjectFileChooser() {
+        super();
     }
 
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        f = new File(getTestDir(), "Untitled.map.xml");
-        if (f.exists()) {
-            if (!f.delete()) {
-                throw new RuntimeException("Can't delete file: " + f);
-            }
-        }
-
-        // copy shared datamap to the test location
-        DataMap m = getSharedNode().getDataMaps()[0];
-
-        PrintWriter out = new PrintWriter(new FileOutputStream(f));
-
-        try {
-            new MapLoader().storeDataMap(out, m);
-        } finally {
-            out.close();
-        }
-
-        p = new DataMapProject(f);
-    }
-
-    public void testConstructor() throws Exception {
-        assertEquals(f.getCanonicalFile(), p.getMainFile());
-        assertTrue(p.getRootNode() instanceof DataMap);
-    }
-
-    public void testTreeNodes() throws Exception {
-        Iterator treeNodes = p.treeNodes();
-        int len = 0;
-        while (treeNodes.hasNext()) {
-            len++;
-            treeNodes.next();
-        }
-
-        assertTrue(len > 1);
+    /**
+     * Builds a title that contains the name of the application.
+     */
+    public void setDialogTitle(String dialogTitle) {
+        super.setDialogTitle(ModelerUtil.buildTitle(dialogTitle));
     }
 }

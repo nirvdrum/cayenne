@@ -53,69 +53,73 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.modeler.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.types.DefaultType;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.modeler.ModelerConstants;
+import org.objectstyle.cayenne.modeler.event.Mediator;
 
-/**
- * @author Andrei Adamchik
- */
-public class DataMapProjectTst extends CayenneTestCase {
-    protected DataMapProject p;
-    protected File f;
+public class ModelerUtil {
 
     /**
-     * Constructor for DataMapProjectTst.
-     * @param name
+     * Builds a consistent title that starts with the application name.
      */
-    public DataMapProjectTst(String name) {
-        super(name);
+    public static String buildTitle(String title) {
+        return (title != null)
+            ? ModelerConstants.TITLE + " - " + title
+            : ModelerConstants.TITLE;
     }
 
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        f = new File(getTestDir(), "Untitled.map.xml");
-        if (f.exists()) {
-            if (!f.delete()) {
-                throw new RuntimeException("Can't delete file: " + f);
-            }
+    /** 
+     * Returns array of db attribute names for DbEntity mapped to 
+     * current ObjEntity. 
+     */
+    public static String[] getDbAttributeNames(Mediator mediator, DbEntity entity) {
+        java.util.List list = entity.getAttributeList();
+        int list_size = list.size() + 1;
+        String[] arr = new String[list_size];
+        arr[0] = "";
+        for (int i = 1; i < list_size; i++) {
+            DbAttribute attribute = (DbAttribute) list.get(i - 1);
+            arr[i] = attribute.getName();
         }
 
-        // copy shared datamap to the test location
-        DataMap m = getSharedNode().getDataMaps()[0];
+        Arrays.sort(arr);
+        return arr;
+    }
 
-        PrintWriter out = new PrintWriter(new FileOutputStream(f));
-
-        try {
-            new MapLoader().storeDataMap(out, m);
-        } finally {
-            out.close();
+    public static String[] getRegisteredTypeNames() {
+        Iterator it = DefaultType.defaultTypes();
+        ArrayList list = new ArrayList();
+        while (it.hasNext()) {
+            list.add(it.next());
         }
 
-        p = new DataMapProject(f);
+        // can't use this anymore, ExtendedTypes are no longer a singleton
+        // String [] arr = ExtendedTypeMap.sharedInstance().getRegisteredTypeNames();
+
+        String[] ret_arr = new String[list.size() + 1];
+        ret_arr[0] = "";
+        for (int i = 0; i < list.size(); i++)
+            ret_arr[i + 1] = (String) list.get(i);
+        return ret_arr;
     }
 
-    public void testConstructor() throws Exception {
-        assertEquals(f.getCanonicalFile(), p.getMainFile());
-        assertTrue(p.getRootNode() instanceof DataMap);
+    public static String[] getDatabaseTypes() {
+        // FIXME!!! Need to have a reference TypesMapping instance
+        //String [] arr;
+        //arr = TypesMapping.getDatabaseTypes();
+        //String[] ret_arr = new String[arr.length + 1];
+        String[] ret_arr = new String[1];
+        ret_arr[0] = "";
+        //for (int i = 0; i < arr.length; i++) ret_arr[i+1] = arr[i];
+        return ret_arr;
     }
 
-    public void testTreeNodes() throws Exception {
-        Iterator treeNodes = p.treeNodes();
-        int len = 0;
-        while (treeNodes.hasNext()) {
-            len++;
-            treeNodes.next();
-        }
-
-        assertTrue(len > 1);
-    }
 }

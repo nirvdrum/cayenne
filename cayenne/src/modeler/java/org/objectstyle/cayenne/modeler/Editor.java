@@ -125,6 +125,7 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.model.TopModel;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.modeler.util.XmlFilter;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
@@ -155,7 +156,6 @@ public class Editor
         DbRelationshipDisplayListener {
     static Logger logObj = Logger.getLogger(Editor.class.getName());
 
-    private static final String TITLE = "CayenneModeler";
 
     /** 
      * Label that indicates as a part of the title that
@@ -253,7 +253,7 @@ public class Editor
     }
 
     public Editor() {
-        super(TITLE);
+        super(ModelerConstants.TITLE);
 
         frame = this;
 
@@ -805,11 +805,7 @@ public class Editor
     }
 
     public void setProjectTitle(String projectPath) {
-        if (projectPath != null) {
-            this.setTitle(TITLE + " - " + projectPath);
-        } else {
-            this.setTitle(TITLE);
-        }
+    	setTitle(ModelerUtil.buildTitle(projectPath));
     }
 
     /**

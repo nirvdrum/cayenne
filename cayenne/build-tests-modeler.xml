@@ -7,6 +7,7 @@
 	<property name="test.build" value="build/tests-modeler"/>
 	<property name="test.output" value="${test.build}/out"/>
 	<property name="test.report" value="${test.build}/report"/>
+	<property name="test.filter" value="**/*Tst.class"/>
 	
 	<path id="classpath">
 	   	<fileset dir="otherlib">
@@ -41,6 +42,7 @@
     		
 			<sysproperty key="ant.home" value="${ant.home}"/>
 			<sysproperty key="dist" value="${dist}"/>
+			<sysproperty key="test.filter" value="${test.filter}"/>
 			<classpath refid="classpath"/>
     	</java>
     </target>    
@@ -69,7 +71,7 @@
             <formatter type="xml" usefile="true"/>
             <batchtest todir="${test.output}">
                 <fileset dir="${test.build}/classes">
-                    <include name="**/*Tst.class"/>
+                    <include name="${test.filter}"/>
                 </fileset>
             </batchtest>
         </junit>
