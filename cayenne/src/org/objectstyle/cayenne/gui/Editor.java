@@ -129,6 +129,7 @@ implements ActionListener
     JMenu  toolMenu   		= new JMenu("Tools");
     JMenuItem importDbMenu  = new JMenuItem("Reverse engineer database");
     JMenuItem generateMenu  = new JMenuItem("Generate Classes");
+    JMenuItem setPackageMenu= new JMenuItem("Set Package Name For Obj Entities");
 
     JMenu helpMenu				= new JMenu("Help");
     JMenuItem aboutMenu  		= new JMenuItem("About");
@@ -178,6 +179,7 @@ implements ActionListener
 
         importDbMenu.addActionListener(this);
         generateMenu.addActionListener(this);
+        setPackageMenu.addActionListener(this);
         aboutMenu.addActionListener(this);
 
 		createDomainBtn.addActionListener(this);
@@ -228,6 +230,8 @@ implements ActionListener
 
         toolMenu.add(importDbMenu);
         toolMenu.add(generateMenu);
+        toolMenu.addSeparator();
+        toolMenu.add(setPackageMenu);
 
         helpMenu.add(aboutMenu);
 
@@ -386,6 +390,9 @@ implements ActionListener
             saveAll();
         } else if (src == importDbMenu) {
             importDb();
+        } else if (src == setPackageMenu) {
+        	// Set the same package name for all obj entities.
+            setPackageName();
         } else if (src == generateMenu) {
             generateClasses();
         } else if (src == exitMenu) {
@@ -396,6 +403,38 @@ implements ActionListener
         	openProject(((JMenuItem)src).getText());
         }
     }
+
+	private void setPackageName()
+	{
+		DataMap map = mediator.getCurrentDataMap();
+		if (map == null) {
+			return;
+		}
+		String package_name;
+		package_name = JOptionPane.showInputDialog(this
+												, "Enter the new package name");
+		// Append period to the end of package name, if it is not there.
+		if (package_name.charAt(package_name.length() - 1) != '.')
+			package_name = package_name + ".";
+		// If user cancelled, just return
+		if (null == package_name)
+			return;
+		// Go through all obj entities in the current data map and
+		// set their package names.
+		ObjEntity [] entities = map.getObjEntities();
+		for (int i = 0; i < entities.length; i++) {
+			String name = entities[i].getClassName();			
+			int idx = name.lastIndexOf('.');
+			if (idx > 0) {
+				if (idx == name.length() -1)
+					name = NameGenerator.getObjEntityName();
+				else
+					name = name.substring(idx+1);
+			}
+			entities[i].setClassName(package_name + name);
+		}// End for()
+		mediator.fireDataMapEvent(new DataMapEvent(this, map));
+	}
 
 	private void remove()
 	{
@@ -1179,6 +1218,7 @@ implements ActionListener
 
         importDbMenu.setEnabled(false);
         generateMenu.setEnabled(false);
+		setPackageMenu.setEnabled(false);
 
         createDomainBtn.setEnabled(false);
         createDataMapBtn.setEnabled(false);
@@ -1206,6 +1246,7 @@ implements ActionListener
 
 	private void enableDataMapMenu() {
 		enableDomainMenu();
+		setPackageMenu.setEnabled(true);
         createObjEntityMenu.setEnabled(true);
         createDbEntityMenu.setEnabled(true);
         generateMenu.setEnabled(true);
