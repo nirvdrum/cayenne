@@ -54,24 +54,44 @@
  *
  */
 
+package org.objectstyle.cayenne.perform.test;
 
-package org.objectstyle.cayenne.perform;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
-import org.objectstyle.perform.PerformanceTest;
+import org.objectstyle.cayenne.perform.CayennePerformanceTest;
 
 /**
  * @author Andrei Adamchik
  */
-public class SimpleRefTest extends PerformanceTest {
+public class InsertRefTest extends CayennePerformanceTest {
 
 	/**
-	 * Constructor for SimpleRefTest.
+	 * Constructor for InsertRefTst.
 	 */
-	public SimpleRefTest(String name) {
+	public InsertRefTest(String name) {
 		super(name);
 	}
 
-    public void runTest() throws Exception {
-    }
-}
+	public void runTest() throws Exception {
+		Connection con = getConnection();
+		try {
 
+			con.setAutoCommit(false);
+			PreparedStatement st =
+				con.prepareStatement(
+					"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
+			for (int i = 1; i <= InsertTest.objCount; i++) {
+				st.setInt(1, i);
+				st.setString(2, "name_" + i);
+				st.executeUpdate();
+			}
+
+			// save all at once
+			con.commit();
+		} finally {
+			con.close();
+		}
+	}
+
+}

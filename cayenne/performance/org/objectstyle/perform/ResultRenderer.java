@@ -99,15 +99,21 @@ public class ResultRenderer {
 				(mainResult.getTestEx() != null)
 					? "ex."
 					: "" + mainResult.getMs();
-					
+
 			String refLine =
 				(refResult == null)
 					? "-"
 					: (refResult.getTestEx() != null)
 					? "ex."
 					: "" + refResult.getMs();
+
 			System.out.println("\tmain: " + resultLine);
 			System.out.println("\t ref: " + refLine);
+
+			double speedDiff = result.compareSpeed();
+			if (speedDiff > 0) {
+				System.out.println("\tdiff: " + (int) (speedDiff * 100) + "%");
+			}
 		}
 	}
 }

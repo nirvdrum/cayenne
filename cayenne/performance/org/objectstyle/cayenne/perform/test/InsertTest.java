@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.perform;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,42 +54,36 @@ package org.objectstyle.cayenne.perform;
  *
  */
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+package org.objectstyle.cayenne.perform.test;
 
-import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 
-import org.objectstyle.TestConstants;
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.ConnectionSetup;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conn.PoolDataSource;
-import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.perform.PerformanceTest;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.perform.CayennePerformanceTest;
+import org.objectstyle.cayenne.perform.PerformMain;
+
 
 /** Simple performance test. Performs an insert of 1000 rows to the database, 
  *  then a select of the same rows. Compares performance of Cayenne and straight
  *  JDBC queries.
  */
-public class SimpleTest extends PerformanceTest implements TestConstants {
-	static Logger logObj = Logger.getLogger(SimpleTest.class.getName());
-
+public class InsertTest extends CayennePerformanceTest {
+	public static final int objCount = 2000;
+	
 	protected DataContext ctxt;
-	protected final int objCount = 2000;
-	protected final int batchCount = objCount / 20;
 
-	public SimpleTest(String name) {
-		super("SimpleTest");
+	public InsertTest(String name) {
+		super("Insert");
+		super.setDesc("Inserting " + objCount + " objects.");
 	}
 
+	public void prepare() throws Exception {
+		ctxt = PerformMain.sharedDomain.createDataContext();
+	}
+	
+	
 	public void runTest() throws Exception {
 		for (int i = 0; i < objCount; i++) {
 			Artist a = (Artist) ctxt.createAndRegisterNewObject("Artist");
@@ -197,23 +190,4 @@ public class SimpleTest extends PerformanceTest implements TestConstants {
 		selectJDBC = t3 - t2;
 	}
 */
-	public void cleanup() throws Exception {
-		Connection c = getConnection();
-
-		try {
-			Statement st = c.createStatement();
-			st.executeUpdate("DELETE FROM ARTIST");
-			st.close();
-		} finally {
-			c.close();
-		}
-	}
-
-	private Connection getConnection() throws Exception {
-		return PerformMain.sharedDomain.getDataNodes()[0].getDataSource().getConnection();
-	}
-
-	public void prepare() throws Exception {
-		ctxt = PerformMain.sharedDomain.createDataContext();
-	}
 }
