@@ -130,7 +130,7 @@ public class ObjEntity extends DVObject {
     return Collections.unmodifiableList(loadErrors);
   }
 
-  public void setDataMap(DataMap dataView){
+  public void setDataMap(DataMap dataMap){
     this.dataMap = dataMap;
   }
 
