@@ -257,16 +257,18 @@ public class TypesMapping {
 
 
         // 2. filter those with biggest precision
-        int maxPrec = 0;
+        long maxPrec = 0;
         for(int i = 0; i < len; i++) {
-            if(maxPrec < alts[i].precision)
+            if(maxPrec < alts[i].precision) {
                 maxPrec = alts[i].precision;
+            }
         }
 
         ArrayList list = new ArrayList();
         for(int i = 0; i < len; i++) {
-            if(maxPrec == alts[i].precision)
+            if(maxPrec == alts[i].precision) {
                 list.add(alts[i]);
+            }
         }
 
 
@@ -343,8 +345,8 @@ public class TypesMapping {
             while(rs.next()) {
                 TypeInfo info = new TypeInfo();
                 info.name = rs.getString("TYPE_NAME");
-                info.jdbcType = rs.getInt("DATA_TYPE");
-                info.precision = rs.getInt("PRECISION");
+                info.jdbcType = rs.getInt("DATA_TYPE");                
+                info.precision = rs.getLong("PRECISION");
 
                 Integer key = new Integer(info.jdbcType);
                 ArrayList infos = (ArrayList)databaseTypes.get(key);
@@ -437,7 +439,7 @@ public class TypesMapping {
     static class TypeInfo {
         String name;
         int jdbcType;
-        int precision;
+        long precision;
 
         public String toString() {
             StringBuffer buf = new StringBuffer();
