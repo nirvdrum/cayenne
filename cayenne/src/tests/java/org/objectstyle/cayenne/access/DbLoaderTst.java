@@ -150,7 +150,7 @@ public class DbLoaderTst extends CayenneTestCase {
 	}
 
 	private DataMap originalMap() {
-		return getNode().getDataMaps()[0];
+		return (DataMap)getNode().getDataMapsAsList().get(0);
 	}
 
 	/** Selectively check how different types were processed. */

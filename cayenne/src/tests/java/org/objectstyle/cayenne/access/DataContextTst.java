@@ -104,7 +104,7 @@ public class DataContextTst extends CayenneTestCase {
         populateTables();
 
         DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
+        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
 
         ctxt = dom.createDataContext();
         opObserver = new TestOperationObserver();
@@ -668,7 +668,7 @@ public class DataContextTst extends CayenneTestCase {
     }
 
     public void changeMaxConnections(int delta) {
-        DataNode node = ((DataDomain) ctxt.getParent()).getDataNodes()[0];
+        DataNode node = (DataNode)((DataDomain)ctxt.getParent()).getDataNodesAsList().get(0);
         PoolManager manager = (PoolManager) node.getDataSource();
         manager.setMaxConnections(manager.getMaxConnections() + delta);
     }

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /** Test cases for DbGenerator.
@@ -75,7 +76,7 @@ public class DbGeneratorTst extends CayenneTestCase {
         gen =
             new DbGenerator(
                 getNode().getAdapter(),
-                getNode().getDataMaps()[0]);
+                (DataMap)getNode().getDataMapsAsList().get(0));
     }
 
     public void testAdapter() throws Exception {

@@ -85,7 +85,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         setup.cleanTableData();
 
         DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
+        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
 
         context = dom.createDataContext();
         context.setTransactionEventsEnabled(true);
@@ -113,7 +113,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     public void testDataContextRolledBackTransaction() throws Exception {
     	// This doesn't work on MySQL, since transaction support
     	// is either non-existent or dubious...
-    	if(getDomain().getDataNodes()[0].getAdapter().getClass() == MySQLAdapter.class) {
+    	if(((DataNode)getDomain().getDataNodesAsList().get(0)).getAdapter().getClass() == MySQLAdapter.class) {
     		return;
     	}
     	

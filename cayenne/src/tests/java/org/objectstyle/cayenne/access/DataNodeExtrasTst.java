@@ -94,7 +94,7 @@ public class DataNodeExtrasTst extends CayenneTestCase {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();        
 
-		DataNode node = getDomain().getDataNodes()[0];
+		DataNode node = (DataNode)getDomain().getDataNodesAsList().get(0);
 		setup.createPkSupportForMapEntities(node);
 
 		DbEntity artistEnt = node.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
@@ -112,7 +112,7 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 	
 	public void testPopulatedNodeEntityResolver() {
 		//Test shared node (one loaded with a real model)
-		assertNotNull(getDomain().getDataNodes()[0].getEntityResolver());
+		assertNotNull(((DataNode)getDomain().getDataNodesAsList().get(0)).getEntityResolver());
 	}
 	
 	public void testEmptyNodeEntityResolver() {

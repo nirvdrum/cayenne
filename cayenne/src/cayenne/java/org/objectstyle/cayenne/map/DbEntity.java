@@ -185,9 +185,10 @@ public class DbEntity extends Entity {
 
         DataMap map = getDataMap();
         if (map != null) {
-            DbEntity[] ents = map.getDbEntities();
-            for (int i = 0; i < ents.length; i++) {
-                Iterator it = ents[i].getRelationshipList().iterator();
+            Iterator ents = map.getDbEntitiesAsList().iterator();
+            while (ents.hasNext()) {
+            	DbEntity ent = (DbEntity)ents.next();
+                Iterator it = ent.getRelationshipList().iterator();
                 while (it.hasNext()) {
                     DbRelationship rel = (DbRelationship) it.next();
                     Iterator joins = rel.getJoins().iterator();
