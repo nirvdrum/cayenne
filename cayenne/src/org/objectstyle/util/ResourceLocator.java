@@ -60,17 +60,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /** 
-  * Utility class to find resources (usually files) using most common Java approaches.
-  * Some ideas were inspired by Velocity ResourceLoader classes (Copyright: Apache 
-  * Software Foundation).
-  *
+  * Utility class to find resources (usually files) using most common 
+  * Java approaches.
+  * 
   * @author Andrei Adamchik
   */
 public class ResourceLocator {
     protected boolean skipHomeDir;
     protected boolean skipCurDir;
     protected boolean skipClasspath;
-
+    protected ClassLoader classLoader;
 
     /** Returns a resource as InputStream if it is found in CLASSPATH. 
       * Returns null otherwise. Lookup is normally performed in all JAR and
@@ -140,15 +139,33 @@ public class ResourceLocator {
     public static URL findURLInClasspath(String name) {
         return findURLInClassLoader(name, ResourceLocator.class.getClassLoader());
     }
-    
-   /** Looks up for resource using specified ClassLoader . */
+
+    /** Looks up for resource using specified ClassLoader . */
     public static URL findURLInClassLoader(String name, ClassLoader loader) {
         return loader.getResource(name);
     }
 
     /** Creates new ResourceLocator with default lookup policy including
      *  user home directory, current directory and CLASSPATH. */
-    public ResourceLocator() {}
+    public ResourceLocator() {
+        setClassLoader(this.getClass().getClassLoader());
+    }
+
+    /** Returns resource URL using lookup strategy configured for this object or
+     *  null if no readable resource can be found for name. */
+    public InputStream findResourceStream(String name) {
+        URL url = findResource(name);
+        if (url == null) {
+            return null;
+        }
+
+        try {
+            return url.openStream();
+        }
+        catch (IOException ioex) {
+            return null;
+        }
+    }
 
     /** Returns resource URL using lookup strategy configured for this object or
      *  null if no readable resource can be found for name. */
@@ -185,7 +202,7 @@ public class ResourceLocator {
         }
 
         if (!isSkipClasspath()) {
-            return findURLInClasspath(name);
+            return findURLInClassLoader(name, classLoader);
         }
 
         return null;
@@ -254,6 +271,17 @@ public class ResourceLocator {
      */
     public void setSkipClasspath(boolean skipClasspath) {
         this.skipClasspath = skipClasspath;
+    }
+
+    /**
+     * Returns the ClassLoader associated with this ResourceLocator.
+     */
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
 }
