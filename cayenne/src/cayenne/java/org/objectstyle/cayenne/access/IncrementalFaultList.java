@@ -625,21 +625,13 @@ public class IncrementalFaultList implements List {
         }
     }
 
-    /**
-     * @see java.util.List#subList(int, int)
-     */
     public List subList(int fromIndex, int toIndex) {
         synchronized (elements) {
-            List sublist = elements.subList(fromIndex, toIndex);
-            IncrementalFaultList list = new IncrementalFaultList(this);
-            list.elements = Collections.unmodifiableList(sublist);
-            return list;
+            resolveInterval(fromIndex, toIndex);
+            return elements.subList(fromIndex, toIndex);
         }
     }
 
-    /**
-     * @see java.util.Collection#toArray()
-     */
     public Object[] toArray() {
         resolveAll();
 
