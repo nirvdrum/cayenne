@@ -12,7 +12,7 @@
             externalType = varchar; 
             name = artistName; 
             valueClassName = NSString; 
-            width = 255; 
+            width = 254; 
         }, 
         {
             allowsNull = Y; 
