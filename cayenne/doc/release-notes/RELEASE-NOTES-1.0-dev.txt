@@ -18,5 +18,7 @@ when a DataNode is selected.
 
 4. Modeler: Added support for customizable sequences on Oracle.
 
+5. Fixed bugs in EOModel loader
+
 
 

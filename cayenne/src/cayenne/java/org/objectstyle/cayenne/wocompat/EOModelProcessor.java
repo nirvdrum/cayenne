@@ -95,8 +95,6 @@ public class EOModelProcessor {
 
             // create and register entity
             ObjEntity e = makeEntity(helper, name);
-            dataMap.addDbEntity(e.getDbEntity());
-            dataMap.addObjEntity(e);
 
             // process entity attributes
             makeAttributes(helper, e);
@@ -133,13 +131,26 @@ public class EOModelProcessor {
      *  Creates and returns a new ObjEntity linked to a corresponding DbEntity.
      */
     protected ObjEntity makeEntity(EOModelHelper helper, String name) {
+        DataMap dataMap = helper.getDataMap();
+
         // create ObjEntity
         ObjEntity e = new ObjEntity(name);
         e.setClassName(helper.entityClass(name));
 
-        // create DbEntity
-        DbEntity de = new DbEntity((String) helper.entityInfo(name).get("externalName"));
+        // create DbEntity...since EOF allows the same table to be 
+        // associated with multiple EOEntities, check for name duplicates
+        String dbEntityName = (String) helper.entityInfo(name).get("externalName");
+        int i = 0;
+        String dbEntityBaseName = dbEntityName;
+        while (dataMap.getDbEntity(dbEntityName, false) != null) {
+            dbEntityName = dbEntityBaseName + i++;
+        }
+
+        DbEntity de = new DbEntity(dbEntityName);
         e.setDbEntity(de);
+
+        dataMap.addDbEntity(de);
+        dataMap.addObjEntity(e);
 
         return e;
     }
@@ -155,6 +166,10 @@ public class EOModelProcessor {
 
         // process attribute list creating both Db and Obj attributes
         List attributes = (List) entityMap.get("attributes");
+        if (attributes == null) {
+            return;
+        }
+
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
             Map attrMap = (Map) it.next();
@@ -313,7 +328,8 @@ public class EOModelProcessor {
                 flatRel.setTargetEntity((ObjEntity) potentialTargets.get(0));
 
                 e.addRelationship(flatRel);
-            } else {
+            }
+            else {
                 throw new CayenneRuntimeException("relationship in path was null!");
             }
         }
@@ -337,7 +353,8 @@ public class EOModelProcessor {
             return null;
         }
 
-        public EODbAttribute() {}
+        public EODbAttribute() {
+        }
 
         public EODbAttribute(String name, int type, DbEntity entity) {
             super(name, type, entity);
