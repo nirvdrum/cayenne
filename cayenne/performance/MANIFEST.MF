@@ -1,2 +1,2 @@
 Main-Class: org.objectstyle.cayenne.perform.PerformMain
-Class-Path: cayenne.jar cayenne_tests.jar
+Class-Path: cayenne.jar cayenne-tests.jar
