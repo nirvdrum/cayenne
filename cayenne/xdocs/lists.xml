@@ -99,6 +99,18 @@
             <list-arch name="cayenne-devel"/>
             </table>
         </subsection>
+        
+         <subsection name="cayenne-cvs">
+        	<p><strong>cayenne-cvs</strong> is a mailing list where all automated CVS commit
+        	notifications are posted. It is intended for tracking of everyday changes made to Cayenne
+        	source tree and only concerns developers. It is hosted on SourceForge.net and is 
+        	not archived. Please DO NOT send any messages to this list. 
+        	</p>
+        	
+        	<p>To <strong>manage your subscription</strong> visit this link:
+        	<a href="http://lists.sourceforge.net/lists/listinfo/cayenne-cvs">http://lists.sourceforge.net/lists/listinfo/cayenne-cvs</a>.
+        	</p>
+        </subsection>
         </section>
     </body>
 </document>
