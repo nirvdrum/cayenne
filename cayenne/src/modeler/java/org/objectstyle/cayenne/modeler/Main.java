@@ -61,7 +61,6 @@ import java.io.IOException;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
@@ -98,6 +97,7 @@ public class Main {
             // JGoddies plastic L&F is default
             laf = PlasticXPLookAndFeel.class.getName();
         }
+        
         try {
             UIManager.setLookAndFeel(laf);
         } catch (Exception e) {
