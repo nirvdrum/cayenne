@@ -66,55 +66,69 @@ package org.objectstyle.cayenne.map;
  */
 
 public class DbKeyGenerator extends MapObject {
-  public static final String ORACLE_TYPE = "ORACLE";
-  public static final String NAMED_SEQUENCE_TABLE_TYPE = "NAMED_SEQUENCE_TABLE";
+    public static final String ORACLE_TYPE = "ORACLE";
+    public static final String NAMED_SEQUENCE_TABLE_TYPE = "NAMED_SEQUENCE_TABLE";
 
-  private String generatorType;
-  private Integer keyCacheSize;
-  private String generatorName;
+    private String generatorType;
+    private Integer keyCacheSize;
+    private String generatorName;
 
-  public DbKeyGenerator() {
-  }
-
-  public DbEntity getDbEntity() {
-    return (DbEntity) getParent();
-  }
-
-  public void setDbEntity(DbEntity entity) {
-    setParent(entity);
-  }
-  public void setGeneratorType(String generatorType) {
-    this.generatorType = generatorType;
-    if (this.generatorType != null) {
-      this.generatorType = this.generatorType.trim().toUpperCase();
-      if (!(ORACLE_TYPE.equals(this.generatorType) || NAMED_SEQUENCE_TABLE_TYPE.equals(this.generatorType)))
-        this.generatorType = null;
+    public DbKeyGenerator() {
     }
-  }
-  public String getGeneratorType() {
-    return generatorType;
-  }
-  public void setKeyCacheSize(Integer keyCacheSize) {
-    this.keyCacheSize = keyCacheSize;
-    if (this.keyCacheSize != null && this.keyCacheSize.intValue() < 1) {
-      this.keyCacheSize = null;
+
+    public DbEntity getDbEntity() {
+        return (DbEntity) getParent();
     }
-  }
-  public Integer getKeyCacheSize() {
-    return keyCacheSize;
-  }
-  public void setGeneratorName(String generatorName) {
-    this.generatorName = generatorName;
-    if (this.generatorName != null) {
-      this.generatorName = this.generatorName.trim();
-      if (this.generatorName.length() == 0)
-        this.generatorName = null;
+
+    public void setDbEntity(DbEntity entity) {
+        setParent(entity);
     }
-  }
-  public String getGeneratorName() {
-    return generatorName;
-  }
-  public String toString() {
-    return "{Type="+generatorType+", Name="+generatorName+", Cache="+keyCacheSize+"}";
-  }
+    
+    public void setGeneratorType(String generatorType) {
+        this.generatorType = generatorType;
+        if (this.generatorType != null) {
+            this.generatorType = this.generatorType.trim().toUpperCase();
+            if (!(ORACLE_TYPE.equals(this.generatorType)
+                || NAMED_SEQUENCE_TABLE_TYPE.equals(this.generatorType)))
+                this.generatorType = null;
+        }
+    }
+    
+    public String getGeneratorType() {
+        return generatorType;
+    }
+    
+    public void setKeyCacheSize(Integer keyCacheSize) {
+        this.keyCacheSize = keyCacheSize;
+        if (this.keyCacheSize != null && this.keyCacheSize.intValue() < 1) {
+            this.keyCacheSize = null;
+        }
+    }
+    
+    public Integer getKeyCacheSize() {
+        return keyCacheSize;
+    }
+    
+    public void setGeneratorName(String generatorName) {
+        this.generatorName = generatorName;
+        if (this.generatorName != null) {
+            this.generatorName = this.generatorName.trim();
+            if (this.generatorName.length() == 0)
+                this.generatorName = null;
+        }
+    }
+    
+    public String getGeneratorName() {
+        return generatorName;
+    }
+    
+    public String toString() {
+        return "{Type="
+            + generatorType
+            + ", Name="
+            + generatorName
+            + ", Cache="
+            + keyCacheSize
+            + "}";
+    }
 }
