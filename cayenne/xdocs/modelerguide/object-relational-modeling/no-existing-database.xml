@@ -6,11 +6,11 @@
     </properties>
 <navigator>
 	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/modelerconcepts.html</prev>
-	<next>/modelerguide/schemamap.html</next>
+	<prev>/modelerguide/object-relational-modeling/existing-database.html</prev>
+	<next>/modelerguide/pksupport.html</next>
 </navigator>
 <body>
- 	<section name="4. Data Map First, Database Second" anchor="map_first">
+ 	<section name="4.2 Start from the O/R Model">
 
 		Here are the steps to create a new Cayenne project.
 		<ol>

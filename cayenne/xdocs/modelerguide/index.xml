@@ -12,11 +12,14 @@
              <br/></li>
              <li><a href="modelerconcepts.html">3. CayenneModeler Concepts: What the Buttons Mean</a>
              <br/></li>
-             <li><a href="mapschema.html">4. DataMap First, Database Second</a>
-             <br/></li>
-             <li><a href="schemamap.html">5. Database First, DataMap Second</a>
-             <br/></li>
-             <li><a href="pksupport.html">6. Generating Primary Key Support in the Database</a>
+             
+             <li><a href="object-relational-modeling/index.html">4. Approach to Object/Relational Modeling</a>
+             <ul>
+                <li><a href="object-relational-modeling/existing-database.html">4.1 Start with Existing Database</a></li>
+                <li><a href="object-relational-modeling/no-existing-database.html">4.2 Start from the O/R Model</a></li>
+            </ul><br/></li>
+            
+             <li><a href="pksupport.html">5. Generating Primary Key Support in the Database</a>
              <br/></li>
         </ul>
     </section>
