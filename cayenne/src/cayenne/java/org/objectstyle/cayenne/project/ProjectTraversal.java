@@ -146,19 +146,21 @@ public class ProjectTraversal {
     protected List buildNodesList() {
         ArrayList list = new ArrayList();
         Configuration config = project.getConfig();
-        addDomains(list, config.getDomainList());
+        Object[] path = buildPath(config, null);
+        list.add(path);
+        addDomains(list, config.getDomainList(), path);
         return list;
     }
 
-    protected void addDomains(List list, List domains) {
+    protected void addDomains(List list, List domains, Object[] path) {
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
-            Object[] path = buildPath(domain, null);
-            list.add(path);
+            Object[] domainPath = buildPath(domain, path);
+            list.add(domainPath);
 
-            addNodes(list, domain.getDataNodeList(), path);
-            addMaps(list, domain.getMapList(), path);
+            addNodes(list, domain.getDataNodeList(), domainPath);
+            addMaps(list, domain.getMapList(), domainPath);
         }
     }
 

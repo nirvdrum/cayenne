@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.AbstractHandler;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
@@ -246,7 +247,7 @@ public class DomainHelper {
 	  * Assumes that the maps have already been saved.*/
 	public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
 		pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-		pw.println("<domains>");
+		pw.println("<domains project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\">");
 		for (int i = 0; i < domains.length; i++) {
 			storeDomain(pw, domains[i]);
 		}

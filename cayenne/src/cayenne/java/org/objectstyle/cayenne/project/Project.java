@@ -80,11 +80,14 @@ import org.objectstyle.cayenne.project.validator.Validator;
  */
 public class Project {
     static Logger logObj = Logger.getLogger(Project.class);
+ 
+    public static final String CURRENT_PROJECT_VERSION = "1.0";
 
     protected String name;
     protected Configuration config;
     protected File projectDir;
     protected List files;
+    protected List upgradeMessages;
 
     /**
      * Constructor for Project. <code>projectFile</code> must denote 
@@ -113,6 +116,46 @@ public class Project {
 
         // take a snapshot of files used by the project
         files = Collections.synchronizedList(buildFileList());
+
+        checkForUpgrades();
+    }
+
+    protected void checkForUpgrades() {
+        upgradeMessages = Collections.synchronizedList(new ArrayList());
+        
+        if (hasRenamedFiles()) {
+            upgradeMessages.add("Some files require renaming");
+        }
+    }
+
+    public boolean isUpgradeNeeded() {
+    	return upgradeMessages.size() > 0;
+    }
+    
+    public List getUpgradeMessages() {
+    	return upgradeMessages;
+    }
+
+    /**
+     * Returns true is project has renamed files.
+     * This is useful when converting from older versions
+     * of the modeler projects.
+     */
+    public boolean hasRenamedFiles() {
+        if (files == null) {
+            return false;
+        }
+
+        synchronized (files) {
+            Iterator it = files.iterator();
+            while (it.hasNext()) {
+                if (((ProjectFile) it.next()).isRenamed()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -121,17 +164,11 @@ public class Project {
     public List buildFileList() {
         List projectFiles = new ArrayList();
 
-        // start with root file
-        projectFiles.add(ProjectFile.projectFileForObject(config));
-
         Iterator nodes = new ProjectTraversal(this).treeNodes();
         while (nodes.hasNext()) {
             Object[] nodePath = (Object[]) nodes.next();
             Object obj = ProjectTraversal.objectFromPath(nodePath);
-
-            ProjectFile f = ProjectFile.projectFileForObject(obj);
-            f.synchronizeName();
-            f.setProject(this);
+            ProjectFile f = ProjectFile.projectFileForObject(this, obj);
 
             if (f != null) {
                 projectFiles.add(f);
@@ -292,13 +329,12 @@ public class Project {
             ProjectFile existingFile = findFile(obj);
 
             if (existingFile == null) {
-            	// check if project node can have a file
-                ProjectFile newFile = ProjectFile.projectFileForObject(obj);
+                // check if project node can have a file
+                ProjectFile newFile = ProjectFile.projectFileForObject(this, obj);
                 if (newFile != null) {
-                    newFile.setProject(this);
                     filesToSave.add(newFile);
                 }
-            } else {
+            } else if(existingFile.canHandleObject()) {
                 wrappedObjects.add(existingFile.getObject());
                 filesToSave.add(existingFile);
             }
@@ -308,24 +344,47 @@ public class Project {
         processSave(filesToSave);
 
         // 3. Commit changes
+        List savedFiles = new ArrayList();
         Iterator saved = filesToSave.iterator();
         while (saved.hasNext()) {
             ProjectFile f = (ProjectFile) saved.next();
-            f.saveCommit();
+            savedFiles.add(f.saveCommit());
         }
 
         // 4. Take care of deleted
-        processDelete(wrappedObjects);
+        processDelete(wrappedObjects, savedFiles);
 
         // 5. Refresh file list
-        files = buildFileList();
+        List freshList = buildFileList();
+        Iterator it = freshList.iterator();
+        while (it.hasNext()) {
+            ((ProjectFile) it.next()).synchronizeLocation();
+        }
+
+        files = freshList;
+
+        synchronized (upgradeMessages) {
+            upgradeMessages.clear();
+        }
     }
 
     protected void processSave(List modifiedFiles) throws ProjectException {
+        // notify that files will be saved
+        Iterator willSave = modifiedFiles.iterator();
+        while (willSave.hasNext()) {
+            ProjectFile f = (ProjectFile) willSave.next();
+            f.willSave();
+        }
+
         try {
             Iterator modified = modifiedFiles.iterator();
             while (modified.hasNext()) {
                 ProjectFile f = (ProjectFile) modified.next();
+
+                if (logObj.isDebugEnabled()) {
+                    logObj.info("Saving file " + f.resolveFile());
+                }
+
                 f.saveTemp();
             }
         } catch (Exception ex) {
@@ -342,19 +401,43 @@ public class Project {
         }
     }
 
-    protected void processDelete(List existingObjects) {
+    protected void processDelete(List existingObjects, List savedFiles) {
 
         // check for deleted
         synchronized (files) {
             Iterator oldFiles = files.iterator();
             while (oldFiles.hasNext()) {
                 ProjectFile f = (ProjectFile) oldFiles.next();
-                if (f.isRenamed()
-                    || f.getObject() == null
-                    || !existingObjects.contains(f.getObject())) {
-                    boolean result = deleteFile(f.resolveOldFile());
-                    if (!result) {
-                        logObj.info("*** Failed to delete old file, ignoring.");
+                File file = f.resolveOldFile();
+
+                // this check is needed, since a file can reuse the name
+                // of a recently deleted file, and we don't want to delete 
+                // new file by mistake
+                if (savedFiles.contains(file)) {
+                    continue;
+                }
+
+                boolean delete = false;
+                if (f.isRenamed()) {
+                    delete = true;
+                    logObj.info("File renamed, deleting old version: " + file);
+                } else if (f.getObject() == null) {
+                    delete = true;
+                    logObj.info("Null internal object, deleting file: " + file);
+                } else if (!existingObjects.contains(f.getObject())) {
+                    delete = true;
+                    logObj.info(
+                        "Object deleted from the project, deleting file: " + file);
+                } else if (!f.canHandleObject()) {
+                    // this happens too - node can start using JNDI for instance
+                    delete = true;
+                    logObj.info(
+                        "Can no longer handle the object, deleting file: " + file);
+                }
+
+                if (delete) {
+                    if (!deleteFile(file)) {
+                        logObj.info("*** Failed to delete file, ignoring.");
                     }
                 }
             }

@@ -87,7 +87,7 @@ public abstract class ValidationDisplayHandler {
 
     public static ValidationDisplayHandler getErrorMsg(ValidationResult result) {
         Object validatedObj = result.getValidatedObject();
-        
+
         ValidationDisplayHandler msg = null;
         if (validatedObj instanceof Attribute) {
             msg = new AttributeErrorMsg(result);
@@ -111,7 +111,10 @@ public abstract class ValidationDisplayHandler {
     public ValidationDisplayHandler(ValidationResult result) {
         this.message = result.getMessage();
         this.severity = result.getSeverity();
-        this.domain = (DataDomain) result.getTreeNodePath()[0];
+
+        if (result.getTreeNodePath().length > 1) {
+            this.domain = (DataDomain) result.getTreeNodePath()[1];
+        }
     }
 
     /** 

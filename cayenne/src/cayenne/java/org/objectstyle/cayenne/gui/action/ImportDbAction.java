@@ -248,14 +248,7 @@ public class ImportDbAction extends CayenneAction {
                 loader.loadDataMapFromDB(schemaName, null, map);
                 return map;
             } else {
-                map = loader.createDataMapFromDB(schemaName);
-                String relative_loc;
-                relative_loc = CreateDataMapAction.getMapLocation(mediator);
-                if (null == relative_loc) {
-                    return null;
-                }
-                map.setLocation(relative_loc);
-                return map;
+                return loader.createDataMapFromDB(schemaName);
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -65,9 +65,10 @@ import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.project.Project;
 
 /**
  * @author Andrei Adamchik
@@ -116,12 +117,12 @@ public class NewProjectAction extends ProjectAction {
                 }
 
                 int retCode = fileChooser.showSaveDialog(Editor.getFrame());
-                if(retCode == JFileChooser.CANCEL_OPTION) {
-                	return;
+                if (retCode == JFileChooser.CANCEL_OPTION) {
+                    return;
                 }
 
                 file = fileChooser.getSelectedFile();
-                
+
                 if (!file.exists()) {
                     file.mkdirs();
                 } else if (!file.isDirectory()) {
@@ -130,7 +131,7 @@ public class NewProjectAction extends ProjectAction {
                         "Can't create directory " + file);
                     return;
                 }
-                
+
                 projectFile = new File(file, Configuration.DOMAIN_FILE);
                 if (projectFile.exists()) {
                     int ret =
@@ -152,13 +153,13 @@ public class NewProjectAction extends ProjectAction {
                 return;
             }
 
+            Project project =
+                Editor.getProjects().createProject(Editor.DEFAULT_PROJECT_NAME, projectFile, true);
+
             // Save dir path to the preferences
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getAbsolutePath());
             setMediator(new Mediator());
-            Editor.getFrame().projectOpened(projectFile);
-
-            // Set title to contain proj file path
-            Editor.getFrame().setProjectTitle(projectFile.getAbsolutePath());
+            Editor.getFrame().projectOpened(project);
         } catch (Exception e) {
             logObj.warn("Error loading project file.", e);
         }

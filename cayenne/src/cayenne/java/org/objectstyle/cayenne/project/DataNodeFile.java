@@ -70,8 +70,6 @@ import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
  * @author Andrei Adamchik
  */
 public class DataNodeFile extends ProjectFile {
-    protected static final String NODE_FILE_EXTENSION = "xml";
-
     protected DataNode node;
 
     public DataNodeFile() {}
@@ -81,8 +79,8 @@ public class DataNodeFile extends ProjectFile {
      * @param name
      * @param extension
      */
-    public DataNodeFile(DataNode node) {
-        super(node.getName(), NODE_FILE_EXTENSION);
+    public DataNodeFile(Project project, DataNode node) {
+        super(project, node.getDataSourceLocation());
         this.node = node;
     }
 
@@ -103,19 +101,9 @@ public class DataNodeFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {
-        FileWriter fw = new FileWriter(f);
-        try {
-            PrintWriter pw = new PrintWriter(fw);
-            try {
-                ProjectDataSource src = (ProjectDataSource) node.getDataSource();
-                DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-            } finally {
-                pw.close();
-            }
-        } finally {
-            fw.close();
-        }
+    public void save(PrintWriter out) throws Exception {
+        ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+        DomainHelper.storeDataNode(out, src.getDataSourceInfo());
     }
 
     /**
@@ -140,7 +128,26 @@ public class DataNodeFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
      */
-    public ProjectFile createProjectFile(Object obj) {
-        return new DataNodeFile((DataNode) obj);
+    public ProjectFile createProjectFile(Project project, Object obj) {
+        return new DataNodeFile(project, (DataNode) obj);
+    }
+    
+    /**
+     * Updates node location to match the name before save.
+     */
+    public void willSave() {
+        super.willSave();
+        
+        if(node != null && canHandle(node)) {
+        	node.setDataSourceLocation(getLocation());
+        }
+    }
+    
+    /**
+     * Returns ".driver.xml" that should be used as a file suffix 
+     * for DataNode driver files.
+     */
+    public String getLocationSuffix() {
+        return ".driver.xml";
     }
 }

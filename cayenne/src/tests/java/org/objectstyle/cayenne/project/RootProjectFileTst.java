@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.CayenneTestCase;
 public class RootProjectFileTst extends CayenneTestCase {
     protected RootProjectFile rpf;
     protected ProjectConfiguration conf;
+    protected Project pr;
     
     
     /**
@@ -80,8 +81,16 @@ public class RootProjectFileTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
+        pr = new Project("abc", new File("xyz"));
         conf = new ProjectConfiguration(new File("tstproj.123"));
-        rpf = new RootProjectFile(conf);
+        rpf = new RootProjectFile(pr, conf);
+    }
+    
+    public void testProjectFileForObject() throws Exception {
+    	ProjectFile pf = ProjectFile.projectFileForObject(pr, conf);
+    	assertNotNull(pf);
+    	assertTrue(pf instanceof RootProjectFile);
+    	assertSame(conf, pf.getObject());
     }
 
     public void testGetObject() throws Exception {
@@ -93,6 +102,6 @@ public class RootProjectFileTst extends CayenneTestCase {
     }
     
     public void testGetFileName() throws Exception {
-    	assertEquals("cayenne.xml", rpf.getFileName());
+    	assertEquals("cayenne.xml", rpf.getLocation());
     }
 }

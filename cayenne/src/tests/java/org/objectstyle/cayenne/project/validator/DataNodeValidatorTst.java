@@ -85,7 +85,7 @@ public class DataNodeValidatorTst extends ValidatorTestBase {
         new DataNodeValidator().validateObject(new Object[] { conf, d1, n1 }, validator);
         assertValidator(ValidationResult.VALID);
 
-        // should complain about no name
+        // should complain about no location
         DataNode n2 = new DataNode("2");
         n2.setAdapter(new JdbcAdapter());
         n2.setDataSourceFactory("123");
@@ -93,7 +93,7 @@ public class DataNodeValidatorTst extends ValidatorTestBase {
 
         validator.reset();
         new DataNodeValidator().validateObject(new Object[] { conf, d1, n2 }, validator);
-        assertValidator(ValidationResult.ERROR);
+        assertValidator(ValidationResult.WARNING);
 
         // should complain about duplicate name
         DataNode n3 = new DataNode("3");

@@ -69,8 +69,6 @@ import org.objectstyle.cayenne.map.MapLoader;
  * @author Andrei Adamchik
  */
 public class DataMapFile extends ProjectFile {
-    protected static final String MAP_FILE_EXTENSION = "xml";
-
     protected DataMap map;
 
     public DataMapFile() {}
@@ -80,8 +78,8 @@ public class DataMapFile extends ProjectFile {
      * @param name
      * @param extension
      */
-    public DataMapFile(DataMap map) {
-        super(map.getName(), MAP_FILE_EXTENSION);
+    public DataMapFile(Project project, DataMap map) {
+        super(project, map.getLocation());
         this.map = map;
     }
 
@@ -102,20 +100,9 @@ public class DataMapFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {
+    public void save(PrintWriter out) throws Exception {
         MapLoader saver = new MapLoader();
-        FileWriter fw = new FileWriter(f);
-
-        try {
-            PrintWriter pw = new PrintWriter(fw);
-            try {
-                saver.storeDataMap(pw, map);
-            } finally {
-                pw.close();
-            }
-        } finally {
-            fw.close();
-        }
+        saver.storeDataMap(out, map);
     }
 
     /**
@@ -128,7 +115,25 @@ public class DataMapFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
      */
-    public ProjectFile createProjectFile(Object obj) {
-        return new DataMapFile((DataMap) obj);
+    public ProjectFile createProjectFile(Project project, Object obj) {
+        return new DataMapFile(project, (DataMap) obj);
+    }
+    
+    /**
+     * Updates map location to match the name before save.
+     */
+    public void willSave() {
+        super.willSave();
+        
+        if(map != null) {
+        	map.setLocation(getLocation());
+        }
+    }
+    
+    /**
+     * Returns ".map.xml" that should be used as a file suffix for DataMaps.
+     */
+    public String getLocationSuffix() {
+        return ".map.xml";
     }
 }

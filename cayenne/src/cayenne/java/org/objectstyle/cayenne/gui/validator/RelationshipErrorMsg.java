@@ -81,9 +81,9 @@ public class RelationshipErrorMsg extends ValidationDisplayHandler {
      */
     public RelationshipErrorMsg(ValidationResult result) {
         super(result);
-        this.map = (DataMap)result.getTreeNodePath()[1];
-        this.entity = (Entity)result.getTreeNodePath()[2];
-        this.rel = (Relationship)result.getTreeNodePath()[3];
+        this.map = (DataMap)result.getTreeNodePath()[2];
+        this.entity = (Entity)result.getTreeNodePath()[3];
+        this.rel = (Relationship)result.getTreeNodePath()[4];
     }
 
 

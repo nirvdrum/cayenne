@@ -140,12 +140,6 @@ public class ImportEOModelAction extends CayenneAction {
 			// loader.loadDataMapFromDB(schema_name, null, map);
 			currentMap.mergeWithDataMap(map);
 			map = currentMap;
-		} else {
-			String relLocation = CreateDataMapAction.getMapLocation(mediator);
-			if (relLocation == null) {
-				return;
-			}
-			map.setLocation(relLocation);
 		}
 
 		// If this is adding to existing data map, remove it

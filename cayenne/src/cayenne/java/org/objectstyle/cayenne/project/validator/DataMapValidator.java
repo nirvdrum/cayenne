@@ -79,10 +79,6 @@ public class DataMapValidator extends TreeNodeValidator {
         DataMap map = (DataMap) ProjectTraversal.objectFromPath(path);
         validateName(map, path, validator);
 
-        if (Util.isEmptyString(map.getLocation())) {
-            validator.registerError("Unspecified DataMap location.", path);
-        }
-
         // check if data map is not attached to any nodes
         validateNodeLinks(map, path, validator);
     }

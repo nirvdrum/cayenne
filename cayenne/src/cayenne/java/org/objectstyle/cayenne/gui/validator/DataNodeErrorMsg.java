@@ -79,7 +79,7 @@ public class DataNodeErrorMsg extends ValidationDisplayHandler {
      */
     public DataNodeErrorMsg(ValidationResult result) {
         super(result);
-        this.node = (DataNode)result.getTreeNodePath()[1];
+        this.node = (DataNode)result.getTreeNodePath()[2];
     }
 
 	public void displayField(Mediator mediator, JFrame frame) {

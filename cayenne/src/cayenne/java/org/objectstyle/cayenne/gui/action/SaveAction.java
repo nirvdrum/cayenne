@@ -58,27 +58,16 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DomainHelper;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.gui.validator.ValidatorDialog;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.project.ProjectDataSource;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /** 
@@ -90,8 +79,6 @@ public class SaveAction extends CayenneAction {
     static Logger logObj = Logger.getLogger(SaveAction.class.getName());
 
     public static final String ACTION_NAME = "Save";
-
-    protected HashMap tempLookup = new HashMap();
 
     public SaveAction() {
         super(ACTION_NAME);
@@ -110,132 +97,9 @@ public class SaveAction extends CayenneAction {
      * and only on successful save, master files are replaced with new versions. 
      */
     protected void saveAll() throws Exception {
-        tempLookup.clear();
-
-        Mediator mediator = getMediator();
-        Iterator iter = mediator.getDirtyDataMaps().iterator();
-        while (iter.hasNext()) {
-            saveDataMap((DataMap) iter.next());
-        }
-
-        iter = mediator.getDirtyDataNodes().iterator();
-        while (iter.hasNext()) {
-            DataNode node = (DataNode) iter.next();
-            // If using direct connection, save into separate file
-            if (node
-                .getDataSourceFactory()
-                .equals(DriverDataSourceFactory.class.getName())) {
-                saveDataNode(node);
-            }
-        }
-
-        saveProject();
-        replaceMasterFiles();
-    }
-
-    /**
-     * Replaces master files with fresh temporary files.
-     */
-    protected void replaceMasterFiles() throws Exception {
-        Iterator it = tempLookup.keySet().iterator();
-        while (it.hasNext()) {
-            File tmp = (File) it.next();
-            File master = (File) tempLookup.get(tmp);
-            if (master.exists()) {
-                if (!master.delete()) {
-                    throw new IOException("Unable to remove old master file " + master);
-                }
-            }
-
-            if (!tmp.renameTo(master)) {
-                throw new IOException("Unable to move " + tmp + " to " + master);
-            }
-        }
-    }
-
-    /**
-     * Attempts to remove all temporary files.
-     */
-    protected void cleanTempFiles() {
-        Iterator it = tempLookup.keySet().iterator();
-        while (it.hasNext()) {
-            File tmp = (File) it.next();
-            tmp.delete();
-        }
-    }
-
-    /** 
-     * Creates temporary file for the master file.
-     */
-    protected File tempFileForFile(File f) throws IOException {
-        File parent = f.getParentFile();
-        String name = f.getName();
-
-        if (name == null || name.length() < 3) {
-            name = "modeler";
-        }
-
-        File tmp = File.createTempFile(name, null, parent);
-        tempLookup.put(tmp, f);
-
-        return tmp;
-    }
-
-    protected void saveProject() throws Exception {
-        Mediator mediator = getMediator();
-        File file = tempFileForFile(Editor.getProject().getMainProjectFile());
-        String masterPath = ((File) tempLookup.get(file)).getAbsolutePath();
-
-        FileWriter fw = new FileWriter(file);
-
-        try {
-            DomainHelper.storeDomains(
-                new PrintWriter(fw),
-                Editor.getProject().getDomains());
-            Editor.getFrame().addToLastProjList(masterPath);
-        } finally {
-            fw.flush();
-            fw.close();
-        }
-    }
-
-    /** Save data source info if data source factory is DIRECT_FACTORY. */
-    protected void saveDataNode(DataNode node) throws Exception {
-        File projDir = Editor.getProject().getProjectDir();
-        File file = tempFileForFile(new File(projDir, node.getDataSourceLocation()));
-
-        FileWriter fw = new FileWriter(file);
-        try {
-            PrintWriter pw = new PrintWriter(fw);
-            try {
-                ProjectDataSource src = (ProjectDataSource) node.getDataSource();
-                DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-            } finally {
-                pw.close();
-            }
-        } finally {
-            fw.close();
-        }
-    }
-
-    /** Save data map to the file. */
-    protected void saveDataMap(DataMap map) throws Exception {
-        File projDir = Editor.getProject().getProjectDir();
-        File file = tempFileForFile(new File(projDir, map.getLocation()));
-
-        MapLoader saver = new MapLoader();
-        FileWriter fw = new FileWriter(file);
-
-        try {
-            PrintWriter pw = new PrintWriter(fw);
-            try {
-                saver.storeDataMap(pw, map);
-            } finally {
-                pw.close();
-            }
-        } finally {
-            fw.close();
-        }
+    	Project p = Editor.getProject();
+        p.save();
+        Editor.getFrame().addToLastProjList(p.getMainProjectFile().getAbsolutePath());
     }
 
     /**
@@ -255,7 +119,6 @@ public class SaveAction extends CayenneAction {
             try {
                 saveAll();
             } catch (Exception ex) {
-                cleanTempFiles();
                 throw new CayenneRuntimeException("Error on save", ex);
             }
 

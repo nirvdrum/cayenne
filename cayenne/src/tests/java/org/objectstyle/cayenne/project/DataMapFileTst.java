@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.project;
 
+import java.io.File;
+
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DataMap;
 
@@ -64,6 +66,7 @@ import org.objectstyle.cayenne.map.DataMap;
 public class DataMapFileTst extends CayenneTestCase {
     protected DataMapFile dmf;
     protected DataMap map;
+    protected Project pr;
     
     /**
      * Constructor for MapFileTst.
@@ -78,10 +81,18 @@ public class DataMapFileTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
+        pr = new Project("abc", new File("xyz"));
         map = new DataMap("m1");
-        dmf = new DataMapFile(map);
+        dmf = new DataMapFile(pr, map);
     }
 
+    public void testProjectFileForObject() throws Exception {
+    	ProjectFile pf = ProjectFile.projectFileForObject(pr, map);
+    	assertNotNull(pf);
+    	assertTrue(pf instanceof DataMapFile);
+    	assertSame(map, pf.getObject());
+    }
+    
     public void testGetObject() throws Exception {
     	assertSame(map, dmf.getObject());
     }
@@ -91,7 +102,7 @@ public class DataMapFileTst extends CayenneTestCase {
     }
     
     public void testGetFileName() throws Exception {
-    	assertEquals(map.getName() + ".xml", dmf.getFileName());
+    	assertEquals(map.getName() + ".map.xml", dmf.getLocation());
     }
 }
 

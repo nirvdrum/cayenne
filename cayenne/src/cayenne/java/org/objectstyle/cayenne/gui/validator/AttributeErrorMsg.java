@@ -83,9 +83,9 @@ public class AttributeErrorMsg extends ValidationDisplayHandler {
      */
     public AttributeErrorMsg(ValidationResult result) {
         super(result);
-        this.map = (DataMap)result.getTreeNodePath()[1];
-        this.entity = (Entity)result.getTreeNodePath()[2];
-        this.attribute = (Attribute)result.getTreeNodePath()[3];
+        this.map = (DataMap)result.getTreeNodePath()[2];
+        this.entity = (Entity)result.getTreeNodePath()[3];
+        this.attribute = (Attribute)result.getTreeNodePath()[4];
     }
 
 	public void displayField(Mediator mediator, JFrame frame) {

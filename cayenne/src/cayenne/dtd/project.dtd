@@ -4,6 +4,10 @@
 <!-- ========================================== -->
 
 <!ELEMENT domains (domain*)>
+<!ATTLIST domains
+	project-version CDATA
+>
+
 <!ELEMENT domain (map*, node*)>
 <!ATTLIST domain
 	name CDATA #REQUIRED

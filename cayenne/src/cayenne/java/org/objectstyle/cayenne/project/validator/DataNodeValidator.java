@@ -60,6 +60,7 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.util.Util;
 
@@ -91,15 +92,15 @@ public class DataNodeValidator extends TreeNodeValidator {
         // If direct factory, make sure the location is a valid file name.
         if (Util.isEmptyString(factory)) {
             validator.registerError("No DataSource factory.", path);
-        } else {
+        } else if(!DriverDataSourceFactory.class.getName().equals(factory)) {
             String location = node.getDataSourceLocation();
             if (Util.isEmptyString(location)) {
-                validator.registerError("DataNode has no location parameter.", path);
+                validator.registerWarning("DataNode has no location parameter.", path);
             }
         }
 
         if (node.getAdapter() == null) {
-            validator.registerError("DataNode has no DBAdapter.", path);
+            validator.registerWarning("DataNode has no DBAdapter.", path);
         }
     }
 

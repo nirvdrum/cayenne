@@ -56,17 +56,10 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
-import org.apache.log4j.Level;
+
 import org.apache.log4j.Logger;
-
-import javax.swing.JFileChooser;
-
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.gui.ModelerPreferences;
-import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
@@ -92,55 +85,10 @@ public class CreateDataMapAction extends CayenneAction {
     /** Calls addDataMap() or creates new data map if no data node selected.*/
     protected void createDataMap() {
         Mediator mediator = getMediator();
-        String relative_location = getMapLocation(mediator);
-        if (null == relative_location) {
-            return;
-        }
-
         DataDomain currentDomain = mediator.getCurrentDataDomain();
         DataMap map =
             (DataMap) NamedObjectFactory.createObject(DataMap.class, currentDomain);
-        map.setLocation(relative_location);
         mediator.addDataMap(this, map);
-    }
-
-    /** Returns location relative to Project or null if nothing selected. */
-    static String getMapLocation(Mediator mediator) {
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
-        // Data map file
-        File file = null;
-
-        try {
-
-            File proj_dir = Editor.getProject().getProjectDir();
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            // Get the data map file name
-            fc = new JFileChooser(file_view);
-            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fc.setDialogTitle("Enter data map file name");
-            if (null != init_dir) {
-                File init_dir_file = new File(init_dir);
-                if (init_dir_file.exists())
-                    fc.setCurrentDirectory(init_dir_file);
-            }
-            int ret_code = fc.showSaveDialog(Editor.getFrame());
-            if (ret_code != JFileChooser.APPROVE_OPTION) {
-                return null;
-            }
-
-            file = fc.getSelectedFile();
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            return Editor.getProject().resolveSymbolicName(file);
-        } catch (Exception e) {
-            logObj.warn("Error creating data map file.", e);
-        }
-        return null;
     }
 
     public void performAction(ActionEvent e) {

@@ -55,8 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
+import java.io.File;
+
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
 /**
  * @author Andrei Adamchik
@@ -64,8 +67,8 @@ import org.objectstyle.cayenne.access.DataNode;
 public class DataNodeFileTst extends CayenneTestCase {
     protected DataNodeFile dnf;
     protected DataNode node;
-    
-    
+    protected Project pr;
+
     /**
      * Constructor for DataNodeFileTst.
      * @param arg0
@@ -74,25 +77,35 @@ public class DataNodeFileTst extends CayenneTestCase {
         super(arg0);
     }
 
-  /**
+    /**
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
         super.setUp();
+        pr = new Project("abc", new File("xyz"));
         node = new DataNode("n1");
-        dnf = new DataNodeFile(node);
+        dnf = new DataNodeFile(pr, node);
+    }
+
+    public void testProjectFileForObject() throws Exception {
+        ProjectFile pf = ProjectFile.projectFileForObject(pr, node);
+        assertNull(pf);
+
+        node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
+        ProjectFile pf1 = ProjectFile.projectFileForObject(pr, node);
+        assertTrue(pf1 instanceof DataNodeFile);
+        assertSame(node, pf1.getObject());
     }
 
     public void testGetObject() throws Exception {
-    	assertSame(node, dnf.getObject());
+        assertSame(node, dnf.getObject());
     }
-    
+
     public void testGetObjectName() throws Exception {
-    	assertEquals(node.getName(), dnf.getObjectName());
+        assertEquals(node.getName(), dnf.getObjectName());
     }
-    
+
     public void testGetFileName() throws Exception {
-    	assertEquals(node.getName() + ".xml", dnf.getFileName());
+        assertEquals(node.getName() + ".driver.xml", dnf.getLocation());
     }
 }
-

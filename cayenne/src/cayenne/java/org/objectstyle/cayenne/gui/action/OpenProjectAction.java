@@ -60,106 +60,142 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.ErrorDebugDialog;
+import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.cayenne.gui.util.RecentFileMenuItem;
+import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectException;
 
 /**
  * @author Andrei Adamchik
  */
 public class OpenProjectAction extends ProjectAction {
-	static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
-	public static final String ACTION_NAME = "Open Project";
+    static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
+    public static final String ACTION_NAME = "Open Project";
 
-	/**
-	 * Constructor for OpenProjectAction.
-	 * @param name
-	 */
-	public OpenProjectAction() {
-		super(ACTION_NAME);
-	}
+    /**
+     * Constructor for OpenProjectAction.
+     * @param name
+     */
+    public OpenProjectAction() {
+        super(ACTION_NAME);
+    }
 
-	public String getIconName() {
-		return "icon-open.gif";
-	}
+    public String getIconName() {
+        return "icon-open.gif";
+    }
 
-	public KeyStroke getAcceleratorKey() {
-		return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
-	}
+    public KeyStroke getAcceleratorKey() {
+        return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		File f = null;
-		if (e.getSource() instanceof RecentFileMenuItem) {
-			RecentFileMenuItem menu = (RecentFileMenuItem) e.getSource();
-			f = menu.getFile();
-		}
+    /**
+     * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        File f = null;
+        if (e.getSource() instanceof RecentFileMenuItem) {
+            RecentFileMenuItem menu = (RecentFileMenuItem) e.getSource();
+            f = menu.getFile();
+        }
 
-		if (f == null) {
-			openProject();
-		} else {
-			openProject(f);
-		}
-	}
+        if (f == null) {
+            openProject();
+        } else {
+            openProject(f);
+        }
+    }
 
-	/** Opens cayenne.xml file using file chooser. */
-	protected void openProject() {
-		ModelerPreferences pref = ModelerPreferences.getPreferences();
-		String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
-		try {
-			// Get the project file name (always cayenne.xml)
-			File file = null;
-			fileChooser.setFileFilter(new ProjectFileFilter());
-			fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			if (null != init_dir) {
-				File init_dir_file = new File(init_dir);
-				if (init_dir_file.exists())
-					fileChooser.setCurrentDirectory(init_dir_file);
-			}
-			int ret_code = fileChooser.showOpenDialog(Editor.getFrame());
-			if (ret_code != JFileChooser.APPROVE_OPTION)
-				return;
-			file = fileChooser.getSelectedFile();
-			openProject(file);
-		} catch (Exception e) {
-			logObj.warn("Error loading project file.", e);
-		}
-	}
+    /** Opens cayenne.xml file using file chooser. */
+    protected void openProject() {
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
+        try {
+            // Get the project file name (always cayenne.xml)
+            File file = null;
+            fileChooser.setFileFilter(new ProjectFileFilter());
+            fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            if (null != init_dir) {
+                File init_dir_file = new File(init_dir);
+                if (init_dir_file.exists())
+                    fileChooser.setCurrentDirectory(init_dir_file);
+            }
+            int ret_code = fileChooser.showOpenDialog(Editor.getFrame());
+            if (ret_code != JFileChooser.APPROVE_OPTION)
+                return;
+            file = fileChooser.getSelectedFile();
+            openProject(file);
+        } catch (Exception e) {
+            logObj.warn("Error loading project file.", e);
+        }
+    }
 
-	/** Opens specified project file. File must already exist. */
-	protected void openProject(File file) {
-		// Save and close (if needed) currently open project.
-		if (getMediator() != null && !closeProject()) {
-			return;
-		}
-		ModelerPreferences pref = ModelerPreferences.getPreferences();
-		try {
-			// Save dir path to the preferences
-			pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
-			Editor.getFrame().addToLastProjList(file.getAbsolutePath());
+    /** Opens specified project file. File must already exist. */
+    protected void openProject(File file) {
+        // Save and close (if needed) currently open project.
+        if (getMediator() != null && !closeProject()) {
+            return;
+        }
 
-			// Initialize gui configuration
-			// uncomment to debug GUI
-			Configuration.setLoggingLevel(Level.INFO);
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        try {
+            // Save dir path to the preferences
+            pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
+            Editor.getFrame().addToLastProjList(file.getAbsolutePath());
 
-			setMediator(new Mediator());
-			Editor.getFrame().projectOpened(file);
-			Editor.getFrame().setProjectTitle(file.getAbsolutePath());
+            // Initialize gui configuration
+            // uncomment to debug GUI
+            Configuration.setLoggingLevel(Level.INFO);
 
-		} catch (Exception ex) {
-			logObj.warn("Error loading project file.", ex);
-			ErrorDebugDialog.guiWarning(ex, "Error loading project");
-		}
-	}
+            Project project =
+                Editor.getProjects().createProject(
+                    Editor.DEFAULT_PROJECT_NAME,
+                    file,
+                    true);
+
+            // if upgrade was canceled
+            if (project.isUpgradeNeeded() && !processUpgrades(project)) {
+                closeProject();
+            } else {
+                setMediator(new Mediator());
+                Editor.getFrame().projectOpened(project);
+            }
+        } catch (Exception ex) {
+            logObj.warn("Error loading project file.", ex);
+            ErrorDebugDialog.guiWarning(ex, "Error loading project");
+        }
+    }
+
+
+    protected boolean processUpgrades(Project project) throws ProjectException {        
+        // must really concat all messages, this is a temp hack...
+        String msg = (String)project.getUpgradeMessages().get(0);
+        
+        // need an upgrade
+        int returnCode =
+            JOptionPane.showConfirmDialog(
+                Editor.getFrame(),
+                "Project needs an upgrade to a newer version. "
+                    + msg
+                    + ". Upgrade?", "Upgrade Needed", JOptionPane.YES_NO_OPTION);
+
+        if(returnCode == JOptionPane.NO_OPTION) {
+            return false;
+        } 
+        
+        // perform upgrade
+        logObj.info("Will upgrade project " + project.getMainProjectFile());
+        project.save();
+        return true;
+    }
 }

@@ -56,15 +56,25 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /**
  * @author Andrei Adamchik
  */
 public class ProjectTst extends CayenneTestCase {
+	static Logger logObj = Logger.getLogger(ProjectTst.class);
+	
     protected Project p;
     protected File f;
 
@@ -83,6 +93,35 @@ public class ProjectTst extends CayenneTestCase {
         super.setUp();
         f = new File("xyz");
         p = new Project("abc", f);
+    }
+    
+    public void testBuildFileList() throws Exception {
+    	// build a test project tree
+    	DataDomain d1 = new DataDomain("d1");
+    	DataMap m1 = new DataMap("m1");
+    	DataNode n1 = new DataNode("n1");
+    	n1.setDataSourceFactory(DriverDataSourceFactory.class.getName());
+    	
+    	d1.addMap(m1);
+    	d1.addNode(n1);
+    	
+    	ObjEntity oe1 = new ObjEntity("oe1");
+    	m1.addObjEntity(oe1);
+    	
+    	n1.addDataMap(m1);
+    	
+    	// initialize project 
+    	p.getConfig().addDomain(d1);
+    	
+    	// make assertions
+    	List files = p.buildFileList();
+    	
+    	// logObj.warn("Files: " + files);
+    	
+    	assertNotNull(files);
+    	
+    	// list must have 3 files total
+    	assertEquals(3, files.size());    	
     }
 
     public void testConstructor() throws Exception {
@@ -150,7 +189,7 @@ public class ProjectTst extends CayenneTestCase {
         /**
          * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
          */
-        public ProjectFile createProjectFile(Object obj) {
+        public ProjectFile createProjectFile(Project project, Object obj) {
             return null;
         }
 
@@ -171,14 +210,15 @@ public class ProjectTst extends CayenneTestCase {
         /**
          * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
          */
-        public void saveToFile(File f) throws Exception {
+        public void save(PrintWriter out) throws Exception {
         }
 
         /**
          * @see org.objectstyle.cayenne.project.ProjectFile#saveCommit()
          */
-        public void saveCommit() {
+        public File saveCommit() {
             commitCount++;
+            return new File("abc");
         }
 
         /**
@@ -206,6 +246,38 @@ public class ProjectTst extends CayenneTestCase {
         public void saveUndo() {
             undoCount++;
         }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#getFileName()
+         */
+        public String getLocation() {
+            return null;
+        }
+
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#getOldFileName()
+         */
+        public String getOldLocation() {
+            return null;
+        }
+
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#resolveFile()
+         */
+        public File resolveFile() {
+            return new File("abc");
+        }
+
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#resolveOldFile()
+         */
+        public File resolveOldFile() {
+            return new File("xyz");
+        }
+
 
     }
 }

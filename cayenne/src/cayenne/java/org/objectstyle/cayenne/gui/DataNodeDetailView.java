@@ -102,38 +102,42 @@ public class DataNodeDetailView
     implements DocumentListener, ActionListener, DataNodeDisplayListener {
     static Logger logObj = Logger.getLogger(DataNodeDetailView.class.getName());
 
-    Mediator mediator;
-    // The node currently being edited on this screen.
-    DataNode node;
+    protected Mediator mediator;
+    protected DataNode node;
 
-    JLabel nameLabel;
-    JTextField name;
-    String oldName;
+    protected JLabel nameLabel;
+    protected JTextField name;
+    protected String oldName;
 
-    JLabel locationLabel;
-    JTextField location;
-    JButton fileBtn;
+    protected JLabel locationLabel;
+    protected JTextField location;
+    
+    protected JLabel jndiLabel;
+    protected JTextField jndiLocation;
 
-    JLabel factoryLabel;
-    JComboBox factory;
+    protected JLabel factoryLabel;
+    protected JComboBox factory;
 
-    JLabel adapterLabel;
-    JComboBox adapter;
+    protected JLabel adapterLabel;
+    protected JComboBox adapter;
 
-    JLabel userNameLabel;
-    PreferenceField userName;
-    JLabel passwordLabel;
-    JPasswordField password;
-    JLabel driverLabel;
-    PreferenceField driver;
-    JLabel urlLabel;
-    PreferenceField url;
-    JLabel minConnectionsLabel;
+    protected JLabel userNameLabel;
+    protected PreferenceField userName;
+    protected JLabel passwordLabel;
+    protected JPasswordField password;
+    protected JLabel driverLabel;
+    protected PreferenceField driver;
+    protected JLabel urlLabel;
+    protected PreferenceField url;
+    protected JLabel minConnectionsLabel;
+    
     // FIXME!!! Need to restrict only to numbers
-    JTextField minConnections;
-    JLabel maxConnectionsLabel;
+    protected JTextField minConnections;
+    protected JLabel maxConnectionsLabel;
     // FIXME!!! Need to restrict only to numbers
-    JTextField maxConnections;
+    protected JTextField maxConnections;
+    
+    protected JPanel driverPanel;
 
     /** Cludge to prevent marking domain as dirty during initial load. */
     private boolean ignoreChange;
@@ -156,10 +160,9 @@ public class DataNodeDetailView
         maxConnections.getDocument().addDocumentListener(this);
         factory.addActionListener(this);
         adapter.addActionListener(this);
-        fileBtn.addActionListener(this);
     }
 
-    private void init() {
+    protected void init() {
         GridBagLayout layout = new GridBagLayout();
         this.setLayout(layout);
         GridBagConstraints constraints = new GridBagConstraints();
@@ -176,7 +179,6 @@ public class DataNodeDetailView
         name = new JTextField(20);
         locationLabel = new JLabel("Location: ");
         location = new JTextField(25);
-        fileBtn = new JButton("...");
         factoryLabel = new JLabel("Data source factory:");
         factory = new JComboBox();
         factory.setEditable(true);
@@ -199,8 +201,6 @@ public class DataNodeDetailView
         adapter.setModel(model);
         adapter.setSelectedIndex(-1);
 
-        JPanel fileChooser = this.formatFileChooser(location, fileBtn);
-
         Component[] left_comp = new Component[4];
         left_comp[0] = nameLabel;
         left_comp[1] = factoryLabel;
@@ -210,13 +210,12 @@ public class DataNodeDetailView
         Component[] right_comp = new Component[4];
         right_comp[0] = name;
         right_comp[1] = factory;
-        right_comp[2] = fileChooser;
+        right_comp[2] = location;
         right_comp[3] = adapter;
 
         JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
         add(temp, constraints);
         location.setEditable(false);
-        fileBtn.setVisible(false);
 
         userNameLabel = new JLabel("User name: ");
         userName = new PreferenceField(ModelerPreferences.USER_NAME);
@@ -250,14 +249,13 @@ public class DataNodeDetailView
         right_comp[4] = minConnections;
         right_comp[5] = maxConnections;
 
-        temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
-        temp.setBorder(BorderFactory.createTitledBorder("Data Source Info"));
+        driverPanel = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
+        driverPanel.setBorder(BorderFactory.createTitledBorder("Data Source Info"));
         constraints.gridheight = 2;
         constraints.gridy = 1;
         constraints.gridwidth = GridBagConstraints.REMAINDER;
         constraints.gridheight = GridBagConstraints.REMAINDER;
-        add(temp, constraints);
-
+        add(driverPanel, constraints);
     }
 
     private JPanel formatFileChooser(JTextField fld, JButton btn) {
@@ -369,11 +367,11 @@ public class DataNodeDetailView
             String ele = (String) factory.getModel().getSelectedItem();
             if (ele != null && ele.trim().length() > 0) {
                 if (ele.equals(DriverDataSourceFactory.class.getName())) {
-                    fileBtn.setVisible(true);
                     location.setEditable(false);
+                    showDiverInfo(true);
                 } else {
-                    fileBtn.setVisible(false);
                     location.setEditable(true);
+                    showDiverInfo(false);
                 }
 
                 if (!ele.equals(aNode.getDataSourceFactory())) {
@@ -416,9 +414,6 @@ public class DataNodeDetailView
                 mediator.getCurrentDataNode().setAdapter(newAdapter);
                 mediator.setDirty(true);
          //   }
-        } else if (src == fileBtn) {
-            // "select node location" clicked
-            selectNodeLocation();
         } else if (src == driver) {
             ignoreChange = true;
             driver.storePreferences();
@@ -434,98 +429,20 @@ public class DataNodeDetailView
         }
     }
 
-    /**
-     * Handles changing file name of the data node configuration.
-     */
-    protected void selectNodeLocation() {
-        SaveHandler saveHandler = new SaveHandler(mediator);
-        String oldLocation = node.getDataSourceLocation();
-
-        File projDir = Editor.getProject().getProjectDir();
-        try {
-            // don't allow changes on unsaved project,
-            // unless this node was just recently added and doesn't have 
-            // a location yet.
-            if (oldLocation != null && !saveHandler.shouldProceed()) {
-                return;
-            }
-
-            FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
-            JFileChooser fc = new JFileChooser(fileView);
-            fc.setDialogType(JFileChooser.SAVE_DIALOG);
-            fc.setDialogTitle("Data Node Location");
-            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-            if (projDir != null) {
-                fc.setCurrentDirectory(projDir);
-            }
-
-            if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
-                return;
-            }
-
-            File file = fc.getSelectedFile();
-
-            // Determine and set new data map location
-            String newFileLocation = file.getAbsolutePath();
-
-            // If it is set, use path striped of proj dir and following separator
-            // If proj dir not set, use absolute location.
-            String relLocation = Editor.getProject().resolveSymbolicName(file);
-            if(relLocation == null) {
-            	logObj.info("Selected location is not the child of project directory, ignoring.");
-            	return;
-            }
- 
-            if (relLocation.equals(node.getDataSourceLocation())) {
-                return;
-            }
-
-            // Create new file
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            node.setDataSourceLocation(relLocation);
-            location.setText(relLocation);
-        } catch (IOException ioex) {
-            ErrorDebugDialog.guiWarning(ioex, "Error renaming map.");
-            return;
-        } catch (Throwable th) {
-            ErrorDebugDialog.guiException(th);
-            return;
-        }
-
-        // Map location changed
-        mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-
-        // remove old location
-        if (oldLocation != null) {
-            // save project only if the node file already exists
-            saveHandler.saveProject();
-
-            File oldFile =
-                (projDir != null)
-                    ? new File(projDir, oldLocation)
-                    : new File(oldLocation);
-            if (!oldFile.delete()) {
-                logObj.info("Can't delete old file: " + oldFile);
-            }
-        }
-    }
-
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         node = e.getDataNode();
-        if (null == node) {
+        
+        if (node == null) {
             return;
         }
+        
         ProjectDataSource src = (ProjectDataSource) node.getDataSource();
         oldName = node.getName();
         ignoreChange = true;
         name.setText(oldName);
         populateFactory(node.getDataSourceFactory());
         DbAdapter adapter = node.getAdapter();
-        if (null != adapter)
+        if (adapter != null)
             populateDbAdapter(adapter.getClass().getName().trim());
         else
             populateDbAdapter("");
@@ -556,7 +473,7 @@ public class DataNodeDetailView
         }
     }
 
-    private void populateFactory(String selected_class) {
+    protected void populateFactory(String selected_class) {
         DefaultComboBoxModel model = (DefaultComboBoxModel) factory.getModel();
         if (selected_class != null && selected_class.length() > 0) {
             boolean found = false;
@@ -569,11 +486,11 @@ public class DataNodeDetailView
                     // show File button and disable text field.
                     // Otherwise hide File button and enable text field.
                     if (selected_class.equals(DriverDataSourceFactory.class.getName())) {
-                        fileBtn.setVisible(true);
                         location.setEditable(false);
+                        showDiverInfo(true);
                     } else {
-                        fileBtn.setVisible(true);
                         location.setEditable(true);
+                        showDiverInfo(false);
                     }
 
                     break;
@@ -589,12 +506,21 @@ public class DataNodeDetailView
             model.setSelectedItem(null);
     }
 
-    private void populateDataSourceInfo(DataSourceInfo info) {
+    protected void populateDataSourceInfo(DataSourceInfo info) {
         userName.setText(info.getUserName());
         password.setText(info.getPassword());
         driver.setText(info.getJdbcDriver());
         url.setText(info.getDataSourceUrl());
         minConnections.setText(String.valueOf(info.getMinConnections()));
         maxConnections.setText(String.valueOf(info.getMaxConnections()));
-    } //end populateDataSourceInfo()
-} // End class DataNodeDetailView
+    } 
+    
+    protected void showDiverInfo(boolean show) {
+    	
+    	if(show && driverPanel.isVisible()) {
+    		ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+    		populateDataSourceInfo(src.getDataSourceInfo());
+    	}
+    	driverPanel.setVisible(show);
+    }
+}

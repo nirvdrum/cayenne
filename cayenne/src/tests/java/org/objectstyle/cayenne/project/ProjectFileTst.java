@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
+import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 
@@ -78,21 +78,27 @@ public class ProjectFileTst extends CayenneTestCase {
     */
     protected void setUp() throws Exception {
         super.setUp();
-        pf = new TestProjectFile("name", "ext");
+        pf = new TestProjectFile("name.ext");
     }
 
-    public void testSynchronizeName() throws Exception {
-        assertEquals("name", pf.name);
-        pf.synchronizeName();
-        assertEquals(TestProjectFile.OBJ_NAME, pf.name);
+    public void testSynchronizeLocation() throws Exception {
+        assertEquals("name.ext", pf.location);
+        pf.synchronizeLocation();
+        assertEquals(TestProjectFile.OBJ_NAME, pf.location);
+    }
+    
+    public void testRenamed() throws Exception {
+    	assertTrue(pf.isRenamed());
+    	pf.synchronizeLocation();
+    	assertTrue(!pf.isRenamed());
     }
 
-    public void testGetFileName() throws Exception {
-        assertEquals(TestProjectFile.OBJ_NAME + ".ext", pf.getFileName());
+    public void testLocation() throws Exception {
+        assertEquals(TestProjectFile.OBJ_NAME, pf.getLocation());
     }
 
-    public void testGetOldFileName() throws Exception {
-        assertEquals("name.ext", pf.getOldFileName());
+    public void testOldLocation() throws Exception {
+        assertEquals("name.ext", pf.getOldLocation());
     }
 
     // inner class to allow testing of the abstract ProjectFile
@@ -104,8 +110,8 @@ public class ProjectFileTst extends CayenneTestCase {
          * @param name
          * @param extension
          */
-        public TestProjectFile(String name, String extension) {
-            super(name, extension);
+        public TestProjectFile(String location) {
+            super(null, location);
         }
 
         /**
@@ -125,12 +131,12 @@ public class ProjectFileTst extends CayenneTestCase {
         /**
          * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
          */
-        public void saveToFile(File f) throws Exception {}
+        public void save(PrintWriter out) throws Exception {}
 
         /**
          * @see org.objectstyle.cayenne.project.ProjectFile#createFileWrapper(Object)
          */
-        public ProjectFile createProjectFile(Object obj) {
+        public ProjectFile createProjectFile(Project project, Object obj) {
             return null;
         }
 

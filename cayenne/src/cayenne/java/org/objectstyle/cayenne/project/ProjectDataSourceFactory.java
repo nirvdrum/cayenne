@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
  * Factory of DataSource objects used by the project model. 
  * Always tries to locate file with direct connection info.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class ProjectDataSourceFactory extends DriverDataSourceFactory {
@@ -88,7 +87,7 @@ public class ProjectDataSourceFactory extends DriverDataSourceFactory {
         try {
             load(location);
         } catch (ConfigException e) {
-            logObj.warn("No data source " + location, e);
+            logObj.info("No data source at '" + location + "', ignoring.");
         }
         return new ProjectDataSource(getDriverInfo());
     }

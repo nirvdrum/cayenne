@@ -56,10 +56,13 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -69,10 +72,11 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class ProjectFile {
+	static Logger logObj = Logger.getLogger(ProjectFile.class);
+	
     protected static final List fileTypes = new ArrayList();
 
-    protected String name;
-    protected String extension;
+    protected String location;
     protected File tempFile;
     protected Project project;
 
@@ -87,11 +91,11 @@ public abstract class ProjectFile {
      * or null if no such object can be created. This is a common
      * factory method that takes care of instantiating the right wrapper.
      */
-    public static ProjectFile projectFileForObject(Object obj) {
+    public static ProjectFile projectFileForObject(Project project, Object obj) {
         for (int i = 0; i < fileTypes.size(); i++) {
             ProjectFile f = (ProjectFile) fileTypes.get(i);
             if (f.canHandle(obj)) {
-                return f.createProjectFile(obj);
+                return f.createProjectFile(project, obj);
             }
         }
         return null;
@@ -102,30 +106,40 @@ public abstract class ProjectFile {
     /**
      * Constructor for ProjectFile.
      */
-    public ProjectFile(String name, String extension) {
-        this.name = name;
-        this.extension = extension;
+    public ProjectFile(Project project, String location) {
+        this.location = location;
+        this.project = project;
     }
 
     /**
-     * Builds a filename from the object name and extension.
+     * Builds a filename from the object name and "file suffix".
      */
-    protected String getFileName() {
+    public String getLocation() {
         String oName = getObjectName();
         if (oName == null) {
             throw new NullPointerException("Null name.");
         }
-        return (extension != null) ? oName + '.' + extension : oName;
+
+        return oName + getLocationSuffix();
     }
 
     /**
     * Builds a filename from the initial name and extension.
     */
-    protected String getOldFileName() {
-        if (name == null) {
+    public String getOldLocation() {
+        if (location == null) {
             throw new NullPointerException("Null old name.");
         }
-        return (extension != null) ? name + '.' + extension : name;
+        return location;
+    }
+
+    /**
+     * Returns suffix to append to object name when 
+     * creating a file name. Default implementation 
+     * returns empty string.
+     */
+    public String getLocationSuffix() {
+        return "";
     }
 
     /**
@@ -144,27 +158,41 @@ public abstract class ProjectFile {
      * The procedure is dependent on the type of
      * object and is implemented by concrete subclasses.
      */
-    public abstract void saveToFile(File f) throws Exception;
+    public abstract void save(PrintWriter out) throws Exception;
 
     /**
      * Returns true if this file wrapper can handle a
      * specified object.
      */
     public abstract boolean canHandle(Object obj);
+    
+   /**
+     * Returns true if this file wrapper can handle an
+     * internally stored object.
+     */
+    public boolean canHandleObject() {
+    	return canHandle(getObject());
+    }
 
     /**
      * Returns an instance of ProjectFile that will handle a 
      * wrapped object. This method is an example of "prototype"
      * pattern, used here due to the lack of Class inheritance in Java.
      */
-    public abstract ProjectFile createProjectFile(Object obj);
+    public abstract ProjectFile createProjectFile(Project project, Object obj);
 
     /**
      * Replaces internally stored filename with the current object name.
      */
-    public void synchronizeName() {
-        name = getObjectName();
+    public void synchronizeLocation() {
+        location = getLocation();
     }
+
+    /**
+     * This method is called by project to let file know that
+     * it will be saved. Default implementation is a noop.
+     */
+    public void willSave() {}
 
     /**
      * Saves ProjectFile's underlying object to a temporary 
@@ -172,15 +200,30 @@ public abstract class ProjectFile {
      * encountered during saving, an Exception is thrown.
      */
     public void saveTemp() throws Exception {
+        // cleanup any previous temp files
         if (tempFile != null && tempFile.isFile()) {
             tempFile.delete();
             tempFile = null;
         }
 
+        // check write permissions for the target final file...
         File finalFile = resolveFile();
         checkWritePermissions(finalFile);
+
+        // ...but save to temp file first
         tempFile = tempFileForFile(finalFile);
-        saveToFile(tempFile);
+        FileWriter fw = new FileWriter(tempFile);
+
+        try {
+            PrintWriter pw = new PrintWriter(fw);
+            try {
+                save(pw);
+            } finally {
+                pw.close();
+            }
+        } finally {
+            fw.close();
+        }
     }
 
     /**
@@ -189,39 +232,41 @@ public abstract class ProjectFile {
      * the <b>new</b> name is returned.
      */
     public File resolveFile() {
-        return getProject().resolveFile(getFileName());
+        return getProject().resolveFile(getLocation());
     }
-    
+
     /**
      * Returns a file which is a canonical representation of the 
      * file to store a wrapped object. If an object was renamed, 
      * the <b>old</b> name is returned.
      */
     public File resolveOldFile() {
-        return getProject().resolveFile(getOldFileName());
+        return getProject().resolveFile(getOldLocation());
     }
 
     /**
      * Finishes saving the underlying object.
      */
-    public void saveCommit() throws ProjectException {
-        if (tempFile == null) {
-            return;
-        }
-
+    public File saveCommit() throws ProjectException {
         File finalFile = resolveFile();
-        if (finalFile.exists()) {
-            if (!finalFile.delete()) {
-                throw new ProjectException(
-                    "Unable to remove old master file : " + finalFile);
+        
+        if (tempFile != null) {
+            if (finalFile.exists()) {
+                if (!finalFile.delete()) {
+                    throw new ProjectException(
+                        "Unable to remove old master file : " + finalFile);
+                }
             }
-        }
 
-        if (!tempFile.renameTo(finalFile)) {
-            throw new ProjectException("Unable to move " + tempFile + " to " + finalFile);
-        }
+            if (!tempFile.renameTo(finalFile)) {
+                throw new ProjectException(
+                    "Unable to move " + tempFile + " to " + finalFile);
+            }
 
-        tempFile = null;
+            tempFile = null;
+        }
+        
+        return finalFile;
     }
 
     /**
@@ -242,16 +287,8 @@ public abstract class ProjectFile {
         return project;
     }
 
-    /**
-     * Sets the project.
-     * @param project The project to set
-     */
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
     public boolean isRenamed() {
-        return Util.nullSafeEquals(name, getObjectName());
+        return !Util.nullSafeEquals(location, getLocation());
     }
 
     /** 
@@ -264,7 +301,13 @@ public abstract class ProjectFile {
         if (name == null || name.length() < 3) {
             name = "cayenne-project";
         }
-
+ 
+        if(!parent.exists()) {
+        	if(!parent.mkdirs()) {
+        		throw new IOException("Error creating directory tree: " + parent);
+        	}
+        }
+         
         return File.createTempFile(name, null, parent);
     }
 
@@ -273,8 +316,20 @@ public abstract class ProjectFile {
             throw new IOException("Target file is a directory: " + file);
         }
 
-        if (!file.canWrite()) {
+        if (file.exists() && !file.canWrite()) {
             throw new IOException("Can't write to file: " + file);
         }
+    }
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("ProjectFile [").append(getClass().getName()).append("]: name = ");
+        if (getObject() != null) {
+            buf.append("*null*");
+        } else {
+            buf.append(getObjectName());
+        }
+
+        return buf.toString();
     }
 }

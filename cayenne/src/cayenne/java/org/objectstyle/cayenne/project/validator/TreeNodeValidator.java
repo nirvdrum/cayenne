@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.project.ProjectException;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
@@ -74,7 +73,7 @@ import org.objectstyle.cayenne.project.ProjectTraversal;
  * @author Andrei Adamchik
  */
 public abstract class TreeNodeValidator {
-
+    
     // initialize singleton validators
     protected static final DomainValidator domainValidator = new DomainValidator();
     protected static final DataNodeValidator nodeValidator = new DataNodeValidator();
@@ -117,7 +116,8 @@ public abstract class TreeNodeValidator {
         } else if (validatedObj instanceof DataDomain) {
             validatorObj = domainValidator;
         } else {
-            throw new ProjectException("Unsupported project node: " + validatedObj);
+            // ignore unknown nodes
+            return;
         }
 
         validatorObj.validateObject(path, validator);

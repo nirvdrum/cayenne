@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Andrei Adamchik
  */
 public class DataMapErrorMsg extends ValidationDisplayHandler {
-	protected DataMap map;
+    protected DataMap map;
 
     /**
      * Constructor for DataMapErrorMsg.
@@ -79,13 +79,16 @@ public class DataMapErrorMsg extends ValidationDisplayHandler {
      */
     public DataMapErrorMsg(ValidationResult result) {
         super(result);
-        this.map = (DataMap)result.getTreeNodePath()[1];
+
+        if (result.getTreeNodePath().length > 2) {
+            this.map = (DataMap) result.getTreeNodePath()[2];
+        }
     }
 
-	public void displayField(Mediator mediator, JFrame frame) {
-		DataMapDisplayEvent event;
-		event = new DataMapDisplayEvent(frame, map, domain);
-		mediator.fireDataMapDisplayEvent(event);
-	}
+    public void displayField(Mediator mediator, JFrame frame) {
+        DataMapDisplayEvent event;
+        event = new DataMapDisplayEvent(frame, map, domain);
+        mediator.fireDataMapDisplayEvent(event);
+    }
 
 }

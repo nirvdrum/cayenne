@@ -56,8 +56,11 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
  * RootProjectFile is a ProjectFile abstraction of the 
@@ -68,22 +71,30 @@ import org.objectstyle.cayenne.conf.Configuration;
  * @author Andrei Adamchik
  */
 public class RootProjectFile extends ProjectFile {
-	protected static final String ROOT_FILE_EXTENSION = "xml";
-	
-	protected Configuration projectConfig;
-	
+    protected Configuration projectConfig;
+
     public RootProjectFile() {}
-    
+
     /**
      * Constructor for RootProjectFile.
      * @param name
      * @param extension
      */
-    public RootProjectFile(Configuration projectConfig) {
-        super("cayenne", ROOT_FILE_EXTENSION);
+    public RootProjectFile(Project project, Configuration projectConfig) {
+        super(project, "cayenne.xml");
         this.projectConfig = projectConfig;
     }
 
+
+    /**
+     * Returns suffix to append to object name when 
+     * creating a file name. Default implementation 
+     * returns empty string.
+     */
+    public String getLocationSuffix() {
+        return ".xml";
+    }
+    
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
      */
@@ -101,17 +112,16 @@ public class RootProjectFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {
-        
+    public void save(PrintWriter out) throws Exception {
+        DomainHelper.storeDomains(out, getProject().getDomains());
     }
-    
+
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#createFileWrapper(Object)
      */
-    public ProjectFile createProjectFile(Object obj) {
-        return new RootProjectFile((Configuration)obj);
+    public ProjectFile createProjectFile(Project project, Object obj) {
+        return new RootProjectFile(project, (Configuration) obj);
     }
-
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#isObjectSupported(Object)
@@ -120,4 +130,3 @@ public class RootProjectFile extends ProjectFile {
         return obj instanceof Configuration;
     }
 }
-

@@ -250,6 +250,10 @@ public class Editor
         return getFrame().projects.getCurrentProject();
     }
 
+    public static ProjectSet getProjects() {
+        return getFrame().projects;
+    }
+
     public Editor() {
         super(TITLE);
 
@@ -469,8 +473,11 @@ public class Editor
     public void projectClosed() {
         recentFileMenu.rebuildFromPreferences();
 
-        getContentPane().remove(view);
-        view = null;
+        if (view != null) {
+            getContentPane().remove(view);
+            view = null;
+        }
+
         setMediator(null);
         projects.removeCurrentProject();
 
@@ -486,11 +493,7 @@ public class Editor
         setProjectTitle(null);
     }
 
-    public void projectOpened(File projectFile) {
-        logObj.debug("Opening project: " + projectFile);
-
-        // create a new project
-        projects.createProject(DEFAULT_PROJECT_NAME, projectFile, true);
+    public void projectOpened(Project project) {
         view = new EditorView(mediator);
         getContentPane().add(view, BorderLayout.CENTER);
 
@@ -505,7 +508,9 @@ public class Editor
         mediator.addDbRelationshipDisplayListener(this);
 
         enableProjectMenu();
-        this.validate();
+        validate();
+
+        setProjectTitle(project.getMainProjectFile().getAbsolutePath());
     }
 
     /**
