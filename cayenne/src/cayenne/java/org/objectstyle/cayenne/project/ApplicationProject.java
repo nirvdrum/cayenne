@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -76,17 +77,18 @@ public class ApplicationProject extends Project {
      */
     public ApplicationProject(File projectFile) {
         super(projectFile);
+    }
 
+    /**
+    * @see org.objectstyle.cayenne.project.Project#postInit(File)
+    */
+    protected void postInit(File projectFile) {
         try {
             config = new ProjectConfiguration(projectFile.getCanonicalFile());
         } catch (IOException e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
-
-        // take a snapshot of files used by the project
-        files = Collections.synchronizedList(buildFileList());
-
-        checkForUpgrades();
+        super.postInit(projectFile);
     }
 
     /**
@@ -117,5 +119,11 @@ public class ApplicationProject extends Project {
             return new DataDomain[0];
         }
         return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
+    }
+
+    public void checkForUpgrades() {
+        if (hasRenamedFiles()) {
+            upgradeMessages.add("Some files require renaming");
+        }
     }
 }

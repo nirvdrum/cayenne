@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Concrete subclass of Project used for testing purposes.
@@ -79,6 +81,19 @@ public class TstProject extends Project {
      */
     public File getMainProjectFile() {
         return null;
+    }
+
+
+    /**
+     * @see org.objectstyle.cayenne.project.Project#checkForUpgrades()
+     */
+    public void checkForUpgrades() {}
+    
+    /**
+     * @see org.objectstyle.cayenne.project.Project#buildFileList()
+     */
+    public List buildFileList() {
+        return new ArrayList();
     }
 
 

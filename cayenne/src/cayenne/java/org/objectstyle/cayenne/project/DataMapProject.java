@@ -79,5 +79,10 @@ public class DataMapProject extends Project {
     public File getMainProjectFile() {
         return null;
     }
+    
+    /**
+     * Does nothing.
+     */
+    public void checkForUpgrades() {}
 }
 

@@ -79,29 +79,28 @@ import org.objectstyle.cayenne.project.validator.Validator;
  */
 public abstract class Project {
     static Logger logObj = Logger.getLogger(Project.class);
- 
+
     public static final String CURRENT_PROJECT_VERSION = "1.0";
 
     protected File projectDir;
     protected List files;
-    protected List upgradeMessages;
     protected ProjectFile mainProjectFile;
+    protected List upgradeMessages;
 
     /**
      * Factory method to create the right project type given project file.
      */
     public static Project createProject(File projectFile) {
-    	String fileName = projectFile.getName();
-    	
+        String fileName = projectFile.getName();
+
         if (Configuration.DOMAIN_FILE.equals(fileName)) {
             return new ApplicationProject(projectFile);
         } else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
             return new DataMapProject(projectFile);
+        } else {
+            throw new ProjectException("Unsupported project file: " + projectFile);
         }
-        else {
-        	throw new ProjectException("Unsupported project file: " + projectFile);
-        }
-    }    
+    }
 
     /**
      * Constructor for Project. <code>projectFile</code> must denote 
@@ -124,22 +123,35 @@ public abstract class Project {
         } catch (IOException e) {
             throw new ProjectException("Error creating project.", e);
         }
+
+        postInit(projectFile);
     }
 
-    protected void checkForUpgrades() {
-        upgradeMessages = Collections.synchronizedList(new ArrayList());
+    /** 
+     * Finished project initialization. Called
+     * from constructor. Default implementation builds a file list
+     * and checks for upgrades.
+     */
+    protected void postInit(File projectFile) {
+        // take a snapshot of files used by the project
+        files = Collections.synchronizedList(buildFileList());
         
-        if (hasRenamedFiles()) {
-            upgradeMessages.add("Some files require renaming");
-        }
+        upgradeMessages = Collections.synchronizedList(new ArrayList());
+        checkForUpgrades();
     }
 
+    /**
+     * Returns true if the project needs to be upgraded.
+     */
     public boolean isUpgradeNeeded() {
-    	return upgradeMessages.size() > 0;
+        return upgradeMessages.size() > 0;
     }
-    
+
+    /**
+      * Returns a list of upgrade messages.
+      */
     public List getUpgradeMessages() {
-    	return upgradeMessages;
+        return upgradeMessages;
     }
 
     /**
@@ -284,6 +296,17 @@ public abstract class Project {
      */
     public abstract File getMainProjectFile();
 
+    /**
+     * Determines whether the project needs to be upgraded.
+     * Populates internal list of upgrade messages with discovered
+     * information.
+     */
+    public abstract void checkForUpgrades();
+
+    /**
+     * Determines if a 
+    public abstract void checkForUpgrades();
+    
     /** 
      * Saves project. All currently existing files are updated,
      * without checking for modifications. New files are created
@@ -308,7 +331,7 @@ public abstract class Project {
                 if (newFile != null) {
                     filesToSave.add(newFile);
                 }
-            } else if(existingFile.canHandleObject()) {
+            } else if (existingFile.canHandleObject()) {
                 wrappedObjects.add(existingFile.getObject());
                 filesToSave.add(existingFile);
             }
