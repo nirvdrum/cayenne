@@ -52,20 +52,54 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.util;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.CayenneTestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-        TestSuite suite = new TestSuite("Util Package Tests");
-        suite.addTestSuite(UtilTst.class);
-        suite.addTestSuite(UtilExtTst.class);
-        suite.addTestSuite(NameConverterTst.class);
-        suite.addTestSuite(ResourceLocatorTst.class);
-        suite.addTestSuite(CayenneMapTst.class);
-        suite.addTestSuite(RequestDequeueTst.class);
-        return suite;
+/**
+ * @author Andrei Adamchik
+ */
+public class RequestDequeueTst extends CayenneTestCase {
+
+    /**
+     * Constructor for RequestDequeueTst.
+     * 
+     * @param arg0
+     */
+    public RequestDequeueTst(String arg0) {
+        super(arg0);
     }
+
+    public void testDequeueEventCode() throws Exception {
+        RequestDequeue dequeue = new RequestDequeue();
+        dequeue.setDequeueEventCode(RequestDequeue.QUEUE_FULL);
+        assertEquals(RequestDequeue.QUEUE_FULL, dequeue.getDequeueEventCode());
+    }
+
+    public void testDequeueSuccess() throws Exception {
+        RequestDequeue dequeue = new RequestDequeue();
+        dequeue.setDequeueEventCode(RequestDequeue.DEQUEUE_SUCCESS);
+        assertTrue(dequeue.isDequeueSuccess());
+    }
+
+    public void testQueueFull() throws Exception {
+        RequestDequeue dequeue = new RequestDequeue();
+        dequeue.setDequeueEventCode(RequestDequeue.QUEUE_FULL);
+        assertTrue(dequeue.isQueueFull());
+    }
+
+    public void testTimedOut() throws Exception {
+        RequestDequeue dequeue = new RequestDequeue();
+        dequeue.setDequeueEventCode(RequestDequeue.WAIT_TIMED_OUT);
+        assertTrue(dequeue.isTimedOut());
+    }
+
+    public void testDequeueEventObject() throws Exception {
+        RequestDequeue dequeue = new RequestDequeue();
+        Object obj = new Object();
+        dequeue.setDequeueEventObject(obj);
+        assertSame(obj, dequeue.getDequeueEventObject());
+    }
+
 }

@@ -67,7 +67,7 @@ import java.util.List;
  * <ul>
  *    <li>Thread is already #1 in the queue and an awaited event occurrs</li>
  * 	  <li>Thread timeout interval expired</li>
- * </li>
+ * </ul>
  * 
  * In both cases thread will be removed from the queue. 
  * 
