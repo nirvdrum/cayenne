@@ -67,13 +67,18 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTNot extends AggregateConditionNode {
-    public ASTNot(Node expression) {
-        super(ExpressionParserTreeConstants.JJTNOT);
-        jjtAddChild(expression, 0);
-    }
 
     ASTNot(int id) {
         super(id);
+    }
+
+    public ASTNot() {
+        super(ExpressionParserTreeConstants.JJTNOT);
+    }
+
+    public ASTNot(Node expression) {
+        super(ExpressionParserTreeConstants.JJTNOT);
+        jjtAddChild(expression, 0);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

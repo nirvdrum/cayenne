@@ -72,6 +72,14 @@ import org.objectstyle.cayenne.exp.Expression;
 public class ASTList extends SimpleNode {
     protected Object[] values;
 
+    ASTList(int id) {
+        super(id);
+    }
+
+    public ASTList() {
+        super(ExpressionParserTreeConstants.JJTLIST);
+    }
+
     /**
      * Initializes a list expression with an Object[].
      */
@@ -94,10 +102,6 @@ public class ASTList extends SimpleNode {
     public ASTList(Iterator objects) {
         super(ExpressionParserTreeConstants.JJTLIST);
         setValues(objects);
-    }
-
-    ASTList(int id) {
-        super(id);
     }
 
     /**

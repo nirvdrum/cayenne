@@ -60,7 +60,6 @@ import java.util.List;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -93,12 +92,12 @@ public class DataContextRollbackTst extends DataContextTestBase {
 
         // after: 
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
-        
+
         // TODO: should we expect relationships to be unset?
         // assertNull(p1.getToArtist());
         // assertEquals(0, artist.getPaintingArray().size());
     }
-    
+
     public void testRollbackNewObject() {
         String artistName = "revertTestArtist";
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
@@ -113,11 +112,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
 
         DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
-        query.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "artistName",
-                artistName));
+        query.setQualifier(ExpressionFactory.matchExp("artistName", artistName));
         List queryResults = freshContext.performQuery(query);
 
         assertEquals(0, queryResults.size());
@@ -151,11 +146,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
 
         DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
-        query.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "artistName",
-                artistName));
+        query.setQualifier(ExpressionFactory.matchExp("artistName", artistName));
         List queryResults = freshContext.performQuery(query);
 
         assertEquals(0, queryResults.size());
@@ -185,11 +176,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
 
         DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Painting.class);
-        query.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "paintingTitle",
-                paintingTitle));
+        query.setQualifier(ExpressionFactory.matchExp("paintingTitle", paintingTitle));
         List queryResults = freshContext.performQuery(query);
 
         assertEquals(1, queryResults.size());
@@ -217,11 +204,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
 
         DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
-        query.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "artistName",
-                artistName));
+        query.setQualifier(ExpressionFactory.matchExp("artistName", artistName));
         List queryResults = freshContext.performQuery(query);
 
         assertEquals(1, queryResults.size());
@@ -246,11 +229,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         //.. and ensure that the correct data is in the db
         DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
-        query.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "artistName",
-                artistName));
+        query.setQualifier(ExpressionFactory.matchExp("artistName", artistName));
         List queryResults = freshContext.performQuery(query);
 
         assertEquals(1, queryResults.size());

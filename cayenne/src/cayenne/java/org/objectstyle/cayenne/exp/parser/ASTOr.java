@@ -68,9 +68,16 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTOr extends AggregateConditionNode {
+    ASTOr(int id) {
+        super(id);
+    }
+
+    public ASTOr() {
+        super(ExpressionParserTreeConstants.JJTOR);
+    }
 
     public ASTOr(Object[] nodes) {
-        super(ExpressionParserTreeConstants.JJTAND);
+        super(ExpressionParserTreeConstants.JJTOR);
         int len = nodes.length;
         for (int i = 0; i < len; i++) {
             jjtAddChild((Node) nodes[i], i);
@@ -84,10 +91,6 @@ public class ASTOr extends AggregateConditionNode {
         for (int i = 0; i < len; i++) {
             jjtAddChild((Node) it.next(), i);
         }
-    }
-
-    ASTOr(int id) {
-        super(id);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

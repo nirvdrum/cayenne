@@ -66,17 +66,21 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  */
 public class ASTLessOrEqual extends ConditionNode {
 
-    public ASTLessOrEqual(ASTPath path, Object value) {
-        super(ExpressionParserTreeConstants.JJTLESSOREQUAL);
-        jjtAddChild(path, 0);
-        jjtAddChild(new ASTScalar(value), 1);
-    }
-
     /**
      * Constructor used by expression parser. Do not invoke directly.
      */
     ASTLessOrEqual(int id) {
         super(id);
+    }
+
+    public ASTLessOrEqual() {
+        super(ExpressionParserTreeConstants.JJTLESSOREQUAL);
+    }
+
+    public ASTLessOrEqual(ASTPath path, Object value) {
+        super(ExpressionParserTreeConstants.JJTLESSOREQUAL);
+        jjtAddChild(path, 0);
+        jjtAddChild(new ASTScalar(value), 1);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

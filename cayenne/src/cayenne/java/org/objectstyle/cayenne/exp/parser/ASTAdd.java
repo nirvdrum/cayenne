@@ -72,6 +72,10 @@ public class ASTAdd extends SimpleNode {
         super(id);
     }
 
+    public ASTAdd() {
+        super(ExpressionParserTreeConstants.JJTADD);
+    }
+
     public ASTAdd(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTADD);
         int len = nodes.length;

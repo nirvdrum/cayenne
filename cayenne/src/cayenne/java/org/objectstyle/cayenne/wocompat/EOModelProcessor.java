@@ -65,7 +65,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.parser.ASTDbPath;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -442,7 +442,7 @@ public class EOModelProcessor {
                 continue;
             }
 
-            Expression exp = ExpressionFactory.unaryExp(Expression.DB_PATH, targetPath);
+            Expression exp = new ASTDbPath(targetPath);
             Iterator path = e.getDbEntity().resolvePathComponents(exp);
 
             ObjRelationship flatRel = new ObjRelationship();

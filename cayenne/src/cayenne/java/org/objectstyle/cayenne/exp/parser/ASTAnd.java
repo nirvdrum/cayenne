@@ -68,6 +68,16 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTAnd extends AggregateConditionNode {
+    /**
+     * Constructor used by expression parser. Do not invoke directly.
+     */
+    ASTAnd(int id) {
+        super(id);
+    }
+
+    public ASTAnd() {
+        super(ExpressionParserTreeConstants.JJTAND);
+    }
 
     public ASTAnd(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTAND);
@@ -84,13 +94,6 @@ public class ASTAnd extends AggregateConditionNode {
         for (int i = 0; i < len; i++) {
             jjtAddChild((Node) it.next(), i);
         }
-    }
-
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTAnd(int id) {
-        super(id);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

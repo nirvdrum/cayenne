@@ -65,16 +65,20 @@ import org.objectstyle.cayenne.map.Entity;
 
 public class ASTObjPath extends ASTPath {
 
-    public ASTObjPath(Object value) {
-        super(ExpressionParserTreeConstants.JJTOBJPATH);
-        setPath(value);
-    }
-
     /**
      * Constructor used by expression parser. Do not invoke directly.
      */
     ASTObjPath(int id) {
         super(id);
+    }
+
+    public ASTObjPath() {
+        super(ExpressionParserTreeConstants.JJTOBJPATH);
+    }
+
+    public ASTObjPath(Object value) {
+        super(ExpressionParserTreeConstants.JJTOBJPATH);
+        setPath(value);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

@@ -5,7 +5,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Level;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -19,7 +18,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import webtest.Gallery;
 import webtest.Painting;
 
-public final class AddPaintingToGalleryAction extends Action {
+public class AddPaintingToGalleryAction extends Action {
 
     public ActionForward execute(
         ActionMapping mapping,
@@ -28,21 +27,13 @@ public final class AddPaintingToGalleryAction extends Action {
         HttpServletResponse response)
         throws Exception {
 
-        DataContext ctxt = BasicServletConfiguration.getDefaultContext(request.getSession());
+        DataContext ctxt =
+            BasicServletConfiguration.getDefaultContext(request.getSession());
 
         String paintingTitle = request.getParameter("title");
-
-        Expression qual =
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "paintingTitle",
-                paintingTitle);
+        Expression qual = ExpressionFactory.matchExp("paintingTitle", paintingTitle);
 
         SelectQuery query = new SelectQuery(Painting.class, qual);
-
-		// set a relatively high logging level, 
-		// to show the query execution progress
-        query.setLoggingLevel(Level.WARN);
 
         List paintings = ctxt.performQuery(query);
 
@@ -50,7 +41,6 @@ public final class AddPaintingToGalleryAction extends Action {
         System.err.println("painting: " + painting);
 
         query = new SelectQuery(Gallery.class);
-        query.setLoggingLevel(Level.WARN);
 
         List galleries = ctxt.performQuery(query);
 

@@ -64,6 +64,16 @@ import org.objectstyle.cayenne.exp.Expression;
  * @author Andrei Adamchik
  */
 public class ASTEqual extends ConditionNode {
+    /**
+     * Constructor used by expression parser. Do not invoke directly.
+     */
+    ASTEqual(int id) {
+        super(id);
+    }
+
+    public ASTEqual() {
+        super(ExpressionParserTreeConstants.JJTEQUAL);
+    }
 
     /**
      * Creates "Equal To" expression.
@@ -72,13 +82,6 @@ public class ASTEqual extends ConditionNode {
         super(ExpressionParserTreeConstants.JJTEQUAL);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
-    }
-
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTEqual(int id) {
-        super(id);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

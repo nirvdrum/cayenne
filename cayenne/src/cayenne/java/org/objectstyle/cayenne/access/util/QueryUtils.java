@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.parser.ASTObjPath;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -284,8 +285,7 @@ public class QueryUtils {
 
         newQ.setRootQuery(q);
         newQ.setPrefetchPath(prefetchPath);
-        Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, prefetchPath);
-        Iterator it = ent.resolvePathComponents(exp);
+        Iterator it = ent.resolvePathComponents(new ASTObjPath(prefetchPath));
 
         ObjRelationship r = null;
         while (it.hasNext()) {
@@ -296,7 +296,7 @@ public class QueryUtils {
             newQ.setRoot(r.getTargetEntity());
             newQ.setQualifier(
                 ent.translateToRelatedEntity(q.getQualifier(), prefetchPath));
-                
+
             if (r.isToMany() && !r.isFlattened()) {
                 newQ.setLastPrefetchHint(r);
             }
@@ -380,12 +380,7 @@ public class QueryUtils {
         }
 
         SelectQuery sel = new SelectQuery(destEnt);
-        sel.setQualifier(
-            ExpressionFactory.binaryDbPathExp(
-                Expression.EQUAL_TO,
-                buf.toString(),
-                source));
-
+        sel.setQualifier(ExpressionFactory.matchDbExp(buf.toString(), source));
         return sel;
     }
 }

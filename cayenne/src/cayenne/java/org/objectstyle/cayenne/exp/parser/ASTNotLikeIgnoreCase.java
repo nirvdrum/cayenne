@@ -65,14 +65,18 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTNotLikeIgnoreCase extends PatternMatchNode {
+    ASTNotLikeIgnoreCase(int id) {
+        super(id, true);
+    }
+
+    public ASTNotLikeIgnoreCase() {
+        super(ExpressionParserTreeConstants.JJTNOTLIKEIGNORECASE, true);
+    }
+
     public ASTNotLikeIgnoreCase(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTNOTLIKEIGNORECASE, true);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
-    }
-
-    ASTNotLikeIgnoreCase(int id) {
-        super(id, true);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

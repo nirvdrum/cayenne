@@ -316,8 +316,7 @@ public class DataContextTst extends DataContextTestBase {
      * returned to the client. Cayenne should trim it.
      */
     public void testCharInQualifier() throws Exception {
-        Expression e =
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
+        Expression e = ExpressionFactory.matchExp("artistName", "artist1");
         SelectQuery q = new SelectQuery("Artist", e);
         List artists = context.performQuery(q);
         assertEquals(1, artists.size());

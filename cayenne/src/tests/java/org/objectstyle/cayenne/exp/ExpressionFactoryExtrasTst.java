@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
 import java.util.ArrayList;
@@ -62,84 +62,87 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-
 public class ExpressionFactoryExtrasTst extends CayenneTestCase {
-    protected TstTraversalHandler handler;    
+    protected TstTraversalHandler handler;
 
-    
-    protected void setUp() throws java.lang.Exception {                
+    protected void setUp() throws java.lang.Exception {
         handler = new TstTraversalHandler();
     }
 
-
+    /**
+     * @deprecated binaryPathExp is deprecated.
+     */
     public void testBinaryPathExp() throws Exception {
         String path = "path1.path2";
         Object o2 = new Object();
         Expression e1 = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, path, o2);
-        assertTrue(e1 instanceof BinaryExpression);
-        assertTrue(e1.getOperand(0) instanceof UnaryExpression);
+        assertEquals(2, e1.getOperandCount());
+
+        assertTrue(e1.getOperand(0) instanceof Expression);
         assertSame(o2, e1.getOperand(1));
         assertEquals(Expression.EQUAL_TO, e1.getType());
-        
-        Expression pathExp = (Expression)e1.getOperand(0);
+
+        Expression pathExp = (Expression) e1.getOperand(0);
         assertEquals(Expression.OBJ_PATH, pathExp.getType());
         assertEquals(path, pathExp.getOperand(0));
     }
-    
-    
-    public void testMatchAllExp() throws Exception {        
+
+    public void testMatchAllExp() throws Exception {
         // create expressions and check the counts,
         // leaf count should be (2N) : 2 leafs for each pair
         // node count should be (2N + 1) for nodes with more than 1 pair
         // and 2N for a single pair : 2 nodes for each pair + 1 list node
         // where N is map size
-        
+
         // check for N in (1..3)
-        for(int n = 1; n <= 3; n++) {
+        for (int n = 1; n <= 3; n++) {
             Map map = new HashMap();
-            
+
             // populate map
-            for(int i = 1; i <= n; i++) {
+            for (int i = 1; i <= n; i++) {
                 map.put("k" + i, "v" + i);
             }
-            
+
             Expression exp = ExpressionFactory.matchAllExp(map, Expression.LESS_THAN);
             assertNotNull(exp);
             handler.traverseExpression(exp);
-            
+
             // assert statistics
             handler.assertConsistency();
             assertEquals("Failed: " + exp, 2 * n, handler.getLeafs());
-            assertEquals("Failed: " + exp, n < 2 ? 2 * n : 2 * n + 1, handler.getNodeCount());
+            assertEquals(
+                "Failed: " + exp,
+                n < 2 ? 2 * n : 2 * n + 1,
+                handler.getNodeCount());
         }
     }
-    
-    
-    
-    public void testJoinExp() throws Exception {        
+
+    public void testJoinExp() throws Exception {
         // create expressions and check the counts,
         // leaf count should be (2N) : 2 leafs for each expression
-        // node count should be (N + 1) for nodes with more than 1 pair
-        // and N for a single pair : 1 node for each pair + 1 list node
+        // node count should be N > 1 ? 2 * N + 1 : 2 * N
         // where N is map size
-        
+
         // check for N in (1..5)
-        for(int n = 1; n <= 5; n++) {
+        for (int n = 1; n <= 5; n++) {
             List list = new ArrayList();
-            
+
             // populate map
-            for(int i = 1; i <= n; i++) {
-                list.add(ExpressionFactory.binaryExp(Expression.EQUAL_TO, ("k" + i), "v" + i));
+            for (int i = 1; i <= n; i++) {
+                list.add(ExpressionFactory.matchExp(("k" + i), "v" + i));
             }
-            
+
             Expression exp = ExpressionFactory.joinExp(Expression.AND, list);
             assertNotNull(exp);
             handler.traverseExpression(exp);
-            
+
             // assert statistics
             handler.assertConsistency();
             assertEquals("Failed: " + exp, 2 * n, handler.getLeafs());
-            assertEquals("Failed: " + exp, n < 2 ? n : n + 1, handler.getNodeCount());
+            assertEquals(
+                "Failed: " + exp,
+                n > 1 ? 2 * n + 1 : 2 * n,
+                handler.getNodeCount());
         }
     }
 }

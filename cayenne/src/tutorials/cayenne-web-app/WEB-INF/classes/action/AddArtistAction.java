@@ -10,7 +10,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-public final class AddArtistAction extends Action {
+public class AddArtistAction extends Action {
 
     public ActionForward execute(
         ActionMapping mapping,

@@ -68,6 +68,10 @@ public class ASTNotEqual extends ConditionNode {
         super(id);
     }
 
+    public ASTNotEqual() {
+        super(ExpressionParserTreeConstants.JJTNOTEQUAL);
+    }
+
     /**
      * Creates "Equal To" expression.
      */

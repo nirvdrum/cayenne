@@ -59,7 +59,6 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting1;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -79,14 +78,11 @@ public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
         return p1;
     }
 
-    protected Painting1 fetchPainting1() {    	
+    protected Painting1 fetchPainting1() {
         SelectQuery q =
             new SelectQuery(
                 "Painting1",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "paintingTitle",
-                    paintingName));
+                ExpressionFactory.matchExp("paintingTitle", paintingName));
         List pts = ctxt.performQuery(q);
         return (pts.size() > 0) ? (Painting1) pts.get(0) : null;
     }
@@ -103,7 +99,7 @@ public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         Painting1 p2 = fetchPainting1();

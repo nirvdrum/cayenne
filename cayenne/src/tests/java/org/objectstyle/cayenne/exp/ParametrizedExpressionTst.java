@@ -189,15 +189,13 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
 
         // some expression nodes must be pruned
         assertNotNull(e2);
-        assertTrue("Not a list expression: " + e2, e2 instanceof ListExpression);
 
-        ListExpression le = (ListExpression) e2;
-        assertEquals(2, le.getOperandCount());
+        assertEquals(2, e2.getOperandCount());
 
-        Expression k2 = (Expression) le.getOperand(0);
+        Expression k2 = (Expression) e2.getOperand(0);
         assertEquals("abc", k2.getOperand(1));
 
-        Expression k3 = (Expression) le.getOperand(1);
+        Expression k3 = (Expression) e2.getOperand(1);
         assertEquals("xyz", k3.getOperand(1));
     }
 

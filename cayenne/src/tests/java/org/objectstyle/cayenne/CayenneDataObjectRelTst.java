@@ -63,7 +63,6 @@ import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -304,10 +303,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         SelectQuery q =
             new SelectQuery(
                 "PaintingInfo",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "painting.paintingTitle",
-                    name));
+                ExpressionFactory.matchExp("painting.paintingTitle", name));
         List pts = ctxt.performQuery(q);
         return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
     }

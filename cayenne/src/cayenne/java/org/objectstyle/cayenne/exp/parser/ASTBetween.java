@@ -70,6 +70,10 @@ public class ASTBetween extends ConditionNode {
         super(id);
     }
 
+    public ASTBetween() {
+        super(ExpressionParserTreeConstants.JJTBETWEEN);
+    }
+
     public ASTBetween(ASTPath path, Object value1, Object value2) {
         super(ExpressionParserTreeConstants.JJTBETWEEN);
         jjtAddChild(path, 0);

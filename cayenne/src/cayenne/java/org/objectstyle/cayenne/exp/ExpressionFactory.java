@@ -63,8 +63,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.exp.parser.ASTAdd;
+import org.objectstyle.cayenne.exp.parser.ASTAnd;
 import org.objectstyle.cayenne.exp.parser.ASTBetween;
 import org.objectstyle.cayenne.exp.parser.ASTDbPath;
+import org.objectstyle.cayenne.exp.parser.ASTDivide;
 import org.objectstyle.cayenne.exp.parser.ASTEqual;
 import org.objectstyle.cayenne.exp.parser.ASTGreater;
 import org.objectstyle.cayenne.exp.parser.ASTGreaterOrEqual;
@@ -74,12 +77,18 @@ import org.objectstyle.cayenne.exp.parser.ASTLessOrEqual;
 import org.objectstyle.cayenne.exp.parser.ASTLike;
 import org.objectstyle.cayenne.exp.parser.ASTLikeIgnoreCase;
 import org.objectstyle.cayenne.exp.parser.ASTList;
+import org.objectstyle.cayenne.exp.parser.ASTMultiply;
+import org.objectstyle.cayenne.exp.parser.ASTNegate;
+import org.objectstyle.cayenne.exp.parser.ASTNot;
 import org.objectstyle.cayenne.exp.parser.ASTNotBetween;
 import org.objectstyle.cayenne.exp.parser.ASTNotEqual;
 import org.objectstyle.cayenne.exp.parser.ASTNotIn;
 import org.objectstyle.cayenne.exp.parser.ASTNotLike;
 import org.objectstyle.cayenne.exp.parser.ASTNotLikeIgnoreCase;
 import org.objectstyle.cayenne.exp.parser.ASTObjPath;
+import org.objectstyle.cayenne.exp.parser.ASTOr;
+import org.objectstyle.cayenne.exp.parser.ASTSubtract;
+import org.objectstyle.cayenne.exp.parser.SimpleNode;
 
 /** 
  * Helper class to build expressions. 
@@ -155,44 +164,42 @@ public class ExpressionFactory {
 
         typeLookup = new Class[max + 1];
 
-        // list types
-        typeLookup[Expression.AND] = ListExpression.class;
-        typeLookup[Expression.OR] = ListExpression.class;
-
-        // ternary types
-        typeLookup[Expression.BETWEEN] = TernaryExpression.class;
-        typeLookup[Expression.NOT_BETWEEN] = TernaryExpression.class;
+        typeLookup[Expression.AND] = ASTAnd.class;
+        typeLookup[Expression.OR] = ASTOr.class;
+        typeLookup[Expression.BETWEEN] = ASTBetween.class;
+        typeLookup[Expression.NOT_BETWEEN] = ASTNotBetween.class;
 
         // binary types
-        typeLookup[Expression.EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.NOT_EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.LESS_THAN] = BinaryExpression.class;
-        typeLookup[Expression.GREATER_THAN] = BinaryExpression.class;
-        typeLookup[Expression.LESS_THAN_EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.GREATER_THAN_EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.IN] = BinaryExpression.class;
-        typeLookup[Expression.NOT_IN] = BinaryExpression.class;
-        typeLookup[Expression.LIKE] = BinaryExpression.class;
-        typeLookup[Expression.LIKE_IGNORE_CASE] = BinaryExpression.class;
-        typeLookup[Expression.NOT_LIKE] = BinaryExpression.class;
-        typeLookup[Expression.NOT_LIKE_IGNORE_CASE] = BinaryExpression.class;
-        typeLookup[Expression.ADD] = BinaryExpression.class;
-        typeLookup[Expression.SUBTRACT] = BinaryExpression.class;
-        typeLookup[Expression.MULTIPLY] = BinaryExpression.class;
-        typeLookup[Expression.DIVIDE] = BinaryExpression.class;
+        typeLookup[Expression.EQUAL_TO] = ASTEqual.class;
+        typeLookup[Expression.NOT_EQUAL_TO] = ASTNotEqual.class;
+        typeLookup[Expression.LESS_THAN] = ASTLess.class;
+        typeLookup[Expression.GREATER_THAN] = ASTGreater.class;
+        typeLookup[Expression.LESS_THAN_EQUAL_TO] = ASTLessOrEqual.class;
+        typeLookup[Expression.GREATER_THAN_EQUAL_TO] = ASTGreaterOrEqual.class;
+        typeLookup[Expression.IN] = ASTIn.class;
+        typeLookup[Expression.NOT_IN] = ASTNotIn.class;
+        typeLookup[Expression.LIKE] = ASTLike.class;
+        typeLookup[Expression.LIKE_IGNORE_CASE] = ASTLikeIgnoreCase.class;
+        typeLookup[Expression.NOT_LIKE] = ASTNotLike.class;
+        typeLookup[Expression.NOT_LIKE_IGNORE_CASE] = ASTNotLikeIgnoreCase.class;
+        typeLookup[Expression.ADD] = ASTAdd.class;
+        typeLookup[Expression.SUBTRACT] = ASTSubtract.class;
+        typeLookup[Expression.MULTIPLY] = ASTMultiply.class;
+        typeLookup[Expression.DIVIDE] = ASTDivide.class;
 
-        // unary types
+        typeLookup[Expression.NOT] = ASTNot.class;
+        typeLookup[Expression.NEGATIVE] = ASTNegate.class;
+        typeLookup[Expression.OBJ_PATH] = ASTObjPath.class;
+        typeLookup[Expression.DB_PATH] = ASTDbPath.class;
+        typeLookup[Expression.LIST] = ASTList.class;
+
+        // remainging "old" types
         typeLookup[Expression.EXISTS] = UnaryExpression.class;
-        typeLookup[Expression.NOT] = UnaryExpression.class;
-        typeLookup[Expression.NEGATIVE] = UnaryExpression.class;
         typeLookup[Expression.POSITIVE] = UnaryExpression.class;
         typeLookup[Expression.ALL] = UnaryExpression.class;
         typeLookup[Expression.SOME] = UnaryExpression.class;
         typeLookup[Expression.ANY] = UnaryExpression.class;
         typeLookup[Expression.RAW_SQL] = UnaryExpression.class;
-        typeLookup[Expression.OBJ_PATH] = UnaryExpression.class;
-        typeLookup[Expression.DB_PATH] = UnaryExpression.class;
-        typeLookup[Expression.LIST] = UnaryExpression.class;
         typeLookup[Expression.SUBQUERY] = UnaryExpression.class;
         typeLookup[Expression.SUM] = UnaryExpression.class;
         typeLookup[Expression.AVG] = UnaryExpression.class;
@@ -214,6 +221,17 @@ public class ExpressionFactory {
             throw new ExpressionException("Bad expression type: " + type);
         }
 
+        // expected this
+        if (SimpleNode.class.isAssignableFrom(typeLookup[type])) {
+            try {
+                return (Expression) typeLookup[type].newInstance();
+            }
+            catch (Exception ex) {
+                throw new ExpressionException("Error creating expression", ex);
+            }
+        }
+
+        // backwards compatibility:
         if (BinaryExpression.class == typeLookup[type]) {
             return new BinaryExpression(type);
         }
@@ -250,76 +268,46 @@ public class ExpressionFactory {
         }
     }
 
-    /** Creates a unary expression. Unary expression is an expression with only single operand.
-     * <code>type</code> must be a valid type defined in Expression interface. It must also
-     * resolve to a unary expression, or an ExpressionException will be thrown. 
-     *
-     * <p>An example of valid unary expression is "negative" (Expression.NEGATIVE). 
-     * Important Cayenne unary expression type is Expression.OBJ_PATH. It specifies 
-     * an property or an object related to an object (or an attribute or an entity related to
-     * an entity) using DataMap terms. 
+    /** 
+     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * specific factory methods.
      */
     public static Expression unaryExp(int type, Object operand) {
         Expression exp = expressionOfType(type);
-        if (!(exp instanceof UnaryExpression))
-            throw new ExpressionException("Bad unary expression type: " + type);
-
         exp.setOperand(0, operand);
         return exp;
     }
 
+    /** 
+     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * specific factory methods.
+     */
     public static Expression listExp(int type, List operands) {
         Expression exp = expressionOfType(type);
-        if (!(exp instanceof ListExpression)) {
-            throw new ExpressionException("Bad list expression type: " + type);
+        for (int i = 0; i < operands.size(); i++) {
+            exp.setOperand(i, operands.get(i));
         }
 
-        ((ListExpression) exp).appendOperands(operands);
         return exp;
     }
 
     /** 
-     * Creates a binary expression. Binary expression is an expression 
-     * with two operands. <code>type</code> must be a valid type defined 
-     * in Expression interface. It must also resolve to a binary expression, 
-     * or an ExpressionException will be thrown. 
+     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * specific factory methods.
      */
     public static Expression binaryExp(
         int type,
         Object leftOperand,
         Object rightOperand) {
         Expression exp = expressionOfType(type);
-        if (!(exp instanceof BinaryExpression)) {
-            // if this is AND/OR expression, provide a temporary workaround
-            if (type == Expression.AND || type == Expression.OR) {
-                logObj.warn(
-                    "Use of AND/OR Expressions as 'binary' is deprecated, "
-                        + "use ListExpression instead.");
-
-                List list = new ArrayList();
-                list.add(leftOperand);
-                list.add(rightOperand);
-                return listExp(type, list);
-            }
-
-            throw new ExpressionException("Bad binary expression type: " + type);
-        }
-
         exp.setOperand(0, leftOperand);
         exp.setOperand(1, rightOperand);
         return exp;
     }
 
     /** 
-     * Creates a binary expression with left operand being Expression.OBJ_PATH. 
-     * This is a more useful method to build binary expressions then 
-     * generic {@link #binaryExp(int, Object, Object) binaryExp}.
-     * It is intended for cases when one of the operands is OBJ_PATH. 
-     * This method wraps <code>pathSpec</code> string representing the path in a 
-     * {@link org.objectstyle.cayenne.exp.Expression#OBJ_PATH OBJ_PATH} expression 
-     * and uses it as a left operand of binary expression.
-     *
-     * @see #binaryExp(int, Object, Object)
+     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * specific factory methods.
      */
     public static Expression binaryPathExp(int type, String pathSpec, Object value) {
         return binaryExp(
@@ -329,12 +317,8 @@ public class ExpressionFactory {
     }
 
     /** 
-     * Creates a binary expression with left operand being 
-     * Expression.DB_PATH. This is a useful method to build 
-     * binary expressions that match DbAttributes not included 
-     * in the entities (for instance primary keys).
-     *
-     * @see #binaryExp(int, Object, Object)
+     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * specific factory methods.
      */
     public static Expression binaryDbPathExp(int type, String pathSpec, Object value) {
         return binaryExp(
@@ -344,11 +328,8 @@ public class ExpressionFactory {
     }
 
     /** 
-     * Creates a ternary expression. Ternary expression is an expression with three operands.
-     * <code>type</code> must be a valid type defined in Expression interface. It must also
-     * resolve to a ternary expression, or an ExpressionException will be thrown.
-     *
-     * <p>Example of ternary expression type is Expression.BETWEEN.</p>
+     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * specific factory methods.
      */
     public static Expression ternaryExp(
         int type,
@@ -356,9 +337,6 @@ public class ExpressionFactory {
         Object secondOperand,
         Object thirdOperand) {
         Expression exp = expressionOfType(type);
-        if (!(exp instanceof TernaryExpression))
-            throw new ExpressionException("Bad ternary expression type: " + type);
-
         exp.setOperand(0, firstOperand);
         exp.setOperand(1, secondOperand);
         exp.setOperand(2, thirdOperand);
@@ -588,8 +566,10 @@ public class ExpressionFactory {
             return currentExp;
         }
 
-        ListExpression exp = new ListExpression(type);
-        exp.appendOperands(expressions);
+        Expression exp = expressionOfType(type);
+        for(int i = 0; i < len; i++) {
+            exp.setOperand(i, expressions.get(i));
+        }
         return exp;
     }
 }

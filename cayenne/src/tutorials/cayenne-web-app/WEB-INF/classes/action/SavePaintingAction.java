@@ -5,7 +5,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Level;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -20,50 +19,39 @@ import webtest.Artist;
 import webtest.Painting;
 import formbean.PaintingForm;
 
-public final class SavePaintingAction extends Action {
+public class SavePaintingAction extends Action {
 
-	public ActionForward execute(
-		ActionMapping mapping,
-		ActionForm form,
-		HttpServletRequest request,
-		HttpServletResponse response)
-		throws Exception {
+    public ActionForward execute(
+        ActionMapping mapping,
+        ActionForm form,
+        HttpServletRequest request,
+        HttpServletResponse response)
+        throws Exception {
 
-		PaintingForm paintingForm = (PaintingForm) form;
+        PaintingForm paintingForm = (PaintingForm) form;
 
-		DataContext ctxt =
-			BasicServletConfiguration.getDefaultContext(request.getSession());
+        DataContext ctxt =
+            BasicServletConfiguration.getDefaultContext(request.getSession());
 
-		String anArtistName = paintingForm.getArtistName();
+        String anArtistName = paintingForm.getArtistName();
 
-		Expression qual =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				anArtistName);
+        Expression qual = ExpressionFactory.matchExp("artistName", anArtistName);
 
-		SelectQuery query = new SelectQuery(Artist.class, qual);
+        SelectQuery query = new SelectQuery(Artist.class, qual);
 
-		// using log level of WARN to show the query execution
-		query.setLoggingLevel(Level.WARN);
+        List artists = ctxt.performQuery(query);
+        System.err.println("artists: " + artists);
+        Artist artist = (Artist) artists.get(0);
 
-		List artists = ctxt.performQuery(query);
-		System.err.println("artists: " + artists);
-		Artist artist = (Artist) artists.get(0);
+        Painting aPainting = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        aPainting.setPaintingTitle(paintingForm.getPaintingTitle());
+        aPainting.setEstimatedPrice(paintingForm.getEstimatedPrice());
 
-		Painting aPainting =
-			(Painting) ctxt.createAndRegisterNewObject("Painting");
-		aPainting.setPaintingTitle(paintingForm.getPaintingTitle());
-		aPainting.setEstimatedPrice(paintingForm.getEstimatedPrice());
+        artist.addToPaintingArray(aPainting);
 
-		artist.addToPaintingArray(aPainting);
+        // commit to the database
+        ctxt.commitChanges();
 
-		// commit to the database
-		// using log level of WARN to show the query execution
-		ctxt.commitChanges(Level.WARN);
-
-		return (mapping.findForward("success"));
-
-	}
-
+        return (mapping.findForward("success"));
+    }
 }

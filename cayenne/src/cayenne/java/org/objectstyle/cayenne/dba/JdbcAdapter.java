@@ -67,8 +67,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
-import org.objectstyle.cayenne.access.trans.FlattenedRelationshipDeleteTranslator;
-import org.objectstyle.cayenne.access.trans.FlattenedRelationshipInsertTranslator;
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
@@ -89,8 +87,6 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
-import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -199,14 +195,8 @@ public class JdbcAdapter implements DbAdapter {
         else if (q instanceof UpdateQuery) {
             return UpdateTranslator.class;
         }
-        else if (q instanceof FlattenedRelationshipInsertQuery) {
-            return FlattenedRelationshipInsertTranslator.class;
-        }
         else if (q instanceof InsertQuery) {
             return InsertTranslator.class;
-        }
-        else if (q instanceof FlattenedRelationshipDeleteQuery) {
-            return FlattenedRelationshipDeleteTranslator.class;
         }
         else if (q instanceof DeleteQuery) {
             return DeleteTranslator.class;

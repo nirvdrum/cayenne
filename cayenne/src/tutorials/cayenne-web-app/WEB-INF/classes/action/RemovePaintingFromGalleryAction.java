@@ -5,7 +5,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Level;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -19,55 +18,40 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import webtest.Gallery;
 import webtest.Painting;
 
-public final class RemovePaintingFromGalleryAction extends Action {
+public class RemovePaintingFromGalleryAction extends Action {
 
-	public ActionForward execute(
-		ActionMapping mapping,
-		ActionForm form,
-		HttpServletRequest request,
-		HttpServletResponse response)
-		throws Exception {
+    public ActionForward execute(
+        ActionMapping mapping,
+        ActionForm form,
+        HttpServletRequest request,
+        HttpServletResponse response)
+        throws Exception {
 
-		DataContext ctxt =
-			BasicServletConfiguration.getDefaultContext(request.getSession());
+        DataContext ctxt =
+            BasicServletConfiguration.getDefaultContext(request.getSession());
 
-		String paintingTitle = request.getParameter("title");
-		String galleryName = request.getParameter("galleryName");
+        String paintingTitle = request.getParameter("title");
+        String galleryName = request.getParameter("galleryName");
 
-		Expression qual =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"paintingTitle",
-				paintingTitle);
+        Expression qual = ExpressionFactory.matchExp("paintingTitle", paintingTitle);
+        SelectQuery query = new SelectQuery(Painting.class, qual);
 
-		SelectQuery query = new SelectQuery(Painting.class, qual);
+        List paintings = ctxt.performQuery(query);
 
-		// set a relatively high logging level, 
-		// to show the query execution progress
-		query.setLoggingLevel(Level.WARN);
-		List paintings = ctxt.performQuery(query);
+        Painting painting = (Painting) paintings.get(0);
+        System.err.println("painting: " + painting);
 
-		Painting painting = (Painting) paintings.get(0);
-		System.err.println("painting: " + painting);
+        qual = ExpressionFactory.matchExp("galleryName", galleryName);
+        query = new SelectQuery(Gallery.class, qual);
 
-		qual =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"galleryName",
-				galleryName);
+        List galleries = ctxt.performQuery(query);
+        Gallery gallery = (Gallery) galleries.get(0);
 
-		query = new SelectQuery(Gallery.class, qual);
-		query.setLoggingLevel(Level.WARN);
-		List galleries = ctxt.performQuery(query);
-		Gallery gallery = (Gallery) galleries.get(0);
+        gallery.removeFromPaintingArray(painting);
 
-		gallery.removeFromPaintingArray(painting);
+        // commit to the database
+        ctxt.commitChanges();
 
-		// commit to the database
-		// use a relatively high logging level, 
-		// to show the query execution progress
-		ctxt.commitChanges(Level.WARN);
-
-		return mapping.findForward("success");
-	}
+        return mapping.findForward("success");
+    }
 }

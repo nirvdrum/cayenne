@@ -62,7 +62,6 @@ import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.art.oneway.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
@@ -115,75 +114,75 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         assertNotNull(a2);
         assertEquals(2, a2.getPaintingArray().size());
     }
-    
+
     // ALL THE COMMENTED OUT TESTS CURRENTLY FAIL
 
-/*    public void testAddNew() throws Exception {
-        // create a painting that will be saved 
-        // without ARTIST attached to it
-        newPainting("p12");
-
-        Artist a1 = newArtist();
-        ctxt.commitChanges();
-
-        Painting p11 = newPainting("p11");
-
-        // **** TESTING THIS *****
-        a1.addToPaintingArray(p11);
-
-        assertEquals(1, a1.getPaintingArray().size());
-        assertEquals(1, ctxt.newObjects().size());
-        assertEquals(1, ctxt.modifiedObjects().size());
-        ctxt.commitChanges();
-
-        // reset context and do a refetch
-        ctxt = createDataContext();
-        Artist a2 = fetchArtist();
-        assertNotNull(a2);
-        assertEquals(1, a2.getPaintingArray().size());
-    }
-
-    public void testAddExisting() throws Exception {
-        // prepare and save a gallery
-        Painting p11 = newPainting("p11");
-        newPainting("p12");
-        Artist a1 = newArtist();
-        ctxt.commitChanges();
-
-        // **** TESTING THIS *****
-        a1.addToPaintingArray(p11);
-
-        assertEquals(1, a1.getPaintingArray().size());
-        assertEquals(
-            "Both artist and painting should be modified.",
-            2,
-            ctxt.modifiedObjects().size());
-        ctxt.commitChanges();
-    }
-
-    public void testRevertModification() throws Exception {
-        // prepare and save a gallery
-        Painting p11 = newPainting("p11");
-        Painting p12 = newPainting("p12");
-        ctxt.commitChanges();
-
-        Artist a1 = newArtist();
-        a1.addToPaintingArray(p11);
-
-        // test before save
-        assertEquals(1, a1.getPaintingArray().size());
-        assertEquals(1, ctxt.newObjects().size());
-        assertEquals(1, ctxt.modifiedObjects().size());
-        ctxt.commitChanges();
-
-        a1.addToPaintingArray(p12);
-        assertEquals(2, a1.getPaintingArray().size());
-        ctxt.rollbackChanges();
-
-        assertEquals(1, a1.getPaintingArray().size());
-        assertEquals(p11, a1.getPaintingArray().get(0));
-        assertFalse(ctxt.hasChanges());
-    } */
+    /*    public void testAddNew() throws Exception {
+            // create a painting that will be saved 
+            // without ARTIST attached to it
+            newPainting("p12");
+    
+            Artist a1 = newArtist();
+            ctxt.commitChanges();
+    
+            Painting p11 = newPainting("p11");
+    
+            // **** TESTING THIS *****
+            a1.addToPaintingArray(p11);
+    
+            assertEquals(1, a1.getPaintingArray().size());
+            assertEquals(1, ctxt.newObjects().size());
+            assertEquals(1, ctxt.modifiedObjects().size());
+            ctxt.commitChanges();
+    
+            // reset context and do a refetch
+            ctxt = createDataContext();
+            Artist a2 = fetchArtist();
+            assertNotNull(a2);
+            assertEquals(1, a2.getPaintingArray().size());
+        }
+    
+        public void testAddExisting() throws Exception {
+            // prepare and save a gallery
+            Painting p11 = newPainting("p11");
+            newPainting("p12");
+            Artist a1 = newArtist();
+            ctxt.commitChanges();
+    
+            // **** TESTING THIS *****
+            a1.addToPaintingArray(p11);
+    
+            assertEquals(1, a1.getPaintingArray().size());
+            assertEquals(
+                "Both artist and painting should be modified.",
+                2,
+                ctxt.modifiedObjects().size());
+            ctxt.commitChanges();
+        }
+    
+        public void testRevertModification() throws Exception {
+            // prepare and save a gallery
+            Painting p11 = newPainting("p11");
+            Painting p12 = newPainting("p12");
+            ctxt.commitChanges();
+    
+            Artist a1 = newArtist();
+            a1.addToPaintingArray(p11);
+    
+            // test before save
+            assertEquals(1, a1.getPaintingArray().size());
+            assertEquals(1, ctxt.newObjects().size());
+            assertEquals(1, ctxt.modifiedObjects().size());
+            ctxt.commitChanges();
+    
+            a1.addToPaintingArray(p12);
+            assertEquals(2, a1.getPaintingArray().size());
+            ctxt.rollbackChanges();
+    
+            assertEquals(1, a1.getPaintingArray().size());
+            assertEquals(p11, a1.getPaintingArray().get(0));
+            assertFalse(ctxt.hasChanges());
+        } */
 
     protected Painting newPainting(String name) {
         Painting p1 = (Painting) ctxt.createAndRegisterNewObject("Painting");
@@ -201,10 +200,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         SelectQuery q =
             new SelectQuery(
                 "Artist",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "artistName",
-                    CayenneDOTestBase.artistName));
+                ExpressionFactory.matchExp("artistName", CayenneDOTestBase.artistName));
         List ats = ctxt.performQuery(q);
         return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }

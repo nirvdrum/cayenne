@@ -71,17 +71,17 @@ public class DOPrefetchTst extends CayenneDOTestBase {
         Painting p1 = super.newPainting();
         p1.setToArtist(a1);
         ctxt.commitChanges();
-        
-		ctxt = createDataContext();
-        Expression e = ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist%");
+
+        ctxt = createDataContext();
+        Expression e = ExpressionFactory.likeExp("artistName", "artist%");
         SelectQuery q = new SelectQuery("Artist", e);
-        
+
         // ** TESTING THIS **
         q.addPrefetch("paintingArray");
-        
+
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
-        Artist a2 = (Artist)artists.get(0);
-        assertNotNull(a2);        
+        Artist a2 = (Artist) artists.get(0);
+        assertNotNull(a2);
     }
 }

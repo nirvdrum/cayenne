@@ -69,6 +69,10 @@ public class ASTNotBetween extends ConditionNode {
         super(id);
     }
 
+    public ASTNotBetween() {
+        super(ExpressionParserTreeConstants.JJTNOTBETWEEN);
+    }
+
     public ASTNotBetween(ASTPath path, Object value1, Object value2) {
         super(ExpressionParserTreeConstants.JJTNOTBETWEEN);
         jjtAddChild(path, 0);

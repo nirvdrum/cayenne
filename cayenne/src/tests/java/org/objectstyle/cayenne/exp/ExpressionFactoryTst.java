@@ -64,140 +64,6 @@ public class ExpressionFactoryTst extends CayenneTestCase {
     // non-existent type
     private static final int badType = -50;
 
-    public void testUnaryExp() throws Exception {
-        Object o1 = new Object();
-        Expression e1 = ExpressionFactory.unaryExp(Expression.NOT, o1);
-        assertTrue(e1 instanceof UnaryExpression);
-        assertSame(o1, e1.getOperand(0));
-        assertEquals(Expression.NOT, e1.getType());
-    }
-
-    public void testBinaryExp() throws Exception {
-        Object o1 = new Object();
-        Object o2 = new Object();
-        Expression e1 = ExpressionFactory.binaryExp(Expression.EQUAL_TO, o1, o2);
-        assertTrue(e1 instanceof BinaryExpression);
-        assertSame(o1, e1.getOperand(0));
-        assertSame(o2, e1.getOperand(1));
-        assertEquals(Expression.EQUAL_TO, e1.getType());
-    }
-
-    public void testTernaryExp() throws Exception {
-        Object o1 = new Object();
-        Object o2 = new Object();
-        Object o3 = new Object();
-        Expression e1 = ExpressionFactory.ternaryExp(Expression.BETWEEN, o1, o2, o3);
-        assertTrue(e1 instanceof TernaryExpression);
-        assertSame(o1, e1.getOperand(0));
-        assertSame(o2, e1.getOperand(1));
-        assertSame(o3, e1.getOperand(2));
-        assertEquals(Expression.BETWEEN, e1.getType());
-    }
-
-    public void testExpressionOfType() throws java.lang.Exception {
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.AND) instanceof ListExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.OR) instanceof ListExpression);
-
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.NOT)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.EQUAL_TO)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.LESS_THAN)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.GREATER_THAN)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.LESS_THAN_EQUAL_TO)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.GREATER_THAN_EQUAL_TO)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.BETWEEN)
-                instanceof TernaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.IN)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.LIKE)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.LIKE_IGNORE_CASE)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.EXISTS)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.ADD)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.SUBTRACT)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.MULTIPLY)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.DIVIDE)
-                instanceof BinaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.NEGATIVE)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.POSITIVE)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.ALL)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.SOME)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.ANY)
-                instanceof UnaryExpression);
-
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.RAW_SQL)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.OBJ_PATH)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.DB_PATH)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.LIST)
-                instanceof UnaryExpression);
-
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.SUBQUERY)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.COUNT)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.AVG)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.SUM)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.MAX)
-                instanceof UnaryExpression);
-        assertTrue(
-            ExpressionFactory.expressionOfType(Expression.MIN)
-                instanceof UnaryExpression);
-
-    }
-
     public void testExpressionOfBadType() throws Exception {
         try {
             ExpressionFactory.expressionOfType(badType);
@@ -214,14 +80,13 @@ public class ExpressionFactoryTst extends CayenneTestCase {
         Expression exp = ExpressionFactory.betweenExp("abc", v1, v2);
         assertEquals(Expression.BETWEEN, exp.getType());
     }
-    
-	public void testNotBetweenExp() throws Exception {
-		 Object v1 = new Object();
-		 Object v2 = new Object();
-		 Expression exp = ExpressionFactory.notBetweenExp("abc", v1, v2);
-		 assertEquals(Expression.NOT_BETWEEN, exp.getType());
-	 }
 
+    public void testNotBetweenExp() throws Exception {
+        Object v1 = new Object();
+        Object v2 = new Object();
+        Expression exp = ExpressionFactory.notBetweenExp("abc", v1, v2);
+        assertEquals(Expression.NOT_BETWEEN, exp.getType());
+    }
 
     public void testGreaterExp() throws Exception {
         Object v = new Object();

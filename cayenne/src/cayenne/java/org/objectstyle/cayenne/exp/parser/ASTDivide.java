@@ -73,6 +73,10 @@ public class ASTDivide extends SimpleNode {
         super(id);
     }
 
+    public ASTDivide() {
+        super(ExpressionParserTreeConstants.JJTDIVIDE);
+    }
+
     public ASTDivide(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTDIVIDE);
         int len = nodes.length;

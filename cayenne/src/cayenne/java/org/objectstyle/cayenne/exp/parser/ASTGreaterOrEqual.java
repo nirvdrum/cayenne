@@ -65,17 +65,22 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTGreaterOrEqual extends ConditionNode {
-    public ASTGreaterOrEqual(ASTPath path, Object value) {
-        super(ExpressionParserTreeConstants.JJTGREATEROREQUAL);
-        jjtAddChild(path, 0);
-        jjtAddChild(new ASTScalar(value), 1);
-    }
 
     /**
      * Constructor used by expression parser. Do not invoke directly.
      */
     ASTGreaterOrEqual(int id) {
         super(id);
+    }
+    
+    public ASTGreaterOrEqual() {
+        super(ExpressionParserTreeConstants.JJTGREATEROREQUAL);
+    }
+
+    public ASTGreaterOrEqual(ASTPath path, Object value) {
+        super(ExpressionParserTreeConstants.JJTGREATEROREQUAL);
+        jjtAddChild(path, 0);
+        jjtAddChild(new ASTScalar(value), 1);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

@@ -66,13 +66,17 @@ import org.objectstyle.cayenne.exp.ExpressionParameter;
  * @author Andrei Adamchik
  */
 public class ASTNamedParameter extends ASTScalar {
+    ASTNamedParameter(int id) {
+        super(id);
+    }
+
+    public ASTNamedParameter() {
+        super(ExpressionParserTreeConstants.JJTNAMEDPARAMETER);
+    }
+
     public ASTNamedParameter(Object value) {
         super(ExpressionParserTreeConstants.JJTNAMEDPARAMETER);
         setValue(value);
-    }
-
-    ASTNamedParameter(int id) {
-        super(id);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

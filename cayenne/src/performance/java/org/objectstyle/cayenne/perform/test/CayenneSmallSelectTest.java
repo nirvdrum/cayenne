@@ -66,43 +66,33 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class CayenneSmallSelectTest extends CayennePerformanceTest {
-	protected DataContext ctxt;
+    protected DataContext ctxt;
 
-	/**
-	 * Constructor for CayenneSmallSelectTest.
-	 */
-	public CayenneSmallSelectTest(String name) {
-		super(name);
-	}
+    /**
+     * Constructor for CayenneSmallSelectTest.
+     */
+    public CayenneSmallSelectTest(String name) {
+        super(name);
+    }
 
-	public void prepare() throws Exception {
-		super.deleteArtists();
-		super.insertArtists();
-		ctxt = super.getDomain().createDataContext();
-	}
+    public void prepare() throws Exception {
+        super.deleteArtists();
+        super.insertArtists();
+        ctxt = super.getDomain().createDataContext();
+    }
 
-	/**
-	 * @see org.objectstyle.perform.PerformanceTest#runTest()
-	 */
-	public void runTest() throws Exception {
-		for (int i = 0; i < SmallSelectTest.QUERIES_COUNT; i++) {
-			ctxt.performQuery(buildQuery(i));
-		}
-	}
+    /**
+     * @see org.objectstyle.perform.PerformanceTest#runTest()
+     */
+    public void runTest() throws Exception {
+        for (int i = 0; i < SmallSelectTest.QUERIES_COUNT; i++) {
+            ctxt.performQuery(buildQuery(i));
+        }
+    }
 
-	protected GenericSelectQuery buildQuery(int i) {
-		Expression e1 =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				"artist_1000");
-		Expression e2 =
-			ExpressionFactory.binaryPathExp(
-				Expression.LIKE,
-				"artistName",
-				"%rtist_1000");
-		return new SelectQuery(
-			"Artist",
-			ExpressionFactory.binaryExp(Expression.OR, e1, e2));
-	}
+    protected GenericSelectQuery buildQuery(int i) {
+        Expression e1 = ExpressionFactory.matchExp("artistName", "artist_1000");
+        Expression e2 = ExpressionFactory.likeExp("artistName", "%rtist_1000");
+        return new SelectQuery("Artist", e1.orExp(e2));
+    }
 }

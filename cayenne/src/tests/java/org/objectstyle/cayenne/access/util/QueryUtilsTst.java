@@ -65,28 +65,26 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class QueryUtilsTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(QueryUtilsTst.class);
-    
+
     public void testSelectPrefetchPath1() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
-        q.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "artistName",
-                "abc"));
+        q.setQualifier(ExpressionFactory.matchExp("artistName", "abc"));
         SelectQuery reverseQ =
             QueryUtils.selectPrefetchPath(getDomain(), q, "paintingArray");
         Object queryRoot = reverseQ.getRoot();
         if (queryRoot instanceof String) {
             assertEquals("Painting", queryRoot);
-        } else if (queryRoot instanceof ObjEntity) {
+        }
+        else if (queryRoot instanceof ObjEntity) {
             assertEquals(
                 getDomain().getEntityResolver().lookupObjEntity(Painting.class),
                 queryRoot);
-        } else if (queryRoot instanceof Class) {
+        }
+        else if (queryRoot instanceof Class) {
             assertEquals(Painting.class, queryRoot);
-        } else {
-            fail(
-                "Query root is of an untestable type :" + queryRoot.getClass());
+        }
+        else {
+            fail("Query root is of an untestable type :" + queryRoot.getClass());
         }
         assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
 
@@ -110,15 +108,17 @@ public class QueryUtilsTst extends CayenneTestCase {
         Object queryRoot = reverseQ.getRoot();
         if (queryRoot instanceof String) {
             assertEquals("Painting", queryRoot);
-        } else if (queryRoot instanceof ObjEntity) {
+        }
+        else if (queryRoot instanceof ObjEntity) {
             assertEquals(
                 getDomain().getEntityResolver().lookupObjEntity(Painting.class),
                 queryRoot);
-        } else if (queryRoot instanceof Class) {
+        }
+        else if (queryRoot instanceof Class) {
             assertEquals(Painting.class, queryRoot);
-        } else {
-            fail(
-                "Query root is of an untestable type :" + queryRoot.getClass());
+        }
+        else {
+            fail("Query root is of an untestable type :" + queryRoot.getClass());
         }
         assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
     }

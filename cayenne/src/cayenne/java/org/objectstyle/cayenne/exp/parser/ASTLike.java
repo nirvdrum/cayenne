@@ -64,15 +64,18 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTLike extends PatternMatchNode {
+    ASTLike(int id) {
+        super(id, false);
+    }
+
+    public ASTLike() {
+        super(ExpressionParserTreeConstants.JJTLIKE, false);
+    }
 
     public ASTLike(ASTPath path, Object pattern) {
         super(ExpressionParserTreeConstants.JJTLIKE, false);
         jjtAddChild(path, 0);
         jjtAddChild(wrapChild(pattern), 1);
-    }
-
-    ASTLike(int id) {
-        super(id, false);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

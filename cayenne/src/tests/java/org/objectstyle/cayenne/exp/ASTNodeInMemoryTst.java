@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.unit.util.TestBean;
  * tested within the same test method as the expressions they negate.
  * 
  * @since 1.0.6
+ * @deprecated Old expression API is deprecated.
  * @author Andrei Adamchik
  */
 public class ASTNodeInMemoryTst extends CayenneTestCase {

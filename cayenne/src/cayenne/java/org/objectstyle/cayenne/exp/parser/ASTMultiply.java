@@ -74,6 +74,10 @@ public class ASTMultiply extends SimpleNode {
         super(id);
     }
 
+    public ASTMultiply() {
+        super(ExpressionParserTreeConstants.JJTMULTIPLY);
+    }
+
     public ASTMultiply(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTMULTIPLY);
         int len = nodes.length;

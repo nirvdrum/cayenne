@@ -74,6 +74,10 @@ public class ASTSubtract extends SimpleNode {
         super(id);
     }
 
+    public ASTSubtract() {
+        super(ExpressionParserTreeConstants.JJTSUBTRACT);
+    }
+
     public ASTSubtract(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTSUBTRACT);
         int len = nodes.length;

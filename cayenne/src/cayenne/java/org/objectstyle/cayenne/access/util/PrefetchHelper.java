@@ -66,8 +66,9 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.parser.ASTDbPath;
+import org.objectstyle.cayenne.exp.parser.ASTIn;
+import org.objectstyle.cayenne.exp.parser.ASTList;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -182,13 +183,10 @@ public class PrefetchHelper {
         }
 
         // do the query
-        SelectQuery sel =
-            new SelectQuery(
-                destEnt,
-                ExpressionFactory.binaryDbPathExp(
-                    Expression.IN,
-                    buf.toString(),
-                    ExpressionFactory.unaryExp(Expression.LIST, objects)));
+
+        ASTDbPath dbpath = new ASTDbPath(buf.toString());
+        ASTList listExp = new ASTList(objects);
+        SelectQuery sel = new SelectQuery(destEnt, new ASTIn(dbpath, listExp));
         sel.setFetchingDataRows(true);
         List results = context.performQuery(sel);
 

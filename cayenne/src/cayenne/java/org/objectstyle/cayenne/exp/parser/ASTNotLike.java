@@ -65,14 +65,19 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTNotLike extends PatternMatchNode {
+
+    ASTNotLike(int id) {
+        super(id, false);
+    }
+
+    public ASTNotLike() {
+        super(ExpressionParserTreeConstants.JJTNOTLIKE, false);
+    }
+
     public ASTNotLike(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTNOTLIKE, false);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
-    }
-
-    ASTNotLike(int id) {
-        super(id, false);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

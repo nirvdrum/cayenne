@@ -61,11 +61,17 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ExpressionEqualsTst extends CayenneTestCase {
+    /**
+     * @deprecated
+     */
     public void testEquals1() throws Exception {
         Expression e1 = ExpressionFactory.unaryExp(Expression.OBJ_PATH, "aa");
         assertEquals(e1, e1);
     }
 
+    /**
+     * @deprecated
+     */
     public void testEquals2() throws Exception {
         Expression e1 = ExpressionFactory.unaryExp(Expression.OBJ_PATH, "aa");
         Expression e2 = ExpressionFactory.unaryExp(Expression.OBJ_PATH, "aa");

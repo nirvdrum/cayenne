@@ -67,7 +67,6 @@ import org.objectstyle.art.FlattenedTest3;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.MockupDataRowUtils;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -182,7 +181,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         SelectQuery q =
             new SelectQuery(
                 ArtGroup.class,
-                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "name", groupName));
+                ExpressionFactory.matchExp("name", groupName));
         List results = ctxt.performQuery(q);
         assertEquals(1, results.size());
 
@@ -200,7 +199,8 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
             //The bug caused the second commit to fail (the link record
             // was inserted again)
             a1.getDataContext().commitChanges();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             fail("Should not have thrown an exception");
         }
@@ -243,7 +243,8 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
 
         try {
             dc.commitChanges();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             fail("Should not have thrown the exception :" + e.getMessage());
         }
@@ -261,10 +262,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         SelectQuery q =
             new SelectQuery(
                 ArtGroup.class,
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "name",
-                    specialGroupName));
+                ExpressionFactory.matchExp("name", specialGroupName));
         List results = ctxt.performQuery(q);
         assertEquals(1, results.size());
 
@@ -275,7 +273,8 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
 
         try {
             ctxt.commitChanges();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Util.unwindException(e).printStackTrace();
             fail("Should not have thrown the exception " + e.getMessage());
         }

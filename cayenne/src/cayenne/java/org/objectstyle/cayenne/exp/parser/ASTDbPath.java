@@ -68,13 +68,17 @@ import org.objectstyle.cayenne.map.Entity;
  * @author Andrei Adamchik
  */
 public class ASTDbPath extends ASTPath {
+    ASTDbPath(int id) {
+        super(id);
+    }
+
+    public ASTDbPath() {
+        super(ExpressionParserTreeConstants.JJTDBPATH);
+    }
+
     public ASTDbPath(Object value) {
         super(ExpressionParserTreeConstants.JJTDBPATH);
         setPath(value);
-    }
-
-    ASTDbPath(int id) {
-        super(id);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

@@ -60,7 +60,6 @@ import java.util.List;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -174,10 +173,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         SelectQuery q =
             new SelectQuery(
                 "Artist",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "artistName",
-                    artistName));
+                ExpressionFactory.matchExp("artistName", artistName));
 
         List artists = context.performQuery(q);
         assertEquals(1, artists.size());
@@ -238,9 +234,9 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
         // test versions assigned after update
         long oldVersion = artist.getSnapshotVersion();
-        
-		artist.setArtistName(artist.getArtistName() + "---");
-		context.commitChanges();
+
+        artist.setArtistName(artist.getArtistName() + "---");
+        context.commitChanges();
 
         assertFalse(oldVersion == artist.getSnapshotVersion());
         assertEquals(
@@ -259,9 +255,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
     private Artist fetchArtist(String name) {
         SelectQuery q =
-            new SelectQuery(
-                "Artist",
-                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", name));
+            new SelectQuery("Artist", ExpressionFactory.matchExp("artistName", name));
         List ats = context.performQuery(q);
         return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }

@@ -407,7 +407,9 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * @since 1.0.6
      */
     public Expression notExp() {
-        return ExpressionFactory.unaryExp(Expression.NOT, this);
+        Expression exp = ExpressionFactory.expressionOfType(Expression.NOT);
+        exp.setOperand(0, this);
+        return exp;
     }
 
     /** 

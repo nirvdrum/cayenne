@@ -34,7 +34,7 @@ public class Main {
         this.ctxt = createContext();
     }
 
-    public void runTutorial(String galleryPattern) {        
+    public void runTutorial(String galleryPattern) {
         Gallery gallery = findGallery(galleryPattern);
         if (gallery != null) {
             addArtist(gallery);
@@ -54,17 +54,13 @@ public class Main {
      */
     private Gallery findGallery(String galleryPattern) {
         String likePattern = "%" + galleryPattern + "%";
-        Expression qual =
-            ExpressionFactory.binaryPathExp(
-                Expression.LIKE_IGNORE_CASE,
-                "galleryName",
-                likePattern);
+        Expression qual = ExpressionFactory.likeIgnoreCaseExp("galleryName", likePattern);
 
         SelectQuery query = new SelectQuery(Gallery.class, qual);
         // using log level of WARN to make sure that query 
         // execution is logged to STDOUT
         query.setLoggingLevel(Level.WARN);
-        
+
         List galleries = ctxt.performQuery(query);
         if (galleries.size() == 1) {
             Gallery gallery = (Gallery) galleries.get(0);
@@ -73,7 +69,7 @@ public class Main {
         }
         else if (galleries.size() == 0) {
             System.out.println("No matching galleries found.");
-			return null;            
+            return null;
         }
         else {
             System.out.println("Found more than one matching gallery. Be more specific.");
@@ -83,19 +79,19 @@ public class Main {
 
     /** Adds new artist and his paintings to the gallery. */
     private void addArtist(Gallery gallery) {
-       // create new Artist object
-       Artist dali = (Artist)ctxt.createAndRegisterNewObject("Artist");
-       dali.setArtistName("Salvador Dali");
-       
-       // create new Painting object
-       Painting paint = (Painting)ctxt.createAndRegisterNewObject("Painting");
-       paint.setPaintingTitle("Sleep");
-       
-       // establish relationship between artist and painting
-       dali.addToPaintingArray(paint);
-       
-       // commit to the database
-       // using log level of WARN to show the query execution
-       ctxt.commitChanges(Level.WARN); 
+        // create new Artist object
+        Artist dali = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        dali.setArtistName("Salvador Dali");
+
+        // create new Painting object
+        Painting paint = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        paint.setPaintingTitle("Sleep");
+
+        // establish relationship between artist and painting
+        dali.addToPaintingArray(paint);
+
+        // commit to the database
+        // using log level of WARN to show the query execution
+        ctxt.commitChanges(Level.WARN);
     }
 }

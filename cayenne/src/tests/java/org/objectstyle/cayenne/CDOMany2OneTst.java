@@ -76,8 +76,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         ctxt.commitChanges();
 
         // do select
-        Expression e =
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("ROPainting", e);
 
         // *** TESTING THIS *** 
@@ -99,15 +98,14 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         ctxt = createDataContext();
 
         // do select
-        Expression e =
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("ROPainting", e);
 
         // *** TESTING THIS *** 
         List paints = ctxt.performQuery(q);
         assertEquals(1, paints.size());
 
-		ROPainting rop1 = (ROPainting) paints.get(0);
+        ROPainting rop1 = (ROPainting) paints.get(0);
         assertNotNull(rop1.getToArtist());
 
         // trigger fetch
@@ -126,8 +124,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         ctxt.commitChanges();
 
         // do select
-        Expression e =
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        Expression e = ExpressionFactory.matchExp("toArtist", a1);
         SelectQuery q = new SelectQuery("Painting", e);
         //q.setLoggingLevel(Level.ERROR);
 
@@ -151,11 +148,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         ctxt.commitChanges();
 
         // do select
-        Expression e =
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                "paintingArray.toGallery",
-                g1);
+        Expression e = ExpressionFactory.matchExp("paintingArray.toGallery", g1);
         SelectQuery q = new SelectQuery("Artist", e);
 
         // *** TESTING THIS *** 

@@ -71,6 +71,10 @@ public class ASTIn extends ConditionNode {
         super(id);
     }
 
+    public ASTIn() {
+        super(ExpressionParserTreeConstants.JJTIN);
+    }
+
     public ASTIn(ASTPath path, ASTList list) {
         super(ExpressionParserTreeConstants.JJTIN);
         jjtAddChild(path, 0);

@@ -60,7 +60,6 @@ import java.util.List;
 import org.objectstyle.art.oneway.Gallery;
 import org.objectstyle.art.oneway.Painting;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.OneWayMappingTestCase;
@@ -123,8 +122,8 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         assertEquals(g12.getGalleryName(), g21.getGalleryName());
     }
 
-	public void testRevertModification() {
-       // prepare and save a gallery
+    public void testRevertModification() {
+        // prepare and save a gallery
         Gallery g11 = newGallery("g1");
         Gallery g12 = newGallery("g1");
         ctxt.commitChanges();
@@ -137,21 +136,21 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         ctxt.commitChanges();
 
         p1.setToGallery(g12);
-		ctxt.rollbackChanges();
-		
-		assertEquals(g11, p1.getToGallery()); //Expecting the original gallery to be the one
-		
-		//And save so we can be sure that the save did the right thing
-		ctxt.commitChanges();
+        ctxt.rollbackChanges();
+
+        assertEquals(g11, p1.getToGallery());
+        //Expecting the original gallery to be the one
+
+        //And save so we can be sure that the save did the right thing
+        ctxt.commitChanges();
         ctxt = createDataContext();
 
         Painting p2 = fetchPainting();
         Gallery g21 = p2.getToGallery();
         assertNotNull(g21);
-		//IT should still be the first one we set
+        //IT should still be the first one we set
         assertEquals(g11.getGalleryName(), g21.getGalleryName());
-	}
-
+    }
 
     protected Painting newPainting() {
         Painting p1 = (Painting) ctxt.createAndRegisterNewObject("Painting");
@@ -169,8 +168,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         SelectQuery q =
             new SelectQuery(
                 "Painting",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
+                ExpressionFactory.matchExp(
                     "paintingTitle",
                     CayenneDOTestBase.paintingName));
         List pts = ctxt.performQuery(q);

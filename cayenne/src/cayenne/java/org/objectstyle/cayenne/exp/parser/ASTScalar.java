@@ -68,16 +68,20 @@ import org.objectstyle.cayenne.exp.Expression;
 public class ASTScalar extends SimpleNode {
     protected Object value;
 
-    public ASTScalar(Object value) {
-        super(ExpressionParserTreeConstants.JJTSCALAR);
-        setValue(value);
-    }
-
     /**
      * Constructor used by expression parser. Do not invoke directly.
      */
     ASTScalar(int id) {
         super(id);
+    }
+
+    public ASTScalar() {
+        super(ExpressionParserTreeConstants.JJTSCALAR);
+    }
+
+    public ASTScalar(Object value) {
+        super(ExpressionParserTreeConstants.JJTSCALAR);
+        setValue(value);
     }
 
     protected Object evaluateNode(Object o) throws Exception {

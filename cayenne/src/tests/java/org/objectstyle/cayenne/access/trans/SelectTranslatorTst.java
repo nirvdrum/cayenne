@@ -71,7 +71,6 @@ import org.objectstyle.art.CompoundPainting;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.SubPainting;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Ordering;
@@ -79,13 +78,14 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class SelectTranslatorTst extends CayenneTestCase {
-	private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);
+    private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);
     protected SelectQuery q;
     protected DbEntity artistEnt;
 
     protected void setUp() throws Exception {
         q = new SelectQuery();
-        artistEnt = getDomain().getEntityResolver().lookupObjEntity("Artist").getDbEntity();
+        artistEnt =
+            getDomain().getEntityResolver().lookupObjEntity("Artist").getDbEntity();
     }
 
     private SelectTranslator buildTranslator(Connection con) throws Exception {
@@ -106,8 +106,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
         try {
             // query with qualifier and ordering
             q.setRoot(Artist.class);
-            q.setQualifier(
-                ExpressionFactory.binaryExp(Expression.LIKE, "artistName", "a%"));
+            q.setQualifier(ExpressionFactory.likeExp("artistName", "a%"));
             q.addOrdering("dateOfBirth", Ordering.ASC);
 
             String generatedSql = buildTranslator(con).createSqlString();
@@ -119,7 +118,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
             assertTrue(generatedSql.indexOf(" WHERE ") > generatedSql.indexOf(" FROM "));
             assertTrue(
                 generatedSql.indexOf(" ORDER BY ") > generatedSql.indexOf(" WHERE "));
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -139,7 +139,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
             // do some simple assertions to make sure all parts are in
             assertNotNull(generatedSql);
             assertTrue(generatedSql.startsWith("SELECT DISTINCT"));
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -170,7 +171,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
             assertTrue(sql.indexOf(" GROUP BY ") > 0);
             assertTrue(sql.indexOf("ARTIST_ID =") > 0);
             assertTrue(sql.indexOf("ARTIST_ID =") > sql.indexOf(" GROUP BY "));
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -182,48 +184,51 @@ public class SelectTranslatorTst extends CayenneTestCase {
         Connection con = getConnection();
 
         try {
-			// query with qualifier and ordering
-			q.setRoot(ArtistAssets.class);
-			q.setParentObjEntityName("Painting");
-			q.setParentQualifier(
-				ExpressionFactory.matchExp("toArtist.artistName", "abc"));
-			q.andParentQualifier(
-				ExpressionFactory.greaterOrEqualExp("estimatedPrice", new BigDecimal(1)));
-			q.setQualifier(
-				ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
+            // query with qualifier and ordering
+            q.setRoot(ArtistAssets.class);
+            q.setParentObjEntityName("Painting");
+            q.setParentQualifier(
+                ExpressionFactory.matchExp("toArtist.artistName", "abc"));
+            q.andParentQualifier(
+                ExpressionFactory.greaterOrEqualExp("estimatedPrice", new BigDecimal(1)));
+            q.setQualifier(
+                ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
 
-			String sql = buildTranslator(con).createSqlString();
+            String sql = buildTranslator(con).createSqlString();
 
-			// do some simple assertions to make sure all parts are in
-			assertNotNull(sql);
-			assertTrue(sql.startsWith("SELECT "));
-			assertTrue(sql.indexOf(" FROM ") > 0);
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(sql);
+            assertTrue(sql.startsWith("SELECT "));
+            assertTrue(sql.indexOf(" FROM ") > 0);
 
-			// no WHERE clause
-			assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
-			assertTrue("WHERE clause must have estimated price: " + sql, sql.indexOf("ESTIMATED_PRICE >=") > 0);
+            // no WHERE clause
+            assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
+            assertTrue(
+                "WHERE clause must have estimated price: " + sql,
+                sql.indexOf("ESTIMATED_PRICE >=") > 0);
 
-			assertTrue(
-				"GROUP BY clause is expected:" + sql,
-				sql.indexOf(" GROUP BY ") > 0);
-			assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
-			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
-			assertTrue(
-				"Relationship join must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
-			assertTrue(
-				"Relationship join must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
-			assertTrue(
-				"Qualifier for related entity must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
-			assertTrue(
-				"Qualifier for related entity must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
-			assertTrue(
-				 "WHERE clause must have estimated price: " + sql,
-				 sql.indexOf("ESTIMATED_PRICE >=") < sql.indexOf(" GROUP BY "));
-        } finally {
+            assertTrue(
+                "GROUP BY clause is expected:" + sql,
+                sql.indexOf(" GROUP BY ") > 0);
+            assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
+            assertTrue(sql.indexOf("ARTIST_ID =") > 0);
+            assertTrue(
+                "Relationship join must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
+            assertTrue(
+                "Relationship join must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
+            assertTrue(
+                "Qualifier for related entity must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
+            assertTrue(
+                "Qualifier for related entity must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
+            assertTrue(
+                "WHERE clause must have estimated price: " + sql,
+                sql.indexOf("ESTIMATED_PRICE >=") < sql.indexOf(" GROUP BY "));
+        }
+        finally {
             con.close();
         }
     }
@@ -239,14 +244,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
         try {
             // query with qualifier and ordering
             q.setRoot(ArtistExhibit.class);
-            q.setQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.LIKE,
-                    "toArtist.artistName",
-                    "a%"));
+            q.setQualifier(ExpressionFactory.likeExp("toArtist.artistName", "a%"));
             q.andQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.LIKE,
+                ExpressionFactory.likeExp(
                     "toExhibit.toGallery.paintingArray.toArtist.artistName",
                     "a%"));
 
@@ -271,7 +271,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
                 generatedSql.charAt(ind1 + "ARTIST t".length())
                     != generatedSql.charAt(ind2 + "ARTIST t".length()));
 
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -287,16 +288,9 @@ public class SelectTranslatorTst extends CayenneTestCase {
         try {
             // query with qualifier and ordering
             q.setRoot(ArtistExhibit.class);
-            q.setQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.LIKE,
-                    "toArtist.artistName",
-                    "a%"));
+            q.setQualifier(ExpressionFactory.likeExp("toArtist.artistName", "a%"));
             q.andQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.LIKE,
-                    "toArtist.paintingArray.paintingTitle",
-                    "p%"));
+                ExpressionFactory.likeExp("toArtist.paintingArray.paintingTitle", "p%"));
 
             SelectTranslator transl = buildTranslator(con);
             String generatedSql = transl.createSqlString();
@@ -314,7 +308,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             int ind2 = generatedSql.indexOf("ARTIST t", ind1 + 1);
             assertTrue(ind2 < 0);
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -329,16 +324,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
         try {
             // query with qualifier and ordering
             q.setRoot(Artist.class);
-            q.setQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.GREATER_THAN,
-                    "dateOfBirth",
-                    new Date()));
-            q.andQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.LESS_THAN,
-                    "dateOfBirth",
-                    new Date()));
+            q.setQualifier(ExpressionFactory.greaterExp("dateOfBirth", new Date()));
+            q.andQualifier(ExpressionFactory.lessExp("dateOfBirth", new Date()));
 
             SelectTranslator transl = buildTranslator(con);
             String generatedSql = transl.createSqlString();
@@ -359,17 +346,17 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             int i4 = generatedSql.indexOf("DATE_OF_BIRTH", i3 + 1);
             assertTrue("No second DOB comparison: " + i4 + ", " + i3, i4 > i3);
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
 
-
-   /**
-     * Test query when qualifying on the same attribute accessed over
-     * relationship, more than once.
-     * Check translation "Painting.toArtist.dateOfBirth > ? AND Painting.toArtist.dateOfBirth < ?".
-     */
+    /**
+      * Test query when qualifying on the same attribute accessed over
+      * relationship, more than once.
+      * Check translation "Painting.toArtist.dateOfBirth > ? AND Painting.toArtist.dateOfBirth < ?".
+      */
     public void testCreateSqlString8() throws Exception {
         Connection con = getConnection();
 
@@ -377,15 +364,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
             // query with qualifier and ordering
             q.setRoot(Painting.class);
             q.setQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.GREATER_THAN,
-                    "toArtist.dateOfBirth",
-                    new Date()));
-            q.andQualifier(
-                ExpressionFactory.binaryPathExp(
-                    Expression.LESS_THAN,
-                    "toArtist.dateOfBirth",
-                    new Date()));
+                ExpressionFactory.greaterExp("toArtist.dateOfBirth", new Date()));
+            q.andQualifier(ExpressionFactory.lessExp("toArtist.dateOfBirth", new Date()));
 
             SelectTranslator transl = buildTranslator(con);
             String generatedSql = transl.createSqlString();
@@ -406,7 +386,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             int i4 = generatedSql.indexOf("DATE_OF_BIRTH", i3 + 1);
             assertTrue("No second DOB comparison: " + i4 + ", " + i3, i4 > i3);
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -417,8 +398,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
         try {
             // query for a compound ObjEntity with qualifier
             q.setRoot(CompoundPainting.class);
-            q.setQualifier(
-                ExpressionFactory.binaryExp(Expression.LIKE, "artistName", "a%"));
+            q.setQualifier(ExpressionFactory.likeExp("artistName", "a%"));
 
             String generatedSql = buildTranslator(con).createSqlString();
 
@@ -464,7 +444,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             int i13 = generatedSql.indexOf("GALLERY_ID");
             assertTrue(i13 > 0);
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -487,7 +468,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
                 assertTrue(columns.contains(it.next()));
             }
 
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -511,7 +493,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
                 assertTrue(columns.contains(dbAttrs[i]));
             }
 
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -531,7 +514,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
             // 1 (obj attr) + 1 (pk) = 2
             assertEquals(2, columns.size());
 
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
@@ -551,7 +535,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
             // 1 (obj attr) + 1 (pk) = 2
             assertEquals(2, columns.size());
 
-        } finally {
+        }
+        finally {
             con.close();
         }
     }

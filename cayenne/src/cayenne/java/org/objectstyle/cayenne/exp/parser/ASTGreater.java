@@ -64,11 +64,6 @@ import org.objectstyle.cayenne.util.ConversionUtil;
  * @author Andrei Adamchik
  */
 public class ASTGreater extends ConditionNode {
-    public ASTGreater(ASTPath path, Object value) {
-        super(ExpressionParserTreeConstants.JJTGREATER);
-        jjtAddChild(path, 0);
-        jjtAddChild(new ASTScalar(value), 1);
-    }
 
     /**
      * Constructor used by expression parser. Do not invoke directly.
@@ -77,22 +72,32 @@ public class ASTGreater extends ConditionNode {
         super(id);
     }
 
+    public ASTGreater() {
+        super(ExpressionParserTreeConstants.JJTGREATER);
+    }
+
+    public ASTGreater(ASTPath path, Object value) {
+        super(ExpressionParserTreeConstants.JJTGREATER);
+        jjtAddChild(path, 0);
+        jjtAddChild(new ASTScalar(value), 1);
+    }
+
     protected Object evaluateNode(Object o) throws Exception {
         int len = jjtGetNumChildren();
         if (len != 2) {
             return Boolean.FALSE;
         }
-        
+
         Comparable c1 = ConversionUtil.toComparabe(evaluateChild(0, o));
-        if(c1 == null) {
+        if (c1 == null) {
             return Boolean.FALSE;
         }
-        
+
         Comparable c2 = ConversionUtil.toComparabe(evaluateChild(1, o));
-        if(c2 == null) {
+        if (c2 == null) {
             return Boolean.FALSE;
         }
-        
+
         return c1.compareTo(c2) > 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
