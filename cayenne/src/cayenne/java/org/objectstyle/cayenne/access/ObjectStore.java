@@ -641,8 +641,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     /**
      * Starts tracking the registration of new objects from this ObjectStore. Used in
      * conjunction with unregisterNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
-     * this won't work with changeObjectKey()?)
+     * instance of ObjectStore is used over a longer time for batch processing.
+     * (TODO: this won't work with changeObjectKey()?)
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
      */
@@ -655,8 +655,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     /**
      * Unregisters the newly registered DataObjects from this objectStore. Used in
      * conjunction with startTrackingNewObjects() to control garbage collection when an
-     * instance of ObjectStore is used over a longer time for batch processing. (TODO:
-     * this won't work with changeObjectKey()?)
+     * instance of ObjectStore is used over a longer time for batch processing.
+     *  (TODO: this won't work with changeObjectKey()?)
      * 
      * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
      */
