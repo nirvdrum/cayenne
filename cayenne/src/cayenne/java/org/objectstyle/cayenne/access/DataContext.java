@@ -254,7 +254,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     /** Takes a snapshot of current object state. */
     public Map takeObjectSnapshot(DataObject anObject) {
-        ObjEntity ent = getEntityResolver().lookupObjEntity(anObject.getClass());
+        ObjEntity ent = getEntityResolver().lookupObjEntity(anObject);
         return snapshotManager.takeObjectSnapshot(ent, anObject);
     }
 
@@ -360,12 +360,22 @@ public class DataContext implements QueryEngine, Serializable {
      * @param dataObject new object that we want to make persistent.
      * @param objEntityName a name of the ObjEntity in the map used to get 
      *  persistence information for this object.
+     *
+     * @deprecated use registerNewObject(DataObject dataObject) instead.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
+    	registerNewObject(dataObject);
+    }
+
+    /** Registers new object (that is not yet persistent) with itself.
+     *
+     * @param dataObject new object that we want to make persistent.
+     */
+    public void registerNewObject(DataObject dataObject) {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
 
-        ObjEntity ent = lookupEntity(objEntityName);
+        ObjEntity ent = getEntityResolver().lookupObjEntity(dataObject);
         snapshotManager.prepareForInsert(ent, dataObject);
         objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
@@ -568,7 +578,7 @@ public class DataContext implements QueryEngine, Serializable {
      * mapped to a "read-only" entity.
      */
     private void filterReadOnly(DataObject dataObj) throws CayenneRuntimeException {
-    	ObjEntity oe=getEntityResolver().lookupObjEntity(dataObj.getClass());
+    	ObjEntity oe=getEntityResolver().lookupObjEntity(dataObj);
         if (oe.isReadOnly()) {
             throw new CayenneRuntimeException(
                 "Attempt to commit a read-only object, " + oe.getName() + ".");
@@ -788,7 +798,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
         ObjEntity objEntity =
-			this.getEntityResolver().lookupObjEntity(dataObject.getClass());
+			this.getEntityResolver().lookupObjEntity(dataObject);
         DbEntity dbEntity = objEntity.getDbEntity();
 
         Iterator it = dbEntity.getRelationshipMap().values().iterator();
