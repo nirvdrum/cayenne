@@ -81,14 +81,14 @@ public class EOModelFileFilterTst extends TestCase {
 	}
 	
 	public void testRejectIndexEOM() throws Exception {
-		assertTrue(filter.accept(new File("index.eomodeld")));
+		assertTrue(!filter.accept(new File("index.eomodeld")));
 	}
 	
 	public void testAcceptIndexEOM() throws Exception {
 		assertTrue(filter.accept(new File("some.eomodeld/index.eomodeld")));
 	}
 	
-	public void testNoAcceptOther() throws Exception {
+	public void testRejectOther() throws Exception {
 		assertTrue(!filter.accept(new File("somefile.txt")));
 	}
 }

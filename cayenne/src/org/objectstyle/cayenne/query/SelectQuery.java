@@ -55,7 +55,8 @@
  */ 
 package org.objectstyle.cayenne.query;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.exp.Expression;
@@ -84,7 +85,9 @@ public class SelectQuery extends QualifiedQuery {
         setQualifier(qualifier);
     }
     
-    
+    /** 
+     * Returns <code>Query.SELECT_QUERY</code> type.
+     */
     public int getQueryType() {
         return SELECT_QUERY;
     }
@@ -115,6 +118,10 @@ public class SelectQuery extends QualifiedQuery {
     /** Sets <code>distinct</code> property. */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
+    }
+    
+    public List getQueryAttributes() {
+    	return new ArrayList();
     }
     
     

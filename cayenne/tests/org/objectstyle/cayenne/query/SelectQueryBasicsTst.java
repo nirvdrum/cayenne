@@ -56,10 +56,7 @@
 
 package org.objectstyle.cayenne.query;
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
+import junit.framework.TestCase;
 
 
 public class SelectQueryBasicsTst extends TestCase {
@@ -110,5 +107,9 @@ public class SelectQueryBasicsTst extends TestCase {
     	assertTrue(!q.isFetchingDataRows());
     	q.setFetchingDataRows(true);
     	assertTrue(q.isFetchingDataRows());
+    }
+    
+    public void testQueryAttributes() throws Exception {
+    	assertEquals(0, q.getQueryAttributes().size());
     }
 }
