@@ -55,21 +55,17 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.List;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.List;
+
+import org.objectstyle.art.CompoundPainting;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.art.CompoundPainting;
 
 /**
  * @author Andrei Adamchik

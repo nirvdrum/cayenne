@@ -67,398 +67,461 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 public class CayenneDataObjectRelTst extends CayenneDOTestBase {
-	private static Logger logObj = Logger.getLogger(CayenneDataObjectRelTst.class);
+    private static Logger logObj =
+        Logger.getLogger(CayenneDataObjectRelTst.class);
 
-	public CayenneDataObjectRelTst(String name) {
-		super(name);
-	}
+    public CayenneDataObjectRelTst(String name) {
+        super(name);
+    }
 
-	private void prepareNestedProperties() throws Exception {
-		Artist a1 = super.newArtist();
-		Painting p1 = super.newPainting();
-		PaintingInfo pi1 = super.newPaintingInfo();
-		Gallery g1 = super.newGallery();
+    private void prepareNestedProperties() throws Exception {
+        Artist a1 = super.newArtist();
+        Painting p1 = super.newPainting();
+        PaintingInfo pi1 = super.newPaintingInfo();
+        Gallery g1 = super.newGallery();
 
-		p1.setToArtist(a1);
-		p1.setToPaintingInfo(pi1);
-		p1.setToGallery(g1);
-		ctxt.commitChanges();
-		resetContext();
-	}
+        p1.setToArtist(a1);
+        p1.setToPaintingInfo(pi1);
+        p1.setToGallery(g1);
+        ctxt.commitChanges();
+        resetContext();
+    }
 
-	public void testReadNestedProperty1() throws Exception {
-		prepareNestedProperties();
+    public void testReadNestedProperty1() throws Exception {
+        prepareNestedProperties();
 
-		Painting p1 = fetchPainting();
-		assertEquals(artistName, p1.readNestedProperty("toArtist.artistName"));
-	}
+        Painting p1 = fetchPainting();
+        assertEquals(artistName, p1.readNestedProperty("toArtist.artistName"));
+    }
 
-	public void testReadNestedProperty2() throws Exception {
-		prepareNestedProperties();
+    public void testReadNestedProperty2() throws Exception {
+        prepareNestedProperties();
 
-		Painting p1 = fetchPainting();
-		assertTrue(p1.getToArtist().readNestedProperty("paintingArray") instanceof List);
-	}
+        Painting p1 = fetchPainting();
+        assertTrue(
+            p1.getToArtist().readNestedProperty("paintingArray")
+                instanceof List);
+    }
 
-	public void testReciprocalRel1() throws Exception {
-		TestCaseDataFactory.createArtistWithPainting(artistName, new String[] { paintingName }, false);
+    public void testReciprocalRel1() throws Exception {
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] { paintingName },
+            false);
 
-		Painting p1 = fetchPainting();
-		Artist a1 = p1.getToArtist();
+        Painting p1 = fetchPainting();
+        Artist a1 = p1.getToArtist();
 
-		assertNotNull(a1);
-		assertEquals(artistName, a1.getArtistName());
+        assertNotNull(a1);
+        assertEquals(artistName, a1.getArtistName());
 
-		List paintings = a1.getPaintingArray();
-		assertEquals(1, paintings.size());
-		Painting p2 = (Painting) paintings.get(0);
-		assertSame(p1, p2);
-	}
+        List paintings = a1.getPaintingArray();
+        assertEquals(1, paintings.size());
+        Painting p2 = (Painting) paintings.get(0);
+        assertSame(p1, p2);
+    }
 
-	public void testReadToOneRel1() throws Exception {
-		// read to-one relationship
-		TestCaseDataFactory.createArtistWithPainting(artistName, new String[] { paintingName }, false);
+    public void testReadToOneRel1() throws Exception {
+        // read to-one relationship
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] { paintingName },
+            false);
 
-		Painting p1 = fetchPainting();
-		Artist a1 = p1.getToArtist();
+        Painting p1 = fetchPainting();
+        Artist a1 = p1.getToArtist();
 
-		assertNotNull(a1);
-		assertEquals(PersistenceState.HOLLOW, a1.getPersistenceState());
-		assertEquals(artistName, a1.getArtistName());
-		assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
-	}
+        assertNotNull(a1);
+        assertEquals(PersistenceState.HOLLOW, a1.getPersistenceState());
+        assertEquals(artistName, a1.getArtistName());
+        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+    }
 
-	public void testReadToOneRel2() throws Exception {
-		// test chained calls to read relationships
-		TestCaseDataFactory.createArtistWithPainting(artistName, new String[] { paintingName }, true);
+    public void testReadToOneRel2() throws Exception {
+        // test chained calls to read relationships
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] { paintingName },
+            true);
 
-		PaintingInfo pi1 = fetchPaintingInfo(paintingName);
-		Painting p1 = pi1.getPainting();
-		p1.getPaintingTitle();
+        PaintingInfo pi1 = fetchPaintingInfo(paintingName);
+        Painting p1 = pi1.getPainting();
+        p1.getPaintingTitle();
 
-		Artist a1 = p1.getToArtist();
+        Artist a1 = p1.getToArtist();
 
-		assertNotNull(a1);
-		assertEquals(PersistenceState.HOLLOW, a1.getPersistenceState());
-		assertEquals(artistName, a1.getArtistName());
-		assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
-	}
+        assertNotNull(a1);
+        assertEquals(PersistenceState.HOLLOW, a1.getPersistenceState());
+        assertEquals(artistName, a1.getArtistName());
+        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+    }
 
-	public void testReadToOneRel3() throws Exception {
-		// test null relationship destination
-		TestCaseDataFactory.createArtistWithPainting(artistName, new String[] { paintingName }, false);
+    public void testReadToOneRel3() throws Exception {
+        // test null relationship destination
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] { paintingName },
+            false);
 
-		Painting p1 = fetchPainting();
-		Gallery g1 = p1.getToGallery();
-		assertNull(g1);
-	}
+        Painting p1 = fetchPainting();
+        Gallery g1 = p1.getToGallery();
+        assertNull(g1);
+    }
 
-	public void testReadToManyRel1() throws Exception {
-		TestCaseDataFactory.createArtistWithPainting(artistName, new String[] { paintingName }, false);
+    public void testReadToManyRel1() throws Exception {
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] { paintingName },
+            false);
 
-		Artist a1 = fetchArtist();
-		List plist = a1.getPaintingArray();
+        Artist a1 = fetchArtist();
+        List plist = a1.getPaintingArray();
 
-		assertNotNull(plist);
-		assertEquals(1, plist.size());
-		assertEquals(PersistenceState.COMMITTED, ((Painting) plist.get(0)).getPersistenceState());
-		assertEquals(paintingName, ((Painting) plist.get(0)).getPaintingTitle());
-	}
+        assertNotNull(plist);
+        assertEquals(1, plist.size());
+        assertEquals(
+            PersistenceState.COMMITTED,
+            ((Painting) plist.get(0)).getPersistenceState());
+        assertEquals(
+            paintingName,
+            ((Painting) plist.get(0)).getPaintingTitle());
+    }
 
-	public void testReadToManyRel2() throws Exception {
-		// test empty relationship
-		TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {}, false);
+    public void testReadToManyRel2() throws Exception {
+        // test empty relationship
+        TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {
+        }, false);
 
-		Artist a1 = fetchArtist();
-		List plist = a1.getPaintingArray();
+        Artist a1 = fetchArtist();
+        List plist = a1.getPaintingArray();
 
-		assertNotNull(plist);
-		assertEquals(0, plist.size());
-	}
+        assertNotNull(plist);
+        assertEquals(0, plist.size());
+    }
 
-	public void testReadFlattenedRelationship() throws Exception {
-		//Test no groups
-		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {});
+    public void testReadFlattenedRelationship() throws Exception {
+        //Test no groups
+        TestCaseDataFactory
+            .createArtistBelongingToGroups(artistName, new String[] {
+        });
 
-		Artist a1 = fetchArtist();
-		List groupList = a1.getGroupArray();
-		assertNotNull(groupList);
-		assertEquals(0, groupList.size());
-	}
+        Artist a1 = fetchArtist();
+        List groupList = a1.getGroupArray();
+        assertNotNull(groupList);
+        assertEquals(0, groupList.size());
+    }
 
-	public void testReadFlattenedRelationship2() throws Exception {
-		//Test no groups
-		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] { groupName });
+    public void testReadFlattenedRelationship2() throws Exception {
+        //Test no groups
+        TestCaseDataFactory.createArtistBelongingToGroups(
+            artistName,
+            new String[] { groupName });
 
-		Artist a1 = fetchArtist();
-		List groupList = a1.getGroupArray();
-		assertNotNull(groupList);
-		assertEquals(1, groupList.size());
-		assertEquals(PersistenceState.COMMITTED, ((ArtGroup) groupList.get(0)).getPersistenceState());
-		assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
-	}
+        Artist a1 = fetchArtist();
+        List groupList = a1.getGroupArray();
+        assertNotNull(groupList);
+        assertEquals(1, groupList.size());
+        assertEquals(
+            PersistenceState.COMMITTED,
+            ((ArtGroup) groupList.get(0)).getPersistenceState());
+        assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
+    }
 
-	public void testAddToFlattenedRelationship() throws Exception {
-		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {});
-		TestCaseDataFactory.createUnconnectedGroup(groupName);
-		Artist a1 = fetchArtist();
-		
-		SelectQuery q =
-			new SelectQuery(ArtGroup.class, ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "name", groupName));
-		List results = ctxt.performQuery(q);
-		assertEquals(1,results.size());
-		
-		ArtGroup group=(ArtGroup)results.get(0);
-		a1.addToGroupArray(group);
+    public void testAddToFlattenedRelationship() throws Exception {
+        TestCaseDataFactory
+            .createArtistBelongingToGroups(artistName, new String[] {
+        });
+        TestCaseDataFactory.createUnconnectedGroup(groupName);
+        Artist a1 = fetchArtist();
 
-		List groupList = a1.getGroupArray();
-		assertEquals(1, groupList.size());
-		assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
-		
-		//Ensure that the commit doesn't fail
-		a1.getDataContext().commitChanges();
-		
-		//and check again
-		groupList = a1.getGroupArray();
-		assertEquals(1, groupList.size());
-		assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
-	}
+        SelectQuery q =
+            new SelectQuery(
+                ArtGroup.class,
+                ExpressionFactory.binaryPathExp(
+                    Expression.EQUAL_TO,
+                    "name",
+                    groupName));
+        List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
 
+        ArtGroup group = (ArtGroup) results.get(0);
+        a1.addToGroupArray(group);
 
-	//Test case to show up a bug in committing more than once
-	public void testDoubleCommitAddToFlattenedRelationship() throws Exception {
-		TestCaseDataFactory
-			.createArtistBelongingToGroups(artistName, new String[] {});
-		TestCaseDataFactory.createUnconnectedGroup(groupName);
-		Artist a1 = fetchArtist();
+        List groupList = a1.getGroupArray();
+        assertEquals(1, groupList.size());
+        assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
 
-		SelectQuery q =
-			new SelectQuery(
-				ArtGroup.class,
-				ExpressionFactory.binaryPathExp(
-					Expression.EQUAL_TO,
-					"name",
-					groupName));
-		List results = ctxt.performQuery(q);
-		assertEquals(1, results.size());
+        //Ensure that the commit doesn't fail
+        a1.getDataContext().commitChanges();
 
-		ArtGroup group = (ArtGroup) results.get(0);
-		a1.addToGroupArray(group);
+        //and check again
+        groupList = a1.getGroupArray();
+        assertEquals(1, groupList.size());
+        assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
+    }
 
-		List groupList = a1.getGroupArray();
-		assertEquals(1, groupList.size());
-		assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
+    //Test case to show up a bug in committing more than once
+    public void testDoubleCommitAddToFlattenedRelationship() throws Exception {
+        TestCaseDataFactory
+            .createArtistBelongingToGroups(artistName, new String[] {
+        });
+        TestCaseDataFactory.createUnconnectedGroup(groupName);
+        Artist a1 = fetchArtist();
 
-		//Ensure that the commit doesn't fail
-		a1.getDataContext().commitChanges();
+        SelectQuery q =
+            new SelectQuery(
+                ArtGroup.class,
+                ExpressionFactory.binaryPathExp(
+                    Expression.EQUAL_TO,
+                    "name",
+                    groupName));
+        List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
 
-		try {
-			//The bug caused the second commit to fail (the link record
-			// was inserted again)
-			a1.getDataContext().commitChanges();
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Should not have thrown an exception");
-		}
+        ArtGroup group = (ArtGroup) results.get(0);
+        a1.addToGroupArray(group);
 
-	}
-	
-	public void testRemoveFromFlattenedRelationship() throws Exception {
-		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {groupName});
-		Artist a1 = fetchArtist();
-		
-		ArtGroup group=(ArtGroup)a1.getGroupArray().get(0);
-		a1.removeFromGroupArray(group);
-		
-		List groupList = a1.getGroupArray();
-		assertEquals(0, groupList.size());
+        List groupList = a1.getGroupArray();
+        assertEquals(1, groupList.size());
+        assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
 
-		//Ensure that the commit doesn't fail
-		a1.getDataContext().commitChanges();
-		
-		//and check again
-		groupList = a1.getGroupArray();
-		assertEquals(0, groupList.size());
-	}
+        //Ensure that the commit doesn't fail
+        a1.getDataContext().commitChanges();
 
-	//Shows up a possible bug in ordering of deletes, when a flattened relationships link record is deleted
-	// at the same time (same transaction) as one of the record to which it links.
-	public void testRemoveFlattenedRelationshipAndRootRecord() throws Exception {
-			TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {groupName});
-			Artist a1 = fetchArtist();
-			DataContext dc=a1.getDataContext();
-		
-			ArtGroup group=(ArtGroup)a1.getGroupArray().get(0);
-			a1.removeFromGroupArray(group); //Cause the delete of the link record
-			
-			dc.deleteObject(a1); //Cause the deletion of the artist
-			
-			try {
-				dc.commitChanges();
-			} catch (Exception e) {
-				e.printStackTrace();
-				fail("Should not have thrown the exception :"+e.getMessage());
-			}
-	}
-	
-	/* Catches a bug in the flattened relationship registration which just inserted/deleted willy-nilly, 
-	 * even if unneccessary */
-	public void testAddRemoveAddFlattenedRelationship() throws Exception {
-		String specialGroupName="Special Group2";
-		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {});
-		TestCaseDataFactory.createUnconnectedGroup(specialGroupName);
-		Artist a1 = fetchArtist();
-		
-		SelectQuery q =
-			new SelectQuery(ArtGroup.class, ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "name", specialGroupName));
-		List results = ctxt.performQuery(q);
-		assertEquals(1,results.size());
-		
-		ArtGroup group=(ArtGroup)results.get(0);
-		a1.addToGroupArray(group);
-		group.removeFromArtistArray(a1);
-		//a1.addToGroupArray(group);
+        try {
+            //The bug caused the second commit to fail (the link record
+            // was inserted again)
+            a1.getDataContext().commitChanges();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have thrown an exception");
+        }
 
-		try {
-			ctxt.commitChanges();
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Should not have thrown the exception "+e.getMessage());
-		}
-		
-		this.resetContext();
-		results = ctxt.performQuery(q);
-		assertEquals(1,results.size());
-		
-		group=(ArtGroup)results.get(0);
-		assertEquals(0, group.getArtistArray().size());
-		//a1 = fetchArtist();
-		//assertTrue(group.getArtistArray().contains(a1));
-	}
+    }
 
-	
-	public void testReflexiveRelationshipInsertOrder1() {
-		DataContext dc=this.createDataContext();
-		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		parentGroup.setName("parent");
-		
-		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		childGroup1.setName("child1");
-		childGroup1.setToParentGroup(parentGroup);
-		dc.commitChanges();
-	}
-	
-	public void testReflexiveRelationshipInsertOrder2() {
-		//Create in a different order and see what happens
-		DataContext dc=this.createDataContext();
-		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		childGroup1.setName("child1");
+    public void testRemoveFromFlattenedRelationship() throws Exception {
+        TestCaseDataFactory.createArtistBelongingToGroups(
+            artistName,
+            new String[] { groupName });
+        Artist a1 = fetchArtist();
 
-		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		parentGroup.setName("parent");
-		
-		childGroup1.setToParentGroup(parentGroup);
-		
-		dc.commitChanges();
-	}
-	
-	public void testReflexiveRelationshipInsertOrder3() {
-		//Tey multiple children, one created before parent, one after
-		DataContext dc=this.createDataContext();
-		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		childGroup1.setName("child1");
+        ArtGroup group = (ArtGroup) a1.getGroupArray().get(0);
+        a1.removeFromGroupArray(group);
 
-		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		parentGroup.setName("parent");
-		
-		childGroup1.setToParentGroup(parentGroup);
+        List groupList = a1.getGroupArray();
+        assertEquals(0, groupList.size());
 
-		ArtGroup childGroup2=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		childGroup2.setName("child2");
-		childGroup2.setToParentGroup(parentGroup);
-		
-		dc.commitChanges();
-	}
-	
-	public void testReflexiveRelationshipInsertOrder4() {
-		//Tey multiple children, one created before parent, one after
-		DataContext dc=this.createDataContext();
-		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		childGroup1.setName("child1");
+        //Ensure that the commit doesn't fail
+        a1.getDataContext().commitChanges();
 
-		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		parentGroup.setName("parent");
-		
-		childGroup1.setToParentGroup(parentGroup);
+        //and check again
+        groupList = a1.getGroupArray();
+        assertEquals(0, groupList.size());
+    }
 
-		ArtGroup childGroup2=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
-		childGroup2.setName("subchild");
-		childGroup2.setToParentGroup(childGroup1);
-		
-		dc.commitChanges();
-	}
-	
-	public void testCrossContextRelationshipException() {
-		DataContext otherContext = getDomain().createDataContext();
-		//Create this object in one context...
-		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
-		//...and this object in another context
-		Painting painting=(Painting)otherContext.createAndRegisterNewObject("Painting");
-		
-		//Check setting a toOne relationship
-		try {
-			painting.setToArtist(artist);
-			fail("Should have failed to set a cross-context relationship");
-		} catch (CayenneRuntimeException e) {
-			//Fine.. it should  throw an exception
-		}
-		
-		assertNull(painting.getToArtist()); //Make sure it wasn't set
-		
-		//Now try the reverse (toMany) relationship
-		try {
-			artist.addToPaintingArray(painting);
-			fail("Should have failed to add a cross-context relationship");
-		} catch (CayenneRuntimeException e) {
-			//Fine.. it should  throw an exception
-		}
-		
-		assertEquals(0, artist.getPaintingArray().size());
-		
-	}
+    //Shows up a possible bug in ordering of deletes, when a flattened relationships link record is deleted
+    // at the same time (same transaction) as one of the record to which it links.
+    public void testRemoveFlattenedRelationshipAndRootRecord()
+        throws Exception {
+        TestCaseDataFactory.createArtistBelongingToGroups(
+            artistName,
+            new String[] { groupName });
+        Artist a1 = fetchArtist();
+        DataContext dc = a1.getDataContext();
 
-	public void testComplexInsertUpdateOrdering() {
-		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
-		artist.setArtistName("a name");
-		
-		ctxt.commitChanges();
-		
-		//Cause an update and an insert that need correct ordering
-		Painting painting=(Painting)ctxt.createAndRegisterNewObject("Painting");
-		painting.setPaintingTitle("a painting");
-		artist.addToPaintingArray(painting);
-		
-		ctxt.commitChanges();
-		
-		ctxt.deleteObject(artist);
-		ctxt.commitChanges();
-	}
-	
-	private Artist newSavedArtist() {
-		Artist o1 = newArtist();
-		o1.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
-		ctxt.commitChanges();
-		return o1;
-	}
+        ArtGroup group = (ArtGroup) a1.getGroupArray().get(0);
+        a1.removeFromGroupArray(group); //Cause the delete of the link record
 
-	private PaintingInfo fetchPaintingInfo(String name) {
-		SelectQuery q =
-			new SelectQuery(
-				"PaintingInfo",
-				ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "painting.paintingTitle", name));
-		List pts = ctxt.performQuery(q);
-		return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
-	}
+        dc.deleteObject(a1); //Cause the deletion of the artist
+
+        try {
+            dc.commitChanges();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have thrown the exception :" + e.getMessage());
+        }
+    }
+
+    /* Catches a bug in the flattened relationship registration which just inserted/deleted willy-nilly, 
+     * even if unneccessary */
+    public void testAddRemoveAddFlattenedRelationship() throws Exception {
+        String specialGroupName = "Special Group2";
+        TestCaseDataFactory
+            .createArtistBelongingToGroups(artistName, new String[] {
+        });
+        TestCaseDataFactory.createUnconnectedGroup(specialGroupName);
+        Artist a1 = fetchArtist();
+
+        SelectQuery q =
+            new SelectQuery(
+                ArtGroup.class,
+                ExpressionFactory.binaryPathExp(
+                    Expression.EQUAL_TO,
+                    "name",
+                    specialGroupName));
+        List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
+
+        ArtGroup group = (ArtGroup) results.get(0);
+        a1.addToGroupArray(group);
+        group.removeFromArtistArray(a1);
+        //a1.addToGroupArray(group);
+
+        try {
+            ctxt.commitChanges();
+        } catch (Exception e) {
+            Util.unwindException(e).printStackTrace();
+            fail("Should not have thrown the exception " + e.getMessage());
+        }
+
+        this.resetContext();
+        results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
+
+        group = (ArtGroup) results.get(0);
+        assertEquals(0, group.getArtistArray().size());
+        //a1 = fetchArtist();
+        //assertTrue(group.getArtistArray().contains(a1));
+    }
+
+    public void testReflexiveRelationshipInsertOrder1() {
+        DataContext dc = this.createDataContext();
+        ArtGroup parentGroup =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        parentGroup.setName("parent");
+
+        ArtGroup childGroup1 =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        childGroup1.setName("child1");
+        childGroup1.setToParentGroup(parentGroup);
+        dc.commitChanges();
+    }
+
+    public void testReflexiveRelationshipInsertOrder2() {
+        //Create in a different order and see what happens
+        DataContext dc = this.createDataContext();
+        ArtGroup childGroup1 =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        childGroup1.setName("child1");
+
+        ArtGroup parentGroup =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        parentGroup.setName("parent");
+
+        childGroup1.setToParentGroup(parentGroup);
+
+        dc.commitChanges();
+    }
+
+    public void testReflexiveRelationshipInsertOrder3() {
+        //Tey multiple children, one created before parent, one after
+        DataContext dc = this.createDataContext();
+        ArtGroup childGroup1 =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        childGroup1.setName("child1");
+
+        ArtGroup parentGroup =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        parentGroup.setName("parent");
+
+        childGroup1.setToParentGroup(parentGroup);
+
+        ArtGroup childGroup2 =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        childGroup2.setName("child2");
+        childGroup2.setToParentGroup(parentGroup);
+
+        dc.commitChanges();
+    }
+
+    public void testReflexiveRelationshipInsertOrder4() {
+        //Tey multiple children, one created before parent, one after
+        DataContext dc = this.createDataContext();
+        ArtGroup childGroup1 =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        childGroup1.setName("child1");
+
+        ArtGroup parentGroup =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        parentGroup.setName("parent");
+
+        childGroup1.setToParentGroup(parentGroup);
+
+        ArtGroup childGroup2 =
+            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        childGroup2.setName("subchild");
+        childGroup2.setToParentGroup(childGroup1);
+
+        dc.commitChanges();
+    }
+
+    public void testCrossContextRelationshipException() {
+        DataContext otherContext = getDomain().createDataContext();
+        //Create this object in one context...
+        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        //...and this object in another context
+        Painting painting =
+            (Painting) otherContext.createAndRegisterNewObject("Painting");
+
+        //Check setting a toOne relationship
+        try {
+            painting.setToArtist(artist);
+            fail("Should have failed to set a cross-context relationship");
+        } catch (CayenneRuntimeException e) {
+            //Fine.. it should  throw an exception
+        }
+
+        assertNull(painting.getToArtist()); //Make sure it wasn't set
+
+        //Now try the reverse (toMany) relationship
+        try {
+            artist.addToPaintingArray(painting);
+            fail("Should have failed to add a cross-context relationship");
+        } catch (CayenneRuntimeException e) {
+            //Fine.. it should  throw an exception
+        }
+
+        assertEquals(0, artist.getPaintingArray().size());
+
+    }
+
+    public void testComplexInsertUpdateOrdering() {
+        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        artist.setArtistName("a name");
+
+        ctxt.commitChanges();
+
+        //Cause an update and an insert that need correct ordering
+        Painting painting =
+            (Painting) ctxt.createAndRegisterNewObject("Painting");
+        painting.setPaintingTitle("a painting");
+        artist.addToPaintingArray(painting);
+
+        ctxt.commitChanges();
+
+        ctxt.deleteObject(artist);
+        ctxt.commitChanges();
+    }
+
+    private Artist newSavedArtist() {
+        Artist o1 = newArtist();
+        o1.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
+        ctxt.commitChanges();
+        return o1;
+    }
+
+    private PaintingInfo fetchPaintingInfo(String name) {
+        SelectQuery q =
+            new SelectQuery(
+                "PaintingInfo",
+                ExpressionFactory.binaryPathExp(
+                    Expression.EQUAL_TO,
+                    "painting.paintingTitle",
+                    name));
+        List pts = ctxt.performQuery(q);
+        return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
+    }
 }
