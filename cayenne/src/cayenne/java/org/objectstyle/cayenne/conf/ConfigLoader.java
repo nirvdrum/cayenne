@@ -61,7 +61,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.AbstractHandler;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
@@ -78,8 +77,6 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Andrei Adamchik
  */
 public class ConfigLoader {
-    private static Logger logObj = Logger.getLogger(ConfigLoader.class);
-
     protected XMLReader parser;
     protected ConfigLoaderDelegate delegate;
 
