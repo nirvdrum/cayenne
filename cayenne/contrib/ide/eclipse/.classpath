@@ -30,7 +30,7 @@
 	<classpathentry exported="true" kind="lib" path="otherlib/jgroups-2.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/jms-1.0.2b.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/forms-1.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="otherlib/plastic-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="otherlib/looks-1.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/jdom-b9.jar"/>
 	<classpathentry kind="lib" path="otherlib/macosx-ui-1.4.2_03.jar"/>
 	<classpathentry kind="lib" path="otherlib/mockrunner-0.2.9.jar"/>
