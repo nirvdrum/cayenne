@@ -73,16 +73,18 @@ import org.objectstyle.cayenne.map.*;
  */
 public class RemoveAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(RemoveAction.class.getName());
-
-	public RemoveAction(Mediator mediator) {
-		super(mediator);
+	public static final String ACTION_NAME = "Remove";
+		
+	public RemoveAction() {
+		super(ACTION_NAME);
 	}
-
+	
 	public void performAction(ActionEvent e) {
 		remove();
 	}
 
 	private void remove() {
+		Mediator mediator = getMediator();
 		if (mediator.getCurrentDbRelationship() != null) {
 			logObj.fine("current Db Rel is not null");
 		}
@@ -116,6 +118,7 @@ public class RemoveAction extends CayenneAction {
 	}
 	
 	protected void removeDomain() {
+		Mediator mediator = getMediator();
 		DataDomain domain = mediator.getCurrentDataDomain();
 		mediator.getConfig().removeDomain(domain.getName());
 		mediator.fireDomainEvent(new DomainEvent(Editor.getFrame(), domain, DomainEvent.REMOVE));
@@ -123,6 +126,7 @@ public class RemoveAction extends CayenneAction {
 	
 	
 	protected void removeDataMap() {
+		Mediator mediator = getMediator();
 		DataMap map = mediator.getCurrentDataMap();
 		DataDomain domain = mediator.getCurrentDataDomain();
 		domain.removeMap(map.getName());
@@ -131,6 +135,7 @@ public class RemoveAction extends CayenneAction {
 	
 
 	protected void removeDataNode() {
+		Mediator mediator = getMediator();
 		DataNode node = mediator.getCurrentDataNode();
 		DataDomain domain = mediator.getCurrentDataDomain();
 		domain.removeDataNode(node.getName());
@@ -142,6 +147,7 @@ public class RemoveAction extends CayenneAction {
 	 * "remove" EntityEvent.
 	 */
 	protected void removeDbEntity() {
+		Mediator mediator = getMediator();
 		DbEntity ent = mediator.getCurrentDbEntity();
 		DataMap map = mediator.getCurrentDataMap();
 		map.deleteDbEntity(ent.getName());
@@ -153,6 +159,7 @@ public class RemoveAction extends CayenneAction {
 	 * Removes current object entity from its DataMap. 
 	 */
 	protected void removeObjEntity() {
+		Mediator mediator = getMediator();
 		ObjEntity ent = mediator.getCurrentObjEntity();
 		DataMap map = mediator.getCurrentDataMap();
 		map.deleteObjEntity(ent.getName());
@@ -161,6 +168,7 @@ public class RemoveAction extends CayenneAction {
 	}
 
 	protected void removeObjAttribute() {
+		Mediator mediator = getMediator();
 		ObjEntity entity = mediator.getCurrentObjEntity();
 		ObjAttribute attrib = mediator.getCurrentObjAttribute();
 		entity.removeAttribute(attrib.getName());
@@ -184,6 +192,7 @@ public class RemoveAction extends CayenneAction {
 	}
 
 	protected void removeDbAttribute() {
+		Mediator mediator = getMediator();
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbAttribute attrib = mediator.getCurrentDbAttribute();
 		entity.removeAttribute(attrib.getName());
@@ -207,6 +216,7 @@ public class RemoveAction extends CayenneAction {
 	}
 
 	protected void removeObjRelationship() {
+		Mediator mediator = getMediator();
 		ObjEntity entity = mediator.getCurrentObjEntity();
 		ObjRelationship rel = mediator.getCurrentObjRelationship();
 		entity.removeRelationship(rel.getName());
@@ -230,6 +240,7 @@ public class RemoveAction extends CayenneAction {
 	}
 
 	protected void removeDbRelationship() {
+		Mediator mediator = getMediator();
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbRelationship rel = mediator.getCurrentDbRelationship();
 		entity.removeRelationship(rel.getName());
@@ -253,6 +264,7 @@ public class RemoveAction extends CayenneAction {
 	}
 
 	protected void removeDataMapFromDataNode() {
+		Mediator mediator = getMediator();
 		DataNode node = mediator.getCurrentDataNode();
 		DataMap map = mediator.getCurrentDataMap();
 		// Get existing data maps

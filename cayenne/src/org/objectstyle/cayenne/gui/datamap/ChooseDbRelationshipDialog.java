@@ -214,6 +214,7 @@ implements ActionListener {
 			dbRel = (DbRelationship)wrap.getRelationship();
 		else
 			dbRel = null;
+	
 		choice = SELECT;
 		hide();
 	}

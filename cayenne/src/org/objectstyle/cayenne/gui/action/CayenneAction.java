@@ -59,7 +59,9 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 
+import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.GUIErrorHandler;
 
@@ -70,26 +72,31 @@ import org.objectstyle.cayenne.gui.util.GUIErrorHandler;
  * @author Andrei Adamchik
  */
 public abstract class CayenneAction extends AbstractAction {
-	protected Mediator mediator;
-
+	
+	public CayenneAction() {}
+	
+	public CayenneAction(String name) {
+		super(name);
+	}
+	
+	/**
+	 * Returns the name of thsi action.
+	 */
+	public String getName() {
+		return (String)super.getValue(Action.NAME);
+	}
+	
     /**
      * Subclasses must implement this method instead of <code>actionPerformed</code>
      * to allow for exception handling.
      */
     public abstract void performAction(ActionEvent e);
-    
-	/**
-	 * Creates new CayenneAction, initalizing it with mediator.
-	 */
-	public CayenneAction(Mediator mediator) {
-		this.mediator = mediator;
-	}
 
 	/** 
-	 * Returns mediator associated with this action.
+	 * Returns shared CayenneModeler mediator.
 	 */
 	public Mediator getMediator() {
-		return mediator;
+		return Editor.getFrame().getMediator();
 	}
 
 	/**

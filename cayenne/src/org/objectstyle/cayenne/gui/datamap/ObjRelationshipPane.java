@@ -56,17 +56,20 @@ package org.objectstyle.cayenne.gui.datamap;
  */ 
 
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
-import java.awt.event.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.table.*;
+import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.CayenneTable;
+import org.objectstyle.cayenne.map.*;
 
 /** Displays ObjRelationship-s for the current obj entity. 
   * @author Michael Misha Shengaout*/
@@ -220,14 +223,18 @@ implements ActionListener, ObjEntityDisplayListener
 	  * Clear old db relationships and put new ones in their place.*/
 	private void copyDbRelationship (ObjRelationship rel, java.util.List list) {
 		rel.removeAllDbRelationships();
-		if (list == null)
+		if (list == null) {
 			return;
+		}
+		
 		// Add DbRelationship to the ObjRedlationship list.
 		Iterator iter = list.iterator();
 		while (iter.hasNext()) {
 			DbRelationship db_rel = (DbRelationship)iter.next();
 			rel.addDbRelationship(db_rel);
-		}// End while
+		}
+		
+		mediator.fireObjRelationshipEvent(new RelationshipEvent(Editor.getFrame(), rel, rel.getSourceEntity()));
 	}
 
 	

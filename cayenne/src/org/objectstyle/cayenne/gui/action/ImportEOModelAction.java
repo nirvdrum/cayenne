@@ -84,13 +84,12 @@ public class ImportEOModelAction extends CayenneAction {
 	static Logger logObj =
 		Logger.getLogger(ImportEOModelAction.class.getName());
 
+	public static final String ACTION_NAME = "ImportEOModel";
+
 	protected JFileChooser eoModelChooser;
 
-	/**
-	 * Constructor for ImportEOModelAction.
-	 */
-	public ImportEOModelAction(Mediator mediator) {
-		super(mediator);
+	public ImportEOModelAction() {
+		super(ACTION_NAME);
 	}
 
 	/**
@@ -133,7 +132,8 @@ public class ImportEOModelAction extends CayenneAction {
 	 * Adds DataMap into the project.
 	 */
 	protected void addDataMap(DataMap map) {
-		DataMap currentMap = mediator.getCurrentDataMap();
+		DataMap currentMap = getMediator().getCurrentDataMap();
+		Mediator mediator = getMediator();
 
 		if (currentMap != null) {
 			// merge with existing map
@@ -165,7 +165,6 @@ public class ImportEOModelAction extends CayenneAction {
 			mediator.addDataMap(Editor.getFrame(), map);
 		}
 	}
-
 
 	/** 
 	 * Returns EOModel chooser.

@@ -77,16 +77,18 @@ import org.objectstyle.cayenne.map.DbLoader;
  * Action that imports database structure into a DataMap.
  * 
  * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
-public class ImportDbAction extends CayenneAction
-{
+public class ImportDbAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(ImportDbAction.class.getName());
-	
-	public ImportDbAction(Mediator mediator) {
-		super(mediator);
+	public static final String ACTION_NAME = "ImportDb";
+		
+	public ImportDbAction() {
+		super(ACTION_NAME);
 	}
-
+	
 	protected void importDb() {
+		Mediator mediator = getMediator();
         DataSourceInfo dsi = new DataSourceInfo();
         Connection conn = null;
         DbAdapter adapter = null;

@@ -82,12 +82,15 @@ import org.objectstyle.cayenne.gui.validator.*;
  */
 public class SaveAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(SaveAction.class.getName());
-	
-	public SaveAction(Mediator mediator) {
-		super(mediator);
-	}
 
+	public static final String ACTION_NAME = "SaveAll";
+		
+	public SaveAction() {
+		super(ACTION_NAME);
+	}
+	
 	protected void saveAll() {
+		Mediator mediator = getMediator();
 		Validator val = new Validator(mediator);
 		int ret_code = val.validate();
 		// If no errors or no serious errors, save.
@@ -129,6 +132,7 @@ public class SaveAction extends CayenneAction {
 
 
 	protected void saveProject() {
+		Mediator mediator = getMediator();
 		File file = mediator.getConfig().getProjFile();
 		System.out.println("Saving project to " + file.getAbsolutePath());
 		try {
@@ -156,10 +160,11 @@ public class SaveAction extends CayenneAction {
 
 	/** Save data source info if data source factory is DIRECT_FACTORY. */
 	protected void saveDataNode(DataNode node) {
+		Mediator mediator = getMediator();
+		
 		try {
-            File file = null;
             String proj_dir_str = mediator.getConfig().getProjDir();
-			file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
+			File file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
 			if (!file.exists()) {
 				saveNodeAs(node);
 				return;
@@ -180,6 +185,7 @@ public class SaveAction extends CayenneAction {
 	  * If there already exists proj tree, saves it under that tree.
 	  * otherwise saves using absolute path. */
 	protected void saveNodeAs(DataNode node) {
+		Mediator mediator = getMediator();
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
     	XmlFilter xmlFilter = new XmlFilter();
         try {
@@ -251,7 +257,7 @@ public class SaveAction extends CayenneAction {
 	protected void saveDataMap(DataMap map) {
 		try {
             File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
+            String proj_dir_str = getMediator().getConfig().getProjDir();
 			file = new File(proj_dir_str + File.separator + map.getLocation());
 			if (!file.exists()) {
 				saveMapAs(map);
@@ -273,7 +279,7 @@ public class SaveAction extends CayenneAction {
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
+            String proj_dir_str = getMediator().getConfig().getProjDir();
             File proj_dir = null;
             if (proj_dir_str != null)
             	proj_dir = new File(proj_dir_str);
@@ -333,7 +339,7 @@ public class SaveAction extends CayenneAction {
             	}
             }
             // Map location changed - mark current domain dirty
-			mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.CHANGE));
+			getMediator().fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.CHANGE));
 
         } catch (Exception e) {
             System.out.println("Error loading project file, " + e.getMessage());

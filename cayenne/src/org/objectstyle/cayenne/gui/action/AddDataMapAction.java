@@ -71,14 +71,15 @@ import org.objectstyle.cayenne.gui.util.*;
 
 
 /** 
- * Parent class for all Editor actions related to DataMap.
+ * Links DataMap to a DataNode.
  * 
  * @author Misha Shengaout
  */
 public class AddDataMapAction extends CayenneAction {
+	public static final String ACTION_NAME = "AddDataMap";
 
-	public AddDataMapAction(Mediator mediator) {
-		super(mediator);
+	public AddDataMapAction() {
+		super(ACTION_NAME);
 	}
 	
 	public void performAction(ActionEvent e) {
@@ -89,6 +90,7 @@ public class AddDataMapAction extends CayenneAction {
 	 * Adds a DataMap to the current data node. 
 	 */	
 	protected void addDataMap() {
+		Mediator mediator = getMediator();
 		DataNode node = mediator.getCurrentDataNode();
 		List map_list = mediator.getCurrentDataDomain().getMapList();
 		AddDataMapDialog dialog = new AddDataMapDialog(node, map_list);

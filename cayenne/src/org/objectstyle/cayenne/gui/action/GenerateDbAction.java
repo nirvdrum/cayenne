@@ -84,13 +84,14 @@ import org.objectstyle.cayenne.gui.validator.*;
  * Action that generates database tables from a DataMap.
  * 
  * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class GenerateDbAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(GenerateDbAction.class.getName());
-	
-
-	public GenerateDbAction(Mediator mediator) {
-		super(mediator);
+	public static final String ACTION_NAME = "GenerateDb";
+		
+	public GenerateDbAction() {
+		super(ACTION_NAME);
 	}
 
 	protected void generateDb() {
@@ -144,8 +145,9 @@ public class GenerateDbAction extends CayenneAction {
 							, JOptionPane.ERROR_MESSAGE);
 				continue;
 			}
-		}// End while()
+		}
 
+        Mediator mediator = getMediator();
 		DataMap map = mediator.getCurrentDataMap();
 		try {
 			GenerateDbDialog dialog;
@@ -156,7 +158,7 @@ public class GenerateDbAction extends CayenneAction {
 				conn.close();
 			} catch (Exception e) {e.printStackTrace();}
 		}
-	}// End generateDb()
+	}
 
 
 	

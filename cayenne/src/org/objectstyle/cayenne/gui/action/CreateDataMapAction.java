@@ -56,32 +56,32 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
-import java.util.List;
 import java.io.File;
-import javax.swing.JFileChooser;
-import javax.swing.AbstractAction;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
+import javax.swing.JFileChooser;
+
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.AddDataMapDialog;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.util.Preferences;
 
 
 /**
  *  Action that creates new DataMap in the project.
  */
 public class CreateDataMapAction extends CayenneAction {
-
-	public CreateDataMapAction(Mediator mediator) {
-		super(mediator);
+	public static final String ACTION_NAME = "CreateDataMap";
+		
+	public CreateDataMapAction() {
+		super(ACTION_NAME);
 	}
 	
 	/** Calls addDataMap() or creates new data map if no data node selected.*/
 	protected void createDataMap() {
+		Mediator mediator = getMediator();
 		String relative_location = getMapLocation(mediator);
 		if (null == relative_location) {
 			return;

@@ -748,8 +748,8 @@ public class Mediator {
 				default :
 					throw new IllegalArgumentException(
 						"Invalid RelationshipEvent type: " + e.getId());
-			} // End switch
-		} // End for()
+			}
+		} 
 	}
 
 	public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e) {

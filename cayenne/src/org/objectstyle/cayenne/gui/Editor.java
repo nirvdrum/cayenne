@@ -127,6 +127,7 @@ public class Editor
 	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
 	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
 	JMenuItem addDataMapMenu = new JMenuItem("Link Data Map to Node");
+	JMenuItem synchObjEntityMenu = new JMenuItem("Synchronize with DbEntity");
 	JMenuItem removeMenu = new JMenuItem("Remove");
 
 	JMenu toolMenu = new JMenu("Tools");
@@ -169,7 +170,7 @@ public class Editor
 		}
 
 		init();
-		postInit();
+		initActions();
 	}
 
 	protected void init() {
@@ -199,6 +200,7 @@ public class Editor
 		projectMenu.add(createDbEntityMenu);
 		projectMenu.addSeparator();
 		projectMenu.add(addDataMapMenu);
+		projectMenu.add(synchObjEntityMenu);
 		projectMenu.addSeparator();
 		projectMenu.add(removeMenu);
 
@@ -220,8 +222,51 @@ public class Editor
 		this.setIconImage(icon);
 		*/
 	}
-	
-	protected void postInit() {
+
+	protected void initActions() {
+		// build action map
+		actionMap = new ActionMap();
+
+		// create and assign actions
+		CayenneAction createMapAction = new CreateDataMapAction();
+		actionMap.put(createMapAction.getName(), createMapAction);
+		createDataMapBtn.addActionListener(createMapAction);
+		createDataMapMenu.addActionListener(createMapAction);
+
+		CayenneAction addMapAction = new AddDataMapAction();
+		actionMap.put(addMapAction.getName(), addMapAction);
+		addDataMapMenu.addActionListener(addMapAction);
+
+		CayenneAction saveAction = new SaveAction();
+		actionMap.put(saveAction.getName(), saveAction);
+		saveMenu.addActionListener(saveAction);
+		saveMenu.setAccelerator(
+			KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+
+		CayenneAction importDbAction = new ImportDbAction();
+		actionMap.put(importDbAction.getName(), importDbAction);
+		importDbMenu.addActionListener(importDbAction);
+
+		CayenneAction importEOModelAction = new ImportEOModelAction();
+		actionMap.put(importEOModelAction.getName(), importEOModelAction);
+		importEOMMenu.addActionListener(importEOModelAction);
+
+		CayenneAction genDbAction = new GenerateDbAction();
+		actionMap.put(genDbAction.getName(), genDbAction);
+		generateDbMenu.addActionListener(genDbAction);
+
+		CayenneAction removeAction = new RemoveAction();
+		actionMap.put(removeAction.getName(), removeAction);
+		removeBtn.addActionListener(removeAction);
+		removeMenu.addActionListener(removeAction);
+		removeMenu.setAccelerator(
+			KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
+
+		CayenneAction entSynchAction = new EntitySynchAction();
+		actionMap.put(entSynchAction.getName(), entSynchAction);
+
+
+        // "legacy" code - need to hook up all menus and toolbars with actions 
 		disableMenu();
 		closeProjectMenu.setEnabled(false);
 		createDomainMenu.setEnabled(false);
@@ -229,36 +274,26 @@ public class Editor
 
 		createProjectMenu.addActionListener(this);
 		createDomainMenu.addActionListener(this);
-		createDataMapMenu.addActionListener(this);
 		createDataSourceMenu.addActionListener(this);
 		createObjEntityMenu.addActionListener(this);
 		createDbEntityMenu.addActionListener(this);
-		addDataMapMenu.addActionListener(this);
-		removeMenu.addActionListener(this);
-		removeMenu.setAccelerator(
-			KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
+
+		synchObjEntityMenu.addActionListener(this);
+
 		openProjectMenu.addActionListener(this);
 		openProjectMenu.setAccelerator(
 			KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 		closeProjectMenu.addActionListener(this);
-		saveMenu.addActionListener(this);
-		saveMenu.setAccelerator(
-			KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		exitMenu.addActionListener(this);
 
-		importDbMenu.addActionListener(this);
-		importEOMMenu.addActionListener(this);
 		generateMenu.addActionListener(this);
-		generateDbMenu.addActionListener(this);
 		setPackageMenu.addActionListener(this);
 		aboutMenu.addActionListener(this);
 
 		createDomainBtn.addActionListener(this);
-		createDataMapBtn.addActionListener(this);
 		createDataSourceBtn.addActionListener(this);
 		createObjEntityBtn.addActionListener(this);
 		createDbEntityBtn.addActionListener(this);
-		removeBtn.addActionListener(this);
 
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setSize(650, 550);
@@ -268,17 +303,6 @@ public class Editor
 				exitEditor();
 			}
 		});
-	}
-
-	private void initAction() {
-		actionMap = new ActionMap();
-		actionMap.put("CreateDataMap", new CreateDataMapAction(mediator));
-		actionMap.put("AddDataMap", new AddDataMapAction(mediator));
-		actionMap.put("SaveAll", new SaveAction(mediator));
-		actionMap.put("ImportDb", new ImportDbAction(mediator));
-		actionMap.put("ImportEOModel", new ImportEOModelAction(mediator));
-		actionMap.put("GenerateDb", new GenerateDbAction(mediator));
-		actionMap.put("Remove", new RemoveAction(mediator));
 	}
 
 	private void reloadLastProjList() {
@@ -457,10 +481,6 @@ public class Editor
 				createProject();
 			} else if (src == createDomainMenu || src == createDomainBtn) {
 				createDomain();
-			} else if (src == createDataMapMenu || src == createDataMapBtn) {
-				actionMap.get("CreateDataMap").actionPerformed(e);
-			} else if (src == addDataMapMenu) {
-				actionMap.get("AddDataMap").actionPerformed(e);
 			} else if (
 				src == createDataSourceMenu || src == createDataSourceBtn) {
 				createDataNode();
@@ -469,21 +489,11 @@ public class Editor
 				createObjEntity();
 			} else if (src == createDbEntityMenu || src == createDbEntityBtn) {
 				createDbEntity();
-			} else if (src == removeMenu || src == removeBtn) {
-				actionMap.get("Remove").actionPerformed(e);
-			} else if (src == saveMenu) {
-				actionMap.get("SaveAll").actionPerformed(e);
-			} else if (src == importDbMenu) {
-				actionMap.get("ImportDb").actionPerformed(e);
-			} else if (src == importEOMMenu) {
-				actionMap.get("ImportEOModel").actionPerformed(e);
 			} else if (src == setPackageMenu) {
 				// Set the same package name for all obj entities.
 				setPackageName();
 			} else if (src == generateMenu) {
 				generateClasses();
-			} else if (src == generateDbMenu) {
-				actionMap.get("GenerateDb").actionPerformed(e);
 			} else if (src == exitMenu) {
 				exitEditor();
 			} else if (src == aboutMenu) {
@@ -492,11 +502,11 @@ public class Editor
 				// uncomment this line to provide debugging 
 				// information during driver loading
 				// Configuration.setLogLevel(Level.SEVERE);
-				
+
 				openProject(((JMenuItem) src).getText());
 			}
 		} catch (Exception ex) {
-            GUIErrorHandler.guiException(ex);
+			GUIErrorHandler.guiException(ex);
 		}
 	}
 
@@ -523,7 +533,10 @@ public class Editor
 			String name = entities[i].getClassName();
 			int idx = name.lastIndexOf('.');
 			if (idx > 0) {
-				name = (idx == name.length() - 1) ? entities[i].getName() : name.substring(idx + 1);
+				name =
+					(idx == name.length() - 1)
+						? entities[i].getName()
+						: name.substring(idx + 1);
 			}
 			entities[i].setClassName(package_name + name);
 		}
@@ -539,8 +552,10 @@ public class Editor
 
 	/** Returns true if successfully closed project, false otherwise. */
 	private boolean closeProject() {
-		if (false == checkSaveOnClose())
+		if (!checkSaveOnClose()) {
 			return false;
+		}
+
 		reloadLastProjList();
 		getContentPane().remove(view);
 		view = null;
@@ -560,7 +575,9 @@ public class Editor
 
 	private void createObjEntity() {
 		ObjEntity entity =
-			(ObjEntity)NamedObjectFactory.createObject(ObjEntity.class, mediator.getCurrentDataMap());
+			(ObjEntity) NamedObjectFactory.createObject(
+				ObjEntity.class,
+				mediator.getCurrentDataMap());
 		mediator.getCurrentDataMap().addObjEntity(entity);
 		mediator.fireObjEntityEvent(
 			new EntityEvent(this, entity, EntityEvent.ADD));
@@ -575,8 +592,10 @@ public class Editor
 
 	private void createDbEntity() {
 		DbEntity entity =
-			(DbEntity)NamedObjectFactory.createObject(DbEntity.class, mediator.getCurrentDataMap());
-			
+			(DbEntity) NamedObjectFactory.createObject(
+				DbEntity.class,
+				mediator.getCurrentDataMap());
+
 		mediator.getCurrentDataMap().addDbEntity(entity);
 		mediator.fireDbEntityEvent(
 			new EntityEvent(this, entity, EntityEvent.ADD));
@@ -717,9 +736,8 @@ public class Editor
 		}
 	}
 
-	private void project(Mediator temp_mediator) {
-		mediator = temp_mediator;
-		initAction();
+	private void project(Mediator mediator) {
+		this.mediator = mediator;
 
 		view = new EditorView(mediator);
 		getContentPane().add(view, BorderLayout.CENTER);
@@ -742,7 +760,10 @@ public class Editor
 	}
 
 	private void createDomain() {
-		DataDomain domain = (DataDomain)NamedObjectFactory.createObject(DataDomain.class, mediator.getConfig());
+		DataDomain domain =
+			(DataDomain) NamedObjectFactory.createObject(
+				DataDomain.class,
+				mediator.getConfig());
 		mediator.getConfig().addDomain(domain);
 		mediator.fireDomainEvent(
 			new DomainEvent(this, domain, DomainEvent.ADD));
@@ -762,10 +783,11 @@ public class Editor
 	 */
 	private void createDataNode() {
 		DataDomain domain = mediator.getCurrentDataDomain();
-		DataNode node = (DataNode)NamedObjectFactory.createObject(DataNode.class, domain);
+		DataNode node =
+			(DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
 		GuiDataSource src = new GuiDataSource(new DataSourceInfo());
 		node.setDataSource(src);
-		
+
 		domain.addNode(node);
 		mediator.fireDataNodeEvent(
 			new DataNodeEvent(this, node, DataNodeEvent.ADD));
@@ -858,6 +880,7 @@ public class Editor
 		createObjEntityMenu.setEnabled(false);
 		createDbEntityMenu.setEnabled(false);
 		addDataMapMenu.setEnabled(false);
+		synchObjEntityMenu.setEnabled(false);
 
 		saveMenu.setEnabled(false);
 		removeMenu.setEnabled(false);
@@ -905,6 +928,7 @@ public class Editor
 
 		createObjEntityBtn.setEnabled(true);
 		createDbEntityBtn.setEnabled(true);
+		synchObjEntityMenu.setEnabled(true);
 	}
 
 	private void enableDataNodeMenu() {
@@ -927,5 +951,12 @@ public class Editor
 			(screenSize.width - frameSize.width) / 2,
 			(screenSize.height - frameSize.height) / 2);
 		frame.setVisible(true);
+	}
+
+	/**
+	 * Returns current CayenneModeler mediator.
+	 */
+	public Mediator getMediator() {
+		return mediator;
 	}
 }
