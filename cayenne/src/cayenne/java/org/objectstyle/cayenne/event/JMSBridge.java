@@ -154,7 +154,7 @@ public class JMSBridge extends EventBridge implements MessageListener {
                             + message.getJMSCorrelationID());
                 }
 
-                eventManager.postEvent(event, localSubject);
+                onExternalEvent(event);
             }
 
         } catch (MessageFormatException mfex) {
@@ -279,7 +279,7 @@ public class JMSBridge extends EventBridge implements MessageListener {
     }
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
-        logObj.debug("Sending message");
+        logObj.debug("Sending event remotely: " + localEvent);
         ObjectMessage message =
             sendSession.createObjectMessage(eventToMessageObject(localEvent));
         message.setObjectProperty(VM_ID_PROPERRTY, VM_ID);

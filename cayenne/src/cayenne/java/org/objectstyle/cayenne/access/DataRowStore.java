@@ -219,6 +219,11 @@ public class DataRowStore implements Serializable {
         // update the internal cache, prepare snapshot event
         Map diffs = null;
         
+        if(deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty()) {
+            logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
+            return;
+        }
+        
         synchronized (snapshots) {
 
             // DELETED: evict deleted snapshots
@@ -280,13 +285,18 @@ public class DataRowStore implements Serializable {
             }
         }
 
-        SnapshotEvent event = new SnapshotEvent(this, source, diffs, deletedSnapshotIds);
-        if (logObj.isDebugEnabled()) {
-            logObj.debug("postSnapshotsChangeEvent: " + event);
-        }
+        // do not send bogus events... e.g. inserted objects are not counted
+        if ((diffs != null && !diffs.isEmpty())
+            || (deletedSnapshotIds != null && !deletedSnapshotIds.isEmpty())) {
+            SnapshotEvent event =
+                new SnapshotEvent(this, source, diffs, deletedSnapshotIds);
+            if (logObj.isDebugEnabled()) {
+                logObj.debug("postSnapshotsChangeEvent: " + event);
+            }
 
-        // notify listeners;
-        EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
+            // notify listeners;
+            EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
+        }
     }
 
     /**

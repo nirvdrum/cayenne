@@ -644,12 +644,18 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
-        // merge objects with changes in event...
-        logObj.debug("new SnapshotEvent: " + event);
+        // must wrap in try/catch, since any exception in the event dispatch
+        // would result in removing this object from the regsitered listeners
+        try {
+            // merge objects with changes in event...
+            logObj.debug("new SnapshotEvent: " + event);
 
-        DataRowUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
+            DataRowUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
 
-        // TODO: what should we do with deleted objects?
-        // I suggest to turn them into TRANSIENT and notify a delegate...
+            // TODO: what should we do with deleted objects?
+            // I suggest to turn them into TRANSIENT and notify a delegate...
+        } catch (Throwable th) {
+            logObj.info("SnapshotEvent processing exception.", th);
+        }
     }
 }

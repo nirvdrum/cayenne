@@ -84,5 +84,12 @@ public class CayenneEvent extends EventObject {
 	public Map getInfo() {
 		return info;
 	}
+    
+    /**
+     * Used when deserializing remote events.
+     */
+    void setSource(Object source) {
+        super.source = source;
+    }
 }
 

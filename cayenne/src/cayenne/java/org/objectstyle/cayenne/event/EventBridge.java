@@ -119,6 +119,11 @@ public abstract class EventBridge implements EventListener {
      * EventManager. Internally calls "startupExternal".
      */
     public void startup(EventManager eventManager, int mode) throws Exception {
+        this.startup(eventManager, mode, null);
+    }
+
+    public void startup(EventManager eventManager, int mode, Object eventsSource)
+        throws Exception {
         // uninstall old event manager
         if (this.eventManager != null) {
             // maybe leave external interface open?
@@ -140,7 +145,8 @@ public abstract class EventBridge implements EventListener {
                     this,
                     "onLocalEvent",
                     CayenneEvent.class,
-                    localSubject);
+                    localSubject,
+                    eventsSource);
             } catch (NoSuchMethodException ex) {
                 // this should never happen
                 throw new CayenneRuntimeException("Can't install EventBridge.");
@@ -177,6 +183,12 @@ public abstract class EventBridge implements EventListener {
      */
     public void onExternalEvent(CayenneEvent event) {
         if (eventManager != null) {
+            
+            // event may have been deserialized with null source
+            if(event.getSource() == null) {
+                event.setSource(this);
+            }
+            
             eventManager.postEvent(event, localSubject);
         } else {
             throw new IllegalStateException(
