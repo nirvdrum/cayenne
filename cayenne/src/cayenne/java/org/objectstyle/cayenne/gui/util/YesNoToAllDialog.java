@@ -23,7 +23,7 @@ public class YesNoToAllDialog extends JDialog implements ActionListener
 	JButton yes = new JButton("Yes");
 	JButton yesToAll = new JButton("Yes to all");
 	JButton no = new JButton("No");
-	JButton noToAll = new JButton("Not to all");
+	JButton noToAll = new JButton("No to all");
 	JButton cancel = new JButton("Stop");
 	
 	private int status = CANCEL;
