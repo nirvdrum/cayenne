@@ -52,7 +52,7 @@
                 <th colspan="1">Nov</th>
                 <th colspan="1">Dec</th>
             </tr>
-            <list-arch name="cayenne-devel"/>
+            <list-arch name="cayenne-user"/>
             </table>
         </subsection>
         
