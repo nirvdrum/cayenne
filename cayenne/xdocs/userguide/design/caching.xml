@@ -81,8 +81,7 @@ EventManager.getDefaultManager().addListener(
                 customListener,
                 "snapshotsChanged",
                 SnapshotEvent.class,
-                cache.getSnapshotEventSubject(),
-                cache);
+                cache.getSnapshotEventSubject());
 </source>
             </subsection>
             
