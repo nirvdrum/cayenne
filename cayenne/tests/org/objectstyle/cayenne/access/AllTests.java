@@ -69,6 +69,7 @@ public class AllTests {
         suite.addTestSuite(ToManyListTst.class);
         suite.addTestSuite(DataSourceInfoTst.class);
         suite.addTestSuite(DefaultResultIteratorTst.class);
+        suite.addTestSuite(DefaultOperationObserverTst.class);
         return suite;
     }
 }

@@ -52,62 +52,33 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.access;
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
+import junit.framework.TestCase;
 
+/**
+ * @author Andrei Adamchik
+ */
+public class DefaultOperationObserverTst extends TestCase {
+	protected DefaultOperationObserver observer;
 
-public class SelectQueryBasicsTst extends TestCase {
-    protected SelectQuery q;
-    
-    public SelectQueryBasicsTst(String name) {
-        super(name);
-    }
-    
-    public void setUp() throws java.lang.Exception {
-        q = new SelectQuery();
-    }
-    
-    public void testAddOrdering1() throws Exception {
-        Ordering ord = new Ordering();
-        q.addOrdering(ord);
-        assertEquals(1, q.getOrderingList().size());
-        assertSame(ord, q.getOrderingList().get(0));
-    }
-    
-    
-    public void testAddPrefetching() throws Exception {
-        String path = "a.b.c";
-        q.addPrefetch(path);
-        assertEquals(1, q.getPrefetchList().size());
-        assertSame(path, q.getPrefetchList().get(0));
-    }
-    
-    
-    public void testAddOrdering2() throws Exception {        
-        String path = "a.b.c";
-        q.addOrdering(path, Ordering.DESC);
-        assertEquals(1, q.getOrderingList().size());
-        
-        Ordering ord  = (Ordering)q.getOrderingList().get(0);
-        assertEquals(path, ord.getSortPathSpec());
-        assertEquals(Ordering.DESC, ord.isAscending());
-    }
-    
-    
-    public void testDistinct1() throws Exception {
-        SelectQuery q = new SelectQuery();
-        assertTrue(!q.isDistinct());
-    }
-    
-    public void testDistinct2() throws Exception {
-        SelectQuery q = new SelectQuery();
-        q.setDistinct(true);
-        assertTrue(q.isDistinct());
+	/**
+	 * Constructor for DefaultOperationObserverTst.
+	 */
+	public DefaultOperationObserverTst(String name) {
+		super(name);
+	}
+
+	public void setUp() throws Exception {
+		observer = new DefaultOperationObserver();
+	}
+
+    public void testIteratedResult() throws Exception {
+    	assertTrue(!observer.useIteratedResult());
+    	
+    	observer.setUseIteratedResult(true);
+    	assertTrue(observer.useIteratedResult());
     }
 }

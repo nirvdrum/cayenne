@@ -56,84 +56,37 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.List;
 import java.util.logging.Level;
 
-import org.objectstyle.cayenne.query.Query;
-
 /**
- * Defines a set of callback methods for a QueryEngine to notify interested 
- * object about different stages of queries execution. Superinterface, OperationHints,
- * defines information methods that are needed to define query execution 
- * strategy. This Interface adds callback methods.
- *
- * <p>Implementing objects are passed to a QueryEngine that will execute
- * one or more queries. QueryEngine will pass results of the execution 
- * of any kind of queries - selects, updates, store proc. calls, etc..
- * to the interested objects. This includes result counts, created objects, 
- * thrown exceptions, etc.</p>
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- * 
- * @see org.objectstyle.cayenne.access.QueryEngine
+ * Defines an API that allows QueryEngine to obtain information about 
+ * query execution. Defines query running strategies, logging, etc. 
  * 
  * @author Andrei Adamchik
  */
-public interface OperationObserver extends OperationHints {
+public interface OperationHints {
 	
-	/** 
-	 * Invoked after the update (can be insert, delete or update query) is executed.
-	 */
-    public void nextCount(Query query, int resultCount);
+    /** Returns a log level level that should be used when logging query execution. */ 
+    public Level queryLogLevel();
     
-    
-    /** Invoked after the next query results are read. */
-    public void nextDataRows(Query query, List dataRows);
-    
-    
-   	/** 
-	 * Invoked after the next query is invoked, if a query required
-	 * results to be returned as a ResultIterator. OperationObserver 
-	 * is responsible for closing the ResultIterator.
-	 */
-    public void nextDataRows(ResultIterator it, Query q);
-	
-	
-    /** Invoked when an exception occurs during query execution. */
-    public void nextQueryException(Query query, Exception ex);
-    
-    /** 
-     * Invoked when a "global" exception occurred, such as JDBC
-     * connection exception, etc.
+    /** <p>DataNode executing a list of statements will consult OperationHints
+     *  about transactional behavior by calling this method.</p>
+     * 
+     *  <ul>
+     *  	<li>If this method returns true, each statement in a batch will be run as a separate 
+     *  transaction.</li>
+     *  	<li>If this method returns false, the whole batch will be wrapped in a transaction.</li>
+     *  </ul>
      */
-    public void nextGlobalException(Exception ex);
+    public boolean useAutoCommit();
     
     
     /** 
-     * Invoked when a batch of queries was processed as a single transaction,
-     * and this transaction was successfully committed.
+     * Returns <code>true</code> to indicate that any results of a select operation
+     * should be returned as a ResultIterator. <code>false</code> is returned when the
+     * results are expected as a list.
      */
-    public void transactionCommitted();
-    
-    
-    /** 
-     * Invoked when a batch of queries was processed as a single transaction,
-     *  and this transaction was failed and was rolled back. 
-     */
-    public void transactionRolledback();
-    
-    
-    /** This method may be called by DataNode. It gives a chance to OperationObserver to order 
-     *  queries to satisfy database referential integrity constraints.
-     *
-     *  @param aNode data node that is about to run a list of queries...
-     *  @param queryList a list of queries being executed by QueryEngine as a single transaction
-     *
-     *  @return ordered query list (of course some implementations may just return unmodified original
-     *  query list if they do not care about ordering)
-     *
-     */
-    public List orderQueries(DataNode aNode, List queryList);
+    public boolean useIteratedResult();
 }
 

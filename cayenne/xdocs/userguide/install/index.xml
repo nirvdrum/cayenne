@@ -115,7 +115,7 @@
 			the applications that use Cayenne. There are a few "standard" ways of doing it in Java,
 			like setting CLASSPATH variable, etc.</p>
             
-            <panel name="Warning:">It is NOT recommended putting Cayenne JAR files under 
+            <panel name="Warning:">It is NOT recommended to put Cayenne JAR files under 
             JRE extensions directory ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext),
             though it will probably work for most cases.</panel>
             

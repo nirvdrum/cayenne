@@ -83,6 +83,7 @@ public class DefaultOperationObserver implements OperationObserver {
     protected boolean transactionCommitted;
     protected boolean transactionRolledback;
     protected Level queryLogLevel = DEFAULT_LOG_LEVEL;
+    protected boolean useIteratedResult;
     
     
     /** Returns a list of global exceptions that occured during data operation run. */
@@ -138,6 +139,10 @@ public class DefaultOperationObserver implements OperationObserver {
         logObj.fine("result count: " + count);
     }
     
+    public void nextDataRows(ResultIterator it, Query q) {
+    	throw new RuntimeException("Not implemented.");
+    }
+    
     
     public void nextQueryException(Query query, Exception ex) {
         logObj.log(Level.WARNING, "query exception", ex);
@@ -171,5 +176,13 @@ public class DefaultOperationObserver implements OperationObserver {
     /** Returns query list without altering its ordering. */
     public List orderQueries(DataNode aNode, List queryList) {
         return queryList;
+    }
+    
+    public boolean useIteratedResult() {
+    	return useIteratedResult;
+    }
+    
+    public void setUseIteratedResult(boolean flag) {
+    	this.useIteratedResult = flag;
     }
 }
