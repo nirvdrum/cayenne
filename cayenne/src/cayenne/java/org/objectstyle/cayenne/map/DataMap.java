@@ -470,7 +470,7 @@ public class DataMap {
      */
     public List getMappedEntities(DbEntity dbEntity) {
         if (dbEntity == null) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
 
         List result = new ArrayList();

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Collections;
 import java.util.Map;
 
 /** 
@@ -84,7 +85,7 @@ public class TempObjectId extends ObjectId {
 
 	/** Returns null */
 	public Map getIdSnapshot() {
-		return (permId == null) ? null : permId.getIdSnapshot();
+		return (permId == null) ? Collections.EMPTY_MAP : permId.getIdSnapshot();
 	}
 
     /**

@@ -283,7 +283,7 @@ public class SnapshotManager {
 			Map idParts = target.getObjectId().getIdSnapshot();
 
 			// this may happen in uncommitted objects
-			if (idParts == null) {
+			if (idParts.isEmpty()) {
 				continue;
 			}
 
