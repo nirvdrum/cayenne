@@ -321,7 +321,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
 
-        // clear caches 
+        // clear caches
         // TODO: the same operation is performed on commit... must create a common method
         this.retainedSnapshotMap.clear();
         this.indirectlyModifiedIds.clear();
@@ -467,13 +467,23 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         List deletedIds = null;
         Map modifiedSnapshots = null;
 
-        Iterator objects = this.getObjectIterator();
+        Iterator entries = objectMap.entrySet().iterator();
         List modifiedIds = null;
 
-        while (objects.hasNext()) {
-            DataObject object = (DataObject) objects.next();
+        while (entries.hasNext()) {
+            Map.Entry entry = (Map.Entry) entries.next();
+            
+            DataObject object = (DataObject) entry.getValue();
             int state = object.getPersistenceState();
             ObjectId id = object.getObjectId();
+            
+            // OID may have been manually substituted instead of using replacement...
+            // not good, but process it here anyway...
+            // [an alternative would be to throw an exception, but as commit is already 
+            // done, this is not a sensible thing to do]
+            if(state == PersistenceState.NEW && !id.isReplacementIdAttached()) {
+                id = fixObjectId((ObjectId) entry.getKey(), object);
+            }
 
             if (id.isReplacementIdAttached()) {
                 if (modifiedIds == null) {
@@ -485,37 +495,50 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 // postpone processing of objects that require an id change
                 continue;
             }
+            // sanity check
+            else if (id.isTemporary()) {
+                throw new CayenneRuntimeException(
+                        "Temporary ID hasn't been replaced on commit: " + object);
+            }
 
             // inserted will all have replacement ids, so do not check for
             // inserts here
             // ...
 
             // deleted
-            if (state == PersistenceState.DELETED) {
-                objects.remove();
-                dataRowCache.forgetSnapshot(id);
-                object.setDataContext(null);
-                object.setPersistenceState(PersistenceState.TRANSIENT);
+            switch (state) {
+                case PersistenceState.DELETED:
+                    entries.remove();
+                    dataRowCache.forgetSnapshot(id);
+                    object.setDataContext(null);
+                    object.setPersistenceState(PersistenceState.TRANSIENT);
 
-                if (deletedIds == null) {
-                    deletedIds = new ArrayList();
-                }
+                    if (deletedIds == null) {
+                        deletedIds = new ArrayList();
+                    }
 
-                deletedIds.add(id);
-            }
-            // modified
-            else if (state == PersistenceState.MODIFIED) {
-                if (modifiedSnapshots == null) {
-                    modifiedSnapshots = new HashMap();
-                }
+                    deletedIds.add(id);
+                    break;
+                // modified
+                case PersistenceState.MODIFIED:
+                    if (modifiedSnapshots == null) {
+                        modifiedSnapshots = new HashMap();
+                    }
 
-                DataRow dataRow = object.getDataContext().currentSnapshot(object);
+                    DataRow dataRow = object.getDataContext().currentSnapshot(object);
 
-                modifiedSnapshots.put(id, dataRow);
-                dataRow.setReplacesVersion(object.getSnapshotVersion());
+                    modifiedSnapshots.put(id, dataRow);
+                    dataRow.setReplacesVersion(object.getSnapshotVersion());
 
-                object.setPersistenceState(PersistenceState.COMMITTED);
-                object.setSnapshotVersion(dataRow.getVersion());
+                    object.setPersistenceState(PersistenceState.COMMITTED);
+                    object.setSnapshotVersion(dataRow.getVersion());
+                    break;
+                // new but without a replacement ID (users may have crafted a perm id
+                // manually)
+                case PersistenceState.NEW:
+                    // TODO: do we need to fix snapshots around?
+                    object.setPersistenceState(PersistenceState.COMMITTED);
+                    break;
             }
         }
 
@@ -580,6 +603,28 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.indirectlyModifiedIds.clear();
         this.flattenedDeletes.clear();
         this.flattenedInserts.clear();
+    }
+    
+    
+    /**
+     * A hack to fix manual ObjectId replacements that may have been done without regards
+     * to the fact that ObjectId is used as a key in ObjectStore. E.g. 
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html. Still not sure 
+     * if this is a sensible thing to do, but we can't leave this condition unhandled either.
+     * 
+     * @since 1.2
+     */
+    ObjectId fixObjectId(ObjectId registeredId, DataObject object) {
+        if (!registeredId.equals(object.getObjectId())
+                && !object.getObjectId().isTemporary()) {
+
+            registeredId.getReplacementIdMap().putAll(
+                    object.getObjectId().getIdSnapshot());
+
+            object.setObjectId(registeredId);
+        }
+
+        return registeredId;
     }
 
     public synchronized void addObject(DataObject obj) {

@@ -386,6 +386,8 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertFalse(id.isTemporary());
 
         altContext.commitChanges();
+        
+        assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
 
         // create independent context and fetch artist in it
         DataContext context3 = getDomain().createDataContext(false);

@@ -71,7 +71,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         assertNotNull(e1);
         assertEquals("Painting", e1.getName());
     }
-    
+
     public void testResolveFault() throws Exception {
         Artist o1 = newSavedArtist();
         context.invalidateObjects(Collections.singleton(o1));
@@ -268,6 +268,31 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
                 .getObjectStore()
                 .getCachedSnapshot(artist.getObjectId())
                 .getVersion(), artist.getSnapshotVersion());
+    }
+
+    /**
+     * Tests a condition when user substitutes object id of a new object instead of
+     * setting replacement. This is demonstrated here -
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html
+     */
+    public void testObjectsCommittedManualOID() throws Exception {
+
+        Artist object = (Artist) context.createAndRegisterNewObject(Artist.class);
+        object.setArtistName("ABC1");
+        assertEquals(PersistenceState.NEW, object.getPersistenceState());
+
+        // do a manual id substitution
+        object.setObjectId(new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 3));
+
+        context.commitChanges();
+        assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
+
+        // refetch
+        context.invalidateObjects(Collections.singleton(object));
+
+        Artist object2 = (Artist) DataObjectUtils.objectForPK(context, Artist.class, 3);
+        assertNotNull(object2);
+        assertEquals("ABC1", object2.getArtistName());
     }
 
     private Artist newSavedArtist() {

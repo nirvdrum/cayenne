@@ -65,18 +65,20 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
 public class ObjectStoreTst extends CayenneTestCase {
+
     protected DataContext context;
     protected ObjectStore objectStore;
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         this.context = createDataContext();
 
         // create ObjectStore outside of this DataContext
@@ -84,14 +86,14 @@ public class ObjectStoreTst extends CayenneTestCase {
         this.objectStore = new ObjectStore(cache);
 
     }
-    
+
     public void testCachedQueryResult() throws Exception {
         assertNull(objectStore.getCachedQueryResult("result"));
-        
+
         List result = new ArrayList();
         objectStore.cacheQueryResult("result", result);
         assertSame(result, objectStore.getCachedQueryResult("result"));
-        
+
         // test refreshing the cache
         List freshResult = new ArrayList();
         objectStore.cacheQueryResult("result", freshResult);
@@ -109,10 +111,10 @@ public class ObjectStoreTst extends CayenneTestCase {
         // insert object into the ObjectStore
         objectStore.addObject(object);
         objectStore.getDataRowCache().processSnapshotChanges(
-            this,
-            Collections.singletonMap(object.getObjectId(), row),
-            Collections.EMPTY_LIST,
-            Collections.EMPTY_LIST);
+                this,
+                Collections.singletonMap(object.getObjectId(), row),
+                Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST);
 
         assertSame(object, objectStore.getObject(oid));
         assertNotNull(objectStore.getCachedSnapshot(oid));
@@ -135,10 +137,10 @@ public class ObjectStoreTst extends CayenneTestCase {
         // insert object into the ObjectStore
         objectStore.addObject(object);
         objectStore.getDataRowCache().processSnapshotChanges(
-            this,
-            Collections.singletonMap(object.getObjectId(), row),
-            Collections.EMPTY_LIST,
-            Collections.EMPTY_LIST);
+                this,
+                Collections.singletonMap(object.getObjectId(), row),
+                Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST);
         assertSame(object, objectStore.getObject(oid));
         assertNotNull(objectStore.getCachedSnapshot(oid));
 
@@ -150,4 +152,24 @@ public class ObjectStoreTst extends CayenneTestCase {
         // in the future this may not be the case
         assertNull(objectStore.getCachedSnapshot(oid));
     }
+
+    /**
+     * Tests a condition when a user substitutes object id of a new object instead of
+     * setting replacement. This is demonstrated here -
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0210.html
+     */
+    public void testObjectsCommittedManualOID() throws Exception {
+
+        Artist object = (Artist) context.createAndRegisterNewObject(Artist.class);
+        object.setArtistName("ABC");
+        assertEquals(PersistenceState.NEW, object.getPersistenceState());
+        objectStore.addObject(object);
+
+        // do a manual ID substitution
+        object.setObjectId(new ObjectId(Artist.class, Artist.ARTIST_ID_PK_COLUMN, 3));
+
+        objectStore.objectsCommitted();
+        assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
+    }
+
 }
