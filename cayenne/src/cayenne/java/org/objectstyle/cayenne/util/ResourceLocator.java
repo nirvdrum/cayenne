@@ -80,6 +80,9 @@ import org.objectstyle.cayenne.conf.Configuration;
 public class ResourceLocator {
 	private static Logger logObj;
 
+	// Create a Predicate that will enable logging only when
+	// Configuration.isLoggingConfigured() returns true.
+	// The passed predicate argument is ignored.
 	static {
 		Predicate p = new Predicate() {
 			public boolean evaluate(Object o) {
@@ -90,12 +93,17 @@ public class ResourceLocator {
 		logObj = new PredicateLogger(ResourceLocator.class, p);
 	}
 
-	protected boolean skipHomeDirectory;
-	protected boolean skipCurrentDirectory;
-	protected boolean skipClasspath;
+	/** properties for enabling/disabling certain lookup strategies */
 	protected boolean skipAbsolutePath;
+	protected boolean skipClasspath;
+	protected boolean skipCurrentDirectory;
+	protected boolean skipHomeDirectory;
+
+	/** additional lookup paths (as Strings) */
 	protected List additionalClassPaths;
 	protected List additionalFilesystemPaths;
+
+	/** ClassLoader used for resource loading */
 	protected ClassLoader classLoader;
 
 	/**
@@ -329,7 +337,7 @@ public class ResourceLocator {
 			logObj.debug("searching additional paths: " + this.additionalFilesystemPaths);
 			Iterator pi = this.additionalFilesystemPaths.iterator();
 			while (pi.hasNext()) {
-				File f = new File((File)pi.next(), name);
+				File f = new File((String)pi.next(), name);
 				logObj.debug("searching for: " + f.getAbsolutePath());
 				if (f.exists()) {
 					try {
@@ -474,11 +482,31 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Adds a custom path for filesystem lookups.
+	 * Adds the given String as a custom path for filesystem lookups.
+	 * The path can be relative or absolute and is <i>not</i> checked
+	 * for existence.
+	 * 
+	 * @throws IllegalArgumentException if <code>path</code> is <code>null</code>.
+	 */
+	public void addFilesystemPath(String path) {
+		if (path != null) {
+			this.additionalFilesystemPaths.add(path);
+		}
+		else {
+			throw new IllegalArgumentException("Path must not be null.");
+		}
+	}
+
+	/**
+	 * Adds the given directory as a path for filesystem lookups.
+	 * The directory is checked for existence.
+	 * 
+	 * @throws IllegalArgumentException if <code>path</code> is <code>null</code>,
+	 * not a directory or not readable.
 	 */
 	public void addFilesystemPath(File path) {
 		if (path != null && path.isDirectory()) {
-			this.additionalFilesystemPaths.add(path);
+			this.addFilesystemPath(path.getPath());
 		}
 		else {
 			throw new IllegalArgumentException("Path '" + path + "' is not a directory.");
