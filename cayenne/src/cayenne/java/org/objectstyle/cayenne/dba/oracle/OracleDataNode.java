@@ -65,7 +65,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
@@ -88,7 +87,6 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class OracleDataNode extends DataNode {
-    private static Logger logObj = Logger.getLogger(OracleDataNode.class);
 
     public OracleDataNode() {
         super();
