@@ -139,12 +139,15 @@ public class BrowseView
 		};
 		browseTree.addMouseListener(ml);
 
+        // listen to tree events (since not al selections
+        // are done by clicking tree with mouse)
 		TreeSelectionListener tsl = new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
 				processSelection(e.getPath());
 			}
 		};
 		browseTree.addTreeSelectionListener(tsl);
+		
 
 		mediator.addDomainListener(this);
 		mediator.addDomainDisplayListener(this);
