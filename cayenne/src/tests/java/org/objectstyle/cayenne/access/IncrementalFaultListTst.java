@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
@@ -80,7 +81,7 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         new DataContextTst().populateTables();
 
         SelectQuery q = new SelectQuery("Artist");
-        
+
         // make sure total number of objects is not divisable
         // by the page size, to test the last smaller page
         q.setPageSize(6);
@@ -95,13 +96,44 @@ public class IncrementalFaultListTst extends CayenneTestCase {
 
     public void testIterator() throws Exception {
         Iterator it = list.iterator();
-        while(it.hasNext()) {
-        	Object obj = it.next();
-        	assertNotNull(obj);
-        	assertTrue(obj instanceof DataObject);
+        int counter = 0;
+        while (it.hasNext()) {
+            Object obj = it.next();
+            assertNotNull(obj);
+            assertTrue(obj instanceof DataObject);
+
+            // iterator must be resolved page by page
+			int expectedResolved = list.pageIndex(counter) * list.getPageSize() + list.getPageSize();
+			if(expectedResolved > list.size()) {
+				expectedResolved = list.size();
+			}
+			
+			assertEquals(list.size() - expectedResolved, list.getUnfetchedObjects());
+
+            counter++;
         }
     }
-    
+
+    public void testListIterator() throws Exception {
+        ListIterator it = list.listIterator();
+        int counter = 0;
+        while (it.hasNext()) {
+            Object obj = it.next();
+            assertNotNull(obj);
+            assertTrue(obj instanceof DataObject);
+
+            // iterator must be resolved page by page
+			int expectedResolved = list.pageIndex(counter) * list.getPageSize() + list.getPageSize();
+			if(expectedResolved > list.size()) {
+				expectedResolved = list.size();
+			}
+			
+			assertEquals(list.size() - expectedResolved, list.getUnfetchedObjects());
+			
+            counter++;
+        }
+    }
+
     public void testUnfetchedObjects() throws Exception {
         assertEquals(DataContextTst.artistCount - 6, list.getUnfetchedObjects());
         list.get(7);
@@ -109,12 +141,19 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         list.resolveAll();
         assertEquals(0, list.getUnfetchedObjects());
     }
-    
+
     public void testPageIndex() throws Exception {
         assertEquals(0, list.pageIndex(0));
         assertEquals(0, list.pageIndex(1));
         assertEquals(1, list.pageIndex(6));
-        assertEquals(13, list.pageIndex(82));
+
+        try {
+            assertEquals(13, list.pageIndex(82));
+            fail("Element index beyound array size must throw an IndexOutOfBoundsException.");
+        }
+        catch (IndexOutOfBoundsException ex) {
+            // exception expercted
+        }
     }
 
     public void testPagesRead1() throws Exception {

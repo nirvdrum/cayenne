@@ -242,15 +242,16 @@ public class IncrementalFaultList implements List {
                 }
             }
 
-            if (quals.size() == 0) {
+            int qualsSize = quals.size();
+            if (qualsSize == 0) {
                 return;
             }
 
             // fetch the range of objects in fetchSize chunks
-            List objects = new ArrayList(1);
-            int fetchEnd = Math.min(quals.size(), maxFetchSize);
+            List objects = new ArrayList(qualsSize);
+            int fetchEnd = Math.min(qualsSize, maxFetchSize);
             int fetchBegin = 0;
-            while (fetchBegin < quals.size()) {
+            while (fetchBegin < qualsSize) {
                 SelectQuery query =
                     new SelectQuery(
                         rootEntity.getName(),
@@ -260,7 +261,7 @@ public class IncrementalFaultList implements List {
 
                 objects.addAll(dataContext.performQuery(query));
                 fetchBegin = fetchEnd;
-                fetchEnd += Math.min(maxFetchSize, quals.size() - fetchEnd);
+                fetchEnd += Math.min(maxFetchSize, qualsSize - fetchEnd);
             }
 
             // sanity check - database data may have changed
@@ -338,7 +339,15 @@ public class IncrementalFaultList implements List {
         }
     }
 
+    /**
+     * Returns zero-based index of the virtual "page" for a given
+     * array element index.
+     */
     public int pageIndex(int elementIndex) {
+		if (elementIndex < 0 || elementIndex > size()) {
+			throw new IndexOutOfBoundsException("Index: " + elementIndex);
+		}
+		
         if (pageSize <= 0 || elementIndex < 0) {
             return -1;
         }
@@ -384,53 +393,7 @@ public class IncrementalFaultList implements List {
      * with next() or previous().
      */
     public ListIterator listIterator() {
-        // by virtue of get(index)'s implementation, resolution of ids into 
-        // objects will occur on pageSize boundaries as necessary.
-        return new ListIterator() {
-            int listIndex = 0;
-
-            public void add(Object o) {
-                throw new UnsupportedOperationException("add operation not supported");
-            }
-
-            public boolean hasNext() {
-                return (listIndex < elements.size());
-            }
-
-            public boolean hasPrevious() {
-                return (listIndex > 0);
-            }
-
-            public Object next() {
-                if (listIndex >= elements.size())
-                    throw new NoSuchElementException("at the end of the list");
-
-                return get(listIndex++);
-            }
-
-            public int nextIndex() {
-                return listIndex;
-            }
-
-            public Object previous() {
-                if (listIndex < 1)
-                    throw new NoSuchElementException("at the beginning of the list");
-
-                return get(--listIndex);
-            }
-
-            public int previousIndex() {
-                return (listIndex - 1);
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException("remove operation not supported");
-            }
-
-            public void set(Object o) {
-                throw new UnsupportedOperationException("set operation not supported");
-            }
-        };
+        return new IncrementalListIterator(0);
     }
 
     /**
@@ -441,57 +404,15 @@ public class IncrementalFaultList implements List {
      * previous method would return the element with the specified index 
      * minus one. 
      * 
-     * DataObjects are resolved a page (according to getPageSize()) at a 
-     * time as necessary - when retrieved with next() or previous().
+     * DataObjects are resolved a page at a time (according to getPageSize()) 
+     * as necessary - when retrieved with next() or previous().
      */
-    public ListIterator listIterator(final int index) {
-        // by virtue of get(index)'s implementation, resolution of ids into 
-        // objects will occur on pageSize boundaries as necessary.
-        return new ListIterator() {
-            int listIndex = index;
+    public ListIterator listIterator(int index) {
+        if (index < 0 || index > size()) {
+            throw new IndexOutOfBoundsException("Index: " + index);
+        }
 
-            public void add(Object o) {
-                throw new UnsupportedOperationException("add operation not supported");
-            }
-
-            public boolean hasNext() {
-                return (listIndex < elements.size());
-            }
-
-            public boolean hasPrevious() {
-                return (listIndex > 0);
-            }
-
-            public Object next() {
-                if (listIndex >= elements.size())
-                    throw new NoSuchElementException("at the end of the list");
-
-                return get(listIndex++);
-            }
-
-            public int nextIndex() {
-                return listIndex;
-            }
-
-            public Object previous() {
-                if (listIndex < 1)
-                    throw new NoSuchElementException("at the beginning of the list");
-
-                return get(--listIndex);
-            }
-
-            public int previousIndex() {
-                return (listIndex - 1);
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException("remove operation not supported");
-            }
-
-            public void set(Object o) {
-                throw new UnsupportedOperationException("set operation not supported");
-            }
-        };
+        return new IncrementalListIterator(index);
     }
 
     /**
@@ -796,4 +717,57 @@ public class IncrementalFaultList implements List {
     public int getUnfetchedObjects() {
         return unfetchedObjects;
     }
+
+    class IncrementalListIterator implements ListIterator {
+        // by virtue of get(index)'s implementation, resolution of ids into 
+        // objects will occur on pageSize boundaries as necessary.
+
+        int listIndex;
+
+        public IncrementalListIterator(int startIndex) {
+            this.listIndex = startIndex;
+        }
+
+        public void add(Object o) {
+            throw new UnsupportedOperationException("add operation not supported");
+        }
+
+        public boolean hasNext() {
+            return (listIndex < elements.size());
+        }
+
+        public boolean hasPrevious() {
+            return (listIndex > 0);
+        }
+
+        public Object next() {
+            if (listIndex >= elements.size())
+                throw new NoSuchElementException("at the end of the list");
+
+            return get(listIndex++);
+        }
+
+        public int nextIndex() {
+            return listIndex;
+        }
+
+        public Object previous() {
+            if (listIndex < 1)
+                throw new NoSuchElementException("at the beginning of the list");
+
+            return get(--listIndex);
+        }
+
+        public int previousIndex() {
+            return (listIndex - 1);
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException("remove operation not supported");
+        }
+
+        public void set(Object o) {
+            throw new UnsupportedOperationException("set operation not supported");
+        }
+    };
 }
