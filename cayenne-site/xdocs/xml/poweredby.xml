@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<document>
+    <title>Powered By Cayenne</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+        <section name="Success Stories">
+        <p><strong>National Hockey League</strong> 
+        (<a target="_new" href="http://www.nhl.com/">http://www.nhl.com/</a>)</p>
+        
+        <p>After the initial trial of Cayenne in October 2002, NHL
+        switched all their public applications running at <a target="_new" href="http://www.nhl.com">NHL.com</a>
+        to use Cayenne. With help from <a target="_new" href="http://objectstyle.com">ObjectStyle</a> and 
+        <a target="_new" href="http://www.centralparksoftware.com/">Central Park Software</a> the site was successfully
+        launched to production. Currently applications receive more than 5 million hits a day. 
+        </p>
+        
+        <p><strong>Pixxures Inc.</strong> 
+        (<a target="_new" href="http://www.pixxures.ca/">http://www.pixxures.ca/</a>)</p>
+        
+        <p><a target="_new" href="http://www.pixxures.ca/">Pixxures Inc.</a> is the world's largest provider of 
+        digital mapping products, services, and online delivery capabilities. 
+        Pixxures used Cayenne to create a private website for a client that sells satellite images for 
+        crop analysis to the agriculture industry. The site contains ordering and image production system. 
+        Now Pixxures plans to revamp their main software to use Cayenne instead of the connection 
+        pooling system and the other data access methods.
+        </p>
+        
+        <p></p>
+        <panel name="Powered by Cayenne">If your site or project uses Cayenne as its Object-Relational engine, 
+        please drop a note to cayenne-user list or directly to "andrus at objectstyle.org". 
+        Provided information will be displayed on this page.
+        </panel>
+        
+     </section>
+     
+    <section name="Cayenne Badges">
+        <p>Also we developed a few web badges to enable you to endorse Cayenne technology.
+        Help us to spread the word and promote Cayenne. If your site or project uses
+        Cayenne, you may put one of the following badges on the site. Badge should be configured
+        as an active link to Cayenne website: http://objectstyle.org/cayenne/
+        </p>
+        
+        <p><img src="images/powered-by-cayenne-green1.gif" width="170" height="45"/></p>
+        <p>
+		&lt;a href="http://objectstyle.org/cayenne/"&gt;&lt;img 
+			src="http://objectstyle.org/cayenne/images/powered-by-cayenne-green1.gif" 
+			width="170" 
+			height="45" 
+			border="0"&gt;&lt;/a&gt;
+		</p>
+		<p>
+			<img src="images/powered-by-cayenne-green2.gif" width="170" height="45"/>
+		</p>
+		  <p>
+		&lt;a href="http://objectstyle.org/cayenne/"&gt;&lt;img 
+			src="http://objectstyle.org/cayenne/images/powered-by-cayenne-green2.gif" 
+			width="170" 
+			height="45" 
+			border="0"&gt;&lt;/a&gt;
+		</p>
+		
+		<p>
+			<img src="images/powered-by-cayenne-white.gif" width="170" height="45"/>
+        </p>
+          <p>
+		&lt;a href="http://objectstyle.org/cayenne/"&gt;&lt;img 
+			src="http://objectstyle.org/cayenne/images/powered-by-cayenne-white.gif" 
+			width="170" 
+			height="45" 
+			border="0"&gt;&lt;/a&gt;
+		</p>
+        </section>
+    </body>
+</document>

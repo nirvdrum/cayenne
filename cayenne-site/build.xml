@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!-- Cayenne Site master build file. -->
+<!-- Serves as a facade to a set of private buildfiles. -->
+<!-- ================================================= -->
+<project name="cayenne" default="site" basedir=".">
+
+    <!-- ============================================= -->
+    <!-- Loads properties from default locations. -->
+    <!-- ============================================= -->
+    <property file="build.properties" />
+    <property file="${user.home}/build.properties" />
+    <property file="default.properties" />
+    
+    
+    <!-- ============================================= -->
+    <!-- Derived Properties. These properties are -->
+    <!-- derived from other properties. You probably -->
+    <!-- don't want to redefine them. -->
+    <!-- ============================================= -->
+    <property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
+
+
+    <!-- ============================================= -->
+    <!-- Prints help message describing build.xml use. -->
+    <!-- ============================================= -->
+    <target name="help">
+        <echo>
+     ******************************************************
+     * Available targets (you can also use the "-projecthelp" ant flag 
+     * to see targets):
+     *
+     *  1. site			- (default) creates Cayenne website
+     *  2. help        - prints this message
+     *  3. clean		- cleans the build
+     *
+     *
+     * ENVIRONMENT:
+     *  java.home = ${java.home}
+     *  user.home = ${user.home}
+     *  ant.home = ${ant.home}
+     ******************************************************
+         </echo>
+    </target>
+
+    <!-- ============================================= -->
+    <!-- Deploys Cayenne web site locally -->
+    <!-- ============================================= -->
+    <target name="site">
+		<ant antfile="build-doc.xml" target="site"/>
+    </target>
+ 
+    <!-- ========================================== -->
+    <!-- Cleans distribution files and subprojects. -->
+    <!-- ========================================== -->
+    <target name="clean">
+        <delete dir="${dist.base}"/>
+        <delete dir="${build}"/>
+    </target>
+</project>
+
+

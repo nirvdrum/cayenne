@@ -1,0 +1,52 @@
+<document>
+<title>Frequently Asked Questions: General</title>
+
+<body>
+    <section name="FAQ 1: General">
+    
+    	<subsection name="Q 1.1 Where do I get help with Cayenne?" anchor="free_help">
+    	
+    	<p>Free Cayenne support is provided by its authors and Cayenne user 
+    	community via cayenne-user mailing list. For details how to 
+    	subscribe and for earlier archives, go to 
+    	<a href="http://objectstyle.org/cayenne/lists.html">http://objectstyle.org/cayenne/lists.html</a>.
+    	Commerical support and consulting services are also available directly from the authors of Cayenne.
+    	Visit <a href="http://objectstyle.com/">http://objectstyle.com/</a> for details.
+    	</p>
+    	</subsection>
+    	
+   		<subsection name="Q 1.2 How do I report a bug that I found in Cayenne?" anchor="bug_reports">
+    	<p>Cayenne is using JIRA Issue Tracking system. Follow <a href="../bugs-features.html">this link</a> 
+    	to submit Cayenne-related bugs. 
+    	 </p>
+    	</subsection>
+    	
+   		<subsection name="Q 1.3 How does Cayenne compare to XYZ O/R tool?" anchor="comparison">
+    	<p>There is a growing Wiki page at <a 
+    	href="http://c2.com/cgi-bin/wiki?ObjectRelationalToolComparison">http://c2.com/cgi-bin/wiki?ObjectRelationalToolComparison</a>
+    	originally started by Cayenne team. Please go there for such information, and to participate in building the comparison.
+    	</p>
+    	</subsection>
+
+  		<subsection name="Q 1.4 What License covers Cayenne source?" anchor="license">
+    	<p>Cayenne license is a BSD/Apache style license. In short - source code is avaliable, 
+    	modifications are allowed, modifications and products built with Cayenne can be 
+    	distributed unrestricted. The only requirement - give Cayenne authors a written credit when 
+    	distributing Cayenne or using Cayenne in a derivative work.</p>
+    	</subsection>
+    	
+    	<subsection name="Q 1.5 Cayenne History" anchor="history">
+    	<p>Idea of Cayenne was conceived back in 2001 by a few programmers in 
+        Atlanta, USA. Current version is based on that original idea and is under active 
+        development since December 2001.</p>
+        
+        <p>Later two of the original authors of Cayenne (Andrus and Misha)
+        <a href="http://objectstyle.com">started a company</a> called ObjectStyle LLC to provide 
+        commercial support and consulting services for the product.</p>
+        
+        <p>Core product is fully OpenSource under the most liberal license, and will stay that way. 
+        Right now Cayenne has a growing international user and developer community.</p>
+    	</subsection>
+    </section>
+</body>
+</document>

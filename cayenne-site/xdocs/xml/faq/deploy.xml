@@ -1,0 +1,68 @@
+<document>
+<title>Frequently Asked Questions: Deploy Cayenne Applications</title>
+
+<body>
+    <section name="FAQ 5. Deploy Cayenne Applications">
+    	<subsection name="Q 5.1 
+    					When my application is idle for a long period of time,
+    					I get 'connection was lost' or similar errors?" 
+    	anchor="reconnect">
+    	
+    	<p>There can be a few reasons for this error: some database servers will automatically drop idle client connections, 
+    	database server may have been restarted, etc. Pooled connections may become invalid over a period of time due to one of these reasons,
+    	resulting in exceptions thrown when such connections are used.</p>
+    	
+    	<p>Cayenne's default connection pool implements a 
+    	few checks for invalid connections, and reconnects if possible. Unfortunately due to driver
+    	differences, this does not work reliably across database engines (One database were reconnects work rather well
+    	is Oracle). If you are still having this problem, here is a few suggested solutions:
+    	
+    	<ul>
+    		<li>If you are using MySQL, MySQL JDBC driver offers "auto-reconnect" feature. Use a URL parameter "autoReconnect" set to "true"
+    		to enable reconnection. E.g.: <i>jdbc:mysql://localhost/test?autoReconnect=true</i>. Unfortunately other
+    		databases do not have such feature.</li>
+    		
+    		<li>Configure your database server to prevent idle connections from being automatically closed. Consult your database
+    		documentation on the details.</li>
+    		
+    		<li>Use a third party connection pool implementation, that performs explicit connection validation, e.g. by running 
+    		a test query every time before checking it out.
+    		It can be configured in many different ways, e.g. as a DataSource accessible via JNDI.
+    		</li>
+    	</ul>
+    	</p>
+    	</subsection>
+    	
+    	
+    	<subsection name="Q 5.2 
+    					I am having problems with logging output. How do I trace them down?" 
+    	anchor="logging">
+    	
+    	<p>First step would be to check that logging is configured per recommendations in the
+    	<a href="../userguide/deploy/logging.html">User Guide</a>. To further debug Log4J 
+    	initialization, start the application with a system property 
+    	<code>log4j.configDebug</code> set to "true". E.g.:
+    	</p>
+    	
+<source>
+java -Dlog4j.configDebug=true MyApp
+</source>
+    	</subsection>
+    	
+    	<subsection name="Q 5.3 
+    					MySQL Driver Throws com.mysql.jdbc.PacketTooBigException when saving large objects." 
+    	anchor="mysqllob">
+    	
+    	<p>Our testing was done using ConnectorJ driver v. 3.0.9 that doesn't seem to implement streaming 
+    	for CLOB and BLOB. As a result an attempt to save a large object would end in exceptions similar to this: 
+    	"com.mysql.jdbc.PacketTooBigException: Packet for query is too large (1069615 > 1048576)".
+    	A workaround is to increase "max_allowed_packet"  parameter of MySQL server. Edit "my.cnf" file
+    	to contain a line like this (see MySQL documenatation for details):
+    	</p>
+    	
+<source>max_allowed_packet = 16M</source>
+    	
+    	</subsection>
+    </section>
+</body>
+</document>

@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<document>
+    <title>Mailing Lists</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>        
+    	<section name="Mailing Lists">
+    	    <p><strong>Cayenne mailing list rules.</strong> 
+    	    <ul>
+    	    <li>Avoid crossposting the same message to more than one list.</li>
+    	    <li>Post to the list that is the most appropriate for the topic of your message.</li>
+    	    </ul>
+        	</p>
+        
+    	    <subsection name="cayenne-user">
+        	<p><strong>cayenne-user</strong> is a mailing list for Cayenne 
+        	users. It is the primary source of free Cayenne support.
+        	It is also a place for general discussion of Cayenne-related topics. 
+        	</p>
+        	
+        	<p>To <strong>subscribe</strong> send empty email to
+        	<a href="mailto:cayenne-user-subscribe@objectstyle.org">cayenne-user-subscribe@objectstyle.org</a>.
+        	</p>
+
+        	<p>To <strong>unsubscribe</strong> send empty email to
+        	<a href="mailto:cayenne-user-unsubscribe@objectstyle.org">cayenne-user-unsubscribe@objectstyle.org</a>.
+        	</p>
+        	
+        	<p>To <strong>post</strong> a message use the following address:
+        	<a href="mailto:cayenne-user@objectstyle.org">cayenne-user@objectstyle.org</a>.
+        	</p>
+        	
+        	<table>
+        	<tr>
+        		<th colspan="13">Message Archive</th>
+        	</tr>
+            <tr>
+                <th colspan="1">Year</th>
+                <th colspan="1">Jan</th>
+                <th colspan="1">Feb</th>
+                <th colspan="1">Mar</th>
+                <th colspan="1">Apr</th>
+                <th colspan="1">May</th>
+                <th colspan="1">Jun</th>
+                <th colspan="1">Jul</th>
+                <th colspan="1">Aug</th>
+                <th colspan="1">Sep</th>
+                <th colspan="1">Oct</th>
+                <th colspan="1">Nov</th>
+                <th colspan="1">Dec</th>
+            </tr>
+            <list-arch name="cayenne-user"/>
+            </table>
+        </subsection>
+        
+        <subsection name="cayenne-devel">
+        	<p><strong>cayenne-devel</strong> is a mailing list where Cayenne design issues
+        	are discussed. This includes current and future features, release schedules, and simply
+        	developer discussion of various Cayenne-related topics. It is a good idea for all
+        	Cayenne commiters to subscribe to this list. 
+        	Others are welcomed to subscribe and
+        	participate if they are interested in the topics discussed here.
+        	</p>
+        	
+        	<p>To <strong>subscribe</strong> send empty email to
+        	<a href="mailto:cayenne-devel-subscribe@objectstyle.org">cayenne-devel-subscribe@objectstyle.org</a>.
+        	</p>
+
+        	<p>To <strong>unsubscribe</strong> send empty email to
+        	<a href="mailto:cayenne-devel-unsubscribe@objectstyle.org">cayenne-devel-unsubscribe@objectstyle.org</a>.
+        	</p>
+        	
+        	<p>To <strong>post</strong> a message use the following address:
+        	<a href="mailto:cayenne-devel@objectstyle.org">cayenne-devel@objectstyle.org</a>.
+        	</p>
+        	
+        	<table>
+        	<tr>
+        		<th colspan="13">Message Archive (<a href="http://objectstyle.org/cayenne/lists/cayenne-devel/old/">...earlier messages</a>)</th>
+        	</tr>
+            <tr>
+                <th colspan="1">Year</th>
+                <th colspan="1">Jan</th>
+                <th colspan="1">Feb</th>
+                <th colspan="1">Mar</th>
+                <th colspan="1">Apr</th>
+                <th colspan="1">May</th>
+                <th colspan="1">Jun</th>
+                <th colspan="1">Jul</th>
+                <th colspan="1">Aug</th>
+                <th colspan="1">Sep</th>
+                <th colspan="1">Oct</th>
+                <th colspan="1">Nov</th>
+                <th colspan="1">Dec</th>
+            </tr>
+            <list-arch name="cayenne-devel"/>
+            </table>
+        </subsection>
+        
+         <subsection name="cayenne-cvs">
+        	<p><strong>cayenne-cvs</strong> is a mailing list where all automated CVS commit
+        	notifications are posted. It is intended for tracking of everyday changes made to Cayenne
+        	source tree and only concerns developers. It is hosted on SourceForge.net and is 
+        	not archived. Please DO NOT send any messages to this list. 
+        	</p>
+        	
+        	<p>To <strong>manage your subscription</strong> visit this link:
+        	<a href="http://lists.sourceforge.net/lists/listinfo/cayenne-cvs">http://lists.sourceforge.net/lists/listinfo/cayenne-cvs</a>.
+        	</p>
+        </subsection>
+        </section>
+    </body>
+</document>

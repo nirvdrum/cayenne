@@ -1,0 +1,98 @@
+<document>
+<title>Frequently Asked Questions: Develop with Cayenne</title>
+
+<body>
+    <section name="FAQ 3: Develop with Cayenne">
+    	<subsection name="Q 3.1 What databases are currently supported?" 
+		anchor="db">
+    	
+    	<p>Almost any database that has a JDBC driver will work with Cayenne. But there are
+    	certain database specific issues that arise mostly when doing schema operations. This is 
+    	discussed in detail <a href="../userguide/design/crossdb.html">here</a>. Having said that, 
+    	Cayenne is tested and proven to be 100% compatible with 
+    	the following engines:
+    	<ul> 
+    		<li><a href="http://oracle.com/" target="_new">Oracle</a> (8, 8i, 9i)</li>
+    		<li><a href="http://www.sybase.com/" target="_new">Sybase (11.9)</a></li>
+    		<li><a href="http://www.microsoft.com/sql/default.asp" target="_new">Microsoft SQL Server</a></li>
+    		<li><a href="http://www.mysql.com/" target="_new">MySQL</a></li>
+    		<li><a href="http://www.postgresql.org/" target="_new">PostgreSQL</a> (7.3 and newer)</li>
+    		<li><a href="http://hsqldb.sourceforge.net/" target="_new">HSQLDB</a></li>
+    		<li><a href="http://www.ibm.com/db2/" target="_new">DB2</a></li>
+    		<li><a href="http://firebird.sourceforge.net/" target="_new">FireBird (Interbase)</a></li>
+    		<li><a href="http://www.openbase.com/" target="_new">OpenBase</a></li>
+    	</ul>
+    	
+    	Adapters for other engines are constantly added. Users can create their own adapters as well.
+    	</p>
+    	<p> </p>
+    	</subsection>
+    	
+    	
+    	<subsection name="Q 3.2 How do I log an output of a single query?" 
+		anchor="log_query">
+    	
+    	<p>Cayenne logging system is based on Jakarta 
+    	<a href="http://jakarta.apache.org/log4j/">Log4J</a> package.
+    	To increase logging level of the execution of a 
+    	single select query do something like this:</p>
+    	
+<source>
+  SelectQuery selectQuery = ...;
+  selectQuery.setLoggingLevel(org.apache.log4j.Level.WARN);
+  List objects = dataContext.performQuery(selectQuery);
+</source>
+		<p>To increase logging level of a commit execution do this:</p>
+<source>
+  dataContext.commitChanges(org.apache.log4j.Level.WARN);
+</source>
+    	</subsection>
+    	
+    	<subsection name="Q 3.3 I am on MySQL and I keep getting 'Can't disable AUTO_COMMIT' error. How do I fix it?" 
+		anchor="auto_commit">
+    	
+    	<p>Errors like the one below may happen when using an outdated MySQL JDBC driver:</p>
+    	<pre>java.sql.SQLException: Cannot disable AUTO_COMMIT
+	at org.gjt.mm.mysql.Connection.setAutoCommit(Connection.java:396)
+	at org.objectstyle.cayenne.conn.ConnectionWrapper.setAutoCommit(ConnectionWrapper.java:343)
+	at org.objectstyle.cayenne.access.DataNode.performQueries(DataNode.java:245)
+    	</pre>
+    	
+    	<p>Though MySQL technically does not support transactions (stable release
+    	as of this writing), call to "setAutoCommit" is completely legitimate and shouldn't fail.
+    	Downloading the latest stable driver from <a href="http://www.mysql.com/products/connector-j/index.html">MySQL 
+    	website</a> should fix this problem.</p>
+    	</subsection>
+    	
+        <subsection name="Q 3.4 How do I select objects that do not have a certain other object in its to-many relationship?" 
+		anchor="not-query">
+    	
+    	<p>Sometimes there is a need to find all objects that DO NOT have a certain object (or objects) 
+    	on the other side of their to-many relationship. From the SQL standpoint, an inner join will not 
+    	produce the right results. Rather a subquery is normally used. In Cayenne you can do this in a 
+    	simple two step process. Lets take the following example. There is a Project class and a Task class.
+    	Project has many tasks. We need to fetch all projects that do not contain a task with type "Database".</p>
+    	
+		<p>The most obvious, but incorrect solution:</p>    	
+<source>
+DataContext ctxt;
+...
+Expression qualifier = ExpressionFactory.noMatchExp("taskArray.type", "Database");
+List projects = ctxt.performQuery(new SelectQuery(Project.class, qualifier));
+</source>
+
+		<p>Correct solution:</p>    	
+<source>
+DataContext ctxt;
+...
+Expression qualifier = ExpressionFactory.matchExp("taskArray.type", "Database");
+List excludeProjects = ctxt.performQuery(new SelectQuery(Project.class, qualifier));
+List projects = ctxt.performQuery(new SelectQuery(Project.class));
+
+// filter out projects that do not satisfy criteria
+projects.removeAll(excludeProjects);
+</source>
+    	</subsection>
+    </section>
+</body>
+</document>

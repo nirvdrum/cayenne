@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<document>
+    <title>Downloads</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+        <!-- Contributors section -->
+        <section name="Downloads">
+        	<p>
+        		<ul>
+        			<li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132">All public releases.</a></li>
+        		</ul>
+        	</p>
+        	
+        	<subsection name="Stable Release -  1.0">
+        	    <ul>
+                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-src-1.0.6.tar.gz">Cayenne</a></li>
+					<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-src-1.0.3.tar.gz">Examples</a></li>
+				</ul>
+        	</subsection>
+        	
+        	 <subsection name="Latest Development Release -  1.1">
+        	    <ul>
+                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-src-1.1M4.tar.gz">Cayenne</a></li>
+					<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-src-1.1a-pre2.tar.gz">Examples</a></li>
+					<li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
+				</ul>
+        	</subsection>
+   
+            <p>All Cayenne distribution contains precompiled JAR files, full documentation and source code. 
+            Nightly builds undergo automated testing, but may contain incomplete features and unstable
+            code. Use them at your own risk. Note that usually only about 7 latest nightly builds 
+            are available, older ones are automatically deleted from the archive.
+            </p>
+            
+            <panel name="Cayenne Examples Note:">
+            Cayenne Examples documentation is bundled with Cayenne and is available on the website.
+            Examples code is downloadable separately, following the link above.
+            </panel>
+        </section>
+    </body>
+</document>
+

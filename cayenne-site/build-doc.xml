@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!--         Cayenne documentation buildfile.          -->
+<!--             (called from build.xml)               -->
+<!-- ================================================= -->
+<project name="cayenne-doc" default="site" basedir=".">
+	
+    <path id="classpath">
+    	<pathelement path="${ant.home}/lib/ant.jar"/>
+        <fileset dir="${lib.dir}">
+            <include name="**.jar"/>
+        </fileset>
+    </path>
+    
+	<!-- ========================================== -->
+    <!-- Creates documentation directories.         -->
+    <!-- ========================================== -->
+    <target name="prepare">
+        <tstamp/>
+        <mkdir dir="${build}/site"/>
+        <mkdir dir="${dist}"/>
+    </target>
+    
+    <!-- ============================================= -->
+    <!-- Deploys Cayenne web site locally -->
+    <!-- ============================================= -->
+    <target name="site" depends="prepare,doc,resources">
+         <!-- do replacement in HTML files, strip "xml" subdir -->
+		<copy todir="${dist}">
+			<fileset dir="${build}/site"  includes="**/*.html"/>
+             
+			<filterset begintoken="!--" endtoken="--">
+				<filter token="SFLOGO" value="${sf.logo}"/>
+			</filterset>
+			<filterset begintoken="!--" endtoken="--">
+				<filter token="JNLOGO" value="${java.net.logo}"/>
+			</filterset>
+		</copy>
+    </target>
+
+    <!-- ========================================== -->
+    <!-- Builds Cayenne documenatation.             -->
+    <!-- ========================================== -->
+    <target name="doc" depends="prepare">
+        <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
+            <classpath refid="classpath"/>
+        </taskdef>
+        <anakia basedir="xdocs/xml" destdir="${build}/site"
+             extension=".html" style="site.vsl"
+             projectFile="../templates/project.xml"
+             includes="**/*.xml"
+             lastModifiedCheck="true"
+             templatePath="xdocs/templates">
+        </anakia>
+    </target>
+    
+    <!-- ========================================== -->
+    <!-- Copies documentation resources, such as images -->
+    <!-- and styles. -->
+    <!-- ========================================== -->
+    <target name="resources" depends="prepare">
+        <!-- copy images -->
+        <copy todir="${dist}">
+            <fileset dir="xdocs/resources" includes="**/**"/>
+        </copy>
+    </target>
+</project>
+
+

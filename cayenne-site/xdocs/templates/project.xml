@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Cayenne" href="http://objectstyle.org/cayenne/">
+    <title>Cayenne</title>
+    
+    <menu name="ABOUT">
+        <item name="Home"       href="/index.html"/>
+        <item name="Download"       href="/download.html"/>
+        <item name="Contributors"   href="/contributors.html"/>
+        <item name="How Can I Help" href="/how-can-i-help.html"/>
+        <item name="Success Stories" href="/poweredby.html"/>
+        <item name="License"        href="/LICENSE"/>
+        <item name="Commercial Support" href="/cayenne-commercial-support.html"/>
+    </menu>
+
+    <menu name="DOCUMENTATION">
+        <item name="User Guide" href="/userguide/index.html"/>
+        <item name="Modeler Guide" href="/modelerguide/index.html"/>
+        <item name="Examples" href="/examples/index.html"/>
+        <item name="Javadoc API" href="/api/index.html"/>
+        <item name="FAQ" href="/faq/index.html"/>    
+    </menu>
+    
+    <menu name="COLLABORATION">
+        <item name="Bugs and Features" href="/bugs-features.html"/>
+        <item name="Mailing Lists"  href="/lists.html"/>
+        <item name="Developer Guide"  href="/developerguide/index.html"/>
+    </menu>
+</project>

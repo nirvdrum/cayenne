@@ -1,0 +1,83 @@
+<document>
+<title>Frequently Asked Questions</title>
+
+<body>
+    <section name="Cayenne FAQ">
+    	<p> This is a list of Cayenne Frequently Asked Questions.
+    	If you have a question not answered here, feel free to ask it on 
+    	<a href="http://objectstyle.org/cayenne/lists.html">cayenne-user</a> 
+    	mailing list. Many of the questions here were originally discussed on that
+    	list.
+    		<ul>
+    			<li><a href="general.html">FAQ 1. General</a>
+    				<ul>
+    					<li><a href="general.html#free_help">Q 1.1
+    					Where do I get help with Cayenne?</a></li>
+    					<li><a href="general.html#bug_reports">Q 1.2
+    					How do I report a bug that I found in Cayenne?</a></li>
+    					<li><a href="general.html#comparison">Q 1.3 
+    					How does Cayenne compare to XYZ O/R tool?</a></li>
+    					<li><a href="general.html#license">Q 1.4 
+    					What License covers Cayenne source?</a></li>
+    					<li><a href="general.html#license">Q 1.5 
+    					Cayenne History</a></li>
+    				</ul>
+    				<br/>
+    			</li>
+    			<li><a href="install.html">FAQ 2. Installation</a>
+    				<ul>
+    					<li><a href="install.html#ext_dir">Q 2.1 
+    					I installed Cayenne in $JRE_HOME/lib/ext and now I am getting strange 
+    					errors. What's wrong?</a></li>
+    				</ul>
+    				<br/>
+    			</li>
+    			<li><a href="develop.html">FAQ 3. Develop with Cayenne</a>
+    				<ul>
+    					<li><a href="develop.html#db">Q 3.1 
+    					What databases are currently supported?</a></li>
+    					<li><a href="develop.html#log_query">Q 3.2
+    					How do I log an output of a single query?</a></li>
+    					<li><a href="develop.html#auto_commit">Q 3.3
+    					I am on MySQL and I keep getting "Can't disable AUTO_COMMIT" error. How do I fix it?</a></li>
+    					<li><a href="develop.html#not-query">Q 3.4
+    					How do I select objects that do not have a certain other object in its to-many relationship?</a></li>
+    				</ul>
+    				<br/>
+    			</li>
+    			<li><a href="design.html">FAQ 4. Cayenne Design</a>
+    				<ul>
+    					<li><a href="design.html#inheritance">Q 4.1 
+    					Why do application objects have to extend 'CayenneDataObject?'? 
+    					What about an arbitrary Java class persistence?</a></li>
+    				</ul>
+    			 	<br/>
+    			</li>
+    			
+    			<li><a href="deploy.html">FAQ 5. Deploy Cayenne Applications</a>
+    				<ul>
+    					<li><a href="deploy.html#reconnect">Q 5.1 
+    					When my application is idle for a long period of time,
+    					I get "connection was lost" or similar errors?</a></li>
+    					<li><a href="deploy.html#logging">Q 5.2 
+    					I am having problems with logging output. How do I trace them down?</a></li>
+    					<li><a href="deploy.html#mysqllob">Q 5.3 
+    					MySQL Driver Throws com.mysql.jdbc.PacketTooBigException when saving large objects.</a></li>
+    				</ul>
+    				<br/>
+    			</li>
+    			
+    			<li><a href="contribute.html">FAQ 6. Contribute to Cayenne</a>
+    				<ul>
+    					<li><a href="contribute.html#license">Q 6.1 
+    					What are the licensing terms for accepted contributions?</a></li>
+    					<li><a href="contribute.html#patch">Q 6.2 
+    					I've fixed a few things in Cayenne. How do I submit a patch?</a></li>
+    				</ul>
+    				<br/>
+    			</li>
+    		</ul>
+		</p>
+    </section>
+</body>
+</document>

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<document>
+    <title>Overview</title>
+
+    <body>        
+        <!-- News section -->
+        <section name="Cayenne News">
+        
+         <p><u><i>[March 4, 2004]</i></u> <strong>M4 - New Cayenne 1.1 Milestone  Release</strong></p>
+         <p>This release fixes serious bugs found in M3, adds suppport for to-one relationships with an FK column
+         target and implements performance enhancements for to-many relationships.
+         For details see <a href="RELEASE-NOTES.txt">release notes</a> and <a href="UPGRADE.txt">upgrade instructions</a>.
+         </p>
+         
+        <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
+         <p>Cayenne 1.0.6 is released. It contains extended implementation of in-memory Expressions
+         evaluation and numerous bug fixes. For details see <a href="RELEASE-NOTES-1.0.6.txt">Release notes</a>. 
+         Release can be downloaded from <a href="download.html">here</a>.
+         </p>
+         
+         <p><u><i>[November 1, 2003]</i></u> <strong>Cayenne in "The Best Freeware And Shareware" of DB Magazine, Japan</strong></p>
+         <p><img align="left" hspace="3" src="images/other/db-mag-cover-small.jpg"/> 
+         A December 2003 edition of the DB Magazine, a 250-page software tecnology magazine published in Japanese, includes 
+         Cayenne in the selection of "The Best Freeware &amp; Shareware". Cayenne 1.0 is also distributed on the CD that comes with the magazine.
+         <br/><br/><br/><br/>
+         </p>
+
+        <p><u><i>[May 1 2003]</i></u> <strong>National Hockey League Switches to Cayenne</strong></p>
+        
+        <p><img align="left" hspace="3" src="images/other/nhl_logo.gif"/> 
+        After the initial trial of Cayenne last October, NHL
+        switched all their public applications running at <a href="http://www.nhl.com">NHL.com</a>
+        to use Cayenne. With the help from <a href="http://objectstyle.com">ObjectStyle</a> and 
+        <a href="http://www.centralparksoftware.com/">Central Park Software</a> the site was successfully
+        launched to production. Currently applications receive more than 5 million hits a day. 
+        <br/><br/>
+        </p>
+        
+        <p><a href="news-archive.html"><strong>older news...</strong></a></p>
+        
+        </section>
+        
+        <!-- About section -->
+        <section name="About Cayenne">
+        <p>Cayenne is a powerful, full-featured OpenSource Object/Relational framework. 
+        Cayenne is written in Java and is intended for Java developers working with
+        relational databases. Cayenne has been successfully deployed in production environment on high 
+        volume sites. Cayenne has a growing international user and developer community.</p>
+        
+        <p>Cayenne provides management of persistent Java objects mapped to relational databases, 
+        single method call queries and updates (including atomic updates of all modified objects), 
+        seamless integration of multiple databases into a single virtual data source. 
+        Cayenne is distributed with CayenneModeler -
+        a complete GUI mapping tool that supports reverse-engineering of RDBMS schema, 
+        working with database mappings and generation of Java source code for the 
+        persistent objects.</p>
+        
+        <p>Cayenne is an OpenSource project and as such encourages the 
+        community to participate in development, testing and writing documentation.
+        This way we can produce a better product that will benefit both contributors
+        and user community.</p>
+        </section>
+    </body>
+</document>
