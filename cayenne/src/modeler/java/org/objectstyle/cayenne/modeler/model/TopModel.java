@@ -83,7 +83,6 @@ import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * A top level MVC model object in CayenneModeler.

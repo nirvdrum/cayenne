@@ -102,7 +102,6 @@ import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 

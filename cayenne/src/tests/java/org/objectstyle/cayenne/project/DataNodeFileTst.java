@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**

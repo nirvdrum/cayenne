@@ -1,7 +1,6 @@
 package org.objectstyle.art;
 
 import java.util.List;
-import org.objectstyle.cayenne.*;
 
 public class DeleteRuleTest2 extends org.objectstyle.cayenne.CayenneDataObject {
 

@@ -85,7 +85,6 @@ import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /** 
  * Removes currently selected object from the project. This can be 

@@ -55,19 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Date;
-
-import org.objectstyle.art.ArtGroup;
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.ArtistAssets;
-import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.DeleteRuleTest1;
-import org.objectstyle.art.DeleteRuleTest2;
-import org.objectstyle.art.Exhibit;
-import org.objectstyle.art.Gallery;
-import org.objectstyle.art.Painting;
-import org.objectstyle.art.PaintingInfo;
-import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 

@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler.event;
 import java.util.EventObject;
 
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * @author Andrei Adamchik
