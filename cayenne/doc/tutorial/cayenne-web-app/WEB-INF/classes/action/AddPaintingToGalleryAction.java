@@ -33,15 +33,15 @@ public final class AddPaintingToGalleryAction extends Action {
                                         paintingTitle);
         
         SelectQuery query = new SelectQuery("Painting", qual);
-        query.setLogLevel(Level.SEVERE);
-        // using log level of SEVERE to show the query execution
+        query.setLogLevel(Level.WARN);
+        // using log level of WARN to show the query execution
         List paintings = ctxt.performQuery(query);
                 
         Painting painting = (Painting)paintings.get(0);
         System.err.println("painting: " + painting);
         
         query = new SelectQuery("Gallery");
-        query.setLogLevel(Level.SEVERE);
+        query.setLogLevel(Level.WARN);
         List galleries = ctxt.performQuery(query);
         
         request.setAttribute("painting", painting);

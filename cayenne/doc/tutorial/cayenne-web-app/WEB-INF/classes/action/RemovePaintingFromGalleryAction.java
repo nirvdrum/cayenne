@@ -36,8 +36,8 @@ public final class RemovePaintingFromGalleryAction extends Action {
         
         SelectQuery query = new SelectQuery("Painting", qual);
         
-        // using log level of SEVERE to show the query execution
-        query.setLogLevel(Level.SEVERE);
+        // using log level of WARN to show the query execution
+        query.setLogLevel(Level.WARN);
         List paintings = ctxt.performQuery(query);
                 
         Painting painting = (Painting)paintings.get(0);
@@ -49,15 +49,15 @@ public final class RemovePaintingFromGalleryAction extends Action {
                                         galleryName);
         
         query = new SelectQuery("Gallery", qual);
-        query.setLogLevel(Level.SEVERE);
+        query.setLogLevel(Level.WARN);
         List galleries = ctxt.performQuery(query);
         Gallery gallery = (Gallery)galleries.get(0);
         
         gallery.removeFromPaintingArray(painting);
         
         // commit to the database
-        // using log level of SEVERE to show the query execution
-        ctxt.commitChanges(Level.SEVERE); 
+        // using log level of WARN to show the query execution
+        ctxt.commitChanges(Level.WARN); 
         
 	return (mapping.findForward("success"));
 

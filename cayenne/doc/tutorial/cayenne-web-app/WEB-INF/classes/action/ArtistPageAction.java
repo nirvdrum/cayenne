@@ -29,8 +29,8 @@ public final class ArtistPageAction extends Action {
 		Ordering ordering = new Ordering("artistName", Ordering.ASC);
 		query.addOrdering(ordering);
 
-		// using log level of SEVERE to show the query execution
-		query.setLogLevel(Level.SEVERE);
+		// using log level of WARN to show the query execution
+		query.setLogLevel(Level.WARN);
 		List artists = ctxt.performQuery(query);
 
 		System.out.println("artists: " + artists);

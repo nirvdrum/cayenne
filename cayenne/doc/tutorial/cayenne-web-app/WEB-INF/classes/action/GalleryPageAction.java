@@ -24,8 +24,8 @@ public final class GalleryPageAction extends Action {
 
 		SelectQuery query = new SelectQuery("Gallery");
 
-		// using log level of SEVERE to show the query execution
-		query.setLogLevel(Level.SEVERE);
+		// using log level of WARN to show the query execution
+		query.setLogLevel(Level.WARN);
 
 		List galleries = ctxt.performQuery(query);
 		request.setAttribute("galleries", galleries);

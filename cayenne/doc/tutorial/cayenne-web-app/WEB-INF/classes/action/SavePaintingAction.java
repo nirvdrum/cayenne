@@ -36,8 +36,8 @@ public final class SavePaintingAction extends Action {
         
         SelectQuery query = new SelectQuery("Artist", qual);
         
-        // using log level of SEVERE to show the query execution
-        query.setLogLevel(Level.SEVERE);
+        // using log level of WARN to show the query execution
+        query.setLogLevel(Level.WARN);
         
       
         List artists = ctxt.performQuery(query);
@@ -52,8 +52,8 @@ public final class SavePaintingAction extends Action {
         artist.addToPaintingArray(aPainting);
        
         // commit to the database
-        // using log level of SEVERE to show the query execution
-        ctxt.commitChanges(Level.SEVERE); 
+        // using log level of WARN to show the query execution
+        ctxt.commitChanges(Level.WARN); 
 
         
 	return (mapping.findForward("success"));

@@ -38,17 +38,17 @@ Configuration.bootstrapSharedConfig(MyClass.class);
  			<p><strong>Q.:</strong>  How do I log an output of a single query.</p>
  			
  			<p><strong>A.:</strong> Cayenne allows to control logging levels of 
- 			individual queries and commits using Java Logging API introduced in JSDK 1.4. 
+ 			individual queries and commits using the Apache log4j API. 
  			For instance to log the execution of a select query do something like this:
 			</p>
 <source>
 SelectQuery q = new SelectQuery();
-q.setLogLevel(Level.SEVERE);
+q.setLogLevel(Level.WARN);
 List objects = dataContext.performQuery(q);
 </source>
 			<p>To log commit execution do this:</p>
 <source>
-dataContext.commitChanges(Level.SEVERE);	
+dataContext.commitChanges(Level.WARN);	
 </source>
 			</subsection>
 			

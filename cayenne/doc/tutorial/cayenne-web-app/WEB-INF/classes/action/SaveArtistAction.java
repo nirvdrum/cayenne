@@ -40,8 +40,8 @@ public final class SaveArtistAction extends Action {
         anArtist.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
        
         // commit to the database
-        // using log level of SEVERE to show the query execution
-        ctxt.commitChanges(Level.SEVERE); 
+        // using log level of WARN to show the query execution
+        ctxt.commitChanges(Level.WARN); 
 
         
 	return (mapping.findForward("success"));

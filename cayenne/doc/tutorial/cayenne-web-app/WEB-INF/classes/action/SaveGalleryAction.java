@@ -26,7 +26,7 @@ public final class SaveGalleryAction extends Action {
         aGallery.setGalleryName(galleryForm.getGalleryName());
        
         // commit to the database
-        ctxt.commitChanges(Level.SEVERE); 
+        ctxt.commitChanges(Level.WARN); 
 
         
 	return (mapping.findForward("success"));
