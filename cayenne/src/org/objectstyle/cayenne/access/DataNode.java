@@ -55,17 +55,18 @@ package org.objectstyle.cayenne.access;
  *
  */
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.conn.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.sql.DataSource;
+import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.access.trans.*;
-import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.query.Query;
 
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework

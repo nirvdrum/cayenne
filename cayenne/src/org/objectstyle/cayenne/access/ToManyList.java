@@ -57,7 +57,8 @@ package org.objectstyle.cayenne.access;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
-import org.objectstyle.cayenne.*;
+
+import org.objectstyle.cayenne.ObjectId;
 
 /**
  * Special List implementation to hold "to many" relationship data.

@@ -55,10 +55,11 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  *  Class that provides sorting of database operations to

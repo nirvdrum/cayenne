@@ -55,8 +55,9 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import java.util.*;
-import java.util.logging.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** Logs special events during query exectutions.
 * DataNodes invoke its static methods to do logging.

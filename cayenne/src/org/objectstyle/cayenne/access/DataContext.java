@@ -56,15 +56,14 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import java.util.logging.*;
 import java.util.*;
-import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.*;
+import org.objectstyle.cayenne.query.*;
 
 
 /** User-level Cayenne access class. Provides isolated object view of 

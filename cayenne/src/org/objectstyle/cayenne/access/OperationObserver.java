@@ -55,10 +55,10 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.List;
+import java.util.logging.Level;
+
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * Interface used by QueryEngine to notify interested object about different 

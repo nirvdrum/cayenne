@@ -56,15 +56,11 @@ package org.objectstyle.cayenne.access;
  */
 
 import java.util.*;
-import javax.sql.*;
-import java.net.*;
-import java.util.logging.*;
-import org.xml.sax.InputSource;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.util.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Query;
 
 
 /**

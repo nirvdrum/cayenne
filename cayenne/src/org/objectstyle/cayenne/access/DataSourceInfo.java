@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import org.objectstyle.util.*;
+import org.objectstyle.util.Util;
 
 /** Helper JavaBean class that holds datasource login information. */
 public class DataSourceInfo implements Cloneable, java.io.Serializable {

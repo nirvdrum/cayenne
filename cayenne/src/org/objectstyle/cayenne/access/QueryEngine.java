@@ -55,9 +55,10 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.List;
+
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Query;
 
 
 /** Interface declares methods used to run Cayenne queries. */
