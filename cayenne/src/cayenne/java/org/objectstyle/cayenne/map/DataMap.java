@@ -731,8 +731,16 @@ public class DataMap implements XMLSerializable, MappingNamespace {
             return Collections.EMPTY_LIST;
         }
 
-        List result = new ArrayList();
-        Iterator iter = this.getObjEntities(true).iterator();
+        Collection allEntities = (namespace != null)
+                ? namespace.getObjEntities()
+                : objEntityValuesRef;
+
+        if (allEntities.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        Collection result = new ArrayList();
+        Iterator iter = allEntities.iterator();
         while (iter.hasNext()) {
             ObjEntity objEnt = (ObjEntity) iter.next();
             if (objEnt.getDbEntity() == dbEntity) {

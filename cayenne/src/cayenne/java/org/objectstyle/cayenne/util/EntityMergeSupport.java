@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
  * @author Andrei Adamchik
  */
 public class EntityMergeSupport {
+
     protected DataMap map;
 
     public EntityMergeSupport(DataMap map) {
@@ -85,9 +86,8 @@ public class EntityMergeSupport {
     }
 
     /**
-     * Updates each one of the list of ObjEntities, adding 
-     * attributes and relationships based on the current state 
-     * of its DbEntity.
+     * Updates each one of the list of ObjEntities, adding attributes and relationships
+     * based on the current state of its DbEntity.
      */
     public void synchronizeWithDbEntities(List objEntities) {
         Iterator it = objEntities.iterator();
@@ -97,8 +97,8 @@ public class EntityMergeSupport {
     }
 
     /**
-     * Updates ObjEntity attributes and relationships
-     * based on the current state of its DbEntity.
+     * Updates ObjEntity attributes and relationships based on the current state of its
+     * DbEntity.
      */
     public void synchronizeWithDbEntity(ObjEntity entity) {
 
@@ -107,7 +107,8 @@ public class EntityMergeSupport {
         }
 
         // synchronization on DataMap is some (weak) protection
-        // against simulteneous modification of the map (like double-clicking on sync button)
+        // against simulteneous modification of the map (like double-clicking on sync
+        // button)
         synchronized (map) {
             List addAttributes = getAttributesToAdd(entity);
             List addRelationships = getRelationshipsToAdd(entity);
@@ -117,10 +118,13 @@ public class EntityMergeSupport {
             while (ait.hasNext()) {
                 DbAttribute da = (DbAttribute) ait.next();
                 String attrName = NameConverter.undescoredToJava(da.getName(), false);
-                
+
                 // avoid duplicate names
-                attrName = NamedObjectFactory.createName(ObjAttribute.class, entity, attrName);
-                
+                attrName = NamedObjectFactory.createName(
+                        ObjAttribute.class,
+                        entity,
+                        attrName);
+
                 String type = TypesMapping.getJavaBySqlType(da.getType());
 
                 ObjAttribute oa = new ObjAttribute(attrName, type, entity);
@@ -132,30 +136,32 @@ public class EntityMergeSupport {
             Iterator rit = addRelationships.iterator();
             while (rit.hasNext()) {
                 DbRelationship dr = (DbRelationship) rit.next();
-                Collection mappedTargets =
-                    map.getMappedEntities((DbEntity) dr.getTargetEntity());
-                if (mappedTargets.size() == 0) {
-                    continue;
+                DbEntity dbEntity = (DbEntity) dr.getTargetEntity();
+
+                Iterator targets = map.getMappedEntities(dbEntity).iterator();
+                if (targets.hasNext()) {
+
+                    Entity mappedTarget = (Entity) targets.next();
+
+                    // avoid duplicate names
+                    String relationshipName = NamedObjectFactory.createName(
+                            ObjRelationship.class,
+                            entity,
+                            dr.getName());
+
+                    ObjRelationship or = new ObjRelationship(relationshipName);
+                    or.addDbRelationship(dr);
+                    or.setSourceEntity(entity);
+                    or.setTargetEntity(mappedTarget);
+                    entity.addRelationship(or);
                 }
-
-                Entity mappedTarget = (Entity) mappedTargets.iterator().next();
-
-                // avoid duplicate names
-                String relationshipName =
-                    NamedObjectFactory.createName(ObjRelationship.class, entity, dr.getName());
-
-                ObjRelationship or = new ObjRelationship(relationshipName);
-                or.addDbRelationship(dr);
-                or.setSourceEntity(entity);
-                or.setTargetEntity(mappedTarget);
-                entity.addRelationship(or);
             }
         }
     }
 
     /**
-     * Returns a list of attributes that exist in the DbEntity, but 
-     * are missing from the ObjEntity.
+     * Returns a list of attributes that exist in the DbEntity, but are missing from the
+     * ObjEntity.
      */
     protected List getAttributesToAdd(ObjEntity objEntity) {
         List missing = new ArrayList();
@@ -174,7 +180,7 @@ public class EntityMergeSupport {
                 continue;
             }
 
-            // check FK's 
+            // check FK's
             boolean isFK = false;
             Iterator rit = rels.iterator();
             while (!isFK && rit.hasNext()) {
