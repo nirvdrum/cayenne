@@ -201,20 +201,12 @@ public class SelectTranslator extends SelectQueryAssembler {
 			}
 		}
 
-		// append prebuilt qualifier
-		if (qualifierStr != null) {
-			if (dbRelCount > 0)
-				queryBuf.append(" AND ");
-			else
-				queryBuf.append(" WHERE ");
-
-			queryBuf.append(qualifierStr);
-		}
-
 		// append group by
+		boolean hasGroupBy = false;
 		if (groupByList != null) {
 			int groupByCount = groupByList.size();
 			if (groupByCount > 0) {
+				hasGroupBy = true;
 				queryBuf.append(" GROUP BY ");
 				appendGroupBy(queryBuf, 0);
 				for (int i = 1; i < groupByCount; i++) {
@@ -222,6 +214,21 @@ public class SelectTranslator extends SelectQueryAssembler {
 					appendGroupBy(queryBuf, i);
 				}
 			}
+		}
+
+		// append prebuilt qualifier
+		if (qualifierStr != null) {
+			if (hasGroupBy) {
+				queryBuf.append(" HAVING ");
+			} else {
+				if (dbRelCount > 0) {
+					queryBuf.append(" AND ");
+				} else {
+					queryBuf.append(" WHERE ");
+				}
+			}
+
+			queryBuf.append(qualifierStr);
 		}
 
 		// append prebuilt ordering

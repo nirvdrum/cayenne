@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.access.trans;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.trans;
 
 import java.util.Iterator;
 import java.util.List;
@@ -248,8 +248,9 @@ public class QualifierTranslator
     }
 
     private void appendRawSql(Object sql) {
-        if (sql != null)
+        if (sql != null) {
             qualBuf.append(sql);
+        }
     }
 
     private final void appendList(Expression listExpr, DbAttribute paramDesc) {
