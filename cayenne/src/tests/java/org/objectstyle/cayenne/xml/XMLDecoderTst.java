@@ -89,7 +89,19 @@ public class XMLDecoderTst extends TestCase {
         Reader xml = new FileReader(XML_DATA_DIR + "encoded-object.xml");
         XMLDecoder decoder = new XMLDecoder();
         Object object = decoder.decode(xml);
-        
+
+        assertTrue(object instanceof TestObject);
+        TestObject test = (TestObject) object;
+        assertEquals("n1", test.getName());
+        assertEquals(5, test.getAge());
+        assertEquals(true, test.isOpen());
+    }
+
+    public void testDecodePrimitives() throws Exception {
+        Reader xml = new FileReader(XML_DATA_DIR + "encoded-object-primitives.xml");
+        XMLDecoder decoder = new XMLDecoder();
+        Object object = decoder.decode(xml);
+
         assertTrue(object instanceof TestObject);
         TestObject test = (TestObject) object;
         assertEquals("n1", test.getName());

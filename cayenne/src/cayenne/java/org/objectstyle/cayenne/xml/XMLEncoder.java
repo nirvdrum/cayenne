@@ -62,7 +62,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * A helper class to encode objects to XML.
@@ -75,10 +75,13 @@ public class XMLEncoder {
     /** The root of the XML document for the encoded object. */
     protected Element root = null;
 
-    public String encode(Object object, String mappingFile) throws CayenneException {
-        XMLMappingUtil mu = new XMLMappingUtil(mappingFile);
-        root = mu.encode(object);
+    /**
+     * Encodes object using provided mapping file.
+     */
+    public String encode(Object object, String mappingFile)
+            throws CayenneRuntimeException {
 
+        this.root = new XMLMappingUtil(mappingFile).encode(object);
         return getXml();
     }
 
@@ -107,7 +110,7 @@ public class XMLEncoder {
     }
 
     public void encodeCollection(String xmlTag, Collection c) {
-        final Element temp = new Element(xmlTag);
+        Element temp = new Element(xmlTag);
 
         for (Iterator it = c.iterator(); it.hasNext();) {
             XMLSerializable element = (XMLSerializable) it.next();
