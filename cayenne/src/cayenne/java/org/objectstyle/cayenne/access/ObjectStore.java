@@ -73,9 +73,17 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
+import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
@@ -1278,7 +1286,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     .equals(otherObj.canonicalRelationshipName)) {
                 return false;
             }
-            //Check that either direct mapping matches (src=>src, dest=>dest), or that
+            // Check that either direct mapping matches (src=>src, dest=>dest), or that
             // cross mapping matches (src=>dest, dest=>src).
             if (((this.source.equals(otherObj.source)) && (this.destination
                     .equals(otherObj.destination)))
@@ -1326,6 +1334,143 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
          */
         public DataObject getSource() {
             return source;
+        }
+
+        /**
+         * Returns a join DbEntity for the single-step flattened relationship.
+         */
+        DbEntity getJoinEntity() {
+            List relList = baseRelationship.getDbRelationships();
+            if (relList.size() != 2) {
+                throw new CayenneRuntimeException(
+                        "Only single-step flattened relationships are supported in this operation: "
+                                + baseRelationship);
+            }
+
+            DbRelationship firstDbRel = (DbRelationship) relList.get(0);
+            return (DbEntity) firstDbRel.getTargetEntity();
+        }
+
+        /**
+         * Returns a snapshot for the join record for the single-step flattened
+         * relationship.
+         */
+        Map buildJoinSnapshot() {
+
+            List relList = baseRelationship.getDbRelationships();
+            if (relList.size() != 2) {
+                throw new CayenneRuntimeException(
+                        "Only single-step flattened relationships are supported in this operation: "
+                                + baseRelationship);
+            }
+
+            DbRelationship firstDbRel = (DbRelationship) relList.get(0);
+            DbRelationship secondDbRel = (DbRelationship) relList.get(1);
+
+            Map sourceId = source.getObjectId().getIdSnapshot();
+            Map destinationId = destination.getObjectId().getIdSnapshot();
+
+            Map snapshot = new HashMap(sourceId.size() + destinationId.size(), 1);
+            List joins = firstDbRel.getJoins();
+            for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
+                DbJoin join = (DbJoin) joins.get(i);
+                snapshot.put(join.getTargetName(), sourceId.get(join.getSourceName()));
+            }
+
+            joins = secondDbRel.getJoins();
+            for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
+                DbJoin join = (DbJoin) joins.get(i);
+                snapshot.put(join.getSourceName(), destinationId
+                        .get(join.getTargetName()));
+            }
+
+            return snapshot;
+        }
+
+        /**
+         * Returns a snapshot for join record for the single-step flattened relationship,
+         * generating value for the primary key column if it is not propagated via the
+         * relationships.
+         */
+        Map buildJoinSnapshotForInsert() {
+            Map snapshot = buildJoinSnapshot();
+
+            boolean autoPkDone = false;
+            DbEntity joinEntity = getJoinEntity();
+            List pkAttributes = joinEntity.getPrimaryKey();
+            Iterator it = pkAttributes.iterator();
+
+            while (it.hasNext()) {
+                DbAttribute dbAttr = (DbAttribute) it.next();
+                String dbAttrName = dbAttr.getName();
+                if (snapshot.containsKey(dbAttrName)) {
+                    continue;
+                }
+
+                if (autoPkDone) {
+                    throw new CayenneRuntimeException(
+                            "Primary Key autogeneration only works for a single attribute.");
+                }
+
+                // finally, use database generation mechanism
+                try {
+                    DataNode node = source.getDataContext().lookupDataNode(
+                            joinEntity.getDataMap());
+                    PkGenerator pkGenerator = node.getAdapter().getPkGenerator();
+                    Object pkValue = pkGenerator.generatePkForDbEntity(node, joinEntity);
+                    snapshot.put(dbAttrName, pkValue);
+                    autoPkDone = true;
+                }
+                catch (Exception ex) {
+                    throw new CayenneRuntimeException("Error generating PK: "
+                            + ex.getMessage(), ex);
+                }
+            }
+
+            return snapshot;
+        }
+
+        /**
+         * Returns pk snapshots for join records for the single-stp flattened
+         * relationship. Multiple joins between the same pair of objects are theoretically
+         * possible, so the return value is a list.
+         */
+        List buildJoinSnapshotsForDelete() {
+            Map snapshot = buildJoinSnapshot();
+
+            DbEntity joinEntity = getJoinEntity();
+            List pkAttributes = joinEntity.getPrimaryKey();
+            Iterator it = pkAttributes.iterator();
+
+            boolean fetchKey = false;
+            while (it.hasNext()) {
+                DbAttribute dbAttr = (DbAttribute) it.next();
+                String dbAttrName = dbAttr.getName();
+                if (!snapshot.containsKey(dbAttrName)) {
+                    fetchKey = true;
+                    break;
+                }
+            }
+
+            if (!fetchKey) {
+                return Collections.singletonList(snapshot);
+            }
+
+            // ok, the key is not included in snapshot, must do the fetch...
+            // TODO: this should be optimized in the future, but now DeleteBatchQuery
+            // expects a PK snapshot, so we must provide it.
+
+            SelectQuery query = new SelectQuery(joinEntity, ExpressionFactory
+                    .matchAllDbExp(snapshot, Expression.EQUAL_TO));
+            query.setFetchingDataRows(true);
+
+            it = pkAttributes.iterator();
+            while (it.hasNext()) {
+                DbAttribute dbAttr = (DbAttribute) it.next();
+                query.addCustomDbAttribute(dbAttr.getName());
+            }
+
+            return source.getDataContext().performQuery(query);
         }
 
     }

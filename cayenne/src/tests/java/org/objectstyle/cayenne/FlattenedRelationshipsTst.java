@@ -60,10 +60,12 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.MockupDataRowUtils;
+import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.relationship.FlattenedTest1;
 import org.objectstyle.cayenne.testdo.relationship.FlattenedTest2;
@@ -76,6 +78,7 @@ import org.objectstyle.cayenne.unit.RelationshipTestCase;
  * @author Andrei Adamchik
  */
 public class FlattenedRelationshipsTst extends RelationshipTestCase {
+
     protected DataContext context;
 
     protected void setUp() throws Exception {
@@ -83,22 +86,91 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
         context = createDataContext();
     }
 
-    public void testQualifyOnToManyFlattened() throws Exception {
-        FlattenedTest1 obj01 =
-            (FlattenedTest1) context.createAndRegisterNewObject(FlattenedTest1.class);
-        FlattenedTest2 obj02 =
-            (FlattenedTest2) context.createAndRegisterNewObject(FlattenedTest2.class);
-        FlattenedTest3 obj031 =
-            (FlattenedTest3) context.createAndRegisterNewObject(FlattenedTest3.class);
-        FlattenedTest3 obj032 =
-            (FlattenedTest3) context.createAndRegisterNewObject(FlattenedTest3.class);
+    public void testInsertJoinWithPK() throws Exception {
+        FlattenedTest1 obj01 = (FlattenedTest1) context
+                .createAndRegisterNewObject(FlattenedTest1.class);
+        FlattenedTest3 obj11 = (FlattenedTest3) context
+                .createAndRegisterNewObject(FlattenedTest3.class);
+        FlattenedTest3 obj12 = (FlattenedTest3) context
+                .createAndRegisterNewObject(FlattenedTest3.class);
 
-        FlattenedTest1 obj11 =
-            (FlattenedTest1) context.createAndRegisterNewObject(FlattenedTest1.class);
-        FlattenedTest2 obj12 =
-            (FlattenedTest2) context.createAndRegisterNewObject(FlattenedTest2.class);
-        FlattenedTest3 obj131 =
-            (FlattenedTest3) context.createAndRegisterNewObject(FlattenedTest3.class);
+        obj01.setName("t01");
+        obj11.setName("t11");
+        obj12.setName("t12");
+
+        obj01.addToFt3OverComplex(obj11);
+        obj01.addToFt3OverComplex(obj12);
+
+        context.commitChanges();
+
+        int pk = DataObjectUtils.intPKForObject(obj01);
+
+        context = createDataContext();
+        FlattenedTest1 fresh01 = (FlattenedTest1) DataObjectUtils.objectForPK(
+                context,
+                FlattenedTest1.class,
+                pk);
+
+        assertEquals("t01", fresh01.getName());
+        ToManyList related = (ToManyList) fresh01.getFt3OverComplex();
+        assertTrue(related.needsFetch());
+
+        assertEquals(2, related.size());
+    }
+
+    public void testUnsetJoinWithPK() throws Exception {
+        createTestData("testUnsetJoinWithPK");
+
+        SQLTemplate joinSelect = new SQLTemplate(
+                FlattenedTest1.class,
+                "SELECT * FROM COMPLEX_JOIN",
+                true);
+        joinSelect.setFetchingDataRows(true);
+        assertEquals(3, context.performQuery(joinSelect).size());
+
+        FlattenedTest1 ft1 = (FlattenedTest1) DataObjectUtils.objectForPK(
+                context,
+                FlattenedTest1.class,
+                2);
+
+        assertEquals("ft12", ft1.getName());
+        ToManyList related = (ToManyList) ft1.getFt3OverComplex();
+        assertTrue(related.needsFetch());
+
+        assertEquals(2, related.size());
+
+        FlattenedTest3 ft3 = (FlattenedTest3) DataObjectUtils.objectForPK(
+                context,
+                FlattenedTest3.class,
+                3);
+        assertTrue(related.contains(ft3));
+        
+        ft1.removeFromFt3OverComplex(ft3);
+        assertFalse(related.contains(ft3));
+        context.commitChanges();
+        
+        // the thing here is that there are two join records between
+        // FT1 and FT3 (emulating invalid data or extras in the join table that 
+        // are ignored in the object model).. all (2) joins must be deleted
+        assertEquals(1, context.performQuery(joinSelect).size());
+    }
+
+    public void testQualifyOnToManyFlattened() throws Exception {
+        FlattenedTest1 obj01 = (FlattenedTest1) context
+                .createAndRegisterNewObject(FlattenedTest1.class);
+        FlattenedTest2 obj02 = (FlattenedTest2) context
+                .createAndRegisterNewObject(FlattenedTest2.class);
+        FlattenedTest3 obj031 = (FlattenedTest3) context
+                .createAndRegisterNewObject(FlattenedTest3.class);
+        FlattenedTest3 obj032 = (FlattenedTest3) context
+                .createAndRegisterNewObject(FlattenedTest3.class);
+
+        FlattenedTest1 obj11 = (FlattenedTest1) context
+                .createAndRegisterNewObject(FlattenedTest1.class);
+        FlattenedTest2 obj12 = (FlattenedTest2) context
+                .createAndRegisterNewObject(FlattenedTest2.class);
+        FlattenedTest3 obj131 = (FlattenedTest3) context
+                .createAndRegisterNewObject(FlattenedTest3.class);
 
         obj01.setName("t01");
         obj02.setName("t02");
@@ -134,14 +206,14 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
     }
 
     public void testToOneSeriesFlattenedRel() {
-        FlattenedTest1 ft1 =
-            (FlattenedTest1) context.createAndRegisterNewObject("FlattenedTest1");
+        FlattenedTest1 ft1 = (FlattenedTest1) context
+                .createAndRegisterNewObject("FlattenedTest1");
         ft1.setName("FT1Name");
-        FlattenedTest2 ft2 =
-            (FlattenedTest2) context.createAndRegisterNewObject("FlattenedTest2");
+        FlattenedTest2 ft2 = (FlattenedTest2) context
+                .createAndRegisterNewObject("FlattenedTest2");
         ft2.setName("FT2Name");
-        FlattenedTest3 ft3 =
-            (FlattenedTest3) context.createAndRegisterNewObject("FlattenedTest3");
+        FlattenedTest3 ft3 = (FlattenedTest3) context
+                .createAndRegisterNewObject("FlattenedTest3");
         ft3.setName("FT3Name");
 
         ft2.setToFT1(ft1);
@@ -163,14 +235,14 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
     public void testTakeObjectSnapshotFlattenedFault() throws Exception {
         createTestData("test");
 
-        // fetch 
+        // fetch
         List ft3s = context.performQuery(new SelectQuery(FlattenedTest3.class));
         assertEquals(1, ft3s.size());
         FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
 
         assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
 
-        // test that taking a snapshot does not trigger a fault, and generally works well 
+        // test that taking a snapshot does not trigger a fault, and generally works well
         Map snapshot = context.currentSnapshot(ft3);
 
         assertEquals("ft3", snapshot.get("NAME"));
@@ -181,7 +253,7 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
     public void testIsToOneTargetModifiedFlattenedFault1() throws Exception {
         createTestData("test");
 
-        // fetch 
+        // fetch
         List ft3s = context.performQuery(new SelectQuery(FlattenedTest3.class));
         assertEquals(1, ft3s.size());
         FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
@@ -191,22 +263,21 @@ public class FlattenedRelationshipsTst extends RelationshipTestCase {
 
         assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
 
-        // test that checking for modifications does not trigger a fault, and generally works well
-        ObjEntity entity =
-            context.getEntityResolver().lookupObjEntity(FlattenedTest3.class);
+        // test that checking for modifications does not trigger a fault, and generally
+        // works well
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(
+                FlattenedTest3.class);
         ObjRelationship flattenedRel = (ObjRelationship) entity.getRelationship("toFT1");
-        assertFalse(
-            MockupDataRowUtils.isToOneTargetModified(
-                flattenedRel,
-                ft3,
-                context.getObjectStore().getCachedSnapshot(ft3.getObjectId())));
+        assertFalse(MockupDataRowUtils.isToOneTargetModified(flattenedRel, ft3, context
+                .getObjectStore()
+                .getCachedSnapshot(ft3.getObjectId())));
         assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
     }
 
     public void testRefetchWithFlattenedFaultToOneTarget1() throws Exception {
         createTestData("test");
 
-        // fetch 
+        // fetch
         List ft3s = context.performQuery(new SelectQuery(FlattenedTest3.class));
         assertEquals(1, ft3s.size());
         FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);

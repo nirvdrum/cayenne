@@ -317,7 +317,6 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertEquals(r2, relationship.getDbRelationships().get(1));
 
         assertTrue(relationship.isFlattened());
-        assertFalse(relationship.isReadOnly());
 
         relationship.removeDbRelationship(r1);
         assertFalse(relationship.isToMany()); //only remaining rel is r2... a toOne

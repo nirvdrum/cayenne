@@ -267,6 +267,10 @@ public class DbRelationship extends Relationship {
         Iterator it = getJoins().iterator();
         while (it.hasNext()) {
             DbJoin join = (DbJoin) it.next();
+            if(join.getTarget() == null) {
+                return false;    
+            }
+            
             if (join.getTarget().isPrimaryKey()) {
                 return true;
             }

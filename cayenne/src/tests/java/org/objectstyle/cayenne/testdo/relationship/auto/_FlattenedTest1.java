@@ -12,6 +12,7 @@ public class _FlattenedTest1 extends org.objectstyle.cayenne.CayenneDataObject {
     public static final String NAME_PROPERTY = "name";
     public static final String FT2ARRAY_PROPERTY = "ft2Array";
     public static final String FT3ARRAY_PROPERTY = "ft3Array";
+    public static final String FT3OVER_COMPLEX_PROPERTY = "ft3OverComplex";
 
     public static final String FT1_ID_PK_COLUMN = "FT1_ID";
 
@@ -42,6 +43,17 @@ public class _FlattenedTest1 extends org.objectstyle.cayenne.CayenneDataObject {
     }
     public List getFt3Array() {
         return (List)readProperty("ft3Array");
+    }
+    
+    
+    public void addToFt3OverComplex(org.objectstyle.cayenne.testdo.relationship.FlattenedTest3 obj) {
+        addToManyTarget("ft3OverComplex", obj, true);
+    }
+    public void removeFromFt3OverComplex(org.objectstyle.cayenne.testdo.relationship.FlattenedTest3 obj) {
+        removeToManyTarget("ft3OverComplex", obj, true);
+    }
+    public List getFt3OverComplex() {
+        return (List)readProperty("ft3OverComplex");
     }
     
     

@@ -94,17 +94,18 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
- * ContextCommit implements DataContext commit logic. DataContext internally
- * delegates commit operations to an instance of ContextCommit. ContextCommit
- * resolves primary key dependencies, referential integrity dependencies
- * (including multi-reflexive entities), generates primary keys, creates
- * batches for massive data modifications, assigns operations to data nodes. It
- * indirectly relies on graph algorithms provided by ASHWOOD library.
+ * ContextCommit implements DataContext commit logic. DataContext internally delegates
+ * commit operations to an instance of ContextCommit. ContextCommit resolves primary key
+ * dependencies, referential integrity dependencies (including multi-reflexive entities),
+ * generates primary keys, creates batches for massive data modifications, assigns
+ * operations to data nodes. It indirectly relies on graph algorithms provided by ASHWOOD
+ * library.
  * 
  * @author Andriy Shapochka
  */
 
 class ContextCommit {
+
     private static Logger logObj = Logger.getLogger(ContextCommit.class);
 
     private DataContext context;
@@ -150,22 +151,18 @@ class ContextCommit {
                 for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
                     DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
                     prepareInsertQueries(nodeHelper);
-                    prepareFlattenedQueries(
-                        nodeHelper,
-                        nodeHelper.getFlattenedInsertQueries());
+                    prepareFlattenedQueries(nodeHelper, nodeHelper
+                            .getFlattenedInsertQueries());
 
                     prepareUpdateQueries(nodeHelper);
 
-                    //Side effect - fills updObjects
-                    prepareFlattenedQueries(
-                        nodeHelper,
-                        nodeHelper.getFlattenedDeleteQueries());
+                    prepareFlattenedQueries(nodeHelper, nodeHelper
+                            .getFlattenedDeleteQueries());
 
                     prepareDeleteQueries(nodeHelper);
                 }
 
-                ContextCommitObserver observer =
-                    new ContextCommitObserver(
+                ContextCommitObserver observer = new ContextCommitObserver(
                         logLevel,
                         context,
                         insObjects,
@@ -179,23 +176,24 @@ class ContextCommit {
                 try {
                     context.fireWillCommit();
 
-                    Transaction transaction =
-                        context.getParentDataDomain().createTransaction();
+                    Transaction transaction = context
+                            .getParentDataDomain()
+                            .createTransaction();
                     transaction.begin();
 
                     try {
                         Iterator i = nodeHelpers.iterator();
                         while (i.hasNext()) {
-                            DataNodeCommitHelper nodeHelper =
-                                (DataNodeCommitHelper) i.next();
+                            DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i
+                                    .next();
                             List queries = nodeHelper.getQueries();
 
                             if (queries.size() > 0) {
                                 // note: observer throws on error
                                 nodeHelper.getNode().performQueries(
-                                    queries,
-                                    observer,
-                                    transaction);
+                                        queries,
+                                        observer,
+                                        transaction);
                             }
                         }
 
@@ -228,7 +226,7 @@ class ContextCommit {
     }
 
     private void prepareInsertQueries(DataNodeCommitHelper commitHelper)
-        throws CayenneException {
+            throws CayenneException {
 
         List entities = commitHelper.getObjEntitiesForInsert();
         if (entities.isEmpty()) {
@@ -248,26 +246,23 @@ class ContextCommit {
             InsertBatchQuery batch = new InsertBatchQuery(dbEntity, 27);
             batch.setLoggingLevel(logLevel);
             if (logObj.isDebugEnabled()) {
-                logObj.debug(
-                    "Creating InsertBatchQuery for DbEntity " + dbEntity.getName());
+                logObj.debug("Creating InsertBatchQuery for DbEntity "
+                        + dbEntity.getName());
             }
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
-                DbRelationship masterDependentDbRel =
-                    (isMasterDbEntity
+                DbRelationship masterDependentDbRel = (isMasterDbEntity
                         ? null
                         : findMasterToDependentDbRelationship(
-                            entity.getDbEntity(),
-                            dbEntity));
+                                entity.getDbEntity(),
+                                dbEntity));
 
                 List objects = (List) newObjectsByObjEntity.get(entity.getClassName());
 
                 // throw an exception - an attempt to modify read-only entity
                 if (entity.isReadOnly() && objects.size() > 0) {
-                    throw attemptToCommitReadOnlyEntity(
-                        objects.get(0).getClass(),
-                        entity);
+                    throw attemptToCommitReadOnlyEntity(objects.get(0).getClass(), entity);
                 }
 
                 if (isMasterDbEntity)
@@ -276,8 +271,7 @@ class ContextCommit {
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
                     //                    batch.add(context.takeObjectSnapshot(o));
-                    Map snapshot =
-                        BatchQueryUtils.buildSnapshotForInsert(
+                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(
                             entity,
                             o,
                             masterDependentDbRel);
@@ -292,7 +286,7 @@ class ContextCommit {
     }
 
     private void prepareDeleteQueries(DataNodeCommitHelper commitHelper)
-        throws CayenneException {
+            throws CayenneException {
 
         List entities = commitHelper.getObjEntitiesForDelete();
         if (entities.isEmpty()) {
@@ -314,28 +308,25 @@ class ContextCommit {
             batch.setLoggingLevel(logLevel);
 
             if (logObj.isDebugEnabled())
-                logObj.debug(
-                    "Creating DeleteBatchQuery for DbEntity " + dbEntity.getName());
+                logObj.debug("Creating DeleteBatchQuery for DbEntity "
+                        + dbEntity.getName());
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
 
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
-                DbRelationship masterDependentDbRel =
-                    (isMasterDbEntity
+                DbRelationship masterDependentDbRel = (isMasterDbEntity
                         ? null
                         : findMasterToDependentDbRelationship(
-                            entity.getDbEntity(),
-                            dbEntity));
+                                entity.getDbEntity(),
+                                dbEntity));
 
-                List objects =
-                    (List) objectsToDeleteByObjEntity.get(entity.getClassName());
+                List objects = (List) objectsToDeleteByObjEntity.get(entity
+                        .getClassName());
 
                 // throw an exception - an attempt to delete read-only entity
                 if (entity.isReadOnly() && objects.size() > 0) {
-                    throw attemptToCommitReadOnlyEntity(
-                        objects.get(0).getClass(),
-                        entity);
+                    throw attemptToCommitReadOnlyEntity(objects.get(0).getClass(), entity);
                 }
 
                 if (isMasterDbEntity) {
@@ -345,7 +336,8 @@ class ContextCommit {
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
 
-                    // check if object was modified from underneath and consult the delegate
+                    // check if object was modified from underneath and consult the
+                    // delegate
                     // if this is the case...
                     // checkConcurrentModifications(o);
 
@@ -365,7 +357,7 @@ class ContextCommit {
     }
 
     private void prepareUpdateQueries(DataNodeCommitHelper commitHelper)
-        throws CayenneException {
+            throws CayenneException {
         List entities = commitHelper.getObjEntitiesForUpdate();
         if (entities.isEmpty()) {
             return;
@@ -384,27 +376,25 @@ class ContextCommit {
                 ObjEntity entity = (ObjEntity) j.next();
 
                 // Per-objEntity optimistic locking conditional
-                boolean optimisticLocking =
-                    (ObjEntity.LOCK_TYPE_OPTIMISTIC == entity.getLockType());
+                boolean optimisticLocking = (ObjEntity.LOCK_TYPE_OPTIMISTIC == entity
+                        .getLockType());
 
                 List qualifierAttributes = qualifierAttributes(entity, optimisticLocking);
 
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
 
-                DbRelationship masterDependentDbRel =
-                    (isMasterDbEntity)
+                DbRelationship masterDependentDbRel = (isMasterDbEntity)
                         ? null
                         : findMasterToDependentDbRelationship(
-                            entity.getDbEntity(),
-                            dbEntity);
-                List objects =
-                    (List) objectsToUpdateByObjEntity.get(entity.getClassName());
+                                entity.getDbEntity(),
+                                dbEntity);
+                List objects = (List) objectsToUpdateByObjEntity.get(entity
+                        .getClassName());
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
 
-                    Map snapshot =
-                        BatchQueryUtils.buildSnapshotForUpdate(
+                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(
                             entity,
                             o,
                             masterDependentDbRel);
@@ -426,9 +416,8 @@ class ContextCommit {
                     Map idSnapshot = o.getObjectId().getIdSnapshot();
 
                     if (!isMasterDbEntity && masterDependentDbRel != null) {
-                        idSnapshot =
-                            masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(
-                                idSnapshot);
+                        idSnapshot = masterDependentDbRel
+                                .targetPkSnapshotWithSrcSnapshot(idSnapshot);
                     }
 
                     Map qualifierSnapshot = idSnapshot;
@@ -436,9 +425,9 @@ class ContextCommit {
                         // clone snapshot and add extra keys...
                         qualifierSnapshot = new HashMap(qualifierSnapshot);
                         appendOptimisticLockingAttributes(
-                            qualifierSnapshot,
-                            o,
-                            qualifierAttributes);
+                                qualifierSnapshot,
+                                o,
+                                qualifierAttributes);
                     }
 
                     // organize batches by the updated columns + nulls in qualifier
@@ -452,13 +441,13 @@ class ContextCommit {
                         }
                     }
 
-                    List batchKey =
-                        Arrays.asList(new Object[] { snapshotSet, nullQualifierNames });
+                    List batchKey = Arrays.asList(new Object[] {
+                            snapshotSet, nullQualifierNames
+                    });
 
                     UpdateBatchQuery batch = (UpdateBatchQuery) batches.get(batchKey);
                     if (batch == null) {
-                        batch =
-                            new UpdateBatchQuery(
+                        batch = new UpdateBatchQuery(
                                 dbEntity,
                                 qualifierAttributes,
                                 updatedAttributes(dbEntity, snapshot),
@@ -472,8 +461,7 @@ class ContextCommit {
                     batch.add(qualifierSnapshot, snapshot);
 
                     if (isMasterDbEntity) {
-                        ObjectId updId =
-                            updatedId(
+                        ObjectId updId = updatedId(
                                 o.getObjectId().getObjClass(),
                                 idSnapshot,
                                 snapshot);
@@ -489,7 +477,7 @@ class ContextCommit {
         }
     }
 
-    /** 
+    /**
      * Creates a list of DbAttributes that should be used in update WHERE clause.
      */
     private List qualifierAttributes(ObjEntity entity, boolean optimisticLocking) {
@@ -505,8 +493,9 @@ class ContextCommit {
 
             if (attribute.isUsedForLocking()) {
                 // only care about first step in a flattened attribute
-                DbAttribute dbAttribute =
-                    (DbAttribute) attribute.getDbPathIterator().next();
+                DbAttribute dbAttribute = (DbAttribute) attribute
+                        .getDbPathIterator()
+                        .next();
 
                 if (!attributes.contains(dbAttribute)) {
                     attributes.add(dbAttribute);
@@ -520,8 +509,9 @@ class ContextCommit {
 
             if (relationship.isUsedForLocking()) {
                 // only care about the first DbRelationship
-                DbRelationship dbRelationship =
-                    (DbRelationship) relationship.getDbRelationships().get(0);
+                DbRelationship dbRelationship = (DbRelationship) relationship
+                        .getDbRelationships()
+                        .get(0);
 
                 Iterator joinsIterator = dbRelationship.getJoins().iterator();
                 while (joinsIterator.hasNext()) {
@@ -539,6 +529,7 @@ class ContextCommit {
 
     /**
      * Creates a list of DbAttributes that are updated in a snapshot
+     * 
      * @param entity
      * @return
      */
@@ -559,13 +550,11 @@ class ContextCommit {
      * Appends values used for optimistic locking to a given snapshot.
      */
     private void appendOptimisticLockingAttributes(
-        Map qualifierSnapshot,
-        DataObject dataObject,
-        List qualifierAttributes)
-        throws CayenneException {
+            Map qualifierSnapshot,
+            DataObject dataObject,
+            List qualifierAttributes) throws CayenneException {
 
-        Map snapshot =
-            dataObject.getDataContext().getObjectStore().getRetainedSnapshot(
+        Map snapshot = dataObject.getDataContext().getObjectStore().getRetainedSnapshot(
                 dataObject.getObjectId());
 
         Iterator it = qualifierAttributes.iterator();
@@ -580,16 +569,15 @@ class ContextCommit {
 
     private void createPrimaryKeys() throws CayenneException {
 
-        // TODO: casting here may not work in the future if
-        // DataContexts are allowed to have parents other than DataDomain
-        DataDomain domain = (DataDomain) context.getParent();
+        DataDomain domain = context.getParentDataDomain();
         PrimaryKeyHelper pkHelper = domain.getPrimaryKeyHelper();
 
         Collections.sort(objEntitiesToInsert, pkHelper.getObjEntityComparator());
-        for (Iterator i = objEntitiesToInsert.iterator(); i.hasNext();) {
+        Iterator i = objEntitiesToInsert.iterator();
+        while (i.hasNext()) {
             ObjEntity currentEntity = (ObjEntity) i.next();
-            List dataObjects =
-                (List) newObjectsByObjEntity.get(currentEntity.getClassName());
+            List dataObjects = (List) newObjectsByObjEntity.get(currentEntity
+                    .getClassName());
             pkHelper.createPermIdsForObjEntity(currentEntity, dataObjects);
         }
     }
@@ -612,13 +600,13 @@ class ContextCommit {
             DataObject nextObject = (DataObject) it.next();
             int objectState = nextObject.getPersistenceState();
             switch (objectState) {
-                case PersistenceState.NEW :
+                case PersistenceState.NEW:
                     objectToInsert(nextObject);
                     break;
-                case PersistenceState.DELETED :
+                case PersistenceState.DELETED:
                     objectToDelete(nextObject);
                     break;
-                case PersistenceState.MODIFIED :
+                case PersistenceState.MODIFIED:
                     objectToUpdate(nextObject);
                     break;
             }
@@ -627,35 +615,37 @@ class ContextCommit {
 
     private void objectToInsert(DataObject o) throws CayenneException {
         classifyByEntityAndNode(
-            o,
-            newObjectsByObjEntity,
-            objEntitiesToInsert,
-            DataNodeCommitHelper.INSERT);
+                o,
+                newObjectsByObjEntity,
+                objEntitiesToInsert,
+                DataNodeCommitHelper.INSERT);
     }
 
     private void objectToDelete(DataObject o) throws CayenneException {
         classifyByEntityAndNode(
-            o,
-            objectsToDeleteByObjEntity,
-            objEntitiesToDelete,
-            DataNodeCommitHelper.DELETE);
+                o,
+                objectsToDeleteByObjEntity,
+                objEntitiesToDelete,
+                DataNodeCommitHelper.DELETE);
     }
 
     private void objectToUpdate(DataObject o) throws CayenneException {
         classifyByEntityAndNode(
-            o,
-            objectsToUpdateByObjEntity,
-            objEntitiesToUpdate,
-            DataNodeCommitHelper.UPDATE);
+                o,
+                objectsToUpdateByObjEntity,
+                objEntitiesToUpdate,
+                DataNodeCommitHelper.UPDATE);
     }
 
     private RuntimeException attemptToCommitReadOnlyEntity(
-        Class objectClass,
-        ObjEntity entity) {
+            Class objectClass,
+            ObjEntity entity) {
         String className = (objectClass != null) ? objectClass.getName() : "<null>";
         StringBuffer message = new StringBuffer();
-        message.append("Class '").append(className).append(
-            "' maps to a read-only entity");
+        message
+                .append("Class '")
+                .append(className)
+                .append("' maps to a read-only entity");
 
         if (entity != null) {
             message.append(" '").append(entity.getName()).append("'");
@@ -670,21 +660,22 @@ class ContextCommit {
      * CayenneRuntimeException if an object can't be classified.
      */
     private void classifyByEntityAndNode(
-        DataObject o,
-        Map objectsByObjEntity,
-        List objEntities,
-        int operationType) {
+            DataObject o,
+            Map objectsByObjEntity,
+            List objEntities,
+            int operationType) {
 
         Class objEntityClass = o.getObjectId().getObjClass();
         ObjEntity entity = context.getEntityResolver().lookupObjEntity(objEntityClass);
-        Collection objectsForObjEntity =
-            (Collection) objectsByObjEntity.get(objEntityClass.getName());
+        Collection objectsForObjEntity = (Collection) objectsByObjEntity
+                .get(objEntityClass.getName());
         if (objectsForObjEntity == null) {
             objEntities.add(entity);
             DataNode responsibleNode = context.lookupDataNode(entity.getDataMap());
 
-            DataNodeCommitHelper commitHelper =
-                DataNodeCommitHelper.getHelperForNode(nodeHelpers, responsibleNode);
+            DataNodeCommitHelper commitHelper = DataNodeCommitHelper.getHelperForNode(
+                    nodeHelpers,
+                    responsibleNode);
 
             commitHelper.addToEntityList(entity, operationType);
             objectsForObjEntity = new ArrayList();
@@ -700,45 +691,34 @@ class ContextCommit {
             FlattenedRelationshipInfo info = (FlattenedRelationshipInfo) i.next();
 
             DataObject source = info.getSource();
+
+            // TODO: does it ever happen? How?
             if (source.getPersistenceState() == PersistenceState.DELETED) {
                 continue;
             }
 
-            Map sourceId = source.getObjectId().getIdSnapshot();
-            ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+            if (info.getDestination().getPersistenceState() == PersistenceState.DELETED) {
+                continue;
+            }
 
-            DataNode responsibleNode = context.lookupDataNode(sourceEntity.getDataMap());
-            DataNodeCommitHelper commitHelper =
-                DataNodeCommitHelper.getHelperForNode(nodeHelpers, responsibleNode);
+            DbEntity flattenedEntity = info.getJoinEntity();
+            DataNode responsibleNode = context.lookupDataNode(flattenedEntity
+                    .getDataMap());
+            DataNodeCommitHelper commitHelper = DataNodeCommitHelper.getHelperForNode(
+                    nodeHelpers,
+                    responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
 
-            ObjRelationship flattenedRel = info.getBaseRelationship();
-            List relList = flattenedRel.getDbRelationships();
-            DbRelationship firstDbRel = (DbRelationship) relList.get(0);
-            DbRelationship secondDbRel = (DbRelationship) relList.get(1);
-            DbEntity flattenedEntity = (DbEntity) firstDbRel.getTargetEntity();
-            InsertBatchQuery relationInsertQuery =
-                (InsertBatchQuery) batchesByDbEntity.get(flattenedEntity);
+            InsertBatchQuery relationInsertQuery = (InsertBatchQuery) batchesByDbEntity
+                    .get(flattenedEntity);
 
             if (relationInsertQuery == null) {
                 relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
                 relationInsertQuery.setLoggingLevel(logLevel);
-                if (logObj.isDebugEnabled())
-                    logObj.debug(
-                        "Creating InsertBatchQuery for DbEntity "
-                            + flattenedEntity.getName());
                 batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
             }
-            DataObject destination = info.getDestination();
-            if (destination.getPersistenceState() == PersistenceState.DELETED)
-                continue;
-            Map dstId = destination.getObjectId().getIdSnapshot();
-            Map flattenedSnapshot =
-                BatchQueryUtils.buildFlattenedSnapshot(
-                    sourceId,
-                    dstId,
-                    firstDbRel,
-                    secondDbRel);
+
+            Map flattenedSnapshot = info.buildJoinSnapshotForInsert();
             relationInsertQuery.add(flattenedSnapshot);
         }
     }
@@ -748,51 +728,47 @@ class ContextCommit {
 
         while (i.hasNext()) {
             FlattenedRelationshipInfo info = (FlattenedRelationshipInfo) i.next();
-            DataObject source = info.getSource();
-            Map sourceId = source.getObjectId().getIdSnapshot();
+
+            // TODO: does it ever happen?
+            Map sourceId = info.getSource().getObjectId().getIdSnapshot();
+
             if (sourceId == null)
                 continue;
 
-            ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
-            DataNode responsibleNode = context.lookupDataNode(sourceEntity.getDataMap());
-            DataNodeCommitHelper commitHelper =
-                DataNodeCommitHelper.getHelperForNode(nodeHelpers, responsibleNode);
+            Map dstId = info.getDestination().getObjectId().getIdSnapshot();
+            if (dstId == null)
+                continue;
+
+            DbEntity flattenedEntity = info.getJoinEntity();
+
+            DataNode responsibleNode = context.lookupDataNode(flattenedEntity
+                    .getDataMap());
+            DataNodeCommitHelper commitHelper = DataNodeCommitHelper.getHelperForNode(
+                    nodeHelpers,
+                    responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
 
-            ObjRelationship flattenedRel = info.getBaseRelationship();
-            List relList = flattenedRel.getDbRelationships();
-            DbRelationship firstDbRel = (DbRelationship) relList.get(0);
-            DbRelationship secondDbRel = (DbRelationship) relList.get(1);
-            DbEntity flattenedEntity = (DbEntity) firstDbRel.getTargetEntity();
-            DeleteBatchQuery relationDeleteQuery =
-                (DeleteBatchQuery) batchesByDbEntity.get(flattenedEntity);
+            DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery) batchesByDbEntity
+                    .get(flattenedEntity);
             if (relationDeleteQuery == null) {
                 relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
                 relationDeleteQuery.setLoggingLevel(logLevel);
-                if (logObj.isDebugEnabled())
-                    logObj.debug(
-                        "Creating DeleteBatchQuery for DbEntity "
-                            + flattenedEntity.getName());
                 batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
             }
 
-            DataObject destination = info.getDestination();
-            Map dstId = destination.getObjectId().getIdSnapshot();
-            if (dstId == null)
-                continue;
-            Map flattenedSnapshot =
-                BatchQueryUtils.buildFlattenedSnapshot(
-                    sourceId,
-                    dstId,
-                    firstDbRel,
-                    secondDbRel);
-            relationDeleteQuery.add(flattenedSnapshot);
+            List flattenedSnapshots = info.buildJoinSnapshotsForDelete();
+            if (!flattenedSnapshots.isEmpty()) {
+                Iterator snapsIt = flattenedSnapshots.iterator();
+                while(snapsIt.hasNext()) {
+                    relationDeleteQuery.add((Map) snapsIt.next());
+                }
+            }
         }
     }
 
     private void prepareFlattenedQueries(
-        DataNodeCommitHelper commitHelper,
-        Map flattenedBatches) {
+            DataNodeCommitHelper commitHelper,
+            Map flattenedBatches) {
 
         for (Iterator i = flattenedBatches.values().iterator(); i.hasNext();) {
             commitHelper.addToQueries((Query) i.next());
@@ -814,9 +790,9 @@ class ContextCommit {
     }
 
     private void groupObjEntitiesBySpannedDbEntities(
-        List dbEntities,
-        Map objEntitiesByDbEntity,
-        List objEntities) {
+            List dbEntities,
+            Map objEntitiesByDbEntity,
+            List objEntities) {
         for (Iterator i = objEntities.iterator(); i.hasNext();) {
             ObjEntity objEntity = (ObjEntity) i.next();
             DbEntity dbEntity = objEntity.getDbEntity();
@@ -828,9 +804,8 @@ class ContextCommit {
             }
             if (!objEntitiesForDbEntity.contains(objEntity))
                 objEntitiesForDbEntity.add(objEntity);
-            for (Iterator j = objEntity.getAttributeMap().values().iterator();
-                j.hasNext();
-                ) {
+            for (Iterator j = objEntity.getAttributeMap().values().iterator(); j
+                    .hasNext();) {
                 ObjAttribute objAttribute = (ObjAttribute) j.next();
                 if (!objAttribute.isCompound())
                     continue;
@@ -848,13 +823,12 @@ class ContextCommit {
     }
 
     private DbRelationship findMasterToDependentDbRelationship(
-        DbEntity masterDbEntity,
-        DbEntity dependentDbEntity) {
+            DbEntity masterDbEntity,
+            DbEntity dependentDbEntity) {
         if (masterDbEntity.equals(dependentDbEntity))
             return null;
-        for (Iterator i = masterDbEntity.getRelationshipMap().values().iterator();
-            i.hasNext();
-            ) {
+        for (Iterator i = masterDbEntity.getRelationshipMap().values().iterator(); i
+                .hasNext();) {
             DbRelationship rel = (DbRelationship) i.next();
             if (dependentDbEntity.equals(rel.getTargetEntity()) && rel.isToDependentPK())
                 return rel;

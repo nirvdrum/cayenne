@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-map project-version="1.1">
+	<db-entity name="COMPLEX_JOIN">
+		<db-attribute name="EXTRA_COLUMN" type="VARCHAR" length="50"/>
+		<db-attribute name="FT1_FK" type="INTEGER"/>
+		<db-attribute name="FT3_FK" type="INTEGER"/>
+		<db-attribute name="PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="DELETE_RULE_TEST1">
 		<db-attribute name="DEL_RULE_TEST1_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="TEST2_ID" type="INTEGER" isMandatory="true"/>
@@ -67,6 +73,12 @@
 	</obj-entity>
 	<obj-entity name="ToOneFK2" className="org.objectstyle.cayenne.testdo.relationship.ToOneFK2" dbEntityName="TO_ONEFK2">
 	</obj-entity>
+	<db-relationship name="toFT1" source="COMPLEX_JOIN" target="FLATTENED_TEST_1" toMany="false">
+		<db-attribute-pair source="FT1_FK" target="FT1_ID"/>
+	</db-relationship>
+	<db-relationship name="toFT3" source="COMPLEX_JOIN" target="FLATTENED_TEST_3" toMany="false">
+		<db-attribute-pair source="FT3_FK" target="FT3_ID"/>
+	</db-relationship>
 	<db-relationship name="deleteRuleTest3Array" source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST3" toMany="true">
 		<db-attribute-pair source="DEL_RULE_TEST1_ID" target="DELETE_RULE_TEST_3_FK"/>
 	</db-relationship>
@@ -82,6 +94,9 @@
 	<db-relationship name="toDeleteRuleTest2" source="DELETE_RULE_TEST3" target="DELETE_RULE_TEST2" toMany="false">
 		<db-attribute-pair source="DELETE_RULE_TEST_3_FK" target="DEL_RULE_TEST2_ID"/>
 	</db-relationship>
+	<db-relationship name="complexJoins" source="FLATTENED_TEST_1" target="COMPLEX_JOIN" toMany="true">
+		<db-attribute-pair source="FT1_ID" target="FT1_FK"/>
+	</db-relationship>
 	<db-relationship name="ft2Array" source="FLATTENED_TEST_1" target="FLATTENED_TEST_2" toMany="true">
 		<db-attribute-pair source="FT1_ID" target="FT1_ID"/>
 	</db-relationship>
@@ -90,6 +105,9 @@
 	</db-relationship>
 	<db-relationship name="toFT1" source="FLATTENED_TEST_2" target="FLATTENED_TEST_1" toMany="false">
 		<db-attribute-pair source="FT1_ID" target="FT1_ID"/>
+	</db-relationship>
+	<db-relationship name="complexJoins" source="FLATTENED_TEST_3" target="COMPLEX_JOIN" toMany="true">
+		<db-attribute-pair source="FT3_ID" target="FT3_FK"/>
 	</db-relationship>
 	<db-relationship name="toFT2" source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" toMany="false">
 		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
@@ -118,6 +136,7 @@
 	<obj-relationship name="toDeleteRuleTest2" source="DeleteRuleTest3" target="DeleteRuleTest2" db-relationship-path="toDeleteRuleTest2"/>
 	<obj-relationship name="ft2Array" source="FlattenedTest1" target="FlattenedTest2" db-relationship-path="ft2Array"/>
 	<obj-relationship name="ft3Array" source="FlattenedTest1" target="FlattenedTest3" db-relationship-path="ft2Array.ft3Array"/>
+	<obj-relationship name="ft3OverComplex" source="FlattenedTest1" target="FlattenedTest3" db-relationship-path="complexJoins.toFT3"/>
 	<obj-relationship name="ft3Array" source="FlattenedTest2" target="FlattenedTest3" db-relationship-path="ft3Array"/>
 	<obj-relationship name="toFT1" source="FlattenedTest2" target="FlattenedTest1" db-relationship-path="toFT1"/>
 	<obj-relationship name="toFT1" source="FlattenedTest3" target="FlattenedTest1" db-relationship-path="toFT2.toFT1"/>

@@ -158,8 +158,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns a "complimentary" ObjRelationship going in the opposite direction.
-     * Returns null if no such relationship is found.
+     * Returns a "complimentary" ObjRelationship going in the opposite direction. Returns
+     * null if no such relationship is found.
      */
     public ObjRelationship getReverseRelationship() {
         // reverse the list
@@ -523,10 +523,10 @@ public class ObjRelationship extends Relationship implements EventListener {
                 }
             }
 
-            dbRelationshipsRefreshNeeded = false;
-
             calculateToManyValue();
             calculateReadOnlyValue();
+
+            dbRelationshipsRefreshNeeded = false;
         }
     }
 
@@ -555,30 +555,27 @@ public class ObjRelationship extends Relationship implements EventListener {
      * Recalculates a new readonly value based on the underlying DbRelationships.
      */
     final void calculateReadOnlyValue() {
-        //Quickly filter the single dbrel case
+        // not flattened, always read/write
         if (dbRelationships.size() < 2) {
             this.readOnly = false;
             return;
         }
 
-        //Also quickly filter any really complex db rel cases
+        // too long, can't handle this yet
         if (dbRelationships.size() > 2) {
             this.readOnly = true;
             return;
         }
 
-        //Now check for a toMany -> toOne series (to return false)
         DbRelationship firstRel = (DbRelationship) dbRelationships.get(0);
         DbRelationship secondRel = (DbRelationship) dbRelationships.get(1);
 
-        //First toOne or second toMany means read only
+        // only support many-to-many with single-step join
         if (!firstRel.isToMany() || secondRel.isToMany()) {
             this.readOnly = true;
             return;
         }
 
-        // Relationship type is in order, now we only have to check the
-        // intermediate table
         DataMap map = firstRel.getTargetEntity().getDataMap();
         if (map == null) {
             throw new CayenneRuntimeException(this.getClass().getName()
@@ -586,17 +583,16 @@ public class ObjRelationship extends Relationship implements EventListener {
                     + firstRel.getName());
         }
 
-        DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName());
-        List pkAttribs = intermediateEntity.getPrimaryKey();
-
-        Iterator allAttribs = intermediateEntity.getAttributes().iterator();
-        while (allAttribs.hasNext()) {
-            if (!pkAttribs.contains(allAttribs.next())) {
-                this.readOnly = true;
-                return;
-                //one of the attributes of intermediate entity is not in the
-                // pk. Must be readonly
-            }
+        // allow modifications if the joins are from FKs
+        if(!secondRel.isToPK()) {
+            this.readOnly = true;
+            return;
+        }
+        
+        DbRelationship firstReverseRel = firstRel.getReverseRelationship();
+        if(firstReverseRel == null || !firstReverseRel.isToPK()) {
+            this.readOnly = true;
+            return;
         }
 
         this.readOnly = false;

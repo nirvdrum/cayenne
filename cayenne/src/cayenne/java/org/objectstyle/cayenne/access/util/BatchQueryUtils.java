@@ -166,6 +166,9 @@ public class BatchQueryUtils {
         return Util.hashCode(c);
     }
 
+    /**
+     * @deprecated Unused since 1.1.
+     */
     public static Map buildFlattenedSnapshot(
         Map sourceId,
         Map destinationId,

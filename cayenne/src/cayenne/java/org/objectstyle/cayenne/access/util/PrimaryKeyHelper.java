@@ -144,7 +144,7 @@ public class PrimaryKeyHelper {
             DataObject object = (DataObject) i.next();
             ObjectId id = object.getObjectId();
             if (!(id instanceof TempObjectId)) {
-                continue; //with next loop
+                continue;
                 //If the id is not a temp, then it must be permanent.  Do nothing else
             }
 
