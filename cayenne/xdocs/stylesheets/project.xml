@@ -127,7 +127,7 @@
     	
     	<item name="3. Cayenne Project Structure"  href="/modelerguide/model-structure/index.html">
     		<item name="3.1 Cayenne Projects"  href="/modelerguide/model-structure/project-structure.html"/>
-    		<item name="3.1 Cayenne DataMaps"  href="/modelerguide/model-structure/data-map-structure.html"/>
+    		<item name="3.2 Cayenne DataMaps"  href="/modelerguide/model-structure/data-map-structure.html"/>
     	</item>
     	
     	<item name="4. Common Modeling Tasks"  href="/modelerguide/common-tasks/index.html">
