@@ -268,7 +268,7 @@ public class JdbcPkGenerator implements PkGenerator {
         SqlSelectQuery q = new SqlSelectQuery();
         q.setSqlString(sql);
 
-        SelectOperationObserver observer = new SelectOperationObserver();
+        SelectObserver observer = new SelectObserver();
         node.performQuery(q, observer);
         return observer.getResults(q);
     }

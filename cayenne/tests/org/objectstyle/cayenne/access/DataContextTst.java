@@ -205,7 +205,7 @@ public class DataContextTst extends TestCase {
 		SelectQuery q = new SelectQuery("Artist", e);
 		q.addPrefetch("paintingArray");
 
-		SelectOperationObserver o = new SelectOperationObserver();
+		SelectObserver o = new SelectObserver();
 		// o.setQueryLogLevel(Level.SEVERE);
 		ctxt.performQuery(q, o);
 		assertEquals(2, o.getSelectCount());
@@ -226,7 +226,7 @@ public class DataContextTst extends TestCase {
 		q.addPrefetch("paintingArray.toGallery");
 		q.addPrefetch("artistExhibitArray.toExhibit");
 
-		SelectOperationObserver o = new SelectOperationObserver();
+		SelectObserver o = new SelectObserver();
 		// o.setQueryLogLevel(Level.SEVERE);
 		ctxt.performQuery(q, o);
 		assertEquals(4, o.getSelectCount());
@@ -332,7 +332,26 @@ public class DataContextTst extends TestCase {
 		}
 	}
 
-	public void testPerformIteratedQuery() throws Exception {
+	public void testPerformIteratedQuery1() throws Exception {
+        SelectQuery q1 = new SelectQuery("Artist");
+		ResultIterator it = ctxt.performIteratedQuery(q1);
+		
+		try {
+			int count = 0;
+			while(it.hasNextRow()) {
+				it.nextDataRow();
+				count++;
+			}
+			
+			assertEquals(DataContextTst.artistCount, count);
+		}
+		finally {
+			it.close();
+		}
+	}
+	
+	
+    public void testPerformIteratedQuery2() throws Exception {
         SelectQuery q1 = new SelectQuery("Artist");
 		ResultIterator it = ctxt.performIteratedQuery(q1);
 		

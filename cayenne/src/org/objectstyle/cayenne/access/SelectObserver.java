@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.query.Query;
  * 
  *  @author Andrei Adamchik
  */
-public class SelectOperationObserver extends DefaultOperationObserver {
+public class SelectObserver extends DefaultOperationObserver {
     protected HashMap results = new HashMap();
     protected int selectCount;
     

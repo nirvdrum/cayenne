@@ -932,7 +932,7 @@ public class DataContext implements QueryEngine {
 	 * OperationObserver for select queries. Will register bacthes of 
 	 * fetched objects with this DataContext.
 	 */
-	class SelectProcessor extends SelectOperationObserver {
+	class SelectProcessor extends SelectObserver {
 		SelectProcessor(Level logLevel) {
 			super.setQueryLogLevel(logLevel);
 		}

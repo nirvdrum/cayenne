@@ -78,7 +78,7 @@ public class DataNodeTst extends IteratorTestBase {
 	}
 
 	public void testRunSelect() throws Exception {
-		SelectOperationObserver observer = new SelectOperationObserver();
+		SelectObserver observer = new SelectObserver();
 
 		try {
 			init();

@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.query.Query;
 
 /**
  * OperationObserver that is used to track the execution
- * of SelectQueries whose results are returned as ResultIterator.
+ * of SelectQueries with results returned as ResultIterator.
  *  
  * @author Andrei Adamchik
  */

@@ -9,7 +9,7 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-1. Added ResultIterator
+1. Added ResultIterator - now it is possible to retrieve data rows one at a time.
 
 2. Added public method DataContext.objectFromDataRow (rather exposed 
 another private method).
@@ -24,4 +24,6 @@ DefaultResultIterator
 directory due to resource loation issues.
 
 6. Split OperationObserver into OperationObserver and OperationHints for clearer API.
+
+7. Renamed SelectOperationObserver to SelectObserver for consistency reasons.
 
