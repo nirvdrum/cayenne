@@ -59,6 +59,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.ZipUtil;
 
@@ -89,13 +90,14 @@ public class ProjectConfigurator {
                 info.setDestJar(info.getSourceJar());
             }
 
-            // perform sanity check
+            // sanity check
             validate();
 
             // do the processing
             tmpDir = makeTempDirectory();
             ZipUtil.unzip(info.getSourceJar(), tmpDir);
 
+            reconfigureProject(tmpDir);
 
             tmpDest = makeTempDestJar();
             ZipUtil.zip(tmpDest, tmpDir, tmpDir.listFiles(), '/');
@@ -121,6 +123,25 @@ public class ProjectConfigurator {
                 tmpDest.delete();
             }
         }
+    }
+
+    /**
+     * Performs reconfiguration of the unjarred project.
+     * 
+     * @param projectDir a directory where a working copy of the project is
+     * located.
+     */
+    protected void reconfigureProject(File projectDir) throws Exception {
+        File projectFile = new File(projectDir, Configuration.DOMAIN_FILE);
+        
+        // process alternative project file
+        if (info.getAltProjectFile() != null) {
+            if(!Util.copy(info.getAltProjectFile(), projectFile)) {
+            	throw new Exception("Can't copy project file: " + info.getAltProjectFile());
+            }
+        }
+        
+        
     }
 
     /**

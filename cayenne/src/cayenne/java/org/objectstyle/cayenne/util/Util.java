@@ -82,7 +82,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- *  Utility methods sink.
+ * Contains various unorganized static utility methods used across Cayenne.
+ * 
+ * @author Andrei Adamchik
  */
 public class Util {
     private static Logger logObj = Logger.getLogger(Util.class);
