@@ -55,14 +55,18 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -259,15 +263,44 @@ public final class DataObjectUtils {
      * @throws CayenneRuntimeException if more than one object matched ObjectId.
      */
     public static DataObject objectForPK(DataContext context, ObjectId id) {
+        ObjectStore objectStore = context.getObjectStore();
 
         // look for cached object first
-        DataObject object = context.getObjectStore().getObject(id);
+        DataObject object = objectStore.getObject(id);
         if (object != null) {
             return object;
         }
 
+        // CAY-218: check for inheritance... ObjectId maybe wrong
+        // TODO: investigate moving this to the ObjectStore "getObject()" - this should
+        // really be global...
+
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(id.getObjClass());
+        EntityInheritanceTree inheritanceHandler = context
+                .getEntityResolver()
+                .lookupInheritanceTree(entity);
+        if (inheritanceHandler != null) {
+            Collection children = inheritanceHandler.getChildren();
+            if (!children.isEmpty()) {
+                // find cached child
+                Iterator it = children.iterator();
+                while (it.hasNext()) {
+                    EntityInheritanceTree child = (EntityInheritanceTree) it.next();
+                    ObjectId childID = new ObjectId(child.getEntity().getJavaClass(
+                            Configuration.getResourceLoader()), id.getIdSnapshot());
+
+                    DataObject childObject = objectStore.getObject(childID);
+                    if (childObject != null) {
+                        return childObject;
+                    }
+                }
+            }
+        }
+
         // look in shared cache...
-        DataRow row = context.getObjectStore().getSnapshot(id, context);
+
+        // TODO: take inheritance into account...
+        DataRow row = objectStore.getSnapshot(id, context);
 
         return (row != null)
                 ? context.objectFromDataRow(id.getObjClass(), row, false)
