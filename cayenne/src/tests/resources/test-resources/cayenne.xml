@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<domains>
+<domains project-version="1.0">
 <domain name="default">
-	<map name="testmap" location="testmap.xml"/>
+	<map name="testmap" location="testmap.map.xml"/>
 </domain>
 </domains>
