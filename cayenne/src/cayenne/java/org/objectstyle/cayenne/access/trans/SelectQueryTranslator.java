@@ -61,23 +61,14 @@ import org.objectstyle.cayenne.access.util.ResultDescriptor;
 
 
 /**
- * Abstract superclass of Query translators.
- * Defines callback methods for helper classes
- * that are delegated tasks of building query parts.
+ * Interface that defines common API for SELECT translators.
  *
  * @author Andrei Adamchik
  */
-public abstract class SelectQueryAssembler extends QueryAssembler {
+public interface SelectQueryTranslator {
 
     /**
      * Returns a descriptor that contains information needed for the ResultSet processing.
      */
-    public abstract ResultDescriptor getResultDescriptor(ResultSet rs);
-
-    /**
-     * Returns a maximum number of rows that the underlying
-     * query should fetch. If the value is less than or equal to
-     * zero, all rows will be returned.
-     */
-    public abstract int getFetchLimit();
+    public ResultDescriptor getResultDescriptor(ResultSet rs);
 }

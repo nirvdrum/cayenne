@@ -74,15 +74,11 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
  *
  * @author Andrei Adamchik
  */
-public class SqlSelectTranslator extends SelectQueryAssembler {
+public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTranslator {
     private static Logger logObj = Logger.getLogger(SqlSelectTranslator.class);
 
     public String createSqlString() throws Exception {
         return getRawQuery().getSqlString();
-    }
-
-    public int getFetchLimit() {
-        return getRawQuery().getFetchLimit();
     }
 
     private final SqlSelectQuery getRawQuery() {

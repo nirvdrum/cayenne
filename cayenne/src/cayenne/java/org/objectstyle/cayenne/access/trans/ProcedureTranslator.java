@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +67,7 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParam;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -75,31 +77,30 @@ import org.objectstyle.cayenne.query.ProcedureQuery;
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureTranslator extends QueryTranslator {
+public class ProcedureTranslator
+    extends QueryTranslator
+    implements SelectQueryTranslator {
+
+    /**
+     * Helper class to make OUT and VOID parameters logger-friendly.
+     */
+    static class NotInParam {
+        protected String type;
+
+        public NotInParam(String type) {
+            this.type = type;
+        }
+
+        public String toString() {
+            return type;
+        }
+    }
+
     private static NotInParam OUT_PARAM = new NotInParam("[OUT]");
     private static NotInParam VOID_PARAM = new NotInParam("[VOID]");
 
-    protected List values;
     protected List callParams;
-
-    public PreparedStatement createStatement(Level logLevel) throws Exception {
-        long t1 = System.currentTimeMillis();
-
-        this.callParams = getProcedure().getCallParamsList();
-        this.values = new ArrayList(callParams.size());
-
-        initValues();
-        String sqlStr = createSqlString();
-
-        QueryLogger.logQuery(
-            logLevel,
-            sqlStr,
-            values,
-            System.currentTimeMillis() - t1);
-        CallableStatement stmt = con.prepareCall(sqlStr);
-        initStatement(stmt);
-        return stmt;
-    }
+    protected List values;
 
     /**
      * Creates an SQL String for the stored procedure call.
@@ -136,25 +137,36 @@ public class ProcedureTranslator extends QueryTranslator {
         return buf.toString();
     }
 
-    protected void initValues() {
-        Map queryValues = getProcedureQuery().getParams();
+    public PreparedStatement createStatement(Level logLevel) throws Exception {
+        long t1 = System.currentTimeMillis();
 
-        // match values with parameters in the correct order.
-        // make an assumption that a missing value is NULL
-        // Any reason why this is bad?
+        this.callParams = getProcedure().getCallParamsList();
+        this.values = new ArrayList(callParams.size());
 
-        Iterator it = callParams.iterator();
-        while (it.hasNext()) {
-            ProcedureParam param = (ProcedureParam) it.next();
+        initValues();
+        String sqlStr = createSqlString();
 
-            if (param.getDirection() == ProcedureParam.OUT_PARAM) {
-                values.add(OUT_PARAM);
-            } else if (param.getDirection() == ProcedureParam.VOID_PARAM) {
-                values.add(VOID_PARAM);
-            } else {
-                values.add(queryValues.get(param.getName()));
-            }
-        }
+        QueryLogger.logQuery(
+            logLevel,
+            sqlStr,
+            values,
+            System.currentTimeMillis() - t1);
+        CallableStatement stmt = con.prepareCall(sqlStr);
+        initStatement(stmt);
+        return stmt;
+    }
+
+    public Procedure getProcedure() {
+        return getProcedureQuery().getProcedure();
+    }
+
+    public ProcedureQuery getProcedureQuery() {
+        return (ProcedureQuery) query;
+    }
+
+    public ResultDescriptor getResultDescriptor(ResultSet rs) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
@@ -177,6 +189,27 @@ public class ProcedureTranslator extends QueryTranslator {
                 if (param.isOutParam()) {
                     setOutParam(stmt, param, i + 1);
                 }
+            }
+        }
+    }
+
+    protected void initValues() {
+        Map queryValues = getProcedureQuery().getParams();
+
+        // match values with parameters in the correct order.
+        // make an assumption that a missing value is NULL
+        // Any reason why this is bad?
+
+        Iterator it = callParams.iterator();
+        while (it.hasNext()) {
+            ProcedureParam param = (ProcedureParam) it.next();
+
+            if (param.getDirection() == ProcedureParam.OUT_PARAM) {
+                values.add(OUT_PARAM);
+            } else if (param.getDirection() == ProcedureParam.VOID_PARAM) {
+                values.add(VOID_PARAM);
+            } else {
+                values.add(queryValues.get(param.getName()));
             }
         }
     }
@@ -222,29 +255,6 @@ public class ProcedureTranslator extends QueryTranslator {
             stmt.registerOutParameter(pos, param.getType(), precision);
         } else {
             stmt.registerOutParameter(pos, param.getType());
-        }
-    }
-
-    public ProcedureQuery getProcedureQuery() {
-        return (ProcedureQuery) query;
-    }
-
-    public Procedure getProcedure() {
-        return getProcedureQuery().getProcedure();
-    }
-
-    /**
-     * Helper class to make OUT and VOID parameters logger-friendly.
-     */
-    static class NotInParam {
-        protected String type;
-
-        public NotInParam(String type) {
-            this.type = type;
-        }
-
-        public String toString() {
-            return type;
         }
     }
 }

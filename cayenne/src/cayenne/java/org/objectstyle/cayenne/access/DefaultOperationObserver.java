@@ -69,7 +69,8 @@ import org.objectstyle.cayenne.query.Query;
 
 /**
  * Simple implementation of OperationObserver interface.
- * Useful as a superclass of other implementations of OperationObserver.
+ * Useful as a superclass of other implementations of OperationObserver. This implementation only 
+ * tracks transaction events and exceptions. Also it performs basic logging.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>

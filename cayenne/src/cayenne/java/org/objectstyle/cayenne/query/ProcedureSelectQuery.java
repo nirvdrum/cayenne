@@ -73,6 +73,7 @@ public class ProcedureSelectQuery
     protected int pageSize;
     protected boolean fetchingDataRows;
     protected Map resultParams = new HashMap();
+    protected int fetchLimit;
 
     /**
      * Constructor for SelectStoredProcedureQuery.
@@ -149,4 +150,11 @@ public class ProcedureSelectQuery
         return Query.SELECT_QUERY;
     }
 
+    public int getFetchLimit() {
+        return fetchLimit;
+    }
+
+    public void setFetchLimit(int fetchLimit) {
+        this.fetchLimit = fetchLimit;
+    }
 }

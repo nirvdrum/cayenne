@@ -69,7 +69,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 
@@ -124,13 +123,6 @@ public class DefaultResultIterator implements ResultIterator {
             (int) Math.ceil(((double) descriptor.getIdIndexes().length) / 0.75);
 
         checkNextRow();
-    }
-
-    /**
-     * @deprecated Since 1.0 Beta1 this method is no longer used.
-     */
-    protected void init(SelectQueryAssembler assembler)
-        throws SQLException, CayenneException {
     }
 
     /**

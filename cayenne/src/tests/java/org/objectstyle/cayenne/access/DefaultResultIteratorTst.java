@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.sql.ResultSet;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 
 public class DefaultResultIteratorTst extends IteratorTestBase {
     protected DefaultResultIterator it;
@@ -70,12 +70,12 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
     protected void init() throws Exception {
         super.init();
-        SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
+        SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
         ResultSet rs = st.executeQuery();
 
         it =
             new DefaultResultIterator(
-                assembler.getCon(),
+                transl.getCon(),
                 st,
                 rs,
                 assembler.getResultDescriptor(rs),

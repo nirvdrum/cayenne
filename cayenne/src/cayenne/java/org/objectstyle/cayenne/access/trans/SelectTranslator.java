@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  *
  * @author Andrei Adamchik
  */
-public class SelectTranslator extends SelectQueryAssembler {
+public class SelectTranslator extends QueryAssembler implements SelectQueryTranslator {
 
     private final Map aliasLookup = new HashMap();
     private final List columnList = new ArrayList();
@@ -114,10 +114,6 @@ public class SelectTranslator extends SelectQueryAssembler {
      */
     protected List getColumns() {
         return columnList;
-    }
-
-    public int getFetchLimit() {
-        return getSelectQuery().getFetchLimit();
     }
 
     /**

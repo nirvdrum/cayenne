@@ -81,4 +81,6 @@ public interface GenericSelectQuery extends Query {
 	 * no paging should occur.
 	 */
 	public int getPageSize();
+	
+	public int getFetchLimit();
 }

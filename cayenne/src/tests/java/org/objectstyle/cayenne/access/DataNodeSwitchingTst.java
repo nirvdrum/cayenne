@@ -130,13 +130,13 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
     public void testProcedureQuery() throws Exception {
         assertQuery(
             new ProcedureQuery(Artist.class, new Procedure()),
-            "runStoredProcedureUpdate");
+            "runStoredProcedure");
     }
 
     public void testSelectProcedureQuery() throws Exception {
         assertQuery(
             new ProcedureSelectQuery(Artist.class, new Procedure()),
-            "runStoredProcedureSelect");
+            "runStoredProcedure");
     }
 
     protected void assertQuery(Query q, String expectedMethod)
@@ -163,27 +163,17 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
         protected void runSelect(
             Connection con,
             Query query,
-            OperationObserver delegate,
-            boolean readAll)
+            OperationObserver delegate)
             throws SQLException, Exception {
             methodsCalled.add("runSelect");
         }
 
-        protected void runStoredProcedureSelect(
-            Connection con,
-            Query query,
-            OperationObserver delegate,
-            boolean readAll)
-            throws SQLException, Exception {
-            methodsCalled.add("runStoredProcedureSelect");
-        }
-
-        protected void runStoredProcedureUpdate(
+        protected void runStoredProcedure(
             Connection con,
             Query query,
             OperationObserver delegate)
             throws SQLException, Exception {
-            methodsCalled.add("runStoredProcedureUpdate");
+            methodsCalled.add("runStoredProcedure");
         }
 
         protected void runUpdate(
