@@ -19,7 +19,7 @@
             Java class. 
             This chapter describes how to use <code>Cgen</code> task. For details on 
             how class generation can be done using GUI see 
-            <a href="../modeler/index.html">CayenneModeler chapter</a>.</p>
+            <a href="../../modelerguide/index.html">CayenneModeler chapter</a>.</p>
             
             <subsection name="5.3.1 Cgen (Cayenne Class Generator)" anchor="cayennegen">
 			<h3>Description</h3>

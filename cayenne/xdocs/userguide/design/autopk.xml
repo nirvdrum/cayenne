@@ -88,7 +88,7 @@
             	
             	<p>To generate needed database objects for the primary key autogeneration
             	use CayenneModeler and follow the instructions given 
-            	<a href="../modeler/pksupport.html">here</a>.</p>
+            	<a href="../../modelerguide/pksupport.html">here</a>.</p>
             	
             	<p><i>Note: Cayenne would only support a PK generation for a single 
             	column per table.</i></p>

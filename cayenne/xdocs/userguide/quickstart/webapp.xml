@@ -131,7 +131,7 @@
        <subsection name="3.2.4 Create Database Primary Key Support." anchor="4">
     	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
     	objects for primary key support by following these  
-    	<a href="../modeler/pksupport.html">instructions</a>. Skip this step if it was already 
+    	<a href="../../modelerguide/pksupport.html">instructions</a>. Skip this step if it was already 
     	done for another tutorial.</p>
     	</subsection>
     	

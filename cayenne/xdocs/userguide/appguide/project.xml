@@ -15,7 +15,7 @@
             <p>Cayenne project is a set of XML configuration files
             needed for a Java application to work with Cayenne. While project
             files can be edited by hand, there is a 
-            <a href="../modeler/index.html">CayenneModeler GUI tool</a>
+            <a href="../../modelerguide/index.html">CayenneModeler GUI tool</a>
             that is intended to work with project files. CayenneModeler is still 
             under active development, so there is a good chance that
             the features that are missing now will be added to it soon.</p>

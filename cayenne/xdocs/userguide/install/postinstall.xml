@@ -69,7 +69,7 @@
             	
             	<code>cayenne-modeler.jar</code> implicitly relies on the presence of 
 				<code>[cayenne_install_dir]/lib/cayenne.jar</code>. Instructions on how to start
-				modeler can be found <a href="../modeler/runmodeler.html">here</a>.
+				modeler can be found <a href="../../modelerguide/runmodeler.html">here</a>.
             	</p>
             	
             </subsection>       
