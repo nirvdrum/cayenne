@@ -80,6 +80,10 @@ public class EntityTreeModel implements TreeModel {
     protected Entity root;
     protected Map sortedChildren;
 
+    // TODO: in the future replace with a more generic filter 
+    // to allow arbitrary tree customization
+    protected boolean hideAttributes;
+
     public EntityTreeModel(Entity root) {
         this.root = root;
         sortedChildren = Collections.synchronizedMap(new HashMap());
@@ -87,6 +91,14 @@ public class EntityTreeModel implements TreeModel {
 
     public Object getRoot() {
         return root;
+    }
+
+    public boolean isHideAttributes() {
+        return hideAttributes;
+    }
+
+    public void setHideAttributes(boolean hideAttributes) {
+        this.hideAttributes = hideAttributes;
     }
 
     public Object getChild(Object node, int index) {
@@ -106,10 +118,10 @@ public class EntityTreeModel implements TreeModel {
     }
 
     public int getIndexOfChild(Object node, Object child) {
-        if(node instanceof Attribute) {
+        if (node instanceof Attribute) {
             return -1;
         }
-        
+
         // wonder if linear search will be faster, considering that
         // this comparator uses reflection?
         return Arrays.binarySearch(
@@ -138,13 +150,15 @@ public class EntityTreeModel implements TreeModel {
                 Collection relationships = entity.getRelationships();
 
                 // combine two collections in an array
-                int alen = attributes.size();
+                int alen = (hideAttributes) ? 0 : attributes.size();
                 int rlen = relationships.size();
                 sortedForNode = new Object[alen + rlen];
 
-                Iterator ait = attributes.iterator();
-                for (int i = 0; i < alen; i++) {
-                    sortedForNode[i] = ait.next();
+                if (!hideAttributes) {
+                    Iterator ait = attributes.iterator();
+                    for (int i = 0; i < alen; i++) {
+                        sortedForNode[i] = ait.next();
+                    }
                 }
 
                 Iterator rit = relationships.iterator();

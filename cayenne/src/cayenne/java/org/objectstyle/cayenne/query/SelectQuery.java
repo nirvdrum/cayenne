@@ -291,6 +291,7 @@ public class SelectQuery
         }
         
         String childPadding = linePadding + "\t";
+        
         // encode qualifier
         if (qualifier != null) {
             pw.print(childPadding);
@@ -299,12 +300,28 @@ public class SelectQuery
             pw.println("</qualifier>");
         }
         
-        // encode ordering
+        // encode orderings
         if(orderings != null && !orderings.isEmpty()) {
             Iterator it = orderings.iterator();
             while(it.hasNext()) {
                 Ordering ordering = (Ordering) it.next();
                 ordering.encodeAsXML(pw, childPadding);
+            }
+        }
+        
+        // encode prefecthes
+        if(prefetches != null && !prefetches.isEmpty()) {
+            Iterator it = prefetches.iterator();
+            while(it.hasNext()) {
+                String prefetch = (String) it.next();
+                
+                // currently prefetch is a String, but DTD 
+                // treats it as a path expression... I guess for now
+                // it will be an overkill to wrap it in "<![CDATA[.."
+                pw.print(childPadding);
+                pw.print("<prefetch>");
+                pw.print(prefetch);
+                pw.println("</prefetch>");
             }
         }
 

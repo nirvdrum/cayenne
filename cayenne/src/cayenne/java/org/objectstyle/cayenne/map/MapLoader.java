@@ -349,7 +349,7 @@ public class MapLoader extends DefaultHandler {
             processStartQueryOrdering(atts);
         }
         else if (local_name.equals(QUERY_PREFETCH_TAG)) {
-            processStartQueryPrefetch(atts);
+            charactersBuffer = new StringBuffer();
         }
         else if (local_name.equals(QUERY_SQL_TAG)) {
             charactersBuffer = new StringBuffer();
@@ -421,6 +421,9 @@ public class MapLoader extends DefaultHandler {
         }
         else if (local_name.equals(QUERY_ORDERING_TAG)) {
             processEndQueryOrdering();
+        }
+        else if (local_name.equals(QUERY_PREFETCH_TAG)) {
+           processEndQueryPrefetch();
         }
 
         resetCurrentTag();
@@ -1358,13 +1361,8 @@ public class MapLoader extends DefaultHandler {
         queryBuilder.addResultColumn(label, dbType, javaType);
     }
     
-    private void processStartQueryPrefetch(Attributes attributes) throws SAXException {
-        String path = attributes.getValue("", "path");
-        if (path == null) {
-            throw new SAXException("MapLoader::processStartQueryPrefetch(), no path.");
-        }
-        
-        queryBuilder.addPrefetch(path);
+    private void processEndQueryPrefetch() throws SAXException {
+        queryBuilder.addPrefetch(charactersBuffer.toString());
     }
     
     private void processStartQueryOrdering(Attributes attributes) throws SAXException {

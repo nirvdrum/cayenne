@@ -63,6 +63,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeModel;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.Entity;
@@ -89,44 +90,41 @@ import com.jgoodies.forms.layout.FormLayout;
 public class SelectQueryOrderingPanel extends SPanel {
     private static Logger logObj = Logger.getLogger(SelectQueryOrderingPanel.class);
 
-    private static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
-    private static final Dimension TABLE_DIM = new Dimension(460, 120);
+    static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
+    static final Dimension TABLE_DIM = new Dimension(460, 120);
 
     protected MultiColumnBrowser browser;
-    protected STable orderingsTable;
+    protected STable table;
 
     public SelectQueryOrderingPanel() {
         initView();
         initController();
     }
 
-    private void initView() {
+    protected void initView() {
         // create widgets
-        SButton addButton =
-            new SButton(new SAction(SelectQueryController.ADD_ORDERING_CONTROL));
+        SButton addButton = new SButton(new SAction(getAddPathControl()));
         addButton.setEnabled(true);
 
-        SButton removeButton =
-            new SButton(new SAction(SelectQueryController.REMOVE_ORDERING_CONTROL));
+        SButton removeButton = new SButton(new SAction(getRemovePathControl()));
         removeButton.setEnabled(true);
 
         browser = new MultiColumnBrowser();
         browser.setPreferredColumnSize(BROWSER_CELL_DIM);
         browser.setDefaultRenderer();
 
-        orderingsTable = new OrderingsTable();
-        STableModel orderingsTableModel = new STableModel(orderingsTable);
-        orderingsTableModel.setSelector(SelectQueryModel.ORDERINGS_SELECTOR);
-        orderingsTableModel.setColumnNames(
-            new String[] { "Path", "Ascending", "Ignore Case" });
-        orderingsTableModel.setColumnSelectors(
-            new Selector[] {
-                OrderingModel.PATH_SELECTOR,
-                OrderingModel.ASCENDING_SELECTOR,
-                OrderingModel.CASE_SELECTOR });
+        table = new STable();
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+        table.setPreferredScrollableViewportSize(TABLE_DIM);
 
-        orderingsTable.setModel(orderingsTableModel);
-        orderingsTable.setSelectionSelector(SelectQueryModel.SELECTED_ORDERING_SELECTOR);
+        STableModel tableModel = new STableModel(table);
+        tableModel.setSelector(getTableModelSelector());
+        tableModel.setColumnNames(getTableColumnNames());
+        tableModel.setColumnSelectors(getTableColumnSelectors());
+
+        table.setModel(tableModel);
+        table.setSelectionSelector(getSelectionSelector());
 
         // assemble
         setLayout(new BorderLayout());
@@ -139,7 +137,7 @@ public class SelectQueryOrderingPanel extends SPanel {
                     "top:p:grow, 3dlu, fill:100dlu"));
 
         // orderings table must grow as the dialog is resized
-        builder.add(new JScrollPane(orderingsTable), cc.xy(1, 1, "d, fill"));
+        builder.add(new JScrollPane(table), cc.xy(1, 1, "d, fill"));
         builder.add(removeButton, cc.xywh(3, 1, 1, 1));
         builder.add(
             new JScrollPane(
@@ -153,7 +151,7 @@ public class SelectQueryOrderingPanel extends SPanel {
         add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    private void initController() {
+    protected void initController() {
         // update model when a tree selection happens
         browser.addTreeSelectionListener(new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent e) {
@@ -163,12 +161,10 @@ public class SelectQueryOrderingPanel extends SPanel {
         });
 
         // scroll to selected row whenever a selection even occurs
-        orderingsTable
-            .getSelectionModel()
-            .addListSelectionListener(new ListSelectionListener() {
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
-                    UIUtil.scrollToSelectedRow(orderingsTable);
+                    UIUtil.scrollToSelectedRow(table);
                 }
             }
         });
@@ -181,25 +177,42 @@ public class SelectQueryOrderingPanel extends SPanel {
 
         // init tree model of the browser
         if (shownModel instanceof SelectQueryModel) {
-            Object root = ((SelectQueryModel) shownModel).getRoot();
-            if (root instanceof Entity) {
-                EntityTreeModel treeModel = new EntityTreeModel((Entity) root);
-                browser.setModel(treeModel);
-            }
+            TreeModel treeModel = createBrowserModel((SelectQueryModel) shownModel);
+            browser.setModel(treeModel);
         }
 
         // init column sizes
-        orderingsTable.getColumnModel().getColumn(0).setPreferredWidth(250);
+        table.getColumnModel().getColumn(0).setPreferredWidth(250);
     }
 
-    final class OrderingsTable extends STable {
-        OrderingsTable() {
-            setRowHeight(25);
-            setRowMargin(3);
-        }
+    protected TreeModel createBrowserModel(SelectQueryModel model) {
+        return new EntityTreeModel((Entity) model.getRoot());
+    }
 
-        public Dimension getPreferredScrollableViewportSize() {
-            return TABLE_DIM;
-        }
+    protected String getAddPathControl() {
+        return SelectQueryController.ADD_ORDERING_CONTROL;
+    }
+
+    protected String getRemovePathControl() {
+        return SelectQueryController.REMOVE_ORDERING_CONTROL;
+    }
+
+    protected Selector getSelectionSelector() {
+        return SelectQueryModel.SELECTED_ORDERING_SELECTOR;
+    }
+
+    protected Selector getTableModelSelector() {
+        return SelectQueryModel.ORDERINGS_SELECTOR;
+    }
+
+    protected String[] getTableColumnNames() {
+        return new String[] { "Path", "Ascending", "Ignore Case" };
+    }
+
+    protected Selector[] getTableColumnSelectors() {
+        return new Selector[] {
+            OrderingModel.PATH_SELECTOR,
+            OrderingModel.ASCENDING_SELECTOR,
+            OrderingModel.CASE_SELECTOR };
     }
 }

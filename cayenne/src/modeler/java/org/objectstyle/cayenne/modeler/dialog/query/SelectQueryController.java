@@ -75,6 +75,10 @@ import org.scopemvc.core.ModelChangeListener;
 import org.scopemvc.core.Selector;
 
 /**
+ * A Scope controller for the SelectQueryDialog. Implements various actions performed
+ * in the dialog.
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
 public class SelectQueryController extends BasicController {
@@ -91,6 +95,12 @@ public class SelectQueryController extends BasicController {
     public static final String REMOVE_ORDERING_CONTROL =
         "cayenne.modeler.selectQuery.removeOrdering.button";
 
+    public static final String ADD_PREFETCH_CONTROL =
+        "cayenne.modeler.selectQuery.addPrefetch.button";
+
+    public static final String REMOVE_PREFETCH_CONTROL =
+        "cayenne.modeler.selectQuery.removePrefetch.button";
+
     protected EventController mediator;
     protected boolean modified;
     protected boolean renamed;
@@ -106,7 +116,7 @@ public class SelectQueryController extends BasicController {
     }
 
     /**
-     * Creates and runs the classpath dialog.
+     * Creates and runs SelectQueryDialog.
      */
     public void startup() {
         setView(new SelectQueryDialog());
@@ -125,6 +135,47 @@ public class SelectQueryController extends BasicController {
         }
         else if (control.matchesID(REMOVE_ORDERING_CONTROL)) {
             removeOrdering();
+        }
+        else if (control.matchesID(ADD_PREFETCH_CONTROL)) {
+            addPrefetch();
+        }
+        else if (control.matchesID(REMOVE_PREFETCH_CONTROL)) {
+            removePrefetch();
+        }
+    }
+
+    protected void addPrefetch() {
+        SelectQueryModel model = (SelectQueryModel) getModel();
+        PrefetchModel newPrefetch = model.createPrefetchFromNavigationPath();
+
+        if (newPrefetch == null) {
+            return;
+        }
+
+        // check that there are no prefetches for 
+        // the same path..
+        Iterator it = model.getPrefetches().iterator();
+        while (it.hasNext()) {
+            PrefetchModel prefetch = (PrefetchModel) it.next();
+            if (Util.nullSafeEquals(prefetch.getPath(), newPrefetch.getPath())) {
+                return;
+            }
+        }
+
+        model.getPrefetches().add(newPrefetch);
+        modified = true;
+
+        // select new row
+        model.setSelectedPrefetch(newPrefetch);
+    }
+
+    protected void removePrefetch() {
+        SelectQueryModel model = (SelectQueryModel) getModel();
+        PrefetchModel removePrefetch = model.getSelectedPrefetch();
+
+        if (removePrefetch != null) {
+            model.getPrefetches().remove(removePrefetch);
+            modified = true;
         }
     }
 
@@ -205,7 +256,8 @@ public class SelectQueryController extends BasicController {
             Selector selector = event.getSelector();
 
             // filter selectors that do not modify model
-            if (selector.startsWith(SelectQueryModel.SELECTED_ORDERING_SELECTOR)) {
+            if (selector.startsWith(SelectQueryModel.SELECTED_ORDERING_SELECTOR)
+                || selector.startsWith(SelectQueryModel.SELECTED_PREFETCH_SELECTOR)) {
                 return;
             }
             else if (selector.startsWith(QueryModel.NAME_SELECTOR)) {

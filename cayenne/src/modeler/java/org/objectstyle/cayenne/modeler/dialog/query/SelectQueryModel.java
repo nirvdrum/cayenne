@@ -56,10 +56,12 @@
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -89,6 +91,10 @@ public class SelectQueryModel extends QueryModel {
     public static final Selector SELECTED_ORDERING_SELECTOR =
         Selector.fromString("selectedOrdering");
 
+    public static final Selector PREFETCHES_SELECTOR = Selector.fromString("prefetches");
+    public static final Selector SELECTED_PREFETCH_SELECTOR =
+        Selector.fromString("selectedPrefetch");
+
     // navigation path from the root entity
     // used for ordering or prefetches picking
     protected Object[] navigationPath;
@@ -100,7 +106,10 @@ public class SelectQueryModel extends QueryModel {
     protected boolean refreshingObjects;
     protected boolean fetchingDataRows;
     protected boolean distinct;
-    protected List prefetches;
+
+    // prefetch related
+    protected ListModel prefetches;
+    protected PrefetchModel selectedPrefetch;
 
     // orderings-related
     protected OrderingModel selectedOrdering;
@@ -127,8 +136,7 @@ public class SelectQueryModel extends QueryModel {
         this.qualifier = selectQuery.getQualifier();
 
         initOrderings(selectQuery);
-
-        this.prefetches = new ArrayList(selectQuery.getPrefetches());
+        initPrefetches(selectQuery);
     }
 
     protected void initOrderings(SelectQuery query) {
@@ -141,6 +149,20 @@ public class SelectQueryModel extends QueryModel {
         }
 
         setOrderings(new ListModel(modelOrderings));
+    }
+
+    protected void initPrefetches(SelectQuery query) {
+        Entity root = (Entity) getRoot();
+        Collection originalPrefetches = query.getPrefetches();
+        List modelPrefetches = new ArrayList(originalPrefetches.size());
+
+        Iterator it = originalPrefetches.iterator();
+        while (it.hasNext()) {
+            String prefetch = (String) it.next();
+            modelPrefetches.add(new PrefetchModel(root, prefetch));
+        }
+
+        setPrefetches(new ListModel(modelPrefetches));
     }
 
     public void updateQuery() {
@@ -157,12 +179,19 @@ public class SelectQueryModel extends QueryModel {
         selectQuery.clearPrefetches();
         selectQuery.addPrefetches(prefetches);
 
-        // update with submodel changes 
+        // update with submodel changes
         selectQuery.clearOrderings();
         Iterator orderingsIt = orderings.iterator();
         while (orderingsIt.hasNext()) {
             OrderingModel orderingModel = (OrderingModel) orderingsIt.next();
             selectQuery.addOrdering(orderingModel.createOrdering());
+        }
+
+        selectQuery.clearPrefetches();
+        Iterator prefetchesIt = prefetches.iterator();
+        while (prefetchesIt.hasNext()) {
+            PrefetchModel prefetchModel = (PrefetchModel) prefetchesIt.next();
+            selectQuery.addPrefetch(prefetchModel.getPath());
         }
     }
 
@@ -173,6 +202,15 @@ public class SelectQueryModel extends QueryModel {
     public OrderingModel createOrderingFromNavigationPath() {
         String path = navigationPathString();
         return (path != null) ? new OrderingModel(path) : null;
+    }
+
+    /**
+     * Helper method to create a new ordering model from the current 
+     * navigation path. Returns null if there is no valid selection.
+     */
+    public PrefetchModel createPrefetchFromNavigationPath() {
+        String path = navigationPathString();
+        return (path != null) ? new PrefetchModel((Entity) getRoot(), path) : null;
     }
 
     private String navigationPathString() {
@@ -276,6 +314,19 @@ public class SelectQueryModel extends QueryModel {
         }
     }
 
+    public ListModel getPrefetches() {
+        return prefetches;
+    }
+
+    public void setPrefetches(ListModel prefetches) {
+        if (this.prefetches != prefetches) {
+            unlistenOldSubmodel(PREFETCHES_SELECTOR);
+            this.prefetches = prefetches;
+            listenNewSubmodel(PREFETCHES_SELECTOR);
+            fireModelChange(VALUE_CHANGED, PREFETCHES_SELECTOR);
+        }
+    }
+
     public Object[] getNavigationPath() {
         return navigationPath;
     }
@@ -294,6 +345,17 @@ public class SelectQueryModel extends QueryModel {
         if (this.selectedOrdering != selectedOrdering) {
             this.selectedOrdering = selectedOrdering;
             fireModelChange(VALUE_CHANGED, SELECTED_ORDERING_SELECTOR);
+        }
+    }
+
+    public PrefetchModel getSelectedPrefetch() {
+        return selectedPrefetch;
+    }
+
+    public void setSelectedPrefetch(PrefetchModel selectedPrefetch) {
+        if (this.selectedPrefetch != selectedPrefetch) {
+            this.selectedPrefetch = selectedPrefetch;
+            fireModelChange(VALUE_CHANGED, SELECTED_PREFETCH_SELECTOR);
         }
     }
 }

@@ -173,11 +173,15 @@ public abstract class QueryBuilder {
     }
 
     public void addPrefetch(String path) {
+        if (path == null || path != null && path.trim().length() == 0) {
+            // throw??
+            return;
+        }
+
         if (prefetches == null) {
             prefetches = new ArrayList();
         }
-
-        prefetches.add(path);
+        prefetches.add(path.trim());
     }
 
     static class ResultColumn {

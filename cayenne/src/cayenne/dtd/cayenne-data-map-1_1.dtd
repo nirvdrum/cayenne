@@ -166,12 +166,9 @@ Defines a query ordering.
 >
 
 <!-- ===================================================
-Defines a query prefetch.
+Defines a query relationship prefetching.
 -->
-<!ELEMENT prefetch>
-<!ATTLIST prefetch
-	path CDATA #REQUIRED
->
+<!ELEMENT prefetch (#PCDATA)>
 
 <!-- ===================================================
 Defines arbitrary SQL statement, normally wrapped in 

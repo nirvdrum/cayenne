@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
 import org.scopemvc.model.basic.BasicModel;
 
@@ -119,12 +118,5 @@ public class OrderingModel extends BasicModel {
 
     public String getPath() {
         return path;
-    }
-
-    public void setPath(String path) {
-        if (!Util.nullSafeEquals(this.path, path)) {
-            this.path = path;
-            fireModelChange(VALUE_CHANGED, PATH_SELECTOR);
-        }
     }
 }

@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.query;
 
-import org.scopemvc.view.swing.SPanel;
+import javax.swing.tree.TreeModel;
+
+import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
+import org.scopemvc.core.Selector;
 
 /**
  * A panel for configuring SelectQuery prefetching policy.
@@ -63,13 +66,37 @@ import org.scopemvc.view.swing.SPanel;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class SelectQueryPrefetchPanel extends SPanel {
+public class SelectQueryPrefetchPanel extends SelectQueryOrderingPanel {
 
-    public SelectQueryPrefetchPanel() {
-        initView();
+    protected TreeModel createBrowserModel(SelectQueryModel model) {
+        EntityTreeModel treeModel = (EntityTreeModel) super.createBrowserModel(model);
+        treeModel.setHideAttributes(true);
+        return treeModel;
+    }
+    
+    protected String getAddPathControl() {
+        return SelectQueryController.ADD_PREFETCH_CONTROL;
     }
 
-    private void initView() {
+    protected String getRemovePathControl() {
+        return SelectQueryController.REMOVE_PREFETCH_CONTROL;
+    }
 
+    protected Selector getSelectionSelector() {
+        return SelectQueryModel.SELECTED_PREFETCH_SELECTOR;
+    }
+
+    protected Selector getTableModelSelector() {
+        return SelectQueryModel.PREFETCHES_SELECTOR;
+    }
+
+    protected String[] getTableColumnNames() {
+        return new String[] { "Prefetch Path", "To Many" };
+    }
+
+    protected Selector[] getTableColumnSelectors() {
+        return new Selector[] {
+            PrefetchModel.PATH_SELECTOR,
+            PrefetchModel.TO_MANY_SELECTOR };
     }
 }
