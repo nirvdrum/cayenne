@@ -28,33 +28,36 @@
         
         <!-- News section -->
         <section name="Cayenne News">
+        <p><u><strong><i>December 21, 2002:</i></strong> <strong>Cayenne 1.0a5 Released.</strong></u></p>
+        
+        <p>The main highlights of this release are: <ul>
+        <li>added flattened relationships (direct many-to-many)</li>
+        <li>introduced type-safe queries using Java Class as a root</li>
+        <li>project structure update - linked files will have
+		preset extensions. Old format can be upgraded via CayenneModeler
+		and is still compatible with Cayenne runtime.</li>
+        <li>bug fixes, code cleanup and refactoring</li>
+        
+        </ul>
+         Download the release 
+        	<a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
+        here</a>. 
+        </p>
+        
+        
         <p><img src="images/other/nhl_logo.gif"/> 
         <u><strong><i>November 6:</i></strong> <strong>National 
         Hockey League Uses Cayenne.</strong></u></p>
         
         <p>During the playoffs, <a href="http://www.nhl.com">NHL.com</a> services 
         over a million page views per day. 
-        <a href="http://objectstyle.com">ObjectStyle LLC</a> and 
+        <a href="http://objectstyle.com">ObjectStyle</a> and 
         <a href="http://www.centralparksoftware.com/">Central Park Software</a>
         teamed up to create a new player/team statistics engine based on Cayenne with JSP frontend
         and Oracle backend. The project was successfully launched in October at the beginning of 
         2002-2003 season.
         </p>
         
-        
-        <p><u><strong><i>October 21:</i></strong> <strong>Cayenne 1.0a4 Released.</strong></u></p>
-        
-        <p>The main highlights of this release are: <ul>
-        <li>bug fixes, code cleanup and refactoring</li>
-        <li>paginated queries</li>
-        <li>serialization support of DataObjects</li>
-        <li>new <a href="http://tapestry.sourceforge.net">Tapestry</a> tutorial</li>
-        <li>all API deprecated in Alpha3 and earlier was removed</li>
-        </ul>
-         Download the release 
-        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
-        here</a>. 
-        </p>
         </section>
         
         
