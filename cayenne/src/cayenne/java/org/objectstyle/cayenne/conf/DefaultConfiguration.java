@@ -111,8 +111,9 @@ public class DefaultConfiguration extends Configuration {
 	  * This can be a standalone file or an entry in a JAR file. */
 	public InputStream getDomainConfig() {
 		try {
-			if (projectFile != null) {
-				return new FileInputStream(projectFile);
+			File pfile = this.projectFile();
+			if (pfile != null) {
+				return new FileInputStream(pfile);
 			}
 		} catch (Throwable ex) {
             logObj.warn("Error opening project file.", ex);
@@ -121,13 +122,18 @@ public class DefaultConfiguration extends Configuration {
 
 		return locator.findResourceStream(DOMAIN_FILE);
 	}
-	
+
+	public ResourceLocator getResourceLocator() {
+		return locator;
+	}
+
 	public File projectFile() {
 		return projectFile;
 	}
-	
+
 	public File projectDir() {
-		return (projectFile != null) ? projectFile.getParentFile() : null;
+		File pfile = this.projectFile();
+		return (pfile != null) ? pfile.getParentFile() : null;
 	}
 
 	/** Returns DataMap configuration from a specified location or null if it
@@ -136,7 +142,7 @@ public class DefaultConfiguration extends Configuration {
 	  * This can be a standalone file or an entry in a JAR file. */
 	public InputStream getMapConfig(String location) {
 		try {
-			File dir = projectDir();
+			File dir = this.projectDir();
 			if (dir != null) {
 				return new FileInputStream(new File(dir, location));
 			}
