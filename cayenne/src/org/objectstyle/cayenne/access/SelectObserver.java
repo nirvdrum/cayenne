@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.*;
+import java.util.logging.Level;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
@@ -81,71 +82,75 @@ import org.objectstyle.cayenne.query.Query;
  *  @author Andrei Adamchik
  */
 public class SelectObserver extends DefaultOperationObserver {
-    protected HashMap results = new HashMap();
-    protected int selectCount;
-    
-    
-    /** 
-     * Returns a count of select queries that returned results
-     * since the last time "clear" was called, or since this object
-     * was created.
-     */
-    public int getSelectCount() {
-        return selectCount;
-    }
-    
-    /** 
-     * Returns a list of result snapshots for the specified query,
-     * or null if this query has never produced any results.
-     */
-    public List getResults(Query q) {
-        return (List)results.get(q);
-    }
-    
-    /** 
-     * Returns query results accumulated during query execution with this
-     * object as an operation observer. 
-     */
-    public Map getResults() {
-        return results;
-    }
+	protected HashMap results = new HashMap();
+	protected int selectCount;
 
-    /** Clears fetched objects stored in an internal list. */
-    public void clear() {
-        selectCount = 0;
-        results.clear();
-    }
-    
+	public SelectObserver() {}
+	
+	public SelectObserver(Level logLevel) {
+		super();
+		super.setQueryLogLevel(logLevel);
+	}
 
-    /** 
-     * Stores all objects in <code>dataRows</code> in an internal
-     * result list. 
-     */
-    public void nextDataRows(Query query, List dataRows) {
-        super.nextDataRows(query, dataRows);
-        if(dataRows != null) {
-            results.put(query, dataRows);
-        }
-        
-        selectCount++;
-    }
-    
-    /** 
-     * Overrides superclass implementation to rethrow an exception
-     *  immediately. 
-     */
-    public void nextQueryException(Query query, Exception ex) {
-        super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException("Query exception.", ex);
-    }
-    
-    
-    /** 
-     * Overrides superclass implementation to rethrow an exception
-     * immediately. 
-     */
-    public void nextGlobalException(Exception ex) {
-        super.nextGlobalException(ex);
-        throw new CayenneRuntimeException("Global exception.", ex);
-    }
+	/** 
+	 * Returns a count of select queries that returned results
+	 * since the last time "clear" was called, or since this object
+	 * was created.
+	 */
+	public int getSelectCount() {
+		return selectCount;
+	}
+
+	/** 
+	 * Returns a list of result snapshots for the specified query,
+	 * or null if this query has never produced any results.
+	 */
+	public List getResults(Query q) {
+		return (List) results.get(q);
+	}
+
+	/** 
+	 * Returns query results accumulated during query execution with this
+	 * object as an operation observer. 
+	 */
+	public Map getResults() {
+		return results;
+	}
+
+	/** Clears fetched objects stored in an internal list. */
+	public void clear() {
+		selectCount = 0;
+		results.clear();
+	}
+
+	/** 
+	 * Stores all objects in <code>dataRows</code> in an internal
+	 * result list. 
+	 */
+	public void nextDataRows(Query query, List dataRows) {
+		super.nextDataRows(query, dataRows);
+		if (dataRows != null) {
+			results.put(query, dataRows);
+		}
+
+		selectCount++;
+	}
+
+	/** 
+	 * Overrides superclass implementation to rethrow an exception
+	 *  immediately. 
+	 */
+	public void nextQueryException(Query query, Exception ex) {
+		super.nextQueryException(query, ex);
+		throw new CayenneRuntimeException("Query exception.", ex);
+	}
+
+	/** 
+	 * Overrides superclass implementation to rethrow an exception
+	 * immediately. 
+	 */
+	public void nextGlobalException(Exception ex) {
+		super.nextGlobalException(ex);
+		throw new CayenneRuntimeException("Global exception.", ex);
+	}
 }

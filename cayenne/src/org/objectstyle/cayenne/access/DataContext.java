@@ -104,6 +104,13 @@ public class DataContext implements QueryEngine {
 		return parent;
 	}
 
+	/**
+	 * Sets parent QueryEngine of this DataContext.
+	 */
+	public void setParent(QueryEngine parent) {
+		this.parent = parent;
+	}
+
 	/** 
 	 * Returns a list of objects that are registered
 	 * with this DataContext (including objects in all states
@@ -567,9 +574,17 @@ public class DataContext implements QueryEngine {
 
 	/** 
 	 * Performs a single database select query. 
+	 * 
+	 * @return A list of DataObjects or a list of data rows
+	 * depending on the value returned by <code>query.isFetchingDataRows()</code>.
 	 */
 	public List performQuery(SelectQuery query) {
-		SelectProcessor observer = new SelectProcessor(query.getLogLevel());
+		// Fetch either DataObjects or data rows.
+		SelectObserver observer =
+			(query.isFetchingDataRows())
+				? new SelectObserver(query.getLogLevel())
+				: new SelectProcessor(query.getLogLevel());
+				
 		performQuery(query, observer);
 		return observer.getResults(query);
 	}
@@ -584,16 +599,14 @@ public class DataContext implements QueryEngine {
 		return performQuery(query);
 	}
 
-
 	/** 
 	 * Performs a single database select query returning result as a ResultIterator.
 	 * Returned ResultIterator will provide access to "data rows" 
 	 * - maps with database data that can be used to create DataObjects.
 	 */
-	public ResultIterator performIteratedQuery(
-		SelectQuery query)
+	public ResultIterator performIteratedQuery(SelectQuery query)
 		throws CayenneException {
-			
+
 		IteratedSelectObserver observer = new IteratedSelectObserver();
 		observer.setQueryLogLevel(query.getLogLevel());
 		performQuery(query, observer);

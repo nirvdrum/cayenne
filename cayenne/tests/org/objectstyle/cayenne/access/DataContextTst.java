@@ -253,27 +253,33 @@ public class DataContextTst extends TestCase {
 		assertNotNull(o2);
 		assertEquals(galleryCount, o2.size());
 	}
-
+	
 	public void testPerformSelectQuery() throws Exception {
-		SelectQuery query = new SelectQuery();
-		query.setObjEntityName("Artist");
-
-		// check query results
+		SelectQuery query = new SelectQuery("Artist");
 		List objects = ctxt.performQuery(query);
+		
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());
+		assertTrue("Artist expected, got " + objects.get(0).getClass(), objects.get(0) instanceof Artist);
 	}
 
 	public void testPerformQuery() throws Exception {
-		SelectQuery query = new SelectQuery();
-		query.setObjEntityName("Artist");
-
+		SelectQuery query = new SelectQuery("Artist");
 		ctxt.performQuery(query, opObserver);
-
-		// check query results
 		ArrayList objects = opObserver.objectsForQuery(query);
+		
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());
+	}
+	
+	public void testPerformDataRowQuery() throws Exception {
+		SelectQuery query = new SelectQuery("Artist");
+		query.setFetchingDataRows(true);
+		List objects = ctxt.performQuery(query);
+		
+		assertNotNull(objects);
+		assertEquals(artistCount, objects.size());
+		assertTrue("Map expected, got " + objects.get(0).getClass(), objects.get(0) instanceof Map);
 	}
 
 	private Artist fetchArtist(String name) {
