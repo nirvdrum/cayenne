@@ -149,7 +149,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
             case DB_ATTRIBUTE_MAX:
                 return "Max Length";
             case DB_ATTRIBUTE_GENERATED:
-                return "Auto";
+                return "Generated";
             default:
                 return "";
         }
