@@ -13,13 +13,13 @@ class ASTScalar extends SimpleNode {
         super(p, id);
     }
 
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         boolean quote = value instanceof String;
 
         if (quote) {
             pw.print('\"');
         }
-        encodeString(pw, String.valueOf(value));
+        encodeAsEscapedString(pw, String.valueOf(value));
         if (quote) {
             pw.print('\"');
         }

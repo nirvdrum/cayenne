@@ -19,8 +19,8 @@ class ASTNot extends SimpleNode {
         return Expression.NOT;
     }
 
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         pw.print("not ");
-        super.encode(pw);
+        super.encodeAsString(pw);
     }
 }

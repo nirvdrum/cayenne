@@ -104,7 +104,7 @@ public class BinaryExpression extends Expression {
     /**
      * @since 1.1
      */
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         // this class will be deprecated soon, so using
         // a deprecated "toStringBuffer" is OK
         StringBuffer buffer = new StringBuffer();

@@ -58,7 +58,7 @@ abstract class SimpleNode extends Expression implements Node {
      * Utility method that prints a string to the provided PrintWriter,
      * escaping special characters.
      */
-    protected void encodeString(PrintWriter pw, String source) {
+    protected void encodeAsEscapedString(PrintWriter pw, String source) {
         int len = source.length();
         for (int i = 0; i < len; i++) {
             char c = source.charAt(i);
@@ -135,7 +135,7 @@ abstract class SimpleNode extends Expression implements Node {
         }
     }
 
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         pw.print((parent == null) ? "" : "(");
 
         if ((children != null) && (children.length > 0)) {
@@ -146,7 +146,7 @@ abstract class SimpleNode extends Expression implements Node {
                     pw.print(' ');
                 }
 
-                ((SimpleNode) children[i]).encode(pw);
+                ((SimpleNode) children[i]).encodeAsString(pw);
             }
         }
 

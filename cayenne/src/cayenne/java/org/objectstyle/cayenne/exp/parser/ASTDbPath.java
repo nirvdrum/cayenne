@@ -15,7 +15,7 @@ class ASTDbPath extends SimpleNode {
         super(p, id);
     }
 
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         pw.print("db:");
         pw.print(value);
     }

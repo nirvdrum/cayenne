@@ -15,7 +15,7 @@ class ASTObjPath extends SimpleNode {
         super(p, id);
     }
 
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         pw.print(value);
     }
 

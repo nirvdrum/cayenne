@@ -26,7 +26,7 @@ class ASTList extends SimpleNode {
         return ",";
     }
 
-    public void encode(PrintWriter pw) {
+    public void encodeAsString(PrintWriter pw) {
         pw.print('(');
 
         if ((children != null) && (children.length > 0)) {
@@ -36,7 +36,7 @@ class ASTList extends SimpleNode {
                     pw.print(' ');
                 }
 
-                ((SimpleNode) children[i]).encode(pw);
+                ((SimpleNode) children[i]).encodeAsString(pw);
             }
         }
 

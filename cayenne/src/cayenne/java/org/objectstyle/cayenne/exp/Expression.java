@@ -396,7 +396,7 @@ public abstract class Expression implements Serializable {
      * 
      * @since 1.1
      */
-    public abstract void encode(PrintWriter pw);
+    public abstract void encodeAsString(PrintWriter pw);
     
 
     /**
@@ -434,7 +434,7 @@ public abstract class Expression implements Serializable {
     public String toString() {
         StringWriter buffer = new StringWriter();
         PrintWriter pw = new PrintWriter(buffer);
-        encode(pw);
+        encodeAsString(pw);
         pw.close();
         buffer.flush();
         return buffer.toString();
