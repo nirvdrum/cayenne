@@ -155,11 +155,25 @@ public abstract class Expression {
      * It is very useful for incrementally building chained expressions,
      * like long AND or OR statements. 
      */
-    public Expression joinExpression(int type, Expression exp) {
+    public Expression joinExp(int type, Expression exp) {
          Expression join = ExpressionFactory.expressionOfType(type);
          join.setOperand(0, this);
          join.setOperand(1, exp);
          return join;
+    }
+    
+    /**
+     * A shortcut for <code>joinExp(Expression.AND, exp)</code>.
+     */
+    public Expression andExp(Expression exp) {
+    	return joinExp(Expression.AND, exp);
+    }
+    
+    /**
+     * A shortcut for <code>joinExp(Expression.OR, exp)</code>.
+     */
+    public Expression orExp(Expression exp) {
+    	return joinExp(Expression.OR, exp);
     }
     
     

@@ -53,88 +53,97 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.*;
 import java.util.logging.Logger;
-
 
 /** Each data object has an id uniquely identifying it. 
   * This concept is a translation of a primary key idea in the database world,
   * to the OO world. Such id is needed to be able to implement object uniquing 
   * and other persistence layer functions. */
 public class ObjectId {
-    static Logger logObj = Logger.getLogger(ObjectId.class.getName());
-    
-    
-    
-    // Keys: DbAttribute objects;
-    // Values database values of the corresponding attribute
-    private Map idKeys;
-    private String objEntityName;
-    private int hash;
-    
-    
-    /** Creates new ObjectId */
-    public ObjectId(String objEntityName, Map idSnapshot) {
-        this.objEntityName = objEntityName;
-        this.idKeys = idSnapshot;
-        
-        int mapId = (idSnapshot != null) ? idSnapshot.hashCode() : 0;
-        this.hash = 10 + mapId + objEntityName.hashCode();
-    }
-    
-    
-    public int hashCode() {
-        return hash;
-    }
-    
-    
-    public boolean equals(Object object) {
-        if(!(object instanceof ObjectId))
-            return false;
-        
-        if(this == object)
-            return true;
-        
-        ObjectId id = (ObjectId)object;
-        return id.hash == this.hash && objEntityName.equals(id.objEntityName);
-    }
-    
-    /** Returns a map of id components. 
-     * Keys in the map are DbAttribute names, values are database values of corresponding columns */
-    public Map getIdSnapshot() {
-        return Collections.unmodifiableMap(idKeys);
-    }
-    
-    
-    public Object getValueForAttribute(String attrName) {
-        return idKeys.get(attrName);
-    }
-    
-    
-    /** Returns a name of ObjEntity for the object identified by this id. */
-    public String getObjEntityName() {
-        return objEntityName;
-    }
-    
-    public boolean isTemporary() {
-        return false;
-    }
-    
-    public String toString() {
-        StringBuffer buf = new StringBuffer(objEntityName);
-        if(isTemporary())
-            buf.append(" (temp)");
-        buf.append(": ");
-        if(idKeys != null) {
-            Iterator it = idKeys.keySet().iterator();
-            while(it.hasNext()) {
-                String nextKey = (String)it.next();
-                Object value = idKeys.get(nextKey);
-                buf.append(" <").append(nextKey).append(": ").append(value).append('>');
-            }
-        }
-        return buf.toString();
-    }
+	static Logger logObj = Logger.getLogger(ObjectId.class.getName());
+
+	// Keys: DbAttribute objects;
+	// Values database values of the corresponding attribute
+	private Map idKeys;
+	private String objEntityName;
+	private int hash;
+
+	/**
+	 * Convenience constructor for entities that have a 
+	 * single Integer as their id.
+	 */
+	public ObjectId(String objEntityName, String keyName, int id) {
+		this.objEntityName = objEntityName;
+		HashMap keys = new HashMap();
+		keys.put(keyName, new Integer(id));
+		setIdKeys(keys);
+	}
+
+	/** Creates new ObjectId */
+	public ObjectId(String objEntityName, Map idKeys) {
+		this.objEntityName = objEntityName;
+		setIdKeys(idKeys);
+	}
+
+	protected void setIdKeys(Map idKeys) {
+		this.idKeys = idKeys;
+
+		int mapId = (idKeys != null) ? idKeys.hashCode() : 0;
+		this.hash = 10 + mapId + objEntityName.hashCode();
+	}
+
+	public int hashCode() {
+		return hash;
+	}
+
+	public boolean equals(Object object) {
+		if (!(object instanceof ObjectId))
+			return false;
+
+		if (this == object)
+			return true;
+
+		ObjectId id = (ObjectId) object;
+		return id.hash == this.hash && objEntityName.equals(id.objEntityName);
+	}
+
+	/** Returns a map of id components. 
+	 * Keys in the map are DbAttribute names, values are database values of corresponding columns */
+	public Map getIdSnapshot() {
+		return Collections.unmodifiableMap(idKeys);
+	}
+
+	public Object getValueForAttribute(String attrName) {
+		return idKeys.get(attrName);
+	}
+
+	/** Returns a name of ObjEntity for the object identified by this id. */
+	public String getObjEntityName() {
+		return objEntityName;
+	}
+
+	public boolean isTemporary() {
+		return false;
+	}
+
+	public String toString() {
+		StringBuffer buf = new StringBuffer(objEntityName);
+		if (isTemporary())
+			buf.append(" (temp)");
+		buf.append(": ");
+		if (idKeys != null) {
+			Iterator it = idKeys.keySet().iterator();
+			while (it.hasNext()) {
+				String nextKey = (String) it.next();
+				Object value = idKeys.get(nextKey);
+				buf.append(" <").append(nextKey).append(": ").append(
+					value).append(
+					'>');
+			}
+		}
+		return buf.toString();
+	}
 }

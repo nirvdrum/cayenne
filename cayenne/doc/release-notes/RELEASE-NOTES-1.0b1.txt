@@ -9,4 +9,6 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-1. Friendlier expression API
+1. Added shortcut methods to Expression and ExpressionFactory
+to make API friendlier.
+

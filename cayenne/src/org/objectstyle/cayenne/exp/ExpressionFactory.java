@@ -298,6 +298,20 @@ public class ExpressionFactory {
 
         return joinExp(Expression.AND, pairs);
     }
+    
+    /**
+     * An shortcut for <code>binaryPathExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+     */
+    public static Expression matchExp(String pathSpec, Object value) {
+    	return binaryPathExp(Expression.EQUAL_TO, pathSpec, value);
+    }
+    
+    /**
+     * An shortcut for <code>binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+     */
+    public static Expression matchDbExp(String pathSpec, Object value) {
+    	return binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value);
+    }
 
     /** Joins all <code>expressions</code> in a single expression. 
      * <code>type</code> is used as an expression type for expressions joining each one of 
