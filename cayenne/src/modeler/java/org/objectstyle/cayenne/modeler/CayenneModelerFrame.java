@@ -74,6 +74,7 @@ import javax.swing.JToolBar;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.action.ConfigureClasspathAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
@@ -311,6 +312,8 @@ public class CayenneModelerFrame
         toolMenu.add(getAction(GenerateDbAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
         toolMenu.add(getAction(PackageMenuAction.getActionName()).buildMenu());
+        toolMenu.addSeparator();
+        toolMenu.add(getAction(ConfigureClasspathAction.getActionName()).buildMenu());
 
         helpMenu.add(getAction(AboutAction.getActionName()).buildMenu());
     }

@@ -57,30 +57,19 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.AboutDialog;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-
 /**
  * @author Andrei Adamchik
  */
-public class AboutAction extends CayenneAction {
+public class ConfigureClasspathAction extends CayenneAction {
+    public static final String getActionName() {
+        return "Configure ClassPath";
+    }
 
-	public static final String getActionName() {
-		return "About CayenneModeler";
-	}
-
-    /**
-     * Constructor for AboutMenuAction.
-     * @param name
-     */
-    public AboutAction() {
+    public ConfigureClasspathAction() {
         super(getActionName());
     }
 
-    /**
-     * Displays About dialog.
-     */
     public void performAction(ActionEvent e) {
-        new AboutDialog(CayenneModelerFrame.getFrame());
+
     }
 }

@@ -59,6 +59,7 @@ import javax.swing.ActionMap;
 
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.action.ConfigureClasspathAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
@@ -178,6 +179,10 @@ public class TopModel {
         CayenneAction aboutAction = new AboutAction();
         aboutAction.setAlwaysOn(true);
         actionMap.put(aboutAction.getKey(), aboutAction);
+
+        CayenneAction configClasspath = new ConfigureClasspathAction();
+        configClasspath.setAlwaysOn(true);
+        actionMap.put(configClasspath.getKey(), configClasspath);
 
         CayenneAction pkgAction = new PackageMenuAction();
         actionMap.put(pkgAction.getKey(), pkgAction);
