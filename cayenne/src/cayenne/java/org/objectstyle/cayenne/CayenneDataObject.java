@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -71,8 +71,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A CayenneDataObject is a default implementation of DataObject interface.
- * It is normally used as a superclass of Cayenne persistent objects. 
- * 
+ * It is normally used as a superclass of Cayenne persistent objects.
+ *
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
@@ -82,8 +82,8 @@ public class CayenneDataObject implements DataObject {
     // to indicate that destination relationship was fetched and is null
     private static final CayenneDataObject nullValue = new CayenneDataObject();
 
-    /** 
-     * Returns String label for persistence state. 
+    /**
+     * Returns String label for persistence state.
      * Used for debugging.
      *
      * @deprecated use PersistenceState.persistenceStateName() instead.
@@ -124,34 +124,34 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Convenience method to read a "nested" property. 
+     * Convenience method to read a "nested" property.
      * Dot-separated path is used to traverse object relationships
      * until the final object is found. If a null object found
      * while traversing path, null is returned. If a list is encountered
      * in the middle of the path, CayenneRuntimeException is thrown.
-     * 
+     *
      * <p>Examples:</p>
      * <ul>
      *    <li>Read this object property:<br>
      *    <code>String name = (String)artist.readNestedProperty("name");</code><br><br></li>
-     * 
-     *    <li>Read an object related to this object:<br> 
+     *
+     *    <li>Read an object related to this object:<br>
      *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code>
      *    <br><br></li>
-     * 
+     *
      *    <li>Read a property of an object related to this object: <br>
      *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code>
      *    <br><br></li>
-     * 
-     *    <li>Read to-many relationship list:<br> 
+     *
+     *    <li>Read to-many relationship list:<br>
      *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code>
      *    <br><br></li>
-     * 
-     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br> 
+     *
+     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br>
      *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code>
      *   <br><br></li>
      * </ul>
-     * 
+     *
      */
     public Object readNestedProperty(String path) {
         StringTokenizer toks = new StringTokenizer(path, ".");
@@ -179,8 +179,12 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected Object readProperty(String propName) {
-        if (persistenceState == PersistenceState.HOLLOW) {
-            dataContext.refetchObject(objectId);
+        try {
+            if (persistenceState == PersistenceState.HOLLOW) {
+                dataContext.refetchObject(objectId);
+            }
+        } catch (Exception ex) {
+            setPersistenceState(PersistenceState.TRANSIENT);
         }
 
         return readPropertyDirectly(propName);
@@ -249,7 +253,7 @@ public class CayenneDataObject implements DataObject {
 			//Handle removing from a flattened relationship
 			dataContext.registerFlattenedRelationshipDelete(this, relationship, val);
 		}
-		
+
 		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.remove(val);
@@ -285,7 +289,7 @@ public class CayenneDataObject implements DataObject {
 			//Handle adding to a flattened relationship
 			dataContext.registerFlattenedRelationshipInsert(this, relationship, val);
 		}
-		
+
 		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.add(val);
@@ -307,9 +311,9 @@ public class CayenneDataObject implements DataObject {
     public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
     	//Three reasons that may mean a check is not needed:
     	// 1: val==null... dataContext of value is unobtainable, and hence irrelevant
-    	// 2: val==nullValue... the relationship is a toOneDependent, this is functionally 
+    	// 2: val==nullValue... the relationship is a toOneDependent, this is functionally
     	//		equivalent to the first condition
-    	// 3: this==nullValue... when setting the reverse direction of a toOneDependent 
+    	// 3: this==nullValue... when setting the reverse direction of a toOneDependent
     	// 		that is being set to null, this will be nullValue.
 		if ((val != null)
 			&& (val != nullValue)
@@ -338,17 +342,17 @@ public class CayenneDataObject implements DataObject {
 
         writeProperty(relName, val);
     }
-    
+
 	private ObjRelationship getRelationshipNamed(String relName) {
 		return (ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(this).getRelationship(relName);
 	}
 
-    /** 
-     * Initializes reverse relationship from object <code>val</code> 
+    /**
+     * Initializes reverse relationship from object <code>val</code>
      * to this object.
-     * 
-     * @param relName name of relationship from this object 
-     * to <code>val</code>. 
+     *
+     * @param relName name of relationship from this object
+     * to <code>val</code>.
      */
     protected void setReverseRelationship(String relName, DataObject val) {
         ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjClass()).getRelationship(relName);
@@ -429,7 +433,7 @@ public class CayenneDataObject implements DataObject {
 
     /**
      * Default implementation does nothing.
-     * 
+     *
      * @see org.objectstyle.cayenne.DataObject#fetchFinished()
      */
     public void fetchFinished() {}

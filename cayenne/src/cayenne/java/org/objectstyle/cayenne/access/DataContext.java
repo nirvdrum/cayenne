@@ -1379,7 +1379,7 @@ public class DataContext implements QueryEngine, Serializable {
 		//Register this combination (so we can remove it later if an insert occurs before commit)
 		FlattenedRelationshipInfo info =
 			new FlattenedRelationshipInfo(source, destination, relationship);
-			
+
 		if (flattenedDeletes.contains(info)) {
 			//If this combination has already been deleted, simply undelete it.
 			logObj.debug(
@@ -1388,7 +1388,7 @@ public class DataContext implements QueryEngine, Serializable {
 		} else if (!flattenedInserts.contains(info)) {
 			logObj.debug("This combination is not currently inserted... ok");
 			flattenedInserts.add(info);
-		} 
+		}
 	}
 
 	public void registerFlattenedRelationshipDelete(
@@ -1428,11 +1428,11 @@ public class DataContext implements QueryEngine, Serializable {
 	private List getFlattenedInsertQueries() {
 		List result = new ArrayList();
 		/*
-		 
+
 		int i;
-		
+
 		Iterator objectIterator;
-		
+
 		objectIterator = flattenedInserts.keySet().iterator();
 		while (objectIterator.hasNext()) {
 			DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1472,7 +1472,7 @@ public class DataContext implements QueryEngine, Serializable {
 		List result = new ArrayList();
 		/*int i;
 		Iterator objectIterator;
-		
+
 		objectIterator = flattenedDeletes.keySet().iterator();
 		while (objectIterator.hasNext()) {
 			DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1525,6 +1525,10 @@ public class DataContext implements QueryEngine, Serializable {
 	public void setTransactionEventsEnabled(boolean onOrOff) {
 		this.postDataContextTransactionEvents = onOrOff;
 	}
+
+    public boolean isTransactionEventsEnabled() {
+        return this.postDataContextTransactionEvents;
+    }
 
 	public Iterator dataMapIterator() {
 		return (
@@ -1583,9 +1587,9 @@ public class DataContext implements QueryEngine, Serializable {
 		return flattenedDeletes;
 	}
 
-	//Stores the information about a flattened relationship between two objects in a 
+	//Stores the information about a flattened relationship between two objects in a
 	// canonical form, such that equals returns true if both objects refer to the same
-	// pair of DataObjects connected by the same relationship (regardless of the 
+	// pair of DataObjects connected by the same relationship (regardless of the
 	// direction of the relationship used to construct this info object)
 	static final class FlattenedRelationshipInfo extends Object {
 		private DataObject source;
@@ -1608,7 +1612,7 @@ public class DataContext implements QueryEngine, Serializable {
 			if (reverseRel != null) {
 				String relName2 = reverseRel.getName();
 				//Find the lexically lesser name and use it first, then use the second.
-				//If equal (the same name), it doesn't matter which order.. be arbitrary  
+				//If equal (the same name), it doesn't matter which order.. be arbitrary
 				if (relName1.compareTo(relName2) <= 0) {
 					this.canonicalRelationshipName = relName1 + "." + relName2;
 				} else {

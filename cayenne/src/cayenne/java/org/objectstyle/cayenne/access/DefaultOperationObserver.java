@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -67,13 +67,13 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * Simple implementation of OperationObserver interface. 
+/**
+ * Simple implementation of OperationObserver interface.
  * Useful as a superclass of other implementations of OperationObserver.
- * 
+ *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
- * 
+ *
  * @author Andrei Adamchik
  */
 public class DefaultOperationObserver implements OperationObserver {
@@ -143,16 +143,16 @@ public class DefaultOperationObserver implements OperationObserver {
 		return transactionRolledback;
 	}
 
-	/** 
-	 * Returns a log level level that should be used when 
-	 * logging query execution. 
+	/**
+	 * Returns a log level level that should be used when
+	 * logging query execution.
 	 */
 	public Level getLoggingLevel() {
 		return loggingLevel;
 	}
 
-	/** 
-	 * Sets log level that should be used for queries. 
+	/**
+	 * Sets log level that should be used for queries.
 	 * If <code>level</code> argument is null, level is set to
 	 * DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
 	 * than log level configured for QueryLogger, query SQL statements
@@ -186,14 +186,18 @@ public class DefaultOperationObserver implements OperationObserver {
 	}
 
 	public void transactionCommitted() {
-		logObj.debug("transaction committed");
-		transactionCommitted = true;
+		transactionCommittedImpl();
 	}
 
 	public void transactionRolledback() {
 		logObj.debug("*** transaction rolled back");
 		transactionRolledback = true;
 	}
+
+    protected final void transactionCommittedImpl() {
+        logObj.debug("transaction committed");
+		transactionCommitted = true;
+    }
 
 	/** Returns <code>true</code> so that individual queries are executed in separate
 	 *  transactions. */
@@ -206,7 +210,7 @@ public class DefaultOperationObserver implements OperationObserver {
 		return queryList;
 	}
 
-	/** 
+	/**
 	 * Returns <code>false</code>.
 	 */
 	public boolean isIteratedResult() {

@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
+import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -117,6 +118,9 @@ class ContextCommit {
     private Map objEntitiesToDeleteByNode;
     private Map objEntitiesToUpdateByNode;
     private Map updatedIds;
+    private List insObjects; //event support
+    private List delObjects; //event support
+    private List updObjects; //event support
 
     ContextCommit(DataContext contextToCommit) {
         context = contextToCommit;
@@ -133,36 +137,47 @@ class ContextCommit {
         nodes.addAll(objEntitiesToDeleteByNode.keySet());
         nodes.addAll(objEntitiesToUpdateByNode.keySet());
         Map queriesByNode = new SequencedHashMap(nodes.size());
+        insObjects = new ArrayList();
+        delObjects = new ArrayList();
+        updObjects = new ArrayList();
         for (Iterator i = nodes.iterator(); i.hasNext();) {
             DataNode node = (DataNode) i.next();
             List queries = new ArrayList();
-            prepareInsertQueries(node, queries);
+            prepareInsertQueries(node, queries); //Side effect - fills insObjects
             prepareFlattenedQueries(node, queries, flattenedInsertBatches);
-            prepareUpdateQueries(node, queries);
+            prepareUpdateQueries(node, queries); //Side effect - fills updObjects
             prepareFlattenedQueries(node, queries, flattenedDeleteBatches);
-            prepareDeleteQueries(node, queries);
+            prepareDeleteQueries(node, queries); //Side effect - fills delObjects
             if (!queries.isEmpty())
                 queriesByNode.put(node, queries);
         }
 
+        CommitObserver observer = new CommitObserver(logLevel, context, insObjects, updObjects, delObjects);
+        if (context.isTransactionEventsEnabled()) observer.registerForDataContextEvents();
+        try {
+            context.fireWillCommit();
+            for (Iterator i = queriesByNode.entrySet().iterator(); i.hasNext();) {
+                Map.Entry entry = (Map.Entry) i.next();
+                DataNode nodeToCommit = (DataNode) entry.getKey();
+                List queries = (List) entry.getValue();
+                nodeToCommit.performQueries(queries, observer);
 
-        CommitObserver observer = new CommitObserver();
-        observer.setLoggingLevel(logLevel);
-        for (Iterator i = queriesByNode.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry) i.next();
-            DataNode nodeToCommit = (DataNode) entry.getKey();
-            List queries = (List) entry.getValue();
-            nodeToCommit.performQueries(queries, observer);
-            if (!observer.isTransactionCommitted())
-                throw new CayenneException("Error committing transaction.");
-            else if (observer.isTransactionRolledback())
-                throw new CayenneException("Transaction was rolledback.");
-            postprocess(nodeToCommit);
+                if (observer.isTransactionRolledback()) {
+                    context.fireTransactionRolledback();
+                    throw new CayenneException("Transaction was rolledback.");
+                } else if (!observer.isTransactionCommitted())
+                    throw new CayenneException("Error committing transaction.");
+
+                postprocess(nodeToCommit);
+            }
+            context.clearFlattenedUpdateQueries();
+            context.fireTransactionCommitted();
+        } finally {
+            if (context.isTransactionEventsEnabled()) observer.unregisterFromDataContextEvents();
         }
     }
 
     private void postprocess(DataNode committedNode) {
-        context.clearFlattenedUpdateQueries();
         ObjectStore objectStore = context.getObjectStore();
         Collection entitiesForNode =
             (Collection) objEntitiesToInsertByNode.get(committedNode);
@@ -254,6 +269,7 @@ class ContextCommit {
                 //queries.add(QueryHelper.insertQuery(context.takeObjectSnapshot(o), o.getObjectId()));
             }
             queries.add(batch);
+            insObjects.addAll(objects);
         }
     }
 
@@ -286,6 +302,7 @@ class ContextCommit {
                 //queries.add(QueryHelper.deleteQuery(o));
             }
             queries.add(batch);
+            delObjects.addAll(objects);
         }
     }
 
@@ -328,6 +345,7 @@ class ContextCommit {
                         snapshot);
                 if (updId != null)
                     updatedIds.put(o.getObjectId(), updId);
+                updObjects.add(o);
                 /*
                 UpdateQuery query = QueryHelper.updateQuery(o);
                 if (query == null) {
@@ -422,7 +440,7 @@ class ContextCommit {
         }
     }
 
-    private void classifyByEntityAndNode(
+    private boolean classifyByEntityAndNode(
         DataObject o,
         Map objectsByObjEntity,
         Map objEntitiesByNode,
@@ -430,11 +448,11 @@ class ContextCommit {
         Class objEntityClass = o.getObjectId().getObjClass();
         ObjEntity entity = null;
         if (readOnlyObjEntities.contains(objEntityClass))
-            return;
+            return false;
         if (!writableObjEntities.contains(objEntityClass)) {
             entity = classifyAsWritable(objEntityClass);
             if (entity == null)
-                return;
+                return false;
         } else {
             entity =
                 context.getEntityResolver().lookupObjEntity(objEntityClass);
@@ -457,6 +475,7 @@ class ContextCommit {
                 objectsForObjEntity);
         }
         objectsForObjEntity.add(o);
+        return true;
     }
 
     private Map categorizeFlattenedInsertsAndCreateBatches() {
@@ -466,7 +485,7 @@ class ContextCommit {
 			DataContext.FlattenedRelationshipInfo info=(FlattenedRelationshipInfo)i.next();
 			DataObject source=info.getSource();
 			if (source.getPersistenceState() == PersistenceState.DELETED) continue;
-			
+
 			Map sourceId = source.getObjectId().getIdSnapshot();
 			ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
 			DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
@@ -503,7 +522,7 @@ class ContextCommit {
 			DataObject source = info.getSource();
 			Map sourceId = source.getObjectId().getIdSnapshot();
 			if (sourceId == null) continue;
-			
+
 			ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
 			DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
 			Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
@@ -511,7 +530,7 @@ class ContextCommit {
 				batchesByDbEntity = new HashMap();
 				flattenedBatches.put(responsibleNode, batchesByDbEntity);
 			}
-			
+
 			ObjRelationship flattenedRel = info.getBaseRelationship();
 			List relList = flattenedRel.getDbRelationshipList();
 			DbRelationship firstDbRel = (DbRelationship)relList.get(0);
@@ -522,7 +541,7 @@ class ContextCommit {
 				relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
 				batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
 			}
-			
+
 			DataObject destination = info.getDestination();
 			Map dstId = destination.getObjectId().getIdSnapshot();
 			if (dstId == null) continue;
@@ -562,24 +581,20 @@ class ContextCommit {
             : null;
     }
 
-    private class CommitObserver extends DefaultOperationObserver {
+    private class CommitObserver extends ContextCommitObserver {
+        private CommitObserver(
+                Level logLevel,
+                DataContext context,
+                List insObjects,
+                List updObjects,
+                List delObjects) {
+            super(logLevel, context, insObjects, updObjects, delObjects);
+        }
         public boolean useAutoCommit() {
             return false;
         }
         public void transactionCommitted() {
-            super.transactionCommitted();
-        }
-        public void nextQueryException(Query query, Exception ex) {
-            super.nextQueryException(query, ex);
-            throw new CayenneRuntimeException(
-                "Raising from query exception.",
-                ex);
-        }
-        public void nextGlobalException(Exception ex) {
-            super.nextGlobalException(ex);
-            throw new CayenneRuntimeException(
-                "Raising from underlyingQueryEngine exception.",
-                ex);
+            transactionCommittedImpl();
         }
         public List orderQueries(DataNode aNode, List queryList) {
             return queryList;
