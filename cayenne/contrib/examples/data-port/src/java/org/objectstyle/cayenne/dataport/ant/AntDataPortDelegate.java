@@ -237,7 +237,7 @@ public class AntDataPortDelegate implements DataPortDelegate
 
   public void willPortEntity(DataPort portTool, DbEntity entity)
   {
-    parentTask.log("Porting '" + entity.getName() + "'");
+    parentTask.log("  Next table '" + entity.getName() + "'");
     lastEntity = entity;
     timestamp = System.currentTimeMillis();
   }
@@ -253,8 +253,8 @@ public class AntDataPortDelegate implements DataPortDelegate
 
     String label = (rowCount == 1) ? "1 row" : rowCount + " rows";
     parentTask.log(
-      "Ported " + label + " to " + entity.getName() + timestampLabel,
-      Project.MSG_DEBUG);
+      "  Ported " + label + " to " + entity.getName() + timestampLabel,
+      Project.MSG_VERBOSE);
   }
 
   public List willCleanData(DataPort portTool, List entities)
@@ -264,7 +264,9 @@ public class AntDataPortDelegate implements DataPortDelegate
 
   public void willCleanData(DataPort portTool, DbEntity entity)
   {
-    parentTask.log("Deleting data from " + entity.getName(), Project.MSG_DEBUG);
+    parentTask.log(
+      "  Deleting data from " + entity.getName(),
+      Project.MSG_VERBOSE);
     lastEntity = entity;
     timestamp = System.currentTimeMillis();
   }
@@ -280,7 +282,7 @@ public class AntDataPortDelegate implements DataPortDelegate
 
     String label = (rowCount == 1) ? "1 row" : rowCount + " rows";
     parentTask.log(
-      "Deleted " + label + " to " + entity.getName() + timestampLabel,
-      Project.MSG_DEBUG);
+      "  Deleted " + label + " from " + entity.getName() + timestampLabel,
+      Project.MSG_VERBOSE);
   }
 }

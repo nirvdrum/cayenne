@@ -153,6 +153,8 @@ public class DataPort
     Iterator it = entities.iterator();
     while (it.hasNext())
     {
+	  observer.clear();
+	  
       DbEntity entity = (DbEntity) it.next();
       DeleteQuery query = new DeleteQuery();
       query.setRoot(entity);
@@ -197,6 +199,8 @@ public class DataPort
     Iterator it = entities.iterator();
     while (it.hasNext())
     {
+	  insertObserver.clear();
+      
       DbEntity entity = (DbEntity) it.next();
 
       SelectQuery select = new SelectQuery();
