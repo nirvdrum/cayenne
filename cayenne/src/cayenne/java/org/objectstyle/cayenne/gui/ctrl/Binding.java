@@ -78,6 +78,7 @@ public abstract class Binding {
     static {
         // add any new binding types in here
         bindPrototypes.add(new JTextFieldBinding());
+        bindPrototypes.add(new JComboBoxBinding());
     }
 
     public static Binding bindingForWidget(Object widget) {

@@ -55,51 +55,65 @@
  */
 package org.objectstyle.cayenne.gui.ctrl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JComboBox;
 
 /**
- * Generic UI controller class.
- * 
  * @author Andrei Adamchik
  */
-public class UIController {
+public class JComboBoxBinding extends Binding implements ActionListener {
+    protected JComboBox comboBox;
 
-    protected Map bindings = Collections.synchronizedMap(new HashMap());
+    /**
+     * @see org.objectstyle.cayenne.gui.ctrl.Binding#isSupportedWidget(Object)
+     */
+    public boolean isSupportedWidget(Object widget) {
+        return widget instanceof JComboBox;
+    }
 
-    public Binding bind(Object widget, Object object, String property)
-        throws ControllerException {
-        Binding bind = Binding.bindingForWidget(widget);
-        
-        if(bind == null) {
-        	String className = (widget != null) ? widget.getClass().getName() : "null";
-        	throw new ControllerException("Can't create binding for " + className);
+    /**
+     * @see org.objectstyle.cayenne.gui.ctrl.Binding#createBinding(Object)
+     */
+    public Binding createBinding(Object widget) {
+        return new JComboBoxBinding();
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.gui.ctrl.Binding#getWidget()
+     */
+    public Object getWidget() {
+        return comboBox;
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.gui.ctrl.Binding#setWidget(Object)
+     */
+    public void setWidget(Object widget) {
+        if (widget != comboBox) {
+            if (comboBox != null) {
+                comboBox.removeActionListener(this);
+            }
+
+            comboBox = (JComboBox) widget;
+
+            if (comboBox != null) {
+                comboBox.addActionListener(this);
+            }
         }
-        
-        bind.setObject(object);
-        bind.setWidget(widget);
-        bind.setProperty(property);
-        
-        addBinding(bind);
-        
-        return bind;
     }
-    
-    public void unbindAll() {
-    	synchronized(bindings) {
-    		Iterator it = bindings.keySet().iterator();
-    		while(it.hasNext()) {
-    			Binding b = (Binding)bindings.get(it.next());
-    			b.setWidget(null);
-    		}
-    	}
+
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+        processEvent(e);
     }
-    
-    public void addBinding(Binding b) {
-    	synchronized(bindings) {
-    		bindings.put(b.getWidget(), b);
-    	}
+
+    protected void processEvent(ActionEvent e) {
+        if (comboBox != null && e.getSource() == comboBox) {
+            setValue(comboBox.getModel().getSelectedItem());
+        }
     }
 }

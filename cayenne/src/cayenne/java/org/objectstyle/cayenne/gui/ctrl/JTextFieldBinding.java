@@ -63,11 +63,11 @@ import javax.swing.event.DocumentListener;
  * @author Andrei Adamchik
  */
 public class JTextFieldBinding extends Binding implements DocumentListener {
-	
-	protected JTextField textField;
-    
+
+    protected JTextField textField;
+
     public JTextFieldBinding() {}
-    
+
     /**
      * @see org.objectstyle.cayenne.gui.ctrl.Binding#createBinding(Object)
      */
@@ -75,14 +75,13 @@ public class JTextFieldBinding extends Binding implements DocumentListener {
         return new JTextFieldBinding();
     }
 
-
     /**
      * @see org.objectstyle.cayenne.gui.ctrl.Binding#isSupportedWidget(Object)
      */
     public boolean isSupportedWidget(Object widget) {
         return widget instanceof JTextField;
     }
-    
+
     /**
      * @see org.objectstyle.cayenne.gui.ctrl.Binding#getWidget()
      */
@@ -90,30 +89,52 @@ public class JTextFieldBinding extends Binding implements DocumentListener {
         return textField;
     }
 
-
     /**
      * @see org.objectstyle.cayenne.gui.ctrl.Binding#setWidget(Object)
      */
     public void setWidget(Object widget) {
-    	textField = (JTextField)widget;
-    }
+        if (widget != textField) {
+            if (textField != null) {
+                textField.getDocument().removeDocumentListener(this);
+            }
 
+            textField = (JTextField) widget;
+
+            if (textField != null) {
+                textField.getDocument().addDocumentListener(this);
+            }
+        }
+    }
 
     /**
      * @see javax.swing.event.DocumentListener#changedUpdate(DocumentEvent)
      */
-    public void changedUpdate(DocumentEvent e) {}
-
+    public void changedUpdate(DocumentEvent e) {
+        processEvent(e);
+    }
 
     /**
      * @see javax.swing.event.DocumentListener#insertUpdate(DocumentEvent)
      */
-    public void insertUpdate(DocumentEvent e) {}
-
+    public void insertUpdate(DocumentEvent e) {
+        processEvent(e);
+    }
 
     /**
      * @see javax.swing.event.DocumentListener#removeUpdate(DocumentEvent)
      */
-    public void removeUpdate(DocumentEvent e) {}
-}
+    public void removeUpdate(DocumentEvent e) {
+        processEvent(e);
+    }
 
+    protected void processEvent(DocumentEvent e) {
+        if (textField != null && e.getDocument() == textField.getDocument()) {
+            String text = textField.getText();
+
+            if (text.length() == 0) {
+                text = null;
+            }
+            setValue(text);
+        }
+    }
+}
