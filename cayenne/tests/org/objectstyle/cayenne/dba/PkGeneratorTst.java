@@ -55,12 +55,14 @@ package org.objectstyle.cayenne.dba;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
+import java.util.ArrayList;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DbEntity;
+
 
 public class PkGeneratorTst extends TestCase {
     protected PkGenerator pkGen;
@@ -73,10 +75,10 @@ public class PkGeneratorTst extends TestCase {
     
     
     protected void setUp() throws java.lang.Exception {     
-        org.objectstyle.cayenne.DatabaseCleanup.cleanTableData();
+        TestMain.getSharedDatabaseSetup().cleanTableData();
            
         pkGen = new PkGenerator();
-        node = org.objectstyle.TestMain.getSharedDomain().getDataNodes()[0];
+        node = TestMain.getSharedDomain().getDataNodes()[0];
         paintEnt = node.lookupEntity("Painting").getDbEntity();
         pkGen.createAutoPkSupportForDbEntity(node, paintEnt);
     }

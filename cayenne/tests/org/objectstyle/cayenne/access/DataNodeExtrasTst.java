@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.map.*;
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.map.DbEntity;
 
 
 public class DataNodeExtrasTst extends TestCase {
@@ -72,8 +70,8 @@ public class DataNodeExtrasTst extends TestCase {
     
     
     public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
-        org.objectstyle.cayenne.DatabaseCleanup.cleanTableData();
-        DataNode node = org.objectstyle.TestMain.getSharedDomain().getDataNodes()[0];
+        TestMain.getSharedDatabaseSetup().cleanTableData();
+        DataNode node = TestMain.getSharedDomain().getDataNodes()[0];
         node.createPkSupportForMapEntities();
         
         DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();

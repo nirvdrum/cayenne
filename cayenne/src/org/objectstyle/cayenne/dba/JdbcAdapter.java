@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -61,7 +61,6 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.map.*;
-
 
 /** A generic DbAdapter implementation. 
   * Can be used as a default adapter or as
@@ -75,7 +74,6 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator pkGen;
     protected TypesHandler typesHandler;
 
-
     public JdbcAdapter() {
         // create Pk generator
         pkGen = createPkGenerator();
@@ -85,7 +83,6 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator createPkGenerator() {
         return new PkGenerator();
     }
-
 
     /** Returns true. */
     public boolean supportsFkConstraints() {
@@ -97,69 +94,77 @@ public class JdbcAdapter implements DbAdapter {
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getName();
     }
-    
+
     /** Returns a SQL string that can be used to create
       * a foreign key constraint for the relationship. */
     public String createFkConstraint(DbRelationship rel) {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();
 
-        buf.append("ALTER TABLE ")
-        .append(rel.getSourceEntity().getName())
-        .append(" ADD FOREIGN KEY (");
+        buf.append("ALTER TABLE ").append(rel.getSourceEntity().getName()).append(
+            " ADD FOREIGN KEY (");
 
         Iterator jit = rel.getJoins().iterator();
         boolean first = true;
-        while(jit.hasNext()) {
-            DbAttributePair join = (DbAttributePair)jit.next();
-            if(!first) {
+        while (jit.hasNext()) {
+            DbAttributePair join = (DbAttributePair) jit.next();
+            if (!first) {
                 buf.append(", ");
                 refBuf.append(", ");
-            } else
+            }
+            else
                 first = false;
 
             buf.append(join.getSource().getName());
             refBuf.append(join.getTarget().getName());
         }
 
-        buf.append(") REFERENCES ")
-        .append(rel.getTargetEntity().getName())
-        .append(" (")
-        .append(refBuf)
-        .append(')');
+        buf
+            .append(") REFERENCES ")
+            .append(rel.getTargetEntity().getName())
+            .append(" (")
+            .append(refBuf)
+            .append(')');
         return buf.toString();
     }
 
-
-    /** Generate necessary database objects to do primary key generation.
-     *  Table used by default is the following:
-     *  <pre>
-     *  CREATE TABLE AUTO_PK_SUPPORT (
-     *   TABLE_NAME           CHAR(100) NOT NULL,
-     *  NEXT_ID              INTEGER NOT NULL
-     *  );
-     *  </pre>
+    /** Generates database objects to provide
+     *  automatic primary key support. This implementation will create
+     *  a lookup table like that:
+     * 
+     *<code><pre>
+     *CREATE TABLE AUTO_PK_SUPPORT (
+     *TABLE_NAME           CHAR(100) NOT NULL,
+     *NEXT_ID              INTEGER NOT NULL
+     *)
+     *</pre></code>
      *
-     *  @param dataNode node that provides connection layer for PkGenerator.
+     *  @param dataNode node that provides access to a DataSource.
      */
     public void createAutoPkSupport(DataNode dataNode) throws Exception {
         pkGen.createAutoPkSupport(dataNode);
     }
 
+    public void dropAutoPkSupport(DataNode node) throws Exception {
+        pkGen.dropAutoPkSupport(node);
+    }
 
-    public void createAutoPkSupportForDbEntity(DataNode dataNode, DbEntity dbEntity) throws Exception {
+    public void createAutoPkSupportForDbEntity(
+        DataNode dataNode,
+        DbEntity dbEntity)
+        throws Exception {
         pkGen.createAutoPkSupportForDbEntity(dataNode, dbEntity);
     }
 
-
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity) throws Exception {
+    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
+        throws Exception {
         return pkGen.generatePkForDbEntity(dataNode, dbEntity);
     }
 
     public String[] externalTypesForJdbcType(int type) {
         return typesHandler.externalTypesForJdbcType(type);
     }
-    
+
     /** Returns null - by default no operation sorter is used. */
     public OperationSorter getOpSorter(DataNode node) {
         return null;

@@ -70,16 +70,19 @@ public class DataMap {
     private String name;
     private String location;
 
-    /** Obj entities representing the data object classes.
-    *  The name of the data object class serves as a key. */
+    /** ObjEntities representing the data object classes.
+      * The name of ObjEntity serves as a key. */
     private SortedMap objEntityMap = new TreeMap();
 
-    /** Db entities representing metadata for individual database tables.
-    *  The name of the database table serves as a key. */
+    /** DbEntities representing metadata for individual database tables.
+      * The name of DbEntity (which is also a database table
+      * name) serves as a key. */
     private SortedMap dbEntityMap = new TreeMap();
+
 
     /** Creates an empty DataMap */
     public DataMap() {}
+
 
     /** Creates an empty DataMap and assigns it a <code>name</code>. */
     public DataMap(String name) {
@@ -118,7 +121,10 @@ public class DataMap {
         return Collections.unmodifiableSortedMap(objEntityMap);
     }
 
-
+   
+    /** Returns sorted unmodifiable map of DbEntities
+      * contained in this DataMap. Keys are DbEntity
+      * names (same as database table names). */ 
     public SortedMap getDbEntityMap() {
         return Collections.unmodifiableSortedMap(dbEntityMap);
     }

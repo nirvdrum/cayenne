@@ -60,20 +60,15 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 
-
-/** Setup database connection info to run tests. */
+/** Utility class to create and destroy test tables and data. */
 public class DatabaseSetup {
     static Logger logObj = Logger.getLogger(DatabaseSetup.class.getName());
-
-
-    public static final String[] TEST_TABLES = new String[] {
-                "AUTO_PK_SUPPORT", "ARTIST", "GALLERY", "EXHIBIT", "ARTIST_EXHIBIT",
-                "PAINTING", "PAINTING_INFO"
-            };
-
 
     protected DataMap map;
 
@@ -81,89 +76,133 @@ public class DatabaseSetup {
         this.map = map;
     }
 
+    /** Deletes all data from the database tables mentioned in the DataMap. */
+    public void cleanTableData() throws Exception {
+        Connection conn = TestMain.getSharedConnection();
 
+        if (conn.getAutoCommit()) {
+            conn.setAutoCommit(false);
+        }
+
+        Statement stmt = conn.createStatement();
+        List list = dbEntitiesInInsertOrder();
+        ListIterator it = list.listIterator(list.size());
+        while (it.hasPrevious()) {
+            DbEntity ent = (DbEntity) it.previous();
+            String deleteSql = "DELETE FROM " + ent.getName();
+            int rowsDeleted = stmt.executeUpdate(deleteSql);
+        }
+        conn.commit();
+
+        // lets recreate pk support, since there is no
+        // generic way to reset pk info
+        DataNode node = TestMain.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
+
+        // drop
+        adapter.dropAutoPkSupport(node);
+
+        // create
+        adapter.createAutoPkSupport(node);
+    }
+
+
+    /** Drops all test tables. */
     public void dropTestTables() throws Exception {
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        Connection conn = TestMain.getSharedConnection();
         DatabaseMetaData md = conn.getMetaData();
         ResultSet tables = md.getTables(null, null, "%", null);
         ArrayList allTables = new ArrayList();
-        while(tables.next()) {
+
+        while (tables.next()) {
             // 'toUpperCase' is needed since most databases
             // are case insensitive, and some will convert names to lower case (PostgreSQL)
             String name = tables.getString("TABLE_NAME");
-            if(name != null)
+            if (name != null)
                 allTables.add(name.toUpperCase());
         }
         tables.close();
 
-
-        // drop tables in reverse order of insert. this will take care of
-        // referential constraints...
+        // drop all tables in the map
         Statement stmt = conn.createStatement();
-        for(int i = TEST_TABLES.length - 1; i >= 0; i--) {
-            if(!allTables.contains(TEST_TABLES[i]))
+        List list = dbEntitiesInInsertOrder();
+        ListIterator it = list.listIterator(list.size());
+        while (it.hasPrevious()) {
+            DbEntity ent = (DbEntity) it.previous();
+            if (!allTables.contains(ent.getName())) {
                 continue;
+            }
 
             try {
-                String dropSql = "DROP TABLE " + TEST_TABLES[i];
+                String dropSql = "DROP TABLE " + ent.getName();
                 stmt.execute(dropSql);
-                logObj.fine("Dropped table " + TEST_TABLES[i]);
-            } catch(SQLException sqe) {
-                logObj.log(Level.FINE, "Can't drop table " + TEST_TABLES[i], sqe);
+                logObj.fine("Dropped table " + ent.getName());
+            }
+            catch (SQLException sqe) {
+                logObj.log(
+                    Level.WARNING,
+                    "Can't drop table " + ent.getName() + ", ignoring...",
+                    sqe);
             }
         }
+
+        // drop primary key support
+        DataNode node = TestMain.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
+        adapter.dropAutoPkSupport(node);
     }
 
-
-
+    /** Creates all test tables in the database. */
     public void setupTestTables() throws Exception {
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
-
+        Connection conn = TestMain.getSharedConnection();
         Statement stmt = conn.createStatement();
 
-
         Iterator it = tableCreateQueries();
-        while(it.hasNext()) {
-            String query = (String)it.next();
+        while (it.hasNext()) {
+            String query = (String) it.next();
             logObj.warning("Create table: " + query);
             stmt.execute(query);
         }
+
+        // create primary key support
+        DataNode node = TestMain.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
+        adapter.createAutoPkSupport(node);
     }
 
-
+    /** Oracle 8i does not support more then 1 "LONG xx" column per table
+      * PAINTING_INFO need to be fixed. */
     private void applyOracleHack() {
         DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
-        DbAttribute textReview = (DbAttribute)paintingInfo.getAttribute("TEXT_REVIEW");
+        DbAttribute textReview = (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
         textReview.setType(Types.VARCHAR);
         textReview.setMaxLength(255);
     }
 
-    /** Return iterator of preprocessed table create queries */
+    /** Returns iterator of preprocessed table create queries */
     public Iterator tableCreateQueries() throws Exception {
         ArrayList queries = new ArrayList();
-        DbAdapter adapter = org.objectstyle.TestMain.getSharedNode().getAdapter();
-        DbGenerator gen = new DbGenerator(org.objectstyle.TestMain.getSharedConnection(), adapter);
+        DbAdapter adapter = TestMain.getSharedNode().getAdapter();
+        DbGenerator gen = new DbGenerator(TestMain.getSharedConnection(), adapter);
 
-        // Oracle does not support more then 1 "LONG xx" column per table
+        // Oracle 8i does not support more then 1 "LONG xx" column per table
         // PAINTING_INFO need to be fixed
-        if(adapter instanceof org.objectstyle.cayenne.dba.oracle.OracleAdapter) {
+        if (adapter instanceof org.objectstyle.cayenne.dba.oracle.OracleAdapter) {
             applyOracleHack();
         }
 
-        for(int i = 0; i < TEST_TABLES.length; i++) {
-            DbEntity ent = ("AUTO_PK_SUPPORT".equals(TEST_TABLES[i]))
-                           ? pkEntity()
-                           : map.getDbEntity(TEST_TABLES[i]);
+        // table definitions
+        Iterator it = dbEntitiesInInsertOrder().iterator();
+        while (it.hasNext()) {
+            DbEntity ent = (DbEntity) it.next();
             queries.add(gen.createTableQuery(ent));
         }
 
-        // add FK constraints
-        if(adapter.supportsFkConstraints()) {
-            for(int i = 0; i < TEST_TABLES.length; i++) {
-                if("AUTO_PK_SUPPORT".equals(TEST_TABLES[i]))
-                    continue;
-
-                DbEntity ent = map.getDbEntity(TEST_TABLES[i]);
+        // FK constraints
+        if (adapter.supportsFkConstraints()) {
+            it = dbEntitiesInInsertOrder().iterator();
+            while (it.hasNext()) {
+                DbEntity ent = (DbEntity) it.next();
                 List qs = gen.createFkConstraintsQueries(ent);
                 queries.addAll(qs);
             }
@@ -172,18 +211,16 @@ public class DatabaseSetup {
         return queries.iterator();
     }
 
-    // temp hack
-    private DbEntity pkEntity() {
-        DbEntity ent = new DbEntity("AUTO_PK_SUPPORT");
-        DbAttribute at1 = new DbAttribute("TABLE_NAME", Types.VARCHAR, null);
-        at1.setMandatory(true);
-        at1.setMaxLength(100);
-        ent.addAttribute(at1);
-        at1.setPrimaryKey(true);
+    /** Helper method that orders DbEntities to satisfy referential
+     *  constraints and returns an ordered list. */
+    private List dbEntitiesInInsertOrder() {
+        List list = map.getDbEntitiesAsList();
 
-        DbAttribute at2 = new DbAttribute("NEXT_ID", Types.INTEGER, null);
-        at2.setMandatory(true);
-        ent.addAttribute(at2);
-        return ent;
+        DataNode node = TestMain.getSharedNode();
+        OperationSorter sorter = node.getAdapter().getOpSorter(node);
+        if (sorter != null) {
+            sorter.sortEntitiesInInsertOrder(list);
+        }
+        return list;
     }
 }

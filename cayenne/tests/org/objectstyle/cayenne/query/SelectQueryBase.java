@@ -55,15 +55,12 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.conn.*;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.TestOperationObserver;
 
 public abstract class SelectQueryBase extends TestCase {
     static Logger logObj = Logger.getLogger(SelectQueryBase.class.getName());
@@ -78,7 +75,7 @@ public abstract class SelectQueryBase extends TestCase {
     
     
     public void setUp() throws java.lang.Exception {
-        DatabaseCleanup.cleanTableData();
+        TestMain.getSharedDatabaseSetup().cleanTableData();
         populateTables();
         query = new SelectQuery();
         opObserver = new TestOperationObserver();
@@ -87,7 +84,7 @@ public abstract class SelectQueryBase extends TestCase {
     
     protected void performQuery() throws java.lang.Exception {
         // run query
-        org.objectstyle.TestMain.getSharedDomain().performQuery(getQuery(), opObserver);
+        TestMain.getSharedDomain().performQuery(getQuery(), opObserver);
         
         // check query errors
         opObserver.assertAllExceptions();

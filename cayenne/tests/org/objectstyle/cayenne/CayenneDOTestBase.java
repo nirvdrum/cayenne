@@ -60,6 +60,7 @@ import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.TestMain;
 import org.objectstyle.art.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.exp.Expression;
@@ -80,7 +81,7 @@ public class CayenneDOTestBase extends TestCase {
     }
     
     public void setUp() throws java.lang.Exception {
-        DatabaseCleanup.cleanTableData();        
+        TestMain.getSharedDatabaseSetup().cleanTableData();        
         DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
         Level oldLevel = QueryLogger.getLogLevel();
         QueryLogger.setLogLevel(Level.SEVERE);

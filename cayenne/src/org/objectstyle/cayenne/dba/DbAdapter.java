@@ -82,8 +82,15 @@ public interface DbAdapter {
     public String createFkConstraint(DbRelationship rel);
 
 
-    /** Creates necessary database objects to do primary key generation. */
+    /** Creates necessary database objects to do automatic primary 
+     * key generation later. This may involve creation of a special primary
+     * key lookup table, stored procedures, sequnces, etc. */
     public void createAutoPkSupport(DataNode dataNode) throws Exception;
+
+
+    /** Drops any database objects associated with automatic primary 
+     * key generation process. */
+    public void dropAutoPkSupport(DataNode dataNode) throws Exception;
 
 
     /** Performs necessary database operations to do primary key generation

@@ -55,13 +55,11 @@ package org.objectstyle;
  *
  */
 
+import java.sql.Connection;
+
+import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.util.*;
-import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.conn.*;
-import java.sql.*;
+import org.objectstyle.util.Util;
 
 
 /** Keeps references to all the test resources needed by Test Cases.
@@ -72,6 +70,7 @@ public class TestResources implements TestConstants {
     private DataSourceInfo sharedConnInfo;
     private Connection sharedConn;
     private DataDomain sharedDomain;
+    private DatabaseSetup sharedDatabaseSetup;
 
 
     public Connection getSharedConnection() {
@@ -103,4 +102,21 @@ public class TestResources implements TestConstants {
     public void setSharedConnInfo(DataSourceInfo dsi) {
         this.sharedConnInfo = dsi;
     }
+    
+    /**
+     * Gets the sharedDatabaseSetup.
+     * @return Returns a DatabaseSetup
+     */
+    public DatabaseSetup getSharedDatabaseSetup() {
+        return sharedDatabaseSetup;
+    }
+
+    /**
+     * Sets the sharedDatabaseSetup.
+     * @param sharedDatabaseSetup The sharedDatabaseSetup to set
+     */
+    public void setSharedDatabaseSetup(DatabaseSetup sharedDatabaseSetup) {
+        this.sharedDatabaseSetup = sharedDatabaseSetup;
+    }
+
 }

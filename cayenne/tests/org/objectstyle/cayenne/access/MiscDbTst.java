@@ -55,10 +55,11 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
 import java.sql.*;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
 
 
 public class MiscDbTst extends TestCase {
@@ -69,13 +70,13 @@ public class MiscDbTst extends TestCase {
 
 
     public void setUp() throws java.lang.Exception {
-        org.objectstyle.cayenne.DatabaseCleanup.cleanTableData();
+        TestMain.getSharedDatabaseSetup().cleanTableData();
     }
 
 
     public void testInsertNullBlob() throws java.lang.Exception {
         String sql = "insert into PAINTING_INFO(PAINTING_ID, IMAGE_BLOB) values (?, ?)";
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        Connection conn = TestMain.getSharedConnection();
         PreparedStatement st = null;
 
         // we must do it in transaction,

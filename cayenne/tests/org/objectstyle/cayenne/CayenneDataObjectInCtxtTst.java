@@ -60,6 +60,7 @@ import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.TestMain;
 import org.objectstyle.art.*;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -77,10 +78,10 @@ public class CayenneDataObjectInCtxtTst extends TestCase {
     }
     
     public void setUp() throws java.lang.Exception {
-        DatabaseCleanup.cleanTableData();        
-        DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
+        TestMain.getSharedDatabaseSetup().cleanTableData();        
+        DataDomain dom = TestMain.getSharedDomain();
         dom.getDataNodes()[0].createPkSupportForMapEntities();
-        ctxt = org.objectstyle.TestMain.getSharedDomain().createDataContext();
+        ctxt = TestMain.getSharedDomain().createDataContext();
     }
     
     

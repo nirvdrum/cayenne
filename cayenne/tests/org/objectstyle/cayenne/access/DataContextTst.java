@@ -55,18 +55,21 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.*;
-import java.net.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
-import java.sql.*;
-import org.objectstyle.art.*;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 
 
@@ -87,7 +90,7 @@ public class DataContextTst extends TestCase {
     
     protected void setUp() throws java.lang.Exception {     
         super.setUp();
-        DatabaseCleanup.cleanTableData();
+        TestMain.getSharedDatabaseSetup().cleanTableData();
         populateTables();
         
         DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
@@ -221,7 +224,7 @@ public class DataContextTst extends TestCase {
     
     protected void populateTables() throws java.lang.Exception {
         String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        Connection conn = TestMain.getSharedConnection();
         PreparedStatement stmt = conn.prepareStatement(insertArtist);
         long dateBase = System.currentTimeMillis();
         

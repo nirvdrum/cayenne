@@ -55,14 +55,14 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.*;
-import java.sql.*;
-import org.objectstyle.art.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 
 
@@ -81,7 +81,7 @@ public class DataContextExtrasTst extends TestCase {
     
     
     protected void setUp() throws java.lang.Exception {   
-        ctxt = org.objectstyle.TestMain.getSharedDomain().createDataContext();
+        ctxt = TestMain.getSharedDomain().createDataContext();
     }
     
     public void testCreateAndRegisterNewObject() throws Exception {
@@ -97,7 +97,7 @@ public class DataContextExtrasTst extends TestCase {
         ctxt.registerNewObject(o1, "Artist");  
         
         // this should cause PK generation exception in commit later
-        DatabaseCleanup.cleanTableData();
+        TestMain.getSharedDatabaseSetup().cleanTableData();
 
         // disable logging for thrown exceptions
         Level oldLevel = DefaultOperationObserver.logObj.getLevel();

@@ -55,27 +55,29 @@ package org.objectstyle;
  *
  */
 
-import junit.framework.*;
-import java.util.*;
-import java.util.logging.*;
 import java.io.*;
 import java.sql.*;
-import javax.sql.DataSource;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import java.util.Properties;
+import java.util.logging.*;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.gui.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.map.*;
+import javax.sql.DataSource;
+
+import org.objectstyle.cayenne.ConnectionSetup;
+import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.util.*;
+import org.objectstyle.cayenne.conn.PoolDataSource;
+import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoaderImpl;
+
 
 /**
  *  Root class of all test cases. When "main" is invoked, 
- *  will configure database connection and invoke all package tests.
+ *  it will configure database connection and call all package tests.
+ *  
+ * <p><i>TODO: need refactoring. This class is too big to only hold static
+ * methods</i></p>
  *
  *  @author Andrei Adamchik
  */
@@ -84,7 +86,6 @@ public class TestMain implements TestConstants {
 
     private static TestResources resources = new TestResources();
     private static boolean noGui;
-
 
     public static TestResources getResources() {
         return resources;
@@ -98,10 +99,10 @@ public class TestMain implements TestConstants {
         // check for "-nogui" flag
         noGui = false;
         boolean xmlDataSource = false;
-        if(args != null && args.length > 0) {
-            if("-nogui".equals(args[0]))
+        if (args != null && args.length > 0) {
+            if ("-nogui".equals(args[0]))
                 noGui = true;
-            else if("-xml".equals(args[0])) {
+            else if ("-xml".equals(args[0])) {
                 noGui = true;
                 xmlDataSource = true;
             }
@@ -112,38 +113,42 @@ public class TestMain implements TestConstants {
 
         // initialize shared resources
         try {
-            DataSourceInfo dsi = (xmlDataSource)
-                                 ? new ConnectionSetup(false, false).buildConnectionInfo()
-                                 : new ConnectionSetup(true, !noGui).buildConnectionInfo();
+            DataSourceInfo dsi =
+                (xmlDataSource)
+                    ? new ConnectionSetup(false, false).buildConnectionInfo()
+                    : new ConnectionSetup(true, !noGui).buildConnectionInfo();
 
             resources.setSharedConnInfo(dsi);
         }
-        catch(Exception ex) {
+        catch (Exception ex) {
             logObj.log(Level.SEVERE, "Can not load connection info.", ex);
             System.exit(1);
         }
 
         resources.setSharedConnection(openConnection());
         resources.setSharedDomain(createSharedDomain());
-
+        resources.setSharedDatabaseSetup(createDbSetup());
 
         // initialize other stuff
         createTestDatabase();
 
-
         // run tests
         boolean success = true;
-        if(System.getProperty(TestMain.SINGLE_TEST_PROP) != null)
-            success = ObjectStyleTestRunner.runSingleTestCase(System.getProperty(SINGLE_TEST_PROP));
+        if (System.getProperty(TestMain.SINGLE_TEST_PROP) != null)
+            success =
+                ObjectStyleTestRunner.runSingleTestCase(System.getProperty(SINGLE_TEST_PROP));
         else
             success = ObjectStyleTestRunner.runTests();
-        
-        if(!success) {
+
+        if (!success) {
             logObj.warning("Some tests have failed.");
             System.exit(1);
         }
     }
 
+    public static DatabaseSetup getSharedDatabaseSetup() {
+        return getResources().getSharedDatabaseSetup();
+    }
 
     public static Connection getSharedConnection() {
         return getResources().getSharedConnection();
@@ -157,79 +162,88 @@ public class TestMain implements TestConstants {
         return getResources().getSharedNode();
     }
 
-
     public static DataSourceInfo getFreshConnInfo() throws java.lang.Exception {
         return getResources().getFreshConnInfo();
     }
 
+    private static DatabaseSetup createDbSetup() {
+        try {
+            return new DatabaseSetup(resources.getSharedNode().getDataMaps()[0]);
+        }
+        catch (Exception ex) {
+            logObj.log(Level.SEVERE, "Can not create shared DatabaseSetup.", ex);
+            System.exit(1);
+        }
 
+        return null;
+    }
 
     private static DataDomain createSharedDomain() {
         try {
 
             // data source
             DataSourceInfo dsi = getFreshConnInfo();
-            PoolDataSource poolDS = new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
-            DataSource ds = new PoolManager(poolDS,
-                                            dsi.getMinConnections(),
-                                            dsi.getMaxConnections(),
-                                            dsi.getUserName(),
-                                            dsi.getPassword());
+            PoolDataSource poolDS =
+                new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
+            DataSource ds =
+                new PoolManager(
+                    poolDS,
+                    dsi.getMinConnections(),
+                    dsi.getMaxConnections(),
+                    dsi.getUserName(),
+                    dsi.getPassword());
 
             // map
-            String[] maps = new String[] {TEST_MAP_PATH};
+            String[] maps = new String[] { TEST_MAP_PATH };
             DataMap map = new MapLoaderImpl().loadDataMaps(maps)[0];
 
             // node
             DataNode node = new DataNode("node");
             node.setDataSource(ds);
             String adapterClass = dsi.getAdapterClass();
-            if(adapterClass == null)
+            if (adapterClass == null)
                 adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-            node.setAdapter((DbAdapter)Class.forName(adapterClass).newInstance());
+            node.setAdapter((DbAdapter) Class.forName(adapterClass).newInstance());
             node.addDataMap(map);
-
 
             // domain
             DataDomain domain = new DataDomain("Shared Domain");
             domain.addNode(node);
             return domain;
 
-        } catch(java.lang.Exception ex) {
+        }
+        catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Can not create shared domain.", ex);
             System.exit(1);
-
-            // to satisfy a compiler, throw an exception
-            // (as if System.exit() is not enough :-))
-            throw new RuntimeException("Will never get here.");
         }
+        return null;
     }
-
 
     /** If we can not connect to the database, quit the application. */
     private static Connection openConnection() {
         try {
             DataSourceInfo dsi = resources.getFreshConnInfo();
-            Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
+            Driver driver = (Driver) Class.forName(dsi.getJdbcDriver()).newInstance();
             return DriverManager.getConnection(
-                       dsi.getDataSourceUrl(),
-                       dsi.getUserName(),
-                       dsi.getPassword());
-        } catch(java.lang.Exception ex) {
+                dsi.getDataSourceUrl(),
+                dsi.getUserName(),
+                dsi.getPassword());
+        }
+        catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Can not connect to the database.", ex);
             System.exit(1);
-            // to satisfy a compiler, throw an exception
-            throw new RuntimeException("Will never get here.");
         }
+        
+        return null;
     }
-
 
     private static void createTestDatabase() {
         try {
-            DatabaseSetup dbSetup = new DatabaseSetup(getResources().getSharedNode().getDataMaps()[0]);
+            DatabaseSetup dbSetup = getSharedDatabaseSetup();
             dbSetup.dropTestTables();
             dbSetup.setupTestTables();
-        } catch(java.lang.Exception ex) {
+        }
+        catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Error creating test database.", ex);
             System.exit(1);
         }
@@ -238,15 +252,17 @@ public class TestMain implements TestConstants {
 
     private static void configureProps() {
         // load user property overrides
-        File propsFile = new File(System.getProperty("user.home") + File.separator + USER_PROPS);
-        if(propsFile.exists()) {
+        File propsFile =
+            new File(System.getProperty("user.home") + File.separator + USER_PROPS);
+        if (propsFile.exists()) {
             Properties props = new Properties();
 
             try {
                 FileInputStream in = new FileInputStream(propsFile);
                 props.load(in);
                 in.close();
-            } catch(IOException ioex) {
+            }
+            catch (IOException ioex) {
                 logObj.log(Level.SEVERE, "Error loading properties.", ioex);
                 System.exit(1);
             }
@@ -256,14 +272,15 @@ public class TestMain implements TestConstants {
             System.setProperties(sysProps);
         }
 
-
-        File logPropsFile = new File(System.getProperty("user.home") + File.separator + LOGGING_PROPS);
-        if(logPropsFile.exists()) {
+        File logPropsFile =
+            new File(System.getProperty("user.home") + File.separator + LOGGING_PROPS);
+        if (logPropsFile.exists()) {
             try {
                 FileInputStream in = new FileInputStream(logPropsFile);
                 LogManager.getLogManager().readConfiguration(in);
                 in.close();
-            } catch(IOException ioex) {
+            }
+            catch (IOException ioex) {
                 throw new RuntimeException("Error reading config.", ioex);
             }
         }
