@@ -167,7 +167,7 @@ public abstract class EventBridge implements EventListener {
                     CayenneEvent.class,
                     localSubject,
                     eventsSource);
-            } catch (NoSuchMethodException ex) {
+            } catch (RuntimeException ex) {
                 // this should never happen
                 throw new CayenneRuntimeException("Can't install EventBridge.");
             }

@@ -146,30 +146,25 @@ public class ContextCommitObserver
     }
 
     public void registerForDataContextEvents() {
-        try {
-            EventManager mgr = EventManager.getDefaultManager();
-            mgr.addListener(
-                this,
-                "dataContextWillCommit",
-                DataContextEvent.class,
-                DataContext.WILL_COMMIT,
-                this.context);
-            mgr.addListener(
-                this,
-                "dataContextDidCommit",
-                DataContextEvent.class,
-                DataContext.DID_COMMIT,
-                this.context);
-            mgr.addListener(
-                this,
-                "dataContextDidRollback",
-                DataContextEvent.class,
-                DataContext.DID_ROLLBACK,
-                this.context);
-        } catch (NoSuchMethodException nsm) {
-            // this really should not happen since we implement all required methods
-            throw new CayenneRuntimeException(nsm);
-        }
+        EventManager mgr = EventManager.getDefaultManager();
+        mgr.addListener(
+            this,
+            "dataContextWillCommit",
+            DataContextEvent.class,
+            DataContext.WILL_COMMIT,
+            this.context);
+        mgr.addListener(
+            this,
+            "dataContextDidCommit",
+            DataContextEvent.class,
+            DataContext.DID_COMMIT,
+            this.context);
+        mgr.addListener(
+            this,
+            "dataContextDidRollback",
+            DataContextEvent.class,
+            DataContext.DID_ROLLBACK,
+            this.context);
     }
 
     public void unregisterFromDataContextEvents() {

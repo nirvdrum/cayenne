@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.event;
 
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -124,16 +123,14 @@ public class EventManager extends Object {
     /**
      * Register	an <code>EventListener</code> for events sent by any sender.
      * 
-     * @throws NoSuchMethodException if <code>methodName</code> is not found
+     * @throws RuntimeException if <code>methodName</code> is not found
      * @see #addListener(EventListener, String, Class, EventSubject, Object)
      */
     public void addListener(
-        EventListener listener,
+        Object listener,
         String methodName,
         Class eventParameterClass,
-        EventSubject subject)
-        throws NoSuchMethodException {
-
+        EventSubject subject) {
         this.addListener(listener, methodName, eventParameterClass, subject, null);
     }
 
@@ -148,16 +145,14 @@ public class EventManager extends Object {
      * @param subject the event subject that the listener is interested in
      * @param sender the object whose events the listener is interested in;
      * <code>null</code> means 'any sender'.
-     * @throws NoSuchMethodException if <code>methodName</code> is not found
+     * @throws RuntimeException if <code>methodName</code> is not found
      */
     public void addListener(
-        EventListener listener,
+        Object listener,
         String methodName,
         Class eventParameterClass,
         EventSubject subject,
-        Object sender)
-        throws NoSuchMethodException {
-
+        Object sender) {
         if (listener == null) {
             throw new IllegalArgumentException("Listener must not be null.");
         }
@@ -172,8 +167,12 @@ public class EventManager extends Object {
         
         logObj.debug("adding listener: " + listener.getClass().getName() + "." + methodName);
 
-        Invocation invocation = new Invocation(listener, methodName, eventParameterClass);
-        dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
+        try {
+	        Invocation invocation = new Invocation(listener, methodName, eventParameterClass);
+	        dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
+        } catch (NoSuchMethodException nsm) {
+        	throw new RuntimeException(nsm.getMessage());
+        }
     }
 
     /**
@@ -184,7 +183,7 @@ public class EventManager extends Object {
      * @return <code>true</code> if <code>listener</code> could be removed for
      * any existing subjects, else returns <code>false</code>.
      */
-    public boolean removeListener(EventListener listener) {
+    public boolean removeListener(Object listener) {
         if (listener == null) {
             return false;
         }
@@ -225,7 +224,7 @@ public class EventManager extends Object {
      * @return <code>true</code> if <code>listener</code> could be removed for
      * the given subject, else returns <code>false</code>.
      */
-    public boolean removeListener(EventListener listener, EventSubject subject) {
+    public boolean removeListener(Object listener, EventSubject subject) {
         return this.removeListener(listener, subject, null);
     }
 
@@ -241,10 +240,9 @@ public class EventManager extends Object {
      * the given subject, else returns <code>false</code>.
      */
     public boolean removeListener(
-        EventListener listener,
+        Object listener,
         EventSubject subject,
         Object sender) {
-
         if (listener == null || subject == null) {
             return false;
         }

@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.event;
 
 import java.util.Collection;
-import java.util.EventListener;
 import java.util.EventObject;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -107,7 +106,7 @@ class DispatchQueue {
         }
     }
 
-    synchronized boolean removeInvocations(EventListener listener, Object sender) {
+    synchronized boolean removeInvocations(Object listener, Object sender) {
 
         // remove only for specific sender
         if (sender != null) {
@@ -150,7 +149,7 @@ class DispatchQueue {
     }
 
     // removes all invocations for a given listener
-    private boolean removeInvocations(Collection invocations, EventListener listener) {
+    private boolean removeInvocations(Collection invocations, Object listener) {
         if (invocations == null || invocations.isEmpty()) {
             return false;
         }

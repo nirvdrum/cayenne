@@ -144,7 +144,7 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
             Assert.fail();
         }
 
-        catch (NoSuchMethodException e) {
+        catch (RuntimeException e) {
             // expected
         }
     }
@@ -160,7 +160,7 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
             Assert.fail();
         }
 
-        catch (NoSuchMethodException e) {
+        catch (RuntimeException e) {
             // expected
         }
     }

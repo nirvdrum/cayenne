@@ -308,19 +308,14 @@ public class DataRowStore implements Serializable {
             return false;
         }
 
-        try {
-            EventManager.getDefaultManager().addListener(
-                objectStore,
-                "snapshotsChanged",
-                SnapshotEvent.class,
-                getSnapshotEventSubject(),
-                this);
-            logObj.debug("ObjectStore will listen for events: " + objectStore);
-            return true;
-        } catch (NoSuchMethodException e) {
-            logObj.warn("Error adding listener.", e);
-            throw new CayenneRuntimeException("Error adding listener.", e);
-        }
+        EventManager.getDefaultManager().addListener(
+            objectStore,
+            "snapshotsChanged",
+            SnapshotEvent.class,
+            getSnapshotEventSubject(),
+            this);
+        logObj.debug("ObjectStore will listen for events: " + objectStore);
+        return true;
     }
 
     /**

@@ -216,17 +216,14 @@ public class ObjRelationship extends Relationship implements EventListener {
 			isFlattened = true;
 			//Now there will be more than one dbRel - this is a flattened relationship
 		}
-		try {
-			EventManager.getDefaultManager().addListener(
-				this,
-				"dbRelationshipDidChange",
-				RelationshipEvent.class,
-				DbRelationship.PROPERTY_DID_CHANGE,
-				dbRel);
-		} catch (NoSuchMethodException e) {
-			//Really, not going to happen, but we have to catch it
-			throw new CayenneRuntimeException(e);
-		}
+
+		EventManager.getDefaultManager().addListener(
+			this,
+			"dbRelationshipDidChange",
+			RelationshipEvent.class,
+			DbRelationship.PROPERTY_DID_CHANGE,
+			dbRel);
+
 		dbRelationships.add(dbRel);
 		//Recalculate whether this relationship is readOnly,
 		this.calculateReadOnlyValue();
