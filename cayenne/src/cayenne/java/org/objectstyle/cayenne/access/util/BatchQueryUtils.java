@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Entity;
 
 /**
  * Collection of utility methods to work with BatchQueries.
@@ -177,30 +178,33 @@ public class BatchQueryUtils {
             while (itr.hasNext()) {
                 String relName = (String) itr.next();
                 ObjRelationship rel = (ObjRelationship)relMap.get(relName);
-
                 // to-many will be handled on the other side
-                if (rel.isToMany()) {
-                    continue;
-                }
-
-                if (rel.isToDependentEntity()) {
-                    continue;
-                }
-
-                DataObject target =
-                        (DataObject) o.readPropertyDirectly(relName);
-                if (target == null) {
-                    continue;
-                }
-
+                if (rel.isToMany()) continue;
+                if (rel.isToDependentEntity()) continue;
+                DataObject target = (DataObject) o.readPropertyDirectly(relName);
+                if (target == null) continue;
                 DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(0);
                 Map idParts = target.getObjectId().getIdSnapshot();
-
                 // this may happen in uncommitted objects
-                if (idParts == null) {
-                    continue;
-                }
-
+                if (idParts == null) continue;
+                Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+                map.putAll(fk);
+            }
+        } else {
+            Map relMap = ent.getRelationshipMap();
+            Iterator itr = relMap.keySet().iterator();
+            while (itr.hasNext()) {
+                String relName = (String) itr.next();
+                ObjRelationship rel = (ObjRelationship)relMap.get(relName);
+                DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(1);
+                if (rel.isToMany()) continue;
+                if (dbRel.isToDependentPK()) continue;
+                DataObject target = (DataObject) o.readPropertyDirectly(relName);
+                if (target == null) continue;
+                if (dbRel.getSourceEntity() != masterDependentRel.getTargetEntity()) continue;
+                Map idParts = target.getObjectId().getIdSnapshot();
+                // this may happen in uncommitted objects
+                if (idParts == null) continue;
                 Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
                 map.putAll(fk);
             }
@@ -376,10 +380,11 @@ public class BatchQueryUtils {
             for (Iterator i = currentSnapshot.entrySet().iterator(); i.hasNext(); ) {
                 Map.Entry entry = (Map.Entry)i.next();
                 String dbAttrPath = (String)entry.getKey();
+                boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
                 Object newValue = entry.getValue();
-                if (isMasterDbEntity && dbAttrPath.indexOf('.') < 0) {
+                if (isMasterDbEntity && !compoundDbAttr) {
                     snapshot.put(dbAttrPath, newValue);
-                } else if (!isMasterDbEntity && dbAttrPath.indexOf('.') > 0) {
+                } else if (!isMasterDbEntity && compoundDbAttr) {
                     Iterator pathIterator =
                             entity.getDbEntity().resolvePathComponents(dbAttrPath);
                     if (pathIterator.hasNext() &&
@@ -387,7 +392,7 @@ public class BatchQueryUtils {
                         DbAttribute dbAttr = (DbAttribute)pathIterator.next();
                         snapshot.put(dbAttr.getName(), newValue);
                     }
-                } else if (!isMasterDbEntity && dbAttrPath.indexOf('.') < 0) {
+                } else if (!isMasterDbEntity && !compoundDbAttr) {
                     String pkAttrName = getTargetDbAttributeName(dbAttrPath,
                             masterDependentRel);
                     if (pkAttrName != null)
@@ -401,14 +406,15 @@ public class BatchQueryUtils {
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry)it.next();
             String dbAttrPath = (String)entry.getKey();
+            boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
             Object newValue = entry.getValue();
             // if snapshot exists, compare old values and new values,
             // only add attribute to the update clause if the value has changed
             Object oldValue = committedSnapshot.get(dbAttrPath);
             if (valueChanged(oldValue, newValue)) {
-                if (isMasterDbEntity && dbAttrPath.indexOf('.') < 0) {
+                if (isMasterDbEntity && !compoundDbAttr) {
                     snapshot.put(dbAttrPath, newValue);
-                } else if (!isMasterDbEntity && dbAttrPath.indexOf('.') > 0) {
+                } else if (!isMasterDbEntity && compoundDbAttr) {
                     Iterator pathIterator =
                             entity.getDbEntity().resolvePathComponents(dbAttrPath);
                     if (pathIterator.hasNext() &&
@@ -416,7 +422,7 @@ public class BatchQueryUtils {
                         DbAttribute dbAttr = (DbAttribute)pathIterator.next();
                         snapshot.put(dbAttr.getName(), newValue);
                     }
-                } else if (!isMasterDbEntity && dbAttrPath.indexOf('.') < 0) {
+                } else if (!isMasterDbEntity && !compoundDbAttr) {
                     String pkAttrName = getTargetDbAttributeName(dbAttrPath,
                             masterDependentRel);
                     if (pkAttrName != null)
@@ -431,11 +437,12 @@ public class BatchQueryUtils {
         while (origit.hasNext()) {
             Map.Entry entry = (Map.Entry)origit.next();
             String dbAttrPath = (String) entry.getKey();
+            boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
             Object oldValue = entry.getValue();
             if (oldValue == null || currentSnapshot.containsKey(dbAttrPath)) continue;
-            if (isMasterDbEntity && dbAttrPath.indexOf('.') < 0) {
+            if (isMasterDbEntity && !compoundDbAttr) {
                 snapshot.put(dbAttrPath, null);
-            } else if (!isMasterDbEntity && dbAttrPath.indexOf('.') > 0) {
+            } else if (!isMasterDbEntity && compoundDbAttr) {
                 Iterator pathIterator =
                         entity.getDbEntity().resolvePathComponents(dbAttrPath);
                 if (pathIterator.hasNext() &&
@@ -443,7 +450,7 @@ public class BatchQueryUtils {
                     DbAttribute dbAttr = (DbAttribute)pathIterator.next();
                     snapshot.put(dbAttr.getName(), null);
                 }
-            } else if (!isMasterDbEntity && dbAttrPath.indexOf('.') < 0) {
+            } else if (!isMasterDbEntity && !compoundDbAttr) {
                 String pkAttrName = getTargetDbAttributeName(dbAttrPath,
                         masterDependentRel);
                 if (pkAttrName != null)
