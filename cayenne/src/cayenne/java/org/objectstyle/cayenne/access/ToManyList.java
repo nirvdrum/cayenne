@@ -66,9 +66,6 @@ import org.objectstyle.cayenne.ObjectId;
 
 /**
  * Special List implementation to hold "to many" relationship data.
- *
- * <p>To retain guaranteed immutable reference to the list, 
- * application might use "List.toArray()" method.</p>
  * 
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>

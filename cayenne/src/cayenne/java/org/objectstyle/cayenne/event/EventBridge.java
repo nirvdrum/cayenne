@@ -218,7 +218,9 @@ public abstract class EventBridge implements EventListener {
      * Internally delegates to "sendExternalEvent" abstract method.
      */
     public void onLocalEvent(CayenneEvent event) throws Exception {
-        sendExternalEvent(event);
+        if(event.getSource() != this) {
+            sendExternalEvent(event);
+        }
     }
 
     protected abstract void sendExternalEvent(CayenneEvent localEvent) throws Exception;

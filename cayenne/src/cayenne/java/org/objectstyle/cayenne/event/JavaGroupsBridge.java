@@ -196,7 +196,7 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
             + "pbcast.STABLE(desired_avg_gossip=10000):"
             + "FRAG:"
             + "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;"
-            + "shun=true;print_local_addr=true)";
+            + "shun=true;print_local_addr=false)";
     }
 
     protected void shutdownExternal() throws Exception {

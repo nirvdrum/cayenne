@@ -178,11 +178,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
+        // note: ObjectStore listens to events using the subject provided
+        // by parent DataRowStore, but event source can be anything (e.g. EventBridge)
+        
         if (this.dataRowCache != null) {
             EventManager.getDefaultManager().removeListener(
                 this,
-                dataRowCache.getSnapshotEventSubject(),
-                dataRowCache);
+                dataRowCache.getSnapshotEventSubject());
         }
 
         this.dataRowCache = snapshotCache;
@@ -195,8 +197,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 this,
                 "snapshotsChanged",
                 SnapshotEvent.class,
-                snapshotCache.getSnapshotEventSubject(),
-                snapshotCache);
+                snapshotCache.getSnapshotEventSubject());
         }
     }
 
@@ -732,7 +733,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     case PersistenceState.HOLLOW :
                         // TODO: HOLLOW objects have a good chance to be present in
                         // ToMany lists, but we can't detect this here... Need a solution
-                    
+
                     case PersistenceState.DELETED :
 
                         // consult delegate if it exists
