@@ -18,25 +18,14 @@ public class _Gallery extends CayenneDataObject {
     }
     
     
-    public void addToPaintingArray(org.objectstyle.art.Painting obj) {
+    public void addToPaintingArray(test.Painting obj) {
         addToManyTarget("paintingArray", obj, true);
     }
-    public void removeFromPaintingArray(org.objectstyle.art.Painting obj) {
+    public void removeFromPaintingArray(test.Painting obj) {
         removeToManyTarget("paintingArray", obj, true);
     }
     public List getPaintingArray() {
         return (List)readProperty("paintingArray");
-    }
-    
-    
-    public void addToExhibitArray(org.objectstyle.art.Exhibit obj) {
-        addToManyTarget("exhibitArray", obj, true);
-    }
-    public void removeFromExhibitArray(org.objectstyle.art.Exhibit obj) {
-        removeToManyTarget("exhibitArray", obj, true);
-    }
-    public List getExhibitArray() {
-        return (List)readProperty("exhibitArray");
     }
     
     

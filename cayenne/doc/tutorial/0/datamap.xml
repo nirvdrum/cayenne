@@ -1,34 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data-map>
-	<db-entity name="artist" schema="">
+	<db-entity name="ARTIST" schema="">
 		<db-attribute name="DATE_OF_BIRTH" type="TIME" length="8"/>
-		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="255"/>
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true" length="11"/>
+		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="255"/>
 	</db-entity>
-	<db-entity name="gallery" schema="">
-		<db-attribute name="GALLERY_NAME" type="VARCHAR" isMandatory="true" length="100"/>
+	<db-entity name="GALLERY" schema="">
 		<db-attribute name="GALLERY_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true" length="11"/>
+		<db-attribute name="GALLERY_NAME" type="VARCHAR" isMandatory="true" length="100"/>
 	</db-entity>
-	<db-entity name="painting" schema="">
+	<db-entity name="PAINTING" schema="">
 		<db-attribute name="PAINTING_TITLE" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="GALLERY_ID" type="INTEGER" length="11"/>
-		<db-attribute name="PAINTING_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true" length="11"/>
 		<db-attribute name="ESTIMATED_PRICE" type="DECIMAL" length="10"/>
+		<db-attribute name="PAINTING_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true" length="11"/>
 		<db-attribute name="ARTIST_ID" type="INTEGER" length="11"/>
 	</db-entity>
-	<obj-entity name="Artist" className="test.Artist" dbEntityName="artist">
+	<obj-entity name="Artist" className="test.Artist" dbEntityName="ARTIST">
 		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
 	</obj-entity>
-	<obj-entity name="Gallery" className="test.Gallery" dbEntityName="gallery">
+	<obj-entity name="Gallery" className="test.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>
 	</obj-entity>
-	<obj-entity name="Painting" className="test.Painting" dbEntityName="painting">
+	<obj-entity name="Painting" className="test.Painting" dbEntityName="PAINTING">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
-		<obj-attribute name="galleryId" type="java.lang.Integer" db-attribute-name="GALLERY_ID"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
-		<obj-attribute name="artistId" type="java.lang.Integer" db-attribute-name="ARTIST_ID"/>
 	</obj-entity>
-	<db-relationship name="paintingArray" source="artist" target="painting" toDependentPK="false" toMany="true">
+	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
+	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true">
+		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="paintingArray" source="Gallery" target="Painting" toMany="true">
+		<db-relationship-ref source="GALLERY" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false">
+		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
+		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
 </data-map>

@@ -104,9 +104,15 @@
     	</subsection>
     	
     	<subsection name="3.2.6 Compile and Run the Application" anchor="6">
-    		<p>Compile the source code:</p>
+    		<p>Compile the source code (assume that JAVA_HOME variable points to the JSDK 1.4 installation). 
+    		On Windows:</p>
 <source>
-# java 
+projectdir> %JAVA_HOME%\bin\javac test\*.java
+</source>
+
+    		<p>On UNIX:</p>
+<source>
+projectdir# $JAVA_HOME/bin/javac test/*.java
 </source>
     	</subsection>
     	</subsection>

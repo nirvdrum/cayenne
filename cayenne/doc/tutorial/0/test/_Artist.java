@@ -26,21 +26,10 @@ public class _Artist extends CayenneDataObject {
     }
     
     
-    public void addToArtistExhibitArray(org.objectstyle.art.ArtistExhibit obj) {
-        addToManyTarget("artistExhibitArray", obj, true);
-    }
-    public void removeFromArtistExhibitArray(org.objectstyle.art.ArtistExhibit obj) {
-        removeToManyTarget("artistExhibitArray", obj, true);
-    }
-    public List getArtistExhibitArray() {
-        return (List)readProperty("artistExhibitArray");
-    }
-    
-    
-    public void addToPaintingArray(org.objectstyle.art.Painting obj) {
+    public void addToPaintingArray(test.Painting obj) {
         addToManyTarget("paintingArray", obj, true);
     }
-    public void removeFromPaintingArray(org.objectstyle.art.Painting obj) {
+    public void removeFromPaintingArray(test.Painting obj) {
         removeToManyTarget("paintingArray", obj, true);
     }
     public List getPaintingArray() {

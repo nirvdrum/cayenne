@@ -3,6 +3,10 @@ package test;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+import java.util.List;
 
 public class Main {
 
@@ -15,7 +19,7 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        if (args.length != 0) {
+        if (args.length != 1) {
             System.err.println("Usage:");
             System.err.println("    java test.Main galleryPattern");
             System.exit(1);
@@ -77,10 +81,11 @@ public class Main {
     private void addArtist(Gallery gallery) {
        // create new Artist object
        Artist dali = (Artist)ctxt.createAndRegisterNewObject("Artist");
-       dali.setName("Salvador Dali");
+       dali.setArtistName("Salvador Dali");
        
        // create new Painting object
        Painting paint = (Painting)ctxt.createAndRegisterNewObject("Painting");
+       paint.setPaintingTitle("Sleep");
        
        // establish relationship between artist and painting
        dali.addToPaintingArray(paint);

@@ -26,30 +26,21 @@ public class _Painting extends CayenneDataObject {
     }
     
     
-    public void setToPaintingInfo(org.objectstyle.art.PaintingInfo toPaintingInfo) {
-        setToOneTarget("toPaintingInfo", toPaintingInfo, true);
-    }
-    
-    public org.objectstyle.art.PaintingInfo getToPaintingInfo() {
-        return (org.objectstyle.art.PaintingInfo)readProperty("toPaintingInfo");
-    } 
-    
-    
-    public void setToGallery(org.objectstyle.art.Gallery toGallery) {
+    public void setToGallery(test.Gallery toGallery) {
         setToOneTarget("toGallery", toGallery, true);
     }
     
-    public org.objectstyle.art.Gallery getToGallery() {
-        return (org.objectstyle.art.Gallery)readProperty("toGallery");
+    public test.Gallery getToGallery() {
+        return (test.Gallery)readProperty("toGallery");
     } 
     
     
-    public void setToArtist(org.objectstyle.art.Artist toArtist) {
+    public void setToArtist(test.Artist toArtist) {
         setToOneTarget("toArtist", toArtist, true);
     }
     
-    public org.objectstyle.art.Artist getToArtist() {
-        return (org.objectstyle.art.Artist)readProperty("toArtist");
+    public test.Artist getToArtist() {
+        return (test.Artist)readProperty("toArtist");
     } 
     
     
