@@ -180,7 +180,10 @@
 #if ($value.getAttributeValue("align"))
 #set ($align=$value.getAttributeValue("align"))
 #end
-<img src="${relativePath}$value.getAttributeValue('src')" width="$!width" height="$!height" align="$!align">
+#if ($value.getAttributeValue("alt"))
+#set ($alt=$value.getAttributeValue("alt"))
+#end
+<img src="${relativePath}$value.getAttributeValue('src')" width="$!width" height="$!height" align="$!align" alt="$!alt">
 #end
 
 #macro ( source $value)

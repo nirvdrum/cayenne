@@ -28,7 +28,7 @@
                 <li><a href="design.html#or_map">3.1 Object Relational Mapping</a></li>
                 <li><a href="design.html#do">3.2 Data Objects</a></li>
                 <li><a href="design.html#access_classes">3.3 Access Classes</a></li>
-                <li><a href="design.html#connect">3.4 Database Connection</a></li>
+                <li><a href="design.html#connect">3.4 Cayenne DataSource</a></li>
                 <li><a href="design.html#crossdb">3.5 Cross-database Issues</a></li>
                 <li><a href="design.html#config">3.6 Configuration</a></li>
             </ul></li>
