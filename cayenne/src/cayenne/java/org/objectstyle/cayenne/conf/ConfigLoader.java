@@ -59,7 +59,9 @@ package org.objectstyle.cayenne.conf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.util.AbstractHandler;
 import org.objectstyle.cayenne.util.Util;
@@ -199,6 +201,8 @@ public class ConfigLoader {
       */
     private class DomainHandler extends AbstractHandler {
         private String domainName;
+        private Map mapLocations;
+        private Map mapDependencies;
 
         public DomainHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
@@ -206,6 +210,8 @@ public class ConfigLoader {
 
         public void init(String name, Attributes attrs) throws SAXException {
             domainName = attrs.getValue("", "name");
+            mapLocations = new HashMap();
+            mapDependencies = new HashMap();
             delegate.shouldLoadDataDomain(domainName);
         }
 
@@ -219,8 +225,10 @@ public class ConfigLoader {
                 new MapHandler(getParser(), this).init(
                     localName,
                     atts,
-                    domainName);
+                    domainName, mapLocations, mapDependencies);
             } else if (localName.equals("node")) {
+                loadMaps();
+                
                 new NodeHandler(getParser(), this).init(
                     localName,
                     atts,
@@ -233,6 +241,20 @@ public class ConfigLoader {
                 throw new SAXParseException(message, null);
             }
         }
+        
+        protected void finished() {
+            loadMaps();
+        }
+        
+        private void loadMaps() {
+            if (mapLocations.size() > 0) {
+                // load all maps 
+                delegate.shouldLoadDataMaps(domainName, mapLocations, mapDependencies);
+                // clean map locations to avoid loading maps twice
+                mapLocations.clear();
+                mapDependencies.clear();
+            }
+        }
     }
 
     private class MapHandler extends AbstractHandler {
@@ -240,14 +262,18 @@ public class ConfigLoader {
         protected List depMaps = new ArrayList();
         protected String mapName;
         protected String location;
+        private Map mapLocations;
+        private Map mapDependencies;
 
         public MapHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs, String domainName)
+        public void init(String name, Attributes attrs, String domainName, Map locations, Map dependencies)
             throws SAXException {
             this.domainName = domainName;
+            this.mapLocations = locations;
+            this.mapDependencies = dependencies;
             mapName = attrs.getValue("", "name");
             location = attrs.getValue("", "location");
         }
@@ -273,8 +299,8 @@ public class ConfigLoader {
         }
 
         protected void finished() {
-            // do actual loading after all references are initialized
-            delegate.shouldLoadDataMap(domainName, mapName, location, depMaps);
+            mapLocations.put(mapName, location);
+            mapDependencies.put(mapName, depMaps);
         }
     }
 

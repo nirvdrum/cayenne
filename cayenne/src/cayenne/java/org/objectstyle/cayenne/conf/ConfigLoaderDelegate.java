@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.conf;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interface that defines callback API used by ConfigLoader to process loaded
@@ -84,11 +85,17 @@ public interface ConfigLoaderDelegate {
      */
     public void shouldLoadDataDomain(String name);
 
+    /**
+     * @deprecated Since 1.0.4 this method is no longer called during project loading.
+     * shouldLoadDataMaps(String,Map,Map) is used instead.
+     */
     public void shouldLoadDataMap(
         String domainName,
         String mapName,
         String location,
         List depMapNames);
+        
+    public void shouldLoadDataMaps(String domainName, Map locations, Map dependencies);
 
     public void shouldLoadDataNode(
         String domainName,
