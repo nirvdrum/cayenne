@@ -53,42 +53,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * "In" expression.
+ * "Not like, ignore case" expression.
  * 
  * @author Andrei Adamchik
  */
-public class ASTIn extends SimpleNode {
-
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTIn(int id) {
-        super(id);
+public class ASTNotLikeIgnoreCase extends SimpleNode {
+    public ASTNotLikeIgnoreCase(ASTPath path, Object value) {
+        super(ExpressionParserTreeConstants.JJTNOTLIKEIGNORECASE);
+        jjtAddChild(path, 0);
+        jjtAddChild(new ASTScalar(value), 1);
     }
 
-    public ASTIn(ASTPath path, ASTList list) {
-        super(ExpressionParserTreeConstants.JJTIN);
-        jjtAddChild(path, 0);
-        jjtAddChild(list, 1);
+    ASTNotLikeIgnoreCase(int id) {
+        super(id);
     }
 
     /**
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        return new ASTIn(id);
+        return new ASTNotLikeIgnoreCase(id);
     }
 
     protected String getExpressionOperator(int index) {
-        return "in";
+        return "not likeIgnoreCase";
     }
 
     public int getType() {
-        return Expression.IN;
+        return Expression.NOT_LIKE_IGNORE_CASE;
     }
 }

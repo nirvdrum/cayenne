@@ -72,7 +72,13 @@ import org.objectstyle.cayenne.exp.parser.ASTIn;
 import org.objectstyle.cayenne.exp.parser.ASTLess;
 import org.objectstyle.cayenne.exp.parser.ASTLessOrEqual;
 import org.objectstyle.cayenne.exp.parser.ASTLike;
+import org.objectstyle.cayenne.exp.parser.ASTLikeIgnoreCase;
 import org.objectstyle.cayenne.exp.parser.ASTList;
+import org.objectstyle.cayenne.exp.parser.ASTNotBetween;
+import org.objectstyle.cayenne.exp.parser.ASTNotEqual;
+import org.objectstyle.cayenne.exp.parser.ASTNotIn;
+import org.objectstyle.cayenne.exp.parser.ASTNotLike;
+import org.objectstyle.cayenne.exp.parser.ASTNotLikeIgnoreCase;
 import org.objectstyle.cayenne.exp.parser.ASTObjPath;
 
 /** 
@@ -454,7 +460,7 @@ public class ExpressionFactory {
      * A convenience method to create an OBJ_PATH "not equal to" expression.
      */
     public static Expression noMatchExp(String pathSpec, Object value) {
-        return new ASTEqual(new ASTObjPath(pathSpec), value, true);
+        return new ASTNotEqual(new ASTObjPath(pathSpec), value);
     }
 
     /**
@@ -503,7 +509,7 @@ public class ExpressionFactory {
      * A convenience shortcut for building NOT_IN expression.
      */
     public static Expression notInExp(String pathSpec, Collection values) {
-        return new ASTIn(new ASTObjPath(pathSpec), new ASTList(values), true);
+        return new ASTNotIn(new ASTObjPath(pathSpec), new ASTList(values));
     }
 
     /**
@@ -511,7 +517,7 @@ public class ExpressionFactory {
      * @since 1.0.6
      */
     public static Expression notInExp(String pathSpec, Object[] values) {
-        return new ASTIn(new ASTObjPath(pathSpec), new ASTList(values), true);
+        return new ASTNotIn(new ASTObjPath(pathSpec), new ASTList(values));
     }
 
     /**
@@ -528,7 +534,7 @@ public class ExpressionFactory {
         String pathSpec,
         Object value1,
         Object value2) {
-        return new ASTBetween(new ASTObjPath(pathSpec), value1, value2, true);
+        return new ASTNotBetween(new ASTObjPath(pathSpec), value1, value2);
     }
 
     /**
@@ -542,21 +548,21 @@ public class ExpressionFactory {
      * A convenience shortcut for building NOT_LIKE expression.
      */
     public static Expression notLikeExp(String pathSpec, Object value) {
-        return new ASTLike(new ASTObjPath(pathSpec), value, true, false);
+        return new ASTNotLike(new ASTObjPath(pathSpec), value);
     }
 
     /**
      * A convenience shortcut for building LIKE_IGNORE_CASE expression.
      */
     public static Expression likeIgnoreCaseExp(String pathSpec, Object value) {
-        return new ASTLike(new ASTObjPath(pathSpec), value, false, true);
+        return new ASTLikeIgnoreCase(new ASTObjPath(pathSpec), value);
     }
 
     /**
      * A convenience shortcut for building NOT_LIKE_IGNORE_CASE expression.
      */
     public static Expression notLikeIgnoreCaseExp(String pathSpec, Object value) {
-        return new ASTLike(new ASTObjPath(pathSpec), value, true, true);
+        return new ASTNotLikeIgnoreCase(new ASTObjPath(pathSpec), value);
     }
 
     /** 

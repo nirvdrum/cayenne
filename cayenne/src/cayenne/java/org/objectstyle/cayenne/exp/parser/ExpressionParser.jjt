@@ -122,7 +122,7 @@ void andExpression() : {}
 
 void notExpression() : {} 
 {
-	  ( ("not" | "!" ) condition() #Not(1))
+	  (  ("not" | "!" ) condition() #Not(1) )
 	|
 	  condition()
 }
@@ -136,11 +136,18 @@ void simpleCondition() : {}
 {
 	  pathExpression() 
 	  
-	  (equalityCondition()
+	(
+	   equalityCondition()
 	| 
-	  comparisonCondition()
-	| 
-	  negatedCondition()
+	   comparisonCondition()
+	|
+	   notCondition()
+	|
+	   likeCondition()
+	|  
+	   inCondition()
+	|  
+	   betweenCondition()
 	)?
 }
 
@@ -149,7 +156,7 @@ void equalityCondition() : {}
 	( 
 	  ("="  | "==") scalarExpression() #Equal(2)
 	| 
-	  ("!=" | "<>")  scalarExpression() { jjtThis.setNegating(true); } #Equal(2)
+	  ("!=" | "<>")  scalarExpression() #NotEqual(2)
 	)
 	
 }
@@ -167,63 +174,61 @@ void comparisonCondition() : {}
 	)
 }
 
-void negatedCondition() :
+void notCondition() : {} 
 {
-	boolean negating = false;
-}
-{
-	( "not"  { negating = true;} )*
+	("not" | "!" )
 	
 	(
-	  likeCondition(negating)
+	   notLikeCondition()
+	|  
+	   notInCondition()
+	|  
+	   notBetweenCondition()
+	)?
+}
+
+void likeCondition() : {} 
+{	
+	(
+	   "like" scalarCharExpression() #Like(2)
 	|
-	  inCondition(negating)
-	|
-	  betweenCondition(negating)
+	    "likeIgnoreCase"  scalarCharExpression() #LikeIgnoreCase(2)
 	)
 }
 
-void likeCondition(boolean negating) : 
-{
-   boolean ignoringCase = false;
-} 
+void notLikeCondition() : {} 
 {	
-	( 
-	   "like" 
-	| 
-	   ("likeIgnoreCase"  { ignoringCase = true; } )
+	(
+	   "like" scalarCharExpression() #NotLike(2)
+	|
+	    "likeIgnoreCase"  scalarCharExpression() #NotLikeIgnoreCase(2)
 	)
-	
-	scalarCharExpression() 
-	
-	{ 
-	    jjtThis.setNegating(negating); 
-	    jjtThis.setIgnoringCase(ignoringCase); 
-	}  
-	
-	#Like(2)
 }
 
-void inCondition(boolean negating) : {} 
+void inCondition() : {} 
 {	
-	"in"
-	
-	"(" scalarCommaList() ")" 
-	
-	{ jjtThis.setNegating(negating); }  
-	
-	#In(2)
+	"in"  "(" scalarCommaList() ")"  #In(2)
 }
 
-void betweenCondition(boolean negating) :  {}
+void notInCondition() : {} 
+{	
+	"in"  "(" scalarCommaList() ")"  #NotIn(2)
+}
+
+void betweenCondition() :  {}
 {
-	"between"
+	"between"  
+	scalarExpression()
+	"and"
+	scalarExpression()  #Between(3)
+}
+
+void notBetweenCondition() :  {}
+{
+	"between"   
 	 scalarExpression()
 	 "and"
-	 scalarExpression()
-	 
-	 { jjtThis.setNegating(negating); }  
-	#Between(3)
+	 scalarExpression() #NotBetween(3)
 }
 
 void scalarCommaList() : {}

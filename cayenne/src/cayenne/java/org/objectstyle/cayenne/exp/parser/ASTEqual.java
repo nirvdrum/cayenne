@@ -58,30 +58,20 @@ package org.objectstyle.cayenne.exp.parser;
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * "Equal To" or "Not Equal To" expression.
+ * "Equal To" expression.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class ASTEqual extends SimpleNode {
-    protected boolean negating;
 
     /**
      * Creates "Equal To" expression.
      */
     public ASTEqual(ASTPath path, Object value) {
-        this(path, value, false);
-    }
-
-    /**
-     * Creates "Equal To" or "Not Equal To" expression, depending on
-     * <code>notEqual</code> value.
-     */
-    public ASTEqual(ASTPath path, Object value, boolean notEqual) {
         super(ExpressionParserTreeConstants.JJTEQUAL);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
-        this.negating = notEqual;
     }
 
     /**
@@ -95,24 +85,14 @@ public class ASTEqual extends SimpleNode {
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        ASTEqual copy = new ASTEqual(id);
-        copy.negating = negating;
-        return copy;
+        return new ASTEqual(id);
     }
 
     protected String getExpressionOperator(int index) {
-        return (negating) ? "!=" : "=";
+        return "=";
     }
 
     public int getType() {
-        return (negating) ? Expression.NOT_EQUAL_TO : Expression.EQUAL_TO;
-    }
-
-    public boolean isNegating() {
-        return negating;
-    }
-
-    public void setNegating(boolean negating) {
-        this.negating = negating;
+        return Expression.EQUAL_TO;
     }
 }

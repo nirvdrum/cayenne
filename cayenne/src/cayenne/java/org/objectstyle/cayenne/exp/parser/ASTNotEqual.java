@@ -53,42 +53,42 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * "In" expression.
+ * "Not equal to" expression.
  * 
  * @author Andrei Adamchik
  */
-public class ASTIn extends SimpleNode {
-
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTIn(int id) {
+public class ASTNotEqual extends SimpleNode {
+    ASTNotEqual(int id) {
         super(id);
     }
 
-    public ASTIn(ASTPath path, ASTList list) {
-        super(ExpressionParserTreeConstants.JJTIN);
+    /**
+     * Creates "Equal To" expression.
+     */
+    public ASTNotEqual(ASTPath path, Object value) {
+        super(ExpressionParserTreeConstants.JJTNOTEQUAL);
         jjtAddChild(path, 0);
-        jjtAddChild(list, 1);
+        jjtAddChild(new ASTScalar(value), 1);
     }
 
     /**
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        return new ASTIn(id);
+        return new ASTNotEqual(id);
     }
 
     protected String getExpressionOperator(int index) {
-        return "in";
+        return "=";
     }
 
     public int getType() {
-        return Expression.IN;
+        return Expression.NOT_EQUAL_TO;
     }
 }

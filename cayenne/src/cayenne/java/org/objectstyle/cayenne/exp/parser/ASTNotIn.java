@@ -53,26 +53,23 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * "In" expression.
+ * "Not In" expression.
  * 
  * @author Andrei Adamchik
  */
-public class ASTIn extends SimpleNode {
-
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTIn(int id) {
+public class ASTNotIn extends SimpleNode {
+    ASTNotIn(int id) {
         super(id);
     }
 
-    public ASTIn(ASTPath path, ASTList list) {
-        super(ExpressionParserTreeConstants.JJTIN);
+    public ASTNotIn(ASTPath path, ASTList list) {
+        super(ExpressionParserTreeConstants.JJTNOTIN);
         jjtAddChild(path, 0);
         jjtAddChild(list, 1);
     }
@@ -81,14 +78,14 @@ public class ASTIn extends SimpleNode {
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        return new ASTIn(id);
+        return new ASTNotIn(id);
     }
 
     protected String getExpressionOperator(int index) {
-        return "in";
+        return "not in";
     }
 
     public int getType() {
-        return Expression.IN;
+        return Expression.NOT_IN;
     }
 }

@@ -139,7 +139,7 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateEQUAL_TO() throws Exception {
         Expression equalTo = new ASTEqual(new ASTObjPath("artistName"), "abc");
-        Expression notEqualTo = new ASTEqual(new ASTObjPath("artistName"), "abc", true);
+        Expression notEqualTo = new ASTNotEqual(new ASTObjPath("artistName"), "abc");
 
         Artist match = new Artist();
         match.setArtistName("abc");
@@ -294,11 +294,10 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
                 new BigDecimal(10),
                 new BigDecimal(20));
         Expression notBetween =
-            new ASTBetween(
+            new ASTNotBetween(
                 new ASTObjPath("estimatedPrice"),
                 new BigDecimal(10),
-                new BigDecimal(20),
-                true);
+                new BigDecimal(20));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(21));
@@ -328,10 +327,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
                 new ASTList(new Object[] { new BigDecimal(10), new BigDecimal(20)}));
 
         Expression notIn =
-            new ASTIn(
+            new ASTNotIn(
                 new ASTObjPath("estimatedPrice"),
-                new ASTList(new Object[] { new BigDecimal(10), new BigDecimal(20)}),
-                true);
+                new ASTList(new Object[] { new BigDecimal(10), new BigDecimal(20)}));
 
         Painting noMatch1 = new Painting();
         noMatch1.setEstimatedPrice(new BigDecimal(21));
@@ -356,8 +354,7 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateLIKE1() throws Exception {
         Expression like = new ASTLike(new ASTObjPath("artistName"), "abc%d");
-        Expression notLike =
-            new ASTLike(new ASTObjPath("artistName"), "abc%d", true, false);
+        Expression notLike = new ASTNotLike(new ASTObjPath("artistName"), "abc%d");
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("dabc");
@@ -377,8 +374,7 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateLIKE2() throws Exception {
         Expression like = new ASTLike(new ASTObjPath("artistName"), "abc?d");
-        Expression notLike =
-            new ASTLike(new ASTObjPath("artistName"), "abc?d", true, false);
+        Expression notLike = new ASTNotLike(new ASTObjPath("artistName"), "abc?d");
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");
@@ -410,9 +406,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLIKE_IGNORE_CASE() throws Exception {
-        Expression like = new ASTLike(new ASTObjPath("artistName"), "aBcD", false, true);
+        Expression like = new ASTLikeIgnoreCase(new ASTObjPath("artistName"), "aBcD");
         Expression notLike =
-            new ASTLike(new ASTObjPath("artistName"), "aBcD", true, true);
+            new ASTNotLikeIgnoreCase(new ASTObjPath("artistName"), "aBcD");
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");

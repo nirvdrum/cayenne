@@ -64,46 +64,30 @@ import org.objectstyle.cayenne.exp.Expression;
  * @author Andrei Adamchik
  */
 public class ASTBetween extends SimpleNode {
-    protected boolean negating;
 
-    public ASTBetween(ASTPath path, Object value1, Object value2) {
-        this(path, value1, value2, false);
+    ASTBetween(int id) {
+        super(id);
     }
 
-    public ASTBetween(ASTPath path, Object value1, Object value2, boolean notBetween) {
+    public ASTBetween(ASTPath path, Object value1, Object value2) {
         super(ExpressionParserTreeConstants.JJTBETWEEN);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value1), 1);
         jjtAddChild(new ASTScalar(value2), 2);
-        this.negating = notBetween;
-    }
-
-    ASTBetween(int id) {
-        super(id);
     }
 
     /**
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        ASTBetween copy = new ASTBetween(id);
-        copy.negating = negating;
-        return copy;
+        return new ASTBetween(id);
     }
 
     protected String getExpressionOperator(int index) {
-        return (index == 2) ? "and" : (negating) ? "not between" : "between";
+        return (index == 2) ? "and" : "between";
     }
 
     public int getType() {
-        return (negating) ? Expression.NOT_BETWEEN : Expression.BETWEEN;
-    }
-
-    public boolean isNegating() {
-        return negating;
-    }
-
-    public void setNegating(boolean negating) {
-        this.negating = negating;
+        return Expression.BETWEEN;
     }
 }

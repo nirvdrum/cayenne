@@ -53,42 +53,41 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * "In" expression.
+ * "Not Between" expression.
  * 
  * @author Andrei Adamchik
  */
-public class ASTIn extends SimpleNode {
-
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTIn(int id) {
+public class ASTNotBetween extends SimpleNode {
+    ASTNotBetween(int id) {
         super(id);
     }
 
-    public ASTIn(ASTPath path, ASTList list) {
-        super(ExpressionParserTreeConstants.JJTIN);
+    public ASTNotBetween(ASTPath path, Object value1, Object value2) {
+        super(ExpressionParserTreeConstants.JJTNOTBETWEEN);
         jjtAddChild(path, 0);
-        jjtAddChild(list, 1);
+        jjtAddChild(new ASTScalar(value1), 1);
+        jjtAddChild(new ASTScalar(value2), 2);
     }
 
     /**
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        return new ASTIn(id);
+        return new ASTNotBetween(id);
     }
 
     protected String getExpressionOperator(int index) {
-        return "in";
+        return (index == 2) ? "and" : "not between";
     }
 
     public int getType() {
-        return Expression.IN;
+        return Expression.NOT_BETWEEN;
     }
+
 }

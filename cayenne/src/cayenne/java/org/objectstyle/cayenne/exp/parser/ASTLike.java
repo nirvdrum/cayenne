@@ -57,20 +57,17 @@ package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
 
+/**
+ * "Like" expression.
+ * 
+ * @author Andrei Adamchik
+ */
 public class ASTLike extends SimpleNode {
-    protected boolean negating;
-    protected boolean ignoringCase;
 
     public ASTLike(ASTPath path, Object value) {
-        this(path, value, false, false);
-    }
-
-    public ASTLike(ASTPath path, Object value, boolean notLike, boolean ignoreCase) {
         super(ExpressionParserTreeConstants.JJTLIKE);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
-        this.negating = notLike;
-        this.ignoringCase = ignoreCase;
     }
 
     ASTLike(int id) {
@@ -81,43 +78,14 @@ public class ASTLike extends SimpleNode {
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        ASTLike copy = new ASTLike(id);
-        copy.negating = negating;
-        copy.ignoringCase = ignoringCase;
-        return copy;
+        return new ASTLike(id);
     }
 
     protected String getExpressionOperator(int index) {
-        if (negating) {
-            return (ignoringCase) ? "not likeIgnoreCase" : "not like";
-        }
-        else {
-            return (ignoringCase) ? "likeIgnoreCase" : "like";
-        }
+        return "like";
     }
 
     public int getType() {
-        if (negating) {
-            return (ignoringCase) ? Expression.NOT_LIKE_IGNORE_CASE : Expression.NOT_LIKE;
-        }
-        else {
-            return (ignoringCase) ? Expression.LIKE_IGNORE_CASE : Expression.LIKE;
-        }
-    }
-
-    public boolean isNegating() {
-        return negating;
-    }
-
-    public void setNegating(boolean negating) {
-        this.negating = negating;
-    }
-
-    public boolean isIgnoringCase() {
-        return ignoringCase;
-    }
-
-    public void setIgnoringCase(boolean ignoringCase) {
-        this.ignoringCase = ignoringCase;
+        return Expression.LIKE;
     }
 }
