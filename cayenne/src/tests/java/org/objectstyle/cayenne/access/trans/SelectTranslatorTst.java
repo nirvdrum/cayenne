@@ -268,6 +268,50 @@ public class SelectTranslatorTst extends CayenneTestCase {
         }
     }
 
+    /**
+     * Test aliases when the same table used in more then 1 relationship.
+     * Check translation of relationship path "ArtistExhibit.toArtist.artistName"
+     * and "ArtistExhibit.toArtist.paintingArray.paintingTitle".
+     */
+    public void testCreateSqlString6() throws Exception {
+        Connection con = getSharedConnection();
+
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("ArtistExhibit");
+            q.setQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.LIKE,
+                    "toArtist.artistName",
+                    "a%"));
+            q.andQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.LIKE,
+                    "toArtist.paintingArray.paintingTitle",
+                    "p%"));
+
+            SelectTranslator transl = buildTranslator(con);
+            String generatedSql = transl.createSqlString();
+            // logObj.warn("Query: " + generatedSql);
+
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT "));
+            assertTrue(generatedSql.indexOf(" FROM ") > 0);
+            assertTrue(generatedSql.indexOf(" WHERE ") > generatedSql.indexOf(" FROM "));
+
+            // check that there is only one distinct alias for the ARTIST table
+            int ind1 = generatedSql.indexOf("ARTIST t", generatedSql.indexOf(" FROM "));
+            assertTrue(ind1 > 0);
+
+            int ind2 = generatedSql.indexOf("ARTIST t", ind1 + 1);
+            assertTrue(ind2 < 0);
+        } finally {
+            con.close();
+        }
+    }
+
+
     public void testBuildColumnList1() throws Exception {
         Connection con = getSharedConnection();
 
