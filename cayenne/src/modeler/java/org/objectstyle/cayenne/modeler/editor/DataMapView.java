@@ -74,8 +74,8 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.dialog.datamap.LockTypeUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.PackageUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SchemaUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SuperclassUpdateController;
@@ -155,12 +155,12 @@ public class DataMapView extends JPanel {
             }
         };
 
-        updateDefaultLockType = new JButton("Update...");
+        updateDefaultLockType = new JButton("Update");
         defaultLockType = new JCheckBox();
 
         // assemble
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, left:max(110dlu;pref), 3dlu, left:90",
+                "right:max(50dlu;pref), 3dlu, left:max(110dlu;pref), 3dlu, fill:90",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -284,8 +284,7 @@ public class DataMapView extends JPanel {
         nodeSelector.setModel(model);
 
         // init default fields
-        defaultLockType
-                .setSelected(map.getDefaultLockType() != ObjEntity.LOCK_TYPE_NONE);
+        defaultLockType.setSelected(map.getDefaultLockType() != ObjEntity.LOCK_TYPE_NONE);
         defaultPackage.setText(map.getDefaultPackage());
         defaultSchema.setText(map.getDefaultSchema());
         defaultSuperclass.setText(map.getDefaultSuperclass());
@@ -479,7 +478,19 @@ public class DataMapView extends JPanel {
         }
 
         if (dataMap.getObjEntities().size() > 0) {
-            new LockTypeUpdateController(eventController, dataMap).startup();
+            int defaultLockType = dataMap.getDefaultLockType();
+
+            Iterator it = dataMap.getObjEntities().iterator();
+            while (it.hasNext()) {
+                ObjEntity entity = (ObjEntity) it.next();
+                if (defaultLockType != entity.getDeclaredLockType()) {
+                    entity.setDeclaredLockType(defaultLockType);
+
+                    // any way to batch events, a big change will flood the app with
+                    // entity events..?
+                    eventController.fireDbEntityEvent(new EntityEvent(this, entity));
+                }
+            }
         }
     }
 }
