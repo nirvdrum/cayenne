@@ -71,6 +71,24 @@
 		</value></constructor-arg>
 	</bean>
 
+<bean id="P11" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (33001, 'P_artist11', 33001, 1000)
+		</value></constructor-arg>
+	</bean>
+	<bean id="P12" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (33002, 'P_artist12', 33001, 2000)
+		</value></constructor-arg>
+	</bean>
+	<bean id="P21" class="org.objectstyle.cayenne.unit.util.UpdatingSQLTemplate">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
+		<constructor-arg><value>
+		INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (33003, 'P_artist21', 33002, 3000)
+		</value></constructor-arg>
+	</bean>
 	
 	<!-- ======================================= -->
 	<!-- Data Sets -->
@@ -87,6 +105,24 @@
 				<ref bean="AG12"/>
 				<ref bean="AG22"/>
 				<ref bean="AG32"/>
+			</list>
+		</constructor-arg>
+	</bean>
+	<bean id="testPrefetch2" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="G1"/>
+				<ref bean="G2"/>
+				<ref bean="A1"/>
+				<ref bean="A2"/>
+				<ref bean="A3"/>
+				<ref bean="AG11"/>
+				<ref bean="AG12"/>
+				<ref bean="AG22"/>
+				<ref bean="AG32"/>
+				<ref bean="P11"/>
+				<ref bean="P12"/>
+				<ref bean="P21"/>
 			</list>
 		</constructor-arg>
 	</bean>

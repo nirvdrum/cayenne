@@ -211,7 +211,6 @@ class FlatPrefetchTreeNode {
     }
 
     void connectToParents() {
-
         if (!isPhantom() && categorizeByParent) {
             Iterator it = partitionedByParent.entrySet().iterator();
             while (it.hasNext()) {
@@ -219,10 +218,19 @@ class FlatPrefetchTreeNode {
 
                 DataObject root = (DataObject) entry.getKey();
                 List related = (List) entry.getValue();
-
                 ToManyList toManyList = (ToManyList) root
                         .readProperty(incoming.getName());
                 toManyList.setObjectList(related);
+            }
+        }
+
+        // recursively connect to children
+        if (children != null) {
+
+            Iterator it = children.iterator();
+            while (it.hasNext()) {
+                FlatPrefetchTreeNode child = (FlatPrefetchTreeNode) it.next();
+                child.connectToParents();
             }
         }
     }
@@ -386,7 +394,7 @@ class FlatPrefetchTreeNode {
             buffer.insert(0, subpath);
         }
 
-        if (parent != null && parent.isPhantom()) {
+        if (parent != null) {
             parent.buildPrefix(buffer);
         }
 

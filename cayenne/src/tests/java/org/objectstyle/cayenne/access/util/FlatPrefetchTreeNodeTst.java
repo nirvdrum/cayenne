@@ -13,7 +13,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  */
 public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
 
-    public void testBuildPrefix() {
+    public void testBuildPrefix1() {
         Collection prefetches = Arrays.asList(new Object[] {
             "toArtist"
         });
@@ -30,6 +30,36 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
                 .next();
 
         assertEquals("toArtist.", artistNode.buildPrefix(new StringBuffer()).toString());
+    }
+
+    public void testBuildPrefix2() {
+        Collection prefetches = Arrays.asList(new Object[] {
+                "toArtist", "toArtist.groupArray"
+        });
+
+        DataContext context = createDataContext();
+        ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
+
+        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches);
+        assertEquals("", paintNode.buildPrefix(new StringBuffer()).toString());
+
+        FlatPrefetchTreeNode artistNode = (FlatPrefetchTreeNode) paintNode
+                .getChildren()
+                .iterator()
+                .next();
+
+        assertEquals("toArtist.", artistNode.buildPrefix(new StringBuffer()).toString());
+
+        // more complicated case - flattened relationship and names of db relationships do
+        // not match names of obj relationships
+        FlatPrefetchTreeNode groupNode = (FlatPrefetchTreeNode) artistNode
+                .getChildren()
+                .iterator()
+                .next();
+
+        assertEquals("toArtist.artistGroupArray.toGroup.", groupNode
+                .buildPrefix(new StringBuffer())
+                .toString());
     }
 
     public void testSourceForTarget() {

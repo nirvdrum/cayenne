@@ -63,12 +63,14 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -77,18 +79,23 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  */
 public class FlatPrefetchResolverTst extends CayenneTestCase {
 
-    public void testResolveObjectTree() {
+    public void testResolveObjectTreeOneJoin() {
 
         Collection prefetches = Arrays.asList(new Object[] {
             "toArtist"
         });
+
+        Date d1 = new Date();
+        List rows = new ArrayList();
+        rows.add(buildRow1(d1));
+        rows.add(buildRow2(d1));
 
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
         FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches);
         FlatPrefetchResolver resolver = new FlatPrefetchResolver(context, false, false);
 
-        List objects = resolver.resolveObjectTree(tree, buildRows());
+        List objects = resolver.resolveObjectTree(tree, rows);
         assertEquals(2, objects.size());
 
         // object store must have only 3 objects
@@ -112,15 +119,44 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
         }
     }
 
-    List buildRows() {
-        List rows = new ArrayList();
+    public void testResolveObjectTreeMultiJoins() {
+
+        Collection prefetches = Arrays.asList(new Object[] {
+                Painting.TO_ARTIST_PROPERTY,
+                Painting.TO_ARTIST_PROPERTY + '.' + Artist.GROUP_ARRAY_PROPERTY
+        });
 
         Date d1 = new Date();
+        List rows = new ArrayList();
+        rows.add(buildMultiRow1(d1));
+        rows.add(buildMultiRow2(d1));
 
-        rows.add(buildRow1(d1));
-        rows.add(buildRow2(d1));
+        DataContext context = createDataContext();
+        ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
+        FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchResolver resolver = new FlatPrefetchResolver(context, false, false);
 
-        return rows;
+        List objects = resolver.resolveObjectTree(tree, rows);
+        assertEquals(2, objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Painting p = (Painting) it.next();
+            assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+            Artist a = p.getToArtist();
+            assertEquals(PersistenceState.COMMITTED, a.getPersistenceState());
+            
+            ToManyList list = (ToManyList) a.getGroupArray();
+            assertNotNull(list);
+            assertFalse("artist's groups not resolved: " + a, list.needsFetch());
+            assertTrue(list.size() > 0);
+
+            Iterator children = list.iterator();
+            while (children.hasNext()) {
+                ArtGroup g = (ArtGroup) children.next();
+                assertEquals(PersistenceState.COMMITTED, g.getPersistenceState());
+            }
+        }
     }
 
     DataRow buildRow1(Date d) {
@@ -145,6 +181,36 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
         r2.put("toArtist.ARTIST_NAME", "Artist1");
         r2.put("toArtist.DATE_OF_BIRTH", d);
         return r2;
+    }
+
+    DataRow buildMultiRow1(Date d) {
+        DataRow r1 = new DataRow(10);
+        r1.put("PAINTING_ID", new Integer(1));
+        r1.put("ARTIST_ID", new Integer(1));
+        r1.put("GALLERY_ID", new Integer(1));
+        r1.put("PAINTING_TITLE", "PXX1");
+        r1.put("ESTIMATED_PRICE", new BigDecimal("22.01"));
+        r1.put("toArtist.ARTIST_NAME", "ArtistXX");
+        r1.put("toArtist.DATE_OF_BIRTH", d);
+        r1.put("toArtist.artistGroupArray.toGroup.GROUP_ID", new Integer(1));
+        r1.put("toArtist.artistGroupArray.toGroup.PARENT_GROUP_ID", null);
+        r1.put("toArtist.artistGroupArray.toGroup.NAME", "G1");
+        return r1;
+    }
+
+    DataRow buildMultiRow2(Date d) {
+        DataRow r1 = new DataRow(10);
+        r1.put("PAINTING_ID", new Integer(2));
+        r1.put("ARTIST_ID", new Integer(2));
+        r1.put("GALLERY_ID", new Integer(1));
+        r1.put("PAINTING_TITLE", "PYY2");
+        r1.put("ESTIMATED_PRICE", new BigDecimal("111.01"));
+        r1.put("toArtist.ARTIST_NAME", "ArtistYY");
+        r1.put("toArtist.DATE_OF_BIRTH", d);
+        r1.put("toArtist.artistGroupArray.toGroup.GROUP_ID", new Integer(1));
+        r1.put("toArtist.artistGroupArray.toGroup.PARENT_GROUP_ID", null);
+        r1.put("toArtist.artistGroupArray.toGroup.NAME", "G1");
+        return r1;
     }
 
 }
