@@ -140,7 +140,7 @@ public class ObjEntityPane
 		dbName = new JComboBox();
 		dbName.setBackground(Color.WHITE);
 
-		JLabel checkLabel = new JLabel("Read-only");
+		JLabel checkLabel = new JLabel("Read-only: ");
 		readOnly = new JCheckBox();
 		readOnly.addItemListener(this);
 
