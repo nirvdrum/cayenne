@@ -72,6 +72,14 @@ public class CayenneUserDir {
     protected static CayenneUserDir sharedInstance;
 
     public static final String CAYENNE_DIR = ".cayenne";
+    
+    /**
+     * A property name for the property that allows to define an alternative
+     * location of Cayenne User Directory (instead of default "$HOME/.cayenne").
+     *  
+     * @since 1.1
+     */
+    public static final String ALT_USER_DIR_PROPERTY = "cayenne.userdir";
 
     protected File cayenneUserDir;
 
@@ -88,30 +96,39 @@ public class CayenneUserDir {
      */
     protected CayenneUserDir() {
         super();
-        File homeDir = new File(System.getProperty("user.home"));
-        File tmpDir = new File(homeDir, CAYENNE_DIR);
 
-        if(tmpDir.exists() && !tmpDir.isDirectory()) {
-        	tmpDir = null;
-        	logObj.warn(tmpDir + " is not a directory.");
+        File tmpDir = null;
+        String dirName = System.getProperty(ALT_USER_DIR_PROPERTY);
+
+        if (dirName != null) {
+            tmpDir = new File(dirName);
         }
-        else if(tmpDir.exists() && !tmpDir.canRead()) {
-        	tmpDir = null;
-        	logObj.warn(tmpDir + " is not readable.");
+        else {
+            File homeDir = new File(System.getProperty("user.home"));
+            tmpDir = new File(homeDir, CAYENNE_DIR);
+        }
+
+        if (tmpDir.exists() && !tmpDir.isDirectory()) {
+            tmpDir = null;
+            logObj.warn(tmpDir + " is not a directory.");
+        }
+        else if (tmpDir.exists() && !tmpDir.canRead()) {
+            tmpDir = null;
+            logObj.warn(tmpDir + " is not readable.");
         }
         else if (!tmpDir.exists()) {
             tmpDir.mkdirs();
-            if(!tmpDir.exists()) {
-            	tmpDir = null;
-            	logObj.warn("Couldn't create " + tmpDir);
+            if (!tmpDir.exists()) {
+                tmpDir = null;
+                logObj.warn("Couldn't create " + tmpDir);
             }
         }
-        
+
         cayenneUserDir = tmpDir;
     }
 
     /**
-     * Returns a directory object where all user Cayenne-related configuration is stored. 
+     * Returns a directory object where all user Cayenne-related configuration is stored.
      * May return null if the directory is not accessible for whatever reason.
      */
     public File getDirectory() {
