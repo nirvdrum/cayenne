@@ -18,7 +18,8 @@
     	<fileset dir="${otherlib.dir}">
 			<include name="${ant-junitreport.jar}"/>
 			<include name="${junit.jar}"/>
-			<include name="${mockrunner.jar}"/>
+			<include name="${servlet.jar}"/>
+    		<include name="${mockrunner.jar}"/>
 			<include name="${spring.jar}"/>
 			<include name="${jgroups.jar}"/>
 		</fileset>

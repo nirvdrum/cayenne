@@ -357,6 +357,8 @@ public abstract class Configuration {
 	 * Returns a DataDomain as a stream or <code>null</code>
 	 * if it cannot be found.
 	 */
+	// TODO: this method is only used in sublcass (DefaultConfiguration),
+	// should we remove it from here?
 	protected abstract InputStream getDomainConfiguration();
 
 	/**

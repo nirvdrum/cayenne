@@ -13,6 +13,10 @@ Changes, Features And Improvements:
 - DataObject.resolveFault() will now throw an exception if the underlying DB row does not exist
   follow this link for further discussion:
   http://objectstyle.org/cayenne/lists/cayenne-user/2004/07/0124.html
+  
+- Better support for custom DbAdapters in CayenneModeler. Custom DbAdapter is no longer 
+  required to be in the modeler CLASSPATH. Rather CLASSPATH settings configured via 
+  "Tools -> Configure ClassPath" are taken into account.
 
 Bugs Fixed:
 

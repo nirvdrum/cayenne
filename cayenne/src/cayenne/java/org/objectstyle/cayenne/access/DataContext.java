@@ -169,6 +169,15 @@ public class DataContext implements QueryEngine, Serializable {
     public static final EventSubject DID_ROLLBACK = EventSubject.getSubject(
             DataContext.class,
             "DataContextDidRollback");
+    
+
+    
+    /**
+     * A holder of a DataContext bound to the current thread.
+     * 
+     * @since 1.1
+     */
+    protected static final ThreadLocal threadDataContext = new ThreadLocal();
 
     // event posting default for new DataContexts
     private static boolean transactionEventsEnabledDefault;
@@ -203,11 +212,40 @@ public class DataContext implements QueryEngine, Serializable {
                 .loadClass(className)
                 .newInstance();
     }
+    
+    /**
+     * Returns the DataContext bound to the current thread.
+     * 
+     * @since 1.1
+     * @return the DataContext associated with caller thread.
+     * @throws IllegalStateException if there is no DataContext bound to the current
+     *             thread.
+     * @see org.objectstyle.cayenne.conf.WebApplicationContextProvider
+     */
+    public static DataContext getThreadDataContext() throws IllegalStateException {
+        DataContext dc = (DataContext) threadDataContext.get();
+        if (dc == null) {
+            throw new IllegalStateException("Current thread has no bound DataContext.");
+        }
+
+        return dc;
+    }
+    
+    /**
+     * Binds a DataContext to the current thread. DataContext can later be retrieved by 
+     * users in the same thread by calling {@link DataContext#getThreadDataContext}. Using
+     * null parameter will unbind currently bound DataContext. 
+     * 
+     * @since 1.1
+     */
+    public static void bindThreadDataContext(DataContext context) {
+        threadDataContext.set(context);
+    }
 
     /**
      * Factory method that creates and returns a new instance of DataContext based on
      * default domain. If more than one domain exists in the current configuration,
-     * {@link DataContext#createDataContext(String)} must be used instead.
+     * {@link DataContext#createDataContext(String)}must be used instead.
      */
     public static DataContext createDataContext() {
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
