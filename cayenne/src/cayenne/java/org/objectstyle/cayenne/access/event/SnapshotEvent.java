@@ -72,56 +72,56 @@ public class SnapshotEvent extends CayenneEvent {
     protected long timestamp;
     protected Collection deletedIds;
     protected Map modifiedDiffs;
-    protected Collection relatedIds;
+    protected Collection indirectlyModifiedIds;
 
     public SnapshotEvent(
         Object source,
         Object postedBy,
         Map modifiedDiffs,
         Collection deletedIds,
-        Collection relatedIds) {
+        Collection indirectlyModifiedIds) {
             
         super(source, postedBy, null);
     
         this.timestamp = System.currentTimeMillis();
         this.modifiedDiffs = modifiedDiffs;
         this.deletedIds = deletedIds;
-        this.relatedIds = relatedIds;
+        this.indirectlyModifiedIds = indirectlyModifiedIds;
     }
 
     public long getTimestamp() {
         return timestamp;
     }
  
-    public Map modifiedDiffs() {
+    public Map getModifiedDiffs() {
         return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
     }
 
-    public Collection deletedIds() {
+    public Collection getDeletedIds() {
         return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
     }
     
-    public Collection relatedIds() {
-        return (relatedIds != null) ? relatedIds : Collections.EMPTY_LIST;
+    public Collection getIndirectlyModifiedIds() {
+        return (indirectlyModifiedIds != null) ? indirectlyModifiedIds : Collections.EMPTY_LIST;
     }
 
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[SnapshotEvent] source: ").append(getSource());
 
-        Map modified = modifiedDiffs();
+        Map modified = getModifiedDiffs();
         if (!modified.isEmpty()) {
             buffer.append(", modified ").append(modified.size()).append(" id(s)");
         }
 
-        Collection deleted = deletedIds();
+        Collection deleted = getDeletedIds();
         if (!deleted.isEmpty()) {
             buffer.append(", deleted ").append(deleted.size()).append(" id(s)");
         }
         
-        Collection related = relatedIds();
+        Collection related = getIndirectlyModifiedIds();
         if (!related.isEmpty()) {
-            buffer.append(", related ").append(related.size()).append(" id(s)");
+            buffer.append(", indirectly modified ").append(related.size()).append(" id(s)");
         }
 
         return buffer.toString();

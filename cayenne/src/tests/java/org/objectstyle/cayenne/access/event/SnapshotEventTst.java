@@ -65,8 +65,8 @@ public class SnapshotEventTst extends CayenneTestCase {
             new SnapshotEvent(source, source, modified, deleted, related);
         assertSame(source, event.getSource());
         assertSame(source, event.getPostedBy());
-        assertSame(deleted, event.deletedIds());
-        assertSame(modified, event.modifiedDiffs());
-        assertSame(related, event.relatedIds());
+        assertSame(deleted, event.getDeletedIds());
+        assertSame(modified, event.getModifiedDiffs());
+        assertSame(related, event.getIndirectlyModifiedIds());
     }
 }

@@ -364,8 +364,8 @@ public class DataRowStore implements Serializable {
             logObj.debug("remote event: " + event);
         }
 
-        Collection deletedSnapshotIds = event.deletedIds();
-        Map diffs = event.modifiedDiffs();
+        Collection deletedSnapshotIds = event.getDeletedIds();
+        Map diffs = event.getModifiedDiffs();
 
         if (deletedSnapshotIds.isEmpty() && diffs.isEmpty()) {
             logObj.warn("processRemoteEvent.. bogus call... no changes.");
@@ -375,7 +375,7 @@ public class DataRowStore implements Serializable {
         synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
             processUpdateDiffs(diffs);
-            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds, event.relatedIds());
+            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds, event.getIndirectlyModifiedIds());
         }
     }
 
@@ -388,7 +388,7 @@ public class DataRowStore implements Serializable {
         Object source,
         Map updatedSnapshots,
         Collection deletedSnapshotIds,
-        Collection relatedSnapshotIds) {
+        Collection indirectlyModifiedIds) {
 
         // update the internal cache, prepare snapshot event
 
@@ -400,7 +400,7 @@ public class DataRowStore implements Serializable {
         synchronized (this) {        
             processDeletedIDs(deletedSnapshotIds);
             Map diffs = processUpdatedSnapshots(updatedSnapshots);
-            sendUpdateNotification(source, diffs, deletedSnapshotIds, relatedSnapshotIds);
+            sendUpdateNotification(source, diffs, deletedSnapshotIds, indirectlyModifiedIds);
         }
     }
 
@@ -491,14 +491,15 @@ public class DataRowStore implements Serializable {
         Object source,
         Map diffs,
         Collection deletedSnapshotIDs,
-        Collection relatedModifiedIds) {
+        Collection indirectlyModifiedIds) {
 
         // do not send bogus events... e.g. inserted objects are not counted
         if ((diffs != null && !diffs.isEmpty())
-            || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())) {
+            || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())
+            || (indirectlyModifiedIds != null && !indirectlyModifiedIds.isEmpty())) {
             
             SnapshotEvent event =
-                new SnapshotEvent(source, this, diffs, deletedSnapshotIDs, relatedModifiedIds);
+                new SnapshotEvent(source, this, diffs, deletedSnapshotIDs, indirectlyModifiedIds);
 
             if (logObj.isDebugEnabled()) {
                 logObj.debug("postSnapshotsChangeEvent: " + event);

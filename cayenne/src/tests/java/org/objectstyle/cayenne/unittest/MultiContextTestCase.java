@@ -87,6 +87,17 @@ public abstract class MultiContextTestCase extends CayenneTestCase {
         assertNotSame(context, mirror);
         assertNotSame(context.getObjectStore(), mirror.getObjectStore());
         
+        if (context.isUsingSharedSnapshotCache()) {
+            assertSame(
+                context.getObjectStore().getDataRowCache(),
+                mirror.getObjectStore().getDataRowCache());
+        }
+        else {
+            assertNotSame(
+                context.getObjectStore().getDataRowCache(),
+                mirror.getObjectStore().getDataRowCache());
+        }
+
         return mirror;
     }
 }

@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Invocation;
 import org.objectstyle.cayenne.util.Util;
@@ -217,7 +218,8 @@ public class EventManager extends Object {
         if (logObj.isDebugEnabled()) {
             String label =
                 (blocking) ? "adding listener: " : "adding non-blocking listener: ";
-            logObj.debug(label + listener.getClass().getName() + "." + methodName);
+            String object = new ToStringBuilder(listener).toString();
+            logObj.debug(label + object + "." + methodName);
         }
 
         try {

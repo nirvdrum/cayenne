@@ -324,7 +324,7 @@ public class ObjRelationship extends Relationship implements EventListener {
 
     /**
 	 * Returns a flag indicating whether modifying a target of such relationship 
-     * in any way will preserve unchanged the underlying table row of the source.
+     * in any way will not change the underlying table row of the source.
 	 * 
 	 * @since 1.1
 	 */
