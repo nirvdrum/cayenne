@@ -12,7 +12,7 @@
             to write a Cayenne application:</p>
             
             <p><strong>- Create DataMap : </strong> 
-            <a href="/api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            <a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
             is stored in an XML file 
             used to desribe your database schema and map it to the Java classes
             in your application. DataMap can be created either manually or using
@@ -20,16 +20,16 @@
             </p>
             
             <p><strong>- Generate Java classes : </strong> In Cayenne
-            <a href="/api/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
+            <a href="../api/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
             map to Java classes that implement 
-            <a href="/api/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
+            <a href="../api/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
             CayenneModeler can be used to generate and maintain such Java classes.            
             </p>
             
             <p><strong>- Access Cayenne classes from your Java code : </strong> 
             Access to Cayenne functionality at the user (Java developer) level 
             is done via  <a 
-            href="/api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
+            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
             class.      
             </p>
             
@@ -43,7 +43,7 @@
         </subsection>
         
         <subsection name="4.2 Create DataMap" anchor="datamap">
-            <p><a href="/api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            <p><a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
             is stored in an XML file 
             used to desribe a database schema and map it to the Java classes
             in the Java application. DataMap can be created either manually or using
@@ -62,11 +62,11 @@
             <subsection name="4.4.1 Getting DataContext" anchor="cayenne_dc">
             <p>In Cayenne application most of the database work is done via a 
             <a 
-            href="/api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
+            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
             instance. It isolates changes made by a single user from other users. In
             web application speak this means that DataContext usually has a "session
             scope". <a 
-            href="/api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
+            href="../api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
             usually serves as a factory for DataContext objects. In a simple
             case of a standalone application, DataContext can be obtained with the following
             lines of code:</p>
