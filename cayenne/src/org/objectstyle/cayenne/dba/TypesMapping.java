@@ -95,6 +95,7 @@ public class TypesMapping {
     public static final String SQL_TIMESTAMP = "TIMESTAMP";
     public static final String SQL_VARBINARY = "VARBINARY";
     public static final String SQL_VARCHAR = "VARCHAR";
+    public static final String SQL_OTHER = "OTHER";
 
     // char constants for Java data types
     public static final String JAVA_LONG = "java.lang.Long";
@@ -153,6 +154,7 @@ public class TypesMapping {
         sqlStringType.put(SQL_TIMESTAMP, new Integer(Types.TIMESTAMP));
         sqlStringType.put(SQL_VARBINARY, new Integer(Types.VARBINARY));
         sqlStringType.put(SQL_VARCHAR, new Integer(Types.VARCHAR));
+        sqlStringType.put(SQL_OTHER, new Integer(Types.OTHER));
 
         sqlEnumType.put(new Integer(Types.ARRAY), SQL_ARRAY);
         sqlEnumType.put(new Integer(Types.BIGINT), SQL_BIGINT);
@@ -176,7 +178,8 @@ public class TypesMapping {
         sqlEnumType.put(new Integer(Types.TIMESTAMP), SQL_TIMESTAMP);
         sqlEnumType.put(new Integer(Types.VARBINARY), SQL_VARBINARY);
         sqlEnumType.put(new Integer(Types.VARCHAR), SQL_VARCHAR);
-
+        sqlEnumType.put(new Integer(Types.OTHER), SQL_OTHER);
+        
         sqlEnumJava.put(new Integer(Types.BIGINT), JAVA_LONG);
         sqlEnumJava.put(new Integer(Types.BINARY), JAVA_BYTES);
         sqlEnumJava.put(new Integer(Types.BIT), JAVA_BOOLEAN);

@@ -67,168 +67,191 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
 
 public class DbLoaderTst extends TestCase {
-    static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
+	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
 
-    protected DbLoader loader;
+	protected DbLoader loader;
 
-    public DbLoaderTst(String name) {
-        super(name);
-    }
+	public DbLoaderTst(String name) {
+		super(name);
+	}
 
-    public void setUp() throws Exception {
-        loader =
-            new DbLoader(
-                TestMain.getSharedConnection(),
-                TestMain.getSharedNode().getAdapter());
-    }
+	public void setUp() throws Exception {
+		loader =
+			new DbLoader(
+				TestMain.getSharedConnection(),
+				TestMain.getSharedNode().getAdapter());
+	}
 
-    /** 
-     * DataMap loading is in one big test method, since breaking it in
-     * individual tests would require multiple reads of metatdata 
-     * which is extremely slow on some RDBMS (Sybase).
-     * TODO: need to break to a bunch of private methods that test individual aspects. 
-     */
-    public void testLoad() throws Exception {
-        try {
-            boolean supportsFK =
-                TestMain.getSharedNode().getAdapter().supportsFkConstraints();
+	/** 
+	 * DataMap loading is in one big test method, since breaking it in
+	 * individual tests would require multiple reads of metatdata 
+	 * which is extremely slow on some RDBMS (Sybase).
+	 * TODO: need to break to a bunch of private methods that test individual aspects. 
+	 */
+	public void testLoad() throws Exception {
+		try {
+			boolean supportsFK =
+				TestMain.getSharedNode().getAdapter().supportsFkConstraints();
 
-            DataMap map = new DataMap();
+			DataMap map = new DataMap();
 
-            // *** TESTING THIS ***
-            loader.loadDbEntities(
-                map,
-                loader.getTables(null, null, "%", new String[] { "TABLE" }));
-            DbEntity dae = map.getDbEntity("ARTIST");
+			// *** TESTING THIS ***
+			loader.loadDbEntities(
+				map,
+				loader.getTables(null, null, "%", new String[] { "TABLE" }));
+			DbEntity dae = map.getDbEntity("ARTIST");
 
-            // sometimes table names get converted to lowercase
-            if (dae == null) {
-                dae = map.getDbEntity("artist");
-            }
+			// sometimes table names get converted to lowercase
+			if (dae == null) {
+				dae = map.getDbEntity("artist");
+			}
 
-            assertNotNull(dae);
-            assertEquals("ARTIST", dae.getName().toUpperCase());
-            assertTrue(((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
+			assertNotNull(dae);
+			assertEquals("ARTIST", dae.getName().toUpperCase());
+			assertTrue(
+				((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
 
-            if (supportsFK) {
-                // *** TESTING THIS ***
-                loader.loadDbRelationships(map);
-                List rels = dae.getRelationshipList();
-                assertNotNull(rels);
-                assertTrue(rels.size() > 0);
-            }
+			if (supportsFK) {
+				// *** TESTING THIS ***
+				loader.loadDbRelationships(map);
+				List rels = dae.getRelationshipList();
+				assertNotNull(rels);
+				assertTrue(rels.size() > 0);
+			}
 
-            // *** TESTING THIS ***
-            loader.loadObjEntities(map);
+			// *** TESTING THIS ***
+			loader.loadObjEntities(map);
 
-            ObjEntity ae = map.getObjEntity("Artist");
-            assertNotNull(ae);
-            assertEquals("Artist", ae.getName());
+			ObjEntity ae = map.getObjEntity("Artist");
+			assertNotNull(ae);
+			assertEquals("Artist", ae.getName());
 
-            // assert primary key is not an attribute
-            assertNull(ae.getAttribute("artistId"));
+			// assert primary key is not an attribute
+			assertNull(ae.getAttribute("artistId"));
 
-            if (supportsFK) {
-                // *** TESTING THIS ***
-                loader.loadObjRelationships(map);
-                List rels = ae.getRelationshipList();
-                assertNotNull(rels);
-                assertTrue(rels.size() > 0);
-            }
+			if (supportsFK) {
+				// *** TESTING THIS ***
+				loader.loadObjRelationships(map);
+				List rels = ae.getRelationshipList();
+				assertNotNull(rels);
+				assertTrue(rels.size() > 0);
+			}
 
-            // now when the map is loaded, test 
-            // various things
+			// now when the map is loaded, test 
+			// various things
 
-            // selectively check how different types were processed
-            checkTypes(map);
-        }
-        finally {
-            loader.getCon().close();
-        }
-    }
+			// selectively check how different types were processed
+			checkTypes(map);
+		} finally {
+			loader.getCon().close();
+		}
+	}
 
-    private DataMap originalMap() {
-        return TestMain.getSharedNode().getDataMaps()[0];
-    }
+	private DataMap originalMap() {
+		return TestMain.getSharedNode().getDataMaps()[0];
+	}
 
-    /** Selectively check how different types were processed. */
-    public void checkTypes(DataMap map) {
-        DbEntity dbe = map.getDbEntity("PAINTING");
+	/** Selectively check how different types were processed. */
+	public void checkTypes(DataMap map) {
+		DbEntity dbe = map.getDbEntity("PAINTING");
+		DbEntity floatTest = map.getDbEntity("FLOAT_TEST");
 
-        // take into account a possibility of a lowercase names
-        if (dbe == null) {
-            dbe = map.getDbEntity("painting");
-        }
+		// take into account a possibility of lowercase names
+		if (dbe == null) {
+			dbe = map.getDbEntity("painting");
+		}
+		if (floatTest == null) {
+			floatTest = map.getDbEntity("float_test");
+		}
 
-        DbAttribute integerAttr = (DbAttribute) dbe.getAttribute("PAINTING_ID");
-        DbAttribute decimalAttr = (DbAttribute) dbe.getAttribute("ESTIMATED_PRICE");
-        DbAttribute varcharAttr = (DbAttribute) dbe.getAttribute("PAINTING_TITLE");
+		DbAttribute integerAttr = (DbAttribute) dbe.getAttribute("PAINTING_ID");
+		DbAttribute decimalAttr =
+			(DbAttribute) dbe.getAttribute("ESTIMATED_PRICE");
+		DbAttribute varcharAttr =
+			(DbAttribute) dbe.getAttribute("PAINTING_TITLE");
+		DbAttribute floatAttr =
+			(DbAttribute) floatTest.getAttribute("FLOAT_COL");
 
-        // check decimal
-        assertEquals(
-            msgForTypeMismatch(Types.DECIMAL, decimalAttr),
-            Types.DECIMAL,
-            decimalAttr.getType());
+		// check decimal
+		assertEquals(
+			msgForTypeMismatch(Types.DECIMAL, decimalAttr),
+			Types.DECIMAL,
+			decimalAttr.getType());
 
-        assertEquals(2, decimalAttr.getPrecision());
+		assertEquals(2, decimalAttr.getPrecision());
 
-        // check varchar
-        assertEquals(
-            msgForTypeMismatch(Types.VARCHAR, varcharAttr),
-            Types.VARCHAR,
-            varcharAttr.getType());
-        assertEquals(255, varcharAttr.getMaxLength());
+		// check varchar
+		assertEquals(
+			msgForTypeMismatch(Types.VARCHAR, varcharAttr),
+			Types.VARCHAR,
+			varcharAttr.getType());
+		assertEquals(255, varcharAttr.getMaxLength());
 
-        // check integer
-        assertEquals(
-            msgForTypeMismatch(Types.INTEGER, integerAttr),
-            Types.INTEGER,
-            integerAttr.getType());
-    }
+		// check integer
+		assertEquals(
+			msgForTypeMismatch(Types.INTEGER, integerAttr),
+			Types.INTEGER,
+			integerAttr.getType());
 
-    public void checkAllDBEntities(DataMap map) {
-        Iterator entIt = originalMap().getDbEntitiesAsList().iterator();
-        while (entIt.hasNext()) {
-            DbEntity origEnt = (DbEntity) entIt.next();
-            DbEntity newEnt = map.getDbEntity(origEnt.getName());
+		// check float
+		// floats are not very well reingeneered by Oracle driver,
+		// so account for that here
 
-            Iterator it = origEnt.getAttributeList().iterator();
-            while (it.hasNext()) {
-                DbAttribute origAttr = (DbAttribute) it.next();
-                DbAttribute newAttr = (DbAttribute) newEnt.getAttribute(origAttr.getName());
-                assertNotNull("No matching DbAttribute for '" + origAttr.getName(), newAttr);
-                assertEquals(
-                    msgForTypeMismatch(origAttr, newAttr),
-                    origAttr.getType(),
-                    newAttr.getType());
-                // length and precision doesn't have to be the same
-                // it must be greater or equal
-                assertTrue(origAttr.getMaxLength() <= newAttr.getMaxLength());
-                assertTrue(origAttr.getPrecision() <= newAttr.getPrecision());
-            }
-        }
-    }
+		assertTrue(
+			msgForTypeMismatch(Types.FLOAT, floatAttr),
+			Types.FLOAT == floatAttr.getType()
+				|| Types.DOUBLE == floatAttr.getType()
+				|| Types.OTHER == floatAttr.getType());
+	}
 
-    private String msgForTypeMismatch(DbAttribute origAttr, DbAttribute newAttr) {
-        return msgForTypeMismatch(origAttr.getType(), newAttr);
-    }
+	public void checkAllDBEntities(DataMap map) {
+		Iterator entIt = originalMap().getDbEntitiesAsList().iterator();
+		while (entIt.hasNext()) {
+			DbEntity origEnt = (DbEntity) entIt.next();
+			DbEntity newEnt = map.getDbEntity(origEnt.getName());
 
-    private String msgForTypeMismatch(int origType, DbAttribute newAttr) {
-        String nt = TypesMapping.getSqlNameByType(newAttr.getType());
-        String ot = TypesMapping.getSqlNameByType(origType);
-        return attrMismatch(
-            newAttr.getName(),
-            "expected type: <" + ot + ">, but was <" + nt + ">");
-    }
+			Iterator it = origEnt.getAttributeList().iterator();
+			while (it.hasNext()) {
+				DbAttribute origAttr = (DbAttribute) it.next();
+				DbAttribute newAttr =
+					(DbAttribute) newEnt.getAttribute(origAttr.getName());
+				assertNotNull(
+					"No matching DbAttribute for '" + origAttr.getName(),
+					newAttr);
+				assertEquals(
+					msgForTypeMismatch(origAttr, newAttr),
+					origAttr.getType(),
+					newAttr.getType());
+				// length and precision doesn't have to be the same
+				// it must be greater or equal
+				assertTrue(origAttr.getMaxLength() <= newAttr.getMaxLength());
+				assertTrue(origAttr.getPrecision() <= newAttr.getPrecision());
+			}
+		}
+	}
 
-    private String attrMismatch(String attrName, String msg) {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("[Error loading attribute '")
-            .append(attrName)
-            .append("': ")
-            .append(msg)
-            .append("]");
-        return buf.toString();
-    }
+	private String msgForTypeMismatch(
+		DbAttribute origAttr,
+		DbAttribute newAttr) {
+		return msgForTypeMismatch(origAttr.getType(), newAttr);
+	}
+
+	private String msgForTypeMismatch(int origType, DbAttribute newAttr) {
+		String nt = TypesMapping.getSqlNameByType(newAttr.getType());
+		String ot = TypesMapping.getSqlNameByType(origType);
+		return attrMismatch(
+			newAttr.getName(),
+			"expected type: <" + ot + ">, but was <" + nt + ">");
+	}
+
+	private String attrMismatch(String attrName, String msg) {
+		StringBuffer buf = new StringBuffer();
+		buf
+			.append("[Error loading attribute '")
+			.append(attrName)
+			.append("': ")
+			.append(msg)
+			.append("]");
+		return buf.toString();
+	}
 }

@@ -97,13 +97,18 @@ public class DbAttribute extends Attribute {
 
 	/** 
 	 * Returns the SQL type of the column.
-	*  @see java.sql.Types*/
+	 * 
+	 * @see java.sql.Types
+	 */
 	public int getType() {
 		return type;
 	}
 
-	/** Set the SQL type for the column.
-	*  @see java.sql.Types*/
+	/** 
+	 * Sets the SQL type for the column.
+	 * 
+	 * @see java.sql.Types
+	 */
 	public void setType(int type) {
 		this.type = type;
 	}

@@ -47,6 +47,11 @@
 		<db-attribute name="IMAGE_BLOB" type="LONGVARBINARY"/>
 	</db-entity>
 	
+	<db-entity name="FLOAT_TEST">
+		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="FLOAT_COL" type="FLOAT" />
+	</db-entity>
+	
 	<obj-entity name="Artist" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
 		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
