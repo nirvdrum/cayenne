@@ -130,9 +130,9 @@ public class DatabaseSetup {
 
         Iterator it = tableCreateQueries();
         while(it.hasNext()) {
-            SqlModifyQuery query = (SqlModifyQuery)it.next();
-            logObj.warning("Create table: " + query.getSqlString());
-            stmt.execute(query.getSqlString());
+            String query = (String)it.next();
+            logObj.warning("Create table: " + query);
+            stmt.execute(query);
         }
     }
 

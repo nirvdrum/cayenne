@@ -62,8 +62,6 @@ import java.util.ArrayList;
 import java.sql.Connection;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 
@@ -98,7 +96,7 @@ public class DbGenerator {
 
     /** Returns a query that can be used to create database table
       * corresponding to <code>ent</code> parameter. */
-    public Query createTableQuery(DbEntity ent) {
+    public String createTableQuery(DbEntity ent) {
         StringBuffer buf = new StringBuffer();
         buf.append("CREATE TABLE ")
         .append(ent.getName())
@@ -154,7 +152,7 @@ public class DbGenerator {
             buf.append(')');
         }
         buf.append(')');
-        return new SqlModifyQuery(null, buf.toString());
+        return buf.toString();
     }
 
 
@@ -169,7 +167,7 @@ public class DbGenerator {
         while(it.hasNext()) {
             DbRelationship rel = (DbRelationship)it.next();
             if(!rel.isToMany() && !rel.isToDependentPK())
-                list.add(new SqlModifyQuery(null, adapter.createFkConstraint(rel)));
+                list.add(adapter.createFkConstraint(rel));
         }
         return list;
     }
