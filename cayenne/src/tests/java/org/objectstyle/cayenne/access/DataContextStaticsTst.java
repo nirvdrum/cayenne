@@ -129,6 +129,10 @@ public class DataContextStaticsTst extends CayenneTestCase {
         protected InputStream getMapConfiguration(String location) {
             return null;
         }
+        
+        protected InputStream getViewConfiguration(String location) {
+            return null;
+        }
     }
 
 }

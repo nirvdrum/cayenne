@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002-2004 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002-2004 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.util.Util;
  * If Cayenne classes are loaded using a different ClassLoader from
  * the application classes, this configuration needs to be bootstrapped
  * by calling {@link Configuration#bootstrapSharedConfiguration(Class)}</code>.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class DefaultConfiguration extends Configuration {
@@ -116,11 +116,11 @@ public class DefaultConfiguration extends Configuration {
 			l.addClassPath(Util.getPackagePath(this.getClass().getName()));
 		}
 
-		// The Configuration superclass statically defines what 
+		// The Configuration superclass statically defines what
 		// ClassLoader to use for resources. This allows applications to
 		// control where resources are loaded from.
 		l.setClassLoader(Configuration.getResourceLoader());
-	
+
 		// remember configured ResourceLocator
 		this.setResourceLocator(l);
 	}
@@ -128,7 +128,7 @@ public class DefaultConfiguration extends Configuration {
 	/**
 	 * Adds a custom path for class path lookups.
 	 * Format should be "my/package/name" <i>without</i> leading "/".
-	 * 
+	 *
 	 * This allows for easy customization of custom search paths after
 	 * Constructor invocation:
 	 * <pre>
@@ -136,7 +136,7 @@ public class DefaultConfiguration extends Configuration {
 	 * conf.addClassPath("my/package/name");
 	 * Configuration.initializeSharedConfiguration(conf);
 	 * </pre>
-	 * 
+	 *
 	 */
 	public void addClassPath(String customPath) {
 		this.getResourceLocator().addClassPath(customPath);
@@ -154,7 +154,7 @@ public class DefaultConfiguration extends Configuration {
 		return true;
 	}
 
-	/** 
+	/**
 	 * Initializes all Cayenne resources. Loads all configured domains and their
 	 * data maps, initializes all domain Nodes and their DataSources.
 	 */
@@ -232,6 +232,10 @@ public class DefaultConfiguration extends Configuration {
 	 */
 	protected InputStream getMapConfiguration(String location) {
 		return locator.findResourceStream(location);
+	}
+
+    protected InputStream getViewConfiguration(String location) {
+        return locator.findResourceStream(location);
 	}
 
 	/**

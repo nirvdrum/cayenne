@@ -64,6 +64,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.Validate;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigurationException;
@@ -79,13 +80,14 @@ import org.xml.sax.InputSource;
 /**
  * Implementation of ConfigLoaderDelegate that creates Cayenne access objects
  * stack.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
     private static Logger logObj = Logger.getLogger(RuntimeLoadDelegate.class);
 
     protected Map domains = new HashMap();
+    protected HashMap dataViewLocations = new HashMap();
     protected ConfigStatus status;
     protected Configuration config;
     protected Level logLevel;
@@ -146,7 +148,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         if(properties == null || properties.isEmpty()) {
             return;
         }
-        
+
         DataDomain domain = null;
         try {
             domain = findDomain(domainName);
@@ -154,7 +156,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             logObj.log(logLevel, "Error: Domain is not loaded: " + domainName);
             throw new ConfigurationException("Domain is not loaded: " + domainName);
         }
-        
+
         domain.getProperties().putAll(properties);
     }
 
@@ -173,7 +175,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         if(locations.size() == 0) {
             return;
         }
-        
+
         DataDomain domain = null;
         try {
             domain = findDomain(domainName);
@@ -190,11 +192,11 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             if (map != null) {
                 continue;
             }
-            
+
             loadDataMap(domain, name, locations, dependencies, new ArrayList());
         }
     }
-    
+
     /**
      * Returns DataMap for the name and location information. If a DataMap
      * is already loaded within a given domain, such loaded map is returned, otherwise
@@ -204,14 +206,14 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         if (mapName == null) {
             throw new ConfigurationException("Error: <map> without 'name'.");
         }
-        
+
         String location = (String)locations.get(mapName);
-        
+
         if (location == null) {
             throw new ConfigurationException(
                 "Error: map '" + mapName + "' without 'location'.");
         }
-        
+
         // some primitive check for circular dependencies
         if (dependenciesPath.contains(mapName)) {
             logObj.log(
@@ -220,14 +222,14 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             getStatus().addFailedMap(mapName, location, "map is a part of a circular dependency.");
             return null;
         }
-        
+
         // determine dependencies
         List depMaps = new ArrayList();
         List depMapNames = (List)dependencies.get(mapName);
         if (depMapNames != null && depMapNames.size() > 0) {
             List localDependenciesPath = new ArrayList(dependenciesPath);
             localDependenciesPath.add(mapName);
-            
+
             for (int i = 0; i < depMapNames.size(); i++) {
                 String depMapName = (String) depMapNames.get(i);
                 if (depMapName == null) {
@@ -297,7 +299,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         }
     }
 
-    
+
     /**
      * @deprecated Since 1.0.4 this method is no longer called during project loading.
      * shouldLoadDataMaps(String,Map,Map) is used instead.
@@ -380,7 +382,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             getStatus().addFailedMap(mapName, location, "map loading failed - " + dmex.getMessage());
         }
     }
-    
+
 
     public void shouldLoadDataNode(
         String domainName,
@@ -511,6 +513,13 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         node.addDataMap(map);
     }
 
+    public void shouldRegisterDataView(String dataViewName,
+                                       String dataViewLocation) {
+      Validate.notNull(dataViewName);
+      Validate.notNull(dataViewLocation);
+      dataViewLocations.put(dataViewName, dataViewLocation);
+    }
+
     /**
      * Returns the domains.
      * @return List
@@ -580,6 +589,8 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         while (it.hasNext()) {
             config.addDomain((DataDomain) it.next());
         }
+
+        config.setDataViewLocations((Map)dataViewLocations.clone());
 
         logObj.log(
             logLevel,

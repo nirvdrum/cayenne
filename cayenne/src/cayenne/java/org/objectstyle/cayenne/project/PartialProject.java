@@ -64,6 +64,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.Validate;
+
 import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.ConfigLoaderDelegate;
 import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
@@ -75,12 +77,13 @@ import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
  * PartialProject is a "lightweight" project implementation. It can work with
  * projects even when some of the resources are missing. It never instantiates
  * Cayenne stack objects, using other, lightweight, data structures instead.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class PartialProject extends Project {
     protected Map domains;
     protected ConfigLoaderDelegate loadDelegate;
+    protected Map dataViewLocations;
 
     /**
      * Constructor PartialProjectHandler.
@@ -311,11 +314,11 @@ public class PartialProject extends Project {
             if(properties == null || properties.isEmpty()) {
                 return;
             }
-        
+
             DomainMetaData domain = findDomain(domainName);
             domain.properties.putAll(properties);
         }
-        
+
         public void shouldLoadDataMaps(
             String domainName,
             Map locations,
@@ -337,7 +340,7 @@ public class PartialProject extends Project {
                 domain.maps.put(name, map);
             }
         }
-        
+
         /**
          * @deprecated Since 1.0.4 this method is no longer called during project loading.
          * shouldLoadDataMaps(String,Map,Map) is used instead.
@@ -367,6 +370,16 @@ public class PartialProject extends Project {
             node.dataSource = dataSource;
             findDomain(domainName).nodes.put(nodeName, node);
         }
+
+        public void shouldRegisterDataView(
+            String dataViewName, String dataViewLocation) {
+          Validate.notNull(dataViewName);
+          Validate.notNull(dataViewLocation);
+          if (dataViewLocations == null) {
+            dataViewLocations = new HashMap();
+          }
+          dataViewLocations.put(dataViewName, dataViewLocation);
+        }
     }
 
     class SaveDelegate implements ConfigSaverDelegate {
@@ -379,7 +392,21 @@ public class PartialProject extends Project {
         public Iterator domainNames() {
             return domains.keySet().iterator();
         }
-        
+
+        public Iterator viewNames() {
+          if (dataViewLocations == null) {
+            dataViewLocations = new HashMap();
+          }
+          return dataViewLocations.keySet().iterator();
+        }
+
+        public String viewLocation(String dataViewName) {
+          if (dataViewLocations == null) {
+            dataViewLocations = new HashMap();
+          }
+          return (String)dataViewLocations.get(dataViewName);
+        }
+
         public Iterator propertyNames(String domainName) {
             return findDomain(domainName).properties.keySet().iterator();
         }

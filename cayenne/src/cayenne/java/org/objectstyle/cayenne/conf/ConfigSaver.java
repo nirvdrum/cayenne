@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * Class that does saving of Cayenne configuration.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class ConfigSaver {
@@ -85,7 +85,7 @@ public class ConfigSaver {
         this.delegate = delegate;
     }
 
-    /** 
+    /**
      * Saves domains into the specified file. Assumes that the maps have already
      * been saved.
      */
@@ -100,8 +100,21 @@ public class ConfigSaver {
         while(it.hasNext()) {
             storeDomain(pw, (String) it.next());
         }
+
+        it = delegate.viewNames();
+        while(it.hasNext()) {
+          String viewName = (String)it.next();
+          String viewLocation = delegate.viewLocation(viewName);
+
+          pw.print("\t<view name=\"" + viewName.trim());
+          pw.print("\" location=\"" + viewLocation.trim());
+
+          pw.println("\"/>");
+        }
+
         pw.println("</domains>");
     }
+
 
     protected void storeDomain(PrintWriter pw, String domainName) {
         pw.println("<domain name=\"" + domainName.trim() + "\">");
@@ -113,16 +126,16 @@ public class ConfigSaver {
             if(name == null) {
                 continue;
             }
-            
+
             String value = delegate.propertyValue(domainName, name);
             if(value == null) {
                 continue;
             }
-     
+
             pw.print("\t<property name=\"" + Util.encodeXmlAttribute(name.trim()));
             pw.println("\" value=\"" + Util.encodeXmlAttribute(value.trim()) + "\"/>");
         }
-               
+
         // store maps
         Iterator maps = delegate.mapNames(domainName);
         while (maps.hasNext()) {

@@ -1,13 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <domains project-version="1.0">
-<domain name="default">
-	<map name="testmap" location="testmap.map.xml"/>
-</domain>
-<domain name="multiple-data-nodes">
-	<map name="map-db1" location="map-db1.map.xml"/>
-	<map name="map-db2" location="map-db2.map.xml"/>
-</domain>
-<domain name="one-way">
-	<map name="one-way-map" location="one-way-map.map.xml"/>
-</domain>
+    <domain name="default">
+        <map name="testmap" location="testmap.map.xml" />
+    </domain>
+    <domain name="multiple-data-nodes">
+        <map name="map-db1" location="map-db1.map.xml" />
+        <map name="map-db2" location="map-db2.map.xml" />
+    </domain>
+    <domain name="one-way">
+        <map name="one-way-map" location="one-way-map.map.xml" />
+    </domain>
+    <view name="dataview1" location="dataview1.view.xml" />
+    <view name="dataview0" location="dataview0.view.xml" />
 </domains>
+

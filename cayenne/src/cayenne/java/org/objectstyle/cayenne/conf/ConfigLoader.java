@@ -73,9 +73,11 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Class that performs runtime loading of Cayenne configuration.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class ConfigLoader {
@@ -102,7 +104,7 @@ public class ConfigLoader {
 
     /**
      * Parses XML input, invoking delegate methods to interpret loaded XML.
-     * 
+     *
      * @param in
      * @return boolean
      */
@@ -186,9 +188,11 @@ public class ConfigLoader {
             throws SAXException {
             if (localName.equals("domain")) {
                 new DomainHandler(getParser(), this).init(localName, atts);
+            } else if (localName.equals("view")) {
+                new ViewHandler(getParser(), this).init(localName, atts);
             } else {
                 String message =
-                    "<domain> should be the only child of <domains>. <"
+                    "<domain> or <view> should be the only child of <domains>. <"
                         + localName
                         + "> is unexpected.";
                 throw new SAXParseException(message, null);
@@ -230,7 +234,7 @@ public class ConfigLoader {
                 // "map" elements go after "property" elements
                 // must flush properties if there are any
                 loadProperties();
-                
+
                 new MapHandler(getParser(), this).init(
                     localName,
                     atts,
@@ -241,7 +245,7 @@ public class ConfigLoader {
                 // "node" elements go after "map" elements
                 // must flush maps if there are any
                 loadMaps();
-                
+
                 new NodeHandler(getParser(), this).init(localName, atts, domainName);
             } else {
                 String message =
@@ -251,25 +255,25 @@ public class ConfigLoader {
                 throw new SAXParseException(message, null);
             }
         }
-        
+
         protected void finished() {
             loadProperties();
             loadMaps();
         }
-        
+
         private void loadProperties() {
             if (properties.size() > 0) {
-                // load all properties 
+                // load all properties
                 delegate.shouldLoadDataDomainProperties(domainName, properties);
-                
+
                 // clean properties to avoid loading them twice
                 properties.clear();
             }
         }
-        
+
         private void loadMaps() {
             if (mapLocations.size() > 0) {
-                // load all maps 
+                // load all maps
                 delegate.shouldLoadDataMaps(domainName, mapLocations, mapDependencies);
                 // clean map locations to avoid loading maps twice
                 mapLocations.clear();
@@ -286,7 +290,7 @@ public class ConfigLoader {
 
         public void init(Attributes attrs, Map properties)
             throws SAXException {
-                
+
             String name = attrs.getValue("", "name");
             String value = attrs.getValue("", "value");
             if(name != null && value != null) {
@@ -294,7 +298,7 @@ public class ConfigLoader {
             }
         }
     }
-    
+
     private class MapHandler extends AbstractHandler {
         protected String domainName;
         protected List depMaps = new ArrayList();
@@ -417,6 +421,36 @@ public class ConfigLoader {
             throws SAXException {
             String mapName = attrs.getValue("", "name");
             delegate.shouldLinkDataMap(domainName, nodeName, mapName);
+        }
+    }
+
+    private class ViewHandler extends AbstractHandler {
+        protected String viewName;
+        protected String location;
+
+        public ViewHandler(XMLReader parser, ContentHandler parentHandler) {
+            super(parser, parentHandler);
+        }
+
+        public void init(String name, Attributes attrs)
+            throws SAXException {
+            viewName = attrs.getValue("", "name");
+            location = attrs.getValue("", "location");
+            if (!StringUtils.isEmpty(viewName) &&
+                !StringUtils.isEmpty(location)) {
+              delegate.shouldRegisterDataView(viewName, location);
+            }
+        }
+
+        public void startElement(
+            String namespaceURI,
+            String localName,
+            String qName,
+            Attributes attrs)
+            throws SAXException {
+        }
+
+        protected void finished() {
         }
     }
 }

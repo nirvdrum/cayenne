@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002-2004 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002-2004 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -65,6 +65,7 @@ public class ConfigLoaderSimpleSuite extends ConfigLoaderSuite {
         buildCase3();
         buildCase4();
         buildCase5();
+        buildCase6();
     }
 
     private void buildCase1() {
@@ -111,8 +112,8 @@ public class ConfigLoaderSimpleSuite extends ConfigLoaderSuite {
         aCase.setTotalDomains(1);
         cases.add(aCase);
     }
-    
-    
+
+
     private void buildCase4() {
         StringBuffer buf = new StringBuffer();
         buf.append("<?xml version='1.0' encoding='utf-8'?>")
@@ -133,7 +134,7 @@ public class ConfigLoaderSimpleSuite extends ConfigLoaderSuite {
         aCase.setTotalDomains(1);
         cases.add(aCase);
     }
-    
+
     private void buildCase5() {
         StringBuffer buf = new StringBuffer();
         buf.append("<?xml version='1.0' encoding='utf-8'?>")
@@ -152,6 +153,23 @@ public class ConfigLoaderSimpleSuite extends ConfigLoaderSuite {
         ConfigLoaderCase aCase = new ConfigLoaderCase();
         aCase.setConfigInfo(buf.toString());
         aCase.setFailedDataSources(1);
+        aCase.setTotalDomains(1);
+        cases.add(aCase);
+    }
+
+    private void buildCase6() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("<?xml version='1.0' encoding='utf-8'?>")
+        .append("\n<domains>")
+        .append("\n   <domain name='domain1'>")
+        .append("\n   <map name='m1' location='test-resources/testmap.map.xml'/>")
+        .append("\n   </domain>")
+        .append("\n   <view name='v1' location='test-resources/testview1.view.xml'/>")
+        .append("\n   <view name='v2' location='test-resources/testview2.view.xml'/>")
+        .append("\n </domains>");
+
+        ConfigLoaderCase aCase = new ConfigLoaderCase();
+        aCase.setConfigInfo(buf.toString());
         aCase.setTotalDomains(1);
         cases.add(aCase);
     }

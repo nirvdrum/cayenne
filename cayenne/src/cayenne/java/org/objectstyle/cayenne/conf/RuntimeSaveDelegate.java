@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * Save delegate used for saving Cayenne access stack.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class RuntimeSaveDelegate implements ConfigSaverDelegate {
@@ -123,6 +123,14 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
             }
         };
         return new TransformIterator(config.getDomains().iterator(), tr);
+    }
+
+    public Iterator viewNames() {
+      return config.getDataViewLocations().keySet().iterator();
+    }
+
+    public String viewLocation(String viewName) {
+      return (String)config.getDataViewLocations().get(viewName);
     }
 
     public Iterator propertyNames(String domainName) {

@@ -56,11 +56,18 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -70,6 +77,7 @@ import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.util.CayenneMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.dataview.DataView;
 
 /**
  * This class is an entry point to Cayenne. It loads all
@@ -95,6 +103,12 @@ public abstract class Configuration {
     protected static Configuration sharedConfiguration = null;
     private static boolean loggingConfigured = false;
 
+    public static final Predicate ACCEPT_ALL_DATAVIEWS = new Predicate() {
+      public boolean evaluate(Object dataViewName) {
+        return true;
+      }
+    };
+
     /**
      * Defines a ClassLoader to use for resource lookup.
      * Configuration objects that are using ClassLoaders
@@ -102,7 +116,7 @@ public abstract class Configuration {
      * explicitly.
      */
 	protected static ClassLoader resourceLoader = Configuration.class.getClassLoader();
-	
+
 	static {
 		if(Configuration.resourceLoader == null) {
 			Configuration.resourceLoader = ClassLoader.getSystemClassLoader();
@@ -118,6 +132,7 @@ public abstract class Configuration {
 	protected boolean ignoringLoadFailures;
     protected ConfigLoaderDelegate loaderDelegate;
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
+    protected Map dataViewLocations = new HashMap();
 
 	/**
 	 * Sets <code>cl</code> class's ClassLoader to serve
@@ -349,6 +364,8 @@ public abstract class Configuration {
 	 */
 	protected abstract InputStream getMapConfiguration(String name);
 
+    protected abstract InputStream getViewConfiguration(String location);
+
 
     /**
      * Configures log4J. This implementation calls
@@ -474,18 +491,66 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Returns a delegate used for controlling the loading of configuration elements. 
+	 * Returns a delegate used for controlling the loading of configuration elements.
 	 */
 	public ConfigLoaderDelegate getLoaderDelegate() {
 		return loaderDelegate;
 	}
-    
+
     /**
      * @since 1.1
      * @param loaderDelegate
      */
     public void setLoaderDelegate(ConfigLoaderDelegate loaderDelegate) {
         this.loaderDelegate = loaderDelegate;
+    }
+
+    public void setDataViewLocations(Map dataViewLocations) {
+      if (dataViewLocations == null)
+        this.dataViewLocations = new HashMap();
+      else
+        this.dataViewLocations = dataViewLocations;
+    }
+
+    public Map getDataViewLocations() {
+      return dataViewLocations;
+    }
+
+    public boolean loadDataView(DataView dataView) throws IOException {
+      return loadDataView(dataView, Configuration.ACCEPT_ALL_DATAVIEWS);
+    }
+
+    public boolean loadDataView(
+        DataView dataView,
+        Predicate dataViewNameFilter) throws IOException {
+      Validate.notNull(dataView, "DataView cannot be null.");
+
+      if (dataViewLocations.size() == 0 ||
+          dataViewLocations.size() > 512) {
+        return false;
+      }
+
+      if (dataViewNameFilter == null)
+        dataViewNameFilter = Configuration.ACCEPT_ALL_DATAVIEWS;
+
+      List viewXMLSources = new ArrayList(dataViewLocations.size());
+      int index = 0;
+      for (Iterator i = dataViewLocations.entrySet().iterator(); i.hasNext(); index++) {
+        Map.Entry entry = (Map.Entry)i.next();
+        String name = (String)entry.getKey();
+        if (!dataViewNameFilter.evaluate(name))
+          continue;
+        String location = (String)entry.getValue();
+        InputStream in = getViewConfiguration(location);
+        if (in != null) viewXMLSources.add(in);
+      }
+
+      if (viewXMLSources.isEmpty())
+        return false;
+
+      dataView.load((InputStream[])viewXMLSources.toArray(
+          new InputStream[viewXMLSources.size()]));
+      return true;
     }
 
     /**
