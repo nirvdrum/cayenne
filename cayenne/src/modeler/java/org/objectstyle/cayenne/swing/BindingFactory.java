@@ -120,11 +120,17 @@ public class BindingFactory {
         return prepareBinding(binding);
     }
 
+    /**
+     * Creates a binding that updates a property on text field text changes.
+     */
     public ObjectBinding bindToTextField(JTextField component, String property) {
         TextBinding binding = new TextBinding(component, property);
         return prepareBinding(binding);
     }
 
+    /**
+     * Configures binding with factory default settings.
+     */
     protected ObjectBinding prepareBinding(BindingBase binding) {
         binding.setUsingNullForEmptyStrings(isUsingNullForEmptyStrings());
         binding.setCheckingForValueChange(isCheckingForValueChange());

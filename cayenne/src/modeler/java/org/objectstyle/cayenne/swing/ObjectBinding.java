@@ -58,10 +58,13 @@ package org.objectstyle.cayenne.swing;
 import java.awt.Component;
 
 /**
+ * Defines API of a binding object that sites between a Swing widget and domain model,
+ * synchronizing the values between the two.
+ * 
  * @author Andrei Adamchik
  */
 public interface ObjectBinding {
-    
+
     public Component getComponent();
 
     public Object getContext();
