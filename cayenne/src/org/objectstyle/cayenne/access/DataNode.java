@@ -94,8 +94,7 @@ public class DataNode implements QueryEngine {
 	protected String dataSourceFactory;
 
 	/** Creates unnamed DataNode */
-	public DataNode() {
-	}
+	public DataNode() {}
 
 	/** Creates DataNode and assigns <code>name</code> to it. */
 	public DataNode(String name) {
@@ -151,6 +150,36 @@ public class DataNode implements QueryEngine {
 			DataMap[] newMaps = new DataMap[dataMaps.length + 1];
 			System.arraycopy(dataMaps, 0, newMaps, 0, dataMaps.length);
 			newMaps[dataMaps.length] = map;
+			dataMaps = newMaps;
+		}
+	}
+
+	public void removeDataMap(String name) {
+		// note to self - implement it as a List
+		// to avoid this ugly resizing in the future
+		if (dataMaps == null || name == null) {
+			return;
+		} else {
+			int mapInd = -1;
+			for (int i = 0; i < dataMaps.length; i++) {
+				if (name.equals(dataMaps[i].getName())) {
+					mapInd = i;
+					break;
+				}
+			}
+
+			if (mapInd < 0) {
+				return;
+			}
+
+			DataMap[] newMaps = new DataMap[dataMaps.length - 1];
+			int newInd = 0;
+			for (int i = 0; i < dataMaps.length; i++) {
+				if (i != mapInd) {
+					newMaps[newInd] = dataMaps[i];
+					newInd++;
+				}
+			}
 			dataMaps = newMaps;
 		}
 	}
@@ -237,13 +266,11 @@ public class DataNode implements QueryEngine {
 				// catch exceptions for each individual query
 				try {
 					// translate query
-					QueryTranslator transl =
-						getAdapter().getQueryTranslator(nextQuery);
+					QueryTranslator transl = getAdapter().getQueryTranslator(nextQuery);
 					transl.setEngine(this);
 					transl.setCon(con);
-					
+
 					PreparedStatement prepStmt = transl.createStatement(logLevel);
-					
 
 					// if ResultIterator is returned to the user,
 					// DataNode is not responsible for closing the connections
@@ -255,7 +282,7 @@ public class DataNode implements QueryEngine {
 						runIteratedSelect(opObserver, prepStmt, transl);
 						return;
 					}
-					
+
 					if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
 						runSelect(opObserver, prepStmt, transl);
 					} else {
@@ -339,14 +366,8 @@ public class DataNode implements QueryEngine {
 		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
 		DefaultResultIterator it =
 			(assembler.getFetchLimit() > 0)
-				? new LimitedResultIterator(
-					prepStmt,
-					this.getAdapter(),
-					assembler)
-				: new DefaultResultIterator(
-					prepStmt,
-					this.getAdapter(),
-					assembler);
+				? new LimitedResultIterator(prepStmt, this.getAdapter(), assembler)
+				: new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
 		// note that we don't need to close ResultIterator
 		// since "dataRows" will do it internally
@@ -372,11 +393,7 @@ public class DataNode implements QueryEngine {
 
 		try {
 			SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-			it =
-				new DefaultResultIterator(
-					prepStmt,
-					this.getAdapter(),
-					assembler);
+			it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
 			it.setClosingConnection(true);
 			observer.nextDataRows(transl.getQuery(), it);

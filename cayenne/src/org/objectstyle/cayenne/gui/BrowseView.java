@@ -184,8 +184,7 @@ public class BrowseView
 		if (null == level)
 			return;
 		while (level.hasMoreElements()) {
-			DefaultMutableTreeNode node =
-				(DefaultMutableTreeNode) level.nextElement();
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) level.nextElement();
 			TreePath path = new TreePath(node.getPath());
 			browseTree.expandPath(path);
 		} // End level
@@ -193,9 +192,7 @@ public class BrowseView
 
 	private DefaultMutableTreeNode loadDomain(DataDomain temp_domain) {
 		DefaultMutableTreeNode domain_ele =
-			new DefaultMutableTreeNode(
-				new DataDomainWrapper(temp_domain),
-				true);
+			new DefaultMutableTreeNode(new DataDomainWrapper(temp_domain), true);
 		List map_list = temp_domain.getMapList();
 		Iterator map_iter = map_list.iterator();
 		while (map_iter.hasNext()) {
@@ -351,12 +348,8 @@ public class BrowseView
 					}
 					if (false == found) {
 						DefaultMutableTreeNode map_ele = loadMap(maps[i]);
-						model.insertNodeInto(
-							map_ele,
-							node,
-							node.getChildCount());
-						logObj.debug(
-							"Added map " + maps[i].getName() + " to node");
+						model.insertNodeInto(map_ele, node, node.getChildCount());
+						logObj.debug("Added map " + maps[i].getName() + " to node");
 						break;
 					}
 				} // End for(i)
@@ -374,8 +367,7 @@ public class BrowseView
 						}
 					}
 					if (!found) {
-						logObj.debug(
-							"About to remove map " + wrap + " from node");
+						logObj.debug("About to remove map " + wrap + " from node");
 						removeNode(child);
 						break;
 					}
@@ -445,15 +437,9 @@ public class BrowseView
 		// Clean up map from the nodes
 		DataNode[] nodes = domain.getDataNodes();
 		for (int i = 0; i < nodes.length; i++) {
-			DataMap[] maps = nodes[i].getDataMaps();
-			for (int j = 0; j < maps.length; j++) {
-				if (maps[j] == map) {
-					DefaultMutableTreeNode mapNode =
-						getMapNode(domain, nodes[i], map);
-					if (null != mapNode) {
-						model.removeNodeFromParent(mapNode);
-					}
-				}
+			DefaultMutableTreeNode mapNode = getMapNode(domain, nodes[i], map);
+			if (mapNode != null) {
+				model.removeNodeFromParent(mapNode);
 			}
 		}
 	}
@@ -540,17 +526,12 @@ public class BrowseView
 					mediator.getCurrentDataMap());
 			if (mapNode != null) {
 				currentNode = new DefaultMutableTreeNode(wrapper, false);
-				model.insertNodeInto(
-					currentNode,
-					mapNode,
-					mapNode.getChildCount());
+				model.insertNodeInto(currentNode, mapNode, mapNode.getChildCount());
 			}
 		}
 
 		DefaultMutableTreeNode mapNode =
-			getMapNode(
-				mediator.getCurrentDataDomain(),
-				mediator.getCurrentDataMap());
+			getMapNode(mediator.getCurrentDataDomain(), mediator.getCurrentDataMap());
 
 		currentNode = new DefaultMutableTreeNode(wrapper, false);
 		fixEntityPosition(mapNode, currentNode);
@@ -606,8 +587,7 @@ public class BrowseView
 
 				// try parent
 				if (newSelection == null) {
-					newSelection =
-						(DefaultMutableTreeNode) toBeRemoved.getParent();
+					newSelection = (DefaultMutableTreeNode) toBeRemoved.getParent();
 
 					// search the whole tree
 					if (newSelection == null) {
@@ -637,8 +617,7 @@ public class BrowseView
 		while (domains.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode) domains.nextElement();
-			DataDomainWrapper wrap =
-				(DataDomainWrapper) temp_node.getUserObject();
+			DataDomainWrapper wrap = (DataDomainWrapper) temp_node.getUserObject();
 			if (wrap.getDataDomain() == domain)
 				return temp_node;
 		}
@@ -668,9 +647,7 @@ public class BrowseView
 	}
 
 	/** Get data source (a.k.a. data node) node by DataDomain and DataNode. */
-	private DefaultMutableTreeNode getDataSourceNode(
-		DataDomain domain,
-		DataNode data) {
+	private DefaultMutableTreeNode getDataSourceNode(DataDomain domain, DataNode data) {
 		if (null == data)
 			return null;
 		DefaultMutableTreeNode domain_node = getDomainNode(domain);
@@ -681,8 +658,7 @@ public class BrowseView
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode) data_sources.nextElement();
 			if (temp_node.getUserObject() instanceof DataNodeWrapper) {
-				DataNodeWrapper wrap =
-					(DataNodeWrapper) temp_node.getUserObject();
+				DataNodeWrapper wrap = (DataNodeWrapper) temp_node.getUserObject();
 				if (wrap.getDataNode() == data)
 					return temp_node;
 			}
@@ -695,18 +671,23 @@ public class BrowseView
 		DataDomain domain,
 		DataNode data,
 		DataMap map) {
-		if (null == map)
+		if (null == map) {
 			return null;
+		}
+
 		DefaultMutableTreeNode data_node = getDataSourceNode(domain, data);
-		if (null == data_node)
+		if (null == data_node) {
 			return null;
+		}
+
 		Enumeration maps = data_node.children();
 		while (maps.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode) maps.nextElement();
 			DataMapWrapper wrap = (DataMapWrapper) temp_node.getUserObject();
-			if (wrap.getDataMap() == map)
+			if (wrap.getDataMap() == map) {
 				return temp_node;
+			}
 		}
 		return null;
 	}
@@ -871,8 +852,7 @@ public class BrowseView
 	private void fixEntityPosition(
 		DefaultMutableTreeNode parent,
 		DefaultMutableTreeNode entityNode) {
-		Entity curEnt =
-			((EntityWrapper) entityNode.getUserObject()).getEntity();
+		Entity curEnt = ((EntityWrapper) entityNode.getUserObject()).getEntity();
 		boolean isObj = curEnt instanceof ObjEntity;
 
 		int len = parent.getChildCount();
@@ -880,8 +860,7 @@ public class BrowseView
 		int rm = -1;
 
 		for (int i = 0; i < len; i++) {
-			DefaultMutableTreeNode node =
-				(DefaultMutableTreeNode) parent.getChildAt(i);
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
 
 			// remeber to remove node
 			if (node == entityNode) {
@@ -941,35 +920,26 @@ public class BrowseView
 
 		public BrowseViewRenderer() {
 			ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
-			URL url =
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-dom.gif");
+			URL url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dom.gif");
 			domainIcon = new ImageIcon(url);
 
-			url =
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
+			url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
 			nodeIcon = new ImageIcon(url);
 
-			url =
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-datamap.gif");
+			url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-datamap.gif");
 			mapIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
+				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
 			dbEntityIcon = new ImageIcon(url);
 
 			url =
 				cl.getResource(
-					CayenneAction.RESOURCE_PATH
-						+ "images/icon-derived-dbentity.gif");
+					CayenneAction.RESOURCE_PATH + "images/icon-derived-dbentity.gif");
 			derivedDbEntityIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
+				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
 			objEntityIcon = new ImageIcon(url);
 		}
 

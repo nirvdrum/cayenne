@@ -127,9 +127,25 @@ public class DataDomain implements QueryEngine {
 		return (DataMap) maps.get(name);
 	}
 
-	/** Unregisters DataMap matching <code>name</code> parameter. */
+	/** 
+	 * Unregisters DataMap matching <code>name</code> parameter.
+	 * Also removes map from any child DataNodes that use it.
+	 */
 	public void removeMap(String name) {
-		maps.remove(name);
+		DataMap map = (DataMap)maps.remove(name);
+		if(map == null) {
+			return;
+		}
+		
+		// remove from data nodes
+		Iterator it = dataNodes.keySet().iterator();
+		while(it.hasNext()) {
+			DataNode node = (DataNode)dataNodes.get(it.next());
+			node.removeDataMap(name);
+		}
+		
+		// reindex nodes to remove references on removed map entities
+		reindexNodes();		
 	}
 
 	/** Unregisters DataNode. Also removes entities mapped to the current node. */
