@@ -108,7 +108,10 @@ public class ValidatorDialog
     protected JTable messages;
     protected JButton closeBtn;
 
-    public static void showDialog(Editor editor, EventController mediator, Validator val) {
+    public static void showDialog(
+        Editor editor,
+        EventController mediator,
+        Validator val) {
 
         ValidatorDialog open = instance;
 
@@ -119,7 +122,10 @@ public class ValidatorDialog
         instance = new ValidatorDialog(editor, mediator, val);
     }
 
-    protected ValidatorDialog(Editor editor, EventController mediator, Validator validator) {
+    protected ValidatorDialog(
+        Editor editor,
+        EventController mediator,
+        Validator validator) {
         super(editor, "Validation Errors", false);
         this.mediator = mediator;
         this.validator = validator;
@@ -167,13 +173,15 @@ public class ValidatorDialog
         getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         closeBtn = new JButton("Close");
-        JPanel panel = PanelFactory.createButtonPanel(new JButton[] { closeBtn });
+        JPanel panel =
+            PanelFactory.createButtonPanel(new JButton[] { closeBtn });
         getContentPane().add(panel, BorderLayout.SOUTH);
     }
 
     public void valueChanged(ListSelectionEvent e) {
         if (messages.getSelectedRow() >= 0) {
-            ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
+            ValidatorTableModel model =
+                (ValidatorTableModel) messages.getModel();
             ValidationInfo obj = model.getValue(messages.getSelectedRow());
             ValidationDisplayHandler.getErrorMsg(obj).displayField(
                 mediator,

@@ -86,157 +86,181 @@ import org.objectstyle.cayenne.modeler.util.ModelerUtil;
  * @author Andrei Adamchik
  */
 public class ObjAttributePane
-	extends JPanel
-	implements
-		ObjEntityDisplayListener,
-		ObjEntityListener,
-		ObjAttributeListener,
-		ExistingSelectionProcessor,
-		ListSelectionListener {
-	private static Logger logObj = Logger.getLogger(ObjAttributePane.class);
+    extends JPanel
+    implements
+        ObjEntityDisplayListener,
+        ObjEntityListener,
+        ObjAttributeListener,
+        ExistingSelectionProcessor,
+        ListSelectionListener {
+    private static Logger logObj = Logger.getLogger(ObjAttributePane.class);
 
-	EventController mediator;
-	CayenneTable table;
+    EventController mediator;
+    CayenneTable table;
 
-	public ObjAttributePane(EventController mediator) {
-		super();
-		this.mediator = mediator;
-		mediator.addObjEntityDisplayListener(this);
-		mediator.addObjEntityListener(this);
-		mediator.addObjAttributeListener(this);
+    public ObjAttributePane(EventController mediator) {
+        super();
+        this.mediator = mediator;
+        mediator.addObjEntityDisplayListener(this);
+        mediator.addObjEntityListener(this);
+        mediator.addObjAttributeListener(this);
 
-		// Create and layout components
-		init();
-	}
+        // Create and layout components
+        init();
+    }
 
-	private void init() {
-		setLayout(new BorderLayout());
-		// Create table with two columns and no rows.
-		table = new CayenneTable();
-		add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
-	}
+    private void init() {
+        setLayout(new BorderLayout());
+        // Create table with two columns and no rows.
+        table = new CayenneTable();
+        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
+    }
 
-	public void processExistingSelection() {
-		ObjAttribute rel = null;
-		if (table.getSelectedRow() >= 0) {
-			ObjAttributeTableModel model =
-				(ObjAttributeTableModel) table.getModel();
-			rel = model.getAttribute(table.getSelectedRow());
-		}
-		AttributeDisplayEvent ev =
-			new AttributeDisplayEvent(
-				this,
-				rel,
-				mediator.getCurrentObjEntity(),
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
+    /**
+       * Selects a specified attribute.
+       */
+    public void selectAttribute(ObjAttribute attr) {
+        if (attr == null) {
+            return;
+        }
 
-		mediator.fireObjAttributeDisplayEvent(ev);
-	}
+        ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
+        java.util.List attrs = model.getObjectList();
+        int attrPos = attrs.indexOf(attr);
+        if (attrPos >= 0) {
+            table.select(attrPos);
+        }
+    }
 
-	public void valueChanged(ListSelectionEvent e) {
-		processExistingSelection();
-	}
+    public void processExistingSelection() {
+        ObjAttribute rel = null;
+        if (table.getSelectedRow() >= 0) {
+            ObjAttributeTableModel model =
+                (ObjAttributeTableModel) table.getModel();
+            rel = model.getAttribute(table.getSelectedRow());
+        }
+        AttributeDisplayEvent ev =
+            new AttributeDisplayEvent(
+                this,
+                rel,
+                mediator.getCurrentObjEntity(),
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain());
 
-	public void objAttributeChanged(AttributeEvent e) {
-		table.select(e.getAttribute());
-	}
+        mediator.fireObjAttributeDisplayEvent(ev);
+    }
 
-	public void objAttributeAdded(AttributeEvent e) {
-		rebuildTable((ObjEntity) e.getEntity());
-		table.select(e.getAttribute());
-	}
+    public void valueChanged(ListSelectionEvent e) {
+        processExistingSelection();
+    }
 
-	public void objAttributeRemoved(AttributeEvent e) {
-		ObjAttributeTableModel model =
-			(ObjAttributeTableModel) table.getModel();
-		int ind = model.getObjectList().indexOf(e.getAttribute());
-		model.removeRow(e.getAttribute());
-		table.select(ind);
-	}
+    public void objAttributeChanged(AttributeEvent e) {
+        table.select(e.getAttribute());
+    }
 
-	private void stopEditing() {
-		// Stop whatever editing may be taking place
-		int col_index = table.getEditingColumn();
-		if (col_index >= 0) {
-			TableColumn col = table.getColumnModel().getColumn(col_index);
-			col.getCellEditor().stopCellEditing();
-		}
-	}
+    public void objAttributeAdded(AttributeEvent e) {
+        rebuildTable((ObjEntity) e.getEntity());
+        table.select(e.getAttribute());
+    }
 
-	public void currentObjEntityChanged(EntityDisplayEvent e) {
-		if (e.getSource() == this)
-			return;
+    public void objAttributeRemoved(AttributeEvent e) {
+        ObjAttributeTableModel model =
+            (ObjAttributeTableModel) table.getModel();
+        int ind = model.getObjectList().indexOf(e.getAttribute());
+        model.removeRow(e.getAttribute());
+        table.select(ind);
+    }
 
-		ObjEntity entity = (ObjEntity) e.getEntity();
-		if (entity != null && e.isEntityChanged()) {
-			rebuildTable(entity);
-		}
+    private void stopEditing() {
+        // Stop whatever editing may be taking place
+        int col_index = table.getEditingColumn();
+        if (col_index >= 0) {
+            TableColumn col = table.getColumnModel().getColumn(col_index);
+            col.getCellEditor().stopCellEditing();
+        }
+    }
 
-		// if an entity was selected on a tree, 
-		// unselect currently selected row
-		if (e.isUnselectAttributes()) {
-			table.clearSelection();
-		}
-	}
+    public void currentObjEntityChanged(EntityDisplayEvent e) {
+        if (e.getSource() == this)
+            return;
 
-	protected void rebuildTable(ObjEntity ent) {
-		ObjAttributeTableModel model =
-			new ObjAttributeTableModel(ent, mediator, this);
-		table.setModel(model);
-		table.setRowHeight(25);
-		table.setRowMargin(3);
-		setUpTableStructure(model, ent);
-		table.getSelectionModel().addListSelectionListener(this);
-	}
+        ObjEntity entity = (ObjEntity) e.getEntity();
+        if (entity != null && e.isEntityChanged()) {
+            rebuildTable(entity);
+        }
 
-	protected void setUpTableStructure(
-		ObjAttributeTableModel model,
-		ObjEntity entity) {
+        // if an entity was selected on a tree, 
+        // unselect currently selected row
+        if (e.isUnselectAttributes()) {
+            table.clearSelection();
+        }
+    }
 
-		TableColumn col = table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE);
-		col.setMinWidth(150);
-		col = table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
-		col.setMinWidth(150);
+    protected void rebuildTable(ObjEntity ent) {
+        ObjAttributeTableModel model =
+            new ObjAttributeTableModel(ent, mediator, this);
+        table.setModel(model);
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+        setUpTableStructure(model, ent);
+        table.getSelectionModel().addListSelectionListener(this);
+    }
 
-		JComboBox combo = new JComboBox(ModelerUtil.getRegisteredTypeNames());
-		combo.setEditable(true);
-		col.setCellEditor(new DefaultCellEditor(combo));
+    protected void setUpTableStructure(
+        ObjAttributeTableModel model,
+        ObjEntity entity) {
 
-		// If DbEntity is specified, display Database info as well.
-		if (entity.getDbEntity() != null) {
-			col = table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE);
-			col.setMinWidth(150);
-			combo =
-				new JComboBox(
-					ModelerUtil.getDbAttributeNames(
-						mediator,
-						mediator.getCurrentObjEntity().getDbEntity()));
-			combo.setEditable(false);
-			col.setCellEditor(new DefaultCellEditor(combo));
-			col = table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE_TYPE);
-			col.setMinWidth(120);
-		}
-	}
+        TableColumn col =
+            table.getColumnModel().getColumn(
+                ObjAttributeTableModel.OBJ_ATTRIBUTE);
+        col.setMinWidth(150);
+        col =
+            table.getColumnModel().getColumn(
+                ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
+        col.setMinWidth(150);
 
-	/** If DbEntity changed, refresh table.*/
-	public void objEntityChanged(EntityEvent e) {
-		if (e.getSource() == this) {
-			return;
-		}
+        JComboBox combo = new JComboBox(ModelerUtil.getRegisteredTypeNames());
+        combo.setEditable(true);
+        col.setCellEditor(new DefaultCellEditor(combo));
 
-		ObjAttributeTableModel model =
-			(ObjAttributeTableModel) table.getModel();
-		if (model.getDbEntity() != ((ObjEntity) e.getEntity()).getDbEntity()) {
-			model.resetDbEntity();
-			setUpTableStructure(model, (ObjEntity) e.getEntity());
-		}
-	}
+        // If DbEntity is specified, display Database info as well.
+        if (entity.getDbEntity() != null) {
+            col =
+                table.getColumnModel().getColumn(
+                    ObjAttributeTableModel.DB_ATTRIBUTE);
+            col.setMinWidth(150);
+            combo =
+                new JComboBox(
+                    ModelerUtil.getDbAttributeNames(
+                        mediator,
+                        mediator.getCurrentObjEntity().getDbEntity()));
+            combo.setEditable(false);
+            col.setCellEditor(new DefaultCellEditor(combo));
+            col =
+                table.getColumnModel().getColumn(
+                    ObjAttributeTableModel.DB_ATTRIBUTE_TYPE);
+            col.setMinWidth(120);
+        }
+    }
 
-	public void objEntityAdded(EntityEvent e) {
-	}
+    /** If DbEntity changed, refresh table.*/
+    public void objEntityChanged(EntityEvent e) {
+        if (e.getSource() == this) {
+            return;
+        }
 
-	public void objEntityRemoved(EntityEvent e) {
-	}
+        ObjAttributeTableModel model =
+            (ObjAttributeTableModel) table.getModel();
+        if (model.getDbEntity() != ((ObjEntity) e.getEntity()).getDbEntity()) {
+            model.resetDbEntity();
+            setUpTableStructure(model, (ObjEntity) e.getEntity());
+        }
+    }
+
+    public void objEntityAdded(EntityEvent e) {
+    }
+
+    public void objEntityRemoved(EntityEvent e) {
+    }
 
 }

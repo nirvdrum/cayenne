@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,7 +52,8 @@ package org.objectstyle.cayenne.modeler.datamap;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
 
@@ -62,6 +62,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -71,72 +75,95 @@ import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 
 /** 
-  * @author Michael Misha Shengaout
-  */
-public class ObjDetailView extends JPanel 
-implements ChangeListener, ObjEntityDisplayListener
-, ObjRelationshipDisplayListener, ObjAttributeDisplayListener
-{
-	EventController mediator;
-	
-	JTabbedPane tab;
-	ObjEntityPane entity;
-	ObjAttributePane attributes;
-	ObjRelationshipPane rel;
-	
-	public ObjDetailView(EventController temp_mediator) {
-		super();
-		mediator = temp_mediator;
-		mediator.addObjEntityDisplayListener(this);
-		mediator.addObjAttributeDisplayListener(this);
-		mediator.addObjRelationshipDisplayListener(this);
-		
-		setLayout(new BorderLayout());
-		tab = new JTabbedPane();
-		tab.setTabPlacement(JTabbedPane.TOP);
-		add(tab, BorderLayout.CENTER);
-		entity = new ObjEntityPane(mediator);
-		tab.addTab("Entity", entity);
-		attributes = new ObjAttributePane(mediator);
-		tab.addTab("Attributes", attributes);
-		rel = new ObjRelationshipPane(mediator);
-		tab.addTab("Relationships", rel);
-		
-		tab.addChangeListener(this);
-	}
-	
-	/** Among other things reset "Remove" button when tab changes. */
-	public void stateChanged(ChangeEvent e)	
-	{
-		ExistingSelectionProcessor proc;
-		proc = (ExistingSelectionProcessor)tab.getSelectedComponent();
-		proc.processExistingSelection();
-	}
-	
-	/** If entity is null hides it's contents, otherwise makes it visible. */
-	public void currentObjEntityChanged(EntityDisplayEvent e)
-	{
-		if (e.getEntity() == null)
-			tab.setVisible(false);
-		else {
-			if (e.isTabReset())
-				tab.setSelectedIndex(0);
-			tab.setVisible(true);
-		}
-	}
-	
-	public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
-		if (e.getEntity() == null)
-			return;
-		// Display relationship tab
-		tab.setSelectedIndex(2);
-	}
+ * Tabbed ObjEntity editor panel.
+ * 
+ * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class ObjDetailView
+    extends JPanel
+    implements
+        ChangeListener,
+        ObjEntityDisplayListener,
+        ObjRelationshipDisplayListener,
+        ObjAttributeDisplayListener {
+    protected EventController mediator;
 
-	public void currentObjAttributeChanged(AttributeDisplayEvent e) {
-		if (e.getEntity() == null)
-			return;
-		// Display attribute tab
-		tab.setSelectedIndex(1);
-	}
+    protected JTabbedPane tab;
+    protected ObjEntityPane entityPanel;
+    protected ObjAttributePane attributesPanel;
+    protected ObjRelationshipPane relationshipsPanel;
+
+    public ObjDetailView(EventController temp_mediator) {
+        super();
+        mediator = temp_mediator;
+        mediator.addObjEntityDisplayListener(this);
+        mediator.addObjAttributeDisplayListener(this);
+        mediator.addObjRelationshipDisplayListener(this);
+
+        setLayout(new BorderLayout());
+        tab = new JTabbedPane();
+        tab.setTabPlacement(JTabbedPane.TOP);
+        add(tab, BorderLayout.CENTER);
+        entityPanel = new ObjEntityPane(mediator);
+        tab.addTab("Entity", entityPanel);
+        attributesPanel = new ObjAttributePane(mediator);
+        tab.addTab("Attributes", attributesPanel);
+        relationshipsPanel = new ObjRelationshipPane(mediator);
+        tab.addTab("Relationships", relationshipsPanel);
+
+        tab.addChangeListener(this);
+    }
+
+    /** 
+     * Notifies a child that it is has been selected.
+     */
+    public void stateChanged(ChangeEvent e) {
+        ExistingSelectionProcessor proc =
+            (ExistingSelectionProcessor) tab.getSelectedComponent();
+        proc.processExistingSelection();
+    }
+
+    /** If entity is null hides it's contents, otherwise makes it visible. */
+    public void currentObjEntityChanged(EntityDisplayEvent e) {
+        if (e.getEntity() == null)
+            tab.setVisible(false);
+        else {
+            if (e.isTabReset()) {
+                tab.setSelectedIndex(0);
+            }
+
+            tab.setVisible(true);
+        }
+    }
+
+    public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
+        if (e.getEntity() == null) {
+            return;
+        }
+
+        // update relationship selection
+        Relationship rel = e.getRelationship();
+        if (rel instanceof ObjRelationship) {
+            relationshipsPanel.selectRelationship((ObjRelationship) rel);
+        }
+
+        // Display relationship tab
+        tab.setSelectedIndex(2);
+    }
+
+    public void currentObjAttributeChanged(AttributeDisplayEvent e) {
+        if (e.getEntity() == null)
+            return;
+
+        // update relationship selection
+        Attribute attr = e.getAttribute();
+        if (attr instanceof ObjAttribute) {
+            attributesPanel.selectAttribute((ObjAttribute) attr);
+        }
+
+        // Display attribute tab
+        tab.setSelectedIndex(1);
+    }
 
 }
