@@ -78,335 +78,323 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class DataContextPrefetchTst extends DataContextTestBase {
-	/**
-	  * Test that all queries specified in prefetch are executed
-	  * with a single prefetch path.
-	  */
-	 public void testPrefetch1() throws Exception {
-		 Expression e =
-			 ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
-		 SelectQuery q = new SelectQuery("Artist", e);
-		 q.addPrefetch("paintingArray");
+    /**
+      * Test that all queries specified in prefetch are executed
+      * with a single prefetch path.
+      */
+    public void testPrefetch1() throws Exception {
+        Expression e = ExpressionFactory.matchExp("artistName", "a");
+        SelectQuery q = new SelectQuery("Artist", e);
+        q.addPrefetch("paintingArray");
 
-		 SelectObserver o = new SelectObserver();
-		 ctxt.performQuery(q, o);
+        SelectObserver o = new SelectObserver();
+        ctxt.performQuery(q, o);
 
-		 assertEquals(2, o.getSelectCount());
-	 }
+        assertEquals(2, o.getSelectCount());
+    }
 
-	 /**
-	  * Test that all queries specified in prefetch are executed
-	  * in a more complex prefetch scenario.
-	  */
-	 public void testPrefetch2() throws Exception {
-		 Expression e =
-			 ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
-		 SelectQuery q = new SelectQuery("Artist", e);
-		 q.addPrefetch("paintingArray");
-		 q.addPrefetch("paintingArray.toGallery");
-		 q.addPrefetch("artistExhibitArray.toExhibit");
+    /**
+     * Test that all queries specified in prefetch are executed
+     * in a more complex prefetch scenario.
+     */
+    public void testPrefetch2() throws Exception {
+        Expression e = ExpressionFactory.matchExp("artistName", "a");
+        SelectQuery q = new SelectQuery("Artist", e);
+        q.addPrefetch("paintingArray");
+        q.addPrefetch("paintingArray.toGallery");
+        q.addPrefetch("artistExhibitArray.toExhibit");
 
-		 SelectObserver o = new SelectObserver();
-		 ctxt.performQuery(q, o);
+        SelectObserver o = new SelectObserver();
+        ctxt.performQuery(q, o);
 
-		 assertEquals(4, o.getSelectCount());
-	 }
+        assertEquals(4, o.getSelectCount());
+    }
 
-	 /**
-	  * Test that all queries specified in prefetch are executed
-	  * in a more complex prefetch scenario with no reverse 
-	  * obj relationships
-	  */
-	 public void testPrefetch2b() throws Exception {
-		 this.populatePaintings();
-		 EntityResolver er = ctxt.getEntityResolver();
-		 ObjEntity paintingEntity = er.lookupObjEntity(Painting.class);
-		 ObjEntity galleryEntity = er.lookupObjEntity(Gallery.class);
-		 ObjEntity artistExhibitEntity = er.lookupObjEntity(ArtistExhibit.class);
-		 ObjEntity exhibitEntity = er.lookupObjEntity(Exhibit.class);
-		 ObjRelationship paintingToArtistRel =
-			 (ObjRelationship) paintingEntity.getRelationship("toArtist");
-		 paintingEntity.removeRelationship("toArtist");
+    /**
+     * Test that all queries specified in prefetch are executed
+     * in a more complex prefetch scenario with no reverse 
+     * obj relationships
+     */
+    public void testPrefetch2b() throws Exception {
+        this.populatePaintings();
+        EntityResolver er = ctxt.getEntityResolver();
+        ObjEntity paintingEntity = er.lookupObjEntity(Painting.class);
+        ObjEntity galleryEntity = er.lookupObjEntity(Gallery.class);
+        ObjEntity artistExhibitEntity = er.lookupObjEntity(ArtistExhibit.class);
+        ObjEntity exhibitEntity = er.lookupObjEntity(Exhibit.class);
+        ObjRelationship paintingToArtistRel =
+            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+        paintingEntity.removeRelationship("toArtist");
 
-		 ObjRelationship galleryToPaintingRel =
-			 (ObjRelationship) galleryEntity.getRelationship("paintingArray");
-		 galleryEntity.removeRelationship("paintingArray");
+        ObjRelationship galleryToPaintingRel =
+            (ObjRelationship) galleryEntity.getRelationship("paintingArray");
+        galleryEntity.removeRelationship("paintingArray");
 
-		 ObjRelationship artistExhibitToArtistRel =
-			 (ObjRelationship) artistExhibitEntity.getRelationship("toArtist");
-		 artistExhibitEntity.removeRelationship("toArtist");
+        ObjRelationship artistExhibitToArtistRel =
+            (ObjRelationship) artistExhibitEntity.getRelationship("toArtist");
+        artistExhibitEntity.removeRelationship("toArtist");
 
-		 ObjRelationship exhibitToArtistExhibitRel =
-			 (ObjRelationship) exhibitEntity.getRelationship("artistExhibitArray");
-		 exhibitEntity.removeRelationship("artistExhibitArray");
+        ObjRelationship exhibitToArtistExhibitRel =
+            (ObjRelationship) exhibitEntity.getRelationship("artistExhibitArray");
+        exhibitEntity.removeRelationship("artistExhibitArray");
 
-		 Expression e =
-			 ExpressionFactory.binaryPathExp(
-				 Expression.EQUAL_TO,
-				 "artistName",
-				 this.artistName(1));
-		 SelectQuery q = new SelectQuery("Artist", e);
-		 q.addPrefetch("paintingArray");
-		 q.addPrefetch("paintingArray.toGallery");
-		 q.addPrefetch("artistExhibitArray.toExhibit");
-		 SelectObserver o = new SelectObserver();
-		 try {
-			 ctxt.performQuery(q, o);
-		 }
-		 finally {
-			 paintingEntity.addRelationship(paintingToArtistRel);
-			 galleryEntity.addRelationship(galleryToPaintingRel);
-			 artistExhibitEntity.addRelationship(artistExhibitToArtistRel);
-			 exhibitEntity.addRelationship(exhibitToArtistExhibitRel);
-		 }
+        Expression e = ExpressionFactory.matchExp("artistName", this.artistName(1));
+        SelectQuery q = new SelectQuery("Artist", e);
+        q.addPrefetch("paintingArray");
+        q.addPrefetch("paintingArray.toGallery");
+        q.addPrefetch("artistExhibitArray.toExhibit");
+        SelectObserver o = new SelectObserver();
+        try {
+            ctxt.performQuery(q, o);
+        }
+        finally {
+            paintingEntity.addRelationship(paintingToArtistRel);
+            galleryEntity.addRelationship(galleryToPaintingRel);
+            artistExhibitEntity.addRelationship(artistExhibitToArtistRel);
+            exhibitEntity.addRelationship(exhibitToArtistExhibitRel);
+        }
 
-		 assertEquals(4, o.getSelectCount());
-	 }
+        assertEquals(4, o.getSelectCount());
+    }
 
-	 /**
-	  * Test that a to-many relationship is initialized.
-	  */
-	 public void testPrefetch3() throws Exception {
-		 populatePaintings();
+    /**
+     * Test that a to-many relationship is initialized.
+     */
+    public void testPrefetch3() throws Exception {
+        populatePaintings();
 
-		 SelectQuery q = new SelectQuery("Artist");
-		 q.addPrefetch("paintingArray");
+        SelectQuery q = new SelectQuery("Artist");
+        q.addPrefetch("paintingArray");
 
-		 CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
-		 ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
-		 assertNotNull(toMany);
+        CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+        ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
+        assertNotNull(toMany);
 
-		 assertFalse(toMany.needsFetch());
-	 }
+        assertFalse(toMany.needsFetch());
+    }
 
-	 /**
-	  * Test that a to-many relationship is initialized when there
-	  * is no inverse relationship
-	  */
-	 public void testPrefetch3a() throws Exception {
-		 populatePaintings();
+    /**
+     * Test that a to-many relationship is initialized when there
+     * is no inverse relationship
+     */
+    public void testPrefetch3a() throws Exception {
+        populatePaintings();
 
-		 ObjEntity paintingEntity =
-			 ctxt.getEntityResolver().lookupObjEntity(Painting.class);
-		 ObjRelationship relationship =
-			 (ObjRelationship) paintingEntity.getRelationship("toArtist");
-		 paintingEntity.removeRelationship("toArtist");
+        ObjEntity paintingEntity =
+            ctxt.getEntityResolver().lookupObjEntity(Painting.class);
+        ObjRelationship relationship =
+            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+        paintingEntity.removeRelationship("toArtist");
 
-		 SelectQuery q = new SelectQuery("Artist");
-		 q.addPrefetch("paintingArray");
+        SelectQuery q = new SelectQuery("Artist");
+        q.addPrefetch("paintingArray");
 
-		 try {
-			 CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
-			 ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
-			 assertNotNull(toMany);
+        try {
+            CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+            ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
+            assertNotNull(toMany);
 
-			 assertFalse(toMany.needsFetch());
-		 }
-		 catch (Exception e) {
-			 e.printStackTrace();
-			 fail("Should not have failed " + e.getMessage());
-		 }
-		 finally {
-			 //Fix it up again, so other tests do not fail
-			 paintingEntity.addRelationship(relationship);
-		 }
+            assertFalse(toMany.needsFetch());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have failed " + e.getMessage());
+        }
+        finally {
+            //Fix it up again, so other tests do not fail
+            paintingEntity.addRelationship(relationship);
+        }
 
-	 }
+    }
 
-	 /**
-	  * Test that a to-many relationship is initialized when there
-	  * is no inverse relationship and the root query is qualified
-	  */
-	 public void testPrefetch3b() throws Exception {
-		 populatePaintings();
+    /**
+     * Test that a to-many relationship is initialized when there
+     * is no inverse relationship and the root query is qualified
+     */
+    public void testPrefetch3b() throws Exception {
+        populatePaintings();
 
-		 ObjEntity paintingEntity =
-			 ctxt.getEntityResolver().lookupObjEntity(Painting.class);
-		 ObjRelationship relationship =
-			 (ObjRelationship) paintingEntity.getRelationship("toArtist");
-		 paintingEntity.removeRelationship("toArtist");
+        ObjEntity paintingEntity =
+            ctxt.getEntityResolver().lookupObjEntity(Painting.class);
+        ObjRelationship relationship =
+            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+        paintingEntity.removeRelationship("toArtist");
 
-		 SelectQuery q = new SelectQuery("Artist");
-		 q.setQualifier(
-			 ExpressionFactory.binaryPathExp(
-				 Expression.EQUAL_TO,
-				 "artistName",
-				 this.artistName(1)));
-		 q.addPrefetch("paintingArray");
+        SelectQuery q = new SelectQuery("Artist");
+        q.setQualifier(ExpressionFactory.matchExp("artistName", this.artistName(1)));
+        q.addPrefetch("paintingArray");
 
-		 try {
-			 CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
-			 ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
-			 assertNotNull(toMany);
+        try {
+            CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+            ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
+            assertNotNull(toMany);
 
-			 assertFalse(toMany.needsFetch());
-		 }
-		 catch (Exception e) {
-			 e.printStackTrace();
-			 fail("Should not have failed " + e.getMessage());
-		 }
-		 finally {
-			 //Fix it up again, so other tests do not fail
-			 paintingEntity.addRelationship(relationship);
-		 }
+            assertFalse(toMany.needsFetch());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have failed " + e.getMessage());
+        }
+        finally {
+            //Fix it up again, so other tests do not fail
+            paintingEntity.addRelationship(relationship);
+        }
 
-	 }
+    }
 
-	 /**
-	  * Test that a to-one relationship is initialized.
-	  */
-	 public void testPrefetch4() throws Exception {
-		 populatePaintings();
+    /**
+     * Test that a to-one relationship is initialized.
+     */
+    public void testPrefetch4() throws Exception {
+        populatePaintings();
 
-		 SelectQuery q = new SelectQuery("Painting");
-		 q.addPrefetch("toArtist");
+        SelectQuery q = new SelectQuery("Painting");
+        q.addPrefetch("toArtist");
 
-		 CayenneDataObject p1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
-		 CayenneDataObject a1 = (CayenneDataObject) p1.readPropertyDirectly("toArtist");
+        CayenneDataObject p1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+        CayenneDataObject a1 = (CayenneDataObject) p1.readPropertyDirectly("toArtist");
 
-		 assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
-	 }
+        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+    }
 
-	 /**
-	  * Test prefetching with queries using DB_PATH.
-	  */
-	 public void testPrefetch5() throws Exception {
-		 populatePaintings();
+    /**
+     * Test prefetching with queries using DB_PATH.
+     */
+    public void testPrefetch5() throws Exception {
+        populatePaintings();
 
-		 SelectQuery q = new SelectQuery("Painting");
-		 q.andQualifier(
-			 ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
-		 q.addPrefetch("toArtist");
-		 // q.setLoggingLevel(Level.INFO);
+        SelectQuery q = new SelectQuery("Painting");
+        q.andQualifier(
+            ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+        q.addPrefetch("toArtist");
 
-		 List results = ctxt.performQuery(q);
-		 assertEquals(1, results.size());
-	 }
+        List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
+    }
 
-	 /**
-	  * Test prefetching with queries using OBJ_PATH.
-	  */
-	 public void testPrefetch6() throws Exception {
-		 populatePaintings();
+    /**
+     * Test prefetching with queries using OBJ_PATH.
+     */
+    public void testPrefetch6() throws Exception {
+        populatePaintings();
 
-		 SelectQuery q = new SelectQuery("Painting");
-		 q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
-		 q.addPrefetch("toArtist");
-		 // q.setLoggingLevel(Level.INFO);
+        SelectQuery q = new SelectQuery("Painting");
+        q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
+        q.addPrefetch("toArtist");
 
-		 List results = ctxt.performQuery(q);
-		 assertEquals(1, results.size());
-	 }
+        List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
+    }
 
-	 /**
-	  * Test prefetching with the prefetch on a reflexive relationship
-	  */
-	 public void testPrefetch7() throws Exception {
-		 ArtGroup parent = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
-		 parent.setName("parent");
-		 ArtGroup child = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
-		 child.setName("child");
-		 child.setToParentGroup(parent);
-		 ctxt.commitChanges();
+    /**
+     * Test prefetching with the prefetch on a reflexive relationship
+     */
+    public void testPrefetch7() throws Exception {
+        ArtGroup parent = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
+        parent.setName("parent");
+        ArtGroup child = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
+        child.setName("child");
+        child.setToParentGroup(parent);
+        ctxt.commitChanges();
 
-		 SelectQuery q = new SelectQuery("ArtGroup");
-		 q.setQualifier(ExpressionFactory.matchExp("name", "child"));
-		 q.addPrefetch("toParentGroup");
+        SelectQuery q = new SelectQuery("ArtGroup");
+        q.setQualifier(ExpressionFactory.matchExp("name", "child"));
+        q.addPrefetch("toParentGroup");
 
-		 ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
-		 try {
-			 ctxt.performQuery(q, o);
-		 }
-		 catch (Exception e) {
-			 e.printStackTrace();
-			 fail("Should not have failed with exception " + e.getMessage());
-		 }
+        ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+        try {
+            ctxt.performQuery(q, o);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have failed with exception " + e.getMessage());
+        }
 
-		 assertEquals(2, o.getSelectCount());
+        assertEquals(2, o.getSelectCount());
 
-		 List results = o.getResults(q);
-		 assertEquals(1, results.size());
+        List results = o.getResults(q);
+        assertEquals(1, results.size());
 
-		 ArtGroup fetchedChild = (ArtGroup) results.get(0);
-		 //The parent must be fully fetched, not just HOLLOW (a fault)
-		 assertEquals(
-			 PersistenceState.COMMITTED,
-			 fetchedChild.getToParentGroup().getPersistenceState());
-	 }
+        ArtGroup fetchedChild = (ArtGroup) results.get(0);
+        //The parent must be fully fetched, not just HOLLOW (a fault)
+        assertEquals(
+            PersistenceState.COMMITTED,
+            fetchedChild.getToParentGroup().getPersistenceState());
+    }
 
-	 /**
-	  * Test prefetching with qualifier on the root query 
-	  * containing the path to the prefetch
-	  */
-	 public void testPrefetch8() throws Exception {
-		 this.populatePaintings();
-		 Expression exp =
-			 ExpressionFactory.matchExp("toArtist.artistName", this.artistName(1));
+    /**
+     * Test prefetching with qualifier on the root query 
+     * containing the path to the prefetch
+     */
+    public void testPrefetch8() throws Exception {
+        this.populatePaintings();
+        Expression exp =
+            ExpressionFactory.matchExp("toArtist.artistName", this.artistName(1));
 
-		 SelectQuery q = new SelectQuery(Painting.class, exp);
+        SelectQuery q = new SelectQuery(Painting.class, exp);
 
-		 q.addPrefetch("toArtist");
-		 ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
-		 try {
-			 ctxt.performQuery(q, o);
-		 }
-		 catch (Exception e) {
-			 e.printStackTrace();
-			 fail("Should not have failed with exception " + e.getMessage());
-		 }
-		 assertEquals(2, o.getSelectCount());
+        q.addPrefetch("toArtist");
+        ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+        try {
+            ctxt.performQuery(q, o);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have failed with exception " + e.getMessage());
+        }
+        assertEquals(2, o.getSelectCount());
 
-		 List results = o.getResults(q);
-		 assertEquals(1, results.size());
+        List results = o.getResults(q);
+        assertEquals(1, results.size());
 
-		 Painting painting = (Painting) results.get(0);
-		 //The parent must be fully fetched, not just HOLLOW (a fault)
-		 assertEquals(
-			 PersistenceState.COMMITTED,
-			 painting.getToArtist().getPersistenceState());
+        Painting painting = (Painting) results.get(0);
+        //The parent must be fully fetched, not just HOLLOW (a fault)
+        assertEquals(
+            PersistenceState.COMMITTED,
+            painting.getToArtist().getPersistenceState());
 
-	 }
+    }
 
-	 /**
-	  * Test prefetching with qualifier on the root query 
-	  * being the path to the prefetch
-	  */
-	 public void testPrefetch9() throws Exception {
-		 this.populatePaintings();
-		 Expression artistExp =
-			 ExpressionFactory.matchExp("artistName", this.artistName(1));
-		 SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
-		 Artist artist1 = (Artist) ctxt.performQuery(artistQuery).get(0);
+    /**
+     * Test prefetching with qualifier on the root query 
+     * being the path to the prefetch
+     */
+    public void testPrefetch9() throws Exception {
+        this.populatePaintings();
+        Expression artistExp =
+            ExpressionFactory.matchExp("artistName", this.artistName(1));
+        SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
+        Artist artist1 = (Artist) ctxt.performQuery(artistQuery).get(0);
 
-		 //Try and find the painting matching the artist
-		 Expression exp = ExpressionFactory.matchExp("toArtist", artist1);
+        //Try and find the painting matching the artist
+        Expression exp = ExpressionFactory.matchExp("toArtist", artist1);
 
-		 SelectQuery q = new SelectQuery(Painting.class, exp);
-		 q.addPrefetch("toArtist");
+        SelectQuery q = new SelectQuery(Painting.class, exp);
+        q.addPrefetch("toArtist");
 
-		 //The rest of this test causes failures.  Do we even need to fix this
-		 // given the rather odd nature of what is trying to be done 
-		 // (prefetching an object which we used to create the root query
-		 // qualifier in the first place)?
-		 /*
-		 ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
-		 try {
-			 ctxt.performQuery(q, o);
-		 } catch (Exception e) {
-			 e.printStackTrace();
-			 fail("Should not have failed with exception " + e.getMessage());
-		 }
-		 assertEquals(2, o.getSelectCount());
+        //The rest of this test causes failures.  Do we even need to fix this
+        // given the rather odd nature of what is trying to be done 
+        // (prefetching an object which we used to create the root query
+        // qualifier in the first place)?
+        /*
+        ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+        try {
+        	 ctxt.performQuery(q, o);
+        } catch (Exception e) {
+        	 e.printStackTrace();
+        	 fail("Should not have failed with exception " + e.getMessage());
+        }
+        assertEquals(2, o.getSelectCount());
         
-		 List results = o.getResults(q);
-		 assertEquals(1, results.size());
+        List results = o.getResults(q);
+        assertEquals(1, results.size());
         
-		 Painting painting = (Painting) results.get(0);
-		 //The parent must be fully fetched, not just HOLLOW (a fault)
-		 assertEquals(
-			 PersistenceState.COMMITTED,
-			 painting.getToArtist().getPersistenceState());
-		 */
+        Painting painting = (Painting) results.get(0);
+        //The parent must be fully fetched, not just HOLLOW (a fault)
+        assertEquals(
+        	 PersistenceState.COMMITTED,
+        	 painting.getToArtist().getPersistenceState());
+        */
 
-	 }
+    }
 }
