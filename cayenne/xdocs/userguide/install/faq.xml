@@ -1,0 +1,38 @@
+<document>
+<title>User Guide - Installation</title>
+
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/install/index.html</prev>
+	<next>/userguide/quickstart/index.html</next>
+</navigator>
+
+<body>
+    <section name="2. Installation">
+        <subsection name="2.5 Installation FAQ" anchor="faq">
+ 			<p><strong>After installation, an application using Cayenne
+ 			gives an error similar to 
+ 			"ConfigException: [org.objectstyle.cayenne.conf.DefaultConfiguration] : 
+ 			Domain configuration file "cayenne.xml" is not found.", even though cayenne.xml
+ 			is in the CLASSPATH.</strong></p>
+ 			
+ 			<p>Most likely this happened due to the fact that application 
+ 			classes and Cayenne classes are loaded by different ClassLoaders
+ 			and Cayenne configuration package can't access configuration
+ 			files accessible to application ClassLoader. Typical scenario
+ 			when this can happen is when cayenne.jar is placed in extensions
+ 			directory of the JVM ($JRE_HOME/lib/ext directory). In this case
+ 			programmer must explicitly bootstrap Cayenne to look for configuration
+ 			files in the right place. This can be done by the following code
+ 			(it can be added to "main" method of the applicaton for instance):	
+ 			</p>
+ 			
+<source>
+// let Cayenne know about the default application ClassLoader
+Configuration.bootstrapSharedConfig(MyClass.class);
+</source>
+ 
+        </subsection>
+    </section>
+</body>
+</document>

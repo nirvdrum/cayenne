@@ -1,0 +1,147 @@
+<document>
+<title>User Guide - Installation</title>
+
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/intro.html</prev>
+	<next>/userguide/install/faq.html</next>
+</navigator>
+
+<body>
+    <section name="2. Installation">
+        <subsection name="2.1 System Requirements" anchor="sys_req">
+            <p>Cayenne, including GUI tools, is written in 100% Java,
+            and therefore should run out of the box on any Java-compatible platform. 
+            More detailed requirements are listed below:</p>
+            
+            <p><strong>- JSDK 1.4 :</strong> Cayenne requires JSDK 1.4 or newer and will not
+            run with earlier versions. To download it from Sun go to <a href="http://java.sun.com/products/">
+            http://java.sun.com/products/</a> or directly to <a href="http://java.sun.com/j2se/1.4/index.html">
+            http://java.sun.com/j2se/1.4/index.html</a></p>		
+                
+            <p><strong>- Operating System compatible with JSDK 1.4 :</strong> Currently this is
+            Linux, Solaris and Windows 95 / 98 / ME / 2000 / NT 4.0. MacOS support should be coming soon.</p>
+                
+            <p><strong>- Access to a relational database and JDBC driver for 
+            this database :</strong> Out of the box, Cayenne would 
+            support Oracle, Sybase, MySQL and PostgreSQL databases. 
+            Certain level of support exists for any other database that has a 
+            JDBC driver available but this is untested and not guaranteed. List of
+            available JDBC drivers can be found at 
+            <a href="http://industry.java.sun.com/products/jdbc/drivers">
+            http://industry.java.sun.com/products/jdbc/drivers</a>.
+            <i>Note that to run Cayenne unit tests you will need "CREATE TABLE" and 
+            "DROP TABLE" database privileges since tests supplied with 
+            Cayenne will create all the tables on the fly.</i>
+            </p>
+            
+            <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary distribution
+            WILL NOT need Ant. Only if you checked out Cayenne from CVS and plan to 
+            build it yourself, you will need Ant (version 1.4.1 or newer, 
+            older versions will not work). Ant can be downloaded from 
+            <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.</p>
+        </subsection>
+
+        <subsection name="2.2 Installation" anchor="inst">
+            <p>This section describes installing Cayenne from source or binary distribution.
+            Building Cayenne from CVS is a different topic covered elsewhere.</p>
+            
+            <p>Download the latest distribution from <a href=
+            "http://objectstyle.org/cayenne/download.html">
+            http://objectstyle.org/cayenne/download.html</a>. 
+            Choose the type of download that fits your needs. If you need
+            a stable version, download source or binary <strong>release</strong>.
+            To get the latest features, download source or binary <strong>milestone or nightly
+            build</strong>. This way you will be able to use the latest features, but this comes with
+            all the risks of using development code. Downloaded file is called something like 
+            <code>cayenne-[release-info].tar.gz</code>.
+            </p>
+            
+            <p>Unpack <code>cayenne-[release-suffix].tar.gz</code> into the target installation
+            directory. On Windows you can use <a href=
+            "http://www.winzip.com/">WinZip</a> to unpack the distribution. 
+            WinZip supports UNIX .tar.gz archives, therefore Cayenne is not provided as a zip file. 
+            On UNIX, run the following command:</p>
+            
+            <source># gz -dc [filename].tar.gz | tar xf -</source>
+                
+            <p>or if you happen to have GNU tar</p>
+                
+            <source># tar xzf [filename].tar.gz</source>
+            
+            <p>Installation is complete.</p>
+        </subsection>
+        
+        
+        <subsection name="2.3 Cayenne JAR Files" anchor="jar">
+            <p>There are two JAR files in <code>[cayenne_install_dir]/lib</code>
+            directory: <code>cayenne.jar</code> and <code>cayenne-nodeps.jar</code>. 
+            Either one or another should be used (<strong>but not both of them</strong>
+            at the same time).
+            In most cases <code>cayenne.jar</code> is the best choice. It has 
+            Cayenne classes as well as all the needed dependencies. 
+            Dependencies include <a href="http://jakarta.apache.org/velocity/">Velocity 
+            Template Engine</a> classes, and are bundled with Cayenne for simpler installation 
+            and configuration. A leaner <code>cayenne-nodeps.jar</code> file
+            should only be used if Velocity is already installed on the user machine
+            or a user wants to install it herself. 
+            <i>Note that Cayenne was tested with Velocity version 1.3. 
+            There is no guarantee that it will work with other versions.</i>
+            </p>
+            
+            <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by 
+			the 
+            applications that use Cayenne. This can be done in many different ways depending on
+            what you are planning to use Cayenne for. The simplest way is to copy
+            <code>cayenne.jar</code> (or <code>cayenne-nodeps.jar</code> 
+            to your JRE extensions directory 
+            ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext).</p>
+        </subsection>
+        
+        
+        <subsection name="2.4 Unit Tests" anchor="tests">        
+            <p>[Optional] Run tests. To do that, you will need to set the following
+            environment variables:</p>
+            
+            <ul>
+                <li><code>CAYENNE_HOME</code> - should point to
+                the directory created when your unpacked Cayenne distribution in the previous 
+                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
+                    
+                <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
+                You may already have it set.</li>
+            </ul>
+            
+            <p>When	this is done, you can run test start script. On Windows, from the command line run:</p>
+            
+            <source>%CAYENNE_HOME%\bin\runtests.bat</source>
+                
+            <p>On UNIX, run:</p>
+			
+            <source>$CAYENNE_HOME/bin/runtests.sh</source>
+                
+            <p>Test runner will present a graphic login panel:</p>
+            <img src="/images/login.jpg" width="350" height="199" border="0" align="middle" alt="Cayenne Login Panel"/>
+            
+            <panel name="Note:">
+            Use &quot;-nogui&quot; flag when calling runtests.sh if you need 
+            to run tests in command line mode with no GUI (for example, for remote installations). 
+            For things like automated unit tests "-xml [filename]" can be supplied on the command line
+            to allow test script to read database info from an XML file.
+            </panel>
+                
+            <p>Enter you
+			database login information, JDBC driver class and database URL.
+			JDBC driver class must be accessible by Java
+			Virtual Machine. For example you can put a database vendor JAR
+			file containing the driver in $JAVA_HOME/jre/lib/ext directory. 
+	        Note that there is a combo box in the top left corner of the login panel
+	        that allows user to select a canned driver and URL information. Of course you are
+	        free to overwrite any of the canned data.
+			</p>
+			
+			<p>Test results will be printed in a terminal window.</p>
+        </subsection>
+    </section>
+</body>
+</document>
