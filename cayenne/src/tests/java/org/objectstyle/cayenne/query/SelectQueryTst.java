@@ -114,7 +114,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
 
-   public void testOrderByIgnoreCase() throws Exception {
+   public void testSelectLike() throws Exception {
  		query.setRoot(Artist.class);
         Expression qual =
             ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist11");
