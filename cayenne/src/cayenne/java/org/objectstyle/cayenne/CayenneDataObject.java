@@ -127,83 +127,81 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
-    /**
-     * Convenience method to read a "nested" property.
-     * Dot-separated path is used to traverse object relationships
-     * until the final object is found. If a null object found
-     * while traversing path, null is returned. If a list is encountered
-     * in the middle of the path, CayenneRuntimeException is thrown.
-     *
-     * <p>Examples:</p>
-     * <ul>
-     *    <li>Read this object property:<br>
-     *    <code>String name = (String)artist.readNestedProperty("name");</code><br><br></li>
-     *
-     *    <li>Read an object related to this object:<br>
-     *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code>
-     *    <br><br></li>
-     *
-     *    <li>Read a property of an object related to this object: <br>
-     *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code>
-     *    <br><br></li>
-     *
-     *    <li>Read to-many relationship list:<br>
-     *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code>
-     *    <br><br></li>
-     *
-     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br>
-     *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code>
-     *   <br><br></li>
-     * </ul>
-     *
-     */
     public Object readNestedProperty(String path) {
-        StringTokenizer toks = new StringTokenizer(path, ".");
+        Object object = null;
+        CayenneDataObject dataObject = this;
+        String[] tokenized = tokenizePath(path);
+        int length = tokenized.length;
+        
+        for (int i = 0; i < length; i++) {
+            
+            object = dataObject.readSimpleProperty(tokenized[i]);
 
-        Object obj = null;
-        CayenneDataObject dataObj = this;
-        boolean terminal = false;
-        while (toks.hasMoreTokens()) {
-            if (terminal) {
-                throw new CayenneRuntimeException("Invalid path: " + path);
-            }
-            String pathComp = toks.nextToken();
-            obj = dataObj.readProperty(pathComp);
-
-            // if a null value is returned, 
-            // there is still a chance to find a non-persistent property
-            // via reflection
-            if (obj == null && !values.containsKey(pathComp)) {
-                try {
-                    obj = PropertyComparator.readProperty(pathComp, dataObj);
-                }
-                catch (IllegalAccessException e) {
-                    throw new CayenneRuntimeException(
-                        "Error reading property '" + pathComp + "'.",
-                        e);
-                }
-                catch (InvocationTargetException e) {
-                    throw new CayenneRuntimeException(
-                        "Error reading property '" + pathComp + "'.",
-                        e);
-                }
-                catch (NoSuchMethodException e) {
-                    // ignoring, no such property exists
-                }
-            }
-
-            if (obj == null) {
+            if (object == null) {
                 return null;
             }
-            else if (obj instanceof CayenneDataObject) {
-                dataObj = (CayenneDataObject) obj;
+            else if (object instanceof CayenneDataObject) {
+                dataObject = (CayenneDataObject) object;
             }
-            else {
-                terminal = true;
+            else if (i + 1 < length) {
+                throw new CayenneRuntimeException("Invalid path: " + path);
             }
         }
 
-        return obj;
+        return object;
+    }
+    
+    private static final String[] tokenizePath(String path) {
+        if (path == null) {
+            throw new NullPointerException("Null property path.");
+        }
+
+        if (path.length() == 0) {
+            throw new IllegalArgumentException("Empty property path.");
+        }
+
+        // take a shortcut for simple properties
+        if (path.indexOf(".") < 0) {
+            return new String[] { path };
+        }
+        
+        StringTokenizer tokens = new StringTokenizer(path, ".");
+        int length = tokens.countTokens();
+        String[] tokenized = new String[length];
+        for(int i = 0; i < length; i++) {
+            tokenized[i] = tokens.nextToken();
+        }
+        
+        return tokenized;
+    }
+    
+    private final Object readSimpleProperty(String property) {
+        // side effect - resolves HOLLOW object
+        Object object = readProperty(property);
+
+        // if a null value is returned, 
+        // there is still a chance to find a non-persistent property
+        // via reflection
+        if (object == null && !values.containsKey(property)) {
+            try {
+                object = PropertyComparator.readProperty(property, this);
+            }
+            catch (IllegalAccessException e) {
+                throw new CayenneRuntimeException(
+                    "Error reading property '" + property + "'.",
+                    e);
+            }
+            catch (InvocationTargetException e) {
+                throw new CayenneRuntimeException(
+                    "Error reading property '" + property + "'.",
+                    e);
+            }
+            catch (NoSuchMethodException e) {
+                // ignoring, no such property exists
+            }
+        }
+        
+        return object;
     }
 
     /**

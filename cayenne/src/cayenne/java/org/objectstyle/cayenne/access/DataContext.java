@@ -938,8 +938,7 @@ public class DataContext implements QueryEngine, Serializable {
             List relatedObjects = Collections.EMPTY_LIST;
             if (relationship.isToMany()) {
 
-                List toMany =
-                    (List) anObject.readPropertyDirectly(relationship.getName());
+                List toMany = (List) anObject.readNestedProperty(relationship.getName());
 
                 if (toMany.size() > 0) {
                     // Get a copy of the list so that deleting objects doesn't 
@@ -948,14 +947,7 @@ public class DataContext implements QueryEngine, Serializable {
                 }
             }
             else {
-                // thisRelationship is toOne... make a list of one object
-                Object relatedObject =
-                    anObject.readPropertyDirectly(thisRelationshipName);
-
-                // related object maybe a relationship fault
-                if (relatedObject instanceof RelationshipFault) {
-                    relatedObject = ((RelationshipFault) relatedObject).resolveToOne();
-                }
+                Object relatedObject = anObject.readNestedProperty(thisRelationshipName);
 
                 if (relatedObject != null) {
                     relatedObjects = Collections.singletonList(relatedObject);

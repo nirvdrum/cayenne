@@ -104,6 +104,41 @@ public interface DataObject extends java.io.Serializable {
     public Object readPropertyDirectly(String propName);
 
     /**
+     * Returns the value of a property path. Property path (or nested property) is a 
+     * dot-separated path used to traverse object relationships until the final object 
+     * is found. If a null object found while traversing path, null is returned. If a 
+     * list is encountered in the middle of the path, CayenneRuntimeException is thrown. 
+     * Unlike @{link #readPropertyDirectly(String)}, this method will resolve an object
+     * if it is HOLLOW.
+     *
+     * <p>Examples:</p>
+     * <ul>
+     *    <li>Read this object property:<br>
+     *    <code>String name = (String)artist.readNestedProperty("name");</code><br><br></li>
+     *
+     *    <li>Read an object related to this object:<br>
+     *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code>
+     *    <br><br></li>
+     *
+     *    <li>Read a property of an object related to this object: <br>
+     *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code>
+     *    <br><br></li>
+     *
+     *    <li>Read to-many relationship list:<br>
+     *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code>
+     *    <br><br></li>
+     *
+     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br>
+     *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code>
+     *   <br><br></li>
+     * </ul>
+     * 
+     * @since 1.0.5
+     *
+     */    
+    public Object readNestedProperty(String path);
+    
+    /**
      * @deprecated Since 1.0.1 this method is no longer needed.
      */
     public DataObject readToOneDependentTarget(String relName);

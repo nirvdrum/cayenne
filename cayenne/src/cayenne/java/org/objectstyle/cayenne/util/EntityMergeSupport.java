@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  * Implements methods for entity merging.
@@ -115,10 +116,14 @@ public class EntityMergeSupport {
             Iterator ait = addAttributes.iterator();
             while (ait.hasNext()) {
                 DbAttribute da = (DbAttribute) ait.next();
-                String attName = NameConverter.undescoredToJava(da.getName(), false);
+                String attrName = NameConverter.undescoredToJava(da.getName(), false);
+                
+                // avoid duplicate names
+                attrName = NamedObjectFactory.createName(ObjAttribute.class, entity, attrName);
+                
                 String type = TypesMapping.getJavaBySqlType(da.getType());
 
-                ObjAttribute oa = new ObjAttribute(attName, type, entity);
+                ObjAttribute oa = new ObjAttribute(attrName, type, entity);
                 oa.setDbAttribute(da);
                 entity.addAttribute(oa);
             }
@@ -132,10 +137,14 @@ public class EntityMergeSupport {
                 if (mappedTargets.size() == 0) {
                     continue;
                 }
-                
+
                 Entity mappedTarget = (Entity) mappedTargets.iterator().next();
 
-                ObjRelationship or = new ObjRelationship(dr.getName());
+                // avoid duplicate names
+                String relationshipName =
+                    NamedObjectFactory.createName(ObjRelationship.class, entity, dr.getName());
+
+                ObjRelationship or = new ObjRelationship(relationshipName);
                 or.addDbRelationship(dr);
                 or.setSourceEntity(entity);
                 or.setTargetEntity(mappedTarget);

@@ -125,6 +125,14 @@ public abstract class NamedObjectFactory {
     public static String createName(Class objectClass, Object namingContext) {
         return ((NamedObjectFactory) factories.get(objectClass)).makeName(namingContext);
     }
+    
+    /**
+     * @since 1.0.5
+     */
+    public static String createName(Class objectClass, Object namingContext, String nameBase) {
+        return ((NamedObjectFactory) factories.get(objectClass)).makeName(namingContext, nameBase);
+    }
+
 
     /**
      * Creates an object using an appropriate factory class.
@@ -137,6 +145,18 @@ public abstract class NamedObjectFactory {
     public static Object createObject(Class objectClass, Object namingContext) {
         return ((NamedObjectFactory) factories.get(objectClass)).makeObject(
             namingContext);
+    }
+
+    /**
+     * @since 1.0.5
+     */
+    public static Object createObject(
+        Class objectClass,
+        Object namingContext,
+        String nameBase) {
+        return ((NamedObjectFactory) factories.get(objectClass)).makeObject(
+            namingContext,
+            nameBase);
     }
 
     /**
@@ -163,22 +183,34 @@ public abstract class NamedObjectFactory {
      * this object.
      */
     protected synchronized String makeName(Object namingContext) {
+        return  makeName(namingContext, nameBase());
+    }
+    
+    /**
+     * @since 1.0.5
+     */
+    protected synchronized String makeName(Object namingContext, String nameBase) {
         int c = 1;
-        String name = null;
-        do {
-            name = nameBase() + c++;
+        String name = nameBase;
+        while (isNameInUse(name, namingContext)) {
+            name = nameBase + c++;
         }
-        while (isNameInUse(name, namingContext));
-
+        
         return name;
     }
 
     /**
-     * Creates a unique name for the new object and constructs
-     * this object.
+     * Creates a unique name for the new object and constructs this object.
      */
     protected Object makeObject(Object namingContext) {
-        return create(makeName(namingContext), namingContext);
+        return makeObject(namingContext, nameBase());
+    }
+    
+    /**
+     * @since 1.0.5
+     */
+    protected Object makeObject(Object namingContext, String nameBase) {
+        return create(makeName(namingContext, nameBase), namingContext);
     }
 
     /** Returns a base default name, like "UntitledEntity", etc. */
