@@ -2,6 +2,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
@@ -45,8 +46,7 @@ public class EntityResolverTst extends CayenneTestCase {
     }
 
     public void testLookupDbEntityByObjEntity() throws Exception {
-        assertIsArtistDbEntity(
-            sharedResolver.lookupDbEntity(getArtistObjEntity()));
+        assertIsArtistDbEntity(sharedResolver.lookupDbEntity(getArtistObjEntity()));
     }
 
     public void testLookupDbEntityByClass() throws Exception {
@@ -55,8 +55,7 @@ public class EntityResolverTst extends CayenneTestCase {
 
     public void testLookupDbEntityByDataobject() throws Exception {
         Artist artist =
-            (Artist) this.createDataContext().createAndRegisterNewObject(
-                "Artist");
+            (Artist) this.createDataContext().createAndRegisterNewObject("Artist");
         assertIsArtistDbEntity(sharedResolver.lookupDbEntity(artist));
     }
 
@@ -76,8 +75,7 @@ public class EntityResolverTst extends CayenneTestCase {
 
     public void testLookupObjEntityByDataobject() throws Exception {
         Artist artist =
-            (Artist) this.createDataContext().createAndRegisterNewObject(
-                "Artist");
+            (Artist) this.createDataContext().createAndRegisterNewObject("Artist");
         assertIsArtistObjEntity(sharedResolver.lookupObjEntity(artist));
     }
 
@@ -162,11 +160,30 @@ public class EntityResolverTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(oe1);
         m1.addObjEntity(oe1);
         oe1.addQuery("abc", q);
-        
+
         List list = new ArrayList();
         list.add(m1);
         EntityResolver resolver = new EntityResolver(list);
 
         assertSame(q, resolver.lookupQuery(Object.class, "abc"));
+    }
+
+    public void testLookupQuery() throws Exception {
+        // create a resolver with a single map
+        DataMap m1 = new DataMap();
+        SelectQuery q = new SelectQuery();
+        q.setName("query1");
+        m1.addQuery(q);
+
+        EntityResolver resolver = new EntityResolver(Collections.singleton(m1));
+        assertSame(q, resolver.lookupQuery("query1"));
+
+        // check that the query added on-the-fly will be recognized
+        assertNull(resolver.lookupQuery("query2"));
+
+        SelectQuery q2 = new SelectQuery();
+        q2.setName("query2");
+        m1.addQuery(q2);
+        assertSame(q2, resolver.lookupQuery("query2"));
     }
 }

@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class EntityResolver {
+    protected Map queryCache;
     protected Map dbEntityCache;
     protected Map objEntityCache;
     protected Map procedureCache;
@@ -91,6 +92,7 @@ public class EntityResolver {
     public EntityResolver() {
         this.maps = new ArrayList();
         this.mapsRef = Collections.unmodifiableList(maps);
+        this.queryCache = new HashMap();
         this.dbEntityCache = new HashMap();
         this.objEntityCache = new HashMap();
         this.procedureCache = new HashMap();
@@ -160,6 +162,7 @@ public class EntityResolver {
      * <code>lookup...</code> methods.
      */
     protected synchronized void clearCache() {
+        queryCache.clear();
         dbEntityCache.clear();
         objEntityCache.clear();
         procedureCache.clear();
@@ -215,6 +218,19 @@ public class EntityResolver {
             while (procedures.hasNext()) {
                 Procedure proc = (Procedure) procedures.next();
                 procedureCache.put(proc.getName(), proc);
+            }
+            
+            // index queries
+            Iterator queries = thisMap.getQueries().iterator();
+            while (queries.hasNext()) {
+                Query query = (Query) queries.next();
+                String name = query.getName();
+                Object existingQuery = queryCache.put(name, query);
+                
+                if (existingQuery != null && query != existingQuery) {
+                    throw new CayenneRuntimeException(
+                        "More than one Query for name" + name);
+                }
             }
         }
     }
@@ -392,6 +408,23 @@ public class EntityResolver {
     public Query lookupQuery(Class queryRoot, String queryName) {
         Entity ent = lookupObjEntity(queryRoot);
         return (ent != null) ? ent.getQuery(queryName) : null;
+    }
+    
+    /**
+     * Returns a named query or null if no query exists for a given name.
+     * 
+     * @since 1.1
+     */
+    public synchronized Query lookupQuery(String name) {
+        Query result = (Query) queryCache.get(name);
+
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            result = (Query) queryCache.get(name);
+        }
+        return result;
     }
 
     public Procedure lookupProcedure(Query q) {
