@@ -19,7 +19,9 @@
             <ul>
                 <li>Release Builds</li>
                 <li>Milestone Builds</li>
-                <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
+                <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a> 
+                (note that usually only about 7 latest nightly builds are available, older ones are 
+                automatically deleted from the archive)</li>
             </ul>            
             </p>
 

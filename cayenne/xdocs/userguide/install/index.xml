@@ -35,10 +35,10 @@
             Cayenne will create all the tables on the fly.</i>
             </p>
             
-            <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary distribution
-            WILL NOT need Ant. Only if you checked out Cayenne from CVS and plan to 
-            build it yourself, you will need Ant (version 1.4.1 or newer, 
-            older versions will not work). Ant can be downloaded from 
+            <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary 
+            distribution WILL NOT need Ant. Only if you plan to <a href="#compile">build it yourself</a>
+            (you don't have to!), you will need Ant. Version 1.4.1 or newer is required, 
+            older versions will not work. Ant can be downloaded from 
             <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.</p>
         </subsection>
 
@@ -142,6 +142,31 @@
 			
 			<p>Test results will be printed in a terminal window.</p>
         </subsection>
+        
+        <subsection name="2.5 Compiling Cayenne from Source" anchor="compile"> 
+        <panel name="Note:">Normally users don't need to compile Cayenne. Prebuilt JAR's
+        are included with both source and binary distributions.</panel>
+        
+        <p>For those users who need to recompile Cayenne (for example if they modified the 
+        source code to customize or test certain aspects), Cayenne source distribution 
+        provides Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). To build
+        custom Cayenne jars execute the following commands. Windows:</p>
+        
+        <source>cd %CAYENNE_HOME%\src
+%ANT_HOME%\bin\ant.bat</source>
+
+		<p>UNIX</p>
+		
+		<source>cd $CAYENNE_HOME/src
+$ANT_HOME/bin/ant</source>
+
+		<p>Note that the original cayenne.jar file should be present in the 
+		<code>[cayenne_install_dir]/lib</code> directory, since it contains dependencies
+		not included as a source code. The result of the build is two new JAR files: 
+		<code>[cayenne_install_dir]/lib/cayenne-cust.jar</code> and
+		<code>[cayenne_install_dir]/lib/cayenne-tests-cust.jar</code>.
+		</p>        
+        </subsection>  
     </section>
 </body>
 </document>
