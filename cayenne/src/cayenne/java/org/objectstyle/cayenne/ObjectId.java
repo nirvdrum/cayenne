@@ -57,11 +57,9 @@ package org.objectstyle.cayenne;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
@@ -77,10 +75,8 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class ObjectId implements Serializable {
-	private static Logger logObj = Logger.getLogger(ObjectId.class);
-
-	// Keys: DbAttribute objects;
-	// Values database values of the corresponding attribute
+	// Keys: DbAttribute names
+	// Values: database values of the corresponding attribute
 	protected Map objectIdKeys;
 	protected Class objectClass;
 	
@@ -98,16 +94,17 @@ public class ObjectId implements Serializable {
 	 */
 	public ObjectId(Class objClass,  String keyName, Object id) {
 		this.objectClass = objClass;
-		Map keys = new HashMap();
-		keys.put(keyName, id);
-		setIdKeys(keys);
+		this.setIdKeys(Collections.singletonMap(keyName, id));
 	}
 
-
-	/** Creates new ObjectId */
+	/**
+	 * Creates a new ObjectId.
+	 */
 	public ObjectId(Class objClass, Map idKeys) {
 		this.objectClass = objClass;
-		setIdKeys(idKeys);
+		if (idKeys != null) {
+			this.setIdKeys(Collections.unmodifiableMap(idKeys));
+		}
 	}
 
 	protected void setIdKeys(Map idKeys) {
@@ -124,15 +121,19 @@ public class ObjectId implements Serializable {
 		}
 
 		ObjectId id = (ObjectId) object;
-		//CTM Use the class name because two objectid's should be equal even if their objClass'es were loaded
-		// by different class loaders.
-		return objectClass.getName().equals(id.objectClass.getName()) && Util.nullSafeEquals(id.objectIdKeys, this.objectIdKeys);
+		// use the class name because two Objectid's should be equal
+		// even if their objClass'es were loaded by different class loaders.
+		return objectClass.getName().equals(id.objectClass.getName()) &&
+				Util.nullSafeEquals(id.objectIdKeys, this.objectIdKeys);
 	}
 
-	/** Returns a map of id components. 
-	 * Keys in the map are DbAttribute names, values are database values of corresponding columns */
+	/**
+	 * Returns a map of id components. 
+	 * Keys in the map are DbAttribute names, values are database values
+	 * of corresponding columns.
+	 */
 	public Map getIdSnapshot() {
-		return Collections.unmodifiableMap(objectIdKeys);
+		return objectIdKeys;
 	}
 
     /**
@@ -173,7 +174,8 @@ public class ObjectId implements Serializable {
      */
     public int hashCode() {
     	int mapHash = (objectIdKeys != null) ? objectIdKeys.hashCode() : 0;
- 		//CTM Use the class name because we don't care about classes from different class loaders being "different"
+		// use the class name because two Objectid's should be equal
+		// even if their objClass'es were loaded by different class loaders.
         return objectClass.getName().hashCode() + mapHash;
     }
     
