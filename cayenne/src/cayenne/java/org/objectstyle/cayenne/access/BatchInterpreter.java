@@ -146,7 +146,12 @@ public class BatchInterpreter {
                             attributeScales[i]);
                     }
                 }
-                results[index++] = st.executeUpdate();
+                results[index] = st.executeUpdate();
+                QueryLogger.logUpdateCount(
+                    batch.getLoggingLevel(),
+                    results[index]);
+
+                index++;
             }
             return results;
         } catch (SQLException e) {
