@@ -283,8 +283,10 @@ $tag
       <tbody>
        	<tr>
        		<td align="left" class="normal">
-       		<strong class="body-white">TABLE OF CONTENTS:</strong><br>
-         #set ($toc = $project.getChild($root.getChild("toc").getAttributeValue("name")))
+       		#set ($toc = $project.getChild($root.getChild("toc").getAttributeValue("name")))
+       		<strong class="body-white">#menuprojectanchor($toc.getAttributeValue("name") $toc.getAttributeValue("href"))</strong><br>
+       		<p><strong class="body-white">TABLE OF CONTENTS:</strong></p>
+
          #foreach ( $item in $toc.getChildren())
     		#set ($name = $item.getAttributeValue("name"))
     		<p>
