@@ -58,6 +58,9 @@ package org.objectstyle.cayenne.dba.postgres;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -92,6 +95,13 @@ public class PostgresAdapter extends JdbcAdapter
 	public String dropTable(DbEntity ent) {
 		return super.dropTable(ent) + " CASCADE";
 	}
+	
+    /**
+     * Returns a trimming translator.
+     */
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+        return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
+    }
 
 	/**
 	 * @see JdbcAdapter#createPkGenerator()

@@ -81,7 +81,9 @@ import org
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
 import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
@@ -120,7 +122,6 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
-    protected QualifierTranslatorFactory qualifierFactory;
     protected BatchInterpreter insertBatchInterpreter;
     protected BatchInterpreter deleteBatchInterpreter;
     protected BatchInterpreter updateBatchInterpreter;
@@ -148,8 +149,6 @@ public class JdbcAdapter implements DbAdapter {
         typesHandler = TypesHandler.getHandler(this.getClass());
         extendedTypes = new ExtendedTypeMap();
         configureExtendedTypes(extendedTypes);
-
-        qualifierFactory = new QualifierTranslatorFactory();
     }
 
     /**
@@ -406,8 +405,12 @@ public class JdbcAdapter implements DbAdapter {
         return extendedTypes;
     }
 
+    /**
+     * @deprecated Since 1.0 Beta 1, QualifierTranslator is created directly by
+     * DbAdapter via 'getQualifierTranslator'.
+     */
     public QualifierTranslatorFactory getQualifierFactory() {
-        return qualifierFactory;
+        return new QualifierTranslatorFactory();
     }
 
     public DbAttribute buildAttribute(
@@ -480,4 +483,10 @@ public class JdbcAdapter implements DbAdapter {
         return getExtendedTypes();
     }
 
+    /**
+     * Creates and returns a default implementation of a qualifier translator.
+     */
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+        return new QualifierTranslator(queryAssembler);
+    }
 }

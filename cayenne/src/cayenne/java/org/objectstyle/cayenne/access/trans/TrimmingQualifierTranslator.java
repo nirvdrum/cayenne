@@ -54,43 +54,47 @@
  *
  */
 
-package org.objectstyle.cayenne.dba.oracle;
+package org.objectstyle.cayenne.access.trans;
 
 import java.sql.Types;
 
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /** 
- * Sequence-based primary key generator implementation for Oracle. 
- * Uses Oracle sequences to generate primary key values. This approach is 
- * at least 50% faster when tested with Oracle compared to the lookup table
- * approach.
- * 
- * <p>When using Cayenne key caching mechanism, make sure that sequences in 
- * the database have "INCREMENT BY" greater or equal to OraclePkGenerator 
- * "pkCacheSize" property value. If this is not the case, you will need to
- * adjust PkGenerator value accordingly. For example when sequence is
- * incremented by 1 each time, use the following code:</p>
- * 
- * <pre>
- * dataNode.getAdapter().getPkGenerator().setPkCacheSize(1);
- * </pre>
+ * QualifierTranslator that allows translation of qualifiers that perform
+ * comparison with CHAR columns. Some databases require trimming the values for
+ * this to work.
  * 
  * @author Andrei Adamchik
  */
-public class OracleQualifierTranslator extends QualifierTranslator {
+public class TrimmingQualifierTranslator extends QualifierTranslator {
+
+    protected String trimFunction;
+
+    /**
+     * Constructor for TrimmingQualifierTranslator.
+     */
+    protected TrimmingQualifierTranslator() {
+        super();
+    }
+
+    /**
+     * Constructor for TrimmingQualifierTranslator.
+     */
+    public TrimmingQualifierTranslator(
+        QueryAssembler queryAssembler,
+        String trimFunction) {
+        super(queryAssembler);
+        this.trimFunction = trimFunction;
+    }
 
     /**
      * Adds special handling of CHAR columns.
      */
     protected void processColumn(StringBuffer buf, DbAttribute dbAttr) {
         if (dbAttr.getType() == Types.CHAR) {
-        	//CTM 7/11/2002 
-        	//TRIM(TRAILING FROM is only available in Oracle 8i and above.  RTRIM is available in older versions as well
-            //buf.append("TRIM(TRAILING FROM ");
-            buf.append("RTRIM(");
+            buf.append(trimFunction).append("(");
             super.processColumn(buf, dbAttr);
             buf.append(')');
         } else {
@@ -100,22 +104,33 @@ public class OracleQualifierTranslator extends QualifierTranslator {
 
     /**
      * Adds special handling of CHAR columns.
-     * 
-     * @see org.objectstyle.cayenne.access.trans.QueryAssemblerHelper#processColumn(StringBuffer, DbAttribute, DbRelationship)
      */
     protected void processColumn(
         StringBuffer buf,
         DbAttribute dbAttr,
         DbRelationship rel) {
         if (dbAttr.getType() == Types.CHAR) {
-       		//CTM 7/11/2002 
-        	//TRIM(TRAILING FROM is only available in Oracle 8i and above.  RTRIM is available in older versions as well
-            //buf.append("TRIM(TRAILING FROM ");
-            buf.append("RTRIM(");
+            buf.append(trimFunction).append("(");
             super.processColumn(buf, dbAttr, rel);
             buf.append(')');
         } else {
             super.processColumn(buf, dbAttr, rel);
         }
+    }
+
+    /**
+     * Returns the trimFunction.
+     * @return String
+     */
+    public String getTrimFunction() {
+        return trimFunction;
+    }
+
+    /**
+     * Sets the trimFunction.
+     * @param trimFunction The trimFunction to set
+     */
+    public void setTrimFunction(String trimFunction) {
+        this.trimFunction = trimFunction;
     }
 }

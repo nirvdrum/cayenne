@@ -64,6 +64,9 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
@@ -98,29 +101,16 @@ public class OracleAdapter extends JdbcAdapter {
 
     protected Map sorters = new HashMap();
 
-    public OracleAdapter() {
-        super();
-        qualifierFactory.setTranslatorClass(
-            org
-                .objectstyle
-                .cayenne
-                .dba
-                .oracle
-                .OracleQualifierTranslator
-                .class
-                .getName());
-    }
-
     /**
      * Installs appropriate ExtendedTypes as converters for passing values
      * between JDBC and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
-    	super.configureExtendedTypes(map);
-    	
-    	// create specially configured CharType handler
+        super.configureExtendedTypes(map);
+
+        // create specially configured CharType handler
         map.registerType(new CharType(true, true));
-        
+
         // create specially configured ByteArrayType handler
         map.registerType(new ByteArrayType(true, true));
     }
@@ -222,5 +212,12 @@ public class OracleAdapter extends JdbcAdapter {
                 new UpdateBatchQueryBuilder(this));
         }
         return updateBatchInterpreter;
+    }
+
+    /**
+     * Returns a trimming translator.
+     */
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+        return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
     }
 }

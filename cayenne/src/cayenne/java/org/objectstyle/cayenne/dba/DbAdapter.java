@@ -60,7 +60,9 @@ import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -163,7 +165,13 @@ public interface DbAdapter {
      */
     public QueryTranslator getQueryTranslator(Query query) throws Exception;
 
+    /**
+     * @deprecated Since 1.0 Beta 1, QualifierTranslator is created directly by
+     * DbAdapter via 'getQualifierTranslator'.
+     */
     public QualifierTranslatorFactory getQualifierFactory();
+    
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler);
 
     /**
      * Creates and returns a DbAttribute based on supplied parameters

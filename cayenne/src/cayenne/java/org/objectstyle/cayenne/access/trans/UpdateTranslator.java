@@ -72,70 +72,67 @@ import org.objectstyle.cayenne.query.UpdateQuery;
   * @author Andrei Adamchik
   */
 public class UpdateTranslator extends QueryAssembler {
-	private static Logger logObj = Logger.getLogger(UpdateTranslator.class);
+    private static Logger logObj = Logger.getLogger(UpdateTranslator.class);
 
-	public String aliasForTable(DbEntity dbEnt) {
-		throw new RuntimeException("aliases not supported");
-	}
+    public String aliasForTable(DbEntity dbEnt) {
+        throw new RuntimeException("aliases not supported");
+    }
 
-	public void dbRelationshipAdded(DbRelationship dbRel) {
-		throw new RuntimeException("db relationships not supported");
-	}
+    public void dbRelationshipAdded(DbRelationship dbRel) {
+        throw new RuntimeException("db relationships not supported");
+    }
 
-	/** Method that converts an update query into SQL string */
-	public String createSqlString() throws Exception {
-		StringBuffer queryBuf = new StringBuffer();
-		queryBuf.append("UPDATE ");
+    /** Method that converts an update query into SQL string */
+    public String createSqlString() throws Exception {
+        StringBuffer queryBuf = new StringBuffer();
+        queryBuf.append("UPDATE ");
 
-		// 1. append table name
-		DbEntity dbEnt = getRootEntity().getDbEntity();
-		queryBuf.append(dbEnt.getFullyQualifiedName());
+        // 1. append table name
+        DbEntity dbEnt = getRootEntity().getDbEntity();
+        queryBuf.append(dbEnt.getFullyQualifiedName());
 
-		// 2. build "set ..." clause
-		buildSetClause(queryBuf, (UpdateQuery) query);
+        // 2. build "set ..." clause
+        buildSetClause(queryBuf, (UpdateQuery) query);
 
-		// 3. build qualifier
-		String qualifierStr =
-			adapter
-				.getQualifierFactory()
-				.createTranslator(this)
-				.doTranslation();
-		if (qualifierStr != null)
-			queryBuf.append(" WHERE ").append(qualifierStr);
+        // 3. build qualifier
+        String qualifierStr =
+            adapter.getQualifierTranslator(this).doTranslation();
+        if (qualifierStr != null)
+            queryBuf.append(" WHERE ").append(qualifierStr);
 
-		return queryBuf.toString();
-	}
+        return queryBuf.toString();
+    }
 
-	/** Translate updated values and relationships into
-	 *  "SET ATTR1 = Val1, ..." SQL statement.
-	 */
-	private void buildSetClause(StringBuffer queryBuf, UpdateQuery query) {
-		Map updAttrs = query.getUpdAttributes();
-		// set of keys.. each key is supposed to be ObjAttribute
-		Iterator attrIt = updAttrs.keySet().iterator();
+    /** Translate updated values and relationships into
+     *  "SET ATTR1 = Val1, ..." SQL statement.
+     */
+    private void buildSetClause(StringBuffer queryBuf, UpdateQuery query) {
+        Map updAttrs = query.getUpdAttributes();
+        // set of keys.. each key is supposed to be ObjAttribute
+        Iterator attrIt = updAttrs.keySet().iterator();
 
-		if (!attrIt.hasNext())
-			throw new CayenneRuntimeException("Nothing to update.");
+        if (!attrIt.hasNext())
+            throw new CayenneRuntimeException("Nothing to update.");
 
-		DbEntity dbEnt = getRootEntity().getDbEntity();
-		queryBuf.append(" SET ");
+        DbEntity dbEnt = getRootEntity().getDbEntity();
+        queryBuf.append(" SET ");
 
-		// append updated attribute values
-		boolean appendedSomething = false;
+        // append updated attribute values
+        boolean appendedSomething = false;
 
-		// now process other attrs in the loop
-		while (attrIt.hasNext()) {
-			String nextKey = (String) attrIt.next();
-			Object attrVal = updAttrs.get(nextKey);
+        // now process other attrs in the loop
+        while (attrIt.hasNext()) {
+            String nextKey = (String) attrIt.next();
+            Object attrVal = updAttrs.get(nextKey);
 
-			if (appendedSomething)
-				queryBuf.append(", ");
+            if (appendedSomething)
+                queryBuf.append(", ");
 
-			queryBuf.append(nextKey).append(" = ?");
-			super.addToParamList(
-				(DbAttribute) dbEnt.getAttribute(nextKey),
-				attrVal);
-			appendedSomething = true;
-		}
-	}
+            queryBuf.append(nextKey).append(" = ?");
+            super.addToParamList(
+                (DbAttribute) dbEnt.getAttribute(nextKey),
+                attrVal);
+            appendedSomething = true;
+        }
+    }
 }

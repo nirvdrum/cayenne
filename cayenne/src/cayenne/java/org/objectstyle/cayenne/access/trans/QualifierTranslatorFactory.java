@@ -59,8 +59,11 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /** 
  * Factory that produces QualifierTranslator objects.
- *
- * @author Andrei Adamchik  
+ * 
+ * @author Andrei Adamchik
+ * 
+ * @deprecated Since 1.0 Beta 1, QualifierTranslator is created directly by
+ * DbAdapter.
  */
 public class QualifierTranslatorFactory {
     private static final String DEFAULT_TRANSLATOR =
