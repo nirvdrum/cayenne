@@ -54,6 +54,9 @@ search          </form>          </td>
       <tr>
         <td align="right"><!--SFLOGO--></td>
       </tr>
+      <tr>
+        <td align="right"><!--JNLOGO--></td>
+      </tr>
     </tbody></table></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" valign="top" bgcolor="#cccc99" class="body-black">

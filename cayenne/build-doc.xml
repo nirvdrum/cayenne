@@ -35,6 +35,10 @@
              <filterset begintoken="!--" endtoken="--">
 				<filter token="SFLOGO" value="${sf.logo}"/>
 			 </filterset>
+				 
+			<filterset begintoken="!--" endtoken="--">
+				<filter token="JNLOGO" value="${java.net.logo}"/>
+			 </filterset>
          </copy>
     </target>
     
