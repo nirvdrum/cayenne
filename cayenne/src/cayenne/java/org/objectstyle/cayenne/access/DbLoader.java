@@ -467,7 +467,7 @@ public class DbLoader {
         while (it.hasNext()) {
             DbEntity pkEntity = (DbEntity) it.next();
             String pkEntName = pkEntity.getName();
-            logObj.warn(pkEntName);
+            
             // Get all the foreign keys referencing this table
             ResultSet rs =
                 getMetaData().getExportedKeys(
@@ -486,8 +486,6 @@ public class DbLoader {
 
                 do {
                     short keySeq = rs.getShort("KEY_SEQ");
-                    logObj.warn(pkEntName + "." + rs.getString("PKCOLUMN_NAME") + ";KEY: " + keySeq + "; FK: " + rs.getString("FKTABLE_NAME") +
-                    "." + rs.getString("FKCOLUMN_NAME"));
                     if (keySeq == 1) {
 
                         if (forwardRelationship != null) {
