@@ -10,6 +10,12 @@
     <!-- Build targets.                             -->
     <!-- ========================================== -->
     
+    <target name="doc">
+		<ant antfile="build-subproj.xml" target="doc">
+			<property name="subproj" value="data-port"/>
+		</ant>
+	</target>
+	
     <target name="api">
 		<ant antfile="build-subproj.xml" target="api">
 			<property name="subproj" value="data-port"/>
@@ -28,7 +34,7 @@
     <!-- Build "fat" JAR file with dependencies.    -->
     <!-- ========================================== -->
     <target name="jar" depends="compile">
-        <jar jarfile="${dist}/lib/data-port.jar">
+        <jar jarfile="${dist}/data-port/lib/data-port.jar">
  			<fileset dir="${data-port.build}/classes"/>
  			
             <metainf dir="${root}/doc/licenses" includes="**"/>

@@ -4,7 +4,7 @@
 <!--            Cayenne master build file.             -->
 <!-- Serves as a facade to a set of private buildfiles.-->
 <!-- ================================================= -->
-<project name="cayenne" default="build" basedir=".">
+<project name="examples" default="build" basedir=".">
 
     <!-- ============================================= -->
     <!-- Loads properties from default locations.      -->
@@ -75,7 +75,7 @@
     <!-- ========================================== -->
     <!-- Cleans distribution files and subprojects. -->
     <!-- ========================================== -->
-    <target name="clean" depends="clean-java">
+    <target name="clean">
         <delete dir="${dist.base}"/>
     </target>
 
@@ -83,7 +83,7 @@
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
     <target name="doc">
-        <ant antfile="build-doc.xml" target="doc"/>
+        <ant antfile="build-data-port.xml" target="doc"/>
     </target>
 
 

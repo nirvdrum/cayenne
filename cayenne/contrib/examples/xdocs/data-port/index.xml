@@ -1,0 +1,12 @@
+<document>
+<title>cdataport task</title>
+<body>
+    <section name="Cayenne Data Porting Example">        
+	<p>This example demonstrates how porting the data from one database to another 
+	can be done with Cayenne. It shows the operations of some of the internal parts of 
+	Cayenne, normally not used in the applications. This example also 
+	contains Ant interface to perform data porting. It is documented <a href="dbport.html">here</a>.
+	</p>
+    </section>
+</body>
+</document>

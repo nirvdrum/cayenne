@@ -67,7 +67,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dataport.DataPort;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.ApplicationProject;
-ectstyle.cayenne.project.ApplicationProject;
 
 /**
  * Ant frontend to DataPort class.

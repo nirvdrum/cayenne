@@ -1,16 +1,7 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/project.html</prev>
-	<next>/userguide/datactxt/index.html</next>
-</navigator>    
+<title>cdataport task</title>
 <body>
-    <section name="[PROPOSAL] Cayenne Data Porting Tool (dataport)">        
+    <section name="Cayenne Data Porting Tool (cdataport)">        
             <p>Sometimes it is necessary to recreate a database, copying data
             from another existing database. For instance, recreating development database 
             instance from production data, etc. While most RDBMS provide data import/export
@@ -19,7 +10,7 @@
             between the databases with identical schema, using DataMap information.
             </p>
             
-            <subsection name="CDataPort Ant Task">
+            <subsection name="cdataport Ant Task">
 			<h3>Description</h3>
 			
 			<p><code>CDataPort</code> is an Ant task uses Cayenne project with at least one 
@@ -81,7 +72,7 @@
 			<p>Here is an example of using <code>CDataPort</code> to port data using all
 			source DataMaps, excluding DBEntities with name matching "BILL_*":</p>
 <source>
-&amp;lt;taskdef name="cdataport" classname="org.objectstyle.cayenne.tools.CayenneDataPort"&amp;gt;
+&amp;lt;taskdef name="cdataport" classname="org.objectstyle.cayenne.dataport.ant.CayenneDataPort"&amp;gt;
      &amp;lt;classpath refid="classpath"/&amp;gt;
 &amp;lt;/taskdef&amp;gt;
 &amp;lt;cdataport projectFile="subdir/cayenne.xml" srcNode="ProductionNode" destNode="DevNode" excludeTables="BILL_*"/&amp;gt;

@@ -4,40 +4,13 @@
 <!--         Cayenne documentation buildfile.          -->
 <!--             (called from build.xml)               -->
 <!-- ================================================= -->
-<project name="cayenne-doc" default="doc" basedir=".">	  
+<project name="examples-doc" default="doc" basedir=".">	  
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
-        <fileset dir="${otherlib.dir}">
+        <fileset dir="${cayenne.dir}/otherlib">
             <include name="**.jar"/>
         </fileset>
     </path>
-    
-
-    <!-- ============================================= -->
-    <!-- Deploys Cayenne web site in a local directory -->
-    <!-- ============================================= -->
-    <target name="release-site" depends="nositedir,prepare,doc">
-         <mkdir dir="${site.dir}/cayenne"/>         
-         
-         <!-- copy all but HTML -->
-         <copy todir="${site.dir}/cayenne">
-             <fileset dir="${dist}/doc"> 
-             	<exclude name="**/*.html"/>
-             </fileset>
-         </copy>
-         
-         <!-- do replacement in HTML files -->
-         <copy todir="${site.dir}/cayenne">
-             <fileset dir="${dist}/doc"> 
-             	<include name="**/*.html"/>
-             </fileset>
-             
-             <filterset begintoken="!--" endtoken="--">
-				<filter token="SFLOGO" value="${sf.logo}"/>
-			 </filterset>
-         </copy>
-    </target>
-    
     
     <!-- ========================================== -->
     <!-- Creates documentation directories.         -->
@@ -45,7 +18,6 @@
     <target name="prepare">
         <tstamp/>
         <mkdir dir="${dist}/doc"/>
-        <mkdir dir="${dist}/doc/dtd"/>
     </target>    
 
 

@@ -20,6 +20,13 @@
     <path id="classpath-data-port">
 		<path refid="classpath-base"/>
     </path>
+    
+    <path id="classpath-docs">
+    	<pathelement path="${ant.home}/lib/ant.jar"/>
+        <fileset dir="${root}/otherlib">
+            <include name="**.jar"/>
+        </fileset>
+    </path>
 	
 	<target name="prepare" depends="nosubproj">
 		<tstamp/>
@@ -29,8 +36,55 @@
 		<mkdir dir="${dist-subproj}/src/${subproj}"/>
 		<mkdir dir="${dist-subproj}/lib"/>
 		<mkdir dir="${dist-subproj}/bin"/>
-		<mkdir dir="${dist-subproj}/doc/api/${subproj}"/>
+		<mkdir dir="${dist-subproj}/doc/api"/>
 	</target>
+	
+	<!-- ========================================== -->
+    <!-- Builds Subproject documenatation.          -->
+    <!-- ========================================== -->
+    <target name="doc" depends="prepare">
+        <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
+            <classpath refid="classpath-docs"/>
+        </taskdef>
+        
+        <!-- Build site -->
+        <anakia basedir="xdocs/${subproj}" destdir="${dist-subproj}/doc"
+             extension=".html" 
+             style="xdocs/stylesheets/cayenne.vsl"
+             projectFile="contrib/examples/xdocs/stylesheets/project.xml"
+             excludes="**/stylesheets/**"
+             includes="**/*.xml"
+             lastModifiedCheck="true"
+             templatePath="${root}"/>
+    </target>    
+    
+    <!-- ========================================== -->
+    <!-- Copies documentation images in the target  -->
+    <!-- directory.                                 -->
+    <!-- ========================================== -->
+    <target name="doc-img">
+        <!-- copy images -->
+        <copy todir="${dist}/doc/images" filtering="no">
+            <fileset dir="xdocs/images">
+                <include name="**/*.gif"/>
+                <include name="**/*.jpeg"/>
+                <include name="**/*.png"/>
+                <include name="**/*.jpg"/>
+                <include name="**/*.css"/>
+            </fileset>
+        </copy>
+        
+        <!-- copy modeler buttons -->
+        <mkdir dir="${dist}/doc/images/modeler"/>
+        <copy todir="${dist}/doc/images/modeler" filtering="no" flatten="yes">
+            <fileset dir="src/modeler/java">
+                <include name="**/*.gif"/>
+                <include name="**/*.jpeg"/>
+                <include name="**/*.png"/>
+                <include name="**/*.jpg"/>
+            </fileset>
+        </copy>
+    </target>
 
 	<target name="compile" depends="nosubproj,prepare">
 		<javac	srcdir="${subproj}/src/java" 
