@@ -56,6 +56,10 @@
 package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -90,6 +94,44 @@ public class SybaseStackAdapter extends AccessStackAdapter {
             executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
+        }
+
+        if (map.getDbEntity("DEPARTMENT") != null) {
+            dropConstraints(con, "DEPARTMENT");
+        }
+
+    }
+
+    protected void dropConstraints(Connection con, String tableName) throws Exception {
+        List names = new ArrayList(3);
+        Statement select = con.createStatement();
+
+        try {
+            ResultSet rs =
+                select.executeQuery(
+                    "SELECT t0.name "
+                        + "FROM sysobjects t0, sysconstraints t1, sysobjects t2 "
+                        + "WHERE t0.id = t1.constrid and t1.tableid = t2.id and t2.name = '"
+                        + tableName
+                        + "'");
+            try {
+
+                while (rs.next()) {
+                    names.add(rs.getString("name"));
+                }
+            }
+            finally {
+                rs.close();
+            }
+        }
+        finally {
+            select.close();
+        }
+
+        for (int i = 0; i < names.size(); i++) {
+            executeDDL(
+                con,
+                "alter table " + tableName + " drop constraint " + names.get(i));
         }
     }
 

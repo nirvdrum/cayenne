@@ -109,9 +109,6 @@ public class SybaseAdapter extends JdbcAdapter {
     protected PkGenerator createPkGenerator() {
         return new SybasePkGenerator();
     }
-    /**
-     *
-     */
 
     public void bindParameter(
         PreparedStatement statement,
