@@ -228,8 +228,10 @@ public class PrimaryKeyHelper {
 
 			DataObject targetDo =
 				(DataObject) dataObject.readPropertyDirectly(rel.getName());
+
 			if (targetDo == null)
-				throw new CayenneException("Null master object, can't create primary key.");
+				throw new CayenneException("Null master object, can't create primary key for: "
+											+ dataObject.getClass() + "." + dbRel.getName());
 
 			ObjectId targetKey = targetDo.getObjectId();
 			Map idMap = targetKey.getIdSnapshot();
