@@ -270,7 +270,7 @@ public class DataContextTst extends TestCase {
 		populatePaintings();
 		
 		SelectQuery q = new SelectQuery("ArtistAssets");
-		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new Integer(1000)));
+		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
 		q.setLogLevel(Level.SEVERE);
 
 		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
