@@ -53,7 +53,6 @@
  * <http://objectstyle.org/>.
  *
  */ 
- 
 package org.objectstyle.cayenne.access.trans;
 
 import java.sql.ResultSet;
