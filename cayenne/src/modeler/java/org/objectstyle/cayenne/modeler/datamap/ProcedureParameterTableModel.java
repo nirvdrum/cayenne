@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 
@@ -126,8 +127,39 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
             : null;
     }
 
-    public void setUpdatedValueAt(Object newVal, int row, int col) {
-        // TODO Auto-generated method stub
+    public void setUpdatedValueAt(Object newVal, int rowIndex, int colIndex) {
+        ProcedureParameter parameter = getParameter(rowIndex);
+
+        if (parameter == null) {
+            return;
+        }
+
+        ProcedureParameterEvent event = new ProcedureParameterEvent(eventSource, parameter);
+        /*switch (colIndex) {
+            case DB_ATTRIBUTE_NAME :
+                e.setOldName(attr.getName());
+                setAttributeName((String) newVal, attr);
+                fireTableCellUpdated(row, col);
+                break;
+            case DB_ATTRIBUTE_TYPE :
+                setAttributeType((String) newVal, attr);
+                break;
+            case DB_ATTRIBUTE_PRIMARY_KEY :
+                setPrimaryKey((Boolean) newVal, attr);
+                fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
+                break;
+            case DB_ATTRIBUTE_PRECISION :
+                setPrecision((String) newVal, attr);
+                break;
+            case DB_ATTRIBUTE_MANDATORY :
+                setMandatory((Boolean) newVal, attr);
+                break;
+            case DB_ATTRIBUTE_MAX :
+                setMaxLength((String) newVal, attr);
+                break;
+        }
+
+        mediator.fireProcedureParameterEvent(event); */
     }
 
     public Class getElementsClass() {

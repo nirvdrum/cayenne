@@ -53,66 +53,13 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map.event;
+package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Relationship;
+import java.util.EventListener;
 
-/** 
- * Represents events resulted from Relationship changes 
- * in CayenneModeler. This event is used for both ObjRelationships
- * and DbRelationships.
- * 
- * 
- * @author Misha Shengaout
+/**
  * @author Andrei Adamchik
  */
-public class RelationshipEvent extends EntityEvent {
-	protected Relationship relationship;
-
-	/** Creates a Relationship change event. */
-	public RelationshipEvent(Object src, Relationship rel, Entity entity) {
-		super(src, entity);
-		setRelationship(rel);
-	}
-
-	/** Creates a Relationship event of a specified type. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		int id) {
-
-		this(src, rel, entity);
-		setId(id);
-	}
-
-	/** Creates a Relationship name change event. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		String oldName) {
-			
-		this(src, rel, entity);
-        setOldName(oldName);
-	}
-
-	/** Returns relationship associated with this event. */
-	public Relationship getRelationship() {
-		return relationship;
-	}
-
-	/**
-	 * Sets relationship associated with this event.
-	 * 
-	 * @param relationship The relationship to set
-	 */
-	public void setRelationship(Relationship relationship) {
-		this.relationship = relationship;
-	}
-	
-	public String getNewName() {
-		return (relationship != null) ? relationship.getName() : null;
-	}
+public interface ProcedureParameterDisplayListener extends EventListener {
+    public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e);
 }

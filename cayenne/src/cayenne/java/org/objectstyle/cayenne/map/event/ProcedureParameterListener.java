@@ -55,64 +55,26 @@
  */
 package org.objectstyle.cayenne.map.event;
 
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Relationship;
+import java.util.EventListener;
 
 /** 
- * Represents events resulted from Relationship changes 
- * in CayenneModeler. This event is used for both ObjRelationships
- * and DbRelationships.
+ * Listener for ProcedureParameterEvents.
  * 
- * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class RelationshipEvent extends EntityEvent {
-	protected Relationship relationship;
+public interface ProcedureParameterListener extends EventListener {
+    /** 
+      *  Called when procedure parameter has changed. 
+      */
+    public void procedureParameterChanged(ProcedureParameterEvent e);
 
-	/** Creates a Relationship change event. */
-	public RelationshipEvent(Object src, Relationship rel, Entity entity) {
-		super(src, entity);
-		setRelationship(rel);
-	}
+    /** 
+     *  Called when new procedure parameter has been created. 
+     */
+    public void procedureParameterAdded(ProcedureParameterEvent e);
 
-	/** Creates a Relationship event of a specified type. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		int id) {
-
-		this(src, rel, entity);
-		setId(id);
-	}
-
-	/** Creates a Relationship name change event. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		String oldName) {
-			
-		this(src, rel, entity);
-        setOldName(oldName);
-	}
-
-	/** Returns relationship associated with this event. */
-	public Relationship getRelationship() {
-		return relationship;
-	}
-
-	/**
-	 * Sets relationship associated with this event.
-	 * 
-	 * @param relationship The relationship to set
-	 */
-	public void setRelationship(Relationship relationship) {
-		this.relationship = relationship;
-	}
-	
-	public String getNewName() {
-		return (relationship != null) ? relationship.getName() : null;
-	}
+    /** 
+     * Called when procedure parameter has been removed.
+     */
+    public void procedureParameterRemoved(ProcedureParameterEvent e);
 }

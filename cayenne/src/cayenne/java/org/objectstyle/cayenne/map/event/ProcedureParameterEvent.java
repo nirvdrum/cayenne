@@ -55,64 +55,44 @@
  */
 package org.objectstyle.cayenne.map.event;
 
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 
-/** 
- * Represents events resulted from Relationship changes 
- * in CayenneModeler. This event is used for both ObjRelationships
- * and DbRelationships.
- * 
- * 
- * @author Misha Shengaout
+/**
  * @author Andrei Adamchik
  */
-public class RelationshipEvent extends EntityEvent {
-	protected Relationship relationship;
+public class ProcedureParameterEvent extends MapEvent {
+    protected ProcedureParameter parameter;
 
-	/** Creates a Relationship change event. */
-	public RelationshipEvent(Object src, Relationship rel, Entity entity) {
-		super(src, entity);
-		setRelationship(rel);
-	}
+    public ProcedureParameterEvent(Object source, ProcedureParameter parameter) {
+        super(source);
+        setParameter(parameter);
+    }
 
-	/** Creates a Relationship event of a specified type. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		int id) {
-
-		this(src, rel, entity);
-		setId(id);
-	}
-
-	/** Creates a Relationship name change event. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		String oldName) {
-			
-		this(src, rel, entity);
+    public ProcedureParameterEvent(
+        Object source,
+        ProcedureParameter parameter,
+        String oldName) {
+        this(source, parameter);
         setOldName(oldName);
-	}
+    }
 
-	/** Returns relationship associated with this event. */
-	public Relationship getRelationship() {
-		return relationship;
-	}
+    public ProcedureParameterEvent(
+        Object source,
+        ProcedureParameter parameter,
+        int type) {
+        this(source, parameter);
+        setId(type);
+    }
 
-	/**
-	 * Sets relationship associated with this event.
-	 * 
-	 * @param relationship The relationship to set
-	 */
-	public void setRelationship(Relationship relationship) {
-		this.relationship = relationship;
-	}
-	
-	public String getNewName() {
-		return (relationship != null) ? relationship.getName() : null;
-	}
+    public String getNewName() {
+        return (parameter != null) ? parameter.getName() : null;
+    }
+
+    public ProcedureParameter getParameter() {
+        return parameter;
+    }
+
+    public void setParameter(ProcedureParameter parameter) {
+        this.parameter = parameter;
+    }
 }

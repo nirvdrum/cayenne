@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataMapListener;
@@ -86,6 +87,8 @@ import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureListener;
+import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
+import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -104,6 +107,8 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -137,6 +142,7 @@ public class EventController extends ModelerController {
     protected ObjRelationship currentObjRel;
     protected DbRelationship currentDbRel;
     protected Procedure currentProcedure;
+    protected ProcedureParameter currentProcedureParameter;
 
     /** Changes have been made, need to be saved. */
     protected boolean dirty;
@@ -198,6 +204,7 @@ public class EventController extends ModelerController {
         currentObjRel = null;
         currentDbRel = null;
         currentProcedure = null;
+        currentProcedureParameter = null;
         getTopModel().setSelectedPath(ProjectPath.EMPTY_PATH);
     }
 
@@ -239,6 +246,10 @@ public class EventController extends ModelerController {
 
     public Procedure getCurrentProcedure() {
         return currentProcedure;
+    }
+
+    public ProcedureParameter getCurrentProcedureParameter() {
+        return currentProcedureParameter;
     }
 
     public void addDomainDisplayListener(DomainDisplayListener listener) {
@@ -316,10 +327,18 @@ public class EventController extends ModelerController {
     public void addProcedureDisplayListener(ProcedureDisplayListener listener) {
         addListener(ProcedureDisplayListener.class, listener);
     }
-    
-	public void addProcedureListener(ProcedureListener listener) {
-		addListener(ProcedureListener.class, listener);
-	}
+
+    public void addProcedureListener(ProcedureListener listener) {
+        addListener(ProcedureListener.class, listener);
+    }
+
+    public void addProcedureParameterListener(ProcedureParameterListener listener) {
+        addListener(ProcedureParameterListener.class, listener);
+    }
+
+    public void addProcedureParameterDisplayListener(ProcedureParameterDisplayListener listener) {
+        addListener(ProcedureParameterDisplayListener.class, listener);
+    }
 
     public void fireDomainDisplayEvent(DomainDisplayEvent e) {
         if (e.getDomain() == currentDomain) {
@@ -530,6 +549,33 @@ public class EventController extends ModelerController {
         }
     }
 
+    /** 
+       * Informs all listeners of the ProcedureEvent. 
+       * Does not send the event to its originator. 
+       */
+    public void fireProcedureParameterEvent(ProcedureParameterEvent e) {
+        setDirty(true);
+        EventListener[] list;
+        list = getListeners(ProcedureParameterListener.class);
+        for (int i = 0; i < list.length; i++) {
+            ProcedureParameterListener listener = (ProcedureParameterListener) list[i];
+            switch (e.getId()) {
+                case EntityEvent.ADD :
+                    listener.procedureParameterAdded(e);
+                    break;
+                case EntityEvent.CHANGE :
+                    listener.procedureParameterChanged(e);
+                    break;
+                case EntityEvent.REMOVE :
+                    listener.procedureParameterRemoved(e);
+                    break;
+                default :
+                    throw new IllegalArgumentException(
+                        "Invalid ProcedureParameterEvent type: " + e.getId());
+            }
+        }
+    }
+
     public void fireObjEntityDisplayEvent(EntityDisplayEvent e) {
         if (currentObjEntity == e.getEntity())
             e.setEntityChanged(false);
@@ -556,6 +602,24 @@ public class EventController extends ModelerController {
         currentDomain = e.getDomain();
         currentMap = e.getDataMap();
         currentProcedure = e.getProcedure();
+
+        EventListener[] list = getListeners(ProcedureDisplayListener.class);
+        for (int i = 0; i < list.length; i++) {
+            ProcedureDisplayListener listener = (ProcedureDisplayListener) list[i];
+            listener.currentProcedureChanged(e);
+        }
+    }
+
+    public void fireProcedureParameterDisplayEvent(ProcedureParameterDisplayEvent e) {
+        if (currentProcedure == e.getProcedure())
+            e.setProcedureChanged(false);
+
+        clearState();
+
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentProcedure = e.getProcedure();
+        currentProcedureParameter = e.getProcedureParameter();
 
         EventListener[] list = getListeners(ProcedureDisplayListener.class);
         for (int i = 0; i < list.length; i++) {

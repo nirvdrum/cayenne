@@ -67,42 +67,41 @@ import org.objectstyle.cayenne.map.Entity;
  * @author Andrei Adamchik
  */
 public class AttributeEvent extends EntityEvent {
-	protected Attribute attribute;
+    protected Attribute attribute;
 
-	/** Creates a Attribute change event. */
-	public AttributeEvent(Object src, Attribute attr, Entity entity) {
-		super(src, entity);
-		setAttribute(attr);
-	}
+    /** Creates a Attribute change event. */
+    public AttributeEvent(Object src, Attribute attr, Entity entity) {
+        super(src, entity);
+        setAttribute(attr);
+    }
 
-	/** Creates a Attribute event of a specified type. */
-	public AttributeEvent(Object src, Attribute attr, Entity entity, int id) {
-		this(src, attr, entity);
-		setId(id);
-	}
+    /** Creates a Attribute event of a specified type. */
+    public AttributeEvent(Object src, Attribute attr, Entity entity, int id) {
+        this(src, attr, entity);
+        setId(id);
+    }
 
-	/** Creates a Attribute name change event.*/
-	public AttributeEvent(
-		Object src,
-		Attribute attr,
-		Entity entity,
-		String oldName) {
-			
-		this(src, attr, entity);
-		setOldName(oldName);
-	}
+    /** Creates a Attribute name change event.*/
+    public AttributeEvent(Object src, Attribute attr, Entity entity, String oldName) {
 
-	/** Get attribute (obj or db). */
-	public Attribute getAttribute() {
-		return attribute;
-	}
+        this(src, attr, entity);
+        setOldName(oldName);
+    }
 
+    /** Get attribute (obj or db). */
+    public Attribute getAttribute() {
+        return attribute;
+    }
 
-	/**
-	 * Sets the attribute.
-	 * @param attribute The attribute to set
-	 */
-	public void setAttribute(Attribute attribute) {
-		this.attribute = attribute;
-	}
+    /**
+     * Sets the attribute.
+     * @param attribute The attribute to set
+     */
+    public void setAttribute(Attribute attribute) {
+        this.attribute = attribute;
+    }
+
+    public String getNewName() {
+        return (attribute != null) ? attribute.getName() : null;
+    }
 }
