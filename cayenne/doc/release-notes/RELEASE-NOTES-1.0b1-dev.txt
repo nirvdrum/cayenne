@@ -19,12 +19,12 @@ distribution structure, if it is not set explicitly.
 3. Cayenne AND/OR expressions are converted to a new expression class - ListExpressions. 
 As a result, generated SQL contains fewer unneeded parenthesis and is generally cleaner.
 
-4. Added parametrized expressions - expressions that can be used as prototypes for other 
+4. Added parameterized expressions - expressions that can be used as prototypes for other 
 application expressions.
 
-5. Added parametrized queries based on parametrized expressions.
+5. Added parameterized queries based on parametrized expressions.
 
-6. DomainHelper is refactored (and deprecated) into 2 classes - 
+6. DomainHelper is deprecated and refactored into 2 classes - 
 ConfigLoader and ConfigSaver. Implementation is changed to use external delegates
 to process loaded XML. This allows alternative loaders.
 

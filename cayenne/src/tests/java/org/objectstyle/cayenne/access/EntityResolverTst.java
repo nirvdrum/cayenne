@@ -7,6 +7,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class EntityResolverTst extends CayenneTestCase {
@@ -49,15 +50,18 @@ public class EntityResolverTst extends CayenneTestCase {
     }
 
     public void testLookupDbEntityByObjEntity() throws Exception {
-        assertIsArtistDbEntity(sharedResolver.lookupDbEntity(getArtistObjEntity()));
+        assertIsArtistDbEntity(
+            sharedResolver.lookupDbEntity(getArtistObjEntity()));
     }
 
     public void testLookupDbEntityByClass() throws Exception {
         assertIsArtistDbEntity(sharedResolver.lookupDbEntity(Artist.class));
     }
-    
+
     public void testLookupDbEntityByDataobject() throws Exception {
-    	Artist artist=(Artist)this.createDataContext().createAndRegisterNewObject("Artist");
+        Artist artist =
+            (Artist) this.createDataContext().createAndRegisterNewObject(
+                "Artist");
         assertIsArtistDbEntity(sharedResolver.lookupDbEntity(artist));
     }
 
@@ -76,7 +80,9 @@ public class EntityResolverTst extends CayenneTestCase {
     }
 
     public void testLookupObjEntityByDataobject() throws Exception {
-    	Artist artist=(Artist)this.createDataContext().createAndRegisterNewObject("Artist");
+        Artist artist =
+            (Artist) this.createDataContext().createAndRegisterNewObject(
+                "Artist");
         assertIsArtistObjEntity(sharedResolver.lookupObjEntity(artist));
     }
 
@@ -148,5 +154,20 @@ public class EntityResolverTst extends CayenneTestCase {
         m1.addObjEntity(oe2);
 
         assertSame(oe2, resolver.lookupObjEntity(String.class));
+    }
+
+    public void testLookupObjQuery() throws Exception {
+        // create a resolver with a single map
+        DataMap m1 = new DataMap();
+        ObjEntity oe1 = new ObjEntity("test1");
+        oe1.setClassName(Object.class.getName());
+        SelectQuery q = new SelectQuery(oe1);
+        oe1.addQuery("abc", q);
+        m1.addObjEntity(oe1);
+        List list = new ArrayList();
+        list.add(m1);
+        EntityResolver resolver = new EntityResolver(list);
+
+        assertSame(q, resolver.lookupQuery(Object.class, "abc"));
     }
 }

@@ -65,8 +65,10 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * EntityResolver encapsulates resolving between ObjEntities, DbEntities, 
@@ -188,7 +190,8 @@ public class EntityResolver {
                             + ": More than one ObjEntity ("
                             + oe.getName()
                             + " and "
-                            + ((ObjEntity) objEntityCache.get(entityClass)).getName()
+                            + ((ObjEntity) objEntityCache.get(entityClass))
+                                .getName()
                             + ") uses the class "
                             + entityClass.getName());
                 }
@@ -206,37 +209,37 @@ public class EntityResolver {
      * that services the specified class
      * @return the required DbEntity, or null if none matches the specifier
      */
-	public synchronized DbEntity lookupDbEntity(Class aClass) {
-		return this._lookupDbEntity(aClass);
-	}
-	
+    public synchronized DbEntity lookupDbEntity(Class aClass) {
+        return this._lookupDbEntity(aClass);
+    }
+
     /**
      * Looks in the DataMap's that this object was created with for the DbEntity
      * that services the specified objentity
      * @return the required DbEntity, or null if none matches the specifier
      */
-	public synchronized DbEntity lookupDbEntity(ObjEntity entity) {
-		return this._lookupDbEntity(entity);
-	}
-	
+    public synchronized DbEntity lookupDbEntity(ObjEntity entity) {
+        return this._lookupDbEntity(entity);
+    }
+
     /**
      * Looks in the DataMap's that this object was created with for the DbEntity
      * that services the class with the given name
      * @return the required DbEntity, or null if none matches the specifier
      */
-	public synchronized DbEntity lookupDbEntity(String entityName) {
-		return this._lookupDbEntity(entityName);
-	}
-	
+    public synchronized DbEntity lookupDbEntity(String entityName) {
+        return this._lookupDbEntity(entityName);
+    }
+
     /**
      * Looks in the DataMap's that this object was created with for the DbEntity
      * that services the specified data Object
      * @return the required DbEntity, or null if none matches the specifier
      */
-	public synchronized DbEntity lookupDbEntity(DataObject dataObject) {
-		return this._lookupDbEntity(dataObject.getClass());
-	}
-	
+    public synchronized DbEntity lookupDbEntity(DataObject dataObject) {
+        return this._lookupDbEntity(dataObject.getClass());
+    }
+
     /**
      * Internal usage only - provides the type-unsafe implementation which services
      * the four typesafe public lookupDbEntity methods
@@ -267,48 +270,47 @@ public class EntityResolver {
      * @return the root DbEntity of the query
      */
     public synchronized DbEntity lookupDbEntity(Query q) {
-		Object root=q.getRoot();
-		if(root instanceof DbEntity) {
-			return (DbEntity)root;
-		} else if (root instanceof Class) {
-			return this.lookupDbEntity((Class)root);
-		} else if (root instanceof ObjEntity) {
-			return this.lookupDbEntity((ObjEntity)root);
-		} else if (root instanceof String) {
-			return this.lookupDbEntity((String)root);
-		} else if (root instanceof DataObject) {
-			return this.lookupDbEntity((DataObject)root);
-		} 
+        Object root = q.getRoot();
+        if (root instanceof DbEntity) {
+            return (DbEntity) root;
+        } else if (root instanceof Class) {
+            return this.lookupDbEntity((Class) root);
+        } else if (root instanceof ObjEntity) {
+            return this.lookupDbEntity((ObjEntity) root);
+        } else if (root instanceof String) {
+            return this.lookupDbEntity((String) root);
+        } else if (root instanceof DataObject) {
+            return this.lookupDbEntity((DataObject) root);
+        }
         return null;
     }
-
 
     /**
      * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
      * services the specified class
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
-	public synchronized ObjEntity lookupObjEntity(Class aClass) {
-		return this._lookupObjEntity(aClass);
-	}
+    public synchronized ObjEntity lookupObjEntity(Class aClass) {
+        return this._lookupObjEntity(aClass);
+    }
 
     /**
      * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
      * services the class with the given name
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
-	public synchronized ObjEntity lookupObjEntity(String entityName) {
-		return this._lookupObjEntity(entityName);
-	}
-	
+    public synchronized ObjEntity lookupObjEntity(String entityName) {
+        return this._lookupObjEntity(entityName);
+    }
+
     /**
      * Looks in the DataMap's that this object was created with for the ObjEntity
      * that services the specified data Object
      * @return the required ObjEntity, or null if none matches the specifier
      */
-	public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
-		return this._lookupObjEntity(dataObject.getClass());
-	}
+    public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
+        return this._lookupObjEntity(dataObject.getClass());
+    }
 
     /**
      * Internal usage only - provides the type-unsafe implementation which services
@@ -346,23 +348,31 @@ public class EntityResolver {
      * to rely on such behaviour).
      */
     public synchronized ObjEntity lookupObjEntity(Query q) {
-    	
-    	Object root=q.getRoot();
-		if(root instanceof DbEntity) {
-           throw new CayenneRuntimeException(
+
+        Object root = q.getRoot();
+        if (root instanceof DbEntity) {
+            throw new CayenneRuntimeException(
                 "Cannot safely resolve the ObjEntity for the query "
                     + q
                     + " because the root of the query is a DbEntity");
-		} else if (root instanceof ObjEntity) {
-			return (ObjEntity)root;
-		} else if (root instanceof Class) {
-			return this.lookupObjEntity((Class)root);
-		} else if (root instanceof String) {
-			return this.lookupObjEntity((String)root);
-		} else if (root instanceof DataObject) {
-			return this.lookupObjEntity((DataObject)root);
-		} 
+        } else if (root instanceof ObjEntity) {
+            return (ObjEntity) root;
+        } else if (root instanceof Class) {
+            return this.lookupObjEntity((Class) root);
+        } else if (root instanceof String) {
+            return this.lookupObjEntity((String) root);
+        } else if (root instanceof DataObject) {
+            return this.lookupObjEntity((DataObject) root);
+        }
         return null;
     }
 
+    /**
+     * Searches for the named query associated with the ObjEntity corresponding
+     * to the Java class specified. Returns such query if found, null otherwise.
+     */
+    public SelectQuery lookupQuery(Class queryRoot, String queryName) {
+        Entity ent = lookupObjEntity(queryRoot);
+        return (ent != null) ? ent.getQuery(queryName) : null;
+    }
 }
