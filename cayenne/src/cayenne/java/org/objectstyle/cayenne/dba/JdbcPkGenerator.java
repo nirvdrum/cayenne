@@ -63,6 +63,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -72,6 +73,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -237,9 +239,11 @@ public class JdbcPkGenerator implements PkGenerator {
 	 * Runs JDBC update over a Connection obtained from DataNode. 
 	 * Returns a number of objects returned from update.
 	 * 
-	 * @throws java.lang.Exception in case of query failure. 
+	 * @throws SQLException in case of query failure. 
 	 */
 	public int runUpdate(DataNode node, String sql) throws SQLException {
+		QueryLogger.logQuery(QueryLogger.getLoggingLevel(), sql, Collections.EMPTY_LIST);
+		
 		Connection con = node.getDataSource().getConnection();
 		try {
 			Statement upd = con.createStatement();

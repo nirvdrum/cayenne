@@ -110,7 +110,7 @@ public class OracleAdapter extends JdbcAdapter {
      * to drop all related foreign key constraints. 
      */
     public String dropTable(DbEntity ent) {
-        return "DROP TABLE " + ent.getName() + " CASCADE CONSTRAINTS";
+        return "DROP TABLE " + ent.getFullyQualifiedName() + " CASCADE CONSTRAINTS";
     }
 
     /**
