@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.dba.openbase;
 
+import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.types.DefaultType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -87,6 +90,14 @@ test-openbase.jdbc.driver = com.openbase.jdbc.ObDriver
  */
 public class OpenBaseAdapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(OpenBaseAdapter.class);
+
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+        super.configureExtendedTypes(map);
+
+        // Byte handling doesn't work on read... 
+        // need special converter
+        map.registerType(new OpenBaseByteType());
+    }
 
     public DbAttribute buildAttribute(
         String name,
@@ -262,5 +273,21 @@ public class OpenBaseAdapter extends JdbcAdapter {
             .append("')");
 
         return buf.toString();
+    }
+
+    // OpenBase JDBC driver has trouble reading "integer" as byte
+    // this converter addresses such problem
+    static class OpenBaseByteType extends DefaultType {
+        OpenBaseByteType() {
+            super(Byte.class.getName());
+        }
+        
+        public Object materializeObject(ResultSet rs, int index, int type)
+            throws Exception {
+
+            // read value as int, and then narrow it down
+            int val = rs.getInt(index);
+            return (rs.wasNull()) ? null : new Byte((byte) val);
+        }
     }
 }

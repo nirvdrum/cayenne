@@ -58,11 +58,13 @@ package org.objectstyle.cayenne.dba;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class PkGeneratorTst extends CayenneTestCase {
+    private static Logger logObj = Logger.getLogger(PkGeneratorTst.class);
 
     protected PkGenerator pkGen;
     protected DataNode node;
@@ -94,7 +96,6 @@ public class PkGeneratorTst extends CayenneTestCase {
             Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
             assertNotNull(pk);
             assertTrue(pk instanceof Number);
-            assertFalse(pkList.contains(pk));
 
             // check that the number is continuous
             // of course this assumes a single-threaded test

@@ -96,6 +96,16 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
     }
 
     /**
+     * Returns a non-repeating primary key for a given entity. Since
+     * OpenBase-specific mechanism is used, key caching is disabled.
+     * Instead a database operation is performed on every call.
+     */
+    public Object generatePkForDbEntity(DataNode node, DbEntity entity)
+        throws Exception {
+        return new Integer(pkFromDatabase(node, entity));
+    }
+
+    /**
      * Generates new (unique and non-repeating) primary key for specified
      * DbEntity.
      *
@@ -108,8 +118,8 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
      *
      *  @param ent DbEntity for which automatic PK is generated.
      */
-    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
-        String sql = generatePkForDbEntityString(ent);
+    protected int pkFromDatabase(DataNode node, DbEntity entity) throws Exception {
+        String sql = generatePkForDbEntityString(entity);
         QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, sql, Collections.EMPTY_LIST);
 
         Connection con = node.getDataSource().getConnection();
@@ -122,7 +132,7 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
                     //Object pk = null;
                     if (!rs.next()) {
                         throw new CayenneRuntimeException(
-                            "Error generating pk for DbEntity " + ent.getName());
+                            "Error generating pk for DbEntity " + entity.getName());
                     }
                     return rs.getInt(1);
                 }
@@ -150,7 +160,7 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
         Iterator it = dbEntities.iterator();
         while (it.hasNext()) {
             DbEntity entity = (DbEntity) it.next();
-            
+
             // the caller must take care of giving us the right entities
             // but lets check anyway
             if (!canCreatePK(entity)) {
@@ -283,4 +293,17 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
     public void reset() {
         // noop
     }
+    
+    /**
+     * Returns zero, since PK caching is not feasible with OpenBase PK
+     * generation mechanism.
+     */
+    public int getPkCacheSize() {
+        return 0;
+    }
+
+    public void setPkCacheSize(int pkCacheSize) {
+        // noop, no PK caching
+    }
+
 }
