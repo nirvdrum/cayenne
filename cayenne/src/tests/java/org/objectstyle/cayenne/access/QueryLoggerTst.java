@@ -71,12 +71,12 @@ public class QueryLoggerTst extends CayenneTestCase {
     }
 
     public void testAppendFormattedByte() throws Exception {
-        assertFormatting((byte) 0, "80");
-        assertFormatting((byte) 1, "81");
-        assertFormatting((byte) 10, "8A");
-        assertFormatting(Byte.MAX_VALUE, "FF");
-        assertFormatting((byte) - 1, "7F");
-        assertFormatting(Byte.MIN_VALUE, "00");
+        assertFormatting((byte) 0, "00");
+        assertFormatting((byte) 1, "01");
+        assertFormatting((byte) 10, "0A");
+        assertFormatting(Byte.MAX_VALUE, "7F");
+        assertFormatting((byte) - 1, "FF");
+        assertFormatting(Byte.MIN_VALUE, "80");
     }
 
     private void assertFormatting(byte b, String formatted) throws Exception {

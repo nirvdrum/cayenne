@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * Default primary key generator implementation. Uses a lookup table named
@@ -297,6 +298,13 @@ public class JdbcPkGenerator implements PkGenerator {
 
 	public Object generatePkForDbEntity(DataNode node, DbEntity ent)
 		throws Exception {
+            
+        // check for binary pk
+        Object binPK = binaryPK(ent);
+        if(binPK != null) {
+            return binPK;
+        }
+            
 		DbKeyGenerator pkGenerator = ent.getPrimaryKeyGenerator();
 		int cacheSize;
 		if (pkGenerator != null && pkGenerator.getKeyCacheSize() != null)
@@ -326,6 +334,23 @@ public class JdbcPkGenerator implements PkGenerator {
 			return r.getNextPrimaryKey();
 		}
 	}
+    
+    /**
+     * @return a binary PK if DbEntity has a BINARY or VARBINARY pk, null otherwise.
+     * This method will likely be deprecated in 1.1 in favor of a more generic soultion.
+     * @since 1.0.2
+     */
+    protected byte[] binaryPK(DbEntity entity) {
+        List pkColumns = entity.getPrimaryKey();
+        if(pkColumns.size() == 1) {
+            DbAttribute pk = (DbAttribute) pkColumns.get(0);
+            if(pk.getMaxLength() > 0 && (pk.getType() == Types.BINARY || pk.getType() == Types.VARBINARY)) {
+                return IDUtil.pseudoUniqueByteSequence(pk.getMaxLength());
+            }
+        }
+        
+        return null;
+    }
 
 	/**
 	 * Performs primary key generation ignoring cache. Generates

@@ -178,16 +178,11 @@ public class QueryLogger {
     /**
      * Prints a byte value to a StringBuffer as a double digit hex value.
      */
-    protected static void appendFormattedByte(
-        StringBuffer buf,
-        byte byteValue) {
+    protected static void appendFormattedByte(StringBuffer buffer, byte byteValue) {
+        final String digits = "0123456789ABCDEF";
 
-        // convert to unsigned 
-        int unsignedByte = byteValue + 128;
-        final String hexDecode = "0123456789ABCDEF";
-
-        buf.append(hexDecode.charAt(unsignedByte >>> 4));
-        buf.append(hexDecode.charAt(unsignedByte & 0x0F));
+        buffer.append(digits.charAt((byteValue >>> 4) & 0xF));
+        buffer.append(digits.charAt(byteValue & 0xF));
     }
 
     /** 
@@ -363,9 +358,7 @@ public class QueryLogger {
     public static void logUpdateCount(Level logLevel, int count) {
         if (isLoggable(logLevel)) {
             String countStr =
-                (count == 1)
-                    ? "=== updated 1 row."
-                    : "=== updated " + count + " rows.";
+                (count == 1) ? "=== updated 1 row." : "=== updated " + count + " rows.";
             logObj.log(logLevel, countStr);
         }
     }
