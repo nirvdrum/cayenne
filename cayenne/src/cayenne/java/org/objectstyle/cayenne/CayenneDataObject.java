@@ -270,6 +270,12 @@ public class CayenneDataObject implements DataObject {
 					+ " because it is in a different DataContext");
 		}
 		ObjRelationship relationship = this.getRelationshipNamed(relName);
+		if (relationship == null) {
+			throw new CayenneRuntimeException(
+				"Cannot add object to relationship "
+					+ relName
+					+ " because there is no relationship by that name");
+		}
 		//Only create the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
 		//This kind of doubles up the meaning of that flag, so we may need to add another?
 		if (relationship.isFlattened() && setReverse) {
