@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DataContextClobTst extends CayenneTestCase {
 
     protected DataContext ctxt;
-    
+
     public DataContextClobTst(String name) {
         super(name);
     }
@@ -81,22 +81,36 @@ public class DataContextClobTst extends CayenneTestCase {
         return !super.getDatabaseSetupDelegate().supportsLobs();
     }
 
-    public void testNewClob() throws Exception {
+    public void testClob() throws Exception {
         if (skipTests()) {
             return;
         }
-        
+
         // insert new clob
-        ClobTest clobObj1 = (ClobTest)ctxt.createAndRegisterNewObject("ClobTest");
+        ClobTest clobObj1 =
+            (ClobTest) ctxt.createAndRegisterNewObject("ClobTest");
         clobObj1.setClobCol("rather small clob...");
         ctxt.commitChanges();
-        
+
         // read the CLOB in the new context
         DataContext ctxt2 = getDomain().createDataContext();
-        List objects = ctxt2.performQuery(new SelectQuery(ClobTest.class));
-        assertEquals(1, objects.size());
-        
-        ClobTest clobObj2 = (ClobTest)objects.get(0);
-        assertEquals(clobObj1.getClobCol(), clobObj2.getClobCol());        
+        List objects2 = ctxt2.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects2.size());
+
+        ClobTest clobObj2 = (ClobTest) objects2.get(0);
+        assertEquals(clobObj1.getClobCol(), clobObj2.getClobCol());
+
+        // update and save Clob
+        clobObj2.setClobCol("updated rather small clob...");
+        ctxt2.commitChanges();
+
+        // read into yet another context and check for changes 
+        DataContext ctxt3 = getDomain().createDataContext();
+        List objects3 = ctxt3.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects3.size());
+
+        ClobTest clobObj3 = (ClobTest) objects3.get(0);
+        assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
+
     }
 }
