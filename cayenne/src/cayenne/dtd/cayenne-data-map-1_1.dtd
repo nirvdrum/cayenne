@@ -126,9 +126,10 @@ level, or linked to an entity or procedure.
 <!ELEMENT query (property*, result-column*, (sql* | (qualifier?, ordering*, prefetch*)? )>
 <!ATTLIST query
         name CDATA #REQUIRED
-        factory CDATA #IMPLIED
+        factory CDATA #REQUIRED
 		root (db-entity | obj-entity | procedure | data-map | java-class) "data-map"
         root-name CDATA #IMPLIED
+        selecting (true | false) "true"
 >
 
 <!-- ===================================================

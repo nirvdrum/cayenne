@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.QueryBuilder;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -212,7 +213,7 @@ public class SelectQuery
         encoder.print("<query name=\"");
         encoder.print(getName());
         encoder.print("\" factory=\"");
-        encoder.print(SelectQueryBuilder.class.getName());
+        encoder.print("org.objectstyle.cayenne.map.SelectQueryBuilder");
 
         String rootString = null;
         String rootType = null;

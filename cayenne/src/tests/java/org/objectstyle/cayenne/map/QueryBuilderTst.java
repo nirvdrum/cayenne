@@ -53,36 +53,54 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
- * QueryBuilder for SelectQueries.
- * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-public class SelectQueryBuilder extends QueryBuilder {
+public class QueryBuilderTst extends BasicTestCase {
 
-    public Query getQuery() {
-        SelectQuery query = new SelectQuery();
-        query.setRoot(root);
-        query.setName(name);
-        query.setQualifier(qualifier);
+    protected QueryBuilder builder;
 
-        if (orderings != null && !orderings.isEmpty()) {
-            query.addOrderings(orderings);
-        }
+    protected void setUp() throws Exception {
+        builder = new QueryBuilder() {
 
-        if (prefetches != null && !prefetches.isEmpty()) {
-            query.addPrefetches(prefetches);
-        }
-        
-        // init properties
-        if (properties != null && !properties.isEmpty()) {
-            query.initWithProperties(properties);
-        }
+            public Query getQuery() {
+                return null;
+            }
+        };
+    }
 
-        return query;
+    public void testSetName() throws Exception {
+        builder.setName("aaa");
+        assertEquals("aaa", builder.name);
+    }
+
+    public void testSetRootInfoDbEntity() throws Exception {
+        DataMap map = new DataMap("map");
+        DbEntity entity = new DbEntity("DB1");
+        map.addDbEntity(entity);
+
+        builder.setRoot(map, QueryBuilder.DB_ENTITY_ROOT, "DB1");
+        assertSame(entity, builder.getRoot());
+    }
+
+    public void testSetRootObjEntity() throws Exception {
+        DataMap map = new DataMap("map");
+        ObjEntity entity = new ObjEntity("OBJ1");
+        map.addObjEntity(entity);
+
+        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "OBJ1");
+        assertSame(entity, builder.getRoot());
+    }
+
+    public void testSetRootDataMap() throws Exception {
+        DataMap map = new DataMap("map");
+
+        builder.setRoot(map, QueryBuilder.DATA_MAP_ROOT, null);
+        assertSame(map, builder.getRoot());
     }
 }

@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,16 +62,19 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A builder used to construct Cayenne queries from abstract configuration
- * information.
+ * A builder that constructs Cayenne queries from abstract configuration information
+ * defined in cayenne-data-map*.dtd. This abstract builder supports values declared in the
+ * DTD, allowing subclasses to define their own Query creation logic.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public abstract class QueryBuilder {
+
     public static final String OBJ_ENTITY_ROOT = "obj-entity";
     public static final String DB_ENTITY_ROOT = "db-entity";
     public static final String PROCEDURE_ROOT = "procedure";
@@ -79,7 +82,6 @@ public abstract class QueryBuilder {
     public static final String JAVA_CLASS_ROOT = "java-class";
 
     protected String name;
-    protected Object root;
     protected Map properties;
     protected List resultColumns;
     protected String sql;
@@ -87,9 +89,12 @@ public abstract class QueryBuilder {
     protected Expression qualifier;
     protected List orderings;
     protected List prefetches;
+    protected DataMap dataMap;
+    protected String rootType;
+    protected String rootName;
 
     /**
-     * Builds a Query object based on internal configuration information. 
+     * Builds a Query object based on internal configuration information.
      */
     public abstract Query getQuery();
 
@@ -98,31 +103,46 @@ public abstract class QueryBuilder {
     }
 
     /**
+     * Determines query root based on configuration info.
+     */
+    protected Object getRoot() {
+        Object root = null;
+
+        if (rootType == null || DATA_MAP_ROOT.equals(rootType)) {
+            root = dataMap;
+        }
+        else if (OBJ_ENTITY_ROOT.equals(rootType)) {
+            root = dataMap.getObjEntity(rootName);
+        }
+        else if (DB_ENTITY_ROOT.equals(rootType)) {
+            root = dataMap.getDbEntity(rootName);
+        }
+        else if (PROCEDURE_ROOT.equals(rootType)) {
+            root = dataMap.getProcedure(rootName);
+        }
+        else if (JAVA_CLASS_ROOT.equals(rootType)) {
+            // setting root to ObjEntity, since creating a Class requires
+            // the knowledge of the ClassLoader
+            root = dataMap.getObjEntityForJavaClass(rootName);
+        }
+
+        if (root == null) {
+            throw new CayenneRuntimeException("Invalid query root - "
+                    + rootType
+                    + ", "
+                    + rootName);
+        }
+
+        return root;
+    }
+
+    /**
      * Determines the root object of the query.
      */
     public void setRoot(DataMap dataMap, String rootType, String rootName) {
-        if (rootType == null || DATA_MAP_ROOT.equals(rootType)) {
-            this.root = dataMap;
-        }
-        else if (OBJ_ENTITY_ROOT.equals(rootType)) {
-            this.root = dataMap.getObjEntity(rootName);
-        }
-        else if (DB_ENTITY_ROOT.equals(rootType)) {
-            this.root = dataMap.getDbEntity(rootName);
-        }
-        else if (PROCEDURE_ROOT.equals(rootType)) {
-            this.root = dataMap.getProcedure(rootName);
-        }
-        else if (JAVA_CLASS_ROOT.equals(rootType)) {
-            // setting root to ObjEntity, since creating a Class requires 
-            // the knowledge of the ClassLoader
-            this.root = dataMap.getObjEntityForJavaClass(rootName);
-        }
-
-        if (this.root == null) {
-            throw new CayenneRuntimeException(
-                "Invalid query root - " + rootType + ", " + rootName);
-        }
+        this.dataMap = dataMap;
+        this.rootType = rootType;
+        this.rootName = rootName;
     }
 
     public void setSql(String sql) {
@@ -184,6 +204,7 @@ public abstract class QueryBuilder {
     }
 
     static class ResultColumn {
+
         String label;
         String dbType;
         String objectType;

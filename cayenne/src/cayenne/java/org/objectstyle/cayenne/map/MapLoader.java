@@ -67,8 +67,6 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.project.DataMapFile;
-import org.objectstyle.cayenne.query.QueryBuilder;
-import org.objectstyle.cayenne.query.SelectQueryBuilder;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
@@ -753,17 +751,22 @@ public class MapLoader extends DefaultHandler {
         }
 
         String builder = attributes.getValue("", "factory");
+
+        // TODO: this is a hack to migrate between 1.1M6 and 1.1M7...
+        // remove this at some point
         if (builder == null) {
-            queryBuilder = new SelectQueryBuilder();
+            builder = SelectQueryBuilder.class.getName();
         }
-        else {
-            try {
-                queryBuilder = (QueryBuilder) Class.forName(builder).newInstance();
-            }
-            catch (Exception ex) {
-                throw new SAXException(
+        else if (builder.equals("org.objectstyle.cayenne.query.SelectQueryBuilder")) {
+            builder = SelectQueryBuilder.class.getName();
+        }
+
+        try {
+            queryBuilder = (QueryBuilder) Class.forName(builder).newInstance();
+        }
+        catch (Exception ex) {
+            throw new SAXException(
                     "MapLoader::processStartQuery(), invalid query builder: " + builder);
-            }
         }
 
         String rootType = attributes.getValue("", "root");
