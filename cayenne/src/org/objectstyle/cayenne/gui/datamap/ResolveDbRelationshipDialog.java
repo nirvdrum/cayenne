@@ -64,10 +64,10 @@ import java.util.Iterator;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
-import org.objectstyle.cayenne.gui.util.NameGenerator;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -116,12 +116,11 @@ implements ActionListener
 		// If DbRelationship does not exist, create it.
 		if (null == db_rel_list || db_rel_list.size() <= 0)  {
 			dbRelList = new ArrayList();
-			dbRel = new DbRelationship();
+			dbRel = (DbRelationship)NamedObjectFactory.createRelationship(start, end, to_many);
 			dbRelList.add(dbRel);
 			reverseDbRel = null;
 			dbRel.setSourceEntity(start);
 			dbRel.setTargetEntity(end);
-			dbRel.setName(NameGenerator.getDbRelationshipName(temp_end, to_many));
 			dbRel.setToMany(to_many);
 			isReverseDbRelNew = true;
 			isDbRelNew = true;

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.gui.util;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
 
 
@@ -72,35 +73,10 @@ public class EntityWrapperTst extends TestCase {
 		super(name);
 	}
 	
-	public void testCreateDbEntity() throws Exception {
-		NameGenerator.resetCounters();
-		DbEntity refEnt = new DbEntity(NameGenerator.getDbEntityName());
-		DataMap map = new DataMap();
-		map.addDbEntity(refEnt);
-		
-		NameGenerator.resetCounters();
-		DbEntity ent = EntityWrapper.createDbEntity(map);
-		assertTrue(!refEnt.getName().equals(ent.getName()));
-	}
-	
-	
-	public void testCreateObjEntity() throws Exception {
-		NameGenerator.resetCounters();
-		ObjEntity refEnt = new ObjEntity(NameGenerator.getObjEntityName());
-		DataMap map = new DataMap();
-		map.addObjEntity(refEnt);
-		
-		NameGenerator.resetCounters();
-		ObjEntity ent = EntityWrapper.createObjEntity(map);
-		assertTrue(!refEnt.getName().equals(ent.getName()));
-	}
-	
 	public void testEntity() throws Exception {
 		ObjEntity ent = new ObjEntity("abc");
 		EntityWrapper wrap = new EntityWrapper(ent);
 		assertSame(ent, wrap.getEntity());
 	}
-
-
 }
 

@@ -61,9 +61,10 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.gui.util.NameGenerator;
 import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
 import org.objectstyle.util.NameConverter;
 
@@ -513,8 +514,7 @@ public class DbLoader {
 	 */
 	public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
 		throws SQLException {
-		DataMap dataMap;
-		dataMap = new DataMap(NameGenerator.getDataMapName());
+		DataMap dataMap = (DataMap)NamedObjectFactory.createObject(DataMap.class, new DataDomain());
 		return loadDataMapFromDB(schemaName, tableTypes, dataMap);
 	}
 

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.gui.util;
 
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -64,7 +65,7 @@ import org.objectstyle.cayenne.map.*;
  * Also provides GUI-specific utility methods for entities.
  */
 public class EntityWrapper {
-	Entity entity = null;
+	Entity entity;
 
 	public EntityWrapper(Entity entity) {
 		this.entity = entity;
@@ -76,32 +77,6 @@ public class EntityWrapper {
 
 	public Entity getEntity() {
 		return entity;
-	}
-
-	/** 
-	 * Creates a new ObjEntity and generate its name. 
-	 * Does not add it to the DataMap. 
-	 */
-	public static ObjEntity createObjEntity(DataMap parentMap) {
-		String name = null;
-		do {
-			name = NameGenerator.getObjEntityName();
-		} while (parentMap.getObjEntity(name) != null);
-
-		return new ObjEntity(name);
-	}
-
-	/** 
-	 * Creates new DbEntity and generate its name. 
-	 * Does not add it to the DataMap. 
-	 */
-	public static DbEntity createDbEntity(DataMap parentMap) {
-		String name = null;
-		do {
-			name = NameGenerator.getDbEntityName();
-		} while (parentMap.getDbEntity(name) != null);
-
-		return new DbEntity(name);
 	}
 
 	public boolean equals(Object obj) {

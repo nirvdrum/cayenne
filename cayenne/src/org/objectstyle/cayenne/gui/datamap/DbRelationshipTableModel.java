@@ -70,6 +70,7 @@ import javax.swing.filechooser.FileFilter;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
 
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
@@ -221,11 +222,10 @@ class DbRelationshipTableModel extends AbstractTableModel {
     }// End setValueAt()
 
 	
-	/** Don't allow adding more than one new attributes. 
-	 * @return true if new row was added, false if not. */
+	/** @return true if new row was added, false if not. */
 	public boolean addRow() {
-		String name = NameGenerator.getDbRelationshipName();
-		DbRelationship temp = new DbRelationship(name);
+		DbRelationship temp = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, entity);
+		
 		temp.setSourceEntity(entity);
 		relList.add(temp);
 		entity.addRelationship(temp);

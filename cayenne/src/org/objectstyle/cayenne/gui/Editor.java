@@ -66,9 +66,9 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gui.action.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
@@ -523,13 +523,10 @@ public class Editor
 			String name = entities[i].getClassName();
 			int idx = name.lastIndexOf('.');
 			if (idx > 0) {
-				if (idx == name.length() - 1)
-					name = NameGenerator.getObjEntityName();
-				else
-					name = name.substring(idx + 1);
+				name = (idx == name.length() - 1) ? entities[i].getName() : name.substring(idx + 1);
 			}
 			entities[i].setClassName(package_name + name);
-		} // End for()
+		}
 		mediator.fireDataMapEvent(new DataMapEvent(this, map));
 	}
 
@@ -563,7 +560,7 @@ public class Editor
 
 	private void createObjEntity() {
 		ObjEntity entity =
-			EntityWrapper.createObjEntity(mediator.getCurrentDataMap());
+			(ObjEntity)NamedObjectFactory.createObject(ObjEntity.class, mediator.getCurrentDataMap());
 		mediator.getCurrentDataMap().addObjEntity(entity);
 		mediator.fireObjEntityEvent(
 			new EntityEvent(this, entity, EntityEvent.ADD));
@@ -578,7 +575,8 @@ public class Editor
 
 	private void createDbEntity() {
 		DbEntity entity =
-			EntityWrapper.createDbEntity(mediator.getCurrentDataMap());
+			(DbEntity)NamedObjectFactory.createObject(DbEntity.class, mediator.getCurrentDataMap());
+			
 		mediator.getCurrentDataMap().addDbEntity(entity);
 		mediator.fireDbEntityEvent(
 			new EntityEvent(this, entity, EntityEvent.ADD));
@@ -744,7 +742,7 @@ public class Editor
 	}
 
 	private void createDomain() {
-		DataDomain domain = new DataDomain(NameGenerator.getDomainName());
+		DataDomain domain = new DataDomain(NamedObjectFactory.getDomainName());
 		mediator.getConfig().addDomain(domain);
 		mediator.fireDomainEvent(
 			new DomainEvent(this, domain, DomainEvent.ADD));
@@ -758,11 +756,11 @@ public class Editor
 	  * Second piece of data should be stored in the separate file
 	  * if the factory requires it. */
 	private void createDataNode() {
-		DataNode node = new DataNode(NameGenerator.getDataNodeName());
-		GuiDataSource src;
-		src = new GuiDataSource(new DataSourceInfo());
-		node.setDataSource(src);
 		DataDomain domain = mediator.getCurrentDataDomain();
+		DataNode node = (DataNode)NamedObjectFactory.createObject(DataNode.class, domain);
+		GuiDataSource src = new GuiDataSource(new DataSourceInfo());
+		node.setDataSource(src);
+		
 		domain.addNode(node);
 		mediator.fireDataNodeEvent(
 			new DataNodeEvent(this, node, DataNodeEvent.ADD));

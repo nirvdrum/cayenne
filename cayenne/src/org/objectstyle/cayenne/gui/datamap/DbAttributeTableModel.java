@@ -58,11 +58,11 @@ package org.objectstyle.cayenne.gui.datamap;
 import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.NameGenerator;
 import org.objectstyle.cayenne.map.*;
 
 
@@ -272,8 +272,7 @@ class DbAttributeTableModel extends AbstractTableModel
 	 * Broadcasts AttributeEvent.
 	 */
 	public void addRow() {
-		String name = NameGenerator.getDbAttributeName();
-		DbAttribute temp = new DbAttribute(name, TypesMapping.NOT_DEFINED, entity);		
+		DbAttribute temp = (DbAttribute)NamedObjectFactory.createObject(DbAttribute.class, entity);		
 		attributeList.add(temp);
 		entity.addAttribute(temp);
 		mediator.fireDbAttributeEvent(new AttributeEvent(src, temp, entity, AttributeEvent.ADD));

@@ -56,7 +56,8 @@
  
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
@@ -67,6 +68,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.EntityWrapper;
@@ -165,7 +167,7 @@ implements DocumentListener, ActionListener
 
 	private void createDbEntity() {
 		// Create DbEntity and add it to DataMap
-		DbEntity entity = EntityWrapper.createDbEntity(mediator.getCurrentDataMap());
+		DbEntity entity = (DbEntity)NamedObjectFactory.createObject(DbEntity.class, mediator.getCurrentDataMap());
 		mediator.getCurrentObjEntity().setDbEntity(entity);
 		mediator.getCurrentDataMap().addDbEntity(entity);
 		EntityEvent event = new EntityEvent(this, mediator.getCurrentObjEntity());

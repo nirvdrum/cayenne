@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -62,6 +62,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
@@ -204,8 +205,7 @@ class ObjRelationshipTableModel extends AbstractTableModel
 	/** Don't allow adding more than one new attributes. 
 	 * @return true if new row was added, false if not. */
 	public boolean addRow() {
-		String name = NameGenerator.getObjRelationshipName();
-		ObjRelationship temp = new ObjRelationship(name);
+		ObjRelationship temp = (ObjRelationship)NamedObjectFactory.createObject(ObjRelationship.class, entity);
 		temp.setSourceEntity(entity);
 		RelationshipEvent e;
 		e = new RelationshipEvent(src, temp, entity, RelationshipEvent.ADD);

@@ -61,6 +61,7 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.AbstractAction;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.util.Preferences;
@@ -86,7 +87,8 @@ public class CreateDataMapAction extends CayenneAction {
 			return;
 		}
 		
-		DataMap map = new DataMap(NameGenerator.getDataMapName());
+		DataDomain currentDomain = mediator.getCurrentDataDomain();
+		DataMap map = (DataMap)NamedObjectFactory.createObject(DataMap.class, currentDomain);
 		map.setLocation(relative_location);
 		mediator.addDataMap(this, map);
 	}

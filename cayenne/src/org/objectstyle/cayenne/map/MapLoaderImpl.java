@@ -139,7 +139,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		return dataMap;
 	}
 
-
 	/** Load multiple DataMaps at once. */
 	public DataMap[] loadDataMaps(InputSource[] src) throws DataMapException {
 		int len = src.length;
@@ -160,13 +159,13 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		locator.setSkipClasspath(false);
 		locator.setSkipCurDir(false);
 		locator.setSkipHomeDir(false);
-		
+
 		// Configuration superclass statically defines what 
 		// ClassLoader to use for resources. This
 		// allows applications to control where resources 
 		// are loaded from.
 		locator.setClassLoader(Configuration.getResourceLoader());
-		
+
 		return locator;
 	}
 
@@ -184,7 +183,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		// configure resource locator
 		ResourceLocator locator = configLocator();
 
-		
 		for (int i = 0; i < len; i++) {
 
 			InputStream in = locator.findResourceStream(src[i]);
@@ -327,10 +325,10 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		while (iter.hasNext()) {
 			DbAttribute temp = (DbAttribute) iter.next();
 			out.print("\t\t<db-attribute name=\"" + temp.getName() + '\"');
-			
+
 			String type = TypesMapping.getSqlNameByType(temp.getType());
-			if(type != null) {
-			    out.print(" type=\"" + type + '\"');
+			if (type != null) {
+				out.print(" type=\"" + type + '\"');
 			}
 
 			// If attribute is part of primary key
@@ -363,12 +361,12 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			ObjEntity temp = (ObjEntity) iter.next();
 			out.print("\t<obj-entity name=\"");
 			out.print(temp.getName());
-			
-			if(temp.getClassName() != null) {
-			    out.print("\" className=\"");
-			    out.print(temp.getClassName());
+
+			if (temp.getClassName() != null) {
+				out.print("\" className=\"");
+				out.print(temp.getClassName());
 			}
-			
+
 			out.print('\"');
 
 			if (temp.getDbEntity() != null) {
@@ -398,11 +396,13 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		Iterator iter = obj_attributes.iterator();
 		while (iter.hasNext()) {
 			ObjAttribute temp = (ObjAttribute) iter.next();
-			out.print("\t\t<obj-attribute name=\"");
-			out.print(temp.getName());
-			out.print("\" type=\"");
-			out.print(temp.getType());
-			out.print('\"');
+			out.print("\t\t<obj-attribute name=\"" + temp.getName() + '\"');
+
+			if (temp.getType() != null) {
+				out.print(" type=\"");
+				out.print(temp.getType());
+				out.print('\"');
+			}
 
 			// If this obj attribute is mapped to db attribute
 			if (temp.getDbAttribute() != null) {
@@ -426,7 +426,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			out.println('>');
 			storeDbRelationshipRef(out, temp);
 			out.println("\t</obj-relationship>");
-		} // End while()
+		}
 	}
 
 	private void storeDbRelationshipRef(
