@@ -56,13 +56,15 @@
 package org.objectstyle.cayenne.tools;
 
 import java.io.File;
+import java.sql.Driver;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -77,8 +79,7 @@ import org.xml.sax.InputSource;
  * @author nirvdrum, Andrei Adamchik
  * @since 1.2
  */
-// TODO: need a simple way to support arbitrary classpath for drivers (and adapters).
-// otherwise this is not very usable...
+// TODO: support classpath attribute for loading the driver
 public class DbGeneratorTask extends Task {
 
     protected DbAdapter adapter;
@@ -113,15 +114,29 @@ public class DbGeneratorTask extends Task {
             adapter = new JdbcAdapter();
         }
 
+        log("connection settings - [driver: "
+                + driver
+                + ", url: "
+                + url
+                + ", username: "
+                + userName
+                + "]", Project.MSG_VERBOSE);
+
+        log("generator options - [dropTables: "
+                + dropTables
+                + ", dropPK: "
+                + dropPK
+                + ", createTables: "
+                + createTables
+                + ", createPK: "
+                + createPK
+                + ", createFK: "
+                + createFK
+                + "]", Project.MSG_VERBOSE);
+
         validateAttributes();
 
         try {
-            // Build up the data source info for the generator.
-            DataSourceInfo dsi = new DataSourceInfo();
-            dsi.setJdbcDriver(driver);
-            dsi.setDataSourceUrl(url);
-            dsi.setUserName(userName);
-            dsi.setPassword(password);
 
             // Load the data map and run the db generator.
             DataMap dataMap = loadDataMap();
@@ -132,7 +147,11 @@ public class DbGeneratorTask extends Task {
             generator.setShouldDropPKSupport(dropPK);
             generator.setShouldDropTables(dropTables);
 
-            generator.runGenerator(dsi);
+            // load driver taking custom CLASSPATH into account...
+            DriverDataSource dataSource = new DriverDataSource((Driver) Class.forName(
+                    driver).newInstance(), url, userName, password);
+
+            generator.runGenerator(dataSource);
         }
         catch (Exception ex) {
             Throwable th = Util.unwindException(ex);
@@ -261,4 +280,5 @@ public class DbGeneratorTask extends Task {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }

@@ -37,9 +37,7 @@
 					<tr>
 						<td valign="top">driver</td>
 						<td valign="top">A class of JDBC driver to use for the 
-							target database. Driver must be in the Ant 
-							classpath. <i>Note: a classpathref attribute is 
-							pending...</i></td>
+							target database.</td>
 						<td valign="top" align="center">Yes</td>
 					</tr>
 					<tr>
@@ -89,6 +87,11 @@
 						<td valign="top" align="center">No</td>
 					</tr>
 				</table>
+				<p> </p>
+				<panel name="Driver Classpath Note:"> Support for "classpath" 
+					or "classpathref" attributes is pending. To work around 
+					this limitation, JDBC driver (and custom DbAdapter) classpath can be 
+					appended to the classpath used to load the task via "taskdef". </panel>
 				<h3>Examples:</h3>
 				<p>Here is an example of using <code>cdbgen</code> to create DB 
 					schema objects on a local HSQLDB.</p>
