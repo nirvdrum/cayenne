@@ -18,7 +18,14 @@ when a DataNode is selected.
 
 4. Modeler: Added support for customizable sequences on Oracle.
 
-5. Fixed bugs in EOModel loader
+5. Fixed bugs in EOModelProcessor that prevented incomplete (or argueably inconsistent) 
+EOModels from loading. Right now Cayenne will try to fix or ignore questionable 
+objects during import.
+
+6. Changed the way DataMaps are linked to DataNodes from being hidden deep in the menus
+to be displayed on the DataMap panel instead.
+
+
 
 
 
