@@ -352,6 +352,8 @@ public class EOModelProcessor {
             boolean toDependentPK = "Y".equals(relMap.get("propagatesPrimaryKey"));
             ObjEntity target = helper.getDataMap().getObjEntity(targetName);
 
+            // target maybe null for cross-EOModel relationships
+            // ignoring those now.
             if (target == null) {
                 continue;
             }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.wocompat;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.wocompat;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.wocompat;
 
 import java.io.PrintWriter;
 
@@ -77,9 +77,30 @@ public class EOModelProcessorTst extends CayenneTestCase {
     }
 
     public void testLoadModel() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/art.eomodeld");
+        DataMap map = processor.loadEOModel("test-resources/wotests/art.eomodeld");
         assertLoaded("art", map);
         assertOneWayRelationships(map);
+    }
+
+    public void testLoadModelWIthDependencies() throws Exception {
+        DataMap map =
+            processor.loadEOModel(
+                "test-resources/wotests/cross-model-relationships.eomodeld");
+
+        ObjEntity entity = map.getObjEntity("CrossModelRelTest");
+        assertNotNull(entity);
+        
+        ObjAttribute a1 = (ObjAttribute) entity.getAttribute("testAttribute");
+        assertNotNull(a1);
+
+        DbAttribute da1 = a1.getDbAttribute();
+        assertNotNull(da1);
+        assertSame(da1, entity.getDbEntity().getAttribute("TEST_ATTRIBUTE"));
+        
+        // for now cross model relationships are simply ignored
+        // eventually we must handle those...
+        assertEquals(0, entity.getRelationships().size());
+        assertEquals(0, entity.getDbEntity().getRelationships().size());
     }
 
     public void testLoadBrokenModel() throws Exception {
