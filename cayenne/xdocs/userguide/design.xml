@@ -140,7 +140,10 @@ Configuration conf = Configuration.getSharedConfig();
             For example, in addition to DefaultConfiguration, Cayenne framework provides
             <a href="../api/org/objectstyle/cayenne/conf/ServletConfiguration.html">ServletConfiguration</a>
             class that, among other things, is able to locate resources relative to WEB-INF directory
-            of a deployed web application.</p>
+            of a deployed web application. More information on the types and locations of configuration 
+            files can be found in 
+            <a href="../userguide/appguide/deploy.html">Deployment Chapter</a>.
+            </p>
             
             <p>To make sure Cayenne 
             uses configuration object of the right class, you should add the following code
