@@ -97,8 +97,8 @@ public class DatabaseSetupDelegate {
         delegates.put(FirebirdAdapter.class, FirebirdDelegate.class);
         delegates.put(PostgresAdapter.class, PostgresDelegate.class);
         delegates.put(MySQLAdapter.class, MySQLDelegate.class);
-        delegates.put(HSQLDBDelegate.class, HSQLDBAdapter.class);
-        delegates.put(OpenBaseDelegate.class, OpenBaseAdapter.class);
+        delegates.put(HSQLDBAdapter.class, HSQLDBDelegate.class);
+        delegates.put(OpenBaseAdapter.class, OpenBaseDelegate.class);
     }
 
     protected DbAdapter adapter;

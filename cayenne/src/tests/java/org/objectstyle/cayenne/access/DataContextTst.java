@@ -288,6 +288,7 @@ public class DataContextTst extends DataContextTestBase {
      * Test fetching a derived entity.
      */
     public void testDerivedEntityFetch1() throws Exception {
+
         // some DBs don't support HAVING
         if (!getDatabaseSetupDelegate().supportsHaving()) {
             return;
