@@ -201,7 +201,6 @@ public class SaveAction extends CayenneAction {
 
     /** Save data source info if data source factory is DIRECT_FACTORY. */
     protected void saveDataNode(DataNode node) throws Exception {
-        Mediator mediator = getMediator();
         File projDir = Editor.getProject().getProjectDir();
         File file = tempFileForFile(new File(projDir, node.getDataSourceLocation()));
 

@@ -69,16 +69,10 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class ProjectFile {
-    public static final int FILE_SAVED = 1;
-    public static final int FILE_DELETED = 2;
-    public static final int FILE_NEW = 3;
-    public static final int FILE_MODIFIED = 4;
-
     protected static final List fileTypes = new ArrayList();
 
     protected String name;
     protected String extension;
-    protected int status;
     protected File tempFile;
     protected Project project;
 
@@ -254,22 +248,6 @@ public abstract class ProjectFile {
      */
     public void setProject(Project project) {
         this.project = project;
-    }
-
-    /**
-     * Returns the status.
-     * @return int
-     */
-    public int getStatus() {
-        return status;
-    }
-
-    /**
-     * Sets the status.
-     * @param status The status to set
-     */
-    public void setStatus(int status) {
-        this.status = status;
     }
 
     public boolean isRenamed() {

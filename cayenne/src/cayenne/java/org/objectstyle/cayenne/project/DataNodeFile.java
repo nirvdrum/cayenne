@@ -56,8 +56,11 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DomainHelper;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
 /**
@@ -100,29 +103,44 @@ public class DataNodeFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {}
+    public void saveToFile(File f) throws Exception {
+        FileWriter fw = new FileWriter(f);
+        try {
+            PrintWriter pw = new PrintWriter(fw);
+            try {
+                ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+                DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
+            } finally {
+                pw.close();
+            }
+        } finally {
+            fw.close();
+        }
+    }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#canHandle(Object)
      */
     public boolean canHandle(Object obj) {
-    	if(obj instanceof DataNode) {
-    		DataNode node = (DataNode)obj;
-    		
-    		// only driver datasource factory requires a file
-    		if(DriverDataSourceFactory.class.getName().equals(node.getDataSourceFactory())) {
-    			return true;
-    		}
-    	}
-    	
+        if (obj instanceof DataNode) {
+            DataNode node = (DataNode) obj;
+
+            // only driver datasource factory requires a file
+            if (DriverDataSourceFactory
+                .class
+                .getName()
+                .equals(node.getDataSourceFactory())) {
+                return true;
+            }
+        }
+
         return false;
     }
-
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
      */
     public ProjectFile createProjectFile(Object obj) {
-        return new DataNodeFile((DataNode)obj);
+        return new DataNodeFile((DataNode) obj);
     }
 }

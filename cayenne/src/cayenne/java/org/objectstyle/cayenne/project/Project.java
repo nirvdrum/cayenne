@@ -274,12 +274,14 @@ public class Project {
     }
 
     /** 
-     * Saves project. 
+     * Saves project. All currently existing files are updated,
+     * without checking for modifications. New files are created
+     * as needed, unused files are deleted.
      */
     public void save() throws ProjectException {
 
         // 1. Traverse project tree to find file wrappers that require update.
-        List modifiedFiles = new ArrayList();
+        List filesToSave = new ArrayList();
         List wrappedObjects = new ArrayList();
 
         Iterator nodes = new ProjectTraversal(this).treeNodes();
@@ -290,24 +292,23 @@ public class Project {
             ProjectFile existingFile = findFile(obj);
 
             if (existingFile == null) {
+            	// check if project node can have a file
                 ProjectFile newFile = ProjectFile.projectFileForObject(obj);
                 if (newFile != null) {
                     newFile.setProject(this);
-                    modifiedFiles.add(newFile);
+                    filesToSave.add(newFile);
                 }
             } else {
                 wrappedObjects.add(existingFile.getObject());
-                if (existingFile.getStatus() == ProjectFile.FILE_MODIFIED) {
-                    modifiedFiles.add(existingFile);
-                }
+                filesToSave.add(existingFile);
             }
         }
 
         // 2. Try saving individual file wrappers
-        processSave(modifiedFiles);
+        processSave(filesToSave);
 
         // 3. Commit changes
-        Iterator saved = modifiedFiles.iterator();
+        Iterator saved = filesToSave.iterator();
         while (saved.hasNext()) {
             ProjectFile f = (ProjectFile) saved.next();
             f.saveCommit();

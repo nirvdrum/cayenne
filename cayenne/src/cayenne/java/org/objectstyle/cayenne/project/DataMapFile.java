@@ -56,8 +56,11 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoader;
 
 /**
  * DataMapFile is a ProjectFile abstraction of the 
@@ -66,12 +69,12 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class DataMapFile extends ProjectFile {
-	protected static final String MAP_FILE_EXTENSION = "xml";
-	
-	protected DataMap map;
+    protected static final String MAP_FILE_EXTENSION = "xml";
+
+    protected DataMap map;
 
     public DataMapFile() {}
-    
+
     /**
      * Constructor for DataMapFile.
      * @param name
@@ -99,9 +102,22 @@ public class DataMapFile extends ProjectFile {
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {}
-    
-    
+    public void saveToFile(File f) throws Exception {
+        MapLoader saver = new MapLoader();
+        FileWriter fw = new FileWriter(f);
+
+        try {
+            PrintWriter pw = new PrintWriter(fw);
+            try {
+                saver.storeDataMap(pw, map);
+            } finally {
+                pw.close();
+            }
+        } finally {
+            fw.close();
+        }
+    }
+
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#canHandle(Object)
      */
@@ -109,12 +125,10 @@ public class DataMapFile extends ProjectFile {
         return obj instanceof DataMap;
     }
 
-
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
      */
     public ProjectFile createProjectFile(Object obj) {
-        return new DataMapFile((DataMap)obj);
+        return new DataMapFile((DataMap) obj);
     }
 }
-

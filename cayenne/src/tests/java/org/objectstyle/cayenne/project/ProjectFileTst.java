@@ -87,14 +87,6 @@ public class ProjectFileTst extends CayenneTestCase {
         assertEquals(TestProjectFile.OBJ_NAME, pf.name);
     }
 
-    public void testStatus() throws Exception {
-        pf.setStatus(ProjectFile.FILE_MODIFIED);
-        assertEquals(ProjectFile.FILE_MODIFIED, pf.getStatus());
-
-        pf.setStatus(ProjectFile.FILE_DELETED);
-        assertEquals(ProjectFile.FILE_DELETED, pf.getStatus());
-    }
-
     public void testGetFileName() throws Exception {
         assertEquals(TestProjectFile.OBJ_NAME + ".ext", pf.getFileName());
     }
