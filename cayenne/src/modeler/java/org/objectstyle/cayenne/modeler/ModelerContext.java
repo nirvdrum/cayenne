@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler;
 
+import java.awt.Dialog;
+import java.awt.Frame;
 import java.awt.Window;
 
 import javax.swing.JRootPane;
@@ -65,6 +67,8 @@ import org.scopemvc.core.View;
 import org.scopemvc.view.swing.SwingView;
 
 /**
+ * CayenneModeler specific implementation of Scope ViewContext.
+ * 
  * @author Andrei Adamchik
  */
 public class ModelerContext extends SwingContext {
@@ -81,7 +85,43 @@ public class ModelerContext extends SwingContext {
         super();
     }
 
-    protected void showViewInPrimaryWindow(SwingView view) {}
+    protected void showViewInPrimaryWindow(SwingView view) {
+    }
+
+    /**
+     * Overrides super implementation to create closable dialogs.
+     */
+    protected void showViewInDialog(SwingView inView) {
+    	// NOTE: 
+    	// copied from superclass, except that JDialog is substituted for CayenneDialog
+    	// Keep in mind when upgrading Scope to the newer versions.
+
+        // Make a JDialog to contain the view.
+        Window parentWindow = getDefaultParentWindow();
+
+        final CayenneDialog dialog;
+        if (parentWindow instanceof Dialog) {
+            dialog = new CayenneDialog((Dialog) parentWindow);
+        }
+        else {
+            dialog = new CayenneDialog((Frame) parentWindow);
+        }
+
+        // Set title, modality, resizability
+        if (inView.getTitle() != null) {
+            dialog.setTitle(inView.getTitle());
+        }
+        if (inView.getDisplayMode() == SwingView.MODAL_DIALOG) {
+            dialog.setModal(true);
+        }
+        else {
+            dialog.setModal(false);
+        }
+        dialog.setResizable(inView.isResizable());
+
+        setupWindow(dialog.getRootPane(), inView, true);
+        dialog.toFront();
+    }
 
     /**
      * Overrides super implementation to allow using Scope

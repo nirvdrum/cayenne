@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler;
 
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.GraphicsConfiguration;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -81,10 +85,69 @@ import org.objectstyle.cayenne.modeler.util.BrowserControl;
 public class CayenneDialog extends JDialog implements HyperlinkListener {
     private static Logger logObj = Logger.getLogger(CayenneDialog.class);
 
+    public CayenneDialog() throws HeadlessException {
+        super();
+    }
+
+    public CayenneDialog(Frame owner) throws HeadlessException {
+        super(owner);
+    }
+
+    public CayenneDialog(Frame owner, boolean modal) throws HeadlessException {
+        super(owner, modal);
+    }
+
+    public CayenneDialog(Frame owner, String title) throws HeadlessException {
+        super(owner, title);
+    }
+
+    public CayenneDialog(Frame owner, String title, boolean modal)
+        throws HeadlessException {
+        super(owner, title, modal);
+    }
+
+    public CayenneDialog(
+        Frame owner,
+        String title,
+        boolean modal,
+        GraphicsConfiguration gc) {
+        super(owner, title, modal, gc);
+    }
+
+    public CayenneDialog(Dialog owner) throws HeadlessException {
+        super(owner);
+    }
+
+    public CayenneDialog(Dialog owner, boolean modal) throws HeadlessException {
+        super(owner, modal);
+    }
+
+    public CayenneDialog(Dialog owner, String title) throws HeadlessException {
+        super(owner, title);
+    }
+
+    public CayenneDialog(Dialog owner, String title, boolean modal)
+        throws HeadlessException {
+        super(owner, title, modal);
+    }
+
+    public CayenneDialog(
+        Dialog owner,
+        String title,
+        boolean modal,
+        GraphicsConfiguration gc)
+        throws HeadlessException {
+        super(owner, title, modal, gc);
+    }
 
     public CayenneDialog(Editor frame, String title, boolean modal) {
         super(frame, title, modal);
+    }
 
+    /**
+     * Makes dialog closeable when ESC button is clicked.
+     */
+    protected void initCloseOnEscape() {
         // make dialog closable on escape
         // TODO: Note that if a dialog contains subcomponents
         // that use ESC for their own purposes (like editable JTable or JComboBox),
@@ -140,5 +203,11 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
      */
     public EventController getMediator() {
         return getParentEditor().getController().getEventController();
+    }
+
+
+    protected void dialogInit() {
+        super.dialogInit();
+        initCloseOnEscape();
     }
 }
