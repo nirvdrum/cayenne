@@ -6,7 +6,15 @@
       	<p>This chapter explains in short what steps are required to write a Cayenne 
       	application, and then presents a few tutorials showing examples of various applications.
       	Each of the tutorials provides a simple SQL script to create 
-        the tables and data needed. Database schema used in all tutorials in 
+        the tables and data needed. </p>
+        
+        <panel name="Note:">
+        Source code for the tutorials discussed in this chapter is bundled with Cayenne 
+        distribution. More advanced Cayenne examples are available as a separate download 
+        from the download page.
+        </panel>
+        
+        <p>Database schema used in all tutorials in 
         this chapter is shown below:</p>
             
         <img src="/images/schema.jpg" width="494" height="250" border="0" 
