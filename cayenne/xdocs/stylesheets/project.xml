@@ -45,7 +45,7 @@
     	</item>
     	
     	<item name="4. Design"  href="/userguide/design/index.html">
-    		<item name="4.1 Object Relational Mapping"  href="/userguide/design/index.html"/>
+    		<item name="4.1 Object Relational Mapping"  href="/userguide/design/orm.html"/>
     		<item name="4.2 Object Graph"  href="/userguide/design/graph.html"/>
     		<item name="4.3 Data Objects"  href="/userguide/design/dataobj.html"/>
     		<item name="4.4 Access Classes"  href="/userguide/design/access.html"/>

@@ -3,13 +3,13 @@
 <toc name="toc-user-guide" chapter="4. Design"/>
 <body>
     <section name="4. Design">
-            <subsection name="4.4 Access Classes" anchor="access_classes">
+            <subsection name="4.4 Access Classes">
             <p>Cayenne database access module consists of a stack of objects, 
             all implementing <a href=
             "../../api/cayenne/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine
             interface</a>:</p>
             
-            <img src="/images/access-class.gif" alt="Cayenne Access Class Diagram"/>
+            <img src="/images/access-layer.gif" width="520" height="341" alt="Cayenne Access Class Diagram"/>
             
             <p>Since all classes on the stack implement QueryEngine, each higher layer 
             of control is optional. Only DataNode layer is required for Cayenne to operate. 
