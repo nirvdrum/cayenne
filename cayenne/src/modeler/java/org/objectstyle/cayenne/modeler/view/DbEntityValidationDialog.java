@@ -56,9 +56,12 @@
 package org.objectstyle.cayenne.modeler.view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -76,6 +79,10 @@ import org.scopemvc.view.swing.SwingView;
  * 
  * @author Andrei Adamchik
  */
+
+// TODO: This class should behave just like validation dialog,
+// i.e. allow to click on errors and go to the problem location.
+// Need some reusable widget for that.
 public class DbEntityValidationDialog extends SPanel {
 
     public DbEntityValidationDialog() {
@@ -88,16 +95,22 @@ public class DbEntityValidationDialog extends SPanel {
         setLayout(new BorderLayout());
 
         // build entity table
-        STable table = new STable();
+        STable table = new STable() {
+            protected final Dimension preferredSize = new Dimension(450, 300);
+            public Dimension getPreferredScrollableViewportSize() {
+                return preferredSize;
+            }
+        };
+        
         table.setBackground(ValidatorDialog.WARNING_COLOR);
         table.setRowHeight(25);
         table.setRowMargin(3);
-        table.setColumnNames(new String[] { "Entity", "Problems" });
-		table.setColumnSelectors(new String[] { "validatedObject.name", "message" });
+        table.setColumnNames(new String[] { "Name", "Problems" });
+        table.setColumnSelectors(new String[] { "validatedObject.name", "message" });
 
         // make sure that long columns are not squeezed
         table.getColumnModel().getColumn(0).setMinWidth(100);
-        table.getColumnModel().getColumn(1).setMinWidth(250);
+        table.getColumnModel().getColumn(1).setMinWidth(350);
 
         // build action buttons
         SButton continueButton =
@@ -111,6 +124,17 @@ public class DbEntityValidationDialog extends SPanel {
         // assemble
         JPanel panel = PanelFactory.createTablePanel(table, new JComponent[] {
         }, new JButton[] { continueButton, cancelButton });
+
+        JEditorPane message =
+            new JEditorPane(
+                "text/html",
+                "<center>Some tables can't be created due to validation problems below.<br> "
+                    + "If \"Continue\" is selected, problematic tables will be skiped.</center>");
+        message.setBackground(this.getBackground());
+        message.setEditable(false);
+        message.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        add(message, BorderLayout.NORTH);
         add(panel, BorderLayout.CENTER);
     }
 }

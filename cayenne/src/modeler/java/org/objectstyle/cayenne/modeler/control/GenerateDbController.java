@@ -68,8 +68,11 @@ import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.datamap.GenerateDbDialog;
@@ -127,7 +130,7 @@ public class GenerateDbController extends BasicController {
             shutdown();
         }
         else if (control.matchesID(GENERATION_OPTIONS_CONTROL)) {
-			shutdown();
+            shutdown();
             runDbGeneration();
         }
     }
@@ -289,19 +292,35 @@ public class GenerateDbController extends BasicController {
             Collection failed = new ArrayList();
             while (it.hasNext()) {
                 ValidationInfo nextProblem = (ValidationInfo) it.next();
-                if (nextProblem.getValidatedObject() instanceof DbEntity) {
-                    DbEntity failedEntity = (DbEntity) nextProblem.getValidatedObject();
+                Entity failedEntity = null;
 
-                    if (failedEntity instanceof DerivedDbEntity) {
-                        continue;
-                    }
-
-                    if (!allEntities.contains(failedEntity)) {
-                        continue;
-                    }
-
-                    failed.add(nextProblem);
+                if (nextProblem.getValidatedObject() instanceof DbAttribute) {
+                    DbAttribute failedAttribute =
+                        (DbAttribute) nextProblem.getValidatedObject();
+                    failedEntity = failedAttribute.getEntity();
                 }
+                else if (nextProblem.getValidatedObject() instanceof DbRelationship) {
+                    DbRelationship failedRelationship =
+                        (DbRelationship) nextProblem.getValidatedObject();
+                    failedEntity = failedRelationship.getSourceEntity();
+                }
+                else if (nextProblem.getValidatedObject() instanceof DbEntity) {
+                    failedEntity = (Entity) nextProblem.getValidatedObject();
+                }
+
+                if (failedEntity == null) {
+                    continue;
+                }
+
+                if (failedEntity instanceof DerivedDbEntity) {
+                    continue;
+                }
+
+                if (!allEntities.contains(failedEntity)) {
+                    continue;
+                }
+
+                failed.add(nextProblem);
             }
 
             return failed;
