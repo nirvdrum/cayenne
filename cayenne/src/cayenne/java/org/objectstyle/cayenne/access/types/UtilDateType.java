@@ -74,7 +74,7 @@ public class UtilDateType extends AbstractType {
     public String getClassName() {
         return java.util.Date.class.getName();
     }
-    
+
     /**
      * Always returns true indicating no validation failures. There is no date-specific
      * validations at the moment.
@@ -90,8 +90,7 @@ public class UtilDateType extends AbstractType {
         return true;
     }
 
-    protected Object convertToJdbcObject(Object val, int type)
-        throws Exception {
+    protected Object convertToJdbcObject(Object val, int type) throws Exception {
         if (type == Types.DATE)
             return new java.sql.Date(((java.util.Date) val).getTime());
         else if (type == Types.TIME)
@@ -100,14 +99,26 @@ public class UtilDateType extends AbstractType {
             return new java.sql.Timestamp(((java.util.Date) val).getTime());
         else
             throw new IllegalArgumentException(
-                "Only date/time types can be used for '"
-                    + getClassName()
-                    + "'.");
+                "Only date/time types can be used for '" + getClassName() + "'.");
     }
 
-    public Object materializeObject(ResultSet rs, int index, int type)
-        throws Exception {
-        Object val = rs.getObject(index);
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+        Object val = null;
+
+        switch (type) {
+            case Types.TIMESTAMP :
+                val = rs.getTimestamp(index);
+                break;
+            case Types.DATE :
+                val = rs.getDate(index);
+                break;
+            case Types.TIME :
+                val = rs.getTime(index);
+                break;
+            default :
+                val = rs.getObject(index);
+                break;
+        }
 
         // all sql time/date classes are subclasses of java.util.Date,
         // so lets cast it to Date,
@@ -117,19 +128,34 @@ public class UtilDateType extends AbstractType {
             ? null
             : new java.util.Date(((java.util.Date) val).getTime());
     }
-    
-    public Object materializeObject(CallableStatement cs, int index, int type)
-         throws Exception {
-         Object val = cs.getObject(index);
 
-         // all sql time/date classes are subclasses of java.util.Date,
-         // so lets cast it to Date,
-         // if it is not date, ClassCastException will be thrown,
-         // which is what we want
-         return (cs.wasNull())
-             ? null
-             : new java.util.Date(((java.util.Date) val).getTime());
-     }
+    public Object materializeObject(CallableStatement cs, int index, int type)
+        throws Exception {
+        Object val = null;
+
+        switch (type) {
+            case Types.TIMESTAMP :
+                val = cs.getTimestamp(index);
+                break;
+            case Types.DATE :
+                val = cs.getDate(index);
+                break;
+            case Types.TIME :
+                val = cs.getTime(index);
+                break;
+            default :
+                val = cs.getObject(index);
+                break;
+        }
+
+        // all sql time/date classes are subclasses of java.util.Date,
+        // so lets cast it to Date,
+        // if it is not date, ClassCastException will be thrown,
+        // which is what we want
+        return (cs.wasNull())
+            ? null
+            : new java.util.Date(((java.util.Date) val).getTime());
+    }
 
     public void setJdbcObject(
         PreparedStatement st,
@@ -138,11 +164,6 @@ public class UtilDateType extends AbstractType {
         int type,
         int precision)
         throws Exception {
-        super.setJdbcObject(
-            st,
-            convertToJdbcObject(val, type),
-            pos,
-            type,
-            precision);
+        super.setJdbcObject(st, convertToJdbcObject(val, type), pos, type, precision);
     }
 }
