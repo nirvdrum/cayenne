@@ -55,56 +55,32 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import java.util.EventObject;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 
-/** 
- * Represents events resulted from Attribute changes 
- * in CayenneModeler. This event is used for both ObjAttributes
- * and DbAttributes.
- * 
- * @author Misha Shengaout
+/**
  * @author Andrei Adamchik
  */
-public class AttributeEvent extends EntityEvent {
-	protected Attribute attribute;
-
-	/** Creates a Attribute change event. */
-	public AttributeEvent(Object src, Attribute attr, Entity entity) {
-		super(src, entity);
-		setAttribute(attr);
-	}
-
-	/** Creates a Attribute event of a specified type. */
-	public AttributeEvent(Object src, Attribute attr, Entity entity, int id) {
-		this(src, attr, entity);
-		setId(id);
-	}
-
-	/** Creates a Attribute name change event.*/
-	public AttributeEvent(
-		Object src,
-		Attribute attr,
-		Entity entity,
-		String oldName) {
-			
-		this(src, attr, entity);
-		setOldName(oldName);
-	}
-
-	/** Get attribute (obj or db). */
-	public Attribute getAttribute() {
-		return attribute;
-	}
-
+public class RelationshipEventTst extends TestCase {
 
 	/**
-	 * Sets the attribute.
-	 * @param attribute The attribute to set
+	 * Constructor for RelationshipEventTst.
+	 * @param arg0
 	 */
-	public void setAttribute(Attribute attribute) {
-		this.attribute = attribute;
+	public RelationshipEventTst(String arg0) {
+		super(arg0);
+	}
+
+	public void testRelationship() throws Exception {
+		Object src = new Object();
+		Relationship r = new DbRelationship();
+		r.setName("xyz");
+		RelationshipEvent e = new RelationshipEvent(src, null, null);
+
+		e.setRelationship(r);
+		assertSame(r, e.getRelationship());
 	}
 }
+

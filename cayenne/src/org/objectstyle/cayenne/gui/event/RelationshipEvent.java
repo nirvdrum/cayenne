@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,65 +52,65 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.event;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.EventObject;
 
-/** Events pertaining to Relationship (Object and Database) display. */
-public class RelationshipEvent extends EventObject
-{
-	/** Relationship changed. Display or re-display it.*/
-	public static final int CHANGE 	= 1;
-	/** New attribute created. Display it or add to the list, if applicable.*/
-	public static final int ADD		= 2;
-	/** Relationship removed. Display another one and/or remove this one from lists.*/
-	public static final int REMOVE	= 3;
-	
-	private int	id = CHANGE;
-	private Entity entity;
-	private Relationship relationship;
-	private String oldName;
-	private String newName;
-	
-	/** Relationship property(-ies) changed. */
-	public RelationshipEvent(Object src, Relationship temp_relationship
-	, Entity temp_entity)
-	{
-		super(src);
-		relationship = temp_relationship;
-		entity = temp_entity;
-		oldName = newName = temp_relationship.getName();
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
+
+/** 
+ * Represents events resulted from Relationship changes 
+ * in CayenneModeler. This event is used for both ObjRelationships
+ * and DbRelationships.
+ * 
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class RelationshipEvent extends EntityEvent {
+	protected Relationship relationship;
+
+	/** Creates a Relationship change event. */
+	public RelationshipEvent(Object src, Relationship rel, Entity entity) {
+		super(src, entity);
+		setRelationship(rel);
 	}
 
-	/** Relationship added or removed. */
-	public RelationshipEvent(Object src, Relationship temp_relationship
-	, Entity temp_entity, int temp_id)
-	{
-		this(src, temp_relationship, temp_entity);
-		id = temp_id;
+	/** Creates a Relationship event of a specified type. */
+	public RelationshipEvent(
+		Object src,
+		Relationship rel,
+		Entity entity,
+		int id) {
+
+		this(src, rel, entity);
+		setId(id);
 	}
 
-	/** Relationship name changed.*/
-	public RelationshipEvent(Object src, Relationship temp_relationship
-	, Entity temp_entity, String old_name)
-	{
-		this(src, temp_relationship, temp_entity, CHANGE);
-		oldName = old_name;
-		newName = temp_relationship.getName();
+	/** Creates a Relationship name change event. */
+	public RelationshipEvent(
+		Object src,
+		Relationship rel,
+		Entity entity,
+		String oldName) {
+			
+		this(src, rel, entity);
+        setOldName(oldName);
 	}
-	
-	/** Get relationship (obj or db). */
-	public Relationship getRelationship() {return relationship;}
-	/** Get entity (obj or db) to which this relationship belongs. */
-	public Entity getEntity() {return entity;}
-	/** Get the type of the event.
-	 *  @return CHANGE, ADD or REMOVE.*/
-	public int getId() {return id;}
-	
-	/** Returns the old relationship name. Used only in CHANGE event. */
-	public String getOldName() {return oldName;}
-	
-	/** Returns the new relationship name. Used only in CHANGE event. */
-	public String getNewName() {return newName;}
+
+	/** Returns relationship associated with this event. */
+	public Relationship getRelationship() {
+		return relationship;
+	}
+
+	/**
+	 * Sets relationship associated with this event.
+	 * 
+	 * @param relationship The relationship to set
+	 */
+	public void setRelationship(Relationship relationship) {
+		this.relationship = relationship;
+	}
 }
