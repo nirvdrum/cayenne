@@ -12,21 +12,21 @@
         </p>
         </section>
         
-        <section name="Project News">
-<p><u><i>[March 2, 2005]</i></u> <strong>Confluence Wiki Launch</strong></p>
-		<p>We are glad to announce an official launch of <a href="http://objectstyle.org/confluence/display/CAY/Home">Confluence Wiki</a> 
-		for Cayenne. Confluence is more that just a classic Wiki. It has blogs, advanced permissions management 
- 		and a number of other tools for collaborative content creation. It also uses Jira logins, so you won't
-		need a second id to get in. Confluence should help us to 
-		<a href="http://objectstyle.org/confluence/display/CAY/Cayenne+FAQ">update the FAQ</a>, 
-		<a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY">blog latest Cayenne
-		developments</a>,
-		and <a href="http://objectstyle.org/confluence/display/CAY/Cayenne+Examples">post examples</a>. Many thanks to Atlassian for providing us free license.</p>
 
-           <p><u><i>[February 7, 2005]</i></u> <strong>Cayenne 1.2 M2</strong></p>
-		<p>Second 1.2 milestone is <a href="download.html">available for download</a>. 
-It removes all previously deprecated API, features real support for auto-increment columns, adds a 
-new ant task "cdbgen" for database schema generation, and <a href="release-notes/RELEASE-NOTES-1.2M2.txt">much, much more</a>...</p>
+        <section name="Project News">
+<p><u><i>[March 20, 2005]</i></u> <strong>Cayenne 1.2M3 Released</strong></p>
+		<p>A new M3 milestone release of Cayenne 1.2 is available. It includes a number of new features, improvements and 
+		bug fixes. The most notable changes are support for single query ("joint") prefetching, support for flattened relationships 
+		prefetching, PostgreSQL PK generator using sequences instead of AUTO_PK_SUPPORT table, DataContext userProperties 
+		map. For more details see the 
+		<a href="http://objectstyle.org/confluence/display/CAY/2005/03/20/Cayenne+1.2M3+Released">release announcement</a>
+		 on Cayenne Blog.</p>
+<p><u><i>[March 13, 2005]</i></u> <strong>Cayenne 1.1.1 Released</strong></p>
+		<p>A new maintenance release of Cayenne stable 1.1 version is now available. It fixes a number of bugs (such as Oracle resource leaks, modeler not escaping strings, etc.). For a full list of resolved issues see this 
+		<a href="http://objectstyle.org/confluence/display/CAY/2005/03/13/Cayenne+1.1.1+Released">blog entry</a>
+		 or release notes file included with download.</p>
+
+           
 
         <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
 		<p><img align="left" hspace="3" src="images/other/javaworld-200409.gif"/>
@@ -59,8 +59,9 @@ new ant task "cdbgen" for database schema generation, and <a href="release-notes
         launched to production. Currently applications receive more than 5 million hits a day. 
         <br/><br/>
         </p>
+<p> </p>
         
-        <p><a href="news-archive.html"><strong>older news...</strong></a></p>
+        <p><a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY"><strong>other news...</strong></a> <a href="http://objectstyle.org/confluence/display/CAY/Old+News+Archive"><strong>old news...</strong></a></p>
         
         </section>
         

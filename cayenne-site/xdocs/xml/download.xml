@@ -16,14 +16,14 @@
         	
         	<subsection name="Development Release: Cayenne 1.2">
         	    <ul>
-                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.2M2.tar.gz">Cayenne 1.2M2</a></li>
+                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.2M3.tar.gz">Cayenne 1.2M3</a></li>
 		<li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
 	</ul>
         	</subsection>
         	        	
-	<subsection name="Stable Release: Cayenne 1.1">
+	<subsection name="Stable Release: Cayenne 1.1.1">
         	    <ul>
-                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1.tar.gz">Cayenne 1.1</a></li>
+                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1.1.tar.gz">Cayenne 1.1.1</a></li>
 		<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-1.1B3.tar.gz">Cayenne Examples</a></li>
 	</ul>
         	</subsection>
