@@ -639,13 +639,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
-        if (event.getSource() == this) {
-            logObj.debug("Ignoring snapshot event sent by us: " + event);
+        if (event.getRootSource() == this || event.getSource() == this) {
+            logObj.debug("SnapshotEvent sent by this ObjectStore, ignoring: " + event);
             return;
         }
 
         // merge objects with changes in event...
-        logObj.debug("Processing snapshot event: " + event);
+        logObj.debug("new SnapshotEvent: " + event);
 
         DataRowUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
 

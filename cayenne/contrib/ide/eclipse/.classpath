@@ -26,6 +26,7 @@
     <classpathentry exported="true" kind="lib" path="otherlib/struts-1.0.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/velocity-dep-1.3.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/shiftone-cache-1.1.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/jms-1.0.2b.jar"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry kind="output" path="build/classes"/>
 </classpath>

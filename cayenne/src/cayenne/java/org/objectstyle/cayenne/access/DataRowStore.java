@@ -182,6 +182,7 @@ public class DataRowStore implements Serializable {
                 SnapshotEvent.class,
                 getSnapshotEventSubject(),
                 this);
+                logObj.debug("ObjectStore will listen for events: " + objectStore);
             return true;
         }
         catch (NoSuchMethodException e) {
