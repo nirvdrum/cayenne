@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.parser.ASTDbPath;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -739,42 +738,6 @@ public class EOModelProcessor {
         }
 
         return null;
-    }
-
-    /**
-     * Special DbAttribute subclass that stores extra info needed to work with EOModels.
-     */
-    // TODO: we have all EO-specific subclasses declared as public... Any reason to keep 
-    // this one as an inner class?
-    static class EODbAttribute extends DbAttribute {
-
-        protected String eoAttributeName;
-
-        public static DbAttribute findForEOAttributeName(DbEntity e, String name) {
-            Iterator it = e.getAttributes().iterator();
-            while (it.hasNext()) {
-                EODbAttribute attr = (EODbAttribute) it.next();
-                if (name.equals(attr.getEoAttributeName())) {
-                    return attr;
-                }
-            }
-            return null;
-        }
-
-        public EODbAttribute() {
-        }
-
-        public EODbAttribute(String name, int type, DbEntity entity) {
-            super(name, type, entity);
-        }
-
-        public String getEoAttributeName() {
-            return eoAttributeName;
-        }
-
-        public void setEoAttributeName(String eoAttributeName) {
-            this.eoAttributeName = eoAttributeName;
-        }
     }
 
     // sorts ObjEntities so that subentities in inheritance hierarchy are shown last

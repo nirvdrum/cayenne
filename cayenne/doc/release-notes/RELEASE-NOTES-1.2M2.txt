@@ -31,6 +31,7 @@ Changes:
 
 Bugs Fixed:
 
+CAY-246 ClassCastException on EOModel import with numeric password
 CAY-251 NPE on calling stored proc for SQL Server.
 CAY-259	Error with national characters in DVModeler
 CAY-255	ORA-01000: maximum open cursors exceeded

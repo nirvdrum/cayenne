@@ -61,8 +61,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
@@ -91,17 +89,6 @@ public class EOObjEntity extends ObjEntity {
    
     public EOObjEntity(String s) {
         super(s);
-    }
-    
-    /**
-     * Overrides superimplementation to properly handle horizontal inheritance.
-     * 
-     * @since 1.2
-     */
-    public DbEntity getDbEntity() {
-        return (dbEntityName != null)
-                ? ((MappingNamespace) getParent()).getDbEntity(dbEntityName)
-                : super.getDbEntity();
     }
 
     /**
