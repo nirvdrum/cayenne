@@ -115,9 +115,8 @@ public class ObjEntity extends Entity {
         encoder.print(getName());
 
         if (getSuperEntityName() != null) {
-            encoder.print(" superEntityName=\"");
+            encoder.print("\" superEntityName=\"");
             encoder.print(getSuperEntityName());
-            encoder.print("\"");
         }
 
         if (getClassName() != null) {
@@ -129,22 +128,21 @@ public class ObjEntity extends Entity {
             encoder.print("\" readOnly=\"true");
         }
 
-        encoder.print('\"');
+        if (getDeclaredLockType() == LOCK_TYPE_OPTIMISTIC) {
+            encoder.print("\" lock-type=\"optimistic");
+        }
 
-        // only encode DbEntity if there is no super entity
         if (getSuperEntityName() == null && getDbEntity() != null) {
-            encoder.print(" dbEntityName=\"");
+            encoder.print("\" dbEntityName=\"");
             encoder.print(getDbEntity().getName());
-            encoder.print('\"');
         }
 
-        if (getSuperClassName() != null) {
-            encoder.print(" superClassName=\"");
+        if (getSuperEntityName() == null && getSuperClassName() != null) {
+            encoder.print("\" superClassName=\"");
             encoder.print(getSuperClassName());
-            encoder.print("\"");
         }
 
-        encoder.println('>');
+        encoder.println("\">");
         encoder.indent(1);
 
         if (qualifier != null) {
@@ -153,12 +151,13 @@ public class ObjEntity extends Entity {
             encoder.println("</qualifier>");
         }
 
-        encoder.print(getAttributeMap());
+        // store attributes
+        encoder.print(getDeclaredAttributes());
 
         encoder.indent(-1);
         encoder.println("</obj-entity>");
     }
-    
+
     /**
      * Returns Java class of persistent objects described by this entity.
      * Casts any thrown exceptions into CayenneRuntimeException.
@@ -196,11 +195,31 @@ public class ObjEntity extends Entity {
     }
 
     /**
-     * Returns the type of lock used by this ObjEntity.
+     * Returns the type of lock used by this ObjEntity. If this 
+     * entity is not locked, this method would look in a super entity
+     * recyrsively, until it finds a lock somewhere in the inheritance
+     * hierarchy.
      * 
      * @since 1.1
      */
     public int getLockType() {
+        // if this entity has an explicit lock, 
+        // no need to lookup inheritance hierarchy
+        if (lockType != LOCK_TYPE_NONE) {
+            return lockType;
+        }
+
+        ObjEntity superEntity = getSuperEntity();
+        return (superEntity != null) ? superEntity.getLockType() : lockType;
+    }
+    
+    /**
+     * Returns the type of lock used by this ObjEntity, regardless of
+     * what locking type is used by super entities.
+     * 
+     * @since 1.1
+     */
+    public int getDeclaredLockType() {
         return lockType;
     }
 
@@ -267,25 +286,22 @@ public class ObjEntity extends Entity {
 
     /**
      * Returns a fully-qualified name of the super class of the DataObject class.
-     * This value is used as a hint for class generation.
+     * This value is used as a hint for class generation. If the entity inherits from 
+     * another entity, a superclass is the class of that entity.
      */
     public String getSuperClassName() {
-        return superClassName;
+        ObjEntity superEntity = getSuperEntity();
+        return (superEntity != null) ? superEntity.getClassName() : superClassName;
     }
 
     /**
      * Sets a fully-qualified name of the super class of the DataObject class.
      * This value is used as a hint for class generation.
      * 
-     * <p><i>An attempt to set superclass on an inherited entity would
-     * result in UnsupportedOperationException, since superclass is always
-     * a class of the parent in the inheritance hierarchy.</i></p>
+     * <p><i>An attempt to set superclass on an inherited entity has no effect, since
+     * a class of the super entity is always used as a superclass.</i></p>
      */
     public void setSuperClassName(String superClassName) {
-        if (superEntityName != null) {
-            throw new UnsupportedOperationException("Setting superclass is not allowed in inherited entities.");
-        }
-
         this.superClassName = superClassName;
     }
 
@@ -304,21 +320,17 @@ public class ObjEntity extends Entity {
      * Returns a DbEntity associated with this ObjEntity. 
      */
     public DbEntity getDbEntity() {
-        return (superEntityName != null) ? getSuperEntity().getDbEntity() : dbEntity;
+        ObjEntity superEntity = getSuperEntity();
+        return (superEntity != null) ? superEntity.getDbEntity() : dbEntity;
     }
 
     /** 
      * Sets the DbEntity used by this ObjEntity.
      * 
-     * <p><i>An attempt to set DbEntity on an inherited entity would
-     * result in UnsupportedOperationException, since DbEntity should be
-     * derived from the top of the inheritance hierarchy.</i></p>
+     * <p><i>An attempt to set DbEntity on an inherited entity has no effect, 
+     * since a class of the super entity is always used as a superclass.</i></p>
      */
     public void setDbEntity(DbEntity dbEntity) {
-        if (superEntityName != null) {
-            throw new UnsupportedOperationException("Setting DBEntity is not allowed in inherited entities.");
-        }
-
         this.dbEntity = dbEntity;
     }
 
@@ -379,6 +391,16 @@ public class ObjEntity extends Entity {
     }
 
     /**
+     * Returns a Collection of all attributes that belong to 
+     * this ObjEntity, excluding inherited attributes.
+     * 
+     * @since 1.1
+     */
+    public Collection getDeclaredAttributes() {
+        return super.getAttributes();
+    }
+
+    /**
      * Returns a named Relationship that either belongs to this ObjEntity or is
      * inherited. Returns null if no matching attribute is found.
      */
@@ -424,6 +446,16 @@ public class ObjEntity extends Entity {
         }
 
         return getRelationshipMap().values();
+    }
+
+    /**
+     * Returns a Collection of all relationships that belong to 
+     * this ObjEntity, excluding inherited attributes.
+     * 
+     * @since 1.1
+     */
+    public Collection getDeclaredRelationships() {
+        return super.getRelationships();
     }
 
     /**
@@ -555,6 +587,29 @@ public class ObjEntity extends Entity {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+    }
+
+    /**
+     * Returns true if this entity directly or indirectly inherits
+     * from a given entity, false otherwise.
+     * 
+     * @since 1.1
+     */
+    public boolean isSubentityOf(ObjEntity entity) {
+        if (entity == null) {
+            return false;
+        }
+
+        if (entity == this) {
+            return false;
+        }
+
+        ObjEntity superEntity = getSuperEntity();
+        if (superEntity == entity) {
+            return true;
+        }
+
+        return (superEntity != null) ? superEntity.isSubentityOf(entity) : false;
     }
 
     public Iterator resolvePathComponents(Expression pathExp)

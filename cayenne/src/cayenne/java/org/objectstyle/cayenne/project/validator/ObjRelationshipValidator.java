@@ -81,6 +81,13 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
 
     public void validateObject(ProjectPath path, Validator validator) {
         ObjRelationship rel = (ObjRelationship) path.getObject();
+
+        // skip validation of inherited relationships
+        if (path.getObjectParent() != null
+            && path.getObjectParent() != rel.getSourceEntity()) {
+            return;
+        }
+
         if (Util.isEmptyString(rel.getName())) {
             validator.registerError("Unnamed ObjRelationship.", path);
         }
@@ -92,7 +99,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
         }
 
         if (rel.getTargetEntity() == null) {
-            validator.registerError("ObjRelationship has no target entity.", path);
+            validator.registerWarning("ObjRelationship has no target entity.", path);
         }
         else {
             // check for missing DbRelationship mappings

@@ -56,10 +56,11 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -68,6 +69,7 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * Model for the Object Entity attributes and for Obj to 
@@ -78,172 +80,207 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class ObjAttributeTableModel extends CayenneTableModel {
-	// Columns
-	static final int OBJ_ATTRIBUTE = 0;
-	static final int OBJ_ATTRIBUTE_TYPE = 1;
-	static final int DB_ATTRIBUTE = 2;
-	static final int DB_ATTRIBUTE_TYPE = 3;
+    // Columns
+    static final int OBJ_ATTRIBUTE = 0;
+    static final int OBJ_ATTRIBUTE_TYPE = 1;
+    static final int DB_ATTRIBUTE = 2;
+    static final int DB_ATTRIBUTE_TYPE = 3;
+    static final int LOCKING = 4;
 
-	static final Logger logObj =
-		Logger.getLogger(ObjAttributeTableModel.class);
+    static final Logger logObj = Logger.getLogger(ObjAttributeTableModel.class);
 
-	protected ObjEntity entity;
-	protected DbEntity dbEntity;
+    protected ObjEntity entity;
+    protected DbEntity dbEntity;
 
-	public ObjAttributeTableModel(
-			ObjEntity entity,
-			EventController mediator,
-			Object eventSource) {
-		super(mediator, eventSource, new ArrayList(entity.getAttributes())); // take a copy
-		this.entity = entity;
-		this.dbEntity = entity.getDbEntity();
-	}
+    public ObjAttributeTableModel(
+        ObjEntity entity,
+        EventController mediator,
+        Object eventSource) {
+        super(mediator, eventSource, new ArrayList(entity.getAttributes()));
+        // take a copy
+        this.entity = entity;
+        this.dbEntity = entity.getDbEntity();
 
-	/**
-	 * Returns ObjAttribute class.
-	 */
-	public Class getElementsClass() {
-		return ObjAttribute.class;
-	}
+        // order using local comparator
+        Collections.sort(objectList, new AttributeComparator());
+    }
 
-	public DbEntity getDbEntity() {
-		return dbEntity;
-	}
+    protected void orderList() {
+        // NOOP
+    }
 
-	public ObjAttribute getAttribute(int row) {
-		return (row >= 0 && row < objectList.size())
-			? (ObjAttribute) objectList.get(row)
-			: null;
-	}
+    public Class getColumnClass(int col) {
+        switch (col) {
+            case LOCKING :
+                return Boolean.class;
+            default :
+                return String.class;
+        }
+    }
 
-	/** Refreshes DbEntity to current db entity within ObjEntity.*/
-	public void resetDbEntity() {
-		if (dbEntity == entity.getDbEntity()) {
-			return;
-		}
+    /**
+     * Returns ObjAttribute class.
+     */
+    public Class getElementsClass() {
+        return ObjAttribute.class;
+    }
 
-		boolean wasShowing = isShowingDb();
-		dbEntity = entity.getDbEntity();
-		boolean isShowing = isShowingDb();
+    public DbEntity getDbEntity() {
+        return dbEntity;
+    }
 
-		if (wasShowing != isShowing) {
-			fireTableStructureChanged();
-		}
+    public ObjAttribute getAttribute(int row) {
+        return (row >= 0 && row < objectList.size())
+            ? (ObjAttribute) objectList.get(row)
+            : null;
+    }
 
-		fireTableDataChanged();
-	}
+    /** Refreshes DbEntity to current db entity within ObjEntity.*/
+    public void resetDbEntity() {
+        if (dbEntity == entity.getDbEntity()) {
+            return;
+        }
 
-	public boolean isShowingDb() {
-		return dbEntity != null;
-	}
+        boolean wasShowing = isShowingDb();
+        dbEntity = entity.getDbEntity();
+        boolean isShowing = isShowingDb();
 
-	public int getColumnCount() {
-		// If showing only obj attributes, show 2 columns 
-		// otherwise show 5 additional columns (7 total) for Db Attributes.
-		return (isShowingDb()) ? 4 : 2;
-	}
+        if (wasShowing != isShowing) {
+            fireTableStructureChanged();
+        }
 
-	public String getColumnName(int column) {
-		if (column == OBJ_ATTRIBUTE)
-			return "Obj Attribute";
-		else if (column == OBJ_ATTRIBUTE_TYPE)
-			return "Type";
-		else if (column == DB_ATTRIBUTE)
-			return "Db Attribute";
-		else if (column == DB_ATTRIBUTE_TYPE)
-			return "Type";
-		else
-			return "";
-	}
+        fireTableDataChanged();
+    }
 
-	public Object getValueAt(int row, int column) {
-		ObjAttribute attrib = getAttribute(row);
+    private boolean isShowingDb() {
+        return dbEntity != null;
+    }
 
-		// If name column
-		if (column == OBJ_ATTRIBUTE) {
-			return attrib.getName();
-		}
-		// If type column
-		else if (column == OBJ_ATTRIBUTE_TYPE) {
-			return attrib.getType();
-		} else {
-			DbAttribute db_attrib = attrib.getDbAttribute();
-			if (null == db_attrib)
-				return null;
-			else if (column == DB_ATTRIBUTE)
-				return db_attrib.getName();
-			else if (column == DB_ATTRIBUTE_TYPE) {
-				return TypesMapping.getSqlNameByType(db_attrib.getType());
-			}
-		}
-		return "";
-	}
+    public int getColumnCount() {
+        return 5;
+    }
 
-	public void setUpdatedValueAt(Object aValue, int row, int column) {
-		
-		ObjAttribute attrib = getAttribute(row);
-		String text = (aValue != null) ? ((String) aValue).trim() : "";
+    public String getColumnName(int column) {
+        switch (column) {
+            case OBJ_ATTRIBUTE :
+                return "ObjAttribute";
+            case OBJ_ATTRIBUTE_TYPE :
+                return "Java Type";
+            case DB_ATTRIBUTE :
+                return "DbAttribute";
+            case DB_ATTRIBUTE_TYPE :
+                return "DB Type";
+            case LOCKING :
+                return "Used for Locking";
+            default :
+                return "";
+        }
+    }
 
-		// If "Obj Name" column
-		if (column == OBJ_ATTRIBUTE) {
-			String old_name = attrib.getName();
-			MapUtil.setAttributeName(attrib, text);
-			AttributeEvent e =
-				new AttributeEvent(eventSource, attrib, entity, old_name);
-			mediator.fireObjAttributeEvent(e);
-			fireTableCellUpdated(row, column);
-		}
-		// If Obj "Type" column
-		else if (column == OBJ_ATTRIBUTE_TYPE) {
+    public Object getValueAt(int row, int column) {
+        ObjAttribute attribute = getAttribute(row);
 
-			String type = (text.length() == 0) ? null : text;
-			attrib.setType(type);
-			mediator.fireObjAttributeEvent(
-				new AttributeEvent(
-					eventSource,
-					attrib,
-					entity,
-					AttributeEvent.CHANGE));
-			fireTableCellUpdated(row, column);
-		} else {
-			DbAttribute db_attrib = attrib.getDbAttribute();
-			if (column == DB_ATTRIBUTE) {
-				// If db attrib exist, associate it with obj attribute
-				if (text.length() > 0) {
-					db_attrib = (DbAttribute) dbEntity.getAttribute(text);
-					attrib.setDbAttribute(db_attrib);
-				}
-				// If name is erased, remove db attribute from obj attribute.
-				else if (db_attrib != null && text.length() == 0) {
-					attrib.setDbAttribute(null);
-				}
-			} else {
-				return;
-			}
-			fireTableRowsUpdated(row, row);
-		}
-		AttributeEvent ev = new AttributeEvent(eventSource, attrib, entity);
-		mediator.fireObjAttributeEvent(ev);
-	}
+        if (column == OBJ_ATTRIBUTE) {
+            return attribute.getName();
+        }
+        else if (column == OBJ_ATTRIBUTE_TYPE) {
+            return attribute.getType();
+        }
+        else if (column == LOCKING) {
+            return attribute.isUsedForLocking() ? Boolean.TRUE : Boolean.FALSE;
+        }
+        else {
+            DbAttribute dbAttribute = attribute.getDbAttribute();
+            if (dbAttribute == null) {
+                return null;
+            }
+            else if (column == DB_ATTRIBUTE)
+                return dbAttribute.getName();
+            else if (column == DB_ATTRIBUTE_TYPE) {
+                return TypesMapping.getSqlNameByType(dbAttribute.getType());
+            }
+            else {
+                return null;
+            }
+        }
+    }
 
-	/** Attribute just needs to be removed from the model. 
-	 *  It is already removed from the DataMap. */
-	public void removeAttribute(Attribute attrib) {
-		objectList.remove(attrib);
-		fireTableDataChanged();
-	}
+    public void setUpdatedValueAt(Object value, int row, int column) {
 
-	public boolean isCellEditable(int row, int col) {
-		// Check if allow obj editing
-		if (col == OBJ_ATTRIBUTE || col == OBJ_ATTRIBUTE_TYPE)
-			return true;
-		else {
-			// Allow choosing different db attributes
-			if (col == DB_ATTRIBUTE)
-				return true;
-			// Don't allow editing db attribute parameters
-			else
-				return false;
-		}
-	}
+        ObjAttribute attribute = getAttribute(row);
+        AttributeEvent event = new AttributeEvent(eventSource, attribute, entity);
+
+        if (column == OBJ_ATTRIBUTE) {
+            event.setOldName(attribute.getName());
+            MapUtil.setAttributeName(
+                attribute,
+                value != null ? value.toString().trim() : null);
+            fireTableCellUpdated(row, column);
+        }
+        else if (column == OBJ_ATTRIBUTE_TYPE) {
+            attribute.setType(value != null ? value.toString() : null);
+            fireTableCellUpdated(row, column);
+        }
+        else if (column == LOCKING) {
+            attribute.setUsedForLocking(
+                (value instanceof Boolean) && ((Boolean) value).booleanValue());
+            fireTableCellUpdated(row, column);
+        }
+        else {
+            DbAttribute dbAttribute = attribute.getDbAttribute();
+            if (column == DB_ATTRIBUTE) {
+                // If db attrib exist, associate it with obj attribute
+                if (value != null) {
+                    dbAttribute = (DbAttribute) dbEntity.getAttribute(value.toString());
+                    attribute.setDbAttribute(dbAttribute);
+                }
+                // If name is erased, remove db attribute from obj attribute.
+                else if (dbAttribute != null) {
+                    attribute.setDbAttribute(null);
+                }
+            }
+
+            fireTableRowsUpdated(row, row);
+        }
+
+        mediator.fireObjAttributeEvent(event);
+    }
+
+    private boolean isInherited(int row) {
+        ObjAttribute attribute = getAttribute(row);
+        return (attribute != null) ? attribute.getEntity() != entity : false;
+    }
+
+    public boolean isCellEditable(int row, int col) {
+        if (isInherited(row)) {
+            return false;
+        }
+
+        if (dbEntity == null) {
+            return col != DB_ATTRIBUTE_TYPE && col != DB_ATTRIBUTE;
+        }
+
+        return col != DB_ATTRIBUTE_TYPE;
+    }
+
+    public ObjEntity getEntity() {
+        return entity;
+    }
+
+    final class AttributeComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            ObjAttribute a1 = (ObjAttribute) o1;
+            ObjAttribute a2 = (ObjAttribute) o2;
+
+            int delta = getWeight(a1) - getWeight(a2);
+
+            return (delta != 0)
+                ? delta
+                : Util.nullSafeCompare(true, a1.getName(), a2.getName());
+        }
+
+        private int getWeight(ObjAttribute a) {
+            return a.getEntity() == entity ? 1 : -1;
+        }
+    }
 }

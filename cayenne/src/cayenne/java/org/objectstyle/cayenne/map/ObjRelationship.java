@@ -97,23 +97,23 @@ public class ObjRelationship extends Relationship implements EventListener {
     private List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
 
     public ObjRelationship() {
-        super();
     }
 
     public ObjRelationship(String name) {
         super(name);
     }
 
+    /**
+     * @deprecated Since 1.1. To-many is derived, so use ObjRelationship(ObjEntity, ObjEntity)
+     */
     public ObjRelationship(ObjEntity source, ObjEntity target, boolean toMany) {
-        this();
+        this(null, source, target);
+    }
+
+    public ObjRelationship(String name, ObjEntity source, ObjEntity target) {
+        super(name);
         this.setSourceEntity(source);
         this.setTargetEntity(target);
-        if (toMany) {
-            this.setName(target.getName() + "Array");
-        }
-        else {
-            this.setName("to" + target.getName());
-        }
     }
 
     /**
@@ -129,16 +129,17 @@ public class ObjRelationship extends Relationship implements EventListener {
             return;
         }
 
-        ObjEntity target = (ObjEntity) getTargetEntity();
-        if (target == null) {
-            logObj.warn("No target entity, will not encode ObjRelationship " + getName());
-            return;
-        }
-
         encoder.print("<obj-relationship name=\"" + getName() + '\"');
         encoder.print(" source=\"" + source.getName() + '\"');
-        encoder.print(" target=\"" + target.getName() + '\"');
-        encoder.print(" toMany=\"" + isToMany() + '\"');
+
+        ObjEntity target = (ObjEntity) getTargetEntity();
+        if (target != null) {
+            encoder.print(" target=\"" + target.getName() + '\"');
+        }
+
+        if (isUsedForLocking()) {
+            encoder.print(" lock=\"true\"");
+        }
 
         String deleteRule = DeleteRule.deleteRuleName(getDeleteRule());
         if (getDeleteRule() != DeleteRule.NO_ACTION && deleteRule != null) {

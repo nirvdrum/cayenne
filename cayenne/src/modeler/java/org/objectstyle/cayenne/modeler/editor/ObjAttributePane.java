@@ -56,12 +56,16 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -92,28 +96,36 @@ public class ObjAttributePane
         ObjEntityDisplayListener,
         ObjEntityListener,
         ObjAttributeListener,
-        ExistingSelectionProcessor,
-        ListSelectionListener {
-        	
+        ExistingSelectionProcessor {
+
     protected EventController mediator;
     protected CayenneTable table;
 
     public ObjAttributePane(EventController mediator) {
-        super();
         this.mediator = mediator;
+
+        init();
+        initController();
+    }
+
+    private void init() {
+        table = new CayenneTable();
+        table.setDefaultRenderer(String.class, new CellRenderer());
+
+        setLayout(new BorderLayout());
+        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
+    }
+
+    private void initController() {
         mediator.addObjEntityDisplayListener(this);
         mediator.addObjEntityListener(this);
         mediator.addObjAttributeListener(this);
 
-        // Create and layout components
-        init();
-    }
-
-    private void init() {
-        setLayout(new BorderLayout());
-        // Create table with two columns and no rows.
-        table = new CayenneTable();
-        add(PanelFactory.createTablePanel(table, null), BorderLayout.CENTER);
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                processExistingSelection();
+            }
+        });
     }
 
     /**
@@ -150,10 +162,6 @@ public class ObjAttributePane
                 mediator.getCurrentDataDomain());
 
         mediator.fireObjAttributeDisplayEvent(ev);
-    }
-
-    public void valueChanged(ListSelectionEvent e) {
-        processExistingSelection();
     }
 
     public void objAttributeChanged(AttributeEvent e) {
@@ -193,42 +201,47 @@ public class ObjAttributePane
         table.setModel(model);
         table.setRowHeight(25);
         table.setRowMargin(3);
-        setUpTableStructure(model, ent);
-        table.getSelectionModel().addListSelectionListener(this);
+        setUpTableStructure(model);
     }
 
-    protected void setUpTableStructure(ObjAttributeTableModel model, ObjEntity entity) {
-
-        TableColumn col =
+    protected void setUpTableStructure(ObjAttributeTableModel model) {
+        TableColumn nameColumn =
             table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE);
-        col.setMinWidth(150);
-        col = table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
-        col.setMinWidth(150);
+        nameColumn.setMinWidth(150);
 
-        JComboBox combo =
+        TableColumn typeColumn =
+            table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
+        typeColumn.setMinWidth(150);
+
+        JComboBox javaTypesCombo =
             CayenneWidgetFactory.createComboBox(
                 ModelerUtil.getRegisteredTypeNames(),
                 false);
-        combo.setEditable(true);
-        col.setCellEditor(new DefaultCellEditor(combo));
+        javaTypesCombo.setEditable(true);
+        typeColumn.setCellEditor(new DefaultCellEditor(javaTypesCombo));
 
-        // If DbEntity is specified, display Database info as well.
-        if (entity.getDbEntity() != null) {
-            col = table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE);
-            col.setMinWidth(150);
-            combo =
+        TableColumn lockColumn =
+            table.getColumnModel().getColumn(ObjAttributeTableModel.LOCKING);
+        lockColumn.setMinWidth(100);
+
+        TableColumn dbTypeColumn =
+            table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE_TYPE);
+        dbTypeColumn.setMinWidth(120);
+
+        TableColumn dbNameColumn =
+            table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE);
+        dbNameColumn.setMinWidth(150);
+
+        if (model.getEntity().getDbEntity() != null) {
+            JComboBox dbAttributesCombo =
                 CayenneWidgetFactory.createComboBox(
                     ModelerUtil.getDbAttributeNames(
                         mediator,
                         mediator.getCurrentObjEntity().getDbEntity()),
                     true);
-                    
-            combo.setEditable(false);
-            col.setCellEditor(new DefaultCellEditor(combo));
-            col =
-                table.getColumnModel().getColumn(
-                    ObjAttributeTableModel.DB_ATTRIBUTE_TYPE);
-            col.setMinWidth(120);
+
+            dbAttributesCombo.setEditable(false);
+            dbNameColumn.setCellEditor(new DefaultCellEditor(dbAttributesCombo));
         }
     }
 
@@ -243,7 +256,7 @@ public class ObjAttributePane
         ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         if (model.getDbEntity() != ((ObjEntity) e.getEntity()).getDbEntity()) {
             model.resetDbEntity();
-            setUpTableStructure(model, (ObjEntity) e.getEntity());
+            setUpTableStructure(model);
         }
     }
 
@@ -253,4 +266,34 @@ public class ObjAttributePane
     public void objEntityRemoved(EntityEvent e) {
     }
 
+    final class CellRenderer extends DefaultTableCellRenderer {
+
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
+
+            super.getTableCellRendererComponent(
+                table,
+                value,
+                isSelected,
+                hasFocus,
+                row,
+                column);
+
+            ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
+            ObjAttribute attribute = model.getAttribute(row);
+
+            Color foreground =
+                (attribute != null && attribute.getEntity() != model.getEntity())
+                    ? Color.GRAY
+                    : Color.BLACK;
+            setForeground(foreground);
+
+            return this;
+        }
+    }
 }

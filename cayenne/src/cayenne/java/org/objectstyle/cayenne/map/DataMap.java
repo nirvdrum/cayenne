@@ -215,8 +215,8 @@ public class DataMap implements XMLSerializable {
 
         // others...
         encoder.print(getObjEntityMap());
-        encodeRelationshipsAsXML(getDbEntityMap(), encoder);
-        encodeRelationshipsAsXML(getObjEntityMap(), encoder);
+        encodeDBRelationshipsAsXML(getDbEntityMap(), encoder);
+        encodeOBJRelationshipsAsXML(getObjEntityMap(), encoder);
         encoder.print(getQueryMap());
 
         encoder.indent(-1);
@@ -224,12 +224,22 @@ public class DataMap implements XMLSerializable {
     }
 
     // stores relationships of for the map of entities
-    private final void encodeRelationshipsAsXML(Map entityMap, XMLEncoder encoder) {
+    private final void encodeDBRelationshipsAsXML(Map entityMap, XMLEncoder encoder) {
         Iterator it = entityMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             Entity entity = (Entity) entry.getValue();
-            encoder.print(entity.getRelationshipMap());
+            encoder.print(entity.getRelationships());
+        }
+    }
+
+    // stores relationships of for the map of entities
+    private final void encodeOBJRelationshipsAsXML(Map entityMap, XMLEncoder encoder) {
+        Iterator it = entityMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            ObjEntity entity = (ObjEntity) entry.getValue();
+            encoder.print(entity.getDeclaredRelationships());
         }
     }
 

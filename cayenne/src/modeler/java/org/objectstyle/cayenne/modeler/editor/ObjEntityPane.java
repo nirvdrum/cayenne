@@ -70,10 +70,13 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.EventController;
@@ -84,6 +87,7 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -100,14 +104,21 @@ public class ObjEntityPane
 
     private static Logger logObj = Logger.getLogger(ObjEntityPane.class);
 
+    private static final Object noInheritance =
+        new MapObject("Direct Mapping to Table/View") {
+        public void encodeAsXML(XMLEncoder encoder) {
+        }
+    };
+
     protected EventController mediator;
     protected JTextField name;
     protected JTextField className;
     protected JTextField superClassName;
-    protected JPanel dbPane;
-    protected JComboBox dbName;
+    protected JComboBox dbEntityCombo;
+    protected JComboBox superEntityCombo;
     protected JButton tableLabel;
     protected JCheckBox readOnly;
+    protected JCheckBox optimisticLocking;
 
     public ObjEntityPane(EventController mediator) {
         this.mediator = mediator;
@@ -120,11 +131,17 @@ public class ObjEntityPane
         name = CayenneWidgetFactory.createTextField();
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
-        dbName = CayenneWidgetFactory.createComboBox();
-        dbName.setRenderer(CellRenderers.listRendererWithIcons());
+
+        dbEntityCombo = CayenneWidgetFactory.createComboBox();
+        dbEntityCombo.setRenderer(CellRenderers.listRendererWithIcons());
+
+        superEntityCombo = CayenneWidgetFactory.createComboBox();
+        superEntityCombo.setRenderer(CellRenderers.listRendererWithIcons());
 
         readOnly = new JCheckBox();
-        tableLabel = CayenneWidgetFactory.createLabelButton("Table name:");
+        optimisticLocking = new JCheckBox();
+
+        tableLabel = CayenneWidgetFactory.createLabelButton("Table/View:");
 
         // assemble
         setLayout(new BorderLayout());
@@ -135,10 +152,15 @@ public class ObjEntityPane
 
         builder.appendSeparator("ObjEntity Configuration");
         builder.append("ObjEntity Name:", name);
+        builder.append("Inheritance:", superEntityCombo);
+        builder.append(tableLabel, dbEntityCombo);
+
+        builder.appendSeparator();
+
         builder.append("Java Class:", className);
         builder.append("Superclass:", superClassName);
-        builder.append(tableLabel, dbName);
-        builder.append("Read-only:", readOnly);
+        builder.append("Read-Only:", readOnly);
+        builder.append("Optimistic Locking:", optimisticLocking);
 
         add(builder.getPanel(), BorderLayout.CENTER);
     }
@@ -152,12 +174,38 @@ public class ObjEntityPane
         className.setInputVerifier(inputCheck);
         superClassName.setInputVerifier(inputCheck);
 
-        dbName.addActionListener(new ActionListener() {
+        dbEntityCombo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Change DbEntity for current ObjEntity
                 ObjEntity entity = mediator.getCurrentObjEntity();
-                entity.setDbEntity((DbEntity) dbName.getSelectedItem());
-                mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                DbEntity dbEntity = (DbEntity) dbEntityCombo.getSelectedItem();
+
+                if (dbEntity != entity.getDbEntity()) {
+                    entity.setDbEntity(dbEntity);
+                    mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                }
+            }
+        });
+
+        superEntityCombo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Change super-entity
+                MapObject superEntity = (MapObject) superEntityCombo.getSelectedItem();
+                String name =
+                    (superEntity == noInheritance) ? null : superEntity.getName();
+
+                ObjEntity entity = mediator.getCurrentObjEntity();
+
+                if (!Util.nullSafeEquals(name, entity.getSuperEntityName())) {
+                    entity.setSuperEntityName(name);
+
+                    // if a super-entity selected, disable table selection
+                    // and also update parent DbEntity selection...
+                    activateFields(name == null);
+                    dbEntityCombo.getModel().setSelectedItem(entity.getDbEntity());
+                    superClassName.setText(entity.getSuperClassName());
+                    mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                }
             }
         });
 
@@ -183,26 +231,83 @@ public class ObjEntityPane
                 }
             }
         });
+
+        optimisticLocking.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ObjEntity entity = mediator.getCurrentObjEntity();
+                if (entity != null) {
+                    entity.setLockType(
+                        optimisticLocking.isSelected()
+                            ? ObjEntity.LOCK_TYPE_OPTIMISTIC
+                            : ObjEntity.LOCK_TYPE_NONE);
+                    mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                }
+            }
+        });
     }
 
     /**
      * Updates the view from the current model state.
      * Invoked when a currently displayed ObjEntity is changed.
      */
-    private void initFromModel(ObjEntity entity) {
+    private void initFromModel(final ObjEntity entity) {
         name.setText(entity.getName());
         superClassName.setText(
             entity.getSuperClassName() != null ? entity.getSuperClassName() : "");
         className.setText(entity.getClassName() != null ? entity.getClassName() : "");
         readOnly.setSelected(entity.isReadOnly());
 
-        DataMap map = mediator.getCurrentDataMap();
-        Object[] entities = map.getDbEntities().toArray();
-        Arrays.sort(entities, Comparators.getDataMapChildrenComparator());
+        // TODO: fix inheritance - we should allow to select optimistic
+        // lock if superclass is not already locked, 
+        // otherwise we must keep this checked in but not editable.
+        optimisticLocking.setSelected(
+            entity.getDeclaredLockType() == ObjEntity.LOCK_TYPE_OPTIMISTIC);
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(entities);
-        model.setSelectedItem(entity.getDbEntity());
-        dbName.setModel(model);
+        // init DbEntities 
+        DataMap map = mediator.getCurrentDataMap();
+        Object[] dbEntities = map.getDbEntities().toArray();
+        Arrays.sort(dbEntities, Comparators.getDataMapChildrenComparator());
+
+        DefaultComboBoxModel dbModel = new DefaultComboBoxModel(dbEntities);
+        dbModel.setSelectedItem(entity.getDbEntity());
+        dbEntityCombo.setModel(dbModel);
+
+        // if a super-entity selected, disable table selection
+        activateFields(entity.getSuperEntityName() == null);
+
+        // init ObjEntities for inheritance
+        Predicate inheritanceFilter = new Predicate() {
+            public boolean evaluate(Object object) {
+                    // do not show this entity or any of the subentities
+    if (entity == object) {
+                    return false;
+                }
+
+                if (object instanceof ObjEntity) {
+                    return !((ObjEntity) object).isSubentityOf(entity);
+                }
+
+                return false;
+            }
+        };
+
+        Object[] objEntities =
+            CollectionUtils.select(map.getObjEntities(), inheritanceFilter).toArray();
+        Arrays.sort(objEntities, Comparators.getDataMapChildrenComparator());
+        Object[] finalObjEntities = new Object[objEntities.length + 1];
+        finalObjEntities[0] = noInheritance;
+        System.arraycopy(objEntities, 0, finalObjEntities, 1, objEntities.length);
+
+        DefaultComboBoxModel superEntityModel =
+            new DefaultComboBoxModel(finalObjEntities);
+        superEntityModel.setSelectedItem(entity.getSuperEntity());
+        superEntityCombo.setModel(superEntityModel);
+    }
+
+    private void activateFields(boolean active) {
+        superClassName.setEnabled(active);
+        superClassName.setEditable(active);
+        dbEntityCombo.setEnabled(active);
     }
 
     public void processExistingSelection() {
@@ -284,7 +389,7 @@ public class ObjEntityPane
 
             return true;
         }
-        
+
         protected boolean verifySuperClassName() {
             String parentClassText = superClassName.getText();
             if (parentClassText != null && parentClassText.trim().length() == 0) {
@@ -293,7 +398,8 @@ public class ObjEntityPane
 
             ObjEntity ent = mediator.getCurrentObjEntity();
 
-            if (ent != null && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
+            if (ent != null
+                && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
                 ent.setSuperClassName(parentClassText);
                 mediator.fireObjEntityEvent(new EntityEvent(this, ent));
             }

@@ -121,8 +121,8 @@ public class EditorView
     protected DataDomainDetailView domainView;
     protected DataNodeDetailView nodeView;
     protected DataMapDetailView dataMapView;
-    protected ObjDetailView objDetailView;
-    protected DbDetailView dbDetailView;
+    protected ObjEntityEditorView objDetailView;
+    protected DbEntityEditorView dbDetailView;
     protected ProcedureDetailView procedureView;
     protected QueryDetailView queryView;
 
@@ -170,10 +170,10 @@ public class EditorView
         queryView = new QueryDetailView(eventController);
         addPanelToDetailView(new JScrollPane(queryView), QUERY_VIEW);
         
-        objDetailView = new ObjDetailView(eventController);
+        objDetailView = new ObjEntityEditorView(eventController);
         addPanelToDetailView(objDetailView, OBJ_VIEW);
         
-        dbDetailView = new DbDetailView(eventController);
+        dbDetailView = new DbEntityEditorView(eventController);
         addPanelToDetailView(dbDetailView, DB_VIEW);
 
 		eventController.addDomainDisplayListener(this);

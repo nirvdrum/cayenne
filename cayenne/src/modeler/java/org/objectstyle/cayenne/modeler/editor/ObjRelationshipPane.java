@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -66,10 +68,12 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.DataMap;
@@ -100,13 +104,10 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
 public class ObjRelationshipPane
     extends JPanel
     implements
-        ActionListener,
         ObjEntityDisplayListener,
         ObjEntityListener,
         ObjRelationshipListener,
-        ExistingSelectionProcessor,
-        ListSelectionListener,
-        TableModelListener {
+        ExistingSelectionProcessor {
 
     private static final Object[] deleteRules =
         new Object[] {
@@ -121,46 +122,53 @@ public class ObjRelationshipPane
     CayenneTable table;
     JButton resolve;
 
-    public ObjRelationshipPane(EventController temp_mediator) {
-        super();
-        mediator = temp_mediator;
-        mediator.addObjEntityDisplayListener(this);
-        mediator.addObjEntityListener(this);
-        mediator.addObjRelationshipListener(this);
-        // Set up graphical components
+    public ObjRelationshipPane(EventController mediator) {
+        this.mediator = mediator;
+
         init();
-        // Add listeners		
-        resolve.addActionListener(this);
+        initController();
     }
 
     private void init() {
-        this.setLayout(new BorderLayout());
         table = new CayenneTable();
+        table.setDefaultRenderer(String.class, new CellRenderer());
+
         resolve = new JButton("Edit Relationship");
+
         JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
+
+        this.setLayout(new BorderLayout());
         add(panel, BorderLayout.CENTER);
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == resolve) {
-            resolveRelationship();
-        }
-    }
+    private void initController() {
+        mediator.addObjEntityDisplayListener(this);
+        mediator.addObjEntityListener(this);
+        mediator.addObjRelationshipListener(this);
 
-    public void tableChanged(TableModelEvent e) {
-        ObjRelationship rel = null;
-        if (table.getSelectedRow() >= 0) {
-            ObjRelationshipTableModel model;
-            model = (ObjRelationshipTableModel) table.getModel();
-            rel = model.getRelationship(table.getSelectedRow());
-            if (rel.getTargetEntity() != null
-                && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
-                && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
-                resolve.setEnabled(true);
+        resolve.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    return;
+                }
+
+                ObjRelationshipTableModel model =
+                    (ObjRelationshipTableModel) table.getModel();
+                new ObjRelationshipInfoController(mediator, model.getRelationship(row))
+                    .startup();
+
+                // need to refresh selected row... do this by unselecting/selecting the row
+                table.getSelectionModel().clearSelection();
+                table.select(row);
             }
-            else
-                resolve.setEnabled(false);
-        }
+        });
+
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                processExistingSelection();
+            }
+        });
     }
 
     /**
@@ -207,24 +215,6 @@ public class ObjRelationshipPane
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain());
         mediator.fireObjRelationshipDisplayEvent(ev);
-    }
-
-    public void valueChanged(ListSelectionEvent e) {
-        processExistingSelection();
-    }
-
-    private void resolveRelationship() {
-        int row = table.getSelectedRow();
-        if (row < 0) {
-            return;
-        }
-
-        ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
-        new ObjRelationshipInfoController(mediator, model.getRelationship(row)).startup();
-
-        // need to refresh selected row... do this by unselecting/selecting the row
-        table.getSelectionModel().clearSelection();
-        table.select(row);
     }
 
     /** Loads obj relationships into table. */
@@ -283,7 +273,7 @@ public class ObjRelationshipPane
     public void objRelationshipRemoved(RelationshipEvent e) {
         ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
         int ind = model.getObjectList().indexOf(e.getRelationship());
-        model.removeRelationship(e.getRelationship());
+        model.removeRow(e.getRelationship());
         table.select(ind);
     }
 
@@ -309,12 +299,31 @@ public class ObjRelationshipPane
     }
 
     protected void rebuildTable(ObjEntity ent) {
-        ObjRelationshipTableModel model =
+        final ObjRelationshipTableModel model =
             new ObjRelationshipTableModel(ent, mediator, this);
-        model.addTableModelListener(this);
+
+        model.addTableModelListener(new TableModelListener() {
+            public void tableChanged(TableModelEvent e) {
+                if (table.getSelectedRow() >= 0) {
+                    ObjRelationship rel = model.getRelationship(table.getSelectedRow());
+                    if (rel.getTargetEntity() != null
+                        && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
+                        && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
+                        resolve.setEnabled(true);
+                    }
+                    else
+                        resolve.setEnabled(false);
+                }
+            }
+        });
+
         table.setModel(model);
         table.setRowHeight(25);
         table.setRowMargin(3);
+
+        TableColumn lockColumn =
+            table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_LOCKING);
+        lockColumn.setMinWidth(100);
 
         TableColumn col =
             table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_NAME);
@@ -332,7 +341,6 @@ public class ObjRelationshipPane
 
         col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_CARDINALITY);
         col.setMinWidth(150);
-        table.getSelectionModel().addListSelectionListener(this);
 
         col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
         col.setMinWidth(60);
@@ -342,5 +350,38 @@ public class ObjRelationshipPane
         editor = new DefaultCellEditor(combo);
         editor.setClickCountToStart(1);
         col.setCellEditor(editor);
+    }
+
+    final class CellRenderer extends DefaultTableCellRenderer {
+
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
+
+            super.getTableCellRendererComponent(
+                table,
+                value,
+                isSelected,
+                hasFocus,
+                row,
+                column);
+
+            ObjRelationshipTableModel model =
+                (ObjRelationshipTableModel) table.getModel();
+            ObjRelationship relationship = model.getRelationship(row);
+
+            Color foreground =
+                (relationship != null
+                    && relationship.getSourceEntity() != model.getEntity())
+                    ? Color.GRAY
+                    : Color.BLACK;
+            setForeground(foreground);
+
+            return this;
+        }
     }
 }

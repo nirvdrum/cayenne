@@ -65,106 +65,119 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 
-public class DbDetailView
+/** 
+ * Tabbed ObjEntity editor panel.
+ * 
+ * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class ObjEntityEditorView
     extends JPanel
     implements
-        ChangeListener,
-        DbEntityDisplayListener,
-        DbRelationshipDisplayListener,
-        DbAttributeDisplayListener {
+        ObjEntityDisplayListener,
+        ObjRelationshipDisplayListener,
+        ObjAttributeDisplayListener {
 
     protected EventController mediator;
     protected JTabbedPane tab;
-    protected DbEntityPane entityPanel;
-    protected DbAttributePane attributesPanel;
-    protected DbRelationshipPane relationshipsPanel;
+    protected ObjRelationshipPane relationshipsPanel;
+    protected ObjAttributePane attributesPanel;
 
-    public DbDetailView(EventController mediator) {
-        super();
+    public ObjEntityEditorView(EventController mediator) {
         this.mediator = mediator;
-        mediator.addDbEntityDisplayListener(this);
-        mediator.addDbAttributeDisplayListener(this);
-        mediator.addDbRelationshipDisplayListener(this);
 
-        setLayout(new BorderLayout());
+        initView();
+        initController();
+    }
+
+    private void initView() {
         tab = new JTabbedPane();
         tab.setTabPlacement(JTabbedPane.TOP);
-        add(tab, BorderLayout.CENTER);
-        
+
         // add panels to tabs
         // note that those panels that have no internal scrollable tables 
         // must be wrapped in a scroll pane
-        
-        entityPanel = new DbEntityPane(mediator);
+
+        ObjEntityPane entityPanel = new ObjEntityPane(mediator);
         tab.addTab("Entity", new JScrollPane(entityPanel));
-        attributesPanel = new DbAttributePane(mediator);
+
+        attributesPanel = new ObjAttributePane(mediator);
         tab.addTab("Attributes", attributesPanel);
-        relationshipsPanel = new DbRelationshipPane(mediator);
+        relationshipsPanel = new ObjRelationshipPane(mediator);
         tab.addTab("Relationships", relationshipsPanel);
 
-        tab.addChangeListener(this);
+        setLayout(new BorderLayout());
+        add(tab, BorderLayout.CENTER);
     }
 
-    /** Handle focus when tab changes. */
-    public void stateChanged(ChangeEvent e) {
-        // find source view
-        Component selected = tab.getSelectedComponent();
-        while (selected instanceof JScrollPane) {
-			selected = ((JScrollPane)selected).getViewport().getView();
-        }
+    private void initController() {
+        mediator.addObjEntityDisplayListener(this);
+        mediator.addObjAttributeDisplayListener(this);
+        mediator.addObjRelationshipDisplayListener(this);
 
-        ExistingSelectionProcessor proc = (ExistingSelectionProcessor)selected;
-        proc.processExistingSelection();
+        tab.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                Component selected = tab.getSelectedComponent();
+                while (selected instanceof JScrollPane) {
+                    selected = ((JScrollPane) selected).getViewport().getView();
+                }
+
+                ((ExistingSelectionProcessor) selected).processExistingSelection();
+            }
+        });
     }
 
-    /** If entity is null hides it's contents, otherwise makes it visible. */
-    public void currentDbEntityChanged(EntityDisplayEvent e) {
+    public void currentObjEntityChanged(EntityDisplayEvent e) {
         if (e.getEntity() == null)
             tab.setVisible(false);
         else {
-            if (e.isTabReset())
+            if (e.isTabReset()) {
                 tab.setSelectedIndex(0);
+            }
+
             tab.setVisible(true);
         }
     }
 
-    public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
+    public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
         if (e.getEntity() == null) {
             return;
         }
 
         // update relationship selection
         Relationship rel = e.getRelationship();
-        if (rel instanceof DbRelationship) {
-            relationshipsPanel.selectRelationship((DbRelationship) rel);
+        if (rel instanceof ObjRelationship) {
+            relationshipsPanel.selectRelationship((ObjRelationship) rel);
         }
 
         // Display relationship tab
         tab.setSelectedIndex(2);
     }
 
-    public void currentDbAttributeChanged(AttributeDisplayEvent e) {
+    public void currentObjAttributeChanged(AttributeDisplayEvent e) {
         if (e.getEntity() == null)
             return;
 
         // update relationship selection
         Attribute attr = e.getAttribute();
-        if (attr instanceof DbAttribute) {
-            attributesPanel.selectAttribute((DbAttribute) attr);
+        if (attr instanceof ObjAttribute) {
+            attributesPanel.selectAttribute((ObjAttribute) attr);
         }
 
         // Display attribute tab
         tab.setSelectedIndex(1);
+
+        tab.getSelectedComponent();
     }
 }

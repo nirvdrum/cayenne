@@ -74,18 +74,24 @@ public class ObjAttributeValidator extends TreeNodeValidator {
     public void validateObject(ProjectPath path, Validator validator) {
         ObjAttribute attribute = (ObjAttribute) path.getObject();
 
+        // skip validation of inherited attributes
+        if (path.getObjectParent() != null
+            && path.getObjectParent() != attribute.getEntity()) {
+            return;
+        }
+
         // Must have name
         if (Util.isEmptyString(attribute.getName())) {
             validator.registerError("Unnamed ObjAttribute.", path);
         }
-        
-         // all attributes must have type
+
+        // all attributes must have type
         if (Util.isEmptyString(attribute.getType())) {
             validator.registerWarning("ObjAttribute has no type.", path);
         }
 
         if (attribute.getDbAttribute() == null) {
-        	validator.registerWarning("ObjAttribute has no DbAttribute mapping.", path);
+            validator.registerWarning("ObjAttribute has no DbAttribute mapping.", path);
         }
     }
 }

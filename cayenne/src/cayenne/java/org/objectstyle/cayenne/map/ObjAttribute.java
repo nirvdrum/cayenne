@@ -100,6 +100,10 @@ public class ObjAttribute extends Attribute {
             encoder.print(getType());
             encoder.print('\"');
         }
+        
+        if(isUsedForLocking()) {
+            encoder.print(" lock=\"true\"");
+        }
 
         // If this obj attribute is mapped to db attribute
         if (getDbAttribute() != null) {

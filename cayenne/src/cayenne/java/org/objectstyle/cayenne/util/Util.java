@@ -301,11 +301,11 @@ public class Util {
         if (o1 == null && o2 == null) {
             return 0;
         }
-        else if (o1 != null) {
-            return nullsFirst ? 1 : -1;
+        else if (o1 == null) {
+            return nullsFirst ? -1 : 1;
         }
         else if (o2 == null) {
-            return nullsFirst ? -1 : 1;
+            return nullsFirst ? 1 : -1;
         }
         else {
             return o1.compareTo(o2);

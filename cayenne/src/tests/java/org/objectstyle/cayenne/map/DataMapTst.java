@@ -109,7 +109,8 @@ public class DataMapTst extends TestCase {
         try {
             map.addObjEntity(e2);
             fail("Should not be able to add more than one entity with the same name");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
         }
     }
 
@@ -128,10 +129,10 @@ public class DataMapTst extends TestCase {
     public void testDeleteObjEntity() {
         ObjEntity e1 = new ObjEntity("1");
         ObjEntity e2 = new ObjEntity("2");
-        e1.addRelationship(new ObjRelationship(e1, e2, false));
-        e1.addRelationship(new ObjRelationship(e2, e1, false));
-        e2.addRelationship(new ObjRelationship(e1, e2, false));
-        e2.addRelationship(new ObjRelationship(e2, e1, false));
+        e1.addRelationship(new ObjRelationship("r1", e1, e2));
+        e1.addRelationship(new ObjRelationship("r2", e2, e1));
+        e2.addRelationship(new ObjRelationship("r3", e1, e2));
+        e2.addRelationship(new ObjRelationship("r4", e2, e1));
         map.addObjEntity(e1);
         map.addObjEntity(e2);
 
@@ -174,7 +175,7 @@ public class DataMapTst extends TestCase {
         map.addQuery(q);
         assertSame(q, map.getQuery("a"));
     }
-    
+
     public void testRemoveQuery() throws Exception {
         Query q = new SelectQuery();
         q.setName("a");
@@ -183,7 +184,7 @@ public class DataMapTst extends TestCase {
         map.removeQuery("a");
         assertNull(map.getQuery("a"));
     }
-    
+
     public void testGetQueryMap() throws Exception {
         Query q = new SelectQuery();
         q.setName("a");
@@ -192,7 +193,7 @@ public class DataMapTst extends TestCase {
         assertEquals(1, queries.size());
         assertSame(q, queries.get("a"));
     }
-    
+
     public void testAddDependency1() throws Exception {
         map.setName("m1");
         DataMap map2 = new DataMap("m2");
@@ -218,7 +219,8 @@ public class DataMapTst extends TestCase {
         try {
             map2.addDependency(map);
             fail("Circular dependencies should throw exceptions.");
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             // exception expected
         }
     }
@@ -233,7 +235,8 @@ public class DataMapTst extends TestCase {
         try {
             map3.addDependency(map);
             fail("Circular dependencies should throw exceptions.");
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             // exception expected
         }
     }
@@ -243,32 +246,24 @@ public class DataMapTst extends TestCase {
     public void testRemoveDbEntity() {
 
         // create a twisty maze of intermingled relationships.
-        DbEntity e1 =
-            (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
+        DbEntity e1 = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
         e1.setName("e1");
 
-        DbEntity e2 =
-            (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
+        DbEntity e2 = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
         e2.setName("e2");
 
         DbRelationship r1 =
-            (DbRelationship) NamedObjectFactory.createObject(
-                DbRelationship.class,
-                e1);
+            (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, e1);
         r1.setName("r1");
         r1.setTargetEntity(e2);
 
         DbRelationship r2 =
-            (DbRelationship) NamedObjectFactory.createObject(
-                DbRelationship.class,
-                e2);
+            (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, e2);
         r2.setName("r2");
         r2.setTargetEntity(e1);
 
         DbRelationship r3 =
-            (DbRelationship) NamedObjectFactory.createObject(
-                DbRelationship.class,
-                e1);
+            (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, e1);
         r3.setName("r3");
         r3.setTargetEntity(e2);
 

@@ -89,20 +89,20 @@ public class CayenneTable extends JTable {
         super.createDefaultEditors();
         
         JTextField textField = CayenneWidgetFactory.createTextField(0);
-        final DefaultCellEditor editor = new DefaultCellEditor(textField);
+        final DefaultCellEditor textEditor = new DefaultCellEditor(textField);
         
         // this takes care of cases like handling of "delete" button clicks
         // that delete a row being currently edited....
         textField.addFocusListener(new FocusAdapter() {
             public void focusLost(FocusEvent e) {
                 if (!e.isTemporary()) {
-                    editor.cancelCellEditing();
+                    textEditor.cancelCellEditing();
                 }
             }
         });
 
-        setDefaultEditor(Object.class, editor);
-        setDefaultEditor(String.class, editor);
+        setDefaultEditor(Object.class, textEditor);
+        setDefaultEditor(String.class, textEditor);
     }
 
     public CayenneTableModel getCayenneModel() {

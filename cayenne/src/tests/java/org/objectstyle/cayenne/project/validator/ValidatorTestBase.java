@@ -72,14 +72,14 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ValidatorTestBase extends CayenneTestCase {
-	protected static int counter = 1;
-	 
+    protected static int counter = 1;
+
     protected Validator validator;
     protected ApplicationProject project;
 
-   /**
-     * @see junit.framework.TestCase#setUp()
-     */
+    /**
+      * @see junit.framework.TestCase#setUp()
+      */
     protected void setUp() throws Exception {
         super.setUp();
         project = new ApplicationProject(new File(System.getProperty("user.dir")));
@@ -114,8 +114,7 @@ public class ValidatorTestBase extends CayenneTestCase {
         map.addObjEntity(target);
         target.setDbEntity((DbEntity) dr1.getTargetEntity());
 
-        ObjRelationship r1 = new ObjRelationship(src, target, dr1.isToMany());
-        r1.setName(name);
+        ObjRelationship r1 = new ObjRelationship(name, src, target);
         src.addRelationship(r1);
 
         r1.addDbRelationship(dr1);

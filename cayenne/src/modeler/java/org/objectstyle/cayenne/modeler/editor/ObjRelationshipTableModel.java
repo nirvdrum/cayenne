@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -68,6 +70,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * Table model to display ObjRelationships. 
@@ -81,6 +84,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
     static final int REL_TARGET = 1;
     static final int REL_CARDINALITY = 2;
     static final int REL_DELETERULE = 3;
+    static final int REL_LOCKING = 4;
 
     protected ObjEntity entity;
 
@@ -90,6 +94,17 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
         Object eventSource) {
         super(mediator, eventSource, new ArrayList(entity.getRelationships()));
         this.entity = entity;
+
+        // order using local comparator
+        Collections.sort(objectList, new RelationshipComparator());
+    }
+
+    protected void orderList() {
+        // NOOP
+    }
+
+    public ObjEntity getEntity() {
+        return entity;
     }
 
     /**
@@ -100,25 +115,31 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
     }
 
     public int getColumnCount() {
-        return 4;
+        return 5;
     }
 
     public String getColumnName(int column) {
-        if (column == REL_NAME)
-            return "Name";
-        else if (column == REL_TARGET)
-            return "Target";
-        else if (column == REL_CARDINALITY)
-            return "To many";
-        else if (column == REL_DELETERULE)
-            return "Delete rule";
-        else
-            return "";
+        switch (column) {
+            case REL_NAME :
+                return "Name";
+            case REL_TARGET :
+                return "Target";
+            case REL_LOCKING :
+                return "Used for Locking";
+            case REL_CARDINALITY :
+                return "To Many";
+            case REL_DELETERULE :
+                return "Delete Rule";
+
+            default :
+                return null;
+        }
     }
 
     public Class getColumnClass(int col) {
         switch (col) {
             case REL_CARDINALITY :
+            case REL_LOCKING :
                 return Boolean.class;
             default :
                 return String.class;
@@ -133,50 +154,49 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 
     public Object getValueAt(int row, int column) {
         ObjRelationship rel = getRelationship(row);
-        // If name column
+
         if (column == REL_NAME) {
             return rel.getName();
-            // If target column
         }
         else if (column == REL_TARGET) {
-            if (null == rel.getTargetEntity())
-                return null;
-            return rel.getTargetEntity().getName();
+            return (rel.getTargetEntity() != null)
+                ? rel.getTargetEntity().getName()
+                : null;
+        }
+        else if (column == REL_LOCKING) {
+            return rel.isUsedForLocking() ? Boolean.TRUE : Boolean.FALSE;
         }
         else if (column == REL_CARDINALITY) {
-            return new Boolean(rel.isToMany());
+            return rel.isToMany() ? Boolean.TRUE : Boolean.FALSE;
         }
         else if (column == REL_DELETERULE) {
             return DeleteRule.deleteRuleName(rel.getDeleteRule());
         }
         else {
-            return "";
+            return null;
         }
     }
 
-    public void setUpdatedValueAt(Object aValue, int row, int column) {
-        ObjRelationship rel = getRelationship(row);
+    public void setUpdatedValueAt(Object value, int row, int column) {
+        ObjRelationship relationship = getRelationship(row);
+        RelationshipEvent event =
+            new RelationshipEvent(eventSource, relationship, entity);
 
-        // If name column
         if (column == REL_NAME) {
-            String text = (String) aValue;
-            String old_name = rel.getName();
-            MapUtil.setRelationshipName(entity, rel, text);
-            RelationshipEvent e =
-                new RelationshipEvent(eventSource, rel, entity, old_name);
-            mediator.fireObjRelationshipEvent(e);
+            String text = (String) value;
+            event.setOldName(relationship.getName());
+            MapUtil.setRelationshipName(entity, relationship, text);
             fireTableCellUpdated(row, column);
         }
-        // If target column
         else if (column == REL_TARGET) {
-            if (aValue == null) {
+            if (value == null) {
                 return;
             }
 
-            String targetName = aValue.toString().trim();
+            String targetName = value.toString().trim();
 
             // Remove db relationship mappings.
-            rel.clearDbRelationships();
+            relationship.clearDbRelationships();
 
             // Set new target, if applicable
             ObjEntity target = null;
@@ -185,30 +205,34 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
                 target = map.getObjEntity(targetName, true);
             }
 
-            rel.setTargetEntity(target);
-            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-            mediator.fireObjRelationshipEvent(e);
+            relationship.setTargetEntity(target);
 
             // now try to connect DbEntities if we can do it in one step
             if (target != null) {
-                DbEntity srcDB = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
+                DbEntity srcDB =
+                    ((ObjEntity) relationship.getSourceEntity()).getDbEntity();
                 DbEntity targetDB = target.getDbEntity();
                 if (srcDB != null && targetDB != null) {
                     Relationship anyConnector = srcDB.getAnyRelationship(targetDB);
                     if (anyConnector != null) {
-                        rel.addDbRelationship((DbRelationship) anyConnector);
+                        relationship.addDbRelationship((DbRelationship) anyConnector);
                     }
                 }
             }
 
+            fireTableRowsUpdated(row, row);
         }
         else if (column == REL_DELETERULE) {
-            String temp = (String) aValue;
-            rel.setDeleteRule(DeleteRule.deleteRuleForName(temp));
-            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-            mediator.fireObjRelationshipEvent(e);
+            relationship.setDeleteRule(DeleteRule.deleteRuleForName((String) value));
+            fireTableCellUpdated(row, column);
         }
-        fireTableRowsUpdated(row, row);
+        else if (column == REL_LOCKING) {
+            relationship.setUsedForLocking(
+                (value instanceof Boolean) && ((Boolean) value).booleanValue());
+            fireTableCellUpdated(row, column);
+        }
+
+        mediator.fireObjRelationshipEvent(event);
     }
 
     public void removeRow(int row) {
@@ -223,18 +247,29 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
         fireTableRowsDeleted(row, row);
     }
 
-    /** Relationship just needs to be removed from the model. 
-     *  It is already removed from the DataMap. */
-    void removeRelationship(Relationship rel) {
-        objectList.remove(rel);
-        fireTableDataChanged();
+    private boolean isInherited(int row) {
+        ObjRelationship relationship = getRelationship(row);
+        return (relationship != null) ? relationship.getSourceEntity() != entity : false;
     }
 
     public boolean isCellEditable(int row, int col) {
-        if (col == REL_CARDINALITY) {
-            return false; //Cannot edit the toMany flag on an ObjRelationship
-        }
-        return true;
+        return !isInherited(row) && col != REL_CARDINALITY;
     }
 
+    final class RelationshipComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            ObjRelationship r1 = (ObjRelationship) o1;
+            ObjRelationship r2 = (ObjRelationship) o2;
+
+            int delta = getWeight(r1) - getWeight(r2);
+
+            return (delta != 0)
+                ? delta
+                : Util.nullSafeCompare(true, r1.getName(), r2.getName());
+        }
+
+        private int getWeight(ObjRelationship r) {
+            return r.getSourceEntity() == entity ? 1 : -1;
+        }
+    }
 }

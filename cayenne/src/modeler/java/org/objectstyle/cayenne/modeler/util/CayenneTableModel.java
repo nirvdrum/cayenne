@@ -104,7 +104,7 @@ public abstract class CayenneTableModel extends AbstractTableModel {
      * Orders internal object list. Key returned by 
      * <code>getOrderingKey</code> is used for comparison.
      */
-    public void orderList() {
+    protected void orderList() {
         String key = getOrderingKey();
         if (key != null) {
             Collections.sort(

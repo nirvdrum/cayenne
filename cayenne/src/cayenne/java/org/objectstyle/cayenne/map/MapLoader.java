@@ -571,16 +571,23 @@ public class MapLoader extends DefaultHandler {
             objEntity.setLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
         }
 
-        String temp = atts.getValue("", "dbEntityName");
-        if (null != temp) {
-            DbEntity db_temp = dataMap.getDbEntity(temp);
-            objEntity.setDbEntity(db_temp);
+        String superEntityName = atts.getValue("", "superEntityName");
+        if (superEntityName != null) {
+            objEntity.setSuperEntityName(superEntityName);
+        }
+        else {
+            String dbEntityName = atts.getValue("", "dbEntityName");
+            if (dbEntityName != null) {
+                DbEntity dbEntity = dataMap.getDbEntity(dbEntityName);
+                objEntity.setDbEntity(dbEntity);
+            }
+
+            String superClassName = atts.getValue("", "superClassName");
+            if (superClassName != null) {
+                objEntity.setSuperClassName(superClassName);
+            }
         }
 
-        temp = atts.getValue("", "superClassName");
-        if (null != temp) {
-            objEntity.setSuperClassName(temp);
-        }
         dataMap.addObjEntity(objEntity);
     }
 
@@ -714,38 +721,28 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processStartObjRelationship(Attributes atts) throws SAXException {
-        String temp = atts.getValue("", "source");
-        if (null == temp) {
+        String sourceName = atts.getValue("", "source");
+        if (sourceName == null) {
             throw new SAXException(
                 "MapLoaderImpl::processStartObjRelationship(),"
                     + " Unable to parse source. Attributes:\n"
                     + printAttributes(atts).toString());
         }
-        ObjEntity source = dataMap.getObjEntity(temp);
-        if (null == source) {
+
+        ObjEntity source = dataMap.getObjEntity(sourceName);
+        if (source == null) {
             throw new SAXException(
                 "MapLoaderImpl::processStartObjRelationship(),"
                     + " Unable to find source "
-                    + temp);
+                    + sourceName);
         }
-        temp = atts.getValue("", "target");
-        if (null == temp) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartObjRelationship(),"
-                    + " Unable to parse target. Attributes:\n"
-                    + printAttributes(atts).toString());
+
+        ObjEntity target = null;
+        String targetName = atts.getValue("", "target");
+        if (targetName != null) {
+            target = dataMap.getObjEntity(targetName, true);
         }
-        ObjEntity target = dataMap.getObjEntity(temp, true);
-        if (null == target) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartObjRelationship(),"
-                    + " Unable to find target "
-                    + temp);
-        }
-        temp = atts.getValue("", "toMany");
-        boolean to_many = false;
-        if (temp != null && temp.equalsIgnoreCase(TRUE))
-            to_many = true;
+
         String name = atts.getValue("", "name");
         if (null == name) {
             throw new SAXException(
@@ -762,8 +759,7 @@ public class MapLoader extends DefaultHandler {
 
         String lock = atts.getValue("", "lock");
 
-        objRelationship = new ObjRelationship(source, target, to_many);
-        objRelationship.setName(name);
+        objRelationship = new ObjRelationship(name, source, target);
         objRelationship.setDeleteRule(deleteRule);
         objRelationship.setUsedForLocking(TRUE.equalsIgnoreCase(lock));
         source.addRelationship(objRelationship);

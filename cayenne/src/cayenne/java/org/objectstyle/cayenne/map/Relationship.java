@@ -141,14 +141,15 @@ public abstract class Relationship extends MapObject {
         return sb.toString();
     }
 	
-	/** Is relationship from source to target to-one or to-many.
-	  * If one-to-many, getxxx() method of the data object class would 
-	  * return a list, otherwise it returns a single DataObject
-	  * There is explicitly no setToMany on Relationship.. only DbRelationship
-	  * supports such a notion, and ObjRelationship derives it's value from the
-	  * underlying DbRelationship(s) */
+	/** 
+     * Tells whether relationship from source to target is to-one or to-many.
+	 * If one-to-many, getxxx() method of the data object class would 
+	 * return a list, otherwise it returns a single DataObject
+	 * There is explicitly no setToMany on Relationship.. only DbRelationship
+	 * supports such a notion, and ObjRelationship derives it's value from the
+	 * underlying DbRelationship(s) 
+     */
 	public boolean isToMany() {
 		return toMany;
 	}
-	
 }
