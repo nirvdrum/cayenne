@@ -77,17 +77,6 @@ public interface ValidationFailure extends Serializable {
     public Object getSource();
 
     /**
-     * Returns the name of the property that has generated this failure. 
-     * It must be formatted according to the JavaBeans standard (getFullName() -> fullName).<br>
-     * For example, if a <code>Person</code> must have a name and a <code>ValidationFailure</code> is created when the
-     * user attempts to save it, the <code>String</code> "name" would be the failure property.
-     *
-     * @return the failure's property name or null in case a source cannot be defined. It MUST be null if
-     * <code>source</code> is null.
-     */
-    public String getProperty();
-
-    /**
      * Returns an user defined error object.
      */
     public Object getError();

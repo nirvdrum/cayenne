@@ -74,8 +74,9 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.validation.BeanValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
-import org.objectstyle.cayenne.validation.Validator;
 
 /**
  * A default implementation of DataObject interface. It is normally used as a
@@ -585,14 +586,17 @@ public class CayenneDataObject implements DataObject {
             DbAttribute dbAttribute = objAttribute.getDbAttribute();
 
             Object value = this.readPropertyDirectly(objAttribute.getName());
-            if (dbAttribute.isMandatory()
-                && !Validator.checkMandatory(
-                    this,
-                    value,
-                    objAttribute.getName(),
-                    validationResult)) {
+            if (dbAttribute.isMandatory()) {
+                ValidationFailure failure =
+                    BeanValidationFailure.validateMandatory(
+                        this,
+                        objAttribute.getName(),
+                        value);
 
-                continue;
+                if (failure != null) {
+                    validationResult.addFailure(failure);
+                    continue;
+                }
             }
 
             if (value != null) {

@@ -70,8 +70,8 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
-import org.objectstyle.cayenne.validation.Validator;
 
 /**
  * @author Andrei Adamchik
@@ -138,15 +138,15 @@ public class ByteArrayType extends AbstractType {
 
         byte[] bytes = (byte[]) value;
         if (bytes.length > dbAttribute.getMaxLength()) {
+            String message =
+                "\""
+                    + property
+                    + "\" exceeds maximum allowed length ("
+                    + dbAttribute.getMaxLength()
+                    + " bytes): "
+                    + bytes.length;
             validationResult.addFailure(
-                source,
-                property,
-                Validator.createMessage(
-                    property,
-                    " exceeds maximum allowed length ("
-                        + dbAttribute.getMaxLength()
-                        + " bytes): "
-                        + bytes.length));
+                new BeanValidationFailure(source, property, message));
             return false;
         }
 

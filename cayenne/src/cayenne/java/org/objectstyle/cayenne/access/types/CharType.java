@@ -69,8 +69,8 @@ import java.sql.Types;
 
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
-import org.objectstyle.cayenne.validation.Validator;
 
 /** 
  * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
@@ -116,15 +116,16 @@ public class CharType extends AbstractType {
 
         String string = (String) value;
         if (string.length() > dbAttribute.getMaxLength()) {
+            String message =
+                "\""
+                    + property
+                    + "\" exceeds maximum allowed length ("
+                    + dbAttribute.getMaxLength()
+                    + " chars): "
+                    + string.length();
             validationResult.addFailure(
-                source,
-                property,
-                Validator.createMessage(
-                    property,
-                    " exceeds maximum allowed length ("
-                        + dbAttribute.getMaxLength()
-                        + " chars): "
-                        + string.length()));
+                new BeanValidationFailure(source, property, message));
+
             return false;
         }
 

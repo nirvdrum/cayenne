@@ -55,11 +55,6 @@
  */
 package org.objectstyle.cayenne.validation;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import junit.framework.TestCase;
 
 /**
@@ -71,146 +66,30 @@ public class ValidationResultTst extends TestCase {
 
     private Object obj1;
     private Object obj2;
-    private Object obj3;
-    private Object obj4;
-    private Object obj5;
-    private Object obj6;
 
     protected void setUp() throws Exception {
         super.setUp();
         obj1 = new Object();
         obj2 = new Object();
-        obj3 = new Object();
-        obj4 = new Object();
-        obj5 = new Object();
-        obj6 = new Object();
-    }
-
-    public void addFailures() {
-        res = new ValidationResult();
-
-        res.addFailure(obj1, "obj1 1", "mes obj1 1");
-        res.addFailure(obj1, "obj1 2", "mes obj1 2");
-        res.addFailure(obj1, "obj1 3", "mes obj1 3");
-
-        res.addFailure(obj2, "obj2 1", "mes obj2 1");
-        res.addFailure(obj2, "obj2 2", "mes obj2 2a");
-        res.addFailure(obj2, "obj2 2", "mes obj2 2b");
-
-        res.addFailure(obj3, "obj3 1", "mes obj3 1");
-        res.addFailure(obj3, null, "obj3 null");
-
-        res.addFailure(obj4, "obj4 1", "mes obj4 1");
-        res.addFailure(obj4, null, "mes obj4 nulla");
-        res.addFailure(obj4, null, "mes obj4 nullb");
-
-        res.addFailure(obj5, null, "mes obj5 null");
-
-        res.addFailure(null, null, "null");
     }
 
     public void testHasFailures() {
-        this.addFailures();
-
+        res = new ValidationResult();
+        res.addFailure(new BeanValidationFailure(obj1, "obj1 1", "mes obj1 1"));
         assertTrue(res.hasFailures());
-
         assertTrue(res.hasFailures(obj1));
-        assertTrue(res.hasFailures(obj1, "obj1 1"));
-        assertTrue(res.hasFailures(obj1, "obj1 2"));
-        assertTrue(res.hasFailures(obj1, "obj1 3"));
-        assertFalse(res.hasFailures(obj1, "Foobar"));
-        assertFalse(res.hasFailures(obj1, null));
-
-        assertTrue(res.hasFailures(obj2));
-        assertTrue(res.hasFailures(obj2, "obj2 1"));
-        assertTrue(res.hasFailures(obj2, "obj2 2"));
-        assertFalse(res.hasFailures(obj2, "Foobar"));
-
-        assertTrue(res.hasFailures(obj3, "obj3 1"));
-        assertTrue(res.hasFailures(obj3, null));
-        assertFalse(res.hasFailures(obj3, "Foobar"));
-
-        assertTrue(res.hasFailures(obj4, "obj4 1"));
-        assertTrue(res.hasFailures(obj4, null));
-        assertFalse(res.hasFailures(obj4, "Foobar"));
-
-        assertTrue(res.hasFailures(obj5, null));
-        assertFalse(res.hasFailures(obj5, "Foobar"));
-
-        assertFalse(res.hasFailures(obj6, null));
-        assertFalse(res.hasFailures(obj6, "Foobar"));
+        assertFalse(res.hasFailures(obj2));
     }
 
-    public void testGetFailure() {
-        this.addFailures();
+    public void testGetFailures() {
+        res = new ValidationResult();
+        res.addFailure(new BeanValidationFailure(obj1, "obj1 1", "mes obj1 1"));
+        res.addFailure(new BeanValidationFailure(obj1, "obj1 1", "mes obj1 1"));
+        res.addFailure(new BeanValidationFailure(obj2, "obj1 1", "mes obj1 1"));
 
-        String[] values =
-            new String[] {
-                "mes obj1 1",
-                "mes obj1 2",
-                "mes obj1 3",
-                "mes obj2 1",
-                "mes obj2 2a",
-                "mes obj2 2b",
-                "mes obj3 1",
-                "obj3 null",
-                "mes obj4 1",
-                "mes obj4 nulla",
-                "mes obj4 nullb",
-                "mes obj5 null",
-                "null" };
-        this.privateTestGetFailure(values, res.getFailures(), true);
-
-        values = new String[] { "mes obj1 1", "mes obj1 2", "mes obj1 3" };
-        this.privateTestGetFailure(values, res.getFailures(obj1), true);
-
-        values = new String[] { "mes obj1 1" };
-        this.privateTestGetFailure(values, res.getFailures(obj1, "obj1 1"), false);
-
-        values = new String[] { "mes obj1 2" };
-        this.privateTestGetFailure(values, res.getFailures(obj1, "obj1 2"), false);
-
-        values = new String[] {
-        };
-        this.privateTestGetFailure(values, res.getFailures(obj1, "foobar"), false);
-
-        values = new String[] { "mes obj2 2a", "mes obj2 2b" };
-        this.privateTestGetFailure(values, res.getFailures(obj2, "obj2 2"), false);
-
-        values = new String[] { "obj3 null" };
-        this.privateTestGetFailure(values, res.getFailures(obj3, null), false);
-
-        values = new String[] { "mes obj4 nulla", "mes obj4 nullb" };
-        this.privateTestGetFailure(values, res.getFailures(obj4, null), false);
-
-        values = new String[] { "null" };
-        this.privateTestGetFailure(values, res.getFailures(null, null), false);
-        this.privateTestGetFailure(values, res.getFailures(null), false);
-
-        values = new String[] {
-        };
-        this.privateTestGetFailure(values, res.getFailures(obj6, null), false);
-        this.privateTestGetFailure(values, res.getFailures(obj6, "foobar"), false);
-    }
-
-    private void privateTestGetFailure(String[] values, List fails, boolean sort) {
-        assertEquals(values.length, fails.size());
-
-        if (sort) {
-            Arrays.sort(values);
-            Collections.sort(fails, new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    ValidationFailure f1 = (ValidationFailure) o1;
-                    ValidationFailure f2 = (ValidationFailure) o2;
-                    return f1.getDescription().compareTo(f2.getDescription());
-                }
-            });
-        }
-
-        for (int i = 0; i < values.length; i++) {
-            ValidationFailure failure = (ValidationFailure) fails.get(i);
-            assertEquals(values[i], failure.getDescription());
-        }
+        assertEquals(2, res.getFailures(obj1).size());
+        assertEquals(1, res.getFailures(obj2).size());
+        assertEquals(3, res.getFailures().size());
     }
 
     public void testEmpty() {
@@ -219,33 +98,5 @@ public class ValidationResultTst extends TestCase {
 
         assertFalse(res.hasFailures(obj1));
         assertFalse(res.hasFailures(null));
-
-        assertFalse(res.hasFailures(obj1, "property"));
-        assertFalse(res.hasFailures(obj1, null));
-        assertFalse(res.hasFailures(null, null));
     }
-
-    public void testAsserts() {
-        this.addFailures();
-
-        try {
-            res.addFailure(null);
-            fail();
-        }
-        catch (IllegalArgumentException e) {
-        }
-        try {
-            res.addFailure(null, "property", "message");
-            fail();
-        }
-        catch (IllegalArgumentException e) {
-        }
-        try {
-            res.hasFailures(null, "property");
-            fail();
-        }
-        catch (IllegalArgumentException e) {
-        }
-    }
-
 }

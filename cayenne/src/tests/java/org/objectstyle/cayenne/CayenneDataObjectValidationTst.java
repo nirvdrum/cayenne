@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.validation.ValidationFailure;
+import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
@@ -83,7 +83,7 @@ public class CayenneDataObjectValidationTst extends CayenneTestCase {
         List failures = result.getFailures();
         assertEquals(1, failures.size());
 
-        ValidationFailure failure = (ValidationFailure) failures.get(0);
+        BeanValidationFailure failure = (BeanValidationFailure) failures.get(0);
         assertEquals(Artist.ARTIST_NAME_PROPERTY, failure.getProperty());
 
         // fix the problem and see if it goes away
@@ -114,7 +114,7 @@ public class CayenneDataObjectValidationTst extends CayenneTestCase {
         List failures = result.getFailures();
         assertEquals(1, failures.size());
 
-        ValidationFailure failure = (ValidationFailure) failures.get(0);
+        BeanValidationFailure failure = (BeanValidationFailure) failures.get(0);
         assertEquals(Artist.ARTIST_NAME_PROPERTY, failure.getProperty());
 
         // fix the problem and see if it goes away
