@@ -55,6 +55,8 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.io.InputStream;
 import javax.sql.DataSource;
 
@@ -82,6 +84,8 @@ import org.objectstyle.cayenne.conn.PoolManager;
   * @author Andrei Adamchik
   */
 public class DriverDataSourceFactory implements DataSourceFactory {
+    static Logger logObj = Logger.getLogger(DriverDataSourceFactory.class.getName());
+
     private XMLReader parser;
     private DataSourceInfo driverInfo;
 
@@ -175,29 +179,70 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
         throws SAXException {
             if (localName.equals("login")) {
-                readLogin(atts);
+                new LoginHandler(this.parser, this).init(localName, atts, driverInfo);
             } else if (localName.equals("url")) {
-                readUrl(atts);
+                new UrlHandler(this.parser, this).init(localName, atts, driverInfo);
             } else if (localName.equals("connectionPool")) {
-                readConnectionPool(atts);
+                new ConnectionHandler(this.parser, this).init(localName, atts, driverInfo);
             } else {
                 throw new SAXException("Config file is not of expected XML type");
             }
         }
 
-        private void readLogin(Attributes atts) {
+    }
+
+
+    private class UrlHandler extends AbstractHandler {
+        /**
+         * Constructor which just delegates to the superconstructor.
+         * 
+         * @param parentHandler The handler which should be restored to the 
+         *                      parser at the end of the element. 
+         *                      Must not be <code>null</code>.
+         */
+        public UrlHandler(XMLReader parser, ContentHandler parentHandler) {
+            super(parser, parentHandler);
+        }
+
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo) throws SAXException {
+            driverInfo.setDataSourceUrl(atts.getValue("value"));
+            if(driverInfo.getDataSourceUrl() == null)
+                throw new SAXException("'<url value=' attribute is required.");
+        }
+    }
+    
+    private class LoginHandler extends AbstractHandler {
+        /**
+         * Constructor which just delegates to the superconstructor.
+         * 
+         * @param parentHandler The handler which should be restored to the 
+         *                      parser at the end of the element. 
+         *                      Must not be <code>null</code>.
+         */
+        public LoginHandler(XMLReader parser, ContentHandler parentHandler) {
+            super(parser, parentHandler);
+        }
+
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo) throws SAXException {
             driverInfo.setUserName(atts.getValue("userName"));
             driverInfo.setPassword(atts.getValue("password"));
         }
-
-        private void readUrl(Attributes atts) throws SAXException {
-            driverInfo.setDataSourceUrl(atts.getValue("value"));
-            if(driverInfo.getDataSourceUrl() == null)
-                throw new SAXException("URL value is required.");
+    }
+    
+    private class ConnectionHandler extends AbstractHandler {
+        /**
+         * Constructor which just delegates to the superconstructor.
+         * 
+         * @param parentHandler The handler which should be restored to the 
+         *                      parser at the end of the element. 
+         *                      Must not be <code>null</code>.
+         */
+        public ConnectionHandler(XMLReader parser, ContentHandler parentHandler) {
+            super(parser, parentHandler);
         }
 
-        private void readConnectionPool(Attributes atts) throws SAXException {
-            try {
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo) throws SAXException {
+           try {
                 String min = atts.getValue("min");
                 if(min != null)
                     driverInfo.setMinConnections(Integer.parseInt(min));
@@ -206,7 +251,8 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 if(max != null)
                     driverInfo.setMaxConnections(Integer.parseInt(max));
             } catch(NumberFormatException nfex) {
-                throw new SAXException("Error reading numeric parameter.", nfex);
+                logObj.log(Level.INFO, "Error loading numeric attribute", nfex);
+                throw new SAXException("Error reading numeric attribute.", nfex);
             }
         }
     }

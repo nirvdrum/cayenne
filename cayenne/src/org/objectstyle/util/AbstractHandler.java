@@ -116,8 +116,8 @@ public class AbstractHandler extends DefaultHandler {
     public XMLReader getParser() {
         return parser;
     }
-    
-    
+
+
     /**
      * Handles the start of an element. This base implementation just
      * throws an exception.
@@ -161,22 +161,16 @@ public class AbstractHandler extends DefaultHandler {
      */
     protected void finished() {}
 
-    
+
     /**
      * Handles the end of an element. Any required clean-up is performed
      * by the finished() method and then the original handler is restored to
      * the parser.
      * 
-     * @param name The name of the element which is ending.
-     *             Will not be <code>null</code>.
-     * 
-     * @exception SAXException in case of error (not thrown in 
-     *                         this implementation)
-     * 
      * @see #finished()
      */
-    public void endElement(String name) throws SAXException {
-
+    public void endElement(String namespaceURI, String localName, String qName)
+    throws SAXException {
         finished();
         // Let parent resume handling SAX events
         parser.setContentHandler(parentHandler);

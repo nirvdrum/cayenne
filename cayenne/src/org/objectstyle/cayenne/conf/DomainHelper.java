@@ -56,15 +56,20 @@ package org.objectstyle.cayenne.conf;
  */
 
 
+import java.util.*;
+import java.io.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import javax.sql.DataSource;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.util.*;
-import java.util.*;
-import javax.sql.DataSource;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import java.io.*;
+
 
 /**
  * Assists Configuration object in loading DataDomain configuration files.
@@ -81,6 +86,8 @@ import java.io.*;
  * @author Andrei Adamchik 
  */
 public class DomainHelper {
+    static Logger logObj = Logger.getLogger(DomainHelper.class.getName());
+
     private Configuration config;
     private MapLoaderImpl loader;
     private XMLReader parser;
@@ -360,13 +367,14 @@ public class DomainHelper {
             try {
                 map = loader.loadDataMap(new InputSource(mapIn));
             } catch (DataMapException dmex) {
+                logObj.log(Level.INFO, "Error loading map", dmex);
                 failedMaps.put(mapName, location);
-                return ;
+                return;
             }
 
             map.setName(mapName);
             map.setLocation(location);
-            domain.addMap(map);
+            domain.addMap(map); 
         }
     }
 
@@ -424,6 +432,7 @@ public class DomainHelper {
 
                 node.setDataSource(localFactory.getDataSource(dataSrcLocation));
             } catch (Exception ex) {
+                logObj.log(Level.INFO, "Error loading DataSource", ex);
                 failedDataSources.put(nodeName, dataSrcLocation);
             }
 
