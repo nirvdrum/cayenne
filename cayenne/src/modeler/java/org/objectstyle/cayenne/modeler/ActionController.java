@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
-import org.objectstyle.cayenne.modeler.action.ImportDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
@@ -216,7 +216,7 @@ public class ActionController extends CayenneController {
             getAction(CreateDataMapAction.getActionName()).setEnabled(true);
             getAction(RemoveAction.getActionName()).setEnabled(true);
             getAction(CreateNodeAction.getActionName()).setEnabled(true);
-            getAction(ImportDbAction.getActionName()).setEnabled(true);
+            getAction(ImportDBAction.getActionName()).setEnabled(true);
             getAction(ImportEOModelAction.getActionName()).setEnabled(true);
         }
     }

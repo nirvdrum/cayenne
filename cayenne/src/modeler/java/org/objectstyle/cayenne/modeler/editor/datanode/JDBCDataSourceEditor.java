@@ -127,7 +127,7 @@ public class JDBCDataSourceEditor extends DataSourceEditor {
 
         DBConnectionInfo dataSource = (DBConnectionInfo) parent
                 .getApplicationPreferenceDomain()
-                .getPreferenceDetail(key, DBConnectionInfo.class, false);
+                .getDetail(key, DBConnectionInfo.class, false);
 
         if (dataSource != null) {
             if (dataSource.copyTo(projectDS.getDataSourceInfo())) {

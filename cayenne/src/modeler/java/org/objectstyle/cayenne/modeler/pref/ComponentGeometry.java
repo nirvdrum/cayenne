@@ -73,7 +73,7 @@ public class ComponentGeometry extends _ComponentGeometry {
     public static final String GEOMETRY_PREF_KEY = "geometry";
 
     public static ComponentGeometry getPreference(Domain domain) {
-        return (ComponentGeometry) domain.getPreferenceDetail(
+        return (ComponentGeometry) domain.getDetail(
                 ComponentGeometry.GEOMETRY_PREF_KEY,
                 ComponentGeometry.class,
                 true);

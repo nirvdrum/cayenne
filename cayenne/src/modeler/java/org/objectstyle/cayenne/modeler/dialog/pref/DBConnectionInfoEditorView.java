@@ -53,50 +53,98 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
-import javax.sql.DataSource;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
-import org.objectstyle.cayenne.conn.DataSourceInfo;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * ProjectDataSource is a DataSource implementation used by the project model.
+ * A generic panel for entering DataSource information.
+ * 
+ * @author Andrei Adamchik
  */
-public class ProjectDataSource implements DataSource {
+public class DBConnectionInfoEditorView extends JPanel {
 
-    protected DataSourceInfo info;
+    protected JComboBox adapters;
+    protected JTextField driver;
+    protected JTextField url;
+    protected JTextField userName;
+    protected JPasswordField password;
 
-    public ProjectDataSource(DataSourceInfo info) {
-        this.info = info;
+    protected Collection labels;
+
+    public DBConnectionInfoEditorView() {
+        adapters = new JComboBox();
+        adapters.setEditable(true);
+
+        driver = new JTextField();
+        url = new JTextField();
+        userName = new JTextField();
+        password = new JPasswordField();
+        labels = new ArrayList();
+
+        // assemble
+        FormLayout layout = new FormLayout(
+                "right:pref, 3dlu, fill:max(50dlu;pref):grow",
+                "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        labels.add(builder.append("Adapter:", adapters));
+        labels.add(builder.append("JDBC Driver:", driver));
+        labels.add(builder.append("DB URL:", url));
+        labels.add(builder.append("User Name:", userName));
+        labels.add(builder.append("Password:", password));
+
+        this.setLayout(new BorderLayout());
+        this.add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    public DataSourceInfo getDataSourceInfo() {
-        return info;
+    public JComboBox getAdapters() {
+        return adapters;
     }
 
-    public Connection getConnection() throws SQLException {
-        throw new SQLException("Method not implemented");
+    public JTextField getDriver() {
+        return driver;
     }
 
-    public Connection getConnection(String username, String password) throws SQLException {
-        throw new SQLException("Method not implemented");
+    public JPasswordField getPassword() {
+        return password;
     }
 
-    public PrintWriter getLogWriter() throws SQLException {
-        return new PrintWriter(System.out);
+    public JTextField getUrl() {
+        return url;
     }
 
-    public void setLogWriter(PrintWriter out) throws SQLException {
+    public JTextField getUserName() {
+        return userName;
     }
 
-    public void setLoginTimeout(int seconds) throws SQLException {
-    }
+    public void setEnabled(boolean enabled) {
+        if (isEnabled() != enabled) {
+            super.setEnabled(enabled);
+            Iterator it = labels.iterator();
+            while (it.hasNext()) {
+                Component c = (Component) it.next();
+                c.setEnabled(enabled);
+            }
 
-    public int getLoginTimeout() throws SQLException {
-        throw new SQLException("Method not implemented");
+            adapters.setEnabled(enabled);
+            driver.setEnabled(enabled);
+            url.setEnabled(enabled);
+            userName.setEnabled(enabled);
+            password.setEnabled(enabled);
+        }
     }
 }

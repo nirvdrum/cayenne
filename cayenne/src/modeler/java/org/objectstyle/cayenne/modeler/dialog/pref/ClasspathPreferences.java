@@ -88,7 +88,7 @@ public class ClasspathPreferences extends CayenneController {
 
         this.editor = parentController.getEditor();
         this.view = new ClasspathPreferencesView();
-        this.classPathEntries = getClassLoaderDomain().getPreferenceDetails();
+        this.classPathEntries = getClassLoaderDomain().getDetails();
         this.tableModel = new ClasspathTableModel();
 
         initBindings();

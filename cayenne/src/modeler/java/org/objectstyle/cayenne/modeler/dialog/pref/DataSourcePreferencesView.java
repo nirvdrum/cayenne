@@ -63,6 +63,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.objectstyle.cayenne.modeler.util.CayenneController;
+
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -77,18 +79,15 @@ public class DataSourcePreferencesView extends JPanel {
     protected JButton removeDataSource;
     protected JButton testDataSource;
     protected JComboBox dataSources;
+    protected DBConnectionInfoEditor dataSourceEditor;
 
-    protected DataSourceEditorView dataSourceEditor;
-
-    public DataSourcePreferencesView() {
+    public DataSourcePreferencesView(CayenneController controller) {
         this.addDataSource = new JButton("New...");
         this.duplicateDataSource = new JButton("Duplicate...");
         this.removeDataSource = new JButton("Delete");
         this.testDataSource = new JButton("Test...");
         this.dataSources = new JComboBox();
-        this.dataSourceEditor = new DataSourceEditorView();
-
-        this.dataSourceEditor.setEnabled(false);
+        this.dataSourceEditor = new DBConnectionInfoEditor(controller);
 
         // assemble
         CellConstraints cc = new CellConstraints();
@@ -105,11 +104,11 @@ public class DataSourcePreferencesView extends JPanel {
         builder.add(testDataSource, cc.xy(1, 11));
 
         setLayout(new BorderLayout());
-        add(new JScrollPane(dataSourceEditor), BorderLayout.CENTER);
+        add(new JScrollPane(dataSourceEditor.getView()), BorderLayout.CENTER);
         add(builder.getPanel(), BorderLayout.EAST);
     }
 
-    public DataSourceEditorView getDataSourceEditor() {
+    public DBConnectionInfoEditor getDataSourceEditor() {
         return dataSourceEditor;
     }
 

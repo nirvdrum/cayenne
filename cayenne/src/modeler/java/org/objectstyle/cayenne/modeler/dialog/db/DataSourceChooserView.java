@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,50 +53,74 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.modeler.dialog.db;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
-import javax.sql.DataSource;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.modeler.dialog.pref.DBConnectionInfoEditor;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 
 /**
- * ProjectDataSource is a DataSource implementation used by the project model.
+ * @author Andrei Adamchik
  */
-public class ProjectDataSource implements DataSource {
+public class DataSourceChooserView extends JDialog {
 
-    protected DataSourceInfo info;
+    protected JComboBox dataSources;
+    protected JButton configButton;
+    protected JButton okButton;
+    protected JButton cancelButton;
+    protected DBConnectionInfoEditor connectionInfo;
 
-    public ProjectDataSource(DataSourceInfo info) {
-        this.info = info;
+    public DataSourceChooserView(CayenneController controller) {
+        this.dataSources = new JComboBox();
+
+        this.configButton = new JButton("...");
+        this.configButton.setToolTipText("configure local DataSource");
+        this.okButton = new JButton("Continue");
+        this.cancelButton = new JButton("Cancel");
+        this.connectionInfo = new DBConnectionInfoEditor(controller);
+
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        topPanel.add(new JLabel("Saved DataSources:"));
+        topPanel.add(dataSources);
+        topPanel.add(configButton);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(okButton);
+
+        getRootPane().setLayout(new BorderLayout());
+        getRootPane().add(topPanel, BorderLayout.NORTH);
+        getRootPane().add(connectionInfo.getView(), BorderLayout.CENTER);
+        getRootPane().add(buttons, BorderLayout.SOUTH);
+
+        setTitle("DB Connection Info");
     }
 
-    public DataSourceInfo getDataSourceInfo() {
-        return info;
+    public JComboBox getDataSources() {
+        return dataSources;
     }
 
-    public Connection getConnection() throws SQLException {
-        throw new SQLException("Method not implemented");
+    public JButton getCancelButton() {
+        return cancelButton;
     }
 
-    public Connection getConnection(String username, String password) throws SQLException {
-        throw new SQLException("Method not implemented");
+    public JButton getConfigButton() {
+        return configButton;
     }
 
-    public PrintWriter getLogWriter() throws SQLException {
-        return new PrintWriter(System.out);
+    public JButton getOkButton() {
+        return okButton;
     }
 
-    public void setLogWriter(PrintWriter out) throws SQLException {
-    }
-
-    public void setLoginTimeout(int seconds) throws SQLException {
-    }
-
-    public int getLoginTimeout() throws SQLException {
-        throw new SQLException("Method not implemented");
+    public DBConnectionInfoEditor getConnectionInfo() {
+        return connectionInfo;
     }
 }

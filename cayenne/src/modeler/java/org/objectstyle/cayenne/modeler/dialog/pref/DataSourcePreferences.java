@@ -56,82 +56,53 @@
 package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.JTextComponent;
 
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
-import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
-import org.objectstyle.cayenne.pref.PreferenceException;
 import org.objectstyle.cayenne.swing.BindingBuilder;
 import org.objectstyle.cayenne.util.Util;
 
 /**
+ * Editor for the local DataSources configured in preferences.
+ * 
  * @author Andrei Adamchik
  */
 public class DataSourcePreferences extends CayenneController {
 
     protected DataSourcePreferencesView view;
     protected PreferenceEditor editor;
-    protected DBConnectionInfo currentDataSource;
+    protected String dataSourceKey;
     protected Map dataSources;
-    protected Map bindings;
 
     public DataSourcePreferences(PreferenceDialog parentController) {
         super(parentController);
 
-        this.view = new DataSourcePreferencesView();
+        this.view = new DataSourcePreferencesView(this);
         this.editor = parentController.getEditor();
-        this.bindings = new HashMap();
-        this.dataSources = new HashMap();
 
         // init view data
-        Collection sources = getDataSourceDomain().getPreferenceDetails(
-                DBConnectionInfo.class);
+        this.dataSources = getDataSourceDomain().getDetailsMap(DBConnectionInfo.class);
 
-        int len = sources.size();
-        Object[] keys = new Object[len];
-        Iterator it = sources.iterator();
-        for (int i = 0; i < len; i++) {
-            DBConnectionInfo info = (DBConnectionInfo) it.next();
-            keys[i] = info.getKey();
-            dataSources.put(keys[i], info);
-        }
-
+        Object[] keys = dataSources.keySet().toArray();
         Arrays.sort(keys);
         DefaultComboBoxModel dataSourceModel = new DefaultComboBoxModel(keys);
         view.getDataSources().setModel(dataSourceModel);
 
-        DefaultComboBoxModel adapterModel = new DefaultComboBoxModel(DbAdapterInfo
-                .getStandardAdapters());
-        adapterModel.insertElementAt("", 0);
-        view.getDataSourceEditor().getAdapters().setModel(adapterModel);
-        view.getDataSourceEditor().getAdapters().setSelectedIndex(0);
-
         initBindings();
 
         // show first item
-        if (len > 0) {
+        if (keys.length > 0) {
             view.getDataSources().setSelectedIndex(0);
             editDataSourceAction();
         }
@@ -153,35 +124,7 @@ public class DataSourcePreferences extends CayenneController {
         builder.bindToAction(view.getRemoveDataSource(), "removeDataSourceAction()");
         builder.bindToAction(view.getTestDataSource(), "testDataSourceAction()");
 
-        view.getDataSources().addItemListener(new ItemListener() {
-
-            public void itemStateChanged(ItemEvent e) {
-                editDataSourceAction();
-            }
-        });
-
-        DocumentDataObjectBinding urlBinding = new DocumentDataObjectBinding("url");
-        urlBinding.attach(view.getDataSourceEditor().getUrl());
-        bindings.put(urlBinding.property, urlBinding);
-
-        DocumentDataObjectBinding passwordBinding = new DocumentDataObjectBinding(
-                "password");
-        passwordBinding.attach(view.getDataSourceEditor().getPassword());
-        bindings.put(passwordBinding.property, passwordBinding);
-
-        DocumentDataObjectBinding userNameBinding = new DocumentDataObjectBinding(
-                "userName");
-        userNameBinding.attach(view.getDataSourceEditor().getUserName());
-        bindings.put(userNameBinding.property, userNameBinding);
-
-        DocumentDataObjectBinding driverBinding = new DocumentDataObjectBinding(
-                "jdbcDriver");
-        driverBinding.attach(view.getDataSourceEditor().getDriver());
-        bindings.put(driverBinding.property, driverBinding);
-
-        ComboDataObjectBinding adapterBinding = new ComboDataObjectBinding("dbAdapter");
-        adapterBinding.attach(view.getDataSourceEditor().getAdapters());
-        bindings.put(adapterBinding.property, adapterBinding);
+        builder.bindToComboSelection(view.getDataSources(), "dataSourceKey");
     }
 
     public Domain getDataSourceDomain() {
@@ -194,6 +137,19 @@ public class DataSourcePreferences extends CayenneController {
 
     public Map getDataSources() {
         return dataSources;
+    }
+
+    public String getDataSourceKey() {
+        return dataSourceKey;
+    }
+
+    public void setDataSourceKey(String dataSourceKey) {
+        this.dataSourceKey = dataSourceKey;
+        editDataSourceAction();
+    }
+
+    public DBConnectionInfo getConnectionInfo() {
+        return (DBConnectionInfo) dataSources.get(dataSourceKey);
     }
 
     /**
@@ -221,7 +177,8 @@ public class DataSourcePreferences extends CayenneController {
     public void duplicateDataSourceAction() {
         Object selected = view.getDataSources().getSelectedItem();
         if (selected != null) {
-            DataSourceDuplicator wizard = new DataSourceDuplicator(this, selected.toString());
+            DataSourceDuplicator wizard = new DataSourceDuplicator(this, selected
+                    .toString());
             DBConnectionInfo dataSource = wizard.startupAction();
 
             if (dataSource != null) {
@@ -236,41 +193,42 @@ public class DataSourcePreferences extends CayenneController {
         }
     }
 
+    /**
+     * Removes current DataSource.
+     */
     public void removeDataSourceAction() {
-        Object selected = view.getDataSources().getSelectedItem();
-        if (selected != null) {
-            editor.deleteDetail(getDataSourceDomain(), selected.toString());
-            dataSources.remove(selected);
+        String key = getDataSourceKey();
+        if (key != null) {
+            editor.deleteDetail(getDataSourceDomain(), key);
+            dataSources.remove(key);
+
             Object[] keys = dataSources.keySet().toArray();
             Arrays.sort(keys);
             view.getDataSources().setModel(new DefaultComboBoxModel(keys));
-            view.getDataSources().setSelectedItem("");
-            editDataSourceAction();
+            editDataSourceAction(keys.length > 0 ? keys[0] : null);
         }
     }
 
+    /**
+     * Opens specified DataSource in the editor.
+     */
     public void editDataSourceAction(Object dataSourceKey) {
         view.getDataSources().setSelectedItem(dataSourceKey);
         editDataSourceAction();
     }
 
+    /**
+     * Opens current DataSource in the editor.
+     */
     public void editDataSourceAction() {
-        Object selected = view.getDataSources().getSelectedItem();
-
-        currentDataSource = (DBConnectionInfo) dataSources.get(selected);
-        DataSourceEditorView subview = view.getDataSourceEditor();
-
-        // update bindings
-        Iterator it = bindings.values().iterator();
-        while (it.hasNext()) {
-            DataObjectBinding binding = (DataObjectBinding) it.next();
-            binding.setObject(currentDataSource);
-        }
-
-        subview.setEnabled(currentDataSource != null);
+        this.view.getDataSourceEditor().setConnectionInfo(getConnectionInfo());
     }
 
+    /**
+     * Tries to establish a DB connection, reporting the status of this operation.
+     */
     public void testDataSourceAction() {
+        DBConnectionInfo currentDataSource = getConnectionInfo();
         if (currentDataSource == null) {
             return;
         }
@@ -322,108 +280,6 @@ public class DataSourcePreferences extends CayenneController {
             JOptionPane.showMessageDialog(null, "Error connecting to DB: "
                     + th.getLocalizedMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
             return;
-        }
-    }
-
-    abstract class DataObjectBinding {
-
-        DataObject object;
-        String property;
-        boolean disableUpdate;
-
-        DataObjectBinding(String property) {
-            this.property = property;
-        }
-
-        void setObject(DataObject object) {
-            this.object = object;
-
-            this.disableUpdate = true;
-
-            try {
-                updateView(object != null ? object.readProperty(property) : null);
-            }
-            finally {
-                disableUpdate = false;
-            }
-        }
-
-        abstract void updateView(Object value);
-    }
-
-    class ComboDataObjectBinding extends DataObjectBinding implements ItemListener {
-
-        JComboBox comboBox;
-
-        ComboDataObjectBinding(String property) {
-            super(property);
-        }
-
-        void updateView(Object value) {
-            if (value != null) {
-                this.comboBox.setSelectedItem(value.toString());
-            }
-            else {
-                this.comboBox.setSelectedIndex(-1);
-            }
-        }
-
-        void attach(JComboBox comboBox) {
-            this.comboBox = comboBox;
-            comboBox.addItemListener(this);
-        }
-
-        public void itemStateChanged(ItemEvent e) {
-            if (disableUpdate || object == null) {
-                return;
-            }
-
-            Object item = e.getItem();
-            object.writeProperty(property, item);
-        }
-    }
-
-    class DocumentDataObjectBinding extends DataObjectBinding implements DocumentListener {
-
-        JTextComponent textField;
-
-        DocumentDataObjectBinding(String property) {
-            super(property);
-        }
-
-        void updateView(Object value) {
-            this.textField.setText(value != null ? value.toString() : null);
-        }
-
-        void attach(JTextComponent textField) {
-            textField.getDocument().addDocumentListener(this);
-            this.textField = textField;
-        }
-
-        public void changedUpdate(DocumentEvent e) {
-            writeChange(e);
-        }
-
-        public void insertUpdate(DocumentEvent e) {
-            writeChange(e);
-        }
-
-        public void removeUpdate(DocumentEvent e) {
-            writeChange(e);
-        }
-
-        void writeChange(DocumentEvent e) {
-            if (disableUpdate || object == null) {
-                return;
-            }
-
-            try {
-                String text = e.getDocument().getText(0, e.getDocument().getLength());
-                object.writeProperty(property, text.length() > 0 ? text : null);
-            }
-            catch (BadLocationException ex) {
-                throw new PreferenceException("Invalid text location", ex);
-            }
         }
     }
 

@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,50 +53,86 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.awt.Component;
 
-import javax.sql.DataSource;
+import javax.swing.DefaultComboBoxModel;
 
-import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
+import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
+import org.objectstyle.cayenne.swing.BindingBuilder;
+import org.objectstyle.cayenne.swing.ObjectBinding;
 
 /**
- * ProjectDataSource is a DataSource implementation used by the project model.
+ * A reusable editor for DBConnectionInfo object.
+ * 
+ * @author Andrei Adamchik
  */
-public class ProjectDataSource implements DataSource {
+public class DBConnectionInfoEditor extends CayenneController {
 
-    protected DataSourceInfo info;
+    // transient placeholder to display disabled form
+    private static final DBConnectionInfo emptyInfo = new DBConnectionInfo();
 
-    public ProjectDataSource(DataSourceInfo info) {
-        this.info = info;
+    protected DBConnectionInfoEditorView view;
+    protected DBConnectionInfo connectionInfo;
+    protected ObjectBinding[] bindings;
+
+    public DBConnectionInfoEditor(CayenneController parent) {
+        super(parent);
+
+        this.view = new DBConnectionInfoEditorView();
+        initBindings();
     }
 
-    public DataSourceInfo getDataSourceInfo() {
-        return info;
+    public Component getView() {
+        return view;
     }
 
-    public Connection getConnection() throws SQLException {
-        throw new SQLException("Method not implemented");
+    protected void initBindings() {
+        this.view.setEnabled(false);
+
+        DefaultComboBoxModel adapterModel = new DefaultComboBoxModel(DbAdapterInfo
+                .getStandardAdapters());
+        adapterModel.insertElementAt("", 0);
+        view.getAdapters().setModel(adapterModel);
+        view.getAdapters().setSelectedIndex(0);
+
+        BindingBuilder builder = new BindingBuilder(
+                getApplication().getBindingFactory(),
+                this);
+
+        bindings = new ObjectBinding[5];
+        bindings[0] = builder.bindToComboSelection(
+                view.getAdapters(),
+                "connectionInfo.dbAdapter");
+        bindings[1] = builder.bindToTextField(
+                view.getUserName(),
+                "connectionInfo.userName");
+        bindings[2] = builder.bindToTextField(
+                view.getPassword(),
+                "connectionInfo.password");
+        bindings[3] = builder.bindToTextField(
+                view.getDriver(),
+                "connectionInfo.jdbcDriver");
+        bindings[4] = builder.bindToTextField(view.getUrl(), "connectionInfo.url");
     }
 
-    public Connection getConnection(String username, String password) throws SQLException {
-        throw new SQLException("Method not implemented");
+    public DBConnectionInfo getConnectionInfo() {
+        return connectionInfo != null ? connectionInfo : emptyInfo;
     }
 
-    public PrintWriter getLogWriter() throws SQLException {
-        return new PrintWriter(System.out);
+    public void setConnectionInfo(DBConnectionInfo connectionInfo) {
+        this.connectionInfo = connectionInfo;
+        refreshView();
     }
 
-    public void setLogWriter(PrintWriter out) throws SQLException {
-    }
+    protected void refreshView() {
+        getView().setEnabled(connectionInfo != null);
 
-    public void setLoginTimeout(int seconds) throws SQLException {
-    }
-
-    public int getLoginTimeout() throws SQLException {
-        throw new SQLException("Method not implemented");
+        for (int i = 0; i < bindings.length; i++) {
+            bindings[i].updateView();
+        }
     }
 }

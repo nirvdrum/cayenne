@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,97 +53,66 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.dialog.pref;
+package org.objectstyle.cayenne.modeler.action;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.awt.event.ActionEvent;
 
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.dialog.db.GenerateDbController;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.project.ProjectPath;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
-/**
+/** 
+ * Action that generates database tables from a DataMap.
+ * 
+ * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DataSourceEditorView extends JPanel {
+public class GenerateDBAction extends CayenneAction {
 
-    protected JComboBox adapters;
-    protected JTextField driver;
-    protected JTextField url;
-    protected JTextField userName;
-    protected JPasswordField password;
-
-    protected Collection labels;
-
-    public DataSourceEditorView() {
-        adapters = new JComboBox();
-        adapters.setEditable(true);
-
-        driver = new JTextField();
-        url = new JTextField();
-        userName = new JTextField();
-        password = new JPasswordField();
-        labels = new ArrayList();
-
-        // assemble
-        FormLayout layout = new FormLayout(
-                "right:pref, 3dlu, fill:max(50dlu;pref):grow",
-                "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.appendSeparator("DataSource Information");
-        labels.add(builder.append("Adapter:", adapters));
-        labels.add(builder.append("JDBC Driver:", driver));
-        labels.add(builder.append("DB URL:", url));
-        labels.add(builder.append("User Name:", userName));
-        labels.add(builder.append("Password:", password));
-
-        this.setLayout(new BorderLayout());
-        this.add(builder.getPanel(), BorderLayout.CENTER);
+    public static String getActionName() {
+        return "Generate Database Schema";
     }
 
-    public JComboBox getAdapters() {
-        return adapters;
+    public GenerateDBAction(Application application) {
+        super(getActionName(), application);
     }
 
-    public JTextField getDriver() {
-        return driver;
+    public void performAction(ActionEvent e) {
+        generateDb();
     }
 
-    public JPasswordField getPassword() {
-        return password;
-    }
+    protected void generateDb() {
 
-    public JTextField getUrl() {
-        return url;
-    }
+        DataNode node = getProjectController().getCurrentDataNode();
+        DataMap map = getProjectController().getCurrentDataMap();
 
-    public JTextField getUserName() {
-        return userName;
-    }
-
-    public void setEnabled(boolean enabled) {
-        if (isEnabled() != enabled) {
-            super.setEnabled(enabled);
-            Iterator it = labels.iterator();
-            while (it.hasNext()) {
-                Component c = (Component) it.next();
-                c.setEnabled(enabled);
-            }
-
-            adapters.setEnabled(enabled);
-            driver.setEnabled(enabled);
-            url.setEnabled(enabled);
-            userName.setEnabled(enabled);
-            password.setEnabled(enabled);
+        // sanity check
+        if (map == null) {
+            throw new IllegalStateException("No current DataMap selected.");
         }
+
+        // detect default node even if one is not selected
+        if (node == null) {
+            node =
+                ModelerUtil.getNodeLinkedToMap(getProjectController().getCurrentDataDomain(), map);
+        }
+
+        // start scope-based controller
+        new GenerateDbController(node, map).startup();
+    }
+
+    /**
+    * Returns <code>true</code> if path contains a DataMap object.
+    */
+    public boolean enableForPath(ProjectPath path) {
+        if (path == null) {
+            return false;
+        }
+
+        return path.firstInstanceOf(DataMap.class) != null;
     }
 }

@@ -227,7 +227,7 @@ public class ProjectController extends CayenneController {
             throw new CayenneRuntimeException("No DataMap selectd");
         }
 
-        return (DataMapDefaults) getPreferenceDomainForDataDomain().getPreferenceDetail(
+        return (DataMapDefaults) getPreferenceDomainForDataDomain().getDetail(
                 map.getName(),
                 DataMapDefaults.class,
                 true);
@@ -243,8 +243,7 @@ public class ProjectController extends CayenneController {
             throw new CayenneRuntimeException("No DataNode selected");
         }
 
-        // TODO: this doesn't take into account that there may be multiple domains...
-        return (DataNodeDefaults) getPreferenceDomainForDataDomain().getPreferenceDetail(
+        return (DataNodeDefaults) getPreferenceDomainForDataDomain().getDetail(
                 node.getName(),
                 DataNodeDefaults.class,
                 true);

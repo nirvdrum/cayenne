@@ -277,9 +277,9 @@ public class DataNodeEditor extends CayenneController {
             }
         });
 
-        BindingBuilder builder = new BindingBuilder(getApplication().getBindingFactory());
-
-        builder.setContext(this);
+        BindingBuilder builder = new BindingBuilder(
+                getApplication().getBindingFactory(),
+                this);
 
         localDataSourceBinding = builder.bindToComboSelection(
                 view.getLocalDataSources(),
@@ -298,10 +298,10 @@ public class DataNodeEditor extends CayenneController {
         // one way bindings
         builder.bindToAction(
                 view.getConfigLocalDataSources(),
-                "showDataSourceConfigAction()");
+                "dataSourceConfigAction()");
     }
 
-    public void showDataSourceConfigAction() {
+    public void dataSourceConfigAction() {
         PreferenceDialog prefs = new PreferenceDialog(this);
         prefs.showDataSourceEditorAction(view.getLocalDataSources().getSelectedItem());
         prefs.startupAction();
@@ -312,7 +312,7 @@ public class DataNodeEditor extends CayenneController {
     protected void refreshLocalDataSources() {
         localDataSources.clear();
 
-        Collection sources = getApplication().getPreferenceDomain().getPreferenceDetails(
+        Collection sources = getApplication().getPreferenceDomain().getDetails(
                 DBConnectionInfo.class);
 
         int len = sources.size();

@@ -127,7 +127,7 @@ public abstract class CayennePreferenceEditor implements PreferenceEditor {
 
     public PreferenceDetail deleteDetail(Domain domain, String key) {
         domain = editableInstance(domain);
-        PreferenceDetail detail = domain.getPreferenceDetail(key, false);
+        PreferenceDetail detail = domain.getDetail(key, false);
 
         if (detail != null) {
             DomainPreference preference = detail.getDomainPreference();

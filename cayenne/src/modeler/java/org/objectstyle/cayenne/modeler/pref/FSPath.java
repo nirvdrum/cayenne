@@ -64,7 +64,7 @@ public class FSPath extends _FSPath {
     public static final String LAST_DIR_PREF_KEY = "lastDir";
 
     public static FSPath getPreference(Domain domain) {
-        return (FSPath) domain.getPreferenceDetail(
+        return (FSPath) domain.getDetail(
                 FSPath.LAST_DIR_PREF_KEY,
                 FSPath.class,
                 true);

@@ -84,9 +84,9 @@ import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
-import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
+import org.objectstyle.cayenne.modeler.action.GenerateDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
-import org.objectstyle.cayenne.modeler.action.ImportDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportDBAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
@@ -196,11 +196,11 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         projectMenu.addSeparator();
         projectMenu.add(getAction(RemoveAction.getActionName()).buildMenu());
 
-        toolMenu.add(getAction(ImportDbAction.getActionName()).buildMenu());
+        toolMenu.add(getAction(ImportDBAction.getActionName()).buildMenu());
         toolMenu.add(getAction(ImportEOModelAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
         toolMenu.add(getAction(GenerateClassesAction.getActionName()).buildMenu());
-        toolMenu.add(getAction(GenerateDbAction.getActionName()).buildMenu());
+        toolMenu.add(getAction(GenerateDBAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
         toolMenu.add(getAction(ConfigurePreferencesAction.getActionName()).buildMenu());
 
@@ -355,7 +355,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         getAction(CreateDerivedDbEntityAction.getActionName()).setEnabled(true);
         getAction(CreateQueryAction.getActionName()).setEnabled(true);
         getAction(CreateProcedureAction.getActionName()).setEnabled(true);
-        getAction(GenerateDbAction.getActionName()).setEnabled(true);
+        getAction(GenerateDBAction.getActionName()).setEnabled(true);
 
         // reset
         getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");

@@ -171,7 +171,7 @@ public class Domain extends _Domain {
     /**
      * Returns all generic preferences for the domain.
      */
-    public List getPreferenceDetails() {
+    public List getDetails() {
         Collection domainPrefs = getPreferences();
 
         if (domainPrefs.isEmpty()) {
@@ -191,14 +191,14 @@ public class Domain extends _Domain {
     /**
      * Returns a preference object used to read/write properties.
      */
-    public PreferenceDetail getPreferenceDetail(String key, boolean create) {
-        return getPreferenceDetail(key, null, create);
+    public PreferenceDetail getDetail(String key, boolean create) {
+        return getDetail(key, null, create);
     }
 
     /**
      * Returns all stored PreferenceDetails for a given class in this Domain.
      */
-    public Collection getPreferenceDetails(Class javaClass) {
+    public Collection getDetails(Class javaClass) {
         // extract preference ids, and then fetch matching prefrences...
         Collection preferences = getPreferences();
         if (preferences.isEmpty()) {
@@ -224,15 +224,32 @@ public class Domain extends _Domain {
     }
 
     /**
+     * Returns preference details keyed using their master key.
+     */
+    public Map getDetailsMap(Class javaClass) {
+        Collection details = getDetails(javaClass);
+        Map map = new HashMap();
+
+        if (details.isEmpty()) {
+            return map;
+        }
+
+        Iterator it = details.iterator();
+        while (it.hasNext()) {
+            PreferenceDetail detail = (PreferenceDetail) it.next();
+            map.put(detail.getKey(), detail);
+        }
+
+        return map;
+    }
+
+    /**
      * Locates a PreferenceDetail in a current Domain for a given key and Java class. If
      * no such preference found, and "create" is true, a new preference is created. If an
      * existing preference class does not match supplied class, PreferenceException is
      * thrown.
      */
-    public PreferenceDetail getPreferenceDetail(
-            String key,
-            Class javaClass,
-            boolean create) {
+    public PreferenceDetail getDetail(String key, Class javaClass, boolean create) {
         DomainPreference preferenceLink = getDomainPreference(key);
 
         if (preferenceLink == null) {

@@ -107,7 +107,7 @@ public abstract class CayennePreferenceService implements PreferenceService {
 
             // save to preferences
             getPreferenceDomain()
-                    .getPreferenceDetail(SAVE_INTERVAL_KEY, true)
+                    .getDetail(SAVE_INTERVAL_KEY, true)
                     .setIntProperty(SAVE_INTERVAL_KEY, ms);
         }
     }
@@ -178,7 +178,7 @@ public abstract class CayennePreferenceService implements PreferenceService {
      */
     protected void initPreferences() {
         Domain preferenceDomain = getPreferenceDomain();
-        PreferenceDetail saveInterval = preferenceDomain.getPreferenceDetail(
+        PreferenceDetail saveInterval = preferenceDomain.getDetail(
                 SAVE_INTERVAL_KEY,
                 false);
         if (saveInterval != null) {
