@@ -74,6 +74,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -84,7 +85,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataMapListener;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
-import org.objectstyle.cayenne.map.event.DataNodeListener;
+import org.objectstyle.cayenne.map.event.DataNodeListener;	
 import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.DomainListener;
@@ -123,6 +124,9 @@ public class BrowseView
         ObjEntityDisplayListener,
         DbEntityListener,
         DbEntityDisplayListener {
+
+    private static Logger logObj = Logger.getLogger(BrowseView.class);
+    
     protected EventController mediator;
     protected ProjectTree browseTree;
     protected DefaultMutableTreeNode rootNode;
@@ -185,7 +189,7 @@ public class BrowseView
     }
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-        if (e.getSource() == this || e.isDataNodeChanged() == false)
+        if (e.getSource() == this || !e.isDataNodeChanged())
             return;
 
         showNode(new Object[] { e.getDomain(), e.getDataNode()});
@@ -251,7 +255,8 @@ public class BrowseView
                 for (int i = 0; i < mapCount; i++) {
                     boolean found = false;
                     for (int j = 0; j < node.getChildCount(); j++) {
-                        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(j);
+                        DefaultMutableTreeNode child =
+                            (DefaultMutableTreeNode) node.getChildAt(j);
                         if (maps.get(i) == child.getUserObject()) {
                             found = true;
                             break;
@@ -262,7 +267,8 @@ public class BrowseView
                         break;
                     }
                 } // End for(i)
-            } else if (mapCount < node.getChildCount()) {
+            }
+            else if (mapCount < node.getChildCount()) {
                 for (int j = 0; j < node.getChildCount(); j++) {
                     boolean found = false;
                     DefaultMutableTreeNode child;
@@ -422,10 +428,10 @@ public class BrowseView
                     mediator.getCurrentDataDomain(),
                     mediator.getCurrentDataMap()});
 
-        if(mapNode == null) {
-        	return;
+        if (mapNode == null) {
+            return;
         }
-        
+
         currentNode = new DefaultMutableTreeNode(entity, false);
         fixEntityPosition(mapNode, currentNode);
         showNode(currentNode);
@@ -514,7 +520,7 @@ public class BrowseView
             return;
         }
 
-		this.showNode(node);
+        this.showNode(node);
     }
 
     protected void updateNode(Object[] path) {
@@ -565,7 +571,8 @@ public class BrowseView
         if (obj instanceof DataDomain) {
             mediator.fireDomainDisplayEvent(
                 new DomainDisplayEvent(this, (DataDomain) obj));
-        } else if (obj instanceof DataMap) {
+        }
+        else if (obj instanceof DataMap) {
             if (data.length == 3) {
                 mediator.fireDataMapDisplayEvent(
                     new DataMapDisplayEvent(
@@ -573,14 +580,16 @@ public class BrowseView
                         (DataMap) obj,
                         (DataDomain) data[data.length - 3],
                         (DataNode) data[data.length - 2]));
-            } else if (data.length == 2) {
+            }
+            else if (data.length == 2) {
                 mediator.fireDataMapDisplayEvent(
                     new DataMapDisplayEvent(
                         this,
                         (DataMap) obj,
                         (DataDomain) data[data.length - 2]));
             }
-        } else if (obj instanceof DataNode) {
+        }
+        else if (obj instanceof DataNode) {
             if (data.length == 2) {
                 mediator.fireDataNodeDisplayEvent(
                     new DataNodeDisplayEvent(
@@ -588,21 +597,24 @@ public class BrowseView
                         (DataDomain) data[data.length - 2],
                         (DataNode) obj));
             }
-        } else if (obj instanceof Entity) {
+        }
+        else if (obj instanceof Entity) {
             EntityDisplayEvent e = new EntityDisplayEvent(this, (Entity) obj);
             e.setUnselectAttributes(true);
             if (data.length == 4) {
                 e.setDataMap((DataMap) data[data.length - 2]);
                 e.setDomain((DataDomain) data[data.length - 4]);
                 e.setDataNode((DataNode) data[data.length - 3]);
-            } else if (data.length == 3) {
+            }
+            else if (data.length == 3) {
                 e.setDataMap((DataMap) data[data.length - 2]);
                 e.setDomain((DataDomain) data[data.length - 3]);
             }
 
             if (obj instanceof ObjEntity) {
                 mediator.fireObjEntityDisplayEvent(e);
-            } else if (obj instanceof DbEntity) {
+            }
+            else if (obj instanceof DbEntity) {
                 mediator.fireDbEntityDisplayEvent(e);
             }
         }
@@ -735,17 +747,22 @@ public class BrowseView
             Object obj = node.getUserObject();
             if (obj instanceof DataDomain) {
                 setIcon(domainIcon);
-            } else if (obj instanceof DataNode) {
+            }
+            else if (obj instanceof DataNode) {
                 setIcon(nodeIcon);
-            } else if (obj instanceof DataMap) {
+            }
+            else if (obj instanceof DataMap) {
                 setIcon(mapIcon);
-            } else if (obj instanceof Entity) {
+            }
+            else if (obj instanceof Entity) {
                 Entity ent = (Entity) obj;
                 if (ent instanceof DerivedDbEntity) {
                     setIcon(derivedDbEntityIcon);
-                } else if (ent instanceof DbEntity) {
+                }
+                else if (ent instanceof DbEntity) {
                     setIcon(dbEntityIcon);
-                } else if (ent instanceof ObjEntity) {
+                }
+                else if (ent instanceof ObjEntity) {
                     setIcon(objEntityIcon);
                 }
             }

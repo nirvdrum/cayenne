@@ -123,7 +123,7 @@ public class ProjectPath {
             newPath[path.length] = object;
             return new ProjectPath(newPath);
         } else {
-            return new ProjectPath();
+            return this;
         }
     }
 
