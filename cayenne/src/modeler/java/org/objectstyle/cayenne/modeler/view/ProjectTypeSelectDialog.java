@@ -87,6 +87,9 @@ public class ProjectTypeSelectDialog extends SPanel {
         init();
     }
 
+    /**
+     * Lays out the dialog.
+     */
     protected void init() {
         setDisplayMode(SwingView.MODAL_DIALOG);
         setTitle(ModelerUtil.buildTitle("New Project"));
@@ -104,6 +107,11 @@ public class ProjectTypeSelectDialog extends SPanel {
             BorderLayout.SOUTH);
     }
 
+    /**
+     * Creates a subpanel for a project type. If <code>disabled</code> is
+     * true, panel is rendered inactive, so that a project of this type
+     * could not be created.
+     */
     protected JPanel buildProjectPanel(String propsPrefix, boolean disabled) {
         String name = ModelerStrings.getString(propsPrefix + ".name");
         String desc = ModelerStrings.getString(propsPrefix + ".desc");

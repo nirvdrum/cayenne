@@ -74,22 +74,31 @@ import org.objectstyle.cayenne.project.ProjectTraversalHandler;
  * @author Andrei Adamchik
  */
 public class ProjectTreeWrapper {
-	protected static ProjectTreeWrapper instance = new ProjectTreeWrapper();
-	
-	/**
-	 * Returns shared instance.
-	 */
-	public static ProjectTreeWrapper getInstance() {
-		return instance;
-	}
+    protected static ProjectTreeWrapper instance = new ProjectTreeWrapper();
 
     /**
-     * Creates a ProjectTree wrapping Cayenne project.
+     * Returns shared instance.
+     */
+    public static ProjectTreeWrapper getInstance() {
+        return instance;
+    }
+
+    /**
+     * Creates a tree of Swing TreeNodes wrapping Cayenne project.
+     * Returns the root node of the tree.
      */
     public DefaultMutableTreeNode wrapProject(Project project) {
-    	TraversalHelper helper = new TraversalHelper();
-    	new ProjectTraversal(helper).traverse(project.getRootNode());
-    	return helper.getRootNode();
+        return wrapProjectNode(project.getRootNode());
+    }
+
+    /**
+     * Creates a tree of Swing TreeNodes wrapping Cayenne project object.
+     * Returns the root node of the tree.
+     */
+    public DefaultMutableTreeNode wrapProjectNode(Object node) {
+        TraversalHelper helper = new TraversalHelper();
+        new ProjectTraversal(helper).traverse(node);
+        return helper.getRootNode();
     }
 
     class TraversalHelper implements ProjectTraversalHandler {
@@ -99,25 +108,25 @@ public class ProjectTreeWrapper {
         public TraversalHelper() {
             this.nodesMap = new HashMap();
         }
-        
+
         public DefaultMutableTreeNode getRootNode() {
-        	return rootNode;
+            return rootNode;
         }
 
         public void projectNode(Object[] nodePath) {
-        	Object parent = ProjectTraversal.objectParentFromPath(nodePath);
-        	Object nodeObj = ProjectTraversal.objectFromPath(nodePath);
-        	DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
-        	
-        	if(parent == null) {
-        		rootNode = node;
-        	}
-        	else {
-        		DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode)nodesMap.get(parent);
-        		nodeParent.add(node);
-        	}
-        	
-        	nodesMap.put(nodeObj, node);            
+            Object parent = ProjectTraversal.objectParentFromPath(nodePath);
+            Object nodeObj = ProjectTraversal.objectFromPath(nodePath);
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
+
+            if (parent == null) {
+                rootNode = node;
+            } else {
+                DefaultMutableTreeNode nodeParent =
+                    (DefaultMutableTreeNode) nodesMap.get(parent);
+                nodeParent.add(node);
+            }
+
+            nodesMap.put(nodeObj, node);
         }
 
         public boolean shouldReadChildren(Object node, Object[] parentPath) {
