@@ -29,7 +29,7 @@ public class Main {
         this.ctxt = createContext();
     }
 
-    public void runTutorial(String galleryPattern) {
+    public void runTutorial(String galleryPattern) {        
         Gallery gallery = findGallery(galleryPattern);
         if (gallery != null) {
             addArtist(gallery);

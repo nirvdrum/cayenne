@@ -41,6 +41,7 @@
 <source>
 # cd somedir
 # mkdir cayenne-tutorial
+# cd cayenne-tutorial
 </source>
 
     	</subsection>
@@ -64,9 +65,18 @@
     			<li><a href="../../tutorial/0/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
-    		These XML files should be copied to the project directory. DataSource connection info
-    		should be changed to reflect the information specific to the user database. This can be 
-    		done either manually or by using CayenneModeler (recommended).
+    		These XML files should be copied to the project directory. To perform any further
+    		modifications to these files, user should open <code>cayenne.xml</code> file
+    		in CayenneModeler (after opening a project, select green "datanode" icon on the left). 
+    		Of course changes can be done using a simple text editor
+    		as well. The following changes may be needed in order to run the tutorial:
+    		
+    		<ul>
+    			<li>if the database used is NOT MySQL, <code>cayenne.xml</code>
+    			must be modified to use <code>node adapter</code> for the appropriate database.</li>
+    			<li><code>driverinfo.xml</code> must be modified to reflect connection and
+    			driver information of the test database.</li>
+    		</ul> 
     		</p>
     	</subsection>
     	
@@ -94,7 +104,10 @@
     	</subsection>
     	
     	<subsection name="3.2.6 Compile and Run the Application" anchor="6">
-    		<p>...</p>
+    		<p>Compile the source code:</p>
+<source>
+# java 
+</source>
     	</subsection>
     	</subsection>
     </section>

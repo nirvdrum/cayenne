@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.io.*;
 import java.awt.*;
@@ -88,7 +88,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 	// Columns
 	public static final int NAME 		= 0;
 	public static final int TARGET 		= 1;
-	public static final int FOREIGN_KEY = 2;
+	public static final int TO_DEPENDENT_KEY = 2;
 	public static final int CARDINALITY = 3;
 	
 	/** To provide reference to String class. */	
@@ -121,10 +121,10 @@ class DbRelationshipTableModel extends AbstractTableModel {
 				return "Name";
 			case TARGET:
 				return "Target";
-			case FOREIGN_KEY:
-				return "Foreign key";
+			case TO_DEPENDENT_KEY:
+				return "To Dep PK";
 			case CARDINALITY:
-				return "To many";
+				return "To Many";
 			default:
 				return null;
 		}// End switch
@@ -132,7 +132,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 
 	public Class getColumnClass(int col) {
 		switch (col) {
-			case FOREIGN_KEY:
+			case TO_DEPENDENT_KEY:
 			case CARDINALITY:
 				return bool.getClass();
 			default:
@@ -167,7 +167,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 					return temp.getName();
 				else
 					return null;
-			case FOREIGN_KEY:
+			case TO_DEPENDENT_KEY:
 				return new Boolean(rel.isToDependentPK());
 			case CARDINALITY:
 				return new Boolean(rel.isToMany());
@@ -205,7 +205,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
 			mediator.fireDbRelationshipEvent(e);
 		}
-		else if (column == FOREIGN_KEY) {
+		else if (column == TO_DEPENDENT_KEY) {
 			Boolean temp = (Boolean)aValue;
 			rel.setToDependentPK(temp.booleanValue());
 		}
