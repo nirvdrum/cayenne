@@ -105,7 +105,7 @@ public class DbLoader {
     /** Creates a unique name for loaded relationship on the given entity. */
     private static String uniqueRelName(Entity entity, String dstName, boolean toMany) {
         int currentSuffix = 1;
-        String baseRelName = defaultRelName(dstName, true);
+        String baseRelName = defaultRelName(dstName, toMany);
         String relName = baseRelName;
 
         while (entity.getRelationship(relName) != null) {
