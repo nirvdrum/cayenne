@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,25 +53,30 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.util.*;
-import java.awt.event.*;
 import java.util.logging.Logger;
+
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.table.*;
+import javax.swing.table.TableColumn;
 
+import org.objectstyle.cayenne.gui.CayenneActionPanel;
 import org.objectstyle.cayenne.gui.PanelFactory;
-import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.CayenneTable;
+import org.objectstyle.cayenne.map.*;
 
-/** Displays DbRelationship-s for the current obj entity. 
-  * @author Michael Misha Shengaout*/
-public class DbRelationshipPane extends JPanel
-implements ActionListener, DbEntityDisplayListener
+/** 
+ * Displays DbRelationship-s for the current obj entity. 
+ * 
+ * @author Michael Misha Shengaout
+ */
+public class DbRelationshipPane extends CayenneActionPanel
+implements DbEntityDisplayListener
 , DbEntityListener, DbRelationshipListener
 , ExistingSelectionProcessor, ListSelectionListener
 , TableModelListener
@@ -109,7 +113,7 @@ implements ActionListener, DbEntityDisplayListener
 		add(panel, BorderLayout.CENTER);
 	}
 	
-	public void actionPerformed(ActionEvent e) {
+	public void performAction(ActionEvent e) {
 		Object src = e.getSource();
 		DbRelationshipTableModel model;
 		model = (DbRelationshipTableModel)table.getModel();

@@ -317,6 +317,10 @@ public abstract class NamedObjectFactory {
 		 * For to-many case it generates name "XXXX_ARRAY". 
 		 */
 		protected String nameBase() {
+			if(target == null) {
+				return "UntitledRel";
+			}
+			
 			String name = target.getName();
 			return (toMany) ? name + "_ARRAY" : "TO_" + name;
 		}

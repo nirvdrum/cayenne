@@ -43,4 +43,7 @@ in DataContext. Corresponding DataContext methods are deprecated.
 14. Added public method DbEntity.getFullyQualifiedName to take advantage of 
 schema information
 
+15. Package org.objectstyle.util is renamed to org.objectstyle.util.cayenne
+
+
 
