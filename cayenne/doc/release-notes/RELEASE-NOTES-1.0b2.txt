@@ -51,3 +51,5 @@ they were generated as to-one). Bug [725995]:
 
   http://sourceforge.net/tracker/index.php?func=detail&aid=725995&group_id=48132&atid=452068 
 
+9. Added ability to put Cayenne files in the web application in an arbitrary configurable 
+location (documentation pending).
