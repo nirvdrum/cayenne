@@ -356,16 +356,15 @@ public class DataContext implements QueryEngine, Serializable {
             ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
             String dbAttrName = attr.getDbAttribute().getName();
 
+          
+        
             Object curVal = anObject.readPropertyDirectly(attrName);
             Object oldVal = oldSnap.get(dbAttrName);
-            Object newVal = snapshot.get(dbAttrName);
-
+            Object newVal = snapshot.get(dbAttrName);        
+        
             // if value not modified, update it from snapshot, 
             // otherwise leave it alone
-            // use reference comparison to detect modifications for speed
-            // this is possible since changing the value even to an equivalent one is 
-            // technically a modfication.... 
-            if (curVal == oldVal && !Util.nullSafeEquals(newVal, curVal)) {
+            if (Util.nullSafeEquals(curVal, oldVal) && !Util.nullSafeEquals(newVal, curVal)) {
                 anObject.writePropertyDirectly(attrName, newVal);
             }
         }
@@ -1231,7 +1230,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /** 
-     * OperationObserver for select queries. Will register bacthes of 
+     * OperationObserver for select queries. Will register batches of 
      * fetched objects with this DataContext.
      */
     class SelectProcessor extends SelectObserver {
