@@ -263,6 +263,12 @@ public class CayenneDataObject implements DataObject {
     }
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
+		if ((val!=null) && (dataContext != val.getDataContext())) {
+			throw new CayenneRuntimeException(
+				"Cannot add object to relationship "
+					+ relName
+					+ " because it is in a different DataContext");
+		}
 		ObjRelationship relationship = this.getRelationshipNamed(relName);
 		//Only create the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
 		//This kind of doubles up the meaning of that flag, so we may need to add another?
@@ -293,6 +299,22 @@ public class CayenneDataObject implements DataObject {
     }
 
     public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
+    	//Three reasons that may mean a check is not needed:
+    	// 1: val==null... dataContext of value is unobtainable, and hence irrelevant
+    	// 2: val==nullValue... the relationship is a toOneDependent, this is functionally 
+    	//		equivalent to the first condition
+    	// 3: this==nullValue... when setting the reverse direction of a toOneDependent 
+    	// 		that is being set to null, this will be nullValue.
+		if ((val != null)
+			&& (val != nullValue)
+			&& (this != nullValue)
+			&& (dataContext != val.getDataContext())) {
+			throw new CayenneRuntimeException(
+				"Cannot set object as destination of relationship "
+					+ relName
+					+ " because it is in a different DataContext");
+		}
+
         DataObject oldTarget = (DataObject) readPropertyDirectly(relName);
         if (oldTarget == val) {
             return;

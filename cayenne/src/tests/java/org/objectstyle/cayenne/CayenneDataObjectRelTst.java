@@ -305,6 +305,35 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 		
 		dc.commitChanges();
 	}
+	
+	public void testCrossContextRelationshipException() {
+		DataContext otherContext = getDomain().createDataContext();
+		//Create this object in one context...
+		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
+		//...and this object in another context
+		Painting painting=(Painting)otherContext.createAndRegisterNewObject("Painting");
+		
+		//Check setting a toOne relationship
+		try {
+			painting.setToArtist(artist);
+			fail("Should have failed to set a cross-context relationship");
+		} catch (CayenneRuntimeException e) {
+			//Fine.. it should  throw an exception
+		}
+		
+		assertNull(painting.getToArtist()); //Make sure it wasn't set
+		
+		//Now try the reverse (toMany) relationship
+		try {
+			artist.addToPaintingArray(painting);
+			fail("Should have failed to add a cross-context relationship");
+		} catch (CayenneRuntimeException e) {
+			//Fine.. it should  throw an exception
+		}
+		
+		assertEquals(0, artist.getPaintingArray().size());
+		
+	}
 
 	
 	private Artist newSavedArtist() {
