@@ -63,18 +63,15 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-/** Handles both standard Java class mapping to JDBC types as well as
-  * custom mapping.
-  * Standard mapping is defined in JDBC documentation (for example at
-  * <a href="http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html">
-  * http://java.sun.com/j2se/1.3/docs/guide/jdbc/getstart/mapping.html</a>)
-  * But it is often rather convenient to have an arbitrary class mapped to 
-  * a JDBC type. For example java.util.Date can be used for mapping to DATE,
-  * TIME and TIMESTAMP. 
-  * 
-  * <p>Class uses singleton model, since mapping is usually shared within
-  * the application. </p>
-  */
+/** 
+ * Contains a map of ExtendedType objects, that serve as handlers for converting
+ * values between Java application and JDBC layer.
+ * 
+ * <p>Class uses singleton model, since mapping is usually shared within the
+ * application.</p>
+ * 
+ * @author Andrei Adamchik
+ */
 public class ExtendedTypeMap {
     private static Logger logObj = Logger.getLogger(ExtendedTypeMap.class);
 
@@ -109,6 +106,11 @@ public class ExtendedTypeMap {
         return defaultType;
     }
 
+    /**
+     * Returns a type registered for the class name. If no such type exists,
+     * returns the default type. It is guaranteed that this method retirns a
+     * non-null ExtendedType instance.
+     */
     public ExtendedType getRegisteredType(String javaClassName) {
         ExtendedType type = (ExtendedType)typeMap.get(javaClassName);
         return (type != null) ? type : defaultType;

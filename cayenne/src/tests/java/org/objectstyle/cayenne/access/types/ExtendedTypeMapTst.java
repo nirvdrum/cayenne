@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.types;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -103,6 +104,9 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
             return "test.test.Test";
         }
 
+        /**
+         * @deprecated 
+         */
         public Object toJdbcObject(Object val, int type) throws Exception {
             return new Object();
         }
@@ -111,6 +115,16 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
             Object val = rs.getObject(index);
             return (rs.wasNull()) ? null : val;
         }
+
+        public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision)
+            throws Exception {
+        }
+
     }
 }
 

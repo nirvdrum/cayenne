@@ -75,7 +75,7 @@ public class SybaseAdapter extends JdbcAdapter {
 
     public SybaseAdapter() {
         super();
-        typeConverter.registerType(new CharType());
+        extendedTypes.registerType(new CharType());
     }
     
     /** 

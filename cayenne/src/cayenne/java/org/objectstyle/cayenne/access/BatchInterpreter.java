@@ -97,19 +97,20 @@ public class BatchInterpreter {
         this.queryBuilder = queryBuilder;
     }
 
-    public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
+    public int[] execute(BatchQuery batch, Connection connection)
+        throws SQLException, CayenneException {
         List dbAttributes = batch.getDbAttributes();
         int attributeCount = dbAttributes.size();
         int[] attributeTypes = new int[attributeCount];
         int[] attributeScales = new int[attributeCount];
         for (int i = 0; i < attributeCount; i++) {
-            DbAttribute attribute = (DbAttribute)dbAttributes.get(i);
+            DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
             attributeTypes[i] = attribute.getType();
             attributeScales[i] = attribute.getPrecision();
         }
         String query = queryBuilder.query(batch);
         PreparedStatement st = null;
-        ExtendedTypeMap typeConverter = adapter.getTypeConverter();
+        ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
         try {
             st = connection.prepareStatement(query);
             batch.reset();
@@ -119,11 +120,18 @@ public class BatchInterpreter {
                 for (int i = 0; i < attributeCount; i++) {
                     Object value = batch.getObject(i);
                     int type = attributeTypes[i];
-                    if (value == null) st.setNull(i + 1, type);
+                    if (value == null)
+                        st.setNull(i + 1, type);
                     else {
-                        ExtendedType map = typeConverter.getRegisteredType(value.getClass().getName());
-                        Object jdbcValue = (map == null) ? value : map.toJdbcObject(value, type);
-                        st.setObject(i + 1, jdbcValue, type, attributeScales[i]);
+                        ExtendedType typeProcessor =
+                            typeConverter.getRegisteredType(
+                                value.getClass().getName());
+                        typeProcessor.setJdbcObject(
+                            st,
+                            value,
+                            i + 1,
+                            type,
+                            attributeScales[i]);
                     }
                 }
                 results[index++] = st.executeUpdate();
@@ -136,9 +144,11 @@ public class BatchInterpreter {
         } catch (Exception e) {
             throw new CayenneException(e);
         } finally {
-            try {if (st != null) st.close();}
-            catch (Exception e) {}
+            try {
+                if (st != null)
+                    st.close();
+            } catch (Exception e) {
+            }
         }
     }
 }
-

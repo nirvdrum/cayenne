@@ -64,15 +64,11 @@ import org.apache.log4j.Logger;
 /** 
  * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
  */
-public class CharType implements ExtendedType {
+public class CharType extends AbstractType {
     private static Logger logObj = Logger.getLogger(CharType.class);
 
     public String getClassName() {
         return String.class.getName();
-    }
-
-    public Object toJdbcObject(Object val, int type) throws Exception {
-        return val;
     }
 
     /** Return trimmed string. */
@@ -82,15 +78,5 @@ public class CharType implements ExtendedType {
 
         // trim CHAR type
         return (val != null) ? ((type == Types.CHAR) ? val.trim() : val) : null;
-    }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("ExtendedType [")
-            .append(getClass().getName())
-            .append("], handling ")
-            .append(getClassName());
-        return buf.toString();
     }
 }

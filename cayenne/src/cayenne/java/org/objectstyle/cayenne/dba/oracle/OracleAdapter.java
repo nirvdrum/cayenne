@@ -100,7 +100,7 @@ public class OracleAdapter extends JdbcAdapter {
 
     public OracleAdapter() {
         super();
-        typeConverter.registerType(new CharType());
+        extendedTypes.registerType(new CharType());
         qualifierFactory.setTranslatorClass(
             "org.objectstyle.cayenne.dba.oracle.OracleQualifierTranslator");
     }

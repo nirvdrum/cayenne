@@ -113,7 +113,7 @@ public class JdbcAdapter implements DbAdapter {
 
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
-    protected ExtendedTypeMap typeConverter;
+    protected ExtendedTypeMap extendedTypes;
     protected QualifierTranslatorFactory qualifierFactory;
     protected BatchInterpreter insertBatchInterpreter;
     protected BatchInterpreter deleteBatchInterpreter;
@@ -141,7 +141,7 @@ public class JdbcAdapter implements DbAdapter {
         // create Pk generator
         pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
-        typeConverter = new ExtendedTypeMap();
+        extendedTypes = new ExtendedTypeMap();
         qualifierFactory = new QualifierTranslatorFactory();
     }
 
@@ -373,8 +373,8 @@ public class JdbcAdapter implements DbAdapter {
         return null;
     }
 
-    public ExtendedTypeMap getTypeConverter() {
-        return typeConverter;
+    public ExtendedTypeMap getExtendedTypes() {
+        return extendedTypes;
     }
 
     public QualifierTranslatorFactory getQualifierFactory() {
@@ -442,4 +442,13 @@ public class JdbcAdapter implements DbAdapter {
         }
         return updateBatchInterpreter;
     }
+    
+    /**
+      * @deprecated Since 1.0Beta1 'getExtendedTypes' is used since this method
+      * name is confusing.
+      */
+    public ExtendedTypeMap getTypeConverter() {
+        return getExtendedTypes();
+    }
+
 }

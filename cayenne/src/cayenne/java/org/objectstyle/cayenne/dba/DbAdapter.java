@@ -125,11 +125,16 @@ public interface DbAdapter {
     public String[] externalTypesForJdbcType(int type);
 
     /**
-     * Returns a map of type converters (ExtendedType objects)
-     * that can be used to translate between simple Java types
-     * and JDBC formats.
+     * @deprecated Since 1.0Beta1 'getExtendedTypes' is used since this method
+     * name is confusing.
      */
     public ExtendedTypeMap getTypeConverter();
+    
+    /**
+     * Returns a map of ExtendedTypes that is used to translate values between
+     * Java and JDBC layer.
+     */
+    public ExtendedTypeMap getExtendedTypes();
 
     /**
      * Returns an operation sorter or null if no sorting

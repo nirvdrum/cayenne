@@ -195,17 +195,16 @@ public class ProcedureTranslator extends QueryTranslator {
         if (val == null) {
             stmt.setNull(pos, type);
         } else {
-            ExtendedType map =
-                adapter.getTypeConverter().getRegisteredType(
+            ExtendedType typeConverter =
+                adapter.getExtendedTypes().getRegisteredType(
                     val.getClass().getName());
-            Object jdbcVal = (map == null) ? val : map.toJdbcObject(val, type);
 
-            int precision = param.getPrecision();
-            if (precision >= 0) {
-                stmt.setObject(pos, jdbcVal, type, precision);
-            } else {
-                stmt.setObject(pos, jdbcVal, type);
-            }
+            typeConverter.setJdbcObject(
+                stmt,
+                val,
+                pos,
+                type,
+                param.getPrecision());
         }
 
     }

@@ -28,3 +28,9 @@ configurable in modeler.preferences (for now).
 database specific strint typeName to allow reverse engineering of 
 unhandled types.
 
+8. DbAdapter.getTypeConverter is renamed to "getExtendedTypes', since the original
+method name is confusing.
+
+9. ExtendedType.toJdbcObject is deprected and replacred with 'setJdbcObject'
+to give ExtendedType more control over setting JDBC values.
+

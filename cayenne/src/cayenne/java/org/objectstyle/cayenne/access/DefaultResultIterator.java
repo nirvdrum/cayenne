@@ -134,7 +134,7 @@ public class DefaultResultIterator implements ResultIterator {
         initResultDescriptor(
             assembler.getSnapshotDesc(resultSet),
             assembler.getResultTypes(resultSet),
-            adapter.getTypeConverter(),
+            adapter.getExtendedTypes(),
             assembler.getFetchLimit());
 
         checkNextRow();

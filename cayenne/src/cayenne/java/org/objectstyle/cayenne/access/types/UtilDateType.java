@@ -55,16 +55,25 @@ package org.objectstyle.cayenne.access.types;
  *
  */
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 
-public class UtilDateType implements ExtendedType {
+public class UtilDateType extends AbstractType {
 
     public String getClassName() {
         return java.util.Date.class.getName();
     }
 
+    /**
+     * @deprecated Since 1.0 Beta1 'setJdbcObject' is used instead.
+     */
     public Object toJdbcObject(Object val, int type) throws Exception {
+        return convertToJdbcObject(val, type);
+    }
+
+    protected Object convertToJdbcObject(Object val, int type)
+        throws Exception {
         if (type == Types.DATE)
             return new java.sql.Date(((java.util.Date) val).getTime());
         else if (type == Types.TIME)
@@ -91,13 +100,18 @@ public class UtilDateType implements ExtendedType {
             : new java.util.Date(((java.util.Date) val).getTime());
     }
 
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("ExtendedType [")
-            .append(getClass().getName())
-            .append("], handling ")
-            .append(getClassName());
-        return buf.toString();
+    public void setJdbcObject(
+        PreparedStatement st,
+        Object val,
+        int pos,
+        int type,
+        int precision)
+        throws Exception {
+        super.setJdbcObject(
+            st,
+            convertToJdbcObject(val, type),
+            pos,
+            type,
+            precision);
     }
 }

@@ -53,72 +53,39 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.types;
 
-package org.objectstyle.cayenne.dba.oracle;
-
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.BatchInterpreter;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- * OracleBatchInterpreter performs BatchQueries
- * in the Oracle JDBC specific fashion.
- * It makes use of addBatch too.
- *
- * @author Andriy Shapochka
+ * Superclass of extended types.
  */
+public abstract class AbstractType implements ExtendedType {
+	
+	/**
+	 * @deprecated Since 1.0 Beta1 'setJdbcObject' is used instead.
+	 */
+    public Object toJdbcObject(Object val, int type) throws Exception {
+        return val;
+    }
 
-public class OracleBatchInterpreter extends BatchInterpreter {
-    private static Logger logObj = Logger.getLogger(OracleBatchInterpreter.class);
+    public void setJdbcObject(
+        PreparedStatement st,
+        Object val,
+        int pos,
+        int type,
+        int precision)
+        throws Exception {
+        st.setObject(pos, val, type, precision);
+    }
 
-    public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
-        List dbAttributes = batch.getDbAttributes();
-        int attributeCount = dbAttributes.size();
-        int[] attributeTypes = new int[attributeCount];
-        int[] attributeScales = new int[attributeCount];
-        for (int i = 0; i < attributeCount; i++) {
-            DbAttribute attribute = (DbAttribute)dbAttributes.get(i);
-            attributeTypes[i] = attribute.getType();
-            attributeScales[i] = attribute.getPrecision();
-        }
-        String query = queryBuilder.query(batch);
-        PreparedStatement st = null;
-        ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
-        try {
-            st = connection.prepareStatement(query);
-            batch.reset();
-            while (batch.next()) {
-                for (int i = 0; i < attributeCount; i++) {
-                    Object value = batch.getObject(i);
-                    int type = attributeTypes[i];
-                    if (value == null) st.setNull(i + 1, type);
-                    else {
-                        ExtendedType typeProcessor = typeConverter.getRegisteredType(value.getClass().getName());
-                        typeProcessor.setJdbcObject(st, value, i + 1, type, attributeScales[i]);
-                    }
-                }
-                st.addBatch();
-            }
-            return st.executeBatch();
-        } catch (SQLException e) {
-            throw e;
-        } catch (CayenneException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CayenneException(e);
-        } finally {
-            try {if (st != null) st.close();}
-            catch (Exception e) {}
-        }
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("ExtendedType [")
+            .append(getClass().getName())
+            .append("], handling ")
+            .append(getClassName());
+        return buf.toString();
     }
 }
-

@@ -170,21 +170,22 @@ public abstract class QueryAssembler extends QueryTranslator {
                     if (val == null)
                         stmt.setNull(i + 1, type);
                     else {
+                        String className = val.getClass().getName();
                         ExtendedType typeConverter =
-                            adapter.getTypeConverter().getRegisteredType(
-                                val.getClass().getName());
-                        Object jdbcVal =
-                            (typeConverter == null)
-                                ? val
-                                : typeConverter.toJdbcObject(val, type);
-
+                            adapter.getExtendedTypes().getRegisteredType(
+                                className);
                         try {
-                            stmt.setObject(i + 1, jdbcVal, type, precision);
+                            typeConverter.setJdbcObject(
+                                stmt,
+                                val,
+                                i + 1,
+                                type,
+                                precision);
                         } catch (Exception ex) {
                             // log error information
                             logObj.warn(
                                 "Error setting value '"
-                                    + jdbcVal
+                                    + val
                                     + "' as "
                                     + TypesMapping.getSqlNameByType(type)
                                     + ", type converter used:"

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.types;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.access.types;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.types;
 
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 
 /** Handles Java types mapped to JDBC types in JDBC sepcification. */
-public class DefaultType implements ExtendedType {
+public class DefaultType extends AbstractType {
     private static Logger logObj = Logger.getLogger(DefaultType.class);
 
     private static final Map readMethods = new HashMap();
@@ -133,8 +133,10 @@ public class DefaultType implements ExtendedType {
     protected Method readMethod;
     protected Object[] args = new Object[1];
 
-    /** CreatesDefaultType to read objects from ResultSet
-      * using "getObject" method. */
+    /** 
+     * CreatesDefaultType to read objects from ResultSet
+     * using "getObject" method.
+     */
     public DefaultType() {
         className = Object.class.getName();
         readMethod = readObjectMethod;
@@ -156,24 +158,10 @@ public class DefaultType implements ExtendedType {
         return className;
     }
 
-    public Object toJdbcObject(Object val, int type) throws Exception {
-        return val;
-    }
-
     public Object materializeObject(ResultSet rs, int index, int type)
         throws Exception {
         args[0] = new Integer(index);
         Object val = readMethod.invoke(rs, args);
         return (rs.wasNull()) ? null : val;
-    }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("ExtendedType [")
-            .append(getClass().getName())
-            .append("], handling ")
-            .append(getClassName());
-        return buf.toString();
     }
 }
