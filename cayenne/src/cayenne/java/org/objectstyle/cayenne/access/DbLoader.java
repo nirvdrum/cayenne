@@ -451,17 +451,27 @@ public class DbLoader {
 
     /** Loads database relationships into a DataMap. */
     public void loadDbRelationships(DataMap map) throws SQLException {
+        DatabaseMetaData md = getMetaData();
         Iterator it = dbEntityList.iterator();
         while (it.hasNext()) {
             DbEntity pkEntity = (DbEntity) it.next();
             String pkEntName = pkEntity.getName();
 
             // Get all the foreign keys referencing this table
-            ResultSet rs =
-                getMetaData().getExportedKeys(
+            ResultSet rs = null;
+            
+            try {
+                rs = md.getExportedKeys(
                     pkEntity.getCatalog(),
                     pkEntity.getSchema(),
                     pkEntity.getName());
+            }
+            catch(SQLException cay182Ex) {
+                // Sybase-specific - the line above blows on VIEWS, see CAY-182.
+                logObj.info("Error getting relationships for '" + pkEntName + "', ignoring.");
+                continue;
+            }
+            
             try {
                 if (!rs.next())
                     continue;
