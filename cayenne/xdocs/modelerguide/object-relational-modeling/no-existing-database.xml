@@ -10,7 +10,7 @@
 	<next>/modelerguide/pksupport.html</next>
 </navigator>
 <body>
- 	<section name="3.2 Start from the O/R Model">
+ 	<section name="2.2 Start from the O/R Model">
 
 		Here are the steps to create a new Cayenne project.
 		<ol>
