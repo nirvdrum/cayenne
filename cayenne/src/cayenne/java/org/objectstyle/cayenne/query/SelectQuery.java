@@ -214,6 +214,10 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     public List getOrderingList() {
         return orderings;
     }
+    
+    public void clearOrderings() {
+        orderings.clear();
+    }
 
     /** Returns true if this query returns distinct rows. */
     public boolean isDistinct() {
