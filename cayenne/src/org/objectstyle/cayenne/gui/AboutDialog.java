@@ -144,8 +144,7 @@ implements ActionListener
 
 	public AboutDialog(JFrame frame)
 	{
-		super(frame, "About Cayenne", true);
-		System.out.println("In AboutDialog");
+		super(frame, "About CayenneModeler", true);
 		init();
 		
 		ok.addActionListener(this);
