@@ -55,6 +55,10 @@
  */
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -66,7 +70,33 @@ public class DataRowTst extends CayenneTestCase {
         DataRow s2 = new DataRow(10);
         DataRow s3 = new DataRow(10);
         assertFalse(s1.getVersion() == s2.getVersion());
-		assertFalse(s2.getVersion() == s3.getVersion());
-		assertFalse(s3.getVersion() == s1.getVersion());
+        assertFalse(s2.getVersion() == s3.getVersion());
+        assertFalse(s3.getVersion() == s1.getVersion());
+    }
+
+    public void testObjectIdFromSnapshot() throws Exception {
+        Class entityClass = Number.class;
+        ObjEntity ent = new ObjEntity();
+
+        DbAttribute at = new DbAttribute();
+        at.setName("xyz");
+        at.setPrimaryKey(true);
+        DbEntity dbe = new DbEntity("123");
+        dbe.addAttribute(at);
+        ent.setDbEntity(dbe);
+        ent.setName("456");
+        ent.setClassName(entityClass.getName());
+
+        // test same id created by different methods
+        DataRow map = new DataRow(10);
+        map.put(at.getName(), "123");
+
+        DataRow map2 = new DataRow(10);
+        map2.put(at.getName(), "123");
+
+        ObjectId ref = new ObjectId(entityClass, map);
+        ObjectId oid = map2.createObjectId(ent);
+
+        assertEquals(ref, oid);
     }
 }

@@ -56,10 +56,16 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * DataRow is a map that holds values retrieved from the database for a 
@@ -101,6 +107,41 @@ public class DataRow extends HashMap {
 
     public void setReplacesVersion(long replacesVersion) {
         this.replacesVersion = replacesVersion;
+    }
+
+    /**
+      * Creates an ObjectId from the values in the snapshot.
+      * If needed attributes are missing in a snapshot,
+      * CayenneRuntimeException is thrown.
+      */
+    public ObjectId createObjectId(ObjEntity entity) {
+
+        // ... handle special case - PK.size == 1
+        //     use some not-so-significant optimizations...
+
+        List pk = entity.getDbEntity().getPrimaryKey();
+        if (pk.size() == 1) {
+            DbAttribute attr = (DbAttribute) pk.get(0);
+            Object val = this.get(attr.getName());
+            return new ObjectId(entity.getJavaClass(), attr.getName(), val);
+        }
+
+        // ... handle generic case - PK.size > 1
+
+        Map idMap = new HashMap(pk.size() * 2);
+        Iterator it = pk.iterator();
+        while (it.hasNext()) {
+            DbAttribute attr = (DbAttribute) it.next();
+            Object val = this.get(attr.getName());
+            if (val == null) {
+                throw new CayenneRuntimeException(
+                    "Null value for '" + attr.getName() + "'. Snapshot: " + this);
+            }
+
+            idMap.put(attr.getName(), val);
+        }
+
+        return new ObjectId(entity.getJavaClass(), idMap);
     }
 
     public String toString() {

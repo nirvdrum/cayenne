@@ -117,7 +117,7 @@ public class DataContext implements QueryEngine, Serializable {
     // noop delegate 
     private static final DataContextDelegate defaultDelegate =
         new DataContextDelegate() {
-        
+
         public GenericSelectQuery willPerformSelect(
             DataContext context,
             GenericSelectQuery query) {
@@ -125,8 +125,8 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         public void snapshotChangedInDataRowStore(
-            DataObject object, 
-			DataRow snapshotInStore) {
+            DataObject object,
+            DataRow snapshotInStore) {
             // noop
         }
     };
@@ -174,6 +174,17 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public static DataContext createDataContext() {
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
+    }
+
+    /**
+      * A factory method of DataObjects. Uses Configuration ClassLoader to
+      * instantiate a new instance of DataObject of a given class.
+      */
+    private static final DataObject newDataObject(String className) throws Exception {
+        return (DataObject) Configuration
+            .getResourceLoader()
+            .loadClass(className)
+            .newInstance();
     }
 
     /**
@@ -334,7 +345,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    obj = DataRowUtils.newDataObject(oid.getObjClass().getName());
+                    obj = DataContext.newDataObject(oid.getObjClass().getName());
                 }
                 catch (Exception ex) {
                     String entity =
@@ -394,11 +405,8 @@ public class DataContext implements QueryEngine, Serializable {
         List results = new ArrayList(dataRows.size());
         Iterator it = dataRows.iterator();
         while (it.hasNext()) {
-			DataRow dataRow = (DataRow) it.next();
-            ObjectId anId = DataRowUtils.objectIdFromSnapshot(entity, dataRow);
-
-            // synchronized on objectstore, since read/write
-            // must be performed atomically
+            DataRow dataRow = (DataRow) it.next();
+            ObjectId anId = dataRow.createObjectId(entity);
 
             // this will create a HOLLOW object if it is not registered yet
             DataObject object = registeredObject(anId);
@@ -430,8 +438,8 @@ public class DataContext implements QueryEngine, Serializable {
                     DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
             }
-            
-			object.setSnapshotVersion(dataRow.getVersion());
+
+            object.setSnapshotVersion(dataRow.getVersion());
             object.fetchFinished();
             results.add(object);
         }
@@ -473,17 +481,17 @@ public class DataContext implements QueryEngine, Serializable {
         return (DataObject) list.get(0);
     }
 
-	/**
-	  * @deprecated Since 1.1 use {@link 
-	  * #objectFromDataRow(Class,org.objectstyle.cayenne.access.DataRow,boolean)
-	  * objectFromDataRow(Class, DataRow, boolean)}.
-	  */
+    /**
+      * @deprecated Since 1.1 use {@link 
+      * #objectFromDataRow(Class,org.objectstyle.cayenne.access.DataRow,boolean)
+      * objectFromDataRow(Class, DataRow, boolean)}.
+      */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
-		// backwards compatibility... wrap this in a DataRow
-		if(!(dataRow instanceof DataRow)) {
-			dataRow = new DataRow(dataRow);
-		}
-		
+        // backwards compatibility... wrap this in a DataRow
+        if (!(dataRow instanceof DataRow)) {
+            dataRow = new DataRow(dataRow);
+        }
+
         ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
         List list = objectsFromDataRows(ent, Collections.singletonList(dataRow), false);
         return (DataObject) list.get(0);
@@ -500,10 +508,10 @@ public class DataContext implements QueryEngine, Serializable {
         boolean refresh) {
 
         // backwards compatibility... wrap this in a DataRow
-        if(!(dataRow instanceof DataRow)) {
-			dataRow = new DataRow(dataRow);
+        if (!(dataRow instanceof DataRow)) {
+            dataRow = new DataRow(dataRow);
         }
-        
+
         List list =
             objectsFromDataRows(objEntity, Collections.singletonList(dataRow), refresh);
         return (DataObject) list.get(0);
@@ -539,7 +547,7 @@ public class DataContext implements QueryEngine, Serializable {
         String objClassName = entity.getClassName();
         DataObject dobj = null;
         try {
-            dobj = DataRowUtils.newDataObject(objClassName);
+            dobj = DataContext.newDataObject(objClassName);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);

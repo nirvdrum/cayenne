@@ -64,18 +64,14 @@ import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
-import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.DataRow;
+import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.ToManyListDataSource;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -90,53 +86,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataRowUtils {
-    /**
-     * A factory method of DataObjects. Uses Configuration ClassLoader to
-     * instantiate a new instance of DataObject of a given class.
-     */
-    public static final CayenneDataObject newDataObject(String className)
-        throws Exception {
-        return (CayenneDataObject) Configuration
-            .getResourceLoader()
-            .loadClass(className)
-            .newInstance();
-    }
-
-    /**
-     * Creates an object id from the values in object snapshot.
-     * If needed attributes are missing in a snapshot or if it is null,
-     * CayenneRuntimeException is thrown.
-     */
-    public static ObjectId objectIdFromSnapshot(ObjEntity entity, Map snapshot) {
-
-        // ... handle special case - PK.size == 1
-        //     use some not-so-significant optimizations...
-
-        List pk = entity.getDbEntity().getPrimaryKey();
-        if (pk.size() == 1) {
-            DbAttribute attr = (DbAttribute) pk.get(0);
-            Object val = snapshot.get(attr.getName());
-            return new ObjectId(entity.getJavaClass(), attr.getName(), val);
-        }
-
-        // ... handle generic case - PK.size > 1
-
-        Map idMap = new HashMap(pk.size() * 2);
-        Iterator it = pk.iterator();
-        while (it.hasNext()) {
-            DbAttribute attr = (DbAttribute) it.next();
-            Object val = snapshot.get(attr.getName());
-            if (val == null) {
-                throw new CayenneRuntimeException(
-                    "Null value for '" + attr.getName() + "'. Snapshot: " + snapshot);
-            }
-
-            idMap.put(attr.getName(), val);
-        }
-
-        return new ObjectId(entity.getJavaClass(), idMap);
-    }
-
     /**
      * Returns an ObjectId of an object on the other side of the to-one relationship,
      * given a snapshot of the source object. Returns null if snapshot FK columns

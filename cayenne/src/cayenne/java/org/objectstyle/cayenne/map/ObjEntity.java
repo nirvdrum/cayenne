@@ -64,7 +64,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.util.DataRowUtils;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -223,12 +223,16 @@ public class ObjEntity extends Entity {
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
      * 
-     * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.access.SnapshotManager.objectIdFromSnapshot(java.util.Map)
-     * SnapshotManager.objectIdFromSnapshot(java.util.Map)}. This method is deprecated to decouple mapping layer from
+     * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.access.DataRow.createObjectId(ObjEntity)
+     * DataRow.createObjectId(ObjEntity)}. This method is deprecated to decouple mapping layer from
      * the access layer implementation.
      */
     public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-        return DataRowUtils.objectIdFromSnapshot(this, objectSnapshot);
+        DataRow dataRow =
+            (objectSnapshot instanceof DataRow)
+                ? (DataRow) objectSnapshot
+                : new DataRow(objectSnapshot);
+        return dataRow.createObjectId(this);
     }
 
     /** Clears all the mapping between this obj entity and its current db entity.
