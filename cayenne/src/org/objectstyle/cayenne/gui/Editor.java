@@ -116,7 +116,6 @@ public class Editor
 
 	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
 	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
-	JMenuItem synchObjEntityMenu = new JMenuItem("Synchronize with DbEntity");
 
 	JMenuItem importDbMenu = new JMenuItem("Reverse Engineer Database");
 	JMenuItem importEOMMenu = new JMenuItem("Import EOModel");
@@ -197,8 +196,13 @@ public class Editor
 		CayenneAction createMapAction = new CreateDataMapAction();
 		actionMap.put(createMapAction.getKey(), createMapAction);
 
+
+
 		CayenneAction addMapToNodeAction = new AddDataMapAction();
 		actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
+		
+		CayenneAction entSynchAction = new EntitySynchAction();
+		actionMap.put(entSynchAction.getKey(), entSynchAction);
 	}
 
 	protected void init() {
@@ -239,7 +243,7 @@ public class Editor
 		projectMenu.add(createDbEntityMenu);
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
-		projectMenu.add(synchObjEntityMenu);
+		projectMenu.add(getAction(EntitySynchAction.ACTION_NAME).buildMenu());
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
@@ -276,9 +280,6 @@ public class Editor
 		actionMap.put(genDbAction.getKey(), genDbAction);
 		generateDbMenu.addActionListener(genDbAction);
 
-		CayenneAction entSynchAction = new EntitySynchAction();
-		actionMap.put(entSynchAction.getKey(), entSynchAction);
-		synchObjEntityMenu.addActionListener(entSynchAction);
 
 		// "legacy" code - need to hook up all menus and toolbars with actions 
 		disableMenu();
@@ -607,31 +608,31 @@ public class Editor
 	}
 
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
-		enableDataMapMenu();
+		enableObjEntityMenu();
 		getAction(RemoveAction.ACTION_NAME).setName("Remove ObjEntity");
 	}
 
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
-		enableDataMapMenu();
+		enableDbEntityMenu();
 		getAction(RemoveAction.ACTION_NAME).setName("Remove DbEntity");
 	}
 
 	public void currentDbAttributeChanged(AttributeDisplayEvent e) {
-		enableDataMapMenu();
+		enableDbEntityMenu();
 		if (e.getAttribute() != null) {
 			getAction(RemoveAction.ACTION_NAME).setName("Remove DbAttribute");
 		}
 	}
 
 	public void currentObjAttributeChanged(AttributeDisplayEvent e) {
-		enableDataMapMenu();
+		enableObjEntityMenu();
 		if (e.getAttribute() != null) {
 			getAction(RemoveAction.ACTION_NAME).setName("Remove ObjAttribute");
 		}
 	}
 
 	public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
-		enableDataMapMenu();
+		enableDbEntityMenu();
 		if (e.getRelationship() != null) {
 			getAction(RemoveAction.ACTION_NAME).setName(
 				"Remove DbRelationship");
@@ -639,7 +640,7 @@ public class Editor
 	}
 
 	public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
-		enableDataMapMenu();
+		enableObjEntityMenu();
 		if (e.getRelationship() != null) {
 			getAction(RemoveAction.ACTION_NAME).setName(
 				"Remove ObjRelationship");
@@ -664,7 +665,7 @@ public class Editor
 		createObjEntityMenu.setEnabled(false);
 		createDbEntityMenu.setEnabled(false);
 
-		synchObjEntityMenu.setEnabled(false);
+		getAction(EntitySynchAction.ACTION_NAME).setEnabled(false);
 
 		importDbMenu.setEnabled(false);
 		importEOMMenu.setEnabled(false);
@@ -702,8 +703,17 @@ public class Editor
 
 		createObjEntityBtn.setEnabled(true);
 		createDbEntityBtn.setEnabled(true);
-		synchObjEntityMenu.setEnabled(true);
 	}
+	
+	private void enableObjEntityMenu() {
+		enableDataMapMenu();
+		getAction(EntitySynchAction.ACTION_NAME).setEnabled(true);
+	}
+	
+	private void enableDbEntityMenu() {
+		enableDataMapMenu();
+	}
+	
 
 	private void enableDataNodeMenu() {
 		enableDomainMenu();
