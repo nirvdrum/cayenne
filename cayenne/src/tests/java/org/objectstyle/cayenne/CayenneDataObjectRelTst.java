@@ -249,6 +249,10 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
         //and check again
 		assertFalse(ctxt.hasChanges());
+		
+		// refetch artist with a different context
+		resetContext();
+		a1 = fetchArtist();
         groupList = a1.getGroupArray();
         assertEquals(1, groupList.size());
         assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
