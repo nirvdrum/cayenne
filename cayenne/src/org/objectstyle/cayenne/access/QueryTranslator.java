@@ -55,16 +55,24 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.*;
+
 import java.util.*;
 import java.sql.*;
 import java.util.logging.*;
+
 import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 
+/** Defines API for translation Cayenne queries to JDBC
+  * PreparedStatements. Also serves as a factory for concrete 
+  * translators.
+  *
+  * @author Andrei Adamchik
+  */
 public abstract class QueryTranslator {
     static Logger logObj = Logger.getLogger(QueryTranslator.class.getName());
 

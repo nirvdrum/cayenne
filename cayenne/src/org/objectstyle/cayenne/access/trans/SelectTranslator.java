@@ -57,12 +57,15 @@ package org.objectstyle.cayenne.access.trans;
 
 
 import java.util.*;
+import java.sql.*;
+import java.util.logging.*;
+
 import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.access.*;
-import java.sql.*;
-import java.util.logging.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
+
 
 /** Class works as a translator of SELECT queries to JDBC statements. */
 public class SelectTranslator extends SelectQueryAssembler {

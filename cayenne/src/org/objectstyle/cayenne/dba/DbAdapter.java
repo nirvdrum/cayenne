@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -56,11 +56,18 @@ package org.objectstyle.cayenne.access;
  */ 
 
 import java.sql.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
+
 
 /** Defines API needed to handle differences between
- * various databases accessed via JDBC. Implementing classed are 
- * intended to be pluggable database specific adapters. */
+  * various databases accessed via JDBC. Implementing classed are 
+  * intended to be pluggable database specific adapters.
+  *
+  * @author Andrei Adamchik 
+  */
 public interface DbAdapter {
 
     /** Returns true if a particular database supports FK constraints. */

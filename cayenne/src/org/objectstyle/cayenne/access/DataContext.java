@@ -56,15 +56,23 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.*;
 import java.util.logging.*;
 import java.util.*;
 import java.io.*;
 
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.util.*;
 
+
+/** User-level Cayenne access class. Provides isolated object view of 
+  * the datasource to the application code. Normal use pattern is to 
+  * create DataContext in a session scope.
+  *
+  * @author Andrei Adamchik
+  */
 public class DataContext implements QueryEngine {
     static Logger logObj = Logger.getLogger(DataContext.class.getName());
     

@@ -53,55 +53,61 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+import java.util.*;
+import java.sql.*;
+import java.util.logging.*;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.util.*;
-import java.util.*;
-import java.sql.*;
-import java.util.logging.*;
+
 
 /** Class implements default translation mechanism of org.objectstyle.cayenne.query.InsertQuery
- *  objects to SQL INSERT statements. Note that in order for this query to execute successfully,
- *  ObjectId contained within InsertQuery must be fully initialized.  */
+  * objects to SQL INSERT statements. Note that in order for this query to execute successfully,
+  * ObjectId contained within InsertQuery must be fully initialized.
+  *
+  * @author Andrei Adamchik  
+ */
 public class InsertTranslator extends QueryAssembler {
     static Logger logObj = Logger.getLogger(InsertTranslator.class.getName());
-    
+
     private ArrayList columnList = new ArrayList();
-    
+
     public InsertTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
         super(engine, con, adapter, query);
     }
-    
+
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");
     }
-    
-    
+
+
     public void dbRelationshipAdded(DbRelationship dbRel) {
         throw new RuntimeException("db relationships not supported");
     }
-    
+
     /** Method that converts an insert query into SQL string */
-    public String createSqlString() throws Exception {        
-        prepareLists();        
+    public String createSqlString() throws Exception {
+        prepareLists();
         StringBuffer queryBuf = new StringBuffer("INSERT INTO ");
         DbEntity dbE = engine.lookupEntity(query.getObjEntityName()).getDbEntity();
         queryBuf.append(dbE.getName()).append(" (");
-        
+
         int len = columnList.size();
-        
+
         // 1. Append column names
-        
+
         // unroll the loop to avoid condition checking in the loop
         queryBuf.append(columnList.get(0)); // assume we have at least 1 column
         for(int i = 1; i < len; i++) {
             queryBuf.append(", ").append(columnList.get(i));
         }
-        
+
         // 2. Append values ('?' in place of actual parameters)
         queryBuf.append(") VALUES (");
         if(len > 0) {
@@ -110,21 +116,21 @@ public class InsertTranslator extends QueryAssembler {
                 queryBuf.append(", ?");
             }
         }
-        
+
         queryBuf.append(')');
         return queryBuf.toString();
     }
-    
+
     public InsertQuery insertQuery() {
         return (InsertQuery)query;
     }
-    
+
     /** Creates 2 matching lists: columns names and values */
     private void prepareLists()  throws Exception {
         DbEntity dbE = engine.lookupEntity(query.getObjEntityName()).getDbEntity();
         ObjectId oid = insertQuery().getObjectId();
         Map id = (oid != null) ? oid.getIdSnapshot() : null;
-        
+
         if(id != null) {
             Iterator idIt = id.keySet().iterator();
             while(idIt.hasNext()) {
@@ -134,18 +140,18 @@ public class InsertTranslator extends QueryAssembler {
                 columnList.add(attrName);
                 values.add(attrValue);
                 attributes.add(attr);
-            }   
+            }
         }
-        
+
         Map snapshot = insertQuery().getObjectSnapshot();
         Iterator columnsIt = snapshot.keySet().iterator();
         while(columnsIt.hasNext()) {
             String attrName = (String)columnsIt.next();
-            
+
             // values taken from ObjectId take precedence.
             if(id != null && id.get(attrName) != null)
                 continue;
-            
+
             Attribute attr = dbE.getAttribute(attrName);
             Object attrValue = snapshot.get(attrName);
             columnList.add(attrName);

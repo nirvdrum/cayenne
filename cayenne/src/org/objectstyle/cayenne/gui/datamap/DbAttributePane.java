@@ -64,7 +64,7 @@ import javax.swing.table.*;
 
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.types.DefaultType;
-import org.objectstyle.cayenne.access.DbAdapter;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;

@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.util.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 
 /**

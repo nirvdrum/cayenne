@@ -61,14 +61,14 @@ import java.util.List;
 import java.util.ArrayList;
 import java.sql.Connection;
 
-import org.objectstyle.cayenne.access.DbAdapter;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 
 /** Utility class that does forward engineering of the database.
-  * It can generate database schema using the data map. It is the 
+  * It can generate database schema using the data map. It is a 
   * counterpart of DbLoader class.
   *
   * @author Andrei Adamchik

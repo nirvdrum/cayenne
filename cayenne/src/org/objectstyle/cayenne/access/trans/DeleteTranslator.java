@@ -55,17 +55,21 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.*;
+
 import java.util.*;
 import java.sql.*;
 import java.util.logging.*;
 
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.*;
 
 /** Class implements default translation mechanism of org.objectstyle.cayenne.query.DeleteQuery
  *  objects to SQL DELETE statements.
+ *
+ *  @author Andrei Adamchik
  */
 public class DeleteTranslator extends QueryAssembler {
     static Logger logObj = Logger.getLogger(DeleteTranslator.class.getName());

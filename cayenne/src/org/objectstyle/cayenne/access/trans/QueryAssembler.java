@@ -55,19 +55,25 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
+
+import java.sql.*;
+import java.util.*;
+import java.util.logging.*;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.dba.*;
 import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.access.types.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
 
 
 /** Abstract superclass of Query translators.
  *  Defines callback methods for helper classes 
- *  that are delegated tasks of building query parts. */
+ *  that are delegated tasks of building query parts.
+ *
+ * @author Andrei Adamchik 
+ */
 public abstract class QueryAssembler extends QueryTranslator {
     static Logger logObj = Logger.getLogger(QueryAssembler.class.getName());
 

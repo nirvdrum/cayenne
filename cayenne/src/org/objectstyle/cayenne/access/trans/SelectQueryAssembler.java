@@ -55,12 +55,14 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
+
+import java.sql.ResultSet;
+import java.sql.Connection;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.access.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
 
 
 /** Abstract superclass of Query translators.

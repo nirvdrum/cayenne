@@ -55,17 +55,23 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.*;
 import java.util.*;
 import java.sql.*;
 import java.util.logging.*;
 
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
-/** Class implements default translation mechanism of org.objectstyle.cayenne.query.UpdateQuery
- *  objects to SQL UPDATE statements. */
+
+/** Class implements default translation mechanism of 
+  * org.objectstyle.cayenne.query.UpdateQuery
+  * objects to SQL UPDATE statements.
+  *
+  * @author Andrei Adamchik
+  */
 public class UpdateTranslator extends QueryAssembler {
     static Logger logObj = Logger.getLogger(UpdateTranslator.class.getName());
 

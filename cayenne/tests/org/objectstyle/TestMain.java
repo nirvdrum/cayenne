@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.conn.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.util.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 /**
  *  Root class of all test cases. When "main" is invoked, 

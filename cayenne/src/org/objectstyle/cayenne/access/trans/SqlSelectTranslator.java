@@ -57,15 +57,22 @@ package org.objectstyle.cayenne.access.trans;
 
 
 import java.util.*;
+import java.sql.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.*;
-import java.sql.*;
-import java.util.logging.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
-/** Class works as a translator of raw SELECT queries to JDBC statements. */
+
+/** Class works as a translator of raw SELECT queries to JDBC statements.
+  * 
+  * @author Andrei Adamchik
+  */
 public class SqlSelectTranslator extends SelectQueryAssembler {
     static Logger logObj = Logger.getLogger(SqlSelectTranslator.class.getName());
 
