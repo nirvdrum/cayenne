@@ -105,7 +105,7 @@ public class ImportDbAction extends CayenneAction {
             dsi = loginObj.getDataSrcInfo();
             if (dsi == null) {
                 return;
-            } 
+            }
 
             // load adapter
             adapter = createAdapter(dsi);
@@ -120,33 +120,43 @@ public class ImportDbAction extends CayenneAction {
             }
         }
 
-        DbLoader loader = new DbLoader(conn, adapter);
-        List schemas = loadSchemas(loader);
-        if (schemas == null) {
-            return;
-        }
-
-        String schemaName = null;
-        if (schemas.size() != 0) {
-            ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
-            dialog.show();
-            if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
-                dialog.dispose();
+        try {
+            DbLoader loader = new DbLoader(conn, adapter);
+            List schemas = loadSchemas(loader);
+            if (schemas == null) {
                 return;
             }
-            schemaName = dialog.getSchemaName();
-            dialog.dispose();
-        }
-        if (schemaName != null && schemaName.length() == 0) {
-            schemaName = null;
-        }
 
-        DataMap map = loadMap(loader, schemaName);
-        if(map == null) {
-        	return;
-        }
+            String schemaName = null;
+            if (schemas.size() != 0) {
+                ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
+                dialog.show();
+                if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
+                    dialog.dispose();
+                    return;
+                }
+                schemaName = dialog.getSchemaName();
+                dialog.dispose();
+            }
+            if (schemaName != null && schemaName.length() == 0) {
+                schemaName = null;
+            }
 
-        processMapUpdate(map);
+            DataMap map = loadMap(loader, schemaName);
+            if (map == null) {
+                return;
+            }
+
+            processMapUpdate(map);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                logObj.warn("Error closing connection.", e);
+            }
+        }
     }
 
     public DbAdapter createAdapter(DataSourceInfo dsi) {
@@ -237,8 +247,7 @@ public class ImportDbAction extends CayenneAction {
             if (map != null) {
                 loader.loadDataMapFromDB(schemaName, null, map);
                 return map;
-            }
-            else {
+            } else {
                 map = loader.createDataMapFromDB(schemaName);
                 String relative_loc;
                 relative_loc = CreateDataMapAction.getMapLocation(mediator);
