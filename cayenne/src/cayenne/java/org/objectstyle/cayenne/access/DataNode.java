@@ -92,7 +92,6 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
-import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server,
