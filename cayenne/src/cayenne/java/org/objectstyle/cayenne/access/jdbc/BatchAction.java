@@ -207,10 +207,7 @@ public class BatchAction extends BaseSQLAction {
 
         Level logLevel = query.getLoggingLevel();
         boolean isLoggable = QueryLogger.isLoggable(logLevel);
-        boolean useOptimisticLock = ((query instanceof UpdateBatchQuery) && ((UpdateBatchQuery) query)
-                .isUsingOptimisticLocking())
-                || ((query instanceof DeleteBatchQuery) && ((DeleteBatchQuery) query)
-                        .isUsingOptimisticLocking());
+        boolean useOptimisticLock = query.isUsingOptimisticLocking();
 
         String queryStr = queryBuilder.createSqlString(query);
 

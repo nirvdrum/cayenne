@@ -74,6 +74,15 @@ public abstract class BatchQuery extends AbstractQuery {
     }
 
     /**
+     * Returns true if the batch query uses optimistic locking.
+     * 
+     * @since 1.1
+     */
+    public boolean isUsingOptimisticLocking() {
+        return false;
+    }
+
+    /**
      * Returns a DbEntity associated with this batch.
      */
     public DbEntity getDbEntity() {

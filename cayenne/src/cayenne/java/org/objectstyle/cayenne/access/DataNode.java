@@ -374,8 +374,7 @@ public class DataNode implements QueryEngine {
         // check run strategy...
 
         // optimistic locking is not supported in batches due to JDBC driver limitations
-        boolean useOptimisticLock = (query instanceof UpdateBatchQuery)
-                && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
+        boolean useOptimisticLock = query.isUsingOptimisticLocking();
 
         boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
         BatchAction action = new BatchAction(getAdapter(), getEntityResolver());

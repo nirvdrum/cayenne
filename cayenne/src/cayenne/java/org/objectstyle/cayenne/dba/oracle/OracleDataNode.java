@@ -107,8 +107,7 @@ public class OracleDataNode extends DataNode {
 
             // optimistic locking is not supported in batches due to JDBC driver
             // limitations
-            boolean useOptimisticLock = (query instanceof UpdateBatchQuery)
-                    && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
+            boolean useOptimisticLock = query.isUsingOptimisticLocking();
 
             boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
             OracleBatchAction batchAction = new OracleBatchAction(
