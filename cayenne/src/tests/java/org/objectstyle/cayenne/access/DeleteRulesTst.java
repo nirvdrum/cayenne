@@ -365,7 +365,7 @@ public class DeleteRulesTst extends RelationshipTestCase {
         ObjRelationship relationship = (ObjRelationship) entity
                 .getRelationship(DeleteRuleFlatA.FLAT_B_PROPERTY);
 
-        FlattenedRelationshipInfo info = new FlattenedRelationshipInfo(a, b, relationship);
+        FlattenedRelationshipUpdate info = new FlattenedRelationshipUpdate(a, b, relationship);
         assertTrue("Join was not deleted for flattened relationship", context
                 .getObjectStore()
                 .getFlattenedDeletes()
@@ -378,7 +378,7 @@ public class DeleteRulesTst extends RelationshipTestCase {
         ObjRelationship relationship = (ObjRelationship) entity
                 .getRelationship(DeleteRuleFlatA.FLAT_B_PROPERTY);
 
-        FlattenedRelationshipInfo info = new FlattenedRelationshipInfo(a, b, relationship);
+        FlattenedRelationshipUpdate info = new FlattenedRelationshipUpdate(a, b, relationship);
         assertFalse("Join was deleted for flattened relationship", context
                 .getObjectStore()
                 .getFlattenedDeletes()

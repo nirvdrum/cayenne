@@ -1100,7 +1100,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         // Register this combination (so we can remove it later if an insert occurs before
         // commit)
-        FlattenedRelationshipInfo info = new FlattenedRelationshipInfo(
+        FlattenedRelationshipUpdate info = new FlattenedRelationshipUpdate(
                 source,
                 destination,
                 relationship);
@@ -1133,7 +1133,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         // Register this combination,
         // so we can remove it later if an insert occurs before commit
-        FlattenedRelationshipInfo info = new FlattenedRelationshipInfo(
+        FlattenedRelationshipUpdate info = new FlattenedRelationshipUpdate(
                 source,
                 destination,
                 relationship);

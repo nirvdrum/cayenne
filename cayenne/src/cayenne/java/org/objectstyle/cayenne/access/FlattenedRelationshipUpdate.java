@@ -76,121 +76,26 @@ import org.objectstyle.cayenne.query.SelectQuery;
 /**
  * A holder of flattened relationship modification data.
  * 
- * @since 1.1
+ * @since 1.2 renamed from FlattenedRelationshipInfo
  * @author Andrei Adamchik
  */
-final class FlattenedRelationshipInfo {
+final class FlattenedRelationshipUpdate extends RelationshipUpdate {
 
-    DataObject source;
-    DataObject destination;
-    ObjRelationship baseRelationship;
-    String canonicalRelationshipName;
-
-    FlattenedRelationshipInfo(DataObject aSource, DataObject aDestination,
+    FlattenedRelationshipUpdate(DataObject source, DataObject destination,
             ObjRelationship relationship) {
 
-        this.source = aSource;
-        this.destination = aDestination;
-        this.baseRelationship = relationship;
-
-        // Calculate canonical relationship name
-        String relName1 = relationship.getName();
-        ObjRelationship reverseRel = relationship.getReverseRelationship();
-        if (reverseRel != null) {
-            String relName2 = reverseRel.getName();
-            //Find the lexically lesser name and use it first, then use the second.
-            //If equal (the same name), it doesn't matter which order.. be arbitrary
-            if (relName1.compareTo(relName2) <= 0) {
-                this.canonicalRelationshipName = relName1 + "." + relName2;
-            }
-            else {
-                this.canonicalRelationshipName = relName2 + "." + relName1;
-            }
-        }
-        else {
-            this.canonicalRelationshipName = relName1;
-        }
-    }
-
-    /**
-     * Does not care about the order of source/destination, only that the pair and the
-     * canonical relationship name match
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    public boolean equals(Object object) {
-
-        if (!(object instanceof FlattenedRelationshipInfo)) {
-            return false;
-        }
-
-        if (this == object) {
-            return true;
-        }
-
-        FlattenedRelationshipInfo otherFRI = (FlattenedRelationshipInfo) object;
-
-        if (!this.canonicalRelationshipName.equals(otherFRI.canonicalRelationshipName)) {
-            return false;
-        }
-
-        // Check that either direct mapping matches (src=>src, dest=>dest), or that
-        // cross mapping matches (src=>dest, dest=>src).
-        return (this.source.equals(otherFRI.source) && this.destination
-                .equals(otherFRI.destination))
-                || (this.source.equals(otherFRI.destination) && this.destination
-                        .equals(otherFRI.source));
-
-    }
-
-    /**
-     * Because equals effectively ignores the order of DataObjects, summing the hashcodes
-     * is sufficient to fulfill the equals/hashcode contract.
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    public int hashCode() {
-        return source.hashCode()
-                + destination.hashCode()
-                + canonicalRelationshipName.hashCode();
-    }
-
-    /**
-     * Returns the baseRelationship.
-     * 
-     * @return ObjRelationship
-     */
-    ObjRelationship getBaseRelationship() {
-        return baseRelationship;
-    }
-
-    /**
-     * Returns the destination.
-     * 
-     * @return DataObject
-     */
-    DataObject getDestination() {
-        return destination;
-    }
-
-    /**
-     * Returns the source.
-     * 
-     * @return DataObject
-     */
-    DataObject getSource() {
-        return source;
+        super(source, destination, relationship);
     }
 
     /**
      * Returns a join DbEntity for the single-step flattened relationship.
      */
     DbEntity getJoinEntity() {
-        List relList = baseRelationship.getDbRelationships();
+        List relList = relationship.getDbRelationships();
         if (relList.size() != 2) {
             throw new CayenneRuntimeException(
                     "Only single-step flattened relationships are supported in this operation: "
-                            + baseRelationship);
+                            + relationship);
         }
 
         DbRelationship firstDbRel = (DbRelationship) relList.get(0);
@@ -202,11 +107,11 @@ final class FlattenedRelationshipInfo {
      */
     Map buildJoinSnapshot() {
 
-        List relList = baseRelationship.getDbRelationships();
+        List relList = relationship.getDbRelationships();
         if (relList.size() != 2) {
             throw new CayenneRuntimeException(
                     "Only single-step flattened relationships are supported in this operation: "
-                            + baseRelationship);
+                            + relationship);
         }
 
         DbRelationship firstDbRel = (DbRelationship) relList.get(0);

@@ -665,7 +665,7 @@ class ContextCommit {
         Iterator i = context.getObjectStore().getFlattenedInserts().iterator();
 
         while (i.hasNext()) {
-            FlattenedRelationshipInfo info = (FlattenedRelationshipInfo) i.next();
+            FlattenedRelationshipUpdate info = (FlattenedRelationshipUpdate) i.next();
 
             DataObject source = info.getSource();
 
@@ -702,7 +702,7 @@ class ContextCommit {
         Iterator i = context.getObjectStore().getFlattenedDeletes().iterator();
 
         while (i.hasNext()) {
-            FlattenedRelationshipInfo info = (FlattenedRelationshipInfo) i.next();
+            FlattenedRelationshipUpdate info = (FlattenedRelationshipUpdate) i.next();
 
             // TODO: does it ever happen?
             Map sourceId = info.getSource().getObjectId().getIdSnapshot();
