@@ -128,7 +128,7 @@ public class ProjectConfiguration extends DefaultConfiguration {
     /**
      * @see org.objectstyle.cayenne.conf.Configuration#getOverrideFactory()
      */
-    protected DataSourceFactory getOverrideFactory() {
+    public DataSourceFactory getOverrideFactory() {
         try {
             return new ProjectDataSourceFactory(getProjectDir());
         } catch (Exception e) {

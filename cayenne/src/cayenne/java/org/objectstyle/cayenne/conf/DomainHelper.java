@@ -130,6 +130,7 @@ public class DomainHelper {
 	public DomainHelper(Configuration config, Level level) throws Exception {
 		this.logLevel = level;
 		this.config = config;
+		this.factory = config.getOverrideFactory();
 		parser = Util.createXmlReader();
 		loader = new MapLoader();
 	}
@@ -168,10 +169,13 @@ public class DomainHelper {
 	/** Reads domain configuration from the InputStream, returns an array
 	  * of initialized DataDomains. An attempt will be made to resolve and
 	  * load all referenced resources (data maps, data sources). 
-	  * <p><code>factory</code> parameter will override any factory settings
-	  * for the node datasources in domain configuration. This API is intended for
-	  * tools working with Cayenne, so that they can load objects from
-	  * deployment configuration files but use their own database connections. 
+	  * 
+	  * <p>If internal Configuration returns non-null from
+	  * <code>getOverrideFactory</code> the returned factory will take a
+	  * precedence over any factories configured in the XML. This API is
+	  * intended for tools working with Cayenne, so that they can load objects
+	  * from deployment configuration files but use their own database
+	  * connections.
 	  * </p>
 	  * 
 	  * <p> 
@@ -188,10 +192,8 @@ public class DomainHelper {
 	  * @return true if no failures happened during domain loading,
 	  * false - if at least one non-fatal failure ocurred.
 	  */
-	public boolean loadDomains(InputStream in, DataSourceFactory factory)
+	public boolean loadDomains(InputStream in)
 		throws Exception {
-		this.factory = factory;
-
 		logObj.log(logLevel, "start configuration loading.");
 		if (factory != null) {
 			logObj.log(
@@ -223,24 +225,6 @@ public class DomainHelper {
 			|| (failedDataSources != null && failedDataSources.size() > 0)
 			|| (failedAdapters != null && failedAdapters.size() > 0)
 			|| (failedMapRefs != null && failedMapRefs.size() > 0);
-	}
-
-	/** Reads domain configuration from the InputStream, returns an array
-	  * of initialized DataDomains. An attempt will be made to resolve and
-	  * load all referenced resources (data maps, data sources). 
-	  * 
-	  * <p> 
-	  * If referenced resource is nonexistent or inaccessible, it will be 
-	  * inserted in one of the failed lists, available for analysis by the caller.
-	  * </p>
-	  * <p>
-	  * XML errors are fatal, and are being rethrown. 
-	  * </p>
-	  * @return true if no failures happened during domain loading,
-	  * false - if at least one non-fatal failure ocurred.
-	  */
-	public boolean loadDomains(InputStream in) throws java.lang.Exception {
-		return loadDomains(in, null);
 	}
 
 	/** Saves domains into the specified file.

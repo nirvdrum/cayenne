@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.conf;
 import java.io.InputStream;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.project.ProjectDataSourceFactory;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
@@ -77,6 +78,16 @@ public class ConfigurationTst extends CayenneTestCase {
         cfg.removeDomain(d1.getName());
         assertNull(cfg.getDomain(d1.getName()));
     }
+    
+	public void testOverrideFactory() throws java.lang.Exception {
+		Configuration cfg = new Config();
+
+        assertNull(cfg.getOverrideFactory());
+		ProjectDataSourceFactory factory = new ProjectDataSourceFactory(null);
+        cfg.setOverrideFactory(factory);
+        assertSame(factory, cfg.getOverrideFactory());
+	}
+
 
     /** Concrete Configuration subclass used for tests. */
     public static class Config extends Configuration {

@@ -108,6 +108,8 @@ public abstract class Configuration {
 
 	/** Lookup map that stores DataDomains with names as keys. */
 	protected CayenneMap dataDomains = new CayenneMap(this);
+	
+	protected DataSourceFactory overrideFactory;
 
 	/** 
 	 * Sets <code>cl</code> class's ClassLoader to serve
@@ -241,7 +243,7 @@ public abstract class Configuration {
 		}
 
 		DomainHelper helper = new DomainHelper(this, getLoggingLevel());
-		if (!helper.loadDomains(in, getOverrideFactory())) {
+		if (!helper.loadDomains(in)) {
 			StringBuffer msg = new StringBuffer();
 			msg.append("[").append(this.getClass().getName()).append(
 				"] : Failed to load domain and/or its maps/nodes.");
@@ -264,13 +266,18 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Default implementation returns null. Subclasses
-	 * may override this method to provide a special factory
-	 * for DataSource creation that will override any factories configured
-	 * in cayenne project.
+	 * Returns an internal property for the DataSource factory that 
+	 * will override any settings configured in XML. 
+	 * Subclasses may override this method to provide a special factory for
+	 * DataSource creation that will take precedence over any factories
+	 * configured in cayenne project. 
 	 */
-	protected DataSourceFactory getOverrideFactory() {
-		return null;
+	public DataSourceFactory getOverrideFactory() {
+		return overrideFactory;
+	}
+	
+	public void setOverrideFactory(DataSourceFactory overrideFactory) {
+		this.overrideFactory = overrideFactory;
 	}
 
 	/** Adds new DataDomain to the list of registered domains. */

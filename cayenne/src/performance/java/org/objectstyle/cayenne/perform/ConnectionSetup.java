@@ -92,15 +92,18 @@ public class ConnectionSetup  {
 
 
     private DataSourceInfo getInfoFromFile() throws Exception {
+		DisconnectedFactory factory = new DisconnectedFactory();
         DefaultConfiguration conf = new DefaultConfiguration();
+		conf.setOverrideFactory(factory);
         DomainHelper helper = new DomainHelper(conf);
         InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DOMAIN_FILE);
         if(in == null)
             throw new RuntimeException("Can't find '" + Configuration.DOMAIN_FILE + "'.");
 
-        DisconnectedFactory factory = new DisconnectedFactory();
-        if(!helper.loadDomains(in, factory))
+        
+        if(!helper.loadDomains(in)) {
             throw new RuntimeException("Error loading configuration.");
+        }
 
         DataSourceInfo dsi = factory.getDriverInfo();
         if(helper.getDomains().size() != 1)
