@@ -104,8 +104,26 @@ public abstract class Configuration {
     /** Creates and initializes shared Configuration object with
       * custom Configuration subclass. */
     public static void initSharedConfig(String configClass) {
+        Configuration conf = null;
+        
+        // separate instantiation exceptions from the 
+        // possible runtime exceptions thown in initSharedConfig
         try {
-            sharedConfig = (Configuration)Class.forName(configClass).newInstance();
+            conf = (Configuration)Class.forName(configClass).newInstance();
+        } catch (java.lang.Exception ex) {
+            logObj.log(Level.SEVERE, "Error initializing shared Configuration", ex);
+            throw new RuntimeException("Error initializing shared Configuration");
+        }
+        
+        initSharedConfig(conf);
+    }
+    
+    
+    /** Sets shared Configuration object to a new Configuration object.
+      * calls <code>init</code> method of <code>conf</code> object. */
+    public static void initSharedConfig(Configuration conf) {
+        try {
+            sharedConfig = conf;
             sharedConfig.init();
         } catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Error initializing shared Configuration", ex);
