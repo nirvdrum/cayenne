@@ -124,7 +124,7 @@ public class DataNode implements QueryEngine {
     // ====================================================
     // DataMaps
     // ====================================================
-    private Map dataMaps = new HashMap();
+    protected Map dataMaps = new HashMap();
     private Collection dataMapsValuesRef =
         Collections.unmodifiableCollection(dataMaps.values());
 
