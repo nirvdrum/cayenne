@@ -5,14 +5,12 @@
   <class>
     <path>[otherlib/ant-1.5.1.jar]</path>
     <path>[otherlib/ashwood-28012003.jar]</path>
-    <path>[otherlib/bcel.jar]</path>
     <path>[otherlib/bcel-5.0.jar]</path>
     <path>[otherlib/commons-beanutils-1.6.1.jar]</path>
     <path>[otherlib/commons-collections-2.1.jar]</path>
     <path>[otherlib/commons-lang-1.0.1.jar]</path>
     <path>[otherlib/commons-logging-1.0.2.jar]</path>
     <path>[otherlib/JavaCC.zip]</path>
-    <path>[otherlib/jdom-b8.jar]</path>
     <path>[otherlib/junit-3.7.jar]</path>
     <path>[otherlib/log4j-1.2.8.jar]</path>
     <path>[otherlib/net.sf.tapestry-2.2.jar]</path>
