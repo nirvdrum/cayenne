@@ -57,14 +57,12 @@
 package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
@@ -86,196 +84,153 @@ import org.objectstyle.cayenne.map.DbEntity;
  * @author Andrei Adamchik
  */
 public class OraclePkGenerator extends JdbcPkGenerator {
-    static Logger logObj = Logger.getLogger(OraclePkGenerator.class.getName());
+	static Logger logObj = Logger.getLogger(OraclePkGenerator.class.getName());
 
-    private static final String _SEQUENCE_PREFIX = "pk_";
+	private static final String _SEQUENCE_PREFIX = "pk_";
 
-    /** 
-    * This is a noop for Oracle. Primary keys are generated from sequences
-    * created for each individual table. Therefore  no common setup required.    *  
-    *
-    *  @param node node that provides access to a DataSource.
-    */
-    public void createAutoPkSupport(DataNode node) throws Exception {
-        // do nothing
-    }
+	public void createAutoPk(DataNode node, List dbEntities) throws Exception {
+		List sequences = getExistingSequences(node);
+		
+		// create needed sequences
+		Iterator it = dbEntities.iterator();
+		while (it.hasNext()) {
+			DbEntity ent = (DbEntity) it.next();
+			if (!sequences.contains(sequenceName(ent.getName()))) {
+				runUpdate(node, createSequenceString(ent.getName()));
+			}
+		}
+	}
 
-    /** 
-     * Creates sequences for each DbEntity. First checks if a corresponding
-     * sequence exists in the database:
-     * 
-     * <pre>
-     * SELECT SEQUENCE_NAME FROM USER_SEQUENCES 
-     * </pre>
-     * 
-     * If a DbEntity doesn't have PK support yet, executes the 
-     * following SQL:
-     * 
-     * <pre>
-     * CREATE SEQUENCE pk_table_name INCREMENT BY pkCacheSize
-     * </pre>
-     *
-     *  @param node node that provides access to a DataSource.
-     */
-    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity dbEntity)
-        throws Exception {
+	public List createAutoPkStatements(List dbEntities) {
+		ArrayList list = new ArrayList();
+		Iterator it = dbEntities.iterator();
+		while (it.hasNext()) {
+			DbEntity ent = (DbEntity) it.next();
+			list.add(createSequenceString(ent.getName()));
+		}
 
-        Connection con = node.getDataSource().getConnection();
-        try {
-            List existing = getExistingSequences(con, dbEntity);
-            if (existing == null || existing.size() == 0) {
-                Statement upd = con.createStatement();
-                try {
-                    StringBuffer buf = new StringBuffer();
-                    buf
-                        .append("CREATE SEQUENCE ")
-                        .append(sequenceName(dbEntity))
-                        .append(" INCREMENT BY ")
-                        .append(getPkCacheSize());
+		return list;
+	}
 
-                    upd.executeUpdate(buf.toString());
-                }
-                finally {
-                    upd.close();
-                }
-            }
-        }
-        finally {
-            con.close();
-        }
-    }
+	public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
+        List sequences = getExistingSequences(node);
 
-    /** 
-     * Drops all sequences for DataMap tables. First checks if a corresponding
-     * sequence exists in the database:
-     * 
-     * <pre>
-     * SELECT SEQUENCE_NAME FROM USER_SEQUENCES 
-     * </pre>
-     * 
-     * For each DbEntity, that has PK sequence (named like "pk_table_name", 
-     * executes the following SQL (drop statements are executed in a single batch):
-     * 
-     * <pre>
-     * DROP SEQUENCE pk_table_name
-     * </pre>
-     *
-     *  @param node node that provides access to a DataSource.
-     */
-    public void dropAutoPkSupport(DataNode node) throws Exception {
-        DataMap[] maps = node.getDataMaps();
+		// create needed sequences
+		Iterator it = dbEntities.iterator();
+		while (it.hasNext()) {
+			DbEntity ent = (DbEntity) it.next();
+			if (sequences.contains(sequenceName(ent.getName()))) {
+				runUpdate(node, dropSequenceString(ent.getName()));
+			}
+		}
+	}
 
-        Connection con = node.getDataSource().getConnection();
-        try {
-            List existing = getExistingSequences(con, null);
-            Statement upd = con.createStatement();
-            try {
-                boolean needToDrop = false;
-                for (int i = 0; i < maps.length; i++) {
+	public List dropAutoPkStatements(List dbEntities) {
+		ArrayList list = new ArrayList();
+		Iterator it = dbEntities.iterator();
+		while (it.hasNext()) {
+			DbEntity ent = (DbEntity) it.next();
+			list.add(dropSequenceString(ent.getName()));
+		}
 
-                    DbEntity[] ents = maps[i].getDbEntities();
-                    for (int j = 0; j < ents.length; j++) {
+		return list;
+	}
 
-                        if (existing.contains(sequenceName(ents[j]))) {
-                            upd.addBatch("DROP SEQUENCE " + sequenceName(ents[j]));
-                            needToDrop = true;
-                        }
-                    }
-                }
+	protected String createSequenceString(String entName) {
+		StringBuffer buf = new StringBuffer();
+		buf
+			.append("CREATE SEQUENCE ")
+			.append(sequenceName(entName))
+			.append(" INCREMENT BY ")
+			.append(getPkCacheSize());
+		return buf.toString();
+	}
 
-                if (needToDrop) {
-                    upd.executeBatch();
-                }
-            }
-            finally {
-                upd.close();
-            }
-        }
-        finally {
-            con.close();
-        }
-    }
+	/** 
+	 * Returns a SQL string needed to drop any database objects associated 
+	 * with automatic primary key generation process for a specific DbEntity. 
+	 */
+	protected String dropSequenceString(String entName) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("DROP SEQUENCE ").append(sequenceName(entName));
+		return buf.toString();
+	}
 
-    /** 
-     * Generates primary key by calling Oracle sequence corresponding to the
-     * <code>dbEntity</code>. Executed SQL looks like this:
-     * 
-     * <pre>
-     * SELECT pk_table_name.nextval FROM DUAL
-     * </pre>
-     */
-    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
+	/** 
+	 * Generates primary key by calling Oracle sequence corresponding to the
+	 * <code>dbEntity</code>. Executed SQL looks like this:
+	 * 
+	 * <pre>
+	 * SELECT pk_table_name.nextval FROM DUAL
+	 * </pre>
+	 */
+	protected int pkFromDatabase(DataNode node, DbEntity ent)
+		throws Exception {
 
-        Connection con = node.getDataSource().getConnection();
-        try {
-            Statement st = con.createStatement();
-            try {
-                ResultSet rs =
-                    st.executeQuery("SELECT " + sequenceName(ent) + ".nextval FROM DUAL");
+		Connection con = node.getDataSource().getConnection();
+		try {
+			Statement st = con.createStatement();
+			try {
+				ResultSet rs =
+					st.executeQuery(
+						"SELECT "
+							+ sequenceName(ent.getName())
+							+ ".nextval FROM DUAL");
+				try {
+					Object pk = null;
+					if (!rs.next()) {
+						throw new CayenneRuntimeException(
+							"Error generating pk for DbEntity "
+								+ ent.getName());
+					}
+					return rs.getInt(1);
+				} finally {
+					rs.close();
+				}
+			} finally {
+				st.close();
+			}
+		} finally {
+			con.close();
+		}
+	}
 
-                try {
-                    Object pk = null;
-                    if (!rs.next()) {
-                        throw new CayenneRuntimeException(
-                            "Error generating pk for DbEntity " + ent.getName());
+	/** Returns expected primary key sequence name for a DbEntity. */
+	protected String sequenceName(String entName) {
+		return _SEQUENCE_PREFIX + entName.toLowerCase();
+	}
 
-                    }
-                    return rs.getInt(1);
-                }
-                finally {
-                    rs.close();
-                }
-            }
-            finally {
-                st.close();
-            }
-        }
-        finally {
-            con.close();
-        }
-    }
+	/** 
+	 * Fetches a list of existing sequences that might match Cayenne
+	 * generated ones.
+	 */
+	protected List getExistingSequences(DataNode node) throws SQLException {
+		
+		// check existing sequences
+		Connection con = node.getDataSource().getConnection();
 
-    /** Returns expected primary key sequence name for a DbEntity. */
-    protected String sequenceName(DbEntity ent) {
-        return _SEQUENCE_PREFIX + ent.getName().toLowerCase();
-    }
-
-    /** 
-     * Fetches a list of existing sequences that might match Cayenne
-     * generated ones. If <code>dbEnt</code> parameter is not null,
-     * only tries to retrieve sequence related to this entity.
-     */
-    protected List getExistingSequences(Connection con, DbEntity ent)
-        throws SQLException {
-        // check existsing sequences
-        Statement sel = con.createStatement();
-        try {
-            StringBuffer q = new StringBuffer();
-            q.append(
-                "SELECT LOWER(SEQUENCE_NAME) FROM USER_SEQUENCES WHERE LOWER(SEQUENCE_NAME)");
-
-            if (ent != null) {
-                q.append(" = '").append(sequenceName(ent)).append('\'');
-            }
-            else {
-                q.append(" LIKE '").append(_SEQUENCE_PREFIX).append("%'");
-            }
-
-            ResultSet rs = sel.executeQuery(q.toString());
-
-            try {
-                List sequenceList = new ArrayList();
-                while (rs.next()) {
-                    sequenceList.add(rs.getString(1));
-                }
-                return sequenceList;
-            }
-            finally {
-                rs.close();
-            }
-        }
-        finally {
-            sel.close();
-        }
-    }
+		try {
+			Statement sel = con.createStatement();
+			try {
+				StringBuffer q = new StringBuffer();
+				q.append(
+					"SELECT LOWER(SEQUENCE_NAME) FROM ALL_SEQUENCES WHERE LOWER(SEQUENCE_NAME)");
+				q.append(" LIKE '").append(_SEQUENCE_PREFIX).append("%'");
+				ResultSet rs = sel.executeQuery(q.toString());
+				try {
+					List sequenceList = new ArrayList();
+					while (rs.next()) {
+						sequenceList.add(rs.getString(1));
+					}
+					return sequenceList;
+				} finally {
+					rs.close();
+				}
+			} finally {
+				sel.close();
+			}
+		} finally {
+			con.close();
+		}
+	}
 }

@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.dba;
 
+import java.util.List;
+
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 
@@ -71,28 +73,39 @@ public interface PkGenerator {
      * key support. 
      * 
      * @param node node that provides access to a DataSource.
+     * @param dbEntities a list of entities that require primary key autogeneration support
      */
-    public void createAutoPkSupport(DataNode node) throws Exception;
+    public void createAutoPk(DataNode node, List dbEntities) throws Exception;
+    
+    /** 
+     * Returns a list of SQL strings needed to generates 
+     * database objects to provide automatic primary support
+     * for the list of entities. No actual database operations 
+     * are performed.
+     */
+    public List createAutoPkStatements(List dbEntities);
+    
 
     /** 
-     * Drops any database objects associated with automatic primary 
+     * Drops any common database objects associated with automatic primary 
      * key generation process. This may be lookup tables, special stored
      * procedures or sequences. 
+     * 
+     * @param node node that provides access to a DataSource.
+     * @param dbEntities a list of entities whose primary key autogeneration support
+     * should be dropped.
      */
-    public void dropAutoPkSupport(DataNode node) throws Exception;
+    public void dropAutoPk(DataNode node, List dbEntities) throws Exception;
+
 
     /** 
-     * Performs database operations necessary for primary key 
-     * generation for a particular DbEntity.
-     * 
-     * <p>This operation should be "safe" in that it shouldn't override any 
-     * existing database objects.</p>
-     * 
-     * @param node node that provides connection layer for PkGenerator.
-     * @param ent DbEntity that needs an auto PK support
+     * Returns SQL string needed to drop database objects associated 
+     * with automatic primary key generation. No actual database 
+     * operations are performed.
      */
-    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity ent)
-        throws Exception;
+    public List dropAutoPkStatements(List dbEntities);
+    
+    
 
     /**
      * Generates new (unique and non-repeating) primary key for specified 
@@ -103,29 +116,9 @@ public interface PkGenerator {
     public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
         throws Exception;
 
-    /** 
-     * Returns SQL query needed to generates 
-     * database objects to provide automatic primary support.
-     * No actual database operations are performed.
-     */
-    public String createAutoPkSupportString();
-
-    /** 
-     * Returns SQL query needed to drop database objects associated 
-     * with automatic primary key generation. No actual database 
-     * operations are performed.
-     */
-    public String dropAutoPkSupportString();
-
-    /** 
-     * Returns SQL query to generate primary key objects for a 
-     * particular DbEntity. No actual database operations are performed.
-     */
-    public String createAutoPkSupportForDbEntityString(DbEntity ent);
-
 
     /**
-     * Returns SQL query that can generate new (unique and non-repeating) 
+     * Returns SQL string that can generate new (unique and non-repeating) 
      * primary key for specified DbEntity. No actual database operations 
      * are performed.
      */

@@ -243,8 +243,10 @@ public class JdbcAdapter implements DbAdapter {
 	}
 	
 
-    /** Returns a SQL string that can be used to create
-      * a foreign key constraint for the relationship. */
+    /** 
+     * Returns a SQL string that can be used to create
+     * a foreign key constraint for the relationship. 
+     */
     public String createFkConstraint(DbRelationship rel) {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();

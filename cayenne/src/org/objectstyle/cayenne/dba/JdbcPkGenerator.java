@@ -72,356 +72,350 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class JdbcPkGenerator implements PkGenerator {
-    static Logger logObj = Logger.getLogger(JdbcPkGenerator.class.getName());
+	static Logger logObj = Logger.getLogger(JdbcPkGenerator.class.getName());
 
-    private static final String NEXT_ID = "NEXT_ID";
-    private static final ObjAttribute[] resultDesc =
-        new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
+	private static final String NEXT_ID = "NEXT_ID";
+	private static final ObjAttribute[] resultDesc =
+		new ObjAttribute[] {
+			 new ObjAttribute("nextId", Integer.class.getName(), null)};
 
-    protected HashMap pkCache = new HashMap();
-    protected int pkCacheSize = 20;
+	protected HashMap pkCache = new HashMap();
+	protected int pkCacheSize = 20;
 
-    static {
-        resultDesc[0].setDbAttribute(new DbAttribute(NEXT_ID, Types.INTEGER, null));
-    }
-    
-    public String createAutoPkSupportString() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("CREATE TABLE AUTO_PK_SUPPORT (")
-            .append("  TABLE_NAME CHAR(100) NOT NULL,")
-            .append("  NEXT_ID INTEGER NOT NULL")
-            .append(")");
-        return buf.toString();
-    }
+	static {
+		resultDesc[0].setDbAttribute(
+			new DbAttribute(NEXT_ID, Types.INTEGER, null));
+	}
 
-    public String dropAutoPkSupportString() {
-        return "DROP TABLE AUTO_PK_SUPPORT";
-    }
+	public void createAutoPk(DataNode node, List dbEntities) throws Exception {
+		// check if a table exists
 
-    public String createAutoPkSupportForDbEntityString(DbEntity ent) {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("INSERT INTO AUTO_PK_SUPPORT")
-            .append(" (TABLE_NAME, NEXT_ID)")
-            .append(" VALUES ('")
-            .append(ent.getName())
-            .append("', 1)");
-        return buf.toString();
-    }
+		// create AUTO_PK_SUPPORT table
+		if (!autoPkTableExists(node)) {
+			runUpdate(node, pkTableCreateString());
+		}
 
-    public String generatePkForDbEntityString(DbEntity ent) {
-        StringBuffer buf = new StringBuffer();
-        buf.append(pkSelectString(ent.getName())).append('\n').append(
-            pkUpdateString(ent.getName()));
-        return buf.toString();
-    }
+		// delete any existing pk entries
+		runUpdate(node, pkDeleteString(dbEntities));
 
-    private String pkSelectString(String entName) {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = '")
-            .append(entName)
-            .append('\'');
-        return buf.toString();
-    }
+		// insert all needed entries
+		Iterator it = dbEntities.iterator();
+		while (it.hasNext()) {
+			DbEntity ent = (DbEntity) it.next();
+			runUpdate(node, pkCreateString(ent.getName()));
+		}
+	}
 
-    private String pkUpdateString(String entName) {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("UPDATE AUTO_PK_SUPPORT")
-            .append(" SET NEXT_ID = NEXT_ID + ")
-            .append(pkCacheSize)
-            .append(" WHERE TABLE_NAME = '")
-            .append(entName)
-            .append('\'');
-        return buf.toString();
-    }
+	public List createAutoPkStatements(List dbEntities) {
+		ArrayList list = new ArrayList();
 
-    /** Generates database objects to provide
-     *  automatic primary key support. This implementation will create
-     *  a lookup table called "AUTO_PK_SUPPORT" unless it already exists:
-     * 
-     *<pre>
-     *  CREATE TABLE AUTO_PK_SUPPORT (
-     *    TABLE_NAME CHAR(100) NOT NULL,
-     *    NEXT_ID INTEGER NOT NULL
-     *  )
-     *</pre>
-     *
-     *  @param node node that provides access to a DataSource.
-     */
-    public void createAutoPkSupport(DataNode node) throws Exception {
-        // check if a table exists
-        Connection con = node.getDataSource().getConnection();
-        boolean shouldCreate = true;
-        try {
-            DatabaseMetaData md = con.getMetaData();
-            ResultSet tables = md.getTables(null, null, "AUTO_PK_SUPPORT", null);
-            shouldCreate = !tables.next();
-            tables.close();
-        }
-        finally {
-            // return connection to the pool
-            con.close();
-        }
+		list.add(pkTableCreateString());
+		list.add(pkDeleteString(dbEntities));
 
-        if (shouldCreate) {
-            runUpdate(node, createAutoPkSupportString());
-        }
-    }
+		Iterator it = dbEntities.iterator();
+		while (it.hasNext()) {
+			DbEntity ent = (DbEntity) it.next();
+			list.add(pkCreateString(ent.getName()));
+		}
 
-    /** 
-     * Drops table named "AUTO_PK_SUPPORT" if it exists in the 
-     * database. 
-     */
-    public void dropAutoPkSupport(DataNode node) throws Exception {
+		return list;
+	}
 
-        // check if a table exists
-        Connection con = node.getDataSource().getConnection();
-        ResultSet tables = null;
-        boolean shouldDrop = false;
-        try {
-            DatabaseMetaData md = con.getMetaData();
-            tables = md.getTables(null, null, "AUTO_PK_SUPPORT", null);
-            shouldDrop = tables.next();
-        }
-        finally {
-            if (tables != null) {
-                tables.close();
-            }
+	/** 
+	 * Drops table named "AUTO_PK_SUPPORT" if it exists in the 
+	 * database. 
+	 */
+	public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
+		if (autoPkTableExists(node)) {
+			runUpdate(node, dropAutoPkString());
+		}
+	}
 
-            // return connection to the pool
-            con.close();
-        }
+	public List dropAutoPkStatements(List dbEntities) {
+		ArrayList list = new ArrayList();
+		list.add(dropAutoPkString());
+		return list;
+	}
 
-        if (shouldDrop) {
-            runUpdate(node, dropAutoPkSupportString());
-        }
-    }
+	protected String pkTableCreateString() {
+		StringBuffer buf = new StringBuffer();
+		buf
+			.append("CREATE TABLE AUTO_PK_SUPPORT (")
+			.append("  TABLE_NAME CHAR(100) NOT NULL,")
+			.append("  NEXT_ID INTEGER NOT NULL")
+			.append(")");
 
-    /** Performs necessary database operations to do primary key generation
-     *  for a particular DbEntity. This may require a prior call 
-     *  to <code>createAutoPkSupport<code> method.
-     * 
-     * <p>This operation is "safe" in that it won't override any existing values.</p>
-     * 
-     *  <p>This operation may produce incorrect results if there is already data
-     *  in the tables, since it will populate lookup tables
-     *  with "1" instead of looking for the correct value. 
-     * <i>Better implementation is pending.</i></p>
-     *
-     *  @param node node that provides connection layer for PkGenerator.
-     *  @param dbEntity DbEntity that needs an auto PK support
-     */
-    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity ent)
-        throws Exception {
+		return buf.toString();
+	}
 
-        // check for existing record
-        boolean shouldInsert = true;
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT ")
-            .append("WHERE TABLE_NAME = '")
-            .append(ent.getName())
-            .append('\'');
+	protected String pkDeleteString(List dbEntities) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("DELETE FROM AUTO_PK_SUPPORT WHERE TABLE_NAME IN (");
+		int len = dbEntities.size();
+		for (int i = 0; i < len; i++) {
+			if (i > 0) {
+				buf.append(", ");
+			}
+			DbEntity ent = (DbEntity) dbEntities.get(i);
+			buf.append('\'').append(ent.getName()).append('\'');
+		}
+		buf.append(')');
+		return buf.toString();
+	}
 
-        List rows = runSelect(node, buf.toString());
-        if (rows.size() > 0) {
-            shouldInsert = false;
-        }
+	protected String pkCreateString(String entName) {
+		StringBuffer buf = new StringBuffer();
+		buf
+			.append("INSERT INTO AUTO_PK_SUPPORT")
+			.append(" (TABLE_NAME, NEXT_ID)")
+			.append(" VALUES ('")
+			.append(entName)
+			.append("', 1)");
+		return buf.toString();
+	}
 
-        // create new one if needed
-        if (shouldInsert) {
-            runUpdate(node, createAutoPkSupportForDbEntityString(ent));
-        }
-    }
+	protected String pkSelectString(String entName) {
+		StringBuffer buf = new StringBuffer();
+		buf
+			.append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = '")
+			.append(entName)
+			.append('\'');
+		return buf.toString();
+	}
 
-    /** 
-     * Runs JDBC update over a Connection obtained from DataNode. 
-     * Returns a number of objects returned from update.
-     * 
-     * @throws java.lang.Exception in case of query failure. 
-     */
-    public int runUpdate(DataNode node, String sql) throws SQLException {
-        Connection con = node.getDataSource().getConnection();
-        try {
-            Statement upd = con.createStatement();
-            try {
-                return upd.executeUpdate(sql);
-            }
-            finally {
-                upd.close();
-            }
-        }
-        finally {
-            con.close();
-        }
-    }
+	protected String pkUpdateString(String entName) {
+		StringBuffer buf = new StringBuffer();
+		buf
+			.append("UPDATE AUTO_PK_SUPPORT")
+			.append(" SET NEXT_ID = NEXT_ID + ")
+			.append(pkCacheSize)
+			.append(" WHERE TABLE_NAME = '")
+			.append(entName)
+			.append('\'');
+		return buf.toString();
+	}
 
-    /** 
-     * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
-     * to track the results of the execution.
-     * 
-     * @throws java.lang.Exception in case of query failure. */
-    private List runSelect(DataNode node, String sql) throws Exception {
-        SqlSelectQuery q = new SqlSelectQuery();
-        q.setSqlString(sql);
+	protected String dropAutoPkString() {
+		return "DROP TABLE AUTO_PK_SUPPORT";
+	}
+	
+	/** 
+	 * Checks if AUTO_PK_TABLE already exists in the database.
+	 */
+	protected boolean autoPkTableExists(DataNode node) throws SQLException {
+		Connection con = node.getDataSource().getConnection();
+		boolean exists = false;
+		try {
+			DatabaseMetaData md = con.getMetaData();
+			ResultSet tables =
+				md.getTables(null, null, "AUTO_PK_SUPPORT", null);
+			try {
+				exists = tables.next();
+			} finally {
+				tables.close();
+			}
+		} finally {
+			// return connection to the pool
+			con.close();
+		}
 
-        SelectObserver observer = new SelectObserver();
-        node.performQuery(q, observer);
-        return observer.getResults(q);
-    }
+		return exists;
+	}
+	
 
-    /**
-     * <p>Generates new (unique and non-repeating) primary key for specified 
-     * dbEntity.</p>
-     *
-     * <p>This implementation is naive and can have problems with high 
-     * volume databases, when multiple applications can use this to get 
-     * a primary key value. There is a possiblity that 2 clients will 
-     * recieve the same value of primary key. So database specific 
-     * implementations should be created for cleaner approach (like Oracle
-     * sequences, for example).</p>
-     */
-    public Object generatePkForDbEntity(DataNode node, DbEntity ent)
-        throws Exception {
+	/** 
+	 * Runs JDBC update over a Connection obtained from DataNode. 
+	 * Returns a number of objects returned from update.
+	 * 
+	 * @throws java.lang.Exception in case of query failure. 
+	 */
+	public int runUpdate(DataNode node, String sql) throws SQLException {
+		Connection con = node.getDataSource().getConnection();
+		try {
+			Statement upd = con.createStatement();
+			try {
+				return upd.executeUpdate(sql);
+			} finally {
+				upd.close();
+			}
+		} finally {
+			con.close();
+		}
+	}
 
-        PkRange r = (PkRange) pkCache.get(ent.getName());
-        if (r == null || r.isExhausted()) {
-            int val = pkFromDatabase(node, ent);
+	/** 
+	 * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
+	 * to track the results of the execution.
+	 * 
+	 * @throws java.lang.Exception in case of query failure. */
+	protected List runSelect(DataNode node, String sql) throws Exception {
+		SqlSelectQuery q = new SqlSelectQuery();
+		q.setSqlString(sql);
 
-            if (pkCacheSize == 1) {
-                return new Integer(val);
-            }
+		SelectObserver observer = new SelectObserver();
+		node.performQuery(q, observer);
+		return observer.getResults(q);
+	}
 
-            r = new PkRange(val, val + pkCacheSize - 1);
-            pkCache.put(ent.getName(), r);
-        }
+	public String generatePkForDbEntityString(DbEntity ent) {
+		StringBuffer buf = new StringBuffer();
+		buf.append(pkSelectString(ent.getName())).append('\n').append(
+			pkUpdateString(ent.getName()));
+		return buf.toString();
+	}
 
-        return r.getNextPrimaryKey();
-    }
+	/**
+	 * <p>Generates new (unique and non-repeating) primary key for specified 
+	 * dbEntity.</p>
+	 *
+	 * <p>This implementation is naive and can have problems with high 
+	 * volume databases, when multiple applications can use this to get 
+	 * a primary key value. There is a possiblity that 2 clients will 
+	 * recieve the same value of primary key. So database specific 
+	 * implementations should be created for cleaner approach (like Oracle
+	 * sequences, for example).</p>
+	 */
+	public Object generatePkForDbEntity(DataNode node, DbEntity ent)
+		throws Exception {
 
-    /** 
-     * Performs primary key generation ignoring cache. Generates 
-     * a range of primary keys as specified by
-     * "pkCacheSize" bean property. 
-     * 
-     * <p>This method is called internally from "generatePkForDbEntity" 
-     * and then generated range of key values is saved in cache for 
-     * performance. Subclasses that implement different primary key 
-     * generation solutions should override this method, 
-     * not "generatePkForDbEntity".</p>
-     */
-    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
-        
-        // run queries via DataNode to utilize its transactional behavior
-        ArrayList queries = new ArrayList(2);
+		PkRange r = (PkRange) pkCache.get(ent.getName());
+		if (r == null || r.isExhausted()) {
+			int val = pkFromDatabase(node, ent);
 
-        // 1. prepare select 
-        SqlSelectQuery sel = new SqlSelectQuery(null, pkSelectString(ent.getName()));
-        sel.setResultDesc(resultDesc);
-        queries.add(sel);
+			if (pkCacheSize == 1) {
+				return new Integer(val);
+			}
 
-                
-        // 2. prepare update 
-        queries.add(new SqlModifyQuery(null, pkUpdateString(ent.getName())));
+			r = new PkRange(val, val + pkCacheSize - 1);
+			pkCache.put(ent.getName(), r);
+		}
 
-        PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
-        node.performQueries(queries, observer);
+		return r.getNextPrimaryKey();
+	}
 
-        if (!observer.successFlag) {
-            throw new CayenneRuntimeException("Error generating PK.");
-        }
-        else {
-            return observer.nextId.intValue();
-        }
-    }
+	/** 
+	 * Performs primary key generation ignoring cache. Generates 
+	 * a range of primary keys as specified by
+	 * "pkCacheSize" bean property. 
+	 * 
+	 * <p>This method is called internally from "generatePkForDbEntity" 
+	 * and then generated range of key values is saved in cache for 
+	 * performance. Subclasses that implement different primary key 
+	 * generation solutions should override this method, 
+	 * not "generatePkForDbEntity".</p>
+	 */
+	protected int pkFromDatabase(DataNode node, DbEntity ent)
+		throws Exception {
 
-    /**
-     * Returns a size of the entity primary key cache.
-     * Default value is 20. If cache size is set to a value
-     * less or equals than "one", no primary key caching is done.
-     */
-    public int getPkCacheSize() {
-        return pkCacheSize;
-    }
+		// run queries via DataNode to utilize its transactional behavior
+		ArrayList queries = new ArrayList(2);
 
-    /**
-     * Sets the size of the entity primary key cache.
-     * If <code>pkCacheSize</code> parameter is less than 1,
-     * cache size is set to "one".
-     * 
-     * <p><i>Note that our tests show that setting primary key
-     * cache value to anything much bigger than 20 does not give 
-     * any significant performance increase. Therefore it does
-     * not make sense to use bigger values, since this may 
-     * potentially create big gaps in the database primary
-     * key sequences in cases like application crashes or restarts.
-     * </i></p>
-     */
-    public void setPkCacheSize(int pkCacheSize) {
-        this.pkCacheSize = (pkCacheSize < 1) ? 1 : pkCacheSize;
-    }
+		// 1. prepare select 
+		SqlSelectQuery sel =
+			new SqlSelectQuery(null, pkSelectString(ent.getName()));
+		sel.setResultDesc(resultDesc);
+		queries.add(sel);
 
-    /** OperationObserver for primary key retrieval. */
-    class PkRetrieveProcessor extends DefaultOperationObserver {
-        private boolean successFlag;
-        private Integer nextId;
-        private String entName;
+		// 2. prepare update 
+		queries.add(new SqlModifyQuery(null, pkUpdateString(ent.getName())));
 
-        public PkRetrieveProcessor(String entName) {
-            this.entName = entName;
-        }
+		PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
+		node.performQueries(queries, observer);
 
-        public boolean useAutoCommit() {
-            return false;
-        }
+		if (!observer.successFlag) {
+			throw new CayenneRuntimeException("Error generating PK.");
+		} else {
+			return observer.nextId.intValue();
+		}
+	}
 
-        public void nextDataRows(Query query, List dataRows) {
-            super.nextDataRows(query, dataRows);
+	/**
+	 * Returns a size of the entity primary key cache.
+	 * Default value is 20. If cache size is set to a value
+	 * less or equals than "one", no primary key caching is done.
+	 */
+	public int getPkCacheSize() {
+		return pkCacheSize;
+	}
 
-            // process selected object, issue an update query
-            if (dataRows == null || dataRows.size() == 0) {
-                throw new CayenneRuntimeException(
-                    "Error generating PK : entity not supported: " + entName);
-            }
-            if (dataRows.size() > 1) {
-                throw new CayenneRuntimeException(
-                    "Error generating PK : too many rows for entity: " + entName);
-            }
+	/**
+	 * Sets the size of the entity primary key cache.
+	 * If <code>pkCacheSize</code> parameter is less than 1,
+	 * cache size is set to "one".
+	 * 
+	 * <p><i>Note that our tests show that setting primary key
+	 * cache value to anything much bigger than 20 does not give 
+	 * any significant performance increase. Therefore it does
+	 * not make sense to use bigger values, since this may 
+	 * potentially create big gaps in the database primary
+	 * key sequences in cases like application crashes or restarts.
+	 * </i></p>
+	 */
+	public void setPkCacheSize(int pkCacheSize) {
+		this.pkCacheSize = (pkCacheSize < 1) ? 1 : pkCacheSize;
+	}
 
-            Map lastPk = (Map) dataRows.get(0);
-            nextId = (Integer) lastPk.get(NEXT_ID);
-            if (nextId == null) {
-                throw new CayenneRuntimeException("Error generating PK : null nextId.");
-            }
-        }
+	/** OperationObserver for primary key retrieval. */
+	class PkRetrieveProcessor extends DefaultOperationObserver {
+		private boolean successFlag;
+		private Integer nextId;
+		private String entName;
 
-        public void nextCount(Query query, int resultCount) {
-            super.nextCount(query, resultCount);
+		public PkRetrieveProcessor(String entName) {
+			this.entName = entName;
+		}
 
-            if (resultCount != 1)
-                throw new CayenneRuntimeException(
-                    "Error generating PK : update count is wrong: " + resultCount);
-        }
+		public boolean useAutoCommit() {
+			return false;
+		}
 
-        public void transactionCommitted() {
-            super.transactionCommitted();
-            successFlag = true;
-        }
+		public void nextDataRows(Query query, List dataRows) {
+			super.nextDataRows(query, dataRows);
 
-        public void nextQueryException(Query query, Exception ex) {
-            super.nextQueryException(query, ex);
-            String entityName = (query != null) ? query.getObjEntityName() : null;
-            throw new CayenneRuntimeException(
-                "Error generating PK for entity '" + entityName + "'.",
-                ex);
-        }
+			// process selected object, issue an update query
+			if (dataRows == null || dataRows.size() == 0) {
+				throw new CayenneRuntimeException(
+					"Error generating PK : entity not supported: " + entName);
+			}
+			if (dataRows.size() > 1) {
+				throw new CayenneRuntimeException(
+					"Error generating PK : too many rows for entity: "
+						+ entName);
+			}
 
-        public void nextGlobalException(Exception ex) {
-            super.nextGlobalException(ex);
-            throw new CayenneRuntimeException("Error generating PK.", ex);
-        }
-    }
+			Map lastPk = (Map) dataRows.get(0);
+			nextId = (Integer) lastPk.get(NEXT_ID);
+			if (nextId == null) {
+				throw new CayenneRuntimeException("Error generating PK : null nextId.");
+			}
+		}
+
+		public void nextCount(Query query, int resultCount) {
+			super.nextCount(query, resultCount);
+
+			if (resultCount != 1)
+				throw new CayenneRuntimeException(
+					"Error generating PK : update count is wrong: "
+						+ resultCount);
+		}
+
+		public void transactionCommitted() {
+			super.transactionCommitted();
+			successFlag = true;
+		}
+
+		public void nextQueryException(Query query, Exception ex) {
+			super.nextQueryException(query, ex);
+			String entityName =
+				(query != null) ? query.getObjEntityName() : null;
+			throw new CayenneRuntimeException(
+				"Error generating PK for entity '" + entityName + "'.",
+				ex);
+		}
+
+		public void nextGlobalException(Exception ex) {
+			super.nextGlobalException(ex);
+			throw new CayenneRuntimeException("Error generating PK.", ex);
+		}
+	}
 }

@@ -210,10 +210,12 @@ public class DataNode implements QueryEngine {
 		boolean rolledBackFlag = false;
 
 		try {
-			
+
 			// check for invalid iterated query
 			if (opObserver.isIteratedResult() && listSize > 1) {
-				throw new CayenneException("Iterated queries are not allowed in a batch. Batch size: " + listSize);
+				throw new CayenneException(
+					"Iterated queries are not allowed in a batch. Batch size: "
+						+ listSize);
 			}
 
 			// check out connection, create statement
@@ -403,20 +405,17 @@ public class DataNode implements QueryEngine {
 	 * Will use its facilities provided by DbAdapter to generate
 	 * any necessary database objects and data for primary
 	 * key support.
+	 * 
+	 * @deprecated Use DbAdapter PK generator functions
 	 */
 	public void createPkSupportForMapEntities() throws Exception {
-		// generate common PK support
-		adapter.getPkGenerator().createAutoPkSupport(this);
-
 		// generate PK support for each indiv. entity.
 		int len = dataMaps.length;
 		for (int i = 0; i < len; i++) {
 			DbEntity[] ents = dataMaps[i].getDbEntities();
-			for (int j = 0; j < ents.length; j++) {
-				adapter.getPkGenerator().createAutoPkSupportForDbEntity(
-					this,
-					ents[j]);
-			}
+			adapter.getPkGenerator().createAutoPk(
+				this,
+				dataMaps[i].getDbEntitiesAsList());
 		}
 	}
 }

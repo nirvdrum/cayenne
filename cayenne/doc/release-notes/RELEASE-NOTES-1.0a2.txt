@@ -58,4 +58,5 @@ schema information
 18. DbGenerator is moved to "access" package, its API has changed 
 to allow more flexibility in defining how the generation should work.
 
-
+19. Added "public String createTable(DbEntity ent)" method to DbAdapter
+with default implementation in JdbcAdapter.

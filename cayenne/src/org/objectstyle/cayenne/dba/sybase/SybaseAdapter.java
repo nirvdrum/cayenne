@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba.sybase;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.dba.sybase;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.dba.sybase;
 
 import java.util.HashMap;
 

@@ -57,12 +57,12 @@
 package org.objectstyle.cayenne.dba.sybase;
 
 import java.sql.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.dba.PkRange;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
@@ -91,8 +91,8 @@ public class SybasePkGenerator extends JdbcPkGenerator {
      * 
      * <p>2. Executed under any circumstances. </p>
      * 
-     * <pre> 
-     * if (select count(*) from sysobjects where name = 'auto_pk_for_table') = 1
+     * <pre>
+     * if exists (SELECT * FROM sysobjects WHERE name = 'auto_pk_for_table')
      * BEGIN
      *    DROP PROCEDURE auto_pk_for_table 
      * END
@@ -112,14 +112,25 @@ public class SybasePkGenerator extends JdbcPkGenerator {
      *
      *  @param node node that provides access to a DataSource.
      */
-    public void createAutoPkSupport(DataNode node) throws Exception {
-        // need to drop procedure first
-        super.runUpdate(node, safePkProcDrop());
-
-        // create objects
-        super.createAutoPkSupport(node);
+    public void createAutoPk(DataNode node, List dbEntities) throws Exception {
+    	super.createAutoPk(node, dbEntities);
+    	super.runUpdate(node, safePkProcDrop());
         super.runUpdate(node, unsafePkProcCreate());
     }
+    
+    
+    public List createAutoPkStatements(List dbEntities) {
+		List list = super.createAutoPkStatements(dbEntities);
+		
+		// add stored procedure drop code
+		list.add(safePkProcDrop());
+		
+		// add stored procedure creation code
+		list.add(unsafePkProcCreate());
+		
+		return list;
+	}
+
 
     /** 
      * Drops database objects related to automatic primary
@@ -141,10 +152,17 @@ public class SybasePkGenerator extends JdbcPkGenerator {
      *
      *  @param node node that provides access to a DataSource.
      */
-    public void dropAutoPkSupport(DataNode node) throws Exception {
+    public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
         super.runUpdate(node, safePkProcDrop());
         super.runUpdate(node, safePkTableDrop());
     }
+    
+    public List dropAutoPkStatements(List dbEntities) {
+		ArrayList list = new ArrayList();
+		list.add(safePkProcDrop());
+		list.add(safePkTableDrop());
+		return list;
+	}
 
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
         Connection con = node.getDataSource().getConnection();
@@ -176,19 +194,6 @@ public class SybasePkGenerator extends JdbcPkGenerator {
         }
     }
 
-    private String safePkTableCreate() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("if (SELECT count(*) FROM sysobjects WHERE name = 'AUTO_PK_SUPPORT') = 0")
-            .append(" BEGIN ")
-            .append(" CREATE TABLE AUTO_PK_SUPPORT (")
-            .append(" TABLE_NAME VARCHAR(32) NOT NULL,")
-            .append(" NEXT_ID INTEGER NOT NULL")
-            .append(" )")
-            .append(" END");
-
-        return buf.toString();
-    }
 
     private String safePkTableDrop() {
         StringBuffer buf = new StringBuffer();

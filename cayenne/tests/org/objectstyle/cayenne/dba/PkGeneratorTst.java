@@ -78,7 +78,9 @@ public class PkGeneratorTst extends TestCase {
         node = TestMain.getSharedDomain().getDataNodes()[0];
         pkGen = node.getAdapter().getPkGenerator();
         paintEnt = node.lookupEntity("Painting").getDbEntity();
-        pkGen.createAutoPkSupportForDbEntity(node, paintEnt);
+        ArrayList list = new ArrayList();
+        list.add(paintEnt);
+        pkGen.createAutoPk(node, list);
     }
 
     public void testGeneratePkForDbEntity() throws java.lang.Exception {
