@@ -61,5 +61,6 @@ import org.objectstyle.cayenne.event.ObserverEventListener;
 public interface DataContextEventListener extends ObserverEventListener {
 	public void dataContextWillCommit(DataContextEvent event);
 	public void dataContextDidCommit(DataContextEvent event);
+	public void dataContextDidRollback(DataContextEvent event);
 }
 
