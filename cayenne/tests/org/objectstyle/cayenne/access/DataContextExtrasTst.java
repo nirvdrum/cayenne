@@ -56,14 +56,14 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.*;
 import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataContext.SelectProcessor;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /** 
@@ -96,6 +96,42 @@ public class DataContextExtrasTst extends TestCase {
         assertTrue(ctxt.registeredObjects().contains(a1));
         assertTrue(ctxt.newObjects().contains(a1));
     }
+    
+    public void testIdObjectFromDataRow() throws Exception {
+        Map row = new HashMap();
+        row.put("ARTIST_ID", new Integer(1));
+        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        
+      /*  assertTrue(ctxt.registeredObjects().contains(obj));
+        assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        assertNull(ctxt.getCommittedSnapshot(obj));
+        */
+    }
+    
+    public void testPartialObjectFromDataRow() throws Exception {
+        Map row = new HashMap();
+        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_NAME", "ArtistXYZ");
+        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        
+     /*   assertTrue(ctxt.registeredObjects().contains(obj));
+        assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        assertNull(ctxt.getCommittedSnapshot(obj));
+        */
+    }
+    
+    public void testFullObjectFromDataRow() throws Exception {
+        Map row = new HashMap();
+        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_NAME", "ArtistXYZ");
+        row.put("DATE_OF_BIRTH", new Date());
+        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        
+        assertTrue(ctxt.registeredObjects().contains(obj));
+        assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
+        assertNotNull(ctxt.getCommittedSnapshot(obj));
+    }
+    
 
     public void testCommitChangesError() throws Exception {
         Artist o1 = new Artist();
