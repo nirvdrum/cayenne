@@ -433,22 +433,4 @@ public class DataNode implements QueryEngine {
 		this.performQueries(qWrapper, opObserver);
 	}
 
-	/** 
-	 * Creates primary key support for all node DbEntities.
-	 * Will use its facilities provided by DbAdapter to generate
-	 * any necessary database objects and data for primary
-	 * key support.
-	 * 
-	 * @deprecated Use DbAdapter PK generator functions
-	 */
-	public void createPkSupportForMapEntities() throws Exception {
-		// generate PK support for each indiv. entity.
-		int len = dataMaps.length;
-		for (int i = 0; i < len; i++) {
-			DbEntity[] ents = dataMaps[i].getDbEntities();
-			adapter.getPkGenerator().createAutoPk(
-				this,
-				dataMaps[i].getDbEntitiesAsList());
-		}
-	}
 }
