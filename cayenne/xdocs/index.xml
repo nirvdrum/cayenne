@@ -14,6 +14,8 @@
         Changes in this release:
         <ul>
         	<li>Fixes a number of Oracle issues with BLOB/CLOB.</li>
+        	<li>Introduces an early version of the <a href=
+        	"modelerguide/index.html">CayenneModeler Guide</a>.</li>
         	<li>Adds extra validation logic to CayenneModeler, fixes
         	a few bugs leading to Modeler exceptions due to partial
         	DataMaps.</li>

@@ -10,9 +10,31 @@
 	<next>/modelerguide/object-relational-modeling/no-existing-database.html</next>
 </navigator>
 <body>
- 	 <section name="2.1 Start With Existing Database">
+	<section name="2. Approach to Object/Relational Modeling">
+ 	 <subsection name="2.1 Java Interface to an Existing Database">
+ 	 	<p><b>To be rewritten...</b></p>
+ 	 	
+
 		<ol>
-		<li>Do steps 1 through 6 of the previous section to create project and a domain.</li>
+				<li>Start CayenneModeler</li>
+		<li>Click File->New Project.
+			System will prompt you to choose the project location -
+			folder which will be the root for all other project files.
+		</li>
+		<li>Select folder and click Save.
+			If there is already a project (cayenne.xml file) in the folder you
+			selected, system will ask you if you want to overwrite existing
+			project.</li>
+		<li>Once you have successfully created the project, the system will
+		split the screen in two panes. Right pane is the Browse View used to
+		navigate through domains, data nodes, data maps and entities. Left pane
+		is the Detail view showing the details of the item currently selected in
+		the Browse view.</li>
+		<li>Click Project->Create Domain. The system will show the new domain
+		selected in the Browse view and detail information (only name) in the
+		Detail view.</li>
+		<li>Rename the domain by typing Domain1 in the detail view.
+		</li>
 		<li>Click Tools->Reverse Engineer Database.
 			System will bring up Enter JDBC Information dialog.</li>
 		<li>Type in the connection information for the database and click
@@ -33,10 +55,7 @@
 			If you database does not support foreign keys (like MySQL),
 			no relationships will be generated.</li>
 		</ol>
-		<p>
-		See previous section for more details on editing and saving the newly
-		created model, as well as creating data nodes.
-		</p>
+		</subsection>
     </section>
 </body>
 </document>

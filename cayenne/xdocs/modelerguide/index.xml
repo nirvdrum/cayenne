@@ -15,8 +15,9 @@
              
              <li><a href="object-relational-modeling/index.html">2. Approach to Object/Relational Modeling</a>
              <ul>
-                <li><a href="object-relational-modeling/existing-database.html">2.1 Start with Existing Database</a></li>
-                <li><a href="object-relational-modeling/no-existing-database.html">2.2 Start from the O/R Model</a></li>
+                <li><a href="object-relational-modeling/existing-database.html">2.1 Java Interface to an Existing Database</a></li>
+                <li><a href="object-relational-modeling/no-existing-database.html">2.2 New System</a></li>
+                <li><a href="object-relational-modeling/existing-java-framework.html">2.3 Converting an Existing Java Business Framework</a></li>
             </ul><br/></li>
             
              <li><a href="pksupport.html">3. Generating Primary Key Support in the Database</a>

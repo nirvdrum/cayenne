@@ -10,9 +10,9 @@
 </navigator>
 <body>
         <section name="4. Modeling Tips">
-        	<p>Here is a few general tips on Object/Relational modeling in Cayenne. 
-        	Some of these things may be reimplemented in the future to make it more
-        	transparent to the user.</p>
+        	<p>This section contains a few unorganized tips on Object/Relational modeling in Cayenne. 
+        	Some of these tips may become obsolete in the future as the Modeler evolves, making
+        	many things more transparent to the user.</p>
         	
         	<ul>
         		<li>Pay attention to validation messages when saving the project, this helps

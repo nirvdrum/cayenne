@@ -1,0 +1,26 @@
+<document>
+<title>CayenneModeler Guide</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/object-relational-modeling/no-existing-database.html</prev>
+	<next>/modelerguide/pksupport.html</next>
+</navigator>
+<body>
+	<section name="2. Approach to Object/Relational Modeling">
+ 	 <subsection name="2.3 Converting an Existing Java Business Framework">
+		<p>
+		To be done..
+		</p>
+		</subsection>
+    </section>
+</body>
+</document>
+
+
+
+
+
