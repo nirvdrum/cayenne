@@ -148,18 +148,4 @@ public class CayenneTable extends JTable {
 		}
 		return null;
 	}
-
-	/**
-	 * @see javax.swing.JTable#prepareEditor(TableCellEditor, int, int)
-	 */
-	public Component prepareEditor(
-		TableCellEditor editor,
-		int row,
-		int column) {
-
-		logObj.severe("prepare editor");
-		Thread.dumpStack();
-		return super.prepareEditor(editor, row, column);
-	}
-
 }
