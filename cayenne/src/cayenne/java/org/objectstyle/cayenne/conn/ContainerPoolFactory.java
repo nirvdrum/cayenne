@@ -2,7 +2,7 @@
  * 
  * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * Copyright (c) 2002-2003 The ObjectStyle Group 
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,9 @@
  * 
  * Other copyright notes:
  *
- * 1. Original idea and implementation Jakarta DBCP project,  
- * copyright (c) 1999-2002 The Apache Software Foundation. 
+ * 1. Original idea and implementation: Jakarta DBCP project,  
+ * copyright (c) The Apache Software Foundation,
+ * author Craig R. McClanahan 
  *
  */
 package org.objectstyle.cayenne.conn;
@@ -129,7 +130,6 @@ import org.apache.log4j.Logger;
 &lt;/resource-ref>
 </pre></code> 
  *
- * @author Craig R. McClanahan
  * @author Andrei Adamchik
  */
 
