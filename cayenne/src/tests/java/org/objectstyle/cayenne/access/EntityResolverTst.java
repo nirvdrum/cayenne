@@ -16,7 +16,7 @@ public class EntityResolverTst extends CayenneTestCase {
 
     public EntityResolverTst(String name) {
         super(name);
-        allMaps.addAll(getDomain().getMapList());
+        allMaps.addAll(getDomain().getDataMapsAsList());
     }
 
     protected void setUp() throws Exception {

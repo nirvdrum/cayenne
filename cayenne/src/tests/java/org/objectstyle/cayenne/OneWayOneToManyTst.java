@@ -62,6 +62,7 @@ import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.art.oneway.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -86,7 +87,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();
         DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
+        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
 
         ctxt = getDomain().createDataContext();
     }

@@ -206,7 +206,7 @@ public class CayenneTestDatabaseSetup {
 		DbAdapter adapter = node.getAdapter();
 		adapter.getPkGenerator().createAutoPk(
 			node,
-			node.getDataMaps()[0].getDbEntitiesAsList());
+			((DataMap)node.getDataMapsAsList().get(0)).getDbEntitiesAsList());
 	}
 
 	/** 
@@ -216,12 +216,11 @@ public class CayenneTestDatabaseSetup {
 	 * key support.
 	 */
 	public void createPkSupportForMapEntities(DataNode node) throws Exception {
-		DataMap[] dataMaps = node.getDataMaps();
-		int len = dataMaps.length;
-		for (int i = 0; i < len; i++) {
+		Iterator dataMaps = node.getDataMapsAsList().iterator();
+		while (dataMaps.hasNext()) {
 			node.getAdapter().getPkGenerator().createAutoPk(
 				node,
-				dataMaps[i].getDbEntitiesAsList());
+				((DataMap)dataMaps.next()).getDbEntitiesAsList());
 		}
 	}
 

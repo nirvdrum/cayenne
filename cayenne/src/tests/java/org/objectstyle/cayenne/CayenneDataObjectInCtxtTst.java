@@ -63,6 +63,7 @@ import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -83,7 +84,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         setup.cleanTableData();
 
 		DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
+        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
 
         ctxt = dom.createDataContext();
     }
