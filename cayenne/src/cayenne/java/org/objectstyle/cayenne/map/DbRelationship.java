@@ -123,7 +123,6 @@ public class DbRelationship extends Relationship {
      * but going in the opposite direction.
      * 
      * @since 1.0.5
-     * @return
      */
     public DbRelationship createReverseRelationship() {
         DbRelationship reverse = new DbRelationship();

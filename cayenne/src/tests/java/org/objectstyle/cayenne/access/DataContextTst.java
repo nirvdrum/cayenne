@@ -85,7 +85,7 @@ public class DataContextTst extends DataContextTestBase {
     }
     
     public void testDeleteNew() throws Exception {
-        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject(Artist.class);
         artist.setArtistName("a");
         
         assertEquals(PersistenceState.NEW, artist.getPersistenceState());
@@ -207,7 +207,7 @@ public class DataContextTst extends DataContextTestBase {
      */
     public void testCreatePermId2() throws Exception {
         Artist artist = new Artist();
-        context.registerNewObject(artist, "Artist");
+        context.registerNewObject(artist);
         ObjectId id1 = context.createPermId(artist);
         ObjectId id2 = context.createPermId(artist);
         //Must not fail on second call

@@ -108,6 +108,12 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertTrue(context.getObjectStore().getObjects().contains(a1));
         assertTrue(context.newObjects().contains(a1));
     }
+    
+    public void testCreateAndRegisterNewObjectWithClass() throws Exception {
+        Artist a1 = (Artist) context.createAndRegisterNewObject(Artist.class);
+        assertTrue(context.getObjectStore().getObjects().contains(a1));
+        assertTrue(context.newObjects().contains(a1));
+    }
 
     public void testIdObjectFromDataRow() throws Exception {
 		DataRow row = new DataRow(10);

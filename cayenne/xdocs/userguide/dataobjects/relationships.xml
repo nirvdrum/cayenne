@@ -19,7 +19,7 @@ Painting painting;
 Artist originalArtist = painting.getToArtist();
 
 // replace with a new artist
-Artist newArtist = (Artist)context.createAndRegisterNewObject("Artist");
+Artist newArtist = (Artist)context.createAndRegisterNewObject(Artist.class);
 painting.setToArtist(newArtist);
 
 // or temporarily remove Artist at all...
@@ -53,7 +53,7 @@ if(paintings.size() > 0) {
 }
 
 // add a new painting
-Painting newPainting = (Painting)context.createAndRegisterNewObject("Painting");
+Painting newPainting = (Painting)context.createAndRegisterNewObject(Painting.class);
 artist.addToPaintingArray(newPainting);
 </source>
     	</subsection>

@@ -772,6 +772,13 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Instantiates new object and registers it with itself. Object class
      * is determined from ObjEntity. Object class must have a default constructor.
+     * 
+     * <p><i>Note: preferred way to create new objects is via 
+     * {@link #createAndRegisterNewObject(Class)} method. It works exactly 
+     * the same way, but makes the application type-safe.
+     * </i></p>
+     * 
+     * @see #createAndRegisterNewObject(Class)
      */
     public DataObject createAndRegisterNewObject(String objEntityName) {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(objEntityName);
@@ -781,16 +788,45 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         String objClassName = entity.getClassName();
-        DataObject dobj = null;
+        DataObject dataObject = null;
         try {
-            dobj = DataContext.newDataObject(objClassName);
+            dataObject = DataContext.newDataObject(objClassName);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);
         }
 
-        registerNewObject(dobj, objEntityName);
-        return dobj;
+        registerNewObjectWithEntity(dataObject, entity);
+        return dataObject;
+    }
+    
+    /**
+     * Instantiates new object and registers it with itself. Object class must have a 
+     * default constructor.
+     * 
+     * @since 1.1
+     */
+    public DataObject createAndRegisterNewObject(Class objectClass) {
+        if (objectClass == null) {
+            throw new NullPointerException("DataObject class can't be null.");
+        }
+        
+        ObjEntity entity = getEntityResolver().lookupObjEntity(objectClass);
+        if (entity == null) {
+            throw new IllegalArgumentException(
+                "Class is not mapped with Cayenne: " + objectClass.getName());
+        }
+
+        DataObject dataObject = null;
+        try {
+            dataObject = (DataObject) objectClass.newInstance();
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error instantiating object.", ex);
+        }
+
+        registerNewObjectWithEntity(dataObject, entity);
+        return dataObject;
     }
 
     /** Registers a new object (that is not yet persistent) with itself.
@@ -798,6 +834,10 @@ public class DataContext implements QueryEngine, Serializable {
      * @param dataObject new object that we want to make persistent.
      * @param objEntityName a name of the ObjEntity in the map used to get
      *  persistence information for this object.
+     * 
+     * @deprecated since 1.1 this method is deprecated. It is misleading to think that 
+     * Cayenne supports more than one class per ObjEntity. Use {@link #registerNewObject(DataObject)}
+     * instead.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
         ObjEntity entity = getEntityResolver().lookupObjEntity(objEntityName);

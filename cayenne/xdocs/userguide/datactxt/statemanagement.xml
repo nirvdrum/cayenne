@@ -36,15 +36,14 @@ ctxt.registerNewObject(artist);
 </source>
 
 	<p>To reduce the amount of code needed to make new objects persistent, DataContext provides a 
-	shortcut to create and register DataObjects in one method call. This requires a default no-argument constructor
-	in the DataObject class.</p>
+	shortcut to create and register DataObjects in one method call. This requires a default no-argument 
+	constructor in the DataObject class.</p>
 <source>
 import org.objectstyle.cayenne.access.DataContext;
 ...
 DataContext ctxt; // assume this exists
 
-// here "Artist" string is the name of ObjEntity that maps to the Artist class
-Artist artist = (Artist)ctxt.createAndRegisterNewObject("Artist");
+Artist artist = (Artist)ctxt.createAndRegisterNewObject(Artist.class);
 </source>
 		</subsection>
 		
@@ -62,7 +61,7 @@ import org.objectstyle.cayenne.access.DataContext;
 DataContext ctxt; // assume this exists
 
 // artist will become PersistenceState.NEW
-Artist artist = (Artist)ctxt.createAndRegisterNewObject("Artist");
+Artist artist = (Artist)ctxt.createAndRegisterNewObject(Artist.class);
 </source>
 		
 		<p>When any of the attributes or relationships of the fetched or committed object are changed, such

@@ -87,10 +87,10 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     }
 
     public void testSetObjectId() throws Exception {
-        CayenneDataObject o1 = new CayenneDataObject();
+        Artist o1 = new Artist();
         assertNull(o1.getObjectId());
 
-        context.registerNewObject(o1, "Artist");
+        context.registerNewObject(o1);
         assertNotNull(o1.getObjectId());
     }
 
@@ -156,10 +156,10 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     }
 
     public void testSetDataContext() throws Exception {
-        CayenneDataObject o1 = new CayenneDataObject();
+        Artist o1 = new Artist();
         assertNull(o1.getDataContext());
 
-        context.registerNewObject(o1, "Artist");
+        context.registerNewObject(o1);
         assertSame(context, o1.getDataContext());
     }
 

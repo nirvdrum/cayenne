@@ -43,7 +43,7 @@ if(realExpensiveArt.size() > 0) {
 
   // create new painting and register it with DataContext
   // "Painting" string is a name of ObjEntity in the DataMap
-  Painting newPainting = (Painting)ctxt.createAndRegisterNewObject("Painting");
+  Painting newPainting = (Painting)ctxt.createAndRegisterNewObject(Painting.class);
   newPainting.setPaintingTitle("Sunset as it is");
 
   // price it as unreasonable as other paintings

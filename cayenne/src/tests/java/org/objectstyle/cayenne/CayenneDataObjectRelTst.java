@@ -313,7 +313,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
     }
 
     public void testToManyUnfaulted() throws Exception {
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) ctxt.createAndRegisterNewObject(Artist.class);
         artist.setArtistName("test");
         assertTrue(artist.readPropertyDirectly("paintingArray") instanceof Fault);
 
