@@ -176,17 +176,24 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		adapterInput =
 			new PreferenceField(
 				Preferences.RDBMS_ADAPTER,
-				false,
 				Arrays.asList(adapter_arr));
 		disableVKEvents(adapterInput);
 
-		Component[] left = new Component[] {
-			unLabel, pwdLabel, drLabel, urlLabel, adapterLabel
-		};
+		Component[] left =
+			new Component[] {
+				unLabel,
+				pwdLabel,
+				drLabel,
+				urlLabel,
+				adapterLabel };
 
-		Component[] right = new Component[] {
-			unInput, pwdInput, drInput, urlInput, adapterInput 
-		};
+		Component[] right =
+			new Component[] {
+				unInput,
+				pwdInput,
+				drInput,
+				urlInput,
+				adapterInput };
 
 		return PanelFactory.createForm(left, right, 5, 5, 5, 5);
 	}
@@ -199,11 +206,10 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		cancel = new JButton("Cancel");
 		cancel.setActionCommand("cancel");
 
-
 		ok.addActionListener(this);
 		cancel.addActionListener(this);
 
-		return GUIUtil.createButtonPanel(new JButton[] {ok, cancel});
+		return GUIUtil.createButtonPanel(new JButton[] { ok, cancel });
 	}
 
 	protected JPanel initMessagePanel() {

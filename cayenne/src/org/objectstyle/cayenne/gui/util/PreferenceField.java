@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.gui.util;
 
@@ -65,65 +65,52 @@ import javax.swing.text.JTextComponent;
 
 import org.objectstyle.util.Preferences;
 
-
-public class PreferenceField extends JComboBox
-{
-    static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
+public class PreferenceField extends JComboBox {
+	static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
 
 	private String key;
-	
+
 	/** 
 	 * Values to put in pref field in addition to preference values.
 	 * These values are not going to be stored to preference file.
 	 */
 	private List initValues;
-	
-	/** 
-	 * Creates PreferenceField that will set preferences 
-	 * only on explicit call to storePreferences().
-	 */
-	public PreferenceField(String temp_key) {
-		this(temp_key, false);
-	}
 
 	/** 
-	 * Creates PreferenceField that allows storing preferences 
-	 * on focus lost.
-	 * 
-	 * @param temp_key Key under which preferences is retrieved or stored
-	 * @param set_on_focus If true, stores preferences each time focus is lost.
+	 * Creates PreferenceField that will set preferences 
+	 * only on explicit call to <code>storePreferences()</code>.
 	 */
-	public PreferenceField(String temp_key, boolean set_on_focus) {
-		this(temp_key, set_on_focus, new Vector());
+	public PreferenceField(String key) {
+		this(key, new Vector());
 	}
-	
-	
-	public PreferenceField(String temp_key, boolean set_on_focus
-						 , List init_values)
-	{
-		key = temp_key;
+
+	public PreferenceField(String key, List initValues) {
+		this.key = key;
 		setEditable(true);
 		setSelectedIndex(-1);
 		Preferences pref = Preferences.getPreferences();
-		initValues = init_values;
-		Vector v = new Vector(init_values);
-		
+		this.initValues = initValues;
+		Vector v = new Vector(initValues);
+
 		// If has key, append preference values to init values
 		if (pref.containsKey(key)) {
 			String[] options = pref.getStringArray(key);
-			if (options != null ) {
+			if (options != null) {
 				v.addAll(Arrays.asList(options));
 			}
 		}
+
 		// If any values (init or pref), put them in the model
 		if (v.size() > 0) {
-			DefaultComboBoxModel model = new DefaultComboBoxModel(v);
-			setModel(model);
+			setModel(new DefaultComboBoxModel(v));
 		}
 		setSelectedItem(null);
 	}
-	
-	/** Return the text of the selected item or "" if nothing is selected.*/
+
+	/** 
+	 * Returns the text of the selected item or empty string 
+	 * if nothing is selected.
+	 */
 	public String getText() {
 		ComboBoxEditor editor = getEditor();
 		if (null == editor) {
@@ -132,60 +119,63 @@ public class PreferenceField extends JComboBox
 		return editor.getItem().toString();
 	}
 
-	/** Gets elements of the combo as string array. 
-	  * Doesn't check if currently selected item is in the drop down. */
-	private Vector getItemsVector() {
-		DefaultComboBoxModel model = (DefaultComboBoxModel)getModel();
+	/** Adds string to the drop down and selects it. */
+	public void setText(String text) {
+		getEditor().setItem(text);
+	}
+	
+	/** 
+	 * Returns elements of the combo as string array. Doesn't check 
+	 * if currently selected item is in the drop down. 
+	 */
+	public Object[] getItems() {
+		DefaultComboBoxModel model = (DefaultComboBoxModel) getModel();
 		int size = model.getSize();
-		Vector arr = new Vector();
+		Object[] arr = new Object[size];
 		for (int i = 0; i < size; i++) {
-			arr.add(model.getElementAt(i));
+			arr[i] = model.getElementAt(i);
 		}
 		return arr;
 	}
-
-	/** Ads string to the drop down and selects it. */
-	public void setText(String text) {
-		ComboBoxEditor editor = getEditor();
-		editor.setItem(text);
-	}	
 	
-	/** Saves the drop down items and newly added item to preferences.*/
+
+	/** 
+	 * Saves the drop down items and newly added item to preferences.
+	 */
 	public void storePreferences() {
-		Vector items = getItemsVector();
+		DefaultComboBoxModel model = (DefaultComboBoxModel)getModel();
+		
+		// add new item to ComboBox if it is not there already
 		String item = getText();
 		if (item != null) {
 			item = item.trim();
-			if (item.length() > 0 && !items.contains(item)) {
-				items.add(item);
+			if (item.length() > 0 && model.getIndexOf(item) < 0) {
+				model.addElement(item);
 			}
 		}
-		
-		Collections.sort(items);
+
+        Object[] items = getItems();
+	    Arrays.sort(items);
+	    
 		Preferences pref = Preferences.getPreferences();
 		pref.remove(key);
 		
-	    StringBuffer buf = new StringBuffer("PreferenceField::storePreferences()"
-								+", key "+ key + ":\n");
-		Iterator iter = items.iterator();
-	    while (iter.hasNext()) {
-		    String str = (String)iter.next();
-		    // Skip initial items (not from preferences)
-		    if (initValues.contains(str)) {
-		    	continue;
-		    }
-		    
-		    pref.addProperty(key, str);
-		    buf.append(str + "\n");
-	    }
-	    
-	    logObj.finer(buf.toString());
-		DefaultComboBoxModel model = new DefaultComboBoxModel(items);
+		int size = items.length;
+		for(int i = 0; i < size; i++) {			
+			// Skip initial items (not from preferences)
+			if (initValues.contains(items[i])) {
+				continue;
+			}
+
+			pref.addProperty(key, items[i]);
+		}
+		
+		model = new DefaultComboBoxModel(items);
 		model.setSelectedItem(item);
-		setModel(model);
 	}
-	
+
 	public Document getDocument() {
-		return ((JTextComponent)getEditor().getEditorComponent()).getDocument();
+		return ((JTextComponent) getEditor().getEditorComponent())
+			.getDocument();
 	}
 }
