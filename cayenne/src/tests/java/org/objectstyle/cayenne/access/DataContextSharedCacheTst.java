@@ -691,6 +691,46 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertEquals(originalName, freshSnapshot.get("ARTIST_NAME"));
     }
 
+    public void testSnapshotEvictedAndObjectsHollowedForInvalidate() throws Exception {
+        String originalName = artist.getArtistName();
+        DataContext context = artist.getDataContext();
+
+        // create alternative context
+        DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object
+        // in the second context
+        final Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        altArtist.resolveFault();
+        assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
+        
+        context.invalidateObjects(Collections.singletonList(artist));
+        // wait long enough for non-blocking events to be processed
+        Thread.sleep(1);
+        
+        // original context
+        assertEquals(PersistenceState.HOLLOW, artist.getPersistenceState());
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId()));
+
+        // alternate context
+        assertEquals(PersistenceState.HOLLOW, altArtist.getPersistenceState());
+        assertNull(
+                altContext.getObjectStore().getDataRowCache().getCachedSnapshot(
+                    altArtist.getObjectId()));
+
+        // resolve object
+        assertEquals(originalName, altArtist.getArtistName());
+        DataRow altFreshSnapshot =
+            altContext.getObjectStore().getDataRowCache().getCachedSnapshot(
+                    altArtist.getObjectId());
+        assertNotNull(altFreshSnapshot);
+        assertEquals(originalName, altFreshSnapshot.get("ARTIST_NAME"));
+        
+    }
+
     public void testSnapshotEvictedForCommitted() throws Exception {
         String newName = "version2";
         DataContext context = artist.getDataContext();
