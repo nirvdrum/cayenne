@@ -16,3 +16,6 @@ the superclass.
 
 3. SnapshotManager is now stateless and is used as a singelton.
 
+4. Fixed CayenneDataObject.readNestedProperty() to avoid converting all
+non-persistent properties to String. [Bug 817449]
+
