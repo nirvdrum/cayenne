@@ -72,6 +72,55 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         super(name);
     }
 
+   public void testReadRO1() throws Exception {
+
+        // setup test
+        Artist a1 = newArtist();
+        Painting p1 = newPainting();
+        a1.addToPaintingArray(p1);
+        ctxt.commitChanges();
+
+        // do select
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        SelectQuery q = new SelectQuery("ROPainting", e);
+
+        // *** TESTING THIS *** 
+        List paints = ctxt.performQuery(q);
+        assertEquals(1, paints.size());
+        
+        Painting rop1 = (Painting)paints.get(0);
+        assertSame(a1, rop1.getToArtist());
+    }
+    
+    public void testReadRO2() throws Exception {
+
+        // setup test
+        Artist a1 = newArtist();
+        Painting p1 = newPainting();
+        a1.addToPaintingArray(p1);
+        ctxt.commitChanges();
+
+        resetContext();
+        
+        // do select
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        SelectQuery q = new SelectQuery("ROPainting", e);
+
+        // *** TESTING THIS *** 
+        List paints = ctxt.performQuery(q);
+        assertEquals(1, paints.size());
+        
+        Painting rop1 = (Painting)paints.get(0);
+        assertNotNull(rop1.getToArtist());
+        
+        // trigger fetch
+        String name = rop1.getToArtist().getArtistName();
+        assertEquals(PersistenceState.COMMITTED, rop1.getToArtist().getPersistenceState());
+    }
+    
+    
     public void testSelectViaRelationship() throws Exception {
 
         // setup test

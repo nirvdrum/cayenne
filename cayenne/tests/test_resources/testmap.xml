@@ -73,6 +73,10 @@
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
 	</obj-entity>
+	<obj-entity name="ROPainting" readOnly="true" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
+	</obj-entity>
 	
 	<obj-entity name="ArtistAssets" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
@@ -165,6 +169,9 @@
 		<db-relationship-ref source="PAINTING" target="GALLERY"  name="toGallery"/>
 	</obj-relationship>
 	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
+		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="ROPainting" target="Artist" toMany="false">
 		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
 	</obj-relationship>
 	<obj-relationship name="toArtist" source="ArtistAssets" target="Artist" toMany="false">

@@ -118,6 +118,12 @@ public class CayenneDOTestBase extends CayenneTestCase {
         return a1;
     }
     
+    protected Painting newROPainting() {
+        Painting p1 = (Painting)ctxt.createAndRegisterNewObject("ROPainting");
+        p1.setPaintingTitle(paintingName);
+        return p1;
+    }
+    
     protected Painting newPainting() {
         Painting p1 = (Painting)ctxt.createAndRegisterNewObject("Painting");
         p1.setPaintingTitle(paintingName);

@@ -55,11 +55,12 @@
  */ 
 package org.objectstyle.cayenne.exp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /** Defines basic API of a generic data expression. */
-public abstract class Expression {
+public abstract class Expression implements Serializable {
     
     /** Corresponds to SQL "A AND B" expression. */
     public static final int AND = 0;

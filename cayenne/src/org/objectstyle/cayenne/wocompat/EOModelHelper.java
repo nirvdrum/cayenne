@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.wocompat;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,14 @@ package org.objectstyle.cayenne.wocompat;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.wocompat;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
