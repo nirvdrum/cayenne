@@ -187,8 +187,6 @@ public class QueryLogger {
 
 			if (dsi != null) {
 				buf.append("\nDriver class: ").append(dsi.getJdbcDriver());
-				buf.append("\nCayenne DbAdapter: ").append(
-					dsi.getAdapterClass());
 				buf.append("\nDatabase URL: ").append(dsi.getDataSourceUrl());
 				buf.append("\nLogin: ").append(dsi.getUserName());
 				buf.append("\nPassword: *******");

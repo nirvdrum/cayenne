@@ -136,7 +136,7 @@ public class TypesHandler {
 
         private HashMap types = new HashMap();
         private ArrayList currentTypes = new ArrayList();
-        private int currentType;
+        private int currentType = TypesMapping.NOT_DEFINED;
 
 
         public HashMap getTypes() {
@@ -154,7 +154,8 @@ public class TypesHandler {
                 try {
                     currentType = Types.class.getDeclaredField(strType).getInt(null);
                 } catch(Exception ex) {
-                    throw new SAXException("error matching types field.", ex);
+                    currentType = TypesMapping.NOT_DEFINED;
+                    logObj.info("type not found: '" + strType + "', ignoring.");
                 }
             } else if(DB_TYPE_TAG.equals(localName)) {
                 currentTypes.add(atts.getValue("", NAME_ATTR));
@@ -162,7 +163,7 @@ public class TypesHandler {
         }
 
         public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
-            if (JDBC_TYPE_TAG.equals(localName)) {
+            if (JDBC_TYPE_TAG.equals(localName) && currentType != TypesMapping.NOT_DEFINED) {
                 String[] typesAsArray = new String[currentTypes.size()];
                 types.put(new Integer(currentType), currentTypes.toArray(typesAsArray));
             }

@@ -97,6 +97,47 @@ public class PanelFactory {
 		return panel;
 	}
 
+	public static JPanel createJDK13Form(
+		Component[] leftComponents,
+		Component[] rightComponents,
+		int xSpacing,
+		int ySpacing,
+		int xPad,
+		int yPad) {
+
+		JPanel panel = new JPanel();
+
+		panel.setBorder(
+			BorderFactory.createEmptyBorder(
+				xSpacing,
+				ySpacing,
+				xSpacing,
+				ySpacing));
+		GridBagLayout gbl = new GridBagLayout();
+		panel.setLayout(gbl);
+
+		GridBagConstraints cstr = new GridBagConstraints();
+		cstr.ipadx = xPad;
+		cstr.ipady = yPad;
+		cstr.fill = GridBagConstraints.HORIZONTAL;
+		cstr.insets = new Insets(1, 1, 1, 1);
+
+		int numRows = Math.max(leftComponents.length, rightComponents.length);
+		for (int i = 0; i < numRows; i++) {
+			cstr.gridwidth = 1;
+			cstr.anchor = GridBagConstraints.EAST;
+			gbl.setConstraints(leftComponents[i], cstr);
+			panel.add(leftComponents[i]);
+
+			cstr.gridwidth = GridBagConstraints.REMAINDER;
+			cstr.anchor = GridBagConstraints.WEST;
+			gbl.setConstraints(rightComponents[i], cstr);
+			panel.add(rightComponents[i]);
+		}
+
+		return panel;
+	}
+
 	/** 
 	 * Create panel with aligned labels on the right and fields on the left.
 	 * Panel uses SpringLayout.
