@@ -81,7 +81,7 @@ public class ObserverManager extends Object {
 	
 	private HashMap _subjects;
 
-	public static ObserverManager getInstance() {
+	public static ObserverManager getDefaultManager() {
 		return _instance;
 	}
 	
@@ -100,7 +100,7 @@ public class ObserverManager extends Object {
 		}
 
 		Method method = observer.getClass().getMethod(methodName, new Class[] { ObserverEvent.class });		
-		Invocation inv = new Invocation(observer, method);
+		ObserverInvocation inv = new ObserverInvocation(observer, method);
 
 		Set observersForSubject = this.observersForSubject(subject);
 		if (observersForSubject == null) {
@@ -129,7 +129,7 @@ public class ObserverManager extends Object {
 
 			Iterator iter = observersForEvent.iterator();
 			while (iter.hasNext()) {
-				Invocation invocation = (Invocation)iter.next();
+				ObserverInvocation invocation = (ObserverInvocation)iter.next();
 
 				// fire invocation, detect if anything went wrong
 				if (invocation.fire(event) == false) {
@@ -179,7 +179,7 @@ public class ObserverManager extends Object {
 				// remove all invocations with the given target
 				Iterator observerIter = observersForSubject.iterator();
 				while (observerIter.hasNext()) {
-					Invocation element = (Invocation)observerIter.next();
+					ObserverInvocation element = (ObserverInvocation)observerIter.next();
 					if (element.getTarget() == observer) {
 						observerIter.remove();
 						didRemove = true;
