@@ -78,7 +78,8 @@ public class DbRelationship extends Relationship {
 	//  key (primary key column of destination table that is also a FK to the source column)
 	protected boolean toDependentPK;
 
-	public DbRelationship() {}
+	public DbRelationship() {
+	}
 
 	public DbRelationship(String name) {
 		super(name);
@@ -155,7 +156,7 @@ public class DbRelationship extends Relationship {
 			return false;
 		}
 
-        DbRelationship revRel = getReverseRelationship();
+		DbRelationship revRel = getReverseRelationship();
 		return (revRel != null) ? revRel.isToDependentPK() : false;
 	}
 
@@ -173,10 +174,10 @@ public class DbRelationship extends Relationship {
 		toDependentPK = flag;
 	}
 
-    /**
-     * Returns a list of joins. List is returned by reference, so 
-     * any modifications of the list will affect this relationship.
-     */
+	/**
+	 * Returns a list of joins. List is returned by reference, so 
+	 * any modifications of the list will affect this relationship.
+	 */
 	public List getJoins() {
 		return joins;
 	}
@@ -230,6 +231,22 @@ public class DbRelationship extends Relationship {
 			throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
 	}
 
+	/** Common code to src?kSnapshotWithTargetSnapshot.  Both are functionally the
+	 * same, except for the name, and whether they operate on a toMany or a toOne.*/
+	private Map srcSnapshotWithTargetSnapshot(Map targetSnapshot) {
+		Map idMap = new HashMap();
+		int len = joins.size();
+		for (int i = 0; i < len; i++) {
+			DbAttributePair join = (DbAttributePair) joins.get(i);
+			Object val = targetSnapshot.get(join.getTarget().getName());
+			if (val == null)
+				throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
+			else
+				idMap.put(join.getSource().getName(), val);
+		}
+
+		return idMap;
+	}
 	/** 
 	 * Creates a snapshot of foreign key attributes of a source
 	 * object of this relationship based on a snapshot of a target.
@@ -241,18 +258,20 @@ public class DbRelationship extends Relationship {
 
 		if (isToMany())
 			throw new CayenneRuntimeException("Only 'to one' relationships support this method.");
-
-		Map idMap = new HashMap();
-		int len = joins.size();
-		for (int i = 0; i < len; i++) {
-			DbAttributePair join = (DbAttributePair) joins.get(i);
-			Object val = targetSnapshot.get(join.getTarget().getName());
-			if (val == null)
-				throw new CayenneRuntimeException("Some parts of PK are missing in snapshot.");
-			else
-				idMap.put(join.getSource().getName(), val);
-		}
-
-		return idMap;
+		return srcSnapshotWithTargetSnapshot(targetSnapshot);
 	}
+
+	/** 
+	 * Creates a snapshot of primary key attributes of a source
+	 * object of this relationship based on a snapshot of a target.
+	 * Only "to-many" relationships are supported.
+	 * Throws CayenneRuntimeException if relationship is "to one" or
+	 * if snapshot is missing id components.
+	 */
+	public Map srcPkSnapshotWithTargetSnapshot(Map targetSnapshot) {
+		if (!isToMany())
+			throw new CayenneRuntimeException("Only 'to many' relationships support this method.");
+		return srcSnapshotWithTargetSnapshot(targetSnapshot);
+	}
+
 }

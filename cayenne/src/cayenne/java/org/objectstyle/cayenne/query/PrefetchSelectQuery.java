@@ -52,78 +52,126 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */
-package org.objectstyle.cayenne.access.util;
+ */package org.objectstyle.cayenne.query;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
-import org.objectstyle.cayenne.query.Query;
 
-/** 
- * ContextSelectObserver is a SelectObserver that would 
- * convert fetched data rows into objects of an associated 
- * DataContext.
+/**
+ * 
+ * @author Craig Miskell
  */
-public class ContextSelectObserver extends SelectObserver {
-	protected DataContext context;
-
+public class PrefetchSelectQuery extends SelectQuery {
+	/** The query that provides the "root" objects of the prefetch*/
+	protected SelectQuery rootQuery;
+	
+	/** The relationship path from root objects to the objects being prefetched*/
+	protected String prefetchPath;
+	
+	protected ObjRelationship singleStepToManyRelationship=null;
+	
 	/**
-	 * Constructor for ContextSelectObserver.
-	 * @param logLevel
+	 * Constructor for PrefetchSelectQuery.
 	 */
-	public ContextSelectObserver(DataContext context, Level logLevel) {
-		super(logLevel);
-		this.context = context;
+	public PrefetchSelectQuery() {
+		super();
 	}
 
-	/** 
-	 * Overrides superclass behavior to convert each  data row to a real
-	 * object. Registers objects with parent DataContext.
+	/**
+	 * Constructor for PrefetchSelectQuery.
+	 * @param root
 	 */
-	public void nextDataRows(Query query, List dataRows) {
-		List result = new ArrayList();
-		if (dataRows != null && dataRows.size() > 0) {
-			ObjEntity ent = context.getEntityResolver().lookupObjEntity(query);
-			Iterator it = dataRows.iterator();
-			while (it.hasNext()) {
-				result.add(
-					context.objectFromDataRow(ent, (Map) it.next(), true));
-			}
-		}
+	public PrefetchSelectQuery(ObjEntity root) {
+		super(root);
+	}
 
-		if (query instanceof PrefetchSelectQuery) {
-			PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
-			ObjRelationship theRelationship =
-				prefetchQuery.getSingleStepToManyRelationship();
-			if (theRelationship!= null) {
-				//The root query should have already executed, so we can get it's
-				// results
-				List rootQueryResults =
-					this.getResults(prefetchQuery.getRootQuery());
-				if (rootQueryResults == null) {
-					throw new CayenneRuntimeException(
-						"Prefetch query for path "
-							+ prefetchQuery.getPrefetchPath()
-							+ " executed before it's root query "
-							+ prefetchQuery.getRootQuery());
-				}
-				this
-					.context
-					.getSnapshotManager()
-					.mergePrefetchResultsRelationships(
-					rootQueryResults, theRelationship, result);
-			}
-		}
+	/**
+	 * Constructor for PrefetchSelectQuery.
+	 * @param root
+	 * @param qualifier
+	 */
+	public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
+		super(root, qualifier);
+	}
 
-		super.nextDataRows(query, result);
+	/**
+	 * Constructor for PrefetchSelectQuery.
+	 * @param rootClass
+	 */
+	public PrefetchSelectQuery(Class rootClass) {
+		super(rootClass);
+	}
+
+	/**
+	 * Constructor for PrefetchSelectQuery.
+	 * @param rootClass
+	 * @param qualifier
+	 */
+	public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
+		super(rootClass, qualifier);
+	}
+
+	/**
+	 * Constructor for PrefetchSelectQuery.
+	 * @param objEntityName
+	 */
+	public PrefetchSelectQuery(String objEntityName) {
+		super(objEntityName);
+	}
+
+	/**
+	 * Constructor for PrefetchSelectQuery.
+	 * @param objEntityName
+	 * @param qualifier
+	 */
+	public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
+		super(objEntityName, qualifier);
+	}
+	
+	/**
+	 * Returns the prefetchPath.
+	 * @return String
+	 */
+	public String getPrefetchPath() {
+		return prefetchPath;
+	}
+
+	/**
+	 * Sets the prefetchPath.
+	 * @param prefetchPath The prefetchPath to set
+	 */
+	public void setPrefetchPath(String prefetchPath) {
+		this.prefetchPath = prefetchPath;
+	}
+
+	/**
+	 * @return SelectQuery
+	 */
+	public SelectQuery getRootQuery() {
+		return rootQuery;
+	}
+
+	/**
+	 * Sets the rootQuery.
+	 * @param rootQuery The rootQuery to set
+	 */
+	public void setRootQuery(SelectQuery rootQuery) {
+		this.rootQuery = rootQuery;
+	}
+
+	/**
+	 * @return ObjRelationship
+	 */
+	public ObjRelationship getSingleStepToManyRelationship() {
+		return singleStepToManyRelationship;
+	}
+
+	/**
+	 * Sets the singleStepToManyRelationship.
+	 * @param singleStepToManyRelationship The singleStepToManyRelationship to set
+	 */
+	public void setSingleStepToManyRelationship(ObjRelationship singleStepToManyRelationship) {
+		this.singleStepToManyRelationship = singleStepToManyRelationship;
 	}
 }
