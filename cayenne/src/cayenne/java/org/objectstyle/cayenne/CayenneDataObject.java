@@ -59,6 +59,7 @@ import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * A default implementation of DataObject interface. It is normally used as a
@@ -555,5 +556,50 @@ public class CayenneDataObject implements DataObject {
 	 */
     public void setSnapshotVersion(long snapshotVersion) {
         this.snapshotVersion = snapshotVersion;
+    }
+    
+    
+    /**
+     * Performs default property validation based on DataMap. This includes checking for
+     * null values and value sizes. CayenneDataObject subclasses may override this method,
+     * calling super.
+     * 
+     * @since 1.1
+     */
+    public void validateForSave(ValidationResult validationResult) {
+        
+    }
+
+    /**
+     * This implementation does nothing. CayenneDataObject subclasses may override
+     * it providing validation logic that should be executed for the newly created
+     * objects before saving them.
+     * 
+     * @since 1.1
+     */
+    public void validateForInsert(ValidationResult validationResult) {
+        // does nothing...
+    }
+
+    /**
+     * This implementation does nothing. CayenneDataObject subclasses may override
+     * it providing validation logic that should be executed for the modified
+     * objects before saving them.
+     * 
+     * @since 1.1
+     */
+    public void validateForUpdate(ValidationResult validationResult) {
+        // does nothing
+    }
+
+    /**
+     * This implementation does nothing. CayenneDataObject subclasses may override
+     * it providing validation logic that should be executed for the deleted
+     * objects before committing them.
+     * 
+     * @since 1.1
+     */
+    public void validateForDelete(ValidationResult validationResult) {
+        // does nothing   
     }
 }

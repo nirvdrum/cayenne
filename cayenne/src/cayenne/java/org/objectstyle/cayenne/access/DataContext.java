@@ -181,6 +181,7 @@ public class DataContext implements QueryEngine, Serializable {
     private List flattenedDeletes = new ArrayList();
 
     protected boolean usingSharedSnaphsotCache;
+    protected boolean validatingObjectsOnCommit;
     protected ObjectStore objectStore;
 
     protected transient QueryEngine parent;
@@ -1145,8 +1146,12 @@ public class DataContext implements QueryEngine, Serializable {
         // prevent multiple commits occuring simulteneously 
         synchronized (getObjectStore()) {
             // is there anything to do?
-            if (this.hasChanges() == false) {
+            if (!this.hasChanges()) {
                 return;
+            }
+            
+            if(isValidatingObjectsOnCommit()) {
+                getObjectStore().validateUncommittedObjects();
             }
 
             ContextCommit worker = new ContextCommit(this);
@@ -1649,6 +1654,27 @@ public class DataContext implements QueryEngine, Serializable {
     public boolean isUsingSharedSnapshotCache() {
         return usingSharedSnaphsotCache;
     }
+    
+    /**
+     * Returns whether this DataContext performs object validation before
+     * commit is executed.
+     * 
+     * @since 1.1
+     */
+    public boolean isValidatingObjectsOnCommit() {
+        return validatingObjectsOnCommit;
+    }
+    
+    /**
+     * Sets the property defining whether this DataContext should perform 
+     * object validation before commit is executed.
+     * 
+     * @since 1.1
+     */
+    public void setValidatingObjectsOnCommit(boolean flag) {
+        this.validatingObjectsOnCommit = flag;
+    }
+    
 
     public Collection getDataMaps() {
         return (parent != null) ? parent.getDataMaps() : Collections.EMPTY_LIST;

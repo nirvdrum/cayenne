@@ -77,6 +77,8 @@ import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.validation.ValidationException;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -108,12 +110,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     protected Map retainedSnapshotMap = new HashMap();
 
     /**
-     * Stores a reference to the SnapshotCache.
+     * Stores a reference to the DataRowStore.
      * 
      * <p>
      * <i>Serialization note:</i> It is up to the owner of this ObjectStore
-     * to initialize snapshot cache after deserialization of this object.
-     * ObjectStore will not know how to restore the SnapshotCache by itself.
+     * to initialize DataRowStore after deserialization of this object.
+     * ObjectStore will not know how to restore the DataRowStore by itself.
      * </p>
      */
     protected transient DataRowStore dataRowCache;
@@ -724,6 +726,42 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
+     * Performs validation of all uncommitted objects in the ObjectStore.
+     * If validation fails, a ValidationException is thrown, listing all 
+     * encountered failures.
+     * 
+     * @since 1.1
+     * 
+     * @throws ValidationException
+     */
+    public synchronized void validateUncommittedObjects() throws ValidationException {
+        ValidationResult validationResult = new ValidationResult();
+
+        Iterator it = getObjectIterator();
+        while (it.hasNext()) {
+            DataObject dataObject = (DataObject) it.next();
+            switch (dataObject.getPersistenceState()) {
+                case PersistenceState.NEW :
+                    dataObject.validateForSave(validationResult);
+                    dataObject.validateForInsert(validationResult);
+                    break;
+                case PersistenceState.MODIFIED :
+                    dataObject.validateForSave(validationResult);
+                    dataObject.validateForUpdate(validationResult);
+                    break;
+                case PersistenceState.DELETED :
+                    dataObject.validateForSave(validationResult);
+                    dataObject.validateForDelete(validationResult);
+                    break;
+            }
+        }
+
+        if (validationResult.hasFailure()) {
+            throw new ValidationException(validationResult);
+        }
+    }
+
+    /**
      * Initializes object with data from cache or from the database, if this
      * object is not fully resolved.
      * 
@@ -849,7 +887,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         object.writePropertyDirectly(relationship.getName(), fault);
                     }
                 }
-                
+
                 delegate.finishedProcessDelete(object);
             }
         }

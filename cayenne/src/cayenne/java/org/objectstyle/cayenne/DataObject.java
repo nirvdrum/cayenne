@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /** 
  * Defines basic methods for a persistent object in Cayenne.
@@ -73,7 +74,9 @@ public interface DataObject extends java.io.Serializable {
      */
     public DataContext getDataContext();
 
-    /** Sets object data context. */
+    /** 
+     * Sets object DataContext. 
+     */
     public void setDataContext(DataContext ctxt);
 
     /** 
@@ -87,18 +90,24 @@ public interface DataObject extends java.io.Serializable {
      */
     public void setObjectId(ObjectId objectId);
 
-    /** Returns current state of this data object.
-     *  For valid states look in PersistenceState class.
+    /** 
+     * Returns current persistence state. Acceptable values are defined in
+     * {@link PersistenceState} class.
      */
     public int getPersistenceState();
 
-    /** Modifies persistence state of this data object
-     *  For valid states look in PersistenceState class.
+    /** 
+     * Modifies persistence state of the object. Acceptable values are defined in
+     * {@link PersistenceState} class.
      */
     public void setPersistenceState(int newState);
 
-    /** Allows Cayenne framework classes to modify object property values. */
-    public void writePropertyDirectly(String propName, Object val);
+    /** 
+     * Modifies a value of a named property without altering the object state in any way,
+     * and without triggering any database operations. This method is intended mostly for internal
+     * use by Cayenne framework, and shouldn't be called from the application code. 
+     */
+    public void writePropertyDirectly(String propertyName, Object val);
 
     /** 
      * Returns mapped property value as curently stored in the DataObject.
@@ -144,9 +153,9 @@ public interface DataObject extends java.io.Serializable {
      * 
      * @since 1.0.5
      *
-     */    
+     */
     public Object readNestedProperty(String path);
-    
+
     /**
      * @deprecated Since 1.0.1 this method is no longer needed.
      */
@@ -207,4 +216,41 @@ public interface DataObject extends java.io.Serializable {
      * @since 1.1
      */
     public void resolveFault();
+
+    /**
+     * Performs property validation of the object, appending any validation failures
+     * to the provided validationResult object. This method is invoked by DataContext
+     * before committing an object to the database. <code>validateForSave(..)</code> 
+     * is called on DELETED, MODIFIED and NEW objects.
+     * 
+     * @since 1.1
+     */
+    public void validateForSave(ValidationResult validationResult);
+
+    /**
+     * Performs property validation of the NEW object, appending any validation failures
+     * to the provided validationResult object. This method is invoked by DataContext
+     * before committing a NEW object to the database.
+     * 
+     * @since 1.1
+     */
+    public void validateForInsert(ValidationResult validationResult);
+
+    /**
+     * Performs property validation of the MODIFIED object, appending any validation failures
+     * to the provided validationResult object. This method is invoked by DataContext
+     * before committing a MODIFIED object to the database.
+     * 
+     * @since 1.1
+     */
+    public void validateForUpdate(ValidationResult validationResult);
+
+    /**
+     * Performs property validation of the DELETED object, appending any validation failures
+     * to the provided validationResult object. This method is invoked by DataContext
+     * before committing a DELETED object to the database.
+     * 
+     * @since 1.1
+     */
+    public void validateForDelete(ValidationResult validationResult);
 }
