@@ -63,10 +63,13 @@ import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
@@ -87,7 +90,10 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
 
     protected JLabel schemaLabel;
     protected JComboBox schemaSelector;
-    protected JTextField tabeNamePatternField;
+    protected JTextField tableNamePatternField;
+    protected JCheckBox loadProcedures;
+    protected JTextField procNamePatternField;
+    protected JLabel procedureLabel;
     protected JButton selectButton;
     protected JButton cancelButton;
     protected int choice;
@@ -95,12 +101,13 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
     /**
      * Creates and initializes new ChooseSchemaDialog.
      */
-    public DbLoaderOptionsDialog(Collection schemas, String dbUserName) {
+    public DbLoaderOptionsDialog(Collection schemas, String dbUserName,
+            boolean loadProcedures) {
         super(CayenneModelerFrame.getFrame(), "DB Reengineering Options", true);
 
         init();
         initController();
-        initFromModel(schemas, dbUserName);
+        initFromModel(schemas, dbUserName, loadProcedures);
 
         this.pack();
         this.centerWindow();
@@ -113,7 +120,9 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
         selectButton = new JButton("Continue");
         cancelButton = new JButton("Cancel");
         schemaSelector = CayenneWidgetFactory.createComboBox();
-        tabeNamePatternField = CayenneWidgetFactory.createTextField();
+        tableNamePatternField = CayenneWidgetFactory.createTextField();
+        procNamePatternField = CayenneWidgetFactory.createTextField();
+        loadProcedures = new JCheckBox();
 
         // assemble
         FormLayout layout = new FormLayout(
@@ -122,8 +131,12 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.append("Table Name Pattern:", tabeNamePatternField);
-        schemaLabel = builder.append("Schemas:", schemaSelector);
+        schemaLabel = builder.append("Select Schema:", schemaSelector);
+        builder.appendSeparator("Table/View Options");
+        builder.append("Table Name Pattern:", tableNamePatternField);
+        builder.appendSeparator("Stored Procedure Options");
+        builder.append("Load Procedures:", loadProcedures);
+        procedureLabel = builder.append("Procedure Name Pattern:", procNamePatternField);
 
         JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {
                 selectButton, cancelButton
@@ -150,11 +163,27 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
                 processCancel();
             }
         });
+
+        loadProcedures.addChangeListener(new ChangeListener() {
+
+            public void stateChanged(ChangeEvent e) {
+                procNamePatternField.setEnabled(loadProcedures.isSelected());
+                procedureLabel.setEnabled(loadProcedures.isSelected());
+            }
+        });
     }
 
-    protected void initFromModel(Collection schemas, String dbUserName) {
+    protected void initFromModel(
+            Collection schemas,
+            String dbUserName,
+            boolean shouldLoadProcedures) {
+
         this.choice = CANCEL;
-        this.tabeNamePatternField.setText(DbLoader.WILDCARD);
+        this.tableNamePatternField.setText(DbLoader.WILDCARD);
+        this.loadProcedures.setSelected(shouldLoadProcedures);
+        this.procNamePatternField.setText(DbLoader.WILDCARD);
+        this.procNamePatternField.setEnabled(shouldLoadProcedures);
+        this.procedureLabel.setEnabled(shouldLoadProcedures);
 
         boolean showSchemaSelector = schemas != null && !schemas.isEmpty();
         schemaSelector.setVisible(showSchemaSelector);
@@ -204,7 +233,19 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
      * Returns the tableNamePattern.
      */
     public String getTableNamePattern() {
-        return "".equals(tabeNamePatternField.getText()) ? null : tabeNamePatternField
+        return "".equals(tableNamePatternField.getText()) ? null : tableNamePatternField
+                .getText();
+    }
+
+    public boolean isLoadingProcedures() {
+        return loadProcedures.isSelected();
+    }
+
+    /**
+     * Returns the procedure name pattern.
+     */
+    public String getProcedureNamePattern() {
+        return "".equals(procNamePatternField.getText()) ? null : procNamePatternField
                 .getText();
     }
 }

@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.LongRunningTask;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Stateful helper class that encapsulates access to DbLoader.
@@ -111,6 +112,8 @@ public class DbLoaderHelper {
     protected DataMap dataMap;
     protected String schemaName;
     protected String tableNamePattern;
+    protected boolean loadProcedures;
+    protected String procedureNamePattern;
     protected List schemas;
 
     protected String loadStatusNote;
@@ -173,9 +176,12 @@ public class DbLoaderHelper {
 
         final DbLoaderOptionsDialog dialog = new DbLoaderOptionsDialog(
                 schemas,
-                dbUserName);
+                dbUserName,
+                true);
 
         try {
+            // since we are not inside EventDisptahcer Thread, must run it via
+            // SwingUtilities
             SwingUtilities.invokeAndWait(new Runnable() {
 
                 public void run() {
@@ -195,6 +201,8 @@ public class DbLoaderHelper {
 
         this.schemaName = dialog.getSelectedSchema();
         this.tableNamePattern = dialog.getTableNamePattern();
+        this.loadProcedures = dialog.isLoadingProcedures();
+        this.procedureNamePattern = dialog.getProcedureNamePattern();
 
         // load DataMap...
         LongRunningTask loadDataMapTask = new LoadDataMapTask(CayenneModelerFrame
@@ -203,6 +211,7 @@ public class DbLoaderHelper {
     }
 
     protected void processException(final Throwable th, final String message) {
+        logObj.info("Exception on reverse engineering", Util.unwindException(th));
         cleanup();
         SwingUtilities.invokeLater(new Runnable() {
 
@@ -386,6 +395,22 @@ public class DbLoaderHelper {
             catch (Throwable th) {
                 if (!isCanceled()) {
                     processException(th, "Error Reengineering Database");
+                }
+            }
+
+            if (loadProcedures) {
+                loadStatusNote = "Importing procedures...";
+                try {
+                    loader
+                            .loadProceduresFromDB(
+                                    schemaName,
+                                    procedureNamePattern,
+                                    dataMap);
+                }
+                catch (Throwable th) {
+                    if (!isCanceled()) {
+                        processException(th, "Error Reengineering Database");
+                    }
                 }
             }
 

@@ -61,9 +61,12 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.ashwood.dbutil.Table;
@@ -77,6 +80,8 @@ import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 import org.objectstyle.cayenne.util.NameConverter;
@@ -91,6 +96,15 @@ import org.objectstyle.cayenne.util.NameConverter;
 public class DbLoader {
 
     private static Logger logObj = Logger.getLogger(DbLoader.class);
+
+    // TODO: remove this hardcoded stuff once delegate starts to support procedure
+    // loading...
+    private static final Collection EXCLUDED_PROCEDURES = Arrays.asList(new Object[] {
+            "auto_pk_for_table", "auto_pk_for_table;1" /*
+                                                        * the last name is some Mac OS X
+                                                        * Sybase artifact
+                                                        */
+    });
 
     public static final String WILDCARD = "%";
 
@@ -140,6 +154,15 @@ public class DbLoader {
      */
     public Connection getCon() {
         return con;
+    }
+
+    /**
+     * Returns DbAdapter associated with this DbLoader.
+     * 
+     * @since 1.1
+     */
+    public DbAdapter getAdapter() {
+        return adapter;
     }
 
     /**
@@ -318,8 +341,9 @@ public class DbLoader {
                 while (rs.next()) {
                     // for a reason not quiet apparent to me, Oracle sometimes
                     // returns duplicate record sets for the same table, messing up table
-                    // names. E.g. for the system table "WK$_ATTR_MAPPING" columns are returned
-                    // twice - as "WK$_ATTR_MAPPING" and "WK$$_ATTR_MAPPING"... Go figure
+                    // names. E.g. for the system table "WK$_ATTR_MAPPING" columns are
+                    // returned twice - as "WK$_ATTR_MAPPING" and "WK$$_ATTR_MAPPING"...
+                    // Go figure
 
                     String tableName = rs.getString("TABLE_NAME");
                     if (!dbEntity.getName().equals(tableName)) {
@@ -508,7 +532,7 @@ public class DbLoader {
                         fkEntity = map.getDbEntity(fkEntityName);
 
                         if (fkEntity == null) {
-                            logObj.debug("FK warning: no entity found for name '"
+                            logObj.info("FK warning: no entity found for name '"
                                     + fkEntityName
                                     + "'");
                         }
@@ -710,5 +734,168 @@ public class DbLoader {
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);
         return dataMap;
+    }
+
+    /**
+     * Loads database stored procedures into the DataMap.
+     * <p>
+     * <i>As of 1.1 there is no boolean property or delegate method to make procedure
+     * loading optional or to implement custom merging logic, so currently this method is
+     * NOT CALLED from "loadDataMapFromDB" and should be invoked explicitly by the user.
+     * </i>
+     * </p>
+     * 
+     * @since 1.1
+     */
+    public void loadProceduresFromDB(
+            String schemaPattern,
+            String namePattern,
+            DataMap dataMap) throws SQLException {
+
+        Map procedures = null;
+
+        // get procedures
+        ResultSet rs = getMetaData().getProcedures(null, schemaPattern, namePattern);
+        try {
+            while (rs.next()) {
+                String name = rs.getString("PROCEDURE_NAME");
+
+                // TODO: this will be moved to Delegate...
+                if (EXCLUDED_PROCEDURES.contains(name)) {
+                    logObj.info("skipping Cayenne PK procedure: " + name);
+                    continue;
+                }
+
+                String catalog = rs.getString("PROCEDURE_CAT");
+                String schema = rs.getString("PROCEDURE_SCHEM");
+
+                short type = rs.getShort("PROCEDURE_TYPE");
+
+                Procedure procedure = new Procedure(name);
+                procedure.setCatalog(catalog);
+                procedure.setSchema(schema);
+
+                switch (type) {
+                    case DatabaseMetaData.procedureNoResult:
+                    case DatabaseMetaData.procedureResultUnknown:
+                        procedure.setReturningValue(false);
+                        break;
+                    case DatabaseMetaData.procedureReturnsResult:
+                        procedure.setReturningValue(true);
+                        break;
+                }
+
+                if (procedures == null) {
+                    procedures = new HashMap();
+                }
+
+                procedures.put(procedure.getFullyQualifiedName(), procedure);
+            }
+        }
+        finally {
+            rs.close();
+        }
+
+        // if nothing found, return
+        if (procedures == null) {
+            return;
+        }
+
+        // get columns
+        ResultSet columnsRS = getMetaData().getProcedureColumns(
+                null,
+                schemaPattern,
+                namePattern,
+                null);
+        try {
+            while (columnsRS.next()) {
+
+                String schema = columnsRS.getString("PROCEDURE_SCHEM");
+                String name = columnsRS.getString("PROCEDURE_NAME");
+
+                // TODO: this will be moved to Delegate...
+                if (EXCLUDED_PROCEDURES.contains(name)) {
+                    continue;
+                }
+
+                String columnName = columnsRS.getString("COLUMN_NAME");
+                short type = columnsRS.getShort("COLUMN_TYPE");
+
+                String key = (schema != null) ? schema + '.' + name : name;
+
+                // skip ResultSet columns, as they are not described in Cayenne procedures
+                // yet...
+                if (type == DatabaseMetaData.procedureColumnResult) {
+                    logObj.debug("skipping ResultSet column: " + key + "." + columnName);
+                }
+
+                Procedure procedure = (Procedure) procedures.get(key);
+
+                if (procedure == null) {
+                    logObj.info("invalid procedure column, no procedure found: "
+                            + key
+                            + "."
+                            + columnName);
+                    continue;
+                }
+
+                ProcedureParameter column = new ProcedureParameter(columnName);
+
+                if (columnName == null) {
+                    if (type == DatabaseMetaData.procedureColumnReturn) {
+                        logObj.debug("null column name, assuming result column: " + key);
+                        column.setName("_return_value");
+                    }
+                    else {
+                        logObj.info("invalid null column name, skipping column : " + key);
+                        continue;
+                    }
+                }
+
+                int columnType = columnsRS.getInt("DATA_TYPE");
+                int columnSize = columnsRS.getInt("LENGTH");
+
+                // ignore precision of non-decimal columns
+                int decimalDigits = -1;
+                if (TypesMapping.isDecimal(columnType)) {
+                    decimalDigits = columnsRS.getShort("SCALE");
+                    if (columnsRS.wasNull()) {
+                        decimalDigits = -1;
+                    }
+                }
+
+                switch (type) {
+                    case DatabaseMetaData.procedureColumnIn:
+                        column.setDirection(ProcedureParameter.IN_PARAMETER);
+                        break;
+                    case DatabaseMetaData.procedureColumnInOut:
+                        column.setDirection(ProcedureParameter.IN_OUT_PARAMETER);
+                        break;
+                    case DatabaseMetaData.procedureColumnOut:
+                        column.setDirection(ProcedureParameter.OUT_PARAMETER);
+                        break;
+                    case DatabaseMetaData.procedureColumnReturn:
+                        procedure.setReturningValue(true);
+                        break;
+                }
+
+                column.setMaxLength(columnSize);
+                column.setPrecision(decimalDigits);
+                column.setProcedure(procedure);
+                column.setType(columnType);
+                procedure.addCallParameter(column);
+            }
+        }
+        finally {
+            columnsRS.close();
+        }
+
+        Iterator it = procedures.values().iterator();
+        while (it.hasNext()) {
+            // overwrite existing procedures...
+
+            Procedure procedure = (Procedure) it.next();
+            dataMap.addProcedure(procedure);
+        }
     }
 }
