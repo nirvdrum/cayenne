@@ -39,7 +39,7 @@
             standalone application, web application, EJB application.
             </p>
             <p>Database schema used in examples in this chapter is shown below:</p>
-            <img src="/images/schema.jpg" border="0" align="middle" alt="Art Catalog Schema"/>
+            <img src="/images/schema.jpg" width="500" height="309" border="0" align="middle" alt="Art Catalog Schema"/>
         </subsection>
         
         <subsection name="4.2 Create DataMap" anchor="datamap">
@@ -140,7 +140,8 @@ import org.objectstyle.art.Artist;
 // assume this exists and initialized
 DataContext ctxt;
 ...
-Expression e = ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
+Expression e = 
+  ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
 SelectQuery q = new SelectQuery("Painting", e);
 List realArt = ctxt.performQuery(q);
 if(realArt.size() > 0) {
