@@ -68,7 +68,8 @@ import org.objectstyle.cayenne.util.ResourceLocator;
   * It resolves configuration file paths relative to the web application
   * "WEB-INF" directory.
   * 
-  * <p>BasicServletConfiguration compatible with Servlet Specification 2.2 and higher.
+  * <p>
+  * BasicServletConfiguration is compatible with Servlet Specification 2.2 and higher.
   * Also look at ServletConfiguration for the information how to utilize listeners 
   * introduced in Servlet Specification 2.3.
   * </p>
