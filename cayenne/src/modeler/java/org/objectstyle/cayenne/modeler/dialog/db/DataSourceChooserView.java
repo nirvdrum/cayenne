@@ -61,11 +61,14 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.modeler.dialog.pref.DBConnectionInfoEditor;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Andrei Adamchik
@@ -87,19 +90,24 @@ public class DataSourceChooserView extends JDialog {
         this.cancelButton = new JButton("Cancel");
         this.connectionInfo = new DBConnectionInfoEditor(controller);
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        topPanel.add(new JLabel("Saved DataSources:"));
-        topPanel.add(dataSources);
-        topPanel.add(configButton);
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(new FormLayout(
+                "20dlu:grow, pref, 3dlu, fill:max(50dlu;pref), 3dlu, fill:20dlu",
+                "p"));
+        builder.setDefaultDialogBorder();
+
+        builder.addLabel("Saved DataSources:", cc.xy(2, 1));
+        builder.add(dataSources, cc.xy(4, 1));
+        builder.add(configButton, cc.xy(6, 1));
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(cancelButton);
         buttons.add(okButton);
 
-        getRootPane().setLayout(new BorderLayout());
-        getRootPane().add(topPanel, BorderLayout.NORTH);
-        getRootPane().add(connectionInfo.getView(), BorderLayout.CENTER);
-        getRootPane().add(buttons, BorderLayout.SOUTH);
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(builder.getPanel(), BorderLayout.NORTH);
+        getContentPane().add(connectionInfo.getView(), BorderLayout.CENTER);
+        getContentPane().add(buttons, BorderLayout.SOUTH);
 
         setTitle("DB Connection Info");
     }
