@@ -55,9 +55,12 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Date;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Exhibit;
+import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -69,6 +72,32 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * @author Andrei Adamchik
  */
 public class CayenneDataObjectValidationTst extends CayenneTestCase {
+
+    public void testValidateForSaveMandatoryToOneMissing() throws Exception {
+        DataContext context = createDataContext();
+        Exhibit exhibit = (Exhibit) context.createAndRegisterNewObject(Exhibit.class);
+        exhibit.setOpeningDate(new Date());
+        exhibit.setClosingDate(new Date());
+
+        ValidationResult result = new ValidationResult();
+        exhibit.validateForSave(result);
+
+        assertTrue("Validation of 'toGallery' should've failed.", result.hasFailures());
+        assertTrue(result.hasFailures(exhibit));
+
+        List failures = result.getFailures();
+        assertEquals(1, failures.size());
+
+        BeanValidationFailure failure = (BeanValidationFailure) failures.get(0);
+        assertEquals(Exhibit.TO_GALLERY_PROPERTY, failure.getProperty());
+
+        // fix the problem and see if it goes away
+        Gallery gallery = (Gallery) context.createAndRegisterNewObject(Gallery.class);
+        exhibit.setToGallery(gallery);
+        result = new ValidationResult();
+        exhibit.validateForSave(result);
+        assertFalse("No failures expected: " + result, result.hasFailures());
+    }
 
     public void testValidateForSaveMandatoryAttributeMissing() throws Exception {
         DataContext context = createDataContext();
