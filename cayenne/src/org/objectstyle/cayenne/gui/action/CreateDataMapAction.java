@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -73,11 +74,16 @@ import org.objectstyle.cayenne.util.Preferences;
  *  Action that creates new DataMap in the project.
  */
 public class CreateDataMapAction extends CayenneAction {
-	public static final String ACTION_NAME = "CreateDataMap";
+	public static final String ACTION_NAME = "Create DataMap";
 		
 	public CreateDataMapAction() {
 		super(ACTION_NAME);
 	}
+	
+	public String getIconName() {
+		return "images/icon-datamap.gif";
+	}
+	
 	
 	/** Calls addDataMap() or creates new data map if no data node selected.*/
 	protected void createDataMap() {

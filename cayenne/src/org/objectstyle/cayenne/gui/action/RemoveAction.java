@@ -79,6 +79,10 @@ public class RemoveAction extends CayenneAction {
 		super(ACTION_NAME);
 	}
 	
+	public String getIconName() {
+		return "images/icon-trash.gif";
+	}
+	
 	public void performAction(ActionEvent e) {
 		remove();
 	}

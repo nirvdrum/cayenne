@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
+import javax.swing.*;
 
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
@@ -72,25 +71,64 @@ import org.objectstyle.cayenne.gui.util.GUIErrorHandler;
  * @author Andrei Adamchik
  */
 public abstract class CayenneAction extends AbstractAction {
-	
-	public CayenneAction() {}
-	
-	public CayenneAction(String name) {
+	/** Defines path to the images. */
+	public static final String RESOURCE_PATH = "org/objectstyle/cayenne/gui/";
+
+    public CayenneAction(String name) {
 		super(name);
+		super.putValue(Action.DEFAULT, name);
+		
+		Icon icon = createIcon();
+		if(icon != null) {
+			super.putValue(Action.SMALL_ICON, icon);
+		}
 	}
-	
-	/**
-	 * Returns the name of thsi action.
-	 */
-	public String getName() {
-		return (String)super.getValue(Action.NAME);
-	}
-	
-    /**
-     * Subclasses must implement this method instead of <code>actionPerformed</code>
-     * to allow for exception handling.
+
+    /** 
+     * Changes the name of this action, propagating the change
+     * to all widgets using this action.
      */
-    public abstract void performAction(ActionEvent e);
+    public void setName(String newName) {
+    	super.putValue(Action.NAME, newName);
+    }
+    
+	/**
+	 * Returns the name of the icon that should be used
+	 * for buttons. Name will be reolved relative to
+	 * <code>RESOURCE_PATH</code>. Default implementation
+	 * returns <code>null</code>.
+	 */
+	public String getIconName() {
+		return null;
+	}
+
+	/**
+	 * Creates and returns an ImageIcon that can be used 
+	 * for buttons that rely on this action.
+	 * Returns <code>null</code> if <code>getIconName</code>
+	 * returns <code>null</code>.
+	 */
+	public Icon createIcon() {
+		String name = getIconName();
+		return (name != null)
+			? new ImageIcon(
+				getClass().getClassLoader().getResource(RESOURCE_PATH + name))
+			: null;
+	}
+
+	/**
+	 * Returns the key under which this action should be stored in the
+	 * ActionMap.
+	 */
+	public String getKey() {
+		return (String) super.getValue(Action.DEFAULT);
+	}
+
+	/**
+	 * Subclasses must implement this method instead of <code>actionPerformed</code>
+	 * to allow for exception handling.
+	 */
+	public abstract void performAction(ActionEvent e);
 
 	/** 
 	 * Returns shared CayenneModeler mediator.
