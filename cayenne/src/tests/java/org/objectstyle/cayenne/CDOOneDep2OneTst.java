@@ -61,6 +61,7 @@ import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
+import org.objectstyle.cayenne.access.types.ByteArrayTypeTst;
 
 public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
@@ -130,6 +131,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         assertNotNull(p21);
         assertEquals(altPaintingName, p21.getPaintingTitle());
         assertSame(pi2, p21.getToPaintingInfo());
+        ByteArrayTypeTst.assertByteArraysEqual(paintingImage, p21.getToPaintingInfo().getImageBlob());
 
         Painting p22 = newPainting();
 
