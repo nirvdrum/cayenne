@@ -68,6 +68,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -80,6 +81,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
@@ -187,19 +189,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         className.setInputVerifier(new InputVerifier() {
 
             public boolean verify(JComponent input) {
-                String classText = className.getText();
-                if (classText != null && classText.trim().length() == 0) {
-                    classText = null;
-                }
-
-                ObjEntity ent = mediator.getCurrentObjEntity();
-
-                // "ent" may be null if we quit editing by changing tree selection
-                if (ent != null && !Util.nullSafeEquals(ent.getClassName(), classText)) {
-                    ent.setClassName(classText);
-                    mediator.fireObjEntityEvent(new EntityEvent(this, ent));
-                }
-
+                setClassName(className.getText());
                 return true;
             }
         });
@@ -381,6 +371,20 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         superEntityCombo.setModel(superEntityModel);
     }
 
+    void setClassName(String className) {
+        if (className != null && className.trim().length() == 0) {
+            className = null;
+        }
+
+        ObjEntity entity = mediator.getCurrentObjEntity();
+
+        // "ent" may be null if we quit editing by changing tree selection
+        if (entity != null && !Util.nullSafeEquals(entity.getClassName(), className)) {
+            entity.setClassName(className);
+            mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+        }
+    }
+
     void setQualifier(String text) {
         if (text != null && text.trim().length() == 0) {
             text = null;
@@ -425,6 +429,31 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
             ProjectUtil.setObjEntityName(entity.getDataMap(), entity, newName);
             mediator.fireObjEntityEvent(e);
+
+            // suggest to update class name
+            String suggestedClassName = suggestedClassName(entity);
+            if (suggestedClassName != null
+                    && !suggestedClassName.equals(entity.getClassName())) {
+                JOptionPane pane = new JOptionPane(
+                        new Object[] {
+                                "Change class name to match new entity name?",
+                                "Suggested class name: " + suggestedClassName
+                        },
+                        JOptionPane.QUESTION_MESSAGE,
+                        JOptionPane.OK_CANCEL_OPTION,
+                        null,
+                        new Object[] {
+                                "Change", "Cancel"
+                        });
+
+                pane
+                        .createDialog(CayenneModelerFrame.getFrame(), "Update Class Name")
+                        .show();
+                if ("Change".equals(pane.getValue())) {
+                    className.setText(suggestedClassName);
+                    setClassName(suggestedClassName);
+                }
+            }
         }
         else {
             // there is an entity with the same name
@@ -432,6 +461,41 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                     + newName
                     + "'.");
         }
+    }
+
+    /**
+     * Build a class name based on current entity name.
+     */
+    private String suggestedClassName(ObjEntity entity) {
+        String name = entity.getName();
+        if (name == null || name.trim().length() == 0) {
+            return null;
+        }
+
+        // build suggested package...
+        String oldFQN = entity.getClassName();
+        String pkg = (entity.getDataMap() != null) ? entity
+                .getDataMap()
+                .getDefaultPackage() : null;
+
+        if (oldFQN != null && oldFQN.lastIndexOf('.') > 0) {
+            pkg = oldFQN.substring(0, oldFQN.lastIndexOf('.'));
+        }
+
+        if (pkg == null) {
+            pkg = "";
+        }
+        else {
+            pkg = pkg + '.';
+        }
+
+        // build suggested class name
+        int dot = name.lastIndexOf('.');
+        if (dot >= 0 && dot < name.length() - 1) {
+            name = name.substring(dot + 1);
+        }
+
+        return pkg + name;
     }
 
     void activateFields(boolean active) {
