@@ -60,6 +60,7 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -72,7 +73,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testFetchLimit() throws java.lang.Exception {
- 		query.setRoot(Artist.class);
+        query.setRoot(Artist.class);
         query.setFetchLimit(7);
         performQuery();
 
@@ -82,7 +83,8 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(7, objects.size());
     }
 
-    public void testSelectAllObjectsRootEntityName() throws java.lang.Exception {
+    public void testSelectAllObjectsRootEntityName()
+        throws java.lang.Exception {
         query.setRoot(Artist.class);
         performQuery();
 
@@ -93,18 +95,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testSelectAllObjectsRootClass() throws java.lang.Exception {
- 		query.setRoot(Artist.class);
-        performQuery();
-
-        // check query results
-        List objects = opObserver.objectsForQuery(query);
-        assertNotNull(objects);
-        assertEquals(_artistCount, objects.size());
-    }
-    
-    public void testSelectAllObjectsRootObjEntity() throws java.lang.Exception {
-		//Crude technique to obtain the Artist ObjEntity, but it works
-  		query.setRoot(this.getDomain().getEntityResolver().lookupObjEntity(Artist.class));
+        query.setRoot(Artist.class);
         performQuery();
 
         // check query results
@@ -113,13 +104,30 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
+    public void testSelectAllObjectsRootObjEntity()
+        throws java.lang.Exception {
+        //Crude technique to obtain the Artist ObjEntity, but it works
+        query.setRoot(
+            this.getDomain().getEntityResolver().lookupObjEntity(Artist.class));
+        performQuery();
 
-   public void testSelectLike() throws Exception {
- 		query.setRoot(Artist.class);
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(_artistCount, objects.size());
+    }
+
+    public void testSelectLike() throws Exception {
+        query.setRoot(Artist.class);
         Expression qual =
-            ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist11");
+            ExpressionFactory.binaryPathExp(
+                Expression.LIKE,
+                "artistName",
+                "artist11%");
         query.setQualifier(qual);
 
+        query.setLoggingLevel(Level.WARN);
+        getDomain().createDataContext().performQuery(query);
         performQuery();
 
         // check query results
@@ -130,7 +138,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
     /** Test how "like ignore case" works when using uppercase parameter. */
     public void testSelectLikeIgnoreCaseObjects1() throws Exception {
- 		query.setRoot(Artist.class);
+        query.setRoot(Artist.class);
         Expression qual =
             ExpressionFactory.binaryPathExp(
                 Expression.LIKE_IGNORE_CASE,
@@ -147,7 +155,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
     /** Test how "like ignore case" works when using lowercase parameter. */
     public void testSelectLikeIgnoreCaseObjects2() throws Exception {
-  		query.setRoot(Artist.class);
+        query.setRoot(Artist.class);
         Expression qual =
             ExpressionFactory.binaryPathExp(
                 Expression.LIKE_IGNORE_CASE,
@@ -163,7 +171,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testSelectCustAttributes() throws java.lang.Exception {
- 		query.setRoot(Artist.class);
+        query.setRoot(Artist.class);
         query.addCustDbAttribute("ARTIST_NAME");
 
         List results = getDomain().createDataContext().performQuery(query);
@@ -190,7 +198,9 @@ public class SelectQueryTst extends SelectQueryBase {
             for (int i = 1; i <= _artistCount; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, "artist" + i);
-                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+                stmt.setDate(
+                    3,
+                    new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
             }
 
