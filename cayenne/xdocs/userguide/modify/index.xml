@@ -1,22 +1,21 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-<properties>
-      <author>Andrei Adamchik</author>
-</properties>
+<title>User Guide - Modifying DataObjects</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/exp.html</prev>
-	<next>/userguide/appguide/bigqueries.html</next>
+	<prev>/userguide/fetch/exp.html</prev>
+	<next>/userguide/perform/index.html</next>
 </navigator>    
+
 <body>
-    <section name="5. Writing Cayenne Applications">            
-            <subsection name="5.7 Saving Modified Objects" anchor="cayenne_save">
+    <section name="8. Modifying DataObjects">
             <p>Continuing the previous example, this section shows how to 
             save changes made to DataObjects. Lets do the following operations: 
             double the price of the first retrieved painting, add new painting 
             that belongs to the same artist as the 
             painting fetched before, save all changes:</p>
+
             
+
 <source>
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.Artist;
 ...
+
 // assume this exists and initialized
 DataContext ctxt;
 ...
@@ -34,28 +34,35 @@ Expression e =
   ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
 SelectQuery q = new SelectQuery("Painting", e);
 List realArt = ctxt.performQuery(q);
+
 if(realArt.size() > 0) {
   Painting firstPainting = (Painting)realArt.get(0);
+
   // double the price
   double oldPrice = firstPainting.getEstimatedPrice().doubleValue();
   firstPainting.setEstimatedPrice(new BigDecimal(oldPrice * 2.00));
+
   // create new painting and register it with DataContext
   // "Painting" string is a name of ObjEntity in the DataMap
   Painting newPainting = (Painting)ctxt.createAndRegisterNewObject("Painting");
   newPainting.setTitle("Sunset as it is");
+
   // get artist via relationship
   // "toArtist" is a relationship property name
   // that is being accessed via getter
   Artist artist = firstPainting.getToArtist();
+
   // assign new painting to an artist
   artist.addToPaintingArray(newPinting);
+
   // save all the changes we've made so far
   ctxt.commitChanges();
 }
 ...
 </source> 
+
 		<p>Notice that all this is done without writing any SQL.</p>
-        </subsection>
     </section>
 </body>
 </document>
+

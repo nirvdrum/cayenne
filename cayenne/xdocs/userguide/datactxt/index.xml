@@ -1,17 +1,15 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>User Guide - Using DataContext</title>
 <properties>
       <author>Andrei Adamchik</author>
 </properties>
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/appguide/javagen.html</prev>
-	<next>/userguide/appguide/fetch.html</next>
+	<next>/userguide/fetch/index.html</next>
 </navigator>    
-<body>
-    <section name="5. Writing Cayenne Applications">      
-    	
-        <subsection name="5.4 Cayenne DataContext" anchor="cayenne_dc">
+<body>   	
+    <section name="6. Using DataContext" anchor="cayenne_dc">
 		<p>In a Cayenne application most of the database work is done via a 
 		<a href="../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
 		instance. It isolates changes made by a single user from other users. 
@@ -45,7 +43,6 @@ HttpSession session;
 DataContext ctxt = ServletConfiguration.getDefaultContext(session);
 ...
 </source>
-            </subsection>
     </section>
 </body>
 </document>

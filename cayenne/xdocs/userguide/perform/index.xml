@@ -1,17 +1,16 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>User Guide - Performance Tuning</title>
 
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/save.html</prev>
-	<next>/userguide/appguide/deploy.html</next>
+	<prev>/userguide/modify/index.html</prev>
+	<next>/userguide/deploy/index.html</next>
 </navigator>    
 <body>
-    <section name="5. Writing Cayenne Applications">        
-		<subsection name="5.8 Handling Large Result Sets" anchor="big">
+    <section name="9. Performance Tuning">        
             <p>Working with tables that contain huge number of rows
             (from tens of thousands to millions) often causes performance problems with 
             traditional O/R approach. The reasons are obvious and in many cases are
@@ -28,7 +27,7 @@
             <p>There is no single design pattern that solves all these issues, therefore
             Cayenne offers a few solutions suitable for different cases.</p>
             
-            <subsection name="5.8.1 Data Rows" anchor="data_rows">
+            <subsection name="9.1 Data Rows" anchor="data_rows">
             <p>DataObjects creation and registering with DataContext is an expensive operation.
             There are cases when only a few objects are really used, but the application still
             has to fetch a lot of objects. For instance when a user performs a search, result may
@@ -75,7 +74,7 @@ Artist artist = (Artist)ctxt.objectFromDataRow("Artist", row);
 </source>
 			</subsection>
             
-			<subsection name="5.8.2 ResultIterator: Incremental Data Processing" anchor="iterator">
+			<subsection name="9.2 ResultIterator: Incremental Data Processing" anchor="iterator">
 			<p>There are cases when the result sets are so large that even when fetching data rows, 
 			application can run out of memory. For instance, a user may be creating a report
 			that requires in-memory processing of hundreds of thousands of database rows. 
@@ -153,7 +152,7 @@ finally {
 </source>
 			</subsection>
             
-			<subsection name="5.8.3 Paged Queries" anchor="paged">
+			<subsection name="9.3 Paged Queries" anchor="paged">
             <p>Another common situation found in interactive applications is when it is needed
             to fetch a large number of rows, and at the same time only a small subset of objects
             is accessed directly. An example of such application would be a search page. 
@@ -208,7 +207,6 @@ int size = artistRows.size();
 
 </source> 
 			</subsection>
-        </subsection>
     </section>
 </body>
 </document>

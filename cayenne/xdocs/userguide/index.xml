@@ -45,17 +45,42 @@
                 <li><a href="appguide/index.html#intro">5.1 Introduction</a></li>
                 <li><a href="appguide/project.html#datamap">5.2 Cayenne Project</a></li>
                 <li><a href="appguide/javagen.html#javagen">5.3 Generating Java Classes</a></li>
-                <li><a href="appguide/datacontext.html#cayenne_dc">5.4 Cayenne DataContext</a></li>
-                <li><a href="appguide/fetch.html#cayenne_fetch">5.5 Fetching Objects</a></li>
-                <li><a href="appguide/exp.html#exp">5.6 Expressions</a></li>
-                <li><a href="appguide/save.html#cayenne_save">5.7 Saving Modified Objects</a></li>
-                <li><a href="appguide/bigqueries.html#big">5.8 Handling Large Result Sets</a></li>
-                <li><a href="appguide/deploy.html#deploy">5.9 Deployment</a></li>
             </ul><br/></li>
             
-            <li><a href="webobjects.html">6.  Miscellaneous Information</a>
+            <li><a href="datactxt/index.html">6. Using DataContext</a>
             <ul>
-                <li><a href="webobjects.html#webobjects">6.1 Cayenne and WebObjects</a></li>
+            </ul><br/>
+            </li>
+            
+            <li><a href="fetch/index.html">7. Using SelectQueries</a>
+            <ul>
+                <li><a href="fetch/fetch.html">7.1 SelectQuery</a></li>
+                <li><a href="fetch/exp.html">7.2 Using Expressions</a></li>
+            </ul><br/></li>
+            
+            <li><a href="modify/index.html">8. Modifying DataObjects</a>
+            <ul>
+            </ul><br/></li>
+            
+            <li><a href="perform/index.html">9. Performance Tuning</a>
+            <ul>
+                <li><a href="perform/index.html#data_rows">9.1 Data Rows</a></li>
+                <li><a href="perform/index.html#iterator">9.2 ResultIterator: Incremental Data Processing</a></li>
+                <li><a href="perform/index.html#paged">9.3 Paged Queries</a></li>
+            </ul><br/></li>
+            
+            <li><a href="deploy/index.html">10. Deployment</a>
+            <ul>
+                <li><a href="deploy/index.html#config">10.1 Configuration</a></li>
+                <li><a href="deploy/index.html#standalone">10.2 Standalone Applications</a></li>
+                <li><a href="deploy/index.html#web">10.3 Web Applications</a></li>
+                <li><a href="deploy/index.html#custom">10.4 Customizing Configuration</a></li>
+                <li><a href="deploy/index.html#jndi">10.5 Using JNDI</a></li>
+            </ul><br/></li>
+            
+            <li><a href="misc.html">11. Miscellaneous Information</a>
+            <ul>
+                <li><a href="misc.html#webobjects">11.1 Cayenne and WebObjects</a></li>
             </ul><br/></li>
         </ul>
     </section>

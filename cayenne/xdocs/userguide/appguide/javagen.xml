@@ -7,7 +7,7 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/appguide/project.html</prev>
-	<next>/userguide/appguide/datacontext.html</next>
+	<next>/userguide/datactxt/index.html</next>
 </navigator>    
 <body>
     <section name="5. Writing Cayenne Applications">        

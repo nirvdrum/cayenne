@@ -1,16 +1,13 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-<properties>
-      <author>Andrei Adamchik</author>
-</properties>
+<title>User Guide - Using SelectQueries</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/datacontext.html</prev>
-	<next>/userguide/appguide/exp.html</next>
+	<prev>/userguide/fetch/index.html</prev>
+	<next>/userguide/fetch/exp.html</next>
 </navigator>    
 <body>
-    <section name="5. Writing Cayenne Applications">      
-        <subsection name="5.5 Fetching Objects" anchor="cayenne_fetch">
+    <section name="7. Using SelectQueries">      
+        <subsection name="7.1 SelectQuery" anchor="cayenne_fetch">
         <p>To fetch a list of objects matching a certain criteria, a SelectQuery
 		object should be created. It can be executed using DataContext, bringing
 		back a list of DataObjects:</p>
