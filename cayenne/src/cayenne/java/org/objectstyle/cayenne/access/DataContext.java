@@ -728,6 +728,8 @@ public class DataContext implements QueryEngine {
      * depending on the value returned by <code>query.isFetchingDataRows()</code>.
      */
     public List performQuery(GenericSelectQuery query) {
+    	// 
+    	
         // Fetch either DataObjects or data rows.
         SelectObserver observer =
             (query.isFetchingDataRows())
@@ -736,16 +738,6 @@ public class DataContext implements QueryEngine {
 
         performQuery((Query) query, observer);
         return observer.getResults((Query) query);
-    }
-
-    /** 
-     * Performs a single database select query.
-     * SQL execution logging is done using specified log level. 
-     * 
-     * @deprecated Set log level of the query object instead, and then use performQuery(Query).
-     */
-    public List performQuery(GenericSelectQuery query, Level logLevel) {
-        return performQuery(query);
     }
 
     /** 

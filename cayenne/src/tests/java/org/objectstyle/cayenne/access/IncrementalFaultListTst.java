@@ -56,10 +56,12 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -119,12 +121,24 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     	assertEquals(2, list.getPagesRead());
     } 
     
-    public void testGet() throws Exception {
-    	Artist a = (Artist)list.get(6);
+    public void testGet1() throws Exception {
+    	Object a = list.get(6);
     	
     	assertNotNull(a);
+    	assertTrue(a instanceof Artist);
     	assertEquals(2, list.getPagesRead());
     	assertTrue(a != list.get(7));
+    	assertEquals(2, list.getPagesRead());
+    }
+    
+    public void testGet2() throws Exception {
+    	// test data rows
+    	((SelectQuery)list.getQuery()).setFetchingDataRows(true);
+    	Object a = list.get(6);
+    	
+    	assertNotNull(a);
+    	assertTrue(a instanceof Map);
+    	assertTrue(!(a instanceof DataObject));
     	assertEquals(2, list.getPagesRead());
     } 
     

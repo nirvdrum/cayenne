@@ -114,9 +114,9 @@ public class IncrementalFaultList extends AbstractList {
     public int getPagesRead() {
         return pagesRead;
     }
-    
+
     public int getObjectsRead() {
-    	return pagesRead * pageSize;
+        return pagesRead * pageSize;
     }
 
     /**
@@ -189,6 +189,7 @@ public class IncrementalFaultList extends AbstractList {
 
                 // read all requested pages
                 ObjEntity ent = dataContext.lookupEntity(query.getObjEntityName());
+                boolean readDataRows = query.isFetchingDataRows();
                 for (int i = readFrom; i < readTo; i++) {
                     if (!it.hasNextRow()) {
                         fullyResolved = true;
@@ -196,9 +197,13 @@ public class IncrementalFaultList extends AbstractList {
                         return;
                     }
 
-                    // read objects
+                    // read objects or data rows
                     Map row = it.nextDataRow();
-                    elements.add(dataContext.objectFromDataRow(ent, row, true));
+                    Object obj =
+                        readDataRows
+                            ? (Object) row
+                            : dataContext.objectFromDataRow(ent, row, true);
+                    elements.add(obj);
                 }
                 pagesRead = toIndex;
 
@@ -323,20 +328,20 @@ public class IncrementalFaultList extends AbstractList {
         private FaultIterator(List list) {
             this.list = list;
         }
-        
+
         /**
         * @see java.util.Iterator#hasNext()
         */
         public boolean hasNext() {
-        	if(isFullyResolved()) {
-        		return cursor < list.size();
-        	}
-        	
-        	if(cursor >= getObjectsRead()) {
-        		// read objects till cursor
-        		readUpToObject(cursor);
-        	}
-        	
+            if (isFullyResolved()) {
+                return cursor < list.size();
+            }
+
+            if (cursor >= getObjectsRead()) {
+                // read objects till cursor
+                readUpToObject(cursor);
+            }
+
             return cursor < getObjectsRead();
         }
 
