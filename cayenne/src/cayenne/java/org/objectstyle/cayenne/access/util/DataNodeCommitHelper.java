@@ -57,11 +57,14 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * @author Andrei Adamchik
@@ -75,6 +78,8 @@ public class DataNodeCommitHelper {
     protected List objEntitiesForInsert = new ArrayList();
     protected List objEntitiesForDelete = new ArrayList();
     protected List objEntitiesForUpdate = new ArrayList();
+    protected Map flattenedInsertQueries = new HashMap();
+    protected Map flattenedDeleteQueries = new HashMap();
     protected List queries = new ArrayList();
 
     /**
@@ -106,6 +111,7 @@ public class DataNodeCommitHelper {
     public DataNodeCommitHelper(DataNode node) {
         this.node = node;
     }
+    
 
     public void addToEntityList(ObjEntity ent, int listType) {
         switch (listType) {
@@ -119,6 +125,10 @@ public class DataNodeCommitHelper {
                 objEntitiesForDelete.add(ent);
                 break;
         }
+    }
+    
+    public void addToQueries(Query q) {
+    	queries.add(q);
     }
 
     /**
@@ -156,5 +166,13 @@ public class DataNodeCommitHelper {
      */
     public List getObjEntitiesForUpdate() {
         return objEntitiesForUpdate;
+    }
+    
+    public Map getFlattenedDeleteQueries() {
+        return flattenedDeleteQueries;
+    }
+
+    public Map getFlattenedInsertQueries() {
+        return flattenedInsertQueries;
     }
 }

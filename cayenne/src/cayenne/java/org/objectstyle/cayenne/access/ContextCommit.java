@@ -84,10 +84,10 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.BatchUtils;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
@@ -134,10 +134,8 @@ class ContextCommit {
 
         categorizeObjects();
         createPrimaryKeys();
-        Map flattenedInsertBatches =
-            categorizeFlattenedInsertsAndCreateBatches();
-        Map flattenedDeleteBatches =
-            categorizeFlattenedDeletesAndCreateBatches();
+        categorizeFlattenedInsertsAndCreateBatches();
+        categorizeFlattenedDeletesAndCreateBatches();
         updatedIds = new SequencedHashMap();
 
         insObjects = new ArrayList();
@@ -146,15 +144,18 @@ class ContextCommit {
 
         for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
             DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
-            DataNode node = nodeHelper.getNode();
-            List queries = nodeHelper.getQueries();
-
             prepareInsertQueries(nodeHelper);
-            //Side effect - fills insObjects
-            prepareFlattenedQueries(node, queries, flattenedInsertBatches);
+            prepareFlattenedQueries(
+                nodeHelper,
+                nodeHelper.getFlattenedInsertQueries());
+
             prepareUpdateQueries(nodeHelper);
+
             //Side effect - fills updObjects
-            prepareFlattenedQueries(node, queries, flattenedDeleteBatches);
+            prepareFlattenedQueries(
+                nodeHelper,
+                nodeHelper.getFlattenedDeleteQueries());
+
             prepareDeleteQueries(nodeHelper);
         }
 
@@ -522,26 +523,29 @@ class ContextCommit {
         return true;
     }
 
-    private Map categorizeFlattenedInsertsAndCreateBatches() {
-        List flattenedInsertsList = context.getFlattenedInserts();
-        Map flattenedBatches = new HashMap();
-        for (Iterator i = flattenedInsertsList.iterator(); i.hasNext();) {
+    private void categorizeFlattenedInsertsAndCreateBatches() {
+        Iterator i = context.getFlattenedInserts().iterator();
+
+        while (i.hasNext()) {
             DataContext.FlattenedRelationshipInfo info =
                 (FlattenedRelationshipInfo) i.next();
+
             DataObject source = info.getSource();
-            if (source.getPersistenceState() == PersistenceState.DELETED)
+            if (source.getPersistenceState() == PersistenceState.DELETED) {
                 continue;
+            }
 
             Map sourceId = source.getObjectId().getIdSnapshot();
             ObjEntity sourceEntity =
                 context.getEntityResolver().lookupObjEntity(source);
+
             DataNode responsibleNode =
                 context.dataNodeForObjEntity(sourceEntity);
-            Map batchesByDbEntity = (Map) flattenedBatches.get(responsibleNode);
-            if (batchesByDbEntity == null) {
-                batchesByDbEntity = new HashMap();
-                flattenedBatches.put(responsibleNode, batchesByDbEntity);
-            }
+            DataNodeCommitHelper commitHelper =
+                DataNodeCommitHelper.getHelperForNode(
+                    nodeHelpers,
+                    responsibleNode);
+            Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
 
             ObjRelationship flattenedRel = info.getBaseRelationship();
             List relList = flattenedRel.getDbRelationshipList();
@@ -570,13 +574,12 @@ class ContextCommit {
                     secondDbRel);
             relationInsertQuery.add(flattenedSnapshot);
         }
-        return flattenedBatches;
     }
 
-    private Map categorizeFlattenedDeletesAndCreateBatches() {
-        List flattenedDeletes = context.getFlattenedDeletes();
-        Map flattenedBatches = new HashMap();
-        for (Iterator i = flattenedDeletes.iterator(); i.hasNext();) {
+    private void categorizeFlattenedDeletesAndCreateBatches() {
+        Iterator i = context.getFlattenedDeletes().iterator();
+
+        while (i.hasNext()) {
             DataContext.FlattenedRelationshipInfo info =
                 (FlattenedRelationshipInfo) i.next();
             DataObject source = info.getSource();
@@ -588,11 +591,11 @@ class ContextCommit {
                 context.getEntityResolver().lookupObjEntity(source);
             DataNode responsibleNode =
                 context.dataNodeForObjEntity(sourceEntity);
-            Map batchesByDbEntity = (Map) flattenedBatches.get(responsibleNode);
-            if (batchesByDbEntity == null) {
-                batchesByDbEntity = new HashMap();
-                flattenedBatches.put(responsibleNode, batchesByDbEntity);
-            }
+            DataNodeCommitHelper commitHelper =
+                DataNodeCommitHelper.getHelperForNode(
+                    nodeHelpers,
+                    responsibleNode);
+            Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
 
             ObjRelationship flattenedRel = info.getBaseRelationship();
             List relList = flattenedRel.getDbRelationshipList();
@@ -622,20 +625,14 @@ class ContextCommit {
                     secondDbRel);
             relationDeleteQuery.add(flattenedSnapshot);
         }
-        return flattenedBatches;
     }
 
     private void prepareFlattenedQueries(
-        DataNode node,
-        List queries,
+        DataNodeCommitHelper commitHelper,
         Map flattenedBatches) {
-        Map batchesByDbEntity = (Map) flattenedBatches.get(node);
-        if (batchesByDbEntity == null)
-            return;
-        for (Iterator i = batchesByDbEntity.values().iterator();
-            i.hasNext();
-            ) {
-            queries.add((BatchQuery) i.next());
+
+        for (Iterator i = flattenedBatches.values().iterator(); i.hasNext();) {
+            commitHelper.addToQueries((Query) i.next());
         }
     }
 
