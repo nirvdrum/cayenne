@@ -206,6 +206,37 @@ public class ValidatorTst extends TestCase {
 		validator.validateObjRels(d1, m1, (ObjEntity) or4.getSourceEntity());
 		assertValidator(ErrorMsg.ERROR);
 	}
+	
+    public void testValidateDbRels() throws Exception {
+		// should succeed
+		DataDomain d1 = new DataDomain("abc");
+		DataMap m1 = new DataMap();
+		DbRelationship dr1 = buildValidDbRelationship("r1");
+		validator.reset();
+		validator.validateDbRels(d1, m1, (DbEntity) dr1.getSourceEntity());
+		assertValidator(ErrorMsg.NO_ERROR);
+		
+		// no target entity
+		DbRelationship dr2 = buildValidDbRelationship("r2");
+		dr2.setTargetEntity(null);
+		validator.reset();
+		validator.validateDbRels(d1, m1, (DbEntity) dr2.getSourceEntity());
+		assertValidator(ErrorMsg.WARNING);
+		
+    	// no name
+		DbRelationship dr3 = buildValidDbRelationship("r3");
+		dr3.setName(null);
+		validator.reset();
+		validator.validateDbRels(d1, m1, (DbEntity) dr3.getSourceEntity());
+		assertValidator(ErrorMsg.ERROR);		
+		
+		// no joins
+		DbRelationship dr4 = buildValidDbRelationship("r4");
+		dr4.removeAllJoins();
+		validator.reset();
+		validator.validateDbRels(d1, m1, (DbEntity) dr4.getSourceEntity());
+		assertValidator(ErrorMsg.WARNING);		
+	}
 
 	protected DbRelationship buildValidDbRelationship(String name) {
 		DbEntity src = new DbEntity("e1");

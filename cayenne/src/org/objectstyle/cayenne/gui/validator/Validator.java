@@ -571,11 +571,32 @@ public class Validator {
 				addErrorMessage(
 					new RelationshipErrorMsg(
 						"Must specify target entity",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						rel));
+			}
+			else if(rel.getJoins().size() == 0) {
+				addErrorMessage(
+					new RelationshipErrorMsg(
+						"Must specify at least one join",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						rel));
+			}
+			
+			if (rel.getName() == null) {
+				addErrorMessage(
+					new RelationshipErrorMsg(
+						"Relationship has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
 						rel));
 			}
+			
+			
 		}
 	}
 }
