@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -72,6 +73,8 @@ import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
  * @author Craig Miskell
  */
 public class Ordering implements Comparator {
+	private static Logger logObj = Logger.getLogger(Ordering.class);
+	
     /** Symbolic representation of ascending ordering criterion. */
     public static final boolean ASC = true;
 

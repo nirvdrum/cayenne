@@ -374,7 +374,7 @@ public abstract class Expression implements Serializable {
     }
 
     /**
-     * Helper class to process parametrised expressions.
+     * Helper class to process parameterized expressions.
      */
     class ParametrizedExpressionBuilder extends TraversalHelper {
         protected final Expression fakeTopLevelParent = new UnaryExpression();
