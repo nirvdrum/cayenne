@@ -133,7 +133,7 @@ projectdir# $JAVA_HOME/bin/javac test/*.java
 			</p>
 <source>
 projectdir> set CLASSPATH=%CLASSPATH%;.
-projectdir> %JAVA_HOME%\bin\java -classpath . test.Main metro
+projectdir> %JAVA_HOME%\bin\java test.Main metro
 </source>
 			
 			<p>If there is a gallery matching search criteria (in our case "Metropolitan Museum of Art"

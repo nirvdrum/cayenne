@@ -9,7 +9,7 @@ import org.apache.struts.action.*;
 public final class ArtistForm extends ActionForm {
 
 	private String artistName = null;
-	private Date dateOfBirth = null;
+	private String dateOfBirth = null;
 
 	public void setArtistName(String value) {
 		artistName = value;
@@ -18,10 +18,10 @@ public final class ArtistForm extends ActionForm {
 		return artistName;
 	}
 
-	public void setDateOfBirth(Date value) {
+	public void setDateOfBirth(String value) {
 		dateOfBirth = value;
 	}
-	public Date getDateOfBirth() {
+	public String getDateOfBirth() {
 		return dateOfBirth;
 	}
 
