@@ -29,8 +29,8 @@
 	<db-entity name="COMPOUND_FK_TEST">
 		<db-attribute name="F_KEY1" type="VARCHAR" length="20"/>
 		<db-attribute name="F_KEY2" type="VARCHAR" length="20"/>
-		<db-attribute name="KEY" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="NAME" type="VARCHAR" length="255"/>
+		<db-attribute name="PKEY" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="COMPOUND_PK_TEST">
 		<db-attribute name="KEY1" type="VARCHAR" isPrimaryKey="true" isMandatory="true" length="20"/>
