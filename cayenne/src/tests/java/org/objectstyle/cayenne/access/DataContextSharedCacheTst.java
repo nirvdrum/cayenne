@@ -145,7 +145,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         altArtist.setArtistName("version3");
         altContext.commitChanges();
         Map snapshot =
-            altContext.getObjectStore().getSnapshotCache().getSnapshot(
+            altContext.getObjectStore().getSnapshotCache().getCachedSnapshot(
                 altArtist.getObjectId());
         assertEquals("version3", snapshot.get("ARTIST_NAME"));
     }
@@ -169,7 +169,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         altArtist.setArtistName("version3");
         altContext.commitChanges();
         Map snapshot =
-            altContext.getObjectStore().getSnapshotCache().getSnapshot(
+            altContext.getObjectStore().getSnapshotCache().getCachedSnapshot(
                 altArtist.getObjectId());
         assertEquals("version3", snapshot.get("ARTIST_NAME"));
 

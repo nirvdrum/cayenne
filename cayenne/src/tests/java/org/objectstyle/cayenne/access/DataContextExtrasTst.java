@@ -59,8 +59,6 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -111,7 +109,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testIdObjectFromDataRow() throws Exception {
-        Map row = new HashMap();
+		Snapshot row = new Snapshot(10);
         row.put("ARTIST_ID", new Integer(100000));
         DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
@@ -121,7 +119,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
-        Map row = new HashMap();
+		Snapshot row = new Snapshot(10);
         row.put("ARTIST_ID", new Integer(100001));
         row.put("ARTIST_NAME", "ArtistXYZ");
         DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
@@ -132,7 +130,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testFullObjectFromDataRow() throws Exception {
-        Map row = new HashMap();
+		Snapshot row = new Snapshot(10);
         row.put("ARTIST_ID", new Integer(123456));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
@@ -140,7 +138,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
         assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-        assertNotNull(ctxt.getObjectStore().getSnapshot(obj.getObjectId()));
+        assertNotNull(ctxt.getObjectStore().getCachedSnapshot(obj.getObjectId()));
         assertEquals("ArtistXYZ", obj.getArtistName());
     }
 

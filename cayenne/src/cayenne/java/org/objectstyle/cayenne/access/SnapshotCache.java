@@ -60,20 +60,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
+import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 import org.shiftone.cache.Cache;
 import org.shiftone.cache.CacheManager;
 
 /**
  * @author Andrei Adamchik
+ * @since 1.1
  */
 public class SnapshotCache implements Serializable {
     private static Logger logObj = Logger.getLogger(SnapshotCache.class);
@@ -109,8 +114,50 @@ public class SnapshotCache implements Serializable {
         this.name = name;
     }
 
-    public Map getSnapshot(ObjectId oid) {
-        return (Map) snapshots.getObject(oid);
+    /**
+     * Returns cached snapshot or null if no snapshot is currently
+     * cached for the given ObjectId.
+     */
+    public Snapshot getCachedSnapshot(ObjectId oid) {
+        return (Snapshot) snapshots.getObject(oid);
+    }
+
+    /**
+     * Returns a snapshot for ObjectId. If snapshot is currently
+     * cached, it is returned. If not, a provided QueryEngine is used
+     * to fetch it from the database. If there is no database row
+     * for a given id, an exception is thrown.
+     */
+    public Snapshot getSnapshot(ObjectId oid, QueryEngine engine) {
+
+        // try cache
+        Snapshot cachedSnapshot = getCachedSnapshot(oid);
+        if (cachedSnapshot != null) {
+            return cachedSnapshot;
+        }
+
+        // try getting it from database
+        SelectQuery select = QueryUtils.selectObjectForId(oid);
+        SelectObserver observer = new SelectObserver();
+        engine.performQueries(Collections.singletonList(select), observer);
+        List results = observer.getResults(select);
+
+        if (results.size() > 1) {
+            throw new CayenneRuntimeException(
+                "More than 1 object found for ObjectId "
+                    + oid
+                    + ". Fetch matched "
+                    + results.size()
+                    + " objects.");
+        }
+        else if (results.size() == 0) {
+            // oops, object was deleted
+            throw new CayenneRuntimeException(
+                "No matching objects found for ObjectId " + oid);
+        }
+        else {
+            return (Snapshot) results.get(0);
+        }
     }
 
     /**
@@ -238,7 +285,7 @@ public class SnapshotCache implements Serializable {
       * Returns an empty map if no differences are found.
       */
     protected Map buildSnapshotDiff(ObjectId oid, Map newSnapshot) {
-        Map oldSnapshot = getSnapshot(oid);
+        Map oldSnapshot = getCachedSnapshot(oid);
 
         if (oldSnapshot == null) {
             return newSnapshot;

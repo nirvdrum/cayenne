@@ -63,6 +63,7 @@ import java.util.HashMap;
  * point for tracking DataObject changes.
  * 
  * @author Andrei Adamchik
+ * @since 1.1
  */
 public class Snapshot extends HashMap {
     protected long lastUpdated;

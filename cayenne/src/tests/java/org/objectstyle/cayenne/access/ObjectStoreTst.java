@@ -83,7 +83,7 @@ public class ObjectStoreTst extends CayenneTestCase {
     }
 
     public void testObjectsInvalidated() throws Exception {
-        Map row = new HashMap();
+        Snapshot row = new Snapshot(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
@@ -98,17 +98,17 @@ public class ObjectStoreTst extends CayenneTestCase {
             Collections.EMPTY_LIST);
 
         assertSame(object, objectStore.getObject(oid));
-        assertNotNull(objectStore.getSnapshot(oid));
+        assertNotNull(objectStore.getCachedSnapshot(oid));
 
         objectStore.objectsInvalidated(Collections.singletonList(object));
 
         assertSame(oid, object.getObjectId());
-        assertNull(objectStore.getSnapshot(oid));
+        assertNull(objectStore.getCachedSnapshot(oid));
         assertSame(object, objectStore.getObject(oid));
     }
 
     public void testObjectsUnregistered() throws Exception {
-        Map row = new HashMap();
+        Snapshot row = new Snapshot(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
@@ -122,7 +122,7 @@ public class ObjectStoreTst extends CayenneTestCase {
             Collections.singletonMap(object.getObjectId(), row),
             Collections.EMPTY_LIST);
         assertSame(object, objectStore.getObject(oid));
-        assertNotNull(objectStore.getSnapshot(oid));
+        assertNotNull(objectStore.getCachedSnapshot(oid));
 
         objectStore.objectsUnregistered(Collections.singletonList(object));
 
@@ -130,6 +130,6 @@ public class ObjectStoreTst extends CayenneTestCase {
         assertNull(objectStore.getObject(oid));
 
         // in the future this may not be the case
-        assertNull(objectStore.getSnapshot(oid));
+        assertNull(objectStore.getCachedSnapshot(oid));
     }
 }

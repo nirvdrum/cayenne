@@ -97,7 +97,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         assertNull(obj.getDataContext());
         assertNull(obj.getObjectId());
         assertNull(ctxt.getObjectStore().getObject(oid));
-        assertNull(ctxt.getObjectStore().getSnapshot(oid));
+        assertNull(ctxt.getObjectStore().getCachedSnapshot(oid));
     }
 
     public void testInvalidateObject() throws Exception {
@@ -117,7 +117,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
         assertSame(ctxt, obj.getDataContext());
         assertSame(oid, obj.getObjectId());
-        assertNull(ctxt.getObjectStore().getSnapshot(oid));
+        assertNull(ctxt.getObjectStore().getCachedSnapshot(oid));
         assertNotNull(ctxt.getObjectStore().getObject(oid));
     }
 

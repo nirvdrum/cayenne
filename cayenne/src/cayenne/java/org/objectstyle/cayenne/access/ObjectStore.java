@@ -100,20 +100,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     public ObjectStore(SnapshotCache snapshotCache) {
-    	this();
+        this();
         setSnapshotCache(snapshotCache);
     }
-    
+
     /**
      * Synchronizes the state of registered DataObjects with
      * the current state of SnapshotCache.
      */
     public synchronized void synchronizeWithCache() {
-		this.lastCachSync = System.currentTimeMillis();
-		
-		// TODO: do the actual synchronization
+        this.lastCachSync = System.currentTimeMillis();
+
+        // TODO: do the actual synchronization
     }
-    
 
     /**
      * Returns a SnapshotCache associated with this ObjectStore.
@@ -371,7 +370,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         DataObject object = (DataObject) objectMap.remove(oldId);
         if (object != null) {
 
-            Map snapshot = getSnapshotCache().getSnapshot(oldId);
+            Map snapshot = getSnapshotCache().getCachedSnapshot(oldId);
             objectMap.put(newId, object);
 
             if (snapshot != null) {
@@ -455,8 +454,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             Collections.EMPTY_LIST);
     }
 
+    /**
+     * @deprecated Since 1.1 getCachedSnapshot(ObjectId) or getSnapshot(ObjectId,QueryEngine) 
+     * must be used.
+     */
     public synchronized Map getSnapshot(ObjectId id) {
-        return (Map) getSnapshotCache().getSnapshot(id);
+        return getCachedSnapshot(id);
+    }
+
+    public Snapshot getCachedSnapshot(ObjectId id) {
+        return getSnapshotCache().getCachedSnapshot(id);
+    }
+
+    public Snapshot getSnapshot(ObjectId id, QueryEngine engine) {
+        return getSnapshotCache().getSnapshot(id, engine);
     }
 
     /**
@@ -553,11 +564,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // merge objects with changes in event...
         logObj.debug("Processing snapshot event: " + event);
 
-		SnapshotUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
-        
+        SnapshotUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
+
         // TODO: what should we do with deleted objects?
         // I suggest to turn them into TRANSIENT and notify a delegate...
-        
-		this.lastCachSync = event.getTimestamp();
+
+        this.lastCachSync = event.getTimestamp();
     }
 }

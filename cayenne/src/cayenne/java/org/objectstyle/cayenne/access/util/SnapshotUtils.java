@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ObjectStore;
+import org.objectstyle.cayenne.access.Snapshot;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.ToManyListDataSource;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -288,7 +289,8 @@ public class SnapshotUtils {
         Map snapshot) {
 
         DataContext context = anObject.getDataContext();
-        Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
+        Map oldSnap =
+            context.getObjectStore().getSnapshot(anObject.getObjectId(), context);
 
         // attributes
         Map attrMap = entity.getAttributeMap();
@@ -462,18 +464,10 @@ public class SnapshotUtils {
 
             DataContext context = anObject.getDataContext();
             ObjectId id = anObject.getObjectId();
-            Map snapshot = context.getObjectStore().getSnapshot(id);
-            if (snapshot != null) {
-                return snapshot;
-            }
-            else {
-                // resolve object
-                context.refetchObject(id);
-                return context.getObjectStore().getSnapshot(id);
-            }
+            return context.getObjectStore().getSnapshot(id, context);
         }
 
-        Map map = new HashMap();
+        Snapshot snapshot = new Snapshot(10);
 
         Map attrMap = ent.getAttributeMap();
         Iterator it = attrMap.keySet().iterator();
@@ -481,7 +475,7 @@ public class SnapshotUtils {
             String attrName = (String) it.next();
             ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
             //processing compound attributes correctly
-            map.put(
+            snapshot.put(
                 objAttr.getDbAttributePath(),
                 anObject.readPropertyDirectly(attrName));
         }
@@ -515,7 +509,7 @@ public class SnapshotUtils {
 
             DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
             Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-            map.putAll(fk);
+            snapshot.putAll(fk);
         }
 
         // process object id map
@@ -528,12 +522,12 @@ public class SnapshotUtils {
             Iterator itm = thisIdParts.keySet().iterator();
             while (itm.hasNext()) {
                 Object nextKey = itm.next();
-                if (!map.containsKey(nextKey)) {
-                    map.put(nextKey, thisIdParts.get(nextKey));
+                if (!snapshot.containsKey(nextKey)) {
+                    snapshot.put(nextKey, thisIdParts.get(nextKey));
                 }
             }
         }
-        return map;
+        return snapshot;
     }
 
     /**
@@ -586,7 +580,8 @@ public class SnapshotUtils {
                 Map sourcePk =
                     dbRelationship.srcPkSnapshotWithTargetSnapshot(
                         context.getObjectStore().getSnapshot(
-                            thisDestinationObject.getObjectId()));
+                            thisDestinationObject.getObjectId(),
+                            context));
                 sourceObject =
                     context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
             }

@@ -210,15 +210,11 @@ public class CayenneDataObject implements DataObject {
 
         try {
             // first try refreshing from snapshot
-            Map snapshot = dataContext.getObjectStore().getSnapshot(objectId);
+            Map snapshot =
+                dataContext.getObjectStore().getSnapshot(objectId, dataContext);
 
-            if (snapshot != null) {
-                ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
-                SnapshotUtils.refreshObjectWithSnapshot(entity, this, snapshot, true);
-            }
-            else {
-                dataContext.refetchObject(objectId);
-            }
+            ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
+            SnapshotUtils.refreshObjectWithSnapshot(entity, this, snapshot, true);
         }
         catch (Exception ex) {
             // TODO: add some sort of delegate method here. Quietly
@@ -435,7 +431,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     public Map getCommittedSnapshot() {
-        return dataContext.getObjectStore().getSnapshot(getObjectId());
+        return dataContext.getObjectStore().getSnapshot(getObjectId(), dataContext);
     }
 
     public Map getCurrentSnapshot() {

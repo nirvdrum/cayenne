@@ -355,6 +355,8 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Converts a list of data rows to a list of DataObjects. 
+     * 
+     * @since 1.1
      */
     public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
         // TODO: (Andrus) maybe move this to SnapshotManager?
