@@ -53,6 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.wocompat;
 
 import java.io.InputStream;
@@ -80,8 +81,10 @@ public class EOModelHelper {
     protected URL modelUrl;
     protected Map entityIndex;
     protected Map entityClassIndex;
+    protected Map entityClientClassIndex;
     protected DataMap dataMap;
 	private Map prototypeValues;
+
 
     static {
         // configure locator 
@@ -96,6 +99,7 @@ public class EOModelHelper {
      *  EOModel and load index file. 
      */
     public EOModelHelper(String path) throws Exception {
+
         // configure URL
         modelUrl = findModelUrl(path);
 
@@ -108,6 +112,7 @@ public class EOModelHelper {
         // load entity indices
         entityIndex = new HashMap();
         entityClassIndex = new HashMap();
+        entityClientClassIndex = new HashMap();
 
         Iterator it = modelIndex.iterator();
         while (it.hasNext()) {
@@ -115,8 +120,68 @@ public class EOModelHelper {
             String name = (String) info.get("name");
             entityIndex.put(name, loadEntityIndex(name));
             entityClassIndex.put(name, info.get("className"));
+            Map entityPlistMap = entityPListMap(name);
+            // get client class information
+            Map internalInfo = (Map) entityPlistMap.get("internalInfo");
+            
+            if (internalInfo != null) {
+                String clientClassName =
+                    (String) internalInfo.get("_javaClientClassName");
+                entityClientClassIndex.put(name, clientClassName);
+            }
+        }
+
+
+        it = modelIndex.iterator();
+        while (it.hasNext()) {
+            Map info = (Map) it.next();
+            String name = (String) info.get("name");
+            Map entityPlistMap = entityPListMap(name);
+            List classProperties = (List) entityPlistMap.get("classProperties");
+            
+            // get client class information
+            Map internalInfo = (Map) entityPlistMap.get("internalInfo");
+            
+            List clientClassProperties =
+                (internalInfo != null)
+                    ? (List) internalInfo.get("_clientClassPropertyNames")
+                    : null;
+                    
+            // guard against no internal info and no client class properties
+            if(clientClassProperties == null) {
+                clientClassProperties = Collections.EMPTY_LIST;
+            }
+                    
+            // there is a bug in EOModeler it sometimes keeps outdated properties in
+            // the client property list. This removes them
+            clientClassProperties.retainAll(classProperties);
+            
+            // remove all properties from the entity properties that are already defined in
+            // a potential parent class.
+            String parentEntity = (String) entityPlistMap.get("parent");
+            while (parentEntity != null) {
+                Map parentEntityPListMap = entityPListMap(parentEntity);
+                List parentClassProps = (List) parentEntityPListMap.get("classProperties");
+                classProperties.removeAll(parentClassProps);
+                // get client class information of parent
+                Map parentInternalInfo = (Map) parentEntityPListMap.get("internalInfo");
+                
+                if (parentInternalInfo != null) {
+                    List parentClientClassProps =
+                        (List) parentInternalInfo.get("_clientClassPropertyNames");
+                    clientClassProperties.removeAll(parentClientClassProps);
+                }
+                
+                parentEntity = (String) parentEntityPListMap.get("parent");
+            }
+            
+            // put back processed properties to the map
+            entityPlistMap.put("classProperties", classProperties);
+            // add client classes directly for easier access
+            entityPlistMap.put("clientClassProperties", clientClassProperties);
         }
     }
+
 
     /** Performs Objective C data types conversion to Java types.
      * 
@@ -143,23 +208,19 @@ public class EOModelHelper {
         // do some minimum sanity check and use as is
         try {
             return Class.forName(type).getName();
-        }
-        catch (ClassNotFoundException aClassNotFoundException) {
+        } catch (ClassNotFoundException aClassNotFoundException) {
             try {
                 return Class.forName("java.lang." + type).getName();
-            }
-            catch (ClassNotFoundException anotherClassNotFoundException) {
+            } catch (ClassNotFoundException anotherClassNotFoundException) {
                 try {
                     return Class.forName("java.util." + type).getName();
-                }
-                catch (ClassNotFoundException yetAnotherClassNotFoundException) {
+                } catch (ClassNotFoundException yetAnotherClassNotFoundException) {
                     try {
                         return ClassLoader
                             .getSystemClassLoader()
                             .loadClass(type)
                             .getName();
-                    }
-                    catch (ClassNotFoundException e) {
+                    } catch (ClassNotFoundException e) {
                         throw new IllegalArgumentException("Unknown data type: " + type);
                     }
                 }
@@ -185,13 +246,12 @@ public class EOModelHelper {
     public Map getPrototypeAttributeMapFor(String aPrototypeAttributeName) {
         if (prototypeValues == null) {
 
-            Map eoPrototypesEntityMap = this.entityInfo("EOPrototypes");
+            Map eoPrototypesEntityMap = this.entityPListMap("EOPrototypes");
 
             // no prototypes
             if (eoPrototypesEntityMap == null) {
                 prototypeValues = Collections.EMPTY_MAP;
-            }
-            else {
+            } else {
                 List eoPrototypeAttributes =
                     (List) eoPrototypesEntityMap.get("attributes");
 
@@ -223,15 +283,33 @@ public class EOModelHelper {
         return aMap;
     }
 
-    /** Returns an info map for the entity called <code>entityName</code>. */
+    /**
+     * @deprecated since 1.0.4 use {@link #entityPListMap(String)}.
+     */
     public Map entityInfo(String entityName) {
-        return (Map) entityIndex.get(entityName);
+        return entityPListMap(entityName);
     }
 
     /** Returns an info map for the entity called <code>entityName</code>. */
+    public Map entityPListMap(String entityName) {
+        return (Map) entityIndex.get(entityName);
+    }
+
+    /**
+     * @deprecated since 1.0.4 use {@link #entityClass(String, boolean)}.
+     */
     public String entityClass(String entityName) {
+        return entityClass(entityName, false);
+    }
+    
+    public String entityClass(String entityName, boolean getClientClass) {
+        if (getClientClass) {
+            return (String) entityClientClassIndex.get(entityName);
+        } else {
         return (String) entityClassIndex.get(entityName);
     }
+    }
+
 
     /** Loads EOModel index and returns it as a map. */
     protected Map loadModelIndex() throws Exception {
@@ -239,8 +317,7 @@ public class EOModelHelper {
         try {
             plistParser.ReInit(indexIn);
             return (Map) plistParser.propertyList();
-        }
-        finally {
+        } finally {
             indexIn.close();
         }
     }
@@ -251,8 +328,7 @@ public class EOModelHelper {
         try {
             plistParser.ReInit(entIn);
             return (Map) plistParser.propertyList();
-        }
-        finally {
+        } finally {
             entIn.close();
         }
     }
