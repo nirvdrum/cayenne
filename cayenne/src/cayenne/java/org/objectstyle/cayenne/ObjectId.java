@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,7 +76,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class ObjectId {
+public class ObjectId implements Serializable {
 	static Logger logObj = Logger.getLogger(ObjectId.class.getName());
 
 	// Keys: DbAttribute objects;
