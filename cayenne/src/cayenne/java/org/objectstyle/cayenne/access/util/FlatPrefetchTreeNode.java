@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.ToManyList;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -98,8 +99,7 @@ class FlatPrefetchTreeNode {
     boolean categorizeByParent;
 
     // column mapping
-    String[] sources;
-    String[] targets;
+    ColumnDescriptor[] columns;
     int[] idIndices;
     int rowCapacity;
 
@@ -175,10 +175,10 @@ class FlatPrefetchTreeNode {
      * Returns a source label for a given target label.
      */
     String sourceForTarget(String targetColumn) {
-        if (targetColumn != null && sources != null && targets != null) {
-            for (int i = 0; i < targets.length; i++) {
-                if (targetColumn.equals(targets[i])) {
-                    return sources[i];
+        if (targetColumn != null && columns != null) {
+            for (int i = 0; i < columns.length; i++) {
+                if (targetColumn.equals(columns[i].getName())) {
+                    return columns[i].getLabel();
                 }
             }
         }
@@ -234,8 +234,8 @@ class FlatPrefetchTreeNode {
 
         Map id = new TreeMap();
         for (int i = 0; i < idIndices.length; i++) {
-            Object value = flatRow.get(sources[idIndices[i]]);
-            id.put(targets[idIndices[i]], value);
+            Object value = flatRow.get(columns[idIndices[i]].getLabel());
+            id.put(columns[idIndices[i]].getName(), value);
         }
 
         return id;
@@ -248,8 +248,8 @@ class FlatPrefetchTreeNode {
         DataRow row = new DataRow(rowCapacity);
 
         // extract subset of flat row columns, recasting to the target keys
-        for (int i = 0; i < sources.length; i++) {
-            row.put(targets[i], flatRow.get(sources[i]));
+        for (int i = 0; i < columns.length; i++) {
+            row.put(columns[i].getName(), flatRow.get(columns[i].getLabel()));
         }
 
         return row;
@@ -312,7 +312,7 @@ class FlatPrefetchTreeNode {
                                     + join);
                 }
 
-                targetSource.put(join.getTargetName(), source);
+                appendColumn(targetSource, join.getTargetName(), source);
             }
         }
 
@@ -322,9 +322,7 @@ class FlatPrefetchTreeNode {
             ObjAttribute attribute = (ObjAttribute) attributes.next();
             String target = attribute.getDbAttributePath();
 
-            if (!targetSource.containsKey(target)) {
-                targetSource.put(target, prefix + target);
-            }
+            appendColumn(targetSource, target, prefix + target);
         }
 
         // add relationships
@@ -338,10 +336,7 @@ class FlatPrefetchTreeNode {
                 DbAttribute attribute = (DbAttribute) dbAttributes.next();
                 String target = attribute.getName();
 
-                // processing compound attributes correctly
-                if (!targetSource.containsKey(target)) {
-                    targetSource.put(target, prefix + target);
-                }
+                appendColumn(targetSource, target, prefix + target);
             }
         }
 
@@ -349,20 +344,26 @@ class FlatPrefetchTreeNode {
         Iterator pks = getEntity().getDbEntity().getPrimaryKey().iterator();
         while (pks.hasNext()) {
             DbAttribute pk = (DbAttribute) pks.next();
-            if (!targetSource.containsKey(pk.getName())) {
-                targetSource.put(pk.getName(), prefix + pk.getName());
-            }
+            appendColumn(targetSource, pk.getName(), prefix + pk.getName());
         }
 
         int size = targetSource.size();
         this.rowCapacity = (int) Math.ceil(size / 0.75);
-        this.sources = new String[size];
-        this.targets = new String[size];
+        this.columns = new ColumnDescriptor[size];
+        targetSource.values().toArray(columns);
+    }
 
-        // 'targetSource' map is ordered so splitting it in two arrays should
-        // preserve the key/value relative ordering.
-        targetSource.keySet().toArray(targets);
-        targetSource.values().toArray(sources);
+    private ColumnDescriptor appendColumn(Map map, String name, String label) {
+        ColumnDescriptor column = (ColumnDescriptor) map.get(name);
+
+        if (column == null) {
+            column = new ColumnDescriptor();
+            column.setName(name);
+            column.setLabel(label);
+            map.put(name, column);
+        }
+
+        return column;
     }
 
     /**
@@ -402,8 +403,8 @@ class FlatPrefetchTreeNode {
         for (int i = 0; i < idIndices.length; i++) {
             DbAttribute pk = (DbAttribute) pks.get(i);
 
-            for (int j = 0; j < targets.length; j++) {
-                if (pk.getName().equals(targets[j])) {
+            for (int j = 0; j < columns.length; j++) {
+                if (pk.getName().equals(columns[j].getName())) {
                     idIndices[i] = j;
                     break;
                 }
