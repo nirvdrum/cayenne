@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="13. DataViews"/>
 <body>
     <section name="13. DataViews">
-        <subsection name="13.3 DataViews in Action">
+        <subsection name="13.4 DataViews in Action">
             <p>
             Here we illustrate the discussion of DataViews with configuration samples and code snippets.
             Cayenne project DTD file supports references to data view configuration files. This information is loaded 

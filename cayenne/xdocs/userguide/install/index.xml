@@ -9,14 +9,12 @@
             More detailed requirements are listed below:</p>
             
             <p><strong>- JDK.</strong> Cayenne applications can be deployed
-            under JDK version 1.3 or higher. Note that JSDK 1.4 or higher is required for development
-            GUI tools. Download JDK from Sun at <a href="http://java.sun.com/products/">
-            http://java.sun.com/products/</a></p>		
+            under JDK version 1.3 or higher.  JSDK 1.4 or higher is required for development
+            GUI tools. Download JDK from Sun at <a href="http://java.sun.com/products/">http://java.sun.com/products/</a></p>		
                 
             <p><strong>- Java Compatible Operating System.</strong></p>
             
-            <panel name="Mac OS X Note:">JSDK 1.4 is now supported on MacOSX. Make sure that it is installed
-            on HFS+ drive. Swing and AWT do not work from UFS!
+            <panel name="Mac OS X Note:">Make sure that Java is installed on HFS+ partition. Swing and AWT do not work from UFS!
             </panel>
                 
             <p><strong>- Access to a relational database and JDBC driver for 
@@ -43,7 +41,7 @@
             and copied to the JRE extensions directory ($JRE_HOME/lib/ext).</p>
             
             <p><strong>- (Optional) Ant 1.4.1 or newer.</strong> Ant can be downloaded from
-            <a href="http://jakarta.apache.org/ant/index.html" target="_new">http://jakarta.apache.org/ant/index.html</a>.
+            <a href="http://ant.apache.org/" target="_blank">http://jakarta.apache.org/ant/index.html</a>.
             Ant is needed for:
             <ul>
             	<li><a href="../javagen.html"><code>cgen</code> Ant task</a>
@@ -62,6 +60,11 @@
             
             <p><strong>- (Optional) JMS.</strong> If you plan to use remote notifications via JMS 
 			transport, J2EE libraries must be available at runtime, and JMS services must be running.
+            </p>
+            
+            <p><strong>- (Optional) JDOM.</strong> If you develop a Swing application that uses 
+            <a href="../dataview/index.html">DataViews</a>, you need to have JDOM jars installed. JDOM can be downloaded 
+            from  <a href="http://www.jdom.org/" target="_blank">http://www.jdom.org/</a>.
             </p>
         </subsection>
     </section>

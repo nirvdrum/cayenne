@@ -21,7 +21,7 @@ ant</source>
 
 <p> </p>
 
-			<panel name="Note:">Cayenne Team discontinued shipping of "build.xml"  file with Cayenne distribution
+			<panel name="Note:">Cayenne Team discontinued shipping "build.xml"  file with Cayenne distribution
 			to avoid maintaining two parallel build systems, and reduce confusion.</panel>
 		</subsection>
     </section>

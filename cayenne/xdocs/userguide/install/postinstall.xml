@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="2. Installation"/>
 <body>
     <section name="2. Installation">       
-    	<subsection name="2.3 Understanding JAR Files" anchor="jar">
+    	<subsection name="2.3 JAR Files and Dependencies">
     		<p>This sections explains where all the relevant jar files are
     		located. It also lists Cayenne dependencies.</p>
     	
@@ -22,21 +22,21 @@
             They include:
             
             <ul>
-            	<li><a href="http:/objectstyle.org/ashwood/" target="_new">ObjectStyle Ashwood Graph Library</a>,
+            	<li><a href="http:/objectstyle.org/ashwood/" target="_blank">ObjectStyle Ashwood Graph Library</a>,
             	version 1.1</li>
-            	<li><a href="http://jakarta.apache.org/velocity/" target="_new">Jakarta Velocity Template 
+            	<li><a href="http://jakarta.apache.org/velocity/" target="_blank">Jakarta Velocity Template 
             	Engine</a>, version 1.3</li>
-				<li><a href="http://jakarta.apache.org/oro/" target="_new">Jakarta ORO Regular Expressions 
+				<li><a href="http://jakarta.apache.org/oro/" target="_blank">Jakarta ORO Regular Expressions 
 				package</a> <i>(also bundled with Velocity)</i></li>
-				<li><a href="http://jakarta.apache.org/log4j/" target="_new">Jakarta Log4J 
+				<li><a href="http://jakarta.apache.org/log4j/" target="_blank">Jakarta Log4J 
 				package</a>, version 1.2.8</li>
-				<li><a href="http://jakarta.apache.org/commons/lang/" target="_new">Jakarta Commons Lang 
+				<li><a href="http://jakarta.apache.org/commons/lang/" target="_blank">Jakarta Commons Lang 
 				package</a>, version 2.0</li>
-				<li><a href="http://jakarta.apache.org/commons/collections/" target="_new">Jakarta Commons Collections 
+				<li><a href="http://jakarta.apache.org/commons/collections/" target="_blank">Jakarta Commons Collections 
 				package</a>, version 3.0</li>
-				<li><a href="http://jakarta.apache.org/commons/logging/" target="_new">Jakarta Commons Logging 
+				<li><a href="http://jakarta.apache.org/commons/logging/" target="_blank">Jakarta Commons Logging 
 				package</a>, version 1.0.3</li>
-				<li><a href="http://jakarta.apache.org/commons/beanutils/" target="_new">Jakarta Commons Beanutils 
+				<li><a href="http://jakarta.apache.org/commons/beanutils/" target="_blank">Jakarta Commons Beanutils 
 				package</a>, version 1.6.1</li>
 			</ul>
             

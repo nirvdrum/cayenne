@@ -9,14 +9,18 @@
 	
 	<p>DataViews define various presentation parameters of the DataObjects in an XML format.
 	Just like DataMaps are edited using CayenneModeler, DataViews are edited with
-    	DVModeler GUI application.
+    	<a href="dvmodeler.html">DVModeler GUI application</a>.
 	<a href="../../api/cayenne/org/objectstyle/cayenne/dataview/package-summary.html">Runtime
 	DataView classes</a>  are a part of the main Cayenne JAR file. </p>
 	
 	<p>For manual editing of the DataViews,  <a href="../../dtd/cayenne-data-view-1_1.dtd">DataView 
 	DTD</a> is included in the distribution.  It is pretty small and the names are self-explanatory once you
-    got to know the Data View structure described in subsequent chapters.
+    become familiar with the Data View structure described in this chapter.
 	</p>
+	
+	<panel name="JDOM Note:">DataViews use JDOM, so in addition to the jar files required by a regular 
+	Cayenne application, DataViews-based application must have access to JDOM jars. JDOM can be 
+	downloaded from http://www.jdom.org/ . </panel>
     </section>
 </body>
 </document>
