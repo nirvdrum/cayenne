@@ -90,5 +90,26 @@ public class DerivedDbEntityTst extends TestCase {
     	ent.addGroupByAttribute(at);
     	assertEquals(1, ent.getGroupByAttributes().size());
     }
+    
+    public void testFullyQualifiedName1() throws Exception {
+    	assignParent();
+    	
+    	ent.setName("derived");
+    	ent.getParentEntity().setName("parent");
+    	assertEquals(ent.getParentEntity().getFullyQualifiedName(), ent.getFullyQualifiedName());
+    }
+    
+    public void testFullyQualifiedName2() throws Exception {
+    	assignParent();
+    	
+    	ent.setName("derived");
+    	ent.getParentEntity().setName("parent");
+    	ent.getParentEntity().setSchema("parent_schema");
+    	assertEquals(ent.getParentEntity().getFullyQualifiedName(), ent.getFullyQualifiedName());
+    }
+    
+    protected void assignParent() {
+    	ent.setParentEntity(new DbEntity());
+    }
 }
 

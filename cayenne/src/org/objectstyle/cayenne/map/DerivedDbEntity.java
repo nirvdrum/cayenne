@@ -156,9 +156,7 @@ public class DerivedDbEntity extends DbEntity {
 	 * @see org.objectstyle.cayenne.map.DbEntity#getFullyQualifiedName()
 	 */
 	public String getFullyQualifiedName() {
-		return (schema != null)
-			? schema + '.' + getParentEntity().getName()
-			: getParentEntity().getName();
+		return getParentEntity().getFullyQualifiedName();
 	}
 
 	/**
@@ -176,5 +174,4 @@ public class DerivedDbEntity extends DbEntity {
 		super.removeAttribute(attrName);
 		removeGroupByAttribute(attrName);
 	}
-
 }
