@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,7 +86,9 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * <pre>
  * 
  *  
- *      SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a=
+ *   
+ *       SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a=
+ *    
  *   
  *  
  * </pre>
@@ -414,6 +417,13 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         }
 
         templates.put(key, template);
+    }
+
+    /**
+     * Returns a collection of configured template keys. 
+     */
+    public synchronized Collection getTemplateKeys() {
+        return Collections.unmodifiableCollection(templates.keySet());
     }
 
     /**

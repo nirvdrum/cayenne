@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler;
 
 import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.modeler.util.DbLoginPanel;
 
 /** Class that can collect login information via GUI or command line interface.  */
 public class InteractiveLogin {

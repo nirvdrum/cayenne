@@ -53,94 +53,113 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.modeler.editor;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.JTextArea;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
 /**
+ * A panel for configuring SQL scripts of a SQL template.
+ * 
  * @author Andrei Adamchik
  */
-public class SQLTemplateTabbedView extends JTabbedPane {
+public class SQLTemplateScriptsTab extends JPanel {
 
     protected EventController mediator;
-    protected SQLTemplateMainTab mainTab;
-    protected SQLTemplateScriptsTab scriptsTab;
-    protected int lastSelectionIndex;
 
-    public SQLTemplateTabbedView(EventController mediator) {
+    protected JComboBox adapters;
+
+    protected JList scripts;
+    protected JTextArea script;
+
+    protected JButton addScript;
+    protected JButton removeScript;
+
+    public SQLTemplateScriptsTab(EventController mediator) {
         this.mediator = mediator;
 
         initView();
         initController();
     }
 
-    private void initView() {
-        setTabPlacement(JTabbedPane.TOP);
+    protected void initView() {
+        // create widgets
+        addScript = new JButton("Add");
+        removeScript = new JButton("Remove");
+        scripts = new JList();
+        script = new JTextArea();
+        adapters = new JComboBox();
 
-        this.mainTab = new SQLTemplateMainTab(mediator);
-        addTab("General", new JScrollPane(mainTab));
+        // assemble
 
-        this.scriptsTab = new SQLTemplateScriptsTab(mediator);
-        addTab("SQL Scripts", scriptsTab);
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(new FormLayout(
+                "fill:100dlu, 3dlu, fill:pref:grow, 3dlu, fill:100dlu",
+                "3dlu, p, 3dlu, p, 10dlu, top:100dlu:grow"));
+
+        // orderings table must grow as the panel is resized
+        builder.add(scripts, cc.xywh(1, 2, 1, 5));
+        builder.add(new JScrollPane(script), cc.xywh(3, 2, 1, 5));
+        builder.add(adapters, cc.xy(5, 2, "d, top"));
+        builder.add(addScript, cc.xy(5, 4, "d, top"));
+        builder.add(removeScript, cc.xy(5, 6, "d, top"));
+
+        setLayout(new BorderLayout());
+        add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    private void initController() {
-        mediator.addQueryDisplayListener(new QueryDisplayListener() {
+    protected void initController() {
 
-            public void currentQueryChanged(QueryDisplayEvent e) {
-                initFromModel();
-            }
-        });
+        // scroll to selected row whenever a selection even occurs
+        scripts.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
-        this.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent e) {
-                lastSelectionIndex = getSelectedIndex();
-                updateTabs();
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    displayScript();
+                }
             }
         });
     }
 
-    void initFromModel() {
-        if (!(mediator.getCurrentQuery() instanceof SQLTemplate)) {
+    protected void initFromModel() {
+        Query query = mediator.getCurrentQuery();
+
+        if (!(query instanceof SQLTemplate)) {
             setVisible(false);
             return;
         }
 
-        // if no root, reset tabs to show the first panel..
-        if (mediator.getCurrentQuery().getRoot() == null) {
-            lastSelectionIndex = 0;
-        }
-
-        // tab did not change - force update
-        if (getSelectedIndex() == lastSelectionIndex) {
-            updateTabs();
-        }
-        // change tab, this will update newly displayed tab...
-        else {
-            setSelectedIndex(lastSelectionIndex);
-        }
+        SQLTemplate template = (SQLTemplate) query;
+        Object[] keys = template.getTemplateKeys().toArray();
 
         setVisible(true);
     }
 
-    void updateTabs() {
-        switch (lastSelectionIndex) {
-            case 0:
-                mainTab.initFromModel();
-                break;
-            case 1:
-                scriptsTab.initFromModel();
-                break;
+    SQLTemplate getQuery() {
+        return (SQLTemplate) mediator.getCurrentQuery();
+    }
+
+    void displayScript() {
+        SQLTemplate query = getQuery();
+        if (query == null) {
+            return;
         }
+
     }
 }

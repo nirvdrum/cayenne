@@ -80,21 +80,22 @@ import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
+/**
  * Detail view of the DataNode and DataSourceInfo.
  * 
- * @author Michael Misha Shengaout 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DataNodeView
-    extends JPanel
-    implements DocumentListener, ActionListener, DataNodeDisplayListener {
+public class DataNodeView extends JPanel implements DocumentListener, ActionListener,
+        DataNodeDisplayListener {
+
     private static Logger logObj = Logger.getLogger(DataNodeView.class);
 
     protected EventController mediator;
@@ -169,31 +170,29 @@ public class DataNodeView
         factoryLabel = CayenneWidgetFactory.createLabel("DataSource Factory:");
         factory = CayenneWidgetFactory.createComboBox();
         factory.setEditable(true);
-        DefaultComboBoxModel model =
-            new DefaultComboBoxModel(
-                new String[] {
-                    JNDIDataSourceFactory.class.getName(),
-                    DriverDataSourceFactory.class.getName()});
+        DefaultComboBoxModel model = new DefaultComboBoxModel(new String[] {
+                JNDIDataSourceFactory.class.getName(),
+                DriverDataSourceFactory.class.getName()
+        });
         factory.setModel(model);
         factory.setSelectedIndex(-1);
 
         adapterLabel = CayenneWidgetFactory.createLabel("DB Adapter:");
-        adapter =
-            CayenneWidgetFactory.createComboBox(
-                DbAdapter.availableAdapterClassNames,
+        adapter = CayenneWidgetFactory.createComboBox(
+                DbAdapterInfo.standardAdapters(),
                 false);
         adapter.setEditable(true);
         adapter.setSelectedIndex(-1);
 
         userNameLabel = CayenneWidgetFactory.createLabel("User Name:");
-        userName =
-            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
+        userName = CayenneWidgetFactory
+                .createPreferenceField(ModelerPreferences.USER_NAME);
         userName.addActionListener(this);
         passwordLabel = CayenneWidgetFactory.createLabel("Password:");
         password = new JPasswordField(20);
         driverLabel = CayenneWidgetFactory.createLabel("Driver Class:");
-        driver =
-            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
+        driver = CayenneWidgetFactory
+                .createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         driver.addActionListener(this);
         urlLabel = CayenneWidgetFactory.createLabel("Database URL:");
         url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
@@ -206,9 +205,9 @@ public class DataNodeView
         // assemble
         this.setLayout(new BorderLayout());
 
-        DefaultFormBuilder topPanelBuilder =
-            new DefaultFormBuilder(
-                new FormLayout("right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)", ""));
+        DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
+                "right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)",
+                ""));
         topPanelBuilder.setDefaultDialogBorder();
 
         topPanelBuilder.appendSeparator("DataNode Configuration");
@@ -219,9 +218,9 @@ public class DataNodeView
 
         add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
 
-        DefaultFormBuilder driverPanelBuilder =
-            new DefaultFormBuilder(
-                new FormLayout("right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)", ""));
+        DefaultFormBuilder driverPanelBuilder = new DefaultFormBuilder(new FormLayout(
+                "right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)",
+                ""));
         driverPanelBuilder.setDefaultDialogBorder();
 
         driverPanelBuilder.appendSeparator("Data Source Info");
@@ -239,9 +238,11 @@ public class DataNodeView
     public void insertUpdate(DocumentEvent e) {
         textFieldChanged(e);
     }
+
     public void changedUpdate(DocumentEvent e) {
         textFieldChanged(e);
     }
+
     public void removeUpdate(DocumentEvent e) {
         textFieldChanged(e);
     }
@@ -274,7 +275,7 @@ public class DataNodeView
         else if (e.getDocument() == location.getDocument()) {
 
             if (node.getDataSourceLocation() != null
-                && node.getDataSourceLocation().equals(location.getText()))
+                    && node.getDataSourceLocation().equals(location.getText()))
                 return;
             node.setDataSourceLocation(location.getText());
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
@@ -282,26 +283,27 @@ public class DataNodeView
         }
         else if (e.getDocument() == userName.getDocument()) {
 
-            String nameStr =
-                (userName.getText().trim().length() > 0)
-                    ? userName.getText().trim()
-                    : null;
+            String nameStr = (userName.getText().trim().length() > 0) ? userName
+                    .getText()
+                    .trim() : null;
             info.setUserName(nameStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
         }
         else if (e.getDocument() == driver.getDocument()) {
 
-            String driverStr =
-                (driver.getText().trim().length() > 0) ? driver.getText().trim() : null;
+            String driverStr = (driver.getText().trim().length() > 0) ? driver
+                    .getText()
+                    .trim() : null;
             info.setJdbcDriver(driverStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
         }
         else if (e.getDocument() == url.getDocument()) {
 
-            String urlStr =
-                (url.getText().trim().length() > 0) ? url.getText().trim() : null;
+            String urlStr = (url.getText().trim().length() > 0)
+                    ? url.getText().trim()
+                    : null;
             info.setDataSourceUrl(urlStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
@@ -371,17 +373,12 @@ public class DataNodeView
             // DBAdapter changed
             String adapterName = (String) adapter.getModel().getSelectedItem();
 
-            // if (!Util.nullSafeEquals(currentName, adapterName)) {
-            // instantiate new adapter if needed
             DbAdapter newAdapter = null;
             if (adapterName != null && adapterName.trim().length() > 0) {
                 try {
-                    newAdapter =
-                        (DbAdapter) Class
+                    newAdapter = (DbAdapter) Class
                             .forName(adapterName)
-                            .getDeclaredConstructors()[0]
-                            .newInstance(
-                            new Object[0]);
+                            .getDeclaredConstructors()[0].newInstance(new Object[0]);
                 }
                 catch (Exception ex) {
                     logObj.warn("Error.", ex);
@@ -392,7 +389,6 @@ public class DataNodeView
 
             mediator.getCurrentDataNode().setAdapter(newAdapter);
             mediator.setDirty(true);
-            //   }
         }
         else if (src == driver) {
             ignoreChange = true;
@@ -464,7 +460,7 @@ public class DataNodeView
                 if (ele.equals(selected_class)) {
                     model.setSelectedItem(ele);
                     found = true;
-                    // If direct connection, 
+                    // If direct connection,
                     // show File button and disable text field.
                     // Otherwise hide File button and enable text field.
                     if (selected_class.equals(DriverDataSourceFactory.class.getName())) {

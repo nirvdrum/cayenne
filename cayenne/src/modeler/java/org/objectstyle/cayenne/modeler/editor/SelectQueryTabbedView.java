@@ -89,7 +89,7 @@ public class SelectQueryTabbedView extends JTabbedPane {
         setTabPlacement(JTabbedPane.TOP);
 
         this.mainTab = new SelectQueryMainTab(mediator);
-        addTab("Select Query", new JScrollPane(mainTab));
+        addTab("General", new JScrollPane(mainTab));
 
         this.orderingTab = new SelectQueryOrderingTab(mediator);
         addTab("Orderings", new JScrollPane(orderingTab));

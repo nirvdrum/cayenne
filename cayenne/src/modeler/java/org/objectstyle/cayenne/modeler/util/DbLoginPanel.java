@@ -53,11 +53,10 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -66,9 +65,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Arrays;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -77,16 +76,15 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 
 import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.modeler.util.*;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.PreferenceField;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.PanelFactory;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * Database login panel.
- * 
- * @author Andrei Adamchik
- * @author Misha Shengauot
  */
 public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
@@ -96,7 +94,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
     protected JPasswordField pwdInput;
     protected PreferenceField drInput;
     protected PreferenceField urlInput;
-    protected PreferenceField adapterInput;
+    protected JComboBox adapterInput;
 
     protected JButton ok;
     protected JButton cancel;
@@ -106,7 +104,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
     public DbLoginPanel(CayenneModelerFrame frame) {
         super(frame, "Driver And Login Information", true);
-        this.setResizable(false);
+        this.setResizable(true);
 
         Container pane = this.getContentPane();
         pane.setLayout(new BorderLayout());
@@ -125,9 +123,12 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
         // closing the window means "Cancel"
         this.addWindowListener(new WindowAdapter() {
+
             public void windowClosing(WindowEvent e) {
-                ActionEvent ae =
-                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED, COMMAND_CANCEL);
+                ActionEvent ae = new ActionEvent(
+                        this,
+                        ActionEvent.ACTION_PERFORMED,
+                        COMMAND_CANCEL);
                 DbLoginPanel.this.actionPerformed(ae);
             }
         });
@@ -159,48 +160,43 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
             pwdInput.setText(dataSrcInfo.getPassword());
             drInput.setText(dataSrcInfo.getJdbcDriver());
             urlInput.setText(dataSrcInfo.getDataSourceUrl());
-            adapterInput.setText(dataSrcInfo.getAdapterClassName());
+            adapterInput.setSelectedItem(dataSrcInfo.getAdapterClassName());
         }
     }
 
     protected JPanel initInputArea() {
-        // user name line
-        unInput =
-            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
+        // create widgets
+
+        unInput = CayenneWidgetFactory
+                .createPreferenceField(ModelerPreferences.USER_NAME);
         disableVKEvents(unInput);
 
-        // password line
         pwdInput = new JPasswordField(25);
         disableVKEvents(pwdInput);
 
-        // JDBC driver line
-        drInput =
-            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
+        drInput = CayenneWidgetFactory
+                .createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         disableVKEvents(drInput);
 
-        // Database URL line
         urlInput = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         disableVKEvents(urlInput);
 
-        // Adapter class line
-        adapterInput =
-            CayenneWidgetFactory.createPreferenceField(
-                ModelerPreferences.RDBMS_ADAPTER,
-                Arrays.asList(DbAdapter.availableAdapterClassNames));
-        disableVKEvents(adapterInput);
+        adapterInput = CayenneWidgetFactory.createComboBox(DbAdapterInfo
+                .standardAdapters(), false);
+        adapterInput.setEditable(true);
 
-        Component[] left =
-            new Component[] {
-                CayenneWidgetFactory.createLabel("User Name:"),
-                CayenneWidgetFactory.createLabel("Password:"),
-                CayenneWidgetFactory.createLabel("JDBC Driver Class:"),
-                CayenneWidgetFactory.createLabel("Database URL:"),
-                CayenneWidgetFactory.createLabel("RDBMS Adapter:")};
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, fill:max(250dlu;pref)",
+                "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+        builder.append(CayenneWidgetFactory.createLabel("User Name:"), unInput);
+        builder.append(CayenneWidgetFactory.createLabel("Password:"), pwdInput);
+        builder.append(CayenneWidgetFactory.createLabel("JDBC Driver Class:"), drInput);
+        builder.append(CayenneWidgetFactory.createLabel("Database URL:"), urlInput);
+        builder.append(CayenneWidgetFactory.createLabel("RDBMS Adapter:"), adapterInput);
 
-        Component[] right =
-            new Component[] { unInput, pwdInput, drInput, urlInput, adapterInput };
-
-        return PanelFactory.createForm(left, right);
+        return builder.getPanel();
     }
 
     private JPanel initButtons() {
@@ -214,7 +210,9 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
         ok.addActionListener(this);
         cancel.addActionListener(this);
 
-        return PanelFactory.createButtonPanel(new JButton[] { ok, cancel });
+        return PanelFactory.createButtonPanel(new JButton[] {
+                ok, cancel
+        });
     }
 
     protected JPanel initMessagePanel() {
@@ -249,7 +247,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
                 url = null;
             dataSrcInfo.setDataSourceUrl(url);
 
-            String adapter = adapterInput.getText();
+            String adapter = (String) adapterInput.getSelectedItem();
             if (adapter != null && adapter.length() == 0)
                 adapter = null;
             dataSrcInfo.setAdapterClassName(adapter);
@@ -264,7 +262,6 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
             unInput.storePreferences();
             drInput.storePreferences();
             urlInput.storePreferences();
-            adapterInput.storePreferences();
             ModelerPreferences.getPreferences().storePreferences();
         }
         else if (e.getActionCommand().equals(COMMAND_CANCEL)) {

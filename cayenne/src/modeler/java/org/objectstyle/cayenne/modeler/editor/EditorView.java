@@ -162,7 +162,7 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
         detailPanel.add(selectQueryView, SELECT_QUERY_VIEW);
 
         Component sqlTemplateView = new SQLTemplateTabbedView(eventController);
-        detailPanel.add(new JScrollPane(sqlTemplateView), SQL_TEMPLATE_VIEW);
+        detailPanel.add(sqlTemplateView, SQL_TEMPLATE_VIEW);
 
         Component procedureQueryView = new ProcedureQueryView(eventController);
         detailPanel.add(new JScrollPane(procedureQueryView), PROCEDURE_QUERY_VIEW);

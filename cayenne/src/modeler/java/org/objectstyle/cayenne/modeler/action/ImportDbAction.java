@@ -60,7 +60,6 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.access.DbLoaderDelegate;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -89,13 +89,14 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
 
-/** 
+/**
  * Action that imports database structure into a DataMap.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class ImportDbAction extends CayenneAction {
+
     private static Logger logObj = Logger.getLogger(ImportDbAction.class);
 
     public static String getActionName() {
@@ -111,8 +112,7 @@ public class ImportDbAction extends CayenneAction {
         DataNode currentNode = mediator.getCurrentDataNode();
         DataSourceInfo dsi = null;
         if (currentNode != null) {
-            dsi =
-                ((ProjectDataSource) currentNode.getDataSource())
+            dsi = ((ProjectDataSource) currentNode.getDataSource())
                     .getDataSourceInfo()
                     .cloneInfo();
             if (currentNode.getAdapter() != null) {
@@ -195,33 +195,29 @@ public class ImportDbAction extends CayenneAction {
         catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
-                e.getMessage(),
-                "Error loading adapter",
-                JOptionPane.ERROR_MESSAGE);
+                    CayenneModelerFrame.getFrame(),
+                    e.getMessage(),
+                    "Error loading adapter",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
 
     public Connection openConnection(DataSourceInfo dsi) {
         String driverClassName = dsi.getJdbcDriver();
-        Properties connectProperties = new Properties();
-
-        if (dsi.getUserName() != null) {
-            connectProperties.put("user", dsi.getUserName());
-        }
-
-        if (dsi.getPassword() != null) {
-            connectProperties.put("password", dsi.getPassword());
-        }
 
         try {
-            // connect directly via driver to avoid weird DriverManager errors
-            // due to a specialized classloader
-            Class driverClass =
-                ModelerClassLoader.getClassLoader().loadClass(driverClassName);
+            // load driver via custom ClassLoader
+            Class driverClass = ModelerClassLoader.getClassLoader().loadClass(
+                    driverClassName);
             Driver driver = (Driver) driverClass.newInstance();
-            return driver.connect(dsi.getDataSourceUrl(), connectProperties);
+
+            // connect via Cayenne DriverDataSource - it addresses some driver issues...
+            return new DriverDataSource(
+                    driver,
+                    dsi.getDataSourceUrl(),
+                    dsi.getUserName(),
+                    dsi.getPassword()).getConnection();
         }
         catch (SQLException e) {
             logObj.warn("Can't open database connection.", e);
@@ -230,31 +226,29 @@ public class ImportDbAction extends CayenneAction {
                 logObj.warn("Nested Exception: ", ex);
             }
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
-                e.getMessage(),
-                "Error Connecting to the Database",
-                JOptionPane.ERROR_MESSAGE);
+                    CayenneModelerFrame.getFrame(),
+                    e.getMessage(),
+                    "Error Connecting to the Database",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
         catch (ClassNotFoundException e) {
-            logObj.warn(
-                "Error loading driver. Classpath: "
-                    + System.getProperty("java.class.path"),
-                e);
+            logObj.warn("Error loading driver. Classpath: "
+                    + System.getProperty("java.class.path"), e);
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
-                "Class not found: " + driverClassName,
-                "Error Loading Driver",
-                JOptionPane.ERROR_MESSAGE);
+                    CayenneModelerFrame.getFrame(),
+                    "Class not found: " + driverClassName,
+                    "Error Loading Driver",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
         catch (Exception e) {
             logObj.warn("Error Connecting to the Database", e);
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
-                e.getMessage(),
-                "Error Connecting to the Database",
-                JOptionPane.ERROR_MESSAGE);
+                    CayenneModelerFrame.getFrame(),
+                    e.getMessage(),
+                    "Error Connecting to the Database",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
@@ -266,10 +260,10 @@ public class ImportDbAction extends CayenneAction {
         catch (SQLException e) {
             logObj.warn("Error loading schemas", e);
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
-                e.getMessage(),
-                "Error loading schemas",
-                JOptionPane.ERROR_MESSAGE);
+                    CayenneModelerFrame.getFrame(),
+                    e.getMessage(),
+                    "Error loading schemas",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
@@ -278,14 +272,13 @@ public class ImportDbAction extends CayenneAction {
         EventController mediator = getMediator();
 
         if (mediator.getCurrentDataMap() != null) {
-            mediator.fireDataMapEvent(
-                new DataMapEvent(CayenneModelerFrame.getFrame(), map, MapEvent.CHANGE));
-            mediator.fireDataMapDisplayEvent(
-                new DataMapDisplayEvent(
+            mediator.fireDataMapEvent(new DataMapEvent(
                     CayenneModelerFrame.getFrame(),
                     map,
-                    mediator.getCurrentDataDomain(),
-                    mediator.getCurrentDataNode()));
+                    MapEvent.CHANGE));
+            mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(CayenneModelerFrame
+                    .getFrame(), map, mediator.getCurrentDataDomain(), mediator
+                    .getCurrentDataNode()));
         }
         else {
             mediator.addDataMap(CayenneModelerFrame.getFrame(), map);
@@ -304,10 +297,8 @@ public class ImportDbAction extends CayenneAction {
                 map = loader.createDataMapFromDB(schemaName, tableNamePattern);
 
                 // fix map name
-                map.setName(
-                    NamedObjectFactory.createName(
-                        DataMap.class,
-                        mediator.getCurrentDataDomain()));
+                map.setName(NamedObjectFactory.createName(DataMap.class, mediator
+                        .getCurrentDataDomain()));
 
                 return map;
             }
@@ -315,10 +306,10 @@ public class ImportDbAction extends CayenneAction {
         catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
-                e.getMessage(),
-                "Error reverse engineering database",
-                JOptionPane.ERROR_MESSAGE);
+                    CayenneModelerFrame.getFrame(),
+                    e.getMessage(),
+                    "Error reverse engineering database",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
@@ -339,6 +330,7 @@ public class ImportDbAction extends CayenneAction {
     }
 
     class LoaderDelegate implements DbLoaderDelegate {
+
         protected EventController mediator;
         protected int duplicate = YesNoToAllDialog.UNDEFINED;
         protected boolean existingMap;
@@ -351,8 +343,8 @@ public class ImportDbAction extends CayenneAction {
         }
 
         /**
-        * @see org.objectstyle.cayenne.access.DbLoaderDelegate#overwriteDbEntity(DbEntity)
-        */
+         * @see org.objectstyle.cayenne.access.DbLoaderDelegate#overwriteDbEntity(DbEntity)
+         */
         public boolean overwriteDbEntity(DbEntity ent) throws CayenneException {
             // the decision may have been made already
             if (duplicate == YesNoToAllDialog.YES_TO_ALL) {
@@ -363,12 +355,11 @@ public class ImportDbAction extends CayenneAction {
                 return false;
             }
 
-            YesNoToAllDialog dialog =
-                new YesNoToAllDialog(
+            YesNoToAllDialog dialog = new YesNoToAllDialog(
                     "Duplicate Table Name",
                     "DataMap already contains DBEntity for table '"
-                        + ent.getName()
-                        + "'. Overwrite?");
+                            + ent.getName()
+                            + "'. Overwrite?");
             int code = dialog.getStatus();
             dialog.dispose();
 
@@ -405,8 +396,7 @@ public class ImportDbAction extends CayenneAction {
 
         public void dbEntityRemoved(DbEntity ent) {
             if (existingMap) {
-                mediator.fireDbEntityEvent(
-                    new EntityEvent(
+                mediator.fireDbEntityEvent(new EntityEvent(
                         CayenneModelerFrame.getFrame(),
                         ent,
                         EntityEvent.REMOVE));
@@ -415,11 +405,8 @@ public class ImportDbAction extends CayenneAction {
 
         public void objEntityRemoved(ObjEntity ent) {
             if (existingMap) {
-                mediator.fireObjEntityEvent(
-                    new EntityEvent(
-                        CayenneModelerFrame.getFrame(),
-                        ent,
-                        EntityEvent.REMOVE));
+                mediator.fireObjEntityEvent(new EntityEvent(CayenneModelerFrame
+                        .getFrame(), ent, EntityEvent.REMOVE));
             }
         }
 
@@ -428,7 +415,7 @@ public class ImportDbAction extends CayenneAction {
         }
 
         /**
-         * Schema should not be used if the user is the owner of this schema. 
+         * Schema should not be used if the user is the owner of this schema.
          */
         protected boolean useSchema(String schema) {
             return userName == null || !userName.equalsIgnoreCase(schema);

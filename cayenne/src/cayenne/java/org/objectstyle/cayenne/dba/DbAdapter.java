@@ -90,26 +90,68 @@ import org.objectstyle.cayenne.query.Query;
  */
 public interface DbAdapter {
 
+    /**
+     * @deprecated since 1.1 Use JdbcAdapter.class.getName()
+     */
     public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use MySQLAdapter.class.getName()
+     */
     public static final String MYSQL = "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use OracleAdapter.class.getName()
+     */
     public static final String ORACLE =
         "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use SybaseAdapter.class.getName()
+     */
     public static final String SYBASE =
         "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use PostgresAdapter.class.getName()
+     */
     public static final String POSTGRES =
         "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use HSQLDBAdapter.class.getName()
+     */
     public static final String HSQLDB =
         "org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use DB2Adapter.class.getName()
+     */
     public static final String DB2 = "org.objectstyle.cayenne.dba.db2.DB2Adapter";
+    
+    /**
+     * @deprecated since 1.1 Use FirebirdAdapter.class.getName()
+     */
     public static final String FIREBIRD =
         "org.objectstyle.cayenne.dba.firebird.FirebirdAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use OpenBaseAdapter.class.getName()
+     */
     public static final String OPENBASE =
         "org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter";
+    
+    /**
+     * @deprecated since 1.1 Use SQLServerAdapter.class.getName()
+     */
     public static final String SQLSERVER =
         "org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter";
 
     /**
      * All available DbAdapter subclass names.
+     * 
+     * @deprecated since 1.1 This is not a good way to tell what adapters exist,
+     * besides there maybe custom adapters.
      */
     public static final String[] availableAdapterClassNames =
         new String[] {

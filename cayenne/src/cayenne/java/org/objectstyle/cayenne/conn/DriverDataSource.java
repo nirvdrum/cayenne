@@ -150,6 +150,13 @@ public class DriverDataSource implements DataSource {
                 }
                 c = driver.connect(connectionUrl, connectProperties);
             }
+            
+            // some drivers (Oracle) return null connections instead of throwing
+            // an exception... fix it here
+            
+            if (c == null) {
+                throw new SQLException("Can't establish connection: " + connectionUrl);
+            }
 
             if (logger != null) {
                 logger.logConnectSuccess();
