@@ -26,6 +26,7 @@ Changes:
 - Expanded deployment chapter of the user guide with extrav options 
   (some existed before but were not documented).
 - Other documentation updates
+- [CAY-261 - Experimental] XML encoder/decoder (still very raw and virtually untested)
 
 Bugs Fixed:
 
