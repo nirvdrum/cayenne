@@ -164,6 +164,8 @@ public class SelectObserver extends DefaultOperationObserver {
       * SelectObserver are loaded as objects to a given DataContext (thus resolving
       * prefetched to-one relationships). Any to-many relationships for the root query
       * are resolved as well.</p>
+      * 
+      * @since 1.1
       */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
         List dataRows = getResults(rootQuery);
@@ -223,9 +225,8 @@ public class SelectObserver extends DefaultOperationObserver {
     }
 
     /** 
-         * Overrides superclass implementation to rethrow an exception
-         *  immediately. 
-         */
+     * Overrides super implementation to rethrow an exception immediately. 
+     */
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
         throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));

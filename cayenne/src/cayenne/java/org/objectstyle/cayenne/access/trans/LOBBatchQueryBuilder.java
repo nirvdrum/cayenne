@@ -69,6 +69,8 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
+ * Superclass of query builders for the DML operations involving LOBs.
+ * 
  * @author Andrei Adamchik
  */
 public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {

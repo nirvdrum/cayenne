@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- * Helper class to extrat the information from BatchQueries, essential for
+ * Helper class to extract the information from BatchQueries, essential for
  * LOB columns processing.
  * 
  * @author Andrei Adamchik
