@@ -267,7 +267,7 @@ public class DataContext implements QueryEngine, Serializable {
      * with <code>false</code> "refersh" parameter.</p>
      */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
-        ObjEntity ent = this.lookupEntity(entityName);
+        ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
         return (ent.isReadOnly())
             ? readOnlyObjectFromDataRow(ent, dataRow, false)
             : objectFromDataRow(ent, dataRow, false);
@@ -343,7 +343,7 @@ public class DataContext implements QueryEngine, Serializable {
      * is determined from ObjEntity. Object class must have a default constructor. 
      */
     public DataObject createAndRegisterNewObject(String objEntityName) {
-        String objClassName = lookupEntity(objEntityName).getClassName();
+        String objClassName = this.getEntityResolver().lookupObjEntity(objEntityName).getClassName();
         DataObject dobj = null;
         try {
             dobj = newDataObject(objClassName);
@@ -355,28 +355,31 @@ public class DataContext implements QueryEngine, Serializable {
         return dobj;
     }
 
-    /** Registers new object (that is not yet persistent) with itself.
+    /** Registers a new object (that is not yet persistent) with itself.
      *
      * @param dataObject new object that we want to make persistent.
      * @param objEntityName a name of the ObjEntity in the map used to get 
      *  persistence information for this object.
-     *
-     * @deprecated use registerNewObject(DataObject dataObject) instead.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
-    	registerNewObject(dataObject);
+        ObjEntity objEntity = getEntityResolver().lookupObjEntity(objEntityName);
+		registerNewObjectWithEntity(dataObject, objEntity);
     }
 
-    /** Registers new object (that is not yet persistent) with itself.
+    /** Registers a new object (that is not yet persistent) with itself.
      *
      * @param dataObject new object that we want to make persistent.
      */
     public void registerNewObject(DataObject dataObject) {
+        ObjEntity objEntity = getEntityResolver().lookupObjEntity(dataObject);
+		registerNewObjectWithEntity(dataObject, objEntity);
+    }
+
+    private void registerNewObjectWithEntity(DataObject dataObject, ObjEntity objEntity) {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
-
-        ObjEntity ent = getEntityResolver().lookupObjEntity(dataObject);
-        snapshotManager.prepareForInsert(ent, dataObject);
+		// TODO: maybe do a sanity check against class/entity mismatch?
+        snapshotManager.prepareForInsert(objEntity, dataObject);
         objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
         dataObject.setPersistenceState(PersistenceState.NEW);
@@ -761,7 +764,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /** Delegates entity name resolution to parent QueryEngine. 
-     * @deprecated use getEntityResolver.lookupObjEntity()*/
+     * @deprecated use getEntityResolver.lookupObjEntity()
+     */
     public ObjEntity lookupEntity(String objEntityName) {
     	return this.getEntityResolver().lookupObjEntity(objEntityName);
      }

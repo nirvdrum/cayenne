@@ -92,7 +92,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         CayenneDataObject o1 = new CayenneDataObject();
         assertNull(o1.getObjectId());
 
-        ctxt.registerNewObject(o1);
+        ctxt.registerNewObject(o1, "Artist");
         assertNotNull(o1.getObjectId());
     }
 
@@ -161,7 +161,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         CayenneDataObject o1 = new CayenneDataObject();
         assertNull(o1.getDataContext());
 
-        ctxt.registerNewObject(o1);
+        ctxt.registerNewObject(o1, "Artist");
         assertSame(ctxt, o1.getDataContext());
     }
 
