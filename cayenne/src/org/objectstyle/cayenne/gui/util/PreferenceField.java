@@ -56,14 +56,13 @@ package org.objectstyle.cayenne.gui.util;
  */ 
 
 import java.awt.Component;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import org.objectstyle.util.Preferences;
 
@@ -138,14 +137,17 @@ public class PreferenceField extends JComboBox
 		Preferences pref = Preferences.getPreferences();
 		pref.remove(key);
 		Iterator iter = items.iterator();
-		StringBuffer buf = new StringBuffer("PreferenceField::storePreferences(), "
+		
+		if(logObj.isLoggable(Level.FINER)) {
+		    StringBuffer buf = new StringBuffer("PreferenceField::storePreferences(), "
 					+"key "+ key + ":\n");
-		while (iter.hasNext()) {
-			String str = (String)iter.next();
-			pref.addProperty(key, str);
-			buf.append(str + "\n");
-		}// End while
-		System.out.println(buf.toString());
+		    while (iter.hasNext()) {
+			    String str = (String)iter.next();
+			    pref.addProperty(key, str);
+			    buf.append(str + "\n");
+		    }// End while
+		    logObj.finer(buf.toString());
+		}
 		DefaultComboBoxModel model = new DefaultComboBoxModel(items);
 		model.setSelectedItem(item);
 		setModel(model);
