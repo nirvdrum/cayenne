@@ -62,22 +62,21 @@ import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 
 /**
  * Cayenne DbAdapter implementation for <a
- * href="http://www.microsoft.com/sql/default.asp"Microsoft SQL Server </a> engine. Sample
+ * href="http://www.microsoft.com/sql/default.asp"Microsoft SQL Server </a> engine. 
+ * </p>
+ * 
+ * <h3>Microsoft Driver Settings</h3>
+ * 
+ * <p>Sample
  * <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection
  * settings </a> to use with MS SQL Server are shown below:
  * 
  * <pre>
- * 
- *  
- *   
  *    sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
  *    sqlserver.jdbc.username = test
  *    sqlserver.jdbc.password = secret
  *    sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
  *    sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
- *    
- *   
- *  
  * </pre>
  * 
  * <p>
@@ -86,6 +85,20 @@ import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
  * with "CS" in symbolic collation name instead of "CI", e.g.
  * "SQL_Latin1_general_CP1_CS_AS"). </i>
  * </p>
+ * 
+ * <h3>jTDS Driver Settings</h3>
+ * <p>jTDS is an open source driver that can be downloaded from <a href=
+ * "http://jtds.sourceforge.net">http://jtds.sourceforge.net</a>.
+ * It supports both SQLServer and Sybase. Sample SQLServer settings are the following:
+ * </p>
+ * 
+ * <pre>
+ *    sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
+ *    sqlserver.jdbc.username = test
+ *    sqlserver.jdbc.password = secret
+ *    sqlserver.jdbc.url = jdbc:jtds:sqlserver://192.168.0.65/cayenne
+ *    sqlserver.jdbc.driver = net.sourceforge.jtds.jdbc.Driver
+ * </pre>
  * 
  * @author Andrei Adamchik
  * @since 1.1
