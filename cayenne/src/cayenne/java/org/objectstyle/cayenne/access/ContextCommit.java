@@ -297,14 +297,19 @@ class ContextCommit {
         for (Iterator i = dbEntities.iterator(); i.hasNext();) {
             DbEntity dbEntity = (DbEntity) i.next();
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
-            DeleteBatchQuery batch = new DeleteBatchQuery(dbEntity, 27);
-            batch.setLoggingLevel(logLevel);
+            Map batches = new LinkedMap();
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
 
-                boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
-                DbRelationship masterDependentDbRel = (isMasterDbEntity
+                // Per-objEntity optimistic locking conditional
+                boolean optimisticLocking = (ObjEntity.LOCK_TYPE_OPTIMISTIC == entity
+                        .getLockType());
+
+                List qualifierAttributes = qualifierAttributes(entity, optimisticLocking);
+
+                boolean isRootDbEntity = (entity.getDbEntity() == dbEntity);
+                DbRelationship masterDependentDbRel = (isRootDbEntity
                         ? null
                         : findMasterToDependentDbRelationship(
                                 entity.getDbEntity(),
@@ -318,25 +323,71 @@ class ContextCommit {
                     throw attemptToCommitReadOnlyEntity(objects.get(0).getClass(), entity);
                 }
 
-                if (isMasterDbEntity) {
+                if (isRootDbEntity) {
                     sorter.sortObjectsForEntity(entity, objects, true);
                 }
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
 
-                    Map id = o.getObjectId().getIdSnapshot();
-                    if (id != null && !id.isEmpty()) {
-                        if (!isMasterDbEntity && masterDependentDbRel != null)
-                            id = masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(id);
-                        batch.add(id);
-                    }
-                }
+                    // build qualifier snapshot
+                    Map idSnapshot = o.getObjectId().getIdSnapshot();
 
-                if (isMasterDbEntity)
+                    if (idSnapshot == null || idSnapshot.isEmpty()) {
+                        // skip this one
+                        continue;
+                    }
+
+                    if (!isRootDbEntity && masterDependentDbRel != null) {
+                        idSnapshot = masterDependentDbRel
+                                .targetPkSnapshotWithSrcSnapshot(idSnapshot);
+                    }
+
+                    Map qualifierSnapshot = idSnapshot;
+                    if (optimisticLocking) {
+                        // clone snapshot and add extra keys...
+                        qualifierSnapshot = new HashMap(qualifierSnapshot);
+                        appendOptimisticLockingAttributes(
+                                qualifierSnapshot,
+                                o,
+                                qualifierAttributes);
+                    }
+
+                    // organize batches by the nulls in qualifier
+                    Set nullQualifierNames = new HashSet();
+                    Iterator it = qualifierSnapshot.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry entry = (Map.Entry) it.next();
+                        if (entry.getValue() == null) {
+                            nullQualifierNames.add(entry.getKey());
+                        }
+                    }
+
+                    List batchKey = Arrays.asList(new Object[] {
+                            nullQualifierNames
+                    });
+
+                    DeleteBatchQuery batch = (DeleteBatchQuery) batches.get(batchKey);
+                    if (batch == null) {
+                        batch = new DeleteBatchQuery(
+                                dbEntity,
+                                qualifierAttributes,
+                                nullQualifierNames,
+                                27);
+                        batch.setLoggingLevel(logLevel);
+                        batch.setUsingOptimisticLocking(optimisticLocking);
+                        batches.put(batchKey, batch);
+                    }
+
+                    batch.add(qualifierSnapshot);
+
+                }
+                
+                if (isRootDbEntity)
                     delObjects.addAll(objects);
+
             }
-            commitHelper.getQueries().add(batch);
+            commitHelper.getQueries().addAll(batches.values());
         }
     }
 
@@ -533,7 +584,7 @@ class ContextCommit {
             DataObject dataObject,
             List qualifierAttributes) throws CayenneException {
 
-        Map snapshot = dataObject.getDataContext().getObjectStore().getRetainedSnapshot(
+        Map snapshot = dataObject.getDataContext().getObjectStore().getCachedSnapshot(
                 dataObject.getObjectId());
 
         Iterator it = qualifierAttributes.iterator();
@@ -724,7 +775,9 @@ class ContextCommit {
             DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery) batchesByDbEntity
                     .get(flattenedEntity);
             if (relationDeleteQuery == null) {
+                boolean optimisticLocking = false;
                 relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
+                relationDeleteQuery.setUsingOptimisticLocking(optimisticLocking);
                 relationDeleteQuery.setLoggingLevel(logLevel);
                 batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
             }

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -71,49 +72,124 @@ import org.objectstyle.cayenne.map.DbEntity;
  * @author Andriy Shapochka
  */
 public class DeleteBatchQuery extends BatchQuery {
-    private List dataObjectIds;
+    private List qualifierSnapshots;
     private List dbAttributes;
-    private Iterator idIterator = IteratorUtils.EMPTY_ITERATOR;
-    private Map currentId = Collections.EMPTY_MAP;
+    private Iterator qualifierIterator = IteratorUtils.EMPTY_ITERATOR;
+    private Map currentQualifier = Collections.EMPTY_MAP;
 
-    public DeleteBatchQuery(DbEntity objectEntity, int batchCapacity) {
+    private boolean usingOptimisticLocking;
+    private List qualifierAttributes;
+    private Collection nullQualifierNames;
+
+    /**
+     * Creates new DeleteBatchQuery.
+     * 
+     * @param dbEntity Table or view to delete.
+     * @param qualifierAttributes DbAttributes used in the WHERE clause.
+     * @param nullQualifierNames DbAttribute names in the WHERE clause that have null values.
+     * @param batchCapacity Estimated size of the batch.
+     */
+    public DeleteBatchQuery(DbEntity objectEntity,
+        List qualifierAttributes,
+        Collection nullQualifierNames,
+        int batchCapacity) {
+        
         super(objectEntity);
-        dataObjectIds = new ArrayList(batchCapacity);
-        prepareMetadata();
+        
+        this.qualifierAttributes = qualifierAttributes;
+        this.nullQualifierNames =
+            nullQualifierNames != null ? nullQualifierNames : Collections.EMPTY_SET;
+        
+        qualifierSnapshots = new ArrayList(batchCapacity);
+        dbAttributes = new ArrayList(qualifierAttributes.size());
+        dbAttributes.addAll(qualifierAttributes);
+        // dbAttributes = getDbEntity().getPrimaryKey();
+    }
+
+    /**
+     * Creates new DeleteBatchQuery.
+     * Don't use this!  Placeholder until I can figure out what ContextCommit.categorizeFlattenedDeletesAndCreateBatches needs.
+     * 
+     * @param dbEntity Table or view to delete.
+     * @param batchCapacity Estimated size of the batch.
+     * 
+     * @deprecated
+     */
+    public DeleteBatchQuery(DbEntity dbEntity, int batchCapacity) {
+        this(dbEntity, dbEntity.getPrimaryKey(), Collections.EMPTY_SET, batchCapacity);
+    }
+
+
+    /**
+     * Returns true if a given attribute always has a null value 
+     * in the batch.
+     * 
+     * @since 1.2
+     */
+    public boolean isNull(DbAttribute attribute) {
+        return nullQualifierNames.contains(attribute.getName());
+    }
+
+    /**
+     * Returns true if the batch query uses optimistic locking.
+     * 
+     * @since 1.2
+     */
+    public boolean isUsingOptimisticLocking() {
+        return usingOptimisticLocking;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setUsingOptimisticLocking(boolean usingOptimisticLocking) {
+        this.usingOptimisticLocking = usingOptimisticLocking;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public List getQualifierAttributes() {
+        return Collections.unmodifiableList(qualifierAttributes);
     }
 
     public void reset() {
-        idIterator = dataObjectIds.iterator();
-        currentId = Collections.EMPTY_MAP;
+        qualifierIterator = qualifierSnapshots.iterator();
+        currentQualifier = Collections.EMPTY_MAP;
     }
 
     public boolean next() {
-        if (!idIterator.hasNext())
+        if (!qualifierIterator.hasNext())
             return false;
-        currentId = (Map) idIterator.next();
-        currentId = (currentId != null ? currentId : Collections.EMPTY_MAP);
+        currentQualifier = (Map) qualifierIterator.next();
+        currentQualifier = (currentQualifier != null ? currentQualifier : Collections.EMPTY_MAP);
         return true;
     }
 
     public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute =
             (DbAttribute) dbAttributes.get(dbAttributeIndex);
-        return currentId.get(attribute.getName());
+        return currentQualifier.get(attribute.getName());
     }
 
     public void add(Map dataObjectId) {
-        dataObjectIds.add(dataObjectId);
+        qualifierSnapshots.add(dataObjectId);
     }
 
     public int size() {
-        return dataObjectIds.size();
+        return qualifierSnapshots.size();
     }
 
     public List getDbAttributes() {
         return dbAttributes;
     }
 
-    private void prepareMetadata() {
-        dbAttributes = getDbEntity().getPrimaryKey();
+    /**
+     * Returns a snapshot of the current qualifier values.
+     * 
+     * @since 1.2
+     */
+    public Map getCurrentQualifier() {
+        return currentQualifier;
     }
 }

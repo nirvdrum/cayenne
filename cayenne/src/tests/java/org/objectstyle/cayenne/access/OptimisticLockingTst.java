@@ -74,6 +74,48 @@ public class OptimisticLockingTst extends LockingTestCase {
         context = createDataContext();
     }
 
+    public void testSimpleLockingOnDeleteSucceed() throws Exception {
+        createTestData("testSimpleLocking");
+
+        List allObjects = context.performQuery(new SelectQuery(SimpleLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        SimpleLockingTest object = (SimpleLockingTest) allObjects.get(0);
+
+        // change description and save... no optimistic lock failure expected
+        object.setDescription("first update");
+        context.commitChanges();
+
+        context.deleteObject(object);
+        context.commitChanges();
+    }
+
+    public void testSimpleLockingOnDeleteFail() throws Exception {
+        createTestData("testSimpleLocking");
+
+        List allObjects = context.performQuery(new SelectQuery(SimpleLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        SimpleLockingTest object = (SimpleLockingTest) allObjects.get(0);
+
+        // change description and save... no optimistic lock failure expected
+        object.setDescription("second update");
+        context.commitChanges();
+
+        // change row underneath, delete and save...  optimistic lock failure expected
+        createTestData("SimpleLockUpdate");
+        
+        context.deleteObject(object);
+
+        try {
+            context.commitChanges();
+            fail("Optimistic lock failure expected.");
+        }
+        catch (OptimisticLockException ex) {
+            // optimistic lock failure expected...
+        }
+    }
+
     public void testSimpleLocking() throws Exception {
         createTestData("testSimpleLocking");
 

@@ -56,17 +56,20 @@
 
 package org.objectstyle.cayenne.access.trans;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.DeleteBatchQuery;
 
 /**
  * Translator for delete BatchQueries. Creates parametrized DELETE SQL statements.
  * 
- * @author Andriy Shapochka, Andrei Adamchik
+ * @author Andriy Shapochka, Andrei Adamchik, Mike Kienenberger
  */
 
 public class DeleteBatchQueryBuilder extends BatchQueryBuilder {
@@ -75,21 +78,51 @@ public class DeleteBatchQueryBuilder extends BatchQueryBuilder {
 	}
 	
 	public String createSqlString(BatchQuery batch) {
+        DeleteBatchQuery deleteBatch = (DeleteBatchQuery) batch;
 		String table = batch.getDbEntity().getFullyQualifiedName();
-		List dbAttributes = batch.getDbAttributes();
+        List qualifierAttributes = deleteBatch.getQualifierAttributes();
+        
 		StringBuffer query = new StringBuffer("DELETE FROM ");
 		query.append(table).append(" WHERE ");
 
-		Iterator i = dbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			appendDbAttribute(query, attribute);
-			query.append(" = ?");
-			
-			if (i.hasNext()) {
-				query.append(" AND ");
-			}
-		}
+        Iterator i = qualifierAttributes.iterator();
+        while (i.hasNext()) {
+            DbAttribute attribute = (DbAttribute) i.next();
+            appendDbAttribute(query, attribute);
+            query.append(deleteBatch.isNull(attribute) ? " IS NULL" : " = ?");
+
+            if (i.hasNext()) {
+                query.append(" AND ");
+            }
+        }
+
 		return query.toString();
 	}
-}
+
+    /**
+     * Binds BatchQuery parameters to the PreparedStatement.
+     */
+    public void bindParameters(PreparedStatement statement, BatchQuery query)
+            throws SQLException, Exception {
+
+        DeleteBatchQuery deleteBatch = (DeleteBatchQuery) query;
+        List qualifierAttributes = deleteBatch.getQualifierAttributes();
+
+        int parameterIndex = 1;
+
+        for (int i = 0; i < qualifierAttributes.size(); i++) {
+            Object value = query.getValue(i);
+
+            // skip null values... they are translated as "IS NULL"
+            if (null == value)
+                continue;
+
+            DbAttribute attribute = (DbAttribute) qualifierAttributes.get(i);
+            adapter.bindParameter(
+                    statement,
+                    value,
+                    parameterIndex++,
+                    attribute.getType(),
+                    attribute.getPrecision());
+        }
+    }}

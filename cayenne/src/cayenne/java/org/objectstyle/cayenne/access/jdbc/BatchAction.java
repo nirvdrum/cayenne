@@ -207,8 +207,10 @@ public class BatchAction extends BaseSQLAction {
 
         Level logLevel = query.getLoggingLevel();
         boolean isLoggable = QueryLogger.isLoggable(logLevel);
-        boolean useOptimisticLock = (query instanceof UpdateBatchQuery)
-                && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
+        boolean useOptimisticLock = ((query instanceof UpdateBatchQuery) && ((UpdateBatchQuery) query)
+                .isUsingOptimisticLocking())
+                || ((query instanceof DeleteBatchQuery) && ((DeleteBatchQuery) query)
+                        .isUsingOptimisticLocking());
 
         String queryStr = queryBuilder.createSqlString(query);
 
@@ -233,9 +235,15 @@ public class BatchAction extends BaseSQLAction {
                 int updated = statement.executeUpdate();
                 if (useOptimisticLock && updated != 1) {
 
-                    Map snapshot = (query instanceof UpdateBatchQuery)
-                            ? ((UpdateBatchQuery) query).getCurrentQualifier()
-                            : Collections.EMPTY_MAP;
+                    Map snapshot = Collections.EMPTY_MAP;
+                    if (query instanceof UpdateBatchQuery)
+                    {
+                        snapshot = ((UpdateBatchQuery) query).getCurrentQualifier();
+                    }
+                    else if (query instanceof DeleteBatchQuery)
+                    {
+                        snapshot = ((DeleteBatchQuery) query).getCurrentQualifier();
+                    }
 
                     throw new OptimisticLockException(
                             query.getDbEntity(),

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -121,7 +122,10 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
     }
 
     public void testBatchDeleteQuery() throws Exception {
-        assertQuery(new DeleteBatchQuery(new DbEntity(), 1), "runBatchUpdate");
+        DbEntity dbEntity = new DbEntity();
+        List qualifierAttributes = dbEntity.getPrimaryKey();
+        Collection nullAttributeNames = null;
+        assertQuery(new DeleteBatchQuery(dbEntity, qualifierAttributes, nullAttributeNames, 1), "runBatchUpdate");
     }
 
     public void testBatchInsertQuery() throws Exception {

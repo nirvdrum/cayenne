@@ -55,14 +55,22 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.DeleteBatchQuery;
+import org.objectstyle.cayenne.testdo.locking.SimpleLockingTest;
+import org.objectstyle.cayenne.unit.LockingTestCase;
 
 /**
- * @author Andrei Adamchik
+ * @author Andrei Adamchik, Mike Kienenberger
  */
-public class DeleteBatchQueryBuilderTst extends CayenneTestCase {
+public class DeleteBatchQueryBuilderTst extends LockingTestCase {
 	public void testConstructor() throws Exception {
 		DbAdapter adapter = new JdbcAdapter();
 
@@ -71,4 +79,47 @@ public class DeleteBatchQueryBuilderTst extends CayenneTestCase {
 
 		assertSame(adapter, builder.getAdapter());
 	}
+
+    public void testCreateSqlString() throws Exception {
+        DbEntity entity =
+            getDomain().getEntityResolver().lookupDbEntity(SimpleLockingTest.class);
+
+        List idAttributes =
+            Collections.singletonList(entity.getAttribute("LOCKING_TEST_ID"));
+
+        DeleteBatchQuery deleteQuery =
+            new DeleteBatchQuery(entity, idAttributes, null, 1);
+        DeleteBatchQueryBuilder builder = new DeleteBatchQueryBuilder(new JdbcAdapter());
+        String generatedSql = builder.createSqlString(deleteQuery);
+        assertNotNull(generatedSql);
+        assertEquals(
+            "DELETE FROM "
+                + entity.getName()
+                + " WHERE LOCKING_TEST_ID = ?",
+            generatedSql);
+    }
+
+    public void testCreateSqlStringWithNulls() throws Exception {
+        DbEntity entity =
+            getDomain().getEntityResolver().lookupDbEntity(SimpleLockingTest.class);
+
+        List idAttributes =
+            Arrays.asList(
+                new Object[] {
+                    entity.getAttribute("LOCKING_TEST_ID"),
+                    entity.getAttribute("NAME")});
+
+        Collection nullAttributes = Collections.singleton("NAME");
+
+        DeleteBatchQuery deleteQuery =
+            new DeleteBatchQuery(entity, idAttributes, nullAttributes, 1);
+        DeleteBatchQueryBuilder builder = new DeleteBatchQueryBuilder(new JdbcAdapter());
+        String generatedSql = builder.createSqlString(deleteQuery);
+        assertNotNull(generatedSql);
+        assertEquals(
+            "DELETE FROM "
+                + entity.getName()
+                + " WHERE LOCKING_TEST_ID = ? AND NAME IS NULL",
+            generatedSql);
+    }
 }
