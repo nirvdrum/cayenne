@@ -1493,7 +1493,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Should be called once the queries returned by getFlattenedUpdateQueries
      * have been succesfully executed or reverted and are no longer needed.
      */
-    private void clearFlattenedUpdateQueries() {
+    void clearFlattenedUpdateQueries() {
         this.flattenedDeletes = new HashMap();
         this.flattenedInserts = new HashMap();
     }

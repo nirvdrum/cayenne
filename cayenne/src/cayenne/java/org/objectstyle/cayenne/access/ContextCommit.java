@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.BatchUtils;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
@@ -124,6 +125,8 @@ class ContextCommit {
         this.logLevel = logLevel;
         categorizeObjects();
         createPrimaryKeys();
+        Map flattenedInsertBatches = categorizeFlattenedInsertsAndCreateBatches();
+        Map flattenedDeleteBatches = categorizeFlattenedDeletesAndCreateBatches();
         updatedIds = new SequencedHashMap();
         Set nodes = new HashSet(objEntitiesToInsertByNode.keySet());
         nodes.addAll(objEntitiesToDeleteByNode.keySet());
@@ -133,11 +136,14 @@ class ContextCommit {
             DataNode node = (DataNode) i.next();
             List queries = new ArrayList();
             prepareInsertQueries(node, queries);
+            prepareFlattenedQueries(node, queries, flattenedInsertBatches);
             prepareUpdateQueries(node, queries);
+            prepareFlattenedQueries(node, queries, flattenedDeleteBatches);
             prepareDeleteQueries(node, queries);
             if (!queries.isEmpty())
                 queriesByNode.put(node, queries);
         }
+
 
         CommitObserver observer = new CommitObserver();
         observer.setLoggingLevel(logLevel);
@@ -155,6 +161,7 @@ class ContextCommit {
     }
 
     private void postprocess(DataNode committedNode) {
+        context.clearFlattenedUpdateQueries();
         ObjectStore objectStore = context.getObjectStore();
         Collection entitiesForNode =
             (Collection) objEntitiesToInsertByNode.get(committedNode);
@@ -451,27 +458,99 @@ class ContextCommit {
         objectsForObjEntity.add(o);
     }
 
-    private void categorizeFlattenedInserts() {
+    private Map categorizeFlattenedInsertsAndCreateBatches() {
         Map flattenedInserts = context.getFlattenedInserts();
+        Map flattenedBatches = new HashMap();
         for (Iterator i = flattenedInserts.entrySet().iterator(); i.hasNext();) {
             Map.Entry fientry = (Map.Entry)i.next();
             DataObject source = (DataObject)fientry.getKey();
+            if (source.getPersistenceState() == PersistenceState.DELETED) continue;
             Map insertsForObject = (Map)fientry.getValue();
             if (insertsForObject == null || insertsForObject.isEmpty()) continue;
+            Map sourceId = source.getObjectId().getIdSnapshot();
             ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
             DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+            Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
+            if (batchesByDbEntity == null) {
+                batchesByDbEntity = new HashMap();
+                flattenedBatches.put(responsibleNode, batchesByDbEntity);
+            }
             for (Iterator j = insertsForObject.entrySet().iterator(); j.hasNext();) {
-                Map.Entry ioentry = (Map.Entry)i.next();
+                Map.Entry ioentry = (Map.Entry)j.next();
                 String relName = (String)ioentry.getKey();
                 List insertedObjectsForRel = (List)ioentry.getValue();
                 if (insertedObjectsForRel == null || insertedObjectsForRel.isEmpty()) continue;
                 ObjRelationship flattenedRel = (ObjRelationship)sourceEntity.getRelationship(relName);
-                DbRelationship firstDbRel = (DbRelationship)flattenedRel.getDbRelationshipList().get(0);
+                List relList = flattenedRel.getDbRelationshipList();
+                DbRelationship firstDbRel = (DbRelationship)relList.get(0);
+                DbRelationship secondDbRel = (DbRelationship)relList.get(1);
                 DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
+                InsertBatchQuery relationInsertQuery = (InsertBatchQuery)batchesByDbEntity.get(flattenedEntity);
+                if (relationInsertQuery == null) {
+                    relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
+                    batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
+                }
                 for (Iterator k = insertedObjectsForRel.iterator(); k.hasNext();) {
                     DataObject destination = (DataObject)k.next();
+                    if (destination.getPersistenceState() == PersistenceState.DELETED) continue;
+                    Map dstId = destination.getObjectId().getIdSnapshot();
+                    Map flattenedSnapshot = BatchUtils.buildFlattenedSnapshot(sourceId, dstId, firstDbRel, secondDbRel);
+                    relationInsertQuery.add(flattenedSnapshot);
                 }
             }
+        }
+        return flattenedBatches;
+    }
+
+    private Map categorizeFlattenedDeletesAndCreateBatches() {
+        Map flattenedDeletes = context.getFlattenedDeletes();
+        Map flattenedBatches = new HashMap();
+        for (Iterator i = flattenedDeletes.entrySet().iterator(); i.hasNext();) {
+            Map.Entry fdentry = (Map.Entry)i.next();
+            DataObject source = (DataObject)fdentry.getKey();
+            Map deletesForObject = (Map)fdentry.getValue();
+            if (deletesForObject == null || deletesForObject.isEmpty()) continue;
+            Map sourceId = source.getObjectId().getIdSnapshot();
+            if (sourceId == null) continue;
+            ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+            DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+            Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
+            if (batchesByDbEntity == null) {
+                batchesByDbEntity = new HashMap();
+                flattenedBatches.put(responsibleNode, batchesByDbEntity);
+            }
+            for (Iterator j = deletesForObject.entrySet().iterator(); j.hasNext();) {
+                Map.Entry doentry = (Map.Entry)j.next();
+                String relName = (String)doentry.getKey();
+                List deletedObjectsForRel = (List)doentry.getValue();
+                if (deletedObjectsForRel == null || deletedObjectsForRel.isEmpty()) continue;
+                ObjRelationship flattenedRel = (ObjRelationship)sourceEntity.getRelationship(relName);
+                List relList = flattenedRel.getDbRelationshipList();
+                DbRelationship firstDbRel = (DbRelationship)relList.get(0);
+                DbRelationship secondDbRel = (DbRelationship)relList.get(1);
+                DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
+                DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery)batchesByDbEntity.get(flattenedEntity);
+                if (relationDeleteQuery == null) {
+                    relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
+                    batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
+                }
+                for (Iterator k = deletedObjectsForRel.iterator(); k.hasNext();) {
+                    DataObject destination = (DataObject)k.next();
+                    Map dstId = destination.getObjectId().getIdSnapshot();
+                    if (dstId == null) continue;
+                    Map flattenedSnapshot = BatchUtils.buildFlattenedSnapshot(sourceId, dstId, firstDbRel, secondDbRel);
+                    relationDeleteQuery.add(flattenedSnapshot);
+                }
+            }
+        }
+        return flattenedBatches;
+    }
+
+    private void prepareFlattenedQueries(DataNode node, List queries, Map flattenedBatches) {
+        Map batchesByDbEntity = (Map)flattenedBatches.get(node);
+        if (batchesByDbEntity == null) return;
+        for (Iterator i = batchesByDbEntity.values().iterator(); i.hasNext();) {
+            queries.add((BatchQuery)i.next());
         }
     }
 

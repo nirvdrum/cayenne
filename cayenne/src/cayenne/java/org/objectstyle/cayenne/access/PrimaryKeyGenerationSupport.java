@@ -193,7 +193,8 @@ class PrimaryKeyGenerationSupport {
       if (rel == null) continue;
 
       DataObject targetDo = (DataObject) dataObject.readPropertyDirectly(rel.getName());
-      if (targetDo == null) throw new CayenneException("Null master object, can't create primary key.");
+      if (targetDo == null)
+          throw new CayenneException("Null master object, can't create primary key.");
 
       ObjectId targetKey = targetDo.getObjectId();
       Map idMap = targetKey.getIdSnapshot();

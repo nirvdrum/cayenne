@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.query;
 import java.util.*;
 import org.apache.commons.lang.builder.*;
 import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
 
 /**
  *
@@ -108,5 +109,24 @@ public class BatchUtils {
     HashCodeBuilder builder = new HashCodeBuilder();
     for (Iterator i = c.iterator(); i.hasNext();) builder.append(i.next());
     return builder.toHashCode();
+  }
+
+  public static Map buildFlattenedSnapshot(Map sourceId, Map destinationId, DbRelationship firstRelationship, DbRelationship secondRelationship) {
+      Map snapshot = new HashMap(sourceId.size() + destinationId.size());
+      List joins = firstRelationship.getJoins();
+      for(int i=0; i<joins.size(); i++) {
+          DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
+          DbAttribute sourceAttribute = thisJoin.getSource();
+          DbAttribute targetAttribute = thisJoin.getTarget();
+          snapshot.put(targetAttribute.getName(), sourceId.get(sourceAttribute.getName()));
+      }
+      joins=secondRelationship.getJoins();
+      for(int i=0; i<joins.size(); i++) {
+          DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
+          DbAttribute sourceAttribute = thisJoin.getSource();
+          DbAttribute targetAttribute = thisJoin.getTarget();
+          snapshot.put(sourceAttribute.getName(), destinationId.get(targetAttribute.getName()));
+      }
+      return snapshot;
   }
 }
