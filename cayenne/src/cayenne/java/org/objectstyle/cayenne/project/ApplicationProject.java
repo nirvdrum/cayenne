@@ -60,7 +60,10 @@ import java.io.IOException;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
@@ -119,9 +122,51 @@ public class ApplicationProject extends Project {
     }
 
     /**
-     * @see org.objectstyle.cayenne.project.Project#getRootNode()
+     * @see org.objectstyle.cayenne.project.Project#getChildren()
      */
-    public Object getRootNode() {
-        return config;
+    public List getChildren() {
+        return config.getDomainList();
+    }
+
+    /**
+    * Returns appropriate ProjectFile or null if object does not require 
+    * a file of its own. In case of ApplicationProject, the nodes 
+    * that require separate filed are: the project itself, each DataMap, each 
+    * driver DataNode.
+    */
+    public ProjectFile projectFileForObject(Object obj) {
+        if (requiresProjectFile(obj)) {
+            return new ApplicationProjectFile(this);
+        } else if (requiresMapFile(obj)) {
+            return new DataMapFile(this, (DataMap) obj);
+        } else if (requiresNodeFile(obj)) {
+            return new DataNodeFile(this, (DataNode) obj);
+        }
+
+        return null;
+    }
+
+    protected boolean requiresProjectFile(Object obj) {
+        return obj == this;
+    }
+
+    protected boolean requiresMapFile(Object obj) {
+        return obj instanceof DataMap;
+    }
+
+    protected boolean requiresNodeFile(Object obj) {
+        if (obj instanceof DataNode) {
+            DataNode node = (DataNode) obj;
+
+            // only driver datasource factory requires a file
+            if (DriverDataSourceFactory
+                .class
+                .getName()
+                .equals(node.getDataSourceFactory())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.io.File;
 import java.util.Enumeration;
 
 import javax.swing.JTree;
@@ -64,8 +65,6 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
 
 /**
@@ -77,32 +76,22 @@ public class ProjectTree extends JTree {
     static Logger logObj = Logger.getLogger(ProjectTree.class);
 
     /**
-     * Factory method to create project tree.
-     */
-    public static ProjectTree createProjectTree(Project project) {
-        ProjectTree tree = new ProjectTree(project);
-        if (project instanceof ApplicationProject) {
-            tree.setRootVisible(false);
-        } else {
-            tree.setRootVisible(true);
-        }
-        return tree;
-    }
-
-    /**
      * Constructor for ProjectTree.
      */
-    protected ProjectTree(Project project) {
+    public ProjectTree(Project project) {
         // build model
         ProjectTreeModel model = new ProjectTreeModel(project);
+        setRootVisible(false);
         setModel(model);
 
+        logObj.debug("Model: " + model.getRootNode().getChildCount());
         // expand top level
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         Enumeration level = model.getRootNode().children();
         while (level.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) level.nextElement();
             TreePath path = new TreePath(node.getPath());
+            logObj.debug("Expanding: " + path);
             expandPath(path);
         }
     }
@@ -135,9 +124,10 @@ public class ProjectTree extends JTree {
             return value.toString();
         }
 
-        // configuration - root node
-        if (value instanceof Configuration) {
-            return "";
+        // Project - return the name of top file
+        if (value instanceof Project) {
+            File f = ((Project) value).getMainFile();
+            return (f != null) ? f.getPath() : "";
         }
 
         // read name property

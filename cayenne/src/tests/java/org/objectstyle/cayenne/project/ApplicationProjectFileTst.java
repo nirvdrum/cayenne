@@ -83,18 +83,11 @@ public class ApplicationProjectFileTst extends CayenneTestCase {
         super.setUp();
         pr = new TstProject(new File("xyz"));
         conf = new ProjectConfiguration(new File("tstproj.123"));
-        rpf = new ApplicationProjectFile(pr, conf);
-    }
-    
-    public void testProjectFileForObject() throws Exception {
-    	ProjectFile pf = ProjectFile.projectFileForObject(pr, conf);
-    	assertNotNull(pf);
-    	assertTrue(pf instanceof ApplicationProjectFile);
-    	assertSame(conf, pf.getObject());
+        rpf = new ApplicationProjectFile(pr);
     }
 
     public void testGetObject() throws Exception {
-    	assertSame(conf, rpf.getObject());
+    	assertSame(pr, rpf.getObject());
     }
     
     public void testGetObjectName() throws Exception {

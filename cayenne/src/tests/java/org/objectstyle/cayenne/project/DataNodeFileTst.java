@@ -87,16 +87,6 @@ public class DataNodeFileTst extends CayenneTestCase {
         dnf = new DataNodeFile(pr, node);
     }
 
-    public void testProjectFileForObject() throws Exception {
-        ProjectFile pf = ProjectFile.projectFileForObject(pr, node);
-        assertNull(pf);
-
-        node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
-        ProjectFile pf1 = ProjectFile.projectFileForObject(pr, node);
-        assertTrue(pf1 instanceof DataNodeFile);
-        assertSame(node, pf1.getObject());
-    }
-
     public void testGetObject() throws Exception {
         assertSame(node, dnf.getObject());
     }

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.project;
 
+import java.io.File;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.DataMap;
@@ -95,5 +96,15 @@ public class ProjectTraversalTst extends CayenneTestCase {
         assertEquals(2, view.size());
         assertSame(map, view.get(0));
         assertSame(ent, view.get(1));
+    }
+    
+    public void testTraverse3() throws Exception {
+        TstProjectTraversalHelper helper = new TstProjectTraversalHelper();
+        Project p = new DataMapProject(null);
+        new ProjectTraversal(helper).traverse(p);
+        List nodes = helper.getNodes();
+        assertNotNull(nodes);
+        assertEquals("Unexpected number of nodes.." + nodes, 2, nodes.size());
+        assertSame(p, nodes.get(0));
     }
 }

@@ -86,13 +86,6 @@ public class DataMapFileTst extends CayenneTestCase {
         dmf = new DataMapFile(pr, map);
     }
 
-    public void testProjectFileForObject() throws Exception {
-    	ProjectFile pf = ProjectFile.projectFileForObject(pr, map);
-    	assertNotNull(pf);
-    	assertTrue(pf instanceof DataMapFile);
-    	assertSame(map, pf.getObject());
-    }
-    
     public void testGetObject() throws Exception {
     	assertSame(map, dmf.getObject());
     }

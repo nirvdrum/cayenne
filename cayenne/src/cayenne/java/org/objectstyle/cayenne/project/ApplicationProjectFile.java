@@ -56,8 +56,9 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.PrintWriter;
+import java.util.List;
 
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
@@ -68,21 +69,15 @@ import org.objectstyle.cayenne.conf.DomainHelper;
  * 
  * @author Andrei Adamchik
  */
-public class ApplicationProjectFile extends ProjectFile {
-    protected Configuration projectConfig;
-
+public class ApplicationProjectFile extends ProjectFile {    
     public ApplicationProjectFile() {}
 
     /**
-     * Constructor for RootProjectFile.
-     * @param name
-     * @param extension
+     * Constructor for ApplicationProjectFile.
      */
-    public ApplicationProjectFile(Project project, Configuration projectConfig) {
+    public ApplicationProjectFile(Project project) {
         super(project, "cayenne.xml");
-        this.projectConfig = projectConfig;
     }
-
 
     /**
      * Returns suffix to append to object name when 
@@ -92,12 +87,12 @@ public class ApplicationProjectFile extends ProjectFile {
     public String getLocationSuffix() {
         return ".xml";
     }
-    
+
     /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+     * Returns a project.
      */
     public Object getObject() {
-        return projectConfig;
+        return getProject();
     }
 
     /**
@@ -108,14 +103,13 @@ public class ApplicationProjectFile extends ProjectFile {
     }
 
     public void save(PrintWriter out) throws Exception {
-        DomainHelper.storeDomains(out, ((ApplicationProject)getProject()).getDomains());
-    }
-
-    public ProjectFile createProjectFile(Project project, Object obj) {
-        return new ApplicationProjectFile(project, (Configuration) obj);
+        List children = getProject().getChildren();
+        DataDomain[] domains = new DataDomain[children.size()];
+        children.toArray(domains);
+        DomainHelper.storeDomains(out, domains);
     }
 
     public boolean canHandle(Object obj) {
-        return obj instanceof Configuration;
+        return obj instanceof ApplicationProject;
     }
 }

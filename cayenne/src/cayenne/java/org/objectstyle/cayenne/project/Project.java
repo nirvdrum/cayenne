@@ -197,7 +197,7 @@ public abstract class Project {
         while (nodes.hasNext()) {
             ProjectPath nodePath = (ProjectPath) nodes.next();
             Object obj = nodePath.getObject();
-            ProjectFile f = ProjectFile.projectFileForObject(this, obj);
+            ProjectFile f = projectFileForObject(obj);
 
             if (f != null) {
                 projectFiles.add(f);
@@ -312,14 +312,16 @@ public abstract class Project {
             return null;
         }
 
-        ProjectFile f = ProjectFile.projectFileForObject(this, getRootNode());
+        ProjectFile f = projectFileForObject(this);
         return (f != null) ? resolveFile(f.getLocation()) : null;
     }
 
+    public abstract ProjectFile projectFileForObject(Object obj);
+    
     /**
-     * Returns the topmost object (node) on the project tree.
+     * Returns a list of first-level children of the project.
      */
-    public abstract Object getRootNode();
+    public abstract List getChildren();
 
     /**
      * Determines whether the project needs to be upgraded.
@@ -332,7 +334,7 @@ public abstract class Project {
      * Returns an Iterator over project tree of objects.
      */
     public Iterator treeNodes() {
-        return FlatProjectView.getInstance().flattenProjectTree(getRootNode()).iterator();
+        return FlatProjectView.getInstance().flattenProjectTree(this).iterator();
     }
     
     /** 
@@ -360,7 +362,7 @@ public abstract class Project {
 
             if (existingFile == null) {
                 // check if project node can have a file
-                ProjectFile newFile = ProjectFile.projectFileForObject(this, obj);
+                ProjectFile newFile = projectFileForObject(obj);
                 if (newFile != null) {
                     filesToSave.add(newFile);
                 }

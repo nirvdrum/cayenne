@@ -100,7 +100,7 @@ public class ProjectOpener extends JFileChooser {
                 ApplicationFileFilter.getInstance());
         } else if (p instanceof DataMapProject) {
         	// configure for DataMap project
-            ProjectFile projFileWrapper = p.findFile(p.getRootNode());
+            ProjectFile projFileWrapper = p.projectFileForObject(p);
             return newProjectDir(
                 f,
                 projFileWrapper.getLocation(),

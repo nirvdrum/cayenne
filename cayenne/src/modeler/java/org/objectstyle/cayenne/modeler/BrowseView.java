@@ -142,7 +142,7 @@ public class BrowseView
         super();
         this.mediator = mediator;
 
-        browseTree = ProjectTree.createProjectTree(Editor.getProject());
+        browseTree = new ProjectTree(Editor.getProject());
         browseTree.setCellRenderer(new BrowseViewRenderer());
         setViewportView(browseTree);
 

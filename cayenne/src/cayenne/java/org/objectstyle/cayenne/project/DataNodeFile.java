@@ -122,10 +122,6 @@ public class DataNodeFile extends ProjectFile {
         return false;
     }
 
-    public ProjectFile createProjectFile(Project project, Object obj) {
-        return new DataNodeFile(project, (DataNode) obj);
-    }
-
     /**
      * Updates node location to match the name before save.
      */

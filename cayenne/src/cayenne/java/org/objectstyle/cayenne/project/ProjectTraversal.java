@@ -89,20 +89,24 @@ public class ProjectTraversal {
      * of any type supported in Cayenne projects (Configuration, DataMap, DataNode, etc...)
      */
     public void traverse(Object rootNode) {
-        if (rootNode instanceof Configuration) {
-            traverseConfig((Configuration) rootNode, null);
+        traverse(rootNode, new ProjectPath());
+    }
+
+    public void traverse(Object rootNode, ProjectPath path) {
+        if (rootNode instanceof Project) {
+            traverseProject((Project) rootNode, path);
         } else if (rootNode instanceof DataDomain) {
-            traverseDomains(Collections.singletonList(rootNode), null);
+            traverseDomains(Collections.singletonList(rootNode), path);
         } else if (rootNode instanceof DataMap) {
-            traverseMaps(Collections.singletonList(rootNode), null);
+            traverseMaps(Collections.singletonList(rootNode), path);
         } else if (rootNode instanceof Entity) {
-            traverseEntities(Collections.singletonList(rootNode), null);
+            traverseEntities(Collections.singletonList(rootNode), path);
         } else if (rootNode instanceof Attribute) {
-            traverseAttributes(Collections.singletonList(rootNode), null);
+            traverseAttributes(Collections.singletonList(rootNode), path);
         } else if (rootNode instanceof Relationship) {
-            traverseRelationships(Collections.singletonList(rootNode), null);
+            traverseRelationships(Collections.singletonList(rootNode), path);
         } else if (rootNode instanceof DataNode) {
-            traverseNodes(Collections.singletonList(rootNode), null);
+            traverseNodes(Collections.singletonList(rootNode), path);
         } else {
             String nodeClass =
                 (rootNode != null) ? rootNode.getClass().getName() : "(null)";
@@ -110,19 +114,18 @@ public class ProjectTraversal {
         }
     }
 
-    /**
-     * Performs traversal starting from Configuration node.
+    /** 
+     * Performs traversal starting from the Project and down to its children.
      */
-    public void traverseConfig(Configuration config, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
+    public void traverseProject(Project project, ProjectPath path) {
+        ProjectPath projectPath = path.appendToPath(project);
+        handler.projectNode(projectPath);
 
-        ProjectPath configPath = path.appendToPath(config);
-        handler.projectNode(configPath);
-
-        if (handler.shouldReadChildren(config, path)) {
-            traverseDomains(config.getDomainList(), configPath);
+        if (handler.shouldReadChildren(project, path)) {
+            Iterator it = project.getChildren().iterator();
+            while (it.hasNext()) {
+                traverse(it.next(), projectPath);
+            }
         }
     }
 
@@ -130,10 +133,6 @@ public class ProjectTraversal {
       * Performs traversal starting from a list of domains.
       */
     public void traverseDomains(List domains, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
-
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
@@ -148,10 +147,6 @@ public class ProjectTraversal {
     }
 
     public void traverseNodes(List nodes, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
-
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
             handler.projectNode(path.appendToPath(it.next()));
@@ -159,9 +154,6 @@ public class ProjectTraversal {
     }
 
     public void traverseMaps(List maps, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
 
         Iterator it = maps.iterator();
         while (it.hasNext()) {
@@ -177,10 +169,6 @@ public class ProjectTraversal {
     }
 
     public void traverseEntities(List entities, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
-
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             Entity ent = (Entity) it.next();
@@ -195,10 +183,6 @@ public class ProjectTraversal {
     }
 
     public void traverseAttributes(List attributes, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
-
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
             handler.projectNode(path.appendToPath(it.next()));
@@ -206,10 +190,6 @@ public class ProjectTraversal {
     }
 
     public void traverseRelationships(List relationships, ProjectPath path) {
-        if (path == null) {
-            path = new ProjectPath();
-        }
-
         Iterator it = relationships.iterator();
         while (it.hasNext()) {
             handler.projectNode(path.appendToPath(it.next()));

@@ -87,13 +87,32 @@ public class ApplicationProjectTst extends CayenneTestCase {
         p = new ApplicationProject(f);
     }
 
+    public void testProjectFileForObject() throws Exception {
+    	DataNode node = new DataNode("dn");
+    	DataDomain dm = new DataDomain();
+    	dm.addNode(node);
+    	p.getConfig().addDomain(dm);
+    	
+        ProjectFile pf = p.projectFileForObject(node);
+        assertNull(pf);
+
+        node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
+        ProjectFile pf1 = p.projectFileForObject(node);
+        assertTrue(pf1 instanceof DataNodeFile);
+        assertSame(node, pf1.getObject());
+    }
+
+
     public void testConfig() throws Exception {
         assertNotNull(p.getConfig());
     }
 
     public void testConstructor() throws Exception {
         assertEquals(f.getCanonicalFile(), p.getMainFile());
-        assertTrue(p.getRootNode() instanceof Configuration);
+        assertTrue(p.projectFileForObject(p) instanceof ApplicationProjectFile);
+
+        assertNotNull(p.getChildren());
+        assertEquals(0, p.getChildren().size());
     }
 
     public void testBuildFileList() throws Exception {

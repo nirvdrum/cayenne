@@ -62,8 +62,8 @@ import java.util.Map;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -77,12 +77,14 @@ import org.objectstyle.cayenne.project.ProjectTraversalHandler;
  * @author Andrei Adamchik
  */
 public class ProjectTreeModel extends DefaultTreeModel {
+	private static Logger logObj = Logger.getLogger(ProjectTreeModel.class);
+	
     /**
      * Creates a tree of Swing TreeNodes wrapping Cayenne project.
      * Returns the root node of the tree.
      */
-    public static DefaultMutableTreeNode wrapProject(Project project) {
-        return wrapProjectNode(project.getRootNode());
+    public static DefaultMutableTreeNode wrapProject(Project project) {    	
+        return wrapProjectNode(project);
     }
 
     /**
@@ -179,6 +181,10 @@ public class ProjectTreeModel extends DefaultTreeModel {
         }
 
         public void projectNode(ProjectPath nodePath) {
+            if(ProjectTreeModel.logObj.isDebugEnabled()) {
+            	logObj.debug("Read node: " + nodePath);
+            }
+            
             Object parent = nodePath.getObjectParent();
             Object nodeObj = nodePath.getObject();
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
@@ -195,7 +201,7 @@ public class ProjectTreeModel extends DefaultTreeModel {
         }
 
         public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
-            return (node instanceof Configuration)
+            return (node instanceof Project)
                 || (node instanceof DataDomain)
                 || (node instanceof DataMap);
         }

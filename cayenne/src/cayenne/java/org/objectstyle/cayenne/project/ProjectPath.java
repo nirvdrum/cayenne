@@ -146,4 +146,19 @@ public class ProjectPath {
         // return next to last object
         return (path.length > 1) ? path[path.length - 2] : null;
     }
+    
+    public String toString() {
+    	StringBuffer buf = new StringBuffer();
+    	buf.append("[ProjectPath: ");
+    	for(int i = 0; i < path.length; i++) {
+    		if(i > 0) {
+    			buf.append(", ");
+    		}
+    		
+    		String token = (path[i] != null) ? path[i].getClass().getName() : "<null>";
+    		buf.append(token);
+    	}
+    	buf.append("]");
+    	return buf.toString();
+    }
 }

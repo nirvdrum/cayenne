@@ -73,33 +73,10 @@ import org.objectstyle.cayenne.util.Util;
  */
 public abstract class ProjectFile {
 	private static Logger logObj = Logger.getLogger(ProjectFile.class);
-	
-    protected static final List fileTypes = new ArrayList();
 
     protected String location;
     protected File tempFile;
     protected Project projectObj;
-
-    static {
-        fileTypes.add(new ApplicationProjectFile());
-        fileTypes.add(new DataMapFile());
-        fileTypes.add(new DataNodeFile());
-    }
-
-    /**
-     * Returns a ProjectFile that can handle a given object,
-     * or null if no such object can be created. This is a common
-     * factory method that takes care of instantiating the right wrapper.
-     */
-    public static ProjectFile projectFileForObject(Project project, Object obj) {
-        for (int i = 0; i < fileTypes.size(); i++) {
-            ProjectFile f = (ProjectFile) fileTypes.get(i);
-            if (f.canHandle(obj)) {
-                return f.createProjectFile(project, obj);
-            }
-        }
-        return null;
-    }
 
     public ProjectFile() {}
 
@@ -170,13 +147,6 @@ public abstract class ProjectFile {
     public boolean canHandleObject() {
     	return canHandle(getObject());
     }
-
-    /**
-     * Returns an instance of ProjectFile that will handle a 
-     * wrapped object. This method is an example of "prototype"
-     * pattern, used here due to the lack of Class inheritance in Java.
-     */
-    public abstract ProjectFile createProjectFile(Project project, Object obj);
 
     /**
      * Replaces internally stored filename with the current object name.

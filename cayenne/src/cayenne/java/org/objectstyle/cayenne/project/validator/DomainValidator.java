@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.project.validator;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.Util;
 
@@ -85,13 +85,13 @@ public class DomainValidator extends TreeNodeValidator {
             return;
         }
 
-        Configuration config = (Configuration) path.getObjectParent();
-        if (config == null) {
+        Project project = (Project) path.getObjectParent();
+        if (project == null) {
             return;
         }
 
         // check for duplicate names in the parent context
-        Iterator it = config.getDomainList().iterator();
+        Iterator it = project.getChildren().iterator();
         while (it.hasNext()) {
             DataDomain dom = (DataDomain) it.next();
             if (dom == domain) {

@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Concrete subclass of Project used for testing purposes.
@@ -88,9 +89,16 @@ public class TstProject extends Project {
     }
     
     /**
-     * @see org.objectstyle.cayenne.project.Project#getRootNode()
+     * @see org.objectstyle.cayenne.project.Project#getChildren()
      */
-    public Object getRootNode() {
+    public List getChildren() {
+        return new ArrayList();
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.Project#projectFileForObject(Object)
+     */
+    public ProjectFile projectFileForObject(Object obj) {
         return null;
     }
 }

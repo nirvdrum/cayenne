@@ -59,6 +59,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
@@ -93,13 +95,6 @@ public class DataMapProject extends Project {
     }
 
     /**
-     * @see org.objectstyle.cayenne.project.Project#getRootNode()
-     */
-    public Object getRootNode() {
-        return map;
-    }
-
-    /**
     * Initializes internal <code>map</code> object and then calls super.
     */
     protected void postInit(File projectFile) {
@@ -117,9 +112,9 @@ public class DataMapProject extends Project {
 
                 map.setName(mapName);
             } catch (IOException e) {
-                throw new ProjectException("Error creating ApplicationProject.", e);
+                throw new ProjectException("Error creating " + this.getClass().getName(), e);
             } catch (DataMapException dme) {
-                throw new ProjectException("Error creating ApplicationProject.", dme);
+                throw new ProjectException("Error creating " + this.getClass().getName(), dme);
             }
         } else {
             map = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
@@ -128,4 +123,27 @@ public class DataMapProject extends Project {
         super.postInit(projectFile);
     }
 
+
+    /**
+     * Returns a list that contains project DataMap as a single object. 
+     */
+    public List getChildren() {
+    	List entities = new ArrayList();
+    	entities.add(map);
+        return entities;
+    }
+
+
+    /**
+     * Returns appropriate ProjectFile or null if object does not require 
+     * a file of its own. In case of DataMapProject, the only 
+     * object that requires a file is the project itself.
+     */
+    public ProjectFile projectFileForObject(Object obj) {
+    	if(obj == this) {
+    		return new DataMapFile(this, map);
+    	}
+    	
+        return null;
+    }
 }

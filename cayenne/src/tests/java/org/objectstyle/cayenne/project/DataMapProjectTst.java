@@ -102,10 +102,22 @@ public class DataMapProjectTst extends CayenneTestCase {
 
         p = new DataMapProject(f);
     }
-
+    
+    public void testProjectFileForObject() throws Exception {
+    	p.map = new DataMap("m1");
+    	ProjectFile pf = p.projectFileForObject(p.map);
+    	assertNull(pf);
+    	
+    	pf = p.projectFileForObject(p);
+    	assertNotNull(pf);
+    	assertTrue(pf instanceof DataMapFile);
+    	assertSame(p.map, pf.getObject());
+    }
+    
+    
     public void testConstructor() throws Exception {
         assertEquals(f.getCanonicalFile(), p.getMainFile());
-        assertTrue(p.getRootNode() instanceof DataMap);
+        assertTrue(p.projectFileForObject(p) instanceof DataMapFile);
     }
 
     public void testTreeNodes() throws Exception {

@@ -93,7 +93,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
 
         validator.reset();
         new ObjEntityValidator().validateObject(
-            new ProjectPath(new Object[] { conf, domain, map, oe1 }),
+            new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
         assertValidator(ValidationResult.VALID);
 
@@ -102,7 +102,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         
         validator.reset();
         new ObjEntityValidator().validateObject(
-            new ProjectPath(new Object[] { conf, domain, map, oe1 }),
+            new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
         assertValidator(ValidationResult.ERROR);
     }
@@ -115,7 +115,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         
         validator.reset();
         new ObjEntityValidator().validateObject(
-            new ProjectPath(new Object[] { conf, domain, map, oe1 }),
+            new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
         assertValidator(ValidationResult.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
 		
@@ -135,7 +135,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         
         validator.reset();
         new ObjEntityValidator().validateObject(
-            new ProjectPath(new Object[] { conf, domain, map, oe1 }),
+            new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
         assertValidator(ValidationResult.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
         
@@ -143,7 +143,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         oe1.setClassName("java.class.name");
         validator.reset();
         new ObjEntityValidator().validateObject(
-            new ProjectPath(new Object[] { conf, domain, map, oe1 }),
+            new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
         assertValidator(ValidationResult.VALID); //Must be valid - this class has a name
 
@@ -151,7 +151,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         oe2.setClassName("java.class.name");
         validator.reset();
         new ObjEntityValidator().validateObject(
-            new ProjectPath(new Object[] { conf, domain, map, oe1 }),
+            new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
         assertValidator(ValidationResult.WARNING); // WARNING - it is OK to save multiple entities with the
 	}
