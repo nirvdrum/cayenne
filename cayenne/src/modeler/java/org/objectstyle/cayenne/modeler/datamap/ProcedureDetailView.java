@@ -54,29 +54,42 @@
  *
  */
 
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 
 /**
  * @author Andrei Adamchik
  */
-public class ProcedureDetailView extends JPanel {
+public class ProcedureDetailView extends JPanel implements ProcedureDisplayListener {
     protected EventController eventController;
     protected JTextField name;
 
     public ProcedureDetailView(EventController eventController) {
+    	
         this.eventController = eventController;
-
+        
         init();
+        
+        eventController.addProcedureDisplayListener(this);
+        InputVerifier inputCheck = new FieldVerifier();
+        name.setInputVerifier(inputCheck);
     }
 
     protected void init() {
@@ -90,5 +103,57 @@ public class ProcedureDetailView extends JPanel {
                 5,
                 5,
                 5));
+    }
+
+    /**
+     * Invoked when currently selected Procedure object is changed.
+     */
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        Procedure procedure = e.getProcedure();
+        if (procedure == null || !e.isProcedureChanged()) {
+            return;
+        }
+
+        name.setText(procedure.getName());
+    }
+
+    class FieldVerifier extends InputVerifier {
+        public boolean verify(JComponent input) {
+            if (input == name) {
+                return verifyName();
+            }
+            else {
+                return true;
+            }
+        }
+
+        protected boolean verifyName() {
+            String text = name.getText();
+            if (text != null && text.trim().length() == 0) {
+                text = null;
+            }
+
+            DataMap map = eventController.getCurrentDataMap();
+            Procedure procedure = eventController.getCurrentProcedure();
+
+            Procedure matchingProcedure = map.getProcedure(text);
+
+            if (matchingProcedure == null) {
+                // completely new name, set new name for entity
+                ProcedureEvent e =
+                    new ProcedureEvent(this, procedure, procedure.getName());
+                MapUtil.setProcedureName(map, procedure, text);
+                eventController.fireProcedureEvent(e);
+                return true;
+            }
+            else if (matchingProcedure == procedure) {
+                // no name changes, just return
+                return true;
+            }
+            else {
+                // there is an entity with the same name
+                return false;
+            }
+        }
     }
 }

@@ -261,6 +261,14 @@ public class BrowseView
     }
 
     public void procedureChanged(ProcedureEvent e) {
+        Object[] path =
+            new Object[] {
+                mediator.getCurrentDataDomain(),
+                mediator.getCurrentDataMap(),
+                e.getProcedure()};
+
+        updateNode(path);
+
         if (e.isNameChange()) {
             reorderOnFocus = true;
         }
@@ -721,7 +729,9 @@ public class BrowseView
     private synchronized void fixOrdering() {
         if (reorderOnFocus) {
             logObj.warn("View items names have changed, must reorder the view..");
-            browseTree.reorder();
+
+            // TODO: (andrus) implements ordering procedure that actually works
+            // browseTree.reorder();
             reorderOnFocus = false;
         }
     }

@@ -66,10 +66,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import org.objectstyle.cayenne.modeler.action.ProcedureDetailView;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.DbDetailView;
 import org.objectstyle.cayenne.modeler.datamap.ObjDetailView;
+import org.objectstyle.cayenne.modeler.datamap.ProcedureDetailView;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;

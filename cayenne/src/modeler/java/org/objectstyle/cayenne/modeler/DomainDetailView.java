@@ -59,45 +59,40 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.util.Util;
 
 /** 
- * Detail view of the Data Domain
+ * Panel for editing DataDomain.
  * 
  * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
  */
-public class DomainDetailView
-    extends JPanel
-    implements DocumentListener, DomainDisplayListener {
-
-    protected EventController mediator;
+public class DomainDetailView extends JPanel implements DomainDisplayListener {
+    protected EventController eventController;
     protected JTextField name;
-    protected String oldName;
 
-    /** Cludge to prevent marking domain as dirty during initial load. */
-    private boolean ignoreChange = false;
+    public DomainDetailView(EventController eventController) {
+        this.eventController = eventController;
 
-    public DomainDetailView(EventController mediator) {
-        super();
-        this.mediator = mediator;
-        mediator.addDomainDisplayListener(this);
         // Create and layout components
         init();
-        // Add listeners
-        name.getDocument().addDocumentListener(this);
+
+        eventController.addDomainDisplayListener(this);
+        InputVerifier inputCheck = new FieldVerifier();
+        name.setInputVerifier(inputCheck);
     }
 
     private void init() {
@@ -113,50 +108,52 @@ public class DomainDetailView
                 5));
     }
 
-    public void insertUpdate(DocumentEvent e) {
-        textFieldChanged(e);
-    }
-    public void changedUpdate(DocumentEvent e) {
-        textFieldChanged(e);
-    }
-    public void removeUpdate(DocumentEvent e) {
-        textFieldChanged(e);
-    }
-
-    private void textFieldChanged(DocumentEvent e) {
-        if (ignoreChange) {
-            return;
-        }
-
-        DataDomain domain = mediator.getCurrentDataDomain();
-        String newName = name.getText();
-        String aName = domain.getName();
-
-        // If name hasn't changed, do nothing
-        if (Util.nullSafeEquals(newName, aName)) {
-            return;
-        }
-
-        domain.setName(newName);
-
-        Project project = Editor.getProject();
-        if (project instanceof ApplicationProject) {
-            ((ApplicationProject) project).getConfiguration().removeDomain(aName);
-            ((ApplicationProject) project).getConfiguration().addDomain(domain);
-        }
-
-        DomainEvent event = new DomainEvent(this, domain, aName);
-        mediator.fireDomainEvent(event);
-        oldName = newName;
-    }
-
     public void currentDomainChanged(DomainDisplayEvent e) {
         DataDomain domain = e.getDomain();
-        if (null == domain)
+        if (null == domain) {
             return;
-        oldName = domain.getName();
-        ignoreChange = true;
-        name.setText(oldName);
-        ignoreChange = false;
+        }
+
+        name.setText(domain.getName());
+    }
+
+    class FieldVerifier extends InputVerifier {
+        public boolean verify(JComponent input) {
+            if (input == name) {
+                return verifyName();
+            }
+            else {
+                return true;
+            }
+        }
+
+        protected boolean verifyName() {
+            String text = name.getText();
+            if (text != null && text.trim().length() == 0) {
+                text = null;
+            }
+
+            Configuration configuration =
+                ((ApplicationProject) Editor.getProject()).getConfiguration();
+            DataDomain domain = eventController.getCurrentDataDomain();
+
+            DataDomain matchingDomain = configuration.getDomain(text);
+
+            if (matchingDomain == null) {
+                // completely new name, set new name for domain
+                DomainEvent e = new DomainEvent(this, domain, domain.getName());
+                MapUtil.setDataDomainName(configuration, domain, text);
+                eventController.fireDomainEvent(e);
+                return true;
+            }
+            else if (matchingDomain == domain) {
+                // no name changes, just return
+                return true;
+            }
+            else {
+                // there is an entity with the same name
+                return false;
+            }
+        }
     }
 }

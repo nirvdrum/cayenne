@@ -60,24 +60,22 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputVerifier;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -89,6 +87,7 @@ import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo
@@ -98,12 +97,11 @@ import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
  */
 public class DataMapDetailView
     extends CayenneActionPanel
-    implements DocumentListener, DataMapDisplayListener, ItemListener {
+    implements DataMapDisplayListener, ItemListener {
 
-    protected EventController mediator;
+    protected EventController eventController;
 
     protected JTextField name;
-    protected String oldName;
 
     protected JLabel location;
     protected JPanel depMapsPanel;
@@ -112,19 +110,18 @@ public class DataMapDetailView
 
     protected Map mapLookup = new HashMap();
 
-    /** Cludge to prevent marking map as dirty during initial load. */
-    private boolean ignoreChange;
-
     public DataMapDetailView(EventController mediator) {
         super();
-        this.mediator = mediator;
+        this.eventController = mediator;
         mediator.addDataMapDisplayListener(this);
         // Create and layout components
         init();
 
         // Add listeners
-        name.getDocument().addDocumentListener(this);
+        eventController.addDataMapDisplayListener(this);
         nodeSelector.addActionListener(this);
+        InputVerifier inputCheck = new FieldVerifier();
+        name.setInputVerifier(inputCheck);
     }
 
     protected void init() {
@@ -153,7 +150,7 @@ public class DataMapDetailView
        */
     protected ComboBoxModel createComboBoxModel(DataMap map) {
 
-        Collection nodes = mediator.getCurrentDataDomain().getDataNodes();
+        Collection nodes = eventController.getCurrentDataDomain().getDataNodes();
         int len = nodes.size();
         Object[] nodesModel = new Object[len + 1];
 
@@ -180,58 +177,6 @@ public class DataMapDetailView
         return model;
     }
 
-    public void insertUpdate(DocumentEvent e) {
-        textFieldChanged(e);
-    }
-
-    public void changedUpdate(DocumentEvent e) {
-        textFieldChanged(e);
-    }
-
-    public void removeUpdate(DocumentEvent e) {
-        textFieldChanged(e);
-    }
-
-    private void textFieldChanged(DocumentEvent e) {
-        if (ignoreChange) {
-            return;
-        }
-
-        DataMap map = mediator.getCurrentDataMap();
-        DataDomain domain = mediator.getCurrentDataDomain();
-
-        if (e.getDocument() == name.getDocument()) {
-            String new_name = name.getText();
-            // If name hasn't changed, do nothing
-            if (oldName != null && new_name.equals(oldName)) {
-                return;
-            }
-
-            // must fully relink renamed map
-            List nodes = new ArrayList();
-            Iterator allNodes = domain.getDataNodes().iterator();
-            while (allNodes.hasNext()) {
-                DataNode node = (DataNode) allNodes.next();
-                if (node.getDataMaps().contains(map)) {
-                    nodes.add(node);
-                }
-            }
-
-            domain.removeMap(map.getName());
-            map.setName(new_name);
-            domain.addMap(map);
-
-            Iterator relinkNodes = nodes.iterator();
-            while (relinkNodes.hasNext()) {
-                DataNode node = (DataNode) relinkNodes.next();
-                node.addDataMap(map);
-            }
-
-            mediator.fireDataMapEvent(new DataMapEvent(this, map, oldName));
-            oldName = new_name;
-        }
-    }
-
     /**
      * Refreshes the view, rebuilds the list of other DataMaps that this one 
      * may depend upon. 
@@ -243,16 +188,14 @@ public class DataMapDetailView
             return;
         }
 
-        oldName = map.getName();
-        ignoreChange = true;
-        name.setText(oldName);
-        location.setText(map.getLocation());
-        ignoreChange = false;
+        name.setText(map.getName());
+        String locationText = map.getLocation();
+        location.setText((locationText != null) ? locationText : "(no file)");
 
         // rebuild data node list
         nodeSelector.setModel(createComboBoxModel(map));
 
-        // rebuild dependecy list
+        // rebuild dependency list
 
         if (depMapsPanel != null) {
             remove(depMapsPanel);
@@ -262,7 +205,7 @@ public class DataMapDetailView
         mapLookup.clear();
 
         // add a list of dependencies
-        Collection maps = mediator.getCurrentDataDomain().getDataMaps();
+        Collection maps = eventController.getCurrentDataDomain().getDataMaps();
 
         if (maps.size() < 2) {
             return;
@@ -310,7 +253,7 @@ public class DataMapDetailView
         DataMap map = (DataMap) mapLookup.get(src);
 
         if (map != null) {
-            DataMap curMap = mediator.getCurrentDataMap();
+            DataMap curMap = eventController.getCurrentDataMap();
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 curMap.addDependency(map);
             }
@@ -318,7 +261,7 @@ public class DataMapDetailView
                 curMap.removeDependency(map);
             }
 
-            mediator.fireDataMapEvent(new DataMapEvent(this, curMap));
+            eventController.fireDataMapEvent(new DataMapEvent(this, curMap));
         }
     }
 
@@ -327,7 +270,7 @@ public class DataMapDetailView
 
             DataNodeWrapper wrapper = (DataNodeWrapper) nodeSelector.getSelectedItem();
             DataNode node = (wrapper != null) ? wrapper.getDataNode() : null;
-            DataMap map = mediator.getCurrentDataMap();
+            DataMap map = eventController.getCurrentDataMap();
 
             // no change?
             if (node != null && node.getDataMaps().contains(map)) {
@@ -337,7 +280,8 @@ public class DataMapDetailView
             boolean hasChanges = false;
 
             // unlink map from any nodes
-            Iterator nodes = mediator.getCurrentDataDomain().getDataNodes().iterator();
+            Iterator nodes =
+                eventController.getCurrentDataDomain().getDataNodes().iterator();
 
             while (nodes.hasNext()) {
                 DataNode nextNode = (DataNode) nodes.next();
@@ -348,7 +292,7 @@ public class DataMapDetailView
                     nextNode.removeDataMap(map.getName());
 
                     // announce DataNode change
-                    mediator.fireDataNodeEvent(new DataNodeEvent(this, nextNode));
+                    eventController.fireDataNodeEvent(new DataNodeEvent(this, nextNode));
 
                     hasChanges = true;
                 }
@@ -360,12 +304,50 @@ public class DataMapDetailView
                 hasChanges = true;
 
                 // announce DataNode change
-                mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+                eventController.fireDataNodeEvent(new DataNodeEvent(this, node));
             }
 
             if (hasChanges) {
                 // maybe reindexing is an overkill in the modeler?
-                mediator.getCurrentDataDomain().reindexNodes();
+                eventController.getCurrentDataDomain().reindexNodes();
+            }
+        }
+    }
+
+    class FieldVerifier extends InputVerifier {
+        public boolean verify(JComponent input) {
+            if (input == name) {
+                return verifyName();
+            }
+            else {
+                return true;
+            }
+        }
+
+        protected boolean verifyName() {
+            String text = name.getText();
+            if (text != null && text.trim().length() == 0) {
+                text = null;
+            }
+
+            DataDomain domain = eventController.getCurrentDataDomain();
+            DataMap map = eventController.getCurrentDataMap();
+            DataMap matchingMap = domain.getMap(text);
+
+            if (matchingMap == null) {
+                // completely new name, set new name for domain
+                DataMapEvent e = new DataMapEvent(this, map, map.getName());
+                MapUtil.setDataMapName(domain, map, text);
+                eventController.fireDataMapEvent(e);
+                return true;
+            }
+            else if (matchingMap == map) {
+                // no name changes, just return
+                return true;
+            }
+            else {
+                // there is an entity with the same name
+                return false;
             }
         }
     }
