@@ -299,8 +299,8 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void storeDbEntities(PrintWriter out, DataMap map) {
-		
-		Iterator iter = sortedDbEntities(map).iterator();
+
+		Iterator iter = sortedRegularDbEntities(map).iterator();
 		while (iter.hasNext()) {
 			DbEntity dbe = (DbEntity) iter.next();
 			out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
@@ -316,14 +316,36 @@ public class MapLoader extends DefaultHandler {
 				out.print(dbe.getCatalog());
 				out.print('\"');
 			}
+			
+			out.println('>');
 
-			if (dbe instanceof DerivedDbEntity) {
-				DbEntity parent = ((DerivedDbEntity) dbe).getParentEntity();
-				String name = (parent != null) ? parent.getName() : "";
-				out.print(" parentName=\"");
-				out.print(name);
+			storeDbAttribute(out, dbe);
+			out.println("\t</db-entity>");
+			dbRelationships.addAll(dbe.getRelationshipList());
+		}
+
+		Iterator diter = sortedDerivedDbEntities(map).iterator();
+		while (diter.hasNext()) {
+			DerivedDbEntity dbe = (DerivedDbEntity) diter.next();
+			out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
+			if (dbe.getSchema() != null
+				&& dbe.getSchema().trim().length() > 0) {
+				out.print(" schema=\"");
+				out.print(dbe.getSchema());
 				out.print('\"');
 			}
+			if (dbe.getCatalog() != null
+				&& dbe.getCatalog().trim().length() > 0) {
+				out.print(" catalog=\"");
+				out.print(dbe.getCatalog());
+				out.print('\"');
+			}
+
+			DbEntity parent = dbe.getParentEntity();
+			String name = (parent != null) ? parent.getName() : "";
+			out.print(" parentName=\"");
+			out.print(name);
+			out.print('\"');
 
 			out.println('>');
 
@@ -934,35 +956,66 @@ public class MapLoader extends DefaultHandler {
 		}
 		return sb;
 	}
-	
-	
-	protected List sortedDbEntities(DataMap map) {
-		ArrayList list = new ArrayList(map.getDbEntitiesAsList());
-		Collections.sort(list, new PropertyComparator("name", DbEntity.class));
-		return list;
+
+	protected List sortedRegularDbEntities(DataMap map) {
+		Iterator it = map.getDbEntitiesAsList().iterator();
+		ArrayList derived = new ArrayList();
+		while (it.hasNext()) {
+			Object ent = it.next();
+			if (!(ent instanceof DerivedDbEntity)) {
+				derived.add(ent);
+			}
+		}
+		if (derived.size() > 1) {
+			Collections.sort(
+				derived,
+				new PropertyComparator("name", DbEntity.class));
+		}
+		return derived;
 	}
-	
+
+	protected List sortedDerivedDbEntities(DataMap map) {
+		Iterator it = map.getDbEntitiesAsList().iterator();
+		ArrayList derived = new ArrayList();
+		while (it.hasNext()) {
+			Object ent = it.next();
+			if (ent instanceof DerivedDbEntity) {
+				derived.add(ent);
+			}
+		}
+		if (derived.size() > 1) {
+			Collections.sort(
+				derived,
+				new PropertyComparator("name", DbEntity.class));
+		}
+		return derived;
+	}
+
 	protected List sortedObjEntities(DataMap map) {
 		ArrayList list = new ArrayList(map.getObjEntitiesAsList());
 		Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
 		return list;
 	}
-	
+
 	protected List sortedAttributes(Entity ent) {
 		ArrayList list = new ArrayList(ent.getAttributeList());
 		Collections.sort(list, new PropertyComparator("name", Attribute.class));
 		return list;
 	}
-	
+
 	protected List sortedRelationships(Entity ent) {
 		ArrayList list = new ArrayList(ent.getRelationshipList());
-		Collections.sort(list, new PropertyComparator("name", Relationship.class));
+		Collections.sort(
+			list,
+			new PropertyComparator("name", Relationship.class));
 		return list;
 	}
-	
+
 	protected List sortedRelationships(List rels) {
 		ArrayList list = new ArrayList(rels);
-		Collections.sort(list, new PropertyComparator("name", Relationship.class));
+		Collections.sort(
+			list,
+			new PropertyComparator("name", Relationship.class));
 		return list;
 	}
 }
