@@ -75,7 +75,7 @@ public class PkGeneratorTst extends CayenneTestCase {
 
         node = getSharedDomain().getDataNodes()[0];
         pkGen = node.getAdapter().getPkGenerator();
-        paintEnt = node.lookupEntity("Painting").getDbEntity();
+        paintEnt = node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
         ArrayList list = new ArrayList();
         list.add(paintEnt);
         pkGen.createAutoPk(node, list);

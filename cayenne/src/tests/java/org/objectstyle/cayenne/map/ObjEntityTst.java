@@ -85,7 +85,7 @@ public class ObjEntityTst extends CayenneTestCase {
 	
 	public void testAttributeForDbAttribute() throws Exception {
 		ObjEntity ae =
-			getSharedDomain().lookupEntity("Artist");
+			getSharedDomain().getEntityResolver().lookupObjEntity("Artist");
 		DbEntity dae = ae.getDbEntity();
 
 		assertNull(
@@ -98,7 +98,7 @@ public class ObjEntityTst extends CayenneTestCase {
 
 	public void testRelationshipForDbRelationship() throws Exception {
 		ObjEntity ae =
-			getSharedDomain().lookupEntity("Artist");
+			getSharedDomain().getEntityResolver().lookupObjEntity("Artist");
 		DbEntity dae = ae.getDbEntity();
 
 		assertNull(ae.getRelationshipForDbRelationship(new DbRelationship()));

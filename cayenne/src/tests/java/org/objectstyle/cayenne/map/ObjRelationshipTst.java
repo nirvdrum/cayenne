@@ -92,8 +92,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
     
     public void testGetReverseRel1() throws Exception {
         DataDomain dom = getSharedDomain();
-        ObjEntity artistEnt = dom.lookupEntity("Artist");
-        ObjEntity paintingEnt = dom.lookupEntity("Painting");
+        ObjEntity artistEnt = dom.getEntityResolver().lookupObjEntity("Artist");
+        ObjEntity paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting");
         
         // start with "to many"
         ObjRelationship r1 = (ObjRelationship)artistEnt.getRelationship("paintingArray");
@@ -105,8 +105,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
     
     public void testGetReverseRel2() throws Exception {
         DataDomain dom = getSharedDomain();
-        ObjEntity artistEnt = dom.lookupEntity("Artist");
-        ObjEntity paintingEnt = dom.lookupEntity("Painting");
+        ObjEntity artistEnt = dom.getEntityResolver().lookupObjEntity("Artist");
+        ObjEntity paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting");
         
         // start with "to one"
         ObjRelationship r1 = (ObjRelationship)paintingEnt.getRelationship("toArtist");

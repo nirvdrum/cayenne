@@ -72,9 +72,9 @@ public class DbRelationshipTst extends CayenneTestCase {
     
     public void setUp() throws Exception {
         DataDomain dom = getSharedDomain();
-        artistEnt = dom.lookupEntity("Artist").getDbEntity();
-        paintingEnt = dom.lookupEntity("Painting").getDbEntity();
-        galleryEnt = dom.lookupEntity("Gallery").getDbEntity();
+        artistEnt = dom.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
+        paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
+        galleryEnt = dom.getEntityResolver().lookupObjEntity("Gallery").getDbEntity();
     }
     
     public void testSrcFkSnapshotWithTargetSnapshot() throws Exception {

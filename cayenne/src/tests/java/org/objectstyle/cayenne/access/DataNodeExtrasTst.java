@@ -97,13 +97,13 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 		DataNode node = getSharedDomain().getDataNodes()[0];
 		setup.createPkSupportForMapEntities(node);
 
-		DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();
+		DbEntity artistEnt = node.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
 		assertNotNull(
 			node.getAdapter().getPkGenerator().generatePkForDbEntity(
 				node,
 				artistEnt));
 
-		DbEntity exhibitEnt = node.lookupEntity("Exhibit").getDbEntity();
+		DbEntity exhibitEnt = node.getEntityResolver().lookupObjEntity("Exhibit").getDbEntity();
 		assertNotNull(
 			node.getAdapter().getPkGenerator().generatePkForDbEntity(
 				node,

@@ -84,7 +84,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         q = new SelectQuery();
-        artistEnt = getSharedDomain().lookupEntity("Artist").getDbEntity();
+        artistEnt = getSharedDomain().getEntityResolver().lookupObjEntity("Artist").getDbEntity();
     }
 
     private SelectTranslator buildTranslator(Connection con) throws Exception {
@@ -463,7 +463,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             List columns = transl.getColumnList();
 
-            ObjEntity subPainting = getSharedDomain().lookupEntity("SubPainting");
+            ObjEntity subPainting = getSharedDomain().getEntityResolver().lookupObjEntity("SubPainting");
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2 
@@ -485,7 +485,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             List columns = transl.getColumnList();
 
-            ObjEntity countsEnt = getSharedDomain().lookupEntity("ArtistPaintingCounts");
+            ObjEntity countsEnt = getSharedDomain().getEntityResolver().lookupObjEntity("ArtistPaintingCounts");
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2 

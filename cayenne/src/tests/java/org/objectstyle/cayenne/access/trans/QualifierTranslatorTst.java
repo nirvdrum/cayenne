@@ -123,7 +123,7 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 					((QualifiedQuery) qa.getQuery()).setQualifier(
 						cases[i].getCayenneExp());
 					ObjEntity ent =
-						getSharedDomain().lookupEntity(
+						getSharedDomain().getEntityResolver().lookupObjEntity(
 							cases[i].getRootEntity());
 					assertNotNull(ent);
 					qa.getQuery().setObjEntityName(ent.getName());

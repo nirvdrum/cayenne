@@ -21,4 +21,14 @@ Old format is still understood by Cayenne runtime.
 3. GUI would allow to upgrade from the earlier projects.
 
 4. DataNode.DEFAULT_ADAPTER_CLASS is now an instance of Class, not String
+
+5. Introduced a concept of queries by Class as opposed to symbolic 
+entity names. A few items below are related to this change.
+
+6. Created a new class EntityResolver to quickly map the queries
+to appropriate entities.
+
+7. Deprecated QueryEngine.lookupEntity in favor of 
+QueryEngine.getEntityResolver().lookup...()
+
  

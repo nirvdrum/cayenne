@@ -73,7 +73,7 @@ public class SelectReadOnlyTest extends SelectTest {
 	 */
 	public void prepare() throws Exception {
 		super.prepare();
-		ctxt.lookupEntity("Artist").setReadOnly(true);
+		ctxt.getEntityResolver().lookupObjEntity("Artist").setReadOnly(true);
 	}
 
 
@@ -81,7 +81,7 @@ public class SelectReadOnlyTest extends SelectTest {
 	 * @see org.objectstyle.perform.PerformanceTest#cleanup()
 	 */
 	public void cleanup() throws Exception {
-		ctxt.lookupEntity("Artist").setReadOnly(false);
+		ctxt.getEntityResolver().lookupObjEntity("Artist").setReadOnly(false);
 		super.cleanup();
 	}
 }
