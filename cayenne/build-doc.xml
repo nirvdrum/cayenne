@@ -75,11 +75,10 @@
             <fileset dir="doc/licenses">
                <include name="**"/>
             </fileset>
-            
-            <fileset dir="doc/release-notes">
-               <include name="RELEASE-NOTES-*.txt"/>
-            </fileset>
-        </copy>
+         </copy>
+         
+		<copy tofile="${dist}/doc/RELEASE-NOTES.txt" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
+		<copy tofile="${dist}/doc/UPGRADE.txt" file="doc/upgrade/UPGRADE-${project.version}.txt"/>
 
         <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
             <classpath refid="classpath"/>

@@ -6,25 +6,22 @@
         <!-- News section -->
         <section name="Cayenne News">
         
-         <p><u><i>[February 1, 2004]</i></u> <strong>Cayenne 1.1 Alpha Preview</strong></p>
-         <p>Cayenne 1.1-a-pre (Alpha Preview) is released. This is the first preview of the upcoming
+         <p><u><i>[February 8, 2004]</i></u> <strong>Release 1.1a-pre2 of Cayenne and Cayenne Examples</strong></p>
+         <p>Cayenne and Cayenne Examples 1.1a-pre2 (Second Alpha Preview) are released. This release features 
          1.1 release. Among its features are:
          <ul>
-         <li>distributed caching</li>
-         <li>object validation</li>
-         <li>data views</li>
-         <li>public transaction API</li>
-         <li>OpenBaseAdapter</li>
-         <li>3.0 Tapestry Tutorial</li>
+         <li>Modeler and API support for container-managed transactions</li>
+         <li>Cayenne with SessionBean facade JBoss example</li>
+         <li>"Import DataMap" function in CayenneModeler</li>
+         <li>MS SQL Server Adapter</li>
+         <li>various bug fixes</li>
          </ul>
          
-         For details see <a href="RELEASE-NOTES-1.1a-pre.txt">release 
-         notes</a> and chapters 1.1 and 1.2 of the User Guide bundled with the release. 
-         Release can be downloaded from <a href="http://objectstyle.org/cayenne/download.html">here</a>.
+         For details see <a href="RELEASE-NOTES.txt">release notes</a> and <a href="UPGRADE.txt">upgrade instructions.</a>.
          </p>
          
         <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
-         <p>Cayenne 1.0.5 is released. It contains extended implementation of in-memory Expressions
+         <p>Cayenne 1.0.6 is released. It contains extended implementation of in-memory Expressions
          evaluation and numerous bug fixes. For details see <a href="RELEASE-NOTES-1.0.6.txt">Release notes</a>. 
          Release can be downloaded from <a href="download.html">here</a>.
          </p>

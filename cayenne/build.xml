@@ -68,7 +68,8 @@
 		<ant antfile="build-tutorials.xml" target="dist-src"/>
 		<ant antfile="build-doc.xml" target="dist-src"/>
 		
-		<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
+		<copy tofile="${dist}/RELEASE-NOTES.txt" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
+		<copy tofile="${dist}/UPGRADE.txt" file="doc/upgrade/UPGRADE-${project.version}.txt"/>
 		
 		<tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar.gz" compression="gzip">
 			<tarfileset dir="${dist.base}">
