@@ -291,7 +291,6 @@ class ContextCommit {
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
 
         EntitySorter sorter = commitHelper.getNode().getEntitySorter();
-        //        sorter.sortObjEntities(entities, true);
         sorter.sortDbEntities(dbEntities, true);
 
         for (Iterator i = dbEntities.iterator(); i.hasNext();) {
@@ -324,11 +323,6 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-
-                    // check if object was modified from underneath and consult the
-                    // delegate
-                    // if this is the case...
-                    // checkConcurrentModifications(o);
 
                     Map id = o.getObjectId().getIdSnapshot();
                     if (id != null && !id.isEmpty()) {
