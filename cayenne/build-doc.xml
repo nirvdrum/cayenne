@@ -82,7 +82,7 @@
         <!-- Assemble project.xml -->
         <loadfile property="project.toc" srcFile="xdocs/stylesheets/toc.xml"/>
         <copy tofile="build/project.xml" file="xdocs/stylesheets/project.xml">
-        	<filterset>
+        	<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
 				<filter token="TOC" value="${project.toc}"/>
 			</filterset>
         </copy>

@@ -29,6 +29,6 @@
     </menu>
     
     <!-- Embedded TOC Start -->
-    @TOC@
+    <!--@TOC@-->
     <!-- Embedded TOC End -->
 </project>
