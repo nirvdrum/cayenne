@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.query;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -126,7 +126,7 @@ public class SelectQuery extends QualifiedQuery {
     }
     
     /** 
-     * Adds a relationship path (ObjRelationship names separated by ".")
+     * Adds a relationship path. ObjRelationship names are separated by ".".
      * to the list of relationship paths that should be prefetched when the
      * query is executed.
      */

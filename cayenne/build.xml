@@ -278,7 +278,7 @@
     <!-- ========================================== -->
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare">
+    <target name="doc" depends="prepare,doc-img">
         <!-- copy all licenses including ours -->
         <copy todir="${dist}/doc">
             <fileset dir="doc">
@@ -299,16 +299,6 @@
              lastModifiedCheck="true"
              templatePath="xdocs/stylesheets">
         </anakia>
-
-        <!-- copy images -->
-        <copy todir="${dist}/doc/images" filtering="no">
-            <fileset dir="xdocs/images">
-                <include name="**/*.gif"/>
-                <include name="**/*.jpeg"/>
-                <include name="**/*.jpg"/>
-                <include name="**/*.css"/>
-            </fileset>
-        </copy>
         
         <!-- copy DTD's -->
         <copy todir="${dist}/doc/dtd">
@@ -322,12 +312,27 @@
             <fileset dir="doc/tutorial"/>
         </copy>
     </target>
+    
+    <target name="doc-img">
+        <!-- copy images -->
+        <copy todir="${dist}/doc/images" filtering="no">
+            <fileset dir="xdocs/images">
+                <include name="**/*.gif"/>
+                <include name="**/*.jpeg"/>
+                <include name="**/*.jpg"/>
+                <include name="**/*.css"/>
+            </fileset>
+        </copy>
+    </target>
 
 
     <!-- ========================================== -->
     <!-- Builds API documenatation.                 -->
+    <!-- Depends on "compile-subprojects", since    -->
+    <!-- some of the classes are generated on the   -->
+    <!-- fly.                                       -->
     <!-- ========================================== -->
-    <target name="api" depends="prepare,doc">
+    <target name="api" depends="prepare,doc-img,compile_subprojects">
         <javadoc    packagenames="org.objectstyle.*"
                     sourcepath="src"
                     defaultexcludes="yes"
