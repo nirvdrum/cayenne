@@ -89,7 +89,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  */
 public class DataPort
 {
-  public static final int INSERT_BATCH_SIZE = 500;
+  public static final int INSERT_BATCH_SIZE = 1000;
 
   protected DataNode sourceNode;
   protected DataNode destinationNode;
@@ -256,18 +256,39 @@ public class DataPort
 
       try
       {
+        int count = 0;
+
+        // Split insertions into the same table into batches of 1000. 
+        // This will allow to process tables of arbitrary big size
+        // without running out of memory. 
+        int currentRow = 0;
+
         while (result.hasNextRow())
         {
+          if (currentRow > 0 && currentRow % INSERT_BATCH_SIZE == 0)
+          {
+            // end of the batch detected... commit and start a new insert query
+            destinationNode.performQuery(insert, insertObserver);
+            insert = new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
+            count += insertObserver.getFirstUpdateCount(insert);
+            insertObserver.clear();
+          }
+
+          currentRow++;
+
           Map nextRow = result.nextDataRow();
           insert.add(nextRow);
         }
 
-        // maybe commit for every INSERT_BATCH_SIZE rows instead of the whole table?
-        destinationNode.performQuery(insert, insertObserver);
+        // commit last batch if needed
+        if (insert.size() > 0)
+        {
+          destinationNode.performQuery(insert, insertObserver);
+          count += insertObserver.getFirstUpdateCount(insert);
+        }
 
         if (delegate != null)
         {
-          int count = insertObserver.getFirstUpdateCount(insert);
           delegate.didPortEntity(this, entity, count);
         }
       }
