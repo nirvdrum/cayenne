@@ -94,7 +94,7 @@ public class ProjectTreeModel extends DefaultTreeModel {
      */
     public static DefaultMutableTreeNode wrapProjectNode(Object node) {
         TraversalHelper helper = new TraversalHelper();
-        
+
         // do sorted traversal
         new ProjectTraversal(helper, true).traverse(node);
         return helper.getStartNode();
@@ -131,8 +131,12 @@ public class ProjectTreeModel extends DefaultTreeModel {
     /**
      * Fixes ordering of nodes.
      */
-    public void refresh() {
-
+    public void reorder() {
+        CopyTraversalHelper helper = new CopyTraversalHelper();
+        new ProjectTraversal(helper).traverse(
+            getRootNode().getUserObject(),
+            new ProjectPath());
+        setRoot(helper.getStartNode());
     }
 
     /**
@@ -169,7 +173,6 @@ public class ProjectTreeModel extends DefaultTreeModel {
 
         for (int i = start; i < path.length; i++) {
             DefaultMutableTreeNode foundNode = null;
-
             Enumeration children = currentNode.children();
             while (children.hasMoreElements()) {
                 DefaultMutableTreeNode child =
@@ -258,6 +261,32 @@ public class ProjectTreeModel extends DefaultTreeModel {
                 || (node instanceof DataDomain)
                 || (node instanceof DataMap)
                 || (node instanceof DataNode);
+        }
+    }
+
+    /**
+     * Traversal hanlder that rebuilds the tree from another tree.
+     * Used to reorder tree nodes.
+     */
+    class CopyTraversalHelper extends TraversalHelper {
+
+        public void projectNode(ProjectPath nodePath) {
+            DefaultMutableTreeNode node;
+
+            if (startNode == null) {
+                startNode = new DefaultMutableTreeNode(nodePath.getObject());
+                node = startNode;
+            }
+            else {
+                DefaultMutableTreeNode original =
+                    ProjectTreeModel.this.getNodeForObjectPath(nodePath.getPath());
+                DefaultMutableTreeNode nodeParent =
+                    (DefaultMutableTreeNode) nodesMap.get(nodePath.getObjectParent());
+                node = new DefaultMutableTreeNode(original.getUserObject());
+                nodeParent.add(node);
+            }
+
+            registerNode(node);
         }
     }
 }

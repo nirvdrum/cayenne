@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.util.Util;
 public class ProjectTraversal {
 
     protected static final Comparator mapObjectComparator = new MapObjectComparator();
+    protected static final Comparator dataMapComparator = new DataMapComparator();
     protected static final Comparator dataDomainComparator = new DataDomainComparator();
     protected static final Comparator dataNodeComparator = new DataNodeComparator();
 
@@ -196,7 +197,7 @@ public class ProjectTraversal {
 
     public void traverseMaps(Iterator maps, ProjectPath path) {
         if (sort) {
-            maps = Util.sortedIterator(maps, ProjectTraversal.mapObjectComparator);
+            maps = Util.sortedIterator(maps, ProjectTraversal.dataMapComparator);
         }
 
         while (maps.hasNext()) {
@@ -272,6 +273,24 @@ public class ProjectTraversal {
         public int compare(Object o1, Object o2) {
             String name1 = ((MapObject) o1).getName();
             String name2 = ((MapObject) o2).getName();
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
+        }
+
+    }
+
+    static class DataMapComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            String name1 = ((DataMap) o1).getName();
+            String name2 = ((DataMap) o2).getName();
 
             if (name1 == null) {
                 return (name2 != null) ? -1 : 0;

@@ -715,6 +715,7 @@ public class BrowseView
     private synchronized void fixOrdering() {
         if (reorderOnFocus) {
             logObj.warn("View items names have changed, must reorder the view..");
+            browseTree.reorder();
             reorderOnFocus = false;
         }
     }
