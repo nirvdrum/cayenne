@@ -262,12 +262,12 @@ public abstract class Expression implements Serializable {
         traversal.setHandler(builder);
         traversal.traverseExpression(this);
         Expression newExp = builder.getExpression();
-        
+
         if (logObj.isDebugEnabled()) {
             logObj.debug("Created expression: " + newExp);
             logObj.debug("  Parameters: " + params);
         }
-        
+
         return newExp;
     }
 
@@ -347,27 +347,39 @@ public abstract class Expression implements Serializable {
         return filtered;
     }
 
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf.append(expName()).append(" (").append(getClass().getName()).append(
-            ") [");
 
+    /**
+     * Convenience method to log nested expressions. Used mainly for debugging.
+     * Called from "toString".
+     * 
+     * @param buf
+     */
+    protected void toStringBuffer(StringBuffer buf) {
         for (int i = 0; i < getOperandCount(); i++) {
             if (i > 0) {
-                buf.append(",");
+                buf.append(" ").append(expName()).append(" ");
             }
+            
             Object op = getOperand(i);
             if (op == null) {
-                buf.append("null");
+                buf.append("<null>");
             } else if (op instanceof String) {
                 buf.append("'").append(op).append("'");
+            } else if (op instanceof Expression) {
+            	buf.append('(');
+            	((Expression)op).toStringBuffer(buf);
+                buf.append(')');
             } else {
-                buf.append(op.getClass().getName());
+                buf.append(String.valueOf(op));
             }
         }
 
-        buf.append("]");
+    }
 
+    public String toString() {
+        StringBuffer buf = new StringBuffer("[");
+        toStringBuffer(buf);
+        buf.append("]");
         return buf.toString();
     }
 

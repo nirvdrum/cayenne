@@ -55,6 +55,7 @@ package org.objectstyle.cayenne;
  *
  */
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -63,30 +64,66 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class QueryHelperTst extends CayenneTestCase {
+    private static Logger logObj = Logger.getLogger(QueryHelperTst.class);
+    
     public QueryHelperTst(String name) {
         super(name);
     }
 
-    public void testSelectPrefetchPath() throws Exception {
+    public void testSelectPrefetchPath1() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
         q.setQualifier(
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
+            ExpressionFactory.binaryPathExp(
+                Expression.EQUAL_TO,
+                "artistName",
+                "abc"));
         SelectQuery reverseQ =
             QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
-		Object queryRoot=reverseQ.getRoot();
-		if(queryRoot instanceof String) {
-			assertEquals("Painting", queryRoot);
-		} else if (queryRoot instanceof ObjEntity) {
-			assertEquals(getDomain().getEntityResolver().lookupObjEntity(Painting.class), queryRoot);
-		} else if (queryRoot instanceof Class) {
-			assertEquals(Painting.class ,queryRoot);
-		} else {
-			fail("Query root is of an untestable type :"+queryRoot.getClass());
-		}
+        Object queryRoot = reverseQ.getRoot();
+        if (queryRoot instanceof String) {
+            assertEquals("Painting", queryRoot);
+        } else if (queryRoot instanceof ObjEntity) {
+            assertEquals(
+                getDomain().getEntityResolver().lookupObjEntity(Painting.class),
+                queryRoot);
+        } else if (queryRoot instanceof Class) {
+            assertEquals(Painting.class, queryRoot);
+        } else {
+            fail(
+                "Query root is of an untestable type :" + queryRoot.getClass());
+        }
         assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
-        
-        Expression newPath = (Expression)reverseQ.getQualifier().getOperand(0);
+
+        Expression newPath = (Expression) reverseQ.getQualifier().getOperand(0);
         assertNotNull("Null path operand.", newPath);
         assertEquals("toArtist.artistName", newPath.getOperand(0));
+    }
+
+    public void testSelectPrefetchPath2() throws Exception {
+        SelectQuery q = new SelectQuery("Artist");
+
+        // modify previous test to us more complex qualifier with 'OR'
+        Expression qual = ExpressionFactory.matchExp("artistName", "abc");
+        qual = qual.orExp(ExpressionFactory.matchExp("artistName", "xyz"));
+
+        q.setQualifier(qual);
+
+        SelectQuery reverseQ =
+            QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
+        logObj.debug("reverse qualifier: " + reverseQ.getQualifier());
+        Object queryRoot = reverseQ.getRoot();
+        if (queryRoot instanceof String) {
+            assertEquals("Painting", queryRoot);
+        } else if (queryRoot instanceof ObjEntity) {
+            assertEquals(
+                getDomain().getEntityResolver().lookupObjEntity(Painting.class),
+                queryRoot);
+        } else if (queryRoot instanceof Class) {
+            assertEquals(Painting.class, queryRoot);
+        } else {
+            fail(
+                "Query root is of an untestable type :" + queryRoot.getClass());
+        }
+        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
     }
 }

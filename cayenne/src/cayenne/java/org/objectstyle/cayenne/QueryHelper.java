@@ -495,5 +495,10 @@ public final class QueryHelper {
         public void objectNode(Object leaf, Expression parentNode) {
             processOperand(leaf, parentNode);
         }
+
+        public void startListNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
+
     }
 }
