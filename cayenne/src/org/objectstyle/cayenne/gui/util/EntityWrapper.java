@@ -90,5 +90,9 @@ public class EntityWrapper{
 	  * Does not add it to the DataMap. */
 	public static DbEntity createDbEntity()
 	{ return new DbEntity("Untitled" + dbNameCounter++); }
+	
+	public boolean equals(Object obj) {
+		return this.toString().equals(obj.toString());
+	}
 }// End class EntityWrapper
 	

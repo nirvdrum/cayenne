@@ -75,6 +75,10 @@ public class RelationshipWrapper{
 		return rel.getName();
 	}
 
-	public Relationship getRelationship() { return rel;}	
+	public Relationship getRelationship() { return rel;}
+	
+	public boolean equals(Object obj) {
+		return this.toString().equals(obj.toString());
+	}
 }// End class RelationshipWrapper
 	
