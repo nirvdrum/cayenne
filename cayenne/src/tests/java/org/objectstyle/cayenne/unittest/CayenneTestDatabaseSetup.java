@@ -71,6 +71,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -96,6 +97,10 @@ public class CayenneTestDatabaseSetup {
 
     /** Deletes all data from the database tables mentioned in the DataMap. */
     public void cleanTableData() throws Exception {
+        // TODO: move this to delegate
+        boolean isFirebird =
+            resources.getSharedNode().getAdapter() instanceof FirebirdAdapter;
+
         Connection conn = resources.getSharedConnection();
 
         List list = this.dbEntitiesInInsertOrder();
@@ -115,14 +120,19 @@ public class CayenneTestDatabaseSetup {
 
                 // this may not work on tables with reflexive relationships
                 // at least on Firebird it doesn't... 
-                // for now implement a hardcoded hack assuming that 
-                // hierarchy of records is at most 2 levels deep;
-                // if nesting is deeper, some sort of hierarchical query is needed 
-                // (similar to CONNECT BY in Oracle)
 
-                if ("ARTGROUP".equalsIgnoreCase(ent.getName())) {
-                    String deleteSql = "DELETE FROM " + ent.getName() + " WHERE PARENT_GROUP_ID IS NOT NULL";
-                    stmt.executeUpdate(deleteSql);
+                if (isFirebird && "ARTGROUP".equalsIgnoreCase(ent.getName())) {
+                    int deleted = 0;
+                    String deleteChildren =
+                        "DELETE FROM "
+                            + ent.getName()
+                            + " WHERE GROUP_ID NOT IN (SELECT DISTINCT PARENT_GROUP_ID FROM "
+                            + ent.getName()
+                            + ")";
+                    do {
+                        deleted = stmt.executeUpdate(deleteChildren);
+                    }
+                    while (deleted > 0);
                 }
 
                 String deleteSql = "DELETE FROM " + ent.getName();
