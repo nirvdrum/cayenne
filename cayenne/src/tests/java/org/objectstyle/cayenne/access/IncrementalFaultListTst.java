@@ -108,6 +108,14 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         }
     }
     
+    public void testUnfetchedObjects() throws Exception {
+        assertEquals(DataContextTst.artistCount - 5, list.getUnfetchedObjects());
+        list.get(7);
+        assertEquals(DataContextTst.artistCount - 10, list.getUnfetchedObjects());
+        list.resolveAll();
+        assertEquals(0, list.getUnfetchedObjects());
+    }
+    
     public void testPageIndex() throws Exception {
         assertEquals(0, list.pageIndex(0));
         assertEquals(0, list.pageIndex(1));

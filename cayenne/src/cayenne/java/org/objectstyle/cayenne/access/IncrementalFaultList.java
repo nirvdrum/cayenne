@@ -99,6 +99,7 @@ public class IncrementalFaultList implements List {
     protected DataContext dataContext;
     protected ObjEntity rootEntity;
     protected SelectQuery internalQuery;
+    protected int unfetchedObjects;
 
     /**
      * Creates a new list copying settings from another list.
@@ -182,6 +183,8 @@ public class IncrementalFaultList implements List {
                     internalQuery,
                     elements.subList(0, endOfPage));
             }
+            
+            unfetchedObjects = elements.size() - pageSize;
         }
     }
 
@@ -283,6 +286,8 @@ public class IncrementalFaultList implements List {
                     throw new CayenneRuntimeException("Can't find id for " + idMap);
                 }
             }
+            
+            unfetchedObjects -= objects.size();
         }
 
         // process prefetching
@@ -633,4 +638,11 @@ public class IncrementalFaultList implements List {
         }
     }
 
+    /**
+     * Returns the unfetchedObjects.
+     * @return int
+     */
+    public int getUnfetchedObjects() {
+        return unfetchedObjects;
+    }
 }
