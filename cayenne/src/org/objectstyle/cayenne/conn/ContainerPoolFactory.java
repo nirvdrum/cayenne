@@ -127,8 +127,8 @@ public class ContainerPoolFactory implements ObjectFactory {
 
 
     /**
-     * <p>Create and return a new <code>PoolManager</code> instance.  If no
-     * instance can be created, return <code>null</code> instead.</p>
+     * <p>Creates and returns a new <code>PoolManager</code> instance.  If no
+     * instance can be created, returns <code>null</code> instead.</p>
      *
      * @param obj The possibly null object containing location or
      *  reference information that can be used in creating an object
