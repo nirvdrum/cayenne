@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+
+import javax.swing.UIManager;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
@@ -83,8 +87,25 @@ public class ExitAction extends ProjectAction {
             return;
         }
 
-        ModelerPreferences.getPreferences().storePreferences();
-        Editor.getFrame().setVisible(false);
+		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+
+		// store LaF
+		prefs.setProperty(ModelerPreferences.EDITOR_LAFNAME, UIManager.getLookAndFeel().getName());
+
+		// store frame 
+		Editor ed = Editor.getFrame();
+		Dimension currentSize = ed.getSize();
+		Point pos = ed.getLocation();
+		prefs.setProperty(ModelerPreferences.EDITOR_FRAME_WIDTH, String.valueOf(currentSize.width));
+		prefs.setProperty(ModelerPreferences.EDITOR_FRAME_HEIGHT, String.valueOf(currentSize.height));
+		prefs.setProperty(ModelerPreferences.EDITOR_FRAME_X, String.valueOf(pos.x));
+		prefs.setProperty(ModelerPreferences.EDITOR_FRAME_Y, String.valueOf(pos.y));
+
+		// write to persistent store
+		prefs.storePreferences();
+
+		// goodbye
+		ed.setVisible(false);
         System.exit(0);
     }
 
