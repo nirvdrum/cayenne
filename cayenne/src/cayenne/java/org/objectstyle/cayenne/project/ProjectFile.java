@@ -81,7 +81,7 @@ public abstract class ProjectFile {
     protected Project project;
 
     static {
-        fileTypes.add(new RootProjectFile());
+        fileTypes.add(new ApplicationProjectFile());
         fileTypes.add(new DataMapFile());
         fileTypes.add(new DataNodeFile());
     }

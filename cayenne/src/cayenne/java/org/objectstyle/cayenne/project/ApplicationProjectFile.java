@@ -63,24 +63,24 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
- * RootProjectFile is a ProjectFile abstraction of the 
+ * ApplicationProjectFile is a ProjectFile abstraction of the 
  * main project file in a Cayenne project. Right now Cayenne 
  * projects can not be renamed, so all the name tracking functionality 
  * is pretty much noop.
  * 
  * @author Andrei Adamchik
  */
-public class RootProjectFile extends ProjectFile {
+public class ApplicationProjectFile extends ProjectFile {
     protected Configuration projectConfig;
 
-    public RootProjectFile() {}
+    public ApplicationProjectFile() {}
 
     /**
      * Constructor for RootProjectFile.
      * @param name
      * @param extension
      */
-    public RootProjectFile(Project project, Configuration projectConfig) {
+    public ApplicationProjectFile(Project project, Configuration projectConfig) {
         super(project, "cayenne.xml");
         this.projectConfig = projectConfig;
     }
@@ -114,7 +114,7 @@ public class RootProjectFile extends ProjectFile {
     }
 
     public ProjectFile createProjectFile(Project project, Object obj) {
-        return new RootProjectFile(project, (Configuration) obj);
+        return new ApplicationProjectFile(project, (Configuration) obj);
     }
 
     public boolean canHandle(Object obj) {
