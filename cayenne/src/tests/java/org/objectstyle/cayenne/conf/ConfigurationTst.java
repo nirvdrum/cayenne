@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 
+import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.project.ProjectDataSourceFactory;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -85,8 +86,13 @@ public class ConfigurationTst extends CayenneTestCase {
 	}
 
 	public void testFileConfigurationConstructorWithNullFile() {
-		Configuration c = new FileConfiguration(null);
-		assertNull(c.getResourceLocator());
+		try {
+			new FileConfiguration(null);
+			fail("expected ConfigurationException!");
+		}
+		catch (ConfigurationException ex) {
+			// OK
+		}
 	}
 
 
