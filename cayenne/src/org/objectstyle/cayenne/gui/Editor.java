@@ -196,6 +196,9 @@ public class Editor
 
 		CayenneAction createDEAction = new CreateDbEntityAction();
 		actionMap.put(createDEAction.getKey(), createDEAction);
+		
+		CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
+		actionMap.put(createDDEAction.getKey(), createDDEAction);
 
 		CayenneAction createAttrAction = new CreateAttributeAction();
 		actionMap.put(createAttrAction.getKey(), createAttrAction);
@@ -257,6 +260,8 @@ public class Editor
 			getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
 		projectMenu.add(
 			getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
+		projectMenu.add(
+			getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
 		projectMenu.add(getAction(EntitySynchAction.ACTION_NAME).buildMenu());
@@ -316,6 +321,7 @@ public class Editor
 		toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateDbEntityAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateObjEntityAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateAttributeAction.ACTION_NAME).buildButton());
 		toolBar.add(
@@ -626,6 +632,7 @@ public class Editor
 
 		getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateDbEntityAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateDerivedDbEntityAction.ACTION_NAME).setEnabled(true);
 		getAction(GenerateDbAction.ACTION_NAME).setEnabled(true);
 	}
 

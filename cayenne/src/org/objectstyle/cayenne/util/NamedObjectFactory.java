@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.map.*;
  *    <li>ObjAttribute</li>
  *    <li>ObjRelationship</li>
  *    <li>DbEntity</li>
+ *    <li>DerivedDbEntity</li>
  *    <li>DbAttribute</li>
  *    <li>DbRelationship</li>
  *    <li>DataNode</li>
@@ -92,6 +93,7 @@ public abstract class NamedObjectFactory {
 		factories.put(DataMap.class, new DataMapFactory());
 		factories.put(ObjEntity.class, new ObjEntityFactory());
 		factories.put(DbEntity.class, new DbEntityFactory());
+		factories.put(DerivedDbEntity.class, new DerivedDbEntityFactory());
 		factories.put(ObjAttribute.class, new ObjAttributeFactory());
 		factories.put(DbAttribute.class, new DbAttributeFactory());
 		factories.put(DataNode.class, new DataNodeFactory());
@@ -221,6 +223,12 @@ public abstract class NamedObjectFactory {
 		protected boolean isNameInUse(String name, Object namingContext) {
 			DataMap map = (DataMap) namingContext;
 			return map.getDbEntity(name) != null;
+		}
+	}
+	
+	static class DerivedDbEntityFactory extends DbEntityFactory {
+		protected Object create(String name, Object namingContext) {
+			return new DerivedDbEntity(name);
 		}
 	}
 

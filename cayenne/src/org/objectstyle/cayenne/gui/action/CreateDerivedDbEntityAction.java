@@ -55,59 +55,38 @@
  */
 package org.objectstyle.cayenne.gui.action;
 
-import java.awt.event.ActionEvent;
+import javax.swing.Action;
 
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**
  * @author Andrei Adamchik
  */
-public class CreateDbEntityAction extends CayenneAction {
-	public static final String ACTION_NAME = "Create DbEntity";
-
+public class CreateDerivedDbEntityAction extends CreateDbEntityAction {
+    public static final String ACTION_NAME = "Create Derived DbEntity";
+    
 	/**
-	 * Constructor for CreateDbEntityAction.
+	 * Constructor for CreateDerivedDbEntityAction.
 	 */
-	public CreateDbEntityAction() {
-		super(ACTION_NAME);
+	public CreateDerivedDbEntityAction() {
+		setName(ACTION_NAME);
+		super.putValue(Action.DEFAULT, ACTION_NAME);
 	}
-
+	
 	public String getIconName() {
-		return "images/icon-dbentity.gif";
+		return "images/icon-derived-dbentity.gif";
 	}
 
 	/**
-	 * Creates new DbEntity, adds it to the current DataMap,
-	 * fires DbEntityEvent and DbEntityDisplayEvent.
-	 * 
-	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		Mediator mediator = getMediator();
-		DbEntity entity = createEntity(mediator.getCurrentDataMap());
-
-		mediator.fireDbEntityEvent(
-			new EntityEvent(this, entity, EntityEvent.ADD));
-		mediator.fireDbEntityDisplayEvent(
-			new EntityDisplayEvent(
-				this,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataNode(),
-				mediator.getCurrentDataDomain()));
-	}
-
-	/**
-	 * Constructs and returns a new DbEntity. Entity returned
+	 * Constructs and returns a new DerivedDbEntity. Entity returned
 	 * is added to the DataMap.
 	 */
 	protected DbEntity createEntity(DataMap map) {
 		DbEntity entity =
-			(DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
+			(DbEntity) NamedObjectFactory.createObject(DerivedDbEntity.class, map);
 		map.addDbEntity(entity);
 		return entity;
 	}
 }
+

@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -68,7 +67,7 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.MapUtil;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -84,7 +83,7 @@ public class DbEntityPane
 		DbEntityDisplayListener,
 		ExistingSelectionProcessor,
 		ActionListener {
-			
+
 	protected Mediator mediator;
 
 	protected JTextField name;
@@ -106,10 +105,10 @@ public class DbEntityPane
 		super();
 		this.mediator = mediator;
 		mediator.addDbEntityDisplayListener(this);
-		
+
 		// Create and layout components
 		init();
-		
+
 		// Add listeners
 		name.getDocument().addDocumentListener(this);
 		catalog.getDocument().addDocumentListener(this);
@@ -143,9 +142,15 @@ public class DbEntityPane
 				parentLabel };
 
 		Component[] rightCol =
-			new Component[] { name, catalog, schema, parentEntities };
+			new Component[] {
+				name,
+				catalog,
+				schema,
+				parentEntities };
 
-		add(PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5), BorderLayout.NORTH);
+		add(
+			PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
+			BorderLayout.NORTH);
 	}
 
 	public void insertUpdate(DocumentEvent e) {
@@ -208,14 +213,8 @@ public class DbEntityPane
 		ignoreChange = false;
 
 		if (entity instanceof DerivedDbEntity) {
-			catalogLabel.setEnabled(false);
-			catalog.setEnabled(false);
-			schemaLabel.setEnabled(false);
-			schema.setEnabled(false);
-			
-			parentLabel.setEnabled(true);
-			parentEntities.setEnabled(true);
-			
+			updateState(true);
+
 			java.util.List ents =
 				mediator.getCurrentDataMap().getDbEntityNames(true);
 			ents.remove(entity.getName());
@@ -228,15 +227,23 @@ public class DbEntityPane
 
 			parentEntities.setModel(model);
 		} else {
-			catalogLabel.setEnabled(true);
-			catalog.setEnabled(true);
-			schemaLabel.setEnabled(true);
-			schema.setEnabled(true);
-			
-			parentLabel.setEnabled(false);
-			parentEntities.setEnabled(false);
+			updateState(false);
 			parentEntities.setSelectedIndex(-1);
 		}
+	}
+
+	/**
+	 * Enables or disbales form fields depending on the
+	 * type of entity shown.
+	 */
+	protected void updateState(boolean isDerivedEntity) {
+		catalogLabel.setEnabled(!isDerivedEntity);
+		catalog.setEnabled(!isDerivedEntity);
+		schemaLabel.setEnabled(!isDerivedEntity);
+		schema.setEnabled(!isDerivedEntity);
+
+		parentLabel.setEnabled(isDerivedEntity);
+		parentEntities.setEnabled(isDerivedEntity);
 	}
 
 	/**
@@ -259,5 +266,4 @@ public class DbEntityPane
 			}
 		}
 	}
-
 }
