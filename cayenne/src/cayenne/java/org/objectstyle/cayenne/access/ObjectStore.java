@@ -73,10 +73,10 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -102,7 +102,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     // TODO: we may implement more fine grained tracking of related objects
     // changes, requiring more sophisticated data structure to hold them
     protected List indirectlyModifiedIds = new ArrayList();
-    
 
     protected List flattenedInserts = new ArrayList();
     protected List flattenedDeletes = new ArrayList();
@@ -280,7 +279,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // no snapshot events needed... snapshots maybe cleared, but no
         // database changes have occured.
     }
-    
+
     /**
      * Reverts changes to all stored uncomitted objects.
      * 
@@ -296,7 +295,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             switch (objectState) {
                 case PersistenceState.NEW :
                     it.remove();
-                    
+
                     object.setDataContext(null);
                     object.setObjectId(null);
                     object.setPersistenceState(PersistenceState.TRANSIENT);
@@ -337,7 +336,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             flattenedRelationshipUnset(source, relationship, target);
         }
     }
-    
+
     /**
      * Performs tracking of object relationship changes.
      * 
@@ -355,7 +354,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             flattenedRelationshipSet(source, relationship, target);
         }
     }
-    
+
     /**
      * Performs tracking of object relationship changes.
      * 
@@ -739,21 +738,51 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // TODO: This implementation is rather naive and would scan all
         // registered
         // objects. Any better ideas? Catching events or something...
-        
-        
+
         if (!flattenedInserts.isEmpty() || !flattenedDeletes.isEmpty()) {
             return true;
         }
 
         Iterator it = getObjectIterator();
         while (it.hasNext()) {
-            DataObject dobj = (DataObject) it.next();
-            int state = dobj.getPersistenceState();
+            DataObject dataObject = (DataObject) it.next();
+            int state = dataObject.getPersistenceState();
+            
             if (state == PersistenceState.MODIFIED) {
-                if (QueryUtils.updatedProperties(dobj) != null) {
-                    return true; //There were some updated properties
-                } //no updated properties, continue and see if any other
-                // objects have changed
+                DataContext context = dataObject.getDataContext();
+                DataRow committedSnapshot = getSnapshot(dataObject.getObjectId(), context);
+                if (committedSnapshot == null) {
+                    return true;
+                }
+
+                DataRow currentSnapshot = context.currentSnapshot(dataObject);
+                
+                Iterator currentIt = currentSnapshot.entrySet().iterator();
+                while (currentIt.hasNext()) {
+                    Map.Entry entry = (Map.Entry) currentIt.next();
+                    Object newValue = entry.getValue();
+                    Object oldValue = committedSnapshot.get(entry.getKey());
+                    if (!Util.nullSafeEquals(oldValue, newValue)) {
+                        return true;
+                    }
+                }
+
+                // original snapshot can have extra keys that are missing in the
+                // current snapshot; process those
+                Iterator committedIt = committedSnapshot.entrySet().iterator();
+                while (committedIt.hasNext()) {
+
+                    Map.Entry entry = (Map.Entry) committedIt.next();
+
+                    // committed snapshot has null value, skip it
+                    if (entry.getValue() == null) {
+                        continue;
+                    }
+
+                    if (!currentSnapshot.containsKey(entry.getKey())) {
+                        return true;
+                    }
+                }
             }
             else if (
                 state == PersistenceState.NEW || state == PersistenceState.DELETED) {
@@ -1027,7 +1056,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
     }
-    
+
     /**
      * Records the fact that flattened relationship was created.
      * 
@@ -1062,7 +1091,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             flattenedInserts.add(info);
         }
     }
-    
+
     /**
      * Records the fact that flattened relationship was broken down.
      * 
@@ -1098,15 +1127,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             flattenedDeletes.add(info);
         }
     }
-    
+
     List getFlattenedInserts() {
         return flattenedInserts;
     }
-    
+
     List getFlattenedDeletes() {
         return flattenedDeletes;
     }
-    
+
     //Stores the information about a flattened relationship between two objects in a
     // canonical form, such that equals returns true if both objects refer to the same
     // pair of DataObjects connected by the same relationship (regardless of the

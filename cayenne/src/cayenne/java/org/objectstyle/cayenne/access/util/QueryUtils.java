@@ -88,6 +88,9 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  */
 public class QueryUtils {
 
+    /**
+     * @deprecated Since 1.1 Unused
+     */
     private static Map putModifiedAttribute(Map aMap, String name, Object value) {
         if (aMap == null) {
             aMap = new HashMap();
@@ -102,7 +105,7 @@ public class QueryUtils {
      * by using equals() (true implies no change).
      * Will return null if there are no changes
      * 
-     * @param dataObject dataObject that may have changes
+     * @deprecated Since 1.1 unused
      */
     public static Map updatedProperties(DataObject dataObject) {
         // Lazily created to avoid creating too many unnecessary objects
