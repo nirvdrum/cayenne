@@ -3,7 +3,7 @@
 <!-- ========================================== -->
 <!-- CayenneModeler(Swing) subproject buildfile.-->
 <!-- ========================================== -->
-<project name="cayenne-modeler" default="compile">
+<project default="compile">
 	<property name="modeler.dist.src" value="${dist}/src/modeler"/>
 	<property name="modeler.build" value="build/modeler"/>
 	<property name="modeler.build.properties" value="${modeler.build}/properties"/>

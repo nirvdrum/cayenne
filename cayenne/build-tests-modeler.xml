@@ -3,7 +3,7 @@
 <!-- ========================================== -->
 <!-- CayenneModeler tests subproject buildfile. -->
 <!-- ========================================== -->
-<project name="cayenne-tests-modeler" default="test">
+<project default="test">
     <property file="default.properties" />
 	<property name="test.build" value="build/tests-modeler"/>
 	<property name="test.output" value="${test.build}/out"/>

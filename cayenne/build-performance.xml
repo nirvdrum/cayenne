@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="cayenne-performance" default="compile">
+<project default="compile">
 	<property name="performance.build" value="build/performance"/>
 	
 	<target name="compile">

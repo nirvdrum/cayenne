@@ -9,7 +9,7 @@
 <!-- - javacc.grammar                                  -->
 <!--                                                   -->
 <!-- ================================================= -->
-<project name="java-subproj" default="compile">
+<project default="compile">
 
 	<!-- ========================================== -->
     <!-- Build paths's for subprojects.             -->

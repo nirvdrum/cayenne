@@ -3,7 +3,7 @@
 <!-- ========================================== -->
 <!-- Core Cayenne subproject buildfile.         -->
 <!-- ========================================== -->
-<project name="cayenne-core" default="compile">
+<project default="compile">
 	<property name="core.dist.src" value="${dist}/src/cayenne"/>
 	<property name="core.build" value="build/cayenne"/>
 	<property name="core.build.deps" value="${core.build}/deps"/>

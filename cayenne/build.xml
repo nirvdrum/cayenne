@@ -4,7 +4,7 @@
 <!--            Cayenne master build file.             -->
 <!-- Serves as a facade to a set of private buildfiles.-->
 <!-- ================================================= -->
-<project name="cayenne" default="build" basedir=".">
+<project name="cayenne" default="build">
 
     <!-- ============================================= -->
     <!-- Loads properties from default locations.      -->
@@ -148,6 +148,7 @@
     <!-- ========================================== -->
     <target name="clean" depends="clean-java">
         <delete dir="${dist.base}"/>
+        <delete file="velocity.log"/>
     </target>
     
     <target name="clean-java">

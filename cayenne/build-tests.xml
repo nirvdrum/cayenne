@@ -3,7 +3,7 @@
 <!-- ========================================== -->
 <!-- Cayenne tests subproject buildfile.        -->
 <!-- ========================================== -->
-<project name="cayenne-tests" default="compile">
+<project default="compile">
 	<property name="test.dist.src" value="${dist}/src/tests"/>
 	<property name="test.build" value="build/tests"/>
 	<property name="test.src" value="src/tests/java"/>

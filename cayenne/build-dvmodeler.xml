@@ -3,7 +3,7 @@
 <!-- ========================================== -->
 <!-- Cayenne Data View Modeler(Swing) subproject buildfile.-->
 <!-- ========================================== -->
-<project name="cayenne-dvmodeler" default="compile">
+<project default="compile">
 	<property name="dvmodeler.dist.src" value="${dist}/src/dvmodeler"/>
 	<property name="dvmodeler.build" value="build/dvmodeler"/>
 	<property name="dvmodeler.build.properties" value="${dvmodeler.build}/properties"/>

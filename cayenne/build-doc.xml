@@ -4,7 +4,7 @@
 <!--         Cayenne documentation buildfile.          -->
 <!--             (called from build.xml)               -->
 <!-- ================================================= -->
-<project name="cayenne-doc" default="doc" basedir=".">	  
+<project default="doc">	  
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
         <fileset dir="${otherlib.dir}">
@@ -48,16 +48,6 @@
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
     <target name="doc" depends="prepare,doc-img,grammars">
-        <!-- copy all licenses & release notes -->
-        <copy todir="${dist}/doc">
-            <fileset dir="doc/licenses">
-               <include name="**"/>
-            </fileset>
-         </copy>
-         
-		<copy tofile="${dist}/doc/RELEASE-NOTES.txt" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
-		<copy tofile="${dist}/doc/UPGRADE.txt" file="doc/upgrade/UPGRADE-${project.version}.txt"/>
-
         <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
             <classpath refid="classpath"/>
         </taskdef>
@@ -78,13 +68,31 @@
                 <include name="**/*.dtd"/>
             </fileset>
         </copy>
+        
+		<!-- copy all licenses & release notes -->
+		<copy todir="${dist}/doc/licenses">
+            <fileset dir="doc/licenses" includes="**/**"/>
+		</copy>
+		
+		<copy tofile="${dist}/doc/RELEASE-NOTES.txt" 
+			file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
+		<copy tofile="${dist}/doc/UPGRADE.txt" 
+			file="doc/upgrade/UPGRADE-${project.version}.txt"/>
+		
+		<!-- Assemble License HTML page -->
+		<loadfile property="license.text" srcFile="doc/licenses/LICENSE"/>
+        <move tofile="${dist}/doc/license.html.tmp" file="${dist}/doc/license.html">
+        	<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="LICENSE" value="${license.text}"/>
+			</filterset>
+        </move>
+        <move tofile="${dist}/doc/license.html" file="${dist}/doc/license.html.tmp"/>
     </target>
     
     <!-- ========================================== -->
     <!-- Builds documentation for the JavaCC Grammars.               -->
     <!-- ========================================== -->
     <target name="grammars" depends="prepare">
-    	
 		<ant antfile="build-cayenne.xml" target="jjdoc">
 			<property name="parser.doc.dir" value="${dist}/doc/grammar"/>
 		</ant>

@@ -7,7 +7,7 @@
 <!-- Cayenne subproject layout, therefore they have  -->
 <!-- their own build.xml file called from here.      -->
 <!-- =============================================== -->
-<project name="cayenne-tutorials" default="compile">
+<project default="compile">
 	<target name="compile">
 		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="compile"/>
 		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="compile"/>

@@ -4,7 +4,7 @@
 <!--           Cayenne examples buildfile.             -->
 <!--             (called from build.xml)               -->
 <!-- ================================================= -->
-<project name="cayenne-examples" default="dist" basedir=".">
+<project default="dist" basedir=".">
 
 	<property name="rn.file" value="RELEASE-NOTES-${project.version}.examples.txt"/>
  
@@ -27,7 +27,6 @@
     <target name="prepare">
         <mkdir dir="${dist}"/>
     </target>    
-
 
     <target name="no-release-notes">
     	<available file="doc/release-notes/${rn.file}" property="examples.release.notes"/>

@@ -3,7 +3,7 @@
 <!-- ================================================= -->
 <!-- Regression Test Application subproject buildfile. -->
 <!-- ================================================= -->
-<project name="cayenne-regression" default="compile">
+<project default="compile">
 	<property name="regression.dist.src" value="${dist}/src/regression"/>
 	<property name="regression.build" value="build/regression"/>
 	<property name="regression.src" value="src/regression/java"/>
