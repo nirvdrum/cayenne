@@ -56,9 +56,13 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -67,17 +71,18 @@ import org.objectstyle.cayenne.query.Query;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbEntity extends Entity {
+public class DbEntity extends Entity implements DbAttributeListener{
     protected String catalog;
     protected String schema;
-    protected DbKeyGenerator primaryKeyGenerator;
-
+	protected List primaryKey;
+	protected DbKeyGenerator primaryKeyGenerator;
 
     /**
      * Creates an unnamed DbEntity.
      */
     public DbEntity() {
     	super();
+    	this.updatePrimaryKey();
     }
 
     /**
@@ -129,19 +134,12 @@ public class DbEntity extends Entity {
     }
 
     /**
-     * Returns a list of DbAttributes representing the primary
-     * key of the table described by this DbEntity.
+     * Returns an unmodifiable list of DbAttributes representing the
+     * primary key of the table described by this DbEntity.
      */
-    public List getPrimaryKey() {
-        List list = new ArrayList();
-        Iterator it = this.getAttributes().iterator();
-        while (it.hasNext()) {
-            DbAttribute dba = (DbAttribute) it.next();
-            if (dba.isPrimaryKey())
-                list.add(dba);
-        }
-        return list;
-    }
+	public List getPrimaryKey() {
+		return primaryKey;
+	}
 
     public String toString() {
         StringBuffer sb = new StringBuffer("DbEntity:");
@@ -172,6 +170,12 @@ public class DbEntity extends Entity {
 
         return sb.toString();
     }
+
+	public void addAttribute(Attribute attr)
+	{
+		super.addAttribute(attr);
+		this.dbAttributeAdded(new AttributeEvent(this, attr, this));
+	}
 
     /**
      * Removes attribute from the entity, removes any relationship
@@ -206,22 +210,72 @@ public class DbEntity extends Entity {
         }
 
         super.removeAttribute(attrName);
+        this.dbAttributeRemoved(new AttributeEvent(this, attr, this));
     }
 
-    protected void validateQueryRoot(Query query)
-        throws IllegalArgumentException {
+	public void clearAttributes() {
+		super.clearAttributes();
+		// post dummy event for no specific attribute
+		this.dbAttributeRemoved(new AttributeEvent(this, null, this));
+	}
+
+    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
         if (query.getRoot() != this) {
             throw new IllegalArgumentException("Wrong query root for DbEntity: " + query.getRoot());
         }
     }
 
-    public void setPrimaryKeyGenerator(DbKeyGenerator primaryKeyGenerator) {
-      this.primaryKeyGenerator = primaryKeyGenerator;
-      if (primaryKeyGenerator != null)
-        primaryKeyGenerator.setDbEntity(this);
+	public void setPrimaryKeyGenerator(DbKeyGenerator primaryKeyGenerator) {
+		this.primaryKeyGenerator = primaryKeyGenerator;
+      	if (primaryKeyGenerator != null) {
+      		primaryKeyGenerator.setDbEntity(this);
+	  	}
     }
+
     public DbKeyGenerator getPrimaryKeyGenerator() {
-      return primaryKeyGenerator;
+    	return primaryKeyGenerator;
     }
+
+	public void dbAttributeAdded(AttributeEvent e) {
+		this.updatePrimaryKey();
+	}
+
+	public void dbAttributeChanged(AttributeEvent e) {
+		this.updatePrimaryKey();
+	}
+
+	public void dbAttributeRemoved(AttributeEvent e) {
+		this.updatePrimaryKey();
+	}
+
+	private void updatePrimaryKey() {
+		Collection attrs = this.getAttributes();
+
+		if (attrs.isEmpty()) {
+			this.primaryKey = Collections.EMPTY_LIST;
+			return;
+		}
+
+		List pk = new ArrayList();
+		Iterator it = this.getAttributes().iterator();
+
+		while (it.hasNext()) {
+			DbAttribute dba = (DbAttribute) it.next();
+			if (dba.isPrimaryKey()) {
+				pk.add(dba);
+			}
+		}
+
+		switch (pk.size()) {
+			case 0:
+				this.primaryKey = Collections.EMPTY_LIST;
+				break;
+			case 1:
+				this.primaryKey = Collections.singletonList(pk.get(0));
+				break;
+			default:
+				this.primaryKey = pk;
+		}
+	}
 
 }

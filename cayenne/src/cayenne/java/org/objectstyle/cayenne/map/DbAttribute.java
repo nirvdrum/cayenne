@@ -57,6 +57,8 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.DbAttributeListener;
 
 /** 
  * A DbAttribute defines a descriptor for a single database table column.
@@ -130,6 +132,10 @@ public class DbAttribute extends Attribute {
 
 	public void setPrimaryKey(boolean primaryKey) {
 		this.primaryKey = primaryKey;
+		Entity e = this.getEntity();
+		if (e instanceof DbAttributeListener) {
+			((DbAttributeListener)e).dbAttributeChanged(new AttributeEvent(this, this, e));
+		}
 	}
 
 	public boolean isMandatory() {
