@@ -61,7 +61,7 @@ import org.jdom.*;
 /**
  *
  * @author Nataliya Kholodna
- * @version 1.0
+ * @since 1.1
  */
 
 public class DisplayFormat{
@@ -100,7 +100,7 @@ public class DisplayFormat{
   }
 
   public Element getDisplayFormatElement(){
-    Element e = new Element("disply-format");
+    Element e = new Element("display-format");
     e.setAttribute(new Attribute("class", className));
     Element ePattern = new Element("pattern");
     ePattern.addContent(pattern);
