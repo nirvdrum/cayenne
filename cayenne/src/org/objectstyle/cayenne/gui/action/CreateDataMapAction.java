@@ -71,7 +71,10 @@ import org.objectstyle.cayenne.util.Preferences;
 
 
 /**
- *  Action that creates new DataMap in the project.
+ * Action that creates new DataMap in the project.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
 	public static final String ACTION_NAME = "Create DataMap";
