@@ -1,7 +1,9 @@
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
@@ -87,5 +89,16 @@ public class DataRowStoreTst extends CayenneTestCase {
         assertNotNull(cache.getCachedSnapshot(key2));
         assertNotNull(cache.getCachedSnapshot(key3));
         assertNull(cache.getCachedSnapshot(key1));
+    }
+    
+    public void testCachedSnapshots() throws Exception {
+        DataRowStore resultStore = new DataRowStore("test");
+
+        List list = new ArrayList();
+
+        assertNull(resultStore.getCachedSnapshots("key"));
+
+        resultStore.registerSnapshotList("key", list);
+        assertSame(list, resultStore.getCachedSnapshots("key"));
     }
 }

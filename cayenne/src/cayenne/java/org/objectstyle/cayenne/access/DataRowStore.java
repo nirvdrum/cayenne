@@ -81,26 +81,24 @@ import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Represents a fixed size cache of DataRows keyed by ObjectId. 
- * 
- * <p><strong>Synchronization Note:</strong> DataRowStore synchronizes 
- * most operations on its own instance.</p>
+ * A fixed size cache of DataRows keyed by ObjectId.
+ * <p>
+ * <strong>Synchronization Note: </strong> DataRowStore synchronizes most operations on
+ * its own instance.
+ * </p>
  * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 public class DataRowStore implements Serializable {
+
     private static Logger logObj = Logger.getLogger(DataRowStore.class);
 
     // property keys
-    public static final String SNAPSHOT_EXPIRATION_PROPERTY =
-        "cayenne.DataRowStore.snapshot.expiration";
-    public static final String SNAPSHOT_CACHE_SIZE_PROPERTY =
-        "cayenne.DataRowStore.snapshot.size";
-    public static final String REMOTE_NOTIFICATION_PROPERTY =
-        "cayenne.DataRowStore.remote.notify";
-    public static final String EVENT_BRIDGE_FACTORY_PROPERTY =
-        "cayenne.DataRowStore.EventBridge.factory";
+    public static final String SNAPSHOT_EXPIRATION_PROPERTY = "cayenne.DataRowStore.snapshot.expiration";
+    public static final String SNAPSHOT_CACHE_SIZE_PROPERTY = "cayenne.DataRowStore.snapshot.size";
+    public static final String REMOTE_NOTIFICATION_PROPERTY = "cayenne.DataRowStore.remote.notify";
+    public static final String EVENT_BRIDGE_FACTORY_PROPERTY = "cayenne.DataRowStore.EventBridge.factory";
 
     // default property values
 
@@ -111,11 +109,11 @@ public class DataRowStore implements Serializable {
 
     // use String for class name, since JavaGroups may not be around,
     // causing CNF exceptions
-    public static final String EVENT_BRIDGE_FACTORY_DEFAULT =
-        "org.objectstyle.cayenne.event.JavaGroupsBridgeFactory";
+    public static final String EVENT_BRIDGE_FACTORY_DEFAULT = "org.objectstyle.cayenne.event.JavaGroupsBridgeFactory";
 
     protected String name;
     protected LRUMap snapshots;
+    protected LRUMap snapshotLists;
     protected boolean notifyingRemoteListeners;
 
     protected transient EventBridge remoteNotificationsHandler;
@@ -132,11 +130,13 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Creates new DataRowStore with a specified name and a set of properties. If no properties
-     * are defined, default values are used.
+     * Creates new DataRowStore with a specified name and a set of properties. If no
+     * properties are defined, default values are used.
      * 
-     * @param name DataRowStore name. Used to idenitfy this DataRowStore in events, etc. Can't be null.
-     * @param properties Properties map used to configure DataRowStore parameters. Can be null.
+     * @param name DataRowStore name. Used to idenitfy this DataRowStore in events, etc.
+     *            Can't be null.
+     * @param properties Properties map used to configure DataRowStore parameters. Can be
+     *            null.
      */
     public DataRowStore(String name, Map properties) {
         if (name == null) {
@@ -159,44 +159,36 @@ public class DataRowStore implements Serializable {
             propertiesWrapper.putAll(properties);
         }
 
-        long snapshotsExpiration =
-            propertiesWrapper.getLong(
+        long snapshotsExpiration = propertiesWrapper.getLong(
                 SNAPSHOT_EXPIRATION_PROPERTY,
                 SNAPSHOT_EXPIRATION_DEFAULT);
 
-        int snapshotsCacheSize =
-            propertiesWrapper.getInt(
+        int snapshotsCacheSize = propertiesWrapper.getInt(
                 SNAPSHOT_CACHE_SIZE_PROPERTY,
                 SNAPSHOT_CACHE_SIZE_DEFAULT);
 
-        boolean notifyRemote =
-            propertiesWrapper.getBoolean(
+        boolean notifyRemote = propertiesWrapper.getBoolean(
                 REMOTE_NOTIFICATION_PROPERTY,
                 REMOTE_NOTIFICATION_DEFAULT);
 
-        String eventBridgeFactory =
-            propertiesWrapper.getString(
+        String eventBridgeFactory = propertiesWrapper.getString(
                 EVENT_BRIDGE_FACTORY_PROPERTY,
                 EVENT_BRIDGE_FACTORY_DEFAULT);
 
         if (logObj.isDebugEnabled()) {
-            logObj.debug(
-                "DataRowStore property "
+            logObj.debug("DataRowStore property "
                     + SNAPSHOT_EXPIRATION_PROPERTY
                     + " = "
                     + snapshotsExpiration);
-            logObj.debug(
-                "DataRowStore property "
+            logObj.debug("DataRowStore property "
                     + SNAPSHOT_CACHE_SIZE_PROPERTY
                     + " = "
                     + snapshotsCacheSize);
-            logObj.debug(
-                "DataRowStore property "
+            logObj.debug("DataRowStore property "
                     + REMOTE_NOTIFICATION_PROPERTY
                     + " = "
                     + notifyRemote);
-            logObj.debug(
-                "DataRowStore property "
+            logObj.debug("DataRowStore property "
                     + EVENT_BRIDGE_FACTORY_PROPERTY
                     + " = "
                     + eventBridgeFactory);
@@ -208,26 +200,32 @@ public class DataRowStore implements Serializable {
         // TODO: ENTRY EXPIRATION is not supported by commons LRU Map
         this.snapshots = new LRUMap(snapshotsCacheSize);
 
+        // TODO: cache size should really be a sum of all result lists sizes...
+        // so we must track it outside the LRUMap...
+        this.snapshotLists = new LRUMap(snapshotsCacheSize);
+
         // init event bridge only if we are notifying remote listeners
         if (notifyingRemoteListeners) {
             try {
-                EventBridgeFactory factory =
-                    (EventBridgeFactory) Class.forName(eventBridgeFactory).newInstance();
-                this.remoteNotificationsHandler =
-                    factory.createEventBridge(getSnapshotEventSubject(), properties);
+                EventBridgeFactory factory = (EventBridgeFactory) Class.forName(
+                        eventBridgeFactory).newInstance();
+                this.remoteNotificationsHandler = factory.createEventBridge(
+                        getSnapshotEventSubject(),
+                        properties);
 
                 // listen to EventBridge
                 EventManager.getDefaultManager().addListener(
-                    this,
-                    "processRemoteEvent",
-                    SnapshotEvent.class,
-                    getSnapshotEventSubject(),
-                    remoteNotificationsHandler);
+                        this,
+                        "processRemoteEvent",
+                        SnapshotEvent.class,
+                        getSnapshotEventSubject(),
+                        remoteNotificationsHandler);
 
-                // start EventBridge - it will listen to all event sources for this subject
+                // start EventBridge - it will listen to all event sources for this
+                // subject
                 remoteNotificationsHandler.startup(
-                    EventManager.getDefaultManager(),
-                    EventBridge.RECEIVE_LOCAL_EXTERNAL);
+                        EventManager.getDefaultManager(),
+                        EventBridge.RECEIVE_LOCAL_EXTERNAL);
             }
             catch (Exception ex) {
                 throw new CayenneRuntimeException("Error initializing DataRowStore.", ex);
@@ -267,9 +265,8 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Returns the name of this SnapshotCache. Name allows to create
-     * EventSubjects for event notifications addressed to or sent from this
-     * SnapshotCache.
+     * Returns the name of this SnapshotCache. Name allows to create EventSubjects for
+     * event notifications addressed to or sent from this SnapshotCache.
      */
     public String getName() {
         return name;
@@ -280,17 +277,17 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Returns cached snapshot or null if no snapshot is currently cached for
-     * the given ObjectId.
+     * Returns cached snapshot or null if no snapshot is currently cached for the given
+     * ObjectId.
      */
     public synchronized DataRow getCachedSnapshot(ObjectId oid) {
         return (DataRow) snapshots.get(oid);
     }
 
     /**
-     * Returns a snapshot for ObjectId. If snapshot is currently cached, it is
-     * returned. If not, a provided QueryEngine is used to fetch it from the
-     * database. If there is no database row for a given id, null is returned.
+     * Returns a snapshot for ObjectId. If snapshot is currently cached, it is returned.
+     * If not, a provided QueryEngine is used to fetch it from the database. If there is
+     * no database row for a given id, null is returned.
      */
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
 
@@ -311,17 +308,14 @@ public class DataRowStore implements Serializable {
         List results = observer.getResults(select);
 
         if (results.size() > 1) {
-            throw new CayenneRuntimeException(
-                "More than 1 object found for ObjectId "
+            throw new CayenneRuntimeException("More than 1 object found for ObjectId "
                     + oid
                     + ". Fetch matched "
                     + results.size()
                     + " objects.");
-        }
-        else if (results.size() == 0) {
+        } else if (results.size() == 0) {
             return null;
-        }
-        else {
+        } else {
             DataRow snapshot = (DataRow) results.get(0);
             snapshots.put(oid, snapshot);
             return snapshot;
@@ -329,19 +323,36 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Returns EventSubject used by this SnapshotCache to notify of snapshot
-     * changes.
+     * Registers a list of snapshots using a String key.
+     */
+    public void registerSnapshotList(String key, List snapshots) {
+        snapshotLists.put(key, snapshots);
+    }
+
+    /**
+     * Returns a list of previously cached snapshots.
+     */
+    public List getCachedSnapshots(String key) {
+        if (key == null) {
+            return null;
+        }
+
+        return (List) snapshotLists.get(key);
+    }
+
+    /**
+     * Returns EventSubject used by this SnapshotCache to notify of snapshot changes.
      */
     public EventSubject getSnapshotEventSubject() {
         return eventSubject;
     }
 
     /**
-     * Expires and removes all stored snapshots without sending any
-     * notification events.
+     * Expires and removes all stored snapshots without sending any notification events.
      */
     public synchronized void clear() {
         snapshots.clear();
+        snapshotLists.clear();
     }
 
     /**
@@ -356,10 +367,11 @@ public class DataRowStore implements Serializable {
      * and then resends the event to local listeners.
      */
     public void processRemoteEvent(SnapshotEvent event) {
-        if(event.getPostedBy() == this || event.getSource() != remoteNotificationsHandler) {
+        if (event.getPostedBy() == this
+                || event.getSource() != remoteNotificationsHandler) {
             return;
         }
-        
+
         if (logObj.isDebugEnabled()) {
             logObj.debug("remote event: " + event);
         }
@@ -368,7 +380,9 @@ public class DataRowStore implements Serializable {
         Map diffs = event.getModifiedDiffs();
         Collection indirectlyModifiedIds = event.getIndirectlyModifiedIds();
 
-        if (deletedSnapshotIds.isEmpty() && diffs.isEmpty()  && indirectlyModifiedIds.isEmpty()) {
+        if (deletedSnapshotIds.isEmpty()
+                && diffs.isEmpty()
+                && indirectlyModifiedIds.isEmpty()) {
             logObj.warn("processRemoteEvent.. bogus call... no changes.");
             return;
         }
@@ -376,32 +390,41 @@ public class DataRowStore implements Serializable {
         synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
             processUpdateDiffs(diffs);
-            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds, indirectlyModifiedIds);
+            sendUpdateNotification(
+                    event.getSource(),
+                    diffs,
+                    deletedSnapshotIds,
+                    indirectlyModifiedIds);
         }
     }
 
     /**
-     * Processes changes made to snapshots. Modifies internal cache state, and
-     * then sends the event to all listeners. Source of these changes is 
-     * usually an ObjectStore.
+     * Processes changes made to snapshots. Modifies internal cache state, and then sends
+     * the event to all listeners. Source of these changes is usually an ObjectStore.
      */
     public void processSnapshotChanges(
-        Object source,
-        Map updatedSnapshots,
-        Collection deletedSnapshotIds,
-        Collection indirectlyModifiedIds) {
+            Object source,
+            Map updatedSnapshots,
+            Collection deletedSnapshotIds,
+            Collection indirectlyModifiedIds) {
 
         // update the internal cache, prepare snapshot event
 
-        if (deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty() && indirectlyModifiedIds.isEmpty()) {
+        if (deletedSnapshotIds.isEmpty()
+                && updatedSnapshots.isEmpty()
+                && indirectlyModifiedIds.isEmpty()) {
             logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
             return;
         }
 
-        synchronized (this) {        
+        synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
             Map diffs = processUpdatedSnapshots(updatedSnapshots);
-            sendUpdateNotification(source, diffs, deletedSnapshotIds, indirectlyModifiedIds);
+            sendUpdateNotification(
+                    source,
+                    diffs,
+                    deletedSnapshotIds,
+                    indirectlyModifiedIds);
         }
     }
 
@@ -455,7 +478,7 @@ public class DataRowStore implements Serializable {
                     }
 
                     Map diff = oldSnapshot.createDiff(newSnapshot);
-                    
+
                     if (diff != null) {
                         if (diffs == null) {
                             diffs = new HashMap();
@@ -490,18 +513,22 @@ public class DataRowStore implements Serializable {
     }
 
     private void sendUpdateNotification(
-        Object source,
-        Map diffs,
-        Collection deletedSnapshotIDs,
-        Collection indirectlyModifiedIds) {
+            Object source,
+            Map diffs,
+            Collection deletedSnapshotIDs,
+            Collection indirectlyModifiedIds) {
 
         // do not send bogus events... e.g. inserted objects are not counted
         if ((diffs != null && !diffs.isEmpty())
-            || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())
-            || (indirectlyModifiedIds != null && !indirectlyModifiedIds.isEmpty())) {
-            
-            SnapshotEvent event =
-                new SnapshotEvent(source, this, diffs, deletedSnapshotIDs, indirectlyModifiedIds);
+                || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())
+                || (indirectlyModifiedIds != null && !indirectlyModifiedIds.isEmpty())) {
+
+            SnapshotEvent event = new SnapshotEvent(
+                    source,
+                    this,
+                    diffs,
+                    deletedSnapshotIDs,
+                    indirectlyModifiedIds);
 
             if (logObj.isDebugEnabled()) {
                 logObj.debug("postSnapshotsChangeEvent: " + event);
@@ -509,12 +536,11 @@ public class DataRowStore implements Serializable {
 
             // notify listeners
 
-            // send synchronously, relying on listeners to 
+            // send synchronously, relying on listeners to
             // register as "non-blocking" if needed.
             EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
         }
     }
-
 
     public boolean isNotifyingRemoteListeners() {
         return notifyingRemoteListeners;
@@ -525,13 +551,12 @@ public class DataRowStore implements Serializable {
     }
 
     // deserialization support
-    private void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
 
         in.defaultReadObject();
 
         // restore subjects
         this.eventSubject = createSubject();
     }
-
 }
