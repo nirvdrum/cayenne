@@ -481,7 +481,6 @@ public class DataRowStore implements Serializable {
                 }
 
                 DataRow newSnapshot = oldSnapshot.applyDiff((DataRow) entry.getValue());
-                logObj.info("APPLIED DIFF: " + entry.getValue() + "; NEW: " + newSnapshot);
                 snapshots.put(key, newSnapshot);
             }
         }
