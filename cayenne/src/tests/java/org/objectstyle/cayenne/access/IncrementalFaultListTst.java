@@ -82,14 +82,14 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
-        new DataContextTst().populateTables(true);
+        createTestData("testArtists");
 
         SelectQuery q = new SelectQuery("Artist");
 
         // make sure total number of objects is not divisable
         // by the page size, to test the last smaller page
         q.setPageSize(6);
-        q.addOrdering("artistName", Ordering.ASC);
+        q.addOrdering("db:ARTIST_ID", Ordering.ASC);
         query = q;
         list = new IncrementalFaultList(super.createDataContext(), query);
     }

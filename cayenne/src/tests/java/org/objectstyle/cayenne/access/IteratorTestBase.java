@@ -68,51 +68,49 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class IteratorTestBase extends CayenneTestCase {
-	protected Connection conn;
-	protected PreparedStatement st;
-	protected QueryTranslator transl;
-	protected SelectQuery query;
+    protected Connection conn;
+    protected PreparedStatement st;
+    protected QueryTranslator transl;
+    protected SelectQuery query;
 
-	protected void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
-        
-		conn = null;
-		st = null;
-		transl = null;
-		query = null;
 
-		deleteTestData();
-		new DataContextTst().populateTables();
-	}
+        conn = null;
+        st = null;
+        transl = null;
+        query = null;
 
+        deleteTestData();
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+    }
 
     /** 
      * Initializes internal state.
      */
-	protected void init() throws Exception {
-		conn = getConnection();
+    protected void init() throws Exception {
+        conn = getConnection();
 
-		query = new SelectQuery(Artist.class);
-		query.addOrdering("artistName", true);
+        query = new SelectQuery(Artist.class);
+        query.addOrdering("artistName", true);
 
-		transl = getNode().getAdapter().getQueryTranslator(query);
-		transl.setEngine(getNode());
-		transl.setCon(conn);
+        transl = getNode().getAdapter().getQueryTranslator(query);
+        transl.setEngine(getNode());
+        transl.setCon(conn);
 
-		st = transl.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
-	}
-
+        st = transl.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
+    }
 
     /**
      * Closes all open resources (connections, statements, etc.)
      */
-	protected void cleanup() throws Exception {
-		if (st != null) {
-			st.close();
-		}
+    protected void cleanup() throws Exception {
+        if (st != null) {
+            st.close();
+        }
 
-		if (conn != null) {
-			conn.close();
-		}
-	}
+        if (conn != null) {
+            conn.close();
+        }
+    }
 }

@@ -202,11 +202,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
                 dataRow = it.nextDataRow();
             }
 
-            assertEquals(
-                "Failed row: " + dataRow,
-                new DataContextTst().artistName(9),
-                dataRow.get("ARTIST_NAME"));
-
+            assertEquals("Failed row: " + dataRow, "artist9", dataRow.get("ARTIST_NAME"));
         }
         finally {
             cleanup();

@@ -80,12 +80,12 @@ public class IncrementalFaultListDataRowsTst extends CayenneTestCase {
         super.setUp();
 
         deleteTestData();
-        new DataContextTst().populateTables(true);
+        createTestData("testArtists");
 
         SelectQuery q = new SelectQuery("Artist");
         q.setPageSize(6);
         q.setFetchingDataRows(true);
-        q.addOrdering("artistName", Ordering.ASC);
+        q.addOrdering("db:ARTIST_ID", Ordering.ASC);
 
         query = q;
         list = new IncrementalFaultList(super.createDataContext(), query);
@@ -127,7 +127,7 @@ public class IncrementalFaultListDataRowsTst extends CayenneTestCase {
     public void testIndexOf2() throws Exception {
         DataContext parallelContext = createDataContext();
 
-        Expression qual = ExpressionFactory.matchExp("artistName", "artist02");
+        Expression qual = ExpressionFactory.matchExp("artistName", "artist2");
         SelectQuery query = new SelectQuery(Artist.class, qual);
         query.setFetchingDataRows(true);
         List artists = parallelContext.performQuery(query);
@@ -144,7 +144,7 @@ public class IncrementalFaultListDataRowsTst extends CayenneTestCase {
     public void testLastIndexOf1() throws Exception {
         DataContext parallelContext = createDataContext();
 
-        Expression qual = ExpressionFactory.matchExp("artistName", "artist03");
+        Expression qual = ExpressionFactory.matchExp("artistName", "artist3");
         SelectQuery query = new SelectQuery(Artist.class, qual);
         query.setFetchingDataRows(true);
         List artists = parallelContext.performQuery(query);
@@ -206,5 +206,4 @@ public class IncrementalFaultListDataRowsTst extends CayenneTestCase {
             counter++;
         }
     }
-
 }

@@ -125,8 +125,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertSame(artistAfter, painting.getToArtist());
     }
 
-    public void testRefetchRootWithNullToOneTargetChangedToNotNull()
-        throws Exception {
+    public void testRefetchRootWithNullToOneTargetChangedToNotNull() throws Exception {
         Painting painting = insertPaintingInContext("p");
         painting.setToArtist(null);
         context.commitChanges();
@@ -168,7 +167,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         Artist artist = fetchArtist("artist2", false);
         assertEquals(artist.getPaintingArray().size(), 0);
 
-        insertPaintingBypassingContext("p", artist.getArtistName());
+        createTestData("P2");
 
         // select without prefetch
         artist = fetchArtist(artist.getArtistName(), false);
@@ -260,18 +259,17 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         Artist artist = fetchArtist("artist2", false);
         assertEquals(artist.getPaintingArray().size(), 0);
 
-        insertPaintingBypassingContext("p", artist.getArtistName());
+        createTestData("P2");
         assertEquals(artist.getPaintingArray().size(), 0);
         context.invalidateObjects(Collections.singletonList(artist));
         assertEquals(artist.getPaintingArray().size(), 1);
     }
 
-    public void testRefetchRootWithAddedToManyViaRefetchObject()
-        throws Exception {
+    public void testRefetchRootWithAddedToManyViaRefetchObject() throws Exception {
         Artist artist = fetchArtist("artist2", false);
         assertEquals(artist.getPaintingArray().size(), 0);
 
-        insertPaintingBypassingContext("p", artist.getArtistName());
+        createTestData("P2");
 
         assertEquals(artist.getPaintingArray().size(), 0);
         artist = (Artist) context.refetchObject(artist.getObjectId());
@@ -280,8 +278,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
 
     public void testInvalidateThenModify() throws Exception {
         Artist artist = fetchArtist("artist2", false);
-        Date dob = artist.getDateOfBirth();
-        assertNotNull(dob);
+        assertNotNull(artist);
 
         artist.getDataContext().invalidateObjects(Collections.singletonList(artist));
         assertEquals(PersistenceState.HOLLOW, artist.getPersistenceState());
@@ -292,19 +289,19 @@ public class DataContextRefreshingTst extends DataContextTestBase {
     }
 
     public void testModifyHollow() throws Exception {
-        insertPaintingBypassingContext("p1", "artist2");
+        createTestData("P2");
 
         // reset context
         context = createDataContext();
 
-        Painting painting = fetchPainting("p1", false);
+        Painting painting = fetchPainting("P_artist2", false);
         Artist artist = painting.getToArtist();
         assertEquals(PersistenceState.HOLLOW, artist.getPersistenceState());
-        assertNull(artist.readPropertyDirectly("dateOfBirth"));
+        assertNull(artist.readPropertyDirectly("artistName"));
 
         // this must trigger a fetch
-        artist.setArtistName("new name");
+        artist.setDateOfBirth(new Date());
         assertEquals(PersistenceState.MODIFIED, artist.getPersistenceState());
-        assertNotNull(artist.readPropertyDirectly("dateOfBirth"));
+        assertNotNull(artist.readPropertyDirectly("artistName"));
     }
 }

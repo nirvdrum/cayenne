@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,10 +67,8 @@ import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 /**
  * Testing chained prefetches...
@@ -80,18 +77,24 @@ import org.objectstyle.cayenne.query.SqlModifyQuery;
  */
 public class DataContextPrefetchMultistepTst extends DataContextTestBase {
 
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        populateExhibits();
+        createTestData("testArtistExhibits");
+    }
+
     public void testToManyToManyFirstStepUnresolved() throws Exception {
-        prepareForToManyToMany();
 
         // Check the target ArtistExhibit objects do not exist yet
 
         Map id1 = new HashMap();
-        id1.put("ARTIST_ID", new Integer(safeId(1)));
+        id1.put("ARTIST_ID", new Integer(33001));
         id1.put("EXHIBIT_ID", new Integer(2));
         ObjectId oid1 = new ObjectId(ArtistExhibit.class, id1);
 
         Map id2 = new HashMap();
-        id2.put("ARTIST_ID", new Integer(safeId(3)));
+        id2.put("ARTIST_ID", new Integer(33003));
         id2.put("EXHIBIT_ID", new Integer(2));
         ObjectId oid2 = new ObjectId(ArtistExhibit.class, id2);
 
@@ -102,7 +105,7 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
         SelectQuery q =
             new SelectQuery(
                 Gallery.class,
-                e.expWithParameters(Collections.singletonMap("name", "g2")));
+                e.expWithParameters(Collections.singletonMap("name", "gallery2")));
         q.addPrefetch("exhibitArray.artistExhibitArray");
 
         List galleries = context.performQuery(q);
@@ -123,13 +126,12 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
     }
 
     public void testToManyToManyFirstStepResolved() throws Exception {
-        prepareForToManyToMany();
 
         Expression e = Expression.fromString("galleryName = $name");
         SelectQuery q =
             new SelectQuery(
                 Gallery.class,
-                e.expWithParameters(Collections.singletonMap("name", "g2")));
+                e.expWithParameters(Collections.singletonMap("name", "gallery2")));
         q.addPrefetch("exhibitArray");
         q.addPrefetch("exhibitArray.artistExhibitArray");
 
@@ -155,38 +157,5 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
 
         ArtistExhibit ae1 = (ArtistExhibit) aexhibits.get(0);
         assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
-    }
-
-    private void prepareForToManyToMany() throws Exception {
-        populateGalleries();
-        populateExhibits();
-        List queries = new ArrayList(4);
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(1)
-                    + ", 1)"));
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(1)
-                    + ", 2)"));
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(2)
-                    + ", 1)"));
-
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(3)
-                    + ", 2)"));
-
-        context.performQueries(queries, new DefaultOperationObserver());
     }
 }

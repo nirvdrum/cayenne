@@ -117,40 +117,49 @@ public class XMLDataSetFactory implements DataSetFactory {
     }
 
     protected BeanFactory getFactory(Class testCase) {
-        BeanFactory factory = (BeanFactory) dataSets.get(testCase);
 
-        if (factory == null && !dataSets.containsKey(testCase)) {
-
-            // load XML file
-            File file = dataSetXML(testCase);
-            if (file.isFile()) {
-                InputStream in = null;
-                try {
-                    in = new FileInputStream(file);
-                }
-                catch (IOException ioex) {
-                    logObj.error("Can't open test resources...", ioex);
-                    throw new RuntimeException("Error loading");
-                }
-
-                factory = new XmlBeanFactory(in);
-            }
-
-            dataSets.put(testCase, factory);
+        // lookup BeanFactory in the class hierarchy...
+        BeanFactory factory = null;
+        Class aClass = testCase;
+        while (factory == null && aClass != null) {
+            factory = loadForClass(aClass);
+            aClass = aClass.getSuperclass();
         }
 
         return factory;
     }
 
-    protected File dataSetXML(Class testCase) {
-        String name = testCase.getName();
+    protected BeanFactory loadForClass(Class testCase) {
+        BeanFactory factory = (BeanFactory) dataSets.get(testCase);
 
-        // strip "org.objectstyle.cayenne"
-        if (name.startsWith("org.objectstyle.cayenne.")) {
-            name = name.substring("org.objectstyle.cayenne.".length());
+        if (factory == null) {
+            String name = testCase.getName();
+
+            // figure file name
+            // strip "org.objectstyle.cayenne"
+            if (name.startsWith("org.objectstyle.cayenne.")) {
+                name = name.substring("org.objectstyle.cayenne.".length());
+            }
+
+            File file = new File(baseDir, name + ".xml");
+            if (!file.isFile()) {
+                return null;
+            }
+
+            InputStream in = null;
+            try {
+                in = new FileInputStream(file);
+            }
+            catch (IOException ioex) {
+                logObj.error("Can't open test resources...", ioex);
+                throw new RuntimeException("Error loading");
+            }
+
+            factory = new XmlBeanFactory(in);
+            dataSets.put(testCase, factory);
         }
 
-        return new File(baseDir, name + ".xml");
+        return factory;
     }
 
     public File getBaseDir() {

@@ -69,12 +69,16 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
+    protected void setUp() throws Exception {
+        super.setUp();
+        createTestData("testPaintings");
+    }
+
     /**
       * Test that all queries specified in prefetch are executed
       * with a single prefetch path.
       */
     public void testPrefetch1() throws Exception {
-        populatePaintings();
 
         Expression e = ExpressionFactory.likeExp("artistName", "artist1%");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -105,7 +109,6 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
      * Test that a to-many relationship is initialized.
      */
     public void testPrefetch3() throws Exception {
-        populatePaintings();
 
         Expression e = ExpressionFactory.likeExp("artistName", "artist1%");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -133,7 +136,6 @@ public class IncrementalFaultListPrefetchTst extends DataContextTestBase {
      * Test that a to-one relationship is initialized.
      */
     public void testPrefetch4() throws Exception {
-        populatePaintings();
 
         SelectQuery q = new SelectQuery("Painting");
         q.setPageSize(4);

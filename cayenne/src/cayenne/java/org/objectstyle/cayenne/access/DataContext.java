@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -1227,6 +1228,17 @@ public class DataContext implements QueryEngine, Serializable {
                 }
             }
         }
+    }
+
+    /**
+     * Performs a single database query that does not return the result.
+     * This is a shortcut for <code>performQueries(Collections.singletonList(query), 
+     * new DefaultOperationObserver())</code>.
+     * 
+     * @since 1.1
+     */
+    public void performModifyQuery(Query query) {
+        performQueries(Collections.singletonList(query), new DefaultOperationObserver());
     }
 
     /**

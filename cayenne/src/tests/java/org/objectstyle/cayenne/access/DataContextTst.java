@@ -254,7 +254,6 @@ public class DataContextTst extends DataContextTestBase {
         // CAY-96 bug report)
 
         // first prepare test fixture
-        populateGalleries();
         populateExhibits();
 
         ObjectId eId = new ObjectId(Exhibit.class, Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
@@ -268,7 +267,7 @@ public class DataContextTst extends DataContextTestBase {
         // assert that after taking a snapshot, we have FK in, but the relationship 
         // is still a Fault
         assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
-        assertEquals(new Integer(2), snapshot.get("GALLERY_ID"));
+        assertEquals(new Integer(33002), snapshot.get("GALLERY_ID"));
     }
 
     public void testLookupEntity() throws Exception {
@@ -305,11 +304,11 @@ public class DataContextTst extends DataContextTestBase {
      * entities used in qualifier.
      */
     public void testMultiObjRelFetch() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("Painting");
-        q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
-        q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(4)));
+        q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", "artist2"));
+        q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", "artist4"));
         List results = context.performQuery(q);
 
         assertEquals(2, results.size());
@@ -320,13 +319,11 @@ public class DataContextTst extends DataContextTestBase {
      * entities used in qualifier.
      */
     public void testMultiDbRelFetch() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("Painting");
-        q.andQualifier(
-            ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
-        q.orQualifier(
-            ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
+        q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", "artist2"));
+        q.orQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", "artist4"));
         List results = context.performQuery(q);
 
         assertEquals(2, results.size());
@@ -342,7 +339,7 @@ public class DataContextTst extends DataContextTestBase {
             return;
         }
 
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("ArtistAssets");
         q.setQualifier(
@@ -363,14 +360,14 @@ public class DataContextTst extends DataContextTestBase {
             return;
         }
 
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("ArtistAssets");
         q.setParentObjEntityName("Painting");
         q.andQualifier(
             ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
         q.andParentQualifier(
-            ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
+            ExpressionFactory.matchExp("toArtist.artistName", "artist1"));
         q.setLoggingLevel(Level.INFO);
 
         ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
@@ -399,14 +396,13 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testSelectDate() throws Exception {
-        SelectQuery query = new SelectQuery("Artist");
-        List objects = context.performQuery(query);
+        populateExhibits();
 
-        assertNotNull(objects);
-        assertEquals(artistCount, objects.size());
+        List objects = context.performQuery(new SelectQuery(Exhibit.class));
+        assertFalse(objects.isEmpty());
 
-        Artist a1 = (Artist) objects.get(0);
-        assertEquals(java.util.Date.class, a1.getDateOfBirth().getClass());
+        Exhibit e1 = (Exhibit) objects.get(0);
+        assertEquals(java.util.Date.class, e1.getClosingDate().getClass());
     }
 
     public void testCaseInsensitiveOrdering() throws Exception {
@@ -575,10 +571,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testPerformIteratedQuery2() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
-        SelectQuery q1 = new SelectQuery("Artist");
-        ResultIterator it = context.performIteratedQuery(q1);
+        ResultIterator it = context.performIteratedQuery(new SelectQuery(Artist.class));
 
         // just for this test increase pool size
         changeMaxConnections(1);
@@ -588,10 +583,14 @@ public class DataContextTst extends DataContextTestBase {
                 DataRow row = (DataRow) it.nextDataRow();
 
                 // try instantiating an object and fetching its relationships
-                Artist obj = (Artist) context.objectFromDataRow(Artist.class, row, false);
-                List paintings = obj.getPaintingArray();
+                Artist artist =
+                    (Artist) context.objectFromDataRow(Artist.class, row, false);
+                List paintings = artist.getPaintingArray();
                 assertNotNull(paintings);
-                assertEquals(1, paintings.size());
+                assertEquals(
+                    "Expected one painting for artist: " + artist,
+                    1,
+                    paintings.size());
             }
         }
         finally {

@@ -269,7 +269,7 @@ public class ExpressionFactory {
     }
 
     /** 
-     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
     public static Expression unaryExp(int type, Object operand) {
@@ -279,7 +279,7 @@ public class ExpressionFactory {
     }
 
     /** 
-     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
     public static Expression listExp(int type, List operands) {
@@ -292,7 +292,7 @@ public class ExpressionFactory {
     }
 
     /** 
-     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
     public static Expression binaryExp(
@@ -306,7 +306,7 @@ public class ExpressionFactory {
     }
 
     /** 
-     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
     public static Expression binaryPathExp(int type, String pathSpec, Object value) {
@@ -317,7 +317,7 @@ public class ExpressionFactory {
     }
 
     /** 
-     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
     public static Expression binaryDbPathExp(int type, String pathSpec, Object value) {
@@ -328,7 +328,7 @@ public class ExpressionFactory {
     }
 
     /** 
-     * @deprecated Since 1.1 use #fromString(String) or one of the more 
+     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
     public static Expression ternaryExp(

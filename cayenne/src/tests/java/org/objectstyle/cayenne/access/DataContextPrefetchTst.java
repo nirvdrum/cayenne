@@ -130,7 +130,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * complex prefetch scenario with no reverse obj relationships
      */
     public void testPrefetch2b() throws Exception {
-        this.populatePaintings();
+        createTestData("testPaintings");
+
         org.objectstyle.cayenne.map.EntityResolver er = context.getEntityResolver();
         ObjEntity paintingEntity = er.lookupObjEntity(Painting.class);
         ObjEntity galleryEntity = er.lookupObjEntity(Gallery.class);
@@ -152,7 +153,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             (ObjRelationship) exhibitEntity.getRelationship("artistExhibitArray");
         exhibitEntity.removeRelationship("artistExhibitArray");
 
-        Expression e = ExpressionFactory.matchExp("artistName", this.artistName(1));
+        Expression e = ExpressionFactory.matchExp("artistName", "artist1");
         SelectQuery q = new SelectQuery("Artist", e);
         q.addPrefetch("paintingArray");
         q.addPrefetch("paintingArray.toGallery");
@@ -175,11 +176,11 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test that a to-many relationship is initialized.
      */
     public void testPrefetchToMany() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         Map params = new HashMap();
-        params.put("name1", artistName(2));
-        params.put("name2", artistName(3));
+        params.put("name1", "artist2");
+        params.put("name2", "artist3");
         Expression e =
             Expression.fromString("artistName = $name1 or artistName = $name2");
         SelectQuery q = new SelectQuery("Artist", e.expWithParameters(params));
@@ -211,7 +212,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test that a to-many relationship is initialized.
      */
     public void testPrefetchToManyNoQualifier() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
         SelectQuery q = new SelectQuery(Artist.class);
         q.addPrefetch("paintingArray");
 
@@ -243,37 +244,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      */
     public void testPrefetchToManyOnJoinTable() throws Exception {
         // setup data
-        populateGalleries();
         populateExhibits();
-
-        List queries = new ArrayList(4);
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(1)
-                    + ", 1)"));
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(1)
-                    + ", 2)"));
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(2)
-                    + ", 1)"));
-
-        queries.add(
-            new SqlModifyQuery(
-                ArtistExhibit.class,
-                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
-                    + safeId(3)
-                    + ", 2)"));
-
-        context.performQueries(queries, new DefaultOperationObserver());
+        createTestData("testArtistExhibits");
 
         SelectQuery q = new SelectQuery(Artist.class);
         q.addPrefetch("artistExhibitArray");
@@ -283,7 +255,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         assertEquals(artistCount, artists.size());
 
         Artist a1 = (Artist) artists.get(0);
-        assertEquals(artistName(1), a1.getArtistName());
+        assertEquals("artist1", a1.getArtistName());
         ToManyList toMany = (ToManyList) a1.readPropertyDirectly("artistExhibitArray");
         assertNotNull(toMany);
         assertFalse(toMany.needsFetch());
@@ -353,7 +325,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * relationship
      */
     public void testPrefetch3a() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         ObjEntity paintingEntity =
             context.getEntityResolver().lookupObjEntity(Painting.class);
@@ -382,7 +354,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * relationship and the root query is qualified
      */
     public void testPrefetchOneWayToMany() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         ObjEntity paintingEntity =
             context.getEntityResolver().lookupObjEntity(Painting.class);
@@ -391,7 +363,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         paintingEntity.removeRelationship("toArtist");
 
         SelectQuery q = new SelectQuery("Artist");
-        q.setQualifier(ExpressionFactory.matchExp("artistName", this.artistName(1)));
+        q.setQualifier(ExpressionFactory.matchExp("artistName", "artist1"));
         q.addPrefetch("paintingArray");
 
         try {
@@ -411,7 +383,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test that a to-one relationship is initialized.
      */
     public void testPrefetch4() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("Painting");
         q.addPrefetch("toArtist");
@@ -445,11 +417,10 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test prefetching with queries using DB_PATH.
      */
     public void testPrefetch5() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("Painting");
-        q.andQualifier(
-            ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+        q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", "artist2"));
         q.addPrefetch("toArtist");
 
         List results = context.performQuery(q);
@@ -460,10 +431,10 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test prefetching with queries using OBJ_PATH.
      */
     public void testPrefetch6() throws Exception {
-        populatePaintings();
+        createTestData("testPaintings");
 
         SelectQuery q = new SelectQuery("Painting");
-        q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
+        q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", "artist2"));
         q.addPrefetch("toArtist");
 
         List results = context.performQuery(q);
@@ -511,9 +482,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * the prefetch
      */
     public void testPrefetch8() throws Exception {
-        this.populatePaintings();
-        Expression exp =
-            ExpressionFactory.matchExp("toArtist.artistName", this.artistName(1));
+        createTestData("testPaintings");
+        Expression exp = ExpressionFactory.matchExp("toArtist.artistName", "artist1");
 
         SelectQuery q = new SelectQuery(Painting.class, exp);
 
@@ -544,9 +514,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * prefetch
      */
     public void testPrefetch9() throws Exception {
-        this.populatePaintings();
-        Expression artistExp =
-            ExpressionFactory.matchExp("artistName", this.artistName(1));
+        createTestData("testPaintings");
+        Expression artistExp = ExpressionFactory.matchExp("artistName", "artist1");
         SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
         Artist artist1 = (Artist) context.performQuery(artistQuery).get(0);
 

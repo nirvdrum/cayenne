@@ -62,13 +62,22 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ParsedExpQualifierCompatTst extends DataContextTestBase {
+public class ParsedExpQualifierCompatTst extends CayenneTestCase {
+
+    protected DataContext context;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        context = createDataContext();
+    }
 
     private List execute(Class root, Expression qualifier) {
         return execute(root, qualifier, null);
@@ -83,6 +92,8 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
     }
 
     public void testOr() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         Expression parsed =
             Expression.fromString("artistName='artist1' or artistName='artist3'");
         assertEquals(2, execute(Artist.class, parsed).size());
@@ -94,6 +105,8 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
     }
 
     public void testAnd() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         Expression parsed =
             Expression.fromString("artistName='artist1' and artistName='artist1'");
         assertEquals(1, execute(Artist.class, parsed).size());
@@ -103,17 +116,25 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
     }
 
     public void testNot() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         Expression parsed1 = Expression.fromString("not artistName='artist3'");
-        assertEquals(artistCount - 1, execute(Artist.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 1,
+            execute(Artist.class, parsed1).size());
 
         Expression parsed2 = Expression.fromString("not artistName='artist3'");
-        assertEquals(artistCount - 1, execute(Artist.class, parsed2).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 1,
+            execute(Artist.class, parsed2).size());
     }
 
     public void testEqual() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         Expression parsed1 = Expression.fromString("artistName='artist3'");
         assertEquals(1, execute(Artist.class, parsed1).size());
-        
+
         // test with prefetch... this type of expressions should work with prefetches
         assertEquals(1, execute(Artist.class, parsed1, "paintingArray").size());
 
@@ -122,86 +143,111 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
     }
 
     public void testNotEqual() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         Expression parsed1 = Expression.fromString("artistName!='artist3'");
-        assertEquals(artistCount - 1, execute(Artist.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 1,
+            execute(Artist.class, parsed1).size());
 
         Expression parsed2 = Expression.fromString("artistName<>'artist3'");
-        assertEquals(artistCount - 1, execute(Artist.class, parsed2).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 1,
+            execute(Artist.class, parsed2).size());
     }
 
     public void testLessThan() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 = Expression.fromString("estimatedPrice < 2000.0");
         assertEquals(1, execute(Painting.class, parsed1).size());
     }
 
     public void testLessThanEqualTo() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 = Expression.fromString("estimatedPrice <= 2000.0");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 
     public void testGreaterThan() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 = Expression.fromString("estimatedPrice > 2000");
-        assertEquals(artistCount - 2, execute(Painting.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 2,
+            execute(Painting.class, parsed1).size());
     }
 
     public void testGreaterThanEqualTo() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 = Expression.fromString("estimatedPrice >= 2000");
-        assertEquals(artistCount - 1, execute(Painting.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 1,
+            execute(Painting.class, parsed1).size());
     }
 
     public void testLike() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 = Expression.fromString("artistName like 'artist%2'");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testLikeIgnoreCase() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName likeIgnoreCase 'artist%2'");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotLike() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 = Expression.fromString("artistName not like 'artist%2'");
-        assertEquals(artistCount - 3, execute(Artist.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 3,
+            execute(Artist.class, parsed1).size());
     }
 
     public void testNotLikeIgnoreCase() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName not likeIgnoreCase 'artist%2'");
-        assertEquals(artistCount - 3, execute(Artist.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 3,
+            execute(Artist.class, parsed1).size());
     }
 
     public void testIn() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName in ('artist1', 'artist3', 'artist19')");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotIn() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName not in ('artist1', 'artist3', 'artist19')");
-        assertEquals(artistCount - 3, execute(Artist.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 3,
+            execute(Artist.class, parsed1).size());
     }
 
     public void testBetween() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 =
             Expression.fromString("estimatedPrice between 2000.0 and 4000.0");
         assertEquals(3, execute(Painting.class, parsed1).size());
     }
 
     public void testNotBetween() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 =
             Expression.fromString("estimatedPrice not between 2000.0 and 4000.0");
-        assertEquals(artistCount - 3, execute(Painting.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount - 3,
+            execute(Painting.class, parsed1).size());
     }
 
     public void testParameter() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Map parameters = new HashMap();
         parameters.put("artistName", "artist5");
         Expression parsed1 = Expression.fromString("artistName=$artistName");
@@ -210,19 +256,24 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
     }
 
     public void testDbExpression() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 = Expression.fromString("db:ARTIST_NAME='artist3'");
         assertEquals(1, execute(Artist.class, parsed1).size());
     }
 
     public void testFloatExpression() throws Exception {
-        populatePaintings();
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
         Expression parsed1 = Expression.fromString("estimatedPrice < 2001.01");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 
     public void testNullExpression() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         Expression parsed1 = Expression.fromString("artistName!=null");
-        assertEquals(artistCount, execute(Artist.class, parsed1).size());
+        assertEquals(
+            DataContextTestBase.artistCount,
+            execute(Artist.class, parsed1).size());
 
         Expression parsed2 = Expression.fromString("artistName = null");
         assertEquals(0, execute(Artist.class, parsed2).size());

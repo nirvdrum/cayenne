@@ -56,18 +56,13 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
 import org.objectstyle.cayenne.ObjectId;
@@ -76,9 +71,7 @@ import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -97,25 +90,11 @@ public class DataContextTestBase extends CayenneTestCase {
         super.setUp();
 
         deleteTestData();
-        populateTables();
+        createTestData("testArtists");
+        createTestData("testGalleries");
 
         context = createDataContext();
         opObserver = new TestOperationObserver();
-    }
-
-    // TODO: deprecate me
-    public String artistName(int ind) {
-        return artistName(ind, false);
-    }
-
-    public String artistName(int ind, boolean padToConstWidth) {
-        String prefix = (padToConstWidth && ind < 10) ? "artist0" : "artist";
-        return prefix + ind;
-    }
-
-    public String galleryName(int ind, boolean padToConstWidth) {
-        String prefix = (padToConstWidth && ind < 10) ? "gallery0" : "gallery";
-        return prefix + ind;
     }
 
     protected Painting fetchPainting(String name, boolean prefetchArtist) {
@@ -150,52 +129,6 @@ public class DataContextTestBase extends CayenneTestCase {
         return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
     }
 
-    protected int safeId(int i) {
-        // something in the range that we are unlikely to hit
-        return 33000 + i;
-    }
-
-    /** Give each artist a single painting. */
-    public void populatePaintings() throws Exception {
-        String insertPaint =
-            "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (?, ?, ?, ?)";
-
-        Connection conn = getConnection();
-
-        try {
-            conn.setAutoCommit(false);
-
-            PreparedStatement stmt = conn.prepareStatement(insertPaint);
-
-            for (int i = 1; i <= artistCount; i++) {
-                stmt.setInt(1, safeId(i));
-                stmt.setString(2, "P_" + artistName(i));
-                stmt.setInt(3, safeId(i));
-                stmt.setBigDecimal(4, new BigDecimal(i * 1000));
-                stmt.executeUpdate();
-            }
-
-            stmt.close();
-            conn.commit();
-        }
-        finally {
-            conn.close();
-        }
-    }
-
-    public void populateGalleries() throws Exception {
-        List galleries = new ArrayList(2);
-        galleries.add(
-            new SqlModifyQuery(
-                Gallery.class,
-                "insert into GALLERY (GALLERY_ID, GALLERY_NAME) values (1, 'g1')"));
-        galleries.add(
-            new SqlModifyQuery(
-                Gallery.class,
-                "insert into GALLERY (GALLERY_ID, GALLERY_NAME) values (2, 'g2')"));
-        context.performQueries(galleries, new DefaultOperationObserver());
-    }
-
     public void populateExhibits() throws Exception {
         String insertPaint =
             "INSERT INTO EXHIBIT (EXHIBIT_ID, GALLERY_ID, OPENING_DATE, CLOSING_DATE) VALUES (?, ?, ?, ?)";
@@ -210,7 +143,7 @@ public class DataContextTestBase extends CayenneTestCase {
 
             for (int i = 1; i <= 2; i++) {
                 stmt.setInt(1, i);
-                stmt.setInt(2, i);
+                stmt.setInt(2, 33000 + i);
                 stmt.setTimestamp(3, now);
                 stmt.setTimestamp(4, now);
                 stmt.executeUpdate();
@@ -224,51 +157,20 @@ public class DataContextTestBase extends CayenneTestCase {
         }
     }
 
-    // TODO: deprecate me
-    public void populateTables() throws Exception {
-        populateTables(false);
-    }
+    /**
+     * Helper method that takes one of the artists from the standard
+     * dataset (always the same one) and creates a new painting for this artist,
+     * committing it to the database. Both Painting and Artist will be cached in current
+     * DataContext.
+     */
+    protected Painting insertPaintingInContext(String paintingName) {
+        Painting painting = (Painting) context.createAndRegisterNewObject("Painting");
+        painting.setPaintingTitle(paintingName);
+        painting.setToArtist(fetchArtist("artist2", false));
 
-    public void populateTables(boolean padToConstWidth) throws Exception {
-        String insertArtist =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+        context.commitChanges();
 
-        Connection conn = getConnection();
-
-        try {
-            conn.setAutoCommit(false);
-
-            PreparedStatement stmt = conn.prepareStatement(insertArtist);
-            long dateBase = System.currentTimeMillis();
-
-            for (int i = 1; i <= artistCount; i++) {
-                // create ID's somewhere outside the range that we can reach
-                stmt.setInt(1, safeId(i));
-                stmt.setString(2, artistName(i, padToConstWidth));
-                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
-                stmt.executeUpdate();
-            }
-
-            stmt.close();
-            conn.commit();
-
-            String insertGal =
-                "INSERT INTO GALLERY (GALLERY_ID, GALLERY_NAME) VALUES (?,?)";
-            stmt = conn.prepareStatement(insertGal);
-
-            for (int i = 1; i <= galleryCount; i++) {
-                // create ID's somewhere outside the range that we can reach
-                stmt.setInt(1, safeId(i));
-                stmt.setString(2, galleryName(i, padToConstWidth));
-                stmt.executeUpdate();
-            }
-
-            stmt.close();
-            conn.commit();
-        }
-        finally {
-            conn.close();
-        }
+        return painting;
     }
 
     /**
@@ -296,43 +198,6 @@ public class DataContextTestBase extends CayenneTestCase {
             ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
         getNode().performQueries(
             Collections.singletonList(deleteQuery),
-            new DefaultOperationObserver());
-    }
-
-    /**
-     * Helper method that takes one of the artists from the standard
-     * dataset (always the same one) and creates a new painting for this artist,
-     * committing it to the database. Both Painting and Artist will be cached in current
-     * DataContext.
-     */
-    protected Painting insertPaintingInContext(String paintingName) {
-        Painting painting = (Painting) context.createAndRegisterNewObject("Painting");
-        painting.setPaintingTitle(paintingName);
-        painting.setToArtist(fetchArtist("artist2", false));
-
-        context.commitChanges();
-
-        return painting;
-    }
-
-    protected void insertPaintingBypassingContext(
-        String paintingName,
-        String artistName) {
-
-        Artist artist = fetchArtist(artistName, false);
-
-        Map snapshot = new HashMap();
-        snapshot.put("ARTIST_ID", artist.getObjectId().getValueForAttribute("ARTIST_ID"));
-        snapshot.put("PAINTING_TITLE", paintingName);
-
-        ObjectId oid = new ObjectId(Painting.class, "PAINTING_ID", 10);
-        InsertQuery ins = new InsertQuery();
-        ins.setRoot(Painting.class);
-        ins.setObjectSnapshot(snapshot);
-        ins.setObjectId(oid);
-
-        getNode().performQueries(
-            Collections.singletonList(ins),
             new DefaultOperationObserver());
     }
 }
