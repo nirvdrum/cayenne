@@ -166,14 +166,25 @@ class ContextCommit {
                 insObjects,
                 updObjects,
                 delObjects);
-        if (context.isTransactionEventsEnabled())
+
+        if (context.isTransactionEventsEnabled()) {
             observer.registerForDataContextEvents();
+        }
+
         try {
             context.fireWillCommit();
+
             for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
                 DataNodeCommitHelper nodeHelper =
                     (DataNodeCommitHelper) i.next();
                 List queries = nodeHelper.getQueries();
+
+                // Andrei: this check is needed, since if we run an empty query set,
+                // commit will not be executed, and this method will blow below.
+                if (queries.size() == 0) {
+                    continue;
+                }
+                
                 nodeHelper.getNode().performQueries(queries, observer);
 
                 if (observer.isTransactionRolledback()) {
@@ -188,8 +199,9 @@ class ContextCommit {
             context.clearFlattenedUpdateQueries();
             context.fireTransactionCommitted();
         } finally {
-            if (context.isTransactionEventsEnabled())
+            if (context.isTransactionEventsEnabled()) {
                 observer.unregisterFromDataContextEvents();
+            }
         }
     }
 
@@ -667,14 +679,14 @@ class ContextCommit {
             List delObjects) {
             super(logLevel, context, insObjects, updObjects, delObjects);
         }
-        public boolean useAutoCommit() {
-            return false;
-        }
-        public void transactionCommitted() {
-            transactionCommittedImpl();
-        }
+
         public List orderQueries(DataNode aNode, List queryList) {
             return queryList;
+        }
+
+        public void transactionCommitted() {
+            logObj.debug("transaction committed");
+            transactionCommitted = true;
         }
     }
 }

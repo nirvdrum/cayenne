@@ -77,143 +77,140 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class DefaultOperationObserver implements OperationObserver {
-	private static Logger logObj = Logger.getLogger(DefaultOperationObserver.class);
+    private static Logger logObj =
+        Logger.getLogger(DefaultOperationObserver.class);
 
-	public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
+    public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
 
-	protected List globalExceptions = new ArrayList();
-	protected Map queryExceptions = new HashMap();
-	protected boolean transactionCommitted;
-	protected boolean transactionRolledback;
-	protected Level loggingLevel = DEFAULT_LOG_LEVEL;
+    protected List globalExceptions = new ArrayList();
+    protected Map queryExceptions = new HashMap();
+    protected boolean transactionCommitted;
+    protected boolean transactionRolledback;
+    protected Level loggingLevel = DEFAULT_LOG_LEVEL;
 
-	/**
-	 * Prints the information about query and global exceptions. */
-	public void printExceptions(PrintWriter out) {
-		if (globalExceptions.size() > 0) {
-			if (globalExceptions.size() == 1) {
-				out.println("Global Exception:");
-			} else {
-				out.println("Global Exceptions:");
-			}
+    /**
+     * Prints the information about query and global exceptions. */
+    public void printExceptions(PrintWriter out) {
+        if (globalExceptions.size() > 0) {
+            if (globalExceptions.size() == 1) {
+                out.println("Global Exception:");
+            } else {
+                out.println("Global Exceptions:");
+            }
 
-			Iterator it = globalExceptions.iterator();
-			while (it.hasNext()) {
-				Throwable th = (Throwable) it.next();
-				th.printStackTrace(out);
-			}
-		}
+            Iterator it = globalExceptions.iterator();
+            while (it.hasNext()) {
+                Throwable th = (Throwable) it.next();
+                th.printStackTrace(out);
+            }
+        }
 
-		if (queryExceptions.size() > 0) {
-			if (queryExceptions.size() == 1) {
-				out.println("Query Exception:");
-			} else {
-				out.println("Query Exceptions:");
-			}
+        if (queryExceptions.size() > 0) {
+            if (queryExceptions.size() == 1) {
+                out.println("Query Exception:");
+            } else {
+                out.println("Query Exceptions:");
+            }
 
-			Iterator it = queryExceptions.keySet().iterator();
-			while (it.hasNext()) {
-				Throwable th = (Throwable) queryExceptions.get(it.next());
-				th.printStackTrace(out);
-			}
-		}
-	}
-
-	/** Returns a list of global exceptions that occured during data operation run. */
-	public List getGlobalExceptions() {
-		return globalExceptions;
-	}
-
-	/** Returns a list of exceptions that occured during data operation run by query. */
-	public Map getQueryExceptions() {
-		return queryExceptions;
-	}
-
-	/** Returns <code>true</code> if at least one exception was registered
-	  * during query execution. */
-	public boolean hasExceptions() {
-		return globalExceptions.size() > 0 || queryExceptions.size() > 0;
-	}
-
-	public boolean isTransactionCommitted() {
-		return transactionCommitted;
-	}
-
-	public boolean isTransactionRolledback() {
-		return transactionRolledback;
-	}
-
-	/**
-	 * Returns a log level level that should be used when
-	 * logging query execution.
-	 */
-	public Level getLoggingLevel() {
-		return loggingLevel;
-	}
-
-	/**
-	 * Sets log level that should be used for queries.
-	 * If <code>level</code> argument is null, level is set to
-	 * DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
-	 * than log level configured for QueryLogger, query SQL statements
-	 * will be logged.
-	 */
-	public void setLoggingLevel(Level level) {
-		this.loggingLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
-	}
-
-	public void nextCount(Query query, int resultCount) {
-		logObj.debug("update count: " + resultCount);
-	}
-
-	public void nextDataRows(Query query, List dataRows) {
-		int count = (dataRows == null) ? -1 : dataRows.size();
-		logObj.debug("result count: " + count);
-	}
-
-	public void nextDataRows(Query q, ResultIterator it) {
-		logObj.debug("result: (iterator)");
-	}
-
-	public void nextQueryException(Query query, Exception ex) {
-		logObj.log(Level.WARN, "query exception", ex);
-		queryExceptions.put(query, ex);
-	}
-
-	public void nextGlobalException(Exception ex) {
-		logObj.log(Level.WARN, "global exception", ex);
-		globalExceptions.add(ex);
-	}
-
-	public void transactionCommitted() {
-		transactionCommittedImpl();
-	}
-
-	public void transactionRolledback() {
-		logObj.debug("*** transaction rolled back");
-		transactionRolledback = true;
-	}
-
-    protected final void transactionCommittedImpl() {
-        logObj.debug("transaction committed");
-		transactionCommitted = true;
+            Iterator it = queryExceptions.keySet().iterator();
+            while (it.hasNext()) {
+                Throwable th = (Throwable) queryExceptions.get(it.next());
+                th.printStackTrace(out);
+            }
+        }
     }
 
-	/** Returns <code>true</code> so that individual queries are executed in separate
-	 *  transactions. */
-	public boolean useAutoCommit() {
-		return true;
-	}
+    /** Returns a list of global exceptions that occured during data operation run. */
+    public List getGlobalExceptions() {
+        return globalExceptions;
+    }
 
-	/** Returns query list without altering its ordering. */
-	public List orderQueries(DataNode aNode, List queryList) {
-		return queryList;
-	}
+    /** Returns a list of exceptions that occured during data operation run by query. */
+    public Map getQueryExceptions() {
+        return queryExceptions;
+    }
 
-	/**
-	 * Returns <code>false</code>.
-	 */
-	public boolean isIteratedResult() {
-		return false;
-	}
+    /** Returns <code>true</code> if at least one exception was registered
+      * during query execution. */
+    public boolean hasExceptions() {
+        return globalExceptions.size() > 0 || queryExceptions.size() > 0;
+    }
+
+    public boolean isTransactionCommitted() {
+        return transactionCommitted;
+    }
+
+    public boolean isTransactionRolledback() {
+        return transactionRolledback;
+    }
+
+    /**
+     * Returns a log level level that should be used when
+     * logging query execution.
+     */
+    public Level getLoggingLevel() {
+        return loggingLevel;
+    }
+
+    /**
+     * Sets log level that should be used for queries.
+     * If <code>level</code> argument is null, level is set to
+     * DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
+     * than log level configured for QueryLogger, query SQL statements
+     * will be logged.
+     */
+    public void setLoggingLevel(Level level) {
+        this.loggingLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
+    }
+
+    public void nextCount(Query query, int resultCount) {
+        logObj.debug("update count: " + resultCount);
+    }
+
+    public void nextDataRows(Query query, List dataRows) {
+        int count = (dataRows == null) ? -1 : dataRows.size();
+        logObj.debug("result count: " + count);
+    }
+
+    public void nextDataRows(Query q, ResultIterator it) {
+        logObj.debug("result: (iterator)");
+    }
+
+    public void nextQueryException(Query query, Exception ex) {
+        logObj.log(Level.WARN, "query exception", ex);
+        queryExceptions.put(query, ex);
+    }
+
+    public void nextGlobalException(Exception ex) {
+        logObj.log(Level.WARN, "global exception", ex);
+        globalExceptions.add(ex);
+    }
+
+    public void transactionCommitted() {
+        logObj.debug("transaction committed");
+        transactionCommitted = true;
+    }
+
+    public void transactionRolledback() {
+        logObj.debug("*** transaction rolled back");
+        transactionRolledback = true;
+    }
+
+    /** Returns <code>true</code> so that individual queries are executed in separate
+     *  transactions. */
+    public boolean useAutoCommit() {
+        return true;
+    }
+
+    /** Returns query list without altering its ordering. */
+    public List orderQueries(DataNode aNode, List queryList) {
+        return queryList;
+    }
+
+    /**
+     * Returns <code>false</code>.
+     */
+    public boolean isIteratedResult() {
+        return false;
+    }
 }
