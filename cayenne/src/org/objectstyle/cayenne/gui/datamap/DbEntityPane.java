@@ -83,6 +83,8 @@ implements DocumentListener, ActionListener, DbEntityDisplayListener
 	JLabel		schemaLabel;
 	JTextField	schema;
 	JButton 	remove;
+	/** Cludge to prevent marking data map as dirty during initial load. */
+	private boolean ignoreChange = false;
 	
 	public DbEntityPane(Mediator temp_mediator) {
 		super();		
@@ -146,6 +148,8 @@ implements DocumentListener, ActionListener, DbEntityDisplayListener
 	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
 
 	private void textFieldChanged(DocumentEvent e) {
+		if (ignoreChange)
+			return;
 		Document doc = e.getDocument();
 		DataMap map = mediator.getCurrentDataMap();
 		DbEntity current_entity = mediator.getCurrentDbEntity();
@@ -169,9 +173,11 @@ implements DocumentListener, ActionListener, DbEntityDisplayListener
 		DbEntity entity = (DbEntity)e.getEntity();
 		if (null == entity) 
 			return;
+		ignoreChange = true;
 		name.setText(entity.getName());
 		oldName = entity.getName();
 		catalog.setText(entity.getCatalog() != null ? entity.getCatalog() : "");
 		schema.setText(entity.getSchema() != null ? entity.getSchema() : "");
+		ignoreChange = false;
 	}	
 }

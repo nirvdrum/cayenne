@@ -161,10 +161,10 @@ public class Mediator
 	/** Resets all current models to null. */
 	private void clearState() {
 		currentDomain 	= null;
-		currentNode 		= null;
-		currentMap = null;	
-		currentObjEntity 	= null;
-		currentDbEntity  	= null;
+		currentNode 	= null;
+		currentMap 		= null;	
+		currentObjEntity= null;
+		currentDbEntity = null;
 	}
 	
 	/** Makes data map current. This means also clearing the current
@@ -280,7 +280,7 @@ public class Mediator
 	/** Informs all listeners of the DomainEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDomainEvent(DomainEvent e) {
-		dirty = true;
+		setDirty(true);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DomainListener");
 		for (int i = 0; i < list.length; i++) {
@@ -670,7 +670,7 @@ public class Mediator
 	public void removeDomain(Object src, DataDomain domain) {
 		config.removeDomain(domain.getName());
 		dirtyDomains.remove(domain);
-		dirty = true;
+		setDirty(true);
 		java.util.List list = domain.getMapList();
 		Iterator iter = list.iterator();
 		while (iter.hasNext())
@@ -719,40 +719,40 @@ public class Mediator
 		return list;
 	}
 	
+	public void setDirty(boolean temp_dirty) {
+		dirty = temp_dirty;
+	}
+	
 	public void setDirty(DataMap map) {
 		if (dirtyMaps.contains(map))
 			return;
 		dirtyMaps.add(map);
-		dirty = true;
+		setDirty(true);
 	}
 
 	public void setDirty(DataNode node) {
 		if (dirtyNodes.contains(node))
 			return;
 		dirtyNodes.add(node);
-		dirty = true;
+		setDirty(true);
 	}
 
 	public void setDirty(DataDomain domain) {
 		if (dirtyDomains.contains(domain))
 			return;
 		dirtyDomains.add(domain);
-		dirty = true;
+		setDirty(true);
 	}
 	
-	public ArrayList getDirtyDataMaps()
-	{
+	public ArrayList getDirtyDataMaps(){
 		return dirtyMaps;
 	}
 
-	public ArrayList getDirtyDataNodes()
-	{
+	public ArrayList getDirtyDataNodes(){
 		return dirtyNodes;
 	}
 
-	public ArrayList getDirtyDomains()
-	{
+	public ArrayList getDirtyDomains(){
 		return dirtyDomains;
 	}
-
 }

@@ -61,27 +61,33 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.logging.*;
+
 import org.objectstyle.cayenne.access.*;
+import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.gui.util.PreferenceField;
 
 
 public class DbLoginPanel extends JDialog implements ActionListener {
     static Logger logObj = Logger.getLogger(DbLoginPanel.class.getName());
 
 
-    private static void disableVKEvents(JTextField txtField) {
+    private static void disableVKEvents(JTextComponent txtField) {
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
         Keymap map = txtField.getKeymap();
         map.removeKeyStrokeBinding(enter);
     }
 
+    private static void disableVKEvents(PreferenceField prefField) {
+    }
+
 
     protected DataSourceInfo dataSrcInfo;
 
-    protected JTextField unInput;
+    protected PreferenceField unInput;
     protected JPasswordField pwdInput;
-    protected JTextField drInput;
-    protected JTextField urlInput;
-    protected JTextField adapterInput;
+    protected PreferenceField drInput;
+    protected PreferenceField urlInput;
+    protected PreferenceField adapterInput;
 
     protected JButton ok;
 	protected JButton cancel;
@@ -100,8 +106,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 
 
         // input fields go here
-        JPanel inputPanel = new JPanel();
-        initInputArea(inputPanel);
+        JPanel inputPanel = initInputArea();
         pane.add(inputPanel, BorderLayout.CENTER);
 
 
@@ -140,86 +145,43 @@ public class DbLoginPanel extends JDialog implements ActionListener {
     }
 
 
-    protected void initInputArea(JPanel panel) {
-        panel.setBorder(BorderFactory.createEmptyBorder(3, 20, 3, 10));
-
-        GridBagLayout gbl = new GridBagLayout();
-        panel.setLayout(gbl);
-
-        GridBagConstraints cstr = new GridBagConstraints();
-        cstr.ipadx = 3;
-        cstr.ipady = 3;
-        cstr.insets = new Insets(2, 2, 2, 2);
-
+    protected JPanel initInputArea() {
         // user name line
         JLabel unLabel = new JLabel("User Name:");
-        cstr.gridwidth = 1;
-        cstr.anchor = GridBagConstraints.EAST;
-        gbl.setConstraints(unLabel, cstr);
-        panel.add(unLabel);
-
-        unInput = new JTextField(25);
+        unInput = new PreferenceField(Preferences.USER_NAME);
         disableVKEvents(unInput);
-        cstr.gridwidth = GridBagConstraints.REMAINDER;
-        cstr.anchor = GridBagConstraints.CENTER;
-        gbl.setConstraints(unInput, cstr);
-        panel.add(unInput);
-
         // password line
         JLabel pwdLabel = new JLabel("Password:");
-        cstr.gridwidth = 1;
-        cstr.anchor = GridBagConstraints.EAST;
-        gbl.setConstraints(pwdLabel, cstr);
-        panel.add(pwdLabel);
-
         pwdInput = new JPasswordField(25);
         disableVKEvents(pwdInput);
-        cstr.gridwidth = GridBagConstraints.REMAINDER;
-        cstr.anchor = GridBagConstraints.CENTER;
-        gbl.setConstraints(pwdInput, cstr);
-        panel.add(pwdInput);
-
         // JDBC driver line
         JLabel drLabel = new JLabel("JDBC Driver Class:");
-        cstr.gridwidth = 1;
-        cstr.anchor = GridBagConstraints.EAST;
-        gbl.setConstraints(drLabel, cstr);
-        panel.add(drLabel);
-
-        drInput = new JTextField(25);
+        drInput = new PreferenceField(Preferences.JDBC_DRIVER);
         disableVKEvents(drInput);
-        cstr.gridwidth = GridBagConstraints.REMAINDER;
-        cstr.anchor = GridBagConstraints.CENTER;
-        gbl.setConstraints(drInput, cstr);
-        panel.add(drInput);
-
         // Database URL line
         JLabel urlLabel = new JLabel("Database URL:");
-        cstr.gridwidth = 1;
-        cstr.anchor = GridBagConstraints.EAST;
-        gbl.setConstraints(urlLabel, cstr);
-        panel.add(urlLabel);
-
-        urlInput = new JTextField(25);
+        urlInput = new PreferenceField(Preferences.DB_URL);
         disableVKEvents(urlInput);
-        cstr.gridwidth = GridBagConstraints.REMAINDER;
-        cstr.anchor = GridBagConstraints.CENTER;
-        gbl.setConstraints(urlInput, cstr);
-        panel.add(urlInput);
-
         // Adapter class line
         JLabel adapterLabel = new JLabel("RDBMS Adapter:");
-        cstr.gridwidth = 1;
-        cstr.anchor = GridBagConstraints.EAST;
-        gbl.setConstraints(adapterLabel, cstr);
-        panel.add(adapterLabel);
-
-        adapterInput = new JTextField(25);
+        adapterInput = new PreferenceField(Preferences.RDBMS_ADAPTER);
         disableVKEvents(adapterInput);
-        cstr.gridwidth = GridBagConstraints.REMAINDER;
-        cstr.anchor = GridBagConstraints.CENTER;
-        gbl.setConstraints(adapterInput, cstr);
-        panel.add(adapterInput);
+        
+        Component[] left = new Component[5];
+        left[0] = unLabel;
+        left[1] = pwdLabel;
+        left[2] = drLabel;
+        left[3] = urlLabel;
+        left[4] = adapterLabel;
+        
+        Component[] right = new Component[5];
+        right[0] = unInput;
+        right[1] = pwdInput;
+        right[2] = drInput;
+        right[3] = urlInput;
+        right[4] = adapterInput;
+        
+        return PanelFactory.createForm(left, right, 5, 5, 5, 5);
     }
 
 
@@ -286,6 +248,11 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 
             if(dataSrcInfo.getMaxConnections() < dataSrcInfo.getMinConnections())
                 dataSrcInfo.setMaxConnections(dataSrcInfo.getMinConnections());
+                
+            unInput.storePreferences();
+            drInput.storePreferences();
+            urlInput.storePreferences();
+            adapterInput.storePreferences();
         }
         else if (e.getSource() == cancel) {
         	setDataSrcInfo(null);

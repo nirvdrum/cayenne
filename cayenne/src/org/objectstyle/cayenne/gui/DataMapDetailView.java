@@ -85,6 +85,9 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 	JTextField	location;
 	JButton		fileBtn;	
 	
+	/** Cludge to prevent marking map as dirty during initial load. */
+	private boolean ignoreChange = false;
+	
 	public DataMapDetailView(Mediator temp_mediator) {
 		super();		
 		mediator = temp_mediator;
@@ -144,6 +147,8 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
 
 	private void textFieldChanged(DocumentEvent e) {
+		if (ignoreChange)
+			return;
 		DataMap map = mediator.getCurrentDataMap();
 		DataMapEvent event;
 		if (e.getDocument() == name.getDocument()) {
@@ -157,6 +162,8 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 			oldName = new_name;
 		}// End changedName
 		else if (e.getDocument() == location.getDocument()) {
+			if (map.getLocation().equals(location.getText()))
+				return;
 			map.setLocation(location.getText());
 			event = new DataMapEvent(this, map);
 			mediator.fireDataMapEvent(event);
@@ -222,9 +229,13 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 	
 	public void currentDataMapChanged(DataMapDisplayEvent e) {
 		DataMap map = e.getDataMap();
+		if (null == map)
+			return;
 		oldName = map.getName();
+		ignoreChange = true;
 		name.setText(oldName);
 		location.setText(map.getLocation());
+		ignoreChange = false;
 	}
 
 } // End class DataMapDetailView

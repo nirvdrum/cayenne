@@ -61,32 +61,42 @@ import org.objectstyle.cayenne.map.*;
 /** Class for generating "Untitled" names for Attributes and Relationships.
  *  Also does name verifications of the existing names. */
 public class NameGenerator {
+	private static int domainCounter = 1;
+	private static int dataMapCounter = 1;
 	private static int dataNodeCounter = 1;
 	private static int objAttributeCounter = 1;
 	private static int dbAttributeCounter = 1;
 	private static int objRelationshipCounter = 1;
 	private static int dbRelationshipCounter = 1;
 
+	public static String getDomainName() {
+		return "UntitledDomain" + domainCounter++;
+	}
+
+	public static String getDataMapName() {
+		return "UntitledMap" + dataMapCounter++;
+	}
+
 	public static String getDataNodeName() {
-		return "Untitled" + dataNodeCounter++;
+		return "UntitledDataSrc" + dataNodeCounter++;
 	}
 
 	
 	public static String getObjAttributeName() {
-		return "Untitled" + objAttributeCounter++;
+		return "UntitledObjAttr" + objAttributeCounter++;
 	}
 
 	public static String getDbAttributeName() {
-		return "Untitled" + dbAttributeCounter++;
+		return "UntitledDbAttr" + dbAttributeCounter++;
 	}
 
 
 	public static String getObjRelationshipName() {
-		return "Untitled" + objRelationshipCounter++;
+		return "UntitledObjRel" + objRelationshipCounter++;
 	}
 
 	public static String getDbRelationshipName() {
-		return "Untitled" + dbRelationshipCounter++;
+		return "UntitledDbRel" + dbRelationshipCounter++;
 	}
 
 

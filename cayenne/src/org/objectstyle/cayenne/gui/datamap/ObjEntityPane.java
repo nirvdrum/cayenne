@@ -85,6 +85,8 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 	JComboBox	dbName;
 	JButton		dbNew;
 	JButton		dbGenerate;
+	/** Cludge to prevent marking data map as dirty during initial load. */
+	private boolean ignoreChange = false;
 	
 	public ObjEntityPane(Mediator temp_mediator) {
 		super();		
@@ -202,6 +204,8 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
 
 	private void textFieldChanged(DocumentEvent e) {
+		if (ignoreChange)
+			return;
 		Document doc = e.getDocument();
 		DataMap map = mediator.getCurrentDataMap();
 		ObjEntity current_entity = mediator.getCurrentObjEntity();
@@ -222,6 +226,7 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		ObjEntity entity = (ObjEntity)e.getEntity();
 		if (null == entity) 
 			return;
+		ignoreChange = true;
 		name.setText(entity.getName());
 		oldName = entity.getName();
 		className.setText(entity.getClassName() != null ? entity.getClassName() : "");
@@ -230,6 +235,7 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		DefaultComboBoxModel combo_model;
 		combo_model = createComboBoxModel(entity.getDbEntity());
 		dbName.setModel(combo_model);
+		ignoreChange = false;
 	}
 	
 	/** Creates DefaultComboBoxModel from the list of DbEntities.

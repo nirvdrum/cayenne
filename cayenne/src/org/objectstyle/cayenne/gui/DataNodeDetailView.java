@@ -110,6 +110,10 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	JLabel			maxConnectionsLabel;
 	// FIXME!!! Need to restrict only to numbers
 	JTextField		maxConnections;
+
+	/** Cludge to prevent marking domain as dirty during initial load. */
+	private boolean ignoreChange = false;
+
 	
 	public DataNodeDetailView(Mediator temp_mediator) {
 		super();		
@@ -226,6 +230,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
 
 	private void textFieldChanged(DocumentEvent e) {
+		if (ignoreChange)
+			return;
 		DataNode node = mediator.getCurrentDataNode();
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		DataSourceInfo info = src.getDataSourceInfo();
@@ -324,7 +330,6 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
             FileSystemViewDecorator file_view;
             file_view = new FileSystemViewDecorator(proj_dir);
             fc = new JFileChooser(file_view);
-            fc.setFileFilter(new DirectoryFilter());
             fc.setDialogType(JFileChooser.SAVE_DIALOG);
             fc.setDialogTitle("Data Node location");
 			fc.setFileSelectionMode(JFileChooser.FILES_ONLY );
@@ -365,8 +370,11 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
 		DataNode node = e.getDataNode();
+		if (null == node)
+			return;
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		oldName = node.getName();
+		ignoreChange = true;
 		name.setText(oldName);
 		location.setText(node.getDataSourceLocation());
 		populateFactory(node.getDataSourceFactory());
@@ -376,6 +384,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		else populateDbAdapter("");
 		DataSourceInfo info = src.getDataSourceInfo();
 		populateDataSourceInfo(info);
+		ignoreChange = false;;
 	}
 	
 	private void populateDbAdapter(String selected_class){
@@ -428,6 +437,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 				model.setSelectedItem(selected_class);
 			}
 		}// End if there is factory to select
+		else 
+			model.setSelectedItem(null);
 		factory.setModel(model);
 	}
 	

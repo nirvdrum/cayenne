@@ -161,12 +161,17 @@ implements ActionListener
 		createDbEntityBtn.addActionListener(this);
 		removeBtn.addActionListener(this);
 	
-	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     	setSize(650, 550);
     	
     	this.addWindowListener(new WindowAdapter() {
     		public void windowClosing(WindowEvent e) {
+    			if (!checkSaveOnClose())
+    				return;
     			Preferences.getPreferences().storePreferences(Editor.this);
+    			Editor.this.setVisible(false);
+    			Editor.this.dispose();
+    			System.exit(0);
     		}
     	});
     }
@@ -177,6 +182,21 @@ implements ActionListener
 			frame = new Editor();
 		}
 		return frame;
+	}
+
+	/** Return false if cancel closing the window, true otherwise. */
+	private boolean checkSaveOnClose() {
+		if (mediator.isDirty()) 
+		{
+			int ret_code = JOptionPane.showConfirmDialog(this
+											, "You have unsaved data. "
+											+ "Do you want to save it?");
+			if (ret_code == JOptionPane.CANCEL_OPTION)
+				return false;
+			else if (ret_code == JOptionPane.YES_OPTION)
+				saveAll();
+		}
+		return true;	
 	}
 
     private void init() {
@@ -217,37 +237,37 @@ implements ActionListener
     	String path = "org/objectstyle/gui/";
     	
     	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
-    	URL url = cl.getResource(path + "images/domain24_grey.gif");
+    	URL url = cl.getResource(path + "images/domain24.jpg");
         ImageIcon domainIcon = new ImageIcon(url);
         createDomainBtn = new JButton(domainIcon);
         createDomainBtn.setToolTipText("Create new domain");
         toolBar.add(createDomainBtn);
         
-    	url = cl.getResource(path + "images/node24_grey.gif");
+    	url = cl.getResource(path + "images/node24.jpg");
     	ImageIcon nodeIcon = new ImageIcon(url);
     	createDataSourceBtn = new JButton(nodeIcon);
     	createDataSourceBtn.setToolTipText("Create new data node");
         toolBar.add(createDataSourceBtn);
     	
-    	url = cl.getResource(path + "images/map24_grey.gif");
+    	url = cl.getResource(path + "images/map24.jpg");
     	ImageIcon mapIcon = new ImageIcon(url);
     	createDataMapBtn = new JButton(mapIcon);
     	createDataMapBtn.setToolTipText("Create new data map");
         toolBar.add(createDataMapBtn);
     	
-    	url = cl.getResource(path + "images/dbentity24_grey.gif");
+    	url = cl.getResource(path + "images/dbentity24.jpg");
     	ImageIcon dbEntityIcon = new ImageIcon(url);
     	createDbEntityBtn = new JButton(dbEntityIcon);
     	createDbEntityBtn.setToolTipText("Create new db entity");
         toolBar.add(createDbEntityBtn);
     	
-    	url = cl.getResource(path + "images/objentity24_grey.gif");
+    	url = cl.getResource(path + "images/objentity24.jpg");
     	ImageIcon objEntityIcon = new ImageIcon(url);
     	createObjEntityBtn = new JButton(objEntityIcon);
     	createObjEntityBtn.setToolTipText("Create new obj entity");
         toolBar.add(createObjEntityBtn);
     	
-    	url = cl.getResource(path + "images/remove24_grey.gif");
+    	url = cl.getResource(path + "images/remove24.jpg");
     	ImageIcon removeIcon = new ImageIcon(url);
     	removeBtn = new JButton(removeIcon);
     	removeBtn.setToolTipText("Remove current");
@@ -272,7 +292,7 @@ implements ActionListener
         } else if (src == createDomainMenu || src == createDomainBtn) {
             createDomain();
         } else if (src == createDataMapMenu || src == createDataMapBtn) {
-        	mediator.addDataMap(this, new DataMap(DataMapWrapper.sessionUniqueDomainName()));
+        	this.createDataMap();
     	} else if (src == createDataSourceMenu || src == createDataSourceBtn) {
     		createDataNode();
         } else if (src == createObjEntityMenu || src == createObjEntityBtn) {
@@ -302,7 +322,9 @@ implements ActionListener
 	private void remove()
 	{
 		if (context instanceof DataDomain) {
+			mediator.removeDomain(this, (DataDomain)context);
 		} else if (context instanceof DataNode) {
+			mediator.removeDataNode(this, (DataNode)context);
 		} else if (context instanceof DataMap) {
 			mediator.removeDataMap(this, (DataMap)context);
 		} else if (context instanceof DbEntity) {
@@ -403,9 +425,7 @@ implements ActionListener
 				return;
 		}
 		System.out.println("Num of db entities in the map: " + map.getDbEntities().length);
-	    mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.ADD));
-	    mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(this, map
-	    												, mediator.getCurrentDataDomain()));
+		mediator.addDataMap(this, map);
 	}
 
 
@@ -711,6 +731,7 @@ implements ActionListener
 		}// End saving DataNode-s
 		
 		saveProject();
+		mediator.setDirty(false);
 	}
 	
 	private void saveProject() {
@@ -725,6 +746,11 @@ implements ActionListener
 			fw.flush();
 			fw.close();
 			mediator.getDirtyDomains().clear();
+			if (mediator.getDirtyDataMaps().size() <=0 
+				&& mediator.getDirtyDataNodes().size() <=0 ) 
+			{
+				mediator.setDirty(false);
+			}
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -747,6 +773,13 @@ implements ActionListener
 			saver.storeDataMap(pw, map);
 			pw.close();
 			fw.close();
+			mediator.getDirtyDataMaps().remove(map);
+			if (mediator.getDirtyDataMaps().size() <=0 
+				&& mediator.getDirtyDataNodes().size() <=0 
+				&& mediator.getDirtyDomains().size() <= 0) 
+			{
+				mediator.setDirty(false);
+			}
 		} catch (Exception e) {}
 	}
 	
@@ -780,7 +813,7 @@ implements ActionListener
 	}
 
 	private void createDomain() {
-		DataDomain domain = new DataDomain(DataDomainWrapper.sessionUniqueDomainName());
+		DataDomain domain = new DataDomain(NameGenerator.getDomainName());
 		mediator.getConfig().addDomain(domain);
 		mediator.fireDomainEvent(new DomainEvent(this, domain, DomainEvent.ADD));
 		mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
@@ -801,6 +834,54 @@ implements ActionListener
 		domain.addNode(node);
 		mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
 		mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
+	}
+
+
+	private void createDataMap() {
+    	Preferences pref = Preferences.getPreferences();
+       	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
+       	// Data map file 
+   	    File file = null;
+   	    // Map location relative to proj dir
+   	    String relative_location = null;
+        try {
+            String proj_dir_str = mediator.getConfig().getProjDir();
+            File proj_dir = null;
+            if (proj_dir_str != null)
+            	proj_dir = new File(proj_dir_str);
+            JFileChooser fc;
+            FileSystemViewDecorator file_view;
+            file_view = new FileSystemViewDecorator(proj_dir);
+            // Get the data map file name
+            fc = new JFileChooser(file_view);
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fc.setDialogTitle("Enter data map file name");
+            if (null != init_dir) {
+            	File init_dir_file = new File(init_dir);
+            	if (init_dir_file.exists())
+            		fc.setCurrentDirectory(init_dir_file);
+            }
+            int ret_code = fc.showSaveDialog(this);
+            if ( ret_code != JFileChooser.APPROVE_OPTION)
+                return;
+            file = fc.getSelectedFile();
+            if (!file.exists())
+            	file.createNewFile();
+			String new_file_location = file.getAbsolutePath();
+			// If it is set, use path striped of proj dir and following separator
+			// If proj dir not set, use absolute location.
+			if (proj_dir_str == null)
+			 	relative_location = new_file_location;
+			else
+				relative_location 
+					= new_file_location.substring(proj_dir_str.length() + 1);
+        } catch (Exception e) {
+            System.out.println("Error lcreating data map file, " + e.getMessage());
+            e.printStackTrace();
+        }
+		DataMap map = new DataMap(NameGenerator.getDataMapName());
+		map.setLocation(relative_location);
+		mediator.addDataMap(this, map);
 	}
 
 

@@ -365,7 +365,8 @@ public class DbLoader {
       * limit types of tables to read (usually only tables and views are relevant). */
     public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
         throws SQLException {
-        DataMap dataMap = new DataMap("Untitled Map");
+        DataMap dataMap;
+        dataMap = new DataMap(org.objectstyle.cayenne.gui.util.NameGenerator.getDataMapName());
         loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes));
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);

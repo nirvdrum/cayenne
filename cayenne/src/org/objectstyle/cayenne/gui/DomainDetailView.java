@@ -77,6 +77,8 @@ implements DocumentListener, DomainDisplayListener
 	JLabel		nameLabel;
 	JTextField	name;
 	String		oldName;
+	/** Cludge to prevent marking domain as dirty during initial load. */
+	private boolean ignoreChange = false;
 	
 	public DomainDetailView(Mediator temp_mediator) {
 		super();		
@@ -113,11 +115,14 @@ implements DocumentListener, DomainDisplayListener
 	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
 
 	private void textFieldChanged(DocumentEvent e) {
-		String new_name = name.getText();
-		// If name hasn't changed, do nothing
-		if (oldName != null && new_name.equals(oldName))
+		if (ignoreChange)
 			return;
+		String new_name = name.getText();
 		DataDomain domain = mediator.getCurrentDataDomain();
+		// If name hasn't changed, do nothing
+		System.out.println("New name = " + new_name + ", domain name = " + domain.getName());
+		if (new_name.equals(domain.getName()))
+			return;
 		domain.setName(new_name);
 		DomainEvent event;
 		event = new DomainEvent(this, domain, oldName);
@@ -128,7 +133,11 @@ implements DocumentListener, DomainDisplayListener
 	
 	public void currentDomainChanged(DomainDisplayEvent e) {
 		DataDomain domain = e.getDomain();
+		if (null == domain)
+			return;
 		oldName = domain.getName();
+		ignoreChange = true;
 		name.setText(oldName);
+		ignoreChange = false;
 	}
 }

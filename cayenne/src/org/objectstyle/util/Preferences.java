@@ -81,6 +81,14 @@ public class Preferences extends ExtendedProperties
 
 	/** The directory of the cayenne project edited last. */
 	public static final String LAST_DIR = "Editor.lastProject";
+	/** User name */
+	public static final String USER_NAME = "DbLoginPanel.unInput";
+	/** JDBC Driver Class */
+	public static final String JDBC_DRIVER = "DbLoginPanel.drInput";
+	/** Database URL */
+	public static final String DB_URL = "DbLoginPanel.urlInput";
+	/** RDBMS Adapter */
+	public static final String RDBMS_ADAPTER = "DbLoginPanel.adapterInput";
 	
 	private static Preferences preferences;
 
