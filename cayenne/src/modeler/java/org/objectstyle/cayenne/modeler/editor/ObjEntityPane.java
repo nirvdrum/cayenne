@@ -276,14 +276,15 @@ public class ObjEntityPane
 
             ObjEntity ent = mediator.getCurrentObjEntity();
 
-            if (!Util.nullSafeEquals(ent.getClassName(), classText)) {
-
+            // "ent" may be null if we quit editing by changing tree selection
+            if (ent != null && !Util.nullSafeEquals(ent.getClassName(), classText)) {
                 ent.setClassName(classText);
                 mediator.fireObjEntityEvent(new EntityEvent(this, ent));
             }
 
             return true;
         }
+        
         protected boolean verifySuperClassName() {
             String parentClassText = superClassName.getText();
             if (parentClassText != null && parentClassText.trim().length() == 0) {
@@ -292,7 +293,7 @@ public class ObjEntityPane
 
             ObjEntity ent = mediator.getCurrentObjEntity();
 
-            if (!Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
+            if (ent != null && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
                 ent.setSuperClassName(parentClassText);
                 mediator.fireObjEntityEvent(new EntityEvent(this, ent));
             }

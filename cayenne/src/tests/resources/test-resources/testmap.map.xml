@@ -46,6 +46,11 @@
 		<db-attribute name="BLOB_COL" type="BLOB"/>
 		<db-attribute name="BLOB_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="CHAR_FK_TEST">
+		<db-attribute name="FK_COL" type="CHAR" length="10"/>
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
+		<db-attribute name="PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="CHAR_PK_TEST">
 		<db-attribute name="OTHER_COL" type="CHAR" length="10"/>
 		<db-attribute name="PK_COL" type="CHAR" isPrimaryKey="true" isMandatory="true" length="10"/>
@@ -70,6 +75,10 @@
 		<db-attribute name="DATE_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="TIMESTAMP_COLUMN" type="TIMESTAMP"/>
 		<db-attribute name="TIME_COLUMN" type="TIME"/>
+	</db-entity>
+	<db-entity name="DECIMAL_PK_TST">
+		<db-attribute name="DECIMAL_PK" type="DECIMAL" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
 	</db-entity>
 	<db-entity name="DELETE_RULE_TEST1">
 		<db-attribute name="DEL_RULE_TEST1_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -197,6 +206,9 @@
 	<obj-entity name="BlobTest" className="org.objectstyle.art.BlobTest" dbEntityName="BLOB_TEST">
 		<obj-attribute name="blobCol" type="byte[]" db-attribute-path="BLOB_COL"/>
 	</obj-entity>
+	<obj-entity name="CharFkTest" className="org.objectstyle.art.CharFkTest" dbEntityName="CHAR_FK_TEST">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
 	<obj-entity name="CharPkTest" className="org.objectstyle.art.CharPkTest" dbEntityName="CHAR_PK_TEST">
 		<obj-attribute name="otherCol" type="java.lang.String" db-attribute-path="OTHER_COL"/>
 		<obj-attribute name="pkCol" type="java.lang.String" db-attribute-path="PK_COL"/>
@@ -223,6 +235,14 @@
 		<obj-attribute name="dateColumn" type="java.util.Date" db-attribute-path="DATE_COLUMN"/>
 		<obj-attribute name="timeColumn" type="java.util.Date" db-attribute-path="TIME_COLUMN"/>
 		<obj-attribute name="timestampColumn" type="java.util.Date" db-attribute-path="TIMESTAMP_COLUMN"/>
+	</obj-entity>
+	<obj-entity name="DecimalPKTest" className="org.objectstyle.art.DecimalPKTest" dbEntityName="DECIMAL_PK_TST">
+		<obj-attribute name="decimalPK" type="java.math.BigDecimal" db-attribute-path="DECIMAL_PK"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="DecimalPkTest1" className="org.objectstyle.art.DecimalPKTest1" dbEntityName="DECIMAL_PK_TST">
+		<obj-attribute name="decimalPK" type="java.lang.Double" db-attribute-path="DECIMAL_PK"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
 	<obj-entity name="DeleteRuleTest1" className="org.objectstyle.art.DeleteRuleTest1" dbEntityName="DELETE_RULE_TEST1">
 	</obj-entity>
@@ -333,6 +353,12 @@
 	<db-relationship name="toBinaryPKMaster" source="BINARY_PK_TEST2" target="BINARY_PK_TEST1" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="FK_ID" target="BIN_ID"/>
 	</db-relationship>
+	<db-relationship name="toCharPK" source="CHAR_FK_TEST" target="CHAR_PK_TEST" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="FK_COL" target="PK_COL"/>
+	</db-relationship>
+	<db-relationship name="charFKs" source="CHAR_PK_TEST" target="CHAR_FK_TEST" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="PK_COL" target="FK_COL"/>
+	</db-relationship>
 	<db-relationship name="toCompoundPk" source="COMPOUND_FK_TEST" target="COMPOUND_PK_TEST" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="F_KEY1" target="KEY1"/>
 		<db-attribute-pair source="F_KEY2" target="KEY2"/>
@@ -441,6 +467,12 @@
 	</obj-relationship>
 	<obj-relationship name="toBinaryPKMaster" source="BinaryPKTest2" target="BinaryPKTest1" toMany="false">
 		<db-relationship-ref source="BINARY_PK_TEST2" target="BINARY_PK_TEST1" name="toBinaryPKMaster"/>
+	</obj-relationship>
+	<obj-relationship name="toCharPK" source="CharFkTest" target="CharPkTest" toMany="false">
+		<db-relationship-ref source="CHAR_FK_TEST" target="CHAR_PK_TEST" name="toCharPK"/>
+	</obj-relationship>
+	<obj-relationship name="charFKs" source="CharPkTest" target="CharFkTest" toMany="true">
+		<db-relationship-ref source="CHAR_PK_TEST" target="CHAR_FK_TEST" name="charFKs"/>
 	</obj-relationship>
 	<obj-relationship name="toCompoundPk" source="CompoundFkTest" target="CompoundPkTest" toMany="false">
 		<db-relationship-ref source="COMPOUND_FK_TEST" target="COMPOUND_PK_TEST" name="toCompoundPk"/>

@@ -275,7 +275,8 @@ public class SelectObserver extends DefaultOperationObserver {
 
         Class sourceObjectClass = ((DataObject) rootObjects.get(0)).getClass();
         ObjRelationship reverseRelationship = relationship.getReverseRelationship();
-        //Might be used later on... obtain and cast only once
+        
+        // Might be used later on... obtain and cast only once
         DbRelationship dbRelationship =
             (DbRelationship) relationship.getDbRelationships().get(0);
 
@@ -297,7 +298,7 @@ public class SelectObserver extends DefaultOperationObserver {
                         reverseRelationship.getName());
             }
             else {
-                //Reverse relationship doesn't exist... match objects manually
+                // Reverse relationship doesn't exist... match objects manually
                 DataContext context = thisDestinationObject.getDataContext();
                 Map sourcePk =
                     dbRelationship.srcPkSnapshotWithTargetSnapshot(
@@ -307,10 +308,11 @@ public class SelectObserver extends DefaultOperationObserver {
                 sourceObject =
                     context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
             }
-            //Find the list so far for this sourceObject
-            List thisList = (List) toManyLists.get(sourceObject);
-            thisList.add(thisDestinationObject);
 
+            if (sourceObject != null) {
+                List relatedObjects = (List) toManyLists.get(sourceObject);
+                relatedObjects.add(thisDestinationObject);
+            }
         }
 
         // destinationObjects has now been partitioned into a list per

@@ -55,12 +55,18 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.objectstyle.art.BitTest;
+import org.objectstyle.art.DecimalPKTest;
+import org.objectstyle.art.DecimalPKTest1;
 import org.objectstyle.art.SmallintTest;
 import org.objectstyle.art.TinyintTest;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -158,30 +164,58 @@ public class NumericTypesTst extends CayenneTestCase {
         BitTest object = (BitTest) objects.get(0);
         assertEquals(Boolean.TRUE, object.getBitColumn());
     }
-    
-    
+
     // mapping bit as an integer doesn't work on most databases (except for MySQL, as always),
     // this test case is commented out just in case we need to do more testing with it
     /*
-
+    
     public void testNumericBit() throws Exception {
-
+    
         // populate (testing insert as well)
         BitNumberTest trueObject = (BitNumberTest) context.createAndRegisterNewObject("BitNumberTest");
         trueObject.setBitColumn(new Integer(1));
         BitNumberTest falseObject = (BitNumberTest) context.createAndRegisterNewObject("BitNumberTest");
         falseObject.setBitColumn(new Integer(0));
         context.commitChanges();
-
+    
         // this will clear cache as a side effect
         context = createDataContext();
-
+    
         Expression qual = ExpressionFactory.matchExp("bitColumn", new Integer(1));
         List objects = context.performQuery(new SelectQuery(BitNumberTest.class, qual));
         assertEquals(1, objects.size());
-
+    
         BitNumberTest object = (BitNumberTest) objects.get(0);
         assertEquals(new Integer(1), object.getBitColumn());
     } */
 
+    public void testDecimalPK() throws Exception {
+
+        // populate (testing insert as well)
+        DecimalPKTest object =
+            (DecimalPKTest) context.createAndRegisterNewObject(DecimalPKTest.class);
+
+        object.setName("o1");
+        object.setDecimalPK(new BigDecimal("1.25"));
+        context.commitChanges();
+
+        Map map = Collections.singletonMap("DECIMAL_PK", new BigDecimal("1.25"));
+        ObjectId syntheticId = new ObjectId(DecimalPKTest.class, map);
+        assertSame(object, context.registeredObject(syntheticId));
+    }
+
+    public void testDecimalPK1() throws Exception {
+
+        // populate (testing insert as well)
+        DecimalPKTest1 object =
+            (DecimalPKTest1) context.createAndRegisterNewObject(DecimalPKTest1.class);
+
+        object.setName("o2");
+        object.setDecimalPK(new Double(1.25));
+        context.commitChanges();
+
+        Map map = Collections.singletonMap("DECIMAL_PK", new Double(1.25));
+        ObjectId syntheticId = new ObjectId(DecimalPKTest1.class, map);
+        assertSame(object, context.registeredObject(syntheticId));
+    }
 }

@@ -58,12 +58,16 @@ package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.CharFkTest;
+import org.objectstyle.art.CharPkTest;
 import org.objectstyle.art.CompoundFkTest;
 import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.art.Exhibit;
@@ -80,6 +84,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 
@@ -87,10 +92,12 @@ import org.objectstyle.cayenne.query.SqlModifyQuery;
  * @author Andrei Adamchik
  */
 public class DataContextPrefetchTst extends DataContextTestBase {
+    private static Logger logObj = Logger.getLogger(DataContextPrefetchTst.class);
+
     /**
-	 * Test that all queries specified in prefetch are executed with a single
-	 * prefetch path.
-	 */
+     * Test that all queries specified in prefetch are executed with a single
+     * prefetch path.
+     */
     public void testPrefetch1() throws Exception {
         Expression e = ExpressionFactory.matchExp("artistName", "a");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -103,9 +110,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test that all queries specified in prefetch are executed in a more
-	 * complex prefetch scenario.
-	 */
+     * Test that all queries specified in prefetch are executed in a more
+     * complex prefetch scenario.
+     */
     public void testPrefetch2() throws Exception {
         Expression e = ExpressionFactory.matchExp("artistName", "a");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -120,9 +127,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test that all queries specified in prefetch are executed in a more
-	 * complex prefetch scenario with no reverse obj relationships
-	 */
+     * Test that all queries specified in prefetch are executed in a more
+     * complex prefetch scenario with no reverse obj relationships
+     */
     public void testPrefetch2b() throws Exception {
         this.populatePaintings();
         EntityResolver er = context.getEntityResolver();
@@ -166,15 +173,17 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test that a to-many relationship is initialized.
-	 */
-    public void testPrefetch3() throws Exception {
+     * Test that a to-many relationship is initialized.
+     */
+    public void testPrefetchToMany() throws Exception {
         populatePaintings();
 
-        Expression e = ExpressionFactory.matchExp("artistName", artistName(2));
-        e = e.orExp(ExpressionFactory.matchExp("artistName", artistName(3)));
-        SelectQuery q = new SelectQuery("Artist", e);
-        q.setLoggingLevel(Level.WARN);
+        Map params = new HashMap();
+        params.put("name1", artistName(2));
+        params.put("name2", artistName(3));
+        Expression e =
+            Expression.fromString("artistName = $name1 or artistName = $name2");
+        SelectQuery q = new SelectQuery("Artist", e.expWithParameters(params));
         q.addPrefetch("paintingArray");
 
         List artists = context.performQuery(q);
@@ -200,9 +209,151 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test that a to-many relationship is initialized when there is no inverse
-	 * relationship
-	 */
+     * Test that a to-many relationship is initialized.
+     */
+    public void testPrefetchToManyNoQualifier() throws Exception {
+        populatePaintings();
+        SelectQuery q = new SelectQuery(Artist.class);
+        q.addPrefetch("paintingArray");
+
+        List artists = context.performQuery(q);
+        assertEquals(artistCount, artists.size());
+
+        Artist a1 = (Artist) artists.get(0);
+        ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
+        assertNotNull(toMany);
+        assertFalse(toMany.needsFetch());
+        assertEquals(1, toMany.size());
+
+        Painting p1 = (Painting) toMany.get(0);
+        assertEquals("P_" + a1.getArtistName(), p1.getPaintingTitle());
+
+        Artist a2 = (Artist) artists.get(1);
+        ToManyList toMany2 = (ToManyList) a2.readPropertyDirectly("paintingArray");
+        assertNotNull(toMany2);
+        assertFalse(toMany2.needsFetch());
+        assertEquals(1, toMany2.size());
+
+        Painting p2 = (Painting) toMany2.get(0);
+        assertEquals("P_" + a2.getArtistName(), p2.getPaintingTitle());
+    }
+
+    /**
+     * Test that a to-many relationship is initialized when a target entity
+     * has a compound PK only partially involved in relationmship.
+     */
+    public void testPrefetchToManyOnJoinTable() throws Exception {
+        // setup data
+        populateGalleries();
+        populateExhibits();
+
+        List queries = new ArrayList(4);
+        queries.add(
+            new SqlModifyQuery(
+                ArtistExhibit.class,
+                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
+                    + safeId(1)
+                    + ", 1)"));
+        queries.add(
+            new SqlModifyQuery(
+                ArtistExhibit.class,
+                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
+                    + safeId(1)
+                    + ", 2)"));
+        queries.add(
+            new SqlModifyQuery(
+                ArtistExhibit.class,
+                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
+                    + safeId(2)
+                    + ", 1)"));
+
+        queries.add(
+            new SqlModifyQuery(
+                ArtistExhibit.class,
+                "insert into ARTIST_EXHIBIT (ARTIST_ID, EXHIBIT_ID) values ("
+                    + safeId(3)
+                    + ", 2)"));
+
+        context.performQueries(queries, new DefaultOperationObserver());
+
+        SelectQuery q = new SelectQuery(Artist.class);
+        q.addPrefetch("artistExhibitArray");
+        q.addOrdering(Artist.ARTIST_NAME_PROPERTY, Ordering.ASC);
+
+        List artists = context.performQuery(q);
+        assertEquals(artistCount, artists.size());
+
+        Artist a1 = (Artist) artists.get(0);
+        logObj.warn("artist: " + a1);
+        assertEquals(artistName(1), a1.getArtistName());
+        ToManyList toMany = (ToManyList) a1.readPropertyDirectly("artistExhibitArray");
+        assertNotNull(toMany);
+        assertFalse(toMany.needsFetch());
+        assertEquals(2, toMany.size());
+
+        ArtistExhibit artistExhibit = (ArtistExhibit) toMany.get(0);
+        assertEquals(PersistenceState.COMMITTED, artistExhibit.getPersistenceState());
+        assertSame(a1, artistExhibit.getToArtist());
+    }
+
+    public void testPrefetchToManyOnCharKey() throws Exception {
+
+        List queries = new ArrayList(6);
+        queries.add(
+            new SqlModifyQuery(
+                CharPkTest.class,
+                "insert into CHAR_PK_TEST (PK_COL, OTHER_COL) values ('k1', 'n1')"));
+        queries.add(
+            new SqlModifyQuery(
+                CharPkTest.class,
+                "insert into CHAR_PK_TEST (PK_COL, OTHER_COL) values ('k2', 'n2')"));
+        queries.add(
+            new SqlModifyQuery(
+                CharFkTest.class,
+                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (1, 'k1', 'fn1')"));
+        queries.add(
+            new SqlModifyQuery(
+                CharFkTest.class,
+                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (2, 'k1', 'fn2')"));
+        queries.add(
+            new SqlModifyQuery(
+                CharFkTest.class,
+                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (3, 'k2', 'fn3')"));
+        queries.add(
+            new SqlModifyQuery(
+                CharFkTest.class,
+                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (4, 'k2', 'fn4')"));
+        queries.add(
+            new SqlModifyQuery(
+                CharFkTest.class,
+                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (5, 'k1', 'fn5')"));
+
+        context.performQueries(queries, new DefaultOperationObserver());
+
+        SelectQuery q = new SelectQuery(CharPkTest.class);
+        q.addPrefetch("charFKs");
+        q.addOrdering(CharPkTest.OTHER_COL_PROPERTY, Ordering.ASC);
+
+        List pks = context.performQuery(q);
+        assertEquals(2, pks.size());
+
+        CharPkTest pk1 = (CharPkTest) pks.get(0);
+        logObj.warn("PK1: " + pk1);
+        assertEquals("n1", pk1.getOtherCol());
+        ToManyList toMany = (ToManyList) pk1.readPropertyDirectly("charFKs");
+        assertNotNull(toMany);
+        assertFalse(toMany.needsFetch());
+        assertEquals(3, toMany.size());
+
+        CharFkTest fk1 = (CharFkTest) toMany.get(0);
+        assertEquals(PersistenceState.COMMITTED, fk1.getPersistenceState());
+        assertSame(pk1, fk1.getToCharPK());
+    }
+
+    /**
+     * Test that a to-many relationship is initialized when there is no inverse
+     * relationship
+     */
     public void testPrefetch3a() throws Exception {
         populatePaintings();
 
@@ -234,9 +385,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test that a to-many relationship is initialized when there is no inverse
-	 * relationship and the root query is qualified
-	 */
+     * Test that a to-many relationship is initialized when there is no inverse
+     * relationship and the root query is qualified
+     */
     public void testPrefetch3b() throws Exception {
         populatePaintings();
 
@@ -269,8 +420,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test that a to-one relationship is initialized.
-	 */
+     * Test that a to-one relationship is initialized.
+     */
     public void testPrefetch4() throws Exception {
         populatePaintings();
 
@@ -303,8 +454,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test prefetching with queries using DB_PATH.
-	 */
+     * Test prefetching with queries using DB_PATH.
+     */
     public void testPrefetch5() throws Exception {
         populatePaintings();
 
@@ -318,8 +469,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test prefetching with queries using OBJ_PATH.
-	 */
+     * Test prefetching with queries using OBJ_PATH.
+     */
     public void testPrefetch6() throws Exception {
         populatePaintings();
 
@@ -332,8 +483,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test prefetching with the prefetch on a reflexive relationship
-	 */
+     * Test prefetching with the prefetch on a reflexive relationship
+     */
     public void testPrefetch7() throws Exception {
         ArtGroup parent = (ArtGroup) context.createAndRegisterNewObject("ArtGroup");
         parent.setName("parent");
@@ -368,9 +519,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test prefetching with qualifier on the root query containing the path to
-	 * the prefetch
-	 */
+     * Test prefetching with qualifier on the root query containing the path to
+     * the prefetch
+     */
     public void testPrefetch8() throws Exception {
         this.populatePaintings();
         Expression exp =
@@ -401,9 +552,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Test prefetching with qualifier on the root query being the path to the
-	 * prefetch
-	 */
+     * Test prefetching with qualifier on the root query being the path to the
+     * prefetch
+     */
     public void testPrefetch9() throws Exception {
         this.populatePaintings();
         Expression artistExp =
@@ -422,24 +573,24 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         // (prefetching an object which we used to create the root query
         // qualifier in the first place)?
         /*
-		 * ContextSelectObserver o = new ContextSelectObserver(ctxt,
-		 * Level.WARN); try { ctxt.performQuery(q, o); } catch (Exception e) {
-		 * e.printStackTrace(); fail("Should not have failed with exception " +
-		 * e.getMessage()); } assertEquals(2, o.getSelectCount());
-		 * 
-		 * List results = o.getResults(q); assertEquals(1, results.size());
-		 * 
-		 * Painting painting = (Painting) results.get(0); //The parent must be
-		 * fully fetched, not just HOLLOW (a fault) assertEquals(
-		 * PersistenceState.COMMITTED,
-		 * painting.getToArtist().getPersistenceState());
-		 */
+         * ContextSelectObserver o = new ContextSelectObserver(ctxt,
+         * Level.WARN); try { ctxt.performQuery(q, o); } catch (Exception e) {
+         * e.printStackTrace(); fail("Should not have failed with exception " +
+         * e.getMessage()); } assertEquals(2, o.getSelectCount());
+         * 
+         * List results = o.getResults(q); assertEquals(1, results.size());
+         * 
+         * Painting painting = (Painting) results.get(0); //The parent must be
+         * fully fetched, not just HOLLOW (a fault) assertEquals(
+         * PersistenceState.COMMITTED,
+         * painting.getToArtist().getPersistenceState());
+         */
 
     }
 
     /**
-	 * Tests to-one prefetching over relationships with compound keys.
-	 */
+     * Tests to-one prefetching over relationships with compound keys.
+     */
     public void testPrefetch10() throws Exception {
         populateCompoundKeyEntities();
 
@@ -476,8 +627,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-	 * Tests to-many prefetching over relationships with compound keys.
-	 */
+     * Tests to-many prefetching over relationships with compound keys.
+     */
     public void testPrefetch11() throws Exception {
         populateCompoundKeyEntities();
 
