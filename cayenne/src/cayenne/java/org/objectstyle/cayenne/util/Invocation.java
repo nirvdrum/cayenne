@@ -141,10 +141,26 @@ public class Invocation extends Object {
 				throw new IllegalArgumentException("parameter types must not be empty");
 			}
 		}
+        
+        Method method = null;
 
-		_method = target.getClass().getMethod(methodName, parameterTypes);
-		_parameterTypes = parameterTypes;
-		_target = new WeakReference(target);
+        // allow access to public methods of inaccessible classes, if such methods were
+        // declared in a public interface
+        Class targetClass = target.getClass();
+        Class[] interfaces = targetClass.getInterfaces();
+        for (int i = 0; i < interfaces.length; i++) {
+            try {
+                method = interfaces[i].getMethod(methodName, parameterTypes);
+                break;
+            } catch (NoSuchMethodException ex) {
+                // ignoring, keep looking
+            }
+        }
+
+        _method =
+            (method != null) ? method : targetClass.getMethod(methodName, parameterTypes);
+        _parameterTypes = parameterTypes;
+        _target = new WeakReference(target);
 	}
 
 	/**
