@@ -38,7 +38,7 @@
             <fileset dir="${dvmodeler.bin}" includes="*.bat,*.sh,*.ico"/>
         </copy>
 
-        <chmod perm="gu+x">
+        <chmod perm="ugo+rx">
             <fileset dir="${dist}/bin">
                 <include name="**/*.sh"/>
             </fileset>
