@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -232,14 +233,18 @@ public class EntityResolver {
 
     /**
      * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
-     * specified object. Object may be a Entity name, or DataObject class (Class object for a class which 
-     * implements the DataObject interface)
+     * specified object. Object may be a Entity name, DataObject instance or DataObject class
+     * (Class object for a class which implements the DataObject interface)
      * 
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
     public synchronized ObjEntity lookupObjEntity(Object object) {
         if (object instanceof ObjEntity) {
             return (ObjEntity) object;
+        }
+
+        if (object instanceof DataObject) {
+            object = object.getClass();
         }
 
         ObjEntity result = (ObjEntity) objEntityCache.get(object);
