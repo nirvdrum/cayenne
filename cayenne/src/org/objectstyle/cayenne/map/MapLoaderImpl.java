@@ -436,12 +436,12 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             DbRelationship temp = (DbRelationship) iter.next();
             out.print("\t<");
             out.print(DB_RELATIONSHIP_TAG);
-            out.print(" source=\"");
+            out.print(" name=\"");
+            out.print(temp.getName());
+            out.print("\" source=\"");
             out.print(temp.getSourceEntity().getName());
             out.print("\" target=\"");
             out.print(temp.getTargetEntity().getName());
-            out.print("\" name=\"");
-            out.print(temp.getName());
             out.print("\" toDependentPK=\"");
             out.print(temp.isToDependentPK() ? TRUE : FALSE);
             out.print("\" toMany=\"");
