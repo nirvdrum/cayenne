@@ -40,8 +40,10 @@ getopts('unm:');
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = 1900 + $year;
-$mon = 1 + $mon;	
-
+$mon = 1 + $mon;
+my $label = "$mon-$mday-$year";	
+my $out_file = "/tmp/cayenne-nightly-$label.txt";
+unlink $out_file if -f $out_file;
 
 die_with_email("No JDK1.4 installation at $ENV{'JAVA_HOME'}") unless -d $ENV{'JAVA_HOME'};
 
@@ -53,38 +55,56 @@ die_with_email("No Ant installation at $ant") unless -f $ant;
 my $rel_path = "/var/sites/objectstyle/html/downloads/cayenne/nightly";
 
 # print timestamp for log
-print "\n\n===================================================\n";
-print "Nightly build: $mon-$mday-$year\n";
+print_line("\n\n===================================================\n");
+print_line("Nightly build: $label\n");
 
+# checkout source, or check the possibility to reuse existing one 
 get_source();
 
 # build
 chdir "$cayenne_src/cayenne" or die_with_email("Can't change to $cayenne_src/cayenne: $!\n");
-my $status = system($ant, "clean");
+my $status = run_command("$ant clean");
 die_with_email("Build failed, return status: $status\n") if $status;
 
-$status = system($ant, "release");
+$status = run_command("$ant release");
 die_with_email("Build failed, return status: $status\n") if $status;
 
 
 # unit tests - ant
-$status = system($ant, "test", "-Dcayenne.test.connection=nightly-test");
-die_with_email("Unit tests failed, return status: $status\n") if $status;
-
+$status = 
+  run_command("$ant test -Dcayenne.test.connection=nightly-test -Dcayenne.test.report=true");
+my $test_failure = $status; 
 
 # upload
 if($opt_u) {
-	# make remote upload directory	
-	$status = system("ssh", "www.objectstyle.org", "mkdir", "-p", "$rel_path/$year-$mon-$mday");
+	# make remote upload directory
+	$status = run_command("ssh www.objectstyle.org mkdir -p $rel_path/$year-$mon-$mday");
 	die_with_email("Can't create release directory, return status: $status\n") if $status;
 	
-	my @gz_files = <dist/*.gz>;
-	die "Distribution file not found." unless @gz_files;
+	# Upload test results no matter what
+	my $test_reports = "$cayenne_src/cayenne/build/tests/report/nightly-test";
+        my $upload_dir = "www.objectstyle.org:$rel_path/$year-$mon-$mday";
+	run_command("rsync -rlt -e ssh --delete --exclude *.xml $test_reports $upload_dir/");
 	
-	$status = system("scp", $gz_files[0], "www.objectstyle.org:$rel_path/$year-$mon-$mday/");
-	die_with_email("Can't upload release, return status: $status\n") if $status;
-	success_email("Build Succeeded.");
+
+	# Upload build if it succeeded
+	if(! $test_failure) {
+		my @gz_files = <dist/*.gz>;
+		my $gz_file = $gz_files[0];
+
+		die "Distribution file not found." unless @gz_files;
+		$status = 
+		run_command("scp $gz_files[0] $upload_dir/");
+		die_with_email("Can't upload release, return status: $status\n") if $status;
+	}
+	
 }
+
+die_with_email("Unit tests failed, return status: $status\n") if $test_failure;
+
+
+print_line("====== SUCCESS\n");
+success_email("Build Succeeded.");
 
 sub get_source() {
 	if($opt_n) {
@@ -99,23 +119,37 @@ sub get_source() {
 
 		# checkout via anonymous CVS
 		# assume anonymous password is already in ~/.cvspass
-		my $status = system(
-		"cvs", 
-		"-z3",
-		"-q",
-		"-d:pserver:anonymous\@cvs.sourceforge.net:/cvsroot/cayenne",
-		"export",
-		"-D",
-		"1 minute ago",
-		"cayenne");
+		my $status = run_command(
+		"cvs" . 
+		" -z3" .
+		" -q" .
+		" -d:pserver:anonymous\@cvs.sourceforge.net:/cvsroot/cayenne" .
+		" export" .
+		" -D" .
+		" \"1 minute ago\"" .
+		" cayenne");
 		die_with_email("CVS checkout failed, return status: $status\n") if $status;
 	}
 }
 
+sub run_command() {
+	my $command = shift;
+	print_line("==== $command\n");
+	return system("$command >> $out_file 2>&1");
+}
+
+sub print_line() {
+	my $line = shift;
+	open(COUT, ">> $out_file") or die_with_email("Can't append to $out_file");
+	print COUT $line;
+	close COUT;
+}
+
+
 sub success_email() {
+	my $msg = shift;
+
 	if($opt_m) {
-		my $msg = $_[0];
-    
 		open(MAIL, "| mail -s 'Cayenne Build Succeeded ($mon/$mday/$year)' $opt_m") 
 			or die  "Can't send mail: $!\n";
     
@@ -128,10 +162,14 @@ sub success_email() {
 
 
 sub die_with_email() {
-	my $msg = $_[0];
-	
+	my $msg = shift;
+
+ 	if(open(COUT, ">> $out_file")) {
+		print COUT $msg;
+		close COUT;
+	}	
+
 	if($opt_m) {
-    
 		open(MAIL, "| mail -s 'Subject: Cayenne Build Failed ($mon/$mday/$year)' $opt_m") 
 		or die  "Can't send mail: $!\n";
     
@@ -143,3 +181,5 @@ sub die_with_email() {
 	
 	die $msg;
 }
+
+
