@@ -7,11 +7,31 @@
     	<p>DataObject implements a set of methods to validate its state. DataContext calls these methods 
     	before performing a commit. If validation fails, commit is aborted with <a href=
     	"../../api/cayenne/org/objectstyle/cayenne/validation/ValidationException.html">ValidationException</a>.
+    	There are a few clear benefits of validating DataObjects at the application level before committing them to the
+    	database: 
     	</p>
     	
+    	<ul>
+    		<li>Cayenne can leverage ORM metadata (DataMap) to check for many standard error
+    		conditions.</li>
+    		<li>Custom validation can be easily integrated into the business objects by overriding standard 
+    		validation methods.</li>
+    		<li>Validation failures can be tracked down to the individual objects and their properties, allowing creation of
+    		user-friendly, internationalized validation messages.</li>
+    		<li>Relying on database validation for things like mandatory properties, 
+    		etc., would result in errors that are meaningless or extremely hard to decode in the application context.</li>
+    		<li>Application validation partially addresses shortcomings of databases that do not support real 
+    		transactions (e.g. MySQL). Validatrion would trap the whole class of errors that would otherwise result in 
+    		failure halfway through the commit, leaving database in inconsistent state.</li>
+    		<li>Automating of the business objects validation takes away some burden from the UI that now has 
+    		fewer things to track.</li>
+    	</ul>
+    	
     	<subsection name="8.5.1 Validation API">
-    	<p>Depending on the non-committed object state, DataContext calls one of the methods 
-    	described below (description of method behavior is provided for CayenneDataObject implementation):</p>
+    	<p>Each DataObject participating in commit operation (i.e. those in state NEW, DELETED or MODIFIED , in other words 
+    	"non-committed")  will be validated by DataContext's ObjectStore during commit processing. Depending on the non-committed 
+    	object state, ObjectStore calls one of the methods described below (description of method behavior is provided for 
+    	CayenneDataObject implementation):</p>
     	
     	<ul>
             <li><code>public void <b>validateForInsert</b>(ValidationResult validationResult)</code><br/>
