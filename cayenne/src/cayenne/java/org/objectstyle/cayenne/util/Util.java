@@ -97,22 +97,25 @@ public class Util {
      * Reads file contents as String.
      */
     public static String stringFromFile(File file) throws IOException {
-    	StringBuffer buf = new StringBuffer();
-    	BufferedReader in = new BufferedReader(new FileReader(file));
-    	
-    	try {
-    		String line = null;
-    		while((line = in.readLine()) != null) {
-    			buf.append(line);
-    		}
-    	}
-    	finally {
-    		in.close();
-    	}
-    	return buf.toString();
+        return stringFromFile(file, "");
     }
-    
-    
+
+    public static String stringFromFile(File file, String joinWith)
+        throws IOException {
+        StringBuffer buf = new StringBuffer();
+        BufferedReader in = new BufferedReader(new FileReader(file));
+
+        try {
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                buf.append(line).append(joinWith);
+            }
+        } finally {
+            in.close();
+        }
+        return buf.toString();
+    }
+
     /** Makes up for the lack of file copying utilities in Java */
     public static boolean copy(File from, File to) {
         BufferedInputStream fin = null;

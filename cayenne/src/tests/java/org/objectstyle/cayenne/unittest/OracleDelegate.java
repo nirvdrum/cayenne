@@ -78,10 +78,9 @@ public class OracleDelegate extends DatabaseSetupDelegate {
     }
 
     public boolean supportsStoredProcedures() {
-    	// this is temporary till we create DDL support in test cases
-        return false;
+        return true;
     }
-    
+
     /**
      * Oracle 8i does not support more then 1 "LONG xx" column per table
      * PAINTING_INFO need to be fixed.
@@ -92,5 +91,11 @@ public class OracleDelegate extends DatabaseSetupDelegate {
             (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
         textReview.setType(Types.VARCHAR);
         textReview.setMaxLength(255);
+    }
+
+    public void createdTables(Connection con, DataMap map) throws Exception {
+        executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
+        executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
+        executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
     }
 }
