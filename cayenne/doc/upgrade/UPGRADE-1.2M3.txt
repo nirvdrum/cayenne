@@ -4,6 +4,12 @@ Date:
 
 WARNING !!!! Most API deprecated in 1.1 is removed.
 
+0. PostgreSQLAdapter is switched to DB sequences for primary key generation.  
+    PK generator for PostgreSQL database uses database sequences instead of 
+    AUTO_PK_TABLE. To port an existing application, you will need to create those 
+    sequences (e.g. using the modeler) and assign correct current values to them 
+    (e.g. taken from the old AUTO_PK_TABLE). After that AUTO_PK_TABLE can be dropped.
+
 
 1. General Upgrade Advise:
 

@@ -2,30 +2,38 @@
 <title>User Guide - Installation</title>
 <toc name="toc-user-guide" chapter="2. Installation"/>
 <body>
-    <section name="2. Installation">       
-    	<subsection name="2.5 Upgrading from Earlier Versions">
-    	
-    	<subsection name="2.5.1 Upgrading Project XML Files">
-    	<p>Opening a 1.0 projects in CayenneModeler would display an upgrade
-    	dialog. Select "Yes" button to perform the upgrade.
-    	</p>
- 		<panel name="Warning!">Upgrading a project to 1.1 will make it unusable with
- 		earlier versions of Cayenne.</panel>
- 		</subsection>
- 		
-    	<subsection name="2.5.2 Clean Recompile">
-    	<p>Cayenne 1.1 introduces a few API changes. Most of them are done to the backend and should not
-    	affect the applications written with the earlier versions. However it is a good idea to perform a clean 
-    	compilation of all Java code that relies on Cayenne. Updating calls to deprecated methods is a good idea 
-    	as well.</p>
-    	</subsection>
+    <section name="2. Installation">
+		<subsection name="2.5 Upgrading From Earlier Versions">
 
-		<subsection name="2.5.3 Cleaning Stale Modeler Preferences">
-    	<p>Cayenne 1.1 almost completely switched its preferences engine to use an embedded HSQL database,
-		however a number of preferences are still loaded from the old preferences file. As a result a number of 
-		bugs associated with the old preferences may reappear in 1.1, even though they were fixed. To clean old
-		preferences shut down all running instances of CayenneModeler, then delete a file $HOME/.cayenne/modeler.preferences.
-		$HOME is a user home directory which is OS and machine specific. </p>
+		<subsection name="2.5.1 General Upgrade Recommendations">
+		<ul>
+			<li><strong>Upgrade XML files.</strong> Open your project with the version of 
+				the Modeler that came with the latest download. If an upgrade dialog 
+				pops up, select "yes" to do an upgrade. Also if you are using a 
+				milestone or a nightly build it is also a good idea to make some 
+				insignificant change to the model (so that a "Save" button is 
+				activated) and do a save. </li>
+			<li><strong>Do a clean recomplie.</strong> Recompile all your code, to make sure 
+				that you are not using any old classes or methods. Pay 
+				attention to deprecation warnings. It is always a good idea to 
+				update your code to avoid deprecated API.</li>
+		</ul>
+		<p> </p>			
+			<panel name="Warning!">Upgrading project XML files will likely make them 
+				unusable with earlier versions of Cayenne.</panel>
+ 		</subsection>
+			       
+    	<subsection name="2.5.2 Upgrading from 1.1 and 1.0">
+
+		<ul>
+			<li><strong>PostgreSQL PK Generator</strong> [For PostgreSQL users 
+				only] Since Cayenne 1.2 default PK generator for PostgreSQL 
+				database uses database sequences instead of AUTO_PK_TABLE. To 
+				port an existing application, you will need to create those 
+				sequences and assign correct current values to them (e.g. taken 
+				from the old AUTO_PK_TABLE). After that AUTO_PK_TABLE can be 
+				dropped.</li>
+		</ul>
     	</subsection>
         </subsection>
     </section>

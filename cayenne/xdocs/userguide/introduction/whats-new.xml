@@ -55,8 +55,11 @@
 						part of the main query. Joint prefetches have public 
 						API similar to the "regular" ones (e.g.: 
 						query.addJointPrefetch("toArtist")). Joint prefetches 
-						support all types of relationships including 
-						flattened.</p>
+						support all types of relationships including flattened. 
+						See <a 
+						href="http://objectstyle.org/confluence/display/CAY/Joint+Prefetches">Joint 
+						Prefetches Wiki page</a> for more information until more 
+						documentation is included in the User Guide.</p>
 				</subsection>
 				<subsection name="1.1.7 DataContext User Properties Map">
 					<p>DataContext now maintains an internal map of 
