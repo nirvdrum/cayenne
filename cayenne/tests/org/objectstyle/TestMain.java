@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.testui.TestLogin;
 
 /**
  *  Root class of all test cases. When "main" is invoked, 

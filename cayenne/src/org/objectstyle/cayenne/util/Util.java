@@ -71,11 +71,9 @@ import org.xml.sax.XMLReader;
  *  Utility methods sink.
  */
 public class Util {
-	static Logger logObj = Logger.getLogger(Util.class.getName());
+	static Logger logObj = Logger.getLogger(Util.class);
 
 	private static final Perl5Util regexUtil = new Perl5Util();
-	// private static final Perl5Util BACKSLASH_PAT = Pattern.compile("\\\\");
-	//  private static final Pattern PKG_PAT = Pattern.compile("\\.");
 
 	/** Makes up for the lack of file copying utilities in Java */
 	public static boolean copy(File from, File to) {
@@ -177,7 +175,7 @@ public class Util {
 		}
 
 		return regexUtil.match("/\\\\/", str)
-			? regexUtil.substitute("s/\\\\/\\//", str)
+			? regexUtil.substitute("s/\\\\/\\//g", str)
 			: str;
 	}
 
@@ -223,7 +221,7 @@ public class Util {
 
 		// set default features
 		reader.setFeature("http://xml.org/sax/features/namespaces", true);
-
+		
 		return reader;
 	}
 
@@ -233,7 +231,7 @@ public class Util {
 	  * Method is used to lookup resources that are located in package subdirectories. */
 	public static String getPackagePath(String className) {
 		if (regexUtil.match("/\\./", className)) {
-			String path = regexUtil.substitute("s/\\./\\//", className);
+			String path = regexUtil.substitute("s/\\./\\//g", className);
 			return path.substring(0, path.lastIndexOf("/"));
 		} else {
 			return "";

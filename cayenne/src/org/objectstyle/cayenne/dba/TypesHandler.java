@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.util.Util;
   * @author Andrei Adamchik
   */
 public class TypesHandler {
-    static Logger logObj = Logger.getLogger(TypesHandler.class.getName());
+    static Logger logObj = Logger.getLogger(TypesHandler.class);
 
     private static HashMap handlerMap = new HashMap();
 
