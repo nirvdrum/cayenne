@@ -56,6 +56,10 @@
 		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
 	</obj-entity>
+	<obj-entity name="ROArtist" readOnly="true" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
+		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
+	</obj-entity>
 	<obj-entity name="ArtistExhibit" className="org.objectstyle.art.ArtistExhibit" dbEntityName="ARTIST_EXHIBIT"/>
 	<obj-entity name="Exhibit" className="org.objectstyle.art.Exhibit" dbEntityName="EXHIBIT">
 		<obj-attribute name="openingDate" type="java.sql.Time" db-attribute-name="OPENING_DATE"/>
@@ -131,6 +135,9 @@
 		<db-relationship-ref source="ARTIST" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
 	</obj-relationship>
 	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true">
+		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" toMany="true">
 		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
 	</obj-relationship>
 	<obj-relationship name="toExhibit" source="ArtistExhibit" target="Exhibit" toMany="false">

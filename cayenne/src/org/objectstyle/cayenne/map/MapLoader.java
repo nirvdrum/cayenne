@@ -55,19 +55,24 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 /** 
- * Default MapLoader.
+ * Default MapLoader. Its responsibilities include reading DataMaps 
+ * from XML files and saving DataMap objects back to XML.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
@@ -113,13 +118,12 @@ public class MapLoader extends DefaultHandler {
 	public synchronized DataMap loadDataMap(InputSource src, List deps)
 		throws DataMapException {
 		try {
-			String system_id = src.getSystemId();
-			if (null == system_id) {
-				system_id = "Untitled";
+			String systemId = src.getSystemId();
+			if (null == systemId) {
+				systemId = "Untitled";
 			}
 
-			String mapName =
-				system_id.substring(system_id.lastIndexOf('/') + 1);
+			String mapName = systemId.substring(systemId.lastIndexOf('/') + 1);
 			dataMap = new DataMap(mapName);
 			Iterator it = deps.iterator();
 			while (it.hasNext()) {
@@ -131,21 +135,19 @@ public class MapLoader extends DefaultHandler {
 
 			parser.setContentHandler(this);
 			parser.setErrorHandler(this);
-
 			parser.parse(src);
+
 		} catch (SAXException e) {
-			logObj.log(Level.INFO, "SAX Exception.", e);
 			logObj.log(Level.INFO, "Wrapped Exception.", e.getException());
 			logObj.log(Level.INFO, "SAX Exception cause.", e.getCause());
 
 			dataMap = null;
-			throw new DataMapException(
-				"Wrong DataMap format." + e.getMessage());
+			throw new DataMapException("Wrong DataMap format.", e);
+			
 		} catch (Exception e) {
 			logObj.log(Level.INFO, "Exception.", e);
 			dataMap = null;
-			throw new DataMapException(
-				"DataMap could not be loaded: " + e.getMessage());
+			throw new DataMapException("Error loading DataMap.", e);
 		}
 		return dataMap;
 	}
@@ -316,7 +318,7 @@ public class MapLoader extends DefaultHandler {
 				out.print(dbe.getCatalog());
 				out.print('\"');
 			}
-			
+
 			out.println('>');
 
 			storeDbAttribute(out, dbe);
@@ -473,6 +475,10 @@ public class MapLoader extends DefaultHandler {
 				out.print(temp.getClassName());
 			}
 
+			if (temp.isReadOnly()) {
+				out.print("\" readOnly=\"true");
+			}
+			
 			out.print('\"');
 
 			if (temp.getDbEntity() != null) {
@@ -719,6 +725,10 @@ public class MapLoader extends DefaultHandler {
 	private void processStartObjEntity(Attributes atts) {
 		objEntity = new ObjEntity(atts.getValue("", "name"));
 		objEntity.setClassName(atts.getValue("", "className"));
+		
+		String readOnly = atts.getValue("", "readOnly");
+		objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
+		
 		String temp = atts.getValue("", "dbEntityName");
 		if (null != temp) {
 			DbEntity db_temp = dataMap.getDbEntity(temp);

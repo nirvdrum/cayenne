@@ -45,6 +45,7 @@
 	name CDATA #REQUIRED
 	className CDATA #REQUIRED
 	dbEntityName CDATA #REQUIRED
+	readOnly (true | false) "false"
 >
 
 <!ELEMENT obj-attribute EMPTY>

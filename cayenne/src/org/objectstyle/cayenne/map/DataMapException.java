@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,17 +53,28 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 /**
- * Used when there is invalid reference in DataMap.
+ * Used to indicate problemes with DataMap loading.
+ * 
  * @author Michael Misha Shengaout
- * @version 1.0
+ * @author Andrei Adamchik
  */
 
 public class DataMapException extends Exception {
 
     public DataMapException() {
     }
+
+	public DataMapException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public DataMapException(Throwable cause) {
+		super(cause);
+	}
+
 
     public DataMapException(String msg) {
         super(msg);
