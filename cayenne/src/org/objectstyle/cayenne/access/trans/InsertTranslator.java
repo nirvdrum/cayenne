@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.sql.Connection;
 import java.util.*;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.QueryEngine;

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;

@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.gui;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 
@@ -81,7 +81,7 @@ public class GuiDataSourceFactory extends DriverDataSourceFactory {
 		try {
 			load(location);
 		} catch (ConfigException e) {
-			logObj.log(Level.WARNING, "No data source " + location, e);
+			logObj.warn("No data source " + location, e);
 		}
 		return new GuiDataSource(getDriverInfo());
 	}

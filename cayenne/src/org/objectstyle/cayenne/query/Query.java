@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 /**
  * Generic query interface.
@@ -74,9 +74,21 @@ public interface Query {
 	 * Log level is a hint to QueryEngine that performs this query
 	 * to log execution with a certain priority.
 	 */
-	public Level getLogLevel();
+	public Level getLoggingLevel();
 	
-	public void setLogLevel(Level level);
+	public void setLoggingLevel(Level level);
+	
+	/**
+	 * @deprecated Use Log4J-based equivalent
+	 */
+	public java.util.logging.Level getLogLevel();
+
+
+	/**
+	 * @deprecated Use Log4J-based equivalent
+	 */
+	public void setLogLevel(java.util.logging.Level logLevel);
+    
 
 	/** Returns the name of root ObjEntity associated with the query. */
 	public String getObjEntityName();

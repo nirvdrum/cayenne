@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.access.trans;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -69,22 +69,22 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
-/** Class works as a translator of raw SELECT queries to JDBC statements.
-  * 
-  * @author Andrei Adamchik
-  */
+/** 
+ * Class works as a translator of raw SELECT queries to JDBC statements.
+ * 
+ * @author Andrei Adamchik
+ */
 public class SqlSelectTranslator extends SelectQueryAssembler {
-	static Logger logObj =
-		Logger.getLogger(SqlSelectTranslator.class.getName());
+	static Logger logObj = Logger.getLogger(SqlSelectTranslator.class);
 
-	public String createSqlString() throws java.lang.Exception {
+	public String createSqlString() throws Exception {
 		return getRawQuery().getSqlString();
 	}
 
 	public int getFetchLimit() {
-        return getRawQuery().getFetchLimit();
+		return getRawQuery().getFetchLimit();
 	}
-	
+
 	private final SqlSelectQuery getRawQuery() {
 		return (SqlSelectQuery) query;
 	}
@@ -180,7 +180,7 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
 			}
 			return types;
 		} catch (SQLException sqex) {
-			logObj.log(Level.SEVERE, "Error", sqex);
+			logObj.error("Error", sqex);
 			throw new CayenneRuntimeException("Error reading metadata.", sqex);
 		}
 	}

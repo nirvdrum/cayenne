@@ -56,7 +56,7 @@ package org.objectstyle.cayenne;
  */
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /** Each data object has an id uniquely identifying it. 
   * This concept is a translation of a primary key idea in the database world,

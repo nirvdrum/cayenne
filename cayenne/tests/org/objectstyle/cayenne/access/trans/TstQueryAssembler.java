@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.access.trans;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.QueryEngine;

@@ -61,7 +61,7 @@ import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;

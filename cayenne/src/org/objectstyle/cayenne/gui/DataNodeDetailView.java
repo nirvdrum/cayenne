@@ -59,8 +59,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -395,7 +395,7 @@ public class DataNodeDetailView
 							.newInstance(
 							new Object[0]);
 			} catch (Exception ex) {
-				logObj.log(Level.WARNING, "Error.", ex);
+				logObj.warn("Error.", ex);
 				adapter.setSelectedIndex(-1);
 				return;
 			}
@@ -403,17 +403,14 @@ public class DataNodeDetailView
 		} else if (src == fileBtn) {
 			selectNodeLocation();
 		} else if (src == driver) {
-			logObj.fine("Driver action performed");
 			ignoreChange = true;
 			driver.storePreferences();
 			ignoreChange = false;
 		} else if (src == url) {
-			logObj.fine("url action performed");
 			ignoreChange = true;
 			url.storePreferences();
 			ignoreChange = false;
 		} else if (src == userName) {
-			logObj.fine("userName action performed");
 			ignoreChange = true;
 			userName.storePreferences();
 			ignoreChange = false;
@@ -463,7 +460,7 @@ public class DataNodeDetailView
 			// Node location changed - mark current domain dirty
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 		} catch (Exception e) {
-			logObj.log(Level.WARNING, "Error setting node file location", e);
+			logObj.warn("Error setting node file location", e);
 		}
 	}
 

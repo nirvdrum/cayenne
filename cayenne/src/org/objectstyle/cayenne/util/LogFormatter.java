@@ -63,7 +63,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-/** ObjectStyle log formatter for more readable logs. */
+/**
+ * ObjectStyle log formatter for more readable logs.
+ * @deprecated Java Logging API is deprecated in Cayenne. 
+ */
 public final class LogFormatter extends Formatter {
     private static final Pattern classNamePat = Pattern.compile("\\.(\\w+\\.\\w+)$");
     private static final long ts = System.currentTimeMillis();

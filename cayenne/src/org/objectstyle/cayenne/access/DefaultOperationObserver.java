@@ -57,11 +57,15 @@
 package org.objectstyle.cayenne.access;
 
 import java.io.PrintWriter;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Log4JConverter;
 
 /** 
  * Simple implementation of OperationObserver interface. 
@@ -83,7 +87,7 @@ public class DefaultOperationObserver implements OperationObserver {
 	protected HashMap queryExceptions = new HashMap();
 	protected boolean transactionCommitted;
 	protected boolean transactionRolledback;
-	protected Level queryLogLevel = DEFAULT_LOG_LEVEL;
+	protected Level loggingLevel = DEFAULT_LOG_LEVEL;
 
 	/**
 	 * Prints the information about query and global exceptions. */
@@ -141,9 +145,22 @@ public class DefaultOperationObserver implements OperationObserver {
 		return transactionRolledback;
 	}
 
-	/** Returns Level.INFO as a default logging level. */
-	public Level queryLogLevel() {
-		return queryLogLevel;
+	/** @deprecated Use Log4J-based API instead. */
+	public java.util.logging.Level queryLogLevel() {
+		return Log4JConverter.getJSDKLogLevel(loggingLevel);
+	}
+
+	/** 
+	 * Returns a log level level that should be used when 
+	 * logging query execution. 
+	 */
+	public Level getLoggingLevel() {
+		return loggingLevel;
+	}
+
+	/** @deprecated Use Log4J-based API instead. */
+	public void setQueryLogLevel(java.util.logging.Level level) {
+		this.setLoggingLevel(Log4JConverter.getLog4JLogLevel(level));
 	}
 
 	/** 
@@ -153,40 +170,40 @@ public class DefaultOperationObserver implements OperationObserver {
 	 * than log level configured for QueryLogger, query SQL statements
 	 * will be logged.
 	 */
-	public void setQueryLogLevel(Level level) {
-		this.queryLogLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
+	public void setLoggingLevel(Level level) {
+		this.loggingLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
 	}
 
 	public void nextCount(Query query, int resultCount) {
-		logObj.fine("update count: " + resultCount);
+		logObj.debug("update count: " + resultCount);
 	}
 
 	public void nextDataRows(Query query, List dataRows) {
 		int count = (dataRows == null) ? -1 : dataRows.size();
-		logObj.fine("result count: " + count);
+		logObj.debug("result count: " + count);
 	}
 
 	public void nextDataRows(Query q, ResultIterator it) {
-		logObj.fine("result: (iterator)");
+		logObj.debug("result: (iterator)");
 	}
 
 	public void nextQueryException(Query query, Exception ex) {
-		logObj.log(Level.WARNING, "query exception", ex);
+		logObj.log(Level.WARN, "query exception", ex);
 		queryExceptions.put(query, ex);
 	}
 
 	public void nextGlobalException(Exception ex) {
-		logObj.log(Level.WARNING, "global exception", ex);
+		logObj.log(Level.WARN, "global exception", ex);
 		globalExceptions.add(ex);
 	}
 
 	public void transactionCommitted() {
-		logObj.fine("transaction committed");
+		logObj.debug("transaction committed");
 		transactionCommitted = true;
 	}
 
 	public void transactionRolledback() {
-		logObj.fine("*** transaction rolled back");
+		logObj.debug("*** transaction rolled back");
 		transactionRolledback = true;
 	}
 
@@ -201,9 +218,9 @@ public class DefaultOperationObserver implements OperationObserver {
 		return queryList;
 	}
 
-    /** 
-     * Returns <code>false</code>.
-     */
+	/** 
+	 * Returns <code>false</code>.
+	 */
 	public boolean isIteratedResult() {
 		return false;
 	}

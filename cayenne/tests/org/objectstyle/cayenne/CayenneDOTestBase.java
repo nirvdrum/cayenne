@@ -56,7 +56,7 @@ package org.objectstyle.cayenne;
  */ 
 
 import java.util.List;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import junit.framework.TestCase;
 
@@ -83,10 +83,10 @@ public class CayenneDOTestBase extends CayenneTestCase {
     public void setUp() throws java.lang.Exception {
         TestMain.getSharedDatabaseSetup().cleanTableData();        
         DataDomain dom = getSharedDomain();
-        Level oldLevel = QueryLogger.getLogLevel();
-        QueryLogger.setLogLevel(Level.SEVERE);
+        Level oldLevel = QueryLogger.getLoggingLevel();
+        QueryLogger.setLoggingLevel(Level.ERROR);
         dom.getDataNodes()[0].createPkSupportForMapEntities();
-        QueryLogger.setLogLevel(oldLevel);
+        QueryLogger.setLoggingLevel(oldLevel);
         resetContext();
     }
     

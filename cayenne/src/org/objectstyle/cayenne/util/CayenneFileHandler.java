@@ -55,8 +55,12 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.io.*;
-import java.util.logging.FileHandler;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Layout;
 
 /**
  * File logging handler used by CayenneModeler. Intersepts all calls
@@ -65,70 +69,60 @@ import java.util.logging.FileHandler;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneFileHandler extends FileHandler {
+public class CayenneFileHandler extends FileAppender {
+
 
 	/**
 	 * Constructor for CayenneFileHandler.
-	 * @throws IOException
-	 * @throws SecurityException
 	 */
-	public CayenneFileHandler() throws IOException, SecurityException {
+	public CayenneFileHandler() {
 		super();
 	}
 
-	/**
-	 * Constructor for CayenneFileHandler.
-	 * @param pattern
-	 * @throws IOException
-	 * @throws SecurityException
-	 */
-	public CayenneFileHandler(String pattern)
-		throws IOException, SecurityException {
-		super(pattern);
-	}
 
 	/**
 	 * Constructor for CayenneFileHandler.
-	 * @param pattern
-	 * @param append
+	 * @param arg0
+	 * @param arg1
+	 * @param arg2
+	 * @param arg3
+	 * @param arg4
 	 * @throws IOException
-	 * @throws SecurityException
-	 */
-	public CayenneFileHandler(String pattern, boolean append)
-		throws IOException, SecurityException {
-		super(pattern, append);
-	}
-
-	/**
-	 * Constructor for CayenneFileHandler.
-	 * @param pattern
-	 * @param limit
-	 * @param count
-	 * @throws IOException
-	 * @throws SecurityException
-	 */
-	public CayenneFileHandler(String pattern, int limit, int count)
-		throws IOException, SecurityException {
-		super(pattern, limit, count);
-	}
-
-	/**
-	 * Constructor for CayenneFileHandler.
-	 * @param pattern
-	 * @param limit
-	 * @param count
-	 * @param append
-	 * @throws IOException
-	 * @throws SecurityException
 	 */
 	public CayenneFileHandler(
-		String pattern,
-		int limit,
-		int count,
-		boolean append)
-		throws IOException, SecurityException {
-		super(pattern, limit, count, append);
+		Layout arg0,
+		String arg1,
+		boolean arg2,
+		boolean arg3,
+		int arg4)
+		throws IOException {
+		super(arg0, arg1, arg2, arg3, arg4);
 	}
+
+
+	/**
+	 * Constructor for CayenneFileHandler.
+	 * @param arg0
+	 * @param arg1
+	 * @param arg2
+	 * @throws IOException
+	 */
+	public CayenneFileHandler(Layout arg0, String arg1, boolean arg2)
+		throws IOException {
+		super(arg0, arg1, arg2);
+	}
+
+
+	/**
+	 * Constructor for CayenneFileHandler.
+	 * @param arg0
+	 * @param arg1
+	 * @throws IOException
+	 */
+	public CayenneFileHandler(Layout arg0, String arg1) throws IOException {
+		super(arg0, arg1);
+	}
+
 
     /**
      * Will use supplied output stream to redirect all stdin and stderr logging.
@@ -136,7 +130,7 @@ public class CayenneFileHandler extends FileHandler {
      * that would use this logger for the output instead of writing 
      * unformatted information to the file.
      */
-	protected synchronized void setOutputStream(OutputStream out)
+/*	protected synchronized void setOutputStream(OutputStream out)
 		throws SecurityException {
 			
 		super.setOutputStream(out);
@@ -144,5 +138,5 @@ public class CayenneFileHandler extends FileHandler {
         System.setOut(pout);
         System.setErr(pout);
 	}
-
+*/
 }

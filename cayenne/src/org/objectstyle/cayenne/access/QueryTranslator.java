@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.Query;

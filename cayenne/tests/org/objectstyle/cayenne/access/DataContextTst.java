@@ -63,8 +63,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
@@ -274,7 +274,7 @@ public class DataContextTst extends CayenneTestCase {
 		
 		SelectQuery q = new SelectQuery("ArtistAssets");
 		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-		q.setLogLevel(Level.SEVERE);
+		q.setLoggingLevel(Level.ERROR);
 
 		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
@@ -290,7 +290,7 @@ public class DataContextTst extends CayenneTestCase {
 		q.setParentObjEntityName("Painting");
 		q.andQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
 		q.andParentQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
-		q.setLogLevel(Level.SEVERE);
+		q.setLoggingLevel(Level.ERROR);
 
 		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
@@ -307,7 +307,7 @@ public class DataContextTst extends CayenneTestCase {
 		q.setParentObjEntityName("Painting");
 		q.andQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
 		q.andParentQualifier(ExpressionFactory.matchExp("toPaintingInfo.textReview", "abc"));
-		q.setLogLevel(Level.SEVERE);
+		q.setLoggingLevel(Level.ERROR);
         assertEquals(0, ctxt.performQuery(q).size());
 	}
 	

@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.exp;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.util.Util;
@@ -159,7 +159,7 @@ public class EvalExpression extends ExpressionTraversal {
 					push(PropertyUtils.getProperty(obj, (String) leaf));
 				} catch (Exception ex) {
 					String msg = "Error reading property '" + leaf + "'.";
-					logObj.log(Level.WARNING, msg, ex);
+					logObj.warn(msg, ex);
 					throw new ExpressionException(msg, ex);
 				}
 			} else {

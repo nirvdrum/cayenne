@@ -60,7 +60,7 @@ import java.io.InputStream;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;

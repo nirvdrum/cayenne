@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import javax.sql.DataSource;
 

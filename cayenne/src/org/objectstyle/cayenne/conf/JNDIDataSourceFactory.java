@@ -55,8 +55,8 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -79,7 +79,7 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
     /** Returns DataSource object corresponding to <code>location</code>.
       * Location is expected to be a path mapped in JNDI InitialContext. */
     public DataSource getDataSource(String location) throws Exception {
-        return getDataSource(location, Level.FINER);
+        return getDataSource(location, Level.DEBUG);
     }
     
     public void setParentConfig(Configuration conf) {
@@ -88,7 +88,7 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
 
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         if(logLevel == null) {
-            logLevel = Level.FINER;
+            logLevel = Level.DEBUG;
         }
             
         try {

@@ -56,8 +56,8 @@ package org.objectstyle.cayenne;
  */ 
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import junit.framework.Assert;
 
@@ -70,15 +70,6 @@ public class TestOperationObserver extends DefaultOperationObserver {
     
     protected HashMap resultObjs = new HashMap();
     protected HashMap resultCounts = new HashMap();
-    protected Level logLevel;
-    
-    public Level queryLogLevel() {
-        return (logLevel == null) ? super.queryLogLevel() : logLevel;
-    }
-    
-    public void setQueryLogLevel(Level logLevel) {
-        this.logLevel = logLevel;
-    }
     
     
     public void assertAllExceptions() {
@@ -119,13 +110,13 @@ public class TestOperationObserver extends DefaultOperationObserver {
     
     
     public void nextQueryException(Query query, Exception ex) {
-        logObj.log(Level.FINE, "Query Exception", ex);
+        logObj.debug("Query Exception", ex);
         super.nextQueryException(query, ex);
     }
     
     
     public void nextGlobalException(Exception ex) {
-        logObj.log(Level.FINE, "Global Exception", ex);
+        logObj.debug("Global Exception", ex);
         super.nextGlobalException(ex);
     }
 }

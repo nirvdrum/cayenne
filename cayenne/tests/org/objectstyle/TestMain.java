@@ -56,16 +56,23 @@
 
 package org.objectstyle;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
-import java.util.logging.*;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.objectstyle.cayenne.ConnectionSetup;
 import org.objectstyle.cayenne.DatabaseSetup;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
@@ -124,7 +131,7 @@ public class TestMain implements TestConstants {
 
 			resources.setSharedConnInfo(dsi);
 		} catch (Exception ex) {
-			logObj.log(Level.SEVERE, "Can not load connection info.", ex);
+			logObj.log(Level.ERROR, "Can not load connection info.", ex);
 			System.exit(1);
 		}
 
@@ -145,7 +152,7 @@ public class TestMain implements TestConstants {
 			success = ObjectStyleTestRunner.runTests();
 
 		if (!success) {
-			logObj.warning("Some tests have failed.");
+			logObj.warn("Some tests have failed.");
 			System.exit(1);
 		}
 	}
@@ -176,10 +183,7 @@ public class TestMain implements TestConstants {
 			return new DatabaseSetup(
 				resources.getSharedNode().getDataMaps()[0]);
 		} catch (Exception ex) {
-			logObj.log(
-				Level.SEVERE,
-				"Can not create shared DatabaseSetup.",
-				ex);
+			logObj.log(Level.ERROR, "Can not create shared DatabaseSetup.", ex);
 			System.exit(1);
 		}
 
@@ -219,7 +223,7 @@ public class TestMain implements TestConstants {
 			domain.addNode(node);
 			return domain;
 		} catch (java.lang.Exception ex) {
-			logObj.log(Level.SEVERE, "Can not create shared domain.", ex);
+			logObj.log(Level.ERROR, "Can not create shared domain.", ex);
 			System.exit(1);
 		}
 		return null;
@@ -231,7 +235,7 @@ public class TestMain implements TestConstants {
 			dbSetup.dropTestTables();
 			dbSetup.setupTestTables();
 		} catch (java.lang.Exception ex) {
-			logObj.log(Level.SEVERE, "Error creating test database.", ex);
+			logObj.log(Level.ERROR, "Error creating test database.", ex);
 			System.exit(1);
 		}
 	}
@@ -249,7 +253,7 @@ public class TestMain implements TestConstants {
 				props.load(in);
 				in.close();
 			} catch (IOException ioex) {
-				logObj.log(Level.SEVERE, "Error loading properties.", ioex);
+				logObj.log(Level.ERROR, "Error loading properties.", ioex);
 				System.exit(1);
 			}
 
@@ -257,20 +261,6 @@ public class TestMain implements TestConstants {
 			sysProps.putAll(props);
 			System.setProperties(sysProps);
 		}
-
-		File logPropsFile =
-			new File(
-				System.getProperty("user.home")
-					+ File.separator
-					+ LOGGING_PROPS);
-		if (logPropsFile.exists()) {
-			try {
-				FileInputStream in = new FileInputStream(logPropsFile);
-				LogManager.getLogManager().readConfiguration(in);
-				in.close();
-			} catch (IOException ioex) {
-				throw new RuntimeException("Error reading config.", ioex);
-			}
-		}
+		Configuration.configCommonLogging();
 	}
 }

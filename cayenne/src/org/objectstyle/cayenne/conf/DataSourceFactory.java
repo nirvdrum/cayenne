@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.util.logging.Level;
+import org.apache.log4j.Level;
  
 import javax.sql.DataSource;
 

@@ -56,7 +56,7 @@ package org.objectstyle.cayenne;
  */
 
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import junit.framework.TestCase;
 

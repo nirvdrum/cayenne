@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;

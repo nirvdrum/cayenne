@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -112,7 +112,7 @@ public class DataNodeTst extends IteratorTestBase {
 		queries.add(new SelectQuery("Artist"));
 
 		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
 
 		try {
 			TestMain.getSharedNode().performQueries(queries, observer);

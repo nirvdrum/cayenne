@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 /**
  * 
@@ -67,8 +67,16 @@ import java.util.logging.Level;
  */
 public interface OperationHints {
 	
-    /** Returns a log level level that should be used when logging query execution. */ 
-    public Level queryLogLevel();
+    /** 
+     * @deprecated Use Log4J-based equivalent.
+     */
+    public java.util.logging.Level queryLogLevel();
+    
+    /** 
+     * Returns a log level level that should be used when 
+     * logging query execution. 
+     */ 
+    public Level getLoggingLevel();
     
     /** <p>DataNode executing a list of statements will consult OperationHints
      *  about transactional behavior by calling this method.</p>

@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.swing.JFileChooser;
 
@@ -77,8 +77,9 @@ import org.objectstyle.cayenne.util.Preferences;
  * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
-	static Logger logObj = Logger.getLogger(CreateDataMapAction.class.getName());
-	
+	static Logger logObj =
+		Logger.getLogger(CreateDataMapAction.class.getName());
+
 	public static final String ACTION_NAME = "Create DataMap";
 
 	public CreateDataMapAction() {
@@ -146,10 +147,7 @@ public class CreateDataMapAction extends CayenneAction {
 				relative_location =
 					new_file_location.substring(proj_dir_str.length() + 1);
 		} catch (Exception e) {
-			logObj.log(
-				Level.WARNING,
-				"Error creating data map file.",
-				e.getMessage());
+			logObj.warn("Error creating data map file.", e);
 		}
 		return relative_location;
 	}

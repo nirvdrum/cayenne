@@ -61,8 +61,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /** 
   * Utility class to find resources. (Resources are usually files).
@@ -78,7 +79,7 @@ public class ResourceLocator {
 	protected boolean skipClasspath;
 	protected boolean skipAbsPath;
 	protected ClassLoader classLoader;
-	protected static Level logLevel = Level.FINER;
+	protected static Level logLevel = Level.DEBUG;
 
 	/** Returns a resource as InputStream if it is found in CLASSPATH. 
 	  * Returns null otherwise. Lookup is normally performed in all JAR and
@@ -181,12 +182,7 @@ public class ResourceLocator {
 	/** Returns resource URL using lookup strategy configured for this object or
 	 *  null if no readable resource can be found for name. */
 	public InputStream findResourceStream(String name) {
-		URL url = findResource(name);
-
-		if (logObj.isLoggable(logLevel)) {
-			logObj.log(logLevel, "Resource URL: " + url);
-		}
-		
+		URL url = findResource(name);		
 		if (url == null) {
 			return null;
 		}
@@ -347,10 +343,25 @@ public class ResourceLocator {
 	}
 
 	/**
+	 * @deprecated Use Log4J-based equivalent
+	 */
+	public static java.util.logging.Level getLogLevel() {
+		return Log4JConverter.getJSDKLogLevel(logLevel);
+	}
+
+
+	/**
+	 * @deprecated Use Log4J-based equivalent
+	 */
+	public static void setLogLevel(java.util.logging.Level logLevel) {
+		setLoggingLevel(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+
+	/**
 	 * Returns the logLevel.
 	 * @return Level
 	 */
-	public static Level getLogLevel() {
+	public static Level getLoggingLevel() {
 		return logLevel;
 	}
 
@@ -359,9 +370,7 @@ public class ResourceLocator {
 	 * Sets the logLevel.
 	 * @param logLevel The logLevel to set
 	 */
-	public static void setLogLevel(Level logLevel) {
+	public static void setLoggingLevel(Level logLevel) {
 		ResourceLocator.logLevel = logLevel;
 	}
-
-
 }

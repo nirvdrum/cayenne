@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.conf;
  */
 
 import java.io.InputStream;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import org.objectstyle.cayenne.util.ResourceLocator;
 
@@ -79,7 +79,7 @@ public class EJBConfiguration extends Configuration {
      */
     public static void initSharedConfig(ClassLoader beanLoader) {
         EJBConfiguration config = new EJBConfiguration(beanLoader);
-        config.setLogLevel(Level.SEVERE);
+        config.setLoggingLevel(Level.ERROR);
         Configuration.initSharedConfig(config);
     }
 

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,19 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.query.DeleteQuery;
+import org.objectstyle.cayenne.query.InsertQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
  * Implements helper methods that perform different query-related operations.

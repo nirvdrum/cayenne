@@ -56,16 +56,17 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.AbstractHandler;
+import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
@@ -96,7 +97,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
 	protected XMLReader parser;
 	protected DataSourceInfo driverInfo;
-	protected Level logLevel = Level.FINER;
+	protected Level logLevel = Level.DEBUG;
 	protected ResourceLocator locator;
 	protected Configuration parentConfig;
 
@@ -123,7 +124,17 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	  * Location is expected to be a path of a file relative to the current
 	  * directory or a user home directory. */
 	public DataSource getDataSource(String location) throws Exception {
-		return getDataSource(location, Level.FINER);
+		return getDataSource(location, Level.DEBUG);
+	}
+
+	/**
+	 * @deprecated Use Log4J-based equivalent.
+	 */
+	public DataSource getDataSource(
+		String location,
+		java.util.logging.Level logLevel)
+		throws Exception {
+		return getDataSource(location, Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
 	public DataSource getDataSource(String location, Level logLevel)

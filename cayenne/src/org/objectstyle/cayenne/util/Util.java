@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.util;
 
 import java.io.*;
 import java.net.URL;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;

@@ -12,13 +12,32 @@
 	<target name="unjar-deps" unless="unjar.exists"> 
 		<mkdir dir="${unjar.dir}"/>
         <unjar src="${velocity.jar}" dest="${unjar.dir}"/>
+        <unjar src="${log4j.jar}" dest="${unjar.dir}"/>
         <unjar src="${commons.logging.jar}" dest="${unjar.dir}"/>
         <unjar src="${commons.collections.jar}" dest="${unjar.dir}"/>
         <unjar src="${commons.beanutils.jar}" dest="${unjar.dir}"/>
         
+        <!-- clean up unused classes -->
         <delete includeEmptyDirs="true">
             <fileset dir="${unjar.dir}">
         		<include name="**/META-INF/**"/>
+        	</fileset>
+        	
+        	<fileset dir="${unjar.dir}">
+        		<include name="**/*.html"/>
+        	</fileset>
+        	
+        	<fileset dir="${unjar.dir}/org/apache/velocity">
+        		<include name="texen/**"/>
+        		<include name="test/**"/>
+        	</fileset>
+        	
+        	<fileset dir="${unjar.dir}/org/apache/log4j">
+        		<include name="chainsaw/**"/>
+        		<include name="jdbc/**"/>
+        		<include name="jmx/**"/>
+        		<include name="lf5/**"/>
+        		<include name="varia/**"/>
         	</fileset>
         </delete>
     </target>

@@ -55,7 +55,7 @@
  */ 
 package org.objectstyle.cayenne.query;
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;

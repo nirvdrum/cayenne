@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.access.trans;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.exp.Expression;

@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.sql.*;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.swing.JOptionPane;
 

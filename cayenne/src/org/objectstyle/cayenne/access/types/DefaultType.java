@@ -59,7 +59,7 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;

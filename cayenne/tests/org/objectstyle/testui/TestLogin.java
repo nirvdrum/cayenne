@@ -58,8 +58,8 @@ package org.objectstyle.testui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import java.util.regex.Pattern;
 
 import javax.swing.JComboBox;
@@ -153,7 +153,7 @@ public class TestLogin extends InteractiveLogin implements TestConstants {
             DataSourceInfo dsi = factory.getDriverInfo();
             return dsi;
         } catch(Exception ex) {
-            logObj.log(Level.WARNING, "error", ex);
+            logObj.warn("error", ex);
             // ignoring
             return null;
         }

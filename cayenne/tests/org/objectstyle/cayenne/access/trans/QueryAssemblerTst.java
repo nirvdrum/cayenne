@@ -55,8 +55,8 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DbAttribute;

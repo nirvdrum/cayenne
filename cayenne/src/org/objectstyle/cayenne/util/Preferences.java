@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.util;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -129,11 +129,11 @@ public class Preferences extends ExtendedProperties {
 	public File prefsDir() {
 		File homeDir = new File(System.getProperty("user.home"));
 		File prefsDir = new File(homeDir, PREF_DIR);
-		
-		if(!prefsDir.exists()) {
+
+		if (!prefsDir.exists()) {
 			prefsDir.mkdirs();
 		}
-		
+
 		return prefsDir;
 	}
 
@@ -145,7 +145,7 @@ public class Preferences extends ExtendedProperties {
 		File prefFile = new File(prefsDir(), PREF);
 		try {
 			if (!prefFile.exists()) {
-				logObj.fine(
+				logObj.debug(
 					"Cannot save preferences - file "
 						+ prefFile
 						+ " does not exist");
@@ -153,13 +153,9 @@ public class Preferences extends ExtendedProperties {
 			}
 			save(new FileOutputStream(prefFile), "");
 		} catch (IOException e) {
-			logObj.log(
-				Level.INFO,
-				"Error saving preferences: ",
-				e.getMessage());
+			logObj.debug("Error saving preferences: ", e);
 		}
 	}
-
 
 	/** 
 	 * Loads preferences from <code>$HOME/.cayenne/modeler.preferences</code> 
@@ -176,7 +172,7 @@ public class Preferences extends ExtendedProperties {
 					return;
 				}
 			}
-			
+
 			load(new FileInputStream(prefsFile));
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(

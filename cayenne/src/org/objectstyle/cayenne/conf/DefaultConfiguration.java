@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.util.ResourceLocator;
@@ -83,7 +83,7 @@ public class DefaultConfiguration extends Configuration {
 	public DefaultConfiguration() {
 		// configure CLASSPATH-only locator
 		locator = new ResourceLocator();
-		locator.setLogLevel(Configuration.getLogLevel());
+		locator.setLoggingLevel(Configuration.getLoggingLevel());
 		locator.setSkipAbsPath(true);
 		locator.setSkipClasspath(false);
 		locator.setSkipCurDir(true);
@@ -115,7 +115,7 @@ public class DefaultConfiguration extends Configuration {
 				return new FileInputStream(projectFile);
 			}
 		} catch (Exception ex) {
-            logObj.log(Level.WARNING, "Error opening project file.", ex);
+            logObj.warn("Error opening project file.", ex);
             throw new ConfigException("Error opening project file.", ex);
 		}
 
@@ -141,7 +141,7 @@ public class DefaultConfiguration extends Configuration {
 				return new FileInputStream(new File(dir, location));
 			}
 		} catch (Exception ex) {
-            logObj.log(Level.WARNING, "Error opening map file.", ex);
+            logObj.warn("Error opening map file.", ex);
             throw new ConfigException("Error opening map file.", ex);
 		}
 		

@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.gui.util;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -124,7 +124,7 @@ public class BrowserControl {
 			}
 		} catch (IOException ex) {
 			// couldn't exec browser
-			logObj.log(Level.FINE, "Could not invoke browser, command=" + cmd, ex);
+			logObj.debug("Could not invoke browser, command=" + cmd, ex);
 		}
 	}
 	/**

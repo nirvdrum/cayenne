@@ -60,8 +60,8 @@ import java.awt.event.*;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 
@@ -263,7 +263,7 @@ public class GenerateDbDialog
 				pw.flush();
 				pw.close();
 			} catch (IOException ex) {
-				logObj.severe(ex.getMessage());
+				logObj.error(ex);
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(
 					this,

@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import javax.swing.*;
 import javax.swing.table.*;
 

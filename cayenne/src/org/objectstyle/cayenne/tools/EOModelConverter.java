@@ -56,8 +56,8 @@ package org.objectstyle.cayenne.tools;
  */ 
 
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
@@ -84,7 +84,7 @@ public class EOModelConverter extends Object {
             out.flush();
         }
         catch(Exception ex) {
-            logObj.log(Level.SEVERE, "Error:", ex);
+            logObj.error("Error:", ex);
             System.err.print("Error converting the model: " + ex);
             System.exit(1);
         }

@@ -58,15 +58,21 @@ package org.objectstyle.cayenne.conf;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.objectstyle.cayenne.access.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DataMapException;
+import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.AbstractHandler;
+import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -88,7 +94,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class DomainHelper {
 	static Logger logObj = Logger.getLogger(DomainHelper.class.getName());
 
-	private Level logLevel = Level.FINER;
+	private Level logLevel = Level.DEBUG;
 	private Configuration config;
 	private MapLoader loader;
 	private XMLReader parser;
@@ -106,14 +112,23 @@ public class DomainHelper {
 	private DataSourceFactory factory;
 
 	/** Creates new DomainHelper. */
-	public DomainHelper(Configuration config) throws java.lang.Exception {
-		this(config, Level.FINER);
+	public DomainHelper(Configuration config) throws Exception {
+		this(config, Level.DEBUG);
+	}
+
+    /**
+     * @deprecated Java logging API is deprectaed in Cayenne. Use corresponding
+     * Log4J-based constructor.
+     */
+	public DomainHelper(
+		Configuration config,
+		java.util.logging.Level logLevel) throws Exception {
+		this(config, Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
 	/** Creates new DomainHelper that uses specified level of verbosity. */
-	public DomainHelper(Configuration config, Level logLevel)
-		throws java.lang.Exception {
-		this.logLevel = logLevel;
+	public DomainHelper(Configuration config, Level level) throws Exception {
+		this.logLevel = level;
 		this.config = config;
 		parser = Util.createXmlReader();
 		loader = new MapLoader();

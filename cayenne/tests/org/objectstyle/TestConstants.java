@@ -62,7 +62,7 @@ public interface TestConstants {
     * TestSuite subclass to be run instead of the whole set. */
     public static final String SINGLE_TEST_PROP = "testsuite.class";
     public static final String USER_PROPS = "cayenne_tests.properties";
-    public static final String LOGGING_PROPS = "cayenne_logging.properties";
+    public static final String LOGGING_PROPS = "cayenne-log.properties";
     public static final String TEST_MAP_PATH = "test_resources/testmap.xml";
     public static final String CUST_DOMAIN_DIR = "cust_domain";
     public static final String CUST_PROJECT_FILE = "custproject.xml";

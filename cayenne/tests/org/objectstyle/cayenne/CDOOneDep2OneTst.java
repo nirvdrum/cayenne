@@ -58,7 +58,7 @@ package org.objectstyle.cayenne;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.art.*;
 

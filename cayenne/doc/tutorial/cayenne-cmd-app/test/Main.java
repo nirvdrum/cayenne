@@ -7,7 +7,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import java.util.List;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 public class Main {
 

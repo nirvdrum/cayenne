@@ -57,7 +57,7 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /** Handles both standard Java class mapping to JDBC types as well as
   * custom mapping.

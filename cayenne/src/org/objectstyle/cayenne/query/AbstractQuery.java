@@ -56,7 +56,8 @@
  
 package org.objectstyle.cayenne.query;
 
-import java.util.logging.Level;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.util.Log4JConverter;
 
 
 /** 
@@ -84,7 +85,7 @@ public abstract class AbstractQuery implements Query {
 	 * Log level is a hint to QueryEngine that performs this query
 	 * to log execution with a certain priority.
 	 */
-	public Level getLogLevel() {
+	public Level getLoggingLevel() {
 		return logLevel;
 	}
 
@@ -92,7 +93,23 @@ public abstract class AbstractQuery implements Query {
 	/**
 	 * Sets the <code>logLevel</code> property.
 	 */
-	public void setLogLevel(Level logLevel) {
+	public void setLoggingLevel(Level logLevel) {
 		this.logLevel = logLevel;
 	}
+	
+    /**
+	 * @deprecated Use Log4J-based equivalent
+	 */
+	public java.util.logging.Level getLogLevel() {
+		return Log4JConverter.getJSDKLogLevel(logLevel);
+	}
+
+
+	/**
+	 * @deprecated Use Log4J-based equivalent
+	 */
+	public void setLogLevel(java.util.logging.Level logLevel) {
+		setLoggingLevel(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+    
 }

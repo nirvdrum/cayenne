@@ -59,7 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.ObjRelationship;

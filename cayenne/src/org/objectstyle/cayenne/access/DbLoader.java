@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -351,9 +351,9 @@ public class DbLoader {
 					NameConverter.undescoredToJava(dbAtt.getName(), false);
 				String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
 
-				if (logObj.isLoggable(Level.FINER)) {
+				if (logObj.isDebugEnabled()) {
 					if (type == null || type.trim().length() == 0) {
-						logObj.finer(
+						logObj.debug(
 							"DbLoader::loadObjEntities(), Entity "
 								+ dbEntity.getName()
 								+ ", attribute "
@@ -363,7 +363,7 @@ public class DbLoader {
 					}
 
 					if (dbAtt.getType() == Types.CLOB) {
-						logObj.finer(
+						logObj.debug(
 							"DbLoader::loadObjEntities(), Entity "
 								+ dbEntity.getName()
 								+ ", attribute "
@@ -412,7 +412,7 @@ public class DbLoader {
 					fkEnt = map.getDbEntity(fkEntName);
 
 					if (fkEnt == null) {
-						logObj.fine(
+						logObj.debug(
 							"FK warning: no entity found for name '"
 								+ fkEntName
 								+ "'");

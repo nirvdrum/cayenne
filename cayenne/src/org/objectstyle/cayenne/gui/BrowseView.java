@@ -64,7 +64,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
@@ -336,7 +336,6 @@ public class BrowseView
 			DataMap[] maps = e.getDataNode().getDataMaps();
 			// If added map to this node
 			if (maps.length > node.getChildCount()) {
-				logObj.fine("About to add map to node");
 				// Find map not already under node and add it
 				for (int i = 0; i < maps.length; i++) {
 					boolean found = false;
@@ -356,7 +355,7 @@ public class BrowseView
 							map_ele,
 							node,
 							node.getChildCount());
-						logObj.fine(
+						logObj.debug(
 							"Added map " + maps[i].getName() + " to node");
 						break;
 					}
@@ -375,7 +374,7 @@ public class BrowseView
 						}
 					}
 					if (!found) {
-						logObj.fine(
+						logObj.debug(
 							"About to remove map " + wrap + " from node");
 						removeNode(child);
 						break;
@@ -717,16 +716,16 @@ public class BrowseView
 		DataDomain domain,
 		DataMap map,
 		Entity entity) {
-			
+
 		if (null == entity) {
 			return null;
 		}
-		
+
 		DefaultMutableTreeNode map_node = getMapNode(domain, map);
 		if (null == map_node) {
 			return null;
 		}
-		
+
 		Enumeration entities = map_node.children();
 		while (entities.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
@@ -736,7 +735,7 @@ public class BrowseView
 				return temp_node;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -746,16 +745,16 @@ public class BrowseView
 		DataNode data,
 		DataMap map,
 		Entity entity) {
-		
+
 		if (null == entity) {
 			return null;
 		}
-		
+
 		DefaultMutableTreeNode map_node = getMapNode(domain, data, map);
 		if (map_node == null) {
 			return null;
 		}
-		
+
 		Enumeration entities = map_node.children();
 		while (entities.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;

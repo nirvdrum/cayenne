@@ -55,7 +55,7 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.art.*;
 

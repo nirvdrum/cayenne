@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;

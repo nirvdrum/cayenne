@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,11 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.util.Log4JConverter;
 
 /** 
  * Logs special events during query exectutions.
@@ -69,7 +69,8 @@ import java.util.logging.Logger;
  * @author Andrei Adamchik
  */
 public class QueryLogger {
-	static Logger logObj = Logger.getLogger(QueryLogger.class.getName());
+	static org.apache.log4j.Logger logObj =
+		org.apache.log4j.Logger.getLogger(QueryLogger.class);
 
 	/** Utility method that appends SQL literal for the specified object to the buffer.
 	*  This value will be quoted as needed. Conversion of the value is done based on Java class.
@@ -132,19 +133,44 @@ public class QueryLogger {
 				"Unsupported type : " + anObject.getClass().getName());
 	}
 
-	public static Level getLogLevel() {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static java.util.logging.Level getLogLevel() {
+		return Log4JConverter.getJSDKLogLevel(getLoggingLevel());
+	}
+
+	/**
+	 * 
+	 * 
+	 * @deprecated
+	 */
+	public static void setLogLevel(java.util.logging.Level level) {
+		setLoggingLevel(Log4JConverter.getLog4JLogLevel(level));
+	}
+
+	/** 
+	 * Returns current logging level.
+	 */
+	public static org.apache.log4j.Level getLoggingLevel() {
 		return logObj.getLevel();
 	}
 
-	public static void setLogLevel(Level level) {
+	/**
+	 * Sets logging level.
+	 */
+	public static void setLoggingLevel(org.apache.log4j.Level level) {
 		logObj.setLevel(level);
 	}
 
 	/**
 	 * Logs database connection event using container data source.
 	 */
-	public static void logConnect(Level logLevel, String dataSource) {
-		if (logObj.isLoggable(logLevel)) {
+	public static void logConnect(
+		org.apache.log4j.Level logLevel,
+		String dataSource) {
+		if (logObj.isEnabledFor(logLevel)) {
 			logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
 		}
 	}
@@ -152,8 +178,10 @@ public class QueryLogger {
 	/**
 	 * Logs database connection event.
 	 */
-	public static void logConnect(Level logLevel, DataSourceInfo dsi) {
-		if (logObj.isLoggable(logLevel)) {
+	public static void logConnect(
+		org.apache.log4j.Level logLevel,
+		DataSourceInfo dsi) {
+		if (logObj.isEnabledFor(logLevel)) {
 			StringBuffer buf =
 				new StringBuffer("Connecting. DataSource information:");
 
@@ -172,30 +200,47 @@ public class QueryLogger {
 		}
 	}
 
-	public static void logConnectSuccess(Level logLevel) {
+	public static void logConnectSuccess(org.apache.log4j.Level logLevel) {
 		logObj.log(logLevel, "+++ Connecting: SUCCESS.");
 	}
 
-	public static void logConnectFailure(Level logLevel, Throwable th) {
+	public static void logConnectFailure(
+		org.apache.log4j.Level logLevel,
+		Throwable th) {
 		logObj.log(logLevel, "*** Connecting: FAILURE.", th);
 	}
 
-	public static void logQuery(Level logLevel, String queryStr, List params) {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logQuery(
+		java.util.logging.Level logLevel,
+		String queryStr,
+		List params) {
+		logQuery(Log4JConverter.getLog4JLogLevel(logLevel), queryStr, params);
+	}
+
+	public static void logQuery(
+		org.apache.log4j.Level logLevel,
+		String queryStr,
+		List params) {
 		logQuery(logLevel, queryStr, params, -1);
 	}
 
-	/** Log query content using Log4J Category with "INFO" priority.
+	/** 
+	 * Log query content using Log4J Category with "INFO" priority.
 	 *
-	 *  @param queryStr Query SQL string
-	 *  @param params optional list of query parameters that are used when 
-	 *  executing query in prepared statement.
+	 * @param queryStr Query SQL string
+	 * @param params optional list of query parameters that are used when 
+	 * executing query in prepared statement.
 	 */
 	public static void logQuery(
-		Level logLevel,
+		org.apache.log4j.Level logLevel,
 		String queryStr,
 		List params,
 		long time) {
-		if (logObj.isLoggable(logLevel)) {
+		if (logObj.isEnabledFor(logLevel)) {
 			StringBuffer buf = new StringBuffer(queryStr);
 			if (params != null && params.size() > 0) {
 				buf.append(" [params: ");
@@ -217,11 +262,26 @@ public class QueryLogger {
 		}
 	}
 
-	public static void logSelectCount(Level logLevel, int count) {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logSelectCount(
+		java.util.logging.Level logLevel,
+		int count) {
+		logSelectCount(Log4JConverter.getLog4JLogLevel(logLevel), count);
+	}
+
+	public static void logSelectCount(
+		org.apache.log4j.Level logLevel,
+		int count) {
 		logSelectCount(logLevel, count, -1);
 	}
 
-	public static void logSelectCount(Level logLevel, int count, long time) {
+	public static void logSelectCount(
+		org.apache.log4j.Level logLevel,
+		int count,
+		long time) {
 		StringBuffer buf = new StringBuffer();
 
 		if (count == 1) {
@@ -237,7 +297,15 @@ public class QueryLogger {
 		logObj.log(logLevel, buf.toString());
 	}
 
-	public static void logUpdateCount(Level logLevel, int count) {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logUpdateCount(java.util.logging.Level logLevel, int count) {
+		logUpdateCount(Log4JConverter.getLog4JLogLevel(logLevel), count);
+	}
+	
+	public static void logUpdateCount(org.apache.log4j.Level logLevel, int count) {
 		String countStr =
 			(count == 1)
 				? "=== updated 1 row."
@@ -245,19 +313,53 @@ public class QueryLogger {
 		logObj.log(logLevel, countStr);
 	}
 
-	public static void logCommitTransaction(Level logLevel) {
+
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logCommitTransaction(java.util.logging.Level logLevel) {
+		logCommitTransaction(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+	
+	public static void logCommitTransaction(org.apache.log4j.Level logLevel) {
 		logObj.log(logLevel, "+++ transaction committed.");
 	}
+	
 
-	public static void logRollbackTransaction(Level logLevel) {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logRollbackTransaction(java.util.logging.Level logLevel) {
+		logRollbackTransaction(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+	
+	public static void logRollbackTransaction(org.apache.log4j.Level logLevel) {
 		logObj.log(logLevel, "*** transaction rolledback.");
 	}
 
-	public static void logQueryError(Level logLevel, Throwable th) {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logQueryError(java.util.logging.Level logLevel, Throwable th) {
+		logQueryError(Log4JConverter.getLog4JLogLevel(logLevel), th);
+	}
+	
+	public static void logQueryError(org.apache.log4j.Level logLevel, Throwable th) {
 		logObj.log(logLevel, "*** error.", th);
 	}
 
-	public static void logQueryStart(Level logLevel, int count) {
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static void logQueryStart(java.util.logging.Level logLevel, int count) {
+		logQueryStart(Log4JConverter.getLog4JLogLevel(logLevel), count);
+	}
+	
+	public static void logQueryStart(org.apache.log4j.Level logLevel, int count) {
 		String countStr =
 			(count == 1)
 				? "--- will run 1 query."
@@ -266,7 +368,15 @@ public class QueryLogger {
 
 	}
 
-	public static boolean isLoggable(Level logLevel) {
-		return logObj.isLoggable(logLevel);
+	/** 
+	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
+	 * Use corresponding Log4J method.
+	 */
+	public static boolean isLoggable(java.util.logging.Level logLevel) {
+		return isLoggable(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+	
+	public static boolean isLoggable(org.apache.log4j.Level logLevel) {
+		return logObj.isEnabledFor(logLevel);
 	}
 }

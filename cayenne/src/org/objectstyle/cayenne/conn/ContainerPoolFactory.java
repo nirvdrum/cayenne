@@ -62,7 +62,7 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.Name;

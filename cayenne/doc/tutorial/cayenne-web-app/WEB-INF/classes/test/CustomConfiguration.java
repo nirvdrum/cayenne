@@ -1,6 +1,6 @@
 package test;
 
-import java.util.logging.*;
+import org.apache.log4j.*;
 import org.objectstyle.cayenne.conf.*;
 
 /** 

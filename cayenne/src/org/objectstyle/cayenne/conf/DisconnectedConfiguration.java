@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.File;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import javax.sql.DataSource;
 
@@ -83,7 +83,7 @@ public class DisconnectedConfiguration extends DefaultConfiguration {
 		try {
 			return new DisconnectedFactory();
 		} catch (Exception ex) {
-            logObj.log(Level.WARNING, "Error initializing factory.", ex);
+            logObj.warn("Error initializing factory.", ex);
             throw new ConfigException("Error initializing factory.", ex);
 		}
 	}

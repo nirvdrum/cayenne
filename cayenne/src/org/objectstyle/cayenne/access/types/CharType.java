@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access.types;
 
 import java.sql.ResultSet;
 import java.sql.Types;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /** Handles CHAR type for JDBC drivers that don't trim trailing spaces. */
 public class CharType implements ExtendedType {

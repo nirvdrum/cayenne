@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.gui.util;
 
 import java.awt.Component;
 import java.util.EventObject;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListSelectionModel;

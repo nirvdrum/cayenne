@@ -56,7 +56,7 @@ package org.objectstyle.cayenne;
  */
 
 import java.io.InputStream;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 

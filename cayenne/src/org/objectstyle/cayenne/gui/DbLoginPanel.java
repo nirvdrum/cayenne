@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;

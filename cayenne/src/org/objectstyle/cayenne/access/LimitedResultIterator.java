@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;

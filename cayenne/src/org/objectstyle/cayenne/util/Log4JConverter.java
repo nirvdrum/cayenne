@@ -53,54 +53,71 @@
  * <http://objectstyle.org/>.
  *
  */
-
-package org.objectstyle.cayenne.access;
-
-import org.apache.log4j.Level;
-
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.query.SelectQuery;
+package org.objectstyle.cayenne.util;
 
 /**
+ * Utility class to facilitate conversion from Java logging API
+ * to Log4J. It is only used as a helper until Java logging is removed.
+ * 
+ * @deprecated 
+ * 
  * @author Andrei Adamchik
  */
-public class DefaultOperationObserverTst extends CayenneTestCase {
-	protected DefaultOperationObserver observer;
+public class Log4JConverter {
 
-	/**
-	 * Constructor for DefaultOperationObserverTst.
+	/** 
+	 * Converts Log4J logging level to JSDK equivalent.
 	 */
-	public DefaultOperationObserverTst(String name) {
-		super(name);
-	}
+	public static java.util.logging.Level getJSDKLogLevel(
+		org.apache.log4j.Level level) {
 
-	public void setUp() throws Exception {
-		observer = new DefaultOperationObserver();
-	}
-
-	public void testHasExceptions1() throws Exception {
-		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
-
-		try {
-			assertTrue(!observer.hasExceptions());
-			observer.nextGlobalException(new Exception());
-			assertTrue(observer.hasExceptions());
-		} finally {
-			DefaultOperationObserver.logObj.setLevel(oldLevel);
+		if (level == null) {
+			return null;
+		} else if (org.apache.log4j.Level.DEBUG.equals(level)) {
+			return java.util.logging.Level.FINE;
+		} else if (org.apache.log4j.Level.WARN.equals(level)) {
+			return java.util.logging.Level.WARNING;
+		} else if (org.apache.log4j.Level.ERROR.equals(level)) {
+			return java.util.logging.Level.SEVERE;
+		} else if (org.apache.log4j.Level.FATAL.equals(level)) {
+			return java.util.logging.Level.SEVERE;
+		} else if (org.apache.log4j.Level.ALL.equals(level)) {
+			return java.util.logging.Level.ALL;
+		} else if (org.apache.log4j.Level.INFO.equals(level)) {
+			return java.util.logging.Level.INFO;
+		} else if (org.apache.log4j.Level.OFF.equals(level)) {
+			return java.util.logging.Level.OFF;
+		} else {
+			return java.util.logging.Level.FINEST;
 		}
 	}
 
-	public void testHasExceptions2() throws Exception {
-		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
-
-		try {
-			assertTrue(!observer.hasExceptions());
-			observer.nextQueryException(new SelectQuery(), new Exception());
-			assertTrue(observer.hasExceptions());
-		} finally {
-			DefaultOperationObserver.logObj.setLevel(oldLevel);
+	/** 
+	 * Converts Log4J logging level to JSDK equivalent.
+	 */
+	public static org.apache.log4j.Level getLog4JLogLevel(
+		java.util.logging.Level level) {
+		if (level == null) {
+			return null;
+		} else if (
+			java.util.logging.Level.FINE.equals(level)
+				|| java.util.logging.Level.FINER.equals(level)
+				|| java.util.logging.Level.FINEST.equals(level)) {
+			return org.apache.log4j.Level.DEBUG;
+		} else if (java.util.logging.Level.SEVERE.equals(level)) {
+			return org.apache.log4j.Level.ERROR;
+		} else if (java.util.logging.Level.WARNING.equals(level)) {
+			return org.apache.log4j.Level.WARN;
+		} else if (java.util.logging.Level.CONFIG.equals(level)) {
+			return org.apache.log4j.Level.INFO;
+		} else if (java.util.logging.Level.INFO.equals(level)) {
+			return org.apache.log4j.Level.INFO;
+		} else if (java.util.logging.Level.ALL.equals(level)) {
+			return org.apache.log4j.Level.ALL;
+		} else if (java.util.logging.Level.OFF.equals(level)) {
+			return org.apache.log4j.Level.OFF;
+		} else {
+			return org.apache.log4j.Level.DEBUG;
 		}
 	}
 }

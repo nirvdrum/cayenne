@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.query;
 
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 
@@ -75,12 +75,12 @@ public class QueryTst extends CayenneTestCase {
         assertSame("SomeEntity", query.getObjEntityName());
     }
     
-    public void testLogLevel() throws Exception {
+    public void testLoggingLevel() throws Exception {
         Query query = new TstUnqualifiedQuery();
-        assertNull(query.getLogLevel());
+        assertNull(query.getLoggingLevel());
         
-        query.setLogLevel(Level.SEVERE);
-        assertSame(Level.SEVERE, query.getLogLevel());
+        query.setLoggingLevel(Level.ERROR);
+        assertSame(Level.ERROR, query.getLoggingLevel());
     }
     
 }

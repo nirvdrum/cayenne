@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;

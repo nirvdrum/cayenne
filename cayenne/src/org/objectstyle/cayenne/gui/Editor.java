@@ -69,12 +69,11 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
 import org.objectstyle.cayenne.gui.action.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
@@ -150,7 +149,7 @@ public class Editor
 		try {
 			props = loadProperties();
 		} catch (IOException ioex) {
-			logObj.log(Level.SEVERE, "error", ioex);
+			logObj.error("error", ioex);
 			// ignoring
 			props = new Properties();
 		}
@@ -710,22 +709,15 @@ public class Editor
 					+ "modeler.log";
 			Logger p1 = logObj;
 			Logger p2 = null;
-			while ((p2 = p1.getParent()) != null) {
+			while ((p2 = (Logger) p1.getParent()) != null) {
 				p1 = p2;
 			}
 
-			// remove any other handlers and replace with our file handler
-			Handler[] handlers = p1.getHandlers();
-			if (handlers != null) {
-				for (int i = 0; i < handlers.length; i++) {
-					p1.removeHandler(handlers[i]);
-				}
-			}
-
-			p1.addHandler(
-				new CayenneFileHandler(log, 2 * 1024 * 1024, 4, true));
+			p1.removeAllAppenders();
+			p1.addAppender(
+				new CayenneFileHandler(new SimpleLayout(), log, true));
 		} catch (IOException ioex) {
-			logObj.log(Level.WARNING, "Error setting logging.", ioex);
+			logObj.warn("Error setting logging.", ioex);
 		}
 	}
 

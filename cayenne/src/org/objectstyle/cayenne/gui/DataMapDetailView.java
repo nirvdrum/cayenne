@@ -61,8 +61,8 @@ import java.awt.event.*;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -231,7 +231,7 @@ public class DataMapDetailView
 			mediator.fireDataMapEvent(new DataMapEvent(this, map));
 
 		} catch (Exception e) {
-			logObj.log(Level.WARNING, "Error setting map location.", e);
+			logObj.warn("Error setting map location.", e);
 		}
 	}
 

@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.conn;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import javax.sql.*;
 
@@ -76,7 +76,7 @@ public class PoolDataSource implements ConnectionPoolDataSource {
 
 	/** Creates new PoolDataSource */
 	public PoolDataSource(DataSource nonPooledDatasource) {
-		logObj.fine("Init new datasource");
+		logObj.debug("Init new datasource");
 		this.nonPooledDatasource = nonPooledDatasource;
 	}
 

@@ -1,6 +1,6 @@
 package action;
 
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

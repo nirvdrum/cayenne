@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;

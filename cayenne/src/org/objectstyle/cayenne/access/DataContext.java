@@ -57,9 +57,9 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
+import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.Util;
 
 /** User-level Cayenne access class. Provides isolated object view of 
@@ -242,7 +243,7 @@ public class DataContext implements QueryEngine {
 			anObject,
 			snapshot);
 	}
-	
+
 	/** 
 	 * Replaces all object attribute values with snapshot values. 
 	 * Sets object state to COMMITTED.
@@ -561,9 +562,17 @@ public class DataContext implements QueryEngine {
 	/** Check what objects have changed in the context. Generate appropriate
 	 *  insert, update and delete queries to commit their state to the database. */
 	public void commitChanges() throws CayenneRuntimeException {
-		commitChanges(null);
+		commitChanges((Level) null);
 	}
 
+    /** 
+     * @deprecated Use Log4J-based equivalent.
+     */
+	public void commitChanges(java.util.logging.Level logLevel)
+		throws CayenneRuntimeException {
+		commitChanges(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+	
 	/** 
 	 * Commits changes of the object graph to the database.
 	 * Checks what objects have changed in the context. 
@@ -680,8 +689,8 @@ public class DataContext implements QueryEngine {
 		// Fetch either DataObjects or data rows.
 		SelectObserver observer =
 			(query.isFetchingDataRows())
-				? new SelectObserver(query.getLogLevel())
-				: new SelectProcessor(query.getLogLevel());
+				? new SelectObserver(query.getLoggingLevel())
+				: new SelectProcessor(query.getLoggingLevel());
 
 		performQuery((Query) query, observer);
 		return observer.getResults((Query) query);
@@ -706,7 +715,7 @@ public class DataContext implements QueryEngine {
 		throws CayenneException {
 
 		IteratedSelectObserver observer = new IteratedSelectObserver();
-		observer.setQueryLogLevel(query.getLogLevel());
+		observer.setLoggingLevel(query.getLoggingLevel());
 		performQuery((Query) query, observer);
 		return observer.getResultIterator();
 	}
@@ -940,25 +949,15 @@ public class DataContext implements QueryEngine {
 		private List delObjects;
 		private List insObjects;
 
-		private Level logLevel;
-
 		public CommitProcessor(
 			Level logLevel,
 			List insObjects,
 			List updObjects,
 			List delObjects) {
-			this.logLevel =
-				(logLevel != null)
-					? logLevel
-					: DefaultOperationObserver.DEFAULT_LOG_LEVEL;
-
+			super.setLoggingLevel(logLevel);
 			this.insObjects = insObjects;
 			this.updObjects = updObjects;
 			this.delObjects = delObjects;
-		}
-
-		public Level queryLogLevel() {
-			return logLevel;
 		}
 
 		public boolean useAutoCommit() {
@@ -1039,7 +1038,7 @@ public class DataContext implements QueryEngine {
 	 */
 	class SelectProcessor extends SelectObserver {
 		SelectProcessor(Level logLevel) {
-			super.setQueryLogLevel(logLevel);
+			super.setLoggingLevel(logLevel);
 		}
 
 		/** 

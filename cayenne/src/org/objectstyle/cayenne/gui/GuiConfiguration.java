@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.gui;
 
 import java.io.*;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -121,7 +121,7 @@ public class GuiConfiguration extends DefaultConfiguration {
 			else
 				super.getDomainConfig();
 		} catch (Exception e) {
-			logObj.log(Level.WARNING, "Error", e);
+			logObj.warn("Error", e);
 		}
 		return null;
 	}
@@ -140,7 +140,7 @@ public class GuiConfiguration extends DefaultConfiguration {
 			else
 				return super.getMapConfig(location);
 		} catch (Exception e) {
-			logObj.log(Level.WARNING, "Error", e);
+			logObj.warn("Error", e);
 		}
 		return null;
 	}
@@ -158,7 +158,7 @@ public class GuiConfiguration extends DefaultConfiguration {
 					+ DOMAIN_FILE
 					+ "\" is not found.");
 
-		DomainHelper helper = new DomainHelper(this, getLogLevel());
+		DomainHelper helper = new DomainHelper(this, this.getLoggingLevel());
 		if (!helper.loadDomains(in, new GuiDataSourceFactory())) {
 			throw new ConfigException("Failed to load domain and/or its maps/nodes.");
 		}

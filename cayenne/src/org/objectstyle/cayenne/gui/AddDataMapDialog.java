@@ -63,7 +63,7 @@ import java.awt.event.*;
 import java.util.List;
 import java.util.Vector;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import javax.swing.*;
 import org.apache.commons.collections.ExtendedProperties;
 import org.objectstyle.cayenne.access.*;

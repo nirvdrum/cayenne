@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.dba;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.*;

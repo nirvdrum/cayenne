@@ -56,11 +56,14 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
-import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Log4JConverter;
 
 /** 
  * OperationObserver that accumulates select query results provided 
@@ -87,9 +90,15 @@ public class SelectObserver extends DefaultOperationObserver {
 
 	public SelectObserver() {}
 	
+	/**
+	 * @deprecated use Log4J-based constructor.
+	 */
+	public SelectObserver(java.util.logging.Level logLevel) {
+		this(Log4JConverter.getLog4JLogLevel(logLevel));
+	}
+	
 	public SelectObserver(Level logLevel) {
-		super();
-		super.setQueryLogLevel(logLevel);
+		super.setLoggingLevel(logLevel);
 	}
 
 	/** 

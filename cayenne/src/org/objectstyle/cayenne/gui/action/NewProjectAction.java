@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 
@@ -148,7 +148,7 @@ public class NewProjectAction extends ProjectAction {
 			try {
 				GuiConfiguration.initSharedConfig(projectFile, false);
 			} catch (ConfigException e) {
-				logObj.warning(e.getMessage());
+				logObj.warn(e);
 			}
 			
 			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
@@ -157,7 +157,7 @@ public class NewProjectAction extends ProjectAction {
 			// Set title to contain proj file path
 			Editor.getFrame().setProjectTitle(projectFile.getAbsolutePath());
 		} catch (Exception e) {
-			logObj.log(Level.WARNING, "Error loading project file.", e.getMessage());
+			logObj.warn("Error loading project file.", e);
 		}
 	}
 }

@@ -59,8 +59,8 @@ package org.objectstyle.cayenne.access;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 
@@ -198,7 +198,7 @@ public class DataNode implements QueryEngine {
 
 	/** Run multiple queries using one of the pooled connections. */
 	public void performQueries(List queries, OperationObserver opObserver) {
-		Level logLevel = opObserver.queryLogLevel();
+		Level logLevel = opObserver.getLoggingLevel();
 
 		int listSize = queries.size();
 		QueryLogger.logQueryStart(logLevel, listSize);
@@ -350,7 +350,7 @@ public class DataNode implements QueryEngine {
 		// since "dataRows" will do it internally
 		List resultRows = it.dataRows();
 		QueryLogger.logSelectCount(
-			observer.queryLogLevel(),
+			observer.getLoggingLevel(),
 			resultRows.size(),
 			System.currentTimeMillis() - t1);
 		observer.nextDataRows(transl.getQuery(), resultRows);
@@ -399,7 +399,7 @@ public class DataNode implements QueryEngine {
 		try {
 			// 2.b execute update
 			int count = prepStmt.executeUpdate();
-			QueryLogger.logUpdateCount(observer.queryLogLevel(), count);
+			QueryLogger.logUpdateCount(observer.getLoggingLevel(), count);
 
 			// 3.b send results back to consumer
 			observer.nextCount(transl.getQuery(), count);

@@ -57,8 +57,8 @@ package org.objectstyle.cayenne;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.*;
@@ -148,11 +148,10 @@ public class DatabaseSetup {
 
 				try {
 					String dropSql = adapter.dropTable(ent);
-					logObj.warning("Drop table: " + dropSql);
+					logObj.warn("Drop table: " + dropSql);
 					stmt.execute(dropSql);
 				} catch (SQLException sqe) {
-					logObj.log(
-						Level.WARNING,
+					logObj.warn(
 						"Can't drop table " + ent.getName() + ", ignoring...",
 						sqe);
 				}
@@ -174,7 +173,7 @@ public class DatabaseSetup {
 			Iterator it = tableCreateQueries();
 			while (it.hasNext()) {
 				String query = (String) it.next();
-				logObj.warning("Create table: " + query);
+				logObj.warn("Create table: " + query);
 				stmt.execute(query);
 			}
 		} finally {

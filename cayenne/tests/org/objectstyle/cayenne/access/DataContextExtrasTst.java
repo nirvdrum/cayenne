@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
+import org.apache.log4j.Level;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
@@ -159,9 +159,9 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
 		// disable logging for thrown exceptions
 		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
 		try {
-			ctxt.commitChanges(Level.FINE);
+			ctxt.commitChanges(Level.DEBUG);
 			fail("Exception expected but not thrown due to missing PK generation routine.");
 		} catch (CayenneRuntimeException ex) {
 			// exception expected
@@ -180,7 +180,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
 		// disable logging for thrown exceptions
 		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
 		try {
 			ctxt.performQuery(q, new DataContextExtended().getSelectObserver());
 			fail("Query was invalid and was supposed to fail.");
@@ -194,7 +194,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 	/** Helper class to get access to DataContext inner classes. */
 	class DataContextExtended extends DataContext {
 		public OperationObserver getSelectObserver() {
-			return new SelectProcessor(Level.FINEST);
+			return new SelectProcessor(Level.DEBUG);
 		}
 	}
 }

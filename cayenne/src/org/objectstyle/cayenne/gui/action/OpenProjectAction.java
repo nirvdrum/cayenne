@@ -58,14 +58,16 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.gui.*;
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.ErrorDebugDialog;
+import org.objectstyle.cayenne.gui.GuiConfiguration;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.cayenne.gui.util.RecentFileMenuItem;
@@ -132,10 +134,7 @@ public class OpenProjectAction extends ProjectAction {
 			file = fileChooser.getSelectedFile();
 			openProject(file);
 		} catch (Exception e) {
-			logObj.log(
-				Level.WARNING,
-				"Error loading project file.",
-				e.getMessage());
+			logObj.warn("Error loading project file.", e);
 		}
 	}
 
@@ -153,8 +152,8 @@ public class OpenProjectAction extends ProjectAction {
 
 			// Initialize gui configuration
 			// uncomment to debug GUI
-			Configuration.setLogLevel(Level.SEVERE);
-			
+			Configuration.setLoggingLevel(Level.ERROR);
+
 			GuiConfiguration.initSharedConfig(file);
 			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
 
@@ -162,7 +161,7 @@ public class OpenProjectAction extends ProjectAction {
 			Editor.getFrame().setProjectTitle(file.getAbsolutePath());
 
 		} catch (Exception ex) {
-			logObj.log(Level.WARNING, "Error loading project file.", ex);
+			logObj.warn("Error loading project file.", ex);
 			ErrorDebugDialog.guiWarning(ex, "Error loading project");
 		}
 	}
