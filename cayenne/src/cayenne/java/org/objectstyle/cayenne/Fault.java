@@ -69,10 +69,10 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Represents a placeholder for an unresolved relationship from a source
- * object. Fault is resolved via {@link #resolveFault(DataObject,String)}. 
- * Depending on the type of fault it is resolved differently. Each type of 
- * fault is a singleton that can be obtained via corresponding static method.
+ * Represents a placeholder for an unresolved relationship from a source object. Fault is
+ * resolved via {@link #resolveFault(DataObject,String)}. Depending on the type of fault
+ * it is resolved differently. Each type of fault is a singleton that can be obtained via
+ * corresponding static method.
  * 
  * @since 1.1
  * @author Andrei Adamchik
@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 // TODO: serialization of faults should take into account the fact that
 // they are used as singletons to avoid duplicate creation on deserialization
 public abstract class Fault implements Serializable {
+
     protected static final Fault toOneFault = new ToOneFault();
     protected static final Fault toManyFault = new ToManyFault();
 
@@ -101,6 +102,7 @@ public abstract class Fault implements Serializable {
     public abstract Object resolveFault(DataObject sourceObject, String relationshipName);
 
     final static class ToManyFault extends Fault {
+
         /**
          * Resolves this fault to a List of objects.
          */
@@ -110,6 +112,7 @@ public abstract class Fault implements Serializable {
     }
 
     final static class ToOneFault extends Fault {
+
         /**
          * Resolves this fault to a DataObject.
          */
@@ -118,27 +121,25 @@ public abstract class Fault implements Serializable {
             EntityResolver resolver = context.getEntityResolver();
 
             ObjEntity entity = resolver.lookupObjEntity(sourceObject);
-            ObjRelationship relationship =
-                (ObjRelationship) entity.getRelationship(relationshipName);
+            ObjRelationship relationship = (ObjRelationship) entity
+                    .getRelationship(relationshipName);
 
             // create HOLLOW object if we can, or do a fetch if we can't
             // criteria that requires fully resolving an object are:
 
-            // 1. Target ObjectId can't be fully expressed using the values 
+            // 1. Target ObjectId can't be fully expressed using the values
             //    from source object snapshot or
             // 2. Target object has subclasses, and it is not clear which class
             //    ro instantiate.
 
             ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
-            if (relationship.isSourceIndependentFromTargetChange()
-                || resolver.lookupInheritanceTree(targetEntity) != null) {
+            if (relationship.isSourceIndependentFromTargetChange()) {
 
                 // TODO: stop using selecteRelationshipObjects, since it performs
                 // extra lookups for objects that have been resolved here
 
                 // can't create HOLLOW, do a fetch
-                SelectQuery select =
-                    QueryUtils.selectRelationshipObjects(
+                SelectQuery select = QueryUtils.selectRelationshipObjects(
                         context,
                         sourceObject,
                         relationshipName);
@@ -153,25 +154,35 @@ public abstract class Fault implements Serializable {
                     return objects.get(0);
                 }
                 else {
-                    throw new CayenneRuntimeException(
-                        "Error resolving to-one fault. "
+                    throw new CayenneRuntimeException("Error resolving to-one fault. "
                             + "More than one object found. "
                             + "Fault entity: "
                             + targetEntity.getName());
                 }
             }
 
-            // return HOLLOW
-            DbRelationship dbRel =
-                (DbRelationship) relationship.getDbRelationships().get(0);
-            Class targetClass =
-                targetEntity.getJavaClass(Configuration.getResourceLoader());
-            ObjectId id =
-                context
-                    .getObjectStore()
-                    .getSnapshot(sourceObject.getObjectId(), context)
-                    .createTargetObjectId(targetClass, dbRel);
-            return (id != null) ? context.registeredObject(id) : null;
+            // get ObjectId...
+            DbRelationship dbRel = (DbRelationship) relationship
+                    .getDbRelationships()
+                    .get(0);
+            Class targetClass = targetEntity.getJavaClass(Configuration
+                    .getResourceLoader());
+            ObjectId id = context.getObjectStore().getSnapshot(
+                    sourceObject.getObjectId(),
+                    context).createTargetObjectId(targetClass, dbRel);
+
+            if (id == null) {
+                return null;
+            }
+
+
+            if (resolver.lookupInheritanceTree(targetEntity) != null) {
+                // this should find a correct subclass if we have inheritance case....
+                return DataObjectUtils.objectForPK(context, id);
+            }
+            else {
+                return context.registeredObject(id);
+            }
         }
 
     }
