@@ -5,19 +5,28 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>September 20, 2003:</i></strong> <strong>Cayenne 1.0 Final Release</strong></u></p>
+        <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne 1.0.3 Release</strong></u></p>
         
-        <p>Cayenne 1.0 is 
+        <p>Cayenne 1.0.3 is 
         <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
-        download</a>. Cayenne team would like to thank everybody who made it possible. For release
-        notes and the list of known issues please follow <a href="RELEASE-NOTES-1.0.txt">this link</a>.
+        download</a>. It fixes numerous bugs (including a few serious ones), and adds a few new features:</p>
+        <ul>
+        <li>Class generation via Modeler or Ant would create "public static final String" class variables
+        for all class property names, and also for the column names of the entity PK.</li>
+        <li>New API added to transfer objects between DataContexts.</li>
+        <li>Iterator over IncrementalFaultList is now "lazy", and will resolve objects one 
+        page at a time.</li>
+        </ul>
+        
+        <p>Details can be found in the <a href="RELEASE-NOTES-1.0.3.txt">release notes</a>.
         </p>
         
-        <p>
-        <u><strong><i>July 2003:</i></strong> <strong>New Website Design</strong></u></p>
+        <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne Examples 1.0.3 Release</strong></u></p>
         
-        <p>Many thanks to our graphic artist Anna Drapeza who created this elegant site design!
-        Sadly enough good artistic work is still a rare thing in the OpenSource world.
+        <p>Cayenne Examples 1.0.3 is 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
+        download</a>. It contains new aggregate queries mapping example. Examples documentation is now a part
+        of the main Cayenne site. Details can be found in the <a href="RELEASE-NOTES-1.0.3.examples.txt">release notes</a>.
         </p>
         
         <p><img src="images/other/nhl_logo.gif"/> 
@@ -30,6 +39,8 @@
         <a href="http://www.centralparksoftware.com/">Central Park Software</a> the site was successfully
         launched to production. Currently applications receive more than 5 million hits a day. 
         </p>
+        
+        <p><a href="news-archive.html"><strong>older news...</strong></a></p>
         
         </section>
         

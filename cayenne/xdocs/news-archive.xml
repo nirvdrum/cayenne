@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<document>
+    <title>Cayenne News Archive</title>
+
+    <body>        
+        <section name="Cayenne News Archive">
+        <p><u><strong><i>October 27, 2003:</i></strong> <strong>Cayenne 1.0.2 Maintenance Release</strong></u></p>
+        
+        <p>Cayenne 1.0.2 is 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
+        download</a>. It contains a number of adapter fixes, as well as support for binary
+        primary keys. Details can be found in <a href="RELEASE-NOTES-1.0.2.txt">release notes</a>.
+        </p>
+        
+        <p>
+        <u><strong><i>July 2003:</i></strong> <strong>New Website Design</strong></u></p>
+        
+        <p>Many thanks to our graphic artist Anna Drapeza who created this elegant site design!
+        Sadly enough good artistic work is still a rare thing in the OpenSource world.
+        </p>
+        
+        <p><img src="images/other/nhl_logo.gif"/> 
+        <u><strong><i>May 1 2003:</i></strong> <strong>National 
+        Hockey League Switches to Cayenne</strong></u></p>
+        
+        <p>After the initial trial of Cayenne last October, NHL
+        switched all their public applications running at <a href="http://www.nhl.com">NHL.com</a>
+        to use Cayenne. With the help from <a href="http://objectstyle.com">ObjectStyle</a> and 
+        <a href="http://www.centralparksoftware.com/">Central Park Software</a> the site was successfully
+        launched to production. Currently applications receive more than 5 million hits a day. 
+        </p>
+        
+        </section>
+    </body>
+</document>
