@@ -351,7 +351,7 @@ public class ObjEntityPane
 
             ObjEntity ent = mediator.getCurrentObjEntity();
 
-            if (!Util.nullSafeEquals(ent.getClassName(), parentClassText)) {
+            if (!Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
                 ent.setSuperClassName(parentClassText);
                 mediator.fireObjEntityEvent(new EntityEvent(this, ent));
             }
