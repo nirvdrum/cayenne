@@ -5,12 +5,12 @@
 </properties>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/fetch.html</prev>
-	<next>/userguide/appguide/exp.html</next>
+	<prev>/userguide/appguide/exp.html</prev>
+	<next>/userguide/appguide/bigqueries.html</next>
 </navigator>    
 <body>
     <section name="5. Writing Cayenne Applications">            
-            <subsection name="5.6 Saving Modified Objects" anchor="cayenne_save">
+            <subsection name="5.7 Saving Modified Objects" anchor="cayenne_save">
             <p>Continuing the previous example, this section shows how to save changes made to
             DataObjects. Lets do the following operations: double the price of the first
             retrieved painting, add new painting that belongs to the same artist as the 
