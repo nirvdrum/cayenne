@@ -13,9 +13,11 @@
             GUI tools. Download JDK from Sun at <a href="http://java.sun.com/products/">
             http://java.sun.com/products/</a></p>		
                 
-            <p><strong>- Java Compatible Operating System.</strong> <i>MacOSX note: 
-            JSDK 1.4 support by Apple on MacOSX is pending, but JDK1.3 is
-            fully supported.</i></p>
+            <p><strong>- Java Compatible Operating System.</strong></p>
+            
+            <panel name="Mac OS X Note:">JSDK 1.4 is now supported on MacOSX. Make sure that it is installed
+            on HFS+ drive. Swing and AWT do not work from UFS!
+            </panel>
                 
             <p><strong>- Access to a relational database and JDBC driver for 
             this database.</strong> Out of the box, Cayenne would 

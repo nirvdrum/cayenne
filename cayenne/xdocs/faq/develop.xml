@@ -17,15 +17,17 @@
     		<li><a href="http://www.mysql.com/">MySQL</a></li>
     		<li><a href="http://www.postgresql.org/">PostgreSQL</a> (7.3 and newer)</li>
     		<li><a href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-    		<li><a href="http://www.ibm.com/db2/">DB2</a></li> 
+    		<li><a href="http://www.ibm.com/db2/">DB2</a></li>
+    		<li><a href="http://firebird.sourceforge.net/">FireBird (Interbase)</a></li> 
     	</ul>
     	
     	Adapters for other engines are constantly added. Users can create their own adapters as well.
     	</p>
+    	<p></p>
     	
-    	<p><i>Note on MS SQLServer adapter:</i> SybaseAdapter is best fitted to be used with SQLServer. We may
-    	create a separate adapter for it in the future.
-    	</p>
+    	<panel name="Note on MS SQLServer adapter:">SybaseAdapter works pretty well with SQLServer. 
+    	A separate adapter maybe created in the future.
+    	</panel>
     	</subsection>
     	
     	

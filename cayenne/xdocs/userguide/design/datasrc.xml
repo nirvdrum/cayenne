@@ -3,46 +3,28 @@
 <toc name="toc-user-guide" chapter="4. Design"/>
 <body>
     <section name="4. Design">
-        <subsection name="4.5 Cayenne DataSource" anchor="connect">
+        <subsection name="4.5 Cayenne DataSource">
         
-        	<p>Cayenne is designed to work with any javax.sql.DataSource implementation. 
-        	When Cayenne applications are deployed in containers (Web, EJB, etc.), DataSource
-        	would normally be obtained from the container (see deployment section). 
-        	
-        	<strong>However 
-        	Cayenne provides full implementation of DataSource functionality of it own, 
-        	including connection pooling. This allows to deploy standalone 
-        	Cayenne applications, as well as to use containers that don't supports JNDI 
-        	DataSource mapping. Cayenne DataSource can also be used as a container-provided 
-        	DataSource, even
-        	when the main part of the Cayenne functionality is not used.</strong> 
-        	For example it can be used as a DataSource implementation
-            of Tomcat web container. <i>(For a sample configuration follow 
-            <a href="../deploy/index.html#web">this link</a>, then scroll down to the sample
-            server.xml configuration file.)</i>
-        	</p>
-            
-            <p>Cayenne DataSource is implemented in <a href=
+        	<p>At the very bottom of Cayenne access stack, database connections are 
+        	obtained via <code>javax.sql.DataSource</code>. If an application is deployed
+        	in a J2EE container, DataSource is normally provided by container via JNDI.
+        	For standalone applications Cayenne includes a full implementation of 
+        	DataSource functionality, including connection pooling. Cayenne DataSource is 
+        	implemented as <a href=
             "../../api/cayenne/org/objectstyle/cayenne/conn/package-summary.html">org.objectstyle.cayenne.conn</a>
-            package. The following class diagram shows how Cayenne connection package classes
-        	(shown in light blue) implement java.sql and javax.sql interfaces 
-        	(shown in yellow) to provide DataSource 
-        	with connection pooling. </p>
-        	
-        	<img src="/images/conn-chart.gif" alt="DataSource Implementation Diagram"/>
-        	
-        	<p>Normally instances of <a href=
+            package. Normally instances of <a href=
         	"../../api/cayenne/org/objectstyle/cayenne/conn/PoolManager.html">PoolManager</a>
-        	class serve as a publicly accessible DataSource objects. They use 
-        	<a href="../../api/cayenne/org/objectstyle/cayenne/conn/PoolDataSource.html">PoolDataSource</a>
-            internally as a factory of PooledConnections. Each 
-        	<a href="../../api/cayenne/org/objectstyle/cayenne/conn/PooledConnectionImpl.html">PooledConnectionImpl</a> 
-        	produces a JDBC Connection object that is used to connect to the database.
-        	JDBC Connections are returned to the user as   
-        	<a href="../../api/cayenne/org/objectstyle/cayenne/conn/ConnectionWrapper.html">ConnectionWrapper</a> 
-        	objects that delegate all database operations to the underlying connection 
-        	and notify parent PooledConnection about SQLExceptions.	
+        	class serve as a publicly accessible DataSource objects.</p>
+        	
+        	<p>DataSource configuration is done as a part of the mapping, so normally 
+        	there is no need to access it in the code.
         	</p>
+        	
+        	<panel name="Note:">Cayenne DataSource implementation is fully independent from 
+        	the rest of the framework and can be used as a standalone module. But since Cayenne's
+        	main focus is on O/R features, DataSource use outside of Cayenne is not supported. 
+        	You may use other standalone implementations of DataSource, 
+        	e.g. Jakarta commons-dbcp.</panel>
         </subsection>
         
     </section>

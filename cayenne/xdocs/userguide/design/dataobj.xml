@@ -14,11 +14,10 @@
             Default implementation of DataObject is <a href=
             "../../api/cayenne/org/objectstyle/cayenne/CayenneDataObject.html">CayenneDataObject</a>.
             Normally application classes that are used for data access would extend 
-            CayenneDataObject. Class diagram of DataObject and its components is shown below
-            (details explained in the following subsections):
+            CayenneDataObject. DataContext provides persistence services to DataObjects:
             </p>
             
-            <img src="/images/dataobject-class.gif" alt="Cayenne DataObject Class Diagram"/> 
+            <img src="/images/data-objects.gif" width="420" height="331" alt="Cayenne DataObjects"/> 
 
             <subsection name="4.3.1 ObjectId">
             	<p>Each object in Cayenne is identified by <a href=
