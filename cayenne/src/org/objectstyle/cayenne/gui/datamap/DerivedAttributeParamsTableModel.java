@@ -85,6 +85,13 @@ public class DerivedAttributeParamsTableModel extends DbAttributeTableModel {
 		this.derived = derived;
 	}
 
+    /**
+     * Returns <code>null</code> to disable ordering.
+     */
+	public String getOrderingKey() {
+		return null;
+	}
+	
     public DbEntity getParentEntity() {
     	return ((DerivedDbEntity) derived.getEntity()).getParentEntity();
     }

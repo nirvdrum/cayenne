@@ -59,14 +59,13 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.gui.*;
+import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
@@ -109,7 +108,8 @@ public class EditDerivedParamsDialog
 		buildTable();
 
 		JPanel panel =
-			PanelFactory.createTablePanel(table,
+			PanelFactory.createTablePanel(
+				table,
 				new JButton[] { add, remove, save, cancel });
 		pane.add(panel, BorderLayout.CENTER);
 
@@ -129,19 +129,21 @@ public class EditDerivedParamsDialog
 			table.getColumnModel().getColumn(model.nameColumnInd());
 		nameCol.setMinWidth(150);
 
-		TableColumn typeCol = table.getColumnModel().getColumn(model.typeColumnInd());
+		TableColumn typeCol =
+			table.getColumnModel().getColumn(model.typeColumnInd());
 		typeCol.setMinWidth(90);
 
-        DbEntity parent = ((DerivedDbEntity)attr.getEntity()).getParentEntity();
-        java.util.List attrs = parent.getAttributeList();
-        
-        Object[] names = new Object[attrs.size() + 1];
-        names[0] = "";
-        
-        for(int i = 0; i < attrs.size(); i++) {
-        	names[i + 1] = ((Attribute)attrs.get(i)).getName();
-        }
-        
+		DbEntity parent =
+			((DerivedDbEntity) attr.getEntity()).getParentEntity();
+		java.util.List attrs = parent.getAttributeList();
+
+		Object[] names = new Object[attrs.size() + 1];
+		names[0] = "";
+
+		for (int i = 0; i < attrs.size(); i++) {
+			names[i + 1] = ((Attribute) attrs.get(i)).getName();
+		}
+
 		JComboBox comboBox = new JComboBox(names);
 		comboBox.setEditable(false);
 		nameCol.setCellEditor(new DefaultCellEditor(comboBox));
@@ -164,7 +166,8 @@ public class EditDerivedParamsDialog
 	}
 
 	protected void removeRow() {
-
+		DerivedAttributeParamsTableModel model = (DerivedAttributeParamsTableModel) table.getModel();	
+		model.removeRow(model.getAttribute(table.getSelectedRow()));
 	}
 
 	protected void addRow() {
@@ -172,6 +175,19 @@ public class EditDerivedParamsDialog
 	}
 
 	protected void save() {
+		// update parameters of the derived attribute
+		attr.clearParams();
+		Iterator it =
+			((CayenneTableModel) table.getModel()).getObjectList().iterator();
+		while (it.hasNext()) {
+			DbAttribute at = (DbAttribute) it.next();
+			attr.addParam(at);
+		}
+
+		// notify interested parties about the changes 
+		getMediator().fireDbAttributeEvent(
+			new AttributeEvent(this, attr, (DbEntity)attr.getEntity(), AttributeEvent.CHANGE));
+
 		hide();
 	}
 

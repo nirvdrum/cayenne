@@ -71,65 +71,68 @@ public abstract class CayenneTableModel extends AbstractTableModel {
 	protected Mediator mediator;
 	protected Object eventSource;
 	protected java.util.List objectList;
-	
 
 	/**
 	 * Constructor for CayenneTableModel.
 	 */
-	public CayenneTableModel(Mediator mediator, Object eventSource, java.util.List objectList) {
+	public CayenneTableModel(
+		Mediator mediator,
+		Object eventSource,
+		java.util.List objectList) {
 		super();
 		this.eventSource = eventSource;
 		this.mediator = mediator;
 		this.objectList = objectList;
-		
+
 		orderList();
 	}
-	
+
 	/**
 	 * Orders internal object list. Key returned by 
 	 * <code>getOrderingKey</code> is used for comparison.
 	 */
 	public void orderList() {
-		Collections.sort(
-			objectList,
-			new PropertyComparator(getOrderingKey(), getElementsClass()));
+		String key = getOrderingKey();
+		if (key != null) {
+			Collections.sort(
+				objectList,
+				new PropertyComparator(getOrderingKey(), getElementsClass()));
+		}
 	}
-	
+
 	/**
 	 * Returns Java class of the internal list elements.
 	 */
 	public abstract Class getElementsClass();
-	
+
 	/** 
 	 * Returns the key by which to order elements
 	 * in the object list. Default value is "name".
 	 */
 	public String getOrderingKey() {
 		return "name";
-	}	
+	}
 
-    /**
-     * Returns the number of objects on the list.
-     */
+	/**
+	 * Returns the number of objects on the list.
+	 */
 	public int getRowCount() {
 		return objectList.size();
 	}
-	
-    /**
-     * Returns an object used as an event source.
-     */
+
+	/**
+	 * Returns an object used as an event source.
+	 */
 	public Object getEventSource() {
 		return eventSource;
 	}
 
-
-    /** 
-     * Returns Mediator object. 
-     */
+	/** 
+	 * Returns Mediator object. 
+	 */
 	public Mediator getMediator() {
 		return mediator;
 	}
-
 
 	/**
 	 * Returns internal object list.
@@ -138,10 +141,13 @@ public abstract class CayenneTableModel extends AbstractTableModel {
 		return objectList;
 	}
 
-    public void addRow(Object row) {
-    	objectList.add(row);
-    	fireTableDataChanged();
-    }
+	public void addRow(Object row) {
+		objectList.add(row);
+		fireTableDataChanged();
+	}
 
+	public void removeRow(Object row) {
+		objectList.remove(row);
+		fireTableDataChanged();
+	}
 }
-

@@ -302,12 +302,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
 		attr.setMandatory(newVal.booleanValue());
 	}
 
-	/** Attribute just needs to be removed from the model. 
-	 *  It is already removed from the DataMap. */
-	public void removeAttribute(Attribute attrib) {
-		objectList.remove(attrib);
-		fireTableDataChanged();
-	}
 
 	public boolean isCellEditable(int row, int col) {
 		DbAttribute attrib = getAttribute(row);

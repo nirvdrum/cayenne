@@ -181,6 +181,14 @@ public class DerivedDbAttribute extends DbAttribute {
 	public void addParam(DbAttribute param) {
 		params.add(param);
 	}
+	
+	public void removeParam(DbAttribute param) {
+		params.remove(param);
+	}
+	
+	public void clearParams() {
+		params.clear();
+	}
 
 	/**
 	 * Sets the expressionSpec.

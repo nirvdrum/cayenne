@@ -170,7 +170,7 @@ public class DbAttributePane
 
 	public void dbAttributeRemoved(AttributeEvent e) {
 		DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
-		model.removeAttribute(e.getAttribute());
+		model.removeRow(e.getAttribute());
 	}
 
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
