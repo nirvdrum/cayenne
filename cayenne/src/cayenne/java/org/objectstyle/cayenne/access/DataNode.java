@@ -139,17 +139,15 @@ public class DataNode implements QueryEngine {
     /**
      * Returns a list of DataMaps handled by this DataNode.
      */
-    public List getMapList() {
+    public List getDataMapsAsList() {
         return entityResolver.getDataMapsList();
     }
 
     /**
      * Returns an array of DataMaps handled by this DataNode.
-     * @deprecated since b1; use #getMapList() instead.
+     * @deprecated since b1; use #getDataMapsAsList() instead.
      */
     public DataMap[] getDataMaps() {
-        // Andrus: this should probably be deprecated eventually,
-        // since it is redundant with "getMapList"
         List maps = entityResolver.getDataMapsList();
         DataMap[] mapsArray = new DataMap[maps.size()];
         return (DataMap[]) maps.toArray(mapsArray);

@@ -86,7 +86,7 @@ public class AddDataMapAction extends CayenneAction {
     protected void addDataMap() {
         EventController mediator = getMediator();
         DataNode node = mediator.getCurrentDataNode();
-        List map_list = mediator.getCurrentDataDomain().getMapList();
+        List map_list = mediator.getCurrentDataDomain().getDataMapsAsList();
         new AddDataMapDialog(node, map_list);
         mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
     }

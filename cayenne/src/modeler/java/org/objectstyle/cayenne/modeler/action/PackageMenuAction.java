@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
+import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
@@ -104,9 +105,10 @@ public class PackageMenuAction extends CayenneAction {
             return;
         // Go through all obj entities in the current data map and
         // set their package names.
-        ObjEntity[] entities = map.getObjEntities();
-        for (int i = 0; i < entities.length; i++) {
-            String name = entities[i].getClassName();
+        Iterator entities = map.getObjEntitiesAsList().iterator();
+        while (entities.hasNext()) {
+        	ObjEntity entity = (ObjEntity)entities.next();
+            String name = entity.getClassName();
 
             // there may be entities with no class selected yet
             if (name == null) {
@@ -117,10 +119,10 @@ public class PackageMenuAction extends CayenneAction {
             if (idx > 0) {
                 name =
                     (idx == name.length() - 1)
-                        ? entities[i].getName()
+                        ? entity.getName()
                         : name.substring(idx + 1);
             }
-            entities[i].setClassName(package_name + name);
+			entity.setClassName(package_name + name);
         }
         getMediator().fireDataMapEvent(new DataMapEvent(this, map));
     }

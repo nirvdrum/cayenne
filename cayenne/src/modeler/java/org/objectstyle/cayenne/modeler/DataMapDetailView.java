@@ -169,11 +169,11 @@ public class DataMapDetailView
 
             // must fully relink renamed map
             List nodes = new ArrayList();
-            Iterator allNodes = domain.getDataNodeList().iterator();
+            Iterator allNodes = domain.getDataNodesAsList().iterator();
             while (allNodes.hasNext()) {
                 DataNode node = (DataNode) allNodes.next();
                 
-                if(node.getMapList().contains(map)) {
+                if(node.getDataMapsAsList().contains(map)) {
                 	nodes.add(node);
                 }
             }
@@ -220,7 +220,7 @@ public class DataMapDetailView
         mapLookup.clear();
 
         // add a list of dependencies
-        java.util.List maps = mediator.getCurrentDataDomain().getMapList();
+        java.util.List maps = mediator.getCurrentDataDomain().getDataMapsAsList();
 
         if (maps.size() < 2) {
             return;

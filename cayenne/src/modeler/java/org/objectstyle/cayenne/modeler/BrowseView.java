@@ -61,6 +61,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -251,32 +252,33 @@ public class BrowseView
 
         if (null != node) {
             model.nodeChanged(node);
-            DataMap[] maps = e.getDataNode().getDataMaps();
+            List maps = e.getDataNode().getDataMapsAsList();
+            int mapCount = maps.size();
             // If added map to this node
-            if (maps.length > node.getChildCount()) {
+            if (mapCount > node.getChildCount()) {
                 // Find map not already under node and add it
-                for (int i = 0; i < maps.length; i++) {
+                for (int i = 0; i < mapCount; i++) {
                     boolean found = false;
                     for (int j = 0; j < node.getChildCount(); j++) {
                         DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(j);
-                        if (maps[i] == child.getUserObject()) {
+                        if (maps.get(i) == child.getUserObject()) {
                             found = true;
                             break;
                         }
                     }
                     if (!found) {
-                        browseTree.insertObject(maps[i], node);
+                        browseTree.insertObject(maps.get(i), node);
                         break;
                     }
                 } // End for(i)
-            } else if (maps.length < node.getChildCount()) {
+            } else if (mapCount < node.getChildCount()) {
                 for (int j = 0; j < node.getChildCount(); j++) {
                     boolean found = false;
                     DefaultMutableTreeNode child;
                     child = (DefaultMutableTreeNode) node.getChildAt(j);
                     Object obj = child.getUserObject();
-                    for (int i = 0; i < maps.length; i++) {
-                        if (maps[i] == obj) {
+                    for (int i = 0; i < mapCount; i++) {
+                        if (maps.get(i) == obj) {
                             found = true;
                             break;
                         }
@@ -341,9 +343,9 @@ public class BrowseView
         removeNode(new Object[] { domain, map });
 
         // Clean up map from the nodes
-        DataNode[] nodes = domain.getDataNodes();
-        for (int i = 0; i < nodes.length; i++) {
-            removeNode(new Object[] { domain, nodes[i], map });
+        Iterator nodes = domain.getDataNodesAsList().iterator();
+        while (nodes.hasNext()) {
+            removeNode(new Object[] { domain, nodes.next(), map });
         }
     }
 

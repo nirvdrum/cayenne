@@ -61,6 +61,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.perform.PerformanceTest;
 
 /**
@@ -118,6 +119,6 @@ public abstract class CayennePerformanceTest extends PerformanceTest {
     }
 
     public Connection getConnection() throws Exception {
-        return getDomain().getDataNodes()[0].getDataSource().getConnection();
+        return ((DataNode)getDomain().getDataNodesAsList().get(0)).getDataSource().getConnection();
     }
 }

@@ -280,9 +280,9 @@ public class RefIntegritySupport {
         reflexiveDbEntities = new HashMap();
         for (Iterator i = supportedNode.dataMapIterator(); i.hasNext();) {
             DataMap map = (DataMap) i.next();
-            DbEntity[] entitiesToConvert = map.getDbEntities();
-            for (int j = 0; j < entitiesToConvert.length; j++) {
-                DbEntity entity = entitiesToConvert[j];
+            Iterator entitiesToConvert = map.getDbEntitiesAsList().iterator();
+            while (entitiesToConvert.hasNext()) {
+                DbEntity entity = (DbEntity)entitiesToConvert.next();
                 Table table =
                     new Table(
                         entity.getCatalog(),

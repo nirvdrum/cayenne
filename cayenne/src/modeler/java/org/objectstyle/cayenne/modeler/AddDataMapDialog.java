@@ -94,8 +94,8 @@ public class AddDataMapDialog extends JDialog implements ActionListener {
     public AddDataMapDialog(DataNode temp_node, List map_list) {
         super(Editor.getFrame(), "Add data maps to the data node", true);
 
-        DataMap[] maps = temp_node.getDataMaps();
-        if (map_list.size() == maps.length) {
+        List maps = temp_node.getDataMapsAsList();
+        if (map_list.size() == maps.size()) {
             dispose();
             return;
         }
@@ -129,14 +129,14 @@ public class AddDataMapDialog extends JDialog implements ActionListener {
     }
 
     private Vector populate(DataNode temp_node, List map_list) {
-        DataMap[] maps = temp_node.getDataMaps();
+        List maps = temp_node.getDataMapsAsList();
         Vector new_maps = new Vector();
         Iterator iter = map_list.iterator();
         while (iter.hasNext()) {
             DataMap map = (DataMap) iter.next();
             boolean found = false;
-            for (int i = 0; maps != null && i < maps.length; i++) {
-                if (map == maps[i]) {
+            for (int i = 0; maps != null && i < maps.size(); i++) {
+                if (map == maps.get(i)) {
                     found = true;
                     break;
                 }

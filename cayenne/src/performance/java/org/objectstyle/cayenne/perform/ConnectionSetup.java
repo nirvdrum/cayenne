@@ -61,6 +61,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -107,7 +108,7 @@ public class ConnectionSetup  {
 
         DataSourceInfo dsi = factory.getDriverInfo();            
         DataDomain dom = conf.getDomain();
-        dsi.setAdapterClass(dom.getDataNodes()[0].getAdapter().getClass().getName());
+        dsi.setAdapterClass(((DataNode)(dom.getDataNodesAsList().get(0))).getAdapter().getClass().getName());
         return dsi;
     }
 

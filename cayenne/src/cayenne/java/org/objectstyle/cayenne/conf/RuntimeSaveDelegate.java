@@ -135,7 +135,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
             }
         };
 
-        List maps = findDomain(domainName).getMapList();
+        List maps = findDomain(domainName).getDataMapsAsList();
 
         // sort to satisfy dependencies
         DataMap.sortMaps(maps);
@@ -163,7 +163,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
             }
         };
 
-        List nodes = findDomain(domainName).getDataNodeList();
+        List nodes = findDomain(domainName).getDataNodesAsList();
         return new TransformIterator(nodes.iterator(), tr);
     }
 
@@ -173,7 +173,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
                 return ((DataMap) input).getName();
             }
         };
-        List maps = findNode(domainName, nodeName).getMapList();
+        List maps = findNode(domainName, nodeName).getDataMapsAsList();
         return new TransformIterator(maps.iterator(), tr);
     }
 }

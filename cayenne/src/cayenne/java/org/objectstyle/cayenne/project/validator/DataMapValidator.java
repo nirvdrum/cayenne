@@ -93,11 +93,11 @@ public class DataMapValidator extends TreeNodeValidator {
         
         boolean unlinked = true;
         int nodeCount = 0;
-        Iterator it = domain.getDataNodeList().iterator();
+        Iterator it = domain.getDataNodesAsList().iterator();
         while(it.hasNext()) {
         	DataNode node = (DataNode)it.next();
         	nodeCount++;
-        	if(node.getMapList().contains(map)) {
+        	if(node.getDataMapsAsList().contains(map)) {
         		unlinked = false;
         		break;
         	}
@@ -122,7 +122,7 @@ public class DataMapValidator extends TreeNodeValidator {
         }
 
         // check for duplicate names in the parent context
-        Iterator it = domain.getMapList().iterator();
+        Iterator it = domain.getDataMapsAsList().iterator();
         while (it.hasNext()) {
             DataMap otherMap = (DataMap) it.next();
             if (otherMap == map) {
