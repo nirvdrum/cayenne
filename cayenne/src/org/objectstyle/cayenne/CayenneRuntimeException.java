@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 /** Generic Cayenne runtime exception. */
 public class CayenneRuntimeException extends RuntimeException {
-    private Exception exception;
     
     /** Creates new <code>CayenneRuntimeException</code> without detail message. */
     public CayenneRuntimeException() {}
@@ -72,23 +71,15 @@ public class CayenneRuntimeException extends RuntimeException {
     }
     
     /**
-     * Constructs an <code>CayenneException</code> that wraps <code>exception</code>
+     * Constructs an <code>CayenneRuntimeException</code> that wraps <code>exception</code>
      * thrown elsewhere.
      */
-    public CayenneRuntimeException(Exception exception) {
-        this.exception = exception;
+    public CayenneRuntimeException(Throwable th) {
+        super(th);
     }
     
-    public CayenneRuntimeException(String msg, Exception exception) {
-        super(msg);
-        this.exception = exception;
-    }
-    
-    public String toString() {
-        if(exception != null)
-            return exception.toString();
-        else
-            return super.toString();
+    public CayenneRuntimeException(String msg, Throwable th) {
+        super(msg, th);
     }
 }
 

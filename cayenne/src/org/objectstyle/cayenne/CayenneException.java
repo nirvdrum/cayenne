@@ -60,8 +60,7 @@ package org.objectstyle.cayenne;
  * will be used in more specific cases.
  *
  */
-public class CayenneException extends java.lang.Exception {
-    private Exception exception;
+public class CayenneException extends Exception {
     
     /**
      * Creates new <code>CayenneException</code> without detail message.
@@ -83,20 +82,12 @@ public class CayenneException extends java.lang.Exception {
      * Constructs an <code>CayenneException</code> that wraps <code>exception</code>
      * thrown elsewhere.
      */
-    public CayenneException(Exception exception) {
-        this.exception = exception;
+    public CayenneException(Throwable th) {
+        super(th);
     }
     
-    public CayenneException(String msg, Exception exception) {
-        super(msg);
-        this.exception = exception;
-    }
-    
-    public String toString() {
-        if(exception != null)
-            return exception.toString();
-        else
-            return super.toString();
+    public CayenneException(String msg, Throwable th) {
+        super(msg, th);
     }
 }
 

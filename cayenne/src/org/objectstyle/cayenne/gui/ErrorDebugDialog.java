@@ -206,7 +206,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 			out.println("Build Date: " + buildDate);
 			out.println("Exception: ");
 			out.println("=================================");
-			throwable.printStackTrace(out);
+			buildStackTrace(out, throwable);
 
 			try {
 				out.close();
@@ -218,6 +218,20 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 		}
 
 		exText.setText(text);
+	}
+
+	protected void buildStackTrace(PrintWriter out, Throwable th) {
+		if (th == null) {
+			return;
+		}
+
+		th.printStackTrace(out);
+
+		Throwable cause = th.getCause();
+		if (cause != null) {
+			out.println("Caused by:");
+			buildStackTrace(out, cause);
+		}
 	}
 
 	public void actionPerformed(ActionEvent e) {

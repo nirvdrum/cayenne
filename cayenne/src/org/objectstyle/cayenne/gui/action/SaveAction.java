@@ -59,12 +59,14 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DomainHelper;
@@ -74,8 +76,8 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
 import org.objectstyle.cayenne.gui.validator.*;
-import org.objectstyle.cayenne.map.*;
-
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoader;
 
 /** 
  * Parent class for all Editor actions related to saving project.
@@ -86,273 +88,194 @@ public class SaveAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(SaveAction.class.getName());
 
 	public static final String ACTION_NAME = "Save";
-		
+
+	protected HashMap tempLookup = new HashMap();
+
 	public SaveAction() {
 		super(ACTION_NAME);
 	}
-	
+
 	public KeyStroke getAcceleratorKey() {
 		return KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK);
 	}
-	
+
 	public String getIconName() {
 		return "images/icon-save.gif";
 	}
-	
-	protected void saveAll() {
+
+	/** 
+	 * Saves project and related files. Saving is done to temporary files, 
+	 * and only on successful save, master files are replaced with new versions. 
+	 */
+	protected void saveAll() throws Exception {
+		tempLookup.clear();
+
 		Mediator mediator = getMediator();
-		Validator val = new Validator(mediator);
-		int ret_code = val.validate();
-		// If no errors or no serious errors, save.
-		if (ret_code == ErrorMsg.NO_ERROR || ret_code == ErrorMsg.WARNING) {
-			Iterator iter = mediator.getDirtyDataMaps().iterator();
-			while (iter.hasNext()) {
-				DataMap map = (DataMap)iter.next();
-				saveDataMap(map);
-			}// End saving maps
-			mediator.getDirtyDataMaps().clear();
-
-			iter = mediator.getDirtyDataNodes().iterator();
-			while (iter.hasNext()) {
-				DataNode node = (DataNode)iter.next();
-				// If using direct connection, save into separate file
-				if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
-					saveDataNode(node);
-				}
-			}// End saving DataNode-s
-			saveProject();
-			mediator.getDirtyDomains().clear();
-			mediator.getDirtyDataNodes().clear();
-
-			mediator.setDirty(false);
+		Iterator iter = mediator.getDirtyDataMaps().iterator();
+		while (iter.hasNext()) {
+			saveDataMap((DataMap) iter.next());
 		}
-		// If there were errors or warnings at validation, display them
-		if (ret_code == ErrorMsg.ERROR || ret_code == ErrorMsg.WARNING) {
-			ValidatorDialog dialog;
-			dialog = new ValidatorDialog(Editor.getFrame(), mediator
-								, val.getErrorMessages(), ret_code);
-			dialog.setVisible(true);
+
+		iter = mediator.getDirtyDataNodes().iterator();
+		while (iter.hasNext()) {
+			DataNode node = (DataNode) iter.next();
+			// If using direct connection, save into separate file
+			if (node
+				.getDataSourceFactory()
+				.equals(DataSourceFactory.DIRECT_FACTORY)) {
+				saveDataNode(node);
+			}
+		}
+
+		saveProject();
+		replaceMasterFiles();
+	}
+
+	/**
+	 * Replaces master files with fresh temporary files.
+	 */
+	protected void replaceMasterFiles() throws Exception {
+		Iterator it = tempLookup.keySet().iterator();
+		while (it.hasNext()) {
+			File tmp = (File) it.next();
+			File master = (File) tempLookup.get(tmp);
+			if (master.exists()) {
+				if (!master.delete()) {
+					throw new IOException(
+						"Unable to remove old master file " + master);
+				}
+			}
+
+			if (!tmp.renameTo(master)) {
+				throw new IOException(
+					"Unable to move " + tmp + " to " + master);
+			}
 		}
 	}
 
+	/**
+	 * Attempts to remove all temporary files.
+	 */
+	protected void cleanTempFiles() {
+		Iterator it = tempLookup.keySet().iterator();
+		while (it.hasNext()) {
+			File tmp = (File) it.next();
+			tmp.delete();
+		}
+	}
 
-	protected void saveProject() {
+	/** 
+	 * Creates temporary file for the master file.
+	 */
+	protected File tempFileForFile(File f) throws IOException {
+		File parent = f.getParentFile();
+		String name = f.getName();
+
+		if (name == null || name.length() < 3) {
+			name = "modeler";
+		}
+
+		File tmp = File.createTempFile(name, null, parent);
+		tempLookup.put(tmp, f);
+
+		return tmp;
+	}
+
+	protected void saveProject() throws Exception {
 		Mediator mediator = getMediator();
-		File file = mediator.getConfig().getProjFile();
-		System.out.println("Saving project to " + file.getAbsolutePath());
+		File file = tempFileForFile(mediator.getConfig().getProjFile());
+        String masterPath = ((File)tempLookup.get(file)).getAbsolutePath();
+
+		FileWriter fw = new FileWriter(file);
+
 		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-            Editor.getFrame().addToLastProjList(file.getAbsolutePath());
-			FileWriter fw = new FileWriter(file);
-			DomainHelper.storeDomains(new PrintWriter(fw), mediator.getDomains());
+			DomainHelper.storeDomains(
+				new PrintWriter(fw),
+				mediator.getDomains());
+			Editor.getFrame().addToLastProjList(masterPath);
+		} finally {
 			fw.flush();
 			fw.close();
-			mediator.getDirtyDomains().clear();
-			if (mediator.getDirtyDataMaps().size() <=0
-				&& mediator.getDirtyDataNodes().size() <=0 )
-			{
-				mediator.setDirty(false);
-			}
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
 		}
 	}
-
-
 
 	/** Save data source info if data source factory is DIRECT_FACTORY. */
-	protected void saveDataNode(DataNode node) {
+	protected void saveDataNode(DataNode node) throws Exception {
 		Mediator mediator = getMediator();
-		
+		File projDir = new File(mediator.getConfig().getProjDir());
+		File file =
+			tempFileForFile(new File(projDir, node.getDataSourceLocation()));
+
+		FileWriter fw = new FileWriter(file);
 		try {
-            String proj_dir_str = mediator.getConfig().getProjDir();
-			File file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
-			if (!file.exists()) {
-				saveNodeAs(node);
-				return;
-			}
-			FileWriter fw = new FileWriter(file);
 			PrintWriter pw = new PrintWriter(fw);
-			GuiDataSource src = (GuiDataSource)node.getDataSource();
-			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-			pw.close();
+			try {
+				GuiDataSource src = (GuiDataSource) node.getDataSource();
+				DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
+			} finally {
+				pw.close();
+			}
+		} finally {
 			fw.close();
-		} catch (Exception e) {
-            e.printStackTrace();
 		}
 	}
 
-
-	/** Save data node (DataSourceInfo) to a different location.
-	  * If there already exists proj tree, saves it under that tree.
-	  * otherwise saves using absolute path. */
-	protected void saveNodeAs(DataNode node) {
-		Mediator mediator = getMediator();
-		GuiDataSource src = (GuiDataSource)node.getDataSource();
-    	XmlFilter xmlFilter = new XmlFilter();
-        try {
-            // Get the project file name (always cayenne.xml)
-            File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            fc = new JFileChooser(file_view);
-            fc.setFileFilter(xmlFilter);
-            fc.setDialogType(JFileChooser.SAVE_DIALOG);
-            fc.setDialogTitle("Save data node - " + node.getName());
-            if (null != proj_dir)
-            	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showSaveDialog(Editor.getFrame());
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fc.getSelectedFile();
-			System.out.println("File path is " + file.getAbsolutePath());
-            String old_loc = node.getDataSourceLocation();
-            // Get absolute path for old location
-            if (null != proj_dir)
-            	old_loc = proj_dir + File.separator + old_loc;
-			// Create new file
-			if (!file.exists())
-				file.createNewFile();
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-			pw.close();
-			fw.close();
-			// Determine and set new data map location
-			String new_file_location = file.getAbsolutePath();
-			String relative_location;
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
-			else
-				relative_location
-					= new_file_location.substring(proj_dir_str.length() + 1);
-			node.setDataSourceLocation(relative_location);
-            // If data map already exists, delete old location after saving new
-            if (null != old_loc) {
-            	System.out.println("Old location is " + old_loc);
-            	File old_loc_file = new File(old_loc);
-            	if (old_loc_file.exists()) {
-            		System.out.println("Deleting old file");
-            		old_loc_file.delete();
-            	}
-            }
-            // Map location changed - mark current domain dirty
-			mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.CHANGE));
-
-        } catch (Exception e) {
-            System.out.println("Error saving DataNode " + node.getName() +": " + e.getMessage());
-            e.printStackTrace();
-        }
-	}
-
-
-
-
 	/** Save data map to the file. */
-	protected void saveDataMap(DataMap map) {
+	protected void saveDataMap(DataMap map) throws Exception {
+		File projDir = new File(getMediator().getConfig().getProjDir());
+		File file = tempFileForFile(new File(projDir, map.getLocation()));
+
+		MapLoader saver = new MapLoader();
+		FileWriter fw = new FileWriter(file);
+
 		try {
-            File file = null;
-            String proj_dir_str = getMediator().getConfig().getProjDir();
-			file = new File(proj_dir_str + File.separator + map.getLocation());
-			if (!file.exists()) {
-				saveMapAs(map);
-				return;
+			PrintWriter pw = new PrintWriter(fw);
+			try {
+				saver.storeDataMap(pw, map);
+			} finally {
+				pw.close();
 			}
-			MapLoader saver = new MapLoader();
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			saver.storeDataMap(pw, map);
-			pw.close();
+		} finally {
 			fw.close();
-		} catch (Exception e) {}
+		}
 	}
 
-	/** Save data map to a different location.
-	  * If there already exists proj tree, saves it under that tree.
-	  * otherwise saves using absolute path. */
-	protected void saveMapAs(DataMap map) {
-        try {
-            // Get the project file name (always cayenne.xml)
-            File file = null;
-            String proj_dir_str = getMediator().getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            fc = new JFileChooser(file_view);
-            fc.setDialogType(JFileChooser.SAVE_DIALOG);
-            fc.setDialogTitle("Save data map - " + map.getName());
-            if (null != proj_dir)
-            	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showSaveDialog(Editor.getFrame());
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fc.getSelectedFile();
-			System.out.println("File path is " + file.getAbsolutePath());
-            String old_loc = map.getLocation();
-            // Get absolute path for old location
-            if (null != proj_dir)
-            	old_loc = proj_dir + File.separator + old_loc;
-			// Create new file
-			if (!file.exists())
-				file.createNewFile();
-			MapLoader saver = new MapLoader();
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			saver.storeDataMap(pw, map);
-			pw.close();
-			fw.close();
-			// Determine and set new data map name
-			String new_file_name = file.getName();
-			String new_name;
-			int index = new_file_name.indexOf(".");
-			if (index >= 0)
-				new_name = new_file_name.substring(0, index);
-			else
-				new_name = new_file_name;
-			map.setName(new_name);
-			// Determine and set new data map location
-			String new_file_location = file.getAbsolutePath();
-			String relative_location;
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
-			else
-				relative_location
-					= new_file_location.substring(proj_dir_str.length() + 1);
-			map.setLocation(relative_location);
-            // If data map already exists, delete old location after saving new
-            if (null != old_loc) {
-            	System.out.println("Old location is " + old_loc);
-            	File old_loc_file = new File(old_loc);
-            	if (old_loc_file.exists()) {
-            		System.out.println("Deleting old file");
-            		old_loc_file.delete();
-            	}
-            }
-            // Map location changed - mark current domain dirty
-			getMediator().fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.CHANGE));
+	/**
+	 * This method is synchronized to prevent problems on double-clicking "save".
+	 */
+	public synchronized void performAction(ActionEvent e) {
+		Mediator mediator = getMediator();
+		Validator val = new Validator(mediator);
+		int validationCode = val.validate();
 
-        } catch (Exception e) {
-            System.out.println("Error loading project file, " + e.getMessage());
-            e.printStackTrace();
-        }
-	}
-	
-	public void performAction(ActionEvent e) {
-		saveAll();
+		// If no serious errors, perform save.
+		if (validationCode == ErrorMsg.NO_ERROR
+			|| validationCode == ErrorMsg.WARNING) {
+
+			try {
+				saveAll();
+			} catch (Exception ex) {
+				cleanTempFiles();
+				throw new CayenneRuntimeException("Error on save", ex);
+			}
+
+			mediator.getDirtyDataMaps().clear();
+			mediator.getDirtyDomains().clear();
+			mediator.getDirtyDataNodes().clear();
+			mediator.setDirty(false);
+		}
+
+		// If there were errors or warnings at validation, display them
+		if (validationCode == ErrorMsg.ERROR
+			|| validationCode == ErrorMsg.WARNING) {
+			ValidatorDialog dialog;
+			dialog =
+				new ValidatorDialog(
+					Editor.getFrame(),
+					mediator,
+					val.getErrorMessages(),
+					validationCode);
+			dialog.setVisible(true);
+		}
 	}
 }
