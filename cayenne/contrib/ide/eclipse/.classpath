@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
     <classpathentry kind="src" path="src/cayenne/java"/>
+    <classpathentry kind="src" path="src/modeler/java"/>
     <classpathentry kind="src" path="src/performance/java"/>
     <classpathentry kind="src" path="src/tests/java"/>
     <classpathentry kind="src" path="src/tutorials/cayenne-cmd-app/java"/>
