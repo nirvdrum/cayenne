@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data-map>
+	<db-entity name="ARTIST">
+		<db-attribute name="DATE_OF_BIRTH" type="TIME"/>
+		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="255"/>
+		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="ARTIST_EXHIBIT">
+		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="EXHIBIT_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="EXHIBIT">
+		<db-attribute name="GALLERY_ID" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="CLOSING_DATE" type="TIME" isMandatory="true"/>
+		<db-attribute name="OPENING_DATE" type="TIME" isMandatory="true"/>
+		<db-attribute name="EXHIBIT_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="GALLERY">
+		<db-attribute name="GALLERY_NAME" type="VARCHAR" isMandatory="true" length="100"/>
+		<db-attribute name="GALLERY_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	
+	<db-entity name="PAINTING">
+		<db-attribute name="PAINTING_TITLE" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="GALLERY_ID" type="INTEGER"/>
+		<db-attribute name="PAINTING_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2"/>
+		<db-attribute name="ARTIST_ID" type="INTEGER"/>
+	</db-entity>
+	
+	<!-- derived entity -->
+	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
+		<db-attribute-derived name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2" spec="SUM(%@)">
+			<db-attribute-ref name="ESTIMATED_PRICE"/>
+		</db-attribute-derived>
+		<db-attribute-derived name="PAINTINGS_COUNT" type="INTEGER" length="10" precision="2" spec="COUNT(%@)">
+			<db-attribute-ref name="PAINTING_ID"/>
+		</db-attribute-derived>
+		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isGroupBy="true" spec="%@">
+			<db-attribute-ref name="ARTIST_ID"/>
+		</db-attribute-derived>
+	</db-entity>
+	
+	<db-entity name="PAINTING_INFO">
+		<db-attribute name="TEXT_REVIEW" type="LONGVARCHAR"/>
+		<db-attribute name="PAINTING_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="IMAGE_BLOB" type="LONGVARBINARY"/>
+	</db-entity>
+	
+	<db-entity name="FLOAT_TEST">
+		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="FLOAT_COL" type="FLOAT" />
+	</db-entity>
+	
+	<obj-entity name="Artist" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
+		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
+	</obj-entity>
+	<obj-entity name="ROArtist" readOnly="true" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
+		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
+	</obj-entity>
+	<obj-entity name="ArtistExhibit" className="org.objectstyle.art.ArtistExhibit" dbEntityName="ARTIST_EXHIBIT"/>
+	<obj-entity name="Exhibit" className="org.objectstyle.art.Exhibit" dbEntityName="EXHIBIT">
+		<obj-attribute name="openingDate" type="java.sql.Time" db-attribute-name="OPENING_DATE"/>
+		<obj-attribute name="closingDate" type="java.sql.Time" db-attribute-name="CLOSING_DATE"/>
+	</obj-entity>
+	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
+		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>
+	</obj-entity>
+	
+	<obj-entity name="Painting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
+	</obj-entity>
+	<obj-entity name="ROPainting" readOnly="true" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
+	</obj-entity>
+	
+	<obj-entity name="ArtistAssets" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
+	</obj-entity>
+	
+	<obj-entity name="ArtistPaintingCounts" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
+		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
+	</obj-entity>
+	
+	<obj-entity name="SubPainting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
+	</obj-entity>
+	
+	<obj-entity name="PaintingInfo" className="org.objectstyle.art.PaintingInfo" dbEntityName="PAINTING_INFO">
+		<obj-attribute name="imageBlob" type="byte[]" db-attribute-name="IMAGE_BLOB"/>
+		<obj-attribute name="textReview" type="java.lang.String" db-attribute-name="TEXT_REVIEW"/>
+	</obj-entity>
+	
+	<db-relationship source="ARTIST" target="ARTIST_EXHIBIT" name="artistExhibitArray" toDependentPK="true" toMany="true">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship source="ARTIST" target="PAINTING" name="paintingArray" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship source="ARTIST_EXHIBIT" target="EXHIBIT" name="toExhibit" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
+	</db-relationship>
+	<db-relationship source="ARTIST_EXHIBIT" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship source="EXHIBIT" target="ARTIST_EXHIBIT" name="artistExhibitArray" toDependentPK="true" toMany="true">
+		<db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
+	</db-relationship>
+	<db-relationship source="EXHIBIT" target="GALLERY" name="toGallery" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship source="GALLERY" target="PAINTING" name="paintingArray" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship source="GALLERY" target="EXHIBIT" name="exhibitArray" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship source="PAINTING" target="PAINTING_INFO" name="toPaintingInfo" toDependentPK="true" toMany="false">
+		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
+	</db-relationship>
+	<db-relationship source="PAINTING" target="GALLERY" name="toGallery" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship source="PAINTING" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship source="ARTIST_ASSETS" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship source="PAINTING_INFO" target="PAINTING" name="painting" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
+	</db-relationship>
+	<obj-relationship name="artistExhibitArray" source="Artist" target="ArtistExhibit" toMany="true">
+		<db-relationship-ref source="ARTIST" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
+	</obj-relationship>
+	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true">
+		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" toMany="true">
+		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="toExhibit" source="ArtistExhibit" target="Exhibit" toMany="false">
+		<db-relationship-ref source="ARTIST_EXHIBIT" target="EXHIBIT" name="toExhibit"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="ArtistExhibit" target="Artist" toMany="false">
+		<db-relationship-ref source="ARTIST_EXHIBIT" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="artistExhibitArray" source="Exhibit" target="ArtistExhibit" toMany="true">
+		<db-relationship-ref source="EXHIBIT" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
+	</obj-relationship>
+	<obj-relationship name="toGallery" source="Exhibit" target="Gallery" toMany="false">
+		<db-relationship-ref source="EXHIBIT" target="GALLERY" name="toGallery"/>
+	</obj-relationship>
+	<obj-relationship name="paintingArray" source="Gallery" target="Painting" toMany="true">
+		<db-relationship-ref source="GALLERY" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="exhibitArray" source="Gallery" target="Exhibit" toMany="true">
+		<db-relationship-ref source="GALLERY" target="EXHIBIT" name="exhibitArray"/>
+	</obj-relationship>
+	<obj-relationship name="toPaintingInfo" source="Painting" target="PaintingInfo" toMany="false">
+		<db-relationship-ref source="PAINTING" target="PAINTING_INFO" name="toPaintingInfo"/>
+	</obj-relationship>
+	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false">
+		<db-relationship-ref source="PAINTING" target="GALLERY"  name="toGallery"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
+		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="ROPainting" target="Artist" toMany="false">
+		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="ArtistAssets" target="Artist" toMany="false">
+		<db-relationship-ref source="ARTIST_ASSETS" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="painting" source="PaintingInfo" target="Painting" toMany="false">
+		<db-relationship-ref source="PAINTING_INFO" target="PAINTING" name="painting"/>
+	</obj-relationship>
+</data-map>

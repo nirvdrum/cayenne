@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!--  Helper build file to compile subprojects.        -->
+<!--                                                   -->
+<!-- Depends on externally defined set of properties:  -->
+<!-- - subproj                                         -->
+<!-- - javacc.dir                                      -->
+<!-- - javacc.grammar                                  -->
+<!--                                                   -->
+<!-- ================================================= -->
+<project name="java-subproj" default="compile">
+
+	<!-- ========================================== -->
+    <!-- Build paths's for subprojects.             -->
+    <!-- (Would be nice if we could import such     -->
+    <!-- things).                                   -->
+    <!-- ========================================== -->    
+	<path id="classpath-cayenne">
+		<fileset dir="otherlib">
+			<include name="*.jar"/>
+		</fileset>
+    </path>
+    
+    <path id="classpath-tests">
+		<path refid="classpath-cayenne"/>
+		<pathelement path="build/cayenne/classes"/>
+    </path>
+    
+    <path id="classpath-performance">
+		<path refid="classpath-tests"/>
+    </path>
+    
+	<path id="javacc-classpath">
+		<fileset dir="otherlib">
+			<include name="*.jar"/>
+			<include name="*.zip"/>
+		</fileset>
+    </path>
+	
+	<target name="prepare" depends="nosubproj">
+		<tstamp/>
+		<mkdir dir="build/${subproj}/properties"/>
+		<mkdir dir="build/${subproj}/deps"/>
+		<mkdir dir="build/${subproj}/classes"/>
+		<mkdir dir="${dist}/src/${subproj}"/>
+		<mkdir dir="${dist}/lib"/>
+		<mkdir dir="${dist}/bin"/>
+	</target>
+	
+
+	<!-- ================================================= -->
+	<!-- JavaCC is normally run expicitly, so no need to   -->
+	<!-- check timestamps.                                 -->
+	<!-- ================================================= -->
+	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">
+		<delete>
+			<fileset dir="${javacc.dir}" includes="**/*.java"/>
+		</delete>
+		
+		<java dir="${basedir}" fork="true" classname="COM.sun.labs.javacc.Main">
+			<classpath refid="javacc-classpath"/>
+			<arg value="-OUTPUT_DIRECTORY=${javacc.dir}"/>
+			<arg value="${javacc.grammar}"/>
+		</java>
+	</target>
+	
+	
+	<target name="javacc-nodir" unless="javacc.dir">
+		<fail>"javacc.dir" is undefined.</fail>
+	</target>
+	
+	<target name="javacc-nogrammar" unless="javacc.grammar">
+		<fail>"javacc.grammar" is undefined.</fail>
+	</target>
+
+
+	<target name="compile" depends="nosubproj,prepare">
+		<javac	srcdir="src/${subproj}/java" 
+				destdir="build/${subproj}/classes" 
+				debug="on" 
+				deprecation="on">
+			<classpath refid="classpath-${subproj}"/>
+		</javac>
+	</target>
+	
+	<target name="nosubproj" unless="subproj">
+		<fail>"subproj" is undefined.</fail>
+	</target>
+</project>

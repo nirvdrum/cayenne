@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<!-- ========================================== -->
+<!-- Core Cayenne subproject buildfile.         -->
+<!-- ========================================== -->
+<project name="cayenne-tests" default="compile">
+	<property name="test.dist.src" value="${dist}/src/tests"/>
+	<property name="test.build" value="build/tests"/>
+	<property name="test.src" value="src/tests/java"/>
+	<property name="test.bin" value="src/tests/bin"/>
+	<property name="test.resources" value="src/tests/resources"/>
+
+
+	<!-- ========================================== -->
+    <!-- Define paths.                              -->
+    <!-- ========================================== -->    
+    <path id="test.dist.src">
+		<fileset dir="${test.src}"/>		
+		<fileset dir="${test.resources}"/>
+    </path>
+    
+
+	<target name="compile">
+		<ant antfile="build-subproj.xml" target="compile">
+			<property name="subproj" value="tests"/>
+		</ant>
+	</target>
+	
+	<target name="dist-src" depends="dist-bin">
+		<copy todir="${test.dist.src}">
+            <fileset refid="test.dist.src"/>
+        </copy>
+	</target>
+
+	<target name="dist-bin" depends="jar">
+	    <copy todir="${dist}/bin">
+            <fileset dir="${test.bin}" includes="*.bat,*.sh"/>
+        </copy>
+
+        <chmod perm="gu+x">
+            <fileset dir="${dist}/bin">
+                <include name="**/*.sh"/>
+            </fileset>
+        </chmod>
+        
+        <!-- JUnit JAR is required for the tests to run. -->
+        <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
+	</target>
+  
+  
+    <!-- ========================================== -->
+    <!-- Build "fat" JAR file with dependencies.    -->
+    <!-- ========================================== -->
+    <target name="jar" depends="compile">
+    	<jar jarfile="${dist}/lib/cayenne-tests.jar" manifest="src/tests/MANIFEST.MF">
+            <fileset dir="${test.build}/classes"/>
+            <fileset dir="${test.resources}"/>
+            <metainf dir="doc" includes="LICENSE"/>
+        </jar>
+    </target>
+</project>
+
