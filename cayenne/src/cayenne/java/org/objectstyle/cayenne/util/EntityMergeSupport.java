@@ -72,148 +72,134 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * Class that implements methods for entity merging.
- * At this point it is at experimental stage, so chances of
- * API changes are about 100%. 
+ * Implements methods for entity merging.
  * 
  * @author Andrei Adamchik
  */
 public class EntityMergeSupport {
-	protected DataMap map;
-	protected ObjEntity objEntity;
+    protected DataMap map;
 
-	public EntityMergeSupport(DataMap map) {
-		this.map = map;
-	}
+    public EntityMergeSupport(DataMap map) {
+        this.map = map;
+    }
 
-	protected void reset() {
-		objEntity = null;
-	}
+    /**
+     * Updates ObjEntity attributes and relationships
+     * based on the current state of its DbEntity.
+     */
+    public void synchronizeWithDbEntity(ObjEntity entity) {
 
-	/**
-	 * Updates ObjEntity attributes and relationships
-	 * based on the current state of its DbEntity.
-	 */
-	public void synchronizeWithDbEntity(ObjEntity entity) {
-		reset();
+        if (entity == null || entity.getDbEntity() == null) {
+            return;
+        }
 
-		if (entity == null || entity.getDbEntity() == null) {
-			return;
-		}
+        // synchronization on DataMap is some (weak) protection
+        // against simulteneous modification of the map (like double-clicking on sync button)
+        synchronized (map) {
+            List addAttributes = getAttributesToAdd(entity);
+            List addRelationships = getRelationshipsToAdd(entity);
 
-		this.setEntity(entity);
+            // add missing attributes
+            Iterator ait = addAttributes.iterator();
+            while (ait.hasNext()) {
+                DbAttribute da = (DbAttribute) ait.next();
+                String attName =
+                    NameConverter.undescoredToJava(da.getName(), false);
+                String type = TypesMapping.getJavaBySqlType(da.getType());
 
-		List addAttributes = getAttributesToAdd();
-		List addRelationships = getRelationshipsToAdd();
+                ObjAttribute oa = new ObjAttribute(attName, type, entity);
+                oa.setDbAttribute(da);
+                entity.addAttribute(oa);
+            }
 
-		// add missing attributes
-		Iterator ait = addAttributes.iterator();
-		while (ait.hasNext()) {
-			DbAttribute da = (DbAttribute) ait.next();
-			String attName =
-				NameConverter.undescoredToJava(da.getName(), false);
-			String type = TypesMapping.getJavaBySqlType(da.getType());
+            // add missing relationships
+            Iterator rit = addRelationships.iterator();
+            while (rit.hasNext()) {
+                DbRelationship dr = (DbRelationship) rit.next();
+                List mappedTargets =
+                    map.getMappedEntities((DbEntity) dr.getTargetEntity());
+                if (mappedTargets.size() == 0) {
+                    continue;
+                }
 
-			ObjAttribute oa = new ObjAttribute(attName, type, entity);
-			oa.setDbAttribute(da);
-			entity.addAttribute(oa);
-		}
+                ObjRelationship or = new ObjRelationship(dr.getName());
+                or.addDbRelationship(dr);
+                or.setSourceEntity(entity);
+                or.setTargetEntity((Entity) mappedTargets.get(0));
+                entity.addRelationship(or);
+            }
+        }
+    }
 
-		// add missing relationships
-		Iterator rit = addRelationships.iterator();
-		while (rit.hasNext()) {
-			DbRelationship dr = (DbRelationship) rit.next();
-			List mappedTargets =
-				map.getMappedEntities((DbEntity) dr.getTargetEntity());
-			if (mappedTargets.size() == 0) {
+    /**
+     * Returns a list of attributes that exist in the DbEntity, but 
+     * are missing from the ObjEntity.
+     */
+    protected List getAttributesToAdd(ObjEntity objEntity) {
+        List missing = new ArrayList();
+        Iterator it = objEntity.getDbEntity().getAttributes().iterator();
+        Collection rels = objEntity.getDbEntity().getRelationships();
+
+        while (it.hasNext()) {
+            DbAttribute dba = (DbAttribute) it.next();
+            // already there
+            if (objEntity.getAttributeForDbAttribute(dba) != null) {
                 continue;
-			}
+            }
 
-			ObjRelationship or = new ObjRelationship(dr.getName());
-			or.addDbRelationship(dr);
-			or.setSourceEntity(entity);
-			or.setTargetEntity((Entity) mappedTargets.get(0));
-			entity.addRelationship(or);
-		}
-	}
+            // check if adding it makes sense at all
+            if (dba.getName() == null || dba.isPrimaryKey()) {
+                continue;
+            }
 
-	/**
-	 * Returns a list of attributes that exist in the DbEntity, but 
-	 * are missing from the ObjEntity.
-	 */
-	protected List getAttributesToAdd() {
-		List missing = new ArrayList();
-		Iterator it = objEntity.getDbEntity().getAttributes().iterator();
-		Collection rels = objEntity.getDbEntity().getRelationships();
+            // check FK's 
+            boolean isFK = false;
+            Iterator rit = rels.iterator();
+            while (!isFK && rit.hasNext()) {
+                DbRelationship rel = (DbRelationship) rit.next();
+                Iterator jit = rel.getJoins().iterator();
+                while (jit.hasNext()) {
+                    DbAttributePair join = (DbAttributePair) jit.next();
+                    if (join.getSource() == dba) {
+                        isFK = true;
+                        break;
+                    }
+                }
+            }
 
-		while (it.hasNext()) {
-			DbAttribute dba = (DbAttribute) it.next();
-			// already there
-			if (objEntity.getAttributeForDbAttribute(dba) != null) {
-				continue;
-			}
+            if (isFK) {
+                continue;
+            }
 
-			// check if adding it makes sense at all
-			if (dba.getName() == null || dba.isPrimaryKey()) {
-				continue;
-			}
+            missing.add(dba);
+        }
 
-			// check FK's 
-			boolean isFK = false;
-			Iterator rit = rels.iterator();
-			while (!isFK && rit.hasNext()) {
-				DbRelationship rel = (DbRelationship) rit.next();
-				Iterator jit = rel.getJoins().iterator();
-				while (jit.hasNext()) {
-					DbAttributePair join = (DbAttributePair) jit.next();
-					if (join.getSource() == dba) {
-						isFK = true;
-						break;
-					}
-				}
-			}
+        return missing;
+    }
 
-			if (isFK) {
-				continue;
-			}
+    protected List getRelationshipsToAdd(ObjEntity objEntity) {
+        List missing = new ArrayList();
+        Iterator it = objEntity.getDbEntity().getRelationships().iterator();
+        while (it.hasNext()) {
+            DbRelationship dbrel = (DbRelationship) it.next();
+            // check if adding it makes sense at all
+            if (dbrel.getName() == null) {
+                continue;
+            }
 
-			missing.add(dba);
-		}
+            if (objEntity.getRelationshipForDbRelationship(dbrel) == null) {
+                missing.add(dbrel);
+            }
+        }
 
-		return missing;
-	}
+        return missing;
+    }
 
-	protected List getRelationshipsToAdd() {
-		List missing = new ArrayList();
-		Iterator it = objEntity.getDbEntity().getRelationships().iterator();
-		while (it.hasNext()) {
-			DbRelationship dbrel = (DbRelationship) it.next();
-			// check if adding it makes sense at all
-			if (dbrel.getName() == null) {
-				continue;
-			}
+    public DataMap getMap() {
+        return map;
+    }
 
-			if (objEntity.getRelationshipForDbRelationship(dbrel) == null) {
-				missing.add(dbrel);
-			}
-		}
-
-		return missing;
-	}
-
-	public ObjEntity getEntity() {
-		return objEntity;
-	}
-
-	public void setEntity(ObjEntity entity) {
-		this.objEntity = entity;
-	}
-
-	public DataMap getMap() {
-		return map;
-	}
-
-	public void setMap(DataMap map) {
-		this.map = map;
-	}
+    public void setMap(DataMap map) {
+        this.map = map;
+    }
 }
