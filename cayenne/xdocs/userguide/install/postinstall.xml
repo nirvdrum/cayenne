@@ -22,14 +22,22 @@
             They include:
             
             <ul>
-            	<li><a href="http:/objectstyle.org/ashwood/">ObjectStyle Ashwood Graph Library</a>
+            	<li><a href="http:/objectstyle.org/ashwood/" target="_new">ObjectStyle Ashwood Graph Library</a>
             	<i>(see a note about Ashwood below)</i></li>
-            	<li><a href="http://jakarta.apache.org/velocity/">Jakarta Velocity Template 
+            	<li><a href="http://jakarta.apache.org/velocity/" target="_new">Jakarta Velocity Template 
             	Engine</a>, version 1.3</li>
-				<li><a href="http://jakarta.apache.org/oro/">Jakarta ORO Regular Expressions 
+				<li><a href="http://jakarta.apache.org/oro/" target="_new">Jakarta ORO Regular Expressions 
 				package</a> <i>(also bundled with Velocity)</i></li>
-				<li><a href="http://jakarta.apache.org/log4j/">Jakarta Log4J 
+				<li><a href="http://jakarta.apache.org/log4j/" target="_new">Jakarta Log4J 
 				package</a>, version 1.2.8</li>
+				<li><a href="http://jakarta.apache.org/commons/lang/" target="_new">Jakarta Commons Lang 
+				package</a>, version 2.0</li>
+				<li><a href="http://jakarta.apache.org/commons/collections/" target="_new">Jakarta Commons Collections 
+				package</a>, version 2.1</li>
+				<li><a href="http://jakarta.apache.org/commons/logging/" target="_new">Jakarta Commons Logging 
+				package</a>, version 1.0.3</li>
+				<li><a href="http://jakarta.apache.org/commons/beanutils/" target="_new">Jakarta Commons Beanutils 
+				package</a>, version 1.6.1</li>
 			</ul>
             
             If bundled Cayenne dependencies conflict with other packages installed
@@ -69,6 +77,8 @@
             	<ul>
             		<li><strong><code>cayenne-modeler.jar</code></strong></li>
 					<li><strong><code>scope-bin-1.0.1.jar</code></strong></li>
+					<li><strong><code>forms-1.0.3.jar</code></strong></li>
+					<li><strong><code>plastic-1.1.2.jar</code></strong></li>
 				</ul>
             	
             	<code>cayenne-modeler.jar</code> implicitly relies on the presence of 
