@@ -139,6 +139,9 @@ public class EOModelHelper {
             String name = (String) info.get("name");
             Map entityPlistMap = entityPListMap(name);
             List classProperties = (List) entityPlistMap.get("classProperties");
+            if(classProperties == null) {
+                classProperties = Collections.EMPTY_LIST;
+            }
 
             // get client class information
             Map internalInfo = (Map) entityPlistMap.get("internalInfo");

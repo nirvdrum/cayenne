@@ -215,6 +215,7 @@ public class EOModelProcessor {
 
         DataMap dataMap = helper.getDataMap();
         Map entityPlist = helper.entityPListMap(name);
+        
 
         // create ObjEntity
         EOObjEntity objEntity = new EOObjEntity(name);
@@ -233,17 +234,45 @@ public class EOModelProcessor {
         // create DbEntity...since EOF allows the same table to be
         // associated with multiple EOEntities, check for name duplicates
         String dbEntityName = (String) entityPlist.get("externalName");
-
         if (dbEntityName != null) {
-            int i = 0;
-            String dbEntityBaseName = dbEntityName;
-            while (dataMap.getDbEntity(dbEntityName) != null) {
-                dbEntityName = dbEntityBaseName + i++;
-            }
+            
+            // ... if inheritance is involved and parent hierarchy uses the same DBEntity, 
+            // do not create a DbEntity...
+            boolean createDbEntity = true;
+            if (parent != null) {
+                String parentName = parent;
+                while (parentName != null) {
+                    Map parentData = helper.entityPListMap(parentName);
+                    if (parentData == null) {
+                        break;
+                    }
 
-            objEntity.setDbEntityName(dbEntityName);
-            DbEntity de = new DbEntity(dbEntityName);
-            dataMap.addDbEntity(de);
+                    String parentExternalName = (String) parentData.get("externalName");
+                    if (parentExternalName == null) {
+                        parentName = (String) parentData.get("parent");
+                        continue;
+                    }
+
+                    if (dbEntityName.equals(parentExternalName)) {
+                        createDbEntity = false;
+                    }
+
+                    break;
+                }
+            }
+            
+            
+            if (createDbEntity) {
+                int i = 0;
+                String dbEntityBaseName = dbEntityName;
+                while (dataMap.getDbEntity(dbEntityName) != null) {
+                    dbEntityName = dbEntityBaseName + i++;
+                }
+
+                objEntity.setDbEntityName(dbEntityName);
+                DbEntity de = new DbEntity(dbEntityName);
+                dataMap.addDbEntity(de);
+            }
         }
 
         // set various flags
@@ -291,6 +320,30 @@ public class EOModelProcessor {
         if (attributes == null) {
             attributes = Collections.EMPTY_LIST;
         }
+        
+        // detect single table inheritance
+        boolean singleTableInheritance = false;
+        String parentName = (String) entityPlistMap.get("parent");
+        while (parentName != null) {
+            Map parentData = helper.entityPListMap(parentName);
+            if (parentData == null) {
+                break;
+            }
+
+            String parentExternalName = (String) parentData.get("externalName");
+            if (parentExternalName == null) {
+                parentName = (String) parentData.get("parent");
+                continue;
+            }
+
+            if (dbEntity.getName() != null
+                    && dbEntity.getName().equals(parentExternalName)) {
+                singleTableInheritance = true;
+            }
+
+            break;
+        }
+        
 
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
@@ -300,62 +353,71 @@ public class EOModelProcessor {
             Map prototypeAttrMap = helper.getPrototypeAttributeMapFor(prototypeName);
 
             String dbAttrName = (String) attrMap.get("columnName");
-            if (null == dbAttrName)
+            if (null == dbAttrName) {
                 dbAttrName = (String) prototypeAttrMap.get("columnName");
+            }
 
             String attrName = (String) attrMap.get("name");
-            if (null == attrName)
+            if (null == attrName) {
                 attrName = (String) prototypeAttrMap.get("name");
+            }
 
             String attrType = (String) attrMap.get("valueClassName");
-            if (null == attrType)
+            if (null == attrType) {
                 attrType = (String) prototypeAttrMap.get("valueClassName");
+            }
 
             String valueType = (String) attrMap.get("valueType");
-            if (valueType == null)
+            if (valueType == null) {
                 valueType = (String) prototypeAttrMap.get("valueType");
+            }
 
             String javaType = helper.javaTypeForEOModelerType(attrType, valueType);
             EODbAttribute dbAttr = null;
 
             if (dbAttrName != null && dbEntity != null) {
+                
 
-                // create DbAttribute...since EOF allows the same column name for
-                // more than one Java attribute, we need to check for name duplicates
-                int i = 0;
-                String dbAttributeBaseName = dbAttrName;
-                while (dbEntity.getAttribute(dbAttrName) != null) {
-                    dbAttrName = dbAttributeBaseName + i++;
+                // if inherited atribute, skip it for DbEntity...
+                if (!singleTableInheritance || dbEntity.getAttribute(dbAttrName) == null) {
+
+                    // create DbAttribute...since EOF allows the same column name for
+                    // more than one Java attribute, we need to check for name duplicates
+                    int i = 0;
+                    String dbAttributeBaseName = dbAttrName;
+                    while (dbEntity.getAttribute(dbAttrName) != null) {
+                        dbAttrName = dbAttributeBaseName + i++;
+                    }
+
+                    dbAttr = new EODbAttribute(dbAttrName, TypesMapping
+                            .getSqlTypeByJava(javaType), dbEntity);
+                    dbAttr.setEoAttributeName(attrName);
+                    dbEntity.addAttribute(dbAttr);
+
+                    Integer width = (Integer) attrMap.get("width");
+                    if (null == width)
+                        width = (Integer) prototypeAttrMap.get("width");
+
+                    if (width != null)
+                        dbAttr.setMaxLength(width.intValue());
+
+                    Integer scale = (Integer) attrMap.get("scale");
+                    if (null == scale)
+                        scale = (Integer) prototypeAttrMap.get("scale");
+
+                    if (scale != null)
+                        dbAttr.setPrecision(scale.intValue());
+
+                    if (primaryKeys.contains(attrName))
+                        dbAttr.setPrimaryKey(true);
+
+                    Object allowsNull = attrMap.get("allowsNull");
+                    // TODO: Unclear that allowsNull should be inherited from EOPrototypes
+                    // if (null == allowsNull) allowsNull =
+                    // prototypeAttrMap.get("allowsNull");;
+
+                    dbAttr.setMandatory(!"Y".equals(allowsNull));
                 }
-
-                dbAttr = new EODbAttribute(dbAttrName, TypesMapping
-                        .getSqlTypeByJava(javaType), dbEntity);
-                dbAttr.setEoAttributeName(attrName);
-                dbEntity.addAttribute(dbAttr);
-
-                Integer width = (Integer) attrMap.get("width");
-                if (null == width)
-                    width = (Integer) prototypeAttrMap.get("width");
-
-                if (width != null)
-                    dbAttr.setMaxLength(width.intValue());
-
-                Integer scale = (Integer) attrMap.get("scale");
-                if (null == scale)
-                    scale = (Integer) prototypeAttrMap.get("scale");
-
-                if (scale != null)
-                    dbAttr.setPrecision(scale.intValue());
-
-                if (primaryKeys.contains(attrName))
-                    dbAttr.setPrimaryKey(true);
-
-                Object allowsNull = attrMap.get("allowsNull");
-                // TODO: Unclear that allowsNull should be inherited from EOPrototypes
-                // if (null == allowsNull) allowsNull =
-                // prototypeAttrMap.get("allowsNull");;
-
-                dbAttr.setMandatory(!"Y".equals(allowsNull));
             }
 
             if (classProperties.contains(attrName)) {
@@ -432,29 +494,42 @@ public class EOModelProcessor {
             // Note: there is no flattened rel. support here....
             // Note: source maybe null, e.g. an abstract entity.
             if (dbSrc != null && dbTarget != null) {
-                dbRel = new DbRelationship();
-                dbRel.setSourceEntity(dbSrc);
-                dbRel.setTargetEntity(dbTarget);
-                dbRel.setToMany(toMany);
-                dbRel.setName(relName);
-                dbRel.setToDependentPK(toDependentPK);
-                dbSrc.addRelationship(dbRel);
+                
+                // in case of inheritance EOF stores duplicates of all inherited
+                // relationships, so we must skip this relationship in DB entity if it is
+                // already there...
 
-                List joins = (List) relMap.get("joins");
-                Iterator jIt = joins.iterator();
-                while (jIt.hasNext()) {
-                    Map joinMap = (Map) jIt.next();
+                dbRel = (DbRelationship) dbSrc.getRelationship(relName);
+                if (dbRel == null) {
 
-                    DbJoin join = new DbJoin(dbRel);
-                    
-                    // find source attribute dictionary and extract the column name
-                    String sourceAttributeName = (String) joinMap.get("sourceAttribute");
-                    join.setSourceName(columnName(attributes, sourceAttributeName));
-                    
-                    String targetAttributeName = (String) joinMap.get("destinationAttribute");
-                    
-                    join.setTargetName(columnName(targetAttributes, targetAttributeName));
-                    dbRel.addJoin(join);
+                    dbRel = new DbRelationship();
+                    dbRel.setSourceEntity(dbSrc);
+                    dbRel.setTargetEntity(dbTarget);
+                    dbRel.setToMany(toMany);
+                    dbRel.setName(relName);
+                    dbRel.setToDependentPK(toDependentPK);
+                    dbSrc.addRelationship(dbRel);
+
+                    List joins = (List) relMap.get("joins");
+                    Iterator jIt = joins.iterator();
+                    while (jIt.hasNext()) {
+                        Map joinMap = (Map) jIt.next();
+
+                        DbJoin join = new DbJoin(dbRel);
+
+                        // find source attribute dictionary and extract the column name
+                        String sourceAttributeName = (String) joinMap
+                                .get("sourceAttribute");
+                        join.setSourceName(columnName(attributes, sourceAttributeName));
+
+                        String targetAttributeName = (String) joinMap
+                                .get("destinationAttribute");
+
+                        join.setTargetName(columnName(
+                                targetAttributes,
+                                targetAttributeName));
+                        dbRel.addJoin(join);
+                    }
                 }
             }
 

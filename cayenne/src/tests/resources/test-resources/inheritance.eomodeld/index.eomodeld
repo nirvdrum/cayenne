@@ -8,7 +8,22 @@
             name = ConcreteEntityOne; 
             parent = AbstractEntity; 
         }, 
-        {className = DetailEntityClass; name = DetailEntity; }
+        {className = DetailEntityClass; name = DetailEntity; }, 
+        {className = HelperEntityClass; name = HelperEntity; }, 
+        {
+            className = SingeTableConcreteEntityOneClass; 
+            name = SingleTableConcreteEntityOne; 
+            parent = XSingleTableAbstractEntity; 
+        }, 
+        {
+            className = SingeTableConcreteEntityTwoClass; 
+            name = SingleTableConcreteEntityTwo; 
+            parent = XSingleTableAbstractEntity; 
+        }, 
+        {
+            className = SingleTableAbstractEntityClass; 
+            name = XSingleTableAbstractEntity; 
+        }
     ); 
     internalInfo = {
         "_deletedEntityNamesInObjectStore" = ("CONCRETE_SUBENTITY", "CONCRETE_SUBENTITY"); 
