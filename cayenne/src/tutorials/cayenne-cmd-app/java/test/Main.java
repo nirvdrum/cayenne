@@ -80,16 +80,16 @@ public class Main {
     /** Adds new artist and his paintings to the gallery. */
     private void addArtist(Gallery gallery) {
         // create new Artist object
-        Artist dali = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist dali = (Artist) ctxt.createAndRegisterNewObject(Artist.class);
         dali.setArtistName("Salvador Dali");
 
         // create new Painting object
-        Painting painting = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        Painting painting = (Painting) ctxt.createAndRegisterNewObject(Painting.class);
         painting.setPaintingTitle("Sleep");
 
         // establish relationship between artist and painting
         dali.addToPaintingArray(painting);
-        
+
         // establish relationship between painting and gallery
         gallery.addToPaintingArray(painting);
 

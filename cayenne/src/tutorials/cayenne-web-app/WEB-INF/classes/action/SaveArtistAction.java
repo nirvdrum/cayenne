@@ -39,7 +39,7 @@ public class SaveArtistAction extends Action {
         DataContext ctxt =
             ServletUtil.getSessionContext(request.getSession());
 
-        Artist anArtist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist anArtist = (Artist) ctxt.createAndRegisterNewObject(Artist.class);
         anArtist.setArtistName(artistForm.getArtistName());
         anArtist.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
 

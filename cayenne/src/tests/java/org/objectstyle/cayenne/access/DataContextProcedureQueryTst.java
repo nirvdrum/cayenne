@@ -273,10 +273,10 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
     }
 
     protected void createArtist(double paintingPrice) {
-        Artist a = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist a = (Artist) ctxt.createAndRegisterNewObject(Artist.class);
         a.setArtistName("An Artist");
 
-        Painting p = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        Painting p = (Painting) ctxt.createAndRegisterNewObject(Painting.class);
         p.setPaintingTitle("A Painting");
         // converting double to stringn prevents rounding weirdness...
         p.setEstimatedPrice(new BigDecimal("" + paintingPrice));

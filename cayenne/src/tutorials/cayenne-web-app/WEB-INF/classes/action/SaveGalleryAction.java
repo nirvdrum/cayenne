@@ -27,7 +27,7 @@ public class SaveGalleryAction extends Action {
 
         GalleryForm galleryForm = (GalleryForm) form;
 
-        Gallery aGallery = (Gallery) ctxt.createAndRegisterNewObject("Gallery");
+        Gallery aGallery = (Gallery) ctxt.createAndRegisterNewObject(Gallery.class);
         aGallery.setGalleryName(galleryForm.getGalleryName());
 
         // commit to the database

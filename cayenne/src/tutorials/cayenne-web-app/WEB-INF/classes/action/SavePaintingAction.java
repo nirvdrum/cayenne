@@ -43,7 +43,7 @@ public class SavePaintingAction extends Action {
         System.err.println("artists: " + artists);
         Artist artist = (Artist) artists.get(0);
 
-        Painting aPainting = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        Painting aPainting = (Painting) ctxt.createAndRegisterNewObject(Painting.class);
         aPainting.setPaintingTitle(paintingForm.getPaintingTitle());
         aPainting.setEstimatedPrice(paintingForm.getEstimatedPrice());
 
