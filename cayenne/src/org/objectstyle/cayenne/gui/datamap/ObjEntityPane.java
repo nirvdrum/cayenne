@@ -67,10 +67,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.util.EntityWrapper;
+import org.objectstyle.cayenne.gui.util.MapUtil;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
@@ -94,6 +95,7 @@ public class ObjEntityPane
 	JTextField className;
 	JPanel dbPane;
 	JComboBox dbName;
+	JButton tableLabel;
 
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
@@ -110,6 +112,7 @@ public class ObjEntityPane
 		name.getDocument().addDocumentListener(this);
 		className.getDocument().addDocumentListener(this);
 		dbName.addActionListener(this);
+		tableLabel.addActionListener(this);
 	}
 
 	private void init() {
@@ -121,12 +124,13 @@ public class ObjEntityPane
 		JLabel classNameLbl = new JLabel("Class name: ");
 		className = new JTextField(25);
 
-		JLabel dbNameLbl = new JLabel("Table name:");
+		tableLabel = PanelFactory.createLabelButton("Table name:");
+
 		dbName = new JComboBox();
 		dbName.setBackground(Color.WHITE);
 
 		Component[] leftCol =
-			new Component[] { nameLbl, classNameLbl, dbNameLbl };
+			new Component[] { nameLbl, classNameLbl, tableLabel };
 
 		Component[] rightCol = new Component[] { name, className, dbName };
 
@@ -157,6 +161,14 @@ public class ObjEntityPane
 			db_entity = (DbEntity) wrap.getEntity();
 			entity.setDbEntity(db_entity);
 			mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+		} else if (tableLabel == src) {
+			DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
+			if (entity != null) {
+				DataDomain dom = mediator.getCurrentDataDomain();
+				DataMap map = dom.getMapForDbEntity(entity.getName());
+				mediator.fireDbEntityDisplayEvent(
+					new EntityDisplayEvent(this, entity, map, dom));
+			}
 		}
 	}
 

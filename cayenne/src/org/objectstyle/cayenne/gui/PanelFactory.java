@@ -69,6 +69,20 @@ import javax.swing.*;
 public class PanelFactory {
 
 	/** 
+	 * Creates a borderless button that can be used
+	 * as a clickable label.
+	 */
+	public static JButton createLabelButton(String text) {
+		JButton but = new JButton(text);
+		but.setBorderPainted(false);
+		but.setHorizontalAlignment(SwingConstants.LEFT);
+		but.setFocusPainted(false);
+		but.setMargin(new Insets(0, 0, 0, 0));
+		but.setBorder(null);
+		return but;
+	}
+
+	/** 
 	 * Creates and returns a panel with right-centered buttons.
 	 */
 	public static JPanel createButtonPanel(JButton[] buttons) {
@@ -79,7 +93,7 @@ public class PanelFactory {
 		for (int i = 0; i < buttons.length; i++) {
 			panel.add(buttons[i]);
 		}
-	
+
 		return panel;
 	}
 

@@ -58,13 +58,15 @@ package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.MapUtil;
@@ -91,7 +93,7 @@ public class DbEntityPane
 	protected JTextField catalog;
 	protected JTextField schema;
 	protected JComboBox parentEntities;
-	protected JLabel parentLabel;
+	protected JButton parentLabel;
 	protected JLabel schemaLabel;
 	protected JLabel catalogLabel;
 
@@ -114,6 +116,7 @@ public class DbEntityPane
 		catalog.getDocument().addDocumentListener(this);
 		schema.getDocument().addDocumentListener(this);
 		parentEntities.addActionListener(this);
+		parentLabel.addActionListener(this);
 	}
 
 	private void init() {
@@ -128,7 +131,7 @@ public class DbEntityPane
 		schemaLabel = new JLabel("Schema: ");
 		schema = new JTextField(25);
 
-		parentLabel = new JLabel("Parent entity: ");
+		parentLabel = PanelFactory.createLabelButton("Parent entity: ");
 		parentLabel.setEnabled(false);
 		parentEntities = new JComboBox();
 		parentEntities.setEditable(false);
@@ -142,11 +145,7 @@ public class DbEntityPane
 				parentLabel };
 
 		Component[] rightCol =
-			new Component[] {
-				name,
-				catalog,
-				schema,
-				parentEntities };
+			new Component[] { name, catalog, schema, parentEntities };
 
 		add(
 			PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
@@ -219,7 +218,7 @@ public class DbEntityPane
 				mediator.getCurrentDataMap().getDbEntityNames(true);
 			ents.remove(entity.getName());
 			ents.add(0, "");
-			
+
 			DefaultComboBoxModel model =
 				new DefaultComboBoxModel(ents.toArray());
 			DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
@@ -259,7 +258,7 @@ public class DbEntityPane
 
 			if (current instanceof DerivedDbEntity) {
 				String name = (String) parentEntities.getSelectedItem();
-				
+
 				DbEntity ent =
 					(name != null && name.trim().length() > 0)
 						? mediator.getCurrentDataMap().getDbEntity(name, true)
@@ -269,6 +268,20 @@ public class DbEntityPane
 				EntityEvent event = new EntityEvent(this, current);
 				mediator.fireDbEntityEvent(event);
 			}
+
+		} else if (parentLabel == e.getSource()) {
+			DbEntity current = mediator.getCurrentDbEntity();
+
+			if (current instanceof DerivedDbEntity) {
+				DbEntity parent = ((DerivedDbEntity) current).getParentEntity();
+				if (parent != null) {
+					DataDomain dom = mediator.getCurrentDataDomain();
+					DataMap map = dom.getMapForDbEntity(parent.getName());
+					mediator.fireDbEntityDisplayEvent(
+						new EntityDisplayEvent(this, parent, map, dom));
+				}
+			}
+
 		}
 	}
 }

@@ -239,6 +239,36 @@ public class DataDomain implements QueryEngine {
 		return null;
 	}
 
+	/** 
+	 * Returns a DataMap that contains DbEntity matching the 
+	 * <code>entityName</code> parameter.
+	 */
+	public DataMap getMapForDbEntity(String entityName) {
+		Iterator it = maps.values().iterator();
+		while (it.hasNext()) {
+			DataMap map = (DataMap) it.next();
+			if(map.getDbEntity(entityName) != null) {
+				return map;
+			}
+		}
+		return null;
+	}
+	
+	/** 
+	 * Returns a DataMap that contains ObjEntity matching the 
+	 * <code>entityName</code> parameter.
+	 */
+	public DataMap getMapForObjEntity(String entityName) {
+		Iterator it = maps.values().iterator();
+		while (it.hasNext()) {
+			DataMap map = (DataMap) it.next();
+			if(map.getObjEntity(entityName) != null) {
+				return map;
+			}
+		}
+		return null;
+	}
+
 	/** Analyzes each query and sends it to appropriate DataNode for execution. */
 	public void performQueries(List queries, OperationObserver resultCons) {
 		Iterator it = queries.iterator();
