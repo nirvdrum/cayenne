@@ -99,7 +99,7 @@ public class DataContext implements QueryEngine {
         return queryHelper;
     }
 
-    /** Returns parent QUeryEngine object. */
+    /** Returns parent QueryEngine object. */
     public QueryEngine getParent() {
         return parent;
     }
