@@ -61,6 +61,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /** 
@@ -71,19 +72,17 @@ import org.objectstyle.cayenne.util.XMLEncoder;
  */
 public class DbAttribute extends Attribute {
     /** 
-     * The type of the column. 
+     * Defines JDBC type of the column. 
      */
     protected int type = TypesMapping.NOT_DEFINED;
 
     /**
-     * If <code>true</code>, column corresponding to 
-     * this attribute does not allows nulls.
+     * Defines whether the attribute allows nulls.
      */
     protected boolean mandatory;
 
     /** 
-     * If <code>true</code>, this attribute is 
-     * a part of primary key.
+     * Defines whether the attribute is a part of the table primary key.
      */
     protected boolean primaryKey;
 
@@ -113,7 +112,10 @@ public class DbAttribute extends Attribute {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<db-attribute name=\"" + getName() + '\"');
+
+        encoder.print("<db-attribute name=\"");
+        encoder.print(Util.encodeXmlAttribute(getName()));
+        encoder.print('\"');
 
         String type = TypesMapping.getSqlNameByType(getType());
         if (type != null) {

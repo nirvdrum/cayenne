@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
@@ -111,16 +112,19 @@ public class DbEntity extends Entity implements DbAttributeListener {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<db-entity name=\"" + getName() + '\"');
-
+        encoder.print("<db-entity name=\"");
+        encoder.print(Util.encodeXmlAttribute(getName()));
+        encoder.print('\"');
+        
         if (getSchema() != null && getSchema().trim().length() > 0) {
             encoder.print(" schema=\"");
-            encoder.print(getSchema().trim());
+            encoder.print(Util.encodeXmlAttribute(getSchema().trim()));
             encoder.print('\"');
         }
+        
         if (getCatalog() != null && getCatalog().trim().length() > 0) {
             encoder.print(" catalog=\"");
-            encoder.print(getCatalog().trim());
+            encoder.print(Util.encodeXmlAttribute(getCatalog().trim()));
             encoder.print('\"');
         }
 

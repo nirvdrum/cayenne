@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
@@ -114,7 +115,7 @@ public class DbRelationship extends Relationship {
      */
     public void encodeAsXML(XMLEncoder encoder) {
         encoder.print("<db-relationship name=\"");
-        encoder.print(getName());
+        encoder.print(Util.encodeXmlAttribute(getName()));
         encoder.print("\" source=\"");
         encoder.print(getSourceEntity().getName());
 
@@ -140,7 +141,7 @@ public class DbRelationship extends Relationship {
 
     /**
      * Returns a target of this relationship. If relationship is not attached
-     * to a DbEntity, and DbENtity doesn't have a namcespace, and exception
+     * to a DbEntity, and DbEntity doesn't have a namcespace, and exception
      * is thrown.
      */
     public Entity getTargetEntity() {
