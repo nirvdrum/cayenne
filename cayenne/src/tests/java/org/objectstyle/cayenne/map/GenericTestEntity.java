@@ -59,9 +59,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.XMLEncoder;
-import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * A helper class that implements all abstract Entity methods as noops.
@@ -72,17 +70,6 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 public class GenericTestEntity extends Entity {
 
     public void encodeAsXML(XMLEncoder encoder) {
-
-    }
-
-    /**
-     * @deprecated
-     */
-    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
-
-    }
-
-    public void validateExpression(Expression e, ValidationResult validationBuilder) {
 
     }
 

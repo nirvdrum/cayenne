@@ -289,34 +289,6 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #getParameters()}.
-     */
-    public Map getParams() {
-        return getParameters();
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #addParameter(String, Object)}.
-     */
-    public void addParam(String name, Object value) {
-        addParameter(name, value);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #removeParameter(String)}.
-     */
-    public void removeParam(String name) {
-        removeParameter(name);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #clearParameters()}.
-     */
-    public void clearParams() {
-        clearParameters();
-    }
-
-    /**
      * Adds a named parameter to the internal map of parameters.
      * 
      * @since 1.1

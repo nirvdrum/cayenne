@@ -198,24 +198,9 @@ public class UpdateBatchQuery extends BatchQuery {
     }
 
     /**
-     * @deprecated Since 1.1 use getQualifierAttributes() that include attributes
-     * used in optimistic locking.
-     */
-    public List getIdDbAttributes() {
-        return getQualifierAttributes();
-    }
-
-    /**
      * @since 1.1
      */
     public List getUpdatedAttributes() {
-        return Collections.unmodifiableList(updatedAttributes);
-    }
-
-    /**
-     * @deprecated Since 1.1 use getUpdatedAttributes().
-     */
-    public List getUpdatedDbAttributes() {
         return Collections.unmodifiableList(updatedAttributes);
     }
 

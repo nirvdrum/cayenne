@@ -409,7 +409,7 @@ public class DataNode implements QueryEngine {
      * Executes batch query without using JDBC Statement batching features, running
      * individual statements in the batch one by one.
      * 
-     * @deprecated since 1.2 execution plans are used.
+     * @deprecated since 1.2 SQLActions are used.
      */
     protected void runBatchUpdateAsIndividualQueries(
             Connection con,
@@ -434,7 +434,7 @@ public class DataNode implements QueryEngine {
     /**
      * Helper method that reads OUT parameters of a CallableStatement.
      * 
-     * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
+     * @deprecated Since 1.2 this logic is moved to SQLAction.
      */
     protected void readStoredProcedureOutParameters(
             CallableStatement statement,
@@ -453,7 +453,7 @@ public class DataNode implements QueryEngine {
     /**
      * Helper method that reads a ResultSet.
      * 
-     * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
+     * @deprecated Since 1.2 this logic is moved to SQLAction.
      */
     protected void readResultSet(
             ResultSet resultSet,
@@ -519,13 +519,6 @@ public class DataNode implements QueryEngine {
                 ObjEntity entity,
                 List objects,
                 boolean deleteOrder) {
-            // do nothing
-        }
-
-        /**
-         * @deprecated Since 1.1
-         */
-        public void indexSorter(QueryEngine queryEngine) {
             // do nothing
         }
 

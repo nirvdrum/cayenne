@@ -60,7 +60,6 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
@@ -99,22 +98,6 @@ public class EntityTst extends CayenneTestCase {
         // remove attribute
         ent.removeAttribute(attr.getName());
         assertNull(ent.getAttribute(attr.getName()));
-    }
-
-    /**
-     * @deprecated Since 1.1 Entity.addQuery() is deprecated.
-     * @throws Exception
-     */
-    public void testQuery() throws Exception {
-        ent.setDataMap(new DataMap("t"));
-
-        SelectQuery q = new SelectQuery("Abc");
-        ent.addQuery("Query1", q);
-        assertSame(q, ent.getQuery("Query1"));
-
-        // remove query
-        ent.removeQuery("Query1");
-        assertNull(ent.getQuery("Query1"));
     }
 
     public void testRelationship() throws Exception {

@@ -73,8 +73,6 @@ import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
-import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
@@ -92,8 +90,6 @@ import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
@@ -243,12 +239,6 @@ public class JdbcAdapter implements DbAdapter {
         }
         else if (q instanceof DeleteQuery) {
             return DeleteTranslator.class;
-        }
-        else if (q instanceof SqlSelectQuery) {
-            return SqlSelectTranslator.class;
-        }
-        else if (q instanceof SqlModifyQuery) {
-            return SqlModifyTranslator.class;
         }
         else if (q instanceof ProcedureQuery) {
             return ProcedureTranslator.class;

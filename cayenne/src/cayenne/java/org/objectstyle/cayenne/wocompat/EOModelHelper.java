@@ -190,18 +190,6 @@ public class EOModelHelper {
     /**
      * Performs Objective C data types conversion to Java types.
      * 
-     * @return String representation for Java type corresponding to String representation
-     *         of Objective C type.
-     * @deprecated Since 1.1 use {@link #javaTypeForEOModelerType(String,String)}to take
-     *             "valueType" into account.
-     */
-    public String javaTypeForEOModelerType(String type) {
-        return javaTypeForEOModelerType(type, null);
-    }
-
-    /**
-     * Performs Objective C data types conversion to Java types.
-     * 
      * @since 1.1
      * @return String representation for Java type corresponding to String representation
      *         of Objective C type.
@@ -356,13 +344,6 @@ public class EOModelHelper {
         return aMap;
     }
 
-    /**
-     * @deprecated since 1.0.4 use {@link #entityPListMap(String)}.
-     */
-    public Map entityInfo(String entityName) {
-        return entityPListMap(entityName);
-    }
-
     /** Returns an info map for the entity called <code>entityName</code>. */
     public Map entityPListMap(String entityName) {
         return (Map) entityIndex.get(entityName);
@@ -395,13 +376,6 @@ public class EOModelHelper {
         }
 
         return (Map) queryPlist.get(queryName);
-    }
-
-    /**
-     * @deprecated since 1.0.4 use {@link #entityClass(String, boolean)}.
-     */
-    public String entityClass(String entityName) {
-        return entityClass(entityName, false);
     }
 
     public String entityClass(String entityName, boolean getClientClass) {

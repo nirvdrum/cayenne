@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.Validate;
 import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.ConfigLoaderDelegate;
@@ -347,45 +346,6 @@ public class PartialProject extends Project {
             }
         }
 
-        /**
-         * @deprecated since 1.1
-         */
-        public void shouldLoadDataMaps(
-            String domainName,
-            Map locations,
-            Map dependencies) {
-
-            if (locations.size() == 0) {
-                return;
-            }
-
-            DomainMetaData domain = findDomain(domainName);
-
-            // load DataMaps tree
-            Iterator it = locations.keySet().iterator();
-            while (it.hasNext()) {
-                String name = (String) it.next();
-                MapMetaData map = new MapMetaData(name);
-                map.location = (String) locations.get(name);
-                domain.maps.put(name, map);
-            }
-        }
-
-        /**
-         * @deprecated Since 1.0.4 this method is no longer called during project loading.
-         * shouldLoadDataMaps(String,Map,Map) is used instead.
-         */
-        public void shouldLoadDataMap(
-            String domainName,
-            String mapName,
-            String location,
-            List depMapNames) {
-
-            MapMetaData map = new MapMetaData(mapName);
-            map.location = location;
-            findDomain(domainName).maps.put(mapName, map);
-        }
-
         public void shouldLoadDataNode(
             String domainName,
             String nodeName,
@@ -418,13 +378,6 @@ public class PartialProject extends Project {
          */
         public String projectVersion() {
             return projectVersion;
-        }
-
-        /**
-         * @deprecated since 1.1
-         */
-        public Iterator dependentMapNames(String domainName, String mapName) {
-            return IteratorUtils.EMPTY_ITERATOR;
         }
 
         public Iterator domainNames() {

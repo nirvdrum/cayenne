@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -65,14 +63,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.collections.Transformer;
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
@@ -157,16 +151,6 @@ public class ObjEntity extends Entity {
 
         encoder.indent(-1);
         encoder.println("</obj-entity>");
-    }
-
-    /**
-     * Returns Java class of persistent objects described by this entity.
-     * Casts any thrown exceptions into CayenneRuntimeException.
-     * 
-     * @deprecated Since 1.0.7 use {@link #getJavaClass(ClassLoader)}
-     */
-    public Class getJavaClass() {
-        return getJavaClass(this.getClass().getClassLoader());
     }
 
     /**
@@ -509,60 +493,6 @@ public class ObjEntity extends Entity {
         return null;
     }
 
-    /**
-     * Creates an id snapshot (the key/value pairs for the pk of the object)
-     * from the values in object snapshot.
-     * If needed attributes are missing in a snapshot or if it is null,
-     * CayenneRuntimeException is thrown.
-     * 
-     * @deprecated Since 1.1 this method is no longer relevant in Cayenne. It is deprecated 
-     * to decouple mapping layer from the access layer implementation.
-     */
-    public Map idSnapshotMapFromSnapshot(Map objectSnapshot) {
-        // create a cheaper map for the mosty common case - 
-        // single attribute id.
-        List pk = getDbEntity().getPrimaryKey();
-        if (pk.size() == 1) {
-            DbAttribute attr = (DbAttribute) pk.get(0);
-            Object val = objectSnapshot.get(attr.getName());
-            return Collections.singletonMap(attr.getName(), val);
-        }
-
-        // multiple attributes in id...
-        Map idMap = new HashMap(pk.size() * 2);
-        Iterator it = pk.iterator();
-        while (it.hasNext()) {
-            DbAttribute attr = (DbAttribute) it.next();
-            Object val = objectSnapshot.get(attr.getName());
-            if (val == null) {
-                throw new CayenneRuntimeException(
-                    "Null value for '"
-                        + attr.getName()
-                        + "'. Snapshot: "
-                        + objectSnapshot);
-            }
-
-            idMap.put(attr.getName(), val);
-        }
-        return idMap;
-    }
-
-    /**
-     * Creates an object id from the values in object snapshot.
-     * If needed attributes are missing in a snapshot or if it is null,
-     * CayenneRuntimeException is thrown.
-     * 
-     * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.DataRow#createObjectId(ObjEntity)}. 
-     * This method is deprecated to remove the dependency of mapping layer from the access layer.
-     */
-    public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-        DataRow dataRow =
-            (objectSnapshot instanceof DataRow)
-                ? (DataRow) objectSnapshot
-                : new DataRow(objectSnapshot);
-        return dataRow.createObjectId(this);
-    }
-
     /** 
      * Clears all the mapping between this obj entity and its current db entity.
      *  Clears mapping between entities, attributes and relationships. 
@@ -646,60 +576,6 @@ public class ObjEntity extends Entity {
             "Invalid expression type: '"
                 + pathExp.expName()
                 + "',  OBJ_PATH is expected.");
-    }
-
-    /**
-     * @deprecated Unused since 1.1
-     */
-    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
-
-        if ((query.getRoot() instanceof Class)
-            && ((Class) query.getRoot()).getName().equals(getClassName())) {
-            return;
-        }
-
-        if (query.getRoot() == this) {
-            return;
-        }
-
-        if (Util.nullSafeEquals(getName(), query.getRoot())) {
-            return;
-        }
-
-        throw new IllegalArgumentException(
-            "Wrong query root for ObjEntity: " + query.getRoot());
-    }
-
-    /**
-     * @deprecated Unused since 1.1
-     */
-    public void validate() throws CayenneException {
-        if (getName() == null)
-            throw new CayenneException("ObjEntity name not defined.");
-
-        String head = "ObjEntity: " + getName();
-
-        if (getDbEntity() == null)
-            throw new CayenneException(head + "DbEntity not defined.");
-
-        if (getClassName() == null)
-            throw new CayenneException(head + "ObjEntity's class not defined.");
-
-        Iterator it = getAttributeMap().values().iterator();
-        while (it.hasNext()) {
-            ObjAttribute objAttr = (ObjAttribute) it.next();
-            objAttr.validate();
-
-            if (!readOnly
-                && objAttr.isCompound()
-                && !objAttr.mapsToDependentDbEntity()) {
-                throw new CayenneException(
-                    head
-                        + "ObjAttribute: "
-                        + objAttr.getName()
-                        + " compound, read only.");
-            }
-        }
     }
 
     /**

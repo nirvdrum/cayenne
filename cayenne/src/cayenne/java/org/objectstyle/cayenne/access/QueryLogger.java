@@ -370,20 +370,6 @@ public class QueryLogger {
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #logCommitTransaction(Level,String)}.
-     */
-    public static void logCommitTransaction(Level logLevel) {
-        logObj.log(logLevel, "+++ transaction committed.");
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #logRollbackTransaction(Level,String)}.
-     */
-    public static void logRollbackTransaction(Level logLevel) {
-        logObj.log(logLevel, "*** transaction rolled back.");
-    }
-
-    /**
      * @since 1.1
      */
     public static void logBeginTransaction(Level logLevel, String transactionLabel) {

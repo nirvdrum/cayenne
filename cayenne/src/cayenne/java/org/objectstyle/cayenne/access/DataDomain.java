@@ -69,8 +69,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -120,14 +118,6 @@ public class DataDomain implements QueryEngine {
     protected boolean sharedCacheEnabled;
     protected boolean validatingObjectsOnCommit;
     protected boolean usingExternalTransactions;
-
-    /** 
-     * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
-     * creates a DataDomain with name "default".
-     */
-    public DataDomain() {
-        this("default");
-    }
 
     /** 
      * Creates a DataDomain and assigns it a name. 
@@ -529,28 +519,6 @@ public class DataDomain implements QueryEngine {
                 return node;
             }
         }
-    }
-
-    /**
-     * Returns a DataMap that contains DbEntity matching the
-     * <code>entityName</code> parameter.
-     * 
-     * @deprecated Since 1.1 Use "getEntityResolver().getDbEntity(name).getDataMap()"
-     */
-    public DataMap getMapForDbEntity(String dbEntityName) {
-        DbEntity entity = getEntityResolver().getDbEntity(dbEntityName);
-        return entity != null ? entity.getDataMap() : null;
-    }
-
-    /**
-     * Returns a DataMap that contains ObjEntity matching the
-     * <code>entityName</code> parameter.
-     * 
-     * @deprecated Since 1.1 Use "getEntityResolver().getObjEntity(name).getDataMap()"
-     */
-    public DataMap getMapForObjEntity(String objEntityName) {
-        ObjEntity entity = getEntityResolver().getObjEntity(objEntityName);
-        return entity != null ? entity.getDataMap() : null;
     }
 
     /** 

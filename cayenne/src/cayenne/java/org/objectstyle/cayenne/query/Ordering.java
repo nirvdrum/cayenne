@@ -129,17 +129,6 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
     }
 
     /** 
-     * Sets sortSpec to be OBJ_PATH expression. 
-     * with path specified as <code>sortPathSpec</code>
-     * parameter.
-     * 
-     * @deprecated Since 1.1 use {@link #setSortSpecString(String)}
-     */
-    public void setSortSpec(String sortSpecString) {
-        this.sortSpec = Expression.fromString(sortSpecString);
-    }
-
-    /** 
      * Sets sortSpec to be an expression represented by string argument.
      * 
      * @since 1.1

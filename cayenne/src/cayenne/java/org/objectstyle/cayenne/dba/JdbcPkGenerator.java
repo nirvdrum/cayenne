@@ -78,8 +78,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.IDUtil;
 
 /**
@@ -91,12 +90,24 @@ import org.objectstyle.cayenne.util.IDUtil;
 public class JdbcPkGenerator implements PkGenerator {
     public static final int DEFAULT_PK_CACHE_SIZE = 20;
 
+    /**
+     * @deprecated Since 1.2 unused.
+     */
     protected static final String NEXT_ID = "NEXT_ID";
+    
+    /**
+     * @deprecated Since 1.2 unused.
+     */
     protected static final ObjAttribute[] objDesc =
         new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
+    
+    /**
+     * @deprecated Since 1.2 unused.
+     */
     protected static final DbAttribute[] resultDesc =
         new DbAttribute[] { new DbAttribute(NEXT_ID, Types.INTEGER, null)};
 
+    
     protected Map pkCache = new HashMap();
     protected int pkCacheSize = DEFAULT_PK_CACHE_SIZE;
 
@@ -344,18 +355,16 @@ public class JdbcPkGenerator implements PkGenerator {
      * not "generatePkForDbEntity".</p>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
+        String select = "SELECT #result('NEXT_ID' 'int' 'NEXT_ID') "
+                + "FROM AUTO_PK_SUPPORT "
+                + "WHERE TABLE_NAME = '"
+                + ent.getName()
+                + '\'';
 
         // run queries via DataNode to utilize its transactional behavior
         List queries = new ArrayList(2);
-
-        // 1. prepare select
-        SqlSelectQuery sel = new SqlSelectQuery(ent, pkSelectString(ent.getName()));
-        sel.setObjDescriptors(objDesc);
-        sel.setResultDescriptors(resultDesc);
-        queries.add(sel);
-
-        // 2. prepare update
-        queries.add(new SqlModifyQuery(ent, pkUpdateString(ent.getName())));
+        queries.add(new SQLTemplate(ent, select, true));
+        queries.add(new SQLTemplate(ent, pkUpdateString(ent.getName()), false));
 
         PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
         node.performQueries(queries, observer);
@@ -424,7 +433,7 @@ public class JdbcPkGenerator implements PkGenerator {
             }
 
             Map lastPk = (Map) dataRows.get(0);
-            nextId = (Integer) lastPk.get(NEXT_ID);
+            nextId = (Integer) lastPk.get("NEXT_ID");
             if (nextId == null) {
                 throw new CayenneRuntimeException("Error generating PK : null nextId.");
             }

@@ -261,26 +261,12 @@ public class EOModelProcessor {
     }
 
     /**
-     * @deprecated since 1.0.4 use {@link #makeHelper(String, boolean)}.
-     */
-    protected EOModelHelper makeHelper(String path) throws Exception {
-        return makeHelper(path, false);
-    }
-
-    /**
      * Creates an returns new EOModelHelper to process EOModel. Exists mostly for the
      * benefit of subclasses.
      */
     protected EOModelHelper makeHelper(String path, boolean genereateClientClass)
             throws Exception {
         return new EOModelHelper(path);
-    }
-
-    /**
-     * @deprecated since 1.0.4 use {@link #makeEntity(EOModelHelper, String, boolean)}.
-     */
-    protected ObjEntity makeEntity(EOModelHelper helper, String name) throws Exception {
-        return makeEntity(helper, name, false);
     }
 
     /**
@@ -378,13 +364,6 @@ public class EOModelProcessor {
         dataMap.addObjEntity(objEntity);
 
         return objEntity;
-    }
-
-    /**
-     * @deprecated since 1.0.4 use {@link #makeAttributes(EOModelHelper, EOObjEntity)}.
-     */
-    protected void makeAttributes(EOModelHelper helper, ObjEntity objEntity) {
-        makeAttributes(helper, objEntity);
     }
 
     /**

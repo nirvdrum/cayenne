@@ -390,13 +390,6 @@ public class ResultDescriptor {
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #getIdIndexes(DbEntity)}.
-     */
-    public int[] getIdIndexes() {
-        return getIdIndexes(null);
-    }
-
-    /**
      * @since 1.1
      */
     public int[] getIdIndexes(DbEntity entity) {

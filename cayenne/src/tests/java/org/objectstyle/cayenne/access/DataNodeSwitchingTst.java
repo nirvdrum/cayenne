@@ -97,15 +97,6 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
         assertQuery(new SelectQuery(Artist.class), "runSelect");
     }
 
-    /**
-     * @deprecated Since 1.1 SqlSelectQuery is deprecated, so is the test.
-     */
-    public void testSQLSelectQuery() throws Exception {
-        assertQuery(
-            new org.objectstyle.cayenne.query.SqlSelectQuery(Artist.class),
-            "runSelect");
-    }
-
     public void testUpdateQuery() throws Exception {
         assertQuery(new UpdateQuery(Artist.class), "runUpdate");
     }

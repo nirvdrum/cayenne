@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access.util;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -86,11 +85,4 @@ public interface DependencySorter {
      * Sorts a list of objects belonging to the ObjEntity. 
      */
     public void sortObjectsForEntity(ObjEntity entity, List objects, boolean deleteOrder);
-
-    /**
-     * Reindexes sorter for the query engine.
-     * 
-     * @deprecated Since 1.1. Use EntitySorter.setDataMaps(Collection)
-     */
-    public void indexSorter(QueryEngine queryEngine);
 }

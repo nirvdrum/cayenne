@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,32 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.trans;
+package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
-/** 
- * Class works as a translator of raw SELECT queries to JDBC statements.
+/**
+ * A SQLTemplate simplified for Spring configuration.
  * 
- * @deprecated Since 1.1. This translator was intended for SqlModifyQuery 
- * that is deprecated in favor of {@link org.objectstyle.cayenne.query.SQLTemplate}.
+ * @since 1.2
+ * @author Andrei Adamchik
  */
-public class SqlModifyTranslator extends QueryAssembler {
+public class UpdatingSQLTemplate extends SQLTemplate {
 
-    public String createSqlString() throws Exception {
-        return ((org.objectstyle.cayenne.query.SqlModifyQuery) query).getSqlString();
-    }
-
-    public String aliasForTable(DbEntity dbEnt) {
-        throw new RuntimeException("aliases not supported");
-    }
-
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        throw new RuntimeException("db relationships not supported");
-    }
-
-    public boolean supportsTableAliases() {
-        return false;
+    public UpdatingSQLTemplate(Class rootClass, String defaultTemplate) {
+        super(rootClass, defaultTemplate, false);
     }
 }

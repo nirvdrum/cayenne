@@ -156,13 +156,6 @@ public class DistinctResultIterator implements ResultIterator {
     }
 
     /**
-     * @deprecated This method is deprecated in the interface.
-     */
-    public Map nextObjectId() throws CayenneException {
-        return nextObjectId(defaultEntity);
-    }
-
-    /**
      * Returns a Map for the next ObjectId. After calling this method, calls to
      * "nextDataRow()" will result in exceptions.
      */

@@ -115,9 +115,6 @@ public class DataContextStaticsTst extends CayenneTestCase {
 		public void didInitialize() {
 		}
 
-        /**
-         * @deprecated Since 1.0 Beta 3 super method is deprecated
-         */
 		public ResourceLocator getResourceLocator() {
 			return null;
 		}

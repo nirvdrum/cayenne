@@ -137,55 +137,7 @@ public class PrefetchSelectQuery extends SelectQuery {
         }
     }
 
-    /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-     */
-    public PrefetchSelectQuery() {
-        super();
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-     */
-    public PrefetchSelectQuery(ObjEntity root) {
-        super(root);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-     */
-    public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
-        super(root, qualifier);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-     */
-    public PrefetchSelectQuery(Class rootClass) {
-        super(rootClass);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-     */
-    public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
-        super(rootClass, qualifier);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-     */
-    public PrefetchSelectQuery(String objEntityName) {
-        super(objEntityName);
-    }
-
-    /**
-    * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
-    */
-    public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
-        super(objEntityName, qualifier);
-    }
-
+ 
     /**
      * Returns the prefetchPath.
      * @return String
@@ -203,20 +155,6 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #getParentQuery()}.
-     */
-    public SelectQuery getRootQuery() {
-        return parentQuery;
-    }
-
-    /**
-     * @deprecated Since 1.1 use setParentQuery(..)
-     */
-    public void setRootQuery(SelectQuery parentQuery) {
-        this.parentQuery = parentQuery;
-    }
-
-    /**
      * @since 1.1
      */
     public SelectQuery getParentQuery() {
@@ -228,23 +166,6 @@ public class PrefetchSelectQuery extends SelectQuery {
      */
     public void setParentQuery(SelectQuery parentQuery) {
         this.parentQuery = parentQuery;
-    }
-
-    /**
-     * @return ObjRelationship
-     * @deprecated Since 1.1 replaced with "lastPrefetch" property. 
-     */
-    public ObjRelationship getSingleStepToManyRelationship() {
-        return lastPrefetchHint;
-    }
-
-    /**
-     * Sets the singleStepToManyRelationship.
-     * @param singleStepToManyRelationship The singleStepToManyRelationship to set
-     * @deprecated Since 1.1 replaced with "lastPrefetch" property. 
-     */
-    public void setSingleStepToManyRelationship(ObjRelationship singleStepToManyRelationship) {
-        this.lastPrefetchHint = singleStepToManyRelationship;
     }
 
     /**

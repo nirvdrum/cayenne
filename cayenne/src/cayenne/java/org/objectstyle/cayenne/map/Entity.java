@@ -64,7 +64,6 @@ import java.util.StringTokenizer;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
 
 /**
@@ -111,57 +110,6 @@ public abstract class Entity extends MapObject {
     public void setDataMap(DataMap dataMap) {
         this.setParent(dataMap);
     }
-
-    /**
-     * Returns a named query associated with this entity.
-     * 
-     * @since 1.1 Return type is changed to Query from SelectQuery.
-     * @deprecated Since 1.1 Queries are stored at the DataMap level.
-     */
-    public Query getQuery(String queryName) {
-        return getDataMap().getQuery(getName() + ":" + queryName);
-    }
-
-    /**
-     * Creates a named association of a SelectQuery with this entity. Throws
-     * IllegalArgumentException if query root can not be resolved to this
-     * entity.
-     * 
-     * @deprecated Since 1.1 Queries are stored at the DataMap level.
-     */
-    public void addQuery(String queryName, Query query) {
-        query.setName(getName() + ":" + queryName);
-        getDataMap().addQuery(query);
-    }
-
-    /**
-     * Removes a named query from this Entity.
-     * 
-     * @deprecated Since 1.1 Queries are stored at the DataMap level.
-     */
-    public void removeQuery(String queryName) {
-        getDataMap().removeQuery(getName() + ":" + queryName);
-    }
-
-    /**
-     * @deprecated Since 1.1 Queries are stored at the DataMap level.
-     */
-    public void clearQueries() {
-        // TODO: for backwards compatibility
-        // we must scan all queries that start with this entity
-        // name and only clean those.
-        getDataMap().clearQueries();
-    }
-
-    /**
-     * Helper method that checks that a Query belongs to this entity by
-     * validating query root object.
-     *
-     * @throws IllegalArgumentException if query does not belong to this entity.
-     * @deprecated Unused since 1.1
-     */
-    protected abstract void validateQueryRoot(Query query)
-        throws IllegalArgumentException;
 
     /**
      * Returns attribute with name <code>attrName</code>.

@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.map;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -133,16 +132,6 @@ public class MapLoader extends DefaultHandler {
     private String currentTag;
     private StringBuffer charactersBuffer;
     private Map mapProperties;
-
-    /** 
-     * Prints DataMap encoded as XML to a provided PrintWriter.
-     * 
-     * @deprecated Since 1.1 use DataMap.encodeAsXML().
-     */
-    public synchronized void storeDataMap(PrintWriter out, DataMap map)
-        throws DataMapException {
-        map.encodeAsXML(out);
-    }
 
     /** 
      * Loads a DataMap from XML input source. 

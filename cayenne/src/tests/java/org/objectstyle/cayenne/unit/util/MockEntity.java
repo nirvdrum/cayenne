@@ -60,19 +60,12 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * @author Andrei Adamchik
  */
 public class MockEntity extends Entity {
-
-    /**
-     * @deprecated Unused since 1.1
-     */
-    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
-    }
 
     public Expression translateToRelatedEntity(
             Expression expression,

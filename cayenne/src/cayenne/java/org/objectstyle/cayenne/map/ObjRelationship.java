@@ -99,15 +99,6 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * @deprecated Since 1.1 use any other constructor.
-     */
-    public ObjRelationship(ObjEntity source, ObjEntity target, boolean toMany) {
-        this();
-        this.setSourceEntity(source);
-        this.setTargetEntity(target);
-    }
-
-    /**
      * Prints itself as XML to the provided XMLEncoder.
      * 
      * @since 1.1

@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.map.event.MapEvent;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
@@ -231,16 +230,6 @@ public class DbEntity extends Entity implements DbAttributeListener {
         super.clearAttributes();
         // post dummy event for no specific attribute
         this.dbAttributeRemoved(new AttributeEvent(this, null, this, MapEvent.REMOVE));
-    }
-
-    /**
-     * @deprecated Unused since 1.1
-     */
-    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
-        if (query.getRoot() != this) {
-            throw new IllegalArgumentException(
-                "Wrong query root for DbEntity: " + query.getRoot());
-        }
     }
 
     public Iterator resolvePathComponents(Expression pathExp)
