@@ -86,27 +86,36 @@ import org.objectstyle.cayenne.util.Util;
 public class SnapshotManager {
     private static Logger logObj = Logger.getLogger(SnapshotManager.class);
 
-    private static final SnapshotManager sharedInstance = new SnapshotManager();
-    
-    public static SnapshotManager getSharedInstance() {
-    	return sharedInstance;
-    }
-    
     /**
      * Constructor for SnapshotManager. Shouldn't be called directly
      */
     protected SnapshotManager() {
     }
-    
+
     /**
      * A factory method of DataObjects. Uses Configuration ClassLoader to
      * instantiate a new instance of DataObject of a given class.
      */
-    public final DataObject newDataObject(String className) throws Exception {
+    public static final DataObject newDataObject(String className)
+        throws Exception {
         return (DataObject) Configuration
             .getResourceLoader()
             .loadClass(className)
             .newInstance();
+    }
+
+    /**
+     * Returns an ObjectId of an object on the other side of the to-one relationship,
+     * given a snapshot of the source object. Returns null if snapshot FK columns
+     * indicate a null to-one relationship.
+     */
+    public static final ObjectId targetObjectId(
+        Class targetClass,
+        DbRelationship relationship,
+        Map sourceSnapshot) {
+        Map target =
+            relationship.targetPkSnapshotWithSrcSnapshot(sourceSnapshot);
+        return (target != null) ? new ObjectId(targetClass, target) : null;
     }
 
     /** 
@@ -114,7 +123,7 @@ public class SnapshotManager {
      * Sets object state to COMMITTED, unless the snapshot is partial
      * in which case the state is set to HOLLOW
      */
-    public void refreshObjectWithSnapshot(
+    public static void refreshObjectWithSnapshot(
         ObjEntity ent,
         DataObject anObject,
         Map snapshot) {
@@ -137,9 +146,10 @@ public class SnapshotManager {
                 isPartialSnapshot = true;
             }
         }
-        
-		DataContext context = anObject.getDataContext();
-        ToManyListDataSource relDataSource = context.getRelationshipDataSource();
+
+        DataContext context = anObject.getDataContext();
+        ToManyListDataSource relDataSource =
+            context.getRelationshipDataSource();
 
         Iterator rit = ent.getRelationships().iterator();
         while (rit.hasNext()) {
@@ -182,18 +192,13 @@ public class SnapshotManager {
                 continue;
             }
 
-            Map destMap = dbRel.targetPkSnapshotWithSrcSnapshot(snapshot);
-            if (destMap == null) {
-                // nullify any old relationship targets
-                anObject.writePropertyDirectly(rel.getName(), null);
-                continue;
-            } else {
-                ObjectId destId = new ObjectId(targetClass, destMap);
-                anObject.writePropertyDirectly(
-                    rel.getName(),
-                    context.registeredObject(destId));
-            }
+            ObjectId id = targetObjectId(targetClass, dbRel, snapshot);
+            DataObject object =
+                (id != null) ? context.registeredObject(id) : null;
+
+            anObject.writePropertyDirectly(rel.getName(), object);
         }
+
         if (isPartialSnapshot) {
             anObject.setPersistenceState(PersistenceState.HOLLOW);
         } else {
@@ -208,7 +213,7 @@ public class SnapshotManager {
      * In case an object is already modified, modified properties will
      * not be overwritten.
      */
-    public void mergeObjectWithSnapshot(
+    public static void mergeObjectWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
         Map snapshot) {
@@ -260,23 +265,16 @@ public class SnapshotManager {
 
                 DbRelationship dbRelationship =
                     (DbRelationship) rel.getDbRelationships().get(0);
-                Map destMap =
-                    dbRelationship.targetPkSnapshotWithSrcSnapshot(snapshot);
 
-                if (destMap == null) {
-                    // nullify any old relationship targets
-                    anObject.writePropertyDirectly(rel.getName(), null);
-                    continue;
-                } else {
-                    ObjectId destId =
-                        new ObjectId(
-                            ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
-                            destMap);
-                    anObject.writePropertyDirectly(
-                        rel.getName(),
-                        context.registeredObject(destId));
-                }
+                ObjectId id =
+                    targetObjectId(
+                        ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
+                        dbRelationship,
+                        snapshot);
+                DataObject target =
+                    (id != null) ? context.registeredObject(id) : null;
 
+                anObject.writePropertyDirectly(rel.getName(), target);
             }
         }
     }
@@ -285,7 +283,7 @@ public class SnapshotManager {
      * Checks if a new snapshot has a modified to-one relationship compared to
      * the cached snapshot.
      */
-    protected boolean isJoinAttributesModified(
+    protected static boolean isJoinAttributesModified(
         ObjRelationship relationship,
         Map newSnapshot,
         Map storedSnapshot) {
@@ -313,7 +311,7 @@ public class SnapshotManager {
     /**
      * Checks if an object has its to-one relationship target modified in memory.
      */
-    protected boolean isToOneTargetModified(
+    protected static boolean isToOneTargetModified(
         ObjRelationship relationship,
         DataObject object,
         Map storedSnapshot) {
@@ -362,7 +360,7 @@ public class SnapshotManager {
     /**
      * Takes a snapshot of current object state.
      */
-    public Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
+    public static Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
         Map map = new HashMap();
 
         Map attrMap = ent.getAttributeMap();
@@ -439,7 +437,7 @@ public class SnapshotManager {
      * @param theRelationship
      * @param destinationObjects
      */
-    public void mergePrefetchResultsRelationships(
+    public static void mergePrefetchResultsRelationships(
         List rootObjects,
         ObjRelationship relationship,
         List destinationObjects) {

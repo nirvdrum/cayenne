@@ -185,7 +185,8 @@ public class SelectObserver extends DefaultOperationObserver {
                     "Can't find results for query: " + nextQuery);
             }
 
-            List nextObjects = convertToObjects(dataContext, nextQuery, nextDataRows);
+            List nextObjects =
+                convertToObjects(dataContext, nextQuery, nextDataRows);
 
             // now deal with to-many prefetching
             if (!(nextQuery instanceof PrefetchSelectQuery)) {
@@ -204,7 +205,7 @@ public class SelectObserver extends DefaultOperationObserver {
                 continue;
             }
 
-            SnapshotManager.getSharedInstance().mergePrefetchResultsRelationships(
+            SnapshotManager.mergePrefetchResultsRelationships(
                 objects,
                 relationship,
                 nextObjects);
@@ -247,7 +248,8 @@ public class SelectObserver extends DefaultOperationObserver {
         List results = new ArrayList(dataRows.size());
         Iterator it = dataRows.iterator();
         while (it.hasNext()) {
-            results.add(dataContext.objectFromDataRow(ent, (Map) it.next(), true));
+            results.add(
+                dataContext.objectFromDataRow(ent, (Map) it.next(), true));
         }
 
         return results;
@@ -259,7 +261,9 @@ public class SelectObserver extends DefaultOperationObserver {
      */
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
+        throw new CayenneRuntimeException(
+            "Query exception.",
+            Util.unwindException(ex));
     }
 
     /** 
@@ -268,6 +272,8 @@ public class SelectObserver extends DefaultOperationObserver {
      */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
-        throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
+        throw new CayenneRuntimeException(
+            "Global exception.",
+            Util.unwindException(ex));
     }
 }

@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -344,13 +345,8 @@ public class DefaultSorter implements DependencySorter {
             snapshot = obj.getCurrentSnapshot();
         }
 
-        Map pksnapshot = finalRel.targetPkSnapshotWithSrcSnapshot(snapshot);
-        if (pksnapshot != null) {
-            ObjectId destId = new ObjectId(targetClass, pksnapshot);
-            return obj.getDataContext().registeredObject(destId);
-        }
-
-        return null;
+        ObjectId id = SnapshotManager.targetObjectId(targetClass, finalRel, snapshot);
+        return (id != null) ? obj.getDataContext().registeredObject(id) : null;
     }
 
     protected Comparator getDbEntityComparator(boolean dependantFirst) {

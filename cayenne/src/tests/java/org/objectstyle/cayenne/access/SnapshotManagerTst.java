@@ -78,7 +78,7 @@ public class SnapshotManagerTst extends DataContextTestBase {
         s2.put("ARTIST_NAME", n2);
         s2.put("DATE_OF_BIRTH", new java.util.Date());
         ObjEntity e = context.getEntityResolver().lookupObjEntity(a1);
-        SnapshotManager.getSharedInstance().mergeObjectWithSnapshot(e, a1, s2);
+        SnapshotManager.mergeObjectWithSnapshot(e, a1, s2);
 
         // name was modified, so it should not change during merge
         assertEquals(n1, a1.getArtistName());
@@ -100,21 +100,16 @@ public class SnapshotManagerTst extends DataContextTestBase {
         Map map = new HashMap();
         map.put(
             "ARTIST_ID",
-            painting.getToArtist().getObjectId().getValueForAttribute("ARTIST_ID"));
+            painting.getToArtist().getObjectId().getValueForAttribute(
+                "ARTIST_ID"));
 
         assertFalse(
-            SnapshotManager.getSharedInstance().isToOneTargetModified(
-                toArtist,
-                painting,
-                map));
+            SnapshotManager.isToOneTargetModified(toArtist, painting, map));
 
         painting.setToArtist(artist);
 
         assertTrue(
-            SnapshotManager.getSharedInstance().isToOneTargetModified(
-                toArtist,
-                painting,
-                map));
+            SnapshotManager.isToOneTargetModified(toArtist, painting, map));
     }
 
     public void testIsJoinAttributesModified() throws Exception {
@@ -136,19 +131,16 @@ public class SnapshotManagerTst extends DataContextTestBase {
         same.put("ARTIST_ID", new Integer(1));
 
         assertFalse(
-            SnapshotManager.getSharedInstance().isJoinAttributesModified(
-                toArtist,
-                stored,
-                same));
+            SnapshotManager.isJoinAttributesModified(toArtist, stored, same));
 
         assertTrue(
-            SnapshotManager.getSharedInstance().isJoinAttributesModified(
+            SnapshotManager.isJoinAttributesModified(
                 toArtist,
                 stored,
                 nullified));
 
         assertTrue(
-            SnapshotManager.getSharedInstance().isJoinAttributesModified(
+            SnapshotManager.isJoinAttributesModified(
                 toArtist,
                 stored,
                 updated));

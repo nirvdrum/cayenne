@@ -201,12 +201,10 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * This method simply returns SnapshotManager singleton.
-     * 
-     * @deprecated Since 1.1 use SnapshotManager.getSharedInstance()
+     * @deprecated Since 1.1 all SnapshotManager methods are static
      */
     public SnapshotManager getSnapshotManager() {
-        return SnapshotManager.getSharedInstance();
+        return new SnapshotManager();
     }
 
     public ToManyListDataSource getRelationshipDataSource() {
@@ -267,7 +265,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    obj = SnapshotManager.getSharedInstance().newDataObject(oid.getObjClass().getName());
+                    obj = SnapshotManager.newDataObject(oid.getObjClass().getName());
                 }
                 catch (Exception ex) {
                     String entity =
@@ -293,7 +291,7 @@ public class DataContext implements QueryEngine, Serializable {
     /** Takes a snapshot of current object state. */
     public Map takeObjectSnapshot(DataObject anObject) {
         ObjEntity ent = getEntityResolver().lookupObjEntity(anObject);
-        return SnapshotManager.getSharedInstance().takeObjectSnapshot(ent, anObject);
+        return SnapshotManager.takeObjectSnapshot(ent, anObject);
     }
 
     /**
@@ -330,7 +328,7 @@ public class DataContext implements QueryEngine, Serializable {
 
             if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
                 // we are asked to refresh an existing object with new values
-                SnapshotManager.getSharedInstance().mergeObjectWithSnapshot(
+                SnapshotManager.mergeObjectWithSnapshot(
                     objEntity,
                     obj,
                     dataRow);
@@ -364,7 +362,7 @@ public class DataContext implements QueryEngine, Serializable {
         DataObject obj = registeredObject(anId);
 
         if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-            SnapshotManager.getSharedInstance().refreshObjectWithSnapshot(
+            SnapshotManager.refreshObjectWithSnapshot(
                 objEntity,
                 obj,
                 dataRow);
@@ -390,7 +388,7 @@ public class DataContext implements QueryEngine, Serializable {
         String objClassName = entity.getClassName();
         DataObject dobj = null;
         try {
-            dobj = SnapshotManager.getSharedInstance().newDataObject(objClassName);
+            dobj = SnapshotManager.newDataObject(objClassName);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);
@@ -692,7 +690,7 @@ public class DataContext implements QueryEngine, Serializable {
                         // rolling the object back will set the state to committed
                     case PersistenceState.MODIFIED :
                         ObjEntity oe = getEntityResolver().lookupObjEntity(thisObject);
-                        SnapshotManager.getSharedInstance().refreshObjectWithSnapshot(
+                        SnapshotManager.refreshObjectWithSnapshot(
                             oe,
                             thisObject,
                             thisObject.getCommittedSnapshot());
@@ -1352,7 +1350,7 @@ public class DataContext implements QueryEngine, Serializable {
                     // properly 
                     Map dataRow = (Map) it.next();
                     DataObject obj = registeredObject(this.oid);
-                    SnapshotManager.getSharedInstance().mergeObjectWithSnapshot(
+                    SnapshotManager.mergeObjectWithSnapshot(
                         ent,
                         obj,
                         dataRow);
