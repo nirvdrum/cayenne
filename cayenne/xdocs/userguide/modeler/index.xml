@@ -8,41 +8,321 @@
 	<up>/userguide/index.html</up>
 	<prev>/userguide/appguide/exp.html</prev>
 	<next>/userguide/webobjects.html</next>
-</navigator>    
+</navigator>
 <body>
     <section name="6. CayenneModeler GUI Tool">
         <subsection name="6.1 Introduction" anchor="intro">
-            <p>CayenneModeler is a Java GUI application that performs the 
+            <p>CayenneModeler is a Java GUI application that performs the
             following functions:
             <ul>
-            	<li>Reverse-engineering of RDBMS schema to create Cayenne 
+            	<li>Reverse-engineering of RDBMS schema to create Cayenne
             	data maps.</li>
-            	<li>Forward-engineering (generation) of the database schema 
+            	<li>Forward-engineering (generation) of the database schema
             	from a data map.</li>
             	<li>Java class generation from a data map.</li>
-            	<li>Cayenne project deployment organization into domains 
+            	<li>Cayenne project deployment organization into domains
             	and nodes.</li>
             </ul>
             </p>
         </subsection>
-        
+
         <subsection name="6.2 Running CayenneModeler" anchor="run">
         	<p>CayenneModeler is a regular Java application and can be run on
-        	a JSDK1.4 compatible JVM. Main class is 
+        	a JSDK1.4 compatible JVM. Main class is
         	<code>org.objectstyle.cayenne.gui.Editor</code>. For convenience
-        	Cayenne distribution provides run scripts to start modeler on Windows
-        	and UNIX platforms. To take advantage of these scripts, user must set
-        	CAYENNE_HOME and JAVA_HOME environment variables as described in the 
-        	<a href="../install.html#inst">installation section</a>. To run 
-        	CayenneModeler use the following commands. Windows:        		
+        	Cayenne distribution provides run scripts to start modeler on
+        	Windows
+        	and UNIX platforms. To take advantage of these scripts, user must
+        	set
+        	CAYENNE_HOME and JAVA_HOME environment variables as described in the
+        	<a href="../install.html#inst">installation section</a>. To run
+        	CayenneModeler use the following commands. Windows:
         	</p>
-        	
+
         	<source>%CAYENNE_HOME%\bin\modeler.bat</source>
-        	
+
         	<p>UNIX:</p>
-        	
+
         	<source>$CAYENNE_HOME/bin/modeler.sh</source>
         </subsection>
+	<subsection name="6.3. Concepts and terminology" anchor="concepts">
+		<p>
+			Cayenne modeler is a GUI tool for creating the data access classes
+			and associated data model.
+			This section describes the techniques of its use as well as the
+			deployment
+			of the files it produces.
+			Before we start describing how to create Cayenne data model with the
+			Modeler,
+			let us introduce core concepts of this model.
+		</p>
+		<table width="100%" border="1">
+		<tr valign="top">
+			<th width="28%">Cayenne term</th>
+			<th width="78%">Definition</th>
+		</tr>
+		<tr valign="top">
+			<td>Db Entity</td>
+			<td>Database table</td>
+		</tr>
+		<tr valign="top">
+			<td>Db Attribute</td>
+			<td>Field of the database table</td>
+		</tr>
+		<tr valign="top">
+			<td>Db Relationship</td>
+			<td>Relationship between database tables</td>
+		</tr>
+		<tr valign="top">
+			<td>Obj Entity</td>
+			<td>Java data access class. May include reference to the
+				underlying database table (Db Entity)
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Obj Attribute</td>
+			<td>Java class member variable.
+				May include reference to the underlying database table field (Db
+				Attribute)
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Obj Relationship</td>
+			<td>Has a relationship between Java classes.
+				May include reference to the underlying relationship
+				between database tables (Db Relationship)
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Data Map</td>
+			<td>Collection of the entities, attributes and relationships (Db and
+			Obj)
+				describing the database schema, corresponding data access
+				classes,
+				their relationships, etc. Cannot span more than one database
+				schema.
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Data Node</td>
+			<td>Description of the information source.
+				Currently there are two types of Data Nodes.<br/>
+				<strong>JNDI</strong> - when it has the information
+					for accessing data source configured in the container
+					(e.g. your WebLogic or Tomcat server).<br/>
+				<strong>DIRECT</strong> - when it has all the information
+					for the direct connection to the database.
+					To enable data access classes to use the database
+					you have to associate (add) the corresponding data map to
+					the
+					data node describing the database.
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Domain</td>
+			<td>Virtual data source.
+				Cayenne’s way to treat multiple databases as if they are one
+				data source.
+				Each domain contains data maps and data nodes
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Project</td>
+			<td>Application. Collection of domains to be used at the same time.
+			</td>
+		</tr>
+		</table>
+
+		<br/><br/>
+		<p>
+		The Cayenne data model is created as a set of the .xml file.
+		Here are the types of files it may have:
+		</p>
+
+		<table width="100%" border="1">
+		<tr valign="top">
+			<th width="28%">Type of file</th>
+			<th width="78%">Description</th>
+		</tr>
+		<tr valign="top">
+			<td>Project file</td>
+			<td>One per project.
+				Contains all the domains for the project.
+				Always called <strong>cayenne.xml</strong>.
+				Located in the project directory.
+				All other files are located under project directory.
+				All paths used in this and other files are relative to the
+				project directory.
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Data node file</td>
+			<td>One per DIRECT data node
+				(see earlier in the section definitions of DIRECT and JNDI data
+				nodes).
+				JNDI data node information, as well as data node to data map
+				association
+				is stored directly in the project file.
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Data map file</td>
+			<td>One per data map. </td>
+		</tr>
+		</table>
+
+		<p>
+		Cayenne Modeler supports three scenarios of use:
+		<ol>
+		<li>	Creating the Data Map and generating database schema from it</li
+		>
+		<li>	Using existing database schema to create Data Map </li>
+		<li>	Combination of 1 and 2. </li>
+		</ol>
+		This document will concentrate on scenarios 1 and 2.
+		</p>
+
+	</subsection>
+
+	<subsection name="6.4. Creating Data Map first and database schema last"
+	anchor="map_first">
+
+		Here are the steps to create a new Cayenne project.
+		<ol>
+		<li>Start Cayenne Modeler</li>
+		<li>Click File->New Project.
+			System will prompt you to choose the project location -
+			folder which will be the root for all other project files.
+		</li>
+		<li>Select folder and click Save.
+			If there is already a project (cayenne.xml file) in the folder you
+			selected, system will ask you if you want to overwrite existing
+			project.</li>
+		<li>Once you have successfully created the project, the system will
+		split the screen in two panes. Right pane is the Browse View used to
+		navigate through domains, data nodes, data maps and entities. Left pane
+		is the Detail view showing the details of the item currently selected in
+		the Browse view.</li>
+		<li>Click Project->Create Domain. The system will show the new domain
+		selected in the Browse view and detail information (only name) in the
+		Detail view.</li>
+		<li>Rename the domain by typing Domain1 in the detail view.
+		</li>
+		<li>Click on Project->Create Data Map.
+		System will prompt you for the file name. Modeler will not allow you to
+		go outside of the project folder, though you can create folders under
+		it. Type datamap1.xml in the file name field and click
+		"Save".</li>
+		<li>System will show new data map under Domain1 and show its
+		detail information in the Detail view.</li>
+		<li>Type DataMap1 in Data map name field</li>
+		<li>Click Project->Create Object Entity. System will create
+		a new object entity. It will show the new object entity under DataMap1
+		and its detail information in the Detail View.</li>
+		<li> Type ObjEntity1 in the entity name. Type myapp.ObjEntity1 in
+		the class name field.</li>
+		<li>Click Attributes tab on the Detail view.</li>
+		<li>Click Add button to add new attributes. Enter attribute
+		names in the Name column and select types of the attributes
+		in the Type column</li>
+		<li>Click Project->Create Object Entity. System will create another new
+		object entity. It will show it under DataMap1 and its
+		Attribute tab in the Detail view.</li>
+		<li>Click Entity tab and enter ObjEntity2 for
+		its name and myapp.ObjEntity2 for its class name.</li>
+		<li>Go back to the Attributes tab and enter its attributes.
+		</li>
+		<li>Click ObjEntity1 in the Browse view. Click Relationships tab.
+		</li>
+		<li>Click Add button to add relationships.</li>
+		<li>System will add a row in the relationships table. Select
+		ObjEntity2 in a target column.</li>
+		<li>Go to Entity tab. Click New button to create
+		a new db entity and associate it with ObjEntity1.</li>
+		<li>System will show new db entity under DataMap1 and show
+		its detail information in the Detail view.</li>
+		<li>Change the name to DbEntity1, go to
+		Attributes tab and enter some attributes.</li>
+		<li>Go back to ObjEntity1. Click Attributes tab. Now it has
+		more columns for showing the mapping of the object attributes to the db
+		attributes.</li>
+		<li>Select attribute in the Db Attribute column. Cayenne
+		Modeler DOES NOT enforce at this time compatibility between obj
+		attribute and db attribute types, so make sure you don't match up
+		java.util.Date type with VARCHAR.</li>
+		<li>Select DataMap1 and click Project->Create DB Entity.
+		Follow the steps for creating DbEntity2. Add attributes to it.</li>
+		<li>Go to db entity Relationships tab and click
+		Add button</li>
+		<li>System will add a row to the relationships table. Select
+		DbEntity1 as the target. This will cause foreign to primary key
+		relationship (if supported by the database) to be generated when
+		generating the database.</li>
+		<li>Click Database Mapping button. System will bring up Db
+		Relationship dialog for entering the columns used for enforcing the
+		relationship between these two database tables. Use Add to
+		add the row and select the Source (from currently edited) and Target
+		columns. Click Save when finished.</li>
+		<li>Select DataMap1 in Browse view.</li>
+		<li>Click Tools->Generate Database. System will bring up
+		Enter JDBC Information dialog.</li>
+		<li>Type in the connection information for the database and click
+		Ok.
+			In my case (I am connecting to the MySQL database).
+			Make sure JDBC driver is in your Classpath or in jre\lib\ext.
+			Also make sure you select RDBMS Adapter for your
+			database.
+			The adapter determines the generation of the SQL.</li>
+		<li>The system will bring up Generate Database dialog with
+		the
+			SQL it intends to use for generation of the new database.
+			Click Drop check box if you want table definitions in
+			the database
+			to be overwritten (comment: this feature is still rather clunky.
+			Will become more reliable in the beta release).</li>
+		<li>Click Generate. This will generate our database!</li>
+		<li>Press Ctrl+S to save the project file.
+			It will bring the Warning or Error dialog if there are any errors or
+			warnings.
+			The system will bring you to the appropriate screen when you click
+			the error message.</li>
+		</ol>
+	 </subsection>
+
+	 <subsection name="6.5 Using existing database schema to create data map" anchor="map_from_db" >
+
+		<ol>
+		<li>Do steps 1 through 6 of the previous section to create project and a domain.</li>
+		<li>Click Tools->Reverse Engineer Database.
+			System will bring up Enter JDBC Information dialog.</li>
+		<li>Type in the connection information for the database and click
+		Ok.
+			In my case (I am connecting to the MySQL database).
+			Make sure JDBC driver is in your Classpath or in jre\lib\ext.
+			Also make sure you select RDBMS Adapter for your
+			database.
+			The adapter determines the generation of the SQL.</li>
+		<li>If the database has multiple schemas,
+			it will bring the Select schema dialog.
+			Select the desired schema and click Ok.</li>
+		<li>System may take several minutes to reverse engineer the database
+		depending on its size.
+			Once it is finished, it will add a new data map to the Domain.
+			The new data map will have Db Entity generated per each DB table and
+			Obj Entity generated per each Db Entity.
+			If you database does not support foreign keys (like MySQL),
+			no relationships will be generated.</li>
+		</ol>
+		<p>
+		See previous section for more details on editing and saving the newly
+		created model, as well as creating data nodes.
+		</p>
+	</subsection>
     </section>
 </body>
 </document>
+
+
+
+
+
