@@ -99,8 +99,12 @@ public class CayenneDataObject implements DataObject {
         return dataContext;
     }
 
-    public void setDataContext(DataContext ctxt) {
-        dataContext = ctxt;
+    public void setDataContext(DataContext dataContext) {
+        this.dataContext = dataContext;
+        
+        if(dataContext == null) {
+        	this.persistenceState = PersistenceState.TRANSIENT;
+        }
     }
 
     public ObjectId getObjectId() {
@@ -204,6 +208,12 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected void resolveFault() {
+    	// no way to resolve faults outside of DataContext.
+    	if(dataContext == null) {
+			setPersistenceState(PersistenceState.TRANSIENT);
+			return;
+    	}
+    	
         try {
             // first try refreshing from snapshot
             Map snapshot = dataContext.getObjectStore().getSnapshot(objectId);
@@ -243,12 +253,12 @@ public class CayenneDataObject implements DataObject {
     protected void writeProperty(String propName, Object val) {
         if (persistenceState == PersistenceState.HOLLOW) {
             resolveFault();
+        }
+        
+        if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }
-        else if (persistenceState == PersistenceState.COMMITTED) {
-            persistenceState = PersistenceState.MODIFIED;
-        }
-        // else if we are deleted or new no persistence state change needed
+        // other persistence states can't be changed to MODIFIED
 
         writePropertyDirectly(propName, val);
     }
