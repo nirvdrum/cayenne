@@ -70,14 +70,16 @@ public class SnapshotEventTst extends CayenneTestCase {
     public void testRootEvent() {
         Object source = new Object();
         Collection deleted = new ArrayList();
+        Collection invalidated = new ArrayList();
         Map modified = new HashMap();
         Collection related = new ArrayList();
 
         SnapshotEvent event =
-            new SnapshotEvent(source, source, modified, deleted, related);
+            new SnapshotEvent(source, source, modified, deleted, invalidated, related);
         assertSame(source, event.getSource());
         assertSame(source, event.getPostedBy());
         assertSame(deleted, event.getDeletedIds());
+        assertSame(invalidated, event.getInvalidatedIds());
         assertSame(modified, event.getModifiedDiffs());
         assertSame(related, event.getIndirectlyModifiedIds());
     }
