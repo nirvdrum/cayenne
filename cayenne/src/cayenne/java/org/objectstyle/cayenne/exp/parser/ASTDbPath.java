@@ -78,7 +78,7 @@ public class ASTDbPath extends ASTPath {
 
     protected Object evaluateNode(Object o) throws Exception {
         // TODO: implement resolving DB_PATH for DataObjects.
-        return (o instanceof Entity) ? ((Entity) o).resolvePathComponents(this) : null;
+        return (o instanceof Entity) ? evaluateEntityNode((Entity) o) : null;
     }
 
     /**

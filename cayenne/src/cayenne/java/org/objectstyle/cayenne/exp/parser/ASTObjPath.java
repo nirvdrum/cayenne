@@ -81,7 +81,7 @@ public class ASTObjPath extends ASTPath {
         return (o instanceof DataObject)
             ? ((DataObject) o).readNestedProperty(path)
             : (o instanceof Entity)
-            ? ((Entity) o).resolvePathComponents(this)
+            ? evaluateEntityNode((Entity) o)
             : PropertyUtils.getProperty(o, path);
     }
 

@@ -226,6 +226,10 @@ public abstract class Expression implements Serializable, XMLSerializable {
         catch (ParseException ex) {
             throw new ExpressionException(ex.getMessage(), ex);
         }
+        catch (Throwable th) {
+            // another common error is TokenManagerError
+            throw new ExpressionException(th.getMessage(), th);
+        }
     }
 
     /**

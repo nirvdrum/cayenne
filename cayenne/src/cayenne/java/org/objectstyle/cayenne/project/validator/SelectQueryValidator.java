@@ -262,10 +262,8 @@ public class SelectQueryValidator extends TreeNodeValidator {
             // check if path nodes are compatibe with root entity
             if (node.getType() == Expression.OBJ_PATH
                 || node.getType() == Expression.DB_PATH) {
-                Iterator it = (Iterator) node.evaluate(rootEntity);
-                while (it.hasNext()) {
-                    it.next();
-                }
+                // this will throw an exception if the path is invalid
+                node.evaluate(rootEntity);
             }
         }
     }

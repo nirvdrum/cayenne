@@ -55,6 +55,10 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.map.Entity;
+
 /**
  * Generic path expression.
  * 
@@ -94,6 +98,20 @@ public abstract class ASTPath extends SimpleNode {
 
     protected String getPath() {
         return path;
+    }
+    
+
+    /**
+     * Helper method to evaluate path expression with Cayenne Entity.
+     */
+    protected Object evaluateEntityNode(Entity entity) {
+        Iterator path = entity.resolvePathComponents(this);
+        Object next = null;
+        while (path.hasNext()) {
+            next = path.next();
+        }
+
+        return next;
     }
 
     protected String getExpressionOperator(int index) {

@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.util.ColnversionUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -247,9 +246,5 @@ public abstract class SimpleNode extends Expression implements Node {
                     Util.unwindException(th));
             }
         }
-    }
-
-    public boolean match(Object o) {
-        return ColnversionUtil.toBoolean(evaluate(o));
     }
 }
