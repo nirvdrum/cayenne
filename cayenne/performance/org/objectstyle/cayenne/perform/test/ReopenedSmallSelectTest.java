@@ -63,13 +63,13 @@ import org.objectstyle.art.Artist;
 /**
  * @author Andrei Adamchik
  */
-public class PreparedSmallSelectTest extends SmallSelectTest {
+public class ReopenedSmallSelectTest extends SmallSelectTest {
 
 	/**
-	 * Constructor for PreparedSmallSelectTest.
+	 * Constructor for ReopenedSmallSelectTest.
 	 * @param name
 	 */
-	public PreparedSmallSelectTest(String name) {
+	public ReopenedSmallSelectTest(String name) {
 		super(name);
 	}
 
@@ -79,15 +79,13 @@ public class PreparedSmallSelectTest extends SmallSelectTest {
 	public void runTest() throws Exception {
 		Connection con = getConnection();
 		try {
-
-			PreparedStatement st =
-				con.prepareStatement(
-					"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = ? OR ARTIST_NAME LIKE ?");
-			try {
-				for (int i = 0; i < QUERIES_COUNT; i++) {
-					st.setString(1, "artist_1000");
-					st.setString(2, "%rtist_1000");
-					ResultSet rs = st.executeQuery();
+			for (int i = 0; i < QUERIES_COUNT; i++) {
+				// recreate statement in the loop
+				Statement st = con.createStatement();
+				try {
+					ResultSet rs =
+						st.executeQuery(
+							"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
 					try {
 						ArrayList artists = new ArrayList();
 						while (rs.next()) {
@@ -101,10 +99,11 @@ public class PreparedSmallSelectTest extends SmallSelectTest {
 					} finally {
 						rs.close();
 					}
+				} finally {
+					st.close();
 				}
-			} finally {
-				st.close();
 			}
+
 		} finally {
 			con.close();
 		}

@@ -85,12 +85,20 @@ public class CayenneSmallSelectTest extends CayennePerformanceTest {
 	 */
 	public void runTest() throws Exception {
 		for (int i = 0; i < SmallSelectTest.QUERIES_COUNT; i++) {
-			Expression qual =
+			Expression e1 =
 				ExpressionFactory.binaryPathExp(
 					Expression.EQUAL_TO,
 					"artistName",
-					"name_1000");
-			SelectQuery q = new SelectQuery("Artist", qual);
+					"artist_1000");
+			Expression e2 =
+				ExpressionFactory.binaryPathExp(
+					Expression.LIKE,
+					"artistName",
+					"%rtist_1000");
+			SelectQuery q =
+				new SelectQuery(
+					"Artist",
+					ExpressionFactory.binaryExp(Expression.OR, e1, e2));
 			ctxt.performQuery(q);
 		}
 	}

@@ -91,7 +91,7 @@ public class SmallSelectTest extends CayennePerformanceTest {
 				for (int i = 0; i < QUERIES_COUNT; i++) {
 					ResultSet rs =
 						st.executeQuery(
-							"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = 'artist_1000'");
+							"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
 					try {
 						ArrayList artists = new ArrayList();
 						while (rs.next()) {
