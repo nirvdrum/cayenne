@@ -63,6 +63,7 @@ import java.util.logging.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.TypesMapping;
 
 /** Utility class that does forward engineering of the database.
   * It can generate database schema using the data map. It is a 
@@ -100,9 +101,11 @@ public class DbGenerator {
         createTables(map, false);
     }
 
-    /** Creates database tables using the information from the
-      * <code>map</code>. Depending on <code>drop</code> flag
-      * value may also drop existing tables. */
+    /** 
+     * Creates database tables using the information from the
+     * <code>map</code>. Depending on <code>drop</code> flag
+     * value may also drop existing tables. 
+     */
     public void createTables(DataMap map, boolean drop) throws SQLException {
         Statement stmt = con.createStatement();
         DatabaseMetaData meta = con.getMetaData();
@@ -112,11 +115,11 @@ public class DbGenerator {
             if (drop) {
                 Iterator it = map.getDbEntitiesAsList().iterator();
                 while (it.hasNext()) {
-                	ResultSet rs = meta.getTables(null, null
-                					  , ((DbEntity) it.next()).getName(), null);
-                	// If no such table, don't try to delete, just continue
-                	if (!rs.next())
-                		continue;
+                    ResultSet rs =
+                        meta.getTables(null, null, ((DbEntity) it.next()).getName(), null);
+                    // If no such table, don't try to delete, just continue
+                    if (!rs.next())
+                        continue;
                     String q = adapter.dropTable((DbEntity) it.next());
                     QueryLogger.logQuery(Level.INFO, q, null);
                     stmt.execute(q);
@@ -166,19 +169,24 @@ public class DbGenerator {
         Iterator it = ent.getAttributeList().iterator();
         boolean first = true;
         while (it.hasNext()) {
-            if (first)
+            if (first) {
                 first = false;
-            else
+            }
+            else {
                 buf.append(", ");
+            }
 
             DbAttribute at = (DbAttribute) it.next();
             String type = adapter.externalTypesForJdbcType(at.getType())[0];
 
             buf.append(at.getName()).append(' ').append(type);
 
-            int len = at.getMaxLength();
-            if (len > 0)
-                buf.append('(').append(len).append(')');
+            if (TypesMapping.supportsLength(at.getType())) {
+                int len = at.getMaxLength();
+                if (len > 0) {
+                    buf.append('(').append(len).append(')');
+                }
+            }
 
             if (at.isMandatory())
                 buf.append(" NOT");
@@ -226,7 +234,6 @@ public class DbGenerator {
         }
         return list;
     }
-    
 
     /** Returns a subset of DbEntities from the <code>map</code>
      *  that have no corresponding database tables. 

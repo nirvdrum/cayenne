@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,18 +53,20 @@ package org.objectstyle.cayenne.dba;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.dba;
 
 import java.sql.*;
 import java.util.*;
 
-/** Handles mappings of JDBC data types to the database types 
-  * and Java types. This is mostly a utility class.
-  *
-  * <p><i>(Good candidate for refactoring.)</i></p>
-  *
-  * @author Michael Shengaout
-  * @author Andrei Adamchik
-  */
+/** 
+ * A utility class that handles mappings of JDBC data types to 
+ * the database types and Java types. Also contains methods that
+ * provide information about JDBC types.
+ *
+ *
+ * @author Michael Shengaout
+ * @author Andrei Adamchik
+ */
 public class TypesMapping {
     // Never use "-1" or any other normal integer, since there
     // is a big chance it is being reserved in java.sql.Types
@@ -215,6 +216,16 @@ public class TypesMapping {
     }
 
     /** 
+     * Returns true if supplied type can have a length attribute 
+     * as a part of column definition. 
+     */
+    public static boolean supportsLength(int type) {
+        return !(type == Types.LONGVARBINARY 
+        || type == Types.LONGVARCHAR
+        || isNumeric(type));
+    }
+
+    /** 
      * Returns true if supplied type is a numeric type.
      */
     public static boolean isNumeric(int type) {
@@ -229,7 +240,7 @@ public class TypesMapping {
             || type == Types.SMALLINT
             || type == Types.TINYINT;
     }
-    
+
     /** 
      * Returns true if supplied type is a decimal type.
      */
