@@ -81,6 +81,11 @@ public class ConnectionProperties {
     static final Logger logObj = Logger.getLogger(ConnectionProperties.class);
 
     public static final String PROPERTIES_FILE = "connection.properties";
+    public static final String ADAPTER_KEY = "cayenne.adapter";
+    public static final String USER_NAME_KEY = "jdbc.username";
+    public static final String PASSWORD_KEY = "jdbc.password";
+    public static final String URL_KEY = "jdbc.url";
+    public static final String DRIVER_KEY = "jdbc.driver";
 
     protected static ConnectionProperties sharedInstance;
     protected Map connectionInfos = Collections.synchronizedMap(new HashMap());
@@ -111,7 +116,12 @@ public class ConnectionProperties {
      * Constructor for ConnectionProperties.
      */
     public ConnectionProperties(ExtendedProperties props) {
-        super();
+        Iterator names = extractNames(props).iterator();
+        while (names.hasNext()) {
+            String name = (String) names.next();
+            DataSourceInfo dsi = buildDataSourceInfo(props.subset(name));
+            connectionInfos.put(name, dsi);
+        }
     }
 
     /**
@@ -119,14 +129,31 @@ public class ConnectionProperties {
      * If name does not match an existing object, returns null.
      */
     public DataSourceInfo getConnectionInfo(String name) {
-        return null;
+        synchronized (connectionInfos) {
+            return (DataSourceInfo) connectionInfos.get(name);
+        }
+    }
+
+    /**
+    * Creates a DataSourceInfo object from a set of properties.
+    */
+    protected DataSourceInfo buildDataSourceInfo(ExtendedProperties props) {
+        DataSourceInfo dsi = new DataSourceInfo();
+
+        dsi.setAdapterClass(props.getString(ADAPTER_KEY));
+        dsi.setUserName(props.getString(USER_NAME_KEY));
+        dsi.setPassword(props.getString(PASSWORD_KEY));
+        dsi.setDataSourceUrl(props.getString(URL_KEY));
+        dsi.setJdbcDriver(props.getString(DRIVER_KEY));
+
+        return dsi;
     }
 
     /**
      * Returns a list of connection names configured
      * in the properties object.
      */
-    protected List getNames(ExtendedProperties props) {
+    protected List extractNames(ExtendedProperties props) {
         Iterator it = props.getKeys();
         List list = new ArrayList();
 

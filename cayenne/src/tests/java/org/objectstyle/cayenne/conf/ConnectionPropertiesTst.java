@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.collections.ExtendedProperties;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
 /**
  * @author Andrei Adamchik
@@ -75,7 +75,26 @@ public class ConnectionPropertiesTst extends TestCase {
         super(arg0);
     }
 
-    public void testGetNames() throws Exception {
+    public void testBuildDataSourceInfo() throws Exception {
+        ConnectionProperties ps = new ConnectionProperties(new ExtendedProperties());
+        
+        ExtendedProperties props = new ExtendedProperties();
+        props.setProperty(ConnectionProperties.ADAPTER_KEY, "1");
+        props.setProperty(ConnectionProperties.DRIVER_KEY, "2");
+        props.setProperty(ConnectionProperties.PASSWORD_KEY, "3");
+        props.setProperty(ConnectionProperties.URL_KEY, "4");
+        props.setProperty(ConnectionProperties.USER_NAME_KEY, "5");
+
+        DataSourceInfo dsi = ps.buildDataSourceInfo(props);   
+        
+        assertEquals("1", dsi.getAdapterClass());     
+        assertEquals("2", dsi.getJdbcDriver());     
+        assertEquals("3", dsi.getPassword());     
+        assertEquals("4", dsi.getDataSourceUrl());     
+        assertEquals("5", dsi.getUserName());     
+    }
+
+    public void testExtractNames() throws Exception {
         ConnectionProperties ps = new ConnectionProperties(new ExtendedProperties());
 
         ExtendedProperties props = new ExtendedProperties();
@@ -84,7 +103,7 @@ public class ConnectionPropertiesTst extends TestCase {
         props.setProperty("b.3", "a");
         props.setProperty("c.4", "a");
 
-        List names = ps.getNames(props);
+        List names = ps.extractNames(props);
         assertNotNull(names);
         assertEquals(3, names.size());
         assertTrue(names.contains("a"));
