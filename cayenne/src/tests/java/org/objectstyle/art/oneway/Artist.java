@@ -1,7 +1,7 @@
 
 package org.objectstyle.art.oneway;
 
-import org.objectstyle.cayenne.event.DataObjectTransactionEvents;
+import org.objectstyle.cayenne.access.event.DataObjectTransactionEvents;
 
 public class Artist extends _Artist implements DataObjectTransactionEvents
 {
