@@ -130,6 +130,8 @@ public class Project {
             Object obj = ProjectTraversal.objectFromPath(nodePath);
 
             ProjectFile f = ProjectFile.projectFileForObject(obj);
+            f.synchronizeName();
+            f.setProject(this);
 
             if (f != null) {
                 projectFiles.add(f);
@@ -290,6 +292,7 @@ public class Project {
             if (existingFile == null) {
                 ProjectFile newFile = ProjectFile.projectFileForObject(obj);
                 if (newFile != null) {
+                    newFile.setProject(this);
                     modifiedFiles.add(newFile);
                 }
             } else {
@@ -312,11 +315,10 @@ public class Project {
 
         // 4. Take care of deleted
         processDelete(wrappedObjects);
-        
+
         // 5. Refresh file list
         files = buildFileList();
     }
-    
 
     protected void processSave(List modifiedFiles) throws ProjectException {
         try {
@@ -346,13 +348,19 @@ public class Project {
             Iterator oldFiles = files.iterator();
             while (oldFiles.hasNext()) {
                 ProjectFile f = (ProjectFile) oldFiles.next();
-                if (f.getObject() == null || !existingObjects.contains(f.getObject())) {
-                    boolean result = f.saveDelete();
+                if (f.isRenamed()
+                    || f.getObject() == null
+                    || !existingObjects.contains(f.getObject())) {
+                    boolean result = deleteFile(f.resolveOldFile());
                     if (!result) {
                         logObj.info("*** Failed to delete old file, ignoring.");
                     }
                 }
             }
         }
+    }
+
+    protected boolean deleteFile(File f) {
+        return (f.exists()) ? f.delete() : true;
     }
 }

@@ -81,6 +81,12 @@ public class ProjectFileTst extends CayenneTestCase {
         pf = new TestProjectFile("name", "ext");
     }
 
+    public void testSynchronizeName() throws Exception {
+        assertEquals("name", pf.name);
+        pf.synchronizeName();
+        assertEquals(TestProjectFile.OBJ_NAME, pf.name);
+    }
+
     public void testStatus() throws Exception {
         pf.setStatus(ProjectFile.FILE_MODIFIED);
         assertEquals(ProjectFile.FILE_MODIFIED, pf.getStatus());
@@ -90,11 +96,16 @@ public class ProjectFileTst extends CayenneTestCase {
     }
 
     public void testGetFileName() throws Exception {
-        assertEquals("name.ext", pf.getFileName());
+        assertEquals(TestProjectFile.OBJ_NAME + ".ext", pf.getFileName());
+    }
+
+    public void testGetOldFileName() throws Exception {
+        assertEquals("name.ext", pf.getOldFileName());
     }
 
     // inner class to allow testing of the abstract ProjectFile
     class TestProjectFile extends ProjectFile {
+        public static final String OBJ_NAME = "obj";
 
         /**
          * Constructor for TestProjectFile.
@@ -116,7 +127,7 @@ public class ProjectFileTst extends CayenneTestCase {
          * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
          */
         public String getObjectName() {
-            return null;
+            return OBJ_NAME;
         }
 
         /**

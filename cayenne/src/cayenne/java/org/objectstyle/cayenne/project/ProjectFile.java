@@ -60,6 +60,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.util.Util;
+
 /**
  * ProjectFile is an adapter from an object in Cayenne project
  * to its representation in the file system.
@@ -114,7 +116,21 @@ public abstract class ProjectFile {
     /**
      * Builds a filename from the object name and extension.
      */
-    public String getFileName() {
+    protected String getFileName() {
+        String oName = getObjectName();
+        if (oName == null) {
+            throw new NullPointerException("Null name.");
+        }
+        return (extension != null) ? oName + '.' + extension : oName;
+    }
+
+    /**
+    * Builds a filename from the initial name and extension.
+    */
+    protected String getOldFileName() {
+        if (name == null) {
+            throw new NullPointerException("Null old name.");
+        }
         return (extension != null) ? name + '.' + extension : name;
     }
 
@@ -150,6 +166,13 @@ public abstract class ProjectFile {
     public abstract ProjectFile createProjectFile(Object obj);
 
     /**
+     * Replaces internally stored filename with the current object name.
+     */
+    public void synchronizeName() {
+        name = getObjectName();
+    }
+
+    /**
      * Saves ProjectFile's underlying object to a temporary 
      * file, returning this file to the caller. If any problems are 
      * encountered during saving, an Exception is thrown.
@@ -166,41 +189,44 @@ public abstract class ProjectFile {
         saveToFile(tempFile);
     }
 
+    /**
+     * Returns a file which is a canonical representation of the 
+     * file to store a wrapped object. If an object was renamed, 
+     * the <b>new</b> name is returned.
+     */
     public File resolveFile() {
         return getProject().resolveFile(getFileName());
     }
-
+    
     /**
-     * Finishes saving the underlying object.
+     * Returns a file which is a canonical representation of the 
+     * file to store a wrapped object. If an object was renamed, 
+     * the <b>old</b> name is returned.
      */
-    public boolean saveDelete() {
-        File finalFile = resolveFile();
-        if (finalFile.exists()) {
-            return finalFile.delete();
-        } else {
-            return true;
-        }
+    public File resolveOldFile() {
+        return getProject().resolveFile(getOldFileName());
     }
 
     /**
      * Finishes saving the underlying object.
      */
     public void saveCommit() throws ProjectException {
-        if(tempFile == null) {
-        	return;
+        if (tempFile == null) {
+            return;
         }
-        
+
         File finalFile = resolveFile();
         if (finalFile.exists()) {
             if (!finalFile.delete()) {
-                throw new ProjectException("Unable to remove old master file : " + finalFile);
+                throw new ProjectException(
+                    "Unable to remove old master file : " + finalFile);
             }
         }
 
         if (!tempFile.renameTo(finalFile)) {
             throw new ProjectException("Unable to move " + tempFile + " to " + finalFile);
         }
-        
+
         tempFile = null;
     }
 
@@ -244,6 +270,10 @@ public abstract class ProjectFile {
      */
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public boolean isRenamed() {
+        return Util.nullSafeEquals(name, getObjectName());
     }
 
     /** 
