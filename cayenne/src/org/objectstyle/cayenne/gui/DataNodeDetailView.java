@@ -142,9 +142,10 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.weightx = 100;
-		constraints.weighty = 100;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
+		constraints.weighty = 50;
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.gridheight = GridBagConstraints.RELATIVE;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 
 		nameLabel 		= new JLabel("Data node name: ");
@@ -155,26 +156,45 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		factoryLabel 	= new JLabel("Data source factory:");
 		factory 		= new JComboBox();
 		factory.setEditable(true);
+		DefaultComboBoxModel model;
+		String[] arr
+			= {DataSourceFactory.JNDI_FACTORY
+			  ,DataSourceFactory.DIRECT_FACTORY};
+		model = new DefaultComboBoxModel(arr);
+		factory.setModel(model);
+		factory.setSelectedIndex(-1);
+		
 		adapterLabel 	= new JLabel("DB query adapter:");
 		adapter 		= new JComboBox();
 		adapter.setEditable(true);
+		String[] arr1
+			= {DbAdapter.JDBC
+			  ,DbAdapter.SYBASE
+			  ,DbAdapter.MYSQL
+			  ,DbAdapter.ORACLE
+			  ,DbAdapter.POSTGRES};
+		model = new DefaultComboBoxModel(arr1);
+		adapter.setModel(model);
+		adapter.setSelectedIndex(-1);
 		
 		JPanel fileChooser = this.formatFileChooser(location, fileBtn);
 
 		Component[] left_comp = new Component[4];
 		left_comp[0] = nameLabel;
-		left_comp[1] = locationLabel;
-		left_comp[2] = factoryLabel;
+		left_comp[1] = factoryLabel;
+		left_comp[2] = locationLabel;
 		left_comp[3] = adapterLabel;
 
 		Component[] right_comp = new Component[4];
 		right_comp[0] = name;
-		right_comp[1] = fileChooser;
-		right_comp[2] = factory;
+		right_comp[1] = factory;
+		right_comp[2] = fileChooser;
 		right_comp[3] = adapter;
 
 		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
 		add(temp, constraints);
+		location.setEditable(false);
+		fileBtn.setVisible(false);
 		
 		userNameLabel 	= new JLabel("User name: ");
 		userName		= new JTextField(20);
@@ -211,6 +231,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		temp.setBorder(border);
 		constraints.gridheight = 2;
 		constraints.gridy = 1;
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		constraints.gridheight = GridBagConstraints.REMAINDER;
 		add(temp, constraints);
 		
 	}
@@ -291,10 +313,15 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		if (src == factory) {
 			String ele = (String)factory.getModel().getSelectedItem();
 			if (null != ele && ele.trim().length() > 0) {
-				if (ele.equals(DataSourceFactory.DIRECT_FACTORY))
-					fileBtn.setEnabled(true);
-				else 
-					fileBtn.setEnabled(false);
+				if (ele.equals(DataSourceFactory.DIRECT_FACTORY)) {
+					fileBtn.setVisible(true);
+					location.setEditable(false);
+					location.setText("");
+				}
+				else {
+					fileBtn.setVisible(false);
+					location.setEditable(true);
+				}
 				mediator.getCurrentDataNode().setDataSourceFactory(ele);
 			}
 			else 
@@ -388,14 +415,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	}
 	
 	private void populateDbAdapter(String selected_class){
-		DefaultComboBoxModel model;
-		String[] arr 
-			= {DbAdapter.JDBC
-			  ,DbAdapter.SYBASE
-			  ,DbAdapter.MYSQL
-			  ,DbAdapter.ORACLE
-			  ,DbAdapter.POSTGRES};
-		model = new DefaultComboBoxModel(arr);
+		DefaultComboBoxModel model = (DefaultComboBoxModel)adapter.getModel();
 		if (selected_class != null && selected_class.length() > 0) {
 			boolean found = false;
 			for (int i = 0; i < model.getSize(); i++)  {
@@ -412,15 +432,10 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 				model.setSelectedItem(selected_class);
 			}
 		}// End if there is factory to select
-		adapter.setModel(model);
 	}
 	
 	private void populateFactory(String selected_class) {
-		DefaultComboBoxModel model;
-		String[] arr 
-			= {DataSourceFactory.JNDI_FACTORY
-			  ,DataSourceFactory.DIRECT_FACTORY};
-		model = new DefaultComboBoxModel(arr);
+		DefaultComboBoxModel model = (DefaultComboBoxModel)factory.getModel();
 		if (selected_class != null && selected_class.length() > 0) {
 			boolean found = false;
 			for (int i = 0; i < model.getSize(); i++)  {
@@ -428,6 +443,18 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 				if (ele.equals(selected_class)) {
 					model.setSelectedItem(ele);
 					found = true;
+					// If direct connection, 
+					// show File button and disable text field.
+					// Otherwise hide File button and enable text field.
+					if (selected_class.equals(DataSourceFactory.DIRECT_FACTORY))
+					{
+						fileBtn.setVisible(true);
+						location.setEditable(false);
+					} else {
+						fileBtn.setVisible(true);
+						location.setEditable(true);
+					}
+					
 					break;
 				}
 			}// End for()
@@ -439,7 +466,6 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		}// End if there is factory to select
 		else 
 			model.setSelectedItem(null);
-		factory.setModel(model);
 	}
 	
 	

@@ -101,21 +101,13 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 	}
 
 	private void init(){
-		GridBagLayout layout = new GridBagLayout();
+		BorderLayout layout = new BorderLayout();
 		this.setLayout(layout);
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.weightx = 100;
-		constraints.weighty = 100;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.anchor = GridBagConstraints.NORTHWEST;
-
 		nameLabel 		= new JLabel("Data map name: ");
 		name 			= new JTextField(20);
 		locationLabel 	= new JLabel("Location: ");
 		location 		= new JTextField(25);
+		location.setEditable(false);
 		fileBtn			= new JButton("...");
 
 		JPanel fileChooser = this.formatFileChooser(location, fileBtn);
@@ -129,7 +121,7 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 		right_comp[1] = fileChooser;
 
 		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
-		add(temp, constraints);
+		add(temp, BorderLayout.CENTER);
 	}
 	
 	private JPanel formatFileChooser(JTextField fld, JButton btn) {

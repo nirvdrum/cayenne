@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.datamap.*;
-
+import org.objectstyle.cayenne.gui.validator.*;
 
 
 /** Window for the Cayenne Modeler.
@@ -709,30 +709,44 @@ implements ActionListener
 	}
 
 	private void saveAll() {
-		Iterator iter = mediator.getDirtyDataMaps().iterator();
-		while (iter.hasNext()) {
-			DataMap map = (DataMap)iter.next();
-			saveDataMap(map);
-			iter.remove();
-		}// End saving maps
-
-		iter = mediator.getDirtyDataNodes().iterator();
-		while (iter.hasNext()) {
-			DataNode node = (DataNode)iter.next();
-			System.out.println("Editor::saveAll(), node name " 
-								+ node.getName() + ", factory " 
-								+ node.getDataSourceFactory());
-			// If using direct connection, save into separate file
-			if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
-				System.out.println("Editor::saveAll(), saving node name " 
-								+ node.getName());
-				saveDataNode(node);
-			}
-			iter.remove();
-		}// End saving DataNode-s
+		Validator val = new Validator(mediator);
+		int ret_code = val.validate();
+		// If no errors or no serious errors, save.
+		if (ret_code == ErrorMsg.NO_ERROR || ret_code == ErrorMsg.WARNING) {
+			Iterator iter = mediator.getDirtyDataMaps().iterator();
+			while (iter.hasNext()) {
+				DataMap map = (DataMap)iter.next();
+				saveDataMap(map);
+			}// End saving maps
+			mediator.getDirtyDataMaps().clear();
+	
+			iter = mediator.getDirtyDataNodes().iterator();
+			while (iter.hasNext()) {
+				DataNode node = (DataNode)iter.next();
+				System.out.println("Editor::saveAll(), node name " 
+									+ node.getName() + ", factory " 
+									+ node.getDataSourceFactory());
+				// If using direct connection, save into separate file
+				if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
+					System.out.println("Editor::saveAll(), saving node name " 
+									+ node.getName());
+					saveDataNode(node);
+				}
+			}// End saving DataNode-s
+			saveProject();
+			mediator.getDirtyDomains().clear();
+			mediator.getDirtyDataNodes().clear();
+			
+			mediator.setDirty(false);
+		}
+		// If there were errors or warnings at validation, display them
+		if (ret_code == ErrorMsg.ERROR || ret_code == ErrorMsg.WARNING) {
+			ValidatorDialog dialog;
+			dialog = new ValidatorDialog(this, mediator
+								, val.getErrorMessages(), ret_code);
+			dialog.setVisible(true);
+		}
 		
-		saveProject();
-		mediator.setDirty(false);
 	}
 	
 	private void saveProject() {
@@ -774,6 +788,7 @@ implements ActionListener
 			saver.storeDataMap(pw, map);
 			pw.close();
 			fw.close();
+			/* Causes problem with concurrent update
 			mediator.getDirtyDataMaps().remove(map);
 			if (mediator.getDirtyDataMaps().size() <=0 
 				&& mediator.getDirtyDataNodes().size() <=0 
@@ -781,6 +796,7 @@ implements ActionListener
 			{
 				mediator.setDirty(false);
 			}
+			*/
 		} catch (Exception e) {}
 	}
 	
