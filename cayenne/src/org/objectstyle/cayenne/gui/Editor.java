@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -54,42 +53,34 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */
+ 
+package org.objectstyle.cayenne.gui;
 
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import java.io.File;
 import java.net.URL;
-import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
+
 import javax.swing.*;
-import javax.swing.filechooser.*;
-import javax.swing.filechooser.FileFilter;
 
-import org.apache.commons.collections.ExtendedProperties;
-
-import org.objectstyle.util.Preferences;
-import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.gui.action.*;
+import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
-import org.objectstyle.cayenne.gui.datamap.*;
-import org.objectstyle.cayenne.gui.validator.*;
-import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.util.Preferences;
 
-import org.objectstyle.cayenne.gui.action.*;
-
-/** Window for the Cayenne Modeler.
-  * Responsibilities include coordination of enabling/disabling of
-  * menu and toolbar.
-  * @author Michael Misha Shengaout */
+/** 
+ * Main frame of CayenneModeler. Responsibilities include 
+ * coordination of enabling/disabling of menu and toolbar.
+ * 
+ * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
+ */
 public class Editor extends JFrame
 implements ActionListener
 , DomainDisplayListener, DataNodeDisplayListener, DataMapDisplayListener
@@ -246,6 +237,12 @@ implements ActionListener
         helpMenu.add(aboutMenu);
 
         initToolBar();
+        
+    	/* ClassLoader cl = Editor.class.getClassLoader();
+    	URL url = cl.getResource("org/objectstyle/gui/images/frameicon16.gif");
+        Image icon = Toolkit.getDefaultToolkit().createImage(url);
+        this.setIconImage(icon);
+        */
     }
 
 
@@ -300,7 +297,7 @@ implements ActionListener
     private void initToolBar() {
     	String path = "org/objectstyle/gui/";
 
-    	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
+    	ClassLoader cl = Editor.class.getClassLoader();        
     	URL url = cl.getResource(path + "images/domain24.gif");
         ImageIcon domainIcon = new ImageIcon(url);
         createDomainBtn = new JButton(domainIcon);
