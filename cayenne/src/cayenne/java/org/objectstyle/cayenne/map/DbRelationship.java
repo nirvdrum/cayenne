@@ -158,7 +158,7 @@ public class DbRelationship extends Relationship {
     }
 
     /**
-     * Returns a Collection of target attributes.
+     * Returns a Collection of source attributes.
      * 
      * @since 1.1
      */
