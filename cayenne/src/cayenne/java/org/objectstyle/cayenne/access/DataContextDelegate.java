@@ -86,7 +86,10 @@ public interface DataContextDelegate {
 	public GenericSelectQuery willPerformSelect(DataContext context, GenericSelectQuery query);
 
 	/**
-	 * Invoked by parent DataContext whenever a change is detected to the object snapshot.
+	 * Invoked by parent DataContext whenever an object change is detected.
+     * This can be a change to the object snapshot, or a modification of an "independent"
+     * relationship not resulting in a snapshot change. In the later case snapshot
+     * argument may be null.
 	 */
     public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore);
     

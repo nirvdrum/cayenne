@@ -1030,6 +1030,7 @@ public class DataContext implements QueryEngine, Serializable {
         if (oldState == PersistenceState.NEW) {
             getObjectStore().objectsUnregistered(
                 Collections.singletonList(anObject));
+            anObject.setDataContext(null);
         }      
     }
 

@@ -366,8 +366,9 @@ public class DataRowStore implements Serializable {
 
         Collection deletedSnapshotIds = event.getDeletedIds();
         Map diffs = event.getModifiedDiffs();
+        Collection indirectlyModifiedIds = event.getIndirectlyModifiedIds();
 
-        if (deletedSnapshotIds.isEmpty() && diffs.isEmpty()) {
+        if (deletedSnapshotIds.isEmpty() && diffs.isEmpty()  && indirectlyModifiedIds.isEmpty()) {
             logObj.warn("processRemoteEvent.. bogus call... no changes.");
             return;
         }
@@ -375,7 +376,7 @@ public class DataRowStore implements Serializable {
         synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
             processUpdateDiffs(diffs);
-            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds, event.getIndirectlyModifiedIds());
+            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds, indirectlyModifiedIds);
         }
     }
 
@@ -392,7 +393,7 @@ public class DataRowStore implements Serializable {
 
         // update the internal cache, prepare snapshot event
 
-        if (deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty()) {
+        if (deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty() && indirectlyModifiedIds.isEmpty()) {
             logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
             return;
         }
@@ -448,6 +449,7 @@ public class DataRowStore implements Serializable {
                     // case 4 above... have to throw out the snapshot since
                     // no good options exist to tell how to merge the two.
                     if (oldSnapshot.getVersion() != newSnapshot.getReplacesVersion()) {
+                        logObj.debug("snapshot version changed... don't know what to do");
                         forgetSnapshot(key);
                         continue;
                     }

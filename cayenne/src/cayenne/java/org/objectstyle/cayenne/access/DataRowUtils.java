@@ -155,6 +155,7 @@ class DataRowUtils {
         }
         else {
             object.setPersistenceState(PersistenceState.COMMITTED);
+            object.setSnapshotVersion(snapshot.getVersion());
         }
 
     }

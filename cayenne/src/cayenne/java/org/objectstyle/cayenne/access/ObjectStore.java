@@ -782,34 +782,28 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     case PersistenceState.HOLLOW :
                     case PersistenceState.DELETED :
 
-                        // consult delegate if it exists
-                        delegate = object.getDataContext().getDelegate();
+                        // consult delegate
+                        delegate = object.getDataContext().nonNullDelegate();
 
-                        if (delegate == null || delegate.shouldProcessDelete(object)) {
+                        if (delegate.shouldProcessDelete(object)) {
                             objectMap.remove(oid);
                             retainedSnapshotMap.remove(oid);
 
                             // setting DataContext to null will also set
                             // state to transient
                             object.setDataContext(null);
-
-                            if (delegate != null) {
-                                delegate.finishedProcessDelete(object);
-                            }
+                            delegate.finishedProcessDelete(object);
                         }
 
                         break;
 
                     case PersistenceState.MODIFIED :
 
-                        // consult delegate if it exists
-                        delegate = object.getDataContext().getDelegate();
-                        if (delegate == null || delegate.shouldProcessDelete(object)) {
+                        // consult delegate
+                        delegate = object.getDataContext().nonNullDelegate();
+                        if (delegate.shouldProcessDelete(object)) {
                             object.setPersistenceState(PersistenceState.NEW);
-
-                            if (delegate != null) {
-                                delegate.finishedProcessDelete(object);
-                            }
+                            delegate.finishedProcessDelete(object);
                         }
 
                         break;
@@ -817,7 +811,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
     }
-
 
     /**
      * @since 1.1
@@ -837,22 +830,27 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             // for now "break" all "independent" object relationships... 
             // in the future we may want to be more precise and go after modified 
             // relationships only, or even process updated lists without invalidating...
-            
-            // TODO: a delegate method for consistency sake - consult if we should invalidate relationships
-            ObjEntity entity =
-                object.getDataContext().getEntityResolver().lookupObjEntity(object);
-            Iterator relationshipIterator = entity.getRelationships().iterator();
-            while (relationshipIterator.hasNext()) {
-                ObjRelationship relationship =
-                    (ObjRelationship) relationshipIterator.next();
-                    
-                if (relationship.isSourceIndependentFromTargetChange()) {
-                    Object fault =
-                        relationship.isToMany()
-                            ? Fault.getToManyFault()
-                            : Fault.getToOneFault();
-                    object.writePropertyDirectly(relationship.getName(), fault);
+
+            DataContextDelegate delegate = object.getDataContext().nonNullDelegate();
+
+            if (delegate.shouldMergeChanges(object, null)) {
+                ObjEntity entity =
+                    object.getDataContext().getEntityResolver().lookupObjEntity(object);
+                Iterator relationshipIterator = entity.getRelationships().iterator();
+                while (relationshipIterator.hasNext()) {
+                    ObjRelationship relationship =
+                        (ObjRelationship) relationshipIterator.next();
+
+                    if (relationship.isSourceIndependentFromTargetChange()) {
+                        Object fault =
+                            relationship.isToMany()
+                                ? Fault.getToManyFault()
+                                : Fault.getToOneFault();
+                        object.writePropertyDirectly(relationship.getName(), fault);
+                    }
                 }
+                
+                delegate.finishedProcessDelete(object);
             }
         }
     }
@@ -879,17 +877,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 DataRow diff = (DataRow) entry.getValue();
 
                 // we are lazy, just turn COMMITTED object into HOLLOW instead
-                // of
-                // actually updating it
+                // of actually updating it
                 if (object.getPersistenceState() == PersistenceState.COMMITTED) {
                     // consult delegate if it exists
-                    DataContextDelegate delegate = object.getDataContext().getDelegate();
-                    if (delegate == null || delegate.shouldMergeChanges(object, diff)) {
+                    DataContextDelegate delegate =
+                        object.getDataContext().nonNullDelegate();
+                    if (delegate.shouldMergeChanges(object, diff)) {
                         object.setPersistenceState(PersistenceState.HOLLOW);
-
-                        if (delegate != null) {
-                            delegate.finishedMergeChanges(object);
-                        }
+                        delegate.finishedMergeChanges(object);
                     }
                     continue;
                 }
@@ -899,16 +894,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     || object.getPersistenceState() == PersistenceState.MODIFIED) {
 
                     // consult delegate if it exists
-                    DataContextDelegate delegate = object.getDataContext().getDelegate();
-                    if (delegate == null || delegate.shouldMergeChanges(object, diff)) {
+                    DataContextDelegate delegate =
+                        object.getDataContext().nonNullDelegate();
+                    if (delegate.shouldMergeChanges(object, diff)) {
                         ObjEntity entity =
                             object.getDataContext().getEntityResolver().lookupObjEntity(
                                 object);
                         DataRowUtils.forceMergeWithSnapshot(entity, object, diff);
-
-                        if (delegate != null) {
-                            delegate.finishedMergeChanges(object);
-                        }
+                        delegate.finishedMergeChanges(object);
                     }
                 }
             }
