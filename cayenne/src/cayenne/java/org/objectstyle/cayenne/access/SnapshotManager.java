@@ -78,25 +78,23 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * SnapshotManager handles snapshot (data row) operations on objects.
  * This is a helper class that works in conjunction with DataContext.
- * 
- * <p>
- * TODO: SnapshotManager is really stateless. All its state information
- * (including relDataSource) does not span mthod calls and is really beloning
- * to the DataContext, so switching to a singleton instance should be easy.
- * </p>
+ * Used as a singleton.
  *
  * @author Andrei Adamchik
  */
 public class SnapshotManager {
     private static Logger logObj = Logger.getLogger(SnapshotManager.class);
 
-    protected ToManyListDataSource relDataSource;
-
+    private static final SnapshotManager sharedInstance = new SnapshotManager();
+    
+    public static SnapshotManager getSharedInstance() {
+    	return sharedInstance;
+    }
+    
     /**
-     * Constructor for SnapshotManager.
+     * Constructor for SnapshotManager. Shouldn't be called directly
      */
-    public SnapshotManager(ToManyListDataSource relDataSource) {
-        this.relDataSource = relDataSource;
+    protected SnapshotManager() {
     }
 
     /** 
@@ -109,7 +107,6 @@ public class SnapshotManager {
         DataObject anObject,
         Map snapshot) {
 
-        DataContext context = anObject.getDataContext();
         Map attrMap = ent.getAttributeMap();
         Iterator it = attrMap.keySet().iterator();
         boolean isPartialSnapshot = false;
@@ -128,6 +125,9 @@ public class SnapshotManager {
                 isPartialSnapshot = true;
             }
         }
+        
+		DataContext context = anObject.getDataContext();
+        ToManyListDataSource relDataSource = context.getRelationshipDataSource();
 
         Iterator rit = ent.getRelationships().iterator();
         while (rit.hasNext()) {
@@ -351,14 +351,14 @@ public class SnapshotManager {
      * Initializes to-many relationships of a DataObject
      * with empty lists.
      */
-    public void prepareForInsert(ObjEntity ent, DataObject anObject) {
+    public void prepareForInsert(DataContext context, ObjEntity ent, DataObject anObject) {
         Iterator it = ent.getRelationships().iterator();
         while (it.hasNext()) {
             ObjRelationship rel = (ObjRelationship) it.next();
             if (rel.isToMany()) {
                 ToManyList relList =
                     new ToManyList(
-                        relDataSource,
+                        context.getRelationshipDataSource(),
                         anObject.getObjectId(),
                         rel.getName());
                 anObject.writePropertyDirectly(rel.getName(), relList);

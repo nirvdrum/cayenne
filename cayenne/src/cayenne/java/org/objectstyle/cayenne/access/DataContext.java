@@ -140,7 +140,7 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient String lazyInitParentDomainName;
 
     protected transient ObjectStore objectStore;
-    protected transient SnapshotManager snapshotManager;
+    protected transient ToManyListDataSource relationshipDataSource;
 
     /**
      * Convenience method to create a new instance of
@@ -180,7 +180,7 @@ public class DataContext implements QueryEngine, Serializable {
     public DataContext(QueryEngine parent) {
         setParent(parent);
         this.objectStore = new ObjectStore();
-        this.snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
+        this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(postDataContextTransactionEventsDefault);
     }
 
@@ -201,8 +201,17 @@ public class DataContext implements QueryEngine, Serializable {
         this.parent = parent;
     }
 
+    /**
+     * This method simply returns SnapshotManager singleton.
+     * 
+     * @deprecated Since 1.1 use SnapshotManager.getSharedInstance()
+     */
     public SnapshotManager getSnapshotManager() {
-        return snapshotManager;
+        return SnapshotManager.getSharedInstance();
+    }
+
+    public ToManyListDataSource getRelationshipDataSource() {
+        return this.relationshipDataSource;
     }
 
     /**
@@ -296,7 +305,7 @@ public class DataContext implements QueryEngine, Serializable {
     /** Takes a snapshot of current object state. */
     public Map takeObjectSnapshot(DataObject anObject) {
         ObjEntity ent = getEntityResolver().lookupObjEntity(anObject);
-        return snapshotManager.takeObjectSnapshot(ent, anObject);
+        return SnapshotManager.getSharedInstance().takeObjectSnapshot(ent, anObject);
     }
 
     /**
@@ -333,7 +342,10 @@ public class DataContext implements QueryEngine, Serializable {
 
             if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
                 // we are asked to refresh an existing object with new values
-                snapshotManager.mergeObjectWithSnapshot(objEntity, obj, dataRow);
+                SnapshotManager.getSharedInstance().mergeObjectWithSnapshot(
+                    objEntity,
+                    obj,
+                    dataRow);
 
                 //The merge might leave the object in hollow state if
                 // dataRow was only partial.  If so, do not add the snapshot
@@ -364,7 +376,10 @@ public class DataContext implements QueryEngine, Serializable {
         DataObject obj = registeredObject(anId);
 
         if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-            snapshotManager.refreshObjectWithSnapshot(objEntity, obj, dataRow);
+            SnapshotManager.getSharedInstance().refreshObjectWithSnapshot(
+                objEntity,
+                obj,
+                dataRow);
 
             // notify object that it was fetched
             obj.fetchFinished();
@@ -422,8 +437,9 @@ public class DataContext implements QueryEngine, Serializable {
         ObjEntity objEntity) {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
+
         // TODO: maybe do a sanity check against class/entity mismatch?
-        snapshotManager.prepareForInsert(objEntity, dataObject);
+        SnapshotManager.getSharedInstance().prepareForInsert(this, objEntity, dataObject);
         objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
         dataObject.setPersistenceState(PersistenceState.NEW);
@@ -677,7 +693,7 @@ public class DataContext implements QueryEngine, Serializable {
                         // rolling the object back will set the state to committed
                     case PersistenceState.MODIFIED :
                         ObjEntity oe = getEntityResolver().lookupObjEntity(thisObject);
-                        snapshotManager.refreshObjectWithSnapshot(
+                        SnapshotManager.getSharedInstance().refreshObjectWithSnapshot(
                             oe,
                             thisObject,
                             thisObject.getCommittedSnapshot());
@@ -1074,7 +1090,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         // initialized new snapshot manager
-        snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
+        this.relationshipDataSource = new RelationshipDataSource(this);
     }
 
     public EntityResolver getEntityResolver() {
@@ -1336,7 +1352,10 @@ public class DataContext implements QueryEngine, Serializable {
                     // properly 
                     Map dataRow = (Map) it.next();
                     DataObject obj = registeredObject(this.oid);
-                    snapshotManager.mergeObjectWithSnapshot(ent, obj, dataRow);
+                    SnapshotManager.getSharedInstance().mergeObjectWithSnapshot(
+                        ent,
+                        obj,
+                        dataRow);
                     obj.fetchFinished();
                     //Swizzle object ids as the old "flattened" one isn't suitable for later
                     // identification of this object

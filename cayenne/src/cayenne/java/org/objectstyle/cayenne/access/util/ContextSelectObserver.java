@@ -63,6 +63,7 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -75,76 +76,75 @@ import org.objectstyle.cayenne.query.Query;
  * DataContext.
  */
 public class ContextSelectObserver extends SelectObserver {
-	protected DataContext context;
+    protected DataContext context;
 
-	/**
-	 * Constructor for ContextSelectObserver.
-	 * @param logLevel
-	 */
-	public ContextSelectObserver(DataContext context, Level logLevel) {
-		super(logLevel);
-		this.context = context;
-	}
+    /**
+     * Constructor for ContextSelectObserver.
+     * @param logLevel
+     */
+    public ContextSelectObserver(DataContext context, Level logLevel) {
+        super(logLevel);
+        this.context = context;
+    }
 
-	/** 
-	 * Overrides superclass behavior to convert each  data row to a real
-	 * object. Registers objects with parent DataContext.
-	 */
-	public void nextDataRows(Query query, List dataRows) {
-		List result = null;
-		if (dataRows != null && dataRows.size() > 0) {
-			ObjEntity ent = context.getEntityResolver().lookupObjEntity(query);
-			
-			// do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
-			// we can't build a valid ObjectId
-			DbEntity dbEntity = ent.getDbEntity();
-			if(dbEntity == null) {
-				throw new CayenneRuntimeException("ObjEntity '" + ent.getName() + "' has no DbEntity.");			
-			}
-			
-			if(dbEntity.getPrimaryKey().size() == 0) {
-				throw new CayenneRuntimeException("Can't create ObjectId for '" 
-				+ ent.getName() 
-				+ "'. Reason: DbEntity '" 
-				+ dbEntity.getName() 
-				+ "' has no Primary Key defined.");
-			}
-			
-			result = new ArrayList(dataRows.size());
-			Iterator it = dataRows.iterator();
-			while (it.hasNext()) {
-				result.add(
-					context.objectFromDataRow(ent, (Map) it.next(), true));
-			}
-		}
-		else {
-			result = new ArrayList();
-		}
+    /** 
+     * Overrides superclass behavior to convert each  data row to a real
+     * object. Registers objects with parent DataContext.
+     */
+    public void nextDataRows(Query query, List dataRows) {
+        List result = null;
+        if (dataRows != null && dataRows.size() > 0) {
+            ObjEntity ent = context.getEntityResolver().lookupObjEntity(query);
 
-		if (query instanceof PrefetchSelectQuery) {
-			PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
-			ObjRelationship theRelationship =
-				prefetchQuery.getSingleStepToManyRelationship();
-			if (theRelationship!= null) {
-				//The root query should have already executed, so we can get it's
-				// results
-				List rootQueryResults =
-					this.getResults(prefetchQuery.getRootQuery());
-				if (rootQueryResults == null) {
-					throw new CayenneRuntimeException(
-						"Prefetch query for path "
-							+ prefetchQuery.getPrefetchPath()
-							+ " executed before it's root query "
-							+ prefetchQuery.getRootQuery());
-				}
-				this
-					.context
-					.getSnapshotManager()
-					.mergePrefetchResultsRelationships(
-					rootQueryResults, theRelationship, result);
-			}
-		}
+            // do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
+            // we can't build a valid ObjectId
+            DbEntity dbEntity = ent.getDbEntity();
+            if (dbEntity == null) {
+                throw new CayenneRuntimeException(
+                    "ObjEntity '" + ent.getName() + "' has no DbEntity.");
+            }
 
-		super.nextDataRows(query, result);
-	}
+            if (dbEntity.getPrimaryKey().size() == 0) {
+                throw new CayenneRuntimeException(
+                    "Can't create ObjectId for '"
+                        + ent.getName()
+                        + "'. Reason: DbEntity '"
+                        + dbEntity.getName()
+                        + "' has no Primary Key defined.");
+            }
+
+            result = new ArrayList(dataRows.size());
+            Iterator it = dataRows.iterator();
+            while (it.hasNext()) {
+                result.add(context.objectFromDataRow(ent, (Map) it.next(), true));
+            }
+        }
+        else {
+            result = new ArrayList();
+        }
+
+        if (query instanceof PrefetchSelectQuery) {
+            PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
+            ObjRelationship theRelationship =
+                prefetchQuery.getSingleStepToManyRelationship();
+            if (theRelationship != null) {
+                //The root query should have already executed, so we can get it's
+                // results
+                List rootQueryResults = this.getResults(prefetchQuery.getRootQuery());
+                if (rootQueryResults == null) {
+                    throw new CayenneRuntimeException(
+                        "Prefetch query for path "
+                            + prefetchQuery.getPrefetchPath()
+                            + " executed before it's root query "
+                            + prefetchQuery.getRootQuery());
+                }
+                SnapshotManager.getSharedInstance().mergePrefetchResultsRelationships(
+                    rootQueryResults,
+                    theRelationship,
+                    result);
+            }
+        }
+
+        super.nextDataRows(query, result);
+    }
 }
