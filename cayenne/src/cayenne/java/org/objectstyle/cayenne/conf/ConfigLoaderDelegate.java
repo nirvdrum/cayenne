@@ -66,10 +66,22 @@ import java.util.List;
  * @author Andrei Adamchik
  */
 public interface ConfigLoaderDelegate {
+    /**
+     * Callback methods invoked in the beginning of the configuration
+     * processing.
+     */
     public void startedLoading();
-    
-	public void finishedLoading();
-	
+
+    /**
+     * Callback methods invoked at the end of the configuration processing.
+     */
+    public void finishedLoading();
+
+    /**
+     * Callback method invoked when a domain is encountered in the configuration
+     * file.
+     * @param name domain name.
+     */
     public void shouldLoadDataDomain(String name);
 
     public void shouldLoadDataMap(
@@ -99,6 +111,9 @@ public interface ConfigLoaderDelegate {
      * decision.
      */
     public boolean loadError(Throwable th);
-    
+
+    /**
+     * @return status object indicating the state of the configuration loading.
+     */
     public ConfigStatus getStatus();
 }

@@ -97,30 +97,32 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
         this.logLevel = logLevel;
     }
 
-    protected DataDomain findDomain(String name) {
+    protected DataDomain findDomain(String name) throws FindException {
         DataDomain domain = (DataDomain) domains.get(name);
         if (domain == null) {
-            throw new ConfigException("Can't find DataDomain: " + name);
+            throw new FindException("Can't find DataDomain: " + name);
         }
 
         return domain;
     }
 
-    protected DataMap findMap(String domainName, String mapName) {
+    protected DataMap findMap(String domainName, String mapName)
+        throws FindException {
         DataDomain domain = findDomain(domainName);
         DataMap map = domain.getMap(mapName);
         if (map == null) {
-            throw new ConfigException("Can't find DataMap: " + mapName);
+            throw new FindException("Can't find DataMap: " + mapName);
         }
 
         return map;
     }
 
-    protected DataNode findNode(String domainName, String nodeName) {
+    protected DataNode findNode(String domainName, String nodeName)
+        throws FindException {
         DataDomain domain = findDomain(domainName);
         DataNode node = domain.getNode(nodeName);
         if (node == null) {
-            throw new ConfigException("Can't find DataNode: " + nodeName);
+            throw new FindException("Can't find DataNode: " + nodeName);
         }
 
         return node;
@@ -173,7 +175,15 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
                 logObj.log(
                     logLevel,
                     "info: linking map to dependent map: " + depMapName);
-                depMaps.add(findMap(domainName, depMapName));
+
+                try {
+                    depMaps.add(findMap(domainName, depMapName));
+                } catch (FindException ex) {
+                    logObj.log(
+                        logLevel,
+                        "error: unknown dependent map: " + depMapName);
+                    getStatus().getFailedMaps().put(mapName, location);
+                }
             }
         }
 
@@ -199,7 +209,14 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
 
             map.setName(mapName);
             map.setLocation(location);
-            findDomain(domainName).addMap(map);
+
+            try {
+                findDomain(domainName).addMap(map);
+            } catch (FindException ex) {
+                logObj.log(logLevel, "error: unknown domain: " + domainName);
+                getStatus().getFailedMaps().put(mapName, location);
+            }
+
         } catch (DataMapException dmex) {
             logObj.log(logLevel, "Warning: map loading failed.", dmex);
             getStatus().getFailedMaps().put(mapName, location);
@@ -288,7 +305,15 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
             getStatus().getFailedAdapters().put(nodeName, adapter);
         }
 
-        findDomain(domainName).addNode(node);
+        try {
+            findDomain(domainName).addNode(node);
+        } catch (FindException ex) {
+            logObj.log(
+                logLevel,
+                "error: can't load node, unknown domain: " + domainName);
+            getStatus().getFailedDataSources().put(nodeName, nodeName);
+        }
+
     }
 
     public void shouldLinkDataMap(
@@ -302,8 +327,24 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
         }
 
         logObj.log(logLevel, "loaded map-ref: " + mapName + ".");
-        DataMap map = findMap(domainName, mapName);
-        DataNode node = findNode(domainName, nodeName);
+        DataMap map = null;
+        DataNode node = null;
+
+        try {
+            map = findMap(domainName, mapName);
+        } catch (FindException ex) {
+            logObj.log(logLevel, "error: unknown map: " + mapName);
+            getStatus().getFailedMapRefs().add(mapName);
+            return;
+        }
+
+        try {
+            node = findNode(domainName, nodeName);
+        } catch (FindException ex) {
+            logObj.log(logLevel, "error: unknown node: " + nodeName);
+            getStatus().getFailedMapRefs().add(mapName);
+            return;
+        }
 
         node.addDataMap(map);
     }
@@ -389,5 +430,18 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
     public void startedLoading() {
         startTime = System.currentTimeMillis();
         logObj.log(logLevel, "Started configuration loading.");
+    }
+
+    /**
+     * Thrown when loaded data does not contain certain expected objects.
+     */
+    class FindException extends Exception {
+        /**
+         * Constructor for FindException.
+         * @param msg
+         */
+        public FindException(String msg) {
+            super(msg);
+        }
     }
 }
