@@ -22,7 +22,7 @@
 	<classpathentry exported="true" kind="lib" path="otherlib/junit-3.8.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="otherlib/tapestry-3.0-beta-3.jar"/>
-	<classpathentry kind="lib" path="otherlib/ognl-2.5.1.jar"/>
+	<classpathentry kind="lib" path="otherlib/ognl-2.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/scope-bin-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/servlet-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ejb-2.0.jar"/>
