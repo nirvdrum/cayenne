@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.unittest;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -68,6 +69,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Defines API and a common superclass for testing various datbase features.
@@ -133,7 +135,7 @@ public class DatabaseSetupDelegate {
     }
 
     protected void executeDDL(Connection con, String ddl) throws Exception {
-        logObj.info("DDL: " + ddl);
+        logObj.info(ddl);
 
         Statement st = con.createStatement();
 
@@ -142,5 +144,23 @@ public class DatabaseSetupDelegate {
         } finally {
             st.close();
         }
+    }
+
+    protected void executeDDL(Connection con, File sourceFile)
+        throws Exception {
+        String ddl = Util.stringFromFile(sourceFile);
+        executeDDL(con, ddl);
+    }
+
+    /**
+     * Returns a file under test resources DDL directory for the specified
+     * database.
+     */
+    protected File ddlFile(String database, String name) {
+        return new File(
+            new File(
+                new File(CayenneTestCase.getDefaultTestResourceDir(), "ddl"),
+                database),
+            name);
     }
 }

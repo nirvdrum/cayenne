@@ -79,7 +79,13 @@ public class CayenneTestCase extends TestCase {
         // init resources if needed
         CayenneTestResources.init();
     }
-    
+
+    public static File getDefaultTestResourceDir() {
+        return new File(
+            new File(new File(new File("build"), "tests"), "deps"),
+            "test-resources");
+    }
+
     /**
      * Constructor for CayenneTestCase.
      * @param arg0
@@ -97,9 +103,7 @@ public class CayenneTestCase extends TestCase {
     }
 
     public File getTestResourceDir() {
-        return new File(
-            new File(new File(new File("build"), "tests"), "deps"),
-            "test-resources");
+        return getDefaultTestResourceDir();
     }
 
     public Connection getConnection() {
@@ -125,8 +129,11 @@ public class CayenneTestCase extends TestCase {
     public CayenneTestDatabaseSetup getDatabaseSetup() {
         return CayenneTestResources.getResources().getSharedDatabaseSetup();
     }
-    
+
     public DatabaseSetupDelegate getDatabaseSetupDelegate() {
-        return CayenneTestResources.getResources().getSharedDatabaseSetup().getDelegate();
+        return CayenneTestResources
+            .getResources()
+            .getSharedDatabaseSetup()
+            .getDelegate();
     }
 }
