@@ -338,6 +338,6 @@ public class DbRelationship extends Relationship {
 
 	protected void firePropertyDidChange() {
 		RelationshipEvent event=new RelationshipEvent(this, this, this.getSourceEntity());
-		EventManager.getDefaultManager().postEvent(event, PROPERTY_DID_CHANGE);
+		EventManager.getDefaultManager().postEvent(event, PROPERTY_DID_CHANGE, true);
 	}
 }

@@ -303,7 +303,7 @@ public class QueryLogger {
             }
 
             // log preparation time only if it is something significant
-            if (time > 10) {
+            if (time > 5) {
                 buf.append(" - prepared in ").append(time).append(" ms.");
             }
 
