@@ -13,7 +13,8 @@ Changes:
 - Started removal of classes and methods deprecated in 1.1. This is still not complete.
 - Upgraded JDOM library to v. 1.0
 - Removed system CLASSPATH from Modeler startup scripts.
-
+- Made ClassLoader obtained from Configuration via static method to be settable by Thread.
+- Persistence by reachability (CAY-249, part 1)
 
 Bugs Fixed:
 

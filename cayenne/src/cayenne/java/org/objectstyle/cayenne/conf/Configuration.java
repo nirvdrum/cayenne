@@ -115,13 +115,14 @@ public abstract class Configuration {
      * to locate resources may need to be bootstrapped
      * explicitly.
      */
-	protected static ClassLoader resourceLoader = Configuration.class.getClassLoader();
+	protected static ClassLoader resourceLoader;
 
-	static {
-		if(Configuration.resourceLoader == null) {
-			Configuration.resourceLoader = ClassLoader.getSystemClassLoader();
-		}
-	}
+	/**
+	 * Stores ClassLoader set up for the current thread.
+	 * @since 1.2
+	 */
+	protected static ThreadLocal threadClassLoader = new ThreadLocal();
+	
 
     /** Lookup map that stores DataDomains with names as keys. */
 	protected CayenneMap dataDomains = new CayenneMap(this);
@@ -228,10 +229,27 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Returns the ClassLoader used to load resources.
+	 * Returns the ClassLoader used to load resources. Since Cayenne 1.2 this
+	 * method implements different logic for providing a class loader. First it 
+	 * checks whether a thread-local ClassLoader was provided via "setThreadClassLoader",
+	 * then it checked static resourceLoader, and finally it returns current thread 
+	 * context ClassLoader.
 	 */
     public static ClassLoader getResourceLoader() {
-        return Configuration.resourceLoader;
+        ClassLoader loader = (ClassLoader) threadClassLoader.get();
+        if(loader == null) {
+            loader = Configuration.resourceLoader;
+        }
+        
+        if(loader == null) {
+            loader = Thread.currentThread().getContextClassLoader();
+        }
+        
+        return loader;
+    }
+    
+    public static void setThreadClassLoader(ClassLoader classLoader) {
+        threadClassLoader.set(classLoader);
     }
 
     /**

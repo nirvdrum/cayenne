@@ -289,12 +289,8 @@ public class CayenneDataObject implements DataObject {
     }
 
     public void addToManyTarget(String relName, DataObject value, boolean setReverse) {
-        if ((value != null) && (dataContext != value.getDataContext())) {
-            throw new CayenneRuntimeException("Cannot add object to relationship "
-                    + relName
-                    + " because it is in a different DataContext");
-        }
-
+        willConnect(relName, value);
+        
         ObjRelationship relationship = this.getRelationshipNamed(relName);
         if (relationship == null) {
             throw new NullPointerException("Can't find relationship: " + relName);
@@ -327,34 +323,31 @@ public class CayenneDataObject implements DataObject {
             String relationshipName,
             DataObject value,
             boolean setReverse) {
-        if ((value != null) && (dataContext != value.getDataContext())) {
-            throw new CayenneRuntimeException(
-                    "Cannot set object as destination of relationship "
-                            + relationshipName
-                            + " because it is in a different DataContext");
-        }
+
+        willConnect(relationshipName, value);
 
         Object oldTarget = readProperty(relationshipName);
         if (oldTarget == value) {
             return;
         }
 
-        ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
+        ObjRelationship relationship = this
+                .getRelationshipNamed(relationshipName);
         if (relationship == null) {
-            throw new NullPointerException("Can't find relationship: " + relationshipName);
+            throw new NullPointerException("Can't find relationship: "
+                    + relationshipName);
         }
 
-        // if "setReverse" is false, avoid unneeded processing of flattened relationship
-        getDataContext().getObjectStore().objectRelationshipSet(
-                this,
-                value,
-                relationship,
-                setReverse);
+        // if "setReverse" is false, avoid unneeded processing of flattened
+        // relationship
+        getDataContext().getObjectStore().objectRelationshipSet(this, value,
+                relationship, setReverse);
 
         if (setReverse) {
             // unset old reverse relationship
             if (oldTarget instanceof DataObject) {
-                unsetReverseRelationship(relationshipName, (DataObject) oldTarget);
+                unsetReverseRelationship(relationshipName,
+                        (DataObject) oldTarget);
             }
 
             // set new reverse relationship
@@ -364,6 +357,35 @@ public class CayenneDataObject implements DataObject {
         }
 
         writeProperty(relationshipName, value);
+    }
+    
+    /**
+     * Called before establishing a relationship with another object. Applies
+     * "persistence by reachability" logic, pulling one of the two objects to a
+     * DataConext of another object in case one of the objects is transient. If
+     * both objects are persistent, and they don't have the same DataContext, 
+     * CayenneRuntimeException is thrown.
+     * 
+     * @since 1.2
+     */
+    protected void willConnect(String relationshipName, DataObject dataObject) {
+        // first handle most common case - both objects are in the same
+        // DataContext or target is null
+        if (dataObject == null
+                || this.getDataContext() == dataObject.getDataContext()) {
+            return;
+        } else if (this.getDataContext() == null
+                && dataObject.getDataContext() != null) {
+            dataObject.getDataContext().registerNewObject(this);
+        } else if (this.getDataContext() != null
+                && dataObject.getDataContext() == null) {
+            this.getDataContext().registerNewObject(dataObject);
+        } else {
+            throw new CayenneRuntimeException(
+                    "Cannot set object as destination of relationship "
+                            + relationshipName
+                            + " because it is in a different DataContext");
+        }
     }
 
     private ObjRelationship getRelationshipNamed(String relName) {
