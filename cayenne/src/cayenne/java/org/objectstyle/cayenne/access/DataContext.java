@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
-import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -651,17 +650,16 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        SelectQuery sel;
         List results;
         if (oid instanceof FlattenedObjectId) {
             FlattenedObjectId foid = (FlattenedObjectId) oid;
-            sel = QueryUtils.selectObjectForFlattenedObjectId(this, foid);
+			SelectQuery sel = QueryUtils.selectObjectForFlattenedObjectId(this, foid);
             FlattenedSelectObserver observer = new FlattenedSelectObserver(foid);
-            this.performQuery(sel, observer);
+            this.performQueries(Collections.singletonList(sel), observer);
             results = observer.getResults(sel);
         }
         else {
-            sel = QueryUtils.selectObjectForId(oid);
+			SelectQuery sel = QueryUtils.selectObjectForId(oid);
             results = this.performQuery(sel);
         }
 
@@ -782,14 +780,12 @@ public class DataContext implements QueryEngine, Serializable {
             return new IncrementalFaultList(this, query);
         }
 
-        // Fetch either DataObjects or data rows.
-        SelectObserver observer =
-            (query.isFetchingDataRows())
-                ? new SelectObserver(query.getLoggingLevel())
-                : new ContextSelectObserver(this, query.getLoggingLevel());
+        SelectObserver observer = new SelectObserver(query.getLoggingLevel());
+        performQueries(Collections.singletonList(query), observer);
 
-        performQuery(query, observer);
-        return observer.getResults(query);
+        return (query.isFetchingDataRows())
+            ? observer.getResults(query)
+            : observer.getResultsAsObjects(this, query);
     }
 
     /**
@@ -802,7 +798,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         IteratedSelectObserver observer = new IteratedSelectObserver();
         observer.setLoggingLevel(query.getLoggingLevel());
-        performQuery(query, observer);
+        performQueries(Collections.singletonList(query), observer);
         return observer.getResultIterator();
     }
 

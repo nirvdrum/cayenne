@@ -56,24 +56,34 @@
 
 package org.objectstyle.cayenne.access.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.SnapshotManager;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
  * OperationObserver that accumulates select query results provided 
  * by callback methods. Later the results can be retrieved
- * via different <code>getResults</code> methods. 
+ * via different <code>getResults</code> methods. Also supports instantiating
+ * DataObjects within a provided DataContext.
  * 
- * <p>This class can serve as a helper for classes that work with 
- * DataNode directly, bypassing DataContext. Also it is used by DataContext
- * to implement "data rows" functionality - retrieving data without 
- * instantiating and registering DataObjects.
+ * <p>Thsi class is used as a default OperationObserver by DataContext.
+ * Also it can serve as a helper for classes that work with 
+ * DataNode directly, bypassing DataContext.
  * </p>
  * 
  * <p>If exceptions happen during the execution, they are immediately rethrown.
@@ -85,74 +95,179 @@ import org.objectstyle.cayenne.util.Util;
  *  @author Andrei Adamchik
  */
 public class SelectObserver extends DefaultOperationObserver {
-	protected Map results = new HashMap();
-	protected int selectCount;
+    private static Logger logObj = Logger.getLogger(SelectObserver.class);
 
-	public SelectObserver() {}
-	
-	public SelectObserver(Level logLevel) {
-		super.setLoggingLevel(logLevel);
-	}
+    protected Map results = new HashMap();
+    protected int selectCount;
 
-	/** 
-	 * Returns a count of select queries that returned results
-	 * since the last time "clear" was called, or since this object
-	 * was created.
-	 */
-	public int getSelectCount() {
-		return selectCount;
-	}
+    public SelectObserver() {
+        this(QueryLogger.DEFAULT_LOG_LEVEL);
+    }
 
-	/** 
-	 * Returns a list of result snapshots for the specified query,
-	 * or null if this query has never produced any results.
-	 */
-	public List getResults(Query q) {
-		return (List) results.get(q);
-	}
+    public SelectObserver(Level logLevel) {
+        super.setLoggingLevel(logLevel);
+    }
 
-	/** 
-	 * Returns query results accumulated during query execution with this
-	 * object as an operation observer. 
-	 */
-	public Map getResults() {
-		return results;
-	}
+    /** 
+     * Returns a count of select queries that returned results
+     * since the last time "clear" was called, or since this object
+     * was created.
+     */
+    public int getSelectCount() {
+        return selectCount;
+    }
 
-	/** Clears fetched objects stored in an internal list. */
-	public void clear() {
-		selectCount = 0;
-		results.clear();
-	}
+    /** 
+     * Returns a list of result snapshots for the specified query,
+     * or null if this query has never produced any results.
+     */
+    public List getResults(Query q) {
+        return (List) results.get(q);
+    }
 
-	/** 
-	 * Stores all objects in <code>dataRows</code> in an internal
-	 * result list. 
-	 */
-	public void nextDataRows(Query query, List dataRows) {
-		super.nextDataRows(query, dataRows);
-		if (dataRows != null) {
-			results.put(query, dataRows);
-		}
+    /** 
+     * Returns query results accumulated during query execution with this
+     * object as an operation observer. 
+     */
+    public Map getResults() {
+        return results;
+    }
 
-		selectCount++;
-	}
+    /** Clears fetched objects stored in an internal list. */
+    public void clear() {
+        selectCount = 0;
+        results.clear();
+    }
 
-	/** 
-	 * Overrides superclass implementation to rethrow an exception
-	 *  immediately. 
-	 */
-	public void nextQueryException(Query query, Exception ex) {
-		super.nextQueryException(query, ex);
-		throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
-	}
+    /** 
+     * Stores all objects in <code>dataRows</code> in an internal
+     * result list. 
+     */
+    public void nextDataRows(Query query, List dataRows) {
 
-	/** 
-	 * Overrides superclass implementation to rethrow an exception
-	 * immediately. 
-	 */
-	public void nextGlobalException(Exception ex) {
-		super.nextGlobalException(ex);
-		throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
-	}
+        super.nextDataRows(query, dataRows);
+        if (dataRows != null) {
+            results.put(query, dataRows);
+        }
+
+        selectCount++;
+    }
+
+    /** 
+      * Returns results for a given query object as DataObjects. <code>rootQuery</code> argument
+      * is assumed to be the root query, and the rest are either independent queries or queries
+      * prefetching relationships for the root query. 
+      * 
+      * <p>Side effect of this method call is that all data rows currently stored in this
+      * SelectObserver are loaded as objects to a given DataContext (thus resolving
+      * prefetched to-one relationships). Any to-many relationships for the root query
+      * are resolved as well.</p>
+      */
+    public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
+        List dataRows = getResults(rootQuery);
+
+        if (dataRows == null) {
+            // Andrus: Maybe return null or an empty collection instead?
+            throw new IllegalArgumentException(
+                "Can't find results for query: " + rootQuery);
+        }
+
+        List objects = convertToObjects(dataContext, rootQuery, dataRows);
+
+        // handle prefetches for this query results
+        Iterator queries = results.keySet().iterator();
+        while (queries.hasNext()) {
+            Query nextQuery = (Query) queries.next();
+
+            List nextDataRows = getResults(nextQuery);
+            if (nextDataRows == null) {
+                throw new CayenneRuntimeException(
+                    "Can't find results for query: " + nextQuery);
+            }
+
+            List nextObjects = convertToObjects(dataContext, nextQuery, nextDataRows);
+
+            // now deal with to-many prefetching
+            if (!(nextQuery instanceof PrefetchSelectQuery)) {
+                continue;
+            }
+
+            PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) nextQuery;
+            if (prefetchQuery.getRootQuery() != rootQuery) {
+                continue;
+            }
+
+            ObjRelationship relationship =
+                prefetchQuery.getSingleStepToManyRelationship();
+
+            if (relationship == null) {
+                continue;
+            }
+
+            SnapshotManager.getSharedInstance().mergePrefetchResultsRelationships(
+                objects,
+                relationship,
+                nextObjects);
+        }
+
+        return objects;
+    }
+
+    /**
+     * Converts a list of data rows to a list of DataObjects. 
+     */
+    protected List convertToObjects(
+        DataContext dataContext,
+        Query query,
+        List dataRows) {
+
+        if (dataRows == null && dataRows.size() == 0) {
+            return new ArrayList(1);
+        }
+
+        ObjEntity ent = dataContext.getEntityResolver().lookupObjEntity(query);
+
+        // do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
+        // we can't build a valid ObjectId
+        DbEntity dbEntity = ent.getDbEntity();
+        if (dbEntity == null) {
+            throw new CayenneRuntimeException(
+                "ObjEntity '" + ent.getName() + "' has no DbEntity.");
+        }
+
+        if (dbEntity.getPrimaryKey().size() == 0) {
+            throw new CayenneRuntimeException(
+                "Can't create ObjectId for '"
+                    + ent.getName()
+                    + "'. Reason: DbEntity '"
+                    + dbEntity.getName()
+                    + "' has no Primary Key defined.");
+        }
+
+        List results = new ArrayList(dataRows.size());
+        Iterator it = dataRows.iterator();
+        while (it.hasNext()) {
+            results.add(dataContext.objectFromDataRow(ent, (Map) it.next(), true));
+        }
+
+        return results;
+    }
+
+    /** 
+     * Overrides superclass implementation to rethrow an exception
+     *  immediately. 
+     */
+    public void nextQueryException(Query query, Exception ex) {
+        super.nextQueryException(query, ex);
+        throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
+    }
+
+    /** 
+     * Overrides superclass implementation to rethrow an exception
+     * immediately. 
+     */
+    public void nextGlobalException(Exception ex) {
+        super.nextGlobalException(ex);
+        throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
+    }
 }

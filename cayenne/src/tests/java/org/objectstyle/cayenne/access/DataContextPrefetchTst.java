@@ -67,7 +67,6 @@ import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -320,7 +319,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.setQualifier(ExpressionFactory.matchExp("name", "child"));
         q.addPrefetch("toParentGroup");
 
-        ContextSelectObserver o = new ContextSelectObserver(context, Level.WARN);
+        SelectObserver o = new SelectObserver();
         try {
             context.performQueries(Collections.singletonList(q), o);
         }
@@ -331,7 +330,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         assertEquals(2, o.getSelectCount());
 
-        List results = o.getResults(q);
+        List results = o.getResultsAsObjects(context, q);
         assertEquals(1, results.size());
 
         ArtGroup fetchedChild = (ArtGroup) results.get(0);
@@ -353,7 +352,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery(Painting.class, exp);
 
         q.addPrefetch("toArtist");
-        ContextSelectObserver o = new ContextSelectObserver(context, Level.WARN);
+        SelectObserver o = new SelectObserver();
         try {
             context.performQueries(Collections.singletonList(q), o);
         }
@@ -363,7 +362,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         }
         assertEquals(2, o.getSelectCount());
 
-        List results = o.getResults(q);
+        List results = o.getResultsAsObjects(context, q);
         assertEquals(1, results.size());
 
         Painting painting = (Painting) results.get(0);

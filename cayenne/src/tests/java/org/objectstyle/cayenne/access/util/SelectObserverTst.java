@@ -55,39 +55,43 @@
  */
 package org.objectstyle.cayenne.access.util;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 
-/** 
- * ContextSelectObserver is a SelectObserver that would 
- * convert fetched data rows into objects of an associated 
- * DataContext.
- * 
- * @deprecated Since 1.1 Cayenne internally uses a superclass SelectObserver that
- * has all needed functionality to convert rows to objects.
+/**
+ * @author Andrei Adamchik
  */
-public class ContextSelectObserver extends SelectObserver {
-    protected DataContext context;
+public class SelectObserverTst extends DataContextTestBase {
 
-    /**
-     * Constructor for ContextSelectObserver.
-     * @param logLevel
-     */
-    public ContextSelectObserver(DataContext context, Level logLevel) {
-        super(logLevel);
-        this.context = context;
+    public void testResults() {
+        SelectObserver observer = new SelectObserver();
+        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
+        SelectQuery query = new SelectQuery(Artist.class, qualifier);
+        context.performQueries(Collections.singletonList(query), observer);
+
+        List results = observer.getResults(query);
+        assertNotNull(results);
+        assertEquals(1, results.size());
+
+        assertTrue(results.get(0) instanceof Map);
     }
 
-    /** 
-     * Overrides superclass behavior to convert each  data row to a real
-     * object. Registers objects with parent DataContext.
-     */
-    public void nextDataRows(Query query, List dataRows) {
-        super.nextDataRows(query, dataRows);
-        List result = super.getResultsAsObjects(context, query);
-        super.nextDataRows(query, result);
+    public void testResultsAsObjects() {
+        SelectObserver observer = new SelectObserver();
+        Expression qualifier = ExpressionFactory.matchExp("artistName", "artist2");
+        SelectQuery query = new SelectQuery(Artist.class, qualifier);
+        context.performQueries(Collections.singletonList(query), observer);
+
+        List results = observer.getResultsAsObjects(context, query);
+        assertNotNull(results);
+        assertEquals(1, results.size());
+		assertTrue(results.get(0) instanceof Artist);
     }
 }
