@@ -87,6 +87,11 @@ public interface ResultIterator {
 	 */
     public Map nextDataRow() throws CayenneException;
     
+    /** 
+	 * Returns a map of ObjectId values from the next result row.
+	 */
+    public Map nextObjectId() throws CayenneException;
+    
     /**
      * Skips current data row instead of reading it.
      */

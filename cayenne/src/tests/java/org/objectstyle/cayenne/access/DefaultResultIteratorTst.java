@@ -157,6 +157,25 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 			cleanup();
 		}
 	}
+	
+	public void testNextObjectId() throws java.lang.Exception {
+		try {
+			init();
+
+			// must be as many rows as we have artists
+			// inserted in the database
+			for (int i = 0; i < DataContextTst.artistCount; i++) {
+				assertTrue(it.hasNextRow());
+				it.nextObjectId();
+			}
+
+			// rows must end here
+			assertTrue(!it.hasNextRow());
+
+		} finally {
+			cleanup();
+		}
+	}
 
 	public void testIsClosingConnection() throws java.lang.Exception {
 		try {
