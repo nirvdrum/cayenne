@@ -164,22 +164,31 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         populatePaintings();
 
         Expression e = ExpressionFactory.matchExp("artistName", artistName(2));
-        
-        // TODO: Uncommenting this line will show that to-many prefetching works 
-        // purely by coincedence.
-     //   e = e.orExp(ExpressionFactory.matchExp("artistName", artistName(3)));
+        e = e.orExp(ExpressionFactory.matchExp("artistName", artistName(3)));
         SelectQuery q = new SelectQuery("Artist", e);
         q.setLoggingLevel(Level.WARN);
         q.addPrefetch("paintingArray");
-        
-        
+
         List artists = ctxt.performQuery(q);
-        assertEquals(1, artists.size());
+        assertEquals(2, artists.size());
+
         Artist a1 = (Artist) artists.get(0);
         ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
         assertNotNull(toMany);
         assertFalse(toMany.needsFetch());
         assertEquals(1, toMany.size());
+
+        Painting p1 = (Painting) toMany.get(0);
+        assertEquals("P_" + a1.getArtistName(), p1.getPaintingTitle());
+
+        Artist a2 = (Artist) artists.get(1);
+        ToManyList toMany2 = (ToManyList) a2.readPropertyDirectly("paintingArray");
+        assertNotNull(toMany2);
+        assertFalse(toMany2.needsFetch());
+        assertEquals(1, toMany2.size());
+
+        Painting p2 = (Painting) toMany2.get(0);
+        assertEquals("P_" + a2.getArtistName(), p2.getPaintingTitle());
     }
 
     /**
