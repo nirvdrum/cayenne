@@ -177,6 +177,10 @@ public class SelectObserver extends DefaultOperationObserver {
         Iterator queries = results.keySet().iterator();
         while (queries.hasNext()) {
             Query nextQuery = (Query) queries.next();
+            
+            if(rootQuery == nextQuery) {
+            	continue;
+            }
 
             List nextDataRows = getResults(nextQuery);
             if (nextDataRows == null) {
