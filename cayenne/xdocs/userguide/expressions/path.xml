@@ -1,0 +1,81 @@
+<document>
+<title>User Guide - Using Expressions</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/expressions/common.html</prev>
+	<next>/userguide/expressions/shortcut.html</next>
+</navigator>    
+<body>
+    <section name="9. Using Expressions">        
+		<subsection name="9.2 Path Expressions">
+		<p>There is an important group of expressions widely used in Cayenne: <i>path expressions</i>.
+        Path expressions have no direct analogue in SQL. Path expressions have a single operand 
+        that is a dot-separated string of path components. Meaning of path components depends 
+        on whether this is an OBJ_PATH or a DB_PATH expression.</p>
+             	
+             <p><b>Object path expressions (OBJ_PATH)</b> match an "object path"
+             - a sequence of object property names (mapped attributes and relationships)
+             that allow to traverse a graph of related objects, 
+             starting from a specific class. Here is a few examples starting from a Painting class:</p>
+             <ul>
+             		<li><code>"paintingTitle"</code><br/> 
+             		Can be used to match the value of "paintingTitle" property.
+             		<p></p>
+             		</li> 
+             		
+             		<li><code>"toArtist"</code><br/>
+             		Can be used to match the value of "toArtist" property, that is a
+             		related Artist object.
+             		<p></p>
+             		</li>
+             		
+             		<li><code>"toArtist.artistName"</code><br/>
+             		Can be used to match the value of artist name of a related artist object.
+             		<p></p>
+             		</li>
+             		
+             		<li><code>"toArtist.exhibitArray.closingDate"</code><br/>
+             		Can be used to match a closing date of any of the exhibits of a related 
+             		artist object.
+             		<p></p>
+             		</li>
+             	</ul>
+             	
+             	<p><b>Database path expressions (DB_PATH)</b> loosely correspond to the joins concept
+             	in the database design. But instead of complex join semantics such expressions utilize the
+             	names of DbRelationships defined in Cayenne DataMap. Translating the above OBJ_PATH examples,
+             	DB_PATH expressions might look like this:        	
+             	</p>
+             	
+             	<ul>
+             		<li><code>"PAINTING_TITLE"</code><br/> 
+             		Can be used to match the value of "PAINTING_TITLE" column.
+             		<p></p>
+             		</li> 
+             		
+             		<li><code>"toArtist"</code><br/>
+             		Can be used to match the value of "ARTIST_ID" column, that is a
+             		foreign key to ARTIST table.
+             		<p></p>
+             		</li>
+             		
+             		<li><code>"toArtist.ARTIST_NAME"</code><br/>
+             		Can be used to match the value of ARTIST_NAME column of a 
+             		record in the ARTIST table joined via PK/FK relationship.
+             		<p></p>
+             		</li>
+             		
+             		<li><code>"toArtist.artistExhibitArray.toExhibit.CLOSING_DATE"</code><br/>
+             		Can be used to match a closing date of any of the exhibits of a related 
+             		artist record.
+             		<p></p>
+             		</li>
+             	</ul>
+             	
+             	<p>Though DB_PATH expressions are widely used by Cayenne framework 
+             	internally, they have only a limited use in applications.             	
+             	</p>
+		</subsection>
+    </section>
+</body>
+</document>

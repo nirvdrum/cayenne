@@ -1,0 +1,67 @@
+<document>
+<title>User Guide - Using Expressions</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/modify/data-context.html</prev>
+	<next>/userguide/expressions/common.html</next>
+</navigator>    
+<body>
+    <section name="9. Using Expressions">
+    	<p>Expressions in Cayenne are used to build query qualifiers and to perform
+    	in-memory sorting of objects.</p>
+    	   
+      	<p>Each expression consists of type and a set of operands. 
+        Expressions are organized by the number of operands as Unary, Binary and Ternary.
+             	Possible expression types are defined as static final int variables in Expression class.
+             	Some of the expressions have corresponding SQL analogues, some are specific to the Object/Relational
+             	domain. Most widely used expression types are:
+             	</p>
+             	
+             	<ul>
+             		<li>Conditions: 
+             		<ul>
+             			<li>LESS_THAN</li>
+             			<li>GREATER_THAN</li>
+             			<li>LESS_THAN_EQUAL_TO</li> 
+             			<li>GREATER_THAN_EQUAL_TO</li>
+             			<li>BETWEEN</li>
+             			<li>IN</li> 
+             			<li>LIKE</li>
+             			<li>LIKE_IGNORE_CASE</li> 
+             			<li>EQUAL_TO</li>
+             			<li>NOT_EQUAL_TO</li>
+             		</ul>
+             		</li>
+             		
+             		<li>Logical Conditions: 
+             		<ul>
+             			<li>AND</li>
+             			<li>OR</li>
+             		</ul>
+             		</li>
+             		
+             		<li>Path Expressions:
+             		<ul>
+             			<li>DB_PATH</li>
+             			<li>OBJ_PATH</li>
+             		</ul>
+             		</li>
+             	</ul>
+             	
+             	<p>Notes:</p>
+             	<ul>
+             		<li><b>Case insensitive comparison.</b> There is no LIKE_IGNORE_CASE in SQL. 
+             		This is a convenience expression that Cayenne provides.
+             		<p></p>
+             		</li>
+             		
+             		<li><b>NULL handling.</b> Null handling is done differently from SQL. Instead 
+             		of using special conditional operator, in Cayenne normal EQUAL_TO, NOT_EQUAL_TO 
+             		expressions are used to check if a value is null or not. It is up to Cayenne to 
+             		translate expressions with nulls to the valid SQL.
+             		<p></p>
+             		</li>
+             	</ul>
+    </section>
+</body>
+</document>

@@ -10,13 +10,13 @@
 	<next>/userguide/deploy/cdeploy.html</next>
 </navigator>    
 <body>
-     <section name="10. Deployment">        
+     <section name="11. Deployment">        
            <p>Cayenne application deployment is about configuring the application 
            so that in runtime it could find a main project file (cayenne.xml) and 
            associated resources, such as DataMaps and DataNode XML files.
            </p>
            
-           <subsection name="10.1 Configuration" anchor="config">
+           <subsection name="11.1 Configuration" anchor="config">
            <p>Central piece in Cayenne deployment is <a href=
            "../../api/cayenne/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
             class. It locates and loads all the mapping and configuration information required 
@@ -33,7 +33,7 @@ DataDomain domain = conf.getDomain();
 </source>
         	</subsection>
         
-           <subsection name="10.2 Standalone Applications" anchor="standalone">
+           <subsection name="11.2 Standalone Applications" anchor="standalone">
                <p>In a standalone Java application, normally a <a href=
                "../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>
                 will be used to locate and load configuration files. This approach
@@ -86,7 +86,7 @@ Configuration conf = Configuration.getSharedConfig();
 
            </subsection>
            
-           <subsection name="10.3 Web Applications" anchor="web">
+           <subsection name="11.3 Web Applications" anchor="web">
                <p>When deploying an application in a web container, it is still possible 
                to use the procedure described for the standalone applications above.
                But Cayenne provides a better way to do that. Suggested way is to use <a href=
@@ -180,7 +180,7 @@ DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
 </source>
                </subsection>
                
-			<subsection name="10.4 Customizing Configuration" anchor="custom">
+			<subsection name="11.4 Customizing Configuration" anchor="custom">
 				<p>A user can create her own subclass of Configuration and use it instead. 
 				Custom subclasses are usually created to load configuration files from 
 				non-standard locations, to automatically configure Cayenne during 
@@ -205,7 +205,7 @@ Configuration.initSharedConfig(myConfigSubclass);
 			</subsection>
                
                
-               <subsection name="10.5 Using JNDI" anchor="jndi">
+               <subsection name="11.5 Using JNDI" anchor="jndi">
                
                 <p>In many cases it is desirable to connect to the database
                 using a preconfigured DataSource accessible via JNDI. In this case,

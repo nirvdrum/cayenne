@@ -7,255 +7,43 @@
 </navigator>    
 <body>
     <section name="7. Using SelectQueries">        
-        <subsection name="7.2 Using Qualifier Expressions">
+        <subsection name="7.2 Qualifier Expressions">
+               
+        <panel name="Note:">This chapter is dedicated to the use of expressions as qualifiers. 
+        A detailed discussion on expressions in general is provided in Chapter 9.
+        </panel>
+        
+        
  		<p>The previous chapter showed how to build a query to fetch all data from
- 		a single table. In most situations though only a subset of data is needed
- 		filtered using a certain criteria. Cayenne provides an <a href=
-            	"../../api/cayenne/org/objectstyle/cayenne/exp/package-summary.html">expressions package</a>
-             	to control the filtering behavior of the queries. 
-             	SelectQuery filtering behavior is controlled by a "qualifier". Qualifier is an 
-             	instance of <a href=
-            	"../../api/cayenne/org/objectstyle/cayenne/exp/Expression.html">Expression</a>.</p>
+ 		a single table. In most situations though only a subset of data matching a 
+ 		certain criteria is needed. Cayenne provides an <a href=
+        "../../api/cayenne/org/objectstyle/cayenne/exp/package-summary.html">expressions package</a>
+        to control the filtering behavior of the queries. <a href=
+        "../../api/cayenne/org/objectstyle/cayenne/exp/Expression.html">Expressions</a>
+        applied to queries are called "qualifiers".</p>
              	
-             	<subsection name="7.2.1 Expression Types">          
-             	<p>Each expression consists of type and a set of operands. 
-             	Expressions are organized by the number of operands as Unary, Binary and Ternary.
-             	Possible expression types are defined as static final int variables in Expression class.
-             	Some of the expressions have corresponding SQL analogues, some are specific to the Object/Relational
-             	domain. Most widely used expression types are:
-             	</p>
-             	
-             	<ul>
-             		<li>Conditions: 
-             		<ul>
-             			<li>LESS_THAN</li>
-             			<li>GREATER_THAN</li>
-             			<li>LESS_THAN_EQUAL_TO</li> 
-             			<li>GREATER_THAN_EQUAL_TO</li>
-             			<li>BETWEEN</li>
-             			<li>IN</li> 
-             			<li>LIKE</li>
-             			<li>LIKE_IGNORE_CASE</li> 
-             			<li>EQUAL_TO</li>
-             			<li>NOT_EQUAL_TO</li>
-             		</ul>
-             		</li>
-             		
-             		<li>Logical Conditions: 
-             		<ul>
-             			<li>AND</li>
-             			<li>OR</li>
-             		</ul>
-             		</li>
-             		
-             		<li>Path Expressions:
-             		<ul>
-             			<li>DB_PATH</li>
-             			<li>OBJ_PATH</li>
-             		</ul>
-             		</li>
-             	</ul>
-             	
-             	<p>Notes:</p>
-             	<ul>
-             		<li><b>Case insensitive comparison.</b> There is no LIKE_IGNORE_CASE in SQL. 
-             		This is a convenience expression that Cayenne provides.
-             		<p></p>
-             		</li>
-             		
-             		<li><b>NULL handling.</b> Null handling is done differently from SQL. Instead 
-             		of using special conditional operator, in Cayenne normal EQUAL_TO, NOT_EQUAL_TO 
-             		expressions are used to check if a value is null or not.
-             		<p></p>
-             		</li>
-             	</ul>
-             	</subsection>
-             	
-             	<subsection name="7.2.2 Path Expressions">   
-             	<p>Path expressions are a special type of Cayenne expressions that has no direct SQL 
-             	correspondence. Path expressions have a single operand that is a dot-separated string 
-             	of path components. Meaning of path components depends on whether this is an OBJ_PATH 
-             	or a DB_PATH expression.</p>
-             	
-             	<p><b>Object path expressions (OBJ_PATH)</b> match an "object path"
-             	- a sequence of object property names (mapped attributes and relationships)
-             	that allow to traverse a graph of related objects, 
-             	starting from a specific class. Here is a few examples starting from a Painting class:</p>
-             	<ul>
-             		<li><code>"paintingTitle"</code><br/> 
-             		Can be used to match the value of "paintingTitle" property.
-             		<p></p>
-             		</li> 
-             		
-             		<li><code>"toArtist"</code><br/>
-             		Can be used to match the value of "toArtist" property, that is a
-             		related Artist object.
-             		<p></p>
-             		</li>
-             		
-             		<li><code>"toArtist.artistName"</code><br/>
-             		Can be used to match the value of artist name of a related artist object.
-             		<p></p>
-             		</li>
-             		
-             		<li><code>"toArtist.exhibitArray.closingDate"</code><br/>
-             		Can be used to match a closing date of any of the exhibits of a related 
-             		artist object.
-             		<p></p>
-             		</li>
-             	</ul>
-             	
-             	<p><b>Database path expressions (DB_PATH)</b> loosely correspond to the joins concept
-             	in the database design. But instead of complex join semantics such expressions utilize the
-             	names of DbRelationships defined in Cayenne DataMap. Translating the above OBJ_PATH examples,
-             	DB_PATH expressions might look like this:        	
-             	</p>
-             	
-             	<ul>
-             		<li><code>"PAINTING_TITLE"</code><br/> 
-             		Can be used to match the value of "PAINTING_TITLE" column.
-             		<p></p>
-             		</li> 
-             		
-             		<li><code>"toArtist"</code><br/>
-             		Can be used to match the value of "ARTIST_ID" column, that is a
-             		foreign key to ARTIST table.
-             		<p></p>
-             		</li>
-             		
-             		<li><code>"toArtist.ARTIST_NAME"</code><br/>
-             		Can be used to match the value of ARTIST_NAME column of a 
-             		record in the ARTIST table joined via PK/FK relationship.
-             		<p></p>
-             		</li>
-             		
-             		<li><code>"toArtist.artistExhibitArray.toExhibit.CLOSING_DATE"</code><br/>
-             		Can be used to match a closing date of any of the exhibits of a related 
-             		artist record.
-             		<p></p>
-             		</li>
-             	</ul>
-             	
-             	<p>Though DB_PATH expressions are widely used by Cayenne framework internally, there is 
-             	rarely a need to use them directly in the application code.             	
-             	</p>
-             		
-             	</subsection>
-             	
-             	
-             	<subsection name="7.2.3 Building Expressions">            	
-             	<p>The easiest way to build expressions is to use <a href=
-            	"../../api/cayenne/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory
-            	class</a>. The following code builds an expression filtering artists that have a 
-            	name that starts with "A" ignoring case sensitivity:
-			</p>
-			
-<source>import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-...
-Expression qualifier 
-   = ExpressionFactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "a%");
-</source>
-
-		<p>Note that we are using a method "binaryPathExp" to create an expresion.
-		"Binary" indicates the fact that the target expression has two operands.
-		"Path" indicates that second argument, the left hand operand of a binary expression ("artistName"),
-		will be converted to an "object path expression" described above.</p>
-            
-		<p>3rd argument to binaryPathExp (right hand operand) does not have to be a String.
-		It can be any object that has the same type as the destination of the object path.
-		It can be a number, a date, or even another DataObject. The last case is demonstrated
-		in the example below:
-            	</p>
-            
-<source>import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-...
-
-// assume this exists
-Gallery metroGallery;
-
-// Will match all artists that have at least one of their paintings displayed 
-// in a Metropolitan Museum.
-// Note that the last component of the object path expression
-// is a relationship name, not an attribute like in previous examples:
-Expression qualifier 
-   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
-                                     "paintingArray.toGallery", 
-                                     metroGallery);
-</source>                  
-
-		<p>Expression class itself provides a set of convenience methods to chain expressions
-		as they are built from smaller parts:</p>
-		
-		<ul>
-            		<li>public Expression <b>joinExp</b>(int type, Expression exp)<br/>
-            		Creates and returns a new expression that joins this object with another 
-            		expression, using specified join type. This is a shorter equivalent of
-            		<code>ExpressionFactory.binaryExpression(type, this, exp)</code>.
+        <p>SelectQuery provides a few ways to initialize and modify the qualifier:</p>
+        <ul>
+			<li><code>public <b>SelectQuery</b>(Class objectClass, Expression e)</code><br/>
+			Passing expression as a second argument in constructor.
+			<p></p>
+			</li>
+         
+            <li><code>public void <b>setQualifier</b>(Expression qualifier)</code><br/>
+            Explicitly setting the qualifier expression.
             		<p></p>
             		</li>
             		
-            		<li>public Expression <b>andExp</b>(Expression exp)<br/>
-            		A shorter equivalent for <code>joinExp(Expression.AND, exp)</code>.
-            		<p></p>
-            		</li>
-            		
-            		<li>public Expression <b>orExp</b>(Expression exp)<br/>
-            		A shorter equivalent for <code>joinExp(Expression.OR, exp)</code>.
-            		<p></p>
-            		</li>
-            	</ul>
-            	
-            	<p>Example of using chaining:</p>
-<source>import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
-...
-
-// find artists whose name starts with "D"
-// with invalid or null date of birth
-
-Expression qual = 
-   ExpressionFactory.binaryPathExp(Expression.GREATER_THAN_EQUAL_TO, "dateOfBirth", new Date());
-// chain expressions
-qual = qual.orExp(Expression.EQUAL_TO, "dateOfBirth", null);
-
-// "AND" applies to a combined earlier criteria
-qual = 
-   qual.andExp(ExpressionFactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "D%")); 
-
-SelectQuery select = new SelectQuery(Artist.class, qual);
-</source>
-		
-            	</subsection>
-                         	
-                         	
-             	<subsection name="7.2.4 Setting Query Qualifier">
-             	<p>SelectQuery provides a few ways to initialize and modify the qualifier:</p>
-            	
-            	<ul>
-            		<li>Passing expression as a second argument in constructor.
-            		<p></p>
-            		</li>
-            		
-            		<li><code>public void <b>setQualifier</b>(Expression qualifier)</code><br/>
-            		Explicitly setting the qualifier expression.
-            		<p></p>
-            		</li>
-            		
-            		<li><code>public void <b>andQualifier</b>(Expression e)</code><br/>
+            <li><code>public void <b>andQualifier</b>(Expression e)</code><br/>
             		Adding an expression to an already existing qualifier using logical AND.
             		<p></p>
             		</li>
             		
-            		<li><code>public void <b>orQualifier</b>(Expression e)</code><br/>
+            <li><code>public void <b>orQualifier</b>(Expression e)</code><br/>
             		Adding an expression to an already existing qualifier using logical OR.
             		<p></p>
-            		</li>
-            	</ul>
-             	</subsection>
-             	
+			</li>
+        </ul>
         </subsection>
     </section>
 </body>

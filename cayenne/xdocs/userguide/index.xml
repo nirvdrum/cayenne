@@ -56,7 +56,7 @@
             <li><a href="fetch/index.html">7. Using SelectQueries</a>
             <ul>
                 <li><a href="fetch/selectQuery.html">7.1 SelectQuery</a></li>
-                <li><a href="fetch/exp.html">7.2 Using Qualifier Expressions</a></li>
+                <li><a href="fetch/exp.html">7.2 Qualifier Expressions</a></li>
                 <li><a href="fetch/orderings.html">7.3 Using Orderings</a></li>
                 <li><a href="fetch/other.html">7.4 Controlling SelectQuery Behavior</a></li>
                 <li><a href="fetch/params.html">7.5 Reusing SelectQueries: Parameterized Queries</a></li>
@@ -68,21 +68,29 @@
             	<li><a href="modify/data-context.html">8.1 Using DataContext</a></li>
             </ul><br/></li>
             
-            <li><a href="perform/index.html">9. Performance Tuning</a>
+            <li><a href="expressions/index.html">9. Using Expressions</a>
             <ul>
-                <li><a href="perform/index.html#data_rows">9.1 Data Rows</a></li>
-                <li><a href="perform/index.html#iterator">9.2 ResultIterator: Incremental Data Processing</a></li>
-                <li><a href="perform/index.html#paged">9.3 Paged Queries</a></li>
+            	<li><a href="expressions/common.html">9.1 General Approach to Building Expressions</a></li>
+            	<li><a href="expressions/path.html">9.2 Path Expressions</a></li>
+            	<li><a href="expressions/shortcut.html">9.3 Shortcuts</a></li>
+            	<li><a href="expressions/nulls.html">9.4 NULL handling, etc.</a></li>
             </ul><br/></li>
             
-            <li><a href="deploy/index.html">10. Deployment</a>
+            <li><a href="perform/index.html">10. Performance Tuning</a>
             <ul>
-                <li><a href="deploy/index.html#config">10.1 Configuration</a></li>
-                <li><a href="deploy/index.html#standalone">10.2 Standalone Applications</a></li>
-                <li><a href="deploy/index.html#web">10.3 Web Applications</a></li>
-                <li><a href="deploy/index.html#custom">10.4 Customizing Configuration</a></li>
-                <li><a href="deploy/index.html#jndi">10.5 Using JNDI</a></li>
-                <li><a href="deploy/cdeploy.html">10.6 Deployment Configuration With Ant</a></li>
+                <li><a href="perform/index.html#data_rows">10.1 Data Rows</a></li>
+                <li><a href="perform/index.html#iterator">10.2 ResultIterator: Incremental Data Processing</a></li>
+                <li><a href="perform/index.html#paged">10.3 Paged Queries</a></li>
+            </ul><br/></li>
+            
+            <li><a href="deploy/index.html">11. Deployment</a>
+            <ul>
+                <li><a href="deploy/index.html#config">11.1 Configuration</a></li>
+                <li><a href="deploy/index.html#standalone">11.2 Standalone Applications</a></li>
+                <li><a href="deploy/index.html#web">11.3 Web Applications</a></li>
+                <li><a href="deploy/index.html#custom">11.4 Customizing Configuration</a></li>
+                <li><a href="deploy/index.html#jndi">11.5 Using JNDI</a></li>
+                <li><a href="deploy/cdeploy.html">11.6 Deployment Configuration With Ant</a></li>
             </ul><br/></li>
             
             <li><a href="misc.html">11. Miscellaneous Information</a>

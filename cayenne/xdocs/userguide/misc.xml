@@ -6,15 +6,15 @@
     </properties>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/deploy/index.html</prev>
+	<prev>/userguide/deploy/cdeploy.html</prev>
 </navigator>        
 <body>
-    <section name="11. Miscellaneous Information">
+    <section name="12. Miscellaneous Information">
     	<p>This section contains information not directly related to 
     	Cayenne development, but still important in the context of this 
     	User Guide.</p>
     	
-        <subsection name="11.1 Cayenne and WebObjects" anchor="webobjects">
+        <subsection name="12.1 Cayenne and WebObjects" anchor="webobjects">
             <p>For those who have never heard what WebObjects is, here is a little
             introduction. WebObjects is one of the first and one of the best
             web application development frameworks. It was created by NeXT (now
@@ -40,7 +40,7 @@
             the latest Java technologies to create an opensource database solution
             for any kind of Java applications.</p>
             
-            <subsection name="11.1.1 Terms Translation" anchor="terms">
+            <subsection name="12.1.1 Terms Translation" anchor="terms">
             <p>Some design patterns used in Cayenne may be familiar to the EOF folk. 
             This section is intended to make Cayenne understanding 
             easier if you have WebObjects/EOF background. Below Cayenne 
