@@ -104,9 +104,7 @@ public class SQLTemplateProcessorSelectTst extends BasicTestCase {
 
         assertEquals(1, compiled.getResultColumns().length);
         assertEquals("A", compiled.getResultColumns()[0].getName());
-        assertEquals(
-            "java.lang.String",
-            compiled.getResultColumns()[0].getJavaClass());
+        assertEquals("java.lang.String", compiled.getResultColumns()[0].getJavaClass());
     }
 
     public void testProcessSelectTemplate3() throws Exception {
