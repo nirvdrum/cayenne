@@ -16,7 +16,6 @@
     <classpathentry exported="true" kind="lib" path="otherlib/commons-collections-2.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-lang-1.0.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-logging-1.0.3.jar"/>
-    <classpathentry exported="true" kind="lib" path="otherlib/JavaCC.zip"/>
     <classpathentry exported="true" kind="lib" path="otherlib/junit-3.8.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/log4j-1.2.8.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/net.sf.tapestry-2.2.jar"/>

@@ -10,7 +10,6 @@
     <path>[otherlib/commons-collections-2.1.jar]</path>
     <path>[otherlib/commons-lang-1.0.1.jar]</path>
     <path>[otherlib/commons-logging-1.0.3.jar]</path>
-    <path>[otherlib/JavaCC.zip]</path>
     <path>[otherlib/junit-3.8.1.jar]</path>
     <path>[otherlib/log4j-1.2.8.jar]</path>
     <path>[otherlib/net.sf.tapestry-2.2.jar]</path>
