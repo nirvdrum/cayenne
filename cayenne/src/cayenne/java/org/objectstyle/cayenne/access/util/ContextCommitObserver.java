@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.access.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +73,10 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.event.DataContextEvent;
+import org.objectstyle.cayenne.access.event.DataContextEventListener;
+import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
+import org.objectstyle.cayenne.event.ObserverManager;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -78,12 +85,16 @@ import org.objectstyle.cayenne.query.Query;
  * 
  * @author Andrei Adamchik
  */
-public class ContextCommitObserver extends DefaultOperationObserver {
+public class ContextCommitObserver
+	extends DefaultOperationObserver
+	implements DataContextEventListener
+{
 
     protected List updObjects;
     protected List delObjects;
     protected List insObjects;
-    
+    protected List objectsToNotify;
+
     protected DataContext context;
 
     public ContextCommitObserver(
@@ -97,6 +108,25 @@ public class ContextCommitObserver extends DefaultOperationObserver {
         this.insObjects = insObjects;
         this.updObjects = updObjects;
         this.delObjects = delObjects;
+		this.objectsToNotify = new ArrayList();
+
+		// Build a list of objects that need to be notified about posted
+		// DataContext events. When notifying about a successful completion
+		// of a transaction we cannot build this list anymore, since all
+		// the work will be done by then.
+		Iterator collIter = (Arrays.asList(new List[]{delObjects, updObjects, insObjects})).iterator();
+		while (collIter.hasNext()) {
+			Iterator objIter = ((Collection)collIter.next()).iterator();
+			while (objIter.hasNext()) {
+				Object element = objIter.next();
+				if (element instanceof DataObjectTransactionEventListener) {
+					this.objectsToNotify.add(element);
+				}
+			}
+        }
+
+        // register myself for events sent by DataContext
+        this.registerForDataContextEvents();
     }
 
     public boolean useAutoCommit() {
@@ -169,4 +199,46 @@ public class ContextCommitObserver extends DefaultOperationObserver {
         OperationSorter sorter = aNode.getAdapter().getOpSorter(aNode);
         return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
     }
+
+	protected void registerForDataContextEvents() {
+		try {
+			ObserverManager mgr = ObserverManager.getDefaultManager();
+			mgr.addObserver(this, DataContextEvent.class, "dataContextWillCommit", DataContext.WILL_COMMIT); 
+			mgr.addObserver(this, DataContextEvent.class, "dataContextDidCommit", DataContext.DID_COMMIT); 
+			mgr.addObserver(this, DataContextEvent.class, "dataContextDidRollback", DataContext.DID_ROLLBACK); 
+		}
+
+		catch (NoSuchMethodException nsm) {
+			// this really should not happen since we implement all required methods
+			throw new CayenneRuntimeException(nsm);
+		}
+	}
+
+	protected void unregisterFromDataContextEvents() {
+		ObserverManager mgr = ObserverManager.getDefaultManager();
+		mgr.removeObserver(this, DataContext.WILL_COMMIT); 
+		mgr.removeObserver(this, DataContext.DID_COMMIT);
+		mgr.removeObserver(this, DataContext.DID_ROLLBACK);
+	}
+
+	public void dataContextWillCommit(DataContextEvent event) {
+		Iterator iter = objectsToNotify.iterator();
+		while (iter.hasNext()) {
+			((DataObjectTransactionEventListener)iter.next()).willCommit();
+		}
+	}
+
+	public void dataContextDidCommit(DataContextEvent event) {
+		Iterator iter = objectsToNotify.iterator();
+		while (iter.hasNext()) {
+			((DataObjectTransactionEventListener)iter.next()).didCommit();
+		}
+
+		this.unregisterFromDataContextEvents();
+	}
+
+	public void dataContextDidRollback(DataContextEvent event) {
+		this.unregisterFromDataContextEvents();		
+	}
+
 }
