@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -96,7 +97,8 @@ public class ObjEntity extends Entity {
     public Class getJavaClass() {
         try {
             return Class.forName(this.getClassName());
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             throw new CayenneRuntimeException(
                 "Failed to load class for name '"
                     + this.getClassName()
@@ -184,8 +186,18 @@ public class ObjEntity extends Entity {
      * CayenneRuntimeException is thrown.
      */
     public Map idSnapshotMapFromSnapshot(Map objectSnapshot) {
-        Map idMap = new HashMap();
-        Iterator it = getDbEntity().getPrimaryKey().iterator();
+    	// create a cheaper map for the mosty common case - 
+    	// single attribute id.
+        List pk = getDbEntity().getPrimaryKey();
+        if (pk.size() == 1) {
+            DbAttribute attr = (DbAttribute) pk.get(0);
+            Object val = objectSnapshot.get(attr.getName());
+            return Collections.singletonMap(attr.getName(), val);
+        }
+
+        // multiple attributes in id...
+        Map idMap = new HashMap(pk.size() * 2);
+        Iterator it = pk.iterator();
         while (it.hasNext()) {
             DbAttribute attr = (DbAttribute) it.next();
             Object val = objectSnapshot.get(attr.getName());
@@ -208,17 +220,19 @@ public class ObjEntity extends Entity {
      * CayenneRuntimeException is thrown.
      */
     public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-        Map idMap = this.idSnapshotMapFromSnapshot(objectSnapshot);
         Class objClass;
         try {
             objClass = Class.forName(this.getClassName());
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             throw new CayenneRuntimeException(
                 "Failed to load class for name "
                     + this.getClassName()
                     + " because "
                     + e.getMessage());
         }
+
+        Map idMap = this.idSnapshotMapFromSnapshot(objectSnapshot);
         ObjectId id = new ObjectId(objClass, idMap);
         return id;
     }
@@ -260,8 +274,7 @@ public class ObjEntity extends Entity {
         this.readOnly = readOnly;
     }
 
-    protected void validateQueryRoot(Query query)
-        throws IllegalArgumentException {
+    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
 
         if ((query.getRoot() instanceof Class)
             && ((Class) query.getRoot()).getName().equals(getClassName())) {

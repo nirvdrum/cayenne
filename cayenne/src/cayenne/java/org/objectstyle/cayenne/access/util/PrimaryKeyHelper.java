@@ -145,7 +145,7 @@ public class PrimaryKeyHelper {
 		HashMap idMap = null;
 		boolean pkFromMaster = true;
 		for (Iterator i = dataObjects.iterator(); i.hasNext();) {
-			idMap = new HashMap(idMap != null ? idMap.size() : 1);
+
 			DataObject object = (DataObject) i.next();
 			ObjectId id = object.getObjectId();
 			if (!(id instanceof TempObjectId)) {
@@ -158,6 +158,8 @@ public class PrimaryKeyHelper {
 				continue;
 				//An id already exists... nothing further required (definitely do not create another)
 			}
+			
+			idMap = new HashMap(idMap != null ? idMap.size() : 1);
 			
 			// first get values delivered via relationships
 			if (pkFromMaster)
