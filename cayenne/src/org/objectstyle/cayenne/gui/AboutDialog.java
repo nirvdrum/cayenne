@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
- 
+
 package org.objectstyle.cayenne.gui;
 
 import java.awt.*;
@@ -79,13 +79,14 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 	private static final int HEIGHT = 450;
 	private static String licenseString;
 	private static final String infoString =
-		"Copyright (c) 2002 The ObjectStyle Group"
-			+ " (http://www.objectstyle.org)\n"
-			+ "and individual authors of the software."
-			+ " All rights reserved.\n\n"
-			+ "This software is distributed free of charge under the terms\n"
-			+ "of The ObjectStyle Group license.\n"
-			+ "Click \"View License\" for more details.\n\n";
+		"<font size='-1' face='Arial,Helvetica'><b>CayenneModeler</b><br>"
+			+ "(c) 2002 The ObjectStyle Group"
+			+ " (<a href='http://objectstyle.org'>http://objectstyle.org</a>)<br>"
+			+ "and individual authors of the software. "
+			+ "All rights reserved.<br><br>"
+			+ "This software is distributed free of charge under the terms "
+			+ "of The ObjectStyle Group license.<br>"
+			+ "Click \"View License\" for more details.</font><br><br>";
 
 	private boolean view_info = true;
 
@@ -106,6 +107,7 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 		view.addActionListener(this);
 
 		setSize(WIDTH, HEIGHT);
+		setResizable(false);
 		GUIUtil.centerWindow(this);
 
 		this.getContentPane().doLayout();
@@ -168,16 +170,20 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 		return licenseString;
 	}
 
-
-    /**
-     * Builds CayenneModeler info string */
+	/**
+	 * Builds CayenneModeler info string */
 	public String getInfoString() {
 		String version = getParentEditor().getProperty("cayenne.version");
-		String versionStr = (version != null) ? "Version " + version : "";
-		
+		String versionStr = (version != null) ? "Version: " + version : "";
+
 		String buildDate = getParentEditor().getProperty("cayenne.build.date");
-		String buildDateStr = (buildDate != null) ? "\nBuilt on " + buildDate : "";
-		return infoString + versionStr + buildDateStr;
+		String buildDateStr =
+			(buildDate != null) ? " (" + buildDate + ")": "";
+		return infoString
+			+ "<font size='-2' face='Arial,Helvetica'>"
+			+ versionStr
+			+ buildDateStr
+			+ "</font>";
 	}
 
 	/** Set up the graphical components. */
@@ -209,11 +215,14 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 		layout.setConstraints(image_pane, c);
 		getContentPane().add(image_pane);
 
-		infoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JTextArea infoArea = new JTextArea(getInfoString());
-		infoPanel.setBorder(border);
+		JEditorPane infoArea = new JEditorPane("text/html", getInfoString());
+		infoArea.setBackground(getContentPane().getBackground());
 		infoArea.setEditable(false);
-		infoArea.setBackground(infoPanel.getBackground());
+		// popup hyperlinks
+		infoArea.addHyperlinkListener(this);
+
+		infoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		infoPanel.setBorder(border);
 		infoPanel.add(infoArea);
 
 		licenceText.setText(getLicenseString());

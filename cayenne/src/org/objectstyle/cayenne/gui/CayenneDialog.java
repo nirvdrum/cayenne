@@ -56,18 +56,32 @@
 package org.objectstyle.cayenne.gui;
 
 import javax.swing.JDialog;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
+import org.objectstyle.cayenne.gui.util.BrowserControl;
 
 /**
- * Superclass of CayenneModeler dialogs.
+ * Superclass of CayenneModeler dialogs. Adds support for popping hyperlinks 
+ * in the default system browser.
  * 
  * @author Andrei Adamchik
  */
-public class CayenneDialog extends JDialog {
+public class CayenneDialog extends JDialog implements HyperlinkListener {
 	public CayenneDialog(Editor frame, String title, boolean modal) {
 		super(frame, title, modal);
 	}
 
 	public Editor getParentEditor() {
 		return (Editor) super.getParent();
+	}
+
+	/** 
+	 * Open hyperlink in the default browser.
+	 */
+	public void hyperlinkUpdate(HyperlinkEvent event) {
+		if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+			BrowserControl.displayURL(event.getURL().toExternalForm());
+		}
 	}
 }

@@ -38,3 +38,4 @@ in DataContext. Corresponding DataContext methods are deprecated.
 
 12. Added "Import EOModel" function.
 
+13. Added GUI error reporting dialog

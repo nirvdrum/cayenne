@@ -106,6 +106,8 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 					+ "http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068</a></font>");
 		infoText.setBackground(pane.getBackground());
 		infoText.setEditable(false);
+		// popup hyperlinks
+		infoText.addHyperlinkListener(this);
 
 		JPanel infoPanel = new JPanel();
 		infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
