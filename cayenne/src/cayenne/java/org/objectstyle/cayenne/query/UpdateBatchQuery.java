@@ -226,6 +226,15 @@ public class UpdateBatchQuery extends BatchQuery {
         return Collections.unmodifiableList(qualifierAttributes);
     }
 
+    /**
+     * Returns a snapshot of the current qualifier values.
+     * 
+     * @since 1.1
+     */
+    public Map getCurrentQualifier() {
+        return currentQualifier;
+    }
+
     public int getQueryType() {
         return Query.UPDATE_QUERY;
     }

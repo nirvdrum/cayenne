@@ -92,7 +92,6 @@ import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * ContextCommit implements DataContext commit logic. DataContext internally
@@ -213,9 +212,7 @@ class ContextCommit {
                         }
 
                         context.fireTransactionRolledback();
-                        throw new CayenneException(
-                            "Transaction was rolledback.",
-                            Util.unwindException(th));
+                        throw new CayenneException("Transaction was rolledback.", th);
                     }
 
                     context.getObjectStore().objectsCommitted();

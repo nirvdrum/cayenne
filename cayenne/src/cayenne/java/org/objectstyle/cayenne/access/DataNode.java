@@ -559,22 +559,13 @@ public class DataNode implements QueryEngine {
                 queryBuilder.bindParameters(statement, query, dbAttributes);
 
                 int updated = statement.executeUpdate();
-
                 if (useOptimisticLock && updated != 1) {
-                    List parameters = query.getValuesForUpdateParameters();
-                    StringBuffer buf = new StringBuffer("[");
-                    QueryLogger.sqlLiteralForObject(buf, parameters.get(0));
-                    for (int i = 1; i < parameters.size(); i++) {
-                        buf.append(", ");
-                        QueryLogger.sqlLiteralForObject(buf, parameters.get(i));
-                    }
-                    buf.append(']');
+                    Map snapshot =
+                        (query instanceof UpdateBatchQuery)
+                            ? ((UpdateBatchQuery) query).getCurrentQualifier()
+                            : Collections.EMPTY_MAP;
 
-                    throw new CayenneException(
-                        "Optimistic lock failure on sql '"
-                            + queryStr
-                            + "' for query bindings="
-                            + buf);
+                    throw new OptimisticLockException(queryStr, snapshot);
                 }
 
                 delegate.nextCount(query, updated);

@@ -102,6 +102,7 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * Class that provides applications with access to Cayenne persistence features. 
@@ -1227,7 +1228,8 @@ public class DataContext implements QueryEngine, Serializable {
                 worker.commit(logLevel);
             }
             catch (CayenneException ex) {
-                throw new CayenneRuntimeException(ex);
+                Throwable unwound = Util.unwindException(ex);
+                throw new CayenneRuntimeException("Commit Exception", unwound);
             }
         }
     }

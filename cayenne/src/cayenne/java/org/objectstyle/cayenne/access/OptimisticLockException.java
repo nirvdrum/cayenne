@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,63 +53,60 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
+
+import java.util.Iterator;
+import java.util.Map;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A CayenneRuntimeException is a generic *runtime*
- * exception that may be thrown by Cayenne framework. 
- * All runtime exceptions in Cayenne would normally inherit 
- * from this class. The class
- * is compatible with JDK 1.3 and at the same time implements
- * enhancements introduced in 1.4, namely chained exceptions.
+ * An exception thrown on optimistic lock failure.
  * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class CayenneRuntimeException extends RuntimeException {
-    private Throwable cause;
+public class OptimisticLockException extends CayenneRuntimeException {
+    protected String querySQL;
+    protected Map qualifierSnapshot;
 
-    /** 
-     * Creates new CayenneRuntimeException without detail message. 
-     */
-    public CayenneRuntimeException() {
+    public OptimisticLockException(String querySQL, Map qualifierSnapshot) {
+        super("Optimistic Lock Failure");
+        this.querySQL = querySQL;
+        this.qualifierSnapshot = qualifierSnapshot;
     }
 
-    /**
-     * Constructs an <code>CayenneRuntimeException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public CayenneRuntimeException(String msg) {
-        super(msg);
+    public Map getQualifierSnapshot() {
+        return qualifierSnapshot;
     }
 
-    /**
-     * Constructs an <code>CayenneRuntimeException</code> that 
-     * wraps <code>exception</code> thrown elsewhere.
-     */
-    public CayenneRuntimeException(Throwable th) {
-        this(th == null ? (String) null : th.toString(), th);
+    public String getQuerySQL() {
+        return querySQL;
     }
 
-    public CayenneRuntimeException(String msg, Throwable th) {
-        super(msg);
-        this.cause = th;
-    }
-
-    /**
-     * Returns an exception that was the underlying cause of this exception.
-     */
-    public Throwable getCause() {
-        return cause;
-    }
-
-    /**
-     * Returns message that includes Cayenne version label and 
-     * the actual exception message.
-     */
     public String getMessage() {
-        String message = super.getMessage();
-        return (message != null)
-            ? CayenneException.getExceptionLabel() + message
-            : CayenneException.getExceptionLabel() + "(no message)";
+        StringBuffer buffer = new StringBuffer(super.getMessage());
+
+        if (querySQL != null) {
+            buffer.append(", SQL: [").append(querySQL.trim()).append("]");
+        }
+
+        if (qualifierSnapshot != null && qualifierSnapshot.size() > 0) {
+            buffer.append(", WHERE clause bindings: [");
+            Iterator it = qualifierSnapshot.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                buffer.append(entry.getKey()).append("=");
+                QueryLogger.sqlLiteralForObject(buffer, entry.getValue());
+
+                if (it.hasNext()) {
+                    buffer.append(", ");
+                }
+            }
+            buffer.append("]");
+        }
+
+        return buffer.toString();
     }
+
 }
