@@ -61,6 +61,7 @@ import java.sql.Types;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 
 /** 
  * Sequence-based primary key generator implementation for Oracle. 
@@ -82,14 +83,34 @@ import org.objectstyle.cayenne.map.DbEntity;
  */
 public class OracleQualifierTranslator extends QualifierTranslator {
 
+    /**
+     * Adds special handling of CHAR columns.
+     */
     protected void processColumn(StringBuffer buf, DbAttribute dbAttr) {
         if (dbAttr.getType() == Types.CHAR) {
             buf.append("TRIM(TRAILING FROM ");
             super.processColumn(buf, dbAttr);
             buf.append(')');
-        }
-        else {
+        } else {
             super.processColumn(buf, dbAttr);
+        }
+    }
+
+    /**
+     * Adds special handling of CHAR columns.
+     * 
+     * @see org.objectstyle.cayenne.access.trans.QueryAssemblerHelper#processColumn(StringBuffer, DbAttribute, DbRelationship)
+     */
+    protected void processColumn(
+        StringBuffer buf,
+        DbAttribute dbAttr,
+        DbRelationship rel) {
+        if (dbAttr.getType() == Types.CHAR) {
+            buf.append("TRIM(TRAILING FROM ");
+            super.processColumn(buf, dbAttr, rel);
+            buf.append(')');
+        } else {
+            super.processColumn(buf, dbAttr, rel);
         }
     }
 }

@@ -268,7 +268,7 @@ public class DataContextTst extends CayenneTestCase {
 		q.andQualifier(
 			ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
 		q.addPrefetch("toArtist");
-		q.setLoggingLevel(Level.INFO);
+		// q.setLoggingLevel(Level.INFO);
 
 		List results = ctxt.performQuery(q);
 		assertEquals(1, results.size());
@@ -283,7 +283,7 @@ public class DataContextTst extends CayenneTestCase {
 		SelectQuery q = new SelectQuery("Painting");
 		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
 		q.addPrefetch("toArtist");
-		q.setLoggingLevel(Level.INFO);
+		// q.setLoggingLevel(Level.INFO);
 
 		List results = ctxt.performQuery(q);
 		assertEquals(1, results.size());
@@ -522,7 +522,7 @@ public class DataContextTst extends CayenneTestCase {
 	/** Give each artist a single painting. */
 	public void populatePaintings() throws Exception {
 		String insertPaint =
-			"INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (?,?,?, ?)";
+			"INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (?, ?, ?, ?)";
 
 		Connection conn = getSharedConnection();
 
