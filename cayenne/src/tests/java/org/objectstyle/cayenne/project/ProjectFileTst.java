@@ -86,11 +86,16 @@ public class ProjectFileTst extends CayenneTestCase {
         pf.setObjectModified(true);
         assertTrue(pf.isObjectModified());
     }
-    
-    public void testGetFileName() throws Exception {
-    	assertEquals("name.ext", pf.getFileName());
+
+    public void testObjectDeleted() throws Exception {
+        assertTrue(!pf.isObjectDeleted());
+        pf.setObjectDeleted(true);
+        assertTrue(pf.isObjectDeleted());
     }
-    
+
+    public void testGetFileName() throws Exception {
+        assertEquals("name.ext", pf.getFileName());
+    }
 
     // inner class to allow testing of the abstract ProjectFile
     class TestProjectFile extends ProjectFile {
@@ -123,5 +128,19 @@ public class ProjectFileTst extends CayenneTestCase {
          */
         public void saveToFile(File f) throws Exception {}
 
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#createFileWrapper(Object)
+         */
+        public ProjectFile createProjectFile(Object obj) {
+            return null;
+        }
+
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#isObjectSupported(Object)
+         */
+        public boolean canHandle(Object obj) {
+            return false;
+        }
     }
 }

@@ -58,13 +58,14 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.validator.Validator;
 
 /**
  * Describes a model of Cayenne project. Project is a set of 
@@ -83,7 +84,7 @@ public class Project {
     protected String name;
     protected Configuration config;
     protected File projectDir;
-    protected List files = Collections.synchronizedList(new ArrayList());
+    protected List files;
 
     /**
      * Constructor for Project. <code>projectFile</code> must denote 
@@ -109,18 +110,39 @@ public class Project {
         } catch (IOException e) {
             throw new ProjectException("Error creating project.", e);
         }
+
+        // take a snapshot of files used by the project
+        files = buildFileList();
     }
 
-    public boolean removeFileForObject(Object obj) {
-        ProjectFile f = findFile(obj);
-        if (f == null) {
-            return false;
+    /**
+     * Creates a list of project files.
+     */
+    public List buildFileList() {
+        List projectFiles = new ArrayList();
+
+        // start with root file
+        projectFiles.add(ProjectFile.projectFileForObject(config));
+
+        Iterator nodes = new ProjectTraversal(this).treeNodes();
+        while (nodes.hasNext()) {
+            Object[] nodePath = (Object[]) nodes.next();
+            Object obj = ProjectTraversal.objectFromPath(nodePath);
+
+            ProjectFile f = ProjectFile.projectFileForObject(obj);
+
+            if (f != null) {
+                projectFiles.add(f);
+            }
         }
 
-        files.remove(f);
-        return true;
+        return projectFiles;
     }
 
+    /**
+     * Looks up and returns a file wrapper for a project
+     * object. Returns null if no file exists.
+     */
     public ProjectFile findFile(Object obj) {
         if (obj == null) {
             return null;
@@ -205,14 +227,13 @@ public class Project {
     public Configuration getConfig() {
         return config;
     }
-    
+
     /**
      * Sets Cayenne configuration object associated with this project. 
      */
     public void setConfig(Configuration config) {
         this.config = config;
     }
-    
 
     /** 
      * Returns project directory. This is a directory where
@@ -243,5 +264,21 @@ public class Project {
      */
     public File getMainProjectFile() {
         return ((ProjectConfiguration) config).getProjectFile();
+    }
+
+    /** Saves project. */
+    public void save() throws ProjectException {
+        // 1. Traverse project tree and update/create file wrappers
+
+        // 2. Try saving individual file wrappers
+
+        // 3. Commit changes
+    }
+
+    /**
+     * Creates an instance of Validator for validating this project.
+     */
+    public Validator getValidator() {
+        return new Validator(this);
     }
 }

@@ -248,7 +248,7 @@ public class SaveAction extends CayenneAction {
 
     public synchronized void performAction(int warningLevel) {
         Mediator mediator = getMediator();
-        Validator val = new Validator(Editor.getFrame().getProject());
+        Validator val = Editor.getFrame().getProject().getValidator();
         int validationCode = val.validate();
 
         // If no serious errors, perform save.

@@ -72,7 +72,8 @@ public class RootProjectFile extends ProjectFile {
 	
 	protected Configuration projectConfig;
 	
-
+    public RootProjectFile() {}
+    
     /**
      * Constructor for RootProjectFile.
      * @param name
@@ -102,6 +103,21 @@ public class RootProjectFile extends ProjectFile {
      */
     public void saveToFile(File f) throws Exception {
         
+    }
+    
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#createFileWrapper(Object)
+     */
+    public ProjectFile createProjectFile(Object obj) {
+        return new RootProjectFile((Configuration)obj);
+    }
+
+
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#isObjectSupported(Object)
+     */
+    public boolean canHandle(Object obj) {
+        return obj instanceof Configuration;
     }
 }
 

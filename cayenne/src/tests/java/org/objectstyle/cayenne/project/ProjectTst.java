@@ -58,11 +58,14 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.project.validator.Validator;
 
 /**
  * @author Andrei Adamchik
  */
 public class ProjectTst extends CayenneTestCase {
+    protected Project p;
+    protected File f;
 
     /**
      * Constructor for ProjectTst.
@@ -72,11 +75,27 @@ public class ProjectTst extends CayenneTestCase {
         super(arg0);
     }
 
+    /**
+      * @see junit.framework.TestCase#setUp()
+      */
+    protected void setUp() throws Exception {
+        super.setUp();
+        f = new File("xyz");
+        p = new Project("abc", f);
+    }
+
     public void testConstructor() throws Exception {
-    	File f = new File("xyz");
-    	Project p = new Project("abc", f);
-    	assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
-    	assertEquals("abc", p.getName());
+        assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
+        assertEquals("abc", p.getName());
+    }
+
+    public void testValidator() throws Exception {
+        Validator v1 = p.getValidator();
+        assertSame(p, v1.getProject());
+        
+        Validator v2 = p.getValidator();
+        assertSame(p, v2.getProject());
+        
+        assertTrue(v1 != v2);
     }
 }
-

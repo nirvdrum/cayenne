@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.objectstyle.cayenne.util.Util;
 
@@ -66,9 +68,35 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class ProjectFile {
+	protected static final List fileTypes = new ArrayList();
+	
     protected String name;
     protected String extension;
     protected boolean objectModified;
+    protected boolean objectDeleted;
+    
+    static {
+		fileTypes.add(new RootProjectFile());
+		fileTypes.add(new DataMapFile());
+		fileTypes.add(new DataNodeFile());
+	}
+	
+    /**
+     * Returns a ProjectFile that can handle a given object,
+     * or null if no such object can be created.
+     */
+    public static ProjectFile projectFileForObject(Object obj) {
+    	for(int i = 0; i < fileTypes.size(); i++) {
+    		ProjectFile f = (ProjectFile)fileTypes.get(i);
+    		if(f.canHandle(obj)) {
+    			return f.createProjectFile(obj);
+    		}
+    	}
+    	return null;
+    }
+    
+    
+    public ProjectFile() {}
     
     /**
      * Constructor for ProjectFile.
@@ -78,21 +106,21 @@ public abstract class ProjectFile {
         this.extension = extension;
     }
     
-    /**
-     * Returns the objectModified.
-     * @return boolean
-     */
     public boolean isObjectModified() {
         return objectModified;
     }
 
-
-    /**
-     * Sets the objectModified.
-     * @param objectModified The objectModified to set
-     */
     public void setObjectModified(boolean objectModified) {
         this.objectModified = objectModified;
+    }
+    
+
+    public boolean isObjectDeleted() {
+        return objectDeleted;
+    }
+
+    public void setObjectDeleted(boolean objectDeleted) {
+        this.objectDeleted = objectDeleted;
     }
     
 
@@ -118,6 +146,19 @@ public abstract class ProjectFile {
      * object and is implemented by concrete subclasses.
      */
     public abstract void saveToFile(File f) throws Exception;
+    
+    /**
+     * Returns true if this file wrapper can handle a
+     * specified object.
+     */
+    public abstract boolean canHandle(Object obj);
+    
+    /**
+     * Returns an instance of ProjectFile that will handle a 
+     * wrapped object. This method is an example of "prototype"
+     * pattern, used here due to the lack of Class inheritance in Java.
+     */
+    public abstract ProjectFile createProjectFile(Object obj);
     
     /**
      * Saves ProjectFile's underlying object to a temporary 
@@ -149,8 +190,4 @@ public abstract class ProjectFile {
     public boolean isRenamed() {
     	return Util.nullSafeEquals(getObjectName(), name);
     }
-    
-    public boolean needsSave() {
-    	return isObjectModified() || isRenamed();
-    }    
 }

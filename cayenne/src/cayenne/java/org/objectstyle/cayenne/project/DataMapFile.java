@@ -70,6 +70,8 @@ public class DataMapFile extends ProjectFile {
 	
 	protected DataMap map;
 
+    public DataMapFile() {}
+    
     /**
      * Constructor for DataMapFile.
      * @param name
@@ -98,5 +100,21 @@ public class DataMapFile extends ProjectFile {
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
     public void saveToFile(File f) throws Exception {}
+    
+    
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#canHandle(Object)
+     */
+    public boolean canHandle(Object obj) {
+        return obj instanceof DataMap;
+    }
+
+
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
+     */
+    public ProjectFile createProjectFile(Object obj) {
+        return new DataMapFile((DataMap)obj);
+    }
 }
 

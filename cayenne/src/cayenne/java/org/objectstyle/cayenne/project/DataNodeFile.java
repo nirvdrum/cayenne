@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
 /**
  * DataNodeFile is a ProjectFile abstraction of the 
@@ -66,9 +67,11 @@ import org.objectstyle.cayenne.access.DataNode;
  * @author Andrei Adamchik
  */
 public class DataNodeFile extends ProjectFile {
-	protected static final String NODE_FILE_EXTENSION = "xml";
-	
-	protected DataNode node;
+    protected static final String NODE_FILE_EXTENSION = "xml";
+
+    protected DataNode node;
+
+    public DataNodeFile() {}
 
     /**
      * Constructor for DataNodeFile.
@@ -99,5 +102,27 @@ public class DataNodeFile extends ProjectFile {
      */
     public void saveToFile(File f) throws Exception {}
 
-}
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#canHandle(Object)
+     */
+    public boolean canHandle(Object obj) {
+    	if(obj instanceof DataNode) {
+    		DataNode node = (DataNode)obj;
+    		
+    		// only driver datasource factory requires a file
+    		if(DriverDataSourceFactory.class.getName().equals(node.getDataSourceFactory())) {
+    			return true;
+    		}
+    	}
+    	
+        return false;
+    }
 
+
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
+     */
+    public ProjectFile createProjectFile(Object obj) {
+        return new DataNodeFile((DataNode)obj);
+    }
+}
