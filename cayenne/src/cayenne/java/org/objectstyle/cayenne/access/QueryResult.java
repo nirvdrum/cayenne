@@ -99,6 +99,28 @@ public class QueryResult
     }
 
     /**
+     * Returns the first results for the query. This is a shortcut for
+     * <code>(List)getRows(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
+     */
+    public List getFirstRows(Query query) {
+        List allResults = getResults(query);
+        int size = allResults.size();
+        if (size == 0) {
+            return Collections.EMPTY_LIST;
+        } else {
+            Iterator it = allResults.iterator();
+            while (it.hasNext()) {
+                Object obj = it.next();
+                if (obj instanceof List) {
+                    return (List) obj;
+                }
+            }
+        }
+
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
      * Returns a List that itself contains Lists of data rows for each ResultSet 
      * returned by the query. ResultSets are returned in the oder they were obtained.
      * Any updates that were performed are not included.

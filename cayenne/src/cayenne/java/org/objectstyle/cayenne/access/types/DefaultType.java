@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 
@@ -72,6 +73,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
  * @author Andrei Adamchik
  */
 public class DefaultType extends AbstractType {
+    private static Logger logObj = Logger.getLogger(DefaultType.class);
 
     private static final Map readMethods = new HashMap();
     private static final Map procReadMethods = new HashMap();
@@ -221,13 +223,14 @@ public class DefaultType extends AbstractType {
 
     public Object materializeObject(ResultSet rs, int index, int type)
         throws Exception {
-        Object val = readMethod.invoke(rs, new Object[] {new Integer(index)});
+        Object val = readMethod.invoke(rs, new Object[] { new Integer(index)});
         return (rs.wasNull()) ? null : val;
     }
 
     public Object materializeObject(CallableStatement st, int index, int type)
         throws Exception {
-        Object val = procReadMethod.invoke(st, new Object[] {new Integer(index)});
+        Object val =
+            procReadMethod.invoke(st, new Object[] { new Integer(index)});
         return (st.wasNull()) ? null : val;
     }
 }

@@ -557,28 +557,31 @@ public class DataNode implements QueryEngine {
         // and out parameters. Read out parameters first, then
         // iterate until we exhaust all results
         boolean hasResultSet = statement.execute();
-        
+
         ResultDescriptor outDesc = transl.getProcedureResultDescriptor();
         int resultWidth = outDesc.getResultWidth();
         if (resultWidth > 0) {
             // TODO: Reading Stored Procedure out parameters is in many respects
-            // similar to how DefaultResultIterator reads rows from ResultSet
+            // similar to how DefaultResultIterator reads rows from ResultSet,
             // so DataNode feels like a wrong place to put this code, may need to move 
-            // it elsewhere
+            // it elsewhere and explore possibilities of reuse
             Map dataRow = new HashMap(resultWidth * 2, 0.75f);
             ExtendedType[] converters = outDesc.getConverters();
             int[] jdbcTypes = outDesc.getJdbcTypes();
             String[] names = outDesc.getNames();
+            int[] outParamIndexes = outDesc.getOutParamIndexes();
 
             // process result row columns,
-            for (int i = 0; i < resultWidth; i++) {
+            for (int i = 0; i < outParamIndexes.length; i++) {
+                int index = outParamIndexes[i];
+                
                 // note: jdbc column indexes start from 1, not 0 unlike everywhere else
                 Object val =
-                    converters[i].materializeObject(
+                    converters[index].materializeObject(
                         statement,
-                        i + 1,
-                        jdbcTypes[i]);
-                dataRow.put(names[i], val);
+                        index + 1,
+                        jdbcTypes[index]);
+                dataRow.put(names[index], val);
             }
 
             // for now treat out parameters as a separate data row set

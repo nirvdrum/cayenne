@@ -183,10 +183,14 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         ctxt.performQuery(q, resultHolder);
 
         // check the results
-        List results = resultHolder.getResults(q);
-        assertNotNull(results);
-        assertEquals(1, results.size());
-        Map outParams = (Map) results.get(0);
+        List rows = resultHolder.getFirstRows(q);
+        assertNotNull(rows);
+
+        assertEquals(1, rows.size());
+        Object row = rows.get(0);
+        assertNotNull(row);
+        assertTrue("Unexpected row class: " + row.getClass().getName(), row instanceof Map);
+        Map outParams = (Map) row;
         Number price = (Number) outParams.get("out_param");
         assertNotNull(price);
         assertEquals(40, price.intValue());

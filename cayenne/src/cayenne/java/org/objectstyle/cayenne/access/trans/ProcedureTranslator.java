@@ -183,7 +183,7 @@ public class ProcedureTranslator
         ResultDescriptor descriptor =
             new ResultDescriptor(getAdapter().getExtendedTypes(), null);
 
-        Iterator it = getProcedure().getCallOutParams().iterator();
+        Iterator it = getProcedure().getCallParams().iterator();
         while(it.hasNext()) {
             descriptor.addDbAttribute((DbAttribute)it.next());
         }

@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ProcedureParam;
 
 /**
  * Contains information about the ResultSet used to process fetched rows. 
@@ -77,11 +78,14 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class ResultDescriptor {
     private static Logger logObj = Logger.getLogger(ResultDescriptor.class);
 
+    private static final int[] emptyInt = new int[0];
+
     // indexed data
     protected String[] names;
     protected int[] jdbcTypes;
     protected ExtendedType[] converters;
     protected int[] idIndexes;
+    protected int[] outParamIndexes;
 
     // unindexed data
     protected List dbAttributes = new ArrayList();
@@ -122,6 +126,7 @@ public class ResultDescriptor {
         // init various things
         int resultWidth = dbAttributes.size();
         int idWidth = 0;
+        int outWidth = 0;
         this.names = new String[resultWidth];
         this.jdbcTypes = new int[resultWidth];
         for (int i = 0; i < resultWidth; i++) {
@@ -133,6 +138,13 @@ public class ResultDescriptor {
             // check if this is an ID
             if (attr.isPrimaryKey()) {
                 idWidth++;
+            }
+
+            // check if this is a stored procedure OUT parameter
+            if (attr instanceof ProcedureParam) {
+                if (((ProcedureParam) attr).isOutParam()) {
+                    outWidth++;
+                }
             }
 
             // figure out name
@@ -152,13 +164,33 @@ public class ResultDescriptor {
             names[i] = name;
         }
 
-        this.idIndexes = new int[idWidth];
-        for (int i = 0, j = 0; i < resultWidth; i++) {
-            DbAttribute attr = (DbAttribute) dbAttributes.get(i);
-            jdbcTypes[i] = attr.getType();
+        if (idWidth == 0) {
+            this.idIndexes = emptyInt;
+        } else {
+            this.idIndexes = new int[idWidth];
+            for (int i = 0, j = 0; i < resultWidth; i++) {
+                DbAttribute attr = (DbAttribute) dbAttributes.get(i);
+                jdbcTypes[i] = attr.getType();
 
-            if (attr.isPrimaryKey()) {
-                idIndexes[j++] = i;
+                if (attr.isPrimaryKey()) {
+                    idIndexes[j++] = i;
+                }
+            }
+        }
+
+        if (outWidth == 0) {
+            this.outParamIndexes = emptyInt;
+        } else {
+            this.outParamIndexes = new int[outWidth];
+            for (int i = 0, j = 0; i < resultWidth; i++) {
+                DbAttribute attr = (DbAttribute) dbAttributes.get(i);
+                jdbcTypes[i] = attr.getType();
+
+                if (attr instanceof ProcedureParam) {
+                    if (((ProcedureParam) attr).isOutParam()) {
+                        outParamIndexes[j++] = i;
+                    }
+                }
             }
         }
 
@@ -184,8 +216,9 @@ public class ResultDescriptor {
     }
 
     protected void initDefaultConverters() {
-		logObj.debug("Creating converters using default JDBC->Java type mapping.");
-		
+        logObj.debug(
+            "Creating converters using default JDBC->Java type mapping.");
+
         int resultWidth = dbAttributes.size();
         this.converters = new ExtendedType[resultWidth];
 
@@ -196,8 +229,8 @@ public class ResultDescriptor {
     }
 
     protected void initConvertersFromMapping() {
-		logObj.debug("Creating converters using ObjAttributes.");
-		
+        logObj.debug("Creating converters using ObjAttributes.");
+
         // assert that we have all the data
         if (dbAttributes.size() == 0) {
             throw new IllegalArgumentException("DbAttributes list is empty.");
@@ -239,11 +272,15 @@ public class ResultDescriptor {
     public String[] getNames() {
         return names;
     }
-    
+
     /**
      * Returns a count of columns in the result.
      */
     public int getResultWidth() {
         return dbAttributes.size();
+    }
+
+    public int[] getOutParamIndexes() {
+        return outParamIndexes;
     }
 }
