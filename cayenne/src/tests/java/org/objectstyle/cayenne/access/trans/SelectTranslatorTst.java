@@ -57,10 +57,11 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.ObjectId;
@@ -311,7 +312,99 @@ public class SelectTranslatorTst extends CayenneTestCase {
         }
     }
 
+    /**
+     * Test query when qualifying on the same attribute more than once.
+     * Check translation "Artist.dateOfBirth > ? AND Artist.dateOfBirth < ?".
+     */
+    public void testCreateSqlString7() throws Exception {
+        Connection con = getSharedConnection();
 
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("Artist");
+            q.setQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.GREATER_THAN,
+                    "dateOfBirth",
+                    new Date()));
+            q.andQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.LESS_THAN,
+                    "dateOfBirth",
+                    new Date()));
+
+            SelectTranslator transl = buildTranslator(con);
+            String generatedSql = transl.createSqlString();
+            // logObj.warn("Query: " + generatedSql);
+
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT "));
+
+            int i1 = generatedSql.indexOf(" FROM ");
+            assertTrue(i1 > 0);
+            
+            int i2 = generatedSql.indexOf(" WHERE ");
+            assertTrue(i2 > i1);
+ 
+            int i3 = generatedSql.indexOf("DATE_OF_BIRTH", i2 + 1);
+            assertTrue(i3 > i2);
+            
+            int i4 = generatedSql.indexOf("DATE_OF_BIRTH", i3 + 1);
+            assertTrue("No second DOB comparison: " + i4 + ", " + i3, i4 > i3);
+        } finally {
+            con.close();
+        }
+    }
+
+
+   /**
+     * Test query when qualifying on the same attribute accessed over 
+     * relationship, more than once.
+     * Check translation "Painting.toArtist.dateOfBirth > ? AND Painting.toArtist.dateOfBirth < ?".
+     */
+    public void testCreateSqlString8() throws Exception {
+        Connection con = getSharedConnection();
+
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("Painting");
+            q.setQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.GREATER_THAN,
+                    "toArtist.dateOfBirth",
+                    new Date()));
+            q.andQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.LESS_THAN,
+                    "toArtist.dateOfBirth",
+                    new Date()));
+
+            SelectTranslator transl = buildTranslator(con);
+            String generatedSql = transl.createSqlString();
+            logObj.warn("Query: " + generatedSql);
+
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT "));
+
+            int i1 = generatedSql.indexOf(" FROM ");
+            assertTrue(i1 > 0);
+            
+            int i2 = generatedSql.indexOf(" WHERE ");
+            assertTrue(i2 > i1);
+ 
+            int i3 = generatedSql.indexOf("DATE_OF_BIRTH", i2 + 1);
+            assertTrue(i3 > i2);
+            
+            int i4 = generatedSql.indexOf("DATE_OF_BIRTH", i3 + 1);
+            assertTrue("No second DOB comparison: " + i4 + ", " + i3, i4 > i3);
+        } finally {
+            con.close();
+        }
+    }
+    
+    
     public void testBuildColumnList1() throws Exception {
         Connection con = getSharedConnection();
 
