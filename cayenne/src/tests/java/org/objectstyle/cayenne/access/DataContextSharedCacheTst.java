@@ -160,7 +160,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
      */
     public void testSnapshotChangePropagation() throws Exception {
         String originalName = artist.getArtistName();
-        String newName = "version2";
+        final String newName = "version2";
 
         // two contexts being tested
         DataContext context = artist.getDataContext();
@@ -168,7 +168,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // make sure we have a fully resolved copy of an artist object 
         // in the second context
-        Artist altArtist =
+        final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
@@ -189,7 +189,12 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
 
         // check peer artist
-        assertEquals(newName, altArtist.getArtistName());
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(newName, altArtist.getArtistName());
+            }
+        };
+        helper.assertWithTimeout(3000);
     }
 
     /**
@@ -204,8 +209,8 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         String originalName = artist.getArtistName();
         Date originalDate = artist.getDateOfBirth();
         String newName = "version2";
-        Date newDate = new Date(originalDate.getTime() - 10000);
-        String newAltName = "version3";
+        final Date newDate = new Date(originalDate.getTime() - 10000);
+        final String newAltName = "version3";
 
         // two contexts being tested
         DataContext context = artist.getDataContext();
@@ -213,7 +218,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // make sure we have a fully resolved copy of an artist object 
         // in the second context
-        Artist altArtist =
+        final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
@@ -235,9 +240,15 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertEquals(newDate, freshSnapshot.get("DATE_OF_BIRTH"));
 
         // check peer artist
-        assertEquals(newAltName, altArtist.getArtistName());
-        assertEquals(newDate, altArtist.getDateOfBirth());
-        assertEquals(PersistenceState.MODIFIED, altArtist.getPersistenceState());
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(newAltName, altArtist.getArtistName());
+                assertEquals(newDate, altArtist.getDateOfBirth());
+                assertEquals(PersistenceState.MODIFIED, altArtist.getPersistenceState());
+            }
+        };
+        helper.assertWithTimeout(3000);
+
     }
 
     /**
@@ -256,7 +267,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // make sure we have a fully resolved copy of an artist object 
         // in the second context
-        Artist altArtist =
+        final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
@@ -273,8 +284,13 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
                 altArtist.getObjectId()));
 
         // check peer artist
-        assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
-        assertNull(altArtist.getDataContext());
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
+                assertNull(altArtist.getDataContext());
+            }
+        };
+        helper.assertWithTimeout(3000);
     }
 
     /**
@@ -293,7 +309,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // make sure we have a fully resolved copy of an artist object 
         // in the second context
-        Artist altArtist =
+        final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
@@ -309,8 +325,13 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
                 altArtist.getObjectId()));
 
         // check peer artist
-        assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
-        assertNull(altArtist.getDataContext());
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
+                assertNull(altArtist.getDataContext());
+            }
+        };
+        helper.assertWithTimeout(3000);
     }
 
     /**
@@ -329,7 +350,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // make sure we have a fully resolved copy of an artist object 
         // in the second context
-        Artist altArtist =
+        final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
@@ -348,7 +369,12 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
                 altArtist.getObjectId()));
 
         // check peer artist
-        assertEquals(PersistenceState.NEW, altArtist.getPersistenceState());
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(PersistenceState.NEW, altArtist.getPersistenceState());
+            }
+        };
+        helper.assertWithTimeout(3000);
 
         // check if now we can save this object again, and with the original ObjectId
         ObjectId id = altArtist.getObjectId();
@@ -382,7 +408,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // make sure we have a fully resolved copy of an artist object 
         // in the second context
-        Artist altArtist =
+        final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
@@ -400,8 +426,14 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
                 altArtist.getObjectId()));
 
         // check peer artist
-        assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
-        assertNull(altArtist.getDataContext());
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
+                assertNull(altArtist.getDataContext());
+            }
+        };
+        helper.assertWithTimeout(3000);
+
         assertFalse(altContext.hasChanges());
     }
 

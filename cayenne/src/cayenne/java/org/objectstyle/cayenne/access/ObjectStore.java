@@ -721,6 +721,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 }
 
                 DataContextDelegate delegate;
+                
+                // TODO: refactor "switch" to avoid code duplication
 
                 switch (object.getPersistenceState()) {
                     case PersistenceState.COMMITTED :
@@ -733,12 +735,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         if (delegate == null || delegate.shouldProcessDelete(object)) {
                             objectMap.remove(oid);
                             retainedSnapshotMap.remove(oid);
+
+                            // setting DataContext to null will also set
+                            // state to transient
                             object.setDataContext(null);
-
-                            // not sure if cleaning ObjectId is needed
-                            // object.setObjectId(null);
-
-                            object.setPersistenceState(PersistenceState.TRANSIENT);
                         }
 
                         break;
