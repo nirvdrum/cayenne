@@ -123,8 +123,18 @@ public class ConnectionWrapper implements Connection {
         }
 
         pooledConnection.reconnect();
-        connectionObj = pooledConnection.getConnection();
-
+        
+		// Pooled connection will wrap returned connection into
+		// another ConnectionWrapper.... lets get the real connection 
+		// underneath...
+		Connection connection = pooledConnection.getConnection();
+		if (connection instanceof ConnectionWrapper) {
+			this.connectionObj = ((ConnectionWrapper) connection).connectionObj;
+		}
+		else {
+			this.connectionObj = connection;
+		}
+		
         lastReconnected = System.currentTimeMillis();
         reconnectCount++;
     }
