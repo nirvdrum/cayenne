@@ -513,7 +513,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
             throw new NullPointerException("Null Visitor.");
         }
 
-        traverse(this, null, visitor);
+        traverse(null, visitor);
     }
 
     /**
@@ -522,29 +522,27 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * 
      * @since 1.1
      */
-    protected void traverse(
-        Object expressionObj,
-        Expression parentExp,
-        TraversalHandler visitor) {
+    protected void traverse(Expression parentExp, TraversalHandler visitor) {
 
-        // see if "expObj" is a leaf node
-        if (!(expressionObj instanceof Expression)) {
-            visitor.objectNode(expressionObj, parentExp);
-            return;
-        }
-
-        Expression exp = (Expression) expressionObj;
-
-        visitor.startNode(exp, parentExp);
+        visitor.startNode(this, parentExp);
 
         // recursively traverse each child
-        int count = exp.getOperandCount();
+        int count = getOperandCount();
         for (int i = 0; i < count; i++) {
-            traverse(exp.getOperand(i), exp, visitor);
-            visitor.finishedChild(exp, i, i < count - 1);
+            Object child = getOperand(i);
+
+            if (child instanceof Expression) {
+                Expression childExp = (Expression) child;
+                childExp.traverse(this, visitor);
+            }
+            else {
+                visitor.objectNode(child, this);
+            }
+            
+            visitor.finishedChild(this, i, i < count - 1);
         }
 
-        visitor.endNode(exp, parentExp);
+        visitor.endNode(this, parentExp);
     }
 
     /**
@@ -553,10 +551,13 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * Null transformer will result in an identical deep copy of
      * this expression.
      * 
+     * <p>To force a node and its children to be pruned from the 
+     * copy, Transformer should return null for a given node.
+     * 
      * <p>There is one limitation on what Transformer is expected to do: 
      * if a node is an Expression it must be transformed to null
-     * or another Expression. Returned Null Expression indicates that the 
-     * whole subtree must be pruned from resulting expression.
+     * or another Expression. Any other object type would result in an 
+     * exception. 
      * 
      *
      * @since 1.1
