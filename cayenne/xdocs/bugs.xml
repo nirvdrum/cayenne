@@ -13,8 +13,9 @@
       	</ul>
       	
       	<panel name="Note:">
-      	To see bugs that are fixed but are not included in the official release yet, follow "Browse" link above and
-      	select "Pending" from the "Status" dropdown list. Nightly builds may already contain such fixes.
+      	To see bugs that are fixed but not included in the official release yet, follow "Browse" link above and
+      	select "Pending" from the "Status" dropdown list. Nightly builds are likely to contain fixes for "Pending"
+      	bugs.
       	</panel>
       	
         </section>
