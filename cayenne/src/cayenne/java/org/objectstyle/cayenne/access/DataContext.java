@@ -84,6 +84,7 @@ import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.event.DataContextTransactionEventHandler;
 import org.objectstyle.cayenne.event.ObserverManager;
 import org.objectstyle.cayenne.event.ObserverSubject;
 import org.objectstyle.cayenne.exp.Expression;
@@ -114,12 +115,24 @@ import org.objectstyle.cayenne.query.UpdateQuery;
   */
 public class DataContext implements QueryEngine, Serializable {
     private static Logger logObj = Logger.getLogger(DataContext.class);
-    private Map flattenedInserts = new HashMap();
-    private Map flattenedDeletes = new HashMap();
 
 	// DataContext events
 	public static final ObserverSubject WILL_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextWillCommit");
 	public static final ObserverSubject DID_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextDidCommit");
+
+	// event posting default for new DataContexts
+	private static boolean postDataContextTransactionEventsDefault = true;
+
+	// need to call this at least once in order to initialize the event handler
+	static {
+		DataContextTransactionEventHandler.registerForDataContextEvents();
+	}
+
+	// enable/disable event handling for individual instances
+	private boolean postDataContextTransactionEvents;
+
+    private Map flattenedInserts = new HashMap();
+    private Map flattenedDeletes = new HashMap();
 
     protected transient QueryEngine parent;
     // When deserialized, the parent domain name is stored in 
@@ -171,6 +184,7 @@ public class DataContext implements QueryEngine, Serializable {
         this.parent = parent;
         this.objectStore = new ObjectStore();
         this.snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
+        this.postDataContextTransactionEvents = postDataContextTransactionEventsDefault;
     }
 
     /** Returns parent QueryEngine object. */
@@ -689,8 +703,10 @@ public class DataContext implements QueryEngine, Serializable {
 		List insObjects = new ArrayList();
 		Map updatedIds = new HashMap();
 
-		// post observer events 
-		ObserverManager.getInstance().postObserverEvent(WILL_COMMIT, this);
+		// post observer events
+		if (this.postDataContextTransactionEvents) {
+			ObserverManager.getInstance().postObserverEvent(WILL_COMMIT, this);
+		}
 
 		synchronized (objectStore) {
 			Iterator it = objectStore.getObjectIterator();
@@ -833,8 +849,10 @@ public class DataContext implements QueryEngine, Serializable {
 			this.clearFlattenedUpdateQueries();
 		}
 
-		// post observer event        
-		ObserverManager.getInstance().postObserverEvent(DID_COMMIT, this);
+		// post observer event
+		if (this.postDataContextTransactionEvents) {
+			ObserverManager.getInstance().postObserverEvent(DID_COMMIT, this);
+		}
 	}
 
 	/**
@@ -1411,11 +1429,26 @@ public class DataContext implements QueryEngine, Serializable {
 	}
 
 	/**
-	 * Should be called once the queries returned by getFlattenedUpdateQueries have been succesfully executed
-	 * ,or reverted and are no longer needed.
+	 * Should be called once the queries returned by getFlattenedUpdateQueries
+	 * have been succesfully executed or reverted and are no longer needed.
 	 */
 	private void clearFlattenedUpdateQueries() {
 		this.flattenedDeletes = new HashMap();
 		this.flattenedInserts = new HashMap();
 	}
+
+	/**
+	 * Sets default for posting transaction events by new DataContexts.
+	 */
+	public void setTransactionEventsEnabledDefault(boolean onOrOff) {
+		postDataContextTransactionEventsDefault = onOrOff;
+	}
+
+	/**
+	 * Enable/disable posting of transaction events by this DataContext.
+	 */
+	public void setTransactionEventsEnabled(boolean onOrOff) {
+		this.postDataContextTransactionEvents = onOrOff;
+	}
+
 }
