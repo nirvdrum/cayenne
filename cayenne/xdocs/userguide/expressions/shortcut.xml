@@ -59,11 +59,27 @@
             <p></p>
             </li>
             
-            <li>public static Expression <b>likeExp</b>(String pathSpec, String value)<br/>
+            <li>public static Expression <b>likeExp</b>(String pathSpec, Object value)<br/>
             <p></p>
             </li>
             
-            <li>public static Expression <b>likeIgnoreCaseExp</b>(String pathSpec, String value)<br/>
+            <li>public static Expression <b>likeIgnoreCaseExp</b>(String pathSpec, Object value)<br/>
+            <p></p>
+            </li>
+            
+            <li>public static Expression <b>notInExp</b>(String pathSpec, Object value)<br/>
+            <p></p>
+            </li>
+            
+            <li>public static Expression <b>notBetweenExp</b>(String pathSpec, Object value)<br/>
+            <p></p>
+            </li>
+            
+            <li>public static Expression <b>notLikeExp</b>(String pathSpec, Object value)<br/>
+            <p></p>
+            </li>
+            
+            <li>public static Expression <b>notLikeIgnoreCaseExp</b>(String pathSpec, Object value)<br/>
             <p></p>
             </li>
         </ul>		

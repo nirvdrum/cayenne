@@ -5,26 +5,27 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>May 25, 2003:</i></strong> <strong>Cayenne Beta 3 Released.</strong></u></p>
+        <p><u><strong><i>June 16, 2003:</i></strong> <strong>Cayenne Beta 4 Released.</strong></u></p>
         
-        <p>Bugfix release. For details see the <a href="RELEASE-NOTES-1.0b3.txt">release notes</a>. 
+        <p>Among other things, this release includes a number of CayenneModeler updates and 
+        bugfixes. For details see the <a href="RELEASE-NOTES-1.0b4.txt">release notes</a>. 
         Download the release <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
         here</a>.
         
         Changes in this release:
         <ul>
-        	<li>Fixes a number of Oracle issues with BLOB/CLOB.</li>
-        	<li>Introduces an early version of the <a href=
-        	"modelerguide/index.html">CayenneModeler Guide</a>.</li>
-        	<li>Adds extra validation logic to CayenneModeler, fixes
-        	a few bugs leading to Modeler exceptions due to partial
-        	DataMaps.</li>
-        	<li>All API deprecated as of Beta 1 is removed. <i><b>Users who customized
-        	their class generation velocity templates MUST read the release notes.</b></i></li>
+        	<li>Full mapping support for stored procedures in CayenneModeler.</li>
+        	<li>CayenneModeler look and feel made more consistent (e.g. dialogs 
+        	will close on ESC, scrollbars will appear when needed, UI widgets
+        	are made the same size, etc.)</li>
+        	<li>Added some missing Expression API (parameterized LIKE expressions,
+        	NOT_LIKE, NOT_IN expressions, etc.)</li>
+        	<li>Cayenne will no longer try to impose its Log4J configuration if it
+        	detects that Log4J is already configured.</li>
         </ul>
         
         <i>Note on deprecated API: There is still some deprecated API created among Beta releases.
-         All deprecated
+        All deprecated
         code will be preserved for a while, but will NOT be included in the final 1.0 release.
         Make sure to replace calls to the deprecated methods and classes
         in your applications with suggested alternatives.</i>

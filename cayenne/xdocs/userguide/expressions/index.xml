@@ -28,6 +28,10 @@
              			<li>LIKE_IGNORE_CASE</li> 
              			<li>EQUAL_TO</li>
              			<li>NOT_EQUAL_TO</li>
+             			<li>NOT_IN</li>
+             			<li>NOT_BETWEEN</li>
+             			<li>NOT_LIKE</li>
+             			<li>NOT_LIKE_IGNORE_CASE</li>
              </ul>
              </li>
              		

@@ -40,7 +40,7 @@
         build complex expression trees.</p>
         
         <panel name="Note:">
-        The API discussed below is rarely used directly. 
+        The API discussed above is rarely used directly. 
 		Instead ExpressionFactory provides a simplified type-safe API discussed in the 
 		following chapters.
 		</panel>         	
