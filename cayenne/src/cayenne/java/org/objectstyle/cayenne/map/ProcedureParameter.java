@@ -72,7 +72,6 @@ public class ProcedureParameter extends MapObject {
      */
     public static final int VOID_PARAMETER = 4;
 
-
     protected int direction = VOID_PARAMETER;
 
     // The length of CHAR or VARCHAR or max num of digits for DECIMAL.
@@ -82,7 +81,6 @@ public class ProcedureParameter extends MapObject {
     protected int precision = -1;
     protected int type = TypesMapping.NOT_DEFINED;
 
- 
     /**
      * Constructor for ProcedureParam.
      */
@@ -94,11 +92,8 @@ public class ProcedureParameter extends MapObject {
         super(name);
     }
 
-    public ProcedureParameter(
-        String name,
-        int type,
-        int direction) {
-            
+    public ProcedureParameter(String name, int type, int direction) {
+
         super(name);
         setType(type);
         setDirection(direction);
@@ -116,7 +111,7 @@ public class ProcedureParameter extends MapObject {
     public Procedure getEntity() {
         return (Procedure) getParent();
     }
-    
+
     public int getMaxLength() {
         return maxLength;
     }
@@ -128,19 +123,19 @@ public class ProcedureParameter extends MapObject {
     public int getType() {
         return type;
     }
-    
+
     /**
      * @return <code>true</code> if this is IN or INOUT parameter.
      */
     public boolean isInParameter() {
         return direction == IN_PARAMETER || direction == IN_OUT_PARAMETER;
     }
-    
+
     /**
      * @return <code>true</code> if this is OUT or INOUT parameter.
      */
     public boolean isOutParam() {
-    	return direction == OUT_PARAMETER || direction == IN_OUT_PARAMETER;
+        return direction == OUT_PARAMETER || direction == IN_OUT_PARAMETER;
     }
 
     /**
@@ -154,8 +149,7 @@ public class ProcedureParameter extends MapObject {
             && direction != OUT_PARAMETER
             && direction != IN_OUT_PARAMETER
             && direction != VOID_PARAMETER) {
-            throw new IllegalArgumentException(
-                "Unknown parameter type: " + direction);
+            throw new IllegalArgumentException("Unknown parameter type: " + direction);
         }
 
         this.direction = direction;
@@ -169,12 +163,17 @@ public class ProcedureParameter extends MapObject {
         precision = i;
     }
 
+    public void setType(int i) {
+        type = i;
+    }
+
+    /** Returns the procedure that holds this parameter. */
+    public Procedure getProcedure() {
+        return (Procedure) getParent();
+    }
+
     /** Sets the procedure that holds this parameter. */
     public void setProcedure(Procedure procedure) {
         setParent(procedure);
-    }
-
-    public void setType(int i) {
-        type = i;
     }
 }

@@ -57,23 +57,25 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 
 /**
  * @author Andrei Adamchik
  */
 public class ProcedureParameterTableModel extends CayenneTableModel {
-    public static final int PARAMETER_RETURN = 0;
-    public static final int PARAMETER_NAME = 1;
-    public static final int PARAMETER_DIRECTION = 2;
-    public static final int PARAMETER_TYPE = 3;
-    public static final int PARAMETER_LENGTH = 4;
-    public static final int PARAMETER_PRECISION = 5;
+    public static final int PARAMETER_NAME = 0;
+    public static final int PARAMETER_DIRECTION = 1;
+    public static final int PARAMETER_TYPE = 2;
+    public static final int PARAMETER_LENGTH = 3;
+    public static final int PARAMETER_PRECISION = 4;
 
     public static final String IN_PARAMETER = "IN";
     public static final String OUT_PARAMETER = "OUT";
@@ -90,7 +92,6 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
 
     private static final int[] PARAMETER_INDEXES =
         new int[] {
-            PARAMETER_RETURN,
             PARAMETER_NAME,
             PARAMETER_DIRECTION,
             PARAMETER_TYPE,
@@ -98,13 +99,7 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
             PARAMETER_PRECISION };
 
     private static final String[] PARAMETER_NAMES =
-        new String[] {
-            "Return Value",
-            "Name",
-            "Direction",
-            "Type",
-            "Max Length",
-            "Precision" };
+        new String[] { "Name", "Direction", "Type", "Max Length", "Precision" };
 
     protected Procedure procedure;
 
@@ -127,39 +122,100 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
             : null;
     }
 
-    public void setUpdatedValueAt(Object newVal, int rowIndex, int colIndex) {
+    public void setUpdatedValueAt(Object newVal, int rowIndex, int columnIndex) {
         ProcedureParameter parameter = getParameter(rowIndex);
 
         if (parameter == null) {
             return;
         }
 
-        ProcedureParameterEvent event = new ProcedureParameterEvent(eventSource, parameter);
-        /*switch (colIndex) {
-            case DB_ATTRIBUTE_NAME :
-                e.setOldName(attr.getName());
-                setAttributeName((String) newVal, attr);
-                fireTableCellUpdated(row, col);
+        ProcedureParameterEvent event =
+            new ProcedureParameterEvent(eventSource, parameter);
+        switch (columnIndex) {
+            case PARAMETER_NAME :
+                event.setOldName(parameter.getName());
+                setParameterName((String) newVal, parameter);
+                fireTableCellUpdated(rowIndex, columnIndex);
                 break;
-            case DB_ATTRIBUTE_TYPE :
-                setAttributeType((String) newVal, attr);
+            case PARAMETER_DIRECTION :
+                setParameterDirection((String) newVal, parameter);
                 break;
-            case DB_ATTRIBUTE_PRIMARY_KEY :
-                setPrimaryKey((Boolean) newVal, attr);
-                fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
+            case PARAMETER_TYPE :
+                setParameterType((String) newVal, parameter);
                 break;
-            case DB_ATTRIBUTE_PRECISION :
-                setPrecision((String) newVal, attr);
+            case PARAMETER_LENGTH :
+                setMaxLength((String) newVal, parameter);
                 break;
-            case DB_ATTRIBUTE_MANDATORY :
-                setMandatory((Boolean) newVal, attr);
-                break;
-            case DB_ATTRIBUTE_MAX :
-                setMaxLength((String) newVal, attr);
+            case PARAMETER_PRECISION :
+                setPrecision((String) newVal, parameter);
                 break;
         }
+        mediator.fireProcedureParameterEvent(event);
+    }
 
-        mediator.fireProcedureParameterEvent(event); */
+    protected void setPrecision(String newVal, ProcedureParameter parameter) {
+        if (newVal == null || newVal.trim().length() <= 0) {
+            parameter.setPrecision(-1);
+        }
+        else {
+            try {
+                parameter.setPrecision(Integer.parseInt(newVal));
+            }
+            catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Invalid precision (" + newVal + "), only numbers are allowed.",
+                    "Invalid Precision Value",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    protected void setMaxLength(String newVal, ProcedureParameter parameter) {
+        if (newVal == null || newVal.trim().length() <= 0) {
+            parameter.setMaxLength(-1);
+        }
+        else {
+            try {
+                parameter.setMaxLength(Integer.parseInt(newVal));
+            }
+            catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Invalid Max Length (" + newVal + "), only numbers are allowed",
+                    "Invalid Maximum Length",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+    }
+
+    protected void setParameterType(String newVal, ProcedureParameter parameter) {
+        parameter.setType(TypesMapping.getSqlTypeByName(newVal));
+    }
+
+    protected void setParameterDirection(
+        String direction,
+        ProcedureParameter parameter) {
+        if (ProcedureParameterTableModel.IN_PARAMETER.equals(direction)) {
+            parameter.setDirection(ProcedureParameter.IN_PARAMETER);
+        }
+        else if (ProcedureParameterTableModel.OUT_PARAMETER.equals(direction)) {
+            parameter.setDirection(ProcedureParameter.OUT_PARAMETER);
+        }
+        else if (ProcedureParameterTableModel.IN_OUT_PARAMETER.equals(direction)) {
+            parameter.setDirection(ProcedureParameter.IN_OUT_PARAMETER);
+        }
+        else if (ProcedureParameterTableModel.VOID_PARAMETER.equals(direction)) {
+            parameter.setDirection(ProcedureParameter.VOID_PARAMETER);
+        }
+        else {
+            parameter.setDirection(-1);
+        }
+    }
+
+    protected void setParameterName(String newVal, ProcedureParameter parameter) {
+        MapUtil.setProcedureParameterName(parameter, newVal.trim());
     }
 
     public Class getElementsClass() {
@@ -178,8 +234,6 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
         }
 
         switch (columnIndex) {
-            case PARAMETER_RETURN :
-                return returnParameter(parameter, rowIndex);
             case PARAMETER_NAME :
                 return getParameterName(parameter);
             case PARAMETER_DIRECTION :
@@ -231,25 +285,12 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
         return parameter.getName();
     }
 
-    protected Object returnParameter(ProcedureParameter parameter, int rowIndex) {
-        if (rowIndex != 0) {
-            return Boolean.FALSE;
-        }
-
-        return (procedure.isReturningValue()) ? Boolean.TRUE : Boolean.FALSE;
-    }
-
     public String getColumnName(int col) {
         return PARAMETER_NAMES[col];
     }
 
     public Class getColumnClass(int col) {
-        switch (col) {
-            case PARAMETER_RETURN :
-                return Boolean.class;
-            default :
-                return String.class;
-        }
+        return String.class;
     }
 
     /**
@@ -259,5 +300,9 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
      */
     public void orderList() {
         // NOOP
+    }
+
+    public boolean isCellEditable(int row, int col) {
+        return true;
     }
 }

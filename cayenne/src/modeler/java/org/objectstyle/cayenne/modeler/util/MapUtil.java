@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.util.Util;
 
@@ -85,10 +86,27 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class MapUtil {
-	
+
+    public static void setProcedureParameterName(
+        ProcedureParameter parameter,
+        String newName) {
+
+        String oldName = parameter.getName();
+
+        // If name hasn't changed, just return
+        if (Util.nullSafeEquals(oldName, newName)) {
+            return;
+        }
+
+        Procedure procedure = parameter.getEntity();
+        procedure.removeCallParameter(parameter.getName());
+        parameter.setName(newName);
+		procedure.addCallParameter(parameter);
+    }
+
     public static void setDataMapName(DataDomain domain, DataMap map, String newName) {
         String oldName = map.getName();
-        
+
         // If name hasn't changed, just return
         if (Util.nullSafeEquals(oldName, newName)) {
             return;
