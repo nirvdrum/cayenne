@@ -136,7 +136,7 @@ public class EventSubject extends Object {
 	}
 
 	public int hashCode() {
-		return (super.hashCode() | _fullyQualifiedSubjectName.hashCode());
+		return (super.hashCode() ^ _fullyQualifiedSubjectName.hashCode());
 	}
 
 	public String getSubjectName() {
