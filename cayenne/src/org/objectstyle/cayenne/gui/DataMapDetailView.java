@@ -215,7 +215,7 @@ public class DataMapDetailView
 			FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
 			JFileChooser fc = new JFileChooser(fileView);
 			fc.setDialogType(JFileChooser.SAVE_DIALOG);
-			fc.setDialogTitle("Data Map location");
+			fc.setDialogTitle("Data Map Location");
 			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
 			if (projDir != null) {

@@ -55,18 +55,20 @@
  */
 package org.objectstyle.cayenne.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import java.io.IOException;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
@@ -74,6 +76,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
+import org.objectstyle.cayenne.gui.util.SaveHandler;
 import org.objectstyle.cayenne.util.Preferences;
 
 /** 
@@ -177,11 +180,7 @@ public class DataNodeDetailView
 		adapter = new JComboBox();
 		adapter.setEditable(true);
 		String[] arr1 =
-			{
-				DbAdapter.JDBC,
-				DbAdapter.SYBASE,
-				DbAdapter.MYSQL,
-				DbAdapter.ORACLE
+			{ DbAdapter.JDBC, DbAdapter.SYBASE, DbAdapter.MYSQL, DbAdapter.ORACLE
 			/* [DISABLE POSTGRES DATA] ,DbAdapter.POSTGRES */
 		};
 		model = new DefaultComboBoxModel(arr1);
@@ -202,8 +201,7 @@ public class DataNodeDetailView
 		right_comp[2] = fileChooser;
 		right_comp[3] = adapter;
 
-		JPanel temp =
-			PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
+		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
 		add(temp, constraints);
 		location.setEditable(false);
 		fileBtn.setVisible(false);
@@ -308,42 +306,35 @@ public class DataNodeDetailView
 		} else if (e.getDocument() == driver.getDocument()) {
 
 			String driverStr =
-				(driver.getText().trim().length() > 0)
-					? driver.getText().trim()
-					: null;
+				(driver.getText().trim().length() > 0) ? driver.getText().trim() : null;
 			info.setJdbcDriver(driverStr);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
 		} else if (e.getDocument() == url.getDocument()) {
 
 			String urlStr =
-				(url.getText().trim().length() > 0)
-					? url.getText().trim()
-					: null;
+				(url.getText().trim().length() > 0) ? url.getText().trim() : null;
 			info.setDataSourceUrl(urlStr);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
 		} else if (e.getDocument() == password.getDocument()) {
 
 			char[] pwd = password.getPassword();
-			String pwdStr =
-				(pwd != null && pwd.length > 0) ? new String(pwd) : null;
+			String pwdStr = (pwd != null && pwd.length > 0) ? new String(pwd) : null;
 
 			info.setPassword(pwdStr);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 		} else if (e.getDocument() == minConnections.getDocument()) {
 
 			if (minConnections.getText().trim().length() > 0)
-				info.setMinConnections(
-					Integer.parseInt(minConnections.getText()));
+				info.setMinConnections(Integer.parseInt(minConnections.getText()));
 			else
 				info.setMinConnections(0);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 		} else if (e.getDocument() == maxConnections.getDocument()) {
 
 			if (maxConnections.getText().trim().length() > 0)
-				info.setMaxConnections(
-					Integer.parseInt(maxConnections.getText()));
+				info.setMaxConnections(Integer.parseInt(maxConnections.getText()));
 			else
 				info.setMaxConnections(0);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
@@ -357,8 +348,7 @@ public class DataNodeDetailView
 		}
 
 		Object src = e.getSource();
-		DataSourceInfo info =
-			((GuiDataSource) node.getDataSource()).getDataSourceInfo();
+		DataSourceInfo info = ((GuiDataSource) node.getDataSource()).getDataSourceInfo();
 
 		DataNode aNode = mediator.getCurrentDataNode();
 		if (src == factory) {
@@ -417,50 +407,80 @@ public class DataNodeDetailView
 		}
 	}
 
-	private void selectNodeLocation() {
+    /**
+     * Handles changing file name of the data node configuration.
+     */
+	protected void selectNodeLocation() {
+		SaveHandler saveHandler = new SaveHandler(mediator);
+		String oldLocation = node.getDataSourceLocation();
+
+		String projDirStr = mediator.getConfig().getProjDir();
+		File projDir = (projDirStr != null) ? new File(projDirStr) : null;
+
 		try {
-			// Get the project file name (always cayenne.xml)
-			File file = null;
-			String proj_dir_str = mediator.getConfig().getProjDir();
-			File proj_dir = null;
-			if (proj_dir_str != null)
-				proj_dir = new File(proj_dir_str);
-			JFileChooser fc;
-			FileSystemViewDecorator file_view;
-			file_view = new FileSystemViewDecorator(proj_dir);
-			fc = new JFileChooser(file_view);
-			fc.setDialogType(JFileChooser.SAVE_DIALOG);
-			fc.setDialogTitle("Data Node location");
-			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			if (null != proj_dir)
-				fc.setCurrentDirectory(proj_dir);
-			int ret_code = fc.showSaveDialog(this);
-			if (ret_code != JFileChooser.APPROVE_OPTION)
+			// don't allow changes on unsaved project
+			if (!saveHandler.shouldProceed()) {
 				return;
-			file = fc.getSelectedFile();
-			String old_loc = node.getDataSourceLocation();
-			// Get absolute path for old location
-			if (null != proj_dir)
-				old_loc = proj_dir + File.separator + old_loc;
-			// Create new file
-			if (!file.exists())
-				file.createNewFile();
+			}
+
+			FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
+			JFileChooser fc = new JFileChooser(fileView);
+			fc.setDialogType(JFileChooser.SAVE_DIALOG);
+			fc.setDialogTitle("Data Node Location");
+			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+			if (projDir != null) {
+				fc.setCurrentDirectory(projDir);
+			}
+
+			if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+				return;
+			}
+
+			File file = fc.getSelectedFile();
+
 			// Determine and set new data map location
-			String new_file_location = file.getAbsolutePath();
-			String relative_location;
+			String newFileLocation = file.getAbsolutePath();
+
 			// If it is set, use path striped of proj dir and following separator
 			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-				relative_location = new_file_location;
-			else
-				relative_location =
-					new_file_location.substring(proj_dir_str.length() + 1);
-			node.setDataSourceLocation(relative_location);
-			location.setText(relative_location);
-			// Node location changed - mark current domain dirty
-			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-		} catch (Exception e) {
-			logObj.warn("Error setting node file location", e);
+			String relLocation =
+				(projDirStr == null)
+					? newFileLocation
+					: newFileLocation.substring(projDirStr.length() + 1);
+
+			if (relLocation.equals(node.getDataSourceLocation())) {
+				return;
+			}
+
+			// Create new file
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			node.setDataSourceLocation(relLocation);
+			location.setText(relLocation);
+		} catch (IOException ioex) {
+			ErrorDebugDialog.guiWarning(ioex, "Error renaming map.");
+			return;
+		} catch (Throwable th) {
+			ErrorDebugDialog.guiException(th);
+			return;
+		}
+
+		// Map location changed
+		mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+		saveHandler.saveProject();
+
+		// remove old location
+		if (oldLocation != null) {
+			File oldFile =
+				(projDir != null)
+					? new File(projDir, oldLocation)
+					: new File(oldLocation);
+			if (!oldFile.delete()) {
+				logObj.info("Can't delete old file: " + oldFile);
+			}
 		}
 	}
 
@@ -518,8 +538,7 @@ public class DataNodeDetailView
 					// If direct connection, 
 					// show File button and disable text field.
 					// Otherwise hide File button and enable text field.
-					if (selected_class
-						.equals(DataSourceFactory.DIRECT_FACTORY)) {
+					if (selected_class.equals(DataSourceFactory.DIRECT_FACTORY)) {
 						fileBtn.setVisible(true);
 						location.setEditable(false);
 					} else {

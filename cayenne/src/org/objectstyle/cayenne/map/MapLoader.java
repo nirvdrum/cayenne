@@ -998,9 +998,10 @@ class SourceTarget {
 	}
 
 	public int hashCode() {
-		int code = +source.hashCode() * 100000 + target.hashCode() * 10000;
-		if (null != name)
+		int code = source.hashCode() * 100000 + target.hashCode() * 10000;
+		if (null != name) {
 			code += name.hashCode();
+		}
 		return code;
 	}
 
