@@ -121,12 +121,12 @@ public class RequestQueue {
 
         // wait
         synchronized (result) {
-        	boolean interrupted = false;
+            boolean interrupted = false;
             try {
                 // release lock and wait
                 result.wait(timeout);
             } catch (InterruptedException e) {
-            	interrupted = true;
+                interrupted = true;
             }
 
             // wait is over, remove itself from the queue
@@ -135,7 +135,10 @@ public class RequestQueue {
                 // timeout or interrupted
                 synchronized (queue) {
                     queue.remove(result);
-                    int code = (interrupted) ? RequestDequeue.INTERRUPTED : RequestDequeue.TIMED_OUT;
+                    int code =
+                        (interrupted)
+                            ? RequestDequeue.INTERRUPTED
+                            : RequestDequeue.TIMED_OUT;
                     result.setDequeueEventCode(code);
                 }
             }
@@ -148,19 +151,29 @@ public class RequestQueue {
      * Releases the first thread in the queue. 
      */
     public boolean dequeueFirst(Object dequeuedObj) {
+        RequestDequeue first = null;
+        // Make sure we avoid nested locks - locking both queue & result object
+        // at the same time - this is a potential deadlock.
+        
         synchronized (queue) {
             if (queue.size() > 0) {
-                RequestDequeue first = (RequestDequeue) queue.get(0);
-                synchronized (first) {
-                    queue.remove(0);
-                    first.setDequeueEventObject(dequeuedObj);
-                    first.setDequeueEventCode(RequestDequeue.DEQUEUE_SUCCESS);
-                    first.notifyAll();
-                }
-                return true;
-            } else {
-                return false;
+                first = (RequestDequeue) queue.get(0);
+                queue.remove(0);
             }
+        }
+
+        // this is true when the queue had at 
+        // least one object
+        if (first != null) {
+            synchronized (first) {
+                first.setDequeueEventObject(dequeuedObj);
+                first.setDequeueEventCode(RequestDequeue.DEQUEUE_SUCCESS);
+                first.notifyAll();
+            }
+
+            return true;
+        } else {
+            return false;
         }
     }
 }
