@@ -310,26 +310,27 @@ public class JdbcPkGenerator implements PkGenerator {
      * not "generatePkForDbEntity".</p>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
+        
+        // run queries via DataNode to utilize its transactional behavior
         ArrayList queries = new ArrayList(2);
 
-        SqlSelectQuery sel = new SqlSelectQuery();
-        sel.setSqlString(pkSelectString(ent.getName()));
+        // 1. prepare select 
+        SqlSelectQuery sel = new SqlSelectQuery(null, pkSelectString(ent.getName()));
         sel.setResultDesc(resultDesc);
         queries.add(sel);
 
-        // create dummy update 
-        // it will be populated with real stuff inside DB transaction
-        SqlModifyQuery upd = new SqlModifyQuery();
-        queries.add(upd);
+                
+        // 2. prepare update 
+        queries.add(new SqlModifyQuery(null, pkUpdateString(ent.getName())));
 
-        PkRetrieveProcessor pkProcessor = new PkRetrieveProcessor(upd, ent.getName());
-        node.performQueries(queries, pkProcessor);
+        PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
+        node.performQueries(queries, observer);
 
-        if (!pkProcessor.successFlag) {
+        if (!observer.successFlag) {
             throw new CayenneRuntimeException("Error generating PK.");
         }
         else {
-            return pkProcessor.nextId.intValue();
+            return observer.nextId.intValue();
         }
     }
 
@@ -362,12 +363,10 @@ public class JdbcPkGenerator implements PkGenerator {
     /** OperationObserver for primary key retrieval. */
     class PkRetrieveProcessor extends DefaultOperationObserver {
         private boolean successFlag;
-        private SqlModifyQuery queryTemplate;
         private Integer nextId;
         private String entName;
 
-        public PkRetrieveProcessor(SqlModifyQuery queryTemplate, String entName) {
-            this.queryTemplate = queryTemplate;
+        public PkRetrieveProcessor(String entName) {
             this.entName = entName;
         }
 
@@ -393,9 +392,6 @@ public class JdbcPkGenerator implements PkGenerator {
             if (nextId == null) {
                 throw new CayenneRuntimeException("Error generating PK : null nextId.");
             }
-
-            // while transaction is still in progress, modify update query that will be executed next
-            queryTemplate.setSqlString(pkUpdateString(entName));
         }
 
         public void nextCount(Query query, int resultCount) {
