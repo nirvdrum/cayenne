@@ -205,8 +205,9 @@ public class EntityResolver {
                             Configuration.getResourceLoader().loadClass(className);
                     }
                     catch (ClassNotFoundException e) {
-                        throw new CayenneRuntimeException(
-                            "Cannot find class " + className);
+                        // print a big warning and continue... DataMaps can contain all kinds of garbage...
+                        logObj.warn("*** Class '" + className + "' not found in runtime. Ignoring.");
+                        continue;
                     }
 
                     if (objEntityCache.get(entityClass) != null) {
@@ -573,6 +574,10 @@ public class EntityResolver {
      * @since 1.1 
      */
     public synchronized DataMap lookupDataMap(Query q) {
+        if(q.getRoot() instanceof DataMap) {
+            return (DataMap) q.getRoot();
+        }
+        
         DbEntity entity = lookupDbEntity(q);
         if (entity != null) {
             return entity.getDataMap();
