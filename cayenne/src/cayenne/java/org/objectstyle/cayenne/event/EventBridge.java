@@ -194,8 +194,9 @@ public abstract class EventBridge implements EventListener {
     protected abstract void shutdownExternal() throws Exception;
 
     /**
-     * Helper method for sucblasses to post an event obtained from a remote source.
-     * Subclasses do not have to use this method, but they probably should for consistency.
+     * Helper method for sucblasses to asynchronously post an event obtained from a remote
+     * source. Subclasses do not have to use this method, but they probably should for
+     * consistency.
      */
     public void onExternalEvent(CayenneEvent event) {
         if (eventManager != null) {
@@ -206,12 +207,14 @@ public abstract class EventBridge implements EventListener {
                 event.setSource(this);
             }
 
-            eventManager.postEvent(event, localSubject);
+            // inject external eveny to the event manager queue, but do it asynchronously
+            // to avoid locking conflicts
+            eventManager.postNonBlockingEvent(event, localSubject);
         }
         else {
             throw new IllegalStateException(
-                "Can't post events. EventBridge was not started properly. "
-                    + "EventManager is null.");
+                    "Can't post events. EventBridge was not started properly. "
+                            + "EventManager is null.");
         }
     }
 
