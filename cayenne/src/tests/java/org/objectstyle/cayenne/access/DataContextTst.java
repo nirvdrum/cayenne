@@ -1095,5 +1095,32 @@ public class DataContextTst extends CayenneTestCase {
 		//NB:  This is an easier comparison than manually fetching artist
 		assertEquals(artistName, queriedPainting.getToArtist().getArtistName());
 	}
+	
+	/**
+	 * Tests that hasChanges performs correctly when an object is "modified" 
+	 * and the property is simply set to the same value (an unreal modification) 
+	 */
+	public void testHasChangesUnrealModify() {
+		String artistName="ArtistName";
+		Artist artist=(Artist)ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName(artistName);
+		ctxt.commitChanges();
+		
+		artist.setArtistName(artistName); //Set again to *exactly* the same value
+		assertTrue(!ctxt.hasChanges());
+	}
+	
+	/**
+	 * Tests that hasChanges performs correctly when an object is "modified" 
+	 * and the property is simply set to the same value (an unreal modification) 
+	 */
+	public void testHasChangesRealModify() {
+		Artist artist=(Artist)ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName("ArtistName");
+		ctxt.commitChanges();
+		
+		artist.setArtistName("Something different"); 
+		assertTrue(ctxt.hasChanges());
+	}
 
 }

@@ -68,6 +68,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.QueryHelper;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -168,9 +169,12 @@ public class ObjectStore implements Serializable {
         while (it.hasNext()) {
             DataObject dobj = (DataObject) it.next();
             int state = dobj.getPersistenceState();
-            if (state == PersistenceState.NEW
-                || state == PersistenceState.DELETED
-                || state == PersistenceState.MODIFIED) {
+            if(state==PersistenceState.MODIFIED) {
+            	if(QueryHelper.updatedProperties(dobj)!=null) {
+            		return true; //There were some updated properties
+            	} //no updated properties, continue and see if any other objects have changed
+            } else if (state == PersistenceState.NEW
+                || state == PersistenceState.DELETED) {
                 return true;
             }
         }

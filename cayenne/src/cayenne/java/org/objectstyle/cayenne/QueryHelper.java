@@ -91,18 +91,24 @@ import org.objectstyle.cayenne.query.UpdateQuery;
 public final class QueryHelper {
 	private static Logger logObj = Logger.getLogger(QueryHelper.class);
 
-	/** Returns an update query for the DataObject that can be used to commit
-	 *  object state changes to the database. If no changes are found, null is returned.
-	 *
-	 *  @param dataObject data object that potentially can have changes that need
-	 *  to be synchronized with the database.
+	private static Map putModifiedAttribute(Map aMap, String name, Object value) {
+		if(aMap==null) {
+			aMap=new HashMap();
+		}
+		aMap.put(name, value);
+		return aMap;
+	}
+	/**
+	 * Returns a map of the properties of dataObject which have actually changed
+	 * compared to the objects commited snapshot.  Actual change is determined
+	 * by using equals() (true implies no change).
+	 * Will return null if there are no changes
+	 * 
+	 * @param dataObject dataObject that may have changes
 	 */
-	public static UpdateQuery updateQuery(DataObject dataObject) {
-		UpdateQuery upd = new UpdateQuery();
-
-		ObjectId id = dataObject.getObjectId();
-		upd.setRoot(dataObject.getClass());
-
+	public static Map updatedProperties(DataObject dataObject) {
+		Map result=null; //Lazily created to avoid creating too many unnecessary objects
+		
 		Map committedSnapshot = dataObject.getCommittedSnapshot();
 		Map currentSnapshot = dataObject.getCurrentSnapshot();
 
@@ -115,14 +121,16 @@ public final class QueryHelper {
 			// only add attribute to the update clause if the value has changed
 			if (committedSnapshot != null) {
 				Object oldValue = committedSnapshot.get(attrName);
-				if (oldValue != null && !oldValue.equals(newValue))
-					upd.addUpdAttribute(attrName, newValue);
-				else if (oldValue == null && newValue != null)
-					upd.addUpdAttribute(attrName, newValue);
+				if (oldValue != null && !oldValue.equals(newValue)) {
+					result=putModifiedAttribute(result, attrName, newValue);
+				} else if (oldValue == null && newValue != null) {
+					result=putModifiedAttribute(result, attrName, newValue);
+				}
 			}
 			// if no snapshot exists, just add the fresh value to update clause
-			else
-				upd.addUpdAttribute(attrName, newValue);
+			else {
+				result=putModifiedAttribute(result, attrName, newValue);
+			}
 		}
 
 		// original snapshot can have extra keys that are missing in the
@@ -137,17 +145,33 @@ public final class QueryHelper {
 				Object oldValue = committedSnapshot.get(attrName);
 				if (oldValue == null)
 					continue;
-
-				upd.addUpdAttribute(attrName, null);
+				result=putModifiedAttribute(result, attrName, null);
 			}
-		}
+		}		
+		return result; //Might be null if nothing was actually changed
+	}
+	
+	/** Returns an update query for the DataObject that can be used to commit
+	 *  object state changes to the database. If no changes are found, null is returned.
+	 *
+	 *  @param dataObject data object that potentially can have changes that need
+	 *  to be synchronized with the database.
+	 */
+	public static UpdateQuery updateQuery(DataObject dataObject) {
+		UpdateQuery upd = new UpdateQuery();
 
-		if (upd.getUpdAttributes().size() > 0) {
+		ObjectId id = dataObject.getObjectId();
+		upd.setRoot(dataObject.getClass());
+		Map modifiedProperties=updatedProperties(dataObject);
+		if((modifiedProperties!=null) && (modifiedProperties.size()>0)) {
+			Iterator keyIterator=modifiedProperties.keySet().iterator();
+			while(keyIterator.hasNext()) {
+				String key=(String)keyIterator.next();
+				upd.addUpdAttribute(key, modifiedProperties.get(key));
+			}
 			// set qualifier
 			upd.setQualifier(
-				ExpressionFactory.matchAllDbExp(
-					id.getIdSnapshot(),
-					Expression.EQUAL_TO));
+				ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
 			return upd;
 		}
 
@@ -539,7 +563,6 @@ public final class QueryHelper {
 			String path,
 			String toPrefix,
 			String fromPrefix) {
-			System.err.println("path :"+path+", toPrefix:"+toPrefix);
 			if (path.equals(toPrefix)) {
 				// 1. Path ends with prefetch entity - match PK
 				throw new CayenneRuntimeException(
