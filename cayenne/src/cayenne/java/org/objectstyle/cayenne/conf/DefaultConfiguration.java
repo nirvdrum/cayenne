@@ -108,7 +108,7 @@ public class DefaultConfiguration extends Configuration {
 	public DefaultConfiguration(File projectFile) {
 		this();
 		this.projectFile = projectFile;
-		this.locator.addFilesystemPath(this.projectDir().getPath());
+		this.locator.addFilesystemPath(this.projectDirectory().getPath());
 	}
 
 	public ResourceLocator getResourceLocator() {
@@ -119,7 +119,7 @@ public class DefaultConfiguration extends Configuration {
 		return projectFile;
 	}
 
-	public File projectDir() {
+	public File projectDirectory() {
 		File pfile = this.projectFile();
 		if (pfile != null) {
 			return pfile.getParentFile();
@@ -155,7 +155,7 @@ public class DefaultConfiguration extends Configuration {
 	  * This can be a standalone file or an entry in a JAR file. */
 	public InputStream getMapConfiguration(String location) {
 		try {
-			File dir = this.projectDir();
+			File dir = this.projectDirectory();
 			if (dir != null) {
 				return new FileInputStream(new File(dir, location));
 			}
