@@ -89,9 +89,7 @@ public class CayenneGenerator extends Task {
 
         try {
             mapTimestamp = map.lastModified();
-            InputSource in = new InputSource(map.getCanonicalPath());
-            DataMap dataMap = new MapLoaderImpl().loadDataMap(in);
-
+            DataMap dataMap = loadDataMap();
             AntClassGenerator gen = new AntClassGenerator(dataMap);
 
             if (makepairs) {
@@ -118,6 +116,13 @@ public class CayenneGenerator extends Task {
             super.log("Error generating classes.");
             throw new BuildException("Error generating classes.", ex);
         }
+    }
+    
+    
+    /** Loads and returns DataMap based on <code>map</code> attribute. */
+    protected DataMap loadDataMap()throws Exception {
+        InputSource in = new InputSource(map.getCanonicalPath());
+        return new MapLoaderImpl().loadDataMap(in);
     }
 
     /** Validates atttribute combinatins. Throws BuildException if
