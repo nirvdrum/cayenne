@@ -75,8 +75,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class DataContextTst extends TestCase {
     static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
 
-    private static final int _artistCount = 25;
-    private static final int _galleryCount = 10;
+    public static final int artistCount = 25;
+    public static final int galleryCount = 10;
 
     protected DataContext ctxt;
     protected TestOperationObserver opObserver;
@@ -238,11 +238,11 @@ public class DataContextTst extends TestCase {
         // check query results
         ArrayList o1 = opObserver.objectsForQuery(q1);
         assertNotNull(o1);
-        assertEquals(_artistCount, o1.size());
+        assertEquals(artistCount, o1.size());
 
         ArrayList o2 = opObserver.objectsForQuery(q2);
         assertNotNull(o2);
-        assertEquals(_galleryCount, o2.size());
+        assertEquals(galleryCount, o2.size());
     }
 
     public void testPerformSelectQuery() throws Exception {
@@ -252,7 +252,7 @@ public class DataContextTst extends TestCase {
         // check query results
         List objects = ctxt.performQuery(query);
         assertNotNull(objects);
-        assertEquals(_artistCount, objects.size());
+        assertEquals(artistCount, objects.size());
     }
 
     public void testPerformQuery() throws Exception {
@@ -264,7 +264,7 @@ public class DataContextTst extends TestCase {
         // check query results
         ArrayList objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
-        assertEquals(_artistCount, objects.size());
+        assertEquals(artistCount, objects.size());
     }
 
     private Artist fetchArtist(String name) {
@@ -276,7 +276,7 @@ public class DataContextTst extends TestCase {
         return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }
 
-    protected void populateTables() throws java.lang.Exception {
+    public void populateTables() throws java.lang.Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
 
@@ -288,7 +288,7 @@ public class DataContextTst extends TestCase {
             PreparedStatement stmt = conn.prepareStatement(insertArtist);
             long dateBase = System.currentTimeMillis();
 
-            for (int i = 1; i <= _artistCount; i++) {
+            for (int i = 1; i <= artistCount; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, "artist" + i);
                 stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
@@ -302,7 +302,7 @@ public class DataContextTst extends TestCase {
                 "INSERT INTO GALLERY (GALLERY_ID, GALLERY_NAME) VALUES (?,?)";
             stmt = conn.prepareStatement(insertGal);
 
-            for (int i = 1; i <= _galleryCount; i++) {
+            for (int i = 1; i <= galleryCount; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, "gallery" + i);
                 stmt.executeUpdate();

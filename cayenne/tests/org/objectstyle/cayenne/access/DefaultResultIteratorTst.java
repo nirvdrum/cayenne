@@ -52,46 +52,108 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.access;
 
-import java.util.Map;
+import java.sql.*;
 
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.DataObject;
+import junit.framework.TestCase;
 
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.SelectQuery;
 
+public class DefaultResultIteratorTst extends TestCase {
 
-/**
- * Defines API of an iterator over the records returned as a result
- * of SelectQuery execution. Usually a ResultIterator is supported by
- * an open java.sql.ResultSet, therefore most of the methods would throw
- * checked exceptions. ResultIterators must be explicitly closed when the
- * user is done working with them.
- * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- * 
- * @author Andrei Adamchik
- */
-public interface ResultIterator {
+	private DefaultResultIterator it;
+	private Connection conn;
+	private PreparedStatement st;
+	private ResultSet rs;
+
+	public DefaultResultIteratorTst(String name) {
+		super(name);
+	}
+
+	public void setUp() throws java.lang.Exception {
+		conn = null;
+		st = null;
+		rs = null;
+		it = null;
+		
+		TestMain.getSharedDatabaseSetup().cleanTableData();
+		new DataContextTst("noop").populateTables();
+	}
+
+	public void testCheckNextRow() throws java.lang.Exception {
+/*		try {
+			createIterator();
+            
+            assertNotNull(it.dataRow);
+            it.checkNextRow();
+            assertNotNull(it.dataRow);
+            
+		} finally {
+			cleanup();
+		}
+	} 
 	
-	/** 
-	 * Returns true if there is at least one more record
-	 * that can be read from the iterator.
-	 */
-	public boolean hasNextRow() throws CayenneException;
-    
-    /** 
-	 * Returns the next result row as a Map.
-	 */
-    public Map nextDataRow() throws CayenneException;
-    
-    /** 
-     * Closes ResultIterator and associated ResultSet. This method must be
-     * called explicitly when the user is finished processing the records.
-     * Otherwise unused database resources will not be released properly.
-     */  
-    public void close() throws CayenneException;
-}
+	public void testHasNextRow() throws java.lang.Exception {
+		try {
+			createIterator();
+            assertTrue(it.hasNextRow());            
+		} finally {
+			cleanup();
+		}
+	}
+	
+	public void testNextDataRow() throws java.lang.Exception {
+		try {
+			createIterator();
+			
+			// must be as many rows as we have artists
+			// inserted in the database
+			for(int i = 0; i < DataContextTst.artistCount; i++) {
+                  assertTrue(it.hasNextRow());
+                  it.nextDataRow();
+			}
+			
+			// rows must end here
+			assertTrue(!it.hasNextRow());
+			
+		} finally {
+			cleanup();
+		} 
+		*/
+	}
 
+	protected void cleanup() throws SQLException {
+		if (rs != null) {
+			rs.close();
+		}
+
+		if (st != null) {
+			st.close();
+		}
+
+		if (conn != null) {
+			conn.close();
+		}
+	}
+
+	protected void createIterator() throws Exception {
+		conn =  TestMain.getSharedConnection();
+			
+		DbAdapter adapter = TestMain.getSharedNode().getAdapter();
+		SelectQuery q = new SelectQuery("Artist");
+		SelectQueryAssembler assembler = (SelectQueryAssembler)adapter.getQueryTranslator(q);
+		assembler.setEngine(TestMain.getSharedNode());
+		
+        assembler.setCon(conn);
+        
+		st = assembler.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);		
+	    rs = st.executeQuery();
+	    
+	    it = new DefaultResultIterator(rs, adapter, assembler);
+	}
+}

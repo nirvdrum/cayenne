@@ -334,19 +334,35 @@ public class DataContext implements QueryEngine {
         return map;
     }
 
-    private DataObject registerFetchedSnapshot(
+    /** 
+     * Creates and returns a DataObject from a data row (snapshot).
+     * Newly created object is registered with this DataContext.
+     * 
+     * <p>Internally this method calls <code>objectFromDataRow(ObjEntity, Map, boolean)</code>
+     * with <code>false</code> "refersh" parameter.</p>
+     */
+    public DataObject objectFromDataRow(String entityName, Map dataRow) {
+    	ObjEntity ent = this.lookupEntity(entityName);
+    	return this.objectFromDataRow(ent, dataRow, false);
+    }
+    
+    /** 
+     * Creates and returns a DataObject from a data row (snapshot).
+     * Newly created object is registered with this DataContext.
+     */
+    public DataObject objectFromDataRow(
         ObjEntity objEntity,
-        Map objectSnapshot,
+        Map dataRow,
         boolean refresh) {
-        ObjectId anId = objEntity.objectIdFromSnapshot(objectSnapshot);
+        ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
 
         // this will create a HOLLOW object if it is not registered yet
         DataObject obj = registeredObject(anId);
 
         if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
             // we are asked to refresh an existing object with new values
-            mergeObjectWithSnapshot(obj, objectSnapshot);
-            committedSnapshots.put(anId, objectSnapshot);
+            mergeObjectWithSnapshot(obj, dataRow);
+            committedSnapshots.put(anId, dataRow);
         }
 
         return obj;
@@ -864,7 +880,7 @@ public class DataContext implements QueryEngine {
                 Iterator it = resultSnapshots.iterator();
                 while (it.hasNext()) {
                     result.add(
-                        DataContext.this.registerFetchedSnapshot(ent, (Map) it.next(), true));
+                        DataContext.this.objectFromDataRow(ent, (Map) it.next(), true));
                 }
             }
 
