@@ -64,9 +64,8 @@ import junit.framework.TestCase;
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /** 
@@ -136,14 +135,23 @@ public class DataContextExtrasTst extends TestCase {
 	}
 
 	public void testCommitChangesError() throws Exception {
-		Artist o1 = new Artist();
-		o1.setArtistName("a");
-		ctxt.registerNewObject(o1, "Artist");
+		JdbcPkGenerator gen =
+			(JdbcPkGenerator) TestMain
+				.getSharedNode()
+				.getAdapter()
+				.getPkGenerator();
+		int cache = gen.getPkCacheSize();
+
+		// make sure we insert enough objects to exhaust the cache
+		for (int i = 0; i < cache + 2; i++) {
+			Artist o1 = new Artist();
+			o1.setArtistName("a" + i);
+			ctxt.registerNewObject(o1, "Artist");
+		}
 
 		// this should cause PK generation exception in commit later
 		DataMap map = TestMain.getSharedNode().getDataMaps()[0];
-		PkGenerator gen =
-			TestMain.getSharedNode().getAdapter().getPkGenerator();
+
 		gen.dropAutoPk(TestMain.getSharedNode(), map.getDbEntitiesAsList());
 
 		// disable logging for thrown exceptions

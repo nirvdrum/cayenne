@@ -141,6 +141,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
 		buf
 			.append("CREATE SEQUENCE ")
 			.append(sequenceName(entName))
+			.append(" START WITH 200")
 			.append(" INCREMENT BY ")
 			.append(getPkCacheSize());
 		return buf.toString();

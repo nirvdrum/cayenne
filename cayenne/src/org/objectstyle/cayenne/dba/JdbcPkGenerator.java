@@ -128,7 +128,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
 		if (autoPkTableExists(node)) {
 			runUpdate(node, dropAutoPkString());
-		}
+		}	
 	}
 
 	public List dropAutoPkStatements(List dbEntities) {
@@ -170,7 +170,7 @@ public class JdbcPkGenerator implements PkGenerator {
 			.append(" (TABLE_NAME, NEXT_ID)")
 			.append(" VALUES ('")
 			.append(entName)
-			.append("', 1)");
+			.append("', 200)");
 		return buf.toString();
 	}
 

@@ -87,9 +87,9 @@ public class DbGeneratorTst extends TestCase {
 	}
 
 	public void testCreatePkSupport() throws Exception {
-		assertTrue(!gen.shouldCreatePKSupport());
-		gen.setShouldCreatePKSupport(true);
 		assertTrue(gen.shouldCreatePKSupport());
+		gen.setShouldCreatePKSupport(false);
+		assertTrue(!gen.shouldCreatePKSupport());
 
 	}
 
