@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataMapListener;
@@ -99,6 +100,8 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -122,15 +125,16 @@ public class EventController extends ModelerController {
 
     protected EventListenerList listenerList;
 
-    DataDomain currentDomain = null;
-    DataNode currentNode = null;
-    DataMap currentMap = null;
-    ObjEntity currentObjEntity = null;
-    DbEntity currentDbEntity = null;
-    ObjAttribute currentObjAttr = null;
-    DbAttribute currentDbAttr = null;
-    ObjRelationship currentObjRel = null;
-    DbRelationship currentDbRel = null;
+    protected DataDomain currentDomain;
+    protected DataNode currentNode;
+    protected DataMap currentMap;
+    protected ObjEntity currentObjEntity;
+    protected DbEntity currentDbEntity;
+    protected ObjAttribute currentObjAttr;
+    protected DbAttribute currentDbAttr;
+    protected ObjRelationship currentObjRel;
+    protected DbRelationship currentDbRel;
+    protected Procedure currentProcedure;
 
     /** Changes have been made, need to be saved. */
     protected boolean dirty;
@@ -146,7 +150,8 @@ public class EventController extends ModelerController {
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(PROJECT_CLOSED_ID)) {
             reset();
-        } else if (control.matchesID(PROJECT_OPENED_ID)) {
+        }
+        else if (control.matchesID(PROJECT_OPENED_ID)) {
             setDirty(((Project) control.getParameter()).isLocationUndefined());
             addDataNodeDisplayListener(Editor.getFrame());
             addDataMapDisplayListener(Editor.getFrame());
@@ -158,14 +163,14 @@ public class EventController extends ModelerController {
             addDbRelationshipDisplayListener(Editor.getFrame());
         }
     }
-    
+
     /**
      * Sends control to parent controller.
      */
     protected void sendControlToParent(String id, Object parameter) {
-    	if(getParent() != null) {
-    		getParent().handleControl(new Control(id, parameter));
-    	}
+        if (getParent() != null) {
+            getParent().handleControl(new Control(id, parameter));
+        }
     }
 
     public void reset() {
@@ -189,35 +194,48 @@ public class EventController extends ModelerController {
         currentDbAttr = null;
         currentObjRel = null;
         currentDbRel = null;
+        currentProcedure = null;
         getTopModel().setSelectedPath(ProjectPath.EMPTY_PATH);
     }
 
     public DataNode getCurrentDataNode() {
         return currentNode;
     }
+
     public DataDomain getCurrentDataDomain() {
         return currentDomain;
     }
+
     public DataMap getCurrentDataMap() {
         return currentMap;
     }
+
     public ObjEntity getCurrentObjEntity() {
         return currentObjEntity;
     }
+
     public DbEntity getCurrentDbEntity() {
         return currentDbEntity;
     }
+
     public ObjAttribute getCurrentObjAttribute() {
         return currentObjAttr;
     }
+
     public DbAttribute getCurrentDbAttribute() {
         return currentDbAttr;
     }
+
     public ObjRelationship getCurrentObjRelationship() {
         return currentObjRel;
     }
+
     public DbRelationship getCurrentDbRelationship() {
         return currentDbRel;
+    }
+
+    public Procedure getCurrentProcedure() {
+        return currentProcedure;
     }
 
     public void addDomainDisplayListener(DomainDisplayListener listener) {
@@ -292,6 +310,10 @@ public class EventController extends ModelerController {
         addListener(ObjRelationshipDisplayListener.class, listener);
     }
 
+    public void addProcedureDisplayListener(ProcedureDisplayListener listener) {
+        addListener(ProcedureDisplayListener.class, listener);
+    }
+
     public void fireDomainDisplayEvent(DomainDisplayEvent e) {
         if (e.getDomain() == currentDomain) {
             e.setDomainChanged(false);
@@ -308,7 +330,7 @@ public class EventController extends ModelerController {
             DomainDisplayListener temp = (DomainDisplayListener) list[i];
             temp.currentDomainChanged(e);
         }
-        
+
         // also send control to parent
         sendControlToParent(DATA_DOMAIN_SELECTED_ID, currentDomain);
     }
@@ -488,7 +510,24 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             ObjEntityDisplayListener temp = (ObjEntityDisplayListener) list[i];
             temp.currentObjEntityChanged(e);
-        } // End for()
+        }
+    }
+
+    public void fireProcedureDisplayEvent(ProcedureDisplayEvent e) {
+        if (currentProcedure == e.getProcedure())
+            e.setProcedureChanged(false);
+
+        clearState();
+
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentProcedure = e.getProcedure();
+
+        EventListener[] list = getListeners(ProcedureDisplayListener.class);
+        for (int i = 0; i < list.length; i++) {
+            ProcedureDisplayListener listener = (ProcedureDisplayListener) list[i];
+            listener.currentProcedureChanged(e);
+        }
     }
 
     public void fireDbEntityDisplayEvent(EntityDisplayEvent e) {
@@ -504,7 +543,7 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             DbEntityDisplayListener temp = (DbEntityDisplayListener) list[i];
             temp.currentDbEntityChanged(e);
-        } // End for()
+        }
     }
 
     /** Notifies all listeners of the change(add, remove) and does the change.*/

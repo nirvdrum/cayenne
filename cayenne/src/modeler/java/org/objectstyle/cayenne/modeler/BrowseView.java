@@ -82,10 +82,11 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataMapListener;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
-import org.objectstyle.cayenne.map.event.DataNodeListener;	
+import org.objectstyle.cayenne.map.event.DataNodeListener;
 import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.DomainListener;
@@ -102,6 +103,8 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
 
 /** 
@@ -123,10 +126,11 @@ public class BrowseView
         ObjEntityListener,
         ObjEntityDisplayListener,
         DbEntityListener,
-        DbEntityDisplayListener {
+        DbEntityDisplayListener,
+        ProcedureDisplayListener {
 
     private static Logger logObj = Logger.getLogger(BrowseView.class);
-    
+
     protected EventController mediator;
     protected ProjectTree browseTree;
     protected DefaultMutableTreeNode rootNode;
@@ -193,6 +197,13 @@ public class BrowseView
             return;
 
         showNode(new Object[] { e.getDomain(), e.getDataNode()});
+    }
+
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        if (e.getSource() == this || !e.isProcedureChanged())
+            return;
+
+        showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getProcedure()});
     }
 
     public void currentDataMapChanged(DataMapDisplayEvent e) {
@@ -618,6 +629,16 @@ public class BrowseView
                 mediator.fireDbEntityDisplayEvent(e);
             }
         }
+        else if (obj instanceof Procedure) {
+            ProcedureDisplayEvent e =
+                new ProcedureDisplayEvent(
+                    this,
+                    (Procedure) obj,
+                    (DataMap) data[data.length - 2],
+                    (DataDomain) data[data.length - 3]);
+            mediator.fireProcedureDisplayEvent(e);
+
+        }
     }
 
     /** Gets array of the user objects ending with this and starting with one under root. 
@@ -703,6 +724,7 @@ public class BrowseView
         ImageIcon dbEntityIcon;
         ImageIcon objEntityIcon;
         ImageIcon derivedDbEntityIcon;
+        ImageIcon procedureIcon;
 
         public BrowseViewRenderer() {
             ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
@@ -724,6 +746,10 @@ public class BrowseView
 
             url = cl.getResource(CayenneAction.RESOURCE_PATH + "icon-objentity.gif");
             objEntityIcon = new ImageIcon(url);
+
+            url =
+                cl.getResource(CayenneAction.RESOURCE_PATH + "icon-stored-procedure.gif");
+            procedureIcon = new ImageIcon(url);
         }
 
         public Component getTreeCellRendererComponent(
@@ -766,6 +792,10 @@ public class BrowseView
                     setIcon(objEntityIcon);
                 }
             }
+            else if (obj instanceof Procedure) {
+                setIcon(procedureIcon);
+            }
+
             return this;
         }
     }

@@ -55,16 +55,41 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import java.util.EventListener;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Procedure;
 
-/** 
- * Interface for classes that are interested in DbEntity 
- * display events. 
+/**
+ * Display event for Stored Procedures.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public interface DbEntityDisplayListener extends EventListener {
-    /** Current entity used as a model has changed.*/
-    public void currentDbEntityChanged(EntityDisplayEvent e);
+public class ProcedureDisplayEvent extends DataMapDisplayEvent {
+	protected Procedure procedure;
+	protected boolean procedureChanged = true;
+
+    /**
+     * Creates a new ProcedureDisplayEvent
+     */
+    public ProcedureDisplayEvent(Object src, Procedure procedure, DataMap map, DataDomain domain) {
+        super(src, map, domain);
+        this.procedure = procedure;
+    }
+
+
+    public Procedure getProcedure() {
+        return procedure;
+    }
+
+    public void setProcedure(Procedure procedure) {
+        this.procedure = procedure;
+    }
+    
+    public boolean isProcedureChanged() {
+        return procedureChanged;
+    }
+
+    public void setProcedureChanged(boolean b) {
+        procedureChanged = b;
+    }
 }

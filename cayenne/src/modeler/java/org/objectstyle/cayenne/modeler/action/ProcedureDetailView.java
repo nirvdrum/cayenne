@@ -53,18 +53,42 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
 
-import java.util.EventListener;
+package org.objectstyle.cayenne.modeler.action;
 
-/** 
- * Interface for classes that are interested in DbEntity 
- * display events. 
- * 
- * @author Misha Shengaout
+import java.awt.BorderLayout;
+import java.awt.Component;
+
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+
+/**
  * @author Andrei Adamchik
  */
-public interface DbEntityDisplayListener extends EventListener {
-    /** Current entity used as a model has changed.*/
-    public void currentDbEntityChanged(EntityDisplayEvent e);
+public class ProcedureDetailView extends JPanel {
+    protected EventController eventController;
+    protected JTextField name;
+
+    public ProcedureDetailView(EventController eventController) {
+        this.eventController = eventController;
+
+        init();
+    }
+
+    protected void init() {
+        this.setLayout(new BorderLayout());
+        this.name = CayenneWidgetFactory.createTextField();
+        this.add(
+            PanelFactory.createForm(
+                new Component[] { CayenneWidgetFactory.createLabel("Procedure name: ")},
+                new Component[] { name },
+                5,
+                5,
+                5,
+                5));
+    }
 }

@@ -63,6 +63,7 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
 
 /**
@@ -93,25 +94,32 @@ public class ProjectTraversal {
 
     public void traverse(Object rootNode, ProjectPath path) {
         if (rootNode instanceof Project) {
-            this.traverseProject((Project)rootNode, path);
-        } else if (rootNode instanceof DataDomain) {
+            this.traverseProject((Project) rootNode, path);
+        }
+        else if (rootNode instanceof DataDomain) {
             this.traverseDomains(Collections.singletonList(rootNode).iterator(), path);
-        } else if (rootNode instanceof DataMap) {
+        }
+        else if (rootNode instanceof DataMap) {
             this.traverseMaps(Collections.singletonList(rootNode).iterator(), path);
-        } else if (rootNode instanceof Entity) {
+        }
+        else if (rootNode instanceof Entity) {
             this.traverseEntities(Collections.singletonList(rootNode).iterator(), path);
-        } else if (rootNode instanceof Attribute) {
+        }
+        else if (rootNode instanceof Attribute) {
             this.traverseAttributes(Collections.singletonList(rootNode).iterator(), path);
-        } else if (rootNode instanceof Relationship) {
-            this.traverseRelationships(Collections.singletonList(rootNode).iterator(), path);
-        } else if (rootNode instanceof DataNode) {
+        }
+        else if (rootNode instanceof Relationship) {
+            this.traverseRelationships(
+                Collections.singletonList(rootNode).iterator(),
+                path);
+        }
+        else if (rootNode instanceof DataNode) {
             this.traverseNodes(Collections.singletonList(rootNode).iterator(), path);
-        } else {
-            String nodeClass = (rootNode != null)
-            					? rootNode.getClass().getName()
-            					: "(null)";
-            throw new IllegalArgumentException(
-                "Unsupported root node: " + nodeClass);
+        }
+        else {
+            String nodeClass =
+                (rootNode != null) ? rootNode.getClass().getName() : "(null)";
+            throw new IllegalArgumentException("Unsupported root node: " + nodeClass);
         }
     }
 
@@ -135,7 +143,7 @@ public class ProjectTraversal {
       */
     public void traverseDomains(Iterator domains, ProjectPath path) {
         while (domains.hasNext()) {
-            DataDomain domain = (DataDomain)domains.next();
+            DataDomain domain = (DataDomain) domains.next();
             ProjectPath domainPath = path.appendToPath(domain);
             handler.projectNode(domainPath);
 
@@ -148,7 +156,7 @@ public class ProjectTraversal {
 
     public void traverseNodes(Iterator nodes, ProjectPath path) {
         while (nodes.hasNext()) {
-            DataNode node = (DataNode)nodes.next();
+            DataNode node = (DataNode) nodes.next();
             ProjectPath nodePath = path.appendToPath(node);
             handler.projectNode(nodePath);
 
@@ -160,20 +168,32 @@ public class ProjectTraversal {
 
     public void traverseMaps(Iterator maps, ProjectPath path) {
         while (maps.hasNext()) {
-            DataMap map = (DataMap)maps.next();
+            DataMap map = (DataMap) maps.next();
             ProjectPath mapPath = path.appendToPath(map);
             handler.projectNode(mapPath);
 
             if (handler.shouldReadChildren(map, path)) {
                 this.traverseEntities(map.getObjEntities().iterator(), mapPath);
                 this.traverseEntities(map.getDbEntities().iterator(), mapPath);
+                this.traverseProcedures(map.getProcedures().iterator(), mapPath);
             }
+        }
+    }
+
+    /**
+     * Performs recusrive traversal of an Iterator of Cayenne Procedure objects.
+     */
+    public void traverseProcedures(Iterator procedures, ProjectPath path) {
+        while (procedures.hasNext()) {
+			Procedure procedure = (Procedure) procedures.next();
+            ProjectPath procedurePath = path.appendToPath(procedure);
+            handler.projectNode(procedurePath);
         }
     }
 
     public void traverseEntities(Iterator entities, ProjectPath path) {
         while (entities.hasNext()) {
-            Entity ent = (Entity)entities.next();
+            Entity ent = (Entity) entities.next();
             ProjectPath entPath = path.appendToPath(ent);
             handler.projectNode(entPath);
 

@@ -58,13 +58,11 @@ package org.objectstyle.cayenne.modeler.event;
 import java.util.EventListener;
 
 /** 
- * Interface for classes that are interested in DbEntity 
+ * Interface for classes that are interested in Procedure 
  * display events. 
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public interface DbEntityDisplayListener extends EventListener {
-    /** Current entity used as a model has changed.*/
-    public void currentDbEntityChanged(EntityDisplayEvent e);
+public interface ProcedureDisplayListener extends EventListener {
+    public void currentProcedureChanged(ProcedureDisplayEvent e);
 }

@@ -53,18 +53,42 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.modeler.action;
 
-import java.util.EventListener;
+import java.awt.event.ActionEvent;
 
-/** 
- * Interface for classes that are interested in DbEntity 
- * display events. 
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.ProjectPath;
+
+/**
+ * Action class to create stored procedures mapping.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public interface DbEntityDisplayListener extends EventListener {
-    /** Current entity used as a model has changed.*/
-    public void currentDbEntityChanged(EntityDisplayEvent e);
+public class CreateStoredProcedureAction extends CayenneAction {
+    public static final String ACTION_NAME = "Create Stored Procedure";
+
+    public CreateStoredProcedureAction() {
+        super(ACTION_NAME);
+    }
+
+    public void performAction(ActionEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+      * Returns <code>true</code> if path contains a DataMap object.
+      */
+    public boolean enableForPath(ProjectPath path) {
+        if (path == null) {
+            return false;
+        }
+
+        return path.firstInstanceOf(DataMap.class) != null;
+    }
+
+    public String getIconName() {
+        return "icon-stored-procedure.gif";
+    }
 }

@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.CreateStoredProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -120,11 +121,11 @@ public class TopModel {
         openProjectAction.setAlwaysOn(true);
         actionMap.put(openProjectAction.getKey(), openProjectAction);
 
-		CayenneAction saveAction = new SaveAction();
-		actionMap.put(saveAction.getKey(), saveAction);
+        CayenneAction saveAction = new SaveAction();
+        actionMap.put(saveAction.getKey(), saveAction);
 
-		CayenneAction validateAction = new ValidateAction();
-		actionMap.put(validateAction.getKey(), validateAction);
+        CayenneAction validateAction = new ValidateAction();
+        actionMap.put(validateAction.getKey(), validateAction);
 
         CayenneAction removeAction = new RemoveAction();
         actionMap.put(removeAction.getKey(), removeAction);
@@ -149,6 +150,9 @@ public class TopModel {
 
         CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
         actionMap.put(createDDEAction.getKey(), createDDEAction);
+
+        CayenneAction createSPAction = new CreateStoredProcedureAction();
+        actionMap.put(createSPAction.getKey(), createSPAction);
 
         CayenneAction createAttrAction = new CreateAttributeAction();
         actionMap.put(createAttrAction.getKey(), createAttrAction);

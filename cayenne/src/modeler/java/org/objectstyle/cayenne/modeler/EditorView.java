@@ -66,6 +66,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import org.objectstyle.cayenne.modeler.action.ProcedureDetailView;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.DbDetailView;
 import org.objectstyle.cayenne.modeler.datamap.ObjDetailView;
@@ -78,11 +79,14 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 
 /** 
  * Panel for the Editor window.
  * 
- *  @author Michael Misha Shengaout. 
+ *  @author Michael Misha Shengaout
+ *  @author Andrei Adamchik
  */
 public class EditorView
     extends JPanel
@@ -92,6 +96,7 @@ public class EditorView
         DomainDisplayListener,
         DataMapDisplayListener,
         DataNodeDisplayListener,
+        ProcedureDisplayListener,
         PropertyChangeListener {
 
     private static final int INIT_DIVIDER_LOCATION = 170;
@@ -102,8 +107,9 @@ public class EditorView
     private static final String DATA_MAP_VIEW = "DataMap";
     private static final String OBJ_VIEW = "ObjView";
     private static final String DB_VIEW = "DbView";
+    private static final String PROCEDURE_VIEW = "ProcedureView";
 
-    protected EventController mediator;
+    protected EventController eventController;
     protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     protected BrowseView treePanel;
     protected JPanel detailPanel;
@@ -113,13 +119,15 @@ public class EditorView
     protected DataMapDetailView dataMapView;
     protected ObjDetailView objDetailView;
     protected DbDetailView dbDetailView;
+    protected ProcedureDetailView procedureView;
+
     protected CardLayout detailLayout;
     protected ModelerPreferences prefs;
 
     public EditorView(EventController eventController) {
         super(new BorderLayout());
 
-        this.mediator = eventController;
+        this.eventController = eventController;
         this.detailPanel = new JPanel();
         this.emptyPanel = new JPanel();
 
@@ -147,21 +155,31 @@ public class EditorView
         addPanelToDetailView(new JScrollPane(nodeView), NODE_VIEW);
         dataMapView = new DataMapDetailView(eventController);
         addPanelToDetailView(new JScrollPane(dataMapView), DATA_MAP_VIEW);
+        procedureView = new ProcedureDetailView(eventController);
+        addPanelToDetailView(new JScrollPane(procedureView), PROCEDURE_VIEW);
 
         objDetailView = new ObjDetailView(eventController);
         addPanelToDetailView(objDetailView, OBJ_VIEW);
         dbDetailView = new DbDetailView(eventController);
         addPanelToDetailView(dbDetailView, DB_VIEW);
 
-        mediator.addDomainDisplayListener(this);
-        mediator.addDataNodeDisplayListener(this);
-        mediator.addDataMapDisplayListener(this);
-        mediator.addObjEntityDisplayListener(this);
-        mediator.addDbEntityDisplayListener(this);
+		eventController.addDomainDisplayListener(this);
+		eventController.addDataNodeDisplayListener(this);
+		eventController.addDataMapDisplayListener(this);
+		eventController.addObjEntityDisplayListener(this);
+		eventController.addDbEntityDisplayListener(this);
+		eventController.addProcedureDisplayListener(this);
     }
 
     protected void addPanelToDetailView(JComponent panel, String name) {
         detailPanel.add(panel, name);
+    }
+
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        if (e.getProcedure() == null)
+            detailLayout.show(detailPanel, EMPTY_VIEW);
+        else
+            detailLayout.show(detailPanel, PROCEDURE_VIEW);
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {

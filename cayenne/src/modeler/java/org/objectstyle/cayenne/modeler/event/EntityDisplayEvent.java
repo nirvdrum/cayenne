@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.modeler.event;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.modeler.event;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;

@@ -92,6 +92,7 @@ import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.CreateStoredProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -162,7 +163,7 @@ public class Editor
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
     protected TopController controller;
 
-	private ModelerPreferences prefs;
+    private ModelerPreferences prefs;
 
     /** Returns an editor singleton object. */
     public static Editor getFrame() {
@@ -173,43 +174,46 @@ public class Editor
      * Main method that starts the CayenneModeler.
      */
     public static void main(String[] args) {
-		// if configured, redirect all logging to the log file
-		configureLogging();
+        // if configured, redirect all logging to the log file
+        configureLogging();
 
-		// get preferences
-		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+        // get preferences
+        ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
-		// set L&F
-		try {
-			String laf = (String)prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
+        // set L&F
+        try {
+            String laf = (String) prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
 
-			if (laf != null) {
-				LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
-				for (int i = 0; i < installed.length; i++) {
-					LookAndFeelInfo lif = installed[i];
-					if (lif.getName().equals(laf)) {
-						UIManager.setLookAndFeel(lif.getClassName());
-						break;
-					}
-				}
-			}
-			else {
-				// no L&F set - use native platform look
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
-		}
-		catch(Exception e){
-			logObj.warn("Could not set selected LookAndFeel - using default.", e);
-		}
-		finally {
-			// remember L&F in prefs
-			prefs.setProperty(ModelerPreferences.EDITOR_LAFNAME, UIManager.getLookAndFeel().getName());
-		}
+            if (laf != null) {
+                LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
+                for (int i = 0; i < installed.length; i++) {
+                    LookAndFeelInfo lif = installed[i];
+                    if (lif.getName().equals(laf)) {
+                        UIManager.setLookAndFeel(lif.getClassName());
+                        break;
+                    }
+                }
+            }
+            else {
+                // no L&F set - use native platform look
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            }
+        }
+        catch (Exception e) {
+            logObj.warn("Could not set selected LookAndFeel - using default.", e);
+        }
+        finally {
+            // remember L&F in prefs
+            prefs.setProperty(
+                ModelerPreferences.EDITOR_LAFNAME,
+                UIManager.getLookAndFeel().getName());
+        }
 
         // check jdk version
         try {
             Class.forName("javax.swing.SpringLayout");
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.fatal("CayenneModeler requires JDK 1.4.");
             logObj.fatal(
                 "Found : '"
@@ -240,64 +244,67 @@ public class Editor
 
             if (f.isFile() && Configuration.DEFAULT_DOMAIN_FILE.equals(f.getName())) {
                 OpenProjectAction openAction =
-                    (OpenProjectAction) frame.getAction(
-                        OpenProjectAction.ACTION_NAME);
+                    (OpenProjectAction) frame.getAction(OpenProjectAction.ACTION_NAME);
                 openAction.openProject(f);
             }
         }
-   }
+    }
 
     /** 
      * Configures Log4J appenders to perform logging to 
      * $HOME/.cayenne/modeler.log.
      */
     public static void configureLogging() {
-		// read default Cayenne log configuration
-		Configuration.configureCommonLogging();
+        // read default Cayenne log configuration
+        Configuration.configureCommonLogging();
 
-		// get preferences
-		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+        // get preferences
+        ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
-		// check whether to set up logging to a file
-		boolean logfileEnabled = prefs.getBoolean(ModelerPreferences.EDITOR_LOGFILE_ENABLED, true);
-		prefs.setProperty(ModelerPreferences.EDITOR_LOGFILE_ENABLED, String.valueOf(logfileEnabled));
+        // check whether to set up logging to a file
+        boolean logfileEnabled =
+            prefs.getBoolean(ModelerPreferences.EDITOR_LOGFILE_ENABLED, true);
+        prefs.setProperty(
+            ModelerPreferences.EDITOR_LOGFILE_ENABLED,
+            String.valueOf(logfileEnabled));
 
-		if (logfileEnabled) {
-	        try {
-	        	// use logfile from preferences or default
-	        	String defaultPath = getLogFile().getPath();
-				String logfilePath = prefs.getString(ModelerPreferences.EDITOR_LOGFILE, defaultPath);
-				File logfile = new File(logfilePath);
+        if (logfileEnabled) {
+            try {
+                // use logfile from preferences or default
+                String defaultPath = getLogFile().getPath();
+                String logfilePath =
+                    prefs.getString(ModelerPreferences.EDITOR_LOGFILE, defaultPath);
+                File logfile = new File(logfilePath);
 
-	            if (logfile != null) {
-	            	if (!logfile.exists()) {
-	            		if (!logfile.createNewFile()) {
-						   logObj.warn("Can't create log file, ignoring.");
-						   return;
-	            		}
-					}
+                if (logfile != null) {
+                    if (!logfile.exists()) {
+                        if (!logfile.createNewFile()) {
+                            logObj.warn("Can't create log file, ignoring.");
+                            return;
+                        }
+                    }
 
-					// remember working path
-					prefs.setProperty(ModelerPreferences.EDITOR_LOGFILE, logfilePath);
-	
-	                // replace appenders to just log to a file.
-	                Logger p1 = logObj;
-	                Logger p2 = null;
-	                while ((p2 = (Logger) p1.getParent()) != null) {
-	                    p1 = p2;
-	                }
-	
-	                Layout layout =
-	                    new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
-	                p1.removeAllAppenders();
-	                p1.addAppender(
-	                    new FileAppender(layout, logfile.getCanonicalPath(), true));
-	            }
-			}
-	        catch (IOException ioex) {
-	            logObj.warn("Error setting logging.", ioex);
-	        }
-		}
+                    // remember working path
+                    prefs.setProperty(ModelerPreferences.EDITOR_LOGFILE, logfilePath);
+
+                    // replace appenders to just log to a file.
+                    Logger p1 = logObj;
+                    Logger p2 = null;
+                    while ((p2 = (Logger) p1.getParent()) != null) {
+                        p1 = p2;
+                    }
+
+                    Layout layout =
+                        new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
+                    p1.removeAllAppenders();
+                    p1.addAppender(
+                        new FileAppender(layout, logfile.getCanonicalPath(), true));
+                }
+            }
+            catch (IOException ioex) {
+                logObj.warn("Error setting logging.", ioex);
+            }
+        }
     }
 
     /** 
@@ -335,58 +342,62 @@ public class Editor
         initToolbar();
         initStatusBar();
 
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-		this.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				((ExitAction) getAction(ExitAction.ACTION_NAME)).exit();
-			}
-		});
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                ((ExitAction) getAction(ExitAction.ACTION_NAME)).exit();
+            }
+        });
 
-		this.addComponentListener(new ComponentAdapter() {
-			public void componentResized(ComponentEvent e) {
-				if (e.getComponent() == Editor.this) {
-					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_WIDTH,
-										String.valueOf(Editor.this.getWidth()));
-					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_HEIGHT,
-										String.valueOf(Editor.this.getHeight()));
-				}
-			}
+        this.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+                if (e.getComponent() == Editor.this) {
+                    prefs.setProperty(
+                        ModelerPreferences.EDITOR_FRAME_WIDTH,
+                        String.valueOf(Editor.this.getWidth()));
+                    prefs.setProperty(
+                        ModelerPreferences.EDITOR_FRAME_HEIGHT,
+                        String.valueOf(Editor.this.getHeight()));
+                }
+            }
 
-			public void componentMoved(ComponentEvent e) {
-				if (e.getComponent() == Editor.this) {
-					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_X,
-										String.valueOf(Editor.this.getX()));
-					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_Y,
-										String.valueOf(Editor.this.getY()));
-				}
-			}
-		});
+            public void componentMoved(ComponentEvent e) {
+                if (e.getComponent() == Editor.this) {
+                    prefs.setProperty(
+                        ModelerPreferences.EDITOR_FRAME_X,
+                        String.valueOf(Editor.this.getX()));
+                    prefs.setProperty(
+                        ModelerPreferences.EDITOR_FRAME_Y,
+                        String.valueOf(Editor.this.getY()));
+                }
+            }
+        });
 
-		prefs = ModelerPreferences.getPreferences();
+        prefs = ModelerPreferences.getPreferences();
 
-		int newWidth = prefs.getInt(ModelerPreferences.EDITOR_FRAME_WIDTH, 650);
-		int newHeight = prefs.getInt(ModelerPreferences.EDITOR_FRAME_HEIGHT, 550);
+        int newWidth = prefs.getInt(ModelerPreferences.EDITOR_FRAME_WIDTH, 650);
+        int newHeight = prefs.getInt(ModelerPreferences.EDITOR_FRAME_HEIGHT, 550);
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-		if (newHeight > screenSize.height) {
-			newHeight = screenSize.height;
-		}
+        if (newHeight > screenSize.height) {
+            newHeight = screenSize.height;
+        }
 
-		if (newWidth > screenSize.width) {
-			newWidth = screenSize.width;
-		}
+        if (newWidth > screenSize.width) {
+            newWidth = screenSize.width;
+        }
 
-		this.setSize(newWidth, newHeight);
+        this.setSize(newWidth, newHeight);
 
-		int defaultX = (screenSize.width - newWidth) / 2;
-		int newX = prefs.getInt(ModelerPreferences.EDITOR_FRAME_X, defaultX);
-		int defaultY = (screenSize.height - newHeight) / 2;
-		int newY = prefs.getInt(ModelerPreferences.EDITOR_FRAME_Y, defaultY);
+        int defaultX = (screenSize.width - newWidth) / 2;
+        int newX = prefs.getInt(ModelerPreferences.EDITOR_FRAME_X, defaultX);
+        int defaultY = (screenSize.height - newHeight) / 2;
+        int newY = prefs.getInt(ModelerPreferences.EDITOR_FRAME_Y, defaultY);
 
-		frame.setLocation(newX, newY);
-		frame.setVisible(true);
+        frame.setLocation(newX, newY);
+        frame.setVisible(true);
 
         this.controller.startup();
     }
@@ -433,16 +444,13 @@ public class Editor
         projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
 
-        projectMenu.add(
-            getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(
-            getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(
-            getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(CreateStoredProcedureAction.ACTION_NAME).buildMenu());
         projectMenu.addSeparator();
         projectMenu.add(getAction(ObjEntitySyncAction.ACTION_NAME).buildMenu());
-        projectMenu.add(
-            getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
         projectMenu.addSeparator();
         projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
@@ -477,12 +485,11 @@ public class Editor
         toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateDbEntityAction.ACTION_NAME).buildButton());
-        toolBar.add(
-            getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
+        toolBar.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
+        toolBar.add(getAction(CreateStoredProcedureAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateObjEntityAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateAttributeAction.ACTION_NAME).buildButton());
-        toolBar.add(
-            getAction(CreateRelationshipAction.ACTION_NAME).buildButton());
+        toolBar.add(getAction(CreateRelationshipAction.ACTION_NAME).buildButton());
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }
@@ -520,11 +527,11 @@ public class Editor
             if (title == null || !title.startsWith(DIRTY_STRING)) {
                 setTitle(DIRTY_STRING + title);
             }
-        } else {
+        }
+        else {
             getAction(SaveAction.ACTION_NAME).setEnabled(false);
             if (title != null && title.startsWith(DIRTY_STRING)) {
-                setTitle(
-                    title.substring(DIRTY_STRING.length(), title.length()));
+                setTitle(title.substring(DIRTY_STRING.length(), title.length()));
             }
         }
     }
@@ -566,16 +573,14 @@ public class Editor
     public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
         enableDbEntityMenu();
         if (e.getRelationship() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName(
-                "Remove DbRelationship");
+            getAction(RemoveAction.ACTION_NAME).setName("Remove DbRelationship");
         }
     }
 
     public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
         enableObjEntityMenu();
         if (e.getRelationship() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName(
-                "Remove ObjRelationship");
+            getAction(RemoveAction.ACTION_NAME).setName("Remove ObjRelationship");
         }
     }
 
@@ -595,6 +600,7 @@ public class Editor
         getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);
         getAction(CreateDbEntityAction.ACTION_NAME).setEnabled(true);
         getAction(CreateDerivedDbEntityAction.ACTION_NAME).setEnabled(true);
+        getAction(CreateStoredProcedureAction.ACTION_NAME).setEnabled(true);
         getAction(GenerateDbAction.ACTION_NAME).setEnabled(true);
     }
 
@@ -631,7 +637,8 @@ public class Editor
         if (project != null) {
             if (project.isLocationUndefined()) {
                 title = "[New]";
-            } else {
+            }
+            else {
                 title = project.getMainFile().getAbsolutePath();
             }
         }
@@ -673,5 +680,4 @@ public class Editor
         this.view = view;
     }
 
-	
 }

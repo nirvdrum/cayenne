@@ -192,7 +192,7 @@ public class CayenneWidgetFactory {
      * Initializes a label or button with a standard font.
      */
     protected static void initLabel(JComponent label) {
-        label.setFont(label.getFont().deriveFont(Font.BOLD, 12));
+        label.setFont(label.getFont().deriveFont(Font.PLAIN, 12));
     }
 
     /** 
