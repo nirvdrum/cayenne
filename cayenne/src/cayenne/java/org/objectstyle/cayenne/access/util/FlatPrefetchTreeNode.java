@@ -286,10 +286,10 @@ class FlatPrefetchTreeNode {
     }
 
     /**
-     * Configures row metadata for this node entity.
+     * Configures row columns mapping for this node entity.
      */
     private void buildRowMapping() {
-        Map targetBySourceColumn = new TreeMap();
+        Map targetSource = new TreeMap();
         String prefix = buildPrefix(new StringBuffer()).toString();
 
         // find propagated keys, assuming that only one-step joins
@@ -312,7 +312,7 @@ class FlatPrefetchTreeNode {
                                     + join);
                 }
 
-                targetBySourceColumn.put(source, join.getTargetName());
+                targetSource.put(join.getTargetName(), source);
             }
         }
 
@@ -320,11 +320,10 @@ class FlatPrefetchTreeNode {
         Iterator attributes = getEntity().getAttributes().iterator();
         while (attributes.hasNext()) {
             ObjAttribute attribute = (ObjAttribute) attributes.next();
-            String source = attribute.getDbAttributePath();
+            String target = attribute.getDbAttributePath();
 
-            // processing compound attributes correctly
-            if (!targetBySourceColumn.containsKey(source)) {
-                targetBySourceColumn.put(source, prefix + source);
+            if (!targetSource.containsKey(target)) {
+                targetSource.put(target, prefix + target);
             }
         }
 
@@ -337,11 +336,11 @@ class FlatPrefetchTreeNode {
 
             while (dbAttributes.hasNext()) {
                 DbAttribute attribute = (DbAttribute) dbAttributes.next();
-                String source = attribute.getName();
+                String target = attribute.getName();
 
                 // processing compound attributes correctly
-                if (!targetBySourceColumn.containsKey(source)) {
-                    targetBySourceColumn.put(source, prefix + source);
+                if (!targetSource.containsKey(target)) {
+                    targetSource.put(target, prefix + target);
                 }
             }
         }
@@ -350,27 +349,27 @@ class FlatPrefetchTreeNode {
         Iterator pks = getEntity().getDbEntity().getPrimaryKey().iterator();
         while (pks.hasNext()) {
             DbAttribute pk = (DbAttribute) pks.next();
-            if (!targetBySourceColumn.containsKey(pk.getName())) {
-                targetBySourceColumn.put(pk.getName(), prefix + pk.getName());
+            if (!targetSource.containsKey(pk.getName())) {
+                targetSource.put(pk.getName(), prefix + pk.getName());
             }
         }
 
-        int size = targetBySourceColumn.size();
+        int size = targetSource.size();
         this.rowCapacity = (int) Math.ceil(size / 0.75);
         this.sources = new String[size];
         this.targets = new String[size];
 
-        // 'sourceByTargetColumn' map is ordered so splitting it in two arrays should
+        // 'targetSource' map is ordered so splitting it in two arrays should
         // preserve the key/value relative ordering.
-        targetBySourceColumn.keySet().toArray(sources);
-        targetBySourceColumn.values().toArray(targets);
+        targetSource.keySet().toArray(targets);
+        targetSource.values().toArray(sources);
     }
 
     /**
      * Recursively prepends "prefix" to provided buffer. Prefix is DB path from the first
      * non-phantom parent node in the tree.
      */
-    private StringBuffer buildPrefix(StringBuffer buffer) {
+    StringBuffer buildPrefix(StringBuffer buffer) {
 
         if (this.getIncoming() == null || getParent() == null) {
             return buffer;

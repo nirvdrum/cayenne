@@ -314,7 +314,8 @@ public class SelectTranslator extends QueryAssembler {
             return new ColumnDescriptor[0];
         }
 
-        return (ColumnDescriptor[]) resultColumns.toArray(new ColumnDescriptor[resultColumns.size()]);
+        return (ColumnDescriptor[]) resultColumns
+                .toArray(new ColumnDescriptor[resultColumns.size()]);
     }
 
     /**
@@ -505,7 +506,7 @@ public class SelectTranslator extends QueryAssembler {
                     if (!skipColumns.contains(attribute)) {
                         // TODO: need to set correct Java type for the target entity
                         // instead of relying on default...
-                        appendColumn(columns, null, attribute, attributes, prefetch);
+                        appendColumn(columns, null, attribute, attributes, dbPrefetch);
                     }
                 }
             }
@@ -542,7 +543,7 @@ public class SelectTranslator extends QueryAssembler {
             ObjAttribute objAttribute,
             DbAttribute attribute,
             Set skipSet,
-            String labelPrefix) {
+            Expression dbPath) {
 
         if (skipSet.add(attribute)) {
             ColumnDescriptor column = (objAttribute != null) ? new ColumnDescriptor(
@@ -550,8 +551,9 @@ public class SelectTranslator extends QueryAssembler {
                     attribute) : new ColumnDescriptor(attribute);
 
             // used for joint prefetches
-            if (labelPrefix != null) {
-                column.setLabel(labelPrefix + '.' + attribute.getName());
+            if (dbPath != null) {
+                String path = dbPath.toString().substring("db:".length());
+                column.setLabel(path + '.' + attribute.getName());
             }
 
             column.setNamePrefix(aliasForTable((DbEntity) attribute.getEntity()));

@@ -62,9 +62,7 @@ import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.CompoundPainting;
-import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -73,8 +71,6 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextCompoundOETst extends CayenneTestCase {
-
-    private static final Logger logObj = Logger.getLogger(DataContextCompoundOETst.class);
 
     final int artistCount = 4;
     final int galleryCount = 2;
@@ -144,21 +140,6 @@ public class DataContextCompoundOETst extends CayenneTestCase {
         }
         finally {
             conn.close();
-        }
-    }
-
-    public void testSelectCompoundDataRow() throws Exception {
-        populateTables();
-        SelectQuery query = new SelectQuery(CompoundPainting.class);
-        query.setFetchingDataRows(true);
-        List objects = ctxt.performQuery(query);
-
-        assertNotNull(objects);
-        assertEquals(3, objects.size());
-
-        for (Iterator i = objects.iterator(); i.hasNext();) {
-            DataRow painting = (DataRow) i.next();
-            logObj.warn("row: " + painting);
         }
     }
 
