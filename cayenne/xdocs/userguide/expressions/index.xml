@@ -8,18 +8,16 @@
 <body>
     <section name="9. Using Expressions">
     	<p>Expressions in Cayenne are used to build query qualifiers and to perform
-    	in-memory sorting of objects.</p>
-    	   
-      	<p>Each expression consists of type and a set of operands. 
+    	in-memory sorting of objects. Each expression consists of a type and a set of operands. 
         Expressions are organized by the number of operands as Unary, Binary and Ternary.
-             	Possible expression types are defined as static final int variables in Expression class.
-             	Some of the expressions have corresponding SQL analogues, some are specific to the Object/Relational
-             	domain. Most widely used expression types are:
-             	</p>
-             	
-             	<ul>
-             		<li>Conditions: 
-             		<ul>
+        Possible expression types are defined as static final int variables in Expression class.
+        Some of the expressions have direct SQL analogues, some are specific to the 
+        Object/Relational domain. Most widely used expression types are:
+        </p>
+        
+        <ul>
+             <li>Conditions: 
+             <ul>
              			<li>LESS_THAN</li>
              			<li>GREATER_THAN</li>
              			<li>LESS_THAN_EQUAL_TO</li> 
@@ -30,23 +28,23 @@
              			<li>LIKE_IGNORE_CASE</li> 
              			<li>EQUAL_TO</li>
              			<li>NOT_EQUAL_TO</li>
-             		</ul>
-             		</li>
+             </ul>
+             </li>
              		
-             		<li>Logical Conditions: 
-             		<ul>
+             <li>Logical Conditions: 
+             <ul>
              			<li>AND</li>
              			<li>OR</li>
-             		</ul>
-             		</li>
+             </ul>
+             </li>
              		
-             		<li>Path Expressions:
-             		<ul>
-             			<li>DB_PATH</li>
-             			<li>OBJ_PATH</li>
-             		</ul>
-             		</li>
-             	</ul>
+             <li>Path Expressions:
+             <ul>
+             	<li>DB_PATH</li>
+             	<li>OBJ_PATH</li>
+             </ul>
+        	</li>
+         </ul>
     </section>
 </body>
 </document>

@@ -8,6 +8,84 @@
 <body>
     <section name="9. Using Expressions">        
 		<subsection name="9.3 Simplified Expression API">
+		<source>import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+...
+Expression qualifier 
+   = ExpressionFactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "a%");
+</source>
+
+		<p>Note that we are using a method "binaryPathExp" to create an expresion.
+		"Binary" indicates the fact that the target expression has two operands.
+		"Path" indicates that second argument, the left hand operand of a binary expression ("artistName"),
+		will be converted to an "object path expression" described above.</p>
+            
+		<p>3rd argument to binaryPathExp (right hand operand) does not have to be a String.
+		It can be any object that has the same type as the destination of the object path.
+		It can be a number, a date, or even another DataObject. The last case is demonstrated
+		in the example below:
+            	</p>
+            
+<source>import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+...
+
+// assume this exists
+Gallery metroGallery;
+
+// Will match all artists that have at least one of their paintings displayed 
+// in a Metropolitan Museum.
+// Note that the last component of the object path expression
+// is a relationship name, not an attribute like in previous examples:
+Expression qualifier 
+   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
+                                     "paintingArray.toGallery", 
+                                     metroGallery);
+</source>                  
+
+		<p>Expression class itself provides a set of convenience methods to chain expressions
+		as they are built from smaller parts:</p>
+		
+		<ul>
+            		<li>public Expression <b>joinExp</b>(int type, Expression exp)<br/>
+            		Creates and returns a new expression that joins this object with another 
+            		expression, using specified join type. This is a shorter equivalent of
+            		<code>ExpressionFactory.binaryExpression(type, this, exp)</code>.
+            		<p></p>
+            		</li>
+            		
+            		<li>public Expression <b>andExp</b>(Expression exp)<br/>
+            		A shorter equivalent for <code>joinExp(Expression.AND, exp)</code>.
+            		<p></p>
+            		</li>
+            		
+            		<li>public Expression <b>orExp</b>(Expression exp)<br/>
+            		A shorter equivalent for <code>joinExp(Expression.OR, exp)</code>.
+            		<p></p>
+            		</li>
+            	</ul>
+            	
+            	<p>Example of using chaining:</p>
+<source>import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+...
+
+// find artists whose name starts with "D"
+// with invalid or null date of birth
+
+Expression qual = 
+   ExpressionFactory.binaryPathExp(Expression.GREATER_THAN_EQUAL_TO, "dateOfBirth", new Date());
+// chain expressions
+qual = qual.orExp(Expression.EQUAL_TO, "dateOfBirth", null);
+
+// "AND" applies to a combined earlier criteria
+qual = 
+   qual.andExp(ExpressionFactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "D%")); 
+
+SelectQuery select = new SelectQuery(Artist.class, qual);
+</source>
+	
 		</subsection>
     </section>
 </body>

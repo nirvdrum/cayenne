@@ -9,15 +9,16 @@
     <section name="9. Using Expressions">        
 		<subsection name="9.2 Path Expressions">
 		<p>There is an important group of expressions widely used in Cayenne: <i>path expressions</i>.
-        Path expressions have no direct analogue in SQL. Path expressions have a single operand 
+        There is no direct analogue in SQL, rather a path expression resolves to a table
+        coolumn name and, optionally, set of joins. Path expressions have a single operand 
         that is a dot-separated string of path components. Meaning of path components depends 
         on whether this is an OBJ_PATH or a DB_PATH expression.</p>
              	
-             <p><b>Object path expressions (OBJ_PATH)</b> match an "object path"
-             - a sequence of object property names (mapped attributes and relationships)
-             that allow to traverse a graph of related objects, 
-             starting from a specific class. Here is a few examples starting from a Painting class:</p>
-             <ul>
+        <p><b>Object path expressions (OBJ_PATH)</b> match an "object path"
+        - a sequence of object property names (mapped attributes and relationships)
+        that allow to traverse a graph of related objects, 
+        starting from a specific class. Here is a few examples starting from a Painting class:</p>
+        <ul>
              		<li><code>"paintingTitle"</code><br/> 
              		Can be used to match the value of "paintingTitle" property.
              		<p></p>
@@ -75,6 +76,15 @@
              	<p>Though DB_PATH expressions are widely used by Cayenne framework 
              	internally, they have only a limited use in applications.             	
              	</p>
+             	
+             	<p>The example below shows a generic way to build a path expression. See
+             	"Simplified Expression API" chapter for the path expression techniques 
+             	used in real applications.
+             	</p>
+<source>
+Expression objPathExp = ExpressionFactory.unaryExpression(Expressions.OBJ_PATH, "artistName");
+Expression dbPathExp = ExpressionFactory.unaryExpression(Expressions.DB_PATH, "ARTIST_NAME");
+</source>
 		</subsection>
     </section>
 </body>
