@@ -55,32 +55,27 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
-import java.io.PrintWriter;
-
-import org.objectstyle.cayenne.exp.Expression;
-
 /**
- * "Not" expression.
+ * Generic path expression.
  * 
- * @since 1.1
  * @author Andrei Adamchik
+ * @since 1.1
  */
-public class ASTNot extends SimpleNode {
-    public ASTNot(Node expression) {
-        super(ExpressionParserTreeConstants.JJTNOT);
-        jjtAddChild(expression, 0);
+public abstract class ASTPath extends SimpleNode {
+
+    ASTPath(int i) {
+        super(i);
     }
 
-    ASTNot(int id) {
-        super(id);
+    public int getOperandCount() {
+        return 1;
     }
 
-    public int getType() {
-        return Expression.NOT;
-    }
+    public Object getOperand(int index) {
+        if (index == 0) {
+            return value;
+        }
 
-    public void encodeAsString(PrintWriter pw) {
-        pw.print("not ");
-        super.encodeAsString(pw);
+        throw new ArrayIndexOutOfBoundsException(index);
     }
 }

@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.exp;
 
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +68,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.exp.parser.ExpressionParser;
+import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -173,6 +177,28 @@ public abstract class Expression implements Serializable, XMLSerializable {
 
     protected int type;
 
+
+    /**
+     * Parses string, converting it to Expression. If string does
+     * not represent a semantically correct expression, an ExpressionException
+     * is thrown.
+     * 
+     * @since 1.1
+     */
+    public static Expression fromString(String expressionString) {
+        if (expressionString == null) {
+            throw new NullPointerException("Null expression string.");
+        }
+
+        Reader reader = new StringReader(expressionString);
+        try {
+            return new ExpressionParser(reader).expression();
+        }
+        catch (ParseException ex) {
+            throw new ExpressionException(ex.getMessage(), ex);
+        }
+    }
+    
     /**
      * Returns String label for this expression. Used for debugging.
      */

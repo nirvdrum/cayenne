@@ -86,10 +86,10 @@ public class ExpressionParser {
     public static void main(String[] arg) {
         // since Main is used for some basic speed measuring,
         // lets run it twice to "warm up" the parser
-        ExpressionFactory.expFromString(arg[0]);
+        Expression.fromString(arg[0]);
         
         long start = System.currentTimeMillis();
-        Expression exp = ExpressionFactory.expFromString(arg[0]);
+        Expression exp = Expression.fromString(arg[0]);
         long end = System.currentTimeMillis();
         
         System.out.println(exp);

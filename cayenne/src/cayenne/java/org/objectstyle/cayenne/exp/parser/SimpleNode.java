@@ -16,28 +16,22 @@ import org.objectstyle.cayenne.exp.ExpressionException;
  * 
  * @since 1.1
  */
-abstract class SimpleNode extends Expression implements Node {
+public abstract class SimpleNode extends Expression implements Node {
     protected Node parent;
     protected Node[] children;
     protected int id;
-    protected ExpressionParser parser;
 
     protected Object value;
 
-    SimpleNode(int i) {
+    protected SimpleNode(int i) {
         id = i;
     }
 
-    SimpleNode(ExpressionParser p, int i) {
-        this(i);
-        parser = p;
-    }
-
-    void setValue(Object value) {
+    protected void setValue(Object value) {
         this.value = value;
     }
 
-    Object getValue() {
+    protected Object getValue() {
         return value;
     }
 
@@ -188,6 +182,7 @@ abstract class SimpleNode extends Expression implements Node {
     public void jjtSetParent(Node n) {
         parent = n;
     }
+    
     public Node jjtGetParent() {
         return parent;
     }

@@ -61,7 +61,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
@@ -225,7 +224,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
         }
 
         try {
-            testExpression(entity, ExpressionFactory.expFromString(prefetch));
+            testExpression(entity, Expression.fromString(prefetch));
         }
         catch (ExpressionException e) {
             validator.registerWarning(

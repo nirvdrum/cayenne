@@ -65,7 +65,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -136,7 +135,7 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      * @deprecated Since 1.1 use {@link #setSortSpecString(String)}
      */
     public void setSortSpec(String sortSpecString) {
-        this.sortSpec = ExpressionFactory.expFromString(sortSpecString);
+        this.sortSpec = Expression.fromString(sortSpecString);
     }
 
     /** 
@@ -146,9 +145,7 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      */
     public void setSortSpecString(String sortSpecString) {
         this.sortSpec =
-            (sortSpecString != null)
-                ? ExpressionFactory.expFromString(sortSpecString)
-                : null;
+            (sortSpecString != null) ? Expression.fromString(sortSpecString) : null;
     }
 
     /** 

@@ -62,7 +62,6 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DataMap;
 
 /**
@@ -139,7 +138,7 @@ public abstract class QueryBuilder {
             this.qualifier = null;
         }
         else {
-            this.qualifier = ExpressionFactory.expFromString(qualifier.trim());
+            this.qualifier = Expression.fromString(qualifier.trim());
         }
     }
 
