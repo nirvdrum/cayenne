@@ -79,7 +79,7 @@ import javax.swing.text.Keymap;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 
 /**
@@ -187,18 +187,10 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
 		// Adapter class line
 		JLabel adapterLabel = new JLabel("RDBMS Adapter:");
-		String[] adapter_arr = {
-			DbAdapter.JDBC,
-			DbAdapter.SYBASE,
-			DbAdapter.MYSQL,
-			DbAdapter.ORACLE,
-			DbAdapter.POSTGRES,
-			DbAdapter.HSQLDB
-		};
 		adapterInput =
 			new PreferenceField(
 				ModelerPreferences.RDBMS_ADAPTER,
-				Arrays.asList(adapter_arr));
+				Arrays.asList(JdbcAdapter.availableAdapterClasses()));
 		disableVKEvents(adapterInput);
 
 		Component[] left =

@@ -119,6 +119,17 @@ public class JdbcAdapter implements DbAdapter {
     protected BatchInterpreter deleteBatchInterpreter;
     protected BatchInterpreter updateBatchInterpreter;
 
+	public static String[] availableAdapterClasses() {
+		return new String[] {
+					DbAdapter.JDBC,
+					DbAdapter.HSQLDB,
+					DbAdapter.MYSQL,
+					DbAdapter.ORACLE,
+					DbAdapter.POSTGRES,
+					DbAdapter.SYBASE
+		};
+	}
+
     public JdbcAdapter() {
         // create Pk generator
         pkGenerator = createPkGenerator();
