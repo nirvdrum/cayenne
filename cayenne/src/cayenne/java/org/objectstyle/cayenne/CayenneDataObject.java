@@ -69,11 +69,9 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.SnapshotManager;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.PropertyComparator;
 
 /**
@@ -84,10 +82,6 @@ import org.objectstyle.cayenne.util.PropertyComparator;
  */
 public class CayenneDataObject implements DataObject {
     private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
-
-    // used for dependent to one relationships
-    // to indicate that destination relationship was fetched and is null
-    private static final CayenneDataObject nullValue = new CayenneDataObject();
 
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
@@ -102,9 +96,9 @@ public class CayenneDataObject implements DataObject {
 
     public void setDataContext(DataContext dataContext) {
         this.dataContext = dataContext;
-        
-        if(dataContext == null) {
-        	this.persistenceState = PersistenceState.TRANSIENT;
+
+        if (dataContext == null) {
+            this.persistenceState = PersistenceState.TRANSIENT;
         }
     }
 
@@ -208,12 +202,12 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected void resolveFault() {
-    	// no way to resolve faults outside of DataContext.
-    	if(dataContext == null) {
-			setPersistenceState(PersistenceState.TRANSIENT);
-			return;
-    	}
-    	
+        // no way to resolve faults outside of DataContext.
+        if (dataContext == null) {
+            setPersistenceState(PersistenceState.TRANSIENT);
+            return;
+        }
+
         try {
             // first try refreshing from snapshot
             Map snapshot = dataContext.getObjectStore().getSnapshot(objectId);
@@ -244,14 +238,15 @@ public class CayenneDataObject implements DataObject {
         }
 
         Object object = readPropertyDirectly(propName);
-        
+
         // must resolve faults immediately
-        if(object instanceof RelationshipFault) {
-        	// for now assume we just have to-one faults...
-        	// after all to-many are represented by ToManyList
-        	object = ((RelationshipFault)object).resolveToOne();
+        if (object instanceof RelationshipFault) {
+            // for now assume we just have to-one faults...
+            // after all to-many are represented by ToManyList
+            object = ((RelationshipFault) object).resolveToOne();
+            writePropertyDirectly(propName, object);
         }
-        
+
         return object;
     }
 
@@ -263,7 +258,7 @@ public class CayenneDataObject implements DataObject {
         if (persistenceState == PersistenceState.HOLLOW) {
             resolveFault();
         }
-        
+
         if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }
@@ -276,41 +271,12 @@ public class CayenneDataObject implements DataObject {
         values.put(propName, val);
     }
 
+    /**
+     * @deprecated Since 1.1 this method is no longer needed, since "readProperty(String)" 
+     * supports to-one dependent targets.
+     */
     public DataObject readToOneDependentTarget(String relName) {
-        Object toOneTarget = readProperty(relName);
-
-        // known to be NULL
-        if (toOneTarget == nullValue) {
-            return null;
-        }
-
-        // known to be NOT NULL
-        if (toOneTarget != null) {
-            return (DataObject) toOneTarget;
-        }
-
-        // need to fetch
-        SelectQuery sel =
-            QueryUtils.selectRelationshipObjects(dataContext, this, relName);
-        List results = dataContext.performQuery(sel);
-
-        // unexpected
-        if (results.size() > 1) {
-            throw new CayenneRuntimeException(
-                "error retrieving 'to one' target, found " + results.size());
-        }
-
-        // null target
-        if (results.size() == 0) {
-            writePropertyDirectly(relName, nullValue);
-            return null;
-        }
-
-        // found a valid object
-
-        DataObject dobj = (DataObject) results.get(0);
-        writePropertyDirectly(relName, dobj);
-        return dobj;
+        return (DataObject) readProperty(relName);
     }
 
     public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
@@ -374,46 +340,44 @@ public class CayenneDataObject implements DataObject {
             setReverseRelationship(relName, val);
     }
 
+    /**
+     * @deprecated Since 1.1 this method is no longer needed, since 
+     * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
+     * as well.
+     */
     public void setToOneDependentTarget(String relName, DataObject val) {
-        if (val == null)
-            val = nullValue;
-
         setToOneTarget(relName, val, true);
     }
 
-    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
-        //Three reasons that may mean a check is not needed:
-        // 1: val==null... dataContext of value is unobtainable, and hence irrelevant
-        // 2: val==nullValue... the relationship is a toOneDependent, this is functionally
-        //		equivalent to the first condition
-        // 3: this==nullValue... when setting the reverse direction of a toOneDependent
-        // 		that is being set to null, this will be nullValue.
-        if ((val != null)
-            && (val != nullValue)
-            && (this != nullValue)
-            && (dataContext != val.getDataContext())) {
+    public void setToOneTarget(
+        String relationship,
+        DataObject value,
+        boolean setReverse) {
+        if ((value != null) && (dataContext != value.getDataContext())) {
             throw new CayenneRuntimeException(
                 "Cannot set object as destination of relationship "
-                    + relName
+                    + relationship
                     + " because it is in a different DataContext");
         }
 
-        DataObject oldTarget = (DataObject) readPropertyDirectly(relName);
-        if (oldTarget == val) {
+        Object oldTarget = readPropertyDirectly(relationship);
+        if (oldTarget == value) {
             return;
         }
 
         if (setReverse) {
             // unset old reverse relationship
-            if (oldTarget != null)
-                unsetReverseRelationship(relName, oldTarget);
+            if (oldTarget instanceof DataObject) {
+                unsetReverseRelationship(relationship, (DataObject) oldTarget);
+            }
 
             // set new reverse relationship
-            if (val != null)
-                setReverseRelationship(relName, val);
+            if (value != null) {
+                setReverseRelationship(relationship, value);
+            }
         }
 
-        writeProperty(relName, val);
+        writeProperty(relationship, value);
     }
 
     private ObjRelationship getRelationshipNamed(String relName) {
@@ -465,8 +429,6 @@ public class CayenneDataObject implements DataObject {
         if (revRel != null) {
             if (revRel.isToMany())
                 val.removeToManyTarget(revRel.getName(), this, false);
-            else if (revRel.isToDependentEntity())
-                val.setToOneTarget(revRel.getName(), nullValue, false);
             else
                 val.setToOneTarget(revRel.getName(), null, false);
         }

@@ -11,14 +11,7 @@ public class ArtGroup extends org.objectstyle.cayenne.CayenneDataObject {
         return (String)readProperty("name");
     }
     
-    public void setToParentGroup(ArtGroup parent) {
-       setToOneTarget("toParentGroup", parent, true);
-    }
     
-    public ArtGroup getToParentGroup() {
-    	return (ArtGroup)readProperty("toParentGroup");
-    }
-     
     public void addToArtistArray(Artist obj) {
         addToManyTarget("artistArray", obj, true);
     }
@@ -29,6 +22,7 @@ public class ArtGroup extends org.objectstyle.cayenne.CayenneDataObject {
         return (List)readProperty("artistArray");
     }
     
+    
     public void addToChildGroupsArray(ArtGroup obj) {
         addToManyTarget("childGroupsArray", obj, true);
     }
@@ -38,7 +32,16 @@ public class ArtGroup extends org.objectstyle.cayenne.CayenneDataObject {
     public List getChildGroupsArray() {
         return (List)readProperty("childGroupsArray");
     }
-
+    
+    
+    public void setToParentGroup(ArtGroup toParentGroup) {
+        setToOneTarget("toParentGroup", toParentGroup, true);
+    }
+    public ArtGroup getToParentGroup() {
+        return (ArtGroup)readProperty("toParentGroup");
+    } 
+    
+    
 }
 
 

@@ -93,8 +93,6 @@ public class CDOOne2OneDepTst extends CayenneDOTestBase {
         // *** TESTING THIS ***
         p2.setToPaintingInfo(null);
         
-        assertNotNull(p2.readPropertyDirectly("toPaintingInfo"));
-        assertSame(CayenneDataObject.class, p2.readPropertyDirectly("toPaintingInfo").getClass());
         assertNull(p2.getToPaintingInfo());
     }
     

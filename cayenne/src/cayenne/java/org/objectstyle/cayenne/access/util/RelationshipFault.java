@@ -61,16 +61,15 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * This class represents a placeholder for an unresolved relationship from a source object.
- * Currently this is used only for flattened to-one relationships, since unresolved to-one
- * can be represented as HOLLOW DataObjects, and unresolved to-many - as unfetched ToManyList.
+ * RelationshipFault is used in cases when it is impossible to create a HOLLOW object using 
+ * the information from the relationship source object. These cases include dependent to-one 
+ * relationships and flattened to-one relationships.
  * 
  * @author Andrei Adamchik
  */
@@ -95,8 +94,12 @@ public class RelationshipFault implements Serializable {
      * Resolves this fault to a DataObject.
      */
     public DataObject resolveToOne() {
-        SelectQuery select = buildToOneQuery();
-        List objects = sourceObject.getDataContext().performQuery(select);
+        DataContext context = sourceObject.getDataContext();
+        SelectQuery select =
+            QueryUtils.selectRelationshipObjects(context, sourceObject, relationshipName);
+        select.setFetchLimit(2);
+
+        List objects = context.performQuery(select);
 
         if (objects.isEmpty()) {
             return null;
@@ -130,22 +133,4 @@ public class RelationshipFault implements Serializable {
 
         return (ObjEntity) relationship.getTargetEntity();
     }
-
-    protected SelectQuery buildToOneQuery() {
-        Expression sourceExpression =
-            ExpressionFactory.matchAllDbExp(
-                sourceObject.getObjectId().getIdSnapshot(),
-                Expression.EQUAL_TO);
-        ObjEntity entity =
-            sourceObject.getDataContext().getEntityResolver().lookupObjEntity(
-                sourceObject);
-
-        Expression qualifier =
-            QueryUtils.transformQualifier(entity, sourceExpression, relationshipName);
-
-        SelectQuery select = new SelectQuery(faultEntity(), qualifier);
-        select.setFetchLimit(2);
-        return select;
-    }
-
 }

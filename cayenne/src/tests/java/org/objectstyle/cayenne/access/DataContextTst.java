@@ -344,7 +344,8 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testCommitChangesRO1() throws Exception {
         ROArtist a1 = (ROArtist) context.createAndRegisterNewObject("ROArtist");
-        a1.setArtistName("abc");
+        a1.writePropertyDirectly("artistName", "abc");
+        a1.setPersistenceState(PersistenceState.MODIFIED);
 
         try {
             context.commitChanges();
@@ -358,8 +359,9 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testCommitChangesRO2() throws Exception {
         ROArtist a1 = fetchROArtist("artist1");
-        a1.setArtistName("abc");
-
+		a1.writePropertyDirectly("artistName", "abc");
+		a1.setPersistenceState(PersistenceState.MODIFIED);
+		
         try {
             context.commitChanges();
             fail("Updating a 'read-only' object must fail.");
@@ -399,8 +401,8 @@ public class DataContextTst extends DataContextTestBase {
                 "Updating 'read-only' object's to-many must succeed, instead an exception was thrown: "
                     + ex);
         }
-        
-		assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+
+        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
     }
 
     public void testPerformIteratedQuery1() throws Exception {

@@ -225,8 +225,11 @@ public class SnapshotManager {
 
             DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
-            // dependent to one relationship is optional... lets not create a fault for it just yet
+            // dependent to one relationship is optional 
+            // use fault, since we do not know whether it is null or not...
             if (dbRel.isToDependentPK()) {
+				RelationshipFault fault = new RelationshipFault(object, rel.getName());
+				object.writePropertyDirectly(rel.getName(), fault);
                 continue;
             }
 

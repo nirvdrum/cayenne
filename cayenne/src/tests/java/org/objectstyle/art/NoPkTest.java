@@ -1,6 +1,5 @@
 package org.objectstyle.art;
 
-
 public class NoPkTest extends org.objectstyle.cayenne.CayenneDataObject {
 
     public void setAttribute1(Integer attribute1) {
@@ -9,6 +8,8 @@ public class NoPkTest extends org.objectstyle.cayenne.CayenneDataObject {
     public Integer getAttribute1() {
         return (Integer)readProperty("attribute1");
     }
+    
+    
 }
 
 
