@@ -77,6 +77,7 @@ public class HSQLDBAdapter extends JdbcAdapter {
 	protected Map sorters = new HashMap();
 
 	/**
+	 * Adds an ADD CONSTRAINT ... clause to a relationship constraint.
 	 * @see JdbcAdapter#createFkConstraint(DbRelationship)
 	 */
 	public String createFkConstraint(DbRelationship rel) {
