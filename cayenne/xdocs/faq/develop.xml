@@ -28,32 +28,8 @@
     	</p>
     	</subsection>
     	
-        <subsection name="Q 3.2 I am getting exceptions like 'Error generating PK' or 'No suitable DataNode to handle entity 'XYZ'." 
-		anchor="linking">
-		
-		<panel name="Note:">
-		This advise applies to CayenneModeler prior to 1.0b4 release. In Modeler 1.0b4 and newer, linking 
-		DataMaps to DataNodes is no longer burried deep in the menus, and is performed on the 
-		DataMap edit screen.
-		</panel>
     	
-    	<p>Likely cause of these errors is that one of your Cayenne DataMaps is not 
-    	linked to any DataNodes. This is pending a better, more intuitive GUI. 
-    	For now you should do the following:
-    	<ul>
-    		<li>Open project in the CayenneModeler</li>
-   			<li>Select data node in the bottom of the project tree on the left.</li>
-			<li>Go to menu "Project" -> "Link DataMap to Node"<br/><br/>
-				<img src="../images/link-node.gif" width="553" height="466" border="0" align="middle"
-				alt="Link DataMap"/><br/><br/>
-			</li>
-			<li>Select appropriate DataMap</li>
-   			<li>Save the project.</li>
-    	</ul>
-    	</p>
-    	</subsection>
-    	
-    	<subsection name="Q 3.3 How do I log an output of a single query?" 
+    	<subsection name="Q 3.2 How do I log an output of a single query?" 
 		anchor="log_query">
     	
     	<p>Cayenne logging system is based on Jakarta 
@@ -72,7 +48,7 @@
 </source>
     	</subsection>
     	
-    	<subsection name="Q 3.4 I am on MySQL and I keep getting 'Can't disable AUTO_COMMIT' error. How do I fix it?" 
+    	<subsection name="Q 3.3 I am on MySQL and I keep getting 'Can't disable AUTO_COMMIT' error. How do I fix it?" 
 		anchor="auto_commit">
     	
     	<p>Errors like the one below may happen when using an outdated MySQL JDBC driver:</p>
@@ -88,7 +64,7 @@
     	website</a> should fix this problem.</p>
     	</subsection>
     	
-        <subsection name="Q 3.5 How do I select objects that do not have a certain other object in its to-many relationship?" 
+        <subsection name="Q 3.4 How do I select objects that do not have a certain other object in its to-many relationship?" 
 		anchor="not-query">
     	
     	<p>Sometimes there is a need to find all objects that DO NOT have a certain object (or objects) 

@@ -36,14 +36,11 @@
     				<ul>
     					<li><a href="develop.html#db">Q 3.1 
     					What databases are currently supported?</a></li>
-    					<li><a href="develop.html#linking">Q 3.2 
-    					I am getting exceptions like 'Error generating PK' or 
-    					'No suitable DataNode to handle entity 'XYZ'.</a></li>
-    					<li><a href="develop.html#log_query">Q 3.3
+    					<li><a href="develop.html#log_query">Q 3.2
     					How do I log an output of a single query?</a></li>
-    					<li><a href="develop.html#auto_commit">Q 3.4
+    					<li><a href="develop.html#auto_commit">Q 3.3
     					I am on MySQL and I keep getting "Can't disable AUTO_COMMIT" error. How do I fix it?</a></li>
-    					<li><a href="develop.html#not-query">Q 3.5
+    					<li><a href="develop.html#not-query">Q 3.4
     					How do I select objects that do not have a certain other object in its to-many relationship?</a></li>
     				</ul>
     				<br/>
