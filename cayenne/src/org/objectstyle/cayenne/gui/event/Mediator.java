@@ -781,8 +781,6 @@ public class Mediator {
 	}
 
 	public void setDirty(boolean dirty) {
-	   logObj.severe("dirty: " + dirty);
-	   Thread.dumpStack();
 	   if (this.dirty != dirty) {
 			this.dirty = dirty;
 			Editor.getFrame().setDirty(dirty);
