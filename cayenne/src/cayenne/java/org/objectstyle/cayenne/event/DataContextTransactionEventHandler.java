@@ -62,39 +62,33 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataContext;
 
-public class DataContextTransactionEventHandler extends Object
-{
+public class DataContextTransactionEventHandler extends Object {
 	/** shared instance that will be registered for DataContext events */
 	private static DataContextTransactionEventHandler _instance = null;
 	private Collection _objectsToBeNotified;
-	
-	private DataContextTransactionEventHandler()
-	{
+
+	private DataContextTransactionEventHandler() {
 		super();
 	}
 
-	public static void registerForDataContextEvents()
-	{
-		if (_instance == null)
-		{
+	public static void registerForDataContextEvents() {
+		if (_instance == null) {
 			_instance = new DataContextTransactionEventHandler();
 
-			try
-			{
+			try {
 				ObserverManager mgr = ObserverManager.getInstance();
 				mgr.addObserver(_instance, "dataContextWillCommit", DataContext.WILL_COMMIT);
 				mgr.addObserver(_instance, "dataContextDidCommit", DataContext.DID_COMMIT);
 			}
 	
-			catch (NoSuchMethodException ex)
-			{
+			catch (NoSuchMethodException ex) {
 				// this can never happen, we define the appropriate methods in this class
+				throw new IllegalStateException();
 			}
 		}
 	}
-	
-	public void dataContextWillCommit(ObserverEvent event)
-	{
+
+	public void dataContextWillCommit(ObserverEvent event) {
 		DataContext ctx = (DataContext)event.getPublisher();
 
 		// build a list of objects that will be send the observerEvents and cache
@@ -102,24 +96,19 @@ public class DataContextTransactionEventHandler extends Object
 		// transaction we cannot build this list anymore since all the work will be done then
 		_objectsToBeNotified = this.getEventRecipientsFromDataContext(ctx);
 		Iterator iter = _objectsToBeNotified.iterator();
-		while (iter.hasNext())
-		{
+		while (iter.hasNext()) {
 			Object element = iter.next();
-			if (element instanceof DataObjectTransactionEvents)
-			{
+			if (element instanceof DataObjectTransactionEvents) {
 				((DataObjectTransactionEvents)element).willCommit();
 			}		
 		}
 	}
 	
-	public void dataContextDidCommit(ObserverEvent event)
-	{
+	public void dataContextDidCommit(ObserverEvent event) {
 		Iterator iter = _objectsToBeNotified.iterator();
-		while (iter.hasNext())
-		{
+		while (iter.hasNext()) {
 			Object element = iter.next();
-			if (element instanceof DataObjectTransactionEvents)
-			{
+			if (element instanceof DataObjectTransactionEvents) {
 				((DataObjectTransactionEvents)element).didCommit();
 			}
 		}
@@ -128,8 +117,7 @@ public class DataContextTransactionEventHandler extends Object
 		_objectsToBeNotified = null;
 	}
 	
-	private Collection getEventRecipientsFromDataContext(DataContext ctx)
-	{
+	private Collection getEventRecipientsFromDataContext(DataContext ctx) {
 		ArrayList candidates = new ArrayList();
 		candidates.addAll(ctx.deletedObjects());
 		candidates.addAll(ctx.modifiedObjects());

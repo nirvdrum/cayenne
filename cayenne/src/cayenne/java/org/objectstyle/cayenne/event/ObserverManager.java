@@ -75,33 +75,27 @@ import org.apache.log4j.Logger;
  * @author Dirk Olmes
  * @author Holger Hoffstätte
  */
-public class ObserverManager extends Object
-{
+public class ObserverManager extends Object {
 	private static final Logger log = Logger.getLogger(ObserverManager.class);
 	private static final ObserverManager _instance = new ObserverManager();
 	
 	private HashMap _subjects;
 
-	public static ObserverManager getInstance()
-	{
+	public static ObserverManager getInstance() {
 		return _instance;
 	}
 	
-	public ObserverManager()
-	{
+	public ObserverManager() {
 		super();
 		_subjects = new HashMap();
 	}
 	
-	public void addObserver(Object observer, String methodName, ObserverSubject subject) throws NoSuchMethodException
-	{
-		if (observer == null)
-		{
+	public void addObserver(Object observer, String methodName, ObserverSubject subject) throws NoSuchMethodException {
+		if (observer == null) {
 			throw new IllegalArgumentException("observer may not be null");
 		}
-		
-		if (subject == null)
-		{
+
+		if (subject == null) {
 			throw new IllegalArgumentException("subject may not be null");
 		}
 
@@ -109,8 +103,7 @@ public class ObserverManager extends Object
 		Invocation inv = new Invocation(observer, method);
 
 		Set observersForSubject = this.observersForSubject(subject);
-		if (observersForSubject == null)
-		{
+		if (observersForSubject == null) {
 			this.addSubject(subject);
 			observersForSubject = this.observersForSubject(subject);
 		}
@@ -118,18 +111,15 @@ public class ObserverManager extends Object
 		observersForSubject.add(inv);
 	}
 	
-	public void postObserverEvent(ObserverSubject subject, Object sender)
-	{
+	public void postObserverEvent(ObserverSubject subject, Object sender) {
 		this.postObserverEvent(subject, sender, null);
 	}
 
-	public void postObserverEvent(ObserverSubject subject, Object sender, Map info)
-	{
+	public void postObserverEvent(ObserverSubject subject, Object sender, Map info) {
 		// get current observers for subject
 		Set observersForEvent = this.observersForSubject(subject);
 
-		if (observersForEvent != null)
-		{
+		if (observersForEvent != null) {
 			// create only one ObserverEvent that will be reused for all Observers
 			ObserverEvent event = new ObserverEvent(sender, info);
 
@@ -138,17 +128,14 @@ public class ObserverManager extends Object
 			List invalidInvocations = null;
 
 			Iterator iter = observersForEvent.iterator();
-			while (iter.hasNext())
-			{
+			while (iter.hasNext()) {
 				Invocation invocation = (Invocation)iter.next();
 
 				// fire invocation, detect if anything went wrong
-				if (invocation.fire(event) == false)
-				{
+				if (invocation.fire(event) == false) {
 					log.debug("invalid invocation detected");
 
-					if (invalidInvocations == null)
-					{
+					if (invalidInvocations == null) {
 						invalidInvocations = new ArrayList();
 					}
 
@@ -157,8 +144,7 @@ public class ObserverManager extends Object
 			}
 
 			// clear out all invalid invocations
-			if (invalidInvocations != null)
-			{
+			if (invalidInvocations != null) {
 				observersForEvent.removeAll(invalidInvocations);	
 			}
 		}
@@ -168,24 +154,19 @@ public class ObserverManager extends Object
 	 * @return <code>true</code> if <code>observer</code> could be removed,
 	 * else returns <code>false</code>.
 	 */
-	public boolean removeObserver(Object observer, ObserverSubject subject)
-	{
+	public boolean removeObserver(Object observer, ObserverSubject subject) {
 		boolean didRemove = false;
 
 		// @HH: is this correct? observer/null subject should IMHO remove for all subjects..
-		if ((observer != null) && (subject != null))
-		{
+		if ((observer != null) && (subject != null)) {
 			Set observersForSubject = this.observersForSubject(subject);
 	
-			if (observersForSubject != null)
-			{
+			if (observersForSubject != null) {
 				// remove all invocations with the given target
 				Iterator observerIter = observersForSubject.iterator();
-				while (observerIter.hasNext())
-				{
+				while (observerIter.hasNext()) {
 					Invocation element = (Invocation)observerIter.next();
-					if (element.getTarget() == observer)
-					{
+					if (element.getTarget() == observer) {
 						log.debug("will remove " + observer);
 						observerIter.remove();
 						didRemove = true;
@@ -193,8 +174,7 @@ public class ObserverManager extends Object
 				}
 
 				// remove the subject if the corresponding observer queue is empty
-				if (observersForSubject.isEmpty())
-				{
+				if (observersForSubject.isEmpty()) {
 					log.debug("no remaining observers for '" + subject + "' - removing subject");
 					this.removeSubject(subject);
 				}
@@ -208,11 +188,9 @@ public class ObserverManager extends Object
 	 * add a new subject & its observer queue to the observer map
 	 * @param subject the ObserverSubject to be added
 	 */
-	private void addSubject(ObserverSubject subject)
-	{
+	private void addSubject(ObserverSubject subject) {
 		// make sure we don't add a subject twice, losing the old observers
-		if (_subjects.get(subject) == null)
-		{
+		if (_subjects.get(subject) == null) {
 			log.debug("no observers for '" + subject + "' - creating new subject");
 			_subjects.put(subject, new HashSet());
 		}
@@ -222,16 +200,14 @@ public class ObserverManager extends Object
 	 * remove a subject & its observer queue from the observer map
 	 * @param subject the ObserverSubject to be removed
 	 */
-	private void removeSubject(ObserverSubject subject)
-	{
+	private void removeSubject(ObserverSubject subject) {
 		_subjects.remove(subject);
 	}
 
 	/**
 	 * @return Set containing all the observers for <code>subject</code>.
 	 */
-	private Set observersForSubject(ObserverSubject subject)
-	{
+	private Set observersForSubject(ObserverSubject subject) {
 		return (Set)_subjects.get(subject);
 	}
 }

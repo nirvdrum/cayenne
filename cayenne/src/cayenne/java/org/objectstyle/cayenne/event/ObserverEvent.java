@@ -67,38 +67,25 @@ import java.util.Map;
  * @author Holger Hoffstätte
  */
 
-public class ObserverEvent extends Object
-{
+public class ObserverEvent extends Object {
 	private Object _publisher;
 	private Map _info;
 
-	private ObserverEvent()
-	{
+	private ObserverEvent() {
 		super();
 	}	
 
-	public ObserverEvent(Object sender, Map info)
-	{
+	public ObserverEvent(Object sender, Map info) {
 		this();
 		_publisher = sender;
-		
-		if (info != null)
-		{
-			_info = info;
-		}
-		else
-		{
-			_info = Collections.EMPTY_MAP;
-		}
+		_info = (info != null ? info : Collections.EMPTY_MAP);
 	}
 
-	public Object getPublisher()
-	{
+	public Object getPublisher() {
 		return _publisher;
 	}
-	
-	public Map getInfo()
-	{
+
+	public Map getInfo() {
 		return _info;
 	}
 }

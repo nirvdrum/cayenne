@@ -56,8 +56,7 @@
 
 package org.objectstyle.cayenne.event;
 
-public interface DataObjectTransactionEvents
-{
+public interface DataObjectTransactionEvents {
 	public void willCommit();
 	public void didCommit();
 }

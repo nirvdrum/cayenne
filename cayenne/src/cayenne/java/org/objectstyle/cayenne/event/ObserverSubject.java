@@ -71,19 +71,15 @@ package org.objectstyle.cayenne.event;
  * @author Holger Hoffstätte
  */
 
-public class ObserverSubject extends Object
-{
+public class ObserverSubject extends Object {
 	private String _subject;
 	
-	public static ObserverSubject getSubject(Class sender, String subjectName)
-	{
-		if (sender == null)
-		{
-			throw new IllegalArgumentException("sender may not be null");
+	public static ObserverSubject getSubject(Class sender, String subjectName) {
+		if (sender == null) {
+			throw new IllegalArgumentException("sender must not be null");
 		}
 
-		if ((subjectName == null) || (subjectName.length() == 0))
-		{
+		if ((subjectName == null) || (subjectName.length() == 0)) {
 			throw new IllegalArgumentException("subjectName must not be empty");
 		}
 		
@@ -95,19 +91,16 @@ public class ObserverSubject extends Object
 	/**
 	 *  make sure that the only way to create ObserverSubjects is via the static method.
 	 */
-	private ObserverSubject()
-	{
+	private ObserverSubject() {
 		super();
 		_subject = null;
 	}
 	
-	private void setSubject(String subject)
-	{
+	private void setSubject(String subject) {
 		_subject = subject;
 	}
 	
-	public String toString()
-	{
+	public String toString() {
         StringBuffer buf = new StringBuffer(64);
 
         buf.append("<");
