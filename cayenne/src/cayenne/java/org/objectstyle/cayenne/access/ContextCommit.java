@@ -130,8 +130,10 @@ class ContextCommit {
      * Commits changes in the enclosed DataContext.
      */
     void commit(Level logLevel) throws CayenneException {
-        this.logLevel =
-            (logLevel == null) ? QueryLogger.DEFAULT_LOG_LEVEL : logLevel;
+        if (logLevel == null) {
+            logLevel = QueryLogger.DEFAULT_LOG_LEVEL;
+        }
+        this.logLevel = logLevel;
 
         categorizeObjects();
         createPrimaryKeys();
@@ -185,6 +187,10 @@ class ContextCommit {
                 if (queries.size() > 0) {
                     nodeHelper.getNode().performQueries(queries, observer);
 
+                    // Andrei: should we reset observer commit status for each iteration?
+                    // Also we may add real distributed transactions support by adding
+                    // some kind of commit delegate that runs all queries, and only then
+                    // commits...
                     if (observer.isTransactionRolledback()) {
                         context.fireTransactionRolledback();
                         throw new CayenneException("Transaction was rolledback.");
