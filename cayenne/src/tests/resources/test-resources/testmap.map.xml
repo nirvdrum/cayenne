@@ -182,6 +182,9 @@
 	<obj-entity name="BinaryPKTest2" className="org.objectstyle.art.BinaryPKTest2" dbEntityName="BINARY_PK_TEST2">
 		<obj-attribute name="detailName" type="java.lang.String" db-attribute-path="DETAIL_NAME"/>
 	</obj-entity>
+	<obj-entity name="BitNumberTest" className="org.objectstyle.art.BitNumberTest" dbEntityName="BIT_TEST">
+		<obj-attribute name="bitColumn" type="java.lang.Integer" db-attribute-path="BIT_COLUMN"/>
+	</obj-entity>
 	<obj-entity name="BitTest" className="org.objectstyle.art.BitTest" dbEntityName="BIT_TEST">
 		<obj-attribute name="bitColumn" type="java.lang.Boolean" db-attribute-path="BIT_COLUMN"/>
 	</obj-entity>

@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.art.BitNumberTest;
 import org.objectstyle.art.BitTest;
 import org.objectstyle.art.SmallintTest;
 import org.objectstyle.art.TinyintTest;
@@ -158,5 +159,30 @@ public class NumericTypesTst extends CayenneTestCase {
         BitTest object = (BitTest) objects.get(0);
         assertEquals(Boolean.TRUE, object.getBitColumn());
     }
+    
+    
+    // mapping bit as an integer doesn't work on most databases (except for MySQL, as always),
+    // this test case is commented out just in case we need to do more testing with it
+    /*
+
+    public void testNumericBit() throws Exception {
+
+        // populate (testing insert as well)
+        BitNumberTest trueObject = (BitNumberTest) context.createAndRegisterNewObject("BitNumberTest");
+        trueObject.setBitColumn(new Integer(1));
+        BitNumberTest falseObject = (BitNumberTest) context.createAndRegisterNewObject("BitNumberTest");
+        falseObject.setBitColumn(new Integer(0));
+        context.commitChanges();
+
+        // this will clear cache as a side effect
+        context = createDataContext();
+
+        Expression qual = ExpressionFactory.matchExp("bitColumn", new Integer(1));
+        List objects = context.performQuery(new SelectQuery(BitNumberTest.class, qual));
+        assertEquals(1, objects.size());
+
+        BitNumberTest object = (BitNumberTest) objects.get(0);
+        assertEquals(new Integer(1), object.getBitColumn());
+    } */
 
 }
