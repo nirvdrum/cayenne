@@ -53,13 +53,13 @@
                                             <fo:block>
                                                 <fo:leader leader-pattern="space" />
                                             </fo:block>
-                                             <fo:inline color="maroon" font-size="20pt">
+                                             <fo:inline color="black" font-size="20pt">
                                                   <xsl:text>Cayenne</xsl:text>
                                             </fo:inline>
                                             <fo:block>
                                                 <fo:leader leader-pattern="space" />
                                             </fo:block>
-                                            <fo:inline color="maroon" font-size="20pt">Framework</fo:inline>
+                                            <fo:inline color="black" font-size="20pt">Framework</fo:inline>
                                         </fo:block>
                                     </fo:table-cell>
                                 </fo:table-row>
@@ -202,8 +202,8 @@
 										<xsl:text>&#xA;</xsl:text>
 									</fo:block>
 									<fo:block font-size="20pt" font-weight="bold" space-before.optimum="1pt" space-after.optimum="2pt">
-										<fo:block text-align="center">
-											<fo:inline color="maroon" font-weight="bold">
+										<fo:block text-align="left">
+											<fo:inline color="black" font-weight="bold">
 												<xsl:value-of select="."/>
 											</fo:inline>
 										</fo:block>
@@ -234,7 +234,7 @@
 				<xsl:text>&#xA;</xsl:text>
 			</fo:block>
 			<fo:block font-size="16pt" font-weight="bold" space-before.optimum="1pt" space-after.optimum="2pt">
-				<fo:block text-align="center" color="maroon" font-weight="bold">
+				<fo:block text-align="left" color="black" font-weight="bold">
 					<xsl:value-of select="."/>
 				</fo:block>
 			</fo:block>
