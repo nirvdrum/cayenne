@@ -55,12 +55,14 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -76,13 +78,11 @@ import org.objectstyle.cayenne.util.Util;
 public class SnapshotManager {
 
     protected ToManyListDataSource relDataSource;
-    protected DataContext context;
 
     /**
      * Constructor for SnapshotManager.
      */
-    public SnapshotManager(DataContext context, ToManyListDataSource relDataSource) {
-        this.context = context;
+    public SnapshotManager(ToManyListDataSource relDataSource) {
         this.relDataSource = relDataSource;
     }
 
@@ -95,6 +95,8 @@ public class SnapshotManager {
         DataObject anObject,
         Map snapshot) {
 
+        DataContext context = anObject.getDataContext();
+        
         Map attrMap = ent.getAttributeMap();
         Iterator it = attrMap.keySet().iterator();
         while (it.hasNext()) {
@@ -149,6 +151,7 @@ public class SnapshotManager {
             return;
         }
 
+        DataContext context = anObject.getDataContext();
         Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
 
         Map attrMap = ent.getAttributeMap();
@@ -185,5 +188,68 @@ public class SnapshotManager {
                 anObject.writePropertyDirectly(rel.getName(), relList);
             }
         }
+    }
+    
+    /** 
+     * Takes a snapshot of current object state. 
+     */
+    public Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
+        HashMap map = new HashMap();
+
+        Map attrMap = ent.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            DbAttribute dbAttr = ((ObjAttribute) attrMap.get(attrName)).getDbAttribute();
+            map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
+        }
+
+        Map relMap = ent.getRelationshipMap();
+        Iterator itr = relMap.keySet().iterator();
+        while (itr.hasNext()) {
+            String relName = (String) itr.next();
+            ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+
+            // to-many will be handled on the other side
+            if (rel.isToMany()) {
+                continue;
+            }
+
+            if (rel.isToDependentEntity()) {
+                continue;
+            }
+
+            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
+            if (target == null) {
+                continue;
+            }
+
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationshipList().get(0);
+            Map idParts = target.getObjectId().getIdSnapshot();
+
+            // this may happen in uncommitted objects
+            if (idParts == null) {
+                continue;
+            }
+
+            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+            map.putAll(fk);
+        }
+
+        // process object id map
+        // we should ignore any object id values if a corresponding attribute
+        // is a part of relationship "toMasterPK", since those values have been 
+        // set above when db relationships where processed.                
+        Map thisIdParts = anObject.getObjectId().getIdSnapshot();
+        if (thisIdParts != null) {
+            // put only thise that do not exist in the map
+            Iterator itm = thisIdParts.keySet().iterator();
+            while (itm.hasNext()) {
+                Object nextKey = itm.next();
+                if (!map.containsKey(nextKey))
+                    map.put(nextKey, thisIdParts.get(nextKey));
+            }
+        }
+        return map;
     }
 }

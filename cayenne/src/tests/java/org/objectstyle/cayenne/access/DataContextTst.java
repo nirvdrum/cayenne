@@ -128,7 +128,7 @@ public class DataContextTst extends CayenneTestCase {
 		s2.put("ARTIST_NAME", n2);
 		s2.put("DATE_OF_BIRTH", new java.util.Date());
 		ObjEntity e = ctxt.lookupEntity("Artist");
-		ctxt.mergeObjectWithSnapshot(e, a1, s2);
+		ctxt.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
 
 		// name was modified, so it should not change during merge
 		assertEquals(n1, a1.getArtistName());

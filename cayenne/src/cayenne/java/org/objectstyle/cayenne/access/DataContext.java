@@ -111,11 +111,9 @@ import org.objectstyle.cayenne.util.Util;
 public class DataContext implements QueryEngine, Serializable {
     static Logger logObj = Logger.getLogger(DataContext.class.getName());
 
-    //Will not be directly serialized - see read/writeObject for details
     protected transient QueryEngine parent;
     protected transient ObjectStore objectStore;
-
-    protected SnapshotManager snapshotManager;
+    protected transient SnapshotManager snapshotManager;
 
     public DataContext() {
         this(null);
@@ -131,8 +129,7 @@ public class DataContext implements QueryEngine, Serializable {
     public DataContext(QueryEngine parent) {
         this.parent = parent;
         this.objectStore = new ObjectStore();
-        this.snapshotManager =
-            new SnapshotManager(this, new RelationshipDataSource(this));
+        this.snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
     }
 
     /** Returns parent QueryEngine object. */
@@ -147,6 +144,10 @@ public class DataContext implements QueryEngine, Serializable {
         this.parent = parent;
     }
 
+    public SnapshotManager getSnapshotManager() {
+    	return snapshotManager;
+    }
+    
     /**
      * Returns ObjectStore associated with this DataContext.
      */
@@ -249,89 +250,10 @@ public class DataContext implements QueryEngine, Serializable {
             .newInstance();
     }
 
-    /** 
-     * Replaces all object attribute values with snapshot values. 
-     * Sets object state to COMMITTED.
-     */
-    protected void refreshObjectWithSnapshot(
-        ObjEntity ent,
-        DataObject anObject,
-        Map snapshot) {
-
-        snapshotManager.refreshObjectWithSnapshot(ent, anObject, snapshot);
-    }
-
-    /**
-     * Delegates the merge to the SnapshotManager.
-     */ 
-    protected void mergeObjectWithSnapshot(
-        ObjEntity ent,
-        DataObject anObject,
-        Map snapshot) {
-
-        snapshotManager.mergeObjectWithSnapshot(ent, anObject, snapshot);
-    }
-
     /** Takes a snapshot of current object state. */
     public Map takeObjectSnapshot(DataObject anObject) {
-        HashMap map = new HashMap();
-
         ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
-        Map attrMap = ent.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            DbAttribute dbAttr = ((ObjAttribute) attrMap.get(attrName)).getDbAttribute();
-            map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
-        }
-
-        Map relMap = ent.getRelationshipMap();
-        Iterator itr = relMap.keySet().iterator();
-        while (itr.hasNext()) {
-            String relName = (String) itr.next();
-            ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-
-            // to-many will be handled on the other side
-            if (rel.isToMany()) {
-                continue;
-            }
-
-            if (rel.isToDependentEntity()) {
-                continue;
-            }
-
-            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
-            if (target == null) {
-                continue;
-            }
-
-            DbRelationship dbRel = (DbRelationship) rel.getDbRelationshipList().get(0);
-            Map idParts = target.getObjectId().getIdSnapshot();
-
-            // this may happen in uncommitted objects
-            if (idParts == null) {
-                continue;
-            }
-
-            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-            map.putAll(fk);
-        }
-
-        // process object id map
-        // we should ignore any object id values if a corresponding attribute
-        // is a part of relationship "toMasterPK", since those values have been 
-        // set above when db relationships where processed.                
-        Map thisIdParts = anObject.getObjectId().getIdSnapshot();
-        if (thisIdParts != null) {
-            // put only thise that do not exist in the map
-            Iterator itm = thisIdParts.keySet().iterator();
-            while (itm.hasNext()) {
-                Object nextKey = itm.next();
-                if (!map.containsKey(nextKey))
-                    map.put(nextKey, thisIdParts.get(nextKey));
-            }
-        }
-        return map;
+        return snapshotManager.takeObjectSnapshot(ent, anObject);
     }
 
     /** 
@@ -367,7 +289,7 @@ public class DataContext implements QueryEngine, Serializable {
 
             if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
                 // we are asked to refresh an existing object with new values
-                mergeObjectWithSnapshot(objEntity, obj, dataRow);
+                snapshotManager.mergeObjectWithSnapshot(objEntity, obj, dataRow);
                 objectStore.addSnapshot(anId, dataRow);
 
                 // notify object that it was fetched
@@ -392,7 +314,7 @@ public class DataContext implements QueryEngine, Serializable {
         DataObject obj = registeredObject(anId);
 
         if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-            refreshObjectWithSnapshot(objEntity, obj, dataRow);
+            snapshotManager.refreshObjectWithSnapshot(objEntity, obj, dataRow);
 
             // notify object that it was fetched
             obj.fetchFinished();
@@ -476,7 +398,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void invalidateObject(DataObject dataObj) {
         // we don't care about objects that are not ours    
-        // we don't care about uncomitted objects		
+        // we don't care about uncommitted objects		
         if (dataObj.getDataContext() != this
             || dataObj.getPersistenceState() == PersistenceState.NEW) {
             return;
@@ -523,17 +445,17 @@ public class DataContext implements QueryEngine, Serializable {
         return (DataObject) results.get(0);
     }
 
-    /** Check what objects have changed in the context. Generate appropriate
-     *  insert, update and delete queries to commit their state to the database. */
+    /** 
+     * Synchronizes object graph with the database. Executes needed
+     * insert, update and delete queries (generated internally).
+     */
     public void commitChanges() throws CayenneRuntimeException {
         commitChanges((Level) null);
     }
 
     /** 
-     * Commits changes of the object graph to the database.
-     * Checks what objects have changed in the context. 
-     * Generates appropriate insert, update and delete queries to 
-     * commit their state to the database. 
+     * Synchronizes object graph with the database. Executes needed
+     * insert, update and delete queries (generated internally).
      * 
      * @param logLevel if logLevel is higher or equals to the level 
      * set for QueryLogger, statements execution will be logged. 
@@ -1043,5 +965,8 @@ public class DataContext implements QueryEngine, Serializable {
                 obj.setDataContext(this);
             }
         }
+
+        // initialized new snapshot manager
+        snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
     }
 }
