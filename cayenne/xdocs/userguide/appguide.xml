@@ -13,7 +13,7 @@
             
             <p><strong>- Create DataMap : </strong> 
             <a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
-            is an XML file 
+            is stored in an XML file 
             used to desribe your database schema and map it to the Java classes
             in your application. DataMap can be created either manually or using
             CayenneModeler GUI tool shipped with Cayenne.
@@ -41,7 +41,13 @@
         </subsection>
         
         <subsection name="4.2 Create DataMap" anchor="datamap">
-            <p>To Be Done</p>
+            <p><a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            is stored in an XML file 
+            used to desribe a database schema and map it to the Java classes
+            in the Java application. DataMap can be created either manually or using
+            CayenneModeler GUI tool shipped with Cayenne. For the details of the XML 
+            structure of the DataMap file see a 
+            <a href="../dtd/data-map.dtd">DTD</a>.</p>
         </subsection>
         
         <subsection name="4.3 Generate Java Classes" anchor="javagen">
@@ -49,7 +55,14 @@
         </subsection>
         
         <subsection name="4.4 Using Cayenne Classes" anchor="cayenne">
-            <p>To Be Done</p>
+            <p>All Cayenne features are usually accessed via a 
+            <a 
+            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
+            instance. It isolates changes made by a single user from other users. In
+            web application speak this means that DataContext usually has a "session
+            scope". <a 
+            href="../api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
+            usually serves as a factory for DataContext objects. </p>
         </subsection>
         
         <subsection name="4.5 Deployment" anchor="deploy">
