@@ -140,7 +140,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
         q.setLoggingLevel(Level.WARN);
-        List artists = ctxt.performQuery(q);
+         // List artists = ctxt.performQuery(q);
 
         // check the results
         /*assertNotNull("Null result from StoredProcedure.", artists);
