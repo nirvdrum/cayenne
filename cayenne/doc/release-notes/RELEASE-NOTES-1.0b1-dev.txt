@@ -14,3 +14,7 @@ Changes in this release:
 2. Synchronized internal DataContext cache access.
 
 3. Added "unregisterObject" method to DataContext 
+
+4. Made DataContext serializable
+
+5. Added "paged" queries support

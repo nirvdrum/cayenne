@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
@@ -69,8 +69,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultListTst extends CayenneTestCase {
-	protected IncrementalFaultList list;
-	protected GenericSelectQuery query;
+    protected IncrementalFaultList list;
+    protected GenericSelectQuery query;
 
     /**
      * Constructor for IncrementalFaultListTst.
@@ -79,8 +79,7 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     public IncrementalFaultListTst(String name) {
         super(name);
     }
-    
-    
+
     /**
      * @see junit.framework.TestCase#setUp()
      */
@@ -88,92 +87,57 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         super.setUp();
         TestMain.getSharedDatabaseSetup().cleanTableData();
         new DataContextTst("Helper").populateTables();
-        
+
         SelectQuery q = new SelectQuery("Artist");
         q.setPageSize(5);
+        // q.setLoggingLevel(Level.WARN);
         query = q;
         list = new IncrementalFaultList(super.createDataContext(), query);
     }
 
-
     public void testSize() throws Exception {
-    	assertEquals(DataContextTst.artistCount, list.size());
+        assertEquals(DataContextTst.artistCount, list.size());
     }
-    
+
     public void testPageIndex() throws Exception {
-    	assertEquals(0, list.pageIndex(0));
-    	assertEquals(0, list.pageIndex(1));
-    	assertEquals(1, list.pageIndex(5));
-    	assertEquals(13, list.pageIndex(69));
+        assertEquals(0, list.pageIndex(0));
+        assertEquals(0, list.pageIndex(1));
+        assertEquals(1, list.pageIndex(5));
+        assertEquals(13, list.pageIndex(69));
     }
-    
+
     public void testPagesRead1() throws Exception {
-    	assertTrue(!list.isFullyResolved());
-    	assertEquals(1, list.getPagesRead());
-    	
-    	list.readUpToPage(1);
-    	assertEquals(1, list.getPagesRead());
-    	
-    	list.readUpToObject(5);
-    	assertEquals(1, list.getPagesRead());
-    	
-    	list.readUpToObject(6);
-    	assertEquals(2, list.getPagesRead());
-    } 
-    
+        assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
+        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Map);
+
+        list.resolveInterval(5, 10);
+        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
+
+        list.resolveAll();
+        assertTrue(
+            ((IncrementalFaultList) list).elements.get(list.size() - 1)
+                instanceof Artist);
+    }
+
     public void testGet1() throws Exception {
-    	Object a = list.get(6);
-    	
-    	assertNotNull(a);
-    	assertTrue(a instanceof Artist);
-    	assertEquals(2, list.getPagesRead());
-    	assertTrue(a != list.get(7));
-    	assertEquals(2, list.getPagesRead());
+        assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
+        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Map);
+
+        Object a = list.get(7);
+
+        assertNotNull(a);
+        assertTrue(a instanceof Artist);
+        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
     }
-    
+
     public void testGet2() throws Exception {
-    	// test data rows
-    	((SelectQuery)list.getQuery()).setFetchingDataRows(true);
-    	Object a = list.get(6);
-    	
-    	assertNotNull(a);
-    	assertTrue(a instanceof Map);
-    	assertTrue(!(a instanceof DataObject));
-    	assertEquals(2, list.getPagesRead());
-    } 
-    
-    public void testRemove1() throws Exception {
-    	// remove from faulted
-    	list.readAll();
-    	try {
-    		list.remove(2);
-    		fail("Remove shouldn't be supported.");
-    	}
-    	catch(UnsupportedOperationException ex) {
-    		//exception expected
-    	}
-    }
-    
-    public void testRemove2() throws Exception {
-    	// remove from unfaulted
-    	try {
-    		list.remove(2);
-    		fail("Remove shouldn't be supported.");
-    	}
-    	catch(UnsupportedOperationException ex) {
-    		//exception expected
-    	}
-    }
-    
-    public void testIterator() throws Exception {
-    	Iterator it = list.iterator();
-    	assertNotNull(it);
-    	
-    	assertTrue(!list.isFullyResolved());
-    	
-    	assertTrue(it.hasNext());
-    	assertNotNull(it.next());
-    	assertTrue(!list.isFullyResolved());
+        ((SelectQuery) query).setFetchingDataRows(true);
+        assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
+        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Map);
+
+        Object a = list.get(7);
+
+        assertNotNull(a);
+        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
     }
 }
-

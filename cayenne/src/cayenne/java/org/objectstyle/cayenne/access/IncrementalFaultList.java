@@ -55,44 +55,63 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * An immutable non-synchronized list implementation that would internally 
- * populate itself with database data only when it is needed. 
- * IncrementalFaultList has an internal page size. On creation list 
- * would only read the first "page". 
- * On access to a list element, it will make sure that all pages from
- * the first one to the one containing requested object are resolved. Pages are indexed
- * starting from zero and up.
+ * A synchronized list that serves as a container of DataObjects. 
+ * It is returned when a paged query is performed by DataContext. 
+ * On creation, only the first "page" is fully resolved, for the rest 
+ * of the objects only their ObjectIds are read. 
+ * Pages following the first page are resolved on demand only. 
+ * On access to an element, the list would ensure that this 
+ * element as well as all its siblings on the same page are fully 
+ * resolved.
  * 
- * <p>Note that some operations on the list would cause the whole list 
- * to be faulted. For instance, calling <code>size()</code>, 
- * <code>contains()</code>, <code>indexOf()</code> method.</p>
+ * <p>Note that this list would only allow addition of DataObjects. Attempts to add any
+ * other object types will result in an exception.</p>
+ * 
+ * <p>Performance note: certain operations like <code>toArray</code> would trigger full list 
+ * fetch.</p>
  * 
  * @author Andrei Adamchik
  */
-public class IncrementalFaultList extends AbstractList {
+public class IncrementalFaultList implements List {
     static Logger logObj = Logger.getLogger(IncrementalFaultList.class.getName());
 
-    protected int pagesRead;
     protected int pageSize;
     protected List elements;
     protected DataContext dataContext;
-    protected GenericSelectQuery query;
-    protected boolean fullyResolved;
+    protected Level logLevel;
+    protected ObjEntity rootEntity;
+
+    /**
+     * Creates a new list copying settings from another list.
+     * Elements WILL NOT be copied or fetched.
+     */
+    public IncrementalFaultList(IncrementalFaultList list) {
+        this.pageSize = list.pageSize;
+        this.logLevel = list.logLevel;
+        this.dataContext = list.dataContext;
+        this.rootEntity = list.rootEntity;
+        elements = Collections.synchronizedList(new ArrayList());
+    }
 
     public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
         if (query.getPageSize() <= 0) {
@@ -101,157 +120,163 @@ public class IncrementalFaultList extends AbstractList {
                     + query.getPageSize());
         }
 
-        elements = new ArrayList();
+        this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
-        this.query = query;
         this.pageSize = query.getPageSize();
-        readUpToPage(1);
+        this.logLevel = query.getLoggingLevel();
+        this.rootEntity = dataContext.lookupEntity(query.getObjEntityName());
+
+        fillIn(query);
     }
 
     /**
-     * Returns a number of pages that are already faulted. 
+     * Performs initialization of the internal list of objects.
+     * Only the first page is fully resolved. For the rest of
+     * the list, only ObjectIds are read.
      */
-    public int getPagesRead() {
-        return pagesRead;
+    protected void fillIn(GenericSelectQuery query) {
+        synchronized (elements) {
+
+            // start fresh
+            elements.clear();
+
+            try {
+                long t1 = System.currentTimeMillis();
+                ResultIterator it = dataContext.performIteratedQuery(query);
+                try {
+                    // read first page completely, the rest as ObjectIds
+                    for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
+                        Map row = it.nextDataRow();
+                        elements.add(
+                            dataContext.objectFromDataRow(rootEntity, row, true));
+                    }
+
+                    // continue reading ids
+                    while (it.hasNextRow()) {
+                        elements.add(it.nextObjectId());
+                    }
+
+                    QueryLogger.logSelectCount(
+                        query.getLoggingLevel(),
+                        elements.size(),
+                        System.currentTimeMillis() - t1);
+
+                } finally {
+                    it.close();
+                }
+            } catch (CayenneException e) {
+                throw new CayenneRuntimeException("Error performing query.", e);
+            }
+        }
     }
 
-    public int getObjectsRead() {
-        return pagesRead * pageSize;
+    protected void resolveAll() {
+        resolveInterval(0, size());
     }
 
     /**
-     * Completely resolves all list objects.
-     */
-    public void readAll() {
-        if (fullyResolved) {
-            return;
-        }
-
-        readPageInterval(pagesRead, Integer.MAX_VALUE);
-    }
-
-    public void readUpToObject(int elementIndex) {
-        int ind = pageIndex(elementIndex);
-
-        // if element is not the first on the page,
-        // fault element page too, otherwise fault
-        // all pages till the element page
-        if (elementIndex % pageSize > 0) {
-            ind++;
-        }
-
-        readUpToPage(ind);
-    }
-
-    /**
-     * Faults this list resolving pages from the beginning
-     * up to but not including <code>pageIndex</code>. After this
-     * method is successfully called, the list is guaranteed to have
-     * first <code>pageIndex</code> pages resolved.
-     */
-    public void readUpToPage(int pageIndex) {
-        if (fullyResolved || pageIndex <= pagesRead) {
-            return;
-        }
-
-        readPageInterval(pagesRead, pageIndex);
-    }
-
-    /**
-     * Faults this list resolving pages starting at <code>fromIndex</code>
+     * Resolves a sublist of objects starting at <code>fromIndex</code>
      * up to but not including <code>toIndex</code>.
      */
-    protected void readPageInterval(int fromIndex, int toIndex) {
+    protected void resolveInterval(int fromIndex, int toIndex) {
         if (fromIndex >= toIndex) {
             return;
         }
 
-        int readFrom = fromIndex * pageSize;
-        int readTo = toIndex * pageSize;
-        
-        // log query range
-        QueryLogger.logQueryRange(query.getLoggingLevel(), readFrom, readTo);
-        
-        try {
-
-            ResultIterator it = dataContext.performIteratedQuery(query);
-            try {
-
-                // skip through read
-                for (int i = 0; i < readFrom; i++) {
-                    if (!it.hasNextRow()) {
-                        // results ended before we need to read anything
-                        fullyResolved = true;
-                        pagesRead = pageIndex(i) + 1;
-                        return;
-                    }
-
-                    // skip processed
-                    it.skipDataRow();
+        synchronized (elements) {
+            ArrayList quals = new ArrayList();
+            ArrayList ids = new ArrayList();
+            for (int i = fromIndex; i < toIndex; i++) {
+                Object obj = elements.get(i);
+                if (obj instanceof Map) {
+                    ids.add(obj);
+                    quals.add(
+                        ExpressionFactory.matchAllDbExp((Map) obj, Expression.EQUAL_TO));
                 }
-
-                // read all requested pages
-                ObjEntity ent = dataContext.lookupEntity(query.getObjEntityName());
-                boolean readDataRows = query.isFetchingDataRows();
-                for (int i = readFrom; i < readTo; i++) {
-                    if (!it.hasNextRow()) {
-                        fullyResolved = true;
-                        pagesRead = pageIndex(i) + 1;
-                        return;
-                    }
-
-                    // read objects or data rows
-                    Map row = it.nextDataRow();
-                    Object obj =
-                        readDataRows
-                            ? (Object) row
-                            : dataContext.objectFromDataRow(ent, row, true);
-                    elements.add(obj);
-                }
-                pagesRead = toIndex;
-
-                // check if coincidentally we read the whole thing 
-                if (!it.hasNextRow()) {
-                    fullyResolved = true;
-                }
-
-            } finally {
-                it.close();
             }
 
-        } catch (CayenneException e) {
-            throw new CayenneRuntimeException("Error faulting page.", e);
+            if (quals.size() == 0) {
+                return;
+            }
+
+            SelectQuery query =
+                new SelectQuery(
+                    rootEntity.getName(),
+                    ExpressionFactory.joinExp(Expression.OR, quals));
+
+            query.setLoggingLevel(logLevel);
+
+            List objects = dataContext.performQuery(query);
+
+            // sanity check - database data may have changed
+            if (objects.size() < ids.size()) {
+                // find missing ids
+                StringBuffer buf = new StringBuffer();
+                buf.append("Some ObjectIds are missing from the database. ");
+                buf.append("Expected ").append(ids.size()).append(", fetched ").append(
+                    objects.size());
+
+                Iterator idsIt = ids.iterator();
+                boolean first = true;
+                while (idsIt.hasNext()) {
+                    boolean found = false;
+                    Object id = (Object) idsIt.next();
+                    Iterator oIt = objects.iterator();
+                    while (oIt.hasNext()) {
+                        if (((DataObject) oIt.next())
+                            .getObjectId()
+                            .getIdSnapshot()
+                            .equals(id)) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            buf.append(", ");
+                        }
+
+                        buf.append(id.toString());
+                    }
+                }
+
+                throw new CayenneRuntimeException(buf.toString());
+            } else if (objects.size() > ids.size()) {
+                throw new CayenneRuntimeException(
+                    "Expected " + ids.size() + " objects, retrieved " + objects.size());
+            }
+
+            // replace ids in the list with objects
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                DataObject obj = (DataObject) it.next();
+                Map idMap = obj.getObjectId().getIdSnapshot();
+
+                boolean found = false;
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (idMap.equals(elements.get(i))) {
+                        elements.set(i, obj);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    throw new CayenneRuntimeException("Can't find id for " + idMap);
+                }
+            }
         }
     }
 
     public int pageIndex(int elementIndex) {
-        if (query.getPageSize() <= 0 || elementIndex < 0) {
+        if (pageSize <= 0 || elementIndex < 0) {
             return -1;
         }
 
-        return elementIndex / query.getPageSize();
-    }
-
-    /**
-     * @see java.util.List#get(int)
-     */
-    public Object get(int index) {
-        if (!fullyResolved && pageIndex(index) <= pagesRead) {
-            readUpToObject(index);
-        }
-
-        return elements.get(index);
-    }
-
-    /**
-     * @see java.util.Collection#size()
-     */
-    public int size() {
-        if (!fullyResolved) {
-            readAll();
-        }
-
-        return elements.size();
+        return elementIndex / pageSize;
     }
 
     /**
@@ -260,22 +285,6 @@ public class IncrementalFaultList extends AbstractList {
      */
     public DataContext getDataContext() {
         return dataContext;
-    }
-
-    /**
-     * Returns the fullyResolved.
-     * @return boolean
-     */
-    public boolean isFullyResolved() {
-        return fullyResolved;
-    }
-
-    /**
-     * Returns the query.
-     * @return GenericSelectQuery
-     */
-    public GenericSelectQuery getQuery() {
-        return query;
     }
 
     /**
@@ -304,55 +313,291 @@ public class IncrementalFaultList extends AbstractList {
      * @see java.util.Collection#iterator()
      */
     public Iterator iterator() {
-        return new FaultIterator(elements);
+        return new FaultIterator();
     }
 
     /**
-     * Removes all elements from the list. Subscequent calls
-     * to <code>isFullyResolved</code> will return <code>true</code>.
-     * 
+     * @see java.util.List#add(int, Object)
+     */
+    public void add(int index, Object element) {
+        if (!(element instanceof DataObject)) {
+            throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
+        }
+
+        synchronized (elements) {
+            elements.add(index, element);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#add(Object)
+     */
+    public boolean add(Object o) {
+        if (!(o instanceof DataObject)) {
+            throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
+        }
+
+        synchronized (elements) {
+            return elements.add(o);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#addAll(Collection)
+     */
+    public boolean addAll(Collection c) {
+        synchronized (elements) {
+            return elements.addAll(c);
+        }
+    }
+
+    /**
+     * @see java.util.List#addAll(int, Collection)
+     */
+    public boolean addAll(int index, Collection c) {
+        synchronized (elements) {
+            return elements.addAll(index, c);
+        }
+    }
+
+    /**
      * @see java.util.Collection#clear()
      */
     public void clear() {
-        elements.clear();
-        pagesRead = 0;
-        fullyResolved = true;
+        synchronized (elements) {
+            elements.clear();
+        }
     }
 
     /**
-     * Iterator that avoids calling <code>size()</code>
-     * to allow incremental resolution of the objects on the list.
+     * @see java.util.Collection#contains(Object)
      */
+    public boolean contains(Object o) {
+        synchronized (elements) {
+            return elements.contains(o);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#containsAll(Collection)
+     */
+    public boolean containsAll(Collection c) {
+        synchronized (elements) {
+            return elements.containsAll(c);
+        }
+    }
+
+    /**
+     * @see java.util.List#get(int)
+     */
+    public Object get(int index) {
+        synchronized (elements) {
+            Object o = elements.get(index);
+
+            if (o instanceof Map) {
+                // read this page
+                int pageStart = pageIndex(index) * pageSize;
+                resolveInterval(pageStart, pageStart + pageSize);
+
+                return elements.get(index);
+            } else {
+                return o;
+            }
+        }
+    }
+
+    /**
+     * @see java.util.List#indexOf(Object)
+     */
+    public int indexOf(Object o) {
+        if (!(o instanceof DataObject)) {
+            return -1;
+        }
+
+        DataObject dataObj = (DataObject) o;
+        if (dataObj.getDataContext() != dataContext) {
+            return -1;
+        }
+
+        if (!dataObj.getObjectId().getObjEntityName().equals(rootEntity.getName())) {
+            return -1;
+        }
+
+        Map idMap = dataObj.getObjectId().getIdSnapshot();
+
+        synchronized (elements) {
+            for (int i = 0; i < elements.size(); i++) {
+                // objects are in the same context, 
+                // just comparing ids should be enough
+                Object obj = elements.get(i);
+                if (obj == dataObj) {
+                    return i;
+                }
+
+                Map otherIdMap =
+                    (obj instanceof DataObject)
+                        ? ((DataObject) obj).getObjectId().getIdSnapshot()
+                        : (Map) obj;
+                if (idMap.equals(otherIdMap)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @see java.util.Collection#isEmpty()
+     */
+    public boolean isEmpty() {
+        synchronized (elements) {
+            return elements.isEmpty();
+        }
+    }
+
+    /**
+     * @see java.util.List#lastIndexOf(Object)
+     */
+    public int lastIndexOf(Object o) {
+        if (!(o instanceof DataObject)) {
+            return -1;
+        }
+
+        DataObject dataObj = (DataObject) o;
+        if (dataObj.getDataContext() != dataContext) {
+            return -1;
+        }
+
+        if (!dataObj.getObjectId().getObjEntityName().equals(rootEntity.getName())) {
+            return -1;
+        }
+
+        Map idMap = dataObj.getObjectId().getIdSnapshot();
+
+        synchronized (elements) {
+            for (int i = elements.size() - 1; i <= 0; i--) {
+                // objects are in the same context, 
+                // just comparing ids should be enough
+                Object obj = elements.get(i);
+                if (obj == dataObj) {
+                    return i;
+                }
+
+                Map otherIdMap =
+                    (obj instanceof DataObject)
+                        ? ((DataObject) obj).getObjectId().getIdSnapshot()
+                        : (Map) obj;
+                if (idMap.equals(otherIdMap)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @see java.util.List#remove(int)
+     */
+    public Object remove(int index) {
+        synchronized (elements) {
+            return elements.remove(index);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#remove(Object)
+     */
+    public boolean remove(Object o) {
+        synchronized (elements) {
+            return elements.remove(o);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#removeAll(Collection)
+     */
+    public boolean removeAll(Collection c) {
+        synchronized (elements) {
+            return elements.removeAll(c);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#retainAll(Collection)
+     */
+    public boolean retainAll(Collection c) {
+        synchronized (elements) {
+            return elements.retainAll(c);
+        }
+    }
+
+    /**
+     * @see java.util.List#set(int, Object)
+     */
+    public Object set(int index, Object element) {
+        if (!(element instanceof DataObject)) {
+            throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
+        }
+
+        synchronized (elements) {
+            return elements.set(index, element);
+        }
+    }
+
+    /**
+     * @see java.util.Collection#size()
+     */
+    public int size() {
+        synchronized (elements) {
+            return elements.size();
+        }
+    }
+
+    /**
+     * @see java.util.List#subList(int, int)
+     */
+    public List subList(int fromIndex, int toIndex) {
+        synchronized (elements) {
+            List sublist = elements.subList(fromIndex, toIndex);
+            IncrementalFaultList list = new IncrementalFaultList(this);
+            list.elements = Collections.unmodifiableList(sublist);
+            return list;
+        }
+    }
+
+    /**
+     * @see java.util.Collection#toArray()
+     */
+    public Object[] toArray() {
+        resolveAll();
+
+        return elements.toArray();
+    }
+
+    /**
+     * @see java.util.Collection#toArray(Object[])
+     */
+    public Object[] toArray(Object[] a) {
+        resolveAll();
+
+        return elements.toArray(a);
+    }
+
     class FaultIterator implements Iterator {
         private int cursor;
-        private List list;
-        private boolean hasNext;
-
-        private FaultIterator(List list) {
-            this.list = list;
-        }
 
         /**
         * @see java.util.Iterator#hasNext()
         */
         public boolean hasNext() {
-            if (isFullyResolved()) {
-                return cursor < list.size();
-            }
-
-            if (cursor >= getObjectsRead()) {
-                // read objects till cursor
-                readUpToObject(cursor);
-            }
-
-            return cursor < getObjectsRead();
+            return cursor < size();
         }
 
         /**
          * @see java.util.Iterator#next()
          */
         public Object next() {
-            Object obj = list.get(cursor);
+            Object obj = get(cursor);
             cursor++;
             return obj;
         }
@@ -361,7 +606,8 @@ public class IncrementalFaultList extends AbstractList {
          * @see java.util.Iterator#remove()
          */
         public void remove() {
-            throw new UnsupportedOperationException("'remove' is not supported.");
+            elements.remove(cursor);
         }
     }
+
 }

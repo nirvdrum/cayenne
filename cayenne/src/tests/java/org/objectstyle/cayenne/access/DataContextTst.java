@@ -401,7 +401,8 @@ public class DataContextTst extends CayenneTestCase {
 		assertNotNull(objects);
 		assertTrue(objects instanceof IncrementalFaultList);
 		
-		assertEquals(1, ((IncrementalFaultList)objects).getPagesRead());
+		assertTrue(((IncrementalFaultList)objects).elements.get(0) instanceof Artist);
+		assertTrue(((IncrementalFaultList)objects).elements.get(7) instanceof Map);
 	}
 
 	public void testPerformDataRowQuery() throws Exception {
