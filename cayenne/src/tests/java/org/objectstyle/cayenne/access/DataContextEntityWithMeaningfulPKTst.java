@@ -59,6 +59,7 @@ import java.util.List;
 
 import org.objectstyle.art.MeaningfulPKDep;
 import org.objectstyle.art.MeaningfulPKTest1;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -84,6 +85,21 @@ public class DataContextEntityWithMeaningfulPKTst extends CayenneTestCase {
         obj.setPkAttribute(new Integer(1000));
         obj.setDescr("aaa-aaa");
         ctxt.commitChanges();
+    }
+
+    public void testChangeKey() throws Exception {
+        MeaningfulPKTest1 obj =
+            (MeaningfulPKTest1) ctxt.createAndRegisterNewObject("MeaningfulPKTest1");
+        obj.setPkAttribute(new Integer(1000));
+        obj.setDescr("aaa-aaa");
+        ctxt.commitChanges();
+
+        obj.setPkAttribute(new Integer(2000));
+        ctxt.commitChanges();
+
+        // assert that object id got fixed
+        ObjectId id = obj.getObjectId();
+        assertEquals(new Integer(2000), id.getIdSnapshot().get("PK_ATTRIBUTE"));
     }
 
     public void testToManyRelationshipWithMeaningfulPK1() throws Exception {
@@ -114,4 +130,5 @@ public class DataContextEntityWithMeaningfulPKTst extends CayenneTestCase {
         dep.setToMeaningfulPK(obj);
         ctxt.commitChanges();
     }
+
 }
