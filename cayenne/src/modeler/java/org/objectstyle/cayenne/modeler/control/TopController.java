@@ -61,8 +61,10 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.EditorView;
 import org.objectstyle.cayenne.modeler.model.TopModel;
+import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.validator.Validator;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
@@ -139,7 +141,9 @@ public class TopController extends ModelerController {
 
         // update main view
         mainFrame.setView(new EditorView(eventController));
-        mainFrame.getContentPane().add(mainFrame.getView(), BorderLayout.CENTER);
+        mainFrame.getContentPane().add(
+            mainFrame.getView(),
+            BorderLayout.CENTER);
         mainFrame.validate();
         mainFrame.updateTitle();
 
@@ -152,9 +156,20 @@ public class TopController extends ModelerController {
 
         control.markUnmatched();
         statusController.handleControl(control);
-        
+
         // --- check for load errors
-        
+        if (project.projectLoadStatus() != null
+            && project.projectLoadStatus().hasFailures()) {
+            // mark project as unsaved
+            project.setModified(true);
+            eventController.setDirty(true);
+
+            // show warning dialog
+            ValidatorDialog.showDialog(
+                mainFrame,
+                eventController,
+                new Validator(project, project.projectLoadStatus()));
+        }
     }
 
     public void setStatusBarView(StatusBarView view) {

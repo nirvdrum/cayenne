@@ -244,15 +244,18 @@ public abstract class Configuration {
         }
 
         ConfigLoader helper = new ConfigLoader(this, getLoggingLevel());
-        this.loadStatus = helper;
-        if (!helper.loadDomains(in)) {
-            StringBuffer msg = new StringBuffer();
-            msg.append("[").append(this.getClass().getName()).append(
-                "] : Failed to load domain and/or its maps/nodes.");
+        try {
+            if (!helper.loadDomains(in)) {
+                StringBuffer msg = new StringBuffer();
+                msg.append("[").append(this.getClass().getName()).append(
+                    "] : Failed to load domain and/or its maps/nodes.");
 
-            if (!ignoringLoadFailures) {
-                throw new ConfigException(msg.toString());
+                if (!ignoringLoadFailures) {
+                    throw new ConfigException(msg.toString());
+                }
             }
+        } finally {
+            this.loadStatus = helper.getStatus();
         }
 
         Iterator it = helper.getDomains().iterator();
@@ -347,7 +350,7 @@ public abstract class Configuration {
     public void setIgnoringLoadFailures(boolean ignoringLoadFailures) {
         this.ignoringLoadFailures = ignoringLoadFailures;
     }
-    
+
     /**
      * Returns the loadStatus.
      * @return ConfigStatus

@@ -76,10 +76,10 @@ public class ConfigLoaderCase {
         InputStream in = new ByteArrayInputStream(configInfo.getBytes());
         helper.loadDomains(in);
         Assert.assertEquals(totalDomains, helper.getDomains().size());
-        Assert.assertEquals(failedMaps, helper.getFailedMaps().size());
-        Assert.assertEquals(failedDataSources, helper.getFailedDataSources().size());
-        Assert.assertEquals(failedAdapters, helper.getFailedAdapters().size());
-        Assert.assertEquals(failedMapRefs, helper.getFailedMapRefs().size());
+        Assert.assertEquals(failedMaps, helper.getStatus().getFailedMaps().size());
+        Assert.assertEquals(failedDataSources, helper.getStatus().getFailedDataSources().size());
+        Assert.assertEquals(failedAdapters, helper.getStatus().getFailedAdapters().size());
+        Assert.assertEquals(failedMapRefs, helper.getStatus().getFailedMapRefs().size());
     }
 
     public void setTotalDomains(int totalDomains) {

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.conf;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,36 +65,59 @@ import java.util.Map;
  * 
  * @author Andrei Adamchik
  */
-public interface ConfigStatus {
-	/**
-	 * Returns a list of error messages not directly associated with project
-	 * objects, such as XML pare exceptions, IOExceptions, etc.
-	 */
-	public List getOtherFailures();
-	
+public class ConfigStatus {
+
+    protected List otherFailures = new ArrayList();
+    protected Map failedMaps = new HashMap();
+    protected Map failedAdapters = new HashMap();
+    protected Map failedDataSources = new HashMap();
+    protected List failedMapRefs = new ArrayList();
+
+    /**
+     * Returns a list of error messages not directly associated with project
+     * objects, such as XML pare exceptions, IOExceptions, etc.
+     */
+    public List getOtherFailures() {
+        return otherFailures;
+    }
+
     /** 
      * Returns a list of map reference names that failed to load.
      */
-    public List getFailedMapRefs();
+    public List getFailedMapRefs() {
+        return failedMapRefs;
+    }
 
     /** 
      * Returns a map of locations for names of the data maps that failed to
      * load.
      */
-    public Map getFailedMaps();
+    public Map getFailedMaps() {
+        return failedMaps;
+    }
 
     /**
      * Returns a map of DataSource locations for node names that failed to load.
      */
-    public Map getFailedDataSources();
+    public Map getFailedDataSources() {
+        return failedDataSources;
+    }
 
     /** 
      * Returns a map of adapter classes for node names that failed to load.
      */
-    public Map getFailedAdapters();
+    public Map getFailedAdapters() {
+        return failedAdapters;
+    }
 
     /**
      * Returns true if any of the "failed.." methods return true.
      */
-    public boolean hasFailures();
+    public boolean hasFailures() {
+        return failedMaps.size() > 0
+            || failedDataSources.size() > 0
+            || failedAdapters.size() > 0
+            || failedMapRefs.size() > 0
+            || otherFailures.size() > 0;
+    }
 }

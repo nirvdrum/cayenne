@@ -89,7 +89,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * 
  * @author Andrei Adamchik
  */
-public class ConfigLoader implements ConfigStatus {
+public class ConfigLoader {
     private static Logger logObj = Logger.getLogger(ConfigLoader.class);
 
     protected Level logLevel = Level.DEBUG;
@@ -99,11 +99,7 @@ public class ConfigLoader implements ConfigStatus {
     protected Locator locator;
     protected List domains;
 
-    protected List otherFailures;
-    protected Map failedMaps;
-    protected Map failedAdapters;
-    protected Map failedDataSources;
-    protected List failedMapRefs;
+    protected ConfigStatus status;
 
     /**
      * If set, <code>factory</code> will override
@@ -128,32 +124,6 @@ public class ConfigLoader implements ConfigStatus {
     /** Returns domains loaded during the last call to "loadDomains". */
     public List getDomains() {
         return domains;
-    }
-
-    /** Returns a list of map reference names that failed to load
-      * during node processing. */
-    public List getFailedMapRefs() {
-        return failedMapRefs;
-    }
-
-    /** Returns a map of locations for names of the data maps that
-      * failed to load during the last call to "loadDomains". */
-    public Map getFailedMaps() {
-        return failedMaps;
-    }
-
-    /**
-     * Returns a map of DataSource locations for node names that
-     * failed to load during the last call to "loadDomains".
-     */
-    public Map getFailedDataSources() {
-        return failedDataSources;
-    }
-
-    /** Returns a map of adapter classes for node names that
-      * failed to load during the last call to "loadDomains". */
-    public Map getFailedAdapters() {
-        return failedAdapters;
     }
 
     /** Reads domain configuration from the InputStream, returns an array
@@ -193,11 +163,8 @@ public class ConfigLoader implements ConfigStatus {
         }
 
         domains = new ArrayList();
-        failedMaps = new HashMap();
-        failedDataSources = new HashMap();
-        failedAdapters = new HashMap();
-        failedMapRefs = new ArrayList();
-        otherFailures = new ArrayList();
+
+        status = new ConfigStatus();
 
         DefaultHandler handler = new RootHandler();
         parser.setContentHandler(handler);
@@ -206,32 +173,25 @@ public class ConfigLoader implements ConfigStatus {
         try {
             parser.parse(new InputSource(in));
         } catch (IOException ioex) {
-            otherFailures.add(
+            status.getOtherFailures().add(
                 "Error reading configuration: " + ioex.getMessage());
         } catch (SAXException saxex) {
-            otherFailures.add("XML Error: " + saxex.getMessage());
+            status.getOtherFailures().add("XML Error: " + saxex.getMessage());
         }
 
         // return true if no failures
-        return !hasFailures();
-    }
-
-    /** 
-     * Returns true if any of the "failed.." collections is non-empty.
-     */
-    public boolean hasFailures() {
-        return (failedMaps != null && failedMaps.size() > 0)
-            || (failedDataSources != null && failedDataSources.size() > 0)
-            || (failedAdapters != null && failedAdapters.size() > 0)
-            || (failedMapRefs != null && failedMapRefs.size() > 0);
+        return !status.hasFailures();
     }
 
     /**
-      * @see org.objectstyle.cayenne.conf.ConfigStatus#getOtherFailures()
-      */
-    public List getOtherFailures() {
-        return otherFailures;
+     * Returns the status.
+     * @return ConfigStatus
+     */
+    public ConfigStatus getStatus() {
+        return status;
     }
+
+
 
     // SAX handlers start below
 
@@ -436,7 +396,7 @@ public class ConfigLoader implements ConfigStatus {
             InputStream mapIn = config.getMapConfig(location);
             if (mapIn == null) {
                 logObj.log(logLevel, "warning: map location not found.");
-                failedMaps.put(mapName, location);
+                getStatus().getFailedMaps().put(mapName, location);
                 return;
             }
 
@@ -445,7 +405,7 @@ public class ConfigLoader implements ConfigStatus {
                 map = loader.loadDataMap(new InputSource(mapIn), depMaps);
             } catch (DataMapException dmex) {
                 logObj.log(logLevel, "warning: map loading failed.", dmex);
-                failedMaps.put(mapName, location);
+                getStatus().getFailedMaps().put(mapName, location);
                 return;
             }
 
@@ -549,11 +509,11 @@ public class ConfigLoader implements ConfigStatus {
                     node.setDataSource(ds);
                 } else {
                     logObj.log(logLevel, "warning: null datasource.");
-                    failedDataSources.put(nodeName, dataSrcLocation);
+                    getStatus().getFailedDataSources().put(nodeName, dataSrcLocation);
                 }
             } catch (Exception ex) {
                 logObj.log(logLevel, "error: DataSource load failed", ex);
-                failedDataSources.put(nodeName, dataSrcLocation);
+                getStatus().getFailedDataSources().put(nodeName, dataSrcLocation);
             }
 
             // load DbAdapter
@@ -562,7 +522,7 @@ public class ConfigLoader implements ConfigStatus {
                     (DbAdapter) Class.forName(adapterClass).newInstance());
             } catch (Exception ex) {
                 logObj.log(logLevel, "instantiating adapter failed.", ex);
-                failedAdapters.put(nodeName, adapterClass);
+                getStatus().getFailedAdapters().put(nodeName, adapterClass);
             }
         }
 
@@ -628,7 +588,7 @@ public class ConfigLoader implements ConfigStatus {
                 logObj.log(
                     logLevel,
                     "warning: unknown map-ref: " + mapName + ".");
-                failedMapRefs.add(mapName);
+                getStatus().getFailedMapRefs().add(mapName);
             } else {
                 logObj.log(logLevel, "loaded map-ref: " + mapName + ".");
                 node.addDataMap(map);
@@ -663,7 +623,7 @@ public class ConfigLoader implements ConfigStatus {
                 logObj.log(
                     logLevel,
                     "warning: unknown map-ref: " + mapName + ".");
-                failedMapRefs.add(mapName);
+                getStatus().getFailedMapRefs().add(mapName);
             } else {
                 logObj.log(logLevel, "loaded dep-map-ref: " + mapName + ".");
                 depMaps.add(depMap);

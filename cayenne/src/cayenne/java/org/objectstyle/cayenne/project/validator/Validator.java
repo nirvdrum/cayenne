@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -80,6 +81,45 @@ public class Validator {
      */
     public Validator(Project project) {
         this.project = project;
+    }
+
+    /**
+     * Initializes validator with the project loading config status.
+     * 
+     * @param project
+     * @param status
+     */
+    public Validator(Project project, ConfigStatus status) {
+        this(project);
+
+        if (status.hasFailures()) {
+            ProjectPath path = new ProjectPath(project);
+
+            Iterator it = status.getOtherFailures().iterator();
+            while (it.hasNext()) {
+                registerError((String) it.next(), path);
+            }
+
+            it = status.getFailedMaps().keySet().iterator();
+            while (it.hasNext()) {
+                registerError("Map failed to load: " + it.next(), path);
+            }
+
+            it = status.getFailedAdapters().keySet().iterator();
+            while (it.hasNext()) {
+                registerError("Adapter failed to load: " + it.next(), path);
+            }
+            
+            it = status.getFailedDataSources().keySet().iterator();
+            while (it.hasNext()) {
+                registerError("DataSource failed to load: " + it.next(), path);
+            }
+            
+            it = status.getFailedMapRefs().iterator();
+            while (it.hasNext()) {
+                registerError("Map reference failed to load: " + it.next(), path);
+            }
+        }
     }
 
     /**
@@ -115,8 +155,12 @@ public class Validator {
      * <code>result</code> parameter has a higher severity then the current value. 
      * Leaves current value unchanged otherwise.
      */
-    public void registerValidated(int severity, String message, ProjectPath treeNodePath) {
-        ValidationInfo result = new ValidationInfo(severity, message, treeNodePath);
+    public void registerValidated(
+        int severity,
+        String message,
+        ProjectPath treeNodePath) {
+        ValidationInfo result =
+            new ValidationInfo(severity, message, treeNodePath);
         validationResults.add(result);
         if (maxSeverity < severity) {
             maxSeverity = severity;
