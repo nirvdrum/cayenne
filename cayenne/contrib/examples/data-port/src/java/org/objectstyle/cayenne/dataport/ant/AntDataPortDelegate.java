@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.dataport.ant;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -109,12 +110,49 @@ public class AntDataPortDelegate implements DataPortDelegate
         return emptyArray;
       }
 
-      String[] patterns = new String[len];
+      List patterns = new ArrayList(len);
       for (int i = 0; i < len; i++)
       {
-        patterns[i] = toks.nextToken();
+        String nextPattern = toks.nextToken();
+        StringBuffer buffer = new StringBuffer();
+
+        // convert * into regex syntax
+        // e.g. abc*x becomes /abc.*x/
+        // or   abc?x becomes /abc.?x/
+        buffer.append('/');
+        for (int j = 0; j < nextPattern.length(); j++)
+        {
+          char nextChar = nextPattern.charAt(j);
+          if (nextChar == '*' || nextChar == '?')
+          {
+            buffer.append('.');
+          }
+          buffer.append(nextChar);
+        }
+        buffer.append('/');
+
+        String finalPattern = buffer.toString();
+
+        // test the pattern
+        try
+        {
+          regexUtil.match(finalPattern, "abc_123");
+        }
+        catch (Exception e)
+        {
+          parentTask.log(
+            "Ignoring invalid pattern ["
+              + nextPattern
+              + "], reason: "
+              + e.getMessage(),
+            Project.MSG_WARN);
+          continue;
+        }
+
+        patterns.add(finalPattern);
       }
-      return patterns;
+
+      return (String[]) patterns.toArray(new String[patterns.size()]);
     }
     else
     {
