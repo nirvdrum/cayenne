@@ -72,6 +72,7 @@ import org.objectstyle.ashwood.graph.IndegreeTopologicalSort;
 import org.objectstyle.ashwood.graph.MapDigraph;
 import org.objectstyle.ashwood.graph.StrongConnection;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.TempObjectId;
@@ -134,6 +135,10 @@ public class PrimaryKeyHelper {
 
 		DbEntity dbEntity = objEntity.getDbEntity();
 		DataNode owner = queryEngine.dataNodeForObjEntity(objEntity);
+		if (owner == null) {
+			throw new CayenneRuntimeException("No suitable DataNode to handle primary key generation.");
+		}
+		  
 		PkGenerator pkGenerator = owner.getAdapter().getPkGenerator();
 		List pkAttributes = dbEntity.getPrimaryKey();
 
