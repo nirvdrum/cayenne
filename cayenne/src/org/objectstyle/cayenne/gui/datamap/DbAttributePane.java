@@ -98,7 +98,7 @@ implements ActionListener, DbEntityDisplayListener
 		setLayout(new BorderLayout());
 
 		// Create table with two columns and no rows.
-		table = new JTable();
+		table = new CayenneTable();
 		add		= new JButton("Add");
 		remove 	= new JButton("Remove");
 		JPanel panel = PanelFactory.createTablePanel(table
@@ -112,9 +112,20 @@ implements ActionListener, DbEntityDisplayListener
 		if (src == add) {
 			model.addRow();
 		} else if (src == remove) {
+			stopEditing();
+			// Delete row
 			int row = table.getSelectedRow();
-			if (row > 0)
+			if (row >= 0)
 				model.removeRow(row);
+		}
+	}
+	
+	private void stopEditing() {
+		// Stop whatever editing may be taking place
+		int col_index = table.getEditingColumn();
+		if (col_index >=0) {
+			TableColumn col = table.getColumnModel().getColumn(col_index);
+			col.getCellEditor().stopCellEditing();
 		}
 	}
 	
@@ -131,6 +142,8 @@ implements ActionListener, DbEntityDisplayListener
 		TableColumn col;
 		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_NAME);
 		col.setMinWidth(150);
+		TextFieldCellEditor editor = new TextFieldCellEditor();
+		col.setCellEditor(editor);
 		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_TYPE);
 		col.setMinWidth(90);
 		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());

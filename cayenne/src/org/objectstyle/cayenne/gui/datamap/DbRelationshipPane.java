@@ -96,7 +96,7 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 	private void init() {
 		setLayout(new BorderLayout());
 		// Create table
-		table = new JTable();
+		table = new CayenneTable();
 		add = new JButton("Add");
 		remove = new JButton("Remove");
 		resolve	= new JButton("Database Mapping");
@@ -107,21 +107,31 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 	
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
+		DbRelationshipTableModel model;
+		model = (DbRelationshipTableModel)table.getModel();
 		if (src == add) {
-			DbRelationshipTableModel model;
-			model = (DbRelationshipTableModel)table.getModel();
 			model.addRow();
 		} else if (src == remove) {
+			stopEditing();
+			// Remove row
 			int row = table.getSelectedRow();
-			if (row >= 0) {
-				DbRelationshipTableModel model;
-				model = (DbRelationshipTableModel)table.getModel();
+			if (row >= 0)
 				model.removeRow(row);
-			}
 		} else if (src == resolve) {
 			resolveRelationship();
 		}
 	}
+
+	private void stopEditing() {
+		// Stop whatever editing may be taking place
+		int col_index = table.getEditingColumn();
+		if (col_index >=0) {
+			TableColumn col = table.getColumnModel().getColumn(col_index);
+			col.getCellEditor().stopCellEditing();
+		}
+	}
+	
+
 
 	private void resolveRelationship() {
 		int row = table.getSelectedRow();

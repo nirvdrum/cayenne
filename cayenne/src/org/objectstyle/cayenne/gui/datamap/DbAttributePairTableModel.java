@@ -146,25 +146,25 @@ public class DbAttributePairTableModel extends AbstractTableModel
 
 		if (column == SOURCE) {
 			if (null == source_attr)
-				return "";
+				return null;
 			return source_attr.getName();
 		}
 		else if (column == SOURCE_TYPE) {
 			if (null == source_attr)
-				return "";
+				return null;
 			return TypesMapping.getSqlNameByType(source_attr.getType());
 		}
 		else if (column == TARGET) {
 			if (null == target_attr)
-				return "";
+				return null;
 			return target_attr.getName();
 		}
 		else if (column == TARGET_TYPE) {
 			if (null == target_attr)
-				return "";
+				return null;
 			return TypesMapping.getSqlNameByType(target_attr.getType());
 		}
-		else return "";
+		else return null;
 
 	}// End getValueAt()
 	

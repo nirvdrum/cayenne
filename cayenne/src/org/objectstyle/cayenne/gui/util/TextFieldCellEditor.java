@@ -55,42 +55,24 @@ package org.objectstyle.cayenne.gui.util;
  *
  */ 
 
-import org.objectstyle.cayenne.map.*;
 
+import java.awt.Component;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.AbstractCellEditor;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableModel;
+import javax.swing.text.Document;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-/** Wrapper for Entity. 
- *  Used to put entities into the JTree and any other place where 
- *  toString() method must return entity name.
- *  ALso provides GUI-specific utility methods for entities*/
-public class EntityWrapper{
-	Entity entity = null;
-	
-	public EntityWrapper(Entity temp_entity){
-		entity = temp_entity;
-	}
-	
-	public String toString(){
-		if (null == entity)
-			return "";
-		return entity.getName();
-	}
+/** Used for editing cells with the combo boxes. 
+  * The types of the objects in the combo box and returned by the 
+  * TableModel::getValueAt() must be of the same and have toString() method
+  * allowing to display them in the table. If value.toString() returns EMPTY, 
+  * editor (JComboBox) shows up with no selection. 
+  * If nothing is selected, returns null to the table model. 
+  *
+  * @author Michael Misha Shengaout
+  */
 
-	public Entity getEntity() { return entity;}
-	
-	/** Create new ObjEntity and generate its name. 
-	  * Does not add it to the DataMap. */
-	public static ObjEntity createObjEntity()
-	{ return new ObjEntity(NameGenerator.getObjEntityName()); }
-	
-	/** Create new DbEntity and generate its name. 
-	  * Does not add it to the DataMap. */
-	public static DbEntity createDbEntity()
-	{ return new DbEntity(NameGenerator.getDbEntityName()); }
-	
-	public boolean equals(Object obj) {
-		if (null == obj)
-			return false;
-		return this.toString().equals(obj.toString());
-	}
-}// End class EntityWrapper
-	

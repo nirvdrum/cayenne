@@ -86,11 +86,11 @@ implements ActionListener
 	private DbRelationship reverseDbRel;
 	private boolean isReverseDbRelNew = false;
 	
-	JTextField name		= new JTextField(20);
-	JLabel reverseNameLabel = new JLabel("Reverse Relationship Name:");
-	JTextField reverseName = new JTextField(20);
-	JCheckBox  hasReverseDbRel = new JCheckBox("Create reverse relationship", false);
-	JTable dbAttributes	= new JTable();
+	JTextField name				= new JTextField(20);
+	JLabel reverseNameLabel 	= new JLabel("Reverse Relationship Name:");
+	JTextField reverseName 		= new JTextField(20);
+	JCheckBox  hasReverseDbRel 	= new JCheckBox("Create reverse relationship", false);
+	JTable table		= new CayenneTable();
 	JButton add			= new JButton("Add");
 	JButton remove		= new JButton("Remove");
 	JButton save		= new JButton("");
@@ -193,26 +193,26 @@ implements ActionListener
 		// Attribute pane
 		DbAttributePairTableModel model;
 		model = new DbAttributePairTableModel(dbRel, mediator, this, true);
-		dbAttributes.setModel(model);
-		dbAttributes.getSelectionModel().setSelectionMode(
+		table.setModel(model);
+		table.getSelectionModel().setSelectionMode(
 										ListSelectionModel.SINGLE_SELECTION);
-		dbAttributes.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);		
-		JScrollPane scroll_pane = new JScrollPane(dbAttributes);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);		
+		JScrollPane scroll_pane = new JScrollPane(table);
 		getContentPane().add(scroll_pane, BorderLayout.CENTER);
 
-		TableColumn col = dbAttributes.getColumnModel().getColumn(0);
+		TableColumn col = table.getColumnModel().getColumn(0);
 		col.setMinWidth(150);
 		JComboBox comboBox = new JComboBox(Util.getDbAttributeNames(mediator, start));
 		comboBox.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
-		col = dbAttributes.getColumnModel().getColumn(1);
+		col = table.getColumnModel().getColumn(1);
 		col.setMinWidth(150);
-		col = dbAttributes.getColumnModel().getColumn(2);
+		col = table.getColumnModel().getColumn(2);
 		col.setMinWidth(150);
 		comboBox = new JComboBox(Util.getDbAttributeNames(mediator, end));
 		comboBox.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
-		col = dbAttributes.getColumnModel().getColumn(3);
+		col = table.getColumnModel().getColumn(3);
 		col.setMinWidth(150);
 
 		temp = new JPanel();
@@ -264,19 +264,17 @@ implements ActionListener
 			
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
+		DbAttributePairTableModel model;
+		model = (DbAttributePairTableModel)table.getModel();
 		
 		if (src == add){
-			DbAttributePairTableModel model;
-			model = (DbAttributePairTableModel)dbAttributes.getModel();
 			model.addRow();
 		} 
 		else if (src == remove) {
-			int row = dbAttributes.getSelectedRow();
-			if (-1 == row) 
-				return;
-			DbAttributePairTableModel model;
-			model = (DbAttributePairTableModel)dbAttributes.getModel();
-			model.removeRow(row);
+			stopEditing();
+			int row = table.getSelectedRow();
+			if (row >= 0) 
+				model.removeRow(row);
 		}
 		else if (src == save) {
 			cancelPressed = false;
@@ -296,6 +294,17 @@ implements ActionListener
 	}
 
 
+	private void stopEditing() {
+		// Stop whatever editing may be taking place
+		int col_index = table.getEditingColumn();
+		if (col_index >=0) {
+			TableColumn col = table.getColumnModel().getColumn(col_index);
+			col.getCellEditor().stopCellEditing();
+		}
+	}
+	
+
+
 	private void save() {
 		if (dbRel.getName() == null) {
 			JOptionPane.showMessageDialog(Editor.getFrame()
@@ -304,11 +313,11 @@ implements ActionListener
 			return;
 		}
 		DbAttributePairTableModel model;
-		model = (DbAttributePairTableModel)dbAttributes.getModel();
+		model = (DbAttributePairTableModel)table.getModel();
 		if (model.getRowCount() == 0) {
 			JOptionPane.showMessageDialog(Editor.getFrame()
 										, "Enter join attributes ");
-			dbAttributes.requestFocus(true);		
+			table.requestFocus(true);		
 			return;
 		}
 		

@@ -56,6 +56,7 @@ package org.objectstyle.cayenne.gui.datamap;
  */ 
 
 import java.util.*;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.*;
 
@@ -72,6 +73,8 @@ import org.objectstyle.cayenne.gui.util.*;
  *  @author Michael Misha Shengaout. */
 class ObjAttributeTableModel extends AbstractTableModel
 {
+	static final Logger logObj = Logger.getLogger(ObjAttributeTableModel.class.getName());
+	
 	Mediator mediator;
 	/** The pane to use as source of AttributeEvents. */
 	Object src;
@@ -161,7 +164,7 @@ class ObjAttributeTableModel extends AbstractTableModel
 		else {
 			DbAttribute db_attrib = attrib.getDbAttribute();
 			if (null == db_attrib)
-				return "";
+				return null;
 			else if (column == DB_ATTRIBUTE)
 				return db_attrib.getName();
 			else if (column == DB_ATTRIBUTE_TYPE) {
@@ -173,8 +176,11 @@ class ObjAttributeTableModel extends AbstractTableModel
 	
     
     public void setValueAt(Object aValue, int row, int column) {
+    	logObj.fine("setValue(), row = "+ row + ",attributeList size is " + attributeList.size());
 		ObjAttribute attrib = (ObjAttribute)attributeList.get(row);
-		String text = ((String)aValue).trim();
+		String text = "";
+		if (null != aValue)
+			text = ((String)aValue).trim();
 		// If "Obj Name" column
 		if (column == OBJ_ATTRIBUTE) {
 			String old_name = attrib.getName();
@@ -236,6 +242,7 @@ class ObjAttributeTableModel extends AbstractTableModel
 		AttributeEvent e;
 		e = new AttributeEvent(src, attrib, entity, AttributeEvent.REMOVE);
 		attributeList.remove(row);
+    	logObj.fine("Removed row " + row + ", attributeList size is " + attributeList.size());
 		entity.removeAttribute(attrib.getName());
 		mediator.fireObjAttributeEvent(e);
 		fireTableDataChanged();

@@ -431,11 +431,14 @@ implements ActionListener
 							, JOptionPane.ERROR_MESSAGE);
 				return;
 		}
-		ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
-		dialog.show();
-		if (dialog.getChoice() == ChooseSchemaDialog.CANCEL)
-			return;
-		String schema_name = dialog.getSchemaName();
+		String schema_name = null;
+		if (schemas.size() != 0) {
+			ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
+			dialog.show();
+			if (dialog.getChoice() == ChooseSchemaDialog.CANCEL)
+				return;
+			schema_name = dialog.getSchemaName();
+		}
 		if (schema_name != null && schema_name.length() == 0)
 			schema_name = null;
 		DataMap map;

@@ -126,7 +126,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 			case CARDINALITY:
 				return "To many";
 			default:
-				return "";
+				return null;
 		}// End switch
 	}
 
@@ -153,26 +153,26 @@ class DbRelationshipTableModel extends AbstractTableModel {
 	public Object getValueAt(int row, int col)
 	{
 		if (null == relList || relList.size() <= row)
-			return "";
+			return null;
 		DbRelationship rel = getRelationship(row);
 		if (rel == null)
-			return "";
+			return null;
 		switch (col)
 		{
 			case NAME:
-				return rel.getName() != null ? rel.getName() : "";
+				return rel.getName();
 			case TARGET:
 				DbEntity temp = (DbEntity)rel.getTargetEntity();
 				if (null != temp)
 					return temp.getName();
 				else
-					return "";
+					return null;
 			case FOREIGN_KEY:
 				return new Boolean(rel.isToDependentPK());
 			case CARDINALITY:
 				return new Boolean(rel.isToMany());
 			default:
-				return "";
+				return null;
 		}// End switch
 	}
 	

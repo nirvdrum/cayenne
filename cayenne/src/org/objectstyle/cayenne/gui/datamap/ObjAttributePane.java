@@ -96,7 +96,7 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 	{
 		setLayout(new BorderLayout());
 		// Create table with two columns and no rows.
-		table = new JTable();
+		table = new CayenneTable();
 		add		= new JButton("Add");
 		remove 	= new JButton("Remove");
 		JPanel panel = PanelFactory.createTablePanel(table
@@ -110,11 +110,24 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		if (src == add) {
 			model.addRow();
 		} else if (src == remove) {
+			stopEditing();
+			// Remove the row.
 			int row = table.getSelectedRow();
-			if (row > 0)
+			if (row >= 0)
 				model.removeRow(row);
 		}
 	}
+
+	private void stopEditing() {
+		// Stop whatever editing may be taking place
+		int col_index = table.getEditingColumn();
+		if (col_index >=0) {
+			TableColumn col = table.getColumnModel().getColumn(col_index);
+			col.getCellEditor().stopCellEditing();
+		}
+	}
+	
+
 	
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		if (e.getSource() == this)

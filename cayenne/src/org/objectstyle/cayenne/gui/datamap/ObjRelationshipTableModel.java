@@ -141,7 +141,7 @@ class ObjRelationshipTableModel extends AbstractTableModel
 		// If target column
 		else if (column == REL_TARGET) {
 			if (null == rel.getTargetEntity())
-				return "";
+				return null;
 			return rel.getTargetEntity().getName();
 		}
 		else if (column == REL_CARDINALITY)

@@ -78,6 +78,8 @@ public class RelationshipWrapper{
 	public Relationship getRelationship() { return rel;}
 	
 	public boolean equals(Object obj) {
+		if (null == obj)
+			return false;
 		return this.toString().equals(obj.toString());
 	}
 }// End class RelationshipWrapper

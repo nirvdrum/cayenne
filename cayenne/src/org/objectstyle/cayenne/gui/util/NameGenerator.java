@@ -64,6 +64,8 @@ public class NameGenerator {
 	private static int domainCounter = 1;
 	private static int dataMapCounter = 1;
 	private static int dataNodeCounter = 1;
+	private static int objEntityCounter = 1;
+	private static int dbEntityCounter = 1;
 	private static int objAttributeCounter = 1;
 	private static int dbAttributeCounter = 1;
 	private static int objRelationshipCounter = 1;
@@ -79,6 +81,14 @@ public class NameGenerator {
 
 	public static String getDataNodeName() {
 		return "UntitledDataSrc" + dataNodeCounter++;
+	}
+
+	public static String getObjEntityName() {
+		return "UntitledObjEntity" + objEntityCounter++;
+	}
+
+	public static String getDbEntityName() {
+		return "UntitledDbEntity" + dbEntityCounter++;
 	}
 
 	
