@@ -236,7 +236,7 @@ public class ResourceLocator {
 	 * Looks up the URL for the named resource using this class' ClassLoader.
 	 */
 	public static URL findURLInClasspath(String name) {
-		ClassLoader classLoader = ResourceLocator.class.getClass().getClassLoader();
+		ClassLoader classLoader = ResourceLocator.class.getClassLoader();
 		if (classLoader == null) {
 			classLoader = ClassLoader.getSystemClassLoader();
 		}
