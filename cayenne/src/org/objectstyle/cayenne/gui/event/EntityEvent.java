@@ -55,12 +55,15 @@ package org.objectstyle.cayenne.gui.event;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.EventObject;
 
-/** Events pertaining to Entity (Object and Database) display. 
-  * We don't need to store Domain and DataMap information in this type of
-    event as they are always currentDataMap and currentDomain. */
+import org.objectstyle.cayenne.map.Entity;
+
+/** 
+ * Events pertaining to Entity (Object and Database) display. 
+ * We don't need to store Domain and DataMap information in 
+ * this type of event as they are always currentDataMap and currentDomain. 
+ */
 public class EntityEvent extends EventObject
 {
 	/** Entity changed. Display or re-display it.*/

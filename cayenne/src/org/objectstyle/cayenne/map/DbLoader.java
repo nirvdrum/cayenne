@@ -325,9 +325,11 @@ public class DbLoader {
 		return ret_code;
 	}
 
-	/** Creates ObjEntities from DbEntities. Uses NameConverter class to
-	 *  change database table and attribute names into whatever
-	 *  user wants them to be, e.g. from EMPLOYEE_NAME to employeeName. */
+	/** 
+	 * Creates ObjEntities from DbEntities. Uses NameConverter class to
+	 * change database table and attribute names into whatever
+	 * user wants them to be, e.g. from EMPLOYEE_NAME to employeeName. 
+	 */
 	public void loadObjEntities(DataMap map) {
 		Iterator it = dbEntityList.iterator();
 		while (it.hasNext()) {

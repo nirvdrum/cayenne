@@ -264,7 +264,7 @@ public class Editor
 
 		CayenneAction entSynchAction = new EntitySynchAction();
 		actionMap.put(entSynchAction.getName(), entSynchAction);
-
+        synchObjEntityMenu.addActionListener(entSynchAction);
 
         // "legacy" code - need to hook up all menus and toolbars with actions 
 		disableMenu();
@@ -277,8 +277,6 @@ public class Editor
 		createDataSourceMenu.addActionListener(this);
 		createObjEntityMenu.addActionListener(this);
 		createDbEntityMenu.addActionListener(this);
-
-		synchObjEntityMenu.addActionListener(this);
 
 		openProjectMenu.addActionListener(this);
 		openProjectMenu.setAccelerator(
@@ -840,12 +838,10 @@ public class Editor
 	}
 
 	public void currentObjAttributeChanged(AttributeDisplayEvent e) {
-		logObj.fine("Changing remove text for ObjAttribute");
 		enableDataMapMenu();
 		if (e.getAttribute() != null) {
 			removeMenu.setText("Remove Obj Attribute");
 			removeBtn.setToolTipText("Remove Obj Attribute");
-			logObj.fine("Changed remove text for ObjAttribute");
 		}
 	}
 

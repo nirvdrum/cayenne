@@ -199,11 +199,6 @@ public class ImportDbAction extends CayenneAction {
 			mediator.addDataMap(Editor.getFrame(), map);
 		}
 	}
-
-	private void getMapLocation(DataMap map) {
-		
-	}
-	
 	
 	public void performAction(ActionEvent e) {
 		importDb();

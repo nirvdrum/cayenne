@@ -57,24 +57,43 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.util.EntityMergeSupport;
 
 /**
  * @author Andrei Adamchik
  */
 public class EntitySynchAction extends CayenneAction {
 	public static final String ACTION_NAME = "EntitySynch";
-		
+
 	public EntitySynchAction() {
 		super(ACTION_NAME);
 	}
-	
+
 	/**
 	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
 	 */
 	public void performAction(ActionEvent e) {
-		System.out.println("synch action: " + e);
+		synchObjEntity();
 	}
 
-}
+	protected void synchObjEntity() {
+		Mediator mediator = getMediator();
+		DataMap map = mediator.getCurrentDataMap();
+		ObjEntity ent = mediator.getCurrentObjEntity();
 
+		if (map != null && ent != null) {
+			EntityMergeSupport merger = new EntityMergeSupport(map);
+			merger.synchronizeWithDbEntity(ent);
+
+			// fire a chain of "remove/add" vents for entity
+			// this seems to be the only way to refresh the view
+			mediator.fireObjEntityEvent(
+				new EntityEvent(this, ent, EntityEvent.REMOVE));
+			mediator.fireObjEntityEvent(
+				new EntityEvent(this, ent, EntityEvent.ADD));
+		}
+	}
+}
