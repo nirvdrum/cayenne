@@ -360,10 +360,29 @@ public abstract class Expression implements Serializable, XMLSerializable {
     /** 
      * Method for in-memory evaluation of expressions. 
      * 
-     * @return <code>true</code> if object matches the expression,
-     * <code>false</code> otherwise.
+     * @deprecated Since 1.1 use {@link #evaluate(Object)} or {@link #evaluateBoolean(Object)}.
      */
     public boolean eval(Object o) {
+        return evaluateBoolean(o);
+    }
+    
+    /**
+     * Calculates expression value with object as a context for 
+     * path expressions.
+     * 
+     * @since 1.1
+     */
+    public Object evaluate(Object o) {
+        return ASTCompiler.compile(this).evaluateASTChain(o);
+    }
+    
+    /**
+     * Calculates expression boolean value with object as a context for 
+     * path expressions.
+     * 
+     * @since 1.1
+     */
+    public boolean evaluateBoolean(Object o) {
         return ASTCompiler.compile(this).evaluateBooleanASTChain(o);
     }
 

@@ -67,16 +67,17 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
-
 /** 
- * Defines ordering policy. Queries can have multiple Ordering's. 
+ * Defines a Comparator for Java Beans. Ordering can be used either
+ * to define ORDER BY clause of a query in terms of object properties,
+ * or as a Comparator for in-memory Java Beans sorting.
  * 
  * @author Andrei Adamchik
  * @author Craig Miskell
  */
 public class Ordering implements Comparator, XMLSerializable {
-	private static Logger logObj = Logger.getLogger(Ordering.class);
-	
+    private static Logger logObj = Logger.getLogger(Ordering.class);
+
     /** Symbolic representation of ascending ordering criterion. */
     public static final boolean ASC = true;
 
@@ -99,7 +100,8 @@ public class Ordering implements Comparator, XMLSerializable {
         Collections.sort(objects, new DataObjectPropertyComparator(orderings));
     }
 
-    public Ordering() {}
+    public Ordering() {
+    }
 
     public Ordering(String sortPathSpec, boolean ascending) {
         this(sortPathSpec, ascending, false);
@@ -128,9 +130,29 @@ public class Ordering implements Comparator, XMLSerializable {
      * Sets sortSpec to be OBJ_PATH expression. 
      * with path specified as <code>sortPathSpec</code>
      * parameter.
+     * 
+     * @deprecated Since 1.1 use {@link #setSortSpecString(String)}
      */
-    public void setSortSpec(String sortPathSpec) {
-        this.sortSpec = ExpressionFactory.unaryExp(Expression.OBJ_PATH, sortPathSpec);
+    public void setSortSpec(String sortSpecString) {
+        this.sortSpec = ExpressionFactory.expressionFromString(sortSpecString);
+    }
+    
+    /** 
+     * Sets sortSpec to be an expression represented by string argument.
+     * 
+     * @since 1.1
+     */
+    public void setSortSpecString(String sortSpecString) {
+        this.sortSpec = ExpressionFactory.expressionFromString(sortSpecString);
+    }
+    
+    /** 
+     * Returns sortSpec string representation.
+     * 
+     * @since 1.1
+     */
+    public String getSortSpecString() {
+        return (sortSpec != null) ? sortSpec.toString() : null;
     }
 
     /** Returns true if sorting is done in ascending order. */
@@ -196,38 +218,66 @@ public class Ordering implements Comparator, XMLSerializable {
         Collections.sort(objects, this);
     }
 
+    /**
+     * Comparable interface implementation. Can compare two
+     * Java Beans based on the stored expression.
+     */
     public int compare(Object o1, Object o2) {
-        String operand0 = (String) this.sortSpec.getOperand(0);
-        Comparable value1 =
-            (Comparable) ((CayenneDataObject) o1).readNestedProperty(operand0);
-        Comparable value2 =
-            (Comparable) ((CayenneDataObject) o2).readNestedProperty(operand0);
-        
-        if(value1==null) {
-        	if(value2==null) {
-        		return 0;
-        	}
-        	return -1; //value 1 is null, value2 isn't... value1 should come first
-        } else if (value2==null) {
-        	return 1; //value 2 is null, value 1 isn't... value1 should come second
+        Object value1 = sortSpec.evaluate(o1);
+        Object value2 = sortSpec.evaluate(o2);
+
+        // nulls first policy... maybe make this configurable as some DB do
+        if (value1 == null) {
+            return (value2 == null) ? 0 : -1;
         }
+        else if (value2 == null) {
+            return 1;
+        }
+
         if (this.caseInsensitive) {
-            //Assumes that value1 and value2 are both the same class - will be the case if
-            // both objects being ordered are the same class - they'd better be, otherwise ordering
-            // them is a dodgy situation.
-            if (value1 instanceof String) {
-                value1 = ((String) value1).toUpperCase();
-                value2 = ((String) value2).toUpperCase();
-            }
+            // TODO: to upper case should probably be defined as a separate expression type
+            value1 = toUpperCase(value1);
+            value2 = toUpperCase(value2);
         }
-        int compareResult = value1.compareTo(value2);
-        if (ascending == ASC) {
-            return compareResult;
-        } else {
-            return -compareResult;
+
+        int compareResult = toComparabe(value1).compareTo(toComparabe(value2));
+        return (ascending) ? compareResult : -compareResult;
+    }
+
+    // attempt to convert objects to Comparable
+    private final Comparable toComparabe(Object object) {
+        if (object == null) {
+            return null;
+        }
+        else if (object instanceof Comparable) {
+            return (Comparable) object;
+        }
+        else if (object instanceof StringBuffer) {
+            return object.toString();
+        }
+        else if (object instanceof char[]) {
+            return new String((char[]) object);
+        }
+        else {
+            throw new ClassCastException(
+                "Invalid Comparable class:" + object.getClass().getName());
         }
     }
-    
+
+    // attempt toUpperCase conversion
+    // TODO: define this as an expression class
+    private final Object toUpperCase(Object object) {
+        if ((object instanceof String) || (object instanceof StringBuffer)) {
+            return object.toString().toUpperCase();
+        }
+        else if (object instanceof char[]) {
+            return new String((char[]) object).toUpperCase();
+        }
+        else {
+            return object;
+        }
+    }
+
     /**
      * Encodes itself as a query ordering.
      * 
@@ -237,11 +287,11 @@ public class Ordering implements Comparator, XMLSerializable {
         pw.print(linePadding);
         pw.print("<ordering path=\"");
         pw.print(sortSpec);
-        
-        if(!ascending) {
+
+        if (!ascending) {
             pw.println("\" ascending=\"false");
         }
-        
+
         pw.println("\"/>");
     }
 }
