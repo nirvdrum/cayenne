@@ -243,6 +243,20 @@ public class ExpressionFactory {
         Object value) {
         return binaryExp(type, unaryExp(Expression.OBJ_PATH, pathSpec), value);
     }
+    
+    /** 
+     * Creates a binary expression with left operand being Expression.DB_NAME. 
+     * This is a useful method to build binary expressions that match DbAttributes
+     * not included in the entities (for instance primary keys).
+     *
+     * @see #binaryExp(int, Object, Object)
+     */
+    public static Expression binaryDbNameExp(
+        int type,
+        String pathSpec,
+        Object value) {
+        return binaryExp(type, unaryExp(Expression.DB_NAME, pathSpec), value);
+    }
 
     /** 
      * Creates a ternary expression. Ternary expression is an expression with three operands.
@@ -308,5 +322,5 @@ public class ExpressionFactory {
         }
 
         return currentExp;
-    }
+    }   
 }

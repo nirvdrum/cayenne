@@ -9,4 +9,4 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-1. 
+1. Friendlier expression API

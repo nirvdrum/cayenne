@@ -63,9 +63,8 @@ package org.objectstyle.cayenne.exp;
  * 
  * @author Andrei Adamchik
  */
-public class UnaryExpression implements Expression {
+public class UnaryExpression extends Expression {
     protected Object operand;
-    protected int type;
     
     public UnaryExpression() {}
     
@@ -92,16 +91,6 @@ public class UnaryExpression implements Expression {
         
         throw new IllegalArgumentException("Invalid operand index for UnaryExpression: " + index);
     }
-    
-    
-    public int getType() {
-        return type;
-    }
-    
-    public void setType(int type) {
-        this.type = type;
-    }
-    
     
     public String toString() {
         StringBuffer buf = new StringBuffer();

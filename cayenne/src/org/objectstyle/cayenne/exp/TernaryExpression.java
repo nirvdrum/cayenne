@@ -58,11 +58,10 @@ package org.objectstyle.cayenne.exp;
 /** Generic ternary expression. 
  *  Describes expression in a form: "<tt>doSomething(operand1, operand2, operand3)</tt>". 
  *  SQL example of ternary expression is BETWEEN expression. */
-public class TernaryExpression implements Expression {
+public class TernaryExpression extends Expression {
     protected Object operand0;
     protected Object operand1;
     protected Object operand2;
-    protected int type;
 
     public TernaryExpression() {}
 
@@ -102,13 +101,5 @@ public class TernaryExpression implements Expression {
 
         throw new IllegalArgumentException(
             "Invalid operand index for TernaryExpression: " + index);
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 }

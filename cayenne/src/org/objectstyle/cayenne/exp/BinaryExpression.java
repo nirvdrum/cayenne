@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,18 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.exp;
 
-/** Generic binary expression. 
- *  Describes expression in a form: "<tt>leftoperand operation rightoperand</tt>". 
- *  SQL has a lot of binary expressions, for example AND, OR, =, etc. */
-public class BinaryExpression implements Expression {
+/** 
+ * Generic binary expression. Describes an expression in a 
+ * form: "<code>leftoperand operation rightoperand</code>". 
+ * SQL has a lot of binary expressions, for example AND, OR, =, etc. 
+ * 
+ * @author Andrei Adamchik
+ */
+public class BinaryExpression extends Expression {
     protected Object leftOperand;
     protected Object rightOperand;
-    protected int type;
-    
     public BinaryExpression() {}
     
     public BinaryExpression(int type) {
@@ -98,11 +100,4 @@ public class BinaryExpression implements Expression {
     }
     
     
-    public int getType() {
-        return type;
-    }
-    
-    public void setType(int type) {
-        this.type = type;
-    }
 }

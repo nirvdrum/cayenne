@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,9 +53,10 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.exp;
 
-/** Describes a generic data expression. */
-public interface Expression {
+/** Defines basic API of a generic data expression. */
+public abstract class Expression {
     
     /** Corresponds to SQL "A AND B" expression. */
     public static final int AND = 0;
@@ -112,8 +112,11 @@ public interface Expression {
     public static final int OBJ_PATH = 26;
     
     
-    /** Describes a table column name.
-    * DB_NAME expression is resolved relative to some root DbEntity. */ 
+    /** 
+     * Describes a table column name.
+     * DB_NAME expression is resolved relative to a root 
+     * DbEntity. 
+     */ 
     public static final int DB_NAME = 27;
     
     
@@ -132,6 +135,32 @@ public interface Expression {
     /** Interpreted as an aggregate min function. */ 
     public static final int MIN = 34;
     
+    protected int type;
+    
+    /** 
+     * Returns a type of expression. Most common types are defined 
+     * as public static fields of this interface.
+     */
+	public int getType() {
+        return type;
+    }
+
+	public void setType(int type) {
+        this.type = type;
+    }
+
+    /** 
+     * Creates a new expression that joins this object
+     * with another expression, using specified join type.
+     * It is very useful for incrementally building chained expressions,
+     * like long AND or OR statements. 
+     */
+    public Expression joinExpression(int type, Expression exp) {
+         Expression join = ExpressionFactory.expressionOfType(type);
+         join.setOperand(0, this);
+         join.setOperand(1, exp);
+         return join;
+    }
     
     
     /** 
@@ -139,27 +168,18 @@ public interface Expression {
      * unary (count == 1), binary (count == 2) and ternary (count == 3) 
      * expressions.
      */
-    public int getOperandCount();
+    public abstract int getOperandCount();
     
     /** 
      * Returns a value of operand at <code>index</code>. 
      * Operand indexing starts at 0. 
      */
-    public Object getOperand(int index);
+    public abstract Object getOperand(int index);
     
     
     /** 
      * Sets a value of operand at <code>index</code>. 
      * Operand indexing starts at 0.
      */
-    public void setOperand(int index, Object value);
-    
-    
-    /** 
-     * Returns a type of expression. Most common types are defined 
-     * as public static fields of this interface.
-     */
-    public int getType();
-    
-    public void setType(int type);
+    public abstract void setOperand(int index, Object value);
 }
