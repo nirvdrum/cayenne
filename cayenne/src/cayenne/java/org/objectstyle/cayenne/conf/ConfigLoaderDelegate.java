@@ -62,8 +62,8 @@ import java.util.Map;
 /**
  * Interface that defines callback API used by ConfigLoader to process loaded
  * configuration. Main responsibility of ConfigLoaderDelegate is to create
- * objects, while ConfigLoader is mainly concerned with XML parsing.
- *
+ * objects, while ConfigLoader is mainly concerned with XML parsing. 
+ * 
  * @author Andrei Adamchik
  */
 public interface ConfigLoaderDelegate {
@@ -79,11 +79,25 @@ public interface ConfigLoaderDelegate {
     public void finishedLoading();
 
     /**
+     * Callback method invoked when a project version is read.
+     * @since 1.1
+     */
+    public void shouldLoadProjectVersion(String version);
+        
+    /**
      * Callback method invoked when a domain is encountered in the configuration
      * file.
      * @param name domain name.
      */
     public void shouldLoadDataDomain(String name);
+    
+    /**
+     * Callback method invoked when a DataView reference is encountered in the configuration
+     * file.
+     * 
+     * @since 1.1
+     */
+    public void shouldRegisterDataView(String name, String location);
 
     /**
      * @deprecated Since 1.0.4 this method is no longer called during project loading.
@@ -94,12 +108,12 @@ public interface ConfigLoaderDelegate {
         String mapName,
         String location,
         List depMapNames);
-
+    
     /**
      * @since 1.0.4
      */
     public void shouldLoadDataMaps(String domainName, Map locations, Map dependencies);
-
+    
     /**
      * @since 1.1
      */
@@ -119,7 +133,7 @@ public interface ConfigLoaderDelegate {
 
     /**
      * Gives delegate an opportunity to process the error.
-     *
+     * 
      * @param th
      * @return boolean indicating whether ConfigLoader should proceed with
      * further processing. Ultimately it is up to the ConfigLoader to make this
@@ -131,6 +145,4 @@ public interface ConfigLoaderDelegate {
      * @return status object indicating the state of the configuration loading.
      */
     public ConfigStatus getStatus();
-
-    public void shouldRegisterDataView(String name, String location);
 }

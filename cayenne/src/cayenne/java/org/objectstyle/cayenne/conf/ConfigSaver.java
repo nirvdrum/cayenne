@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * Class that does saving of Cayenne configuration.
- *
+ * 
  * @author Andrei Adamchik
  */
 public class ConfigSaver {
@@ -85,7 +85,7 @@ public class ConfigSaver {
         this.delegate = delegate;
     }
 
-    /**
+    /** 
      * Saves domains into the specified file. Assumes that the maps have already
      * been saved.
      */
@@ -93,28 +93,27 @@ public class ConfigSaver {
         pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         pw.println(
             "<domains project-version=\""
-                + Project.CURRENT_PROJECT_VERSION
+                + delegate.projectVersion()
                 + "\">");
 
         Iterator it = delegate.domainNames();
         while(it.hasNext()) {
             storeDomain(pw, (String) it.next());
         }
-
-        it = delegate.viewNames();
-        while(it.hasNext()) {
-          String viewName = (String)it.next();
-          String viewLocation = delegate.viewLocation(viewName);
-
-          pw.print("\t<view name=\"" + viewName.trim());
-          pw.print("\" location=\"" + viewLocation.trim());
-
-          pw.println("\"/>");
+        
+        Iterator views = delegate.viewNames();
+        while(views.hasNext()) {
+            storeDataView(pw, (String)views.next());
         }
-
         pw.println("</domains>");
     }
-
+    
+    protected void storeDataView(PrintWriter pw, String dataViewName) {
+        String location = delegate.viewLocation(dataViewName);
+        pw.print("<view name=\"" + dataViewName.trim());
+        pw.print("\" location=\"" + location.trim());
+        pw.println("\"/>");
+    }
 
     protected void storeDomain(PrintWriter pw, String domainName) {
         pw.println("<domain name=\"" + domainName.trim() + "\">");
@@ -126,16 +125,16 @@ public class ConfigSaver {
             if(name == null) {
                 continue;
             }
-
+            
             String value = delegate.propertyValue(domainName, name);
             if(value == null) {
                 continue;
             }
-
+     
             pw.print("\t<property name=\"" + Util.encodeXmlAttribute(name.trim()));
             pw.println("\" value=\"" + Util.encodeXmlAttribute(value.trim()) + "\"/>");
         }
-
+               
         // store maps
         Iterator maps = delegate.mapNames(domainName);
         while (maps.hasNext()) {

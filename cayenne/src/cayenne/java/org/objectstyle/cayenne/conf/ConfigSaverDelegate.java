@@ -60,33 +60,44 @@ import java.util.Iterator;
 /**
  * Defines a set of callback methods that provide information
  * to ConfigSaver when Cayenne project is saved.
- *
+ * 
  * @author Andrei Adamchik
  */
 public interface ConfigSaverDelegate {
+    /**
+     * @since 1.1
+     */
+    public String projectVersion();
+    
     public Iterator domainNames();
 
-    public Iterator propertyNames(String domainName);
-
-    public String propertyValue(String domainName, String propertyName);
-
-    public Iterator mapNames(String domainName);
-
-    public String mapLocation(String domainName, String mapName);
-
-    public Iterator dependentMapNames(String domainName, String mapName);
-
-    public Iterator linkedMapNames(String domainName, String nodeName);
-
-    public Iterator nodeNames(String domainName);
-
-    public String nodeDataSourceName(String domainName, String nodeName);
-
-    public String nodeAdapterName(String domainName, String nodeName);
-
-    public String nodeFactoryName(String domainName, String nodeName);
-
+    /**
+     * @since 1.1
+     */    
     public Iterator viewNames();
-
-    public String viewLocation(String viewName);
+    
+    /**
+     * @since 1.1
+     */    
+    public String viewLocation(String dataViewName);
+    
+    public Iterator propertyNames(String domainName);
+    
+    public String propertyValue(String domainName, String propertyName);
+    
+    public Iterator mapNames(String domainName);
+    
+    public String mapLocation(String domainName, String mapName);
+    
+    public Iterator dependentMapNames(String domainName, String mapName);
+    
+    public Iterator linkedMapNames(String domainName, String nodeName);
+    
+    public Iterator nodeNames(String domainName); 
+    
+    public String nodeDataSourceName(String domainName, String nodeName);
+    
+    public String nodeAdapterName(String domainName, String nodeName);
+    
+    public String nodeFactoryName(String domainName, String nodeName);
 }

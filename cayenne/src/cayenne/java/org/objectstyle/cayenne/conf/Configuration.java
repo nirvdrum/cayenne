@@ -520,52 +520,70 @@ public abstract class Configuration {
         this.loaderDelegate = loaderDelegate;
     }
 
+    /**
+     * Initializes configuration with the location of data views.
+     * 
+     * @since 1.1
+     * @param dataViewLocations Map of DataView locations.
+     */
     public void setDataViewLocations(Map dataViewLocations) {
-      if (dataViewLocations == null)
-        this.dataViewLocations = new HashMap();
-      else
-        this.dataViewLocations = dataViewLocations;
+        if (dataViewLocations == null)
+            this.dataViewLocations = new HashMap();
+        else
+            this.dataViewLocations = dataViewLocations;
     }
 
+    /**
+     * @since 1.1
+     */
     public Map getDataViewLocations() {
-      return dataViewLocations;
+        return dataViewLocations;
     }
 
+    /**
+     * @since 1.1
+     */
     public boolean loadDataView(DataView dataView) throws IOException {
-      return loadDataView(dataView, Configuration.ACCEPT_ALL_DATAVIEWS);
+        return loadDataView(dataView, Configuration.ACCEPT_ALL_DATAVIEWS);
     }
 
-    public boolean loadDataView(
-        DataView dataView,
-        Predicate dataViewNameFilter) throws IOException {
-      Validate.notNull(dataView, "DataView cannot be null.");
+    /**
+     * @since 1.1
+     */
+    public boolean loadDataView(DataView dataView, Predicate dataViewNameFilter)
+        throws IOException {
+            
+        Validate.notNull(dataView, "DataView cannot be null.");
 
-      if (dataViewLocations.size() == 0 ||
-          dataViewLocations.size() > 512) {
-        return false;
-      }
+        if (dataViewLocations.size() == 0 || dataViewLocations.size() > 512) {
+            return false;
+        }
 
-      if (dataViewNameFilter == null)
-        dataViewNameFilter = Configuration.ACCEPT_ALL_DATAVIEWS;
+        if (dataViewNameFilter == null)
+            dataViewNameFilter = Configuration.ACCEPT_ALL_DATAVIEWS;
 
-      List viewXMLSources = new ArrayList(dataViewLocations.size());
-      int index = 0;
-      for (Iterator i = dataViewLocations.entrySet().iterator(); i.hasNext(); index++) {
-        Map.Entry entry = (Map.Entry)i.next();
-        String name = (String)entry.getKey();
-        if (!dataViewNameFilter.evaluate(name))
-          continue;
-        String location = (String)entry.getValue();
-        InputStream in = getViewConfiguration(location);
-        if (in != null) viewXMLSources.add(in);
-      }
+        List viewXMLSources = new ArrayList(dataViewLocations.size());
+        int index = 0;
+        for (Iterator i = dataViewLocations.entrySet().iterator();
+            i.hasNext();
+            index++) {
+            Map.Entry entry = (Map.Entry) i.next();
+            String name = (String) entry.getKey();
+            if (!dataViewNameFilter.evaluate(name))
+                continue;
+            String location = (String) entry.getValue();
+            InputStream in = getViewConfiguration(location);
+            if (in != null)
+                viewXMLSources.add(in);
+        }
 
-      if (viewXMLSources.isEmpty())
-        return false;
+        if (viewXMLSources.isEmpty())
+            return false;
 
-      dataView.load((InputStream[])viewXMLSources.toArray(
-          new InputStream[viewXMLSources.size()]));
-      return true;
+        dataView.load(
+            (InputStream[]) viewXMLSources.toArray(
+                new InputStream[viewXMLSources.size()]));
+        return true;
     }
 
     /**
