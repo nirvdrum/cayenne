@@ -513,6 +513,17 @@ public class DataNodeView extends JPanel implements DocumentListener {
         DefaultComboBoxModel model = new DefaultComboBoxModel(new String[] {
                 DriverDataSourceFactory.class.getName(),
                 JNDIDataSourceFactory.class.getName(),
+                "Some stuff...",
+                "sadsad sad asd 234",
+                "sadsad sad asd 324",
+                "sadsad sad asd 324234",
+                "sadsad sad asd 324",
+                "sadsad sad asd 234234",
+                "sadsad sad asd 2344234",
+                "sadsad sad asd 3434",
+                "sadsad sad asd 3434",
+                "sadsad sad asd ",
+                "sadsad sad sadasd "
         });
 
         if (factoryName != null && factoryName.length() > 0) {
