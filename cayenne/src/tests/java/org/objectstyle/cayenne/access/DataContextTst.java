@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataContextTst extends DataContextTestBase {
     private static Logger logObj = Logger.getLogger(DataContextTst.class);
-    
+
     public void testLocalObjects() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
 
@@ -98,10 +98,10 @@ public class DataContextTst extends DataContextTestBase {
             assertSame(context, a.getDataContext());
         }
     }
-    
+
     public void testLocalObjectsSanity() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
-        Artist a = (Artist)artists.get(0);
+        Artist a = (Artist) artists.get(0);
         a.setArtistName("new name");
 
         DataContext altContext = createAltContext();
@@ -109,11 +109,11 @@ public class DataContextTst extends DataContextTestBase {
             altContext.localObjects(Collections.singletonList(a));
             fail("Shouldn't allow transfers of modified objects.");
         }
-        catch(CayenneRuntimeException ex) {
+        catch (CayenneRuntimeException ex) {
             // expected
         }
     }
-    
+
     public void testLocalObjectsFaulting() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
         Artist a = (Artist) artists.get(0);
@@ -124,9 +124,12 @@ public class DataContextTst extends DataContextTestBase {
 
         assertEquals(PersistenceState.HOLLOW, altA.getPersistenceState());
         assertEquals(a.getObjectId(), altA.getObjectId());
-        
-        DataRow snapshot = context.getObjectStore().getDataRowCache().getCachedSnapshot(a.getObjectId());
-        DataRow altSnapshot = altContext.getObjectStore().getDataRowCache().getCachedSnapshot(altA.getObjectId());
+
+        DataRow snapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(a.getObjectId());
+        DataRow altSnapshot =
+            altContext.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altA.getObjectId());
         assertNotNull(altSnapshot);
         assertSame(snapshot, altSnapshot);
 
@@ -140,16 +143,22 @@ public class DataContextTst extends DataContextTestBase {
                 fail("Attempt to resolve object via query instead of snapshot");
                 return null;
             }
-            public void snapshotChangedInDataRowStore(
+            
+            public boolean shouldMergeChanges(
                 DataObject object,
                 DataRow snapshotInStore) {
+                return true;
+            }
+
+            public boolean shouldProcessDelete(DataObject object) {
+                return true;
             }
         };
-        
+
         altContext.setDelegate(delegate);
         altA.getArtistName();
     }
-    
+
     private DataContext createAltContext() {
         // can't use super.createdataContext(), since it would clean up the cache
         return context.getParentDataDomain().createDataContext();
@@ -220,10 +229,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Tests how CHAR field is handled during fetch. Some databases (Oracle...)
-	 * would pad a CHAR column with extra spaces, returned to the client.
-	 * Cayenne should trim it.
-	 */
+     * Tests how CHAR field is handled during fetch. Some databases (Oracle...)
+     * would pad a CHAR column with extra spaces, returned to the client.
+     * Cayenne should trim it.
+     */
     public void testCharFetch() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
         List artists = context.performQuery(q);
@@ -232,10 +241,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Tests how CHAR field is handled during fetch in the WHERE clause. Some
-	 * databases (Oracle...) would pad a CHAR column with extra spaces,
-	 * returned to the client. Cayenne should trim it.
-	 */
+     * Tests how CHAR field is handled during fetch in the WHERE clause. Some
+     * databases (Oracle...) would pad a CHAR column with extra spaces,
+     * returned to the client. Cayenne should trim it.
+     */
     public void testCharInQualifier() throws Exception {
         Expression e =
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
@@ -245,9 +254,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Test fetching query with multiple relationship paths between the same 2
-	 * entities used in qualifier.
-	 */
+     * Test fetching query with multiple relationship paths between the same 2
+     * entities used in qualifier.
+     */
     public void testMultiObjRelFetch() throws Exception {
         populatePaintings();
 
@@ -260,9 +269,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Test fetching query with multiple relationship paths between the same 2
-	 * entities used in qualifier.
-	 */
+     * Test fetching query with multiple relationship paths between the same 2
+     * entities used in qualifier.
+     */
     public void testMultiDbRelFetch() throws Exception {
         populatePaintings();
 
@@ -277,8 +286,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Test fetching a derived entity.
-	 */
+     * Test fetching a derived entity.
+     */
     public void testDerivedEntityFetch1() throws Exception {
         // Skip HSQLDB, since it currently does not support HAVING;
         // this is supposed to appear in the next release.
@@ -301,9 +310,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Test fetching a derived entity with complex qualifier including
-	 * relationships.
-	 */
+     * Test fetching a derived entity with complex qualifier including
+     * relationships.
+     */
     public void testDerivedEntityFetch2() throws Exception {
         // Skip HSQLDB, since it currently does not support HAVING;
         // this is supposed to appear in the next release.
@@ -375,7 +384,8 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(artistCount, objects.size());
 
         Artist artist = (Artist) objects.get(0);
-        Map snapshot = context.getObjectStore().getSnapshot(artist.getObjectId(), context);
+        Map snapshot =
+            context.getObjectStore().getSnapshot(artist.getObjectId(), context);
         assertEquals(3, snapshot.size());
     }
 
@@ -563,10 +573,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-	 * Tests that hasChanges performs correctly when an object is "modified"
-	 * and the property is simply set to the same value (an unreal
-	 * modification)
-	 */
+     * Tests that hasChanges performs correctly when an object is "modified"
+     * and the property is simply set to the same value (an unreal
+     * modification)
+     */
     public void testHasChangesUnrealModify() {
         String artistName = "ArtistName";
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
@@ -574,15 +584,15 @@ public class DataContextTst extends DataContextTestBase {
         context.commitChanges();
 
         artist.setArtistName(artistName); //Set again to *exactly* the same
-										  // value
+        // value
         assertFalse(context.hasChanges());
     }
 
     /**
-	 * Tests that hasChanges performs correctly when an object is "modified"
-	 * and the property is simply set to the same value (an unreal
-	 * modification)
-	 */
+     * Tests that hasChanges performs correctly when an object is "modified"
+     * and the property is simply set to the same value (an unreal
+     * modification)
+     */
     public void testHasChangesRealModify() {
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("ArtistName");

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.event;
 
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
 
 /**
  * @author Andrei Adamchik
@@ -108,18 +109,27 @@ public class EventBridgeTst extends CayenneTestCase {
     }
 
     public void testSendExternalEvent() throws Exception {
+        
         EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
         String external = "externalSubject";
-        TestBridge bridge = new TestBridge(local, external);
+        final TestBridge bridge = new TestBridge(local, external);
 
         EventManager manager = EventManager.getDefaultManager();
         bridge.startup(manager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
 
-        SnapshotEvent event = new SnapshotEvent(this, this, null, null);
+        final SnapshotEvent event = new SnapshotEvent(this, this, null, null);
 
-		manager.postNonBlockingEvent(event, local);
-        assertSame(event, bridge.lastLocalEvent);
+        manager.postEvent(event, local);
 
+        // since bridge is notified asynchronously by default,
+        // we must wait till notification is received
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertSame(event, bridge.lastLocalEvent);
+            }
+        };
+        
+        helper.assertWithTimeout(5000);
     }
 
     class TestBridge extends EventBridge {

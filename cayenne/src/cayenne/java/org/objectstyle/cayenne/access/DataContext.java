@@ -144,10 +144,12 @@ public class DataContext implements QueryEngine, Serializable {
             return query;
         }
 
-        public void snapshotChangedInDataRowStore(
-            DataObject object,
-            DataRow snapshotInStore) {
-            // noop
+        public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
+            return true;
+        }
+
+        public boolean shouldProcessDelete(DataObject object) {
+            return true;
         }
     };
 

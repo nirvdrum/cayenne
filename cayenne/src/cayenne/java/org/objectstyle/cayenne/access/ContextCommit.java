@@ -210,7 +210,7 @@ class ContextCommit {
         DataRow snapshotInStore =
             store.getSnapshot(object.getObjectId(), context.getParent());
         if (object.getSnapshotVersion() != snapshotInStore.getVersion()) {
-            delegate.snapshotChangedInDataRowStore(object, snapshotInStore);
+            delegate.shouldMergeChanges(object, snapshotInStore);
         }
     }
 

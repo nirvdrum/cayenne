@@ -70,7 +70,7 @@ public class DataContextDelegateTst extends MultiContextTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         // disable ObjectStore events
         context.getParentDataDomain().getSnapshotCache().setNotifyingObjectStores(false);
 
@@ -236,10 +236,7 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         protected boolean abortCommit;
         protected boolean overridesConcurrentModifictions;
 
-        public void snapshotChangedInDataRowStore(
-            DataObject object,
-            DataRow snapshotInStore) {
-
+        public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
             this.changedSnapshot = snapshotInStore;
 
             if (abortCommit) {
@@ -254,6 +251,12 @@ public class DataContextDelegateTst extends MultiContextTestCase {
                     snapshotInStore);
 
             }
+
+            return false;
+        }
+
+        public boolean shouldProcessDelete(DataObject object) {
+            return true;
         }
 
         public GenericSelectQuery willPerformSelect(
