@@ -77,8 +77,8 @@
     		
     		<ul>
     			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/driverinfo.xml">driverinfo.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/datamap.map.xml">datamap.map.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/datanode.driver.xml">datanode.driver.xml</a></li>
     		</ul>
     		
     		These files are under WEB-INF subdirectory of the tutorial project folder. Open <code>cayenne.xml</code> 

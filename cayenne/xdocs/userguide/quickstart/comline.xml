@@ -60,8 +60,8 @@
     		
     		<ul>
     			<li><a href="../../tutorials/cayenne-cmd-app/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorials/cayenne-cmd-app/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorials/cayenne-cmd-app/driverinfo.xml">driverinfo.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/datamap.map.xml">datamap.map.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/datanode.driver.xml">driverinfo.driver.xml</a></li>
     		</ul>
     		
     		Open <code>cayenne.xml</code> 

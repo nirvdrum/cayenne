@@ -9,3 +9,14 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
+1. Created a project package to handle project file operations 
+independently from GUI, switched CayenneModeler to this package.
+This allowed to eliminate explicit "location" selection and fixed
+lots of bugs.
+
+2. Project structure update - now linked files have
+preset extensions, and project file version is saved in "cayenne.xml".
+Old format is still understood by Cayenne runtime. 
+
+3. GUI would allow to upgrade from the earlier projects.
+ 
