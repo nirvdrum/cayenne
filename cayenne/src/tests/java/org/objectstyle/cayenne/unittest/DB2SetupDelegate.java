@@ -1,11 +1,7 @@
 package org.objectstyle.cayenne.unittest;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
@@ -29,7 +25,7 @@ public class DB2SetupDelegate extends DatabaseSetupDelegate {
         return false;
     }
 
-    public void createdTables(Connection con, DataMap map) throws Exception {
+  /*  public void createdTables(Connection con, DataMap map) throws Exception {
         executeDDL(con, super.ddlFile("db2", "create-update-sp.sql"));
         executeDDL(con, super.ddlFile("db2", "create-out-sp.sql"));
         executeDDL(con, super.ddlFile("db2", "create-select-sp.sql"));
@@ -58,5 +54,5 @@ public class DB2SetupDelegate extends DatabaseSetupDelegate {
         catch (SQLException ex) {
             logObj.info("Can't drop procedure, ignoring.", ex);
         }
-    }
+    } */
 }
