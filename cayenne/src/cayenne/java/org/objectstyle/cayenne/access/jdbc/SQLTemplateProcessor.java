@@ -127,7 +127,9 @@ class SQLTemplateProcessor {
     /**
      * Builds and returns a SQL string from template and a set of parameters. As a side effect, 
      * objects that should be used as PreparedStatement bindings are inserted into 
-     * bindingsHolder list.
+     * bindingsHolder list. VelocityContext exposes the following things as variables: all parameters
+     * in the map, {@link SQLTemplateRenderingUtils} instance using "helper" key and bindings list using 
+     * "bindings" key.
      */
     String processTemplate(String template, Map parameters, List bindingsHolder)
         throws Exception {

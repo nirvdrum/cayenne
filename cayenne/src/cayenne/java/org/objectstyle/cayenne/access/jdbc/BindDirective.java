@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * A custom Velocity directive to create a PreparedStatement parameter text.
- * There are these possible invocation forms inside the template:
+ * There are the following possible invocation formats inside the template:
  * 
  * <pre>
  * #bind(value) - e.g. #bind($xyz)
