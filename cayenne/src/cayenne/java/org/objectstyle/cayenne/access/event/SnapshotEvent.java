@@ -72,12 +72,10 @@ public abstract class SnapshotEvent extends CayenneEvent implements Serializable
     public static SnapshotEvent createEvent(
         Object source,
         Map modifiedDiffs,
-        Map insertedSnapshots,
         Collection deletedIds) {
 
         RootSnapshotEvent event = new RootSnapshotEvent(source);
         event.modifiedDiffs = modifiedDiffs;
-        event.insertedSnapshots = insertedSnapshots;
         event.deletedIds = deletedIds;
 
         return event;
@@ -94,8 +92,6 @@ public abstract class SnapshotEvent extends CayenneEvent implements Serializable
     public abstract Object getRootSource();
 
     public abstract Map modifiedDiffs();
-
-    public abstract Map insertedSnapshots();
 
     public abstract Collection deletedIds();
 
@@ -122,10 +118,6 @@ public abstract class SnapshotEvent extends CayenneEvent implements Serializable
             return rootEvent.modifiedDiffs();
         }
 
-        public Map insertedSnapshots() {
-            return rootEvent.insertedSnapshots();
-        }
-
         public Collection deletedIds() {
             return rootEvent.deletedIds();
         }
@@ -138,8 +130,7 @@ public abstract class SnapshotEvent extends CayenneEvent implements Serializable
     static class RootSnapshotEvent extends SnapshotEvent {
         protected Collection deletedIds;
         protected Map modifiedDiffs;
-        protected Map insertedSnapshots;
-
+ 
         RootSnapshotEvent(Object source) {
             super(source);
         }
@@ -153,12 +144,6 @@ public abstract class SnapshotEvent extends CayenneEvent implements Serializable
 
         public Map modifiedDiffs() {
             return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
-        }
-
-        public Map insertedSnapshots() {
-            return (insertedSnapshots != null)
-                ? insertedSnapshots
-                : Collections.EMPTY_MAP;
         }
 
         public Collection deletedIds() {

@@ -129,7 +129,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
-        ctxt.invalidateObject(p);
+        ctxt.invalidateObjects(Collections.singletonList(p));
         assertEquals(2000, p.getEstimatedPrice().intValue());
     }
 
@@ -160,7 +160,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
-        ctxt.invalidateObject(p);
+        ctxt.invalidateObjects(Collections.singletonList(p));
         assertEquals(2000, p.getEstimatedPrice().intValue());
     }
 
@@ -193,7 +193,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
-        ctxt.invalidateObject(p);
+        ctxt.invalidateObjects(Collections.singletonList(p));
         assertEquals(2000, p.getEstimatedPrice().intValue());
     }
 

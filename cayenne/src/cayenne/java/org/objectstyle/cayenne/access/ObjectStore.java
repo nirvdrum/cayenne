@@ -60,6 +60,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,8 +80,8 @@ import org.objectstyle.cayenne.access.util.QueryUtils;
  * @author Andrei Adamchik
  */
 public class ObjectStore implements Serializable, SnapshotEventListener {
-	private static Logger logObj = Logger.getLogger(ObjectStore.class);
-	
+    private static Logger logObj = Logger.getLogger(ObjectStore.class);
+
     protected transient Map objectMap = new HashMap();
     protected transient Map newObjectMap = null;
     protected Map snapshotMap = new HashMap();
@@ -94,6 +95,56 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         objectMap = (Map) in.readObject();
+    }
+
+    /**
+     * Invalidates a collection of DataObjects.
+     */
+    public synchronized void objectsInvalidated(Collection objects) {
+        if (objects.isEmpty()) {
+            return;
+        }
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+
+            // we don't care about NEW objects, 
+            // but we still do care about HOLLOW, since snapshot might still be present
+            if (object.getPersistenceState() == PersistenceState.NEW) {
+                continue;
+            }
+
+            object.setPersistenceState(PersistenceState.HOLLOW);
+
+            // remove snapshot, but keep the object
+            removeSnapshot(object.getObjectId());
+        }
+    }
+
+    /**
+     * Evicts a collection of DataObjects from this ObjectStore.
+     */
+    public void objectsUnregistered(Collection objects) {
+        if (objects.isEmpty()) {
+            return;
+        }
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+
+            // remove object and snapshot (for now)
+            removeObject(object.getObjectId());
+        }
+    }
+
+    public void objectsFetched(Collection objects) {
+
+    }
+
+    public void objectsCommitted() {
+
     }
 
     /**
@@ -259,11 +310,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
-        if(event.getRootSource() == this) {
-        	logObj.debug("Ignoring snapshot event sent by us: " + event);
-        	return;
+        if (event.getRootSource() == this) {
+            logObj.debug("Ignoring snapshot event sent by us: " + event);
+            return;
         }
-        
-		logObj.debug("Processing snapshot event: " + event);
+
+        logObj.debug("Processing snapshot event: " + event);
     }
 }

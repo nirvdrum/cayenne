@@ -435,7 +435,7 @@ class ContextCommit {
                             o,
                             masterDependentDbRel);
 
-                    // check whether MODEIFIED object has real db-level modifications 
+                    // check whether MODIFIED object has real db-level modifications 
                     if (snapshot.isEmpty()) {
                         o.setPersistenceState(PersistenceState.COMMITTED);
                         continue;
@@ -447,8 +447,9 @@ class ContextCommit {
                         throw attemptToCommitReadOnlyEntity(o.getClass(), entity);
                     }
 
+                    // Need to wrap snapshot keys to a TreeSet to ensure automatic ordering
+                    // so that we can build a valid hashcode
                     TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
-
                     Integer hashCode = new Integer(Util.hashCode(updatedAttributeNames));
 
                     UpdateBatchQuery batch = (UpdateBatchQuery) batches.get(hashCode);

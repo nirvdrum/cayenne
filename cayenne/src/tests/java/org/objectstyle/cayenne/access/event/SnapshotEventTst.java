@@ -70,15 +70,12 @@ public class SnapshotEventTst extends CayenneTestCase {
         Object source = new Object();
         Collection deleted = new ArrayList();
         Map modified = new HashMap();
-        Map inserted = new HashMap();
 
-        SnapshotEvent event =
-            SnapshotEvent.createEvent(source, modified, inserted, deleted);
+        SnapshotEvent event = SnapshotEvent.createEvent(source, modified, deleted);
         assertSame(source, event.getSource());
         assertSame(source, event.getRootSource());
         assertSame(deleted, event.deletedIds());
         assertSame(modified, event.modifiedDiffs());
-        assertSame(inserted, event.insertedSnapshots());
     }
 
     public void testChainedEvent() {
@@ -86,15 +83,13 @@ public class SnapshotEventTst extends CayenneTestCase {
         Object source = new Object();
         Collection deleted = new ArrayList();
         Map modified = new HashMap();
-        Map inserted = new HashMap();
 
         SnapshotEvent rootEvent =
-            SnapshotEvent.createEvent(rootSource, modified, inserted, deleted);
+            SnapshotEvent.createEvent(rootSource, modified, deleted);
         SnapshotEvent event = SnapshotEvent.createEvent(source, rootEvent);
         assertSame(source, event.getSource());
         assertSame(rootSource, event.getRootSource());
         assertSame(deleted, event.deletedIds());
         assertSame(modified, event.modifiedDiffs());
-        assertSame(inserted, event.insertedSnapshots());
     }
 }

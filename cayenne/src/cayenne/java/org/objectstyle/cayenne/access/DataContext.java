@@ -464,25 +464,20 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * "Invalidates" a DataObject, changing it to a HOLLOW state.
-     * This would remove object's snapshot
-     * and change its state to HOLLOW.
-     * On the next access to this object, it will be refeched.
+     * @deprecated Since 1.1, use DataContext.invalidateObjects(Collections.singletonList(dataObject))
+     * to invalidate a single object.
      */
-    public void invalidateObject(DataObject dataObj) {
-        // we don't care about objects that are not ours
-        // we don't care about uncommitted objects
-        if (dataObj.getDataContext() != this
-            || dataObj.getPersistenceState() == PersistenceState.NEW
-            || dataObj.getPersistenceState() == PersistenceState.HOLLOW) {
-            return;
-        }
-
-        // remove snapshot
-        objectStore.removeSnapshot(dataObj.getObjectId());
-
-        // change state to HOLLOW
-        dataObj.setPersistenceState(PersistenceState.HOLLOW);
+    public void invalidateObject(DataObject dataObject) {
+		invalidateObjects(Collections.singletonList(dataObject));
+    }
+    
+	/**
+	  * "Invalidates" a COllection of DataObject. This operation would remove 
+	  * each object's snapshot from cache and change object's state to HOLLOW.
+	  * On the next access to this object, it will be refeched.
+	  */
+    public void invalidateObjects(Collection dataObjects) {
+    	objectStore.objectsInvalidated(dataObjects);
     }
 
     /**

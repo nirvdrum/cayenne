@@ -55,9 +55,15 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
+//import org.shiftone.cache.Cache;
+//import org.shiftone.cache.CacheManager;
 
 /**
  * @author Andrei Adamchik
@@ -65,7 +71,11 @@ import org.objectstyle.cayenne.event.EventSubject;
 public class SnapshotCache {
     protected String name;
     protected EventSubject snapshotEventSubject;
+    //   protected Cache snapshots;
 
+    /**
+     * Creates new SnapshotCache, assigning it a specified name.
+     */
     public SnapshotCache(String name) {
         if (name == null) {
             throw new IllegalArgumentException("SnapshotCache name can't be null.");
@@ -73,6 +83,9 @@ public class SnapshotCache {
 
         this.name = name;
         this.snapshotEventSubject = EventSubject.getSubject(this.getClass(), name);
+
+        // TODO: these values will be configurable
+        //   this.snapshots = CacheManager.getInstance().newCache(12 * 60 * 60 * 1000, 10000);
     }
 
     /**
@@ -83,16 +96,46 @@ public class SnapshotCache {
     public String getName() {
         return name;
     }
-    
+
     /**
      * Returns EventSubject used by this SnapshotCache to notify of snapshot changes.
      */
-	public EventSubject getSnapshotEventSubject() {
-		return snapshotEventSubject;
-	}
+    public EventSubject getSnapshotEventSubject() {
+        return snapshotEventSubject;
+    }
 
-    protected void processSnapshotsChangeEvent(SnapshotEvent event) {
-        // TODO: implement me
+    /**
+     * Updates internal cache with the changes from the SnapshotEvent.
+     */
+    protected synchronized void processSnapshotsChangeEvent(SnapshotEvent event) {
+        // DELETED: evict deleted snapshots
+        Collection deleted = event.deletedIds();
+        if (!deleted.isEmpty()) {
+            Iterator it = deleted.iterator();
+            while (it.hasNext()) {
+                //          snapshots.remove(it.next());
+            }
+        }
+
+        // MODIFIED: merge diffs
+        Map updates = event.modifiedDiffs();
+        if (!updates.isEmpty()) {
+            Iterator it = updates.keySet().iterator();
+            while (it.hasNext()) {
+                /*  Object key = it.next();
+                Map diff = (Map) updates.get(key);
+                
+                Map snapshot = (Map) snapshots.getObject(key);
+                if (snapshot == null) {
+                    // insert new snapshot
+                    snapshots.addObject(key, diff);
+                }
+                else {
+                    // merge
+                    snapshot.putAll(diff);
+                } */
+            }
+        }
     }
 
     /**

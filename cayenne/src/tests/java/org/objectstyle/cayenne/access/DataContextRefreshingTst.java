@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collections;
 import java.util.Date;
 
 import org.objectstyle.art.Artist;
@@ -189,7 +190,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         // update via DataNode directly
         updateRow(artist.getObjectId(), "ARTIST_NAME", nameAfter);
 
-        context.invalidateObject(artist);
+        context.invalidateObjects(Collections.singletonList(artist));
         assertEquals(nameAfter, artist.getArtistName());
     }
 
@@ -200,7 +201,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         // update via DataNode directly
         updateRow(painting.getObjectId(), "ARTIST_ID", null);
 
-        context.invalidateObject(painting);
+        context.invalidateObjects(Collections.singletonList(painting));
         assertNull(painting.getToArtist());
     }
 
@@ -219,7 +220,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
             "ARTIST_ID",
             artistAfter.getObjectId().getValueForAttribute("ARTIST_ID"));
 
-        context.invalidateObject(painting);
+        context.invalidateObjects(Collections.singletonList(painting));
         assertSame(artistAfter, painting.getToArtist());
     }
 
@@ -240,7 +241,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
             "ARTIST_ID",
             artistAfter.getObjectId().getValueForAttribute("ARTIST_ID"));
 
-        context.invalidateObject(painting);
+        context.invalidateObjects(Collections.singletonList(painting));
         assertSame(artistAfter, painting.getToArtist());
     }
 
@@ -251,7 +252,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
 
         deleteRow(painting.getObjectId());
 
-        context.invalidateObject(artist);
+        context.invalidateObjects(Collections.singletonList(artist));
         assertEquals(artist.getPaintingArray().size(), 0);
     }
 
@@ -261,7 +262,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
 
         insertPaintingBypassingContext("p", artist.getArtistName());
         assertEquals(artist.getPaintingArray().size(), 0);
-        context.invalidateObject(artist);
+        context.invalidateObjects(Collections.singletonList(artist));
         assertEquals(artist.getPaintingArray().size(), 1);
     }
 
@@ -282,7 +283,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         Date dob = artist.getDateOfBirth();
         assertNotNull(dob);
 
-        artist.getDataContext().invalidateObject(artist);
+        artist.getDataContext().invalidateObjects(Collections.singletonList(artist));
         assertEquals(PersistenceState.HOLLOW, artist.getPersistenceState());
 
         // this must trigger a fetch
