@@ -62,6 +62,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -104,35 +105,47 @@ class ObjectDeleteHandler {
         // be a requirement...
         object.resolveFault();
 
-        // We cannot delay setting state to deleted, as Cascade deletes might cause
-        // recursion, and the "deleted" state is the best way we have of noticing that and
-        // bailing out (see above)
         if (oldState == PersistenceState.NEW) {
-            object.setPersistenceState(PersistenceState.TRANSIENT);
+            deleteNew();
         }
         else {
-            object.setPersistenceState(PersistenceState.DELETED);
-        }
-
-        processDeleteRules();
-
-        // if an object was NEW, we must throw it out of the ObjectStore
-        if (oldState == PersistenceState.NEW) {
-            dataContext.getObjectStore().objectsUnregistered(Collections
-                    .singletonList(object));
-            object.setDataContext(null);
-        }
-        else {
-            // must retain snapshot for optimistic locking to work ...
-            // the assumption (is it fully tested?) is that if delete rules affected an
-            // object state
-
-            // TODO: if no optimistic locking is needed for entity, maybe we should skip
-            // this step
-            // dataContext.getObjectStore().retainSnapshot(object);
+            deletePersistent();
         }
 
         return true;
+    }
+
+    private void deletePersistent() throws DeleteDenyException {
+
+        // duplicating some code from ObjectStore.retainSnapshot, as we have to do it
+        // in two phases, extracting snapshot here, but retaining it after the
+        // successful deletion only...
+        DataRow snapshot = dataContext.getObjectStore().getCachedSnapshot(object
+                .getObjectId());
+        if (snapshot == null) {
+            snapshot = dataContext.currentSnapshot(object);
+        }
+
+        // We cannot delay setting state to deleted, as Cascade deletes might cause
+        // recursion, and the "deleted" state is the best way we have of noticing that and
+        // bailing out (see above)
+
+        object.setPersistenceState(PersistenceState.DELETED);
+        processDeleteRules();
+
+        // must retain snapshot for optimistic locking to work ...
+        dataContext.getObjectStore().retainSnapshot(object, snapshot);
+    }
+
+    private void deleteNew() throws DeleteDenyException {
+        object.setPersistenceState(PersistenceState.TRANSIENT);
+        processDeleteRules();
+
+        // if an object was NEW, we must throw it out of the ObjectStore
+
+        dataContext.getObjectStore().objectsUnregistered(Collections
+                .singletonList(object));
+        object.setDataContext(null);
     }
 
     private void processDeleteRules() throws DeleteDenyException {
@@ -175,7 +188,7 @@ class ObjectDeleteHandler {
 
             // process DENY rule first...
             if (relationship.getDeleteRule() == DeleteRule.DENY) {
-                resetObjectState();
+                object.setPersistenceState(oldState);
 
                 String message = relatedObjects.size() == 1
                         ? "1 related object"
@@ -241,17 +254,10 @@ class ObjectDeleteHandler {
 
                     break;
                 default:
-                    resetObjectState();
+                    object.setPersistenceState(oldState);
                     throw new CayenneRuntimeException("Invalid delete rule "
                             + relationship.getDeleteRule());
             }
         }
-    }
-
-    /**
-     * Restores DataObject to its original state on delete failure.
-     */
-    private void resetObjectState() {
-        object.setPersistenceState(oldState);
     }
 }
