@@ -71,47 +71,7 @@ public interface TraversalHandler {
         Expression node,
         int childIndex,
         boolean hasMoreChildren);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startListNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startUnaryNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startBinaryNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startTernaryNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endUnaryNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endListNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endBinaryNode(Expression node, Expression parentNode);
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endTernaryNode(Expression node, Expression parentNode);
-
+  
     /** 
      * Called during the traversal before an expression node children
      * processing is started.

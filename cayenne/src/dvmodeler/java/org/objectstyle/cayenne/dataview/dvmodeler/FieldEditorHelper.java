@@ -89,11 +89,10 @@ class FieldEditorHelper {
   private DataViewTreeModel dataViewTreeModel;
   private FieldsTableModel fieldsTableModel;
 
-  private FieldEditor fieldEditor;
   private ObjEntityViewField objEntityViewField;
 
   FieldEditorHelper(FieldEditor fieldEditor){
-    this.fieldEditor = fieldEditor;
+    // this.fieldEditor = fieldEditor;
 
     fieldNameField = fieldEditor.getFieldNameField();
     fieldNameField.getDocument().addDocumentListener(

@@ -82,14 +82,4 @@ public interface DbLoaderDelegate {
     public void objEntityAdded(ObjEntity ent);
 
     public void objEntityRemoved(ObjEntity ent);
-
-    /**
-     * This method allows delegate to do its own processing of schema of the loaded
-     * entity. For instance if a user is the schema owner, schema may be ignored.
-     * 
-     * @deprecated Since 1.1 this method is not used by DbLoader. Suppressing schema
-     *             during reverse-engineering has undesired consequences, such as
-     *             incorrectly reengineered relationships.
-     */
-    public void setSchema(DbEntity ent, String schema);
 }

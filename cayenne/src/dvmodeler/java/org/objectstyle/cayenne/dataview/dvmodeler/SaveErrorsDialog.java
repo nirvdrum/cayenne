@@ -56,24 +56,26 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.Borders;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  *
  * @author Nataliya Kholodna
- * @version 1.0
  */
-
 class SaveErrorsDialog extends JDialog{
   public static String CLOSE_DIALOG = "CLOSE";
   public static String SAVE_DIALOG = "SAVE";

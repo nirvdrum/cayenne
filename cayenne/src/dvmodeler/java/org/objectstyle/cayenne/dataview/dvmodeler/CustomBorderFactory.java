@@ -121,7 +121,6 @@ public class CustomBorderFactory {
 
     private void paintShadowedBorder(Component c, Graphics g, int x, int y, int w, int h) {
       Color background	= c.getParent().getBackground();
-      Color highlight		= UIManager.getColor("controlLtHighlight");
       Color shadow    = UIManager.getColor("controlShadow");
       Color lightShadow   = new Color(shadow.getRed(),
                                       shadow.getGreen(),

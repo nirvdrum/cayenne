@@ -74,53 +74,5 @@ public class TraversalHelper implements TraversalHandler {
     }
 
     public void objectNode(Object leaf, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startUnaryNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startBinaryNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startTernaryNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endUnaryNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endBinaryNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endTernaryNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void endListNode(Expression node, Expression parentNode) {
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used.
-     */
-    public void startListNode(Expression node, Expression parentNode) {
-    }
+    }  
 }

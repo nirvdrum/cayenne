@@ -82,7 +82,6 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 import org.objectstyle.cayenne.util.NameConverter;
 
@@ -658,38 +657,6 @@ public class DbLoader {
         String[] types = new String[list.size()];
         list.toArray(types);
         return types;
-    }
-
-    /**
-     * Performs database reverse engineering and generates DataMap that contains default
-     * mapping of the tables and views. By default will include regular tables and views.
-     * 
-     * @deprecated Since 1.1 Use "loadDataMapFromDB"
-     */
-    public DataMap createDataMapFromDB(String schemaName, String tablePattern)
-            throws SQLException {
-
-        String[] types = getDefaultTableTypes();
-        if (types.length == 0) {
-            throw new SQLException("No supported table types found.");
-        }
-
-        return createDataMapFromDB(schemaName, tablePattern, types);
-    }
-
-    /**
-     * Performs database reverse engineering and generates DataMap object that contains
-     * default mapping of the tables and views. Allows to limit types of tables to read.
-     * 
-     * @deprecated Since 1.1 Use "loadDataMapFromDB"
-     */
-    public DataMap createDataMapFromDB(
-            String schemaName,
-            String tablePattern,
-            String[] tableTypes) throws SQLException {
-        DataMap dataMap = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
-        dataMap.setDefaultSchema(schemaName);
-        return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
     }
 
     /**

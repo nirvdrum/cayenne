@@ -92,13 +92,6 @@ public interface ResultIterator {
 	 */
     public Map nextDataRow() throws CayenneException;
     
-    /** 
-	 * Returns a map of ObjectId values from the next result row.
-     * 
-     * @deprecated Since 1.1 use {@link #nextObjectId(DbEntity)}
-	 */
-    public Map nextObjectId() throws CayenneException;
-    
     /**
      * Returns a map of ObjectId values from the next result row.
      * Primary key columns are determined from the provided DbEntity.

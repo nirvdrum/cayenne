@@ -56,30 +56,35 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.Insets;
 
-import javax.swing.*;
-import javax.swing.plaf.basic.*;
-import javax.swing.tree.*;
+import javax.swing.AbstractButton;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeSelectionModel;
 
-
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
-
-
-import com.jgoodies.plaf.Options;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.plaf.HeaderStyle;
-import com.jgoodies.forms.factories.*;
-
-import org.jdom.*;
-import org.jdom.output.*;
-
-import java.io.*;
-import java.beans.*;
+import com.jgoodies.plaf.Options;
 
 /**
  *

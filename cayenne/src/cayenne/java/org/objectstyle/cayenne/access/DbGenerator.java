@@ -97,11 +97,6 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 public class DbGenerator {
 
     private Logger logObj = Logger.getLogger(DbGenerator.class);
-
-    /**
-     * @deprecated Unused since 1.1
-     */
-    protected DataNode node;
     
     protected DbAdapter adapter;
     protected DataMap map;
@@ -395,24 +390,6 @@ public class DbGenerator {
         }
         finally {
             statement.close();
-        }
-    }
-
-    /**
-     * Executes a DDL statement, logging the execution via the QueryLogger.
-     * 
-     * @deprecated Since 1.1 this method is unused.
-     */
-    protected void executeStatement(String sql, Statement stmt) throws SQLException {
-        QueryLogger.logQuery(Level.INFO, sql, null);
-
-        try {
-            stmt.execute(sql);
-        }
-        catch (SQLException ex) {
-            SQLException newException = new SQLException("Failed statement: " + sql);
-            newException.setNextException(ex);
-            throw newException;
         }
     }
 

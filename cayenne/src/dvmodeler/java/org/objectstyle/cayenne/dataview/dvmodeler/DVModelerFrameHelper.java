@@ -56,22 +56,35 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.util.*;
-
-import java.awt.*;
-import java.awt.event.WindowListener;
+import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
-import javax.swing.*;
-import javax.swing.filechooser.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-
-import java.io.*;
-import java.beans.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 
 
 
@@ -289,7 +302,6 @@ class DVModelerFrameHelper {
 
     int returnVal = openProjectFileChooser.showDialog(dvModelerFrame, "Open Project");
 
-    String fileName = "";
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       if (cayenneProject != null) {
         int result = JOptionPane.showConfirmDialog(
@@ -583,7 +595,6 @@ class DVModelerFrameHelper {
     JTree dataViewTree = dvModelerFrame.getDataViewTree();
 
     boolean dataViewTabSelected = (dataTabbedPane.getSelectedIndex() == 0);
-    boolean openProject = (cayenneProject != null);
     Object node = (dataViewTabSelected ?
                    dataViewTree.getLastSelectedPathComponent() :
                    dataMapTree.getLastSelectedPathComponent());
@@ -624,7 +635,7 @@ class DVModelerFrameHelper {
         }
       } else {
         int index = cayenneProject.getDataViews().indexOf(dataView);
-        Map removingViews = cayenneProject.removeDataView(dataView);
+        cayenneProject.removeDataView(dataView);
 
         DataViewTreeModel dataViewTreeModel =
           (DataViewTreeModel)dataViewTree.getModel();
@@ -694,7 +705,6 @@ class DVModelerFrameHelper {
       ObjEntityViewField field = (ObjEntityViewField)node;
       ObjEntityView view = field.getObjEntityView();
 
-      DataView dataView = view.getDataView();
       int index = view.getIndexOfObjEntityViewField(field);
       view.removeObjEntityViewField(field);
 
@@ -709,9 +719,7 @@ class DVModelerFrameHelper {
       JTable fieldsTable = dvModelerFrame.getFieldsTable();
       FieldsTableModel tableModel = (FieldsTableModel)fieldsTable.getModel();
       tableModel.fireTableRowsDeleted(index,index);
-
-      ObjEntity entity = view.getObjEntity();
-      DataMap dataMap = entity.getDataMap();
+      
       if (view.getObjEntityViewFieldCount() == 0){
         if (dataViewTabSelected){
           selectObjEntityViewInDataViewTree(view);
@@ -1044,7 +1052,6 @@ class DVModelerFrameHelper {
 
       if (source instanceof DataView) {
         if ("name".equals(propertyName)) {
-          DataView dataView = (DataView)source;
           String topTitle = "Data View \"" +
                              source +
                              "\" :: Properties";

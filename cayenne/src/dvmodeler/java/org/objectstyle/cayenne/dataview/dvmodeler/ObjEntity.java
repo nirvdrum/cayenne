@@ -170,7 +170,7 @@ public class ObjEntity extends DVObject {
     return Collections.unmodifiableList(objEntityViews);
   }
 
-  private void setClassName(String className){
+  public void setClassName(String className){
     this.className = className;
   }
 

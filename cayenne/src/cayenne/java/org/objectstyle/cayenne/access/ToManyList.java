@@ -115,26 +115,12 @@ public class ToManyList implements List, Serializable {
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #getSource()}
-     */
-    public ObjectId getSrcObjectId() {
-        return source.getObjectId();
-    }
-
-    /**
      * Returns a source object of this relationship.
      * 
      * @since 1.1
      */
     public DataObject getSource() {
         return source;
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #getRelationship()}
-     */
-    public String getRelName() {
-        return relationship;
     }
 
     /**

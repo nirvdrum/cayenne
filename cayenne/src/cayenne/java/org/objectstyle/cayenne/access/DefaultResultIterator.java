@@ -400,15 +400,6 @@ public class DefaultResultIterator implements ResultIterator {
     }
 
     /**
-     * Reads just ObjectId columns and returns them as a map.
-     *
-     * @deprecated Since 1.1 use {@link #nextObjectId(DbEntity)}
-     */
-    public Map nextObjectId() throws CayenneException {
-        return nextObjectId(null);
-    }
-
-    /**
      * Returns a map of ObjectId values from the next result row.
      * Primary key columns are determined from the provided DbEntity.
      * 

@@ -56,10 +56,15 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.util.*;
-import java.io.*;
-import org.jdom.*;
-import java.beans.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.jdom.Element;
 
 /**
  *

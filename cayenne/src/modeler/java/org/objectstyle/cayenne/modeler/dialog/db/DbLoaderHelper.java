@@ -301,10 +301,6 @@ public class DbLoaderHelper {
             }
         }
 
-        public void setSchema(DbEntity entity, String schema) {
-            // noop, deprecated in the interface
-        }
-
         void checkCanceled() {
             if (isStoppingReverseEngineering()) {
                 throw new CayenneRuntimeException("Reengineering was canceled.");
