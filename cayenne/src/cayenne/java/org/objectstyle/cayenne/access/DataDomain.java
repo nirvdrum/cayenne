@@ -319,37 +319,36 @@ public class DataDomain implements QueryEngine {
         reindexNodes();
     }
 
-    /** Unregisters DataNode. Also removes entities mapped to the current node. */
+    /** 
+     * Removes DataNode. 
+     */
     public synchronized void removeDataNode(String nodeName) {
         DataNode nodeToRemove = (DataNode) nodes.get(nodeName);
         if (null == nodeToRemove)
             return;
         nodes.remove(nodeName);
 
-        Iterator iter = nodesByEntityName.keySet().iterator();
-        while (iter.hasNext()) {
-            String text = (String) iter.next();
-            DataNode node = (DataNode) nodesByEntityName.get(text);
-            if (node == nodeToRemove) {
-                nodesByEntityName.remove(text);
+        Iterator it = nodesByEntityName.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            if (entry.getValue() == nodeToRemove) {
+                it.remove();
             }
         }
 
-        iter = nodesByDbEntityName.keySet().iterator();
-        while (iter.hasNext()) {
-            String text = (String) iter.next();
-            DataNode node = (DataNode) nodesByDbEntityName.get(text);
-            if (node == nodeToRemove) {
-                nodesByDbEntityName.remove(text);
+        it = nodesByDbEntityName.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            if (entry.getValue() == nodeToRemove) {
+                it.remove();
             }
         }
 
-        iter = nodesByProcedureName.keySet().iterator();
-        while (iter.hasNext()) {
-            String text = (String) iter.next();
-            DataNode node = (DataNode) nodesByProcedureName.get(text);
-            if (node == nodeToRemove) {
-                nodesByProcedureName.remove(text);
+        it = nodesByProcedureName.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            if (entry.getValue() == nodeToRemove) {
+                it.remove();
             }
         }
 
