@@ -1,8 +1,8 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
+<toc name="toc-user-guide" chapter="7. Using Queries"/> 
 <body>
-    <section name="7. Using SelectQueries">      
+    <section name="7. Using Queries">      
         <subsection name="7.1 SelectQuery">
             <p>The most commonly used query is 
             <a href="../../api/cayenne/org/objectstyle/cayenne/query/SelectQuery.html">SelectQuery</a>. 

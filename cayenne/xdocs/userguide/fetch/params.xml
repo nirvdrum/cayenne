@@ -1,8 +1,8 @@
 	<document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
+<toc name="toc-user-guide" chapter="7. Using Queries"/> 
 <body>
-    <section name="7. Using SelectQueries">        
+    <section name="7. Using Queries">        
         <subsection name="7.5 Parameterized Queries">
 		<p>SelectQuery objects can be rather complex. They may contain big qualifiers
     	and lots of tuning parameters. <i>Parameterized Queries</i> is a feature in Cayenne

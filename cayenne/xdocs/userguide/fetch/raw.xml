@@ -1,11 +1,36 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
+<toc name="toc-user-guide" chapter="7. Using Queries"/> 
 <body>
-    <section name="7. Using SelectQueries">        
-        <subsection name="7.6 Executing Raw SQL">
-	<p>TO BE DONE		
-	</p>
+    <section name="7. Using Queries">        
+        <subsection name="7.6 Using Raw SQL">
+	<p>Sometimes there is a need to execute a complex query that doesn't have an adequate
+	mapping to the object layer. In such cases using raw SQL may be unavoidable. 
+	Cayenne allows to execute an arbitrary SQL and obtain result as data rows. Later data rows can
+	be converted to objects. Query used in this case is <a 
+	href="../../api/cayenne/org/objectstyle/cayenne/query/SqlSelectQuery.html">SqlSelectQuery</a>.
+	Obvious drawback of using raw SQL is lost portability otherwise provided by Cayenne.</p>
+	
+	<p>Here is an example of using a SqlSelectQuery. To get a list of names of artists that 
+	have more than 2 paintings, the following query can be executed:</p>
+	
+<source>
+String sql = "SELECT t0.ARTIST_NAME, COUNT(1) AS PAINTINGS" 
+ + " FROM ARTIST t0, PAINTING t1"
+ + " WHERE t0.ARTIST_ID = t1.ARTIST_ID"
+ + " GROUP BY t0.ARTIST_NAME"
+ + " HAVING COUNT(1) > 2";
+ 
+SqlSelectQuery query = new SqlSelectQuery(Artist.class, sql);
+List data = context.performQuery(query);
+</source>
+
+<p></p>
+<panel name="Note:">
+Root class for SqlSelectQuery (Artist in this case) is rather arbitrary. It is used to find the
+right DataNode for query execution, not for object creation. So this can be any class from the 
+DataMap that maps to a correct DataNode.
+</panel>
         </subsection>
     </section>
 </body>

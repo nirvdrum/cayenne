@@ -65,13 +65,14 @@
     		<item name="6.3 DataObject State Management"  href="/userguide/datactxt/statemanagement.html"/>
     	</item>
  
-    	<item name="7. Using SelectQueries"  href="/userguide/fetch/index.html">
+    	<item name="7. Using Queries"  href="/userguide/fetch/index.html">
     		<item name="7.1 SelectQuery"  href="/userguide/fetch/selectquery.html"/>
     		<item name="7.2 Qualifier Expressions"  href="/userguide/fetch/exp.html"/>
     		<item name="7.3 Using Orderings"  href="/userguide/fetch/orderings.html"/>
     		<item name="7.4 SelectQuery Customization"  href="/userguide/fetch/other.html"/>
     		<item name="7.5 Parameterized Queries"  href="/userguide/fetch/params.html"/>
-    		<item name="7.6 Executing Raw SQL"  href="/userguide/fetch/raw.html"/>
+    		<item name="7.6 Using Raw SQL"  href="/userguide/fetch/raw.html"/>
+    		<item name="7.7 Modifying Database Directly"  href="/userguide/fetch/dml.html"/>
     	</item>
     	
     	<item name="8. Working with DataObjects"  href="/userguide/dataobjects/index.html">

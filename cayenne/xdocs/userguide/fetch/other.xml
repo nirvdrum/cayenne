@@ -1,8 +1,8 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
+<toc name="toc-user-guide" chapter="7. Using Queries"/> 
 <body>
-    <section name="7. Using SelectQueries">        
+    <section name="7. Using Queries">        
         <subsection name="7.4 SelectQuery Customization">
 	<p>SelectQueries allow to fine tune the behavior of the fetch using the following API:				
 	</p>

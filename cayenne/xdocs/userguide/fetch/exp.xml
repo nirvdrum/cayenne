@@ -1,12 +1,12 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide" chapter="7. Using SelectQueries"/>  
+<toc name="toc-user-guide" chapter="7. Using Queries"/>  
 <body>
-    <section name="7. Using SelectQueries">        
+    <section name="7. Using Queries">        
         <subsection name="7.2 Qualifier Expressions">
                
         <panel name="Note:">This chapter is dedicated to the use of expressions as qualifiers. 
-        A detailed discussion on expressions in general is provided in Chapter 9.
+        A detailed discussion on expressions in general is provided in Chapter 10.
         </panel>
         
         
