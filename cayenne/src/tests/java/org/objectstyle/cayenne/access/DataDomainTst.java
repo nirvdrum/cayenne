@@ -164,7 +164,7 @@ public class DataDomainTst extends CayenneTestCase {
 
     public void testCreateDataContextWithSharedCache() throws Exception {
         Map properties = new HashMap();
-        properties.put(DataDomain.SHARED_CACHE_ENABLED_PROPERTY, Boolean.toString(true));
+        properties.put(DataDomain.SHARED_CACHE_ENABLED_PROPERTY, Boolean.TRUE.toString());
 
         DataDomain domain = new DataDomain("d1", properties);
         assertTrue(domain.isSharedCacheEnabled());
@@ -187,7 +187,7 @@ public class DataDomainTst extends CayenneTestCase {
 
     public void testCreateDataContextWithLocalCache() throws Exception {
         Map properties = new HashMap();
-        properties.put(DataDomain.SHARED_CACHE_ENABLED_PROPERTY, Boolean.toString(false));
+        properties.put(DataDomain.SHARED_CACHE_ENABLED_PROPERTY, Boolean.FALSE.toString());
 
         DataDomain domain = new DataDomain("d1", properties);
         assertFalse(domain.isSharedCacheEnabled());
@@ -217,7 +217,7 @@ public class DataDomainTst extends CayenneTestCase {
         Map properties = new HashMap();
         properties.put(
             DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
-            Boolean.toString(true));
+            Boolean.TRUE.toString());
 
         DataDomain domain = new DataDomain("d1", properties);
         assertTrue(domain.isValidatingObjectsOnCommit());
@@ -230,7 +230,7 @@ public class DataDomainTst extends CayenneTestCase {
         Map properties = new HashMap();
         properties.put(
             DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
-            Boolean.toString(false));
+            Boolean.FALSE.toString());
 
         DataDomain domain = new DataDomain("d1", properties);
         assertFalse(domain.isValidatingObjectsOnCommit());
