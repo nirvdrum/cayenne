@@ -113,6 +113,10 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
 
+	public static void store(String location, DataSourceInfo info) {
+		
+	}// End store
+
     /** Loads driver information from the file at <code>location</code>.
       * Called internally from "getDataSource" */
     protected void load(String location) throws Exception {

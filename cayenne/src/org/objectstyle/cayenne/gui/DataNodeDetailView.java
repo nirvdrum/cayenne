@@ -66,6 +66,7 @@ import javax.swing.border.TitledBorder;
 
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.event.*;
@@ -74,20 +75,35 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Detail view of the DataNode and DataSourceInfo
  * @author Michael Misha Shengaout */
 public class DataNodeDetailView extends JPanel 
-implements DocumentListener, DataNodeDisplayListener
+implements DocumentListener, ActionListener, DataNodeDisplayListener
 {
 	Mediator mediator;
 	
 	JLabel		nameLabel;
 	JTextField	name;
 	String		oldName;
-
+	
 	JLabel		locationLabel;
 	JTextField	location;
-	JButton		fileBtn;
+	JButton		fileBtn;	
 	
 	JLabel		factoryLabel;
 	JComboBox	factory;
+	
+	JLabel			userNameLabel;
+	JTextField		userName;
+	JLabel			passwordLabel;
+	JPasswordField	password;
+	JLabel			driverLabel;
+	JTextField		driver;
+	JLabel			urlLabel;
+	JTextField		url;
+	JLabel			minConnectionsLabel;
+	// FIXME!!! Need to restrict only to numbers
+	JTextField		minConnections;
+	JLabel			maxConnectionsLabel;
+	// FIXME!!! Need to restrict only to numbers
+	JTextField		maxConnections;
 	
 	public DataNodeDetailView(Mediator temp_mediator) {
 		super();		
@@ -97,11 +113,26 @@ implements DocumentListener, DataNodeDisplayListener
 		init();
 		// Add listeners
 		name.getDocument().addDocumentListener(this);
+		userName.getDocument().addDocumentListener(this);
+		password.getDocument().addDocumentListener(this);
+		driver.getDocument().addDocumentListener(this);
+		url.getDocument().addDocumentListener(this);
+		minConnections.getDocument().addDocumentListener(this);
+		maxConnections.getDocument().addDocumentListener(this);
+		factory.addActionListener(this);
 	}
 
 	private void init(){
-		SpringLayout layout = new SpringLayout();
+		GridBagLayout layout = new GridBagLayout();
 		this.setLayout(layout);
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.weightx = 100;
+		constraints.weighty = 100;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
 
 		nameLabel 		= new JLabel("Data node name: ");
 		name 			= new JTextField(20);
@@ -124,12 +155,44 @@ implements DocumentListener, DataNodeDisplayListener
 		right_comp[2] = fileChooser;
 
 		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
-		Spring pad = Spring.constant(5);
-		Spring ySpring = pad;
-		add(temp);
-		SpringLayout.Constraints cons = layout.getConstraints(temp);
-		cons.setY(ySpring);
-		cons.setX(pad);
+		add(temp, constraints);
+		
+		userNameLabel 	= new JLabel("User name: ");
+		userName		= new JTextField(20);
+		passwordLabel	= new JLabel("Password: ");
+		password		= new JPasswordField(20);
+		driverLabel		= new JLabel("Driver class: ");
+		driver			= new JTextField(30);
+		urlLabel		= new JLabel("Database URL: ");
+		url				= new JTextField(30);
+		minConnectionsLabel = new JLabel("Min connections: ");
+		minConnections		= new JTextField(5);
+		maxConnectionsLabel	= new JLabel("Max connections: ");
+		maxConnections		= new JTextField(5);
+		
+		left_comp = new Component[6];
+		left_comp[0] = userNameLabel;
+		left_comp[1] = passwordLabel;
+		left_comp[2] = driverLabel;
+		left_comp[3] = urlLabel;
+		left_comp[4] = minConnectionsLabel;
+		left_comp[5] = maxConnectionsLabel;
+
+		right_comp = new Component[6];
+		right_comp[0] = userName;
+		right_comp[1] = password;
+		right_comp[2] = driver;
+		right_comp[3] = url;
+		right_comp[4] = minConnections;
+		right_comp[5] = maxConnections;
+
+		temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
+		TitledBorder border;
+		border = BorderFactory.createTitledBorder("Data Source Info");
+		constraints.gridheight = 2;
+		constraints.gridy = 1;
+		add(temp, constraints);
+		
 	}
 	
 	private JPanel formatFileChooser(JTextField fld, JButton btn) {
@@ -147,87 +210,119 @@ implements DocumentListener, DataNodeDisplayListener
 	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
 
 	private void textFieldChanged(DocumentEvent e) {
-		String new_name = name.getText();
-		// If name hasn't changed, do nothing
-		if (oldName != null && new_name.equals(oldName))
-			return;
-		DataDomain domain = mediator.getCurrentDataDomain();
-		domain.setName(new_name);
-		DomainEvent event;
-		event = new DomainEvent(this, domain, oldName);
-		mediator.fireDomainEvent(event);
-		oldName = new_name;
+		DataNode node = mediator.getCurrentDataNode();
+		GuiDataSource src = (GuiDataSource)node.getDataSource();
+		DataSourceInfo info = src.getDataSourceInfo();
+		if (e.getDocument() == name.getDocument()) {
+			String new_name = name.getText();
+			// If name hasn't changed, do nothing
+			if (oldName != null && new_name.equals(oldName))
+				return;
+			node.setName(new_name);
+			DataNodeEvent event;
+			event = new DataNodeEvent(this, node, oldName);
+			mediator.fireDataNodeEvent(event);
+			oldName = new_name;
+		}// End changedName
+		else if (e.getDocument() == location.getDocument()) {
+			node.setDataSourceLocation(location.getText());
+		} else if (e.getDocument() == userName.getDocument()) {
+			info.setUserName(userName.getText());
+		} else if (e.getDocument() == password.getDocument()) {
+			String pswd = new String(password.getPassword());
+			info.setPassword(pswd);
+		} else if (e.getDocument() == driver.getDocument()) {
+			info.setJdbcDriver(driver.getText());
+		} else if (e.getDocument() == url.getDocument()) {
+			info.setDataSourceUrl(url.getText());
+		} else if (e.getDocument() == minConnections.getDocument()) {
+			info.setMinConnections(Integer.parseInt(minConnections.getText()));
+		} else if (e.getDocument() == maxConnections.getDocument()) {
+			info.setMaxConnections(Integer.parseInt(maxConnections.getText()));
+		}
 
 	}
+
+	public void actionPerformed(ActionEvent e) {
+		Object src = e.getSource();
+		
+		if (src == factory) {
+			FactoryElement ele = (FactoryElement)factory.getModel().getSelectedItem();
+			if (null != ele) {
+				if (ele.getClassName().equals(DataSourceFactory.DIRECT_FACTORY))
+					fileBtn.setEnabled(true);
+				else fileBtn.setEnabled(false);
+			}
+		}// End factory
+	}// End actionPerformed()
 	
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
 		DataNode node = e.getDataNode();
+		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		oldName = node.getName();
 		name.setText(oldName);
+		location.setText(node.getDataSourceLocation());
+		populateFactory(node.getDataSourceFactory());
+		DataSourceInfo info = src.getDataSourceInfo();
+		populateDataSourceInfo(info);
 	}
-}
+	
+	private void populateFactory(String selected_class) {
+		DefaultComboBoxModel model;
+		FactoryElement[] arr 
+			= {new FactoryElement("JNDI", DataSourceFactory.JNDI_FACTORY),
+			   new FactoryElement("Direct connection", DataSourceFactory.DIRECT_FACTORY)};
+		model = new DefaultComboBoxModel(arr);
+		if (selected_class != null && selected_class.length() > 0) {
+			boolean found = false;
+			for (int i = 0; i < model.getSize(); i++)  {
+				FactoryElement ele = (FactoryElement)model.getElementAt(i);
+				if (ele.getClassName().equals(selected_class)) {
+					model.setSelectedItem(ele);
+					found = true;
+					break;
+				}
+			}// End for()
+			// In case if there is unknown factory
+			if (!found) {
+				FactoryElement ele = new FactoryElement("Unknown", selected_class);
+				model.addElement(ele);
+				model.setSelectedItem(ele);
+			}
+		}// End if there is factory to select
+		factory.setModel(model);
+	}
+	
+	
+	private void populateDataSourceInfo(DataSourceInfo info) {
+		userName.setText(info.getUserName());
+		password.setText(info.getPassword());
+		driver.setText(info.getJdbcDriver());
+		url.setText(info.getDataSourceUrl());
+		minConnections.setText(String.valueOf(info.getMinConnections()));
+		maxConnections.setText(String.valueOf(info.getMaxConnections()));
+	}//end populateDataSourceInfo()
+	
+	private class FactoryElement {
+		String label;
+		String className;
+		
+		public FactoryElement(String temp_label, String class_name) {
+			label = temp_label;
+			className = class_name;
+		}
+		
+		public String toString()
+		{ return label; }
+		
+		public String getClassName() 
+		{ return className; }
+		
+		public String getLabel()
+		{ return label; }
+	}// End class FactoryElement
+	
+	
+} // End class DataNodeDetailView
 
-class DataSourceInfoPane extends JPanel 
-implements DataNodeDisplayListener
-{
-	Mediator mediator;
-	
-	private JLabel userNameLabel;
-	private JTextField userName;
-	private JLabel	passwordLabel;
-	private JPasswordField password;
-	private JLabel	repeatPasswordLabel;
-	private JPasswordField repeatPassword;
-	private JLabel jdbcDriverLabel;
-	private JTextField jdbcDriver;
-	private JLabel dataSourceURLLabel;
-	private JTextField dataSourceURL;
-	
-	public DataSourceInfoPane(Mediator temp_mediator)
-	{
-		mediator = temp_mediator;
-		
-		init();
-	}
-	
-	private void init() {
-		setLayout(new BorderLayout());
-		
-		Component[] left_comp = new Component[5];
-		left_comp[0] = userNameLabel;
-		left_comp[1] = passwordLabel;
-		left_comp[2] = repeatPasswordLabel;
-		left_comp[3] = jdbcDriverLabel;
-		left_comp[4] = dataSourceURLLabel;
 
-		Component[] right_comp = new Component[5];
-		right_comp[0] = userName;
-		right_comp[1] = password;
-		right_comp[2] = repeatPassword;
-		left_comp[3] = jdbcDriver;
-		left_comp[4] = dataSourceURL;
-		
-		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
-		TitledBorder border = BorderFactory.createTitledBorder("Connection info");
-		border.setTitleJustification(TitledBorder.LEFT);
-		temp.setBorder(border);
-		
-		this.add(temp, BorderLayout.CENTER);
-	}
-	
-	public void currentDataNodeChanged(DataNodeDisplayEvent e)
-	{
-	}
-	
-	private void populatePanel(DataNode node) {
-		this.setEnabled(true);
-	}
-	
-	private void clearPanel() {
-		userName.setText("");
-		password.setText("");
-		repeatPassword.setText("");
-		dataSourceURL.setText("");
-		this.setEnabled(false);
-	}
-}

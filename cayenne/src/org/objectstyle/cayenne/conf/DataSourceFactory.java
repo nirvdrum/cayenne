@@ -63,6 +63,9 @@ import javax.sql.DataSource;
 /** Defines API to obtain a javax.sql.DataSource objects from configuration data. */
 public interface DataSourceFactory {
 
+	public static final String JNDI_FACTORY = "org.objectstyle.cayenne.conf.JNDIDataSourceFactory";
+	public static final String DIRECT_FACTORY = "org.objectstyle.cayenne.conf.DriverDataSourceFactory";
+
     /** Returns DataSource object corresponding to <code>location</code>.
       * Concrete implementations may treat location differently - as a
       * file path, JNDI location, etc. */
