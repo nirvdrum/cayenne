@@ -93,7 +93,7 @@ public abstract class Configuration {
      * to locate reosurces may need to be bootstrapped
      * explicitly.
      */
-    private static ClassLoader resourceLoader;
+    private static ClassLoader resourceLoader = Configuration.class.getClassLoader();
 
     /** Lookup map that stores DataDomains with names as keys. */
     protected HashMap dataDomains = new HashMap();

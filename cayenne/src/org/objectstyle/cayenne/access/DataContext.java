@@ -60,6 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
@@ -152,10 +153,7 @@ public class DataContext implements QueryEngine {
         DataObject obj = (DataObject) registeredMap.get(oid);
         if (obj == null) {
             try {
-                obj =
-                    (DataObject) Class
-                        .forName(lookupEntity(oid.getObjEntityName()).getClassName())
-                        .newInstance();
+                obj = newDataObject(lookupEntity(oid.getObjEntityName()).getClassName());
             }
             catch (Exception ex) {
                 throw new CayenneRuntimeException("Error creating object.", ex);
@@ -168,6 +166,10 @@ public class DataContext implements QueryEngine {
         }
 
         return obj;
+    }
+    
+    private final DataObject newDataObject(String className) throws Exception {
+        return (DataObject)Configuration.getResourceLoader().loadClass(className).newInstance();
     }
 
     /** Replaces all object attribute values with snapshot values. */
