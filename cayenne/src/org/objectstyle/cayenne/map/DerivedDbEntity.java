@@ -52,37 +52,129 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
 package org.objectstyle.cayenne.map;
 
-/** 
- * Superclass of all attribute classes. 
+import java.util.*;
+
+/**
+ * DbEntity subclass that is based on another DbEntity
+ * and allows to define complex database expressions 
+ * like GROUP BY and aggregate functions.
  * 
  * @author Andrei Adamchik
  */
-public abstract class Attribute {
-    protected String name;
-    protected Entity entity;
+public class DerivedDbEntity extends DbEntity {
+	protected DbEntity parentEntity;
+	protected ArrayList groupByAttributes = new ArrayList();
 
-    /** Returns attribute name. */
-    public String getName() {
-        return name;
-    }
+	/**
+	 * Constructor for DerivedDbEntity.
+	 */
+	public DerivedDbEntity() {
+		super();
+	}
 
-    /** Sets attribute name. */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/**
+	 * Constructor for DerivedDbEntity.
+	 * @param name
+	 */
+	public DerivedDbEntity(String name) {
+		super(name);
+	}
 
-    /** Returns the entity that holds this attribute. */
-    public Entity getEntity() {
-        return entity;
-    }
+	/**
+	 * Constructor for DerivedDbEntity. Creates
+	 * a derived entity with the attribute set of a parent entity.
+	 */
+	public DerivedDbEntity(String name, DbEntity parentEntity) {
+		super(name);
 
+		this.setParentEntity(parentEntity);
+		this.resetToParentView();
+	}
 
-    /** Sets the entity that holds this attribute. */
-    public void setEntity(Entity entity) {
-        this.entity = entity;
-    }
+	/**
+	 * Removes all attributes and relationships, 
+	 * and replaces them with the data of 
+	 * the parent entity.
+	 */
+	public void resetToParentView() {
+		clearAttributes();
+		clearRelationships();
+
+		Iterator it = getParentEntity().getAttributeList().iterator();
+		while (it.hasNext()) {
+			DbAttribute at = (DbAttribute) it.next();
+			addAttribute(new DbAttribute(at));
+		}
+	}
+
+	/**
+	 * Returns the parentEntity.
+	 * 
+	 * @return DbEntity
+	 */
+	public DbEntity getParentEntity() {
+		return parentEntity;
+	}
+
+	/**
+	 * Sets the parentEntity.
+	 * 
+	 * @param parentEntity The parentEntity to set
+	 */
+	public void setParentEntity(DbEntity parentEntity) {
+		this.parentEntity = parentEntity;
+	}
+
+	/** 
+	 * Returns attributes used in GROUP BY as an unmodifiable list.
+	 */
+	public List getGroupByAttributes() {
+		return Collections.unmodifiableList(groupByAttributes);
+	}
+
+	/** Adds an attribute to the GROUP BY clause. */
+	public void addGroupByAttribute(DbAttribute dbAttr) {
+		groupByAttributes.add(dbAttr);
+	}
+
+	/** 
+	 * Removes an  attribute from the list of attributes used 
+	 * in GROUP BY clause. 
+	 */
+	public void removeGroupByAttribute(String attrName) {
+		groupByAttributes.remove(getAttribute(attrName));
+	}
+
+	public void clearGroupByAttributes() {
+		groupByAttributes.clear();
+	}
+	
+	/**
+	 * @see org.objectstyle.cayenne.map.DbEntity#getFullyQualifiedName()
+	 */
+	public String getFullyQualifiedName() {
+		return (schema != null)
+			? schema + '.' + getParentEntity().getName()
+			: getParentEntity().getName();
+	}
+
+	/**
+	 * @see org.objectstyle.cayenne.map.Entity#clearAttributes()
+	 */
+	public void clearAttributes() {
+		super.clearAttributes();
+		clearGroupByAttributes();
+	}
+
+	/**
+	 * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
+	 */
+	public void removeAttribute(String attrName) {
+		super.removeAttribute(attrName);
+		removeGroupByAttribute(attrName);
+	}
+
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 import junit.framework.TestSuite;
 
@@ -75,6 +75,7 @@ public class AllTests {
         suite.addTestSuite(ObjRelationshipTst.class);
         suite.addTestSuite(DbRelationshipTst.class);
         suite.addTestSuite(DbEntityTst.class);
+        suite.addTestSuite(DerivedDbEntityTst.class);
 		return suite;
 	}
 }

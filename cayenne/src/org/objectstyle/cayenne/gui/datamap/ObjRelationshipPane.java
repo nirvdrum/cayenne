@@ -228,7 +228,7 @@ public class ObjRelationshipPane
 	/** Set obj relationship to db relationships resolution.
 	  * Clear old db relationships and put new ones in their place.*/
 	private void copyDbRelationship(ObjRelationship rel, java.util.List list) {
-		rel.removeAllDbRelationships();
+		rel.clearDbRelationships();
 		if (list == null) {
 			return;
 		}

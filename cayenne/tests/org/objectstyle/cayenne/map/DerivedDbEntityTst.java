@@ -52,37 +52,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
 package org.objectstyle.cayenne.map;
 
-/** 
- * Superclass of all attribute classes. 
- * 
+import junit.framework.TestCase;
+
+/**
  * @author Andrei Adamchik
  */
-public abstract class Attribute {
-    protected String name;
-    protected Entity entity;
+public class DerivedDbEntityTst extends TestCase {
+    protected DerivedDbEntity ent;
 
-    /** Returns attribute name. */
-    public String getName() {
-        return name;
-    }
 
-    /** Sets attribute name. */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /** Returns the entity that holds this attribute. */
-    public Entity getEntity() {
-        return entity;
+    public DerivedDbEntityTst(String name) {
+        super(name);
     }
 
 
-    /** Sets the entity that holds this attribute. */
-    public void setEntity(Entity entity) {
-        this.entity = entity;
+    public void setUp() throws Exception {
+        ent = new DerivedDbEntity();
+    }
+
+    public void testParentEntity() throws Exception {
+    	assertNull(ent.getParentEntity());
+    	DbEntity parent = new DbEntity();
+    	ent.setParentEntity(parent);
+    	
+    	assertSame(parent, ent.getParentEntity());
+    }
+    
+    public void testGroupByAttributes() throws Exception {
+    	DbAttribute at = new DbAttribute();
+    	at.setName("abc");
+        ent.addAttribute(at);
+    	assertEquals(0, ent.getGroupByAttributes().size());
+    	
+    	ent.addGroupByAttribute(at);
+    	assertEquals(1, ent.getGroupByAttributes().size());
     }
 }
+

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 import java.util.*;
 
@@ -102,10 +102,17 @@ public abstract class Entity {
     public void removeAttribute(String attrName) {
         attributes.remove(attrName);
     }
+    
+    public void clearAttributes() {
+    	attributes.clear();
+    }
 
 
-    /** Returns relationship with name <code>relName</code>.
-    * Will return null if no relationship with this name exists in the entity. */
+    /** 
+     * Returns relationship with name <code>relName</code>.
+     * Will return null if no relationship with this name 
+     * exists in the entity. 
+     */
     public Relationship getRelationship(String relName) {
         return (Relationship)relationships.get(relName);
     }
@@ -125,6 +132,9 @@ public abstract class Entity {
         relationships.remove(relName);
     }
 
+    public void clearRelationships() {
+    	relationships.clear();
+    }
 
     public Map getRelationshipMap() {
         return Collections.unmodifiableMap(relationships);
@@ -143,12 +153,12 @@ public abstract class Entity {
     }
 
 
-    /** Returns the properties of the corresponding data object class */
+    /** Returns entity attributes as an unmodifiable map. */
     public Map getAttributeMap() {
         return Collections.unmodifiableMap(attributes);
     }
 
-
+    /** Returns entity attributes as a list. */
     public List getAttributeList() {
         ArrayList list = new ArrayList();
         Iterator it = attributes.keySet().iterator();

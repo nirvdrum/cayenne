@@ -154,7 +154,7 @@ public class ObjRelationship extends Relationship {
         dbRelationships.remove(dbRel);
     }
 
-    public void removeAllDbRelationships() {
+    public void clearDbRelationships() {
     	dbRelationships.clear();
     }
 

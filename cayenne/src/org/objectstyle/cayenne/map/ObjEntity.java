@@ -163,7 +163,7 @@ import org.objectstyle.cayenne.ObjectId;
         Iterator rel_it = getRelationshipList().iterator();
         while(rel_it.hasNext()) {
         	ObjRelationship obj_rel = (ObjRelationship)rel_it.next();
-        	obj_rel.removeAllDbRelationships();
+        	obj_rel.clearDbRelationships();
         }
         dbEntity = null;
      }

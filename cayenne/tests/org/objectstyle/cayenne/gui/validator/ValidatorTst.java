@@ -194,7 +194,7 @@ public class ValidatorTst extends TestCase {
 
 		// no DbRelationship mapping, must give a warning
 		ObjRelationship or3 = buildValidObjRelationship("r2");
-		or3.removeAllDbRelationships();
+		or3.clearDbRelationships();
 		validator.reset();
 		validator.validateObjRels(d1, m1, (ObjEntity) or3.getSourceEntity());
 		assertValidator(ErrorMsg.WARNING);

@@ -172,7 +172,7 @@ class ObjRelationshipTableModel extends CayenneTableModel {
 				return;
 			}
 			// Remove db relationship mappings.
-			rel.removeAllDbRelationships();
+			rel.clearDbRelationships();
 			// Set new target, if applicable
 			ObjEntity target = null;
 			if ("".equals(target_name))

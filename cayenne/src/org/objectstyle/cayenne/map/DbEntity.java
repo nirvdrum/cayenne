@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,19 +53,21 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
 import java.util.*;
 
-/** Metadata for the relational database table. */
+/** 
+ * Defines a structure of a relational database table. 
+ */
 public class DbEntity extends Entity {
-	// The catalog of the database table.
-	private String catalog;
+	/** Catalog of the database table. */
+	protected String catalog;
 
-	// Database table schema
-	private String schema;
+	/** Database table schema. */
+	protected String schema;
 
-	public DbEntity() {
-	}
+	public DbEntity() {}
 
 	public DbEntity(String name) {
 		setName(name);

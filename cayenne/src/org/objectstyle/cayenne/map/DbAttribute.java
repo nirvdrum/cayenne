@@ -1,7 +1,3 @@
-package org.objectstyle.cayenne.map;
-
-import org.objectstyle.cayenne.dba.TypesMapping;
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -59,36 +55,15 @@ import org.objectstyle.cayenne.dba.TypesMapping;
  */ 
 
 
+package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.dba.TypesMapping;
 
-/** Metadata for the column. Also used to map database table columns
- *  to data object properties. Here is the standard SQL to Java mapping
- *  (<a href="http://java.sun.com/j2se/1.3/docs/guide/jdbc/">
- *   http://java.sun.com/j2se/1.3/docs/guide/jdbc/</a>):
- *
- * <pre>
-SQL type            Java Type
-------------------------------
-CHAR                String
-VARCHAR             String
-LONGVARCHAR         String
-NUMERIC             java.math.BigDecimal
-DECIMAL             java.math.BigDecimal
-BIT                 boolean
-TINYINT             byte
-SMALLINT            short
-INTEGER             int
-BIGINT              long
-REAL                float
-FLOAT               double
-DOUBLE              double
-BINARY              byte[]
-VARBINARY           byte[]
-LONGVARBINARY       byte[]
-DATE                java.sql.Date
-TIME                java.sql.Time
-TIMESTAMP           java.sql.Timestamp
-</pre>
+/** 
+ * Contains information about a database column.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class DbAttribute extends Attribute {
     /** 
@@ -115,10 +90,23 @@ public class DbAttribute extends Attribute {
         setType(type);
         setEntity(entity);
     }
+    
+    /**
+     * Creates new DbAttribute using another attribute as a prototype.
+     */
+    public DbAttribute(DbAttribute proto) {
+    	this.name = proto.name;
+    	this.type = proto.type;
+    	this.mandatory = proto.mandatory;
+    	this.maxLength = proto.maxLength;
+    	this.precision = proto.precision;
+    	this.primaryKey = proto.primaryKey;
+    }
 
 
 
-    /** Gets the SQL type of the column.
+    /** 
+     * Returns the SQL type of the column.
     *  @see java.sql.Types*/
     public int getType() {
         return type;

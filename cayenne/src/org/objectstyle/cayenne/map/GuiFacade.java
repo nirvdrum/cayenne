@@ -165,7 +165,7 @@ public class GuiFacade {
         Iterator rel_it = entity.getRelationshipList().iterator();
         while(rel_it.hasNext()) {
         	ObjRelationship obj_rel = (ObjRelationship)rel_it.next();
-        	obj_rel.removeAllDbRelationships();
+        	obj_rel.clearDbRelationships();
         }
         entity.setDbEntity(null);
      }

@@ -288,7 +288,7 @@ public class DataMap {
                     while (db_rel_iter.hasNext()) {
                         DbRelationship db_rel = (DbRelationship) db_rel_iter.next();
                         if (db_rel.getTargetEntity() == db_entity) {
-                            rel.removeAllDbRelationships();
+                            rel.clearDbRelationships();
                             break;
                         }
                     } 
