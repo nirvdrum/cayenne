@@ -1,5 +1,5 @@
 Cayenne Upgrade Information 1.2 Milesone (M3)
-Date: 
+Date: March 20, 2005
 ============================================
 
 WARNING !!!! Most API deprecated in 1.1 is removed.
