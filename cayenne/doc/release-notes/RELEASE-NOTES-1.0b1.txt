@@ -33,3 +33,8 @@ directory due to resource loation issues.
 
 10. Now individual Query execution log level is set in the query itself, not
 in DataContext. Corresponding DataContext methods are deprecated.
+
+11. Cleaned up Modeler dialogs
+
+12. Added "Import EOModel" function.
+

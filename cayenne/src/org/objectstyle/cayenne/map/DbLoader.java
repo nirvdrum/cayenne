@@ -434,6 +434,12 @@ public class DbLoader {
         while (it.hasNext()) {
             ObjEntity objEnt = (ObjEntity) it.next();
             DbEntity dbEnt = objEnt.getDbEntity();
+            
+            // bug #578419: no assumptions should be made about current state of the model,
+            // it might as well contain ObjEntities without DbEntities
+            if(dbEnt == null) {
+            	continue;
+            }
 
             Iterator relIt = dbEnt.getRelationshipList().iterator();
             while (relIt.hasNext()) {
