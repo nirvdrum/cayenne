@@ -22,7 +22,7 @@
         	when the main part of the Cayenne functionality is not used.</strong> 
         	For example it can be used as a DataSource implementation
             of Tomcat web container. <i>(For a sample configuration follow 
-            <a href="../appguide/deploy.html#web">this link</a>, then scroll down to the sample
+            <a href="../deploy/index.html#web">this link</a>, then scroll down to the sample
             server.xml configuration file.)</i>
         	</p>
             
