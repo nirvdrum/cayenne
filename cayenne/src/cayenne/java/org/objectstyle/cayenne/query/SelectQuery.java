@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
@@ -74,266 +75,317 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
-	private static Logger logObj = Logger.getLogger(SelectQuery.class);
+    private static Logger logObj = Logger.getLogger(SelectQuery.class);
 
-	protected List custDbAttributes = new ArrayList();
-	protected List orderings = new ArrayList();
-	protected List prefetches = new ArrayList();
-	protected boolean distinct;
-	protected boolean fetchingDataRows;
-	protected int fetchLimit;
-	protected Expression parentQualifier;
-	protected String parentObjEntityName;
-	protected int pageSize;
+    protected List custDbAttributes = new ArrayList();
+    protected List orderings = new ArrayList();
+    protected List prefetches = new ArrayList();
+    protected boolean distinct;
+    protected boolean fetchingDataRows;
+    protected int fetchLimit;
+    protected Expression parentQualifier;
+    protected String parentObjEntityName;
+    protected int pageSize;
 
-	/** Creates empty SelectQuery. */
-	public SelectQuery() {
-	}
+    /** Creates empty SelectQuery. */
+    public SelectQuery() {
+    }
 
     private void init(Object root, Expression qualifier) {
-    	setRoot(root);
-    	setQualifier(qualifier);
+        setRoot(root);
+        setQualifier(qualifier);
     }
-    
+
     /**
      * Creates a SelectQuery with null qualifier, for the specifed ObjEntity
      * @param root the ObjEntity this SelectQuery is for.
      */
     public SelectQuery(ObjEntity root) {
-    	this(root, null);
+        this(root, null);
     }
-    
-     /**
-     * Creates a SelectQuery  for the specifed ObjEntity with the given qualifier
-     * @param root the ObjEntity this SelectQuery is for.
-     * @param qualifier an Expression indicating which objects should be fetched
-     */
-   public SelectQuery(ObjEntity root, Expression qualifier) {
-		init(root, qualifier);
+
+    /**
+    * Creates a SelectQuery  for the specifed ObjEntity with the given qualifier
+    * @param root the ObjEntity this SelectQuery is for.
+    * @param qualifier an Expression indicating which objects should be fetched
+    */
+    public SelectQuery(ObjEntity root, Expression qualifier) {
+        init(root, qualifier);
     }
-    
-     /**
-     * Creates a SelectQuery with null qualifier, for the entity which uses the given class
+
+    /**
+    * Creates a SelectQuery with null qualifier, for the entity which uses the given class
+    * @param root the Class of objects this SelectQuery is for.
+    */
+    public SelectQuery(Class rootClass) {
+        this(rootClass, null);
+    }
+
+    /**
+     * Creates a SelectQuery for the entity which uses the given class,  with the given qualifier
      * @param root the Class of objects this SelectQuery is for.
-     */
-   public SelectQuery(Class rootClass) {
-    	this(rootClass, null);
-    }
-    
-	/**
-	 * Creates a SelectQuery for the entity which uses the given class,  with the given qualifier
-	 * @param root the Class of objects this SelectQuery is for.
      * @param qualifier an Expression indicating which objects should be fetched
      */
-   public SelectQuery(Class rootClass, Expression qualifier) {
-    	init(rootClass, qualifier);
-    }  
+    public SelectQuery(Class rootClass, Expression qualifier) {
+        init(rootClass, qualifier);
+    }
 
-	/** Creates SelectQuery with <code>objEntityName</code> parameter. */
-	public SelectQuery(String objEntityName) {
-		this(objEntityName, null);
-	}
+    /** Creates SelectQuery with <code>objEntityName</code> parameter. */
+    public SelectQuery(String objEntityName) {
+        this(objEntityName, null);
+    }
 
-	/** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
-	public SelectQuery(String objEntityName, Expression qualifier) {
-		init(objEntityName, qualifier);
-	}
+    /** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+    public SelectQuery(String objEntityName, Expression qualifier) {
+        init(objEntityName, qualifier);
+    }
 
-	/** 
-	 * Returns <code>Query.SELECT_QUERY</code> type.
-	 */
-	public int getQueryType() {
-		return SELECT_QUERY;
-	}
+    /**
+     * A shortcut for <code>queryWithParams(params, true)</code>.
+     */
+    public SelectQuery queryWithParams(Map params) {
+        return queryWithParams(params, true);
+    }
 
-	/** Adds ordering specification to this query orderings. */
-	public void addOrdering(Ordering ordering) {
-		orderings.add(ordering);
-	}
+    /**
+     * Returns a query built using this query as a prototype, using a set of
+     * parameters to build the qualifier. 
+     * 
+     * @see org.objectstyle.cayenne.exp.Expression#expWithParams(java.util.Map,
+     * boolean) Explanation on parameter substitution.
+     */
+    public SelectQuery queryWithParams(Map params, boolean pruneMissing) {
+        // create a query replica
+        SelectQuery query = new SelectQuery();
+        query.setDistinct(distinct);
+        query.setFetchingDataRows(fetchingDataRows);
+        query.setFetchLimit(fetchLimit);
+        query.setLoggingLevel(logLevel);
+        query.setPageSize(pageSize);
+        query.setParentObjEntityName(parentObjEntityName);
+        query.setParentQualifier(parentQualifier);
+        query.setRoot(root);
 
-	/** Adds ordering specification to this query orderings. */
-	public void addOrdering(String sortPathSpec, boolean isAscending) {
-		addOrdering(new Ordering(sortPathSpec, isAscending));
-	}
-	
-	/** Adds ordering specification to this query orderings. */
-	public void addOrdering(String sortPathSpec, boolean isAscending, boolean ignoreCase) {
-		addOrdering(new Ordering(sortPathSpec, isAscending, ignoreCase));
-	}
+        query.addPrefetches(prefetches);
+        query.addOrderings(orderings);
+        query.addCustDbAttributes(custDbAttributes);
 
-	/** Returns a list of orderings used by this query. */
-	public List getOrderingList() {
-		return orderings;
-	}
+        // substitute qualifier parameters
+        if (qualifier != null) {
+            query.setQualifier(qualifier.expWithParams(params, pruneMissing));
+        }
 
-	/** Returns true if this query returns distinct rows. */
-	public boolean isDistinct() {
-		return distinct;
-	}
+        return query;
+    }
 
-	/** Sets <code>distinct</code> property. */
-	public void setDistinct(boolean distinct) {
-		this.distinct = distinct;
-	}
+    /** 
+     * Returns <code>Query.SELECT_QUERY</code> type.
+     */
+    public int getQueryType() {
+        return SELECT_QUERY;
+    }
 
-	/**
-	 * Returns a list of attributes that will be included
-	 * in the results of this query.
-	 */
-	public List getCustDbAttributes() {
-		return custDbAttributes;
-	}
+    /** Adds ordering specification to this query orderings. */
+    public void addOrdering(Ordering ordering) {
+        orderings.add(ordering);
+    }
 
-	/**
-	 * Adds a path to the DbAttribute that should be included 
-	 * in the results of this query. Valid paths would look like
-	 * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
-	 * etc.
-	 */
-	public void addCustDbAttribute(String attributePath) {
-		custDbAttributes.add(attributePath);
-	}
+    /**
+     * Adds a list of orderings.
+     */
+    public void addOrderings(List orderings) {
+        this.orderings.addAll(orderings);
+    }
 
-	/**
-	 * Returns <code>true</code> if there is at least one custom query 
-	 * attribute specified, otherwise returns <code>false</code>
-	 * for the case when the query results will contain only the 
-	 * root entity attributes.
-	 * 
-	 * <p>Note that queries that are fetching custom attributes
-	 * always return data rows instead of DataObjects.
-	 * </p>
-	 */
-	public boolean isFetchingCustAttributes() {
-		return custDbAttributes.size() > 0;
-	}
+    /** Adds ordering specification to this query orderings. */
+    public void addOrdering(String sortPathSpec, boolean isAscending) {
+        addOrdering(new Ordering(sortPathSpec, isAscending));
+    }
 
-	/**
-	 * Returns a list of relationships that must be prefetched 
-	 * as a part of this query.
-	 */
-	public List getPrefetchList() {
-		return prefetches;
-	}
+    /** Adds ordering specification to this query orderings. */
+    public void addOrdering(
+        String sortPathSpec,
+        boolean isAscending,
+        boolean ignoreCase) {
+        addOrdering(new Ordering(sortPathSpec, isAscending, ignoreCase));
+    }
 
-	/** 
-	 * Adds a relationship path. ObjRelationship names are separated by ".".
-	 * to the list of relationship paths that should be prefetched when the
-	 * query is executed.
-	 */
-	public void addPrefetch(String relPath) {
-		prefetches.add(relPath);
-	}
-	
-	public void addPrefetches(List relPaths) {
-		prefetches.addAll(relPaths);
-	}
+    /** Returns a list of orderings used by this query. */
+    public List getOrderingList() {
+        return orderings;
+    }
 
-	/**
-	 * Returns <code>true</code> if this query 
-	 * should produce a list of data rows as opposed
-	 * to DataObjects, <code>false</code> for DataObjects. 
-	 * This is a hint to QueryEngine executing this query.
-	 */
-	public boolean isFetchingDataRows() {
-		return isFetchingCustAttributes() || fetchingDataRows;
-	}
+    /** Returns true if this query returns distinct rows. */
+    public boolean isDistinct() {
+        return distinct;
+    }
 
-	/**	
-	 * Sets query result type. If <code>flag</code> parameter is
-	 * <code>true</code>, then results will be in the form of data rows.
-	 * 
-	 * <p><i>Note that if <code>isFetchingCustAttributes()</code>
-	 * returns <code>true</code>, this setting has no effect, and data 
-	 * rows are always fetched.</i></p>
-	 */
-	public void setFetchingDataRows(boolean flag) {
-		this.fetchingDataRows = flag;
-	}
+    /** Sets <code>distinct</code> property. */
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
+    }
 
-	/**
-	 * Returns the fetchLimit.
-	 * @return int
-	 */
-	public int getFetchLimit() {
-		return fetchLimit;
-	}
+    /**
+     * Returns a list of attributes that will be included
+     * in the results of this query.
+     */
+    public List getCustDbAttributes() {
+        return custDbAttributes;
+    }
 
-	/**
-	 * Sets the fetchLimit.
-	 * 
-	 * @param fetchLimit The fetchLimit to set
-	 */
-	public void setFetchLimit(int fetchLimit) {
-		this.fetchLimit = fetchLimit;
-	}
+    /**
+     * Adds a path to the DbAttribute that should be included 
+     * in the results of this query. Valid paths would look like
+     * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
+     * etc.
+     */
+    public void addCustDbAttribute(String attributePath) {
+        custDbAttributes.add(attributePath);
+    }
+    
+    public void addCustDbAttributes(List attrPaths) {
+        custDbAttributes.addAll(attrPaths);
+    }
 
-	/** Setter for query's parent entity qualifier. */
-	public void setParentQualifier(Expression parentQualifier) {
-		this.parentQualifier = parentQualifier;
-	}
+    /**
+     * Returns <code>true</code> if there is at least one custom query 
+     * attribute specified, otherwise returns <code>false</code>
+     * for the case when the query results will contain only the 
+     * root entity attributes.
+     * 
+     * <p>Note that queries that are fetching custom attributes
+     * always return data rows instead of DataObjects.
+     * </p>
+     */
+    public boolean isFetchingCustAttributes() {
+        return custDbAttributes.size() > 0;
+    }
 
-	/** Getter for query parent entity qualifier. */
-	public Expression getParentQualifier() {
-		return parentQualifier;
-	}
+    /**
+     * Returns a list of relationships that must be prefetched 
+     * as a part of this query.
+     */
+    public List getPrefetchList() {
+        return prefetches;
+    }
 
-	/**
-	 * Adds specified parent entity qualifier to the 
-	 * existing parent entity qualifier joining it using "AND".
-	 */
-	public void andParentQualifier(Expression e) {
-		parentQualifier =
-			(parentQualifier != null) ? parentQualifier.andExp(e) : e;
-	}
+    /** 
+     * Adds a relationship path. ObjRelationship names are separated by ".".
+     * to the list of relationship paths that should be prefetched when the
+     * query is executed.
+     */
+    public void addPrefetch(String relPath) {
+        prefetches.add(relPath);
+    }
 
-	/**
-	* Adds specified parent entity qualifier to the existing 
-	* qualifier joining it using "OR".
-	*/
-	public void orParentQualifier(Expression e) {
-		parentQualifier =
-			(parentQualifier != null) ? parentQualifier.orExp(e) : e;
-	}
+    public void addPrefetches(List relPaths) {
+        prefetches.addAll(relPaths);
+    }
 
-	/**
-	 * Returns the name of parent ObjEntity.
-	 * 
-	 * @return String
-	 */
-	public String getParentObjEntityName() {
-		return parentObjEntityName;
-	}
+    /**
+     * Returns <code>true</code> if this query 
+     * should produce a list of data rows as opposed
+     * to DataObjects, <code>false</code> for DataObjects. 
+     * This is a hint to QueryEngine executing this query.
+     */
+    public boolean isFetchingDataRows() {
+        return isFetchingCustAttributes() || fetchingDataRows;
+    }
 
-	/**
-	 * Sets the name of parent ObjEntity. If query's root 
-	 * ObjEntity maps to a derived entity in the DataMap,
-	 * this query qualifier will resolve to a HAVING clause
-	 * of an SQL statement. To allow fine tuning the query 
-	 * before applying GROUP BY and HAVING, callers can setup
-	 * the name of parent ObjEntity and parent qualifier that
-	 * will be used to create WHERE clause preceeding GROUP BY.
-	 * 
-	 * <p>For instance this is helpful to qualify the fetch 
-	 * on a related entity attributes, since HAVING does not 
-	 * allow joins.</p>
-	 * 
-	 * @param parentObjEntityName The parentObjEntityName to set
-	 */
-	public void setParentObjEntityName(String parentObjEntityName) {
-		this.parentObjEntityName = parentObjEntityName;
-	}
-	
-	
-	/**
-	 * Returns <code>true</code> if this query has an extra
-	 * qualifier that uses a parent entity of the query
-	 * root entity for additional result filtering.
-	 */
-	public boolean isQualifiedOnParent() {
-		return getParentObjEntityName() != null && parentQualifier != null;
-	}
-	
+    /**	
+     * Sets query result type. If <code>flag</code> parameter is
+     * <code>true</code>, then results will be in the form of data rows.
+     * 
+     * <p><i>Note that if <code>isFetchingCustAttributes()</code>
+     * returns <code>true</code>, this setting has no effect, and data 
+     * rows are always fetched.</i></p>
+     */
+    public void setFetchingDataRows(boolean flag) {
+        this.fetchingDataRows = flag;
+    }
+
+    /**
+     * Returns the fetchLimit.
+     * @return int
+     */
+    public int getFetchLimit() {
+        return fetchLimit;
+    }
+
+    /**
+     * Sets the fetchLimit.
+     * 
+     * @param fetchLimit The fetchLimit to set
+     */
+    public void setFetchLimit(int fetchLimit) {
+        this.fetchLimit = fetchLimit;
+    }
+
+    /** Setter for query's parent entity qualifier. */
+    public void setParentQualifier(Expression parentQualifier) {
+        this.parentQualifier = parentQualifier;
+    }
+
+    /** Getter for query parent entity qualifier. */
+    public Expression getParentQualifier() {
+        return parentQualifier;
+    }
+
+    /**
+     * Adds specified parent entity qualifier to the 
+     * existing parent entity qualifier joining it using "AND".
+     */
+    public void andParentQualifier(Expression e) {
+        parentQualifier =
+            (parentQualifier != null) ? parentQualifier.andExp(e) : e;
+    }
+
+    /**
+    * Adds specified parent entity qualifier to the existing 
+    * qualifier joining it using "OR".
+    */
+    public void orParentQualifier(Expression e) {
+        parentQualifier =
+            (parentQualifier != null) ? parentQualifier.orExp(e) : e;
+    }
+
+    /**
+     * Returns the name of parent ObjEntity.
+     * 
+     * @return String
+     */
+    public String getParentObjEntityName() {
+        return parentObjEntityName;
+    }
+
+    /**
+     * Sets the name of parent ObjEntity. If query's root 
+     * ObjEntity maps to a derived entity in the DataMap,
+     * this query qualifier will resolve to a HAVING clause
+     * of an SQL statement. To allow fine tuning the query 
+     * before applying GROUP BY and HAVING, callers can setup
+     * the name of parent ObjEntity and parent qualifier that
+     * will be used to create WHERE clause preceeding GROUP BY.
+     * 
+     * <p>For instance this is helpful to qualify the fetch 
+     * on a related entity attributes, since HAVING does not 
+     * allow joins.</p>
+     * 
+     * @param parentObjEntityName The parentObjEntityName to set
+     */
+    public void setParentObjEntityName(String parentObjEntityName) {
+        this.parentObjEntityName = parentObjEntityName;
+    }
+
+    /**
+     * Returns <code>true</code> if this query has an extra
+     * qualifier that uses a parent entity of the query
+     * root entity for additional result filtering.
+     */
+    public boolean isQualifiedOnParent() {
+        return getParentObjEntityName() != null && parentQualifier != null;
+    }
+
     /**
      * Returns <code>pageSize</code> property.
      * Page size is a hint telling Cayenne QueryEngine 
@@ -345,7 +397,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     public int getPageSize() {
         return pageSize;
     }
-
 
     /**
      * Sets  <code>pageSize</code> property.

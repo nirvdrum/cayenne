@@ -56,8 +56,15 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.ExpressionParam;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SelectQueryBasicsTst extends CayenneTestCase {
@@ -158,7 +165,8 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.andParentQualifier(e1);
         assertSame(e1, q.getParentQualifier());
 
-        Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+        Expression e2 =
+            ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
         q.andParentQualifier(e2);
         assertEquals(Expression.AND, q.getParentQualifier().getType());
     }
@@ -170,7 +178,8 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.orParentQualifier(e1);
         assertSame(e1, q.getParentQualifier());
 
-        Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+        Expression e2 =
+            ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
         q.orParentQualifier(e2);
         assertEquals(Expression.OR, q.getParentQualifier().getType());
     }
@@ -181,5 +190,38 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.setParentObjEntityName("SomeEntity");
         assertSame("SomeEntity", q.getParentObjEntityName());
     }
-   
+
+    public void testQueryWithParams1() throws Exception {
+    	q.setRoot(Artist.class);
+        q.setDistinct(true);
+
+        SelectQuery q1 = q.queryWithParams(new HashMap(), true);
+        assertSame(q.getRoot(), q1.getRoot());
+        assertEquals(q.isDistinct(), q1.isDistinct());
+        assertNull(q1.getQualifier());
+    }
+
+    public void testQueryWithParams2() throws Exception {
+        q.setRoot(Artist.class);
+        
+        List list = new ArrayList();
+        list.add(
+            ExpressionFactory.matchExp("k1", new ExpressionParam("test1")));
+        list.add(
+            ExpressionFactory.matchExp("k2", new ExpressionParam("test2")));
+        list.add(
+            ExpressionFactory.matchExp("k3", new ExpressionParam("test3")));
+        list.add(
+            ExpressionFactory.matchExp("k4", new ExpressionParam("test4")));
+        q.setQualifier(ExpressionFactory.joinExp(Expression.OR, list));
+        
+
+        Map params = new HashMap();
+        params.put("test2", "abc");
+        params.put("test3", "xyz");
+        SelectQuery q1 = q.queryWithParams(params, true);
+        assertSame(q.getRoot(), q1.getRoot());
+        assertNotNull(q1.getQualifier());
+        assertTrue(q1.getQualifier() != q.getQualifier());
+    }
 }

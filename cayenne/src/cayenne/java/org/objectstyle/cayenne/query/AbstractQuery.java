@@ -66,74 +66,76 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public abstract class AbstractQuery implements Query {
-	/** The root object this query is bsaed on - maybe an entity name , class, ObjEntity or 
-	 * DbEntity, depending on the specific query and how it was constructed */
-	protected Object root;
-	
-	protected Level logLevel = DEFAULT_LOG_LEVEL;
+    /** The root object this query is bsaed on - maybe an entity name , class, ObjEntity or 
+     * DbEntity, depending on the specific query and how it was constructed */
+    protected Object root;
 
-	/**
-	 * @deprecated use setRoot instead
-	 */
-	public void setObjEntityName(String objEntityName) {
-		this.root = objEntityName;
-	}
+    protected Level logLevel = DEFAULT_LOG_LEVEL;
 
-	/** Returns the name of root ObjEntity associated with the query.   Will return null if the query root
-	 * is a DbEntity or a Class
-	 * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
-	 * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
-	public String getObjEntityName() {
-		//Handle the various cases... DbEntity is not able to be handled, and Class is dubious (we have no resolver here).
-		//However, code which uses this method should still be able to function ok because it'll be using entity names anyway
-		if (root instanceof String) {
-			return (String) root;
-		} else if (root instanceof ObjEntity) {
-			return ((ObjEntity)root).getName();
-		} 
-		return null;
-	}
+    /**
+     * @deprecated use setRoot instead
+     */
+    public void setObjEntityName(String objEntityName) {
+        this.root = objEntityName;
+    }
 
-	/**
-	 * Returns the <code>logLevel</code> property of this query.
-	 * Log level is a hint to QueryEngine that performs this query
-	 * to log execution with a certain priority.
-	 */
-	public Level getLoggingLevel() {
-		return logLevel;
-	}
+    /** Returns the name of root ObjEntity associated with the query.   Will return null if the query root
+     * is a DbEntity or a Class
+     * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
+     * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
+    public String getObjEntityName() {
+        //Handle the various cases... DbEntity is not able to be handled, and Class is dubious (we have no resolver here).
+        //However, code which uses this method should still be able to function ok because it'll be using entity names anyway
+        if (root instanceof String) {
+            return (String) root;
+        } else if (root instanceof ObjEntity) {
+            return ((ObjEntity) root).getName();
+        }
+        return null;
+    }
 
-	/**
-	 * Sets the <code>logLevel</code> property.
-	 */
-	public void setLoggingLevel(Level logLevel) {
-		this.logLevel = logLevel;
-	}
+    /**
+     * Returns the <code>logLevel</code> property of this query.
+     * Log level is a hint to QueryEngine that performs this query
+     * to log execution with a certain priority.
+     */
+    public Level getLoggingLevel() {
+        return logLevel;
+    }
 
-	/**
-	 * Returns the root of this query
-	 * @return Object
-	 */
-	public Object getRoot() {
-		return root;
-	}
+    /**
+     * Sets the <code>logLevel</code> property.
+     */
+    public void setLoggingLevel(Level logLevel) {
+        this.logLevel = logLevel;
+    }
 
-	/**
-	 * Sets the root of the query
-	 * @param value The new root
-	 * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity or Class
-	 */
-	public void setRoot(Object value) {
-		if (!((value instanceof String)
-			|| (value instanceof ObjEntity)
-			|| (value instanceof DbEntity)
-			|| (value instanceof Class))) {
-			throw new IllegalArgumentException(
-				getClass().getName()
-					+ ".setRoot takes a String, ObjEntity, DbEntity or Class only.  It was passed a "
-					+ value.getClass().getName());
-		}
-		this.root = value;
-	}
+    /**
+     * Returns the root of this query
+     * @return Object
+     */
+    public Object getRoot() {
+        return root;
+    }
+
+    /**
+     * Sets the root of the query
+     * @param value The new root
+     * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity or Class
+     */
+    public void setRoot(Object value) {
+        if (!((value instanceof String)
+            || (value instanceof ObjEntity)
+            || (value instanceof DbEntity)
+            || (value instanceof Class))) {
+            String rootClass =
+                (value != null) ? value.getClass().getName() : "null";
+            throw new IllegalArgumentException(
+                getClass().getName()
+                    + ".setRoot takes a String, ObjEntity, DbEntity or Class only. It was passed a "
+                    + rootClass);
+        }
+        this.root = value;
+    }
 
 }

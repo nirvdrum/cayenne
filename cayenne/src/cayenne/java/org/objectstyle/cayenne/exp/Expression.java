@@ -241,7 +241,7 @@ public abstract class Expression implements Serializable {
      * in the <code>params</code> map. 
      * 
      * <p><i>Null values in the <code>params</code> map should be
-     * explicitly present in the map for the corresponding key.
+     * explicitly created in the map for the corresponding key.
      * </i></p>
      * 
      * @param params a map of parameters, with each key being a string name of
@@ -251,8 +251,8 @@ public abstract class Expression implements Serializable {
      * on missing parameters will be pruned from the resulting tree. If
      * <code>false</code>, any missing values will generate an exception.
      * 
-     * @return Expression Expression resulting from substitution of parameters
-     * with real values, or null if the whole expression was pruned, due to the
+     * @return Expression resulting from the substitution of parameters with
+     * real values, or null if the whole expression was pruned, due to the
      * missing parameters.
      */
     public Expression expWithParams(Map params, boolean pruneMissing) {
