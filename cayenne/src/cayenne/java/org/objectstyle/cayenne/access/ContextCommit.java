@@ -130,7 +130,8 @@ class ContextCommit {
      * Commits changes in the enclosed DataContext.
      */
     void commit(Level logLevel) throws CayenneException {
-        this.logLevel = (logLevel == null) ? QueryLogger.DEFAULT_LOG_LEVEL : logLevel;
+        this.logLevel =
+            (logLevel == null) ? QueryLogger.DEFAULT_LOG_LEVEL : logLevel;
 
         categorizeObjects();
         createPrimaryKeys();
@@ -181,17 +182,15 @@ class ContextCommit {
 
                 // Andrei: this check is needed, since if we run an empty query set,
                 // commit will not be executed, and this method will blow below.
-                if (queries.size() == 0) {
-                    continue;
-                }
+                if (queries.size() > 0) {
+                    nodeHelper.getNode().performQueries(queries, observer);
 
-                nodeHelper.getNode().performQueries(queries, observer);
-
-                if (observer.isTransactionRolledback()) {
-                    context.fireTransactionRolledback();
-                    throw new CayenneException("Transaction was rolledback.");
-                } else if (!observer.isTransactionCommitted()) {
-                    throw new CayenneException("Error committing transaction.");
+                    if (observer.isTransactionRolledback()) {
+                        context.fireTransactionRolledback();
+                        throw new CayenneException("Transaction was rolledback.");
+                    } else if (!observer.isTransactionCommitted()) {
+                        throw new CayenneException("Error committing transaction.");
+                    }
                 }
 
                 postprocess(nodeHelper);
@@ -382,7 +381,7 @@ class ContextCommit {
                             new ArrayList(snapshot.keySet()),
                             10);
                     batch.setLoggingLevel(logLevel);
-                    
+
                     if (logObj.isDebugEnabled())
                         logObj.debug(
                             "Creating UpdateBatchQuery for DbEntity "
@@ -572,7 +571,7 @@ class ContextCommit {
             DbEntity flattenedEntity = (DbEntity) firstDbRel.getTargetEntity();
             InsertBatchQuery relationInsertQuery =
                 (InsertBatchQuery) batchesByDbEntity.get(flattenedEntity);
-        
+
             if (relationInsertQuery == null) {
                 relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
                 relationInsertQuery.setLoggingLevel(logLevel);

@@ -260,7 +260,7 @@ public class QueryLogger {
         if (isLoggable(logLevel)) {
             int attributeCount = batch.getDbAttributes().size();
             if (attributeCount > 0) {
-                StringBuffer buf = new StringBuffer(" [batch params: ");
+                StringBuffer buf = new StringBuffer("[batch params: ");
                 sqlLiteralForObject(buf, batch.getObject(0));
 
                 for (int i = 1; i < attributeCount; i++) {
