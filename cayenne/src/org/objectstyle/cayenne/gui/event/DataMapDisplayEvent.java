@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.*;
 
@@ -64,54 +64,56 @@ import org.objectstyle.cayenne.map.*;
 /** Event meaning change of the current DataMap model.
   * Contains in it the reference to the domain, to which this map belongs
   * and (optionally) the Data Source assicuated with this map. */
-public class DataMapDisplayEvent extends EventObject
-{
-	private DataMap dataMap;
-	private DataDomain domain;
-	private DataNode node = null;
+public class DataMapDisplayEvent extends EventObject {
+	protected DataMap dataMap;
+	protected DataDomain domain;
+	protected DataNode node = null;
+
 	/** True if different from current data map. */
 	private boolean dataMapChanged = true;
-	
-	
-	/** 
-	 * @deprecated
-	 * @see #DataMapDisplayEvent(Object, DataMap, DataDomain)*/
-	public DataMapDisplayEvent(Object src, DataMap data_map_wrap)
-	{
+
+	public DataMapDisplayEvent(
+		Object src,
+		DataMap dataMap,
+		DataDomain domain) {
 		super(src);
-		dataMap = data_map_wrap;
+		this.dataMap = dataMap;
+		this.domain = domain;
 	}
 
-
-	public DataMapDisplayEvent(Object src, DataMap data_map_wrap
-							 , DataDomain temp_domain)
-	{
-		this(src, data_map_wrap);
-		domain = temp_domain;
-	}
-	
 	/** Current DataMap changed. */
-	public DataMapDisplayEvent(Object src, DataMap data_map_wrap
-							 , DataDomain temp_domain, DataNode temp_node)
-	{
-		this(src, data_map_wrap, temp_domain);
-		node = temp_node;
+	public DataMapDisplayEvent(
+		Object src,
+		DataMap dataMap,
+		DataDomain domain,
+		DataNode node) {
+			
+		this(src, dataMap, domain);
+		this.node = node;
 	}
-	
-	
+
 
 	/** Get dataMap wrapper. */
-	public DataMap getDataMap() {return dataMap;}
+	public DataMap getDataMap() {
+		return dataMap;
+	}
+	
 
 	/** Get domain for this data map. */
-	public DataDomain getDomain() {return domain;}
+	public DataDomain getDomain() {
+		return domain;
+	}
 
 	/** Get data node (data source) associated with this data map. */
-	public DataNode getDataNode() {return node;}
-	
+	public DataNode getDataNode() {
+		return node;
+	}
+
 	/** Returns true if data map is different from the current data map. */
-	public boolean isDataMapChanged() {return dataMapChanged;}
-	public void setDataMapChanged(boolean temp){
+	public boolean isDataMapChanged() {
+		return dataMapChanged;
+	}
+	public void setDataMapChanged(boolean temp) {
 		dataMapChanged = temp;
 	}
 }

@@ -343,13 +343,11 @@ public class DataMap {
 		
 		if(dbEntity == null) {
 			return null;
-		}
+		}		 
 		
-		Iterator iter = objEntityMap.keySet().iterator();
-		
+		Iterator iter = getObjEntitiesAsList(true).iterator();
 		while (iter.hasNext()) {
-			String name = (String)iter.next();
-			ObjEntity objEnt = getObjEntity(name) ;
+			ObjEntity objEnt = (ObjEntity)iter.next() ;
 			if (objEnt.getDbEntity() == dbEntity) {
 				list.add(objEnt);
 			}
@@ -357,6 +355,7 @@ public class DataMap {
 		
 		return list;
 	}
+	
 
 	/** Renames DbEntity. */
 	public void renameDbEntity(String oldName, String newName) {

@@ -69,6 +69,8 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -136,6 +138,13 @@ public class BrowseView
 			}
 		};
 		browseTree.addMouseListener(ml);
+
+		TreeSelectionListener tsl = new TreeSelectionListener() {
+			public void valueChanged(TreeSelectionEvent e) {
+				processSelection(e.getPath());
+			}
+		};
+		browseTree.addTreeSelectionListener(tsl);
 
 		mediator.addDomainListener(this);
 		mediator.addDomainDisplayListener(this);
@@ -509,35 +518,36 @@ public class BrowseView
 	 * Adds a tree node for the entity and make it selected. 
 	 */
 	protected void entityAdded(EntityEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this) {
 			return;
+		}
+
 		Entity entity = e.getEntity();
+
 		// Add a node and make it selected.
 		EntityWrapper wrapper = new EntityWrapper(entity);
-
 		if (mediator.getCurrentDataNode() != null) {
-			DefaultMutableTreeNode map_node =
+			DefaultMutableTreeNode mapNode =
 				getMapNode(
 					mediator.getCurrentDataDomain(),
 					mediator.getCurrentDataNode(),
 					mediator.getCurrentDataMap());
-			if (map_node != null) {
+			if (mapNode != null) {
 				currentNode = new DefaultMutableTreeNode(wrapper, false);
 				model.insertNodeInto(
 					currentNode,
-					map_node,
-					map_node.getChildCount());
+					mapNode,
+					mapNode.getChildCount());
 			}
 		}
 
-		DefaultMutableTreeNode map_node =
+		DefaultMutableTreeNode mapNode =
 			getMapNode(
 				mediator.getCurrentDataDomain(),
 				mediator.getCurrentDataMap());
 
 		currentNode = new DefaultMutableTreeNode(wrapper, false);
-		// model.insertNodeInto(currentNode, map_node, map_node.getChildCount());
-		fixEntityPosition(map_node, currentNode);
+		fixEntityPosition(mapNode, currentNode);
 		showNode(currentNode);
 	}
 
@@ -804,7 +814,6 @@ public class BrowseView
 			} else if (data.length == 3) {
 				e.setDataMap((DataMap) data[data.length - 2]);
 				e.setDomain((DataDomain) data[data.length - 3]);
-
 			}
 
 			if (obj instanceof ObjEntity) {
@@ -833,7 +842,7 @@ public class BrowseView
 			else
 				throw new UnsupportedOperationException("Tree contains invalid wrapper");
 			node = (DefaultMutableTreeNode) node.getParent();
-		} // End while()
+		}
 		return list.toArray();
 	}
 
@@ -986,5 +995,4 @@ public class BrowseView
 			return this;
 		}
 	}
-
 }
