@@ -57,9 +57,9 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.util.Comparator;
+import java.util.List;
 
 import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * Interface that defines a set of algorithms used for sorting various lists of
@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public interface DependencySorter {
-	public void initSorter(QueryEngine queryEngine, DataMap[] dataMaps);
+	public void initSorter(QueryEngine queryEngine, List dataMaps);
 	
 	/**
 	 * Returns a comparator for sorting DbEntities to satisfy their

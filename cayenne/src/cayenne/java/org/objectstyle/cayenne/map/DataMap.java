@@ -455,16 +455,18 @@ public class DataMap {
         if (null == db_entity) {
             return;
         }
+
         dbEntityMap.remove(dbEntityName);
 
-        DbEntity[] db_entity_arr = getDbEntities();
-        for (int i = 0; i < db_entity_arr.length; i++) {
-            Iterator rel_iter =
-                db_entity_arr[i].getRelationshipList().iterator();
+        Iterator db_entity_iter = this.getDbEntitiesAsList().iterator();
+        while (db_entity_iter.hasNext()) {
+        	DbEntity ent = (DbEntity)db_entity_iter.next();
+            Iterator rel_iter = ent.getRelationshipList().iterator();
             while (rel_iter.hasNext()) {
-                DbRelationship rel = (DbRelationship) rel_iter.next();
-                if (rel.getTargetEntity() == db_entity)
-                    db_entity_arr[i].removeRelationship(rel.getName());
+                DbRelationship rel = (DbRelationship)rel_iter.next();
+                if (rel.getTargetEntity() == db_entity) {
+                    ent.removeRelationship(rel.getName());
+                }
             }
         }
 
@@ -503,16 +505,18 @@ public class DataMap {
         if (null == entity) {
             return;
         }
+
         objEntityMap.remove(objEntityName);
-        ObjEntity[] obj_entity_arr = getObjEntities();
-        for (int i = 0; i < obj_entity_arr.length; i++) {
-            Iterator rel_iter =
-                obj_entity_arr[i].getRelationshipList().iterator();
+
+        Iterator obj_entity_iter = this.getObjEntitiesAsList().iterator();
+        while (obj_entity_iter.hasNext()) {
+        	ObjEntity ent = (ObjEntity)obj_entity_iter.next();
+            Iterator rel_iter = ent.getRelationshipList().iterator();
             while (rel_iter.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) rel_iter.next();
+                ObjRelationship rel = (ObjRelationship)rel_iter.next();
                 if (rel.getTargetEntity() == entity
                     || rel.getSourceEntity() == entity) {
-                    obj_entity_arr[i].removeRelationship(rel.getName());
+                    ent.removeRelationship(rel.getName());
                 }
             }
         }

@@ -436,7 +436,7 @@ public class DataNode implements QueryEngine {
     }
 
     public Iterator dataMapIterator() {
-      return IteratorUtils.arrayIterator(getDataMaps());
+      return this.getDataMapsAsList().iterator();
     }
 
     public void resetReferentialIntegritySupport() throws CayenneException {

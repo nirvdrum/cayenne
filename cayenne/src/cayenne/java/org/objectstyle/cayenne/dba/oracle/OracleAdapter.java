@@ -97,7 +97,7 @@ public class OracleAdapter extends JdbcAdapter {
         synchronized (sorters) {
             OperationSorter sorter = (OperationSorter) sorters.get(node);
             if (sorter == null) {
-                sorter = new OperationSorter(node, node.getDataMaps());
+                sorter = new OperationSorter(node, node.getDataMapsAsList());
                 sorters.put(node, sorter);
             }
             return sorter;

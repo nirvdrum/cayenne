@@ -37,7 +37,7 @@ public class SortHandler {
     /**
      * Constructor for SortHandler.
      */
-    public SortHandler(QueryEngine queryEngine, DataMap[] dataMaps) {
+    public SortHandler(QueryEngine queryEngine, List dataMaps) {
         this(defaultSorterClass, queryEngine, dataMaps);
     }
 
@@ -47,7 +47,7 @@ public class SortHandler {
     public SortHandler(
         Class sorterClass,
         QueryEngine queryEngine,
-        DataMap[] dataMaps) {
+        List dataMaps) {
 
         // sanity check
         if (sorterClass == null) {

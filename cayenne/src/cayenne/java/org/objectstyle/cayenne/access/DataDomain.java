@@ -298,9 +298,9 @@ public class DataDomain implements QueryEngine {
 		nodesByEntityName.clear();
  		nodesByDbEntityName.clear();
 
-		DataNode[] nodes = this.getDataNodes();
-		for (int j = 0; j < nodes.length; j++) {
-			DataNode node = nodes[j];
+		Iterator nodes = this.getDataNodesAsList().iterator();
+		while (nodes.hasNext()) {
+			DataNode node = (DataNode)nodes.next();
 			Iterator nodeMaps = node.getDataMapsAsList().iterator();
 			while (nodeMaps.hasNext()) {
 				DataMap map = (DataMap)nodeMaps.next();
