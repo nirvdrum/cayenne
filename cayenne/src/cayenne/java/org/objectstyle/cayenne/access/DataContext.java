@@ -918,11 +918,12 @@ public class DataContext implements QueryEngine, Serializable {
         // We cannot delay setting it to deleted, as Cascade deletes might cause
         // recursion, and the "deleted" state is the best way we have of noticing that and bailing out (see above)
         int oldState = anObject.getPersistenceState();
-
-        //TODO - figure out what to do when an object is still in
-        //PersistenceState.NEW (unregister maybe?)
-        anObject.setPersistenceState(PersistenceState.DELETED);
-
+        int newState =
+            (oldState == PersistenceState.NEW)
+                ? PersistenceState.TRANSIENT
+                : PersistenceState.DELETED;
+        anObject.setPersistenceState(newState);
+        
         //Do the right thing with all the relationships of the deleted object
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
         Iterator relationshipIterator = entity.getRelationships().iterator();
@@ -1024,6 +1025,12 @@ public class DataContext implements QueryEngine, Serializable {
                         "Unknown type of delete rule " + relationship.getDeleteRule());
             }
         }
+        
+        // if an object was NEW, we must throw it out of the ObjectStore
+        if (oldState == PersistenceState.NEW) {
+            getObjectStore().objectsUnregistered(
+                Collections.singletonList(anObject));
+        }      
     }
 
     /**

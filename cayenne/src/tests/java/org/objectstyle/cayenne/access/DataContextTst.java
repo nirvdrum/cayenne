@@ -83,6 +83,17 @@ public class DataContextTst extends DataContextTestBase {
         context.deleteObject(a);
         assertEquals(PersistenceState.DELETED, a.getPersistenceState());
     }
+    
+    public void testDeleteNew() throws Exception {
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+        artist.setArtistName("a");
+        
+        assertEquals(PersistenceState.NEW, artist.getPersistenceState());
+        context.deleteObject(artist);
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+        context.rollbackChanges();
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+    }
 
     public void testLocalObjects() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));

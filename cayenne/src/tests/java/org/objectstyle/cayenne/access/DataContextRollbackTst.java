@@ -69,6 +69,36 @@ import org.objectstyle.cayenne.query.SelectQuery;
  */
 public class DataContextRollbackTst extends DataContextTestBase {
 
+    public void testRollbackNew() {
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+        artist.setArtistName("a");
+
+        Painting p1 = (Painting) context.createAndRegisterNewObject("Painting");
+        p1.setPaintingTitle("p1");
+        p1.setToArtist(artist);
+
+        Painting p2 = (Painting) context.createAndRegisterNewObject("Painting");
+        p2.setPaintingTitle("p2");
+        p2.setToArtist(artist);
+
+        Painting p3 = (Painting) context.createAndRegisterNewObject("Painting");
+        p3.setPaintingTitle("p3");
+        p3.setToArtist(artist);
+
+        // before:
+        assertEquals(artist, p1.getToArtist());
+        assertEquals(3, artist.getPaintingArray().size());
+
+        context.rollbackChanges();
+
+        // after: 
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+        
+        // TODO: should we expect relationships to be unset?
+        // assertNull(p1.getToArtist());
+        // assertEquals(0, artist.getPaintingArray().size());
+    }
+    
     public void testRollbackNewObject() {
         String artistName = "revertTestArtist";
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
