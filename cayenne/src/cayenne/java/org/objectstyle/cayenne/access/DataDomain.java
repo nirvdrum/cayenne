@@ -186,14 +186,12 @@ public class DataDomain implements QueryEngine {
 
 	/** Returns a list of registered DataMap objects. */
 	public List getMapList() {
-		List list = new ArrayList();
+		List list;
 
 		synchronized (maps) {
-			Iterator it = maps.keySet().iterator();
-			while (it.hasNext()) {
-				list.add(maps.get(it.next()));
-			}
+			list = new ArrayList(maps.values());
 		}
+
 		return list;
 	}
 
@@ -202,14 +200,12 @@ public class DataDomain implements QueryEngine {
 	 * List is returned by copy.
 	 */
 	public List getDataNodeList() {
-		List list = new ArrayList();
+		List list;
 
 		synchronized (dataNodes) {
-			Iterator it = dataNodes.keySet().iterator();
-			while (it.hasNext()) {
-				list.add(dataNodes.get(it.next()));
-			}
+			list = new ArrayList(dataNodes.values());
 		}
+
 		return list;
 	}
 
