@@ -64,11 +64,13 @@ import java.util.Map;
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.FlattenedObjectId;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -96,12 +98,44 @@ public class SnapshotManager {
      * A factory method of DataObjects. Uses Configuration ClassLoader to
      * instantiate a new instance of DataObject of a given class.
      */
-    public static final DataObject newDataObject(String className)
-        throws Exception {
+    public static final DataObject newDataObject(String className) throws Exception {
         return (DataObject) Configuration
             .getResourceLoader()
             .loadClass(className)
             .newInstance();
+    }
+
+    /**
+     * Creates an object id from the values in object snapshot.
+     * If needed attributes are missing in a snapshot or if it is null,
+     * CayenneRuntimeException is thrown.
+     */
+    public static ObjectId objectIdFromSnapshot(ObjEntity entity, Map snapshot) {
+        // PK.size == 1 is a special (and most common) case
+        // add some minimum optimization...
+        List pk = entity.getDbEntity().getPrimaryKey();
+        if (pk.size() == 1) {
+            DbAttribute attr = (DbAttribute) pk.get(0);
+            Object val = snapshot.get(attr.getName());
+            return new ObjectId(entity.getJavaClass(), attr.getName(), val);
+        }
+
+        // ... handle generic case - PK.size > 1
+
+        Map idMap = new HashMap(pk.size() * 2);
+        Iterator it = pk.iterator();
+        while (it.hasNext()) {
+            DbAttribute attr = (DbAttribute) it.next();
+            Object val = snapshot.get(attr.getName());
+            if (val == null) {
+                throw new CayenneRuntimeException(
+                    "Null value for '" + attr.getName() + "'. Snapshot: " + snapshot);
+            }
+
+            idMap.put(attr.getName(), val);
+        }
+
+        return new ObjectId(entity.getJavaClass(), idMap);
     }
 
     /**
@@ -113,8 +147,7 @@ public class SnapshotManager {
         Class targetClass,
         DbRelationship relationship,
         Map sourceSnapshot) {
-        Map target =
-            relationship.targetPkSnapshotWithSrcSnapshot(sourceSnapshot);
+        Map target = relationship.targetPkSnapshotWithSrcSnapshot(sourceSnapshot);
         return (target != null) ? new ObjectId(targetClass, target) : null;
     }
 
@@ -148,8 +181,7 @@ public class SnapshotManager {
         }
 
         DataContext context = anObject.getDataContext();
-        ToManyListDataSource relDataSource =
-            context.getRelationshipDataSource();
+        ToManyListDataSource relDataSource = context.getRelationshipDataSource();
 
         Iterator rit = ent.getRelationships().iterator();
         while (rit.hasNext()) {
@@ -158,10 +190,7 @@ public class SnapshotManager {
                 // "to many" relationships have no information to collect from snapshot
                 // simply initialize a new empty list...
                 ToManyList relList =
-                    new ToManyList(
-                        relDataSource,
-                        anObject.getObjectId(),
-                        rel.getName());
+                    new ToManyList(relDataSource, anObject.getObjectId(), rel.getName());
                 anObject.writePropertyDirectly(rel.getName(), relList);
                 continue;
             }
@@ -182,8 +211,7 @@ public class SnapshotManager {
                 continue;
             }
 
-            DbRelationship dbRel =
-                (DbRelationship) rel.getDbRelationships().get(0);
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
             // dependent to one relationship is optional... lets not create a fault for it just yet
             if (dbRel.isToDependentPK()) {
@@ -191,15 +219,15 @@ public class SnapshotManager {
             }
 
             ObjectId id = targetObjectId(targetClass, dbRel, snapshot);
-            DataObject object =
-                (id != null) ? context.registeredObject(id) : null;
+            DataObject object = (id != null) ? context.registeredObject(id) : null;
 
             anObject.writePropertyDirectly(rel.getName(), object);
         }
 
         if (isPartialSnapshot) {
             anObject.setPersistenceState(PersistenceState.HOLLOW);
-        } else {
+        }
+        else {
             anObject.setPersistenceState(PersistenceState.COMMITTED);
         }
 
@@ -222,8 +250,7 @@ public class SnapshotManager {
         }
 
         DataContext context = anObject.getDataContext();
-        Map oldSnap =
-            context.getObjectStore().getSnapshot(anObject.getObjectId());
+        Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
 
         // attributes
         Map attrMap = entity.getAttributeMap();
@@ -269,8 +296,7 @@ public class SnapshotManager {
                         ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
                         dbRelationship,
                         snapshot);
-                DataObject target =
-                    (id != null) ? context.registeredObject(id) : null;
+                DataObject target = (id != null) ? context.registeredObject(id) : null;
 
                 anObject.writePropertyDirectly(rel.getName(), target);
             }
@@ -320,8 +346,7 @@ public class SnapshotManager {
 
         DataObject toOneTarget =
             (DataObject) object.readPropertyDirectly(relationship.getName());
-        ObjectId currentId =
-            (toOneTarget != null) ? toOneTarget.getObjectId() : null;
+        ObjectId currentId = (toOneTarget != null) ? toOneTarget.getObjectId() : null;
 
         // check if ObjectId map is a subset of a stored snapshot;
         // this is an equality condition
@@ -339,13 +364,13 @@ public class SnapshotManager {
                 if (storedSnapshot.get(propertyName) != null) {
                     return true;
                 }
-            } else {
+            }
+            else {
                 // for equality to be true, snapshot must contain all matching pk values
                 // note that we must use target entity names to extract id values.
                 if (!Util
                     .nullSafeEquals(
-                        currentId.getValueForAttribute(
-                            join.getTarget().getName()),
+                        currentId.getValueForAttribute(join.getTarget().getName()),
                         storedSnapshot.get(propertyName))) {
                     return true;
                 }
@@ -387,8 +412,7 @@ public class SnapshotManager {
                 continue;
             }
 
-            DataObject target =
-                (DataObject) anObject.readPropertyDirectly(relName);
+            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
             if (target == null) {
                 continue;
             }
@@ -400,8 +424,7 @@ public class SnapshotManager {
                 continue;
             }
 
-            DbRelationship dbRel =
-                (DbRelationship) rel.getDbRelationships().get(0);
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
             Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
             map.putAll(fk);
         }
@@ -446,8 +469,7 @@ public class SnapshotManager {
         }
 
         Class sourceObjectClass = ((DataObject) rootObjects.get(0)).getClass();
-        ObjRelationship reverseRelationship =
-            relationship.getReverseRelationship();
+        ObjRelationship reverseRelationship = relationship.getReverseRelationship();
         //Might be used later on... obtain and cast only once
         DbRelationship dbRelationship =
             (DbRelationship) relationship.getDbRelationships().get(0);
@@ -468,7 +490,8 @@ public class SnapshotManager {
                 sourceObject =
                     (DataObject) thisDestinationObject.readPropertyDirectly(
                         reverseRelationship.getName());
-            } else {
+            }
+            else {
                 //Reverse relationship doesn't exist... match objects manually
                 DataContext context = thisDestinationObject.getDataContext();
                 Map sourcePk =
@@ -476,8 +499,7 @@ public class SnapshotManager {
                         context.getObjectStore().getSnapshot(
                             thisDestinationObject.getObjectId()));
                 sourceObject =
-                    context.registeredObject(
-                        new ObjectId(sourceObjectClass, sourcePk));
+                    context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
             }
             //Find the list so far for this sourceObject
             List thisList = (List) toManyLists.get(sourceObject);
@@ -493,8 +515,7 @@ public class SnapshotManager {
         while (rootIterator.hasNext()) {
             DataObject thisRoot = (DataObject) rootIterator.next();
             ToManyList toManyList =
-                (ToManyList) thisRoot.readPropertyDirectly(
-                    relationship.getName());
+                (ToManyList) thisRoot.readPropertyDirectly(relationship.getName());
 
             toManyList.setObjectList((List) toManyLists.get(thisRoot));
         }

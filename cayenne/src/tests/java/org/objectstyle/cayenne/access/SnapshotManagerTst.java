@@ -60,6 +60,9 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
@@ -100,16 +103,13 @@ public class SnapshotManagerTst extends DataContextTestBase {
         Map map = new HashMap();
         map.put(
             "ARTIST_ID",
-            painting.getToArtist().getObjectId().getValueForAttribute(
-                "ARTIST_ID"));
+            painting.getToArtist().getObjectId().getValueForAttribute("ARTIST_ID"));
 
-        assertFalse(
-            SnapshotManager.isToOneTargetModified(toArtist, painting, map));
+        assertFalse(SnapshotManager.isToOneTargetModified(toArtist, painting, map));
 
         painting.setToArtist(artist);
 
-        assertTrue(
-            SnapshotManager.isToOneTargetModified(toArtist, painting, map));
+        assertTrue(SnapshotManager.isToOneTargetModified(toArtist, painting, map));
     }
 
     public void testIsJoinAttributesModified() throws Exception {
@@ -130,19 +130,36 @@ public class SnapshotManagerTst extends DataContextTestBase {
         Map same = new HashMap();
         same.put("ARTIST_ID", new Integer(1));
 
-        assertFalse(
-            SnapshotManager.isJoinAttributesModified(toArtist, stored, same));
+        assertFalse(SnapshotManager.isJoinAttributesModified(toArtist, stored, same));
 
-        assertTrue(
-            SnapshotManager.isJoinAttributesModified(
-                toArtist,
-                stored,
-                nullified));
+        assertTrue(SnapshotManager.isJoinAttributesModified(toArtist, stored, nullified));
 
-        assertTrue(
-            SnapshotManager.isJoinAttributesModified(
-                toArtist,
-                stored,
-                updated));
+        assertTrue(SnapshotManager.isJoinAttributesModified(toArtist, stored, updated));
+    }
+
+    public void testObjectIdFromSnapshot() throws Exception {
+        Class entityClass = Number.class;
+        ObjEntity ent = new ObjEntity();
+        
+        DbAttribute at = new DbAttribute();
+        at.setName("xyz");
+        at.setPrimaryKey(true);
+        DbEntity dbe = new DbEntity("123");
+        dbe.addAttribute(at);
+        ent.setDbEntity(dbe);
+        ent.setName("456");
+        ent.setClassName(entityClass.getName());
+
+        // test same id created by different methods
+        Map map = new HashMap();
+        map.put(at.getName(), "123");
+
+        Map map2 = new HashMap();
+        map2.put(at.getName(), "123");
+
+        ObjectId ref = new ObjectId(entityClass, map);
+        ObjectId oid = SnapshotManager.objectIdFromSnapshot(ent, map2);
+
+        assertEquals(ref, oid);
     }
 }

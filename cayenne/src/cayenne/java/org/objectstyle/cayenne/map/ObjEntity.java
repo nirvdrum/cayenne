@@ -64,6 +64,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -184,10 +185,13 @@ public class ObjEntity extends Entity {
      * from the values in object snapshot.
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
+     * 
+     * @deprecated Since 1.1 this method is no longer relevant in Cayenne. It is deprecated 
+     * to decouple mapping layer from the access layer implementation.
      */
     public Map idSnapshotMapFromSnapshot(Map objectSnapshot) {
-    	// create a cheaper map for the mosty common case - 
-    	// single attribute id.
+        // create a cheaper map for the mosty common case - 
+        // single attribute id.
         List pk = getDbEntity().getPrimaryKey();
         if (pk.size() == 1) {
             DbAttribute attr = (DbAttribute) pk.get(0);
@@ -218,23 +222,13 @@ public class ObjEntity extends Entity {
      * Creates an object id from the values in object snapshot.
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
+     * 
+     * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.access.SnapshotManager.objectIdFromSnapshot(java.util.Map)
+     * SnapshotManager.objectIdFromSnapshot(java.util.Map)}. This method is deprecated to decouple mapping layer from
+     * the access layer implementation.
      */
     public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-        Class objClass;
-        try {
-            objClass = Class.forName(this.getClassName());
-        }
-        catch (ClassNotFoundException e) {
-            throw new CayenneRuntimeException(
-                "Failed to load class for name "
-                    + this.getClassName()
-                    + " because "
-                    + e.getMessage());
-        }
-
-        Map idMap = this.idSnapshotMapFromSnapshot(objectSnapshot);
-        ObjectId id = new ObjectId(objClass, idMap);
-        return id;
+        return SnapshotManager.objectIdFromSnapshot(this, objectSnapshot);
     }
 
     /** Clears all the mapping between this obj entity and its current db entity.

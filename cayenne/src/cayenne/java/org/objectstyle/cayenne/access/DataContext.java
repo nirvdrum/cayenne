@@ -318,7 +318,7 @@ public class DataContext implements QueryEngine, Serializable {
         Map dataRow,
         boolean refresh) {
 
-        ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
+        ObjectId anId = SnapshotManager.objectIdFromSnapshot(objEntity, dataRow);
 
         // synchronized on objectstore, since read/write
         // must be performed atomically
@@ -353,7 +353,8 @@ public class DataContext implements QueryEngine, Serializable {
         ObjEntity objEntity,
         Map dataRow,
         boolean refresh) {
-        ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
+        	
+        ObjectId anId = SnapshotManager.objectIdFromSnapshot(objEntity, dataRow);
 
         // this will create a HOLLOW object if it is not registered yet
         DataObject obj = registeredObject(anId);
@@ -1343,7 +1344,7 @@ public class DataContext implements QueryEngine, Serializable {
                     obj.fetchFinished();
                     //Swizzle object ids as the old "flattened" one isn't suitable for later
                     // identification of this object
-                    ObjectId newOid = ent.objectIdFromSnapshot(dataRow);
+                    ObjectId newOid = SnapshotManager.objectIdFromSnapshot(ent, dataRow);
                     obj.setObjectId(newOid);
                     DataContext.this.objectStore.changeObjectKey(this.oid, newOid);
                     result.add(obj);

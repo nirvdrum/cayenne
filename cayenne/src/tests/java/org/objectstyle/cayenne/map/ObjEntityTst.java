@@ -55,10 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ObjEntityTst extends CayenneTestCase {
@@ -102,30 +98,6 @@ public class ObjEntityTst extends CayenneTestCase {
 		assertNotNull(
 			ae.getRelationshipForDbRelationship(
 				(DbRelationship) dae.getRelationship("paintingArray")));
-	}
-
-	public void testObjectIdFromSnapshot() throws Exception {
-		Class entityClass=Number.class;
-		DbAttribute at = new DbAttribute();
-		at.setName("xyz");
-		at.setPrimaryKey(true);
-		DbEntity dbe = new DbEntity("123");
-		dbe.addAttribute(at);
-		ent.setDbEntity(dbe);
-		ent.setName("456");
-		ent.setClassName(entityClass.getName());
-
-		// test same id created by different methods
-		Map map = new HashMap();
-		map.put(at.getName(), "123");
-
-		Map map2 = new HashMap();
-		map2.put(at.getName(), "123");
-
-		ObjectId ref = new ObjectId(entityClass, map);
-		ObjectId oid = ent.objectIdFromSnapshot(map2);
-
-		assertEquals(ref, oid);
 	}
 	
 	public void testReadOnly() throws Exception {
