@@ -57,13 +57,17 @@ package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.OptimisticLockException;
 import org.objectstyle.cayenne.access.QueryLogger;
@@ -71,7 +75,9 @@ import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
@@ -85,20 +91,33 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  */
 public class BatchAction extends BaseSQLAction {
 
-    protected boolean runningAsBatch;
+    protected boolean batch;
+    protected boolean generatedKeys;
 
-    public BatchAction(DbAdapter adapter, EntityResolver entityResolver,
-            boolean runningAsBatch) {
+    public BatchAction(DbAdapter adapter, EntityResolver entityResolver) {
         super(adapter, entityResolver);
-        this.runningAsBatch = runningAsBatch;
     }
 
-    public boolean isRunningAsBatch() {
-        return runningAsBatch;
+    public boolean isBatch() {
+        return batch;
     }
 
-    public void performAction(Connection connection, Query query, OperationObserver observer)
-            throws SQLException, Exception {
+    public void setBatch(boolean runningAsBatch) {
+        this.batch = runningAsBatch;
+    }
+
+    public boolean isGeneratedKeys() {
+        return generatedKeys;
+    }
+
+    public void setGeneratedKeys(boolean supportingGeneratedKeys) {
+        this.generatedKeys = supportingGeneratedKeys;
+    }
+
+    public void performAction(
+            Connection connection,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
 
         // sanity check
         if (!(query instanceof BatchQuery)) {
@@ -106,17 +125,24 @@ public class BatchAction extends BaseSQLAction {
                     + query);
         }
 
-        BatchQuery batch = (BatchQuery) query;
-        BatchQueryBuilder queryBuilder = createBuilder(batch);
-        
-        if (runningAsBatch) {
-            runAsBatch(connection, batch, queryBuilder, observer);
+        BatchQuery batchQuery = (BatchQuery) query;
+        BatchQueryBuilder queryBuilder = createBuilder(batchQuery);
+
+        boolean generatesKeys = shouldProcessGeneratedKeys(batchQuery);
+
+        if (batch && !generatesKeys) {
+            runAsBatch(connection, batchQuery, queryBuilder, observer);
         }
         else {
-            runAsIndividualQueries(connection, batch, queryBuilder, observer);
+            runAsIndividualQueries(
+                    connection,
+                    batchQuery,
+                    queryBuilder,
+                    observer,
+                    generatesKeys);
         }
     }
-    
+
     // TODO: move all query translation logic to adapter.getQueryTranslator()
     protected BatchQueryBuilder createBuilder(BatchQuery batch) throws CayenneException {
         if (batch instanceof InsertBatchQuery) {
@@ -180,11 +206,15 @@ public class BatchAction extends BaseSQLAction {
         }
     }
 
+    /**
+     * Executes batch as individual queries over the same prepared statement.
+     */
     protected void runAsIndividualQueries(
             Connection con,
             BatchQuery query,
             BatchQueryBuilder queryBuilder,
-            OperationObserver delegate) throws SQLException, Exception {
+            OperationObserver delegate,
+            boolean generatesKeys) throws SQLException, Exception {
 
         Level logLevel = query.getLoggingLevel();
         boolean isLoggable = QueryLogger.isLoggable(logLevel);
@@ -225,6 +255,10 @@ public class BatchAction extends BaseSQLAction {
 
                 delegate.nextCount(query, updated);
 
+                if (generatesKeys) {
+                    processGeneratedKeys(query, statement, delegate);
+                }
+
                 if (isLoggable) {
                     QueryLogger.logUpdateCount(logLevel, updated);
                 }
@@ -237,5 +271,48 @@ public class BatchAction extends BaseSQLAction {
             catch (Exception e) {
             }
         }
+    }
+
+    /**
+     * Returns whether BatchQuery generates
+     */
+    protected boolean shouldProcessGeneratedKeys(BatchQuery query) {
+        // see if we are configured to syupport generated keys
+        if (!generatedKeys) {
+            return false;
+        }
+
+        // see if the query needs them
+        if (query instanceof InsertBatchQuery) {
+
+            Iterator attributes = query.getDbAttributes().iterator();
+            while (attributes.hasNext()) {
+                if (((DbAttribute) attributes.next()).isGenerated()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Implements generated keys extraction supported since JDBC 3.0 specification.
+     */
+    protected void processGeneratedKeys(
+            BatchQuery query,
+            Statement statement,
+            OperationObserver observer) throws SQLException, CayenneException {
+
+        ResultSet keysRS = statement.getGeneratedKeys();
+        DefaultResultIterator iterator = new DefaultResultIterator(
+                null,
+                null,
+                keysRS,
+                ResultDescriptor
+                        .createDescriptor(keysRS, getAdapter().getExtendedTypes()),
+                0);
+
+        observer.nextKeyDataRows(query, iterator);
     }
 }

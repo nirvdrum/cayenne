@@ -71,19 +71,20 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Simple implementation of OperationObserver interface.
- * Useful as a superclass of other implementations of OperationObserver. 
- * This implementation only tracks transaction events and exceptions. 
+ * Simple implementation of OperationObserver interface. Useful as a superclass of other
+ * implementations of OperationObserver. This implementation only tracks transaction
+ * events and exceptions.
+ * <p>
+ * <i>This operation observer is unsafe to use in application, since it doesn't rethrow
+ * the exceptions immediately, and may cause the database to hang. Use
+ * {@link org.objectstyle.cayenne.access.QueryResult}instead. </i>
+ * </p>
  * 
- * <p><i>This operation observer is unsafe to use in application, since it doesn't
- * rethrow the exceptions immediately, and may cause the database to hang. 
- * Use {@link org.objectstyle.cayenne.access.QueryResult} instead.</i></p>
- *
  * @author Andrei Adamchik
  */
 public class DefaultOperationObserver implements OperationObserver {
-    private static Logger logObj =
-        Logger.getLogger(DefaultOperationObserver.class);
+
+    private static Logger logObj = Logger.getLogger(DefaultOperationObserver.class);
 
     public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
 
@@ -92,13 +93,14 @@ public class DefaultOperationObserver implements OperationObserver {
     protected Level loggingLevel = DEFAULT_LOG_LEVEL;
 
     /**
-     * Prints the information about query and global exceptions. 
+     * Prints the information about query and global exceptions.
      */
     public void printExceptions(PrintWriter out) {
         if (globalExceptions.size() > 0) {
             if (globalExceptions.size() == 1) {
                 out.println("Global Exception:");
-            } else {
+            }
+            else {
                 out.println("Global Exceptions:");
             }
 
@@ -112,7 +114,8 @@ public class DefaultOperationObserver implements OperationObserver {
         if (queryExceptions.size() > 0) {
             if (queryExceptions.size() == 1) {
                 out.println("Query Exception:");
-            } else {
+            }
+            else {
                 out.println("Query Exceptions:");
             }
 
@@ -134,26 +137,25 @@ public class DefaultOperationObserver implements OperationObserver {
         return queryExceptions;
     }
 
-    /** Returns <code>true</code> if at least one exception was registered
-      * during query execution. */
+    /**
+     * Returns <code>true</code> if at least one exception was registered during query
+     * execution.
+     */
     public boolean hasExceptions() {
         return globalExceptions.size() > 0 || queryExceptions.size() > 0;
     }
 
     /**
-     * Returns a log level level that should be used when
-     * logging query execution.
+     * Returns a log level level that should be used when logging query execution.
      */
     public Level getLoggingLevel() {
         return loggingLevel;
     }
 
     /**
-     * Sets log level that should be used for queries.
-     * If <code>level</code> argument is null, level is set to
-     * DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
-     * than log level configured for QueryLogger, query SQL statements
-     * will be logged.
+     * Sets log level that should be used for queries. If <code>level</code> argument is
+     * null, level is set to DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
+     * than log level configured for QueryLogger, query SQL statements will be logged.
      */
     public void setLoggingLevel(Level level) {
         this.loggingLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
@@ -171,10 +173,18 @@ public class DefaultOperationObserver implements OperationObserver {
     }
 
     public void nextDataRows(Query query, List dataRows) {
+        // noop
     }
 
     public void nextDataRows(Query q, ResultIterator it) {
         logObj.debug("result: (iterator)");
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void nextKeyDataRows(Query query, ResultIterator keysIterator) {
+        // noop
     }
 
     public void nextQueryException(Query query, Exception ex) {

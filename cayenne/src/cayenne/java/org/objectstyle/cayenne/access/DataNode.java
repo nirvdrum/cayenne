@@ -117,8 +117,13 @@ public class DataNode implements QueryEngine {
     protected DbAdapter adapter;
     protected String dataSourceLocation;
     protected String dataSourceFactory;
-    protected org.objectstyle.cayenne.map.EntityResolver entityResolver;
+    protected EntityResolver entityResolver;
     protected EntitySorter entitySorter = NULL_SORTER;
+    
+    /** 
+     * @since 1.2
+     */
+    protected int supportedJDBCSpec;
 
     // ====================================================
     // DataMaps
@@ -144,6 +149,24 @@ public class DataNode implements QueryEngine {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    /**
+     * Returns a minimum version of the JDBC spcification supported by internal
+     * DataSource. This property is configured by whoever creates this DataNode, so it may
+     * not be accurate.
+     * 
+     * @since 1.2
+     */
+    public int getSupportedJDBCSpec() {
+        return supportedJDBCSpec;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setSupportedJDBCSpec(int supportedJDBCSpec) {
+        this.supportedJDBCSpec = supportedJDBCSpec;
     }
 
     /** Returns a location of DataSource of this node. */
@@ -386,10 +409,10 @@ public class DataNode implements QueryEngine {
                 && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
 
         boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-        new BatchAction(getAdapter(), getEntityResolver(), runningAsBatch).performAction(
-                connection,
-                query,
-                observer);
+        BatchAction action = new BatchAction(getAdapter(), getEntityResolver());
+        action.setBatch(runningAsBatch);
+        action.setGeneratedKeys(false);
+        action.performAction(connection, query, observer);
     }
 
     /**
@@ -566,7 +589,8 @@ public class DataNode implements QueryEngine {
     final class TempBatchAction extends BatchAction {
 
         public TempBatchAction(boolean runningAsBatch) {
-            super(DataNode.this.adapter, DataNode.this.entityResolver, runningAsBatch);
+            super(DataNode.this.adapter, DataNode.this.entityResolver);
+            setBatch(runningAsBatch);
         }
 
         // making public to access from DataNode
@@ -584,7 +608,8 @@ public class DataNode implements QueryEngine {
                 BatchQuery query,
                 BatchQueryBuilder queryBuilder,
                 OperationObserver delegate) throws SQLException, Exception {
-            super.runAsIndividualQueries(con, query, queryBuilder, delegate);
+            super.runAsIndividualQueries(con, query, queryBuilder, delegate, false);
         }
     }
+
 }

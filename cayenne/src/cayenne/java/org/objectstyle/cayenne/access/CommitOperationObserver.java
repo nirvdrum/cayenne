@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,25 +62,24 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.event.DataContextTransactionEventListener;
 import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * ContextCommitObserver is used as an observer for DataContext 
- * commit operations.
+ * CommitOperationObserver is used as an observer for DataContext commit operations.
  * 
- * @deprecated Unused since 1.2
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class ContextCommitObserver
-    extends DefaultOperationObserver
-    implements DataContextTransactionEventListener {
+class CommitOperationObserver extends DefaultOperationObserver implements
+        DataContextTransactionEventListener {
 
     protected List updObjects;
     protected List delObjects;
@@ -89,13 +88,9 @@ public class ContextCommitObserver
 
     protected DataContext context;
 
-    public ContextCommitObserver(
-        Level logLevel,
-        DataContext context,
-        List insObjects,
-        List updObjects,
-        List delObjects) {
-            
+    public CommitOperationObserver(Level logLevel, DataContext context, List insObjects,
+            List updObjects, List delObjects) {
+
         super.setLoggingLevel(logLevel);
 
         this.context = context;
@@ -108,9 +103,9 @@ public class ContextCommitObserver
         // DataContext events. When notifying about a successful completion
         // of a transaction we cannot build this list anymore, since all
         // the work will be done by then.
-        Iterator collIter =
-            (Arrays.asList(new List[] { delObjects, updObjects, insObjects }))
-                .iterator();
+        Iterator collIter = (Arrays.asList(new List[] {
+                delObjects, updObjects, insObjects
+        })).iterator();
         while (collIter.hasNext()) {
             Iterator objIter = ((Collection) collIter.next()).iterator();
             while (objIter.hasNext()) {
@@ -124,38 +119,37 @@ public class ContextCommitObserver
 
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException(
-            "Raising from query exception.",
-            Util.unwindException(ex));
+        throw new CayenneRuntimeException("Raising from query exception.", Util
+                .unwindException(ex));
     }
 
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
         throw new CayenneRuntimeException(
-            "Raising from underlyingQueryEngine exception.",
-            Util.unwindException(ex));
+                "Raising from underlyingQueryEngine exception.",
+                Util.unwindException(ex));
     }
 
     public void registerForDataContextEvents() {
         EventManager mgr = EventManager.getDefaultManager();
         mgr.addListener(
-            this,
-            "dataContextWillCommit",
-            DataContextEvent.class,
-            DataContext.WILL_COMMIT,
-            this.context);
+                this,
+                "dataContextWillCommit",
+                DataContextEvent.class,
+                DataContext.WILL_COMMIT,
+                this.context);
         mgr.addListener(
-            this,
-            "dataContextDidCommit",
-            DataContextEvent.class,
-            DataContext.DID_COMMIT,
-            this.context);
+                this,
+                "dataContextDidCommit",
+                DataContextEvent.class,
+                DataContext.DID_COMMIT,
+                this.context);
         mgr.addListener(
-            this,
-            "dataContextDidRollback",
-            DataContextEvent.class,
-            DataContext.DID_ROLLBACK,
-            this.context);
+                this,
+                "dataContextDidRollback",
+                DataContextEvent.class,
+                DataContext.DID_ROLLBACK,
+                this.context);
     }
 
     public void unregisterFromDataContextEvents() {
@@ -168,8 +162,7 @@ public class ContextCommitObserver
     public void dataContextWillCommit(DataContextEvent event) {
         Iterator iter = objectsToNotify.iterator();
         while (iter.hasNext()) {
-            ((DataObjectTransactionEventListener) iter.next()).willCommit(
-                event);
+            ((DataObjectTransactionEventListener) iter.next()).willCommit(event);
         }
     }
 
@@ -182,5 +175,29 @@ public class ContextCommitObserver
 
     public void dataContextDidRollback(DataContextEvent event) {
         // do nothing for now
+    }
+
+    /**
+     * Processed generated keys.
+     * 
+     * @since 1.2
+     */
+    public void nextKeyDataRows(Query query, ResultIterator keysIterator) {
+        try {
+            List keys = keysIterator.dataRows(true);
+            if (keys.size() > 1) {
+                throw new CayenneRuntimeException("Only a single PK is expected...");
+            }
+
+            if (keys.size() == 0) {
+                return;
+            }
+
+            // extract key
+        }
+        catch (CayenneException ex) {
+            throw new CayenneRuntimeException("Error reading primary key", Util
+                    .unwindException(ex));
+        }
     }
 }

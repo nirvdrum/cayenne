@@ -75,8 +75,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
-import org.objectstyle.cayenne.access.util.ContextCommitObserver;
-import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -145,7 +143,7 @@ class ContextCommit {
                 updObjects = new ArrayList();
 
                 for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
-                    DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
+                    NodeCommit nodeHelper = (NodeCommit) i.next();
                     prepareInsertQueries(nodeHelper);
                     prepareFlattenedQueries(nodeHelper, nodeHelper
                             .getFlattenedInsertQueries());
@@ -158,7 +156,7 @@ class ContextCommit {
                     prepareDeleteQueries(nodeHelper);
                 }
 
-                ContextCommitObserver observer = new ContextCommitObserver(
+                CommitOperationObserver observer = new CommitOperationObserver(
                         logLevel,
                         context,
                         insObjects,
@@ -180,8 +178,7 @@ class ContextCommit {
                     try {
                         Iterator i = nodeHelpers.iterator();
                         while (i.hasNext()) {
-                            DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i
-                                    .next();
+                            NodeCommit nodeHelper = (NodeCommit) i.next();
                             List queries = nodeHelper.getQueries();
 
                             if (queries.size() > 0) {
@@ -221,8 +218,7 @@ class ContextCommit {
         }
     }
 
-    private void prepareInsertQueries(DataNodeCommitHelper commitHelper)
-            throws CayenneException {
+    private void prepareInsertQueries(NodeCommit commitHelper) throws CayenneException {
 
         List entities = commitHelper.getObjEntitiesForInsert();
         if (entities.isEmpty()) {
@@ -278,8 +274,7 @@ class ContextCommit {
         }
     }
 
-    private void prepareDeleteQueries(DataNodeCommitHelper commitHelper)
-            throws CayenneException {
+    private void prepareDeleteQueries(NodeCommit commitHelper) throws CayenneException {
 
         List entities = commitHelper.getObjEntitiesForDelete();
         if (entities.isEmpty()) {
@@ -339,8 +334,7 @@ class ContextCommit {
         }
     }
 
-    private void prepareUpdateQueries(DataNodeCommitHelper commitHelper)
-            throws CayenneException {
+    private void prepareUpdateQueries(NodeCommit commitHelper) throws CayenneException {
         List entities = commitHelper.getObjEntitiesForUpdate();
         if (entities.isEmpty()) {
             return;
@@ -601,7 +595,7 @@ class ContextCommit {
                 o,
                 newObjectsByObjEntity,
                 objEntitiesToInsert,
-                DataNodeCommitHelper.INSERT);
+                NodeCommit.INSERT);
     }
 
     private void objectToDelete(DataObject o) throws CayenneException {
@@ -609,7 +603,7 @@ class ContextCommit {
                 o,
                 objectsToDeleteByObjEntity,
                 objEntitiesToDelete,
-                DataNodeCommitHelper.DELETE);
+                NodeCommit.DELETE);
     }
 
     private void objectToUpdate(DataObject o) throws CayenneException {
@@ -617,7 +611,7 @@ class ContextCommit {
                 o,
                 objectsToUpdateByObjEntity,
                 objEntitiesToUpdate,
-                DataNodeCommitHelper.UPDATE);
+                NodeCommit.UPDATE);
     }
 
     private RuntimeException attemptToCommitReadOnlyEntity(
@@ -656,9 +650,7 @@ class ContextCommit {
             objEntities.add(entity);
             DataNode responsibleNode = context.lookupDataNode(entity.getDataMap());
 
-            DataNodeCommitHelper commitHelper = DataNodeCommitHelper.getHelperForNode(
-                    nodeHelpers,
-                    responsibleNode);
+            NodeCommit commitHelper = nodeHelper(responsibleNode);
 
             commitHelper.addToEntityList(entity, operationType);
             objectsForObjEntity = new ArrayList();
@@ -687,9 +679,7 @@ class ContextCommit {
             DbEntity flattenedEntity = info.getJoinEntity();
             DataNode responsibleNode = context.lookupDataNode(flattenedEntity
                     .getDataMap());
-            DataNodeCommitHelper commitHelper = DataNodeCommitHelper.getHelperForNode(
-                    nodeHelpers,
-                    responsibleNode);
+            NodeCommit commitHelper = nodeHelper(responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
 
             InsertBatchQuery relationInsertQuery = (InsertBatchQuery) batchesByDbEntity
@@ -726,9 +716,7 @@ class ContextCommit {
 
             DataNode responsibleNode = context.lookupDataNode(flattenedEntity
                     .getDataMap());
-            DataNodeCommitHelper commitHelper = DataNodeCommitHelper.getHelperForNode(
-                    nodeHelpers,
-                    responsibleNode);
+            NodeCommit commitHelper = nodeHelper(responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
 
             DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery) batchesByDbEntity
@@ -742,16 +730,14 @@ class ContextCommit {
             List flattenedSnapshots = info.buildJoinSnapshotsForDelete();
             if (!flattenedSnapshots.isEmpty()) {
                 Iterator snapsIt = flattenedSnapshots.iterator();
-                while(snapsIt.hasNext()) {
+                while (snapsIt.hasNext()) {
                     relationDeleteQuery.add((Map) snapsIt.next());
                 }
             }
         }
     }
 
-    private void prepareFlattenedQueries(
-            DataNodeCommitHelper commitHelper,
-            Map flattenedBatches) {
+    private void prepareFlattenedQueries(NodeCommit commitHelper, Map flattenedBatches) {
 
         for (Iterator i = flattenedBatches.values().iterator(); i.hasNext();) {
             commitHelper.addToQueries((Query) i.next());
@@ -776,12 +762,12 @@ class ContextCommit {
             List dbEntities,
             Map objEntitiesByDbEntity,
             List objEntities) {
-        
+
         Iterator i = objEntities.iterator();
         while (i.hasNext()) {
             ObjEntity objEntity = (ObjEntity) i.next();
             DbEntity dbEntity = objEntity.getDbEntity();
-            
+
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
             if (objEntitiesForDbEntity == null) {
                 objEntitiesForDbEntity = new ArrayList(1);
@@ -820,5 +806,29 @@ class ContextCommit {
                 return rel;
         }
         return null;
+    }
+
+    /**
+     * Finds an existing helper for DataNode, creates a new one if no matching helper is
+     * found.
+     */
+    private NodeCommit nodeHelper(DataNode node) {
+
+        NodeCommit helper = null;
+        Iterator it = nodeHelpers.iterator();
+        while (it.hasNext()) {
+            NodeCommit itHelper = (NodeCommit) it.next();
+            if (itHelper.getNode() == node) {
+                helper = itHelper;
+                break;
+            }
+        }
+
+        if (helper == null) {
+            helper = new NodeCommit(node);
+            nodeHelpers.add(helper);
+        }
+
+        return helper;
     }
 }

@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
+ * @deprecated Unused since 1.2.
  * @author Andrei Adamchik
  */
 public class DataNodeCommitHelper {

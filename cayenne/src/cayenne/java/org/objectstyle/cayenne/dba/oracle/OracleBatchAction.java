@@ -68,9 +68,8 @@ import org.objectstyle.cayenne.query.BatchQuery;
  */
 class OracleBatchAction extends BatchAction {
 
-    OracleBatchAction(DbAdapter adapter, EntityResolver entityResolver,
-            boolean runningAsBatch) {
-        super(adapter, entityResolver, runningAsBatch);
+    OracleBatchAction(DbAdapter adapter, EntityResolver entityResolver) {
+        super(adapter, entityResolver);
     }
 
     protected BatchQueryBuilder createBuilder(BatchQuery batch) throws CayenneException {

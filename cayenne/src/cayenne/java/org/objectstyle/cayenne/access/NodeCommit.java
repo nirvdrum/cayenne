@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -56,66 +56,102 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Defines a set of callback methods for a QueryEngine to notify interested object about
- * different stages of queries execution. Superinterface, OperationHints, defines
- * information methods that are needed to define query execution strategy. This Interface
- * adds callback methods.
- * <p>
- * Implementing objects are passed to a QueryEngine that will execute one or more queries.
- * QueryEngine will pass results of the execution of any kind of queries - selects,
- * updates, store proc. calls, etc.. to the interested objects. This includes result
- * counts, created objects, thrown exceptions, etc.
- * </p>
- * <p>
- * <i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide. </a> </i>
- * </p>
+ * A helper class for ContextCommit.
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public interface OperationObserver extends OperationHints {
+class NodeCommit {
+
+    static final int INSERT = 1;
+    static final int UPDATE = 2;
+    static final int DELETE = 3;
+
+    DataNode node;
+    List objEntitiesForInsert = new ArrayList();
+    List objEntitiesForDelete = new ArrayList();
+    List objEntitiesForUpdate = new ArrayList();
+    Map flattenedInsertQueries = new HashMap();
+    Map flattenedDeleteQueries = new HashMap();
+    List queries = new ArrayList();
+
+    NodeCommit(DataNode node) {
+        this.node = node;
+    }
+
+    void addToEntityList(ObjEntity ent, int listType) {
+        switch (listType) {
+            case 1:
+                objEntitiesForInsert.add(ent);
+                break;
+            case 2:
+                objEntitiesForUpdate.add(ent);
+                break;
+            case 3:
+                objEntitiesForDelete.add(ent);
+                break;
+        }
+    }
+
+    void addToQueries(Query q) {
+        queries.add(q);
+    }
 
     /**
-     * Invoked after the update (can be insert, delete or update query) is executed.
+     * Returns the node.
      */
-    public void nextCount(Query query, int resultCount);
+    DataNode getNode() {
+        return node;
+    }
 
     /**
-     * Invoked after the batch update is executed
+     * Returns the queries.
      */
-    public void nextBatchCount(Query query, int[] resultCount);
+    List getQueries() {
+        return queries;
+    }
 
     /**
-     * Invoked after each ResultSet is read.
-     */
-    public void nextDataRows(Query query, List dataRows);
-
-    /**
-     * Invoked after each ResultSet is obtained. This method is called instead of
-     * "nextDataRows(Query,List)", if a query required results to be returned as a
-     * ResultIterator. OperationObserver is responsible for closing the ResultIterator.
-     */
-    public void nextDataRows(Query q, ResultIterator it);
-
-    /**
-     * Invoked after each batch of generated keys is read.
+     * Returns the objEntitiesForDelete.
      * 
-     * @since 1.2
+     * @return List
      */
-    public void nextKeyDataRows(Query query, ResultIterator keysIterator);
-
-    /** Invoked when an exception occurs during query execution. */
-    public void nextQueryException(Query query, Exception ex);
+    List getObjEntitiesForDelete() {
+        return objEntitiesForDelete;
+    }
 
     /**
-     * Invoked when a "global" exception occurred, such as JDBC connection exception, etc.
+     * Returns the objEntitiesForInsert.
+     * 
+     * @return List
      */
-    public void nextGlobalException(Exception ex);
-}
+    List getObjEntitiesForInsert() {
+        return objEntitiesForInsert;
+    }
 
+    /**
+     * Returns the objEntitiesForUpdate.
+     * 
+     * @return List
+     */
+    List getObjEntitiesForUpdate() {
+        return objEntitiesForUpdate;
+    }
+
+    Map getFlattenedDeleteQueries() {
+        return flattenedDeleteQueries;
+    }
+
+    Map getFlattenedInsertQueries() {
+        return flattenedInsertQueries;
+    }
+}

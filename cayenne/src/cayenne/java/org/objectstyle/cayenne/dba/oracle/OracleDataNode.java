@@ -111,10 +111,12 @@ public class OracleDataNode extends DataNode {
                     && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
 
             boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
-            action = new OracleBatchAction(
+            OracleBatchAction batchAction = new OracleBatchAction(
                     getAdapter(),
-                    getEntityResolver(),
-                    runningAsBatch);
+                    getEntityResolver());
+            batchAction.setBatch(runningAsBatch);
+            batchAction.setGeneratedKeys(false);
+            action = batchAction;
         }
 
         action.performAction(connection, query, observer);
