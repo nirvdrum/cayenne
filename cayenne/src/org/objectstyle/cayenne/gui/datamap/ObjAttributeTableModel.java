@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,95 +52,109 @@ package org.objectstyle.cayenne.gui.datamap;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.datamap;
 
-import java.util.*;
+import java.util.Collections;
 import java.util.logging.Logger;
-import javax.swing.*;
-import javax.swing.table.*;
 
+import javax.swing.table.AbstractTableModel;
+
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.gui.event.AttributeEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.util.PropertyComparator;
 
+/** 
+ * Model for the Object Entity attributes and for Obj to 
+ * DB Attribute Mapping tables. Allows adding/removing attributes,
+ * modifying the types and the names. Add/remove changes are 
+ * cached and saved into ObjEntity only when commit() is called.
+ * 
+ * @author Michael Misha Shengaout. 
+ * @author Andrei Adamchik
+ */
+class ObjAttributeTableModel extends AbstractTableModel {
+	static final Logger logObj =
+		Logger.getLogger(ObjAttributeTableModel.class.getName());
 
-/** Model for the Object Entity attributes and for Obj to DB Attribute Mapping tables.
- *  Allows adding/removing attributes, modifying the types and the names.
- *  Add/remove changes are cached and saved into ObjEntity only when commit()
- *  is called.
- *  @author Michael Misha Shengaout. */
-class ObjAttributeTableModel extends AbstractTableModel
-{
-	static final Logger logObj = Logger.getLogger(ObjAttributeTableModel.class.getName());
-	
 	Mediator mediator;
+
 	/** The pane to use as source of AttributeEvents. */
 	Object src;
+
 	private ObjEntity entity;
-	private DbEntity dbEntity = null;
+	private DbEntity dbEntity;
+
 	/** Add/remove changes will be made not to entity but to attributeList.
 	 *  The changes will be copied to entity in commit().
 	 *  Assumption: the attributes themselves are passed by reference. 
 	 *  Any modification to the attribute from the list (change in name, type) 
 	 *  will be reflected in the entity. */
 	private java.util.List attributeList;
+
 	/** Whether to show the mapping to the db attributes.*/
-	private boolean showDb = false;
-	
+	private boolean showDb;
+
 	// Columns
 	static final int OBJ_ATTRIBUTE = 0;
 	static final int OBJ_ATTRIBUTE_TYPE = 1;
 	static final int DB_ATTRIBUTE = 2;
 	static final int DB_ATTRIBUTE_TYPE = 3;
-	
-	public ObjAttributeTableModel(ObjEntity temp_entity
-	, Mediator temp_mediator, Object temp_src)
-	{
-		entity = temp_entity;
-		mediator = temp_mediator;
-		dbEntity = entity.getDbEntity();
-		src = temp_src;
-		attributeList = entity.getAttributeList();
-		showDb = (entity.getDbEntity() != null);
+
+	public ObjAttributeTableModel(
+		ObjEntity entity,
+		Mediator mediator,
+		Object src) {
+			
+		this.entity = entity;
+		this.mediator = mediator;
+		this.dbEntity = entity.getDbEntity();
+		this.src = src;
+		this.attributeList = entity.getAttributeList();
+		this.showDb = (entity.getDbEntity() != null);
+
+		Collections.sort(
+			attributeList,
+			new PropertyComparator("name", Attribute.class));
 	}
-	
-	public DbEntity getDbEntity(){ 
+
+	public DbEntity getDbEntity() {
 		return dbEntity;
 	}
 
 	public ObjAttribute getAttribute(int row) {
 		if (row < 0 || row >= attributeList.size())
 			return null;
-		ObjAttribute attribute = (ObjAttribute)attributeList.get(row);
+		ObjAttribute attribute = (ObjAttribute) attributeList.get(row);
 		return attribute;
 	}
-	
 
-	
 	/** Refreshes DbEntity to current db entity within ObjEntity.*/
 	public void resetDbEntity() {
 		if (dbEntity == entity.getDbEntity())
 			return;
 		boolean change;
-		change = (   dbEntity == null && entity.getDbEntity() != null
-				  || dbEntity != null && entity.getDbEntity() == null);
-		
+		change =
+			(dbEntity == null
+				&& entity.getDbEntity() != null
+				|| dbEntity != null
+				&& entity.getDbEntity() == null);
+
 		dbEntity = entity.getDbEntity();
 		showDb = (null != dbEntity);
 		if (change)
 			fireTableStructureChanged();
 		fireTableDataChanged();
 	}
-	
+
 	public int getRowCount() {
 		return attributeList.size();
 	}
-	
-	public int getColumnCount()
-	{
+
+	public int getColumnCount() {
 		// If showing only obj attributes, show 2 columns 
 		// otherwise show 5 additional columns (7 total) for Db Attributes.
 		if (!showDb)
@@ -149,7 +162,7 @@ class ObjAttributeTableModel extends AbstractTableModel
 		else
 			return 4;
 	}
-	
+
 	public String getColumnName(int column) {
 		if (column == OBJ_ATTRIBUTE)
 			return "Obj Attribute";
@@ -159,13 +172,12 @@ class ObjAttributeTableModel extends AbstractTableModel
 			return "Db Attribute";
 		else if (column == DB_ATTRIBUTE_TYPE)
 			return "Type";
-		else return "";
+		else
+			return "";
 	}
-		
-	
-	public Object getValueAt(int row, int column)
-	{
-		ObjAttribute attrib = (ObjAttribute)attributeList.get(row);
+
+	public Object getValueAt(int row, int column) {
+		ObjAttribute attrib = (ObjAttribute) attributeList.get(row);
 		// If name column
 		if (column == OBJ_ATTRIBUTE)
 			return attrib.getName();
@@ -181,21 +193,26 @@ class ObjAttributeTableModel extends AbstractTableModel
 			else if (column == DB_ATTRIBUTE_TYPE) {
 				return TypesMapping.getSqlNameByType(db_attrib.getType());
 			}
-		}// End if DbAttrib column
+		} // End if DbAttrib column
 		return "";
-	}// End getValueAt()
-	
-    
-    public void setValueAt(Object aValue, int row, int column) {
-    	logObj.fine("setValue(), row = "+ row + ",attributeList size is " + attributeList.size());
-		ObjAttribute attrib = (ObjAttribute)attributeList.get(row);
-		String text = (aValue != null) ? ((String)aValue).trim() : "";
+	} // End getValueAt()
+
+	public void setValueAt(Object aValue, int row, int column) {
+		logObj.fine(
+			"setValue(), row = "
+				+ row
+				+ ",attributeList size is "
+				+ attributeList.size());
+		ObjAttribute attrib = (ObjAttribute) attributeList.get(row);
+		String text = (aValue != null) ? ((String) aValue).trim() : "";
 
 		// If "Obj Name" column
 		if (column == OBJ_ATTRIBUTE) {
 			String old_name = attrib.getName();
-			GuiFacade.setObjAttributeName(mediator.getCurrentDataMap()
-										, attrib, text);
+			GuiFacade.setObjAttributeName(
+				mediator.getCurrentDataMap(),
+				attrib,
+				text);
 			AttributeEvent e;
 			e = new AttributeEvent(src, attrib, entity, old_name);
 			mediator.fireObjAttributeEvent(e);
@@ -203,49 +220,52 @@ class ObjAttributeTableModel extends AbstractTableModel
 		}
 		// If Obj "Type" column
 		else if (column == OBJ_ATTRIBUTE_TYPE) {
-			
+
 			String type = (text.length() == 0) ? null : text;
 			attrib.setType(type);
-			mediator.fireObjAttributeEvent(new AttributeEvent(src, attrib, entity, AttributeEvent.CHANGE));
+			mediator.fireObjAttributeEvent(
+				new AttributeEvent(src, attrib, entity, AttributeEvent.CHANGE));
 			fireTableCellUpdated(row, column);
-		}
-		else {
+		} else {
 			DbAttribute db_attrib = attrib.getDbAttribute();
 			if (column == DB_ATTRIBUTE) {
 				// If db attrib exist, associate it with obj attribute
 				if (text.length() > 0) {
-					db_attrib = (DbAttribute)dbEntity.getAttribute(text);
+					db_attrib = (DbAttribute) dbEntity.getAttribute(text);
 					attrib.setDbAttribute(db_attrib);
 				}
 				// If name is erased, remove db attribute from obj attribute.
 				else if (db_attrib != null && text.length() == 0) {
 					attrib.setDbAttribute(null);
 				}
-			}// End DB_ATTRIBUTE column
+			} // End DB_ATTRIBUTE column
 			else {
 				return;
 			}
-        	fireTableRowsUpdated(row, row);
-		}// End DbAttribute columns
+			fireTableRowsUpdated(row, row);
+		} // End DbAttribute columns
 		AttributeEvent ev = new AttributeEvent(src, attrib, entity);
 		mediator.fireObjAttributeEvent(ev);
-    }// End setValueAt()
+	} // End setValueAt()
 
-	
 	/** Add new attribute to the model and the table. 
 	 *  Broadcast AttributeEvent.*/
 	public void addRow() {
-		ObjAttribute attr = (ObjAttribute)NamedObjectFactory.createObject(ObjAttribute.class, entity);
-		attributeList.add(attr);		
+		ObjAttribute attr =
+			(ObjAttribute) NamedObjectFactory.createObject(
+				ObjAttribute.class,
+				entity);
+		attributeList.add(attr);
 		entity.addAttribute(attr);
-		mediator.fireObjAttributeEvent(new AttributeEvent(src, attr, entity, AttributeEvent.ADD));
+		mediator.fireObjAttributeEvent(
+			new AttributeEvent(src, attr, entity, AttributeEvent.ADD));
 		fireTableDataChanged();
 	}
 
 	public void removeRow(int row) {
 		if (row < 0)
 			return;
-		Attribute attrib = (Attribute)attributeList.get(row);
+		Attribute attrib = (Attribute) attributeList.get(row);
 		AttributeEvent e;
 		e = new AttributeEvent(src, attrib, entity, AttributeEvent.REMOVE);
 		attributeList.remove(row);
@@ -253,7 +273,7 @@ class ObjAttributeTableModel extends AbstractTableModel
 		mediator.fireObjAttributeEvent(e);
 		fireTableDataChanged();
 	}
-	
+
 	/** Attribute just needs to be removed from the model. 
 	 *  It is already removed from the DataMap. */
 	void removeAttribute(Attribute attrib) {
@@ -266,15 +286,14 @@ class ObjAttributeTableModel extends AbstractTableModel
 		if (col == OBJ_ATTRIBUTE || col == OBJ_ATTRIBUTE_TYPE)
 			return true;
 		else {
-			ObjAttribute attrib = (ObjAttribute)attributeList.get(row);
+			ObjAttribute attrib = (ObjAttribute) attributeList.get(row);
 			DbAttribute db_attrib = attrib.getDbAttribute();
 			// Allow choosing different db attributes
 			if (col == DB_ATTRIBUTE)
 				return true;
 			// Don't allow editing db attribute parameters
-			else 
+			else
 				return false;
-		}// End DbAttribute columns
-	}// End isCellEditable()
-}// End ObjAttributeTableModel
-
+		} // End DbAttribute columns
+	} // End isCellEditable()
+} // End ObjAttributeTableModel

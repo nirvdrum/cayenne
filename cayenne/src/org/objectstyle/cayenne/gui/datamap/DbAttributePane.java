@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
@@ -71,61 +71,68 @@ import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
-/** Detail view of the DbEntity attributes. 
- * @author Michael Misha Shengaout */
-public class DbAttributePane extends JPanel
-implements ActionListener, DbEntityDisplayListener
-, ListSelectionListener, DbAttributeListener, ExistingSelectionProcessor
-{
+/** 
+ * Detail view of the DbEntity attributes. 
+ * 
+ * @author Michael Misha Shengaout 
+ */
+public class DbAttributePane
+	extends JPanel
+	implements
+		ActionListener,
+		DbEntityDisplayListener,
+		ListSelectionListener,
+		DbAttributeListener,
+		ExistingSelectionProcessor {
 	Mediator mediator;
 
-	JTable		table;
-	JButton		add;
-	
-	public DbAttributePane(Mediator temp_mediator)
-	{
+	JTable table;
+	JButton add;
+
+	public DbAttributePane(Mediator temp_mediator) {
 		super();
-		mediator = temp_mediator;		
+		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);
 		mediator.addDbAttributeListener(this);
 		// Create and layout components
-		init();		
+		init();
 		// Add listeners
 		add.addActionListener(this);
 	}
-	
-	private void init()
-	{
+
+	private void init() {
 		setLayout(new BorderLayout());
 
 		// Create table with two columns and no rows.
 		table = new CayenneTable();
-		add		= new JButton("Add");
-		JPanel panel = PanelFactory.createTablePanel(table
-												, new JButton[]{add});
+		add = new JButton("Add");
+		JPanel panel =
+			PanelFactory.createTablePanel(table, new JButton[] { add });
 		add(panel, BorderLayout.CENTER);
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		DbAttributeTableModel model = (DbAttributeTableModel)table.getModel();
+		DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
 		if (src == add) {
 			model.addRow();
 		}
 	}
-	
-	public void processExistingSelection()
-	{
-		DbAttribute rel = null;
+
+	public void processExistingSelection() {
+		DbAttribute att = null;
 		if (table.getSelectedRow() >= 0) {
-			DbAttributeTableModel model;
-			model = (DbAttributeTableModel)table.getModel();
-			rel = model.getAttribute(table.getSelectedRow());
+			DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
+			att = model.getAttribute(table.getSelectedRow());
 		}
 		AttributeDisplayEvent ev;
-		ev = new AttributeDisplayEvent(this, rel
-				, mediator.getCurrentDbEntity(), mediator.getCurrentDataMap()
-				, mediator.getCurrentDataDomain());
+		ev =
+			new AttributeDisplayEvent(
+				this,
+				att,
+				mediator.getCurrentDbEntity(),
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireDbAttributeDisplayEvent(ev);
 	}
 
@@ -133,32 +140,34 @@ implements ActionListener, DbEntityDisplayListener
 		processExistingSelection();
 	}
 
-	
 	private void stopEditing() {
 		// Stop whatever editing may be taking place
 		int col_index = table.getEditingColumn();
-		if (col_index >=0) {
+		if (col_index >= 0) {
 			TableColumn col = table.getColumnModel().getColumn(col_index);
 			col.getCellEditor().stopCellEditing();
 		}
 	}
+
+	public void dbAttributeChanged(AttributeEvent e) {
+	}
 	
-	public void dbAttributeChanged(AttributeEvent e){}
-	public void dbAttributeAdded(AttributeEvent e){}
-	public void dbAttributeRemoved(AttributeEvent e){
+	public void dbAttributeAdded(AttributeEvent e) {
+	}
+	
+	public void dbAttributeRemoved(AttributeEvent e) {
 		DbAttributeTableModel model;
-		model = (DbAttributeTableModel)table.getModel();
+		model = (DbAttributeTableModel) table.getModel();
 		model.removeAttribute(e.getAttribute());
 	}
 
-
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
-		DbEntity entity = (DbEntity)e.getEntity();
-		if (null == entity || e.isEntityChanged() == false)
+		DbEntity entity = (DbEntity) e.getEntity();
+		if (entity == null || !e.isEntityChanged())
 			return;
+			
 		// Display Obj Entity Attrib
-		DbAttributeTableModel model;
-		model = new DbAttributeTableModel(entity, mediator, this);
+		DbAttributeTableModel model = new DbAttributeTableModel(entity, mediator, this);
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);
