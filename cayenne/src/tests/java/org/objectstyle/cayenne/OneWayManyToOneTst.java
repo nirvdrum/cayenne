@@ -92,21 +92,16 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
 
     public void testSavedAdd() throws Exception {
         // prepare and save a gallery
-        Gallery g1 = newGallery();
+        Gallery g1 = newGallery("g1");
         ctxt.commitChanges();
-        ctxt = getDomain().createDataContext();
-
-        // fetch gallery and try setting it on the painting
-        Gallery g2 = fetchGallery();
-        assertNotNull(g2);
 
         Painting p2 = newPainting();
 
         // *** TESTING THIS *** 
-        p2.setToGallery(g2);
+        p2.setToGallery(g1);
 
         // test before save
-        assertSame(g2, p2.getToGallery());
+        assertSame(g1, p2.getToGallery());
 
         // do save II
         ctxt.commitChanges();
@@ -115,7 +110,31 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         Painting p3 = fetchPainting();
         Gallery g3 = p3.getToGallery();
         assertNotNull(g3);
-        assertEquals(CayenneDOTestBase.galleryName, g3.getGalleryName());
+        assertEquals("g1", g3.getGalleryName());
+    }
+
+    public void testSavedReplace() throws Exception {
+        // prepare and save a gallery
+        Gallery g11 = newGallery("g1");
+        Gallery g12 = newGallery("g1");
+        ctxt.commitChanges();
+
+        Painting p1 = newPainting();
+        p1.setToGallery(g11);
+
+        // test before save
+        assertSame(g11, p1.getToGallery());
+        ctxt.commitChanges();
+
+        p1.setToGallery(g12);
+        ctxt.commitChanges();
+
+        ctxt = getDomain().createDataContext();
+
+        Painting p2 = fetchPainting();
+        Gallery g21 = p2.getToGallery();
+        assertNotNull(g21);
+        assertEquals(g12.getGalleryName(), g21.getGalleryName());
     }
 
     protected Painting newPainting() {
@@ -124,22 +143,10 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         return p1;
     }
 
-    protected Gallery newGallery() {
+    protected Gallery newGallery(String name) {
         Gallery g1 = (Gallery) ctxt.createAndRegisterNewObject("Gallery");
-        g1.setGalleryName(CayenneDOTestBase.galleryName);
+        g1.setGalleryName(name);
         return g1;
-    }
-
-    protected Gallery fetchGallery() {
-        SelectQuery q =
-            new SelectQuery(
-                "Gallery",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "galleryName",
-                    CayenneDOTestBase.galleryName));
-        List gls = ctxt.performQuery(q);
-        return (gls.size() > 0) ? (Gallery) gls.get(0) : null;
     }
 
     protected Painting fetchPainting() {
