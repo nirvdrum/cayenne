@@ -57,14 +57,19 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
+
+import org.apache.log4j.Logger;
 
 /**  
  * Common superclass of tables used in Cayenne. Contains some common configuration
@@ -74,23 +79,46 @@ import javax.swing.text.JTextComponent;
  * @author Andrei Adamchik
  */
 public class CayenneTable extends JTable {
+    private static Logger logObj = Logger.getLogger(CayenneTable.class);
+
     protected void createDefaultEditors() {
         super.createDefaultEditors();
-        DefaultCellEditor temp =
-            new DefaultCellEditor(CayenneWidgetFactory.createTextField(0));
-        setDefaultEditor(Object.class, temp);
-        setDefaultEditor(String.class, temp);
+        
+        JTextField textField = CayenneWidgetFactory.createTextField(0);
+        final DefaultCellEditor editor = new DefaultCellEditor(textField);
+        
+        // this takes care of cases like handling of "delete" button clicks
+        // that delete a row being currently edited....
+        textField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                if (!e.isTemporary()) {
+                    editor.cancelCellEditing();
+                }
+            }
+        });
+
+        setDefaultEditor(Object.class, editor);
+        setDefaultEditor(String.class, editor);
     }
 
     public CayenneTableModel getCayenneModel() {
         return (CayenneTableModel) getModel();
+    }
+    
+    /**
+     * Cancels editing of any cells that maybe currently edited.
+     * This method should be called before updating any selections.
+     */
+    protected void cancelEditing() {
+    	editingCanceled(new ChangeEvent(this));
     }
 
     public void select(Object row) {
         if (row == null) {
             return;
         }
-
+		cancelEditing();
+		
         CayenneTableModel model = getCayenneModel();
         int ind = model.getObjectList().indexOf(row);
 
@@ -100,6 +128,8 @@ public class CayenneTable extends JTable {
     }
 
     public void select(int index) {
+		cancelEditing();
+		
         CayenneTableModel model = getCayenneModel();
         if (index >= model.getObjectList().size()) {
             index = model.getObjectList().size() - 1;
@@ -157,6 +187,7 @@ public class CayenneTable extends JTable {
                 if (!t.isFocusOwner()) {
                     t.requestFocus();
                 }
+
                 t.setCaretPosition(t.getDocument().getLength());
             }
         }

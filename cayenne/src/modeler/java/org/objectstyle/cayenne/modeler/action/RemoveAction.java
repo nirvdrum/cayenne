@@ -61,6 +61,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
@@ -90,8 +91,11 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * Domain, DataNode, Entity, Attribute or Relationship.
  * 
  * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class RemoveAction extends CayenneAction {
+    private static Logger logObj = Logger.getLogger(RemoveAction.class);
+
     public static final String ACTION_NAME = "Remove";
 
     public RemoveAction() {
@@ -115,27 +119,36 @@ public class RemoveAction extends CayenneAction {
 
         if (mediator.getCurrentObjAttribute() != null) {
             removeObjAttribute();
-        } else if (mediator.getCurrentDbAttribute() != null) {
+        }
+        else if (mediator.getCurrentDbAttribute() != null) {
             removeDbAttribute();
-        } else if (mediator.getCurrentObjRelationship() != null) {
+        }
+        else if (mediator.getCurrentObjRelationship() != null) {
             removeObjRelationship();
-        } else if (mediator.getCurrentDbRelationship() != null) {
+        }
+        else if (mediator.getCurrentDbRelationship() != null) {
             removeDbRelationship();
-        } else if (mediator.getCurrentObjEntity() != null) {
+        }
+        else if (mediator.getCurrentObjEntity() != null) {
             removeObjEntity();
-        } else if (mediator.getCurrentDbEntity() != null) {
+        }
+        else if (mediator.getCurrentDbEntity() != null) {
             removeDbEntity();
-        } else if (mediator.getCurrentDataMap() != null) {
+        }
+        else if (mediator.getCurrentDataMap() != null) {
             // In context of Data node just remove from Data Node
             if (mediator.getCurrentDataNode() != null) {
                 removeDataMapFromDataNode();
-            } else {
+            }
+            else {
                 // Not under Data Node, remove completely
                 removeDataMap();
             }
-        } else if (mediator.getCurrentDataNode() != null) {
+        }
+        else if (mediator.getCurrentDataNode() != null) {
             removeDataNode();
-        } else if (mediator.getCurrentDataDomain() != null) {
+        }
+        else if (mediator.getCurrentDataDomain() != null) {
             removeDomain();
         }
     }
@@ -267,17 +280,23 @@ public class RemoveAction extends CayenneAction {
 
         if (lastObject instanceof DataDomain) {
             return true;
-        } else if (lastObject instanceof DataMap) {
+        }
+        else if (lastObject instanceof DataMap) {
             return true;
-        } else if (lastObject instanceof DataNode) {
+        }
+        else if (lastObject instanceof DataNode) {
             return true;
-        } else if (lastObject instanceof Entity) {
+        }
+        else if (lastObject instanceof Entity) {
             return true;
-        } else if (lastObject instanceof Attribute) {
+        }
+        else if (lastObject instanceof Attribute) {
             return true;
-        } else if (lastObject instanceof Relationship) {
+        }
+        else if (lastObject instanceof Relationship) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
