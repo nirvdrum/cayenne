@@ -260,6 +260,7 @@ public abstract class Configuration {
             loader.loadDomains(in);
         } finally {
             this.loadStatus = delegate.getStatus();
+            in.close();
         }
     }
 

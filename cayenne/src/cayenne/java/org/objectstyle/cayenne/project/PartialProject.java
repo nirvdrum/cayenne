@@ -56,15 +56,18 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.ConfigLoaderDelegate;
 import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
 import org.objectstyle.cayenne.conf.ConfigStatus;
-import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * PartialProject is a "lightweight" project implementation. It can work with
@@ -97,6 +100,20 @@ public class PartialProject extends Project {
     protected void postInit(File projectFile) {
         loadDelegate = new LoadDelegate();
         domains = new ArrayList();
+
+        try {
+            FileInputStream in = new FileInputStream(projectFile);
+            try {
+                new ConfigLoader(loadDelegate).loadDomains(in);
+            } catch (Exception ex) {
+                throw new ProjectException("Error creating PartialProject.", ex);
+            } finally {
+                in.close();
+            }
+        } catch (IOException ioex) {
+            throw new ProjectException("Error creating PartialProject.", ioex);
+        }
+
         super.postInit(projectFile);
     }
 
@@ -106,6 +123,16 @@ public class PartialProject extends Project {
 
     public void checkForUpgrades() {
         // do nothing...
+    }
+    
+
+    /**
+     * @see org.objectstyle.cayenne.project.Project#buildFileList()
+     */
+    public List buildFileList() {
+        List list = new ArrayList();
+        list.add(projectFileForObject(this));
+        return list;
     }
 
     /**
@@ -126,7 +153,14 @@ public class PartialProject extends Project {
     }
 
     class DomainMetaData {
+        protected String name;
+        protected List nodes = new ArrayList();
+        protected List maps = new ArrayList();
+        protected Map mapDependencies = new HashMap();
 
+        public DomainMetaData(String name) {
+            this.name = name;
+        }
     }
 
     class LoadDelegate implements ConfigLoaderDelegate {
@@ -140,6 +174,7 @@ public class PartialProject extends Project {
         }
 
         public boolean loadError(Throwable th) {
+            status.getOtherFailures().add(th.getMessage());
             return false;
         }
 
@@ -150,6 +185,7 @@ public class PartialProject extends Project {
         }
 
         public void shouldLoadDataDomain(String name) {
+            domains.add(new DomainMetaData(name));
         }
 
         public void shouldLoadDataMap(

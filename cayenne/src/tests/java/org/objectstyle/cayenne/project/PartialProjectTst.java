@@ -122,5 +122,8 @@ public class PartialProjectTst extends CayenneTestCase {
             handler.findFile(handler).resolveFile(),
             handler.getMainFile());
     }
-
+    
+    public void testDomains() throws Exception {
+    	assertEquals(2, handler.getChildren().size());
+    }
 }
