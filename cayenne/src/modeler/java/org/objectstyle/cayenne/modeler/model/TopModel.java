@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -120,8 +121,11 @@ public class TopModel {
         openProjectAction.setAlwaysOn(true);
         actionMap.put(openProjectAction.getKey(), openProjectAction);
 
-        CayenneAction saveAction = new SaveAction();
-        actionMap.put(saveAction.getKey(), saveAction);
+		CayenneAction saveAction = new SaveAction();
+		actionMap.put(saveAction.getKey(), saveAction);
+
+		CayenneAction validateAction = new ValidateAction();
+		actionMap.put(validateAction.getKey(), validateAction);
 
         CayenneAction removeAction = new RemoveAction();
         actionMap.put(removeAction.getKey(), removeAction);

@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -113,7 +114,8 @@ public class ActionController extends ModelerController {
 
     protected void projectClosed() {
         disableAllActions();
-        getAction(ProjectAction.ACTION_NAME).setEnabled(false);
+		getAction(ValidateAction.ACTION_NAME).setEnabled(false);
+		getAction(ProjectAction.ACTION_NAME).setEnabled(false);
         getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
 
@@ -182,7 +184,8 @@ public class ActionController extends ModelerController {
     protected void enableProjectActions() {
         disableAllActions();
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
-        getAction(ProjectAction.ACTION_NAME).setEnabled(true);
+		getAction(ProjectAction.ACTION_NAME).setEnabled(true);
+		getAction(ValidateAction.ACTION_NAME).setEnabled(true);
     }
 
     /**

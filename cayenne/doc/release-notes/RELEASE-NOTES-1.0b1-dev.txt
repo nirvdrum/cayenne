@@ -9,3 +9,8 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
+1. Added validation on ObjRelationship to report a warning on a toMany 
+relationship with a Nullify delete rule, where the inverse relationship is 
+mandatory (based on mandatory attributes).
+
+2. Added Validation menu item on the File menu in the modeller.

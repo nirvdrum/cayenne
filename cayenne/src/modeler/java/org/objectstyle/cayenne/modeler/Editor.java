@@ -101,6 +101,7 @@ import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.control.TopController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -294,7 +295,8 @@ public class Editor
         fileMenu.add(getAction(OpenProjectAction.ACTION_NAME).buildMenu());
         fileMenu.add(getAction(ProjectAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
-        fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
+		fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
+		fileMenu.add(getAction(ValidateAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();
