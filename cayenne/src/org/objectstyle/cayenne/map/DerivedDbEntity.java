@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
@@ -115,21 +118,23 @@ public class DerivedDbEntity extends DbEntity {
 		Iterator rit = getParentEntity().getRelationshipList().iterator();
 		while (rit.hasNext()) {
 			DbRelationship protoRel = (DbRelationship) rit.next();
-            DbRelationship rel = new DbRelationship();
-            rel.setName(protoRel.getName());
-            rel.setSourceEntity(this);
-            rel.setTargetEntity(protoRel.getTargetEntity());
-            
-            Iterator joins = protoRel.getJoins().iterator(); 
-            while(joins.hasNext()) {
-            	DbAttributePair protoJoin = (DbAttributePair)joins.next();
-            	
-            	DbAttribute src = (DbAttribute)getAttribute(protoJoin.getSource().getName());
-            	DbAttributePair join = new DbAttributePair(src, protoJoin.getTarget());
-            	rel.addJoin(join);
-            }   
-            
-            addRelationship(rel);       
+			DbRelationship rel = new DbRelationship();
+			rel.setName(protoRel.getName());
+			rel.setSourceEntity(this);
+			rel.setTargetEntity(protoRel.getTargetEntity());
+
+			Iterator joins = protoRel.getJoins().iterator();
+			while (joins.hasNext()) {
+				DbAttributePair protoJoin = (DbAttributePair) joins.next();
+
+				DbAttribute src =
+					(DbAttribute) getAttribute(protoJoin.getSource().getName());
+				DbAttributePair join =
+					new DbAttributePair(src, protoJoin.getTarget());
+				rel.addJoin(join);
+			}
+
+			addRelationship(rel);
 		}
 	}
 

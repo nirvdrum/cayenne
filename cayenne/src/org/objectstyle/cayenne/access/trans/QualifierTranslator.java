@@ -63,6 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionTraversal;
 import org.objectstyle.cayenne.exp.TraversalHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -70,224 +71,225 @@ import org.objectstyle.cayenne.query.SelectQuery;
 /** Translates query qualifier to SQL. Used as a helper
  *  class by query translators. */
 public class QualifierTranslator
-    extends QueryAssemblerHelper
-    implements TraversalHandler {
-    static Logger logObj = Logger.getLogger(QualifierTranslator.class.getName());
+	extends QueryAssemblerHelper
+	implements TraversalHandler {
+	static Logger logObj =
+		Logger.getLogger(QualifierTranslator.class.getName());
 
-    private ExpressionTraversal treeWalker = new ExpressionTraversal();
-    private StringBuffer qualBuf = new StringBuffer();
-    
-    protected boolean translateParentQual;
+	private ExpressionTraversal treeWalker = new ExpressionTraversal();
+	private StringBuffer qualBuf = new StringBuffer();
 
-    public QualifierTranslator() {
-        this(null);
-    }
+	protected boolean translateParentQual;
 
-    public QualifierTranslator(QueryAssembler queryAssembler) {
-        super(queryAssembler);
-        treeWalker.setHandler(this);
-    }
+	public QualifierTranslator() {
+		this(null);
+	}
 
-    /** Translates query qualifier to SQL WHERE clause. 
-     *  Qualifier is obtained from <code>queryAssembler</code> object. 
-     */
-    public String doTranslation() {
-    	qualBuf.setLength(0);
-    	
-        Expression rootNode = extractQualifier();
-        if (rootNode == null) {
-            return null;
-        }
+	public QualifierTranslator(QueryAssembler queryAssembler) {
+		super(queryAssembler);
+		treeWalker.setHandler(this);
+	}
 
-        // build SQL where clause string based on expression
-        // (using '?' for object values)
-        treeWalker.traverseExpression(rootNode);
-        return qualBuf.length() > 0 ? qualBuf.toString() : null;
-    }
-    
-    protected Expression extractQualifier() {
-    	Query q = queryAssembler.getQuery();
-    	
-    	if(isTranslateParentQual()) {
-    		return ((SelectQuery) q).getParentQualifier();
-    	}
-    	else {
-    		return ((QualifiedQuery) q).getQualifier();
-    	}
-    }
+	/** Translates query qualifier to SQL WHERE clause. 
+	 *  Qualifier is obtained from <code>queryAssembler</code> object. 
+	 */
+	public String doTranslation() {
+		qualBuf.setLength(0);
 
-    /** Opportunity to insert an operation */
-    public void finishedChild(
-        Expression node,
-        int childIndex,
-        boolean hasMoreChildren) {
-        if (!hasMoreChildren)
-            return;
+		Expression rootNode = extractQualifier();
+		if (rootNode == null) {
+			return null;
+		}
 
-        switch (node.getType()) {
-            case Expression.AND :
-                qualBuf.append(" AND ");
-                break;
-            case Expression.OR :
-                qualBuf.append(" OR ");
-                break;
-            case Expression.EQUAL_TO :
-                qualBuf.append(" = ");
-                break;
-            case Expression.NOT_EQUAL_TO :
-                qualBuf.append(" <> ");
-                break;
-            case Expression.LESS_THAN :
-                qualBuf.append(" < ");
-                break;
-            case Expression.GREATER_THAN :
-                qualBuf.append(" > ");
-                break;
-            case Expression.LESS_THAN_EQUAL_TO :
-                qualBuf.append(" <= ");
-                break;
-            case Expression.GREATER_THAN_EQUAL_TO :
-                qualBuf.append(" >= ");
-                break;
-            case Expression.IN :
-                qualBuf.append(" IN ");
-                break;
-            case Expression.LIKE :
-                qualBuf.append(" LIKE ");
-                break;
-            case Expression.LIKE_IGNORE_CASE :
-                qualBuf.append(") LIKE UPPER(");
-                break;
-            case Expression.ADD :
-                qualBuf.append(" + ");
-                break;
-            case Expression.SUBTRACT :
-                qualBuf.append(" - ");
-                break;
-            case Expression.MULTIPLY :
-                qualBuf.append(" * ");
-                break;
-            case Expression.DIVIDE :
-                qualBuf.append(" / ");
-                break;
-            case Expression.BETWEEN :
-                if (childIndex == 0)
-                    qualBuf.append(" BETWEEN ");
-                else if (childIndex == 1)
-                    qualBuf.append(" AND ");
-                break;
-        }
-    }
+		// build SQL where clause string based on expression
+		// (using '?' for object values)
+		treeWalker.traverseExpression(rootNode);
+		return qualBuf.length() > 0 ? qualBuf.toString() : null;
+	}
 
-    /** Opportunity to open a bracket */
-    public void startUnaryNode(Expression node, Expression parentNode) {
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append('(');
+	protected Expression extractQualifier() {
+		Query q = queryAssembler.getQuery();
 
-        if (node.getType() == Expression.NEGATIVE)
-            qualBuf.append('-');
-        // ignore POSITIVE - it is a NOOP
-        // else if(node.getType() == Expression.POSITIVE)
-        //     qualBuf.append('+');
-        else if (node.getType() == Expression.NOT)
-            qualBuf.append("NOT ");
-        else if (node.getType() == Expression.EXISTS)
-            qualBuf.append("EXISTS ");
-        else if (node.getType() == Expression.ALL)
-            qualBuf.append("ALL ");
-        else if (node.getType() == Expression.SOME)
-            qualBuf.append("SOME ");
-        else if (node.getType() == Expression.ANY)
-            qualBuf.append("ANY ");
-    }
+		if (isTranslateParentQual()) {
+			return ((SelectQuery) q).getParentQualifier();
+		} else {
+			return ((QualifiedQuery) q).getQualifier();
+		}
+	}
 
-    /** Opportunity to open a bracket */
-    public void startBinaryNode(Expression node, Expression parentNode) {
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append('(');
-        if (node.getType() == Expression.LIKE_IGNORE_CASE)
-            qualBuf.append("UPPER(");
-    }
+	/** Opportunity to insert an operation */
+	public void finishedChild(
+		Expression node,
+		int childIndex,
+		boolean hasMoreChildren) {
+		if (!hasMoreChildren)
+			return;
 
-    /** Opportunity to open a bracket */
-    public void startTernaryNode(Expression node, Expression parentNode) {
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append('(');
-    }
+		switch (node.getType()) {
+			case Expression.AND :
+				qualBuf.append(" AND ");
+				break;
+			case Expression.OR :
+				qualBuf.append(" OR ");
+				break;
+			case Expression.EQUAL_TO :
+				qualBuf.append(" = ");
+				break;
+			case Expression.NOT_EQUAL_TO :
+				qualBuf.append(" <> ");
+				break;
+			case Expression.LESS_THAN :
+				qualBuf.append(" < ");
+				break;
+			case Expression.GREATER_THAN :
+				qualBuf.append(" > ");
+				break;
+			case Expression.LESS_THAN_EQUAL_TO :
+				qualBuf.append(" <= ");
+				break;
+			case Expression.GREATER_THAN_EQUAL_TO :
+				qualBuf.append(" >= ");
+				break;
+			case Expression.IN :
+				qualBuf.append(" IN ");
+				break;
+			case Expression.LIKE :
+				qualBuf.append(" LIKE ");
+				break;
+			case Expression.LIKE_IGNORE_CASE :
+				qualBuf.append(") LIKE UPPER(");
+				break;
+			case Expression.ADD :
+				qualBuf.append(" + ");
+				break;
+			case Expression.SUBTRACT :
+				qualBuf.append(" - ");
+				break;
+			case Expression.MULTIPLY :
+				qualBuf.append(" * ");
+				break;
+			case Expression.DIVIDE :
+				qualBuf.append(" / ");
+				break;
+			case Expression.BETWEEN :
+				if (childIndex == 0)
+					qualBuf.append(" BETWEEN ");
+				else if (childIndex == 1)
+					qualBuf.append(" AND ");
+				break;
+		}
+	}
 
-    /** Opportunity to close a bracket */
-    public void endUnaryNode(Expression node, Expression parentNode) {
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append(')');
-    }
+	/** Opportunity to open a bracket */
+	public void startUnaryNode(Expression node, Expression parentNode) {
+		if (parenthesisNeeded(node, parentNode))
+			qualBuf.append('(');
 
-    /** Opportunity to close a bracket */
-    public void endBinaryNode(Expression node, Expression parentNode) {
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append(')');
-        if (node.getType() == Expression.LIKE_IGNORE_CASE)
-            qualBuf.append(')');
-    }
+		if (node.getType() == Expression.NEGATIVE)
+			qualBuf.append('-');
+		// ignore POSITIVE - it is a NOOP
+		// else if(node.getType() == Expression.POSITIVE)
+		//     qualBuf.append('+');
+		else if (node.getType() == Expression.NOT)
+			qualBuf.append("NOT ");
+		else if (node.getType() == Expression.EXISTS)
+			qualBuf.append("EXISTS ");
+		else if (node.getType() == Expression.ALL)
+			qualBuf.append("ALL ");
+		else if (node.getType() == Expression.SOME)
+			qualBuf.append("SOME ");
+		else if (node.getType() == Expression.ANY)
+			qualBuf.append("ANY ");
+	}
 
-    /** Opportunity to close a bracket */
-    public void endTernaryNode(Expression node, Expression parentNode) {
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append(')');
-    }
+	/** Opportunity to open a bracket */
+	public void startBinaryNode(Expression node, Expression parentNode) {
+		if (parenthesisNeeded(node, parentNode))
+			qualBuf.append('(');
+		if (node.getType() == Expression.LIKE_IGNORE_CASE)
+			qualBuf.append("UPPER(");
+	}
 
-    public void objectNode(Object leaf, Expression parentNode) {
-        if (parentNode.getType() == Expression.RAW_SQL)
-            appendRawSql(leaf);
-        else if (parentNode.getType() == Expression.OBJ_PATH)
-            appendObjPath(qualBuf, parentNode);
-        else if (parentNode.getType() == Expression.DB_NAME)
-            appendDbPath(qualBuf, parentNode);
-        else if (parentNode.getType() == Expression.LIST)
-            appendList(parentNode, paramsDbType(parentNode));
-        else
-            appendLiteral(qualBuf, leaf, paramsDbType(parentNode));
-    }
+	/** Opportunity to open a bracket */
+	public void startTernaryNode(Expression node, Expression parentNode) {
+		if (parenthesisNeeded(node, parentNode))
+			qualBuf.append('(');
+	}
 
-    private boolean parenthesisNeeded(Expression node, Expression parentNode) {
-        if (parentNode == null)
-            return false;
+	/** Opportunity to close a bracket */
+	public void endUnaryNode(Expression node, Expression parentNode) {
+		if (parenthesisNeeded(node, parentNode))
+			qualBuf.append(')');
+	}
 
-        // only unary expressions can go w/o parenthesis
-        if (node.getOperandCount() > 1)
-            return true;
+	/** Opportunity to close a bracket */
+	public void endBinaryNode(Expression node, Expression parentNode) {
+		if (parenthesisNeeded(node, parentNode))
+			qualBuf.append(')');
+		if (node.getType() == Expression.LIKE_IGNORE_CASE)
+			qualBuf.append(')');
+	}
 
-        if (node.getType() == Expression.OBJ_PATH)
-            return false;
+	/** Opportunity to close a bracket */
+	public void endTernaryNode(Expression node, Expression parentNode) {
+		if (parenthesisNeeded(node, parentNode))
+			qualBuf.append(')');
+	}
 
-        if (node.getType() == Expression.DB_NAME)
-            return false;
+	public void objectNode(Object leaf, Expression parentNode) {
+		if (parentNode.getType() == Expression.RAW_SQL) {
+			appendRawSql(leaf);
+		} else if (parentNode.getType() == Expression.OBJ_PATH) {
+			appendObjPath(qualBuf, parentNode);
+		} else if (parentNode.getType() == Expression.DB_NAME) {
+			appendDbPath(qualBuf, parentNode);
+		} else if (parentNode.getType() == Expression.LIST) {
+			appendList(parentNode, paramsDbType(parentNode));
+		} else {
+			appendLiteral(qualBuf, leaf, paramsDbType(parentNode));
+		}
+	}
 
-        return true;
-    }
+	private boolean parenthesisNeeded(Expression node, Expression parentNode) {
+		if (parentNode == null)
+			return false;
 
-    private void appendRawSql(Object sql) {
-        if (sql != null) {
-            qualBuf.append(sql);
-        }
-    }
+		// only unary expressions can go w/o parenthesis
+		if (node.getOperandCount() > 1)
+			return true;
 
-    private final void appendList(Expression listExpr, DbAttribute paramDesc) {
-        List list = (List) listExpr.getOperand(0);
+		if (node.getType() == Expression.OBJ_PATH)
+			return false;
 
-        Iterator it = list.iterator();
-        // process first element outside the loop
-        // (unroll loop to avoid condition checking
-        if (it.hasNext())
-            appendLiteral(qualBuf, it.next(), paramDesc);
-        else
-            return;
+		if (node.getType() == Expression.DB_NAME)
+			return false;
 
-        while (it.hasNext()) {
-            qualBuf.append(", ");
-            appendLiteral(qualBuf, it.next(), paramDesc);
-        }
-    }
-    
+		return true;
+	}
+
+	private void appendRawSql(Object sql) {
+		if (sql != null) {
+			qualBuf.append(sql);
+		}
+	}
+
+	private final void appendList(Expression listExpr, DbAttribute paramDesc) {
+		List list = (List) listExpr.getOperand(0);
+
+		Iterator it = list.iterator();
+		// process first element outside the loop
+		// (unroll loop to avoid condition checking
+		if (it.hasNext())
+			appendLiteral(qualBuf, it.next(), paramDesc);
+		else
+			return;
+
+		while (it.hasNext()) {
+			qualBuf.append(", ");
+			appendLiteral(qualBuf, it.next(), paramDesc);
+		}
+	}
+
 	/**
 	 * Returns <code>true</code> if this translator will translate
 	 * parent qualifier on call to <code>doTranslation</code>.
@@ -297,7 +299,6 @@ public class QualifierTranslator
 	public boolean isTranslateParentQual() {
 		return translateParentQual;
 	}
-
 
 	/**
 	 * Configures translator to translate
@@ -309,5 +310,15 @@ public class QualifierTranslator
 		this.translateParentQual = translateParentQual;
 	}
 
+	/**
+	 * @see org.objectstyle.cayenne.access.trans.QueryAssemblerHelper#getObjEntity()
+	 */
+	public ObjEntity getObjEntity() {
+		return (isTranslateParentQual())
+			? queryAssembler.getEngine().lookupEntity(
+				((SelectQuery) queryAssembler.getQuery())
+					.getParentObjEntityName())
+			: super.getObjEntity();
+	}
 
 }

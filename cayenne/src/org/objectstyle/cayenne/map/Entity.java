@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.map;
 
 import java.util.*;
@@ -60,195 +60,188 @@ import java.util.*;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 
-
 /** Superclass of metadata classes. */
 public abstract class Entity {
-    public static final String PATH_SEPARATOR = ".";
+	public static final String PATH_SEPARATOR = ".";
 
-    protected String name;
-    protected HashMap attributes =  new HashMap();
-    protected HashMap relationships =  new HashMap();
+	protected String name;
+	protected HashMap attributes = new HashMap();
+	protected HashMap relationships = new HashMap();
 
-    /** Returns entity name. */
-    public String getName() {
-        return name;
-    }
+	/** Returns entity name. */
+	public String getName() {
+		return name;
+	}
 
+	/** Sets entity name. */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /** Sets entity name. */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/** Returns attribute with name <code>attrName</code>.
+	* Will return null if no attribute with this name exists in the entity. */
+	public Attribute getAttribute(String attrName) {
+		return (Attribute) attributes.get(attrName);
+	}
 
+	/** Adds new attribute to the entity.
+	 * Also sets <code>attr</code> entity to be this entity. */
+	public void addAttribute(Attribute attr) {
+		attributes.put(attr.getName(), attr);
 
-    /** Returns attribute with name <code>attrName</code>.
-    * Will return null if no attribute with this name exists in the entity. */
-    public Attribute getAttribute(String attrName) {
-        return (Attribute)attributes.get(attrName);
-    }
+		// set attribute's entity to be "this" entity
+		attr.setEntity(this);
+	}
 
+	/** Removes an attribute named <code>attrName</code>.*/
+	public void removeAttribute(String attrName) {
+		attributes.remove(attrName);
+	}
 
-    /** Adds new attribute to the entity.
-     * Also sets <code>attr</code> entity to be this entity. */
-    public void addAttribute(Attribute attr) {
-        attributes.put(attr.getName(), attr);
+	public void clearAttributes() {
+		attributes.clear();
+	}
 
-        // set attribute's entity to be "this" entity
-        attr.setEntity(this);
-    }
+	/** 
+	 * Returns relationship with name <code>relName</code>.
+	 * Will return null if no relationship with this name 
+	 * exists in the entity. 
+	 */
+	public Relationship getRelationship(String relName) {
+		return (Relationship) relationships.get(relName);
+	}
 
+	/** Adds new relationship to the entity. */
+	public void addRelationship(Relationship rel) {
+		relationships.put(rel.getName(), rel);
 
-    /** Removes an attribute named <code>attrName</code>.*/
-    public void removeAttribute(String attrName) {
-        attributes.remove(attrName);
-    }
-    
-    public void clearAttributes() {
-    	attributes.clear();
-    }
+		// set rel's source entity to be "this" entity
+		rel.setSourceEntity(this);
+	}
 
+	/** Removes a relationship named <code>attrName</code>.*/
+	public void removeRelationship(String relName) {
+		relationships.remove(relName);
+	}
 
-    /** 
-     * Returns relationship with name <code>relName</code>.
-     * Will return null if no relationship with this name 
-     * exists in the entity. 
-     */
-    public Relationship getRelationship(String relName) {
-        return (Relationship)relationships.get(relName);
-    }
+	public void clearRelationships() {
+		relationships.clear();
+	}
 
+	public Map getRelationshipMap() {
+		return Collections.unmodifiableMap(relationships);
+	}
 
-    /** Adds new relationship to the entity. */
-    public void addRelationship(Relationship rel) {
-        relationships.put(rel.getName(), rel);
+	/** Returns a list of Relationship's that exist in this entity. */
+	public List getRelationshipList() {
+		ArrayList list = new ArrayList();
+		Iterator it = relationships.keySet().iterator();
+		while (it.hasNext()) {
+			list.add(relationships.get(it.next()));
+		}
 
-        // set rel's source entity to be "this" entity
-        rel.setSourceEntity(this);
-    }
+		return list;
+	}
 
+	/** Returns entity attributes as an unmodifiable map. */
+	public Map getAttributeMap() {
+		return Collections.unmodifiableMap(attributes);
+	}
 
-    /** Removes a relationship named <code>attrName</code>.*/
-    public void removeRelationship(String relName) {
-        relationships.remove(relName);
-    }
+	/** Returns entity attributes as a list. */
+	public List getAttributeList() {
+		ArrayList list = new ArrayList();
+		Iterator it = attributes.keySet().iterator();
+		while (it.hasNext()) {
+			list.add(attributes.get(it.next()));
+		}
 
-    public void clearRelationships() {
-    	relationships.clear();
-    }
+		return list;
+	}
 
-    public Map getRelationshipMap() {
-        return Collections.unmodifiableMap(relationships);
-    }
+	/** 
+	 * Processes expression <code>objPathExp</code> and returns an Iterator
+	 * of path components that contains a sequence of Attributes and Relationships.
+	 * Note that if path is invalid and can not be resolved from this entity,
+	 * this method will still return an Iterator, but an attempt to read the first
+	 * invalid path component will result in ExpressionException.
+	 *
+	 * @see org.objectstyle.cayenne.exp.Expression#OBJ_PATH for definition of OBJ_PATH.
+	 *
+	 * @throws org.objectstyle.cayenne.exp.ExpressionException Exception is thrown if
+	 * <code>objPathExp</code> is not of type OBJ_PATH
+	 */
+	public Iterator resolvePathComponents(Expression objPathExp)
+		throws ExpressionException {
+		if (objPathExp.getType() != Expression.OBJ_PATH)
+			throw new ExpressionException(
+				"Invalid expression type: '"
+					+ objPathExp.getType()
+					+ "' ('"
+					+ Expression.OBJ_PATH
+					+ "' is expected).");
 
+		return new PathIterator(this, (String) objPathExp.getOperand(0));
+	}
 
-    /** Returns a list of Relationship's that exist in this entity. */
-    public List getRelationshipList() {
-        ArrayList list = new ArrayList();
-        Iterator it = relationships.keySet().iterator();
-        while(it.hasNext()) {
-            list.add(relationships.get(it.next()));
-        }
+	// Used to return an iterator to callers of 'resolvePathComponents'
+	protected final class PathIterator implements Iterator {
+		private StringTokenizer toks;
+		private Entity currentEnt;
 
-        return list;
-    }
+		PathIterator(Entity ent, String path) {
+			this.toks = new StringTokenizer(path, PATH_SEPARATOR);
+			this.currentEnt = ent;
+		}
 
+		public boolean hasNext() {
+			return toks.hasMoreTokens();
+		}
 
-    /** Returns entity attributes as an unmodifiable map. */
-    public Map getAttributeMap() {
-        return Collections.unmodifiableMap(attributes);
-    }
+		public Object next() {
+			String pathComp = toks.nextToken();
 
-    /** Returns entity attributes as a list. */
-    public List getAttributeList() {
-        ArrayList list = new ArrayList();
-        Iterator it = attributes.keySet().iterator();
-        while(it.hasNext()) {
-            list.add(attributes.get(it.next()));
-        }
+			// see if this is an attribute
+			Attribute attr = currentEnt.getAttribute(pathComp);
+			if (attr != null) {
+				// do a sanity check...
+				if (toks.hasMoreTokens()) {
+					throw new ExpressionException(
+						"Attribute must be the last component of the path: '"
+							+ pathComp
+							+ "'.");
+				}
 
-        return list;
-    }
+				return attr;
+			}
 
+			Relationship rel = currentEnt.getRelationship(pathComp);
+			if (rel != null) {
+				currentEnt = rel.getTargetEntity();
+				return rel;
+			}
 
-    /** 
-     * Processes expression <code>objPathExp</code> and returns an Iterator
-     * of path components that contains a sequence of Attributes and Relationships.
-     * Note that if path is invalid and can not be resolved from this entity,
-     * this method will still return an Iterator, but an attempt to read the first
-     * invalid path component will result in ExpressionException.
-     *
-     * @see org.objectstyle.cayenne.exp.Expression#OBJ_PATH for definition of OBJ_PATH.
-     *
-     * @throws org.objectstyle.cayenne.exp.ExpressionException Exception is thrown if
-     * <code>objPathExp</code> is not of type OBJ_PATH
-     */
-    public Iterator resolvePathComponents(Expression objPathExp) throws ExpressionException {
-        if(objPathExp.getType() != Expression.OBJ_PATH)
-            throw new ExpressionException(
-            "Invalid expression type: '" + objPathExp.getType()
-            + "' ('" + Expression.OBJ_PATH + "' is expected)."
-            );
+			// build error message
+			StringBuffer buf = new StringBuffer();
+			buf
+				.append("Can't resolve path component: [")
+				.append(currentEnt.getName())
+				.append('.')
+				.append(pathComp)
+				.append("].");
+			throw new ExpressionException(buf.toString());
+		}
 
-        return new PathIterator((String)objPathExp.getOperand(0));
-    }
+		public void remove() {
+			throw new UnsupportedOperationException("'remove' operation is not supported.");
+		}
+	}
 
+	HashMap getAttributes() {
+		return attributes;
+	}
 
-    // Used to return an iterator to callers of 'resolvePathComponents'
-    final class PathIterator implements Iterator {
-        private StringTokenizer toks;
-        private Entity currentEnt;
-
-        PathIterator(String path) {
-            toks = new StringTokenizer(path, PATH_SEPARATOR);
-            currentEnt = Entity.this;
-        }
-
-
-        public boolean hasNext() {
-            return toks.hasMoreTokens();
-        }
-
-
-        public Object next() {
-            String pathComp = toks.nextToken();
-
-            // see if this is an attribute
-            Attribute attr = currentEnt.getAttribute(pathComp);
-            if(attr != null) {
-                // do a sanity check...
-                if(toks.hasMoreTokens())
-                    throw new ExpressionException("Attribute must be the last component of the path: '" + pathComp + "'.");
-
-                return attr;
-            }
-
-            Relationship rel = currentEnt.getRelationship(pathComp);
-            if(rel != null) {
-                currentEnt = rel.getTargetEntity();
-                return rel;
-            }
-
- 
-            // build error message
-            StringBuffer buf = new StringBuffer();
-            buf.append("Can't resolve path component: [")
-            .append(currentEnt.getName())
-            .append('.')
-            .append(pathComp)
-            .append("].");
-            throw new ExpressionException(buf.toString());
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("'remove' operation is not supported.");
-        }
-    }
-
-  HashMap getAttributes() {
-    return attributes;
-  }
-
-  HashMap getRelationships() {
-    return relationships;
-  }
+	HashMap getRelationships() {
+		return relationships;
+	}
 }

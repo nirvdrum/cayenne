@@ -93,15 +93,16 @@ public abstract class QueryAssembler extends QueryTranslator {
     * to invoke it explicitly. */
     public abstract String createSqlString() throws java.lang.Exception;
 
-    /** Returns a name that can be used as column alias.
-     *  This can be one of the following:
-     *  <ul>
-     *  <li>an alias for this table, if it uses aliases
-     *  <li>a fully qualified table name, if not
-     *  <li> null if dbEnt is not in its list of tables
-     *  </ul>
-     *
-     *  Default implementation throws RuntimeException
+    /** 
+     * Returns a name that can be used as column alias.
+     * This can be one of the following:
+     * <ul>
+     *  <li>an alias for this table, if it uses aliases</li>
+     *  <li>a fully qualified table name, if not.</li>
+     * </ul>
+     *  
+     * CayenneRuntimeException is thrown if a table alias
+     * can not be created.
      */
     public abstract String aliasForTable(DbEntity dbEnt);
 

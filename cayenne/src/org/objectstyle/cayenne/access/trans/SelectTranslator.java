@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.io.File;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -277,10 +276,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 	 * Creates a list of columns used in the query.
 	 */
 	private void buildColumnList() {
-		DbEntity dbEntity = getRootEntity().getDbEntity();
-		String newAlias = "t" + aliasCounter++;
-		tableList.add(dbEntity);
-		aliasList.add(newAlias);
+		newAliasForTable(getRootEntity().getDbEntity());
 		appendAttributes();
 	}
 
@@ -366,51 +362,25 @@ public class SelectTranslator extends SelectQueryAssembler {
 
 	private void appendColumn(StringBuffer queryBuf, int index) {
 		DbAttribute attr = (DbAttribute) columnList.get(index);
-		Entity ent = attr.getEntity();
-		int aliasIndex = tableList.indexOf(ent);
-
-		if (aliasIndex < 0) {
-			// print some valuable diagnostics in case of translation errors
-
-			String name = (ent != null) ? ent.getName() : "<null entity>";
-			String attrName = attr.getName();
-			StringBuffer msg = new StringBuffer();
-			msg
-				.append("Alias not found for attribute: ")
-				.append(name)
-				.append('.')
-				.append(attrName)
-				.append(File.separator)
-				.append("Existing aliased entities:");
-
-			Iterator it = tableList.iterator();
-			while (it.hasNext()) {
-				DbEntity en = (DbEntity) it.next();
-				msg.append(' ').append(
-					en != null ? en.getName() : "<null entity>");
-			}
-
-			throw new CayenneRuntimeException(msg.toString());
-		}
-
-		queryBuf.append(
-			attr.getAliasedName((String) aliasList.get(aliasIndex)));
+		String alias = aliasForTable((DbEntity) attr.getEntity());
+		queryBuf.append(attr.getAliasedName(alias));
 	}
+
 
 	private void appendGroupBy(StringBuffer queryBuf, int index) {
 		DbAttribute attr = (DbAttribute) groupByList.get(index);
-		Entity ent = attr.getEntity();
-		int aliasIndex = tableList.indexOf(ent);
-
+		DbEntity ent = (DbEntity)attr.getEntity();
 		queryBuf.append(
-			attr.getAliasedName((String) aliasList.get(aliasIndex)));
+			attr.getAliasedName(aliasForTable(ent)));
 	}
+
 
 	private void appendTable(StringBuffer queryBuf, int index) {
 		DbEntity ent = (DbEntity) tableList.get(index);
 		queryBuf.append(ent.getFullyQualifiedName());
-		queryBuf.append(' ').append(aliasList.get(index));
+		queryBuf.append(' ').append(aliasForTable(ent));
 	}
+
 
 	private void appendDbRelJoins(StringBuffer queryBuf, int index) {
 		DbRelationship rel = (DbRelationship) dbRelList.get(index);
@@ -455,23 +425,60 @@ public class SelectTranslator extends SelectQueryAssembler {
 		if (existAlias == null) {
 			dbRelList.add(rel);
 
-			// add alias for the destination table
-			// of the relationship
-			String newAlias = "t" + aliasCounter++;
-			tableList.add(rel.getTargetEntity());
-			aliasList.add(newAlias);
+			// add alias for the destination table of the relationship
+			String newAlias =
+				newAliasForTable((DbEntity) rel.getTargetEntity());
 			aliasLookup.put(rel, newAlias);
 		}
 	}
 
-	/** Overrides superclass implementation. Will return an alias that
-	*  should be used for a specified DbEntity in the query
-	*  (or null if this DbEntity is not included in the FROM
-	*  clause).
-	*/
-	public String aliasForTable(DbEntity dbEnt) {
-		int entIndex = tableList.indexOf(dbEnt);
-		return (entIndex >= 0) ? (String) aliasList.get(entIndex) : null;
+	/**
+	 * Sets up and returns a new alias for a speciafied table.
+	 */
+	protected String newAliasForTable(DbEntity ent) {
+		if (ent instanceof DerivedDbEntity) {
+			ent = ((DerivedDbEntity) ent).getParentEntity();
+		}
+
+		String newAlias = "t" + aliasCounter++;
+		tableList.add(ent);
+		aliasList.add(newAlias);
+		return newAlias;
+	}
+
+	/** 
+	 * Overrides superclass implementation. Will return an alias that
+	 * should be used for a specified DbEntity in the query
+	 * (or null if this DbEntity is not included in the FROM clause).
+	 */
+	public String aliasForTable(DbEntity ent) {
+		if (ent instanceof DerivedDbEntity) {
+			ent = ((DerivedDbEntity) ent).getParentEntity();
+		}
+
+		int entIndex = tableList.indexOf(ent);
+		if (entIndex >= 0) {
+			return (String) aliasList.get(entIndex);
+		} else {
+			StringBuffer msg = new StringBuffer();
+			msg
+				.append("Alias not found, DbEntity: '")
+				.append(ent != null ? ent.getName() : "<null entity>")
+				.append("'\nExisting aliases:");
+
+			int len = aliasList.size();
+			for (int i = 0; i < len; i++) {
+				String dbeName =
+					(tableList.get(i) != null)
+						? ((DbEntity) tableList.get(i)).getName()
+						: "<null entity>";
+				msg.append("\n").append(aliasList.get(0)).append(
+					" => ").append(
+					dbeName);
+			}
+
+			throw new CayenneRuntimeException(msg.toString());
+		}
 	}
 
 	public boolean supportsTableAliases() {

@@ -296,6 +296,22 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(1, a1.getPaintingsCount().intValue());
 	}
 	
+    /** 
+	 * Test fetching a derived entity with complex qualifier including relationships
+	 * on the parent entity.
+	 */
+	public void testDerivedEntityFetch3() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("ArtistAssets");
+		q.setParentObjEntityName("Painting");
+		q.andQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
+		q.andParentQualifier(ExpressionFactory.matchExp("toPaintingInfo.textReview", "abc"));
+		q.setLogLevel(Level.SEVERE);
+        assertEquals(0, ctxt.performQuery(q).size());
+	}
+	
+	
 	public void testPerformQueries() throws Exception {
 		SelectQuery q1 = new SelectQuery();
 		q1.setObjEntityName("Artist");

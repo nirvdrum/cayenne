@@ -100,11 +100,18 @@ public abstract class QueryAssemblerHelper {
 	 * when translating columns. */
 	public abstract String doTranslation();
 
+	public ObjEntity getObjEntity() {
+		return getQueryAssembler().getRootEntity();
+	}
+
+	public DbEntity getDbEntity() {
+		return getQueryAssembler().getRootEntity().getDbEntity();
+	}
+
 	/** Processes parts of the OBJ_PATH expression. */
 	protected void appendObjPath(StringBuffer buf, Expression pathExp) {
 
-		Iterator it =
-			getQueryAssembler().getRootEntity().resolvePathComponents(pathExp);
+		Iterator it = getObjEntity().resolvePathComponents(pathExp);
 
 		while (it.hasNext()) {
 			Object pathComp = it.next();
@@ -129,21 +136,27 @@ public abstract class QueryAssemblerHelper {
 
 	protected void appendDbPath(StringBuffer buf, Expression pathExp) {
 		String attrName = (String) pathExp.getOperand(0);
-		DbAttribute attr =
-			(DbAttribute) getQueryAssembler()
-				.getRootEntity()
-				.getDbEntity()
-				.getAttribute(
-				attrName);
+		DbAttribute attr = (DbAttribute) getDbEntity().getAttribute(attrName);
+
+		if (attr == null) {
+			DbEntity dbe = getDbEntity();
+			StringBuffer msg = new StringBuffer();
+			msg
+				.append("DbAttribute not found: '")
+				.append(dbe.getName())
+				.append('.')
+				.append(attrName)
+				.append("'.");
+			throw new CayenneRuntimeException(msg.toString());
+		}
+
 		processColumn(buf, attr);
 	}
 
 	/** Appends column name of a column in a root entity. */
 	protected void processColumn(StringBuffer buf, Expression nameExp) {
 		if (queryAssembler.supportsTableAliases()) {
-			String alias =
-				queryAssembler.aliasForTable(
-					getQueryAssembler().getRootEntity().getDbEntity());
+			String alias = queryAssembler.aliasForTable(getDbEntity());
 			buf.append(alias).append('.');
 		}
 
@@ -266,11 +279,7 @@ public abstract class QueryAssemblerHelper {
 				Expression ope = (Expression) op;
 				if (ope.getType() == Expression.OBJ_PATH) {
 
-					Iterator it =
-						getQueryAssembler()
-							.getRootEntity()
-							.resolvePathComponents(
-							ope);
+					Iterator it = getObjEntity().resolvePathComponents(ope);
 					while (it.hasNext()) {
 						Object pathComp = it.next();
 
