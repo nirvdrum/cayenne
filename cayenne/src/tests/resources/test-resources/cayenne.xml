@@ -4,8 +4,8 @@
 	<map name="one-way-map" location="one-way-map.map.xml"/>
 	<map name="map-db2" location="map-db2.map.xml"/>
 	<map name="locking" location="locking.map.xml"/>
-	<map name="map-db1" location="map-db1.map.xml"/>
 	<map name="testmap" location="testmap.map.xml"/>
+	<map name="map-db1" location="map-db1.map.xml"/>
 	<map name="people" location="people.map.xml"/>
 	<map name="relationships" location="relationships.map.xml"/>
 </domain>

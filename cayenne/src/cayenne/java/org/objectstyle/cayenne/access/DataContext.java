@@ -1031,17 +1031,19 @@ public class DataContext implements QueryEngine, Serializable {
                 : PersistenceState.DELETED;
         anObject.setPersistenceState(newState);
 
-        //Do the right thing with all the relationships of the deleted object
+        // Apply delete rules to the related objects...
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
         Iterator relationshipIterator = entity.getRelationships().iterator();
         while (relationshipIterator.hasNext()) {
             ObjRelationship relationship = (ObjRelationship) relationshipIterator.next();
 
-            if (relationship.getDeleteRule() == DeleteRule.NO_ACTION) {
+            boolean processFlattened = relationship.isFlattened()
+                    && relationship.isToDependentEntity();
+
+            // first check for no action... bail out if no flattened processing is needed
+            if (relationship.getDeleteRule() == DeleteRule.NO_ACTION && !processFlattened) {
                 continue;
             }
-
-            String thisRelationshipName = relationship.getName();
 
             List relatedObjects = Collections.EMPTY_LIST;
             if (relationship.isToMany()) {
@@ -1055,24 +1057,59 @@ public class DataContext implements QueryEngine, Serializable {
                 }
             }
             else {
-                Object relatedObject = anObject.readNestedProperty(thisRelationshipName);
+                Object relatedObject = anObject
+                        .readNestedProperty(relationship.getName());
 
                 if (relatedObject != null) {
                     relatedObjects = Collections.singletonList(relatedObject);
                 }
             }
 
+            // no related object, bail out
             if (relatedObjects.size() == 0) {
                 continue;
             }
 
+            // process DENY rule first...
+            if (relationship.getDeleteRule() == DeleteRule.DENY) {
+                // Clean up - we shouldn't be deleting this object
+                anObject.setPersistenceState(oldState);
+                throw new DeleteDenyException("Cannot delete a "
+                        + getEntityResolver().lookupObjEntity(anObject).getName()
+                        + " because it has "
+                        + relatedObjects.size()
+                        + " object"
+                        + (relatedObjects.size() > 1 ? "s" : "")
+                        + "in it's "
+                        + relationship.getName()
+                        + " relationship"
+                        + " and this relationship has DENY "
+                        + "as it's delete rule");
+            }
+
+            // process flattened with dependent join tables...
+            // joins must be removed even if they are non-existent or ignored in the
+            // object graph
+            if (processFlattened) {
+                ObjectStore objectStore = getObjectStore();
+                Iterator iterator = relatedObjects.iterator();
+                while (iterator.hasNext()) {
+                    DataObject relatedObject = (DataObject) iterator.next();
+                    objectStore.flattenedRelationshipUnset(anObject, relationship, relatedObject);
+                }
+            }
+
+            // process remaining rules
             switch (relationship.getDeleteRule()) {
+                case DeleteRule.NO_ACTION:
+                    break;
                 case DeleteRule.NULLIFY:
                     ObjRelationship inverseRelationship = relationship
                             .getReverseRelationship();
+
                     if (inverseRelationship == null) {
-                        // with next relationship... nothing we can do here
-                        continue;
+                        // nothing we can do here
+                        break;
                     }
 
                     if (inverseRelationship.isToMany()) {
@@ -1095,6 +1132,7 @@ public class DataContext implements QueryEngine, Serializable {
                                     true);
                         }
                     }
+                    
                     break;
                 case DeleteRule.CASCADE:
                     //Delete all related objects
@@ -1103,27 +1141,12 @@ public class DataContext implements QueryEngine, Serializable {
                         DataObject relatedObject = (DataObject) iterator.next();
                         this.deleteObject(relatedObject);
                     }
-                    break;
-                case DeleteRule.DENY:
-                    int relatedObjectsCount = relatedObjects.size();
-                    if (relatedObjectsCount != 0) {
-                        //Clean up - we shouldn't be deleting this object
-                        anObject.setPersistenceState(oldState);
-                        throw new DeleteDenyException("Cannot delete a "
-                                + getEntityResolver().lookupObjEntity(anObject).getName()
-                                + " because it has "
-                                + relatedObjectsCount
-                                + " object"
-                                + (relatedObjectsCount > 1 ? "s" : "")
-                                + "in it's "
-                                + thisRelationshipName
-                                + " relationship"
-                                + " and this relationship has DENY "
-                                + "as it's delete rule");
-                    }
+                    
                     break;
                 default:
-                    //Clean up - we shouldn't be deleting this object
+                    // Does this ever happen???
+
+                    // Clean up - we shouldn't be deleting this object
                     anObject.setPersistenceState(oldState);
                     throw new CayenneRuntimeException("Unknown type of delete rule "
                             + relationship.getDeleteRule());
