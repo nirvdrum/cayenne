@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * RequestQueue implements a FIFO queue for threads waiting for a 
  * particular event, resource, etc. Each thread will wait 
@@ -75,6 +77,8 @@ import java.util.List;
  * @author Andrei Adamchik
  */
 public class RequestQueue {
+    static Logger logObj = Logger.getLogger(RequestQueue.class.getName());
+
     protected List queue;
     protected int maxSize;
     protected int timeout;
@@ -124,10 +128,26 @@ public class RequestQueue {
         synchronized (result) {
             boolean interrupted = false;
             try {
+
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug(
+                        "thread ["
+                            + Thread.currentThread().getName()
+                            + "] will wait in the queue for "
+                            + timeout);
+                }
+
                 // release lock and wait
                 result.wait(timeout);
             } catch (InterruptedException e) {
                 interrupted = true;
+            }
+
+            if (logObj.isDebugEnabled()) {
+                logObj.debug(
+                    "thread ["
+                        + Thread.currentThread().getName()
+                        + "] finished waiting in the queue.");
             }
 
             // wait is over, remove itself from the queue
@@ -155,7 +175,7 @@ public class RequestQueue {
         RequestDequeue first = null;
         // Make sure we avoid nested locks - locking both queue & result object
         // at the same time - this is a potential deadlock.
-        
+
         synchronized (queue) {
             if (queue.size() > 0) {
                 first = (RequestDequeue) queue.get(0);
@@ -163,8 +183,7 @@ public class RequestQueue {
             }
         }
 
-        // this is true when the queue had at 
-        // least one object
+        // this is true when the queue contained at least one object
         if (first != null) {
             synchronized (first) {
                 first.setDequeueEventObject(dequeuedObj);
