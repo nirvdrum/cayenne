@@ -4,7 +4,10 @@
 <body>
     <section name="2. Installation">       
     	<subsection name="2.5 Upgrading from Earlier Versions">
- 
+ 		<panel name="Warning!">Cayenne 1.1 introduces additions to the project format.
+ 		While CayenneModeler 1.1 will open files created by Modeler 1.0, saving them
+ 		would make them uneditable with 1.0 Modeler.
+ 		</panel>
         </subsection>
     </section>
 </body>
