@@ -210,7 +210,7 @@ public class ContainerPoolFactory implements ObjectFactory {
             username = ra.getContent().toString();
         }
 
-        logObj.warning("Loading datasource: " + driver);
+        logObj.fine("Loading datasource: " + driver);
         return new PoolManager(driver, url, min, max, username, password);
     }
 }
