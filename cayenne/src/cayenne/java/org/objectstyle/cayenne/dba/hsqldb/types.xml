@@ -18,7 +18,7 @@ HSQLDB types mapping
        <db-type name="BIT"/>
    </jdbc-type>
    <jdbc-type name="BLOB">
-       <db-type name="BLOB"/>
+       <db-type name="LONGVARBINARY"/>
    </jdbc-type>
    <jdbc-type name="BOOLEAN">
        <db-type name="BOOLEAN"/>
@@ -27,7 +27,7 @@ HSQLDB types mapping
        <db-type name="CHAR"/>
    </jdbc-type>
    <jdbc-type name="CLOB">
-       <db-type name="CLOB"/>
+       <db-type name="LONGVARCHAR"/>
    </jdbc-type>
    <jdbc-type name="DATALINK">
        <db-type name="DATALINK"/>
