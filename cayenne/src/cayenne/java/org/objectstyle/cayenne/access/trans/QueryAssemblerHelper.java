@@ -83,7 +83,8 @@ public abstract class QueryAssemblerHelper {
 
     protected QueryAssembler queryAssembler;
 
-    public QueryAssemblerHelper() {}
+    public QueryAssemblerHelper() {
+    }
 
     /** Creates QueryAssemblerHelper. Sets queryAssembler property. */
     public QueryAssemblerHelper(QueryAssembler queryAssembler) {
@@ -141,7 +142,10 @@ public abstract class QueryAssemblerHelper {
                 ObjAttribute objAttr = (ObjAttribute) pathComp;
                 if (lastRelationship != null) {
                     DbRelationship lastDbRel =
-                        (DbRelationship) lastRelationship.getDbRelationshipList().get(0);
+                        (DbRelationship) lastRelationship
+                            .getDbRelationshipList()
+                            .get(
+                            0);
                     processColumn(buf, objAttr.getDbAttribute(), lastDbRel);
                 } else {
                     processColumn(buf, objAttr.getDbAttribute());
@@ -189,7 +193,9 @@ public abstract class QueryAssemblerHelper {
         DbRelationship rel) {
         String alias =
             (queryAssembler.supportsTableAliases())
-                ? queryAssembler.aliasForTable((DbEntity) dbAttr.getEntity(), rel)
+                ? queryAssembler.aliasForTable(
+                    (DbEntity) dbAttr.getEntity(),
+                    rel)
                 : null;
 
         buf.append(dbAttr.getAliasedName(alias));
@@ -224,7 +230,10 @@ public abstract class QueryAssemblerHelper {
      * is being appended.
      * 
      */
-    protected void appendLiteral(StringBuffer buf, Object val, DbAttribute attr) {
+    protected void appendLiteral(
+        StringBuffer buf,
+        Object val,
+        DbAttribute attr) {
         if (val == null) {
             buf.append("NULL");
         } else if (val instanceof DataObject) {
@@ -254,7 +263,10 @@ public abstract class QueryAssemblerHelper {
             }
 
             // checks have been passed, use id value
-            appendLiteralDirect(buf, snap.get(snap.keySet().iterator().next()), attr);
+            appendLiteralDirect(
+                buf,
+                snap.get(snap.keySet().iterator().next()),
+                attr);
         } else {
             appendLiteralDirect(buf, val, attr);
         }
@@ -336,7 +348,9 @@ public abstract class QueryAssemblerHelper {
       * expression for the target entity primary key. If this is a "to one"
       * relationship, column expresion for the source foreign key is added.
       */
-    protected void processRelTermination(StringBuffer buf, ObjRelationship rel) {
+    protected void processRelTermination(
+        StringBuffer buf,
+        ObjRelationship rel) {
         if (rel.isToMany()) {
             // append joins
             processRelParts(rel);
@@ -361,8 +375,23 @@ public abstract class QueryAssemblerHelper {
 
         DbAttributePair join = (DbAttributePair) joins.get(0);
 
-        DbAttribute att = join.getSource();
-        processColumn(buf, att);
+        if (rel.isToMany()) {
+            DbEntity dest = (DbEntity) join.getTarget().getEntity();
+            List pk = dest.getPrimaryKey();
+            
+            if (pk.size() != 1) {
+                StringBuffer msg = new StringBuffer();
+                msg.append(
+                    "Multi-column PK is not supported in relationship joins.");
+
+                throw new CayenneRuntimeException(msg.toString());
+            }
+            
+            processColumn(buf, (DbAttribute)pk.get(0));
+        } else {
+            DbAttribute att = join.getSource();
+            processColumn(buf, att);
+        }
     }
 
     /** 
@@ -371,7 +400,9 @@ public abstract class QueryAssemblerHelper {
      * expression for the target entity primary key. If this is a "to one"
      * relationship, column expresion for the source foreign key is added.
      */
-    protected void processRelTermination(StringBuffer buf, DbRelationship rel) {
+    protected void processRelTermination(
+        StringBuffer buf,
+        DbRelationship rel) {
         if (rel.isToMany()) {
             // append joins
             queryAssembler.dbRelationshipAdded(rel);

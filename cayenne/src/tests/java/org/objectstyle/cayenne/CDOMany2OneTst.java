@@ -133,6 +133,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         Expression e =
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
         SelectQuery q = new SelectQuery("Painting", e);
+        //q.setLoggingLevel(Level.ERROR);
 
         // *** TESTING THIS *** 
         List paints = ctxt.performQuery(q);

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,20 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
+import java.util.List;
+
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public class CDOOne2ManyTst extends CayenneDOTestBase {
     private static Logger logObj = Logger.getLogger(CDOOne2ManyTst.class);
@@ -69,7 +75,31 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         super(name);
     }
 
-  /*  public void testSelectViaRelationship() throws Exception {
+    public void testSelectWithToManyDBQualifier() throws Exception {
+         // setup test, intentionally add more than 1 painting to artist
+         // since this reduces a chance that painting and artist primary keys
+         // would accidentally match, resulting in success when it should fail
+         Artist a1 = newArtist();
+         Painting p1 = newPainting();
+         Painting p2 = newPainting();
+         Painting p3 = newPainting();
+         a1.addToPaintingArray(p1);
+         a1.addToPaintingArray(p2);
+         a1.addToPaintingArray(p3);
+         ctxt.commitChanges();
+
+         // do select
+         Expression e = ExpressionFactory.matchDbExp("paintingArray", p2);
+         SelectQuery q = new SelectQuery(Artist.class, e);
+         q.setLoggingLevel(Level.WARN);
+
+         // *** TESTING THIS ***
+         List artists = ctxt.performQuery(q);
+         assertEquals(1, artists.size());
+         assertSame(a1, artists.get(0));
+     }
+     
+    public void testSelectWithToManyQualifier() throws Exception {
         // setup test, intentionally add more than 1 painting to artist
         // since this reduces a chance that painting and artist primary keys 
         // would accidentally match, resulting in success when it should fail
@@ -83,15 +113,14 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         ctxt.commitChanges();
 
         // do select
-        Expression e =
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingArray", p2);
-        SelectQuery q = new SelectQuery("Artist", e);
- 
+        Expression e = ExpressionFactory.matchExp("paintingArray", p2);
+        SelectQuery q = new SelectQuery(Artist.class, e);
+
         // *** TESTING THIS *** 
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
         assertSame(a1, artists.get(0));
-    } */
+    }
 
     public void testNewAdd() throws Exception {
         Artist a1 = newArtist();

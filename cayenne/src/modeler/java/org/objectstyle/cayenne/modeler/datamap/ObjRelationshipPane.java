@@ -158,14 +158,15 @@ public class ObjRelationshipPane
      * Selects a specified relationship in the relationships table.
      */
     public void selectRelationship(ObjRelationship rel) {
-    	if(rel == null) {
-    		return;
-    	}
-    	
-        ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
+        if (rel == null) {
+            return;
+        }
+
+        ObjRelationshipTableModel model =
+            (ObjRelationshipTableModel) table.getModel();
         java.util.List rels = model.getObjectList();
         int relPos = rels.indexOf(rel);
-        if(relPos >= 0) {
+        if (relPos >= 0) {
             table.select(relPos);
         }
     }
@@ -173,7 +174,8 @@ public class ObjRelationshipPane
     public void processExistingSelection() {
         ObjRelationship rel = null;
         if (table.getSelectedRow() >= 0) {
-            ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
+            ObjRelationshipTableModel model =
+                (ObjRelationshipTableModel) table.getModel();
             rel = model.getRelationship(table.getSelectedRow());
             if (rel.getTargetEntity() != null
                 && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
@@ -183,7 +185,7 @@ public class ObjRelationshipPane
                 resolve.setEnabled(false);
         } else
             resolve.setEnabled(false);
-            
+
         RelationshipDisplayEvent ev =
             new RelationshipDisplayEvent(
                 this,
