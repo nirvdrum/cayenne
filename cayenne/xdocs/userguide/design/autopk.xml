@@ -50,7 +50,7 @@
             </subsection>
             
                    
-          	<subsection name="4.7.2 Primary Key Derived From Realtionship" anchor="pk-rel">            
+          	<subsection name="4.7.2 Primary Key Derived From Relationship" anchor="pk-rel">            
             	<p>A primary key column of a table may depend on a primary key 
             	column of another table. This is normally the case with "join"
             	tables used to resolve many-to-many relationships. In such cases 
