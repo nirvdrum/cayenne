@@ -72,8 +72,8 @@ public class DataMapTst extends CayenneTestCase {
 	}
 
 	public void testName() throws Exception {
+		assertNotNull(map.getName());
 		String tstName = "tst_name";
-		assertNull(map.getName());
 		map.setName(tstName);
 		assertEquals(tstName, map.getName());
 	}
