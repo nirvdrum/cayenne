@@ -9,7 +9,17 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><strong><font color="#AAAAAA"><i>July 16:</i></font></strong> <strong>Cayenne Alpha 2 Is Out.</strong> 
+        <p><strong><font color="#AAAAAA"><i>July 29:</i></font></strong> <strong>Cayenne Comparison Chart.</strong> 
+        Having received multiple requests to compare Cayenne features
+        with other O/R frameworks we decided to leverage the community collective knowledge
+        to do this research. A WikiWiki page was setup to build a feature matrix at
+        <a href="http://c2.com/cgi-bin/wiki?CayenneVsOther">http://c2.com/cgi-bin/wiki?CayenneVsOther</a>.
+        Anybody who has experience with TopLink, CocoBase, EOF, etc. are welcome to provide
+        the input interactively via WikiWiki collaboration engine. To participate, click on the link
+        above, scroll to the bottom of the page and select "Edit Text".
+        </p>
+        
+        <p><font color="#AAAAAA"><i>July 16:</i></font> <strong>Cayenne Alpha 2 Is Out.</strong> 
         This is a second Alpha release. Everybody is encouraged to upgrade. You won't 
         regret - CayenneModeler GUI is much better now. Source and binary packages
         can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
