@@ -882,25 +882,23 @@ public class MapLoader extends DefaultHandler {
 		Iterator iter = dbRel.getJoins().iterator();
 		while (iter.hasNext()) {
 			DbAttributePair pair = (DbAttributePair) iter.next();
-
-			// sanity check
-			if (pair.getSource() == null) {
-				throw new DataMapException(
-					"DbAttributePair has no source attribute. Relationship name: "
-						+ dbRel.getName());
-			}
-
-			if (pair.getTarget() == null) {
-				throw new DataMapException(
-					"DbAttributePair has no target attribute. Relationship name: "
-						+ dbRel.getName());
-			}
-
 			out.print("\t\t<");
 			out.print(DB_ATTRIBUTE_PAIR_TAG);
-			out.print(" source=\"");
-			out.print(pair.getSource().getName());
-			out.println("\" target=\"" + pair.getTarget().getName() + "\"/>");
+			
+			// sanity check
+			if (pair.getSource() != null) {
+				out.print(" source=\"");
+				out.print(pair.getSource().getName());
+				out.print("\"");
+			}
+
+			if (pair.getTarget() != null) {
+				out.print(" target=\"");
+				out.print(pair.getTarget().getName());
+				out.print("\"");
+			}
+
+			out.println("/>");
 		}
 	}
 
@@ -1138,34 +1136,18 @@ public class MapLoader extends DefaultHandler {
 	private void processStartDbAttributePair(Attributes atts)
 		throws SAXException {
 		String source = atts.getValue("", "source");
-		if (null == source) {
-			throw new SAXException(
-				" Unable to parse target. Attributes:\n"
-					+ printAttributes(atts).toString());
-		}
 		String target = atts.getValue("", "target");
-		if (null == target) {
-			throw new SAXException(
-				" Unable to parse source. Attributes:\n"
-					+ printAttributes(atts).toString());
-		}
-		DbAttribute dbSrc =
+		DbAttribute dbSrc = null;
+		DbAttribute dbTarget = null;
+		
+		if (source != null) {
+			dbSrc =
 			(DbAttribute) dbRelationship.getSourceEntity().getAttribute(source);
-		if (dbSrc == null) {
-			throw new SAXException(
-				"Unable to parse source. Undefined join source:\n"
-					+ source
-					+ ", source entity: "
-					+ dbRelationship.getSourceEntity().getName());
 		}
-		DbAttribute dbTarget =
+		
+		if (target != null) {
+			dbTarget =
 			(DbAttribute) dbRelationship.getTargetEntity().getAttribute(target);
-		if (dbTarget == null) {
-			throw new SAXException(
-				"Unable to parse source. Undefined join target:\n"
-					+ target
-					+ ", target entity: "
-					+ dbRelationship.getTargetEntity().getName());
 		}
 
 		DbAttributePair pair = new DbAttributePair(dbSrc, dbTarget);
