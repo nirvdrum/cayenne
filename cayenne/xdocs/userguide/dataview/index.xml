@@ -1,8 +1,8 @@
 <document>
 <title>User Guide - DataViews</title>
-<toc name="toc-user-guide" chapter="13. DataViews"/>
+<toc name="toc-user-guide" chapter="14. DataViews"/>
 <body>
-    <section name="13. DataViews">
+    <section name="14. DataViews">
     	<p> Cayenne takes care of managing persistence layer for all types of 
 	applications - web, rich client, command line, etc. With DataViews Cayenne extends into 
 	the area of integrating such persistent layer with Swing GUI.</p>

@@ -1,13 +1,13 @@
 <document>
-<title>User Guide - Design</title>
-<toc name="toc-user-guide" chapter="4. Design"/>
-<body>
-    <section name="4. Design">
-    	<p>This chapter describes design ideas implemented in Cayenne and the underlying
-    	architecture. It does not contain any "hands on" information on application development and 
-    	is not required to start using Cayenne. Those 
-    	interested in Cayenne "recepies" should skip to the next chapters. 
-    	</p>
-    </section>
-</body>
+	<title>User Guide - Design</title>
+	<toc name="toc-user-guide" chapter="4. Design"/>
+	<body>
+		<section name="4. Design">
+			<p>This chapter describes design ideas and architecture of Cayenne. 
+				It is not required to start using Cayenne, and there is no 
+				hands-on information here. So new users can skip it initially 
+				and come back later to gain better understanding of how Cayenne 
+				operates under the hood.</p>
+		</section>
+	</body>
 </document>

@@ -29,8 +29,7 @@
 			<li>Inspect PaintingInfo attributes and relationships. A set of values matching
 			the underlying DbEntity should've been created.</li>
 		</ul>
-	
-		<img src="/images/modelerguide/syncobjwithdb.jpg" width="520" height="335"/>
+		
 		<p> </p>
 
 		<subsection name="6.1.1 ObjEntity Qualifier">

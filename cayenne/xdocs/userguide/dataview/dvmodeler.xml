@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - DataViews</title>
-<toc name="toc-user-guide" chapter="13. DataViews"/>
+<toc name="toc-user-guide" chapter="14. DataViews"/>
 <body>
-    <section name="13. DataViews">
-        <subsection name="13.3 DVModeler GUI Tool">
+    <section name="14. DataViews">
+        <subsection name="14.3 DVModeler GUI Tool">
 			<p>DVModeler is a Java GUI tool to work with DataViews configuration included in Cayenne projects. 
 			Steps needed to start DVModeler are similar to that of CayenneModeler. Main class is
 			<code>org.objectstyle.cayenne.dataview.dvmodeler.Main</code>. For convenience

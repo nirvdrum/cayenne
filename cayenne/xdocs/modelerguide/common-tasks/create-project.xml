@@ -4,9 +4,6 @@
 <body>
 	<section name="4. Common Modeling Tasks">
 	<subsection name="4.1 Create New Project">
- 	 	<p><i>Prerequisites: before creating a new project you must start CayenneModeler as described
- 	 	<a href="../modeler-intro/runmodeler.html">earlier</a>.</i></p>
- 	 	
  	    <p><strong>Start New Project</strong>. Select <code>"File > New Project"</code> menu item (or click
  	    <code>"New Project"</code> toolbar button):</p>
  	    
