@@ -93,7 +93,7 @@ public class DataNodeValidatorTst extends ValidatorTestBase {
 
         validator.reset();
         new DataNodeValidator().validateObject(new Object[] { conf, d1, n2 }, validator);
-        assertValidator(ValidationResult.WARNING);
+        assertValidator(ValidationResult.ERROR);
 
         // should complain about duplicate name
         DataNode n3 = new DataNode("3");

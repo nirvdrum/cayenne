@@ -189,30 +189,22 @@ public class BrowseView
         if (e.getSource() == this) {
             return;
         }
-        DefaultMutableTreeNode temp;
-        temp = getDomainNode(e.getDomain());
-        if (null == temp)
-            return;
-        showNode(temp);
 
+        showNode(new Object[] { e.getDomain()});
     }
+
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         if (e.getSource() == this || e.isDataNodeChanged() == false)
             return;
-        DefaultMutableTreeNode temp;
-        temp = getDataSourceNode(e.getDomain(), e.getDataNode());
-        if (null == temp)
-            return;
-        showNode(temp);
+
+        showNode(new Object[] { e.getDomain(), e.getDataNode()});
     }
+
     public void currentDataMapChanged(DataMapDisplayEvent e) {
-        if (e.getSource() == this || e.isDataMapChanged() == false)
+        if (e.getSource() == this || !e.isDataMapChanged())
             return;
-        DefaultMutableTreeNode temp;
-        temp = getMapNode(e.getDomain(), e.getDataMap());
-        if (null == temp)
-            return;
-        showNode(temp);
+
+        showNode(new Object[] { e.getDomain(), e.getDataMap()});
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
@@ -233,10 +225,8 @@ public class BrowseView
     public void domainChanged(DomainEvent e) {
         if (e.getSource() == this)
             return;
-        DefaultMutableTreeNode node;
-        node = getDomainNode(e.getDomain());
-        if (null != node)
-            model.nodeChanged(node);
+
+        updateNode(new Object[] { e.getDomain()});
     }
 
     public void domainAdded(DomainEvent e) {
@@ -250,17 +240,16 @@ public class BrowseView
             return;
         }
 
-        DefaultMutableTreeNode treeNode = getDomainNode(e.getDomain());
-        if (treeNode != null) {
-            removeNode(treeNode);
-        }
+        removeNode(new Object[] { e.getDomain()});
     }
 
     public void dataNodeChanged(DataNodeEvent e) {
         if (e.getSource() == this)
             return;
         DefaultMutableTreeNode node =
-            getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
+            browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] { mediator.getCurrentDataDomain(), e.getDataNode()});
+
         if (null != node) {
             model.nodeChanged(node);
             DataMap[] maps = e.getDataNode().getDataMaps();
@@ -307,10 +296,9 @@ public class BrowseView
     public void dataNodeAdded(DataNodeEvent e) {
         if (e.getSource() == this)
             return;
-        DefaultMutableTreeNode parent;
-        parent = getDomainNode(mediator.getCurrentDataDomain());
-        if (null == parent)
-            return;
+        DefaultMutableTreeNode parent =
+            browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] { mediator.getCurrentDataDomain()});
 
         browseTree.insertObject(e.getDataNode(), parent);
     }
@@ -320,27 +308,24 @@ public class BrowseView
             return;
         }
 
-        DefaultMutableTreeNode treeNode =
-            getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
-        if (treeNode != null) {
-            removeNode(treeNode);
-        }
+        removeNode(new Object[] { mediator.getCurrentDataDomain(), e.getDataNode()});
     }
 
     public void dataMapChanged(DataMapEvent e) {
-        if (e.getSource() == this)
+        if (e.getSource() == this) {
             return;
-        DefaultMutableTreeNode node;
-        node = getMapNode(mediator.getCurrentDataDomain(), e.getDataMap());
-        if (null != node)
-            model.nodeChanged(node);
+        }
+
+        updateNode(new Object[] { mediator.getCurrentDataDomain(), e.getDataMap()});
     }
 
     public void dataMapAdded(DataMapEvent e) {
         if (e.getSource() == this)
             return;
-        DefaultMutableTreeNode parent;
-        parent = getDomainNode(mediator.getCurrentDataDomain());
+        DefaultMutableTreeNode parent =
+            browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] { mediator.getCurrentDataDomain()});
+
         if (null == parent)
             return;
 
@@ -354,18 +339,13 @@ public class BrowseView
 
         DataMap map = e.getDataMap();
         DataDomain domain = mediator.getCurrentDataDomain();
-        DefaultMutableTreeNode treeNode = getMapNode(domain, map);
-        if (treeNode != null) {
-            removeNode(treeNode);
-        }
+
+        removeNode(new Object[] { domain, map });
 
         // Clean up map from the nodes
         DataNode[] nodes = domain.getDataNodes();
         for (int i = 0; i < nodes.length; i++) {
-            DefaultMutableTreeNode mapNode = getMapNode(domain, nodes[i], map);
-            if (mapNode != null) {
-                model.removeNodeFromParent(mapNode);
-            }
+            removeNode(new Object[] { domain, nodes[i], map });
         }
     }
 
@@ -433,10 +413,12 @@ public class BrowseView
         // Add a node and make it selected.
         if (mediator.getCurrentDataNode() != null) {
             DefaultMutableTreeNode mapNode =
-                getMapNode(
-                    mediator.getCurrentDataDomain(),
-                    mediator.getCurrentDataNode(),
-                    mediator.getCurrentDataMap());
+                browseTree.getProjectModel().getNodeForObjectPath(
+                    new Object[] {
+                        mediator.getCurrentDataDomain(),
+                        mediator.getCurrentDataNode(),
+                        mediator.getCurrentDataMap()});
+
             if (mapNode != null) {
                 currentNode = new DefaultMutableTreeNode(entity, false);
                 model.insertNodeInto(currentNode, mapNode, mapNode.getChildCount());
@@ -444,7 +426,10 @@ public class BrowseView
         }
 
         DefaultMutableTreeNode mapNode =
-            getMapNode(mediator.getCurrentDataDomain(), mediator.getCurrentDataMap());
+            browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] {
+                    mediator.getCurrentDataDomain(),
+                    mediator.getCurrentDataMap()});
 
         currentNode = new DefaultMutableTreeNode(entity, false);
         fixEntityPosition(mapNode, currentNode);
@@ -512,73 +497,6 @@ public class BrowseView
 
         // remove this node
         model.removeNodeFromParent(toBeRemoved);
-    }
-
-    /** Get domain node by DataDomain. */
-    private DefaultMutableTreeNode getDomainNode(DataDomain domain) {
-        if (null == domain)
-            return null;
-        Enumeration domains = rootNode.children();
-        while (domains.hasMoreElements()) {
-            DefaultMutableTreeNode temp_node;
-            temp_node = (DefaultMutableTreeNode) domains.nextElement();
-            if (temp_node.getUserObject() == domain)
-                return temp_node;
-        }
-        return null;
-    }
-
-    /** Get map node by DataDomain and DataMap. */
-    private DefaultMutableTreeNode getMapNode(DataDomain domain, DataMap map) {
-        return browseTree.getProjectModel().getNodeForObjectPath(
-            new Object[] { domain, map });
-    }
-
-    private DefaultMutableTreeNode getDataSourceNode(
-        DataDomain domain,
-        DataNode dataNode) {
-        if (dataNode == null) {
-            return null;
-        }
-
-        DefaultMutableTreeNode domain_node = getDomainNode(domain);
-        if (null == domain_node)
-            return null;
-        Enumeration data_sources = domain_node.children();
-        while (data_sources.hasMoreElements()) {
-            DefaultMutableTreeNode temp_node;
-            temp_node = (DefaultMutableTreeNode) data_sources.nextElement();
-
-            if (temp_node.getUserObject() == dataNode) {
-                return temp_node;
-            }
-        }
-        return null;
-    }
-
-    /** Get map node by DataDomain, DataNode and DataMap. */
-    private DefaultMutableTreeNode getMapNode(
-        DataDomain domain,
-        DataNode data,
-        DataMap map) {
-        if (null == map) {
-            return null;
-        }
-
-        DefaultMutableTreeNode data_node = getDataSourceNode(domain, data);
-        if (null == data_node) {
-            return null;
-        }
-
-        Enumeration maps = data_node.children();
-        while (maps.hasMoreElements()) {
-            DefaultMutableTreeNode temp_node;
-            temp_node = (DefaultMutableTreeNode) maps.nextElement();
-            if (temp_node.getUserObject() == map) {
-                return temp_node;
-            }
-        }
-        return null;
     }
 
     /** Makes node current, visible and selected.*/

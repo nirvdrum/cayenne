@@ -291,11 +291,12 @@ public class DomainHelper {
 		for (int i = 0; i < nodes.length; i++) {
 			pw.println("\t<node name=\"" + nodes[i].getName().trim() + "\"");
 			String datasource = nodes[i].getDataSourceLocation();
-			if (null != datasource)
+			if (datasource != null) {
 				datasource = datasource.trim();
-			else
-				datasource = "";
-			pw.println("\t\t datasource=\"" + datasource + "\"");
+				pw.print("\t\t datasource=\"" + datasource + "\"");
+			}
+			pw.println("");
+			
 			if (nodes[i].getAdapter() != null) {
 				pw.println(
 					"\t\t adapter=\""
@@ -617,15 +618,12 @@ public class DomainHelper {
 
 			String dataSrcLocation = attrs.getValue("", "datasource");
 			if (dataSrcLocation == null) {
-				logObj.log(logLevel, "error: <map> without 'datasource'.");
-				throw new SAXParseException(
-					"'<node datasource=' attribute must be present.",
-					locator);
+				logObj.log(logLevel, "warning: <node> without 'datasource'.");
 			}
 
 			String factoryName = attrs.getValue("", "factory");
 			if (factoryName == null) {
-				logObj.log(logLevel, "error: <map> without 'factory'.");
+				logObj.log(logLevel, "error: <node> without 'factory'.");
 				throw new SAXParseException(
 					"'<node factory=' attribute must be present.",
 					locator);

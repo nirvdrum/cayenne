@@ -95,7 +95,7 @@ public class DataNodeValidator extends TreeNodeValidator {
         } else if(!DriverDataSourceFactory.class.getName().equals(factory)) {
             String location = node.getDataSourceLocation();
             if (Util.isEmptyString(location)) {
-                validator.registerWarning("DataNode has no location parameter.", path);
+                validator.registerError("DataNode has no location parameter.", path);
             }
         }
 

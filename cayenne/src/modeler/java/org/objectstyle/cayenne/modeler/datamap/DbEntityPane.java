@@ -60,6 +60,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
@@ -185,10 +187,17 @@ public class DbEntityPane
 		if (entity instanceof DerivedDbEntity) {
 			updateState(true);
 
-			java.util.List ents =
-				mediator.getCurrentDataMap().getDbEntityNames(true);
-			ents.remove(entity.getName());
-			ents.add(0, "");
+            // build a list consisting of non-derived entities
+			java.util.List ents = new ArrayList();
+			ents.add("");
+			
+			Iterator it = mediator.getCurrentDataMap().getDbEntitiesAsList(true).iterator();
+			while(it.hasNext()) {
+				DbEntity ent = (DbEntity)it.next();
+				if(!(ent instanceof DerivedDbEntity)) {
+					ents.add(ent.getName());
+				}
+			}			
 
 			DefaultComboBoxModel model =
 				new DefaultComboBoxModel(ents.toArray());
@@ -236,7 +245,7 @@ public class DbEntityPane
 						? mediator.getCurrentDataMap().getDbEntity(name, true)
 						: null;
 
-				if (ent != derived.getParentEntity()) {
+				if (ent != null && ent != derived.getParentEntity()) {
 					derived.setParentEntity(ent);
 					derived.resetToParentView();
 					MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
