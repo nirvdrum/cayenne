@@ -509,7 +509,7 @@ public class DbLoader {
                             // init relationship
                             forwardRelationship =
                                 new DbRelationship(
-                                    uniqueRelName(
+                                    DbLoader.uniqueRelName(
                                         pkEntity,
                                         fkEntityName,
                                         true));
@@ -572,17 +572,31 @@ public class DbLoader {
             }
 
         }
-        
+
         boolean toDependentPK = false;
         boolean toMany = true;
-        
-        if(toPK) {
+
+        if (toPK) {
             toDependentPK = true;
-            if(((DbEntity) relationship.getTargetEntity()).getPrimaryKey().size() == joins.size()) {
+            if (((DbEntity) relationship.getTargetEntity())
+                .getPrimaryKey()
+                .size()
+                == joins.size()) {
                 toMany = false;
             }
         }
-        
+
+        // if this is really to-one we need to rename the relationship
+        if (!toMany) {
+            Entity source = relationship.getSourceEntity();
+            source.removeRelationship(relationship.getName());
+            relationship.setName(
+                DbLoader.uniqueRelName(
+                    source,
+                    relationship.getTargetEntityName(),
+                    false));
+            source.addRelationship(relationship);
+        }
 
         relationship.setToDependentPK(toDependentPK);
         relationship.setToMany(toMany);
