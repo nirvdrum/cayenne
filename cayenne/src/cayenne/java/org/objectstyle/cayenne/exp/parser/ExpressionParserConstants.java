@@ -62,21 +62,21 @@ package org.objectstyle.cayenne.exp.parser;
 public interface ExpressionParserConstants {
 
   int EOF = 0;
-  int NULL = 27;
-  int PROPERTY_PATH = 28;
-  int IDENTIFIER = 29;
-  int LETTER = 30;
-  int DIGIT = 31;
-  int ESC = 34;
-  int SINGLE_QUOTED_STRING = 36;
-  int STRING_ESC = 37;
-  int DOUBLE_QUOTED_STRING = 39;
-  int INT_LITERAL = 40;
-  int FLOAT_LITERAL = 41;
-  int DEC_FLT = 42;
-  int DEC_DIGITS = 43;
-  int EXPONENT = 44;
-  int FLT_SUFF = 45;
+  int NULL = 31;
+  int PROPERTY_PATH = 32;
+  int IDENTIFIER = 33;
+  int LETTER = 34;
+  int DIGIT = 35;
+  int ESC = 38;
+  int SINGLE_QUOTED_STRING = 40;
+  int STRING_ESC = 41;
+  int DOUBLE_QUOTED_STRING = 43;
+  int INT_LITERAL = 44;
+  int FLOAT_LITERAL = 45;
+  int DEC_FLT = 46;
+  int DEC_DIGITS = 47;
+  int EXPONENT = 48;
+  int FLT_SUFF = 49;
 
   int DEFAULT = 0;
   int WithinSingleQuoteLiteral = 1;
@@ -103,6 +103,10 @@ public interface ExpressionParserConstants {
     "\"in\"",
     "\"between\"",
     "\",\"",
+    "\"+\"",
+    "\"-\"",
+    "\"*\"",
+    "\"/\"",
     "\"$\"",
     "\"obj:\"",
     "\"db:\"",
@@ -118,10 +122,10 @@ public interface ExpressionParserConstants {
     "\"\\\'\"",
     "\"\\\"\"",
     "<ESC>",
-    "<token of kind 35>",
+    "<token of kind 39>",
     "\"\\\'\"",
     "<STRING_ESC>",
-    "<token of kind 38>",
+    "<token of kind 42>",
     "\"\\\"\"",
     "<INT_LITERAL>",
     "<FLOAT_LITERAL>",

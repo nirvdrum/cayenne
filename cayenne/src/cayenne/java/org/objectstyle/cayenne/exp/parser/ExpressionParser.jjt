@@ -134,36 +134,15 @@ void condition() : {}
 
 void simpleCondition() : {} 
 {
-	  pathExpression() 
+	  scalarExpression() 
 	  
 	(
-	   equalityCondition()
+	   simpleNotCondition()
 	| 
-	   comparisonCondition()
-	|
-	   notCondition()
-	|
-	   likeCondition()
-	|  
-	   inCondition()
-	|  
-	   betweenCondition()
-	)?
-}
-
-void equalityCondition() : {} 
-{
-	( 
 	  ("="  | "==") scalarExpression() #Equal(2)
 	| 
 	  ("!=" | "<>")  scalarExpression() #NotEqual(2)
-	)
-	
-}
-
-void comparisonCondition() : {} 
-{
-	( 
+	|
 	  "<=" scalarExpression() #LessOrEqual(2)
 	| 
 	  "<" scalarExpression() #Less(2)
@@ -171,107 +150,110 @@ void comparisonCondition() : {}
 	  ">"  scalarExpression() #Greater(2)
 	| 
 	  ">=" scalarExpression() #GreaterOrEqual(2)
+	|
+		"like" scalarCharExpression() #Like(2)
+	|
+	    "likeIgnoreCase"  scalarCharExpression() #LikeIgnoreCase(2)
+	|  
+		"in"  "(" scalarCommaList() ")"  #In(2)
+	|  
+		"between"  scalarExpression() "and" scalarExpression() #Between(3)
 	)
 }
 
-void notCondition() : {} 
+void simpleNotCondition() : {} 
 {
 	("not" | "!" )
 	
 	(
-	   notLikeCondition()
-	|  
-	   notInCondition()
-	|  
-	   notBetweenCondition()
-	)?
-}
-
-void likeCondition() : {} 
-{	
-	(
-	   "like" scalarCharExpression() #Like(2)
-	|
-	    "likeIgnoreCase"  scalarCharExpression() #LikeIgnoreCase(2)
-	)
-}
-
-void notLikeCondition() : {} 
-{	
-	(
-	   "like" scalarCharExpression() #NotLike(2)
+		"like" scalarCharExpression() #NotLike(2)
 	|
 	    "likeIgnoreCase"  scalarCharExpression() #NotLikeIgnoreCase(2)
+	|  
+		"in"  "(" scalarCommaList() ")"  #NotIn(2)
+	|  
+		"between"  scalarExpression() "and" scalarExpression() #NotBetween(3)
 	)
-}
-
-void inCondition() : {} 
-{	
-	"in"  "(" scalarCommaList() ")"  #In(2)
-}
-
-void notInCondition() : {} 
-{	
-	"in"  "(" scalarCommaList() ")"  #NotIn(2)
-}
-
-void betweenCondition() :  {}
-{
-	"between"  
-	scalarExpression()
-	"and"
-	scalarExpression()  #Between(3)
-}
-
-void notBetweenCondition() :  {}
-{
-	"between"   
-	 scalarExpression()
-	 "and"
-	 scalarExpression() #NotBetween(3)
 }
 
 void scalarCommaList() : {}
 {
-	(scalarExpression()
-	( ","  scalarExpression() )*) #List
+	(
+		scalarConstExpression()
+		( ","  scalarConstExpression() )*
+	) #List
 }
 
-void scalarExpression() : {}
+void scalarExpression() : {} 
 {
    // TODO: once we switch expression package to use AST* from parser package,
    // we might need implement special subclasses for numeric and character constant
    // nodes for the purpose of expression evaluation, instead . For now keep them as 
    // generic ASTScalar and purge from the parent node to keep compatible with QualifierTranslator.
    
-   ( <INT_LITERAL> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
-      | 
-        <FLOAT_LITERAL>{ jjtThis.setValue(token_source.literalValue); }  #Scalar(0)
-      | 
-        <SINGLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
-      | 
-        <DOUBLE_QUOTED_STRING>  { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
-      | 
-        namedParameter()
-      | 
-        <NULL> #Scalar(0) ) 
+		scalarNumericExpression()
+	|
+		<SINGLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
+	| 
+	  	<DOUBLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
+	| 
+		<NULL> #Scalar(0) 
 }
 
-void scalarCharExpression() : 
+void scalarConstExpression() : {}
 {
+	  scalarCharExpression()
+	| 
+	  <INT_LITERAL> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
+	| 
+	   <FLOAT_LITERAL>{ jjtThis.setValue(token_source.literalValue); }  #Scalar(0)
 }
+
+void scalarCharExpression() : {}
 {
-	   // TODO: once we switch expression package to use AST* from parser package,
-       // we might need implement special subclasses for numeric and character constant
-       // nodes for the purpose of expression evaluation, instead . For now keep them as 
-       // generic ASTScalar and purge from the parent node to keep compatible with QualifierTranslator.
-	( 
 	  <SINGLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
 	| 
 	  <DOUBLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
 	| 
 	  namedParameter()
-	)
+}
+
+void scalarNumericExpression() : {}
+{
+	multiplySubtractExp() 
+	( 
+		"+" multiplySubtractExp() #Add(2)
+	|
+		"-" multiplySubtractExp() #Subtract(2)
+	)*
+}
+
+void multiplySubtractExp() : {} 
+{
+	numericTerm() 
+	( 
+		"*" numericTerm() #Multiply(2)
+	|
+		"/" numericTerm() #Divide(2)
+	)*
+}
+
+void numericTerm() : {} 
+{
+		( "+" )?  numericPrimary ()
+	|
+		"-"  numericPrimary() #Negate(1)
+}
+
+void numericPrimary() : {} 
+{
+		pathExpression()
+	|
+		namedParameter()
+	|
+	   <INT_LITERAL> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
+	| 
+	   <FLOAT_LITERAL>{ jjtThis.setValue(token_source.literalValue); }  #Scalar(0)
 }
 
 void namedParameter() : 

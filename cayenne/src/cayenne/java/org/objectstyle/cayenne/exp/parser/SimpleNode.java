@@ -162,6 +162,10 @@ public abstract class SimpleNode extends Expression implements Node {
         return unwrapChild(child);
     }
 
+    protected Node wrapChild(Object child) {
+        return (child instanceof Node) ? (Node) child : new ASTScalar(child);
+    }
+
     protected Object unwrapChild(Node child) {
         return (child instanceof ASTScalar) ? ((ASTScalar) child).getValue() : child;
     }

@@ -16,17 +16,22 @@ public interface ExpressionParserTreeConstants
   public int JJTGREATEROREQUAL = 9;
   public int JJTLIKE = 10;
   public int JJTLIKEIGNORECASE = 11;
-  public int JJTNOTLIKE = 12;
-  public int JJTNOTLIKEIGNORECASE = 13;
-  public int JJTIN = 14;
-  public int JJTNOTIN = 15;
-  public int JJTBETWEEN = 16;
+  public int JJTIN = 12;
+  public int JJTBETWEEN = 13;
+  public int JJTNOTLIKE = 14;
+  public int JJTNOTLIKEIGNORECASE = 15;
+  public int JJTNOTIN = 16;
   public int JJTNOTBETWEEN = 17;
   public int JJTLIST = 18;
   public int JJTSCALAR = 19;
-  public int JJTNAMEDPARAMETER = 20;
-  public int JJTOBJPATH = 21;
-  public int JJTDBPATH = 22;
+  public int JJTADD = 20;
+  public int JJTSUBTRACT = 21;
+  public int JJTMULTIPLY = 22;
+  public int JJTDIVIDE = 23;
+  public int JJTNEGATE = 24;
+  public int JJTNAMEDPARAMETER = 25;
+  public int JJTOBJPATH = 26;
+  public int JJTDBPATH = 27;
 
 
   public String[] jjtNodeName = {
@@ -42,14 +47,19 @@ public interface ExpressionParserTreeConstants
     "GreaterOrEqual",
     "Like",
     "LikeIgnoreCase",
+    "In",
+    "Between",
     "NotLike",
     "NotLikeIgnoreCase",
-    "In",
     "NotIn",
-    "Between",
     "NotBetween",
     "List",
     "Scalar",
+    "Add",
+    "Subtract",
+    "Multiply",
+    "Divide",
+    "Negate",
     "NamedParameter",
     "ObjPath",
     "DbPath",
