@@ -365,7 +365,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public boolean eval(Object o) {
         return evaluateBoolean(o);
     }
-    
+
     /**
      * Calculates expression value with object as a context for 
      * path expressions.
@@ -375,7 +375,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public Object evaluate(Object o) {
         return ASTCompiler.compile(this).evaluateASTChain(o);
     }
-    
+
     /**
      * Calculates expression boolean value with object as a context for 
      * path expressions.
@@ -409,7 +409,88 @@ public abstract class Expression implements Serializable, XMLSerializable {
 
         return filtered;
     }
-    
+
+    /**
+     * Traverses a itself and tree of child expressions invoking visitor callback
+     * methods as it goes. This is an Expression-specific "Visitor"
+     * pattern implementation.
+     * 
+     * @since 1.1
+     */
+    public void traverse(TraversalHandler visitor) {
+        if (visitor == null) {
+            throw new NullPointerException("Null Visitor.");
+        }
+
+        traverse(this, null, visitor);
+    }
+
+    /**
+     * Traverses itself and child expressions invoking visitor callback
+     * methods as it goes.
+     * 
+     * @since 1.1
+     */
+    protected void traverse(
+        Object expressionObj,
+        Expression parentExp,
+        TraversalHandler visitor) {
+            
+        // see if "expObj" is a leaf node
+        if (!(expressionObj instanceof Expression)) {
+            visitor.objectNode(expressionObj, parentExp);
+            return;
+        }
+
+        Expression exp = (Expression) expressionObj;
+        int count = exp.getOperandCount();
+
+        // announce start node
+        if (exp instanceof ListExpression) {
+            visitor.startListNode(exp, parentExp);
+        }
+        else {
+            switch (count) {
+                case 2 :
+                    visitor.startBinaryNode(exp, parentExp);
+                    break;
+                case 1 :
+                    visitor.startUnaryNode(exp, parentExp);
+                    break;
+                case 3 :
+                    visitor.startTernaryNode(exp, parentExp);
+                    break;
+            }
+        }
+
+        // traverse each child
+        int count_1 = count - 1;
+        for (int i = 0; i <= count_1; i++) {
+            traverse(exp.getOperand(i), exp, visitor);
+
+            // announce finished child
+            visitor.finishedChild(exp, i, i < count_1);
+        }
+
+        // announce the end of traversal
+        if (exp instanceof ListExpression) {
+            visitor.endListNode(exp, parentExp);
+        }
+        else {
+            switch (count) {
+                case 2 :
+                    visitor.endBinaryNode(exp, parentExp);
+                    break;
+                case 1 :
+                    visitor.endUnaryNode(exp, parentExp);
+                    break;
+                case 3 :
+                    visitor.endTernaryNode(exp, parentExp);
+                    break;
+            }
+        }
+    }
+
     /**
      * Encodes itself, wrapping the string into XML CDATA section.
      * @since 1.1
@@ -420,7 +501,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
         encodeAsString(pw);
         pw.print("]]>");
     }
-    
+
     /**
      * Stores a String representation of Expression using a provided
      * PrintWriter.
@@ -428,7 +509,6 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * @since 1.1
      */
     public abstract void encodeAsString(PrintWriter pw);
-    
 
     /**
      * Convenience method to log nested expressions. Used mainly for debugging.

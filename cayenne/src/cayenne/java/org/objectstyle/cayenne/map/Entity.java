@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * An Entity is an abstract descriptor for an entity mapping concept.
@@ -158,6 +159,16 @@ public abstract class Entity extends MapObject {
      */
     protected abstract void validateQueryRoot(Query query)
         throws IllegalArgumentException;
+
+    /**
+     * Checks if expression is compatible with this entity, i.e. all
+     * the path subexpressions can be resolved using this entity as a context.
+     * 
+     * @since 1.1
+     */
+    public abstract void validateExpression(
+        Expression e,
+        ValidationResult validationBuilder);
 
     /**
      * Returns attribute with name <code>attrName</code>.
@@ -273,38 +284,22 @@ public abstract class Entity extends MapObject {
      * @throws org.objectstyle.cayenne.exp.ExpressionException Exception is thrown if
      * <code>objPathExp</code> is not of type OBJ_PATH
      */
-    public Iterator resolvePathComponents(Expression pathExp)
-        throws ExpressionException {
-        if (pathExp.getType() != Expression.OBJ_PATH
-            && pathExp.getType() != Expression.DB_PATH) {
-            StringBuffer msg = new StringBuffer();
-            msg
-                .append("Invalid expression type: '")
-                .append(pathExp.getType())
-                .append("' ('")
-                .append(Expression.OBJ_PATH)
-                .append(" or ")
-                .append(Expression.DB_PATH)
-                .append("' is expected).");
-
-            throw new ExpressionException(msg.toString());
-        }
-
-        return new PathIterator(this, (String) pathExp.getOperand(0));
-    }
+    public abstract Iterator resolvePathComponents(Expression pathExp)
+        throws ExpressionException;
 
     public Iterator resolvePathComponents(String path) throws ExpressionException {
-        return new PathIterator(this, path);
+        return new PathIterator(path);
     }
 
-    // Used to return an iterator to callers of 'resolvePathComponents'
-    protected final class PathIterator implements Iterator {
+    // An iterator resolving mapping components represented by the path string.
+    // This entity is assumed to be the root of the path.
+    final class PathIterator implements Iterator {
         private StringTokenizer toks;
         private Entity currentEnt;
 
-        PathIterator(Entity ent, String path) {
+        PathIterator(String path) {
             super();
-            this.currentEnt = ent;
+            this.currentEnt = Entity.this;
             this.toks = new StringTokenizer(path, PATH_SEPARATOR);
         }
 

@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class RelationshipTst extends CayenneTestCase {
@@ -77,25 +76,13 @@ public class RelationshipTst extends CayenneTestCase {
     }
 
     public void testSourceEntity() throws Exception {
-        Entity tstEntity = new Entity() {
-            /**
-             * @deprecated
-             */
-            protected void validateQueryRoot(Query query) {
-            }
-        };
+        Entity tstEntity = new GenericTestEntity();
         rel.setSourceEntity(tstEntity);
         assertSame(tstEntity, rel.getSourceEntity());
     }
 
     public void testTargetEntity() throws Exception {
-        Entity tstEntity = new Entity() {
-            /**
-             * @deprecated
-             */
-            protected void validateQueryRoot(Query query) {
-            }
-        };
+        Entity tstEntity = new GenericTestEntity();
         tstEntity.setName("abc");
         rel.setTargetEntity(tstEntity);
         assertSame("abc", rel.getTargetEntityName());

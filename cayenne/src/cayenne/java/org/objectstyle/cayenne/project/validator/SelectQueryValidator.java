@@ -53,39 +53,59 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.validation;
+package org.objectstyle.cayenne.project.validator;
 
-import java.io.Serializable;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Definea a single failure during the validation process. Implementing classes may
- * store any extra information to help callers to identify the source and reasons 
- * for the failure.
- *
- * @see BeansValidationFailure
- * @author Fabricio Voznika
+ * Validator for SelectQueries.
+ * 
+ * @author Andrei Adamchik
  * @since 1.1
  */
-public interface ValidationFailure extends Serializable {
+public class SelectQueryValidator extends TreeNodeValidator {
 
-    /**
-     * Returns the object that has generated the failure. For example, if a <code>Person</code>
-     * must have a name and a <code>ValidationFailure</code> is created when the
-     * user attempts to save it, the <code>Person</code> object would be the failure source.
-     *
-     * @return the failure's source or null in case a source cannot be defined.
-     */
-    public Object getSource();
+    public void validateObject(ProjectPath treeNodePath, Validator validator) {
+        SelectQuery query = (SelectQuery) treeNodePath.getObject();
+        validateName(query, treeNodePath, validator);
+     
+    }
 
-    /**
-     * Returns an user defined error object.
-     */
-    public Object getError();
+    protected void validateName(Query query, ProjectPath path, Validator validator) {
+        String name = query.getName();
 
-    /**
-     * Returns a String representation of the error object.
-     * This is used in log messages and exceptions.
-     */
-    public String getDescription();
+        // Must have name
+        if (Util.isEmptyString(name)) {
+            validator.registerError("Unnamed Procedure.", path);
+            return;
+        }
+
+        DataMap map = (DataMap) path.getObjectParent();
+        if (map == null) {
+            return;
+        }
+
+        // check for duplicate names in the parent context
+        Iterator it = map.getQueries().iterator();
+        while (it.hasNext()) {
+            Query otherQuery = (Query) it.next();
+            if (otherQuery == query) {
+                continue;
+            }
+
+            if (name.equals(otherQuery.getName())) {
+                validator.registerError("Duplicate Query name: " + name + ".", path);
+                break;
+            }
+        }
+    }
+    
+    
 
 }

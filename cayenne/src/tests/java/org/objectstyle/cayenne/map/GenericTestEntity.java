@@ -53,39 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.validation;
+package org.objectstyle.cayenne.map;
 
-import java.io.Serializable;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * Definea a single failure during the validation process. Implementing classes may
- * store any extra information to help callers to identify the source and reasons 
- * for the failure.
- *
- * @see BeansValidationFailure
- * @author Fabricio Voznika
- * @since 1.1
+ * A hleper class that implements all abstract Entity methods as noops.
+ * Used as a mockup Entity test object in test cases.
+ * 
+ * @author Andrei Adamchik
  */
-public interface ValidationFailure extends Serializable {
+public class GenericTestEntity extends Entity {
 
     /**
-     * Returns the object that has generated the failure. For example, if a <code>Person</code>
-     * must have a name and a <code>ValidationFailure</code> is created when the
-     * user attempts to save it, the <code>Person</code> object would be the failure source.
-     *
-     * @return the failure's source or null in case a source cannot be defined.
+     * @deprecated
      */
-    public Object getSource();
+    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
 
-    /**
-     * Returns an user defined error object.
-     */
-    public Object getError();
+    }
 
-    /**
-     * Returns a String representation of the error object.
-     * This is used in log messages and exceptions.
-     */
-    public String getDescription();
+    public void validateExpression(Expression e, ValidationResult validationBuilder) {
 
+    }
+
+    public Iterator resolvePathComponents(Expression pathExp)
+        throws ExpressionException {
+        return null;
+    }
 }

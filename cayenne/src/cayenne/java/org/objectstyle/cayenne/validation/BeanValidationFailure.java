@@ -68,10 +68,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrei Adamchik
  * @since 1.1
  */
-public class BeanValidationFailure implements ValidationFailure {
-    private Object source;
-    private String property;
-    private Object error;
+public class BeanValidationFailure extends SimpleValidationFailure {
+
+    protected String property;
 
     private static String validationMessage(String attribute, String message) {
         StringBuffer buffer = new StringBuffer(message.length() + attribute.length() + 5);
@@ -170,20 +169,13 @@ public class BeanValidationFailure implements ValidationFailure {
      * Creates new BeanValidationFailure.
      */
     public BeanValidationFailure(Object source, String property, Object error) {
+        super(source, error);
+
         if (source == null && property != null) {
             throw new IllegalArgumentException("ValidationFailure cannot have 'property' when 'source' is null.");
         }
 
-        this.source = source;
         this.property = property;
-        this.error = error;
-    }
-
-    /**
-     * Returns the error converted to String.
-     */
-    public String getDescription() {
-        return String.valueOf(error);
     }
 
     /**
@@ -191,17 +183,6 @@ public class BeanValidationFailure implements ValidationFailure {
      */
     public String getProperty() {
         return property;
-    }
-
-    /**
-     * Returns object that failed the validation.
-     */
-    public Object getSource() {
-        return source;
-    }
-
-    public Object getError() {
-        return error;
     }
 
     /**

@@ -481,8 +481,7 @@ public class QueryUtils {
          * from target to source.
          */
         public String reverseDbPath(ObjEntity e, String relPath) {
-            Expression exp = ExpressionFactory.unaryExp(Expression.DB_PATH, relPath);
-            Iterator it = e.resolvePathComponents(exp);
+            Iterator it = e.resolvePathComponents(relPath);
             StringBuffer buf = new StringBuffer();
             boolean hasRels = false;
 

@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class AttributeTst extends CayenneTestCase {
@@ -80,22 +79,8 @@ public class AttributeTst extends CayenneTestCase {
     }
 
     public void testEntity() throws Exception {
-        Entity tstEntity = new Entity() {
-            public String getNameToDisplay() {
-                return null;
-            }
-            public String getTypenameToDisplay() {
-                return null;
-            }
-            
-            /**
-             * @deprecated
-             */
-            protected void validateQueryRoot(Query query) {
-            }
-        };
+        Entity tstEntity = new GenericTestEntity();
         attr.setEntity(tstEntity);
         assertSame(tstEntity, attr.getEntity());
     }
-
 }

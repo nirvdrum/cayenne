@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Validator of a single node in a project object tree. 
@@ -99,6 +100,8 @@ public abstract class TreeNodeValidator {
 
     protected static final ProcedureParameterValidator procedureParameterValidator =
         new ProcedureParameterValidator();
+    protected static final SelectQueryValidator selectQueryValidator =
+        new SelectQueryValidator();
 
     /**
      * Validates an object, appending any validation messages 
@@ -139,6 +142,9 @@ public abstract class TreeNodeValidator {
         }
         else if (validatedObj instanceof ProcedureParameter) {
             validatorObj = procedureParameterValidator;
+        }
+        else if (validatedObj instanceof SelectQuery) {
+            validatorObj = selectQueryValidator;
         }
         else {
             // ignore unknown nodes

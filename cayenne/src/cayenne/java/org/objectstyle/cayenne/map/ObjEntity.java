@@ -65,8 +65,13 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.validation.SimpleValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * ObjEntity is a mapping descriptor for a DataObject Java class.
@@ -172,7 +177,7 @@ public class ObjEntity extends Entity {
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             ObjRelationship objRel = (ObjRelationship) entry.getValue();
-            
+
             List relList = objRel.getDbRelationships();
             if (relList.size() != 1) {
                 continue;
@@ -278,6 +283,29 @@ public class ObjEntity extends Entity {
         this.readOnly = readOnly;
     }
 
+    public Iterator resolvePathComponents(Expression pathExp)
+        throws ExpressionException {
+
+        // resolve DB_PATH if we can
+        if (pathExp.getType() == Expression.DB_PATH) {
+            if (getDbEntity() == null) {
+                throw new ExpressionException(
+                    "Can't resolve DB_PATH '" + pathExp + "', DbEntity is not set.");
+            }
+
+            return getDbEntity().resolvePathComponents(pathExp);
+        }
+
+        if (pathExp.getType() == Expression.OBJ_PATH) {
+            return new PathIterator((String) pathExp.getOperand(0));
+        }
+
+        throw new ExpressionException(
+            "Invalid expression type: '"
+                + pathExp.expName()
+                + "',  OBJ_PATH is expected.");
+    }
+
     /**
      * @deprecated Unused since 1.1
      */
@@ -300,6 +328,23 @@ public class ObjEntity extends Entity {
             "Wrong query root for ObjEntity: " + query.getRoot());
     }
 
+    /**
+     * Checks if expression is compatible with this entity, i.e. all
+     * the path subexpressions can be resolved using this entity as a context.
+     * 
+     * @since 1.1
+     */
+    public void validateExpression(Expression e, ValidationResult validationBuilder) {
+        e.traverse(new ExpressionValidatingTraversal(validationBuilder));
+
+        if (getDbEntity() != null) {
+            getDbEntity().validateExpression(e, validationBuilder);
+        }
+    }
+
+    /**
+     * @deprecated Unused since 1.1
+     */
     public void validate() throws CayenneException {
         if (getName() == null)
             throw new CayenneException("ObjEntity name not defined.");
@@ -325,6 +370,37 @@ public class ObjEntity extends Entity {
                         + "ObjAttribute: "
                         + objAttr.getName()
                         + " compound, read only.");
+            }
+        }
+    }
+
+    final class ExpressionValidatingTraversal extends TraversalHelper {
+        ValidationResult validationBuilder;
+
+        ExpressionValidatingTraversal(ValidationResult validationBuilder) {
+            this.validationBuilder = validationBuilder;
+        }
+
+        public void startUnaryNode(Expression node, Expression parentNode) {
+            // if this is an OBJ_PATH, see if the path fully resolves
+            if (node.getType() == Expression.OBJ_PATH) {
+                StringBuffer pathBuffer = new StringBuffer();
+                try {
+                    Iterator pathIt = resolvePathComponents(node);
+                    while (pathIt.hasNext()) {
+                        Object next = pathIt.next();
+                        pathBuffer.append('.').append(next);
+                    }
+                }
+                catch (ExpressionException ex) {
+                    String message =
+                        "Invalid object expression path: '" + node.getOperand(0) + "'";
+                    if (pathBuffer.length() > 0) {
+                        message += ", last valid component: " + pathBuffer;
+                    }
+                    validationBuilder.addFailure(
+                        new SimpleValidationFailure(node, message));
+                }
             }
         }
     }

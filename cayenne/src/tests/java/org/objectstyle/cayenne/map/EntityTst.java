@@ -60,7 +60,6 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -68,21 +67,7 @@ public class EntityTst extends CayenneTestCase {
     protected Entity ent;
 
     public void setUp() throws Exception {
-        // create an anonymous inner Entity subclass, since Entity is abstract
-        ent = new Entity() {
-            public String getNameToDisplay() {
-                return null;
-            }
-            public String getTypenameToDisplay() {
-                return null;
-            }
-            
-            /**
-             * @deprecated 
-             */
-            protected void validateQueryRoot(Query query) {
-            }
-        };
+        ent = new GenericTestEntity();
     }
 
     public void testName() throws Exception {
@@ -202,13 +187,7 @@ public class EntityTst extends CayenneTestCase {
     }
 
     public void testRemoveAttribute() {
-        Entity entity = new Entity() {
-            /**
-             * @deprecated
-             */
-            protected void validateQueryRoot(Query query) {
-            }
-        };
+        Entity entity = new GenericTestEntity();
 
         entity.setName("test");
         ObjAttribute attribute1 = new ObjAttribute("a1");

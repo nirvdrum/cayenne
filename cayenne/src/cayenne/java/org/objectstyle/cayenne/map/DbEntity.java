@@ -60,10 +60,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.validation.SimpleValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * A DbEntity is a mapping descriptor that defines a structure of a database table.
@@ -229,6 +234,28 @@ public class DbEntity extends Entity implements DbAttributeListener {
             throw new IllegalArgumentException("Wrong query root for DbEntity: " + query.getRoot());
         }
     }
+    
+    /**
+     * Checks if expression is compatible with this entity, i.e. all
+     * the path subexpressions can be resolved using this entity as a context.
+     * 
+     * @since 1.1
+     */
+    public void validateExpression(Expression e, ValidationResult validationBuilder) {
+        e.traverse(new ExpressionValidatingTraversal(validationBuilder));
+    }
+
+    public Iterator resolvePathComponents(Expression pathExp)
+        throws ExpressionException {
+        if (pathExp.getType() != Expression.DB_PATH) {
+            throw new ExpressionException(
+                "Invalid expression type: '"
+                    + pathExp.expName()
+                    + "',  DB_PATH is expected.");
+        }
+
+        return new PathIterator((String) pathExp.getOperand(0));
+    }
 
 	public void setPrimaryKeyGenerator(DbKeyGenerator primaryKeyGenerator) {
 		this.primaryKeyGenerator = primaryKeyGenerator;
@@ -298,5 +325,36 @@ public class DbEntity extends Entity implements DbAttributeListener {
 				}
 		}
 	}
-
+    
+    
+    final class ExpressionValidatingTraversal extends TraversalHelper {
+        ValidationResult validationBuilder;
+        
+        ExpressionValidatingTraversal(ValidationResult validationBuilder) {
+            this.validationBuilder = validationBuilder;
+        }
+        
+        public void startUnaryNode(Expression node, Expression parentNode) {
+            // if this is an DB_PATH, see if the path fully resolves
+            if (node.getType() == Expression.DB_PATH) {
+                StringBuffer pathBuffer = new StringBuffer();
+                try {
+                    Iterator pathIt = resolvePathComponents(node);
+                    while (pathIt.hasNext()) {
+                        Object next = pathIt.next();
+                        pathBuffer.append('.').append(next);
+                    }
+                }
+                catch (ExpressionException ex) {
+                    String message =
+                        "Invalid DB expression path: '" + node.getOperand(0) + "'";
+                    if (pathBuffer.length() > 0) {
+                        message += ", last valid component: " + pathBuffer;
+                    }
+                    validationBuilder.addFailure(
+                        new SimpleValidationFailure(node, message));
+                }
+            }
+        }
+    }
 }

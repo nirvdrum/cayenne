@@ -53,39 +53,60 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.validation;
 
-import java.io.Serializable;
-
 /**
- * Definea a single failure during the validation process. Implementing classes may
- * store any extra information to help callers to identify the source and reasons 
- * for the failure.
- *
- * @see BeansValidationFailure
- * @author Fabricio Voznika
+ * Represents a generic validation failure that contains
+ * failed object and a message describing the failure.
+ * 
  * @since 1.1
+ * @author Andrei Adamchik
  */
-public interface ValidationFailure extends Serializable {
+public class SimpleValidationFailure implements ValidationFailure {
+    protected Object source;
+    protected Object error;
+
+    public SimpleValidationFailure(Object source, Object error) {
+        this.source = source;
+        this.error = error;
+    }
 
     /**
-     * Returns the object that has generated the failure. For example, if a <code>Person</code>
-     * must have a name and a <code>ValidationFailure</code> is created when the
-     * user attempts to save it, the <code>Person</code> object would be the failure source.
-     *
-     * @return the failure's source or null in case a source cannot be defined.
+     * Returns the error converted to String.
      */
-    public Object getSource();
+    public String getDescription() {
+        return String.valueOf(error);
+    }
 
     /**
-     * Returns an user defined error object.
+     * Returns object that failed the validation.
      */
-    public Object getError();
+    public Object getSource() {
+        return source;
+    }
+
+    public Object getError() {
+        return error;
+    }
 
     /**
-     * Returns a String representation of the error object.
-     * This is used in log messages and exceptions.
+     * Returns a String representation of the failure.
      */
-    public String getDescription();
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
 
+        buffer.append("Validation failure for ");
+        Object source = getSource();
+
+        if (source == null) {
+            buffer.append("[General]");
+        }
+        else {
+            buffer.append(source.getClass().getName());
+        }
+        buffer.append(": ");
+        buffer.append(getDescription());
+        return buffer.toString();
+    }
 }
