@@ -113,8 +113,8 @@ public class TestOperationObserver extends DefaultOperationObserver {
     }
     
     
-    public void nextSnapshots(Query query, List resultSnapshots) {
-        resultObjs.put(query, resultSnapshots);
+    public void nextDataRows(Query query, List dataRows) {
+        resultObjs.put(query, dataRows);
     }
     
     

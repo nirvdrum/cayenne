@@ -12,6 +12,8 @@ Changes in this release:
 1. Added ResultIterator
 2. Added public method DataContext.objectFromDataRow (rather exposed 
 another private method).
-3. Removed public DataNode.snapshotsFromResultSet refactored into 
+3. Term "Snapshot" is changed to "DataRow" in most places.
+   - OperationObserver and its implementations: nextSnapshots became nextDataRows
+4. Removed public DataNode.snapshotsFromResultSet refactored into 
 DefaultResultIterator
 

@@ -133,8 +133,8 @@ public class DefaultOperationObserver implements OperationObserver {
     }
     
     
-    public void nextSnapshots(Query query, List resultSnapshots) {
-        int count = (resultSnapshots == null) ? -1 : resultSnapshots.size();
+    public void nextDataRows(Query query, List dataRows) {
+        int count = (dataRows == null) ? -1 : dataRows.size();
         logObj.fine("result count: " + count);
     }
     

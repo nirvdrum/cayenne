@@ -82,7 +82,7 @@ public interface OperationObserver {
     public void nextCount(Query query, int resultCount);
     
     /** Called when the next query results are read. */
-    public void nextSnapshots(Query query, List resultSnapshots);
+    public void nextDataRows(Query query, List dataRows);
     
     public void nextQueryException(Query query, Exception ex);
     public void nextGlobalException(Exception ex);

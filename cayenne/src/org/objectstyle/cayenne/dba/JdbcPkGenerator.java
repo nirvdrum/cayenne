@@ -378,20 +378,20 @@ public class JdbcPkGenerator implements PkGenerator {
             return false;
         }
 
-        public void nextSnapshots(Query query, List resultObjects) {
-            super.nextSnapshots(query, resultObjects);
+        public void nextDataRows(Query query, List dataRows) {
+            super.nextDataRows(query, dataRows);
 
             // process selected object, issue an update query
-            if (resultObjects == null || resultObjects.size() == 0) {
+            if (dataRows == null || dataRows.size() == 0) {
                 throw new CayenneRuntimeException(
                     "Error generating PK : entity not supported: " + entName);
             }
-            if (resultObjects.size() > 1) {
+            if (dataRows.size() > 1) {
                 throw new CayenneRuntimeException(
                     "Error generating PK : too many rows for entity: " + entName);
             }
 
-            Map lastPk = (Map) resultObjects.get(0);
+            Map lastPk = (Map) dataRows.get(0);
             nextId = (Integer) lastPk.get(NEXT_ID);
             if (nextId == null) {
                 throw new CayenneRuntimeException("Error generating PK : null nextId.");

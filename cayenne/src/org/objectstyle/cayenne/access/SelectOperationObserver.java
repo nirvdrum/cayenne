@@ -118,13 +118,13 @@ public class SelectOperationObserver extends DefaultOperationObserver {
     
 
     /** 
-     * Stores all objects in <code>resultSnapshots</code> in an internal
+     * Stores all objects in <code>dataRows</code> in an internal
      * result list. 
      */
-    public void nextSnapshots(Query query, List resultSnapshots) {
-        super.nextSnapshots(query, resultSnapshots);
-        if(resultSnapshots != null) {
-            results.put(query, resultSnapshots);
+    public void nextDataRows(Query query, List dataRows) {
+        super.nextDataRows(query, dataRows);
+        if(dataRows != null) {
+            results.put(query, dataRows);
         }
         
         selectCount++;

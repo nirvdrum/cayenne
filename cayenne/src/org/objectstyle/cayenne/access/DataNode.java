@@ -253,7 +253,7 @@ public class DataNode implements QueryEngine {
 							rs.close();
 
 							// 3.a send results back to consumer
-							opObserver.nextSnapshots(
+							opObserver.nextDataRows(
 								nextQuery,
 								resultSnapshots);
 						} else {

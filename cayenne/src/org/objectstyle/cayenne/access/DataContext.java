@@ -870,21 +870,21 @@ public class DataContext implements QueryEngine {
 
         /** 
          * Ovwerrides superclass behavior to convert each  
-         * snapshot to a real object. Registers objects with 
+         * data row to a real object. Registers objects with 
          * parent DataContext.
          */
-        public void nextSnapshots(Query query, List resultSnapshots) {
+        public void nextDataRows(Query query, List dataRows) {
             ArrayList result = new ArrayList();
-            if (resultSnapshots != null && resultSnapshots.size() > 0) {
+            if (dataRows != null && dataRows.size() > 0) {
                 ObjEntity ent = DataContext.this.lookupEntity(query.getObjEntityName());
-                Iterator it = resultSnapshots.iterator();
+                Iterator it = dataRows.iterator();
                 while (it.hasNext()) {
                     result.add(
                         DataContext.this.objectFromDataRow(ent, (Map) it.next(), true));
                 }
             }
 
-            super.nextSnapshots(query, result);
+            super.nextDataRows(query, result);
         }
     }
 
