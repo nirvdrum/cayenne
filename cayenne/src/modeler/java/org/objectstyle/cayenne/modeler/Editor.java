@@ -174,8 +174,8 @@ public class Editor
      * Main method that starts the CayenneModeler.
      */
     public static void main(String[] args) {
-		// redirect all logging to the log file
-		configLogging();
+		// if configured, redirect all logging to the log file
+		configureLogging();
 
 		// get preferences
 		ModelerPreferences prefs = ModelerPreferences.getPreferences();
@@ -252,33 +252,47 @@ public class Editor
      * Configures Log4J appenders to perform logging to 
      * $HOME/.cayenne/modeler.log.
      */
-    public static void configLogging() {
-        try {
-            File log = getLogFile();
+    public static void configureLogging() {
+		// read default Cayenne log configuration
+		Configuration.configureCommonLogging();
 
-            if (log != null) {
+		// get preferences
+		ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
-                // read default Cayenne log configuration
-                Configuration.configCommonLogging();
+		// check whether to set up logging to a file
+		boolean logfileEnabled = prefs.getBoolean(ModelerPreferences.EDITOR_LOGFILE_ENABLED, true);
+		prefs.setProperty(ModelerPreferences.EDITOR_LOGFILE_ENABLED, String.valueOf(logfileEnabled));
 
-                // replace appenders to jsut log to a file.
-                Logger p1 = logObj;
-                Logger p2 = null;
-                while ((p2 = (Logger) p1.getParent()) != null) {
-                    p1 = p2;
-                }
+		if (logfileEnabled) {
+	        try {
+	        	// use logfile from preferences or default
+	        	String defaultPath = getLogFile().getPath();
+				String logfilePath = prefs.getString(ModelerPreferences.EDITOR_LOGFILE, defaultPath);
+				File logfile = new File(logfilePath);
 
-                Layout layout =
-                    new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
-                p1.removeAllAppenders();
-                p1.addAppender(
-                    new FileAppender(layout, log.getCanonicalPath(), true));
-            } else {
-                logObj.warn("Can't create log file, ignoring.");
-            }
-        } catch (IOException ioex) {
-            logObj.warn("Error setting logging.", ioex);
-        }
+	            if ((logfile != null) && (logfile.exists())) {
+	            	// remember working path
+					prefs.setProperty(ModelerPreferences.EDITOR_LOGFILE, logfilePath);
+	
+	                // replace appenders to just log to a file.
+	                Logger p1 = logObj;
+	                Logger p2 = null;
+	                while ((p2 = (Logger) p1.getParent()) != null) {
+	                    p1 = p2;
+	                }
+	
+	                Layout layout =
+	                    new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
+	                p1.removeAllAppenders();
+	                p1.addAppender(
+	                    new FileAppender(layout, logfile.getCanonicalPath(), true));
+	            } else {
+	                logObj.warn("Can't create log file, ignoring.");
+	            }
+	        } catch (IOException ioex) {
+	            logObj.warn("Error setting logging.", ioex);
+	        }
+		}
     }
 
     /** 
@@ -369,7 +383,7 @@ public class Editor
 		frame.setLocation(newX, newY);
 		frame.setVisible(true);
 
-        controller.startup();
+        this.controller.startup();
     }
 
     /**
