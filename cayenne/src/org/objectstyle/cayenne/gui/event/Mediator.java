@@ -115,9 +115,9 @@ public class Mediator
 	}
 	
 
-	private Mediator(GuiConfiguration temp_config) {
+	private Mediator(GuiConfiguration config) {
 		this();
-		config = temp_config;
+		this.config = config;
 	}
 	
 	public static Mediator getMediator() {

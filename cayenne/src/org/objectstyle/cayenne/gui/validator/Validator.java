@@ -75,13 +75,13 @@ public class Validator {
 	private Mediator mediator;
 	private Vector errMsg = new Vector();
 
-	/** Create validator for specified mediator. 
-	  * @param temp_mediator The mediator with dirty elements to check.
-	  * @param temp_frame Frame to use for displaying dialog window. 
-	  * 	   If null, default frame is used.
-	  */
-	public Validator(Mediator temp_mediator) {
-		mediator = temp_mediator;
+	/** 
+	 * Create validator for specified mediator. 
+	 * 
+	 * @param mediator The mediator with dirty elements to check.
+	 */
+	public Validator(Mediator mediator) {
+		this.mediator = mediator;
 	}
 
 	/** 
@@ -114,7 +114,7 @@ public class Validator {
 	 * Checks if there are empty or duplicate domain names. 
 	 * Also checks data nodes. 
 	 */
-	private int validateDomains(DataDomain[] domains) {
+	protected int validateDomains(DataDomain[] domains) {
 		int status = ErrorMsg.NO_ERROR;
 		DomainErrorMsg msg;
 		// Used to check for duplicate names
@@ -163,7 +163,7 @@ public class Validator {
 	}
 
 	/** Checks for duplicate data node names and other stuff. */
-	private int validateDataNodes(DataDomain domain, DataNode[] nodes) {
+	protected int validateDataNodes(DataDomain domain, DataNode[] nodes) {
 		int status = ErrorMsg.NO_ERROR;
 		DataNodeErrorMsg msg;
 		// Used to check for duplicate names
@@ -204,7 +204,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateDataNode(DataDomain domain, DataNode node) {
+	protected int validateDataNode(DataDomain domain, DataNode node) {
 		int status = ErrorMsg.NO_ERROR;
 		DataNodeErrorMsg msg;
 
@@ -258,7 +258,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateDataMaps(DataDomain domain, List maps) {
+	protected int validateDataMaps(DataDomain domain, List maps) {
 		int status = ErrorMsg.NO_ERROR;
 
 		// Used to check for duplicate names
@@ -298,7 +298,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateDataMap(DataDomain domain, DataMap map) {
+	protected int validateDataMap(DataDomain domain, DataMap map) {
 		int status = ErrorMsg.NO_ERROR;
 
 		// If directo factory, make sure the location is a valid file name.
@@ -333,7 +333,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateObjEntities(
+	protected int validateObjEntities(
 		DataDomain domain,
 		DataMap map,
 		ObjEntity[] entities) {
@@ -418,7 +418,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateObjAttributes(
+	protected int validateObjAttributes(
 		DataDomain domain,
 		DataMap map,
 		ObjEntity entity) {
@@ -461,7 +461,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateObjRels(
+	protected int validateObjRels(
 		DataDomain domain,
 		DataMap map,
 		ObjEntity entity) {
@@ -488,7 +488,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateDbEntities(
+	protected int validateDbEntities(
 		DataDomain domain,
 		DataMap map,
 		DbEntity[] entities) {
@@ -540,7 +540,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateDbAttributes(
+	protected int validateDbAttributes(
 		DataDomain domain,
 		DataMap map,
 		DbEntity entity) {
@@ -586,7 +586,7 @@ public class Validator {
 		return status;
 	}
 
-	private int validateDbRels(
+	protected int validateDbRels(
 		DataDomain domain,
 		DataMap map,
 		DbEntity entity) {

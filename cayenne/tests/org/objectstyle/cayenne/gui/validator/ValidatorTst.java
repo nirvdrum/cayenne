@@ -55,20 +55,33 @@
  */
 package org.objectstyle.cayenne.gui.validator;
 
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("GUI Package Tests");
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.gui.event.Mediator;
 
-		// don't test GUI if no graphics environment present
-		if (!org.objectstyle.TestMain.noGui()) {
-			// add gui tests here
-		}
+/**
+ * Test cases for the Validator class.
+ * 
+ * @author Andrei Adamchik
+ */
+public class ValidatorTst extends TestCase {
+	protected Validator validator;
 
-		// continue with noGUI tests
-		suite.addTestSuite(ErrorMsgTst.class);
-		suite.addTestSuite(ValidatorTst.class);
-		return suite;
+	/**
+	 * Constructor for ValidatorTst.
+	 */
+	public ValidatorTst(String name) {
+		super(name);
+	}
+	
+	public void setUp() throws Exception {
+		validator = new Validator(Mediator.getMediator());
+	}
+	
+	public void testValidateDomains() throws Exception {
+		DataDomain d1 = new DataDomain("abc");
+		assertEquals(ErrorMsg.NO_ERROR, validator.validateDomains(new DataDomain[] {d1}));
 	}
 }
+
