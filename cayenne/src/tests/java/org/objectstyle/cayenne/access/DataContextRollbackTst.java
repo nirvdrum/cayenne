@@ -233,7 +233,5 @@ public class DataContextRollbackTst extends DataContextTestBase {
         List queryResults = freshContext.performQuery(query);
 
         assertEquals(1, queryResults.size());
-
     }
-
 }

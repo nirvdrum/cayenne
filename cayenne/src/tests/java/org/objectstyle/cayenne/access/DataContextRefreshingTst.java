@@ -60,7 +60,13 @@ import java.util.Date;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.DeleteQuery;
+import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
  * Test suite covering possible scenarios of refreshing updated 
@@ -303,5 +309,32 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         artist.setDateOfBirth(new Date());
         assertEquals(PersistenceState.MODIFIED, artist.getPersistenceState());
         assertNotNull(artist.readPropertyDirectly("artistName"));
+    }
+
+    /**
+     * Helper method to update a single column in a database row.
+     */
+    protected void updateRow(ObjectId id, String dbAttribute, Object newValue) {
+        UpdateQuery updateQuery = new UpdateQuery();
+        updateQuery.setRoot(id.getObjClass());
+        updateQuery.addUpdAttribute(dbAttribute, newValue);
+
+        // set qualifier
+        updateQuery.setQualifier(
+            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+
+        getNode().performQueries(
+            Collections.singletonList(updateQuery),
+            new DefaultOperationObserver());
+    }
+
+    protected void deleteRow(ObjectId id) {
+        DeleteQuery deleteQuery = new DeleteQuery();
+        deleteQuery.setRoot(id.getObjClass());
+        deleteQuery.setQualifier(
+            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+        getNode().performQueries(
+            Collections.singletonList(deleteQuery),
+            new DefaultOperationObserver());
     }
 }

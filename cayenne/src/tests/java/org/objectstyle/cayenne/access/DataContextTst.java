@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.TestOperationObserver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
@@ -84,9 +85,18 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 public class DataContextTst extends DataContextTestBase {
     private static Logger logObj = Logger.getLogger(DataContextTst.class);
+
+    protected TestOperationObserver opObserver;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        opObserver = new TestOperationObserver();
+    }
 
     public void testLocalObjects() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
@@ -254,6 +264,7 @@ public class DataContextTst extends DataContextTestBase {
         // CAY-96 bug report)
 
         // first prepare test fixture
+        createTestData("testGalleries");
         populateExhibits();
 
         ObjectId eId = new ObjectId(Exhibit.class, Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
@@ -375,6 +386,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testPerformQueries() throws Exception {
+        createTestData("testGalleries");
+
         SelectQuery q1 = new SelectQuery();
         q1.setRoot(Artist.class);
         SelectQuery q2 = new SelectQuery();
@@ -396,6 +409,7 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testSelectDate() throws Exception {
+        createTestData("testGalleries");
         populateExhibits();
 
         List objects = context.performQuery(new SelectQuery(Exhibit.class));
@@ -464,6 +478,21 @@ public class DataContextTst extends DataContextTestBase {
 
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
+    }
+
+    public void testPerformModifyQuery() throws Exception {
+        SelectQuery select =
+            new SelectQuery(Painting.class, Expression.fromString("db:PAINTING_ID = 1"));
+
+        assertEquals(0, context.performQuery(select).size());
+
+        SqlModifyQuery query =
+            new SqlModifyQuery(
+                Painting.class,
+                "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
+                    + "VALUES (1, 'PX', 33002, 1)");
+        context.performModifyQuery(query);
+        assertEquals(1, context.performQuery(select).size());
     }
 
     public void testPerformPagedQuery() throws Exception {

@@ -59,20 +59,13 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TestOperationObserver;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -84,17 +77,14 @@ public class DataContextTestBase extends CayenneTestCase {
     public static final int galleryCount = 10;
 
     protected DataContext context;
-    protected TestOperationObserver opObserver;
 
     protected void setUp() throws Exception {
         super.setUp();
 
         deleteTestData();
         createTestData("testArtists");
-        createTestData("testGalleries");
 
         context = createDataContext();
-        opObserver = new TestOperationObserver();
     }
 
     protected Painting fetchPainting(String name, boolean prefetchArtist) {
@@ -129,6 +119,10 @@ public class DataContextTestBase extends CayenneTestCase {
         return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
     }
 
+    /**
+     * Temporary workaround for current inability to store dates in test 
+     * fixture XML files.
+     */
     public void populateExhibits() throws Exception {
         String insertPaint =
             "INSERT INTO EXHIBIT (EXHIBIT_ID, GALLERY_ID, OPENING_DATE, CLOSING_DATE) VALUES (?, ?, ?, ?)";
@@ -171,33 +165,5 @@ public class DataContextTestBase extends CayenneTestCase {
         context.commitChanges();
 
         return painting;
-    }
-
-    /**
-     * Helper method to update a single column in a database row.
-     */
-    protected void updateRow(ObjectId id, String dbAttribute, Object newValue) {
-
-        UpdateQuery updateQuery = new UpdateQuery();
-        updateQuery.setRoot(id.getObjClass());
-        updateQuery.addUpdAttribute(dbAttribute, newValue);
-
-        // set qualifier
-        updateQuery.setQualifier(
-            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-
-        getNode().performQueries(
-            Collections.singletonList(updateQuery),
-            new DefaultOperationObserver());
-    }
-
-    protected void deleteRow(ObjectId id) {
-        DeleteQuery deleteQuery = new DeleteQuery();
-        deleteQuery.setRoot(id.getObjClass());
-        deleteQuery.setQualifier(
-            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-        getNode().performQueries(
-            Collections.singletonList(deleteQuery),
-            new DefaultOperationObserver());
     }
 }

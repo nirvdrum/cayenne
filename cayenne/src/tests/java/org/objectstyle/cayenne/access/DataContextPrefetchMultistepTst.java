@@ -80,6 +80,7 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        createTestData("testGalleries");
         populateExhibits();
         createTestData("testArtistExhibits");
     }

@@ -244,6 +244,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      */
     public void testPrefetchToManyOnJoinTable() throws Exception {
         // setup data
+        createTestData("testGalleries");
         populateExhibits();
         createTestData("testArtistExhibits");
 
