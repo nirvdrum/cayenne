@@ -53,77 +53,73 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import java.awt.event.ActionEvent;
+import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.util.Util;
+import org.scopemvc.controller.basic.BasicController;
+import org.scopemvc.core.Control;
+import org.scopemvc.core.ControlException;
 
 /**
  * @author Andrei Adamchik
  */
-public class CreateDbEntityAction extends CayenneAction {
+public class DataMapSchemaUpdateController extends BasicController {
 
-	public static String getActionName() {
-		return "Create DbEntity";
-	}
+    public static final String CANCEL_CONTROL = "cayenne.modeler.datamap.schemaupdate.cancel.button";
+    public static final String UPDATE_SCHEMA_CONTROL = "cayenne.modeler.datamap.schemaupdate.update.button";
+    public static final String UPDATE_ALL_RADIO_CONTROL = "cayenne.modeler.datamap.schemaupdate.updateall.radio";
+    public static final String UPDATE_EMPTY_RADIO_CONTROL = "cayenne.modeler.datamap.schemaupdate.updateempty.radio";
 
-    /**
-     * Constructor for CreateDbEntityAction.
-     */
-    public CreateDbEntityAction() {
-        super(getActionName());
-    }
+    protected DataMap dataMap;
+    protected EventController mediator;
 
-    public String getIconName() {
-        return "icon-dbentity.gif";
-    }
-
-    /**
-     * Creates new DbEntity, adds it to the current DataMap,
-     * fires DbEntityEvent and DbEntityDisplayEvent.
-     * 
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
-    public void performAction(ActionEvent e) {
-        EventController mediator = getMediator();
-        DbEntity entity = createEntity(mediator.getCurrentDataMap());
-
-        mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-        mediator.fireDbEntityDisplayEvent(
-            new EntityDisplayEvent(
-                this,
-                entity,
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataDomain()));
+    public DataMapSchemaUpdateController(EventController mediator, DataMap dataMap) {
+        setModel(new DataMapSchemaUpdateModel(true));
+        this.dataMap = dataMap;
+        this.mediator = mediator;
     }
 
     /**
-     * Constructs and returns a new DbEntity. Entity returned
-     * is added to the DataMap.
+     * Creates and runs the class generation dialog.
      */
-    protected DbEntity createEntity(DataMap map) {
-        DbEntity entity = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
-        entity.setSchema(map.getDefaultSchema());
-        map.addDbEntity(entity);
-        return entity;
+    public void startup() {
+        setView(new DataMapSchemaUpdateDialog());
+        super.startup();
     }
 
-    /**
-     * Returns <code>true</code> if path contains a DataMap object.
-     */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(CANCEL_CONTROL)) {
+            shutdown();
+        }
+        else if (control.matchesID(UPDATE_SCHEMA_CONTROL)) {
+            updateSchema();
+        }
+    }
+
+    protected void updateSchema() {
+        boolean doAll = ((DataMapSchemaUpdateModel) getModel()).isUpdatingAllDbEntities();
+        String defaultSchema = dataMap.getDefaultSchema();
+
+        Iterator it = dataMap.getDbEntities().iterator();
+        while (it.hasNext()) {
+            DbEntity entity = (DbEntity) it.next();
+            if (doAll || Util.isEmptyString(entity.getSchema())) {
+                if (!Util.nullSafeEquals(defaultSchema, entity.getSchema())) {
+                    entity.setSchema(defaultSchema);
+
+                    // any way to batch events, a big change will flood the app with
+                    // entity events..?
+                    mediator.fireDbEntityEvent(new EntityEvent(this, entity));
+                }
+            }
         }
 
-        return path.firstInstanceOf(DataMap.class) != null;
+        shutdown();
     }
 }

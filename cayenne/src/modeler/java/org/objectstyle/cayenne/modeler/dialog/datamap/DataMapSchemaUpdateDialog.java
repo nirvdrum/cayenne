@@ -53,77 +53,67 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.project.ProjectPath;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+
+import org.scopemvc.view.swing.SButton;
+import org.scopemvc.view.swing.SPanel;
+import org.scopemvc.view.swing.SRadioButton;
+import org.scopemvc.view.swing.SwingView;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Andrei Adamchik
  */
-public class CreateDbEntityAction extends CayenneAction {
+public class DataMapSchemaUpdateDialog extends SPanel {
 
-	public static String getActionName() {
-		return "Create DbEntity";
-	}
-
-    /**
-     * Constructor for CreateDbEntityAction.
-     */
-    public CreateDbEntityAction() {
-        super(getActionName());
+    public DataMapSchemaUpdateDialog() {
+        initView();
     }
 
-    public String getIconName() {
-        return "icon-dbentity.gif";
-    }
+    protected void initView() {
+        SRadioButton updateAll = new SRadioButton(
+                DataMapSchemaUpdateController.UPDATE_ALL_RADIO_CONTROL,
+                DataMapSchemaUpdateModel.UPDATING_ALL_SELECTOR);
 
-    /**
-     * Creates new DbEntity, adds it to the current DataMap,
-     * fires DbEntityEvent and DbEntityDisplayEvent.
-     * 
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
-    public void performAction(ActionEvent e) {
-        EventController mediator = getMediator();
-        DbEntity entity = createEntity(mediator.getCurrentDataMap());
+        SRadioButton updateEmpty = new SRadioButton(
+                DataMapSchemaUpdateController.UPDATE_EMPTY_RADIO_CONTROL,
+                DataMapSchemaUpdateModel.UPDATING_EMPTY_SELECTOR);
 
-        mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-        mediator.fireDbEntityDisplayEvent(
-            new EntityDisplayEvent(
-                this,
-                entity,
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataDomain()));
-    }
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(updateAll);
+        buttonGroup.add(updateEmpty);
 
-    /**
-     * Constructs and returns a new DbEntity. Entity returned
-     * is added to the DataMap.
-     */
-    protected DbEntity createEntity(DataMap map) {
-        DbEntity entity = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
-        entity.setSchema(map.getDefaultSchema());
-        map.addDbEntity(entity);
-        return entity;
-    }
+        SButton updateButton = new SButton(
+                DataMapSchemaUpdateController.UPDATE_SCHEMA_CONTROL);
+        SButton cancelButton = new SButton(DataMapSchemaUpdateController.CANCEL_CONTROL);
 
-    /**
-     * Returns <code>true</code> if path contains a DataMap object.
-     */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
-        }
+        // assemble
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(updateButton);
+        buttonPanel.add(cancelButton);
 
-        return path.firstInstanceOf(DataMap.class) != null;
+        CellConstraints cc = new CellConstraints();
+        FormLayout layout = new FormLayout("left:max(180dlu;pref)", "p, 3dlu, p, 3dlu");
+        PanelBuilder builder = new PanelBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.add(updateAll, cc.xy(1, 1));
+        builder.add(updateEmpty, cc.xy(1, 3));
+
+        setLayout(new BorderLayout());
+        add(builder.getPanel(), BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        setDisplayMode(SwingView.MODAL_DIALOG);
+        setTitle("Update DbEntities Schema");
     }
 }

@@ -53,77 +53,40 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import java.awt.event.ActionEvent;
-
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.project.ProjectPath;
+import org.scopemvc.core.Selector;
 
 /**
  * @author Andrei Adamchik
  */
-public class CreateDbEntityAction extends CayenneAction {
+public class DataMapSchemaUpdateModel {
 
-	public static String getActionName() {
-		return "Create DbEntity";
-	}
+    public static final Selector UPDATING_ALL_SELECTOR = Selector
+            .fromString("updatingAllDbEntities");
 
-    /**
-     * Constructor for CreateDbEntityAction.
-     */
-    public CreateDbEntityAction() {
-        super(getActionName());
+    public static final Selector UPDATING_EMPTY_SELECTOR = Selector
+            .fromString("updatingEmptyDbEntities");
+
+    protected boolean updatingAllDbEntities;
+
+    public DataMapSchemaUpdateModel(boolean updatingAllDbEntities) {
+        this.updatingAllDbEntities = updatingAllDbEntities;
     }
 
-    public String getIconName() {
-        return "icon-dbentity.gif";
+    public boolean isUpdatingAllDbEntities() {
+        return updatingAllDbEntities;
     }
 
-    /**
-     * Creates new DbEntity, adds it to the current DataMap,
-     * fires DbEntityEvent and DbEntityDisplayEvent.
-     * 
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
-    public void performAction(ActionEvent e) {
-        EventController mediator = getMediator();
-        DbEntity entity = createEntity(mediator.getCurrentDataMap());
-
-        mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-        mediator.fireDbEntityDisplayEvent(
-            new EntityDisplayEvent(
-                this,
-                entity,
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataDomain()));
+    public void setUpdatingAllDbEntities(boolean flag) {
+        this.updatingAllDbEntities = flag;
     }
 
-    /**
-     * Constructs and returns a new DbEntity. Entity returned
-     * is added to the DataMap.
-     */
-    protected DbEntity createEntity(DataMap map) {
-        DbEntity entity = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
-        entity.setSchema(map.getDefaultSchema());
-        map.addDbEntity(entity);
-        return entity;
+    public boolean isUpdatingEmptyDbEntities() {
+        return !isUpdatingAllDbEntities();
     }
 
-    /**
-     * Returns <code>true</code> if path contains a DataMap object.
-     */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
-        }
-
-        return path.firstInstanceOf(DataMap.class) != null;
+    public void setUpdatingEmptyDbEntities(boolean flag) {
+        setUpdatingAllDbEntities(!flag);
     }
 }

@@ -83,10 +83,10 @@ import org.scopemvc.view.swing.SwingView;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
+/**
  * Dialog for generating Java classes from the DataMap.
- *  
- * @author Michael Misha Shengaout 
+ * 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
 public class ClassGeneratorDialog extends SPanel {
@@ -109,30 +109,30 @@ public class ClassGeneratorDialog extends SPanel {
         STextField folder = new STextField(30);
         folder.setSelector("outputDir");
 
-        SButton chooseButton =
-            new SButton(new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL));
+        SButton chooseButton = new SButton(new SAction(
+                ClassGeneratorController.CHOOSE_LOCATION_CONTROL));
         chooseButton.setEnabled(true);
 
-        SButton chooseTemplateButton =
-            new SButton(new SAction(ClassGeneratorController.CHOOSE_TEMPLATE_CONTROL));
+        SButton chooseTemplateButton = new SButton(new SAction(
+                ClassGeneratorController.CHOOSE_TEMPLATE_CONTROL));
         chooseTemplateButton.setEnabled(true);
 
-        final SButton chooseSuperTemplateButton =
-            new SButton(
-                new SAction(ClassGeneratorController.CHOOSE_SUPERTEMPLATE_CONTROL));
+        final SButton chooseSuperTemplateButton = new SButton(new SAction(
+                ClassGeneratorController.CHOOSE_SUPERTEMPLATE_CONTROL));
         chooseSuperTemplateButton.setEnabled(true);
 
-        SButton generateButton =
-            new SButton(new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL));
+        SButton generateButton = new SButton(new SAction(
+                ClassGeneratorController.GENERATE_CLASSES_CONTROL));
         generateButton.setEnabled(true);
 
-        SButton cancelButton =
-            new SButton(new SAction(ClassGeneratorController.CANCEL_CONTROL));
+        SButton cancelButton = new SButton(new SAction(
+                ClassGeneratorController.CANCEL_CONTROL));
         cancelButton.setEnabled(true);
 
         SCheckBox generateSuperclass = new SCheckBox() {
-                // (de)activate the text fields
-    public void itemStateChanged(ItemEvent inEvent) {
+
+            // (de)activate the text fields
+            public void itemStateChanged(ItemEvent inEvent) {
                 boolean enabled = inEvent.getStateChange() == ItemEvent.SELECTED;
                 superClassPackage.setEnabled(enabled);
                 superClassTemplate.setEnabled(enabled);
@@ -148,8 +148,7 @@ public class ClassGeneratorDialog extends SPanel {
         setTitle("Generate Java Classes");
         setLayout(new BorderLayout());
 
-        FormLayout layout =
-            new FormLayout(
+        FormLayout layout = new FormLayout(
                 "right:max(50dlu;pref), 3dlu, left:max(180dlu;pref), 3dlu, left:70",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
@@ -169,13 +168,12 @@ public class ClassGeneratorDialog extends SPanel {
         table.setRowMargin(3);
         ClassGeneratorModel model = new ClassGeneratorModel(table);
         model.setSelector("entities");
-        model.setColumnNames(new String[] { "Entity", "Class", "Generate", "Problems" });
-        model.setColumnSelectors(
-            new String[] {
-                "entity.name",
-                "entity.className",
-                "selected",
-                "validationMessage" });
+        model.setColumnNames(new String[] {
+                "Entity", "Class", "Generate", "Problems"
+        });
+        model.setColumnSelectors(new String[] {
+                "entity.name", "entity.className", "selected", "validationMessage"
+        });
 
         table.setModel(model);
 
@@ -185,16 +183,22 @@ public class ClassGeneratorDialog extends SPanel {
 
         // **** assemble
         add(builder.getPanel(), BorderLayout.NORTH);
-        JPanel panel = PanelFactory.createTablePanel(table, new JComponent[] {
-        }, new JButton[] { generateButton, cancelButton });
+        JPanel panel = PanelFactory.createTablePanel(
+                table,
+                new JComponent[] {},
+                new JButton[] {
+                        generateButton, cancelButton
+                });
         add(panel, BorderLayout.CENTER);
     }
 
     class ClassGeneratorModel extends STableModel {
+
         Selector enabledSelector = Selector.fromString("enabled");
 
         /**
          * Constructor for TableModel.
+         * 
          * @param table
          */
         public ClassGeneratorModel(JTable table) {
@@ -232,6 +236,7 @@ public class ClassGeneratorDialog extends SPanel {
     }
 
     class ClassGeneratorTable extends STable {
+
         final Dimension preferredSize = new Dimension(500, 300);
 
         DefaultTableCellRenderer problemRenderer;
@@ -245,8 +250,8 @@ public class ClassGeneratorDialog extends SPanel {
             ClassGeneratorModel model = (ClassGeneratorModel) getModel();
 
             return (model.isEnabledRow(row))
-                ? super.getCellRenderer(row, column)
-                : problemRenderer;
+                    ? super.getCellRenderer(row, column)
+                    : problemRenderer;
         }
 
         public Dimension getPreferredScrollableViewportSize() {
@@ -257,24 +262,24 @@ public class ClassGeneratorDialog extends SPanel {
     class ClassGeneratorProblemRenderer extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column) {
+                JTable table,
+                Object value,
+                boolean isSelected,
+                boolean hasFocus,
+                int row,
+                int column) {
 
             if (value instanceof Boolean) {
                 value = "";
             }
 
             return super.getTableCellRendererComponent(
-                table,
-                value,
-                isSelected,
-                hasFocus,
-                row,
-                column);
+                    table,
+                    value,
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
         }
 
     }
