@@ -670,6 +670,8 @@ public class DataContext implements QueryEngine, Serializable {
                         //Do the same as for modified... deleted is only a persistence state, so
                         // rolling the object back will set the state to committed
                     case PersistenceState.MODIFIED :
+                        // this will clean any modifications and deferrefresh from snapshot
+                        // till the next object accessor is called
                         thisObject.setPersistenceState(PersistenceState.HOLLOW);
                         break;
                     default :
@@ -679,10 +681,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
 
             // unregister candidates
-            it = objectsToUnregister.iterator();
-            while (it.hasNext()) {
-                this.unregisterObject((DataObject) it.next());
-            }
+			unregisterObjects(objectsToUnregister);
 
             // finally clear flattened inserts & deletes
             this.clearFlattenedUpdateQueries();

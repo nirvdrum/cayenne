@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -73,8 +72,6 @@ import org.objectstyle.cayenne.map.DbRelationship;
  * @author Andrei Adamchik 
  */
 public abstract class QueryAssembler extends QueryTranslator {
-    private static Logger logObj = Logger.getLogger(QueryAssembler.class);
-
     /** PreparedStatement values. */
     protected List values = new ArrayList();
 

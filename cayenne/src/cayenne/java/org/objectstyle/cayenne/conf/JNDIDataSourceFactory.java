@@ -62,7 +62,6 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 
 /** Looks up DataSource objects via JNDI.
@@ -70,7 +69,6 @@ import org.objectstyle.cayenne.access.QueryLogger;
   * @author Andrei Adamchik
   */
 public class JNDIDataSourceFactory implements DataSourceFactory {
-    private static Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class);
 
     protected Configuration parentConfig;
 

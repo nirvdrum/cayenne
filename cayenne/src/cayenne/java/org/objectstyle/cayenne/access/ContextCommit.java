@@ -573,15 +573,6 @@ class ContextCommit {
         return new CayenneRuntimeException(message.toString());
     }
 
-    private RuntimeException attemptToCommitUnmappedClass(Class objectClass) {
-        String className = (objectClass != null) ? objectClass.getName() : "<null>";
-        StringBuffer message = new StringBuffer();
-        message.append("Class '").append(className).append(
-            "' does not map to an ObjEntity and is therefore not persistent. Can't commit changes.");
-
-        return new CayenneRuntimeException(message.toString());
-    }
-
     /**
      * Performs classification of a DataObject for the DML operation.
      * Throws CayenneRuntimeException if an object can't be classified. 

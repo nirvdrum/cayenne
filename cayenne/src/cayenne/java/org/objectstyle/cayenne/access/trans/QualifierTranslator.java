@@ -59,9 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionTraversal;
 import org.objectstyle.cayenne.exp.TraversalHandler;
@@ -80,8 +78,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class QualifierTranslator
     extends QueryAssemblerHelper
     implements TraversalHandler {
-
-    private static Logger logObj = Logger.getLogger(QueryUtils.class);
 
     private ExpressionTraversal treeWalker = new ExpressionTraversal();
     private StringBuffer qualBuf = new StringBuffer();

@@ -63,7 +63,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.FlattenedObjectId;
@@ -85,7 +84,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class SnapshotManager {
-    private static Logger logObj = Logger.getLogger(SnapshotManager.class);
 
     /**
      * Constructor for SnapshotManager. Shouldn't be called directly

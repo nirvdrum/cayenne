@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
@@ -67,7 +66,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataObjectSerializationTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(DataObjectSerializationTst.class);
 
     public void testSerializeTransient() throws Exception {
         Artist artist = new Artist();

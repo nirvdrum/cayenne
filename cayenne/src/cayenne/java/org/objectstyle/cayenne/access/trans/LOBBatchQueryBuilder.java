@@ -62,7 +62,6 @@ import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -73,7 +72,6 @@ import org.objectstyle.cayenne.query.BatchQuery;
  * @author Andrei Adamchik
  */
 public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
-    private static Logger logObj = Logger.getLogger(LOBBatchQueryBuilder.class);
 
     protected String newClobFunction;
     protected String newBlobFunction;
