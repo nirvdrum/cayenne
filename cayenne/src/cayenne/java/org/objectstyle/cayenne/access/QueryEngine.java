@@ -79,8 +79,8 @@ public interface QueryEngine {
      * and close any connections that were added to it.
      * 
      * @since 1.1
-     * @see {@link OperationObserver}
-     * @see {@link Transaction}
+     * @see OperationObserver
+     * @see Transaction
      */
     public void performQueries(Collection queries, OperationObserver resultConsumer, Transaction transaction);
 
