@@ -255,6 +255,7 @@ implements ActionListener
 		actionMap.put("AddDataMap", new AddDataMapAction(mediator));
 		actionMap.put("SaveAll", new SaveAction(mediator));
 		actionMap.put("ImportDb", new ImportDbAction(mediator));
+		actionMap.put("GenerateDb", new GenerateDbAction(mediator));
 		actionMap.put("Remove", new RemoveAction(mediator));
 	}
 
