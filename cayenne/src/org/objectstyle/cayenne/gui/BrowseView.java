@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui;
 
 import java.awt.Component;
 import java.net.URL;
@@ -257,8 +257,9 @@ public class BrowseView
 		if (e.getSource() == this || !e.isEntityChanged()) {
 			return;
 		}
-		
-		DefaultMutableTreeNode treeNode = getEntityNode(e.getDomain(), e.getDataMap(), e.getEntity());
+
+		DefaultMutableTreeNode treeNode =
+			getEntityNode(e.getDomain(), e.getDataMap(), e.getEntity());
 		if (treeNode == null) {
 			return;
 		}
@@ -273,7 +274,7 @@ public class BrowseView
 		if (null != node)
 			model.nodeChanged(node);
 	}
-	
+
 	public void domainAdded(DomainEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -281,7 +282,7 @@ public class BrowseView
 		node = loadDomain(e.getDomain());
 		model.insertNodeInto(node, rootNode, rootNode.getChildCount());
 	}
-	
+
 	public void domainRemoved(DomainEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -290,7 +291,7 @@ public class BrowseView
 		if (null != node)
 			model.removeNodeFromParent(node);
 	}
-	
+
 	public void dataNodeChanged(DataNodeEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -508,7 +509,6 @@ public class BrowseView
 		showNode(currentNode);
 	}
 
-
 	/** 
 	 * Event handler for ObjEntity and DbEntity removals.
 	 * Removes a tree node for the entity and selects its sibling. 
@@ -527,7 +527,7 @@ public class BrowseView
 
 		if (treeNode != null) {
 			if (treeNode == currentNode) {
-				willRemoveCurrentNode();
+				showClosestSibling();
 			}
 			model.removeNodeFromParent(treeNode);
 		}
@@ -542,22 +542,39 @@ public class BrowseView
 
 		if (treeNode != null) {
 			if (treeNode == currentNode) {
-				willRemoveCurrentNode();
+				showClosestSibling();
 			}
 			model.removeNodeFromParent(treeNode);
 		}
 	}
 
 	/** 
-	 * Selects a current node adjacent to the currently selected node.
-	 * This method is called before current node removal.
+	 * Selects a new node adjacent to the currently selected node.
+	 * This method may be called in cases like current node removal.
 	 */
-	protected void willRemoveCurrentNode() {
+	protected void showClosestSibling() {
 		if (currentNode != null) {
-			DefaultMutableTreeNode newSelection = currentNode.getNextNode();
+			// first search siblings
+			DefaultMutableTreeNode newSelection = currentNode.getNextSibling();
 			if (newSelection == null) {
-				newSelection = currentNode.getPreviousNode();
+				newSelection = currentNode.getPreviousSibling();
+
+				// try parent
+				if (newSelection == null) {
+					newSelection = (DefaultMutableTreeNode)currentNode.getParent();
+
+					// search the whole tree
+					if (newSelection == null) {
+
+						newSelection = currentNode.getNextNode();
+						if (newSelection == null) {
+
+							newSelection = currentNode.getPreviousNode();
+						}
+					}
+				}
 			}
+
 			currentNode = newSelection;
 			showNode(currentNode);
 		}
@@ -689,7 +706,7 @@ public class BrowseView
 	}
 
 	/** Makes node current, visible and selected.*/
-	private void showNode(DefaultMutableTreeNode node) {
+	protected void showNode(DefaultMutableTreeNode node) {
 		currentNode = node;
 		TreePath path = new TreePath(currentNode.getPath());
 		browseTree.scrollPathToVisible(path);
