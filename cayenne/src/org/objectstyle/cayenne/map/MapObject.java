@@ -55,96 +55,51 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 
-/** 
- * DataMap unit tests.
+/**
+ * Superclass of DataMap objects.
  * 
- * @author Andrei Adamchik 
+ * @author Andrei Adamchik
  */
-public class DataMapTst extends CayenneTestCase {
-	protected DataMap map;
+public abstract class MapObject implements CayenneMapEntry {
+	protected String name;
+	protected Object parent;
 
-	public DataMapTst(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		map = new DataMap();
-	}
-
-	public void testName() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getName());
-		map.setName(tstName);
-		assertEquals(tstName, map.getName());
+	/**
+	 * Constructor for MapObject.
+	 */
+	public MapObject() {
+		super();
 	}
 
-	public void testLocation() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getLocation());
-		map.setLocation(tstName);
-		assertEquals(tstName, map.getLocation());
+	/**
+	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getName()
+	 */
+	public String getName() {
+		return name;
 	}
 
-	public void testAddObjEntity() throws Exception {
-		ObjEntity e = new ObjEntity("b");
-		map.addObjEntity(e);
-		assertSame(e, map.getObjEntity(e.getName()));
+	/**
+	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getParent()
+	 */
+	public Object getParent() {
+		return parent;
 	}
 
-	public void testAddDbEntity() throws Exception {
-		DbEntity e = new DbEntity("b");
-		map.addDbEntity(e);
-		assertSame(e, map.getDbEntity(e.getName()));
+	/**
+	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#setParent(Object)
+	 */
+	public void setParent(Object parent) {
+		this.parent = parent;
 	}
-	
-	public void testAddDependency1() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		assertTrue(!map.isDependentOn(map2));
-		map.addDependency(map2);
-		assertTrue(map.isDependentOn(map2));
-	}
-	
-	public void testAddDependency2() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		DataMap map3 = new DataMap("m3");
-		map.addDependency(map2);
-		map2.addDependency(map3);
-		assertTrue(map.isDependentOn(map3));
-	}
-	
-	
-	public void testAddDependency3() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		
-		try {
-			map2.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
-	}
-	
-	public void testAddDependency4() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		DataMap map3 = new DataMap("m3");
-		map2.addDependency(map3);
-		
-		try {
-			map3.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
+
+	/**
+	 * Sets the name.
+	 * @param name The name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 }
+

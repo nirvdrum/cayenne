@@ -53,98 +53,78 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.util;
+
+import java.util.HashMap;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 
-/** 
- * DataMap unit tests.
- * 
- * @author Andrei Adamchik 
+/**
+ * @author Andrei Adamchik
  */
-public class DataMapTst extends CayenneTestCase {
-	protected DataMap map;
+public class CayenneMapTst extends CayenneTestCase {
 
-	public DataMapTst(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		map = new DataMap();
+	/**
+	 * Constructor for CayenneMapTst.
+	 * @param arg0
+	 */
+	public CayenneMapTst(String arg0) {
+		super(arg0);
 	}
 
-	public void testName() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getName());
-		map.setName(tstName);
-		assertEquals(tstName, map.getName());
+	protected CayenneMapEntry makeEntry() {
+		return new CayenneMapEntry() {
+			protected Object parent;
+
+			public String getName() {
+				return "abc";
+			}
+
+			public Object getParent() {
+				return parent;
+			}
+
+			public void setParent(Object parent) {
+				this.parent = parent;
+			}
+		};
 	}
 
-	public void testLocation() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getLocation());
-		map.setLocation(tstName);
-		assertEquals(tstName, map.getLocation());
+	public void testConstructor1() throws Exception {
+		Object o1 = new Object();
+		String k1 = "123";
+		HashMap map = new HashMap();
+		map.put(k1, o1);
+		CayenneMap cm = new CayenneMap(null, map);
+		assertSame(o1, cm.get(k1));
 	}
 
-	public void testAddObjEntity() throws Exception {
-		ObjEntity e = new ObjEntity("b");
-		map.addObjEntity(e);
-		assertSame(e, map.getObjEntity(e.getName()));
+	public void testConstructor2() throws Exception {
+		Object parent = new Object();
+		CayenneMapEntry o1 = makeEntry();
+		String k1 = "123";
+		HashMap map = new HashMap();
+		map.put(k1, o1);
+		CayenneMap cm = new CayenneMap(parent, map);
+		assertSame(o1, cm.get(k1));
+		assertSame(parent, o1.getParent());
 	}
 
-	public void testAddDbEntity() throws Exception {
-		DbEntity e = new DbEntity("b");
-		map.addDbEntity(e);
-		assertSame(e, map.getDbEntity(e.getName()));
+	public void testPut() throws Exception {
+		Object parent = new Object();
+		CayenneMapEntry o1 = makeEntry();
+		String k1 = "123";
+		CayenneMap cm = new CayenneMap(parent);
+		cm.put(k1, o1);
+		assertSame(o1, cm.get(k1));
+		assertSame(parent, o1.getParent());
 	}
-	
-	public void testAddDependency1() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		assertTrue(!map.isDependentOn(map2));
-		map.addDependency(map2);
-		assertTrue(map.isDependentOn(map2));
-	}
-	
-	public void testAddDependency2() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		DataMap map3 = new DataMap("m3");
-		map.addDependency(map2);
-		map2.addDependency(map3);
-		assertTrue(map.isDependentOn(map3));
-	}
-	
-	
-	public void testAddDependency3() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		
-		try {
-			map2.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
-	}
-	
-	public void testAddDependency4() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		DataMap map3 = new DataMap("m3");
-		map2.addDependency(map3);
-		
-		try {
-			map3.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
+
+	public void testParent() throws Exception {
+		Object parent = new Object();
+		CayenneMap cm = new CayenneMap(null);
+		assertNull(cm.getParent());
+		cm.setParent(parent);
+		assertSame(parent, cm.getParent());
 	}
 }

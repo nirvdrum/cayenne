@@ -55,96 +55,38 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.sql.Types;
+
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.dba.TypesMapping;
 
-/** 
- * DataMap unit tests.
- * 
- * @author Andrei Adamchik 
+/**
+ * @author Andrei Adamchik
  */
-public class DataMapTst extends CayenneTestCase {
-	protected DataMap map;
+public class DbAttributeTst extends CayenneTestCase {
 
-	public DataMapTst(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		map = new DataMap();
+	/**
+	 * Constructor for DbAttributeTst.
+	 * @param arg0
+	 */
+	public DbAttributeTst(String arg0) {
+		super(arg0);
 	}
 
-	public void testName() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getName());
-		map.setName(tstName);
-		assertEquals(tstName, map.getName());
-	}
-
-	public void testLocation() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getLocation());
-		map.setLocation(tstName);
-		assertEquals(tstName, map.getLocation());
-	}
-
-	public void testAddObjEntity() throws Exception {
-		ObjEntity e = new ObjEntity("b");
-		map.addObjEntity(e);
-		assertSame(e, map.getObjEntity(e.getName()));
-	}
-
-	public void testAddDbEntity() throws Exception {
-		DbEntity e = new DbEntity("b");
-		map.addDbEntity(e);
-		assertSame(e, map.getDbEntity(e.getName()));
-	}
-	
-	public void testAddDependency1() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		assertTrue(!map.isDependentOn(map2));
-		map.addDependency(map2);
-		assertTrue(map.isDependentOn(map2));
-	}
-	
-	public void testAddDependency2() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		DataMap map3 = new DataMap("m3");
-		map.addDependency(map2);
-		map2.addDependency(map3);
-		assertTrue(map.isDependentOn(map3));
-	}
-	
-	
-	public void testAddDependency3() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		
-		try {
-			map2.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
-	}
-	
-	public void testAddDependency4() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		DataMap map3 = new DataMap("m3");
-		map2.addDependency(map3);
-		
-		try {
-			map3.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
-	}
+    public void testConstructor1() throws Exception {
+    	DbAttribute a = new DbAttribute("abc");
+    	assertEquals("abc", a.getName());
+    	assertEquals(TypesMapping.NOT_DEFINED, a.getType());
+    	assertNull(a.getEntity());
+    }
+    
+    public void testConstructor2() throws Exception {
+    	int type = Types.INTEGER;
+    	DbEntity dbe = new DbEntity("e");
+    	DbAttribute a = new DbAttribute("abc", type, dbe);
+    	assertEquals("abc", a.getName());
+    	assertEquals(type, a.getType());
+    	assertSame(dbe, a.getEntity());
+    }
 }
+

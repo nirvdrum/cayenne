@@ -174,8 +174,8 @@ public class OperationSorter {
 		 */
 		private final int compareMaps(DataMap m1, DataMap m2) {
 
-			boolean hasDependent1 = m1.dependsOn(m2);
-			boolean hasDependent2 = m2.dependsOn(m1);
+			boolean hasDependent1 = m1.isDependentOn(m2);
+			boolean hasDependent2 = m2.isDependentOn(m1);
 
 			// ok if 1 map has a dependency and another does not, 
 			// the first one goes first

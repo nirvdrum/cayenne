@@ -75,6 +75,8 @@ public class AllTests {
         suite.addTestSuite(ObjRelationshipTst.class);
         suite.addTestSuite(DbRelationshipTst.class);
         suite.addTestSuite(DbEntityTst.class);
+        suite.addTestSuite(DbAttributePairTst.class);
+        suite.addTestSuite(DbAttributeTst.class);
         suite.addTestSuite(DerivedDbEntityTst.class);
 		return suite;
 	}

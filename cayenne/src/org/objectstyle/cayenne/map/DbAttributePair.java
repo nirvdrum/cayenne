@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,55 +52,72 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-/** The attribute names to use in the join. */
+package org.objectstyle.cayenne.map;
+
+/** 
+ * A <strong>DbAttributePair</strong> represents a join
+ * between two database tables. A set of DbAtributePair's
+ * defines a semantics of a DbRelationship.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public class DbAttributePair {
-    private DbAttribute sourceAttribute;
-    private DbAttribute targetAttribute;
+	protected DbAttribute source;
+	protected DbAttribute target;
+
+    public DbAttributePair() {}
     
-    public DbAttributePair(DbAttribute source, DbAttribute target){
-        setSource(source);
-        setTarget(target);
-    }
-    
-    /** Get DbAttribute on on the left side of the join. */
-    public DbAttribute getSource() {
-        return sourceAttribute;
-    }
-    
-    /** Set DbAttribute name on on the left side of the join. */
-    public void setSource(DbAttribute attr) {
-        sourceAttribute = attr;
-    }
-    
-    /** Get DbAttribute on on the right side of the join. */
-    public DbAttribute getTarget() {
-        return targetAttribute;
-    }
-    
-    /** Set DbAttribute name on on the right side of the join. */
-    public void setTarget(DbAttribute attr) {
-        targetAttribute = attr;
-    }
-    
-    public int hashCode() {
-        return sourceAttribute.hashCode() + targetAttribute.hashCode();
-    }
-    
-    public boolean equals(Object o) {
-        if(o == null)
-            return false;
-        
-        if(o.getClass() != DbAttributePair.class)
-            return false;
-        
-        if(o == this)
-            return true;
-        
-        DbAttributePair j = (DbAttributePair)o;
-        return 
-        j.sourceAttribute == this.sourceAttribute 
-        && j.targetAttribute == this.targetAttribute;
-    }
+	public DbAttributePair(DbAttribute source, DbAttribute target) {
+		setSource(source);
+		setTarget(target);
+	}
+
+	/** Returns DbAttribute on on the left side of the join. */
+	public DbAttribute getSource() {
+		return source;
+	}
+
+	/** Set DbAttribute name on on the left side of the join. */
+	public void setSource(DbAttribute source) {
+		this.source = source;
+	}
+
+	/** Returns DbAttribute on on the right side of the join. */
+	public DbAttribute getTarget() {
+		return target;
+	}
+
+	/** Set DbAttribute name on on the right side of the join. */
+	public void setTarget(DbAttribute target) {
+		this.target = target;
+	}
+
+	public int hashCode() {
+		return super.hashCode() + source.hashCode() + target.hashCode();
+	}
+
+	/**
+	 * Returns <code>true</code> if this join and 
+	 * object parameter both represent joins between
+	 * the same DbAttributes.
+	 */
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+
+		if (o.getClass() != DbAttributePair.class) {
+			return false;
+		}
+
+		if (o == this) {
+			return true;
+		}
+
+		DbAttributePair j = (DbAttributePair) o;
+		return j.source == this.source && j.target == this.target;
+	}
 }

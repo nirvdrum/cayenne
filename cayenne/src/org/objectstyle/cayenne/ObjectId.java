@@ -125,6 +125,10 @@ public class ObjectId {
 		return Collections.unmodifiableMap(idKeys);
 	}
 
+    /**
+     * Returns a value of id attribute identified by the 
+     * name of DbAttribute.
+     */
 	public Object getValueForAttribute(String attrName) {
 		return idKeys.get(attrName);
 	}

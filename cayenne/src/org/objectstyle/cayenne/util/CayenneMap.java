@@ -53,98 +53,111 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.util;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
 
-/** 
- * DataMap unit tests.
+import org.apache.commons.collections.FastTreeMap;
+
+/**
+ * A <code>CayenneMap</code> is a specialized double-linked 
+ * ordered map class. Attempts to add objects using
+ * an already existing keys will result in 
+ * IllegalArgumentExceptions. 
  * 
- * @author Andrei Adamchik 
+ * <p>Normally CayenneMap is not subclassed directly,
+ * but is rather used as an instance variable within
+ * another class. Enclosing instance would set itself
+ * as a parent of this map.</p>
+ * 
+ * 
+ * @author Andrei Adamchik
  */
-public class DataMapTst extends CayenneTestCase {
-	protected DataMap map;
+public class CayenneMap extends FastTreeMap {
+	protected Object parent;
 
-	public DataMapTst(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		map = new DataMap();
+	/**
+	 * Constructor for CayenneMap.
+	 */
+	public CayenneMap(Object parent) {
+		this.parent = parent;
 	}
 
-	public void testName() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getName());
-		map.setName(tstName);
-		assertEquals(tstName, map.getName());
+	/**
+	 * Constructor for CayenneMap.
+	 * @param c
+	 */
+	public CayenneMap(Object parent, Comparator c) {
+		super(c);
+		this.parent = parent;
 	}
 
-	public void testLocation() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getLocation());
-		map.setLocation(tstName);
-		assertEquals(tstName, map.getLocation());
+	/**
+	 * Constructor for CayenneMap.
+	 * @param m
+	 */
+	public CayenneMap(Object parent, Map m) {
+		// !IMPORTANT - set parent before populating the map
+		this.parent = parent;
+		putAll(m);
 	}
 
-	public void testAddObjEntity() throws Exception {
-		ObjEntity e = new ObjEntity("b");
-		map.addObjEntity(e);
-		assertSame(e, map.getObjEntity(e.getName()));
+	/**
+	 * Constructor for CayenneMap.
+	 * @param m
+	 */
+	public CayenneMap(Object parent, SortedMap m) {
+		// !IMPORTANT - set parent before populating the map
+		this.parent = parent;
+		putAll(m);
 	}
 
-	public void testAddDbEntity() throws Exception {
-		DbEntity e = new DbEntity("b");
-		map.addDbEntity(e);
-		assertSame(e, map.getDbEntity(e.getName()));
-	}
-	
-	public void testAddDependency1() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		assertTrue(!map.isDependentOn(map2));
-		map.addDependency(map2);
-		assertTrue(map.isDependentOn(map2));
-	}
-	
-	public void testAddDependency2() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		DataMap map3 = new DataMap("m3");
-		map.addDependency(map2);
-		map2.addDependency(map3);
-		assertTrue(map.isDependentOn(map3));
-	}
-	
-	
-	public void testAddDependency3() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		
-		try {
-			map2.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
+	/** 
+	 * Maps specified key-value pair. If value is a
+	 * CayenneMapEntry, sets its parent to this map.
+	 * 
+	 * @see java.util.Map#put(Object, Object)
+	 */
+	public Object put(Object key, Object value) {
+		if (containsKey(key) && get(key) != value) {
+			throw new IllegalArgumentException("Map already contains a key " + key);
 		}
-		catch(RuntimeException ex) {
-			// exception expected
+
+		if (value instanceof CayenneMapEntry) {
+			((CayenneMapEntry) value).setParent(parent);
+		}
+
+		super.put(key, value);
+		return null;
+	}
+
+	/**
+	 * @see java.util.Map#putAll(Map)
+	 */
+	public void putAll(Map t) {
+		Iterator it = t.keySet().iterator();
+		while (it.hasNext()) {
+			Object key = it.next();
+			put(key, t.get(key));
 		}
 	}
-	
-	public void testAddDependency4() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		DataMap map3 = new DataMap("m3");
-		map2.addDependency(map3);
-		
-		try {
-			map3.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
+
+	/**
+	 * Returns the parent.
+	 * @return Object
+	 */
+	public Object getParent() {
+		return parent;
+	}
+
+	/**
+	 * Sets the parent.
+	 * @param parent The parent to set
+	 */
+	public void setParent(Object mapParent) {
+		this.parent = mapParent;
 	}
 }

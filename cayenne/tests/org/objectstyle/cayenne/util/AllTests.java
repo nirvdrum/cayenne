@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.util;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.util;
 
 import junit.framework.TestSuite;
 
@@ -65,6 +65,7 @@ public class AllTests {
         suite.addTestSuite(LogFormatterTst.class);
         suite.addTestSuite(NameConverterTst.class);
         suite.addTestSuite(ResourceLocatorTst.class);
+        suite.addTestSuite(CayenneMapTst.class);
         return suite;
     }
 }

@@ -161,16 +161,6 @@ public class ValidatorTst extends CayenneTestCase {
 		validator.validateDbAttributes(d1, m1, e1);
 		assertValidator(ErrorMsg.NO_ERROR);
 
-		// should complain about no name
-		DbAttribute a2 = new DbAttribute();
-		a2.setType(Types.CHAR);
-		a2.setMaxLength(2);
-		DbEntity e2 = new DbEntity("e2");
-		e2.addAttribute(a2);
-		validator.reset();
-		validator.validateDbAttributes(d1, m1, e2);
-		assertValidator(ErrorMsg.ERROR);
-
 		// should complain about no max length
 		DbAttribute a3 = new DbAttribute();
 		a3.setName("a3");

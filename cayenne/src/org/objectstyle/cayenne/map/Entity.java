@@ -59,38 +59,44 @@ import java.util.*;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.util.CayenneMap;
 
 /** Superclass of metadata classes. */
-public abstract class Entity {
+public abstract class Entity extends MapObject {
 	public static final String PATH_SEPARATOR = ".";
 
-	protected String name;
-	protected HashMap attributes = new HashMap();
+	protected CayenneMap attributes = new CayenneMap(this);
 	protected HashMap relationships = new HashMap();
 
-	/** Returns entity name. */
-	public String getName() {
-		return name;
-	}
-
-	/** Sets entity name. */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/** Returns attribute with name <code>attrName</code>.
-	* Will return null if no attribute with this name exists in the entity. */
+    public DataMap getDataMap() {
+    	return (DataMap)getParent();
+    }
+    
+    public void setDataMap(DataMap dataMap) {
+    	setParent(dataMap);
+    }
+    
+    
+	/** 
+	 * Returns attribute with name <code>attrName</code>.
+	 * Will return null if no attribute with this name exists. 
+	 */
 	public Attribute getAttribute(String attrName) {
 		return (Attribute) attributes.get(attrName);
 	}
 
-	/** Adds new attribute to the entity.
-	 * Also sets <code>attr</code> entity to be this entity. */
+	/** 
+	 * Adds new attribute to the entity. If attribute has no name,
+	 * IllegalArgumentException is thrown.
+	 * 
+	 * Also sets <code>attr</code>'s entity to be this entity. 
+	 */
 	public void addAttribute(Attribute attr) {
+		if(attr.getName() == null) {
+			throw new IllegalArgumentException("Attempt to insert unnamed attribute.");
+		}
+		
 		attributes.put(attr.getName(), attr);
-
-		// set attribute's entity to be "this" entity
-		attr.setEntity(this);
 	}
 
 	/** Removes an attribute named <code>attrName</code>.*/
@@ -242,13 +248,5 @@ public abstract class Entity {
 		public void remove() {
 			throw new UnsupportedOperationException("'remove' operation is not supported.");
 		}
-	}
-
-	HashMap getAttributes() {
-		return attributes;
-	}
-
-	HashMap getRelationships() {
-		return relationships;
 	}
 }

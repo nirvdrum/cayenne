@@ -70,10 +70,16 @@ public class DbAttribute extends Attribute {
 	 */
 	protected int type = TypesMapping.NOT_DEFINED;
 
-	// Does this attribute allow null
+	/**
+	 * If <code>true</code>, column corresponding to 
+	 * this attribute does not allows nulls.
+	 */
 	protected boolean mandatory;
 
-	// Is this attribute a part of primary key
+	/** 
+	 * If <code>true</code>, this attribute is 
+	 * a part of primary key.
+	 */
 	protected boolean primaryKey;
 
 	// The length of CHAR or VARCHAr or max num of digits for DECIMAL.
@@ -83,6 +89,10 @@ public class DbAttribute extends Attribute {
 	protected int precision = -1;
 
 	public DbAttribute() {
+	}
+	
+	public DbAttribute(String name) {
+		setName(name);
 	}
 
 	public DbAttribute(String name, int type, DbEntity entity) {

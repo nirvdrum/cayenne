@@ -273,12 +273,12 @@ public class DataMapDetailView
 				JLabel label = new JLabel(nextMap.getName());
 
 				check.addItemListener(this);
-				if (nextMap.dependsOn(map)) {
+				if (nextMap.isDependentOn(map)) {
 					check.setEnabled(false);
 					label.setEnabled(false);
 				}
 
-				if (map.dependsOn(nextMap)) {
+				if (map.isDependentOn(nextMap)) {
 					check.setSelected(true);
 				}
 

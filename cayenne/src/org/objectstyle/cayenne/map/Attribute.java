@@ -61,28 +61,16 @@ package org.objectstyle.cayenne.map;
  * 
  * @author Andrei Adamchik
  */
-public abstract class Attribute {
-    protected String name;
-    protected Entity entity;
-
-    /** Returns attribute name. */
-    public String getName() {
-        return name;
-    }
-
-    /** Sets attribute name. */
-    public void setName(String name) {
-        this.name = name;
-    }
+public abstract class Attribute extends MapObject {
 
     /** Returns the entity that holds this attribute. */
     public Entity getEntity() {
-        return entity;
+        return (Entity)getParent();
     }
 
 
     /** Sets the entity that holds this attribute. */
     public void setEntity(Entity entity) {
-        this.entity = entity;
+        setParent(entity);
     }
 }

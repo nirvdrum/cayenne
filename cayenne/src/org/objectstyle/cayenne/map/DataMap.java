@@ -84,8 +84,7 @@ public class DataMap {
 	private SortedMap dbEntityMap = new TreeMap();
 
 	/** Creates an empty DataMap */
-	public DataMap() {
-	}
+	public DataMap() {}
 
 	/** Creates an empty DataMap and assigns it a <code>name</code>. */
 	public DataMap(String name) {
@@ -94,8 +93,22 @@ public class DataMap {
 
 	/**
 	 * Adds a data map that has entities used by this map.
+	 * 
+	 * @throws IllegalArgumentException if a <code>map</code> argument
+	 * already depends on thsi map directly or indirectly.
 	 */
-	public void addDependency(DataMap map) {
+	public void addDependency(DataMap map) throws IllegalArgumentException {
+		if (map.isDependentOn(this)) {
+			StringBuffer buf =
+				new StringBuffer("Attempt to create circular dependency. ");
+			String name1 = (this.getName() != null) ? this.getName() : "unnamed";
+			String name2 = (map.getName() != null) ? map.getName() : "unnamed";
+
+			buf.append('\'').append(name2).append("' already depends on '").append(
+				name1).append(
+				"'.");
+			throw new IllegalArgumentException(buf.toString());
+		}
 		dependencies.add(map);
 	}
 
@@ -107,8 +120,33 @@ public class DataMap {
 		return Collections.unmodifiableList(dependencies);
 	}
 
-	public boolean dependsOn(DataMap map) {
-		return dependencies.contains(map);
+    /**
+     * Returns <code>true</code> if this map
+     * depends on DataMap supplied as a <code>map</code>
+     * parameter. Checks for nested dependencies as well.
+     * For instance if the following dependency exists:
+     * map1 -> map2 -> map3, calling <code>map1.isDependentOn(map3)</code>
+     * will return <code>true</code>.
+     */
+	public boolean isDependentOn(DataMap map) {
+		if(dependencies.contains(map)) {
+			return true;
+		}
+		
+		if(dependencies.size() == 0) {
+			return false;
+		}
+		
+		Iterator it = dependencies.iterator();
+		while(it.hasNext()) {
+			// check dependencies recursively
+			DataMap dep = (DataMap)it.next();
+			if(dep.isDependentOn(map)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	public void clearDependencies() {
@@ -191,11 +229,12 @@ public class DataMap {
 	  * already, does nothing. */
 	public void addDbEntity(DbEntity dbEntity) {
 		String name = dbEntity.getName();
-		if (!dbEntityMap.containsKey(name))
+		if (!dbEntityMap.containsKey(name)) {
 			dbEntityMap.put(name, dbEntity);
+		}
 	}
 
-	/** Return an array of object entities (by copy) */
+	/** Returns a by copy array of object entities. */
 	public ObjEntity[] getObjEntities() {
 		Collection objEnts = getObjEntityMap().values();
 		ObjEntity[] immutableEnts = null;
@@ -226,13 +265,13 @@ public class DataMap {
 		return getObjEntitiesAsList(false);
 	}
 
-    /**
+	/**
 	 * Returns all ObjEntities in this DataMap, including entities
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
 	 */
 	public List getObjEntitiesAsList(boolean includeDeps) {
 		ArrayList ents = new ArrayList(objEntityMap.values());
-		
+
 		if (includeDeps) {
 			Iterator it = dependencies.iterator();
 			while (it.hasNext()) {
@@ -243,9 +282,7 @@ public class DataMap {
 		}
 		return ents;
 	}
-	
-	
-	
+
 	/**
 	 * Returns all DbEntities in this DataMap.
 	 */
@@ -259,7 +296,7 @@ public class DataMap {
 	 */
 	public List getDbEntitiesAsList(boolean includeDeps) {
 		ArrayList ents = new ArrayList(dbEntityMap.values());
-		
+
 		if (includeDeps) {
 			Iterator it = dependencies.iterator();
 			while (it.hasNext()) {
@@ -270,10 +307,10 @@ public class DataMap {
 		}
 		return ents;
 	}
-	
+
 	public List getDbEntityNames(boolean includeDeps) {
 		ArrayList ents = new ArrayList(dbEntityMap.keySet());
-		
+
 		if (includeDeps) {
 			Iterator it = dependencies.iterator();
 			while (it.hasNext()) {
@@ -315,9 +352,8 @@ public class DataMap {
 	public ObjEntity getObjEntity(String name) {
 		return (ObjEntity) objEntityMap.get(name);
 	}
-	
-	
-    public ObjEntity getObjEntity(String name, boolean searchDependencies) {
+
+	public ObjEntity getObjEntity(String name, boolean searchDependencies) {
 		ObjEntity ent = (ObjEntity) objEntityMap.get(name);
 		if (ent != null || !searchDependencies) {
 			return ent;
@@ -340,22 +376,21 @@ public class DataMap {
 	 */
 	public List getMappedEntities(DbEntity dbEntity) {
 		ArrayList list = new ArrayList();
-		
-		if(dbEntity == null) {
+
+		if (dbEntity == null) {
 			return null;
-		}		 
-		
+		}
+
 		Iterator iter = getObjEntitiesAsList(true).iterator();
 		while (iter.hasNext()) {
-			ObjEntity objEnt = (ObjEntity)iter.next() ;
+			ObjEntity objEnt = (ObjEntity) iter.next();
 			if (objEnt.getDbEntity() == dbEntity) {
 				list.add(objEnt);
 			}
 		}
-		
+
 		return list;
 	}
-	
 
 	/** Renames DbEntity. */
 	public void renameDbEntity(String oldName, String newName) {
@@ -388,8 +423,7 @@ public class DataMap {
 
 		DbEntity[] db_entity_arr = getDbEntities();
 		for (int i = 0; i < db_entity_arr.length; i++) {
-			Iterator rel_iter =
-				db_entity_arr[i].getRelationshipList().iterator();
+			Iterator rel_iter = db_entity_arr[i].getRelationshipList().iterator();
 			while (rel_iter.hasNext()) {
 				DbRelationship rel = (DbRelationship) rel_iter.next();
 				if (rel.getTargetEntity() == db_entity)
@@ -408,11 +442,9 @@ public class DataMap {
 				Iterator iter = temp.getRelationshipList().iterator();
 				while (iter.hasNext()) {
 					ObjRelationship rel = (ObjRelationship) iter.next();
-					Iterator db_rel_iter =
-						rel.getDbRelationshipList().iterator();
+					Iterator db_rel_iter = rel.getDbRelationshipList().iterator();
 					while (db_rel_iter.hasNext()) {
-						DbRelationship db_rel =
-							(DbRelationship) db_rel_iter.next();
+						DbRelationship db_rel = (DbRelationship) db_rel_iter.next();
 						if (db_rel.getTargetEntity() == db_entity) {
 							rel.clearDbRelationships();
 							break;
@@ -435,12 +467,10 @@ public class DataMap {
 		objEntityMap.remove(entity_name);
 		ObjEntity[] obj_entity_arr = getObjEntities();
 		for (int i = 0; i < obj_entity_arr.length; i++) {
-			Iterator rel_iter =
-				obj_entity_arr[i].getRelationshipList().iterator();
+			Iterator rel_iter = obj_entity_arr[i].getRelationshipList().iterator();
 			while (rel_iter.hasNext()) {
 				ObjRelationship rel = (ObjRelationship) rel_iter.next();
-				if (rel.getTargetEntity() == entity
-					|| rel.getSourceEntity() == entity) {
+				if (rel.getTargetEntity() == entity || rel.getSourceEntity() == entity) {
 					obj_entity_arr[i].removeRelationship(rel.getName());
 				}
 			}
@@ -450,18 +480,5 @@ public class DataMap {
 	/** "Dirty" remove of the ObjEntity from the data map.*/
 	public void removeObjEntity(String entity_name) {
 		objEntityMap.remove(entity_name);
-	}
-
-	//methods needed by DataMapValidator
-	//there are no friend classes in Java
-	//so we use methods with package visibility
-	//author: Andriy Shapochka
-
-	SortedMap getObjMap() {
-		return objEntityMap;
-	}
-
-	SortedMap getDbMap() {
-		return dbEntityMap;
 	}
 }
