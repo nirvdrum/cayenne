@@ -73,11 +73,12 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class Validator {
-	private Mediator mediator;
-	private Vector errMsg = new Vector();
+	protected Mediator mediator;
+	protected Vector errorMessages;
+	protected int errorSeverity;
 
 	/** 
-	 * Create validator for specified mediator. 
+	 * Creates validator for specified mediator. 
 	 * 
 	 * @param mediator The mediator with dirty elements to check.
 	 */
@@ -86,124 +87,125 @@ public class Validator {
 	}
 
 	/** 
-	 * Validates dirty elements in mediator.
-	 * Displays non-modal dialog window if errors are found.
-	 * 
-	 * @return ErrorMsg.NO_ERROR if no errors are found, 
-	 * another error code if errors are found.
+	 * Resets internal state. 
+	 * Called internally before starting validation.
 	 */
-	public int validate() {
-		int status = ErrorMsg.NO_ERROR;
-		int temp_err_level;
-		errMsg = new Vector();
+	protected void reset() {
+		errorMessages = new Vector();
+		errorSeverity = ErrorMsg.NO_ERROR;
+	}
 
-		// Validate domains. If error level worse than current status,
-		// set status to new error level
-		temp_err_level = validateDomains(mediator.getDomains());
-		if (temp_err_level > status) {
-			status = temp_err_level;
+	/** 
+	 * Returns maximum error severity level encountered during 
+	 * the last validation run. 
+	 */
+	public int getErrorSeverity() {
+		return errorSeverity;
+	}
+
+	/**
+	 * Adds new error message to the list of messages. Increases severity
+	 * if <code>msg</code> parameter
+	 * has a higher severity then the current value. 
+	 * Leaves current value unchanged otherwise.
+	 */
+	public void addErrorMessage(ErrorMsg msg) {
+		errorMessages.add(msg);
+		if (errorSeverity < msg.getSeverity()) {
+			errorSeverity = msg.getSeverity();
 		}
-		return status;
 	}
 
 	/** Return collection of ErrorMsg objects from last validation. */
 	public Vector getErrorMessages() {
-		return errMsg;
+		return errorMessages;
+	}
+
+	/** 
+	 * Validates all project elements.
+	 * 
+	 * @return ErrorMsg.NO_ERROR if no errors are found, 
+	 * another error code if errors are found.
+	 */
+	public synchronized int validate() {
+		reset();
+
+		// Validate domains. 
+		// This will recursively run validation on maps, nodes, etc.
+		validateDomains(mediator.getDomains());
+
+		return getErrorSeverity();
 	}
 
 	/** 
 	 * Checks if there are empty or duplicate domain names. 
 	 * Also checks data nodes. 
 	 */
-	protected int validateDomains(DataDomain[] domains) {
-		int status = ErrorMsg.NO_ERROR;
-		DomainErrorMsg msg;
+	protected void validateDomains(DataDomain[] domains) {
 		// Used to check for duplicate names
 		HashMap name_map = new HashMap();
 
 		for (int i = 0; i < domains.length; i++) {
-			String name = (domains[i].getName() != null) ? domains[i].getName().trim() : "";
+			String name =
+				(domains[i].getName() != null)
+					? domains[i].getName().trim()
+					: "";
 
 			if (name.length() == 0) {
-				msg =
+				addErrorMessage(
 					new DomainErrorMsg(
 						"Domain has no name",
 						ErrorMsg.ERROR,
-						domains[i]);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						domains[i]));
 			} else if (name_map.containsKey(name)) {
-				msg =
+				addErrorMessage(
 					new DomainErrorMsg(
 						"Duplicate domain name \"" + name + "\".",
 						ErrorMsg.ERROR,
-						domains[i]);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						domains[i]));
 			}
 
 			name_map.put(name, domains[i]);
-			// Validate data nodes. If error level worse than current status,
-			// set status to new error level
-			int errLevel =
-				validateDataNodes(domains[i], domains[i].getDataNodes());
-			if (errLevel > status) {
-				status = errLevel;
-			}
 
-			// Validate data maps. If error level worse than current status,
-			// set status to new error level
+			// Validate data nodes.
+			validateDataNodes(domains[i], domains[i].getDataNodes());
+
+			// Validate data maps. 
 			List list = domains[i].getMapList();
-			errLevel = validateDataMaps(domains[i], list);
-			if (errLevel > status) {
-				status = errLevel;
-			}
+			validateDataMaps(domains[i], list);
 		}
-
-		return status;
 	}
 
 	/** Checks for duplicate data node names and other stuff. */
-	protected int validateDataNodes(DataDomain domain, DataNode[] nodes) {
-		int status = ErrorMsg.NO_ERROR;
-		DataNodeErrorMsg msg;
+	protected void validateDataNodes(DataDomain domain, DataNode[] nodes) {
 		// Used to check for duplicate names
 		HashMap name_map = new HashMap();
 
 		for (int i = 0; i < nodes.length; i++) {
-			String name = (nodes[i].getName() != null) ? nodes[i].getName().trim() : "";
+			String name =
+				(nodes[i].getName() != null) ? nodes[i].getName().trim() : "";
 			if (name.length() == 0) {
-				msg =
+				addErrorMessage(
 					new DataNodeErrorMsg(
 						"Data node has no name",
 						ErrorMsg.ERROR,
 						domain,
-						nodes[i]);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						nodes[i]));
 			} else if (name_map.containsKey(name)) {
-				msg =
+				addErrorMessage(
 					new DataNodeErrorMsg(
 						"Duplicate data node name \"" + name + "\".",
 						ErrorMsg.ERROR,
 						domain,
-						nodes[i]);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						nodes[i]));
 			}
 
-			int temp_err_level = validateDataNode(domain, nodes[i]);
-			if (temp_err_level > status) {
-				status = temp_err_level;
-			}
+			validateDataNode(domain, nodes[i]);
 			name_map.put(name, nodes[i]);
-		} // End for()
-		return status;
+		}
 	}
 
-	protected int validateDataNode(DataDomain domain, DataNode node) {
-		int status = ErrorMsg.NO_ERROR;
-		DataNodeErrorMsg msg;
+	protected void validateDataNode(DataDomain domain, DataNode node) {
 
 		String factory = node.getDataSourceFactory();
 		if (factory == null)
@@ -212,11 +214,9 @@ public class Validator {
 			factory = factory.trim();
 		// If direct factory, make sure the location is a valid file name.
 		if (factory.length() == 0) {
-			String temp;
-			temp = "Must select factory to use to get to data source.";
-			msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
-			errMsg.add(msg);
-			status = ErrorMsg.ERROR;
+			String temp = "Must select factory to use to get to data source.";
+			addErrorMessage(
+				new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node));
 		} else if (factory.equals(DataSourceFactory.DIRECT_FACTORY)) {
 			String location = node.getDataSourceLocation();
 			if (location == null)
@@ -224,11 +224,9 @@ public class Validator {
 			else
 				location = location.trim();
 			if (location.length() == 0) {
-				String temp;
-				temp = "Must specify file name for Data Node Location";
-				msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+				String temp = "Must specify file name for Data Node Location";
+				addErrorMessage(
+					new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node));
 			}
 		} else if (factory.equals(DataSourceFactory.JNDI_FACTORY)) {
 			String location = node.getDataSourceLocation();
@@ -237,27 +235,20 @@ public class Validator {
 			else
 				location = location.trim();
 			if (location.length() == 0) {
-				String temp;
-				temp = "Must specify valid Data Source location";
-				msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+				String temp = "Must specify valid Data Source location";
+				addErrorMessage(
+					new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node));
 			}
 		}
 
 		if (node.getAdapter() == null) {
-			String temp;
-			temp = "Must specify DB query adapter.";
-			msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
-			errMsg.add(msg);
-			status = ErrorMsg.ERROR;
+			String temp = "Must specify DB query adapter.";
+			addErrorMessage(
+				new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node));
 		}
-		return status;
 	}
 
-	protected int validateDataMaps(DataDomain domain, List maps) {
-		int status = ErrorMsg.NO_ERROR;
-
+	protected void validateDataMaps(DataDomain domain, List maps) {
 		// Used to check for duplicate names
 		HashMap nameMap = new HashMap();
 
@@ -268,159 +259,117 @@ public class Validator {
 			name = (name == null) ? "" : name.trim();
 
 			if (name.length() == 0) {
-				errMsg.add(
+				addErrorMessage(
 					new DataMapErrorMsg(
 						"Data map has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map));
-				status = ErrorMsg.ERROR;
 			} else if (nameMap.containsKey(name)) {
-				errMsg.add(
+				addErrorMessage(
 					new DataMapErrorMsg(
 						"Duplicate data map name \"" + name + "\".",
 						ErrorMsg.ERROR,
 						domain,
 						map));
-				status = ErrorMsg.ERROR;
 			}
 
-			int errLevel = validateDataMap(domain, map);
-			if (errLevel > status) {
-				status = errLevel;
-			}
-
+			validateDataMap(domain, map);
 			nameMap.put(name, map);
 		}
-		return status;
 	}
 
-	protected int validateDataMap(DataDomain domain, DataMap map) {
-		int status = ErrorMsg.NO_ERROR;
-
-		// If directo factory, make sure the location is a valid file name.
+	protected void validateDataMap(DataDomain domain, DataMap map) {
+		// If directory factory, make sure the location is a valid file name.
 		String location = map.getLocation();
 		location = (location == null) ? "" : location.trim();
 
 		// Must have data map file name
 		if (location.length() == 0) {
-			errMsg.add(
+			addErrorMessage(
 				new DataMapErrorMsg(
 					"Must specify valid Data Map file name",
 					ErrorMsg.ERROR,
 					domain,
 					map));
-			status = ErrorMsg.ERROR;
 		}
 
 		// Validate obj entities
 		ObjEntity[] entities = map.getObjEntities();
-		int errLevel = validateObjEntities(domain, map, entities);
-		if (errLevel > status) {
-			status = errLevel;
-		}
+		validateObjEntities(domain, map, entities);
 
 		// Validate db entities
 		DbEntity[] dbEntities = map.getDbEntities();
-		errLevel = validateDbEntities(domain, map, dbEntities);
-		if (errLevel > status) {
-			status = errLevel;
-		}
-
-		return status;
+		validateDbEntities(domain, map, dbEntities);
 	}
 
-	protected int validateObjEntities(
+	protected void validateObjEntities(
 		DataDomain domain,
 		DataMap map,
 		ObjEntity[] entities) {
 
-		int status = ErrorMsg.NO_ERROR;
 		if (entities == null) {
-			return status;
+			return;
 		}
 
 		// Used to check for duplicate names
 		HashMap nameMap = new HashMap();
-
 		for (int i = 0; i < entities.length; i++) {
-			
+
 			// validate name
 			String name = entities[i].getName();
 			name = (name == null) ? "" : name.trim();
 			if (name.length() == 0) {
-				errMsg.add(
+				addErrorMessage(
 					new EntityErrorMsg(
 						"Entity has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
 						entities[i]));
-				status = ErrorMsg.ERROR;
 			} else if (nameMap.containsKey(name)) {
-				errMsg.add(
+				addErrorMessage(
 					new EntityErrorMsg(
 						"Duplicate entity name \"" + name + "\".",
 						ErrorMsg.ERROR,
 						domain,
 						map,
 						entities[i]));
-				status = ErrorMsg.ERROR;
 			}
 			nameMap.put(name, map);
 
-            // validate DbEntity presence
-            if(entities[i].getDbEntity() == null) {
-				errMsg.add(
+			// validate DbEntity presence
+			if (entities[i].getDbEntity() == null) {
+				addErrorMessage(
 					new EntityErrorMsg(
 						"No DbEntity for ObjEntity \"" + name + "\".",
 						ErrorMsg.WARNING,
 						domain,
 						map,
 						entities[i]));
-						
-				if(status < ErrorMsg.WARNING) {
-					status = ErrorMsg.WARNING;
-				}
-            }
-            
-            // validate Java Class
-            String className = entities[i].getClassName();
-            if(className == null || className.trim().length() == 0) {
-				errMsg.add(
+			}
+
+			// validate Java Class
+			String className = entities[i].getClassName();
+			if (className == null || className.trim().length() == 0) {
+				addErrorMessage(
 					new EntityErrorMsg(
 						"No Java class for \"" + name + "\".",
 						ErrorMsg.WARNING,
 						domain,
 						map,
 						entities[i]));
-						
-				if(status < ErrorMsg.WARNING) {
-					status = ErrorMsg.WARNING;
-				}
-            }
-            
-			int errLevel =
-				validateObjAttributes(domain, map, entities[i]);
-			if (errLevel > status) {
-				status = errLevel;
 			}
-			
-			errLevel = validateObjRels(domain, map, entities[i]);
-			if (errLevel > status) {
-				status = errLevel;
-			}	
+
+			validateObjAttributes(domain, map, entities[i]);
+			validateObjRels(domain, map, entities[i]);
 		}
-		
-		return status;
 	}
 
-	protected int validateObjAttributes(
+	protected void validateObjAttributes(
 		DataDomain domain,
 		DataMap map,
 		ObjEntity entity) {
-		int status = ErrorMsg.NO_ERROR;
-		AttributeErrorMsg msg;
 
 		List attributes = entity.getAttributeList();
 		Iterator iter = attributes.iterator();
@@ -429,70 +378,101 @@ public class Validator {
 			// Must have name
 			if (attribute.getName() == null
 				|| attribute.getName().trim().length() == 0) {
-				msg =
+				addErrorMessage(
 					new AttributeErrorMsg(
 						"Attribute has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						attribute);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						attribute));
 			}
 			// Should have type (WARNING)
 			if (attribute.getType() == null
 				|| attribute.getType().trim().length() == 0) {
-				msg =
+				addErrorMessage(
 					new AttributeErrorMsg(
 						"Must specify attribute type",
 						ErrorMsg.WARNING,
 						domain,
 						map,
-						attribute);
-				errMsg.add(msg);
-				if (status == ErrorMsg.NO_ERROR)
-					status = ErrorMsg.WARNING;
+						attribute));
 			}
-		} // End while()
-
-		return status;
+		}
 	}
 
-	protected int validateObjRels(
+	protected void validateObjRels(
 		DataDomain domain,
 		DataMap map,
 		ObjEntity entity) {
-		int status = ErrorMsg.NO_ERROR;
-		RelationshipErrorMsg msg;
 
 		List rels = entity.getRelationshipList();
 		Iterator iter = rels.iterator();
 		while (iter.hasNext()) {
 			ObjRelationship rel = (ObjRelationship) iter.next();
-			if (rel.getTargetEntity() == null) {
-				msg =
+			if (rel.getName() == null) {
+				addErrorMessage(
 					new RelationshipErrorMsg(
-						"Must specify target entity",
+						"Relationship has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						rel);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						rel));
 			}
-		} // End while()
+			
+			
+			if (rel.getTargetEntity() == null) {
+				addErrorMessage(
+					new RelationshipErrorMsg(
+						"Must specify target entity",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						rel));
+			} else {
+				// check for missing DbRelationship mappings
+				List dbRels = rel.getDbRelationshipList();
+				if (dbRels.size() == 0) {
+					addErrorMessage(
+						new RelationshipErrorMsg(
+							"No DbRelationship mapping",
+							ErrorMsg.WARNING,
+							domain,
+							map,
+							rel));
+				} else {
+					DbEntity expectedSrc =
+						((ObjEntity) rel.getSourceEntity()).getDbEntity();
+					DbEntity expectedTarget =
+						((ObjEntity) rel.getTargetEntity()).getDbEntity();
 
-		return status;
+					if (((DbRelationship) dbRels.get(0)).getSourceEntity()
+						!= expectedSrc
+						|| ((DbRelationship) dbRels.get(dbRels.size() - 1))
+							.getTargetEntity()
+							!= expectedTarget) {
+						addErrorMessage(
+							new RelationshipErrorMsg(
+								"Incomplete DbRelationship mapping",
+								ErrorMsg.WARNING,
+								domain,
+								map,
+								rel));
+					}
+				}
+			}
+
+		}
 	}
 
-	protected int validateDbEntities(
+	protected void validateDbEntities(
 		DataDomain domain,
 		DataMap map,
 		DbEntity[] entities) {
-		int status = ErrorMsg.NO_ERROR;
-		if (null == entities)
-			return status;
-		EntityErrorMsg msg;
+
+		if (null == entities) {
+			return;
+		}
+
 		// Used to check for duplicate names
 		HashMap name_map = new HashMap();
 
@@ -504,45 +484,34 @@ public class Validator {
 				name = name.trim();
 			// Must have name
 			if (name.length() == 0) {
-				msg =
+				addErrorMessage(
 					new EntityErrorMsg(
 						"Entity has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						entities[i]);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						entities[i]));
 				// Cannot have duplicate names within data map
 			} else if (name_map.containsKey(name)) {
-				msg =
+				addErrorMessage(
 					new EntityErrorMsg(
 						"Duplicate entity name \"" + name + "\".",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						entities[i]);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						entities[i]));
 			}
 			name_map.put(name, map);
 
-			int temp_err_level = validateDbAttributes(domain, map, entities[i]);
-			if (temp_err_level > status)
-				status = temp_err_level;
-			temp_err_level = validateDbRels(domain, map, entities[i]);
-			if (temp_err_level > status)
-				status = temp_err_level;
-		} // End for()
-		return status;
+			validateDbAttributes(domain, map, entities[i]);
+			validateDbRels(domain, map, entities[i]);
+		}
 	}
 
-	protected int validateDbAttributes(
+	protected void validateDbAttributes(
 		DataDomain domain,
 		DataMap map,
 		DbEntity entity) {
-		int status = ErrorMsg.NO_ERROR;
-		AttributeErrorMsg msg;
 
 		List attributes = entity.getAttributeList();
 		Iterator iter = attributes.iterator();
@@ -551,20 +520,17 @@ public class Validator {
 			// Must have name
 			if (attribute.getName() == null
 				|| attribute.getName().trim().length() == 0) {
-				msg =
+				addErrorMessage(
 					new AttributeErrorMsg(
 						"Attribute has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						attribute);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						attribute));
 			}
 			// all attributes must have type
-			else if (
-				attribute.getType() == TypesMapping.NOT_DEFINED) {
-				msg =
+			else if (attribute.getType() == TypesMapping.NOT_DEFINED) {
+				addErrorMessage(
 					new AttributeErrorMsg(
 						"Attribute \""
 							+ attribute.getName()
@@ -572,16 +538,14 @@ public class Validator {
 						ErrorMsg.WARNING,
 						domain,
 						map,
-						attribute);
-				errMsg.add(msg);
-				status = ErrorMsg.WARNING;
+						attribute));
 			}
 			// VARCHAR and CHAR attributes must have max length
 			else if (
 				attribute.getMaxLength() < 0
 					&& (attribute.getType() == java.sql.Types.VARCHAR
 						|| attribute.getType() == java.sql.Types.CHAR)) {
-				msg =
+				addErrorMessage(
 					new AttributeErrorMsg(
 						"Attribute \""
 							+ attribute.getName()
@@ -589,38 +553,29 @@ public class Validator {
 						ErrorMsg.WARNING,
 						domain,
 						map,
-						attribute);
-				errMsg.add(msg);
-				status = ErrorMsg.WARNING;
+						attribute));
 			}
-		} // End while()
-
-		return status;
+		}
 	}
 
-	protected int validateDbRels(
+	protected void validateDbRels(
 		DataDomain domain,
 		DataMap map,
 		DbEntity entity) {
-		int status = ErrorMsg.NO_ERROR;
-		RelationshipErrorMsg msg;
 
 		List rels = entity.getRelationshipList();
 		Iterator iter = rels.iterator();
 		while (iter.hasNext()) {
 			DbRelationship rel = (DbRelationship) iter.next();
 			if (rel.getTargetEntity() == null) {
-				msg =
+				addErrorMessage(
 					new RelationshipErrorMsg(
 						"Must specify target entity",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						rel);
-				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+						rel));
 			}
-		} // End while()
-		return status;
+		}
 	}
 }

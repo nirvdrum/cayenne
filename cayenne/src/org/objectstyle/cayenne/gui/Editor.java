@@ -126,7 +126,7 @@ public class Editor
 	JMenuItem createDataSourceMenu = new JMenuItem("Create Data Source");
 	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
 	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
-	JMenuItem addDataMapMenu = new JMenuItem("Add Data Map");
+	JMenuItem addDataMapMenu = new JMenuItem("Link Data Map to Node");
 	JMenuItem removeMenu = new JMenuItem("Remove");
 
 	JMenu toolMenu = new JMenu("Tools");
