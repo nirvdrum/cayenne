@@ -111,10 +111,8 @@ public class CayenneUserDir {
     }
 
     /**
-     * Returns a directory object where all user
-     * Cayenne-related configuration is stored. 
-     * May return null if the directory is not accessible 
-     * for whatever reason.
+     * Returns a directory object where all user Cayenne-related configuration is stored. 
+     * May return null if the directory is not accessible for whatever reason.
      */
     public File getDirectory() {
         return cayenneUserDir;
