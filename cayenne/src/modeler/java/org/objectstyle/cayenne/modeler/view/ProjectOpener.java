@@ -65,8 +65,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
-import org.objectstyle.cayenne.modeler.util.ApplicationFileFilter;
-import org.objectstyle.cayenne.modeler.util.DataMapFileFilter;
+import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.DataMapProject;
@@ -93,19 +92,21 @@ public class ProjectOpener extends JFileChooser {
      */
     public File newProjectDir(Frame f, Project p) {
         if (p instanceof ApplicationProject) {
-        	// configure for application project
+            // configure for application project
             return newProjectDir(
                 f,
                 Configuration.DEFAULT_DOMAIN_FILE,
-                ApplicationFileFilter.getInstance());
-        } else if (p instanceof DataMapProject) {
-        	// configure for DataMap project
+                FileFilters.getApplicationFilter());
+        }
+        else if (p instanceof DataMapProject) {
+            // configure for DataMap project
             ProjectFile projFileWrapper = p.projectFileForObject(p);
             return newProjectDir(
                 f,
                 projFileWrapper.getLocation(),
-                DataMapFileFilter.getInstance());
-        } else {
+                FileFilters.getDataMapFilter());
+        }
+        else {
             String message =
                 (p == null)
                     ? "Null project."
@@ -154,13 +155,16 @@ public class ProjectOpener extends JFileChooser {
 
                 if (dialog.shouldOverwrite()) {
                     break;
-                } else if (dialog.shouldSelectAnother()) {
+                }
+                else if (dialog.shouldSelectAnother()) {
                     continue;
-                } else {
+                }
+                else {
                     // canceled
                     return null;
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -180,11 +184,11 @@ public class ProjectOpener extends JFileChooser {
 
         // configure filters
         resetChoosableFileFilters();
-        addChoosableFileFilter(ApplicationFileFilter.getInstance());
-        addChoosableFileFilter(DataMapFileFilter.getInstance());
+        addChoosableFileFilter(FileFilters.getApplicationFilter());
+        addChoosableFileFilter(FileFilters.getDataMapFilter());
 
         // default to App projects
-        setFileFilter(ApplicationFileFilter.getInstance());
+        setFileFilter(FileFilters.getApplicationFilter());
 
         int status = showOpenDialog(f);
         if (status != JFileChooser.APPROVE_OPTION) {

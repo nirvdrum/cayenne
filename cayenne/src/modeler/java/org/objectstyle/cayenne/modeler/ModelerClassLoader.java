@@ -66,6 +66,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -113,7 +114,7 @@ public class ModelerClassLoader {
     }
 
     /**
-     * Returns class for a given name.
+     * Returns class for a given name, loading it if needed from configured locations.
      */
     public synchronized Class loadClass(String className) throws ClassNotFoundException {
         load();
@@ -127,10 +128,21 @@ public class ModelerClassLoader {
         return Collections.unmodifiableList(pathFiles);
     }
 
+    public synchronized void setPathFiles(List files) throws MalformedURLException {
+
+        pathFiles.clear();
+        classLoader = null;
+
+        Iterator it = files.iterator();
+        while (it.hasNext()) {
+            addFile((File) it.next());
+        }
+    }
+
     /**
      * Adds a new location to the list of configured locations.
      */
-    public synchronized void addFile(File file) throws MalformedURLException {
+    private void addFile(File file) throws MalformedURLException {
         file = file.getAbsoluteFile();
 
         if (pathFiles.contains(file)) {
@@ -143,22 +155,6 @@ public class ModelerClassLoader {
 
         pathFiles.add(file);
         logObj.debug("Added CLASSPATH entry...: " + file.getAbsolutePath());
-        store();
-    }
-
-    /**
-     * 
-     * @param file
-     * @throws MalformedURLException
-     */
-    public synchronized void removeFile(File file) throws MalformedURLException {
-        file = file.getAbsoluteFile();
-
-        if (pathFiles.remove(file)) {
-            // must reinit class loader
-            classLoader = null;
-            store();
-        }
     }
 
     private synchronized FileClassLoader nonNullClassLoader() {
@@ -190,7 +186,9 @@ public class ModelerClassLoader {
                     line = line.trim();
 
                     // skip comments
-                    if (line.startsWith("#") || line.startsWith("//")) {
+                    if (line.length() == 0
+                        || line.startsWith("#")
+                        || line.startsWith("//")) {
                         continue;
                     }
 
@@ -234,7 +232,7 @@ public class ModelerClassLoader {
      * Stores classpath configuration into a file at preconfigured location.
      * Uses a temp file to store locations to avoid corrupting the main file.
      */
-    protected synchronized void store() {
+    public synchronized void store() throws IOException {
         if (classpathFile == null) {
             return;
         }
@@ -244,32 +242,33 @@ public class ModelerClassLoader {
             return;
         }
 
+        File temp = File.createTempFile("modeler", ".classpath", dir);
+        BufferedWriter out = new BufferedWriter(new FileWriter(temp));
+
         try {
-            File temp = File.createTempFile("modeler", ".classpath", dir);
-            BufferedWriter out = new BufferedWriter(new FileWriter(temp));
+            // write header
+            out.write("# CayenneModeler Custom Classpath; " + new Date());
+            out.newLine();
+            out.newLine();
 
-            try {
-                Iterator it = pathFiles.iterator();
-                while (it.hasNext()) {
-                    File file = (File) it.next();
-                    out.write(file.getAbsolutePath());
-                    out.newLine();
-                }
-            }
-            finally {
-                out.close();
-            }
-
-            // move temp file to perm
-            classpathFile.delete();
-
-            if (temp.renameTo(classpathFile)) {
-                loadedAt = classpathFile.lastModified();
+            Iterator it = pathFiles.iterator();
+            while (it.hasNext()) {
+                File file = (File) it.next();
+                out.write(file.getAbsolutePath());
+                out.newLine();
             }
         }
-        catch (IOException ioex) {
-            logObj.warn("*** Failed to save classpath file: " + classpathFile, ioex);
+        finally {
+            out.close();
         }
+
+        // move temp file to perm
+        classpathFile.delete();
+
+        if (temp.renameTo(classpathFile)) {
+            loadedAt = classpathFile.lastModified();
+        }
+
     }
 
     // URLClassLoader with addURL method exposed.

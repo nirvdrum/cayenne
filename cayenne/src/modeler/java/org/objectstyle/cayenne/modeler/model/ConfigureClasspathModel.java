@@ -53,37 +53,94 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.model;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
 
-import javax.swing.filechooser.FileFilter;
-
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.modeler.ModelerClassLoader;
+import org.scopemvc.core.Selector;
+import org.scopemvc.model.basic.BasicModel;
+import org.scopemvc.model.collection.ListModel;
 
 /**
- * FileFilter used to select Cayenne Application project files.
+ * A Scope model for classpath configuration.
  * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class ApplicationFileFilter extends FileFilter {
-    protected static ApplicationFileFilter sharedInstance = new ApplicationFileFilter();
+public class ConfigureClasspathModel extends BasicModel {
+    public static final Selector CUSTOM_CLASSPATH_SELECTOR =
+        Selector.fromString("customClasspath");
+    public static final Selector SELECTED_ENTRY_SELECTOR =
+        Selector.fromString("selectedEntry");
 
-    public static ApplicationFileFilter getInstance() {
-        return sharedInstance;
+    protected ListModel customClasspath;
+    protected File selectedEntry;
+    protected ModelerClassLoader classLoader;
+
+    public ConfigureClasspathModel(ModelerClassLoader classLoader) {
+        this.classLoader = classLoader;
+        this.customClasspath = new ListModel();
+        this.customClasspath.addAll(classLoader.getPathFiles());
+        this.customClasspath.addModelChangeListener(this);
+    }
+
+    public List getCustomClasspath() {
+        return customClasspath;
+    }
+
+    public File getSelectedEntry() {
+        return selectedEntry;
+    }
+
+    public void setSelectedEntry(File selectedEntry) {
+        this.selectedEntry = selectedEntry;
+    }
+
+    public void save() throws MalformedURLException, IOException {
+        classLoader.setPathFiles(customClasspath);
+        classLoader.store();
     }
 
     /**
-     * Accepts all directories and all cayenne.xml files.
+     * Adds a new file classpath entry above the currently selected
+     * one. If no current selection exists, adds it at the end of the 
+     * list.
      */
-    public boolean accept(File f) {
-        return f.isDirectory() || Configuration.DEFAULT_DOMAIN_FILE.equals(f.getName());
+    public void addEntry(File newEntry) {
+        newEntry = newEntry.getAbsoluteFile();
+
+        synchronized (customClasspath) {
+            // don't add duplicates
+            if (customClasspath.contains(newEntry)) {
+                return;
+            }
+
+            if (selectedEntry == null) {
+                customClasspath.add(newEntry);
+            }
+            else {
+                int index = customClasspath.indexOf(selectedEntry);
+                if (index >= 0) {
+                    customClasspath.add(index, newEntry);
+                }
+                else {
+                    customClasspath.add(newEntry);
+                }
+            }
+        }
     }
 
-    /**
-     *  Returns description of this filter.
-     */
-    public String getDescription() {
-        return "Cayenne Applications (" + Configuration.DEFAULT_DOMAIN_FILE + ")";
+    public boolean removeSelectedEntry() {
+        if (selectedEntry == null) {
+            return false;
+        }
+
+        synchronized (customClasspath) {
+            return customClasspath.remove(selectedEntry);
+        }
     }
 }

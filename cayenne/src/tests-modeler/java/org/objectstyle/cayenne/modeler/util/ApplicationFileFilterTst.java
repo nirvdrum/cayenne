@@ -53,9 +53,11 @@
  * <http://objectstyle.org/>.
  *
  */
- package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.io.File;
+
+import javax.swing.filechooser.FileFilter;
 
 import junit.framework.TestCase;
 
@@ -65,26 +67,25 @@ import org.objectstyle.cayenne.conf.Configuration;
  * @author Andrei Adamchik
  */
 public class ApplicationFileFilterTst extends TestCase {
-	protected ApplicationFileFilter filter;
-	
-	public void setUp() throws Exception {
-		filter = new ApplicationFileFilter();
-	}
-	
-	public void testAcceptDir() throws Exception {
-		assertTrue(filter.accept(new File(".")));
-	}
-	
-	public void testAcceptCayenneXml() throws Exception {
-		assertTrue(filter.accept(new File(Configuration.DEFAULT_DOMAIN_FILE)));
-	}
-	
-	public void testRejectOther() throws Exception {
-		assertFalse(filter.accept(new File("somefile.txt")));
-	}
-	
-	public void testRejectBadCayenneXml() throws Exception {
-		assertFalse(filter.accept(new File("bad_cayenne.xml")));
-	}
-}
+    protected FileFilter filter;
 
+    public void setUp() throws Exception {
+        filter = FileFilters.getApplicationFilter();
+    }
+
+    public void testAcceptDir() throws Exception {
+        assertTrue(filter.accept(new File(".")));
+    }
+
+    public void testAcceptCayenneXml() throws Exception {
+        assertTrue(filter.accept(new File(Configuration.DEFAULT_DOMAIN_FILE)));
+    }
+
+    public void testRejectOther() throws Exception {
+        assertFalse(filter.accept(new File("somefile.txt")));
+    }
+
+    public void testRejectBadCayenneXml() throws Exception {
+        assertFalse(filter.accept(new File("bad_cayenne.xml")));
+    }
+}

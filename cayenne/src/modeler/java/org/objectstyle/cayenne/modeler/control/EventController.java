@@ -112,7 +112,6 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -162,7 +161,6 @@ public class EventController extends ModelerController {
             reset();
         }
         else if (control.matchesID(PROJECT_OPENED_ID)) {
-            setDirty(((Project) control.getParameter()).isLocationUndefined());
             addDataNodeDisplayListener(CayenneModelerFrame.getFrame());
             addDataMapDisplayListener(CayenneModelerFrame.getFrame());
             addObjEntityDisplayListener(CayenneModelerFrame.getFrame());

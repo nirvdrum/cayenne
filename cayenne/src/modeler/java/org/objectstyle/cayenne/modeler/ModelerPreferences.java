@@ -96,8 +96,17 @@ public class ModelerPreferences extends ExtendedProperties {
     public static final String LAST_GENERATED_CLASSES_DIR =
         "gui.datamap.GenerateClassDialog.lastDir";
 
+    /**
+     * @since 1.1
+     */
     public static final String LAST_CLASS_GENERATION_TEMPLATE =
         "gui.datamap.GenerateClassDialog.lastTemplate";
+
+    /**
+     * @since 1.1
+     */
+    public static final String LAST_CLASSPATH_SELECTION_DIR =
+        "gui.datamap.ConfigureClasspathDialog.lastDir";
 
     /** User name */
     public static final String USER_NAME = "DbLoginPanel.unInput";

@@ -56,9 +56,7 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -66,13 +64,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -93,6 +89,9 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+
+import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
  * Editor for DbRelationship and its DbAttributePair's.
@@ -119,13 +118,13 @@ public class ResolveDbRelationshipDialog
         CayenneWidgetFactory.createLabel("Reverse Relationship:");
     protected JLabel reverseCheckLabel =
         CayenneWidgetFactory.createLabel("Create Reverse:");
-    protected JTextField name = CayenneWidgetFactory.createTextField();
-    protected JTextField reverseName = CayenneWidgetFactory.createTextField();
+    protected JTextField name = CayenneWidgetFactory.createTextField(30);
+    protected JTextField reverseName = CayenneWidgetFactory.createTextField(30);
     protected JCheckBox hasReverseDbRel = new JCheckBox("", false);
-    protected CayenneTable table = new CayenneTable();
+    protected CayenneTable table;
     protected JButton add = new JButton("Add");
     protected JButton remove = new JButton("Remove");
-    protected JButton save = new JButton("Save");
+    protected JButton save = new JButton("Done");
     protected JButton cancel = new JButton("Cancel");
 
     private boolean cancelPressed;
@@ -158,7 +157,8 @@ public class ResolveDbRelationshipDialog
             dbRel.setToMany(toMany);
             isReverseDbRelNew = true;
             isDbRelNew = true;
-        } else {
+        }
+        else {
             dbRelList = new ArrayList(relationships);
             dbRel = (DbRelationship) dbRelList.get(0);
             reverseDbRel = dbRel.getReverseRelationship();
@@ -168,14 +168,20 @@ public class ResolveDbRelationshipDialog
 
         init();
 
+        add.addActionListener(this);
+        remove.addActionListener(this);
+        save.addActionListener(this);
+        cancel.addActionListener(this);
+        hasReverseDbRel.addActionListener(this);
+
         this.pack();
         this.centerWindow();
     }
 
     /** Set up the graphical components. */
     private void init() {
-        getContentPane().setLayout(
-            new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        setTitle("DbRelationship Info: " + start.getName() + " to " + end.getName());
+        getContentPane().setLayout(new BorderLayout());
 
         if (!isReverseDbRelNew) {
             reverseCheckLabel.setText("Update Reverse:");
@@ -198,41 +204,31 @@ public class ResolveDbRelationshipDialog
             reverseName.setEnabled(false);
             reverseNameLabel.setEnabled(false);
             hasReverseDbRel.setSelected(false);
-        } else {
+        }
+        else {
             reverseNameLabel.setEnabled(true);
             reverseName.setEnabled(true);
             reverseName.setText(
                 (reverseDbRel.getName() != null ? reverseDbRel.getName() : ""));
             hasReverseDbRel.setSelected(true);
         }
-        hasReverseDbRel.addActionListener(this);
 
         name.setText((dbRel.getName() != null ? dbRel.getName() : ""));
 
-        Component[] left =
-            new Component[] {
-                CayenneWidgetFactory.createLabel("Relationship: "),
-                reverseNameLabel,
-                reverseCheckLabel };
+        DefaultFormBuilder topBuilder =
+            new DefaultFormBuilder(new FormLayout("right:max(50dlu;pref), 3dlu, left:max(250dlu;pref)", ""));
+        topBuilder.setDefaultDialogBorder();
 
-        Component[] right =
-            new Component[] { name, reverseName, hasReverseDbRel };
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        panel.add(PanelFactory.createForm(left, right));
-        getContentPane().add(panel);
+        topBuilder.append("Relationship:", name);
+        topBuilder.append(reverseNameLabel, reverseName);
+        topBuilder.append(reverseCheckLabel, hasReverseDbRel);
+        getContentPane().add(topBuilder.getPanel(), BorderLayout.NORTH);
 
         // Attribute pane
-        DbAttributePairTableModel model =
-            new DbAttributePairTableModel(dbRel, getMediator(), this, true);
-        table.setModel(model);
-        table.getSelectionModel().setSelectionMode(
-            ListSelectionModel.SINGLE_SELECTION);
+        table = new AttributeTable();
+        table.setModel(new DbAttributePairTableModel(dbRel, getMediator(), this, true));
+        table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        JScrollPane scroll_pane = new JScrollPane(table);
-        scroll_pane.setPreferredSize(new Dimension(600, 100));
-        getContentPane().add(scroll_pane, BorderLayout.CENTER);
 
         TableColumn col = table.getColumnModel().getColumn(0);
         col.setMinWidth(150);
@@ -243,8 +239,6 @@ public class ResolveDbRelationshipDialog
 
         comboBox.setEditable(false);
         col.setCellEditor(new DefaultCellEditor(comboBox));
-        col = table.getColumnModel().getColumn(1);
-        col.setMinWidth(150);
         col = table.getColumnModel().getColumn(2);
         col.setMinWidth(150);
         comboBox =
@@ -253,21 +247,22 @@ public class ResolveDbRelationshipDialog
                 true);
         comboBox.setEditable(false);
         col.setCellEditor(new DefaultCellEditor(comboBox));
-        col = table.getColumnModel().getColumn(3);
-        col.setMinWidth(150);
 
-        setTitle(
-            "DbRelationship Info: " + start.getName() + " to " + end.getName());
+        getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel buttons =
-            PanelFactory.createButtonPanel(
-                new JButton[] { add, remove, save, cancel });
-        getContentPane().add(buttons, BorderLayout.SOUTH);
+        // right buttons
+        DefaultFormBuilder rightButtonsBuilder =
+            new DefaultFormBuilder(new FormLayout("left:max(50dlu;pref)", ""));
+        rightButtonsBuilder.setDefaultDialogBorder();
 
-        add.addActionListener(this);
-        remove.addActionListener(this);
-        save.addActionListener(this);
-        cancel.addActionListener(this);
+        rightButtonsBuilder.append(add);
+        rightButtonsBuilder.append(remove);
+        getContentPane().add(rightButtonsBuilder.getPanel(), BorderLayout.EAST);
+
+        // bottom buttons
+        getContentPane().add(
+            PanelFactory.createButtonPanel(new JButton[] { save, cancel }),
+            BorderLayout.SOUTH);
     }
 
     public List getDbRelationships() {
@@ -280,24 +275,27 @@ public class ResolveDbRelationshipDialog
 
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
-        DbAttributePairTableModel model =
-            (DbAttributePairTableModel) table.getModel();
+        DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
 
         if (src == add) {
             model.addRow(new DbAttributePair());
             table.select(model.getRowCount() - 1);
-        } else if (src == remove) {
+        }
+        else if (src == remove) {
             stopEditing();
             int row = table.getSelectedRow();
             model.removeRow(model.getJoin(row));
-        } else if (src == save) {
+        }
+        else if (src == save) {
             cancelPressed = false;
             save();
-        } else if (src == cancel) {
+        }
+        else if (src == cancel) {
             dbRelList = originalList;
             cancelPressed = true;
             hide();
-        } else if (src == hasReverseDbRel) {
+        }
+        else if (src == hasReverseDbRel) {
             if (!hasReverseDbRel.isSelected()) {
                 reverseName.setText("");
             }
@@ -318,24 +316,17 @@ public class ResolveDbRelationshipDialog
     private void save() {
         if (!name.getText().equals(dbRel.getName())) {
             String oldName = dbRel.getName();
-            MapUtil.setRelationshipName(
-                dbRel.getSourceEntity(),
-                dbRel,
-                name.getText());
+            MapUtil.setRelationshipName(dbRel.getSourceEntity(), dbRel, name.getText());
 
             getMediator().fireDbRelationshipEvent(
-                new RelationshipEvent(
-                    this,
-                    dbRel,
-                    dbRel.getSourceEntity(),
-                    oldName));
+                new RelationshipEvent(this, dbRel, dbRel.getSourceEntity(), oldName));
         }
 
-        DbAttributePairTableModel model =
-            (DbAttributePairTableModel) table.getModel();
+        DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
         try {
             model.commit();
-        } catch (DataMapException e) {
+        }
+        catch (DataMapException e) {
             e.printStackTrace();
             return;
         }
@@ -410,11 +401,17 @@ public class ResolveDbRelationshipDialog
         // and put them to the reverse list.
         for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
             DbAttributePair pair = (DbAttributePair) joins.get(i);
-            reverseJoins.add(
-                new DbAttributePair(pair.getTarget(), pair.getSource()));
+            reverseJoins.add(new DbAttributePair(pair.getTarget(), pair.getSource()));
         }
 
         return reverseJoins;
     }
 
+    final class AttributeTable extends CayenneTable {
+        final Dimension preferredSize = new Dimension(450, 200);
+
+        public Dimension getPreferredScrollableViewportSize() {
+            return preferredSize;
+        }
+    }
 }

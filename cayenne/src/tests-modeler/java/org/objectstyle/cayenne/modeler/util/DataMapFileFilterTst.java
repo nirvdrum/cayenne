@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.io.File;
 
+import javax.swing.filechooser.FileFilter;
+
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.conf.Configuration;
@@ -65,10 +67,10 @@ import org.objectstyle.cayenne.conf.Configuration;
  * @author Andrei Adamchik
  */
 public class DataMapFileFilterTst extends TestCase {
-    protected DataMapFileFilter filter;
+    protected FileFilter filter;
 
     public void setUp() throws Exception {
-        filter = new DataMapFileFilter();
+        filter = FileFilters.getDataMapFilter();
     }
 
     public void testAcceptDir() throws Exception {
@@ -86,11 +88,11 @@ public class DataMapFileFilterTst extends TestCase {
     public void testRejectHiddenMapXml() throws Exception {
         assertFalse(filter.accept(new File(".map.xml")));
     }
-    
+
     public void testAcceptMapXml() throws Exception {
         assertTrue(filter.accept(new File("xyz.map.xml")));
     }
-    
+
     public void testRejectMixedCase() throws Exception {
         assertFalse(filter.accept(new File("xyz.MAP.xml")));
     }

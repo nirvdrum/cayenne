@@ -57,16 +57,18 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.io.File;
 
+import javax.swing.filechooser.FileFilter;
+
 import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
 public class EOModelFileFilterTst extends TestCase {
-	protected EOModelFileFilter filter;
+	protected FileFilter filter;
 
 	public void setUp() throws Exception {
-		filter = new EOModelFileFilter();
+		filter = FileFilters.getEOModelFilter();
 	}
 	
 	public void testAcceptDir() throws Exception {

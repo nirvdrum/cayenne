@@ -193,7 +193,7 @@ public class ClassGeneratorDialog extends SPanel {
     }
 
     class ClassGeneratorModel extends STableModel {
-        protected Selector enabledSelector = Selector.fromString("enabled");
+        Selector enabledSelector = Selector.fromString("enabled");
 
         /**
          * Constructor for TableModel.
@@ -234,11 +234,11 @@ public class ClassGeneratorDialog extends SPanel {
     }
 
     class ClassGeneratorTable extends STable {
-        protected final Dimension preferredSize = new Dimension(500, 300);
+        final Dimension preferredSize = new Dimension(500, 300);
 
-        protected DefaultTableCellRenderer problemRenderer;
+        DefaultTableCellRenderer problemRenderer;
 
-        public ClassGeneratorTable() {
+        ClassGeneratorTable() {
             problemRenderer = new ClassGeneratorProblemRenderer();
             problemRenderer.setBackground(ValidatorDialog.WARNING_COLOR);
         }

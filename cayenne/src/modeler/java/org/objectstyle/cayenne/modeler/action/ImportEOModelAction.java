@@ -75,8 +75,7 @@ import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.EOModelFileFilter;
-import org.objectstyle.cayenne.modeler.util.EOModelSelectFilter;
+import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 
@@ -215,11 +214,11 @@ public class ImportEOModelAction extends CayenneAction {
         protected JDialog cachedDialog;
 
         public EOModelChooser(String title) {
-            super.setFileFilter(new EOModelFileFilter());
+            super.setFileFilter(FileFilters.getEOModelFilter());
             super.setDialogTitle(title);
             super.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-            this.selectFilter = new EOModelSelectFilter();
+            this.selectFilter = FileFilters.getEOModelSelectFilter();
         }
 
         public int showOpenDialog(Component parent) {

@@ -57,7 +57,11 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.modeler.control.ConfigureClasspathController;
+
 /**
+ * Action class that shows the dialog to configure custom classpath.
+ * 
  * @author Andrei Adamchik
  */
 public class ConfigureClasspathAction extends CayenneAction {
@@ -70,6 +74,6 @@ public class ConfigureClasspathAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-
+        new ConfigureClasspathController().startup();
     }
 }

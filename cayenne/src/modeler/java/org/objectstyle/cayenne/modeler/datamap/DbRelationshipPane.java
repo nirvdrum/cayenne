@@ -103,30 +103,26 @@ public class DbRelationshipPane
         ExistingSelectionProcessor,
         ListSelectionListener,
         TableModelListener {
+            
     protected EventController mediator;
     protected CayenneTable table;
     protected JButton resolve;
 
-    public DbRelationshipPane(EventController temp_mediator) {
+    public DbRelationshipPane(EventController mediator) {
         super();
-        mediator = temp_mediator;
-        mediator.addDbEntityDisplayListener(this);
-        mediator.addDbEntityListener(this);
-        mediator.addDbRelationshipListener(this);
-        // Set up graphical components
+        
+        this.mediator = mediator;
+        this.mediator.addDbEntityDisplayListener(this);
+        this.mediator.addDbEntityListener(this);
+        this.mediator.addDbRelationshipListener(this);
+        
         init();
-        // Add listeners		
         resolve.addActionListener(this);
     }
 
     protected void init() {
         setLayout(new BorderLayout());
-        // Create table
         table = new CayenneTable();
-
-        // add special editor
-        //CayenneCellEditor editor = new CayenneCellEditor(new JCheckBox());
-        //table.setDefaultEditor(Boolean.class, editor);
 
         resolve = new JButton("Database Mapping");
         JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
