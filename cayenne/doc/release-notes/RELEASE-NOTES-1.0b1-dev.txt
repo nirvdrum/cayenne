@@ -17,3 +17,10 @@ mandatory (based on mandatory attributes).
 
 3. Initial support for PostgreSQL and HSQLDB.
 
+4. Modeler uses the platform's look&feel by default; this is
+configurable in modeler.preferences (for now).
+
+5. Modeler remembers window size, position and tree view width.
+
+6. updated to commons-beanutils 1.6.1 and log4j 1.2.8.
+
