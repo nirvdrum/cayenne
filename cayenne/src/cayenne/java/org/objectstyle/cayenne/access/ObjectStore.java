@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -171,10 +172,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * cache is configured to allow ObjectStores to receive such events.
      */
     public void setDataRowCache(DataRowStore snapshotCache) {
-        if(snapshotCache == this.dataRowCache) {
+        if (snapshotCache == this.dataRowCache) {
             return;
         }
-        
+
         if (this.dataRowCache != null) {
             EventManager.getDefaultManager().removeListener(
                 this,
@@ -255,8 +256,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         // no snapshot events needed... snapshots maybe cleared, but no
-        // database changes
-        // have occured.
+        // database changes have occured.
     }
 
     /**
@@ -645,7 +645,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
         if (event.getRootSource() == this || event.getSource() == this) {
-            logObj.debug("SnapshotEvent sent by this ObjectStore, ignoring: " + event);
+            logObj.debug("SnapshotEvent by this ObjectStore, ignoring: " + event);
             return;
         }
 
@@ -653,40 +653,108 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         logObj.debug("new SnapshotEvent: " + event);
 
         synchronized (this) {
+            processUpdatedSnapshots(event.modifiedDiffs());
+            processDeletedIDs(event.deletedIds());
+        }
+    }
 
-            // process updated
-            DataRowUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
+    /**
+     * @since 1.1
+     */
+    void processDeletedIDs(Collection deletedIDs) {
+        if (deletedIDs != null && !deletedIDs.isEmpty()) {
+            Iterator it = deletedIDs.iterator();
+            while (it.hasNext()) {
+                ObjectId oid = (ObjectId) it.next();
+                DataObject object = getObject(oid);
+                if (object == null) {
+                    continue;
+                }
 
-            // process deleted
-            Collection deleted = event.deletedIds();
-            if (deleted != null && !deleted.isEmpty()) {
-                Iterator it = deleted.iterator();
-                while (it.hasNext()) {
-                    ObjectId oid = (ObjectId) it.next();
-                    DataObject object = getObject(oid);
-                    if (object == null) {
-                        continue;
-                    }
+                DataContextDelegate delegate;
 
-                    switch (object.getPersistenceState()) {
-                        case PersistenceState.COMMITTED :
-                        case PersistenceState.HOLLOW :
-                        case PersistenceState.DELETED :
+                switch (object.getPersistenceState()) {
+                    case PersistenceState.COMMITTED :
+                    case PersistenceState.HOLLOW :
+                    case PersistenceState.DELETED :
+
+                        // consult delegate if it exists
+                        delegate = object.getDataContext().getDelegate();
+
+                        if (delegate == null || delegate.shouldProcessDelete(object)) {
                             objectMap.remove(oid);
                             retainedSnapshotMap.remove(oid);
                             object.setDataContext(null);
-                            
+
                             // not sure if cleaning ObjectId is needed
                             // object.setObjectId(null);
-                            
+
                             object.setPersistenceState(PersistenceState.TRANSIENT);
-                            break;
-                        case PersistenceState.MODIFIED :
+                        }
+
+                        break;
+
+                    case PersistenceState.MODIFIED :
+
+                        // consult delegate if it exists
+                        delegate = object.getDataContext().getDelegate();
+                        if (delegate == null || delegate.shouldProcessDelete(object)) {
                             object.setPersistenceState(PersistenceState.NEW);
-                            // What are the implications that OID is not temporary?
+                        }
+
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * @since 1.1
+     */
+    void processUpdatedSnapshots(Map diffs) {
+        if (diffs != null && !diffs.isEmpty()) {
+            Iterator oids = diffs.entrySet().iterator();
+
+            while (oids.hasNext()) {
+                Map.Entry entry = (Map.Entry) oids.next();
+
+                ObjectId oid = (ObjectId) entry.getKey();
+                DataObject object = getObject(oid);
+
+                // no object, or HOLLOW object require no processing
+                if (object == null
+                    || object.getPersistenceState() == PersistenceState.HOLLOW) {
+                    continue;
+                }
+
+                DataRow diff = (DataRow) entry.getValue();
+
+                // we are lazy, just turn COMMITTED object into HOLLOW instead of 
+                // actually updating it
+                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
+                    // consult delegate if it exists
+                    DataContextDelegate delegate = object.getDataContext().getDelegate();
+                    if (delegate == null || delegate.shouldMergeChanges(object, diff)) {
+                        object.setPersistenceState(PersistenceState.HOLLOW);
+                    }
+                    continue;
+                }
+
+                // merge modified and deleted
+                if (object.getPersistenceState() == PersistenceState.DELETED
+                    || object.getPersistenceState() == PersistenceState.MODIFIED) {
+
+                    // consult delegate if it exists
+                    DataContextDelegate delegate = object.getDataContext().getDelegate();
+                    if (delegate == null || delegate.shouldMergeChanges(object, diff)) {
+                        ObjEntity entity =
+                            object.getDataContext().getEntityResolver().lookupObjEntity(
+                                object);
+                        DataRowUtils.forceMergeWithSnapshot(entity, object, diff);
                     }
                 }
             }
         }
     }
+
 }

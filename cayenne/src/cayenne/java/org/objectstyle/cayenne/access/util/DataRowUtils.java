@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.ToManyListDataSource;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -185,44 +184,8 @@ public class DataRowUtils {
 
     }
 
-    public static void mergeObjectsWithSnapshotDiffs(
-        ObjectStore objectStore,
-        Map diffs) {
 
-        if (diffs != null && !diffs.isEmpty()) {
-            Iterator oids = diffs.keySet().iterator();
-
-            while (oids.hasNext()) {
-                ObjectId oid = (ObjectId) oids.next();
-                DataObject object = objectStore.getObject(oid);
-
-                // no object, or HOLLOW object require no processing
-                if (object == null
-                    || object.getPersistenceState() == PersistenceState.HOLLOW) {
-                    continue;
-                }
-
-                // we are lazy, just turn COMMITTED object into HOLLOW instead of 
-                // actually updating it
-                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
-                    object.setPersistenceState(PersistenceState.HOLLOW);
-                    continue;
-                }
-
-                // merge modified and deleted
-                if (object.getPersistenceState() == PersistenceState.DELETED
-                    || object.getPersistenceState() == PersistenceState.MODIFIED) {
-
-                    ObjEntity entity =
-                        object.getDataContext().getEntityResolver().lookupObjEntity(
-                            object);
-                    forceMergeWithSnapshot(entity, object, (DataRow) diffs.get(oid));
-                }
-            }
-        }
-    }
-
-    private static void forceMergeWithSnapshot(
+    public static void forceMergeWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
         DataRow snapshot) {

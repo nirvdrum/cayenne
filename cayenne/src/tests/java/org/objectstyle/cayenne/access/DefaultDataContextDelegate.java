@@ -1,7 +1,3 @@
-package org.objectstyle.cayenne.access;
-
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.DataRow;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -57,6 +53,10 @@ import org.objectstyle.cayenne.DataRow;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
+
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
