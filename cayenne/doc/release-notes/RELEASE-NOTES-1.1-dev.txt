@@ -19,3 +19,7 @@ the superclass.
 4. Fixed CayenneDataObject.readNestedProperty() to avoid converting all
 non-persistent properties to String. [Bug 817449]
 
+5. FlattenedObjectId is no longer used for tracking to-one flattened relationships
+(or for anything else for that matter). Instead a correct solution
+using RelationshipFault is implemented. [Bug 813413]
+

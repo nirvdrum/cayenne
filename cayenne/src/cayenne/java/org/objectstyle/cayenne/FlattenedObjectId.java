@@ -67,6 +67,9 @@ import org.objectstyle.cayenne.util.Util;
  * when the object is touched
  * </p>
  * 
+ * @deprecated Since 1.1 FlattenedObjectId is deprecated and is no longer used in
+ * Cayenne since it is not a valid ObjectId. RelationshipFault is used instead.
+ * 
  * @author Craig Miskell
  */
 public class FlattenedObjectId extends ObjectId {

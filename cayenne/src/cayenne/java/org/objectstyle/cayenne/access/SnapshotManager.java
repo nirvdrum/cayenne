@@ -65,9 +65,9 @@ import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.FlattenedObjectId;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -215,14 +215,11 @@ public class SnapshotManager {
 
             // handle toOne flattened relationship
             if (rel.isFlattened()) {
-                //A flattened toOne relationship must be a series of
-                // toOne dbRelationships.  Record the relationship name
-                // and the source idsnapshot in order for later code 
-                // to be able to perform an appropriate fetch
-                FlattenedObjectId objectid =
-                    new FlattenedObjectId(targetClass, object, rel.getName());
-                Object newObject = context.registeredObject(objectid);
-                object.writePropertyDirectly(rel.getName(), newObject);
+                // A flattened toOne relationship must be a series of
+                // toOne dbRelationships.  Initialize fault for it, since 
+                // creating a hollow object won't be right...
+                RelationshipFault fault = new RelationshipFault(object, rel.getName());
+                object.writePropertyDirectly(rel.getName(), fault);
                 continue;
             }
 

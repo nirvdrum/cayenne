@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -242,7 +243,16 @@ public class CayenneDataObject implements DataObject {
             resolveFault();
         }
 
-        return readPropertyDirectly(propName);
+        Object object = readPropertyDirectly(propName);
+        
+        // must resolve faults immediately
+        if(object instanceof RelationshipFault) {
+        	// for now assume we just have to-one faults...
+        	// after all to-many are represented by ToManyList
+        	object = ((RelationshipFault)object).resolveToOne();
+        }
+        
+        return object;
     }
 
     public Object readPropertyDirectly(String propName) {

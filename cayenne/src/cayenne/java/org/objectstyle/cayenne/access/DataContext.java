@@ -73,7 +73,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.FlattenedObjectId;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
@@ -737,18 +736,8 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        List results;
-        if (oid instanceof FlattenedObjectId) {
-            FlattenedObjectId foid = (FlattenedObjectId) oid;
-            SelectQuery sel = QueryUtils.selectObjectForFlattenedObjectId(this, foid);
-            FlattenedSelectObserver observer = new FlattenedSelectObserver(foid);
-            this.performQueries(Collections.singletonList(sel), observer);
-            results = observer.getResults(sel);
-        }
-        else {
-            SelectQuery sel = QueryUtils.selectObjectForId(oid);
-            results = this.performQuery(sel);
-        }
+        SelectQuery sel = QueryUtils.selectObjectForId(oid);
+        List results = this.performQuery(sel);
 
         if (results.size() != 1) {
             String msg =
@@ -929,7 +918,7 @@ public class DataContext implements QueryEngine, Serializable {
                 }
             }
             else {
-				finalQueries.add(query);
+                finalQueries.add(query);
             }
         }
 
@@ -1449,38 +1438,4 @@ public class DataContext implements QueryEngine, Serializable {
 
     }
 
-    private class FlattenedSelectObserver extends SelectObserver {
-        FlattenedObjectId oid;
-
-        public FlattenedSelectObserver(FlattenedObjectId anOid) {
-            super();
-            this.oid = anOid;
-        }
-
-        public void nextDataRows(Query query, List dataRows) {
-            List result = new ArrayList();
-            if (dataRows != null && dataRows.size() > 0) {
-                //Really, we're only expecting one row, but lets be complete
-                ObjEntity ent =
-                    DataContext.this.getEntityResolver().lookupObjEntity(query);
-                Iterator it = dataRows.iterator();
-                while (it.hasNext()) {
-                    //The next few lines are basically a cut down/modified 
-                    // version of objectFromDataRow that handles the oid swapping
-                    // properly 
-                    Map dataRow = (Map) it.next();
-                    DataObject obj = registeredObject(this.oid);
-                    SnapshotManager.mergeObjectWithSnapshot(ent, obj, dataRow);
-                    obj.fetchFinished();
-                    //Swizzle object ids as the old "flattened" one isn't suitable for later
-                    // identification of this object
-                    ObjectId newOid = SnapshotManager.objectIdFromSnapshot(ent, dataRow);
-                    obj.setObjectId(newOid);
-                    DataContext.this.objectStore.changeObjectKey(this.oid, newOid);
-                    result.add(obj);
-                }
-            }
-            super.nextDataRows(query, result);
-        }
-    }
 }

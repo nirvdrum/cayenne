@@ -215,6 +215,10 @@ public class QueryUtils {
 		return ins;
 	}
 
+    /**
+     * @deprecated Since 1.1 FlattenedObjectId is deprecated, so this 
+     * method is deprecated too.
+     */
 	public static SelectQuery selectObjectForFlattenedObjectId(
 		QueryEngine e,
 		FlattenedObjectId oid) {
@@ -238,17 +242,12 @@ public class QueryUtils {
 
 		return sel;
 	}
+	
 	/** 
 	 * Creates and returns a select query that can be used to 
 	 * fetch an object given an ObjectId.
 	 */
 	public static SelectQuery selectObjectForId(ObjectId oid) {
-		if (oid instanceof FlattenedObjectId) {
-			throw new CayenneRuntimeException(
-				"Please use "
-					+ "selectObjectForFlattenedObjectId(QueryEngine, FlattenedObjectId)"
-					+ " to create a select query for a FlattenedObjectId");
-		}
 		SelectQuery sel = new SelectQuery();
 		sel.setRoot(oid.getObjClass());
 
