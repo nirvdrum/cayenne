@@ -62,28 +62,25 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.event.ObserverEvent;
 import org.objectstyle.cayenne.event.ObserverManager;
 
-public class DataContextTransactionEventHandler extends Object {
+public class DataContextTransactionEventHandler
+	extends Object
+	implements DataContextEventListener {
+
 	// shared instance that will be registered for DataContext events
 	private static DataContextTransactionEventHandler _instance = null;
-	private Collection _objectsToBeNotified;
 
-	private DataContextTransactionEventHandler() {
-		super();
-	}
-
-	public static void registerForDataContextEvents() {
+	public static synchronized void initialize() {
 		if (_instance == null) {
 			_instance = new DataContextTransactionEventHandler();
 
 			try {
 				ObserverManager mgr = ObserverManager.getDefaultManager();
-				mgr.addObserver(_instance, "dataContextWillCommit", DataContext.WILL_COMMIT);
-				mgr.addObserver(_instance, "dataContextDidCommit", DataContext.DID_COMMIT);
+				mgr.addObserver(_instance, DataContextEvent.class, "dataContextWillCommit", DataContext.WILL_COMMIT);
+				mgr.addObserver(_instance, DataContextEvent.class, "dataContextDidCommit", DataContext.DID_COMMIT);
 			}
-	
+
 			catch (NoSuchMethodException ex) {
 				// this can never happen, we define the appropriate methods in this class
 				throw new CayenneRuntimeException(ex);
@@ -91,8 +88,15 @@ public class DataContextTransactionEventHandler extends Object {
 		}
 	}
 
-	public void dataContextWillCommit(ObserverEvent event) {
-		DataContext ctx = (DataContext)event.getPublisher();
+	// holds per-manager collecton of objects
+	private Collection _objectsToBeNotified;
+
+	private DataContextTransactionEventHandler() {
+		super();
+	}
+
+	public void dataContextWillCommit(DataContextEvent event) {
+		DataContext ctx = (DataContext)event.getSource();
 
 		// build a list of objects that will be send the observerEvents and cache
 		// them here. Later, when notifying about a successful completion of a
@@ -101,18 +105,18 @@ public class DataContextTransactionEventHandler extends Object {
 		Iterator iter = _objectsToBeNotified.iterator();
 		while (iter.hasNext()) {
 			Object element = iter.next();
-			if (element instanceof DataObjectTransactionEvents) {
-				((DataObjectTransactionEvents)element).willCommit();
+			if (element instanceof DataObjectTransactionEventListener) {
+				((DataObjectTransactionEventListener)element).willCommit();
 			}		
 		}
 	}
 
-	public void dataContextDidCommit(ObserverEvent event) {
+	public void dataContextDidCommit(DataContextEvent event) {
 		Iterator iter = _objectsToBeNotified.iterator();
 		while (iter.hasNext()) {
 			Object element = iter.next();
-			if (element instanceof DataObjectTransactionEvents) {
-				((DataObjectTransactionEvents)element).didCommit();
+			if (element instanceof DataObjectTransactionEventListener) {
+				((DataObjectTransactionEventListener)element).didCommit();
 			}
 		}
 		

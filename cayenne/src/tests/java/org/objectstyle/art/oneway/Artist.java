@@ -1,9 +1,9 @@
 
 package org.objectstyle.art.oneway;
 
-import org.objectstyle.cayenne.access.event.DataObjectTransactionEvents;
+import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
 
-public class Artist extends _Artist implements DataObjectTransactionEvents
+public class Artist extends _Artist implements DataObjectTransactionEventListener
 {
 	private boolean _receivedWillCommit = false;
 	private boolean _receivedDidCommit = false;

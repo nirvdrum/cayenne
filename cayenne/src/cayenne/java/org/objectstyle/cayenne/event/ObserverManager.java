@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -90,16 +89,24 @@ public class ObserverManager extends Object {
 		_subjects = new HashMap();
 	}
 
-	public void addObserver(Object observer, String methodName, ObserverSubject subject) throws NoSuchMethodException {
+	public void addObserver(ObserverEventListener observer,
+							Class handledEventArgumentClass,
+							String methodName,
+							ObserverSubject subject)
+		throws NoSuchMethodException {
 		if (observer == null) {
-			throw new IllegalArgumentException("observer may not be null");
+			throw new IllegalArgumentException("observer must not be null");
+		}
+
+		if (handledEventArgumentClass == null) {
+			throw new IllegalArgumentException("event class must not be null");
 		}
 
 		if (subject == null) {
-			throw new IllegalArgumentException("subject may not be null");
+			throw new IllegalArgumentException("subject must not be null");
 		}
 
-		Method method = observer.getClass().getMethod(methodName, new Class[] { ObserverEvent.class });		
+		Method method = observer.getClass().getMethod(methodName, new Class[] { handledEventArgumentClass });		
 		ObserverInvocation inv = new ObserverInvocation(observer, method);
 
 		Set observersForSubject = this.observersForSubject(subject);
@@ -110,19 +117,12 @@ public class ObserverManager extends Object {
 
 		observersForSubject.add(inv);
 	}
-	
-	public void postObserverEvent(ObserverSubject subject, Object sender) {
-		this.postObserverEvent(subject, sender, null);
-	}
 
-	public void postObserverEvent(ObserverSubject subject, Object sender, Map info) {
+	public void postObserverEvent(ObserverSubject subject, ObserverEvent event) {
 		// get current observers for subject
 		Set observersForEvent = this.observersForSubject(subject);
 
 		if (observersForEvent != null) {
-			// create only one ObserverEvent that will be reused for all Observers
-			ObserverEvent event = new ObserverEvent(sender, info);
-
 			// used to collect all invalid invocations in order to remove
 			// them at the end of this posting cycle
 			List invalidInvocations = null;

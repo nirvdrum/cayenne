@@ -137,7 +137,7 @@ public class ObserverInvocationTst extends CayenneTestCase {
 		System.gc();
 		System.gc();
 
-		Assert.assertEquals(false, inv.fire(new ObserverEvent(this, null)));
+		Assert.assertEquals(false, inv.fire(new ObserverEvent(this)));
 	}
 	
 	// these methods exist for the test of Invocation equality

@@ -54,10 +54,11 @@
  *
  */ 
 
-package org.objectstyle.cayenne.access.event;
+package org.objectstyle.cayenne.event;
 
-public interface DataObjectTransactionEvents {
-	public void willCommit();
-	public void didCommit();
+import java.util.EventListener;
+
+public interface ObserverEventListener extends EventListener {
+
 }
 

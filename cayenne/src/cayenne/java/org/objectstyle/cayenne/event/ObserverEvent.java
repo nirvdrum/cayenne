@@ -56,37 +56,19 @@
 
 package org.objectstyle.cayenne.event;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.EventObject;
 
 /**
- * This class encapsulates the information that is passed from the ObserverManager
- * to the Observer.
+ * Common superclass for events passed from the ObserverManager to Observers.
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstätte
  */
 
-public class ObserverEvent extends Object {
-	private Object _publisher;
-	private Map _info;
+public class ObserverEvent extends EventObject {
 
-	private ObserverEvent() {
-		super();
+	public ObserverEvent(Object src) {
+		super(src);
 	}	
-
-	public ObserverEvent(Object sender, Map info) {
-		this();
-		_publisher = sender;
-		_info = (info != null ? info : Collections.EMPTY_MAP);
-	}
-
-	public Object getPublisher() {
-		return _publisher;
-	}
-
-	public Map getInfo() {
-		return _info;
-	}
 }
 

@@ -76,7 +76,7 @@ public class ObserverSubject extends Object {
 	
 	public static ObserverSubject getSubject(Class sender, String subjectName) {
 		if (sender == null) {
-			throw new IllegalArgumentException("sender must not be null");
+			throw new IllegalArgumentException("sender class must not be null");
 		}
 
 		if ((subjectName == null) || (subjectName.length() == 0)) {
