@@ -92,7 +92,7 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
 
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
-        FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches, null);
         FlatPrefetchResolver resolver = new FlatPrefetchResolver(context, false, false);
 
         List objects = resolver.resolveObjectTree(tree, rows);
@@ -133,7 +133,7 @@ public class FlatPrefetchResolverTst extends CayenneTestCase {
 
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
-        FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchTreeNode tree = new FlatPrefetchTreeNode(paint, prefetches, null);
         FlatPrefetchResolver resolver = new FlatPrefetchResolver(context, false, false);
 
         List objects = resolver.resolveObjectTree(tree, rows);

@@ -1,10 +1,14 @@
 package org.objectstyle.cayenne.access.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.collections.Closure;
+import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -21,7 +25,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
 
-        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches, null);
         assertEquals("", paintNode.buildPrefix(new StringBuffer()).toString());
 
         FlatPrefetchTreeNode artistNode = (FlatPrefetchTreeNode) paintNode
@@ -40,7 +44,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
 
-        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches, null);
         assertEquals("", paintNode.buildPrefix(new StringBuffer()).toString());
 
         FlatPrefetchTreeNode artistNode = (FlatPrefetchTreeNode) paintNode
@@ -70,7 +74,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
 
-        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchTreeNode paintNode = new FlatPrefetchTreeNode(paint, prefetches, null);
         assertEquals("PAINTING_TITLE", paintNode.sourceForTarget("PAINTING_TITLE"));
         assertEquals("ARTIST_ID", paintNode.sourceForTarget("ARTIST_ID"));
 
@@ -91,7 +95,7 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
         DataContext context = createDataContext();
         ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
 
-        FlatPrefetchTreeNode node = new FlatPrefetchTreeNode(paint, prefetches);
+        FlatPrefetchTreeNode node = new FlatPrefetchTreeNode(paint, prefetches, null);
 
         assertNotNull(node.getChildren());
         assertEquals(1, node.getChildren().size());
@@ -101,5 +105,62 @@ public class FlatPrefetchTreeNodeTst extends CayenneTestCase {
                 .next();
 
         assertSame(node, child.getParent());
+    }
+
+    public void testPrefetchBlocking1() {
+        Collection prefetches = Arrays.asList(new Object[] {
+                "toArtist", "toArtist.groupArray"
+        });
+
+        DataContext context = createDataContext();
+        ObjEntity paint = context.getEntityResolver().lookupObjEntity(Painting.class);
+
+        Expression q1 = Expression.fromString("toArtist.artistName = 'aaa'");
+        FlatPrefetchTreeNode n1 = new FlatPrefetchTreeNode(paint, prefetches, q1);
+        Collection nonPhantom1 = new NonPhanotomFilter().filterNonPhantom(n1);
+        assertEquals(2, nonPhantom1.size());
+
+        Expression q2 = Expression.fromString("toArtist.groupArray = 'aaa'");
+        FlatPrefetchTreeNode n2 = new FlatPrefetchTreeNode(paint, prefetches, q2);
+        Collection nonPhantom2 = new NonPhanotomFilter().filterNonPhantom(n2);
+        assertEquals(1, nonPhantom2.size());
+    }
+
+    public void testPrefetchBlocking2() {
+        Collection prefetches = Arrays.asList(new Object[] {
+                "paintingArray", "paintingArray.toPaintingInfo"
+        });
+
+        DataContext context = createDataContext();
+        ObjEntity artist = context.getEntityResolver().lookupObjEntity(Artist.class);
+
+        Expression q1 = Expression.fromString("groupArray = 'aaa'");
+        FlatPrefetchTreeNode n1 = new FlatPrefetchTreeNode(artist, prefetches, q1);
+        Collection nonPhantom1 = new NonPhanotomFilter().filterNonPhantom(n1);
+        assertEquals(2, nonPhantom1.size());
+
+        Expression q2 = Expression.fromString("paintingArray.paintingTitle = 'aaa'");
+        FlatPrefetchTreeNode n2 = new FlatPrefetchTreeNode(artist, prefetches, q2);
+        Collection nonPhantom2 = new NonPhanotomFilter().filterNonPhantom(n2);
+        assertEquals(1, nonPhantom2.size());
+    }
+
+    static class NonPhanotomFilter implements Closure {
+
+        Collection nonPhantom;
+
+        public void execute(Object object) {
+            FlatPrefetchTreeNode node = (FlatPrefetchTreeNode) object;
+            if (!node.isPhantom()) {
+                nonPhantom.add(node);
+            }
+        }
+
+        Collection filterNonPhantom(FlatPrefetchTreeNode root) {
+            nonPhantom = new ArrayList();
+            root.executeDepthFirst(this);
+            nonPhantom.remove(root);
+            return nonPhantom;
+        }
     }
 }

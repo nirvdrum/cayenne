@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collection;
 
-import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
@@ -150,13 +149,9 @@ public class DataContextSelectActionTst extends CayenneTestCase {
         DataContext context = createDataContext();
         DataContextSelectAction action = new DataContextSelectAction(context);
 
-        Expression artistExp = ExpressionFactory.matchExp("artistName", "artist1");
-        SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
-        Artist artist1 = (Artist) context.performQuery(artistQuery).get(0);
-
         // find the painting not matching the artist (this is the case where such prefetch
         // at least makes sense)
-        Expression exp = ExpressionFactory.noMatchExp("toArtist", artist1);
+        Expression exp = ExpressionFactory.noMatchExp("toArtist", new Object());
 
         SelectQuery q = new SelectQuery(Painting.class, exp);
         q.addPrefetch("toArtist");

@@ -65,8 +65,10 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -190,9 +192,19 @@ public class SelectObserver extends DefaultOperationObserver {
             GenericSelectQuery rootSelect = (GenericSelectQuery) rootQuery;
             Collection jointPrefetches = rootSelect.getJointPrefetches();
             if (!jointPrefetches.isEmpty()) {
+
+                // certain qualifiers conflict with joint prefetches, so we
+                // might need to disable some prefetched to-many arrays from being
+                // resolved. This is somewhat of a hack in search of a better solution.
+                Expression qualifier = null;
+                if (rootSelect instanceof QualifiedQuery) {
+                    qualifier = ((QualifiedQuery) rootSelect).getQualifier();
+                }
+
                 FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
                         entity,
-                        jointPrefetches);
+                        jointPrefetches,
+                        qualifier);
 
                 FlatPrefetchResolver flatPrefetchResolver = new FlatPrefetchResolver(
                         dataContext,

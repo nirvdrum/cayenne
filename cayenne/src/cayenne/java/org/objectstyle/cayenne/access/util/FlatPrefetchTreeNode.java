@@ -58,7 +58,9 @@ package org.objectstyle.cayenne.access.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +69,14 @@ import java.util.TreeMap;
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -89,6 +94,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Andrei Adamchik
  */
 class FlatPrefetchTreeNode {
+
+    final static Logger logObj = Logger.getLogger(FlatPrefetchTreeNode.class);
 
     // tree linking
     FlatPrefetchTreeNode parent;
@@ -108,11 +115,18 @@ class FlatPrefetchTreeNode {
     Map resolved;
 
     /**
-     * Creates new FlatPrefetchTreeNode.
+     * Creates new FlatPrefetchTreeNode. Last argument is used to block certain to-many
+     * prefetches that conflict with qualifier expression. This is somewhat of a hack in
+     * search of a better solution.
      */
-    FlatPrefetchTreeNode(ObjEntity entity, Collection jointPrefetchKeys) {
+    FlatPrefetchTreeNode(ObjEntity entity, Collection jointPrefetchKeys,
+            Expression queryQualifier) {
         this();
-        buildTree(entity, jointPrefetchKeys);
+
+        this.entity = entity;
+
+        Collection qualifierKeys = extractQualifierKeys(queryQualifier);
+        buildTree(jointPrefetchKeys, qualifierKeys);
     }
 
     /**
@@ -128,6 +142,19 @@ class FlatPrefetchTreeNode {
 
         this.partitionedByParent = MapUtils.lazyMap(new HashMap(), listFactory);
         this.resolved = new HashMap();
+    }
+
+    /**
+     * Returns a collection of qualifier DB PATH keys.
+     */
+    private Collection extractQualifierKeys(Expression qualifier) {
+        if (qualifier == null) {
+            return Collections.EMPTY_SET;
+        }
+
+        DBPathExtractor extractor = new DBPathExtractor(entity);
+        qualifier.traverse(extractor);
+        return extractor.getPaths();
     }
 
     ObjEntity getEntity() {
@@ -157,6 +184,14 @@ class FlatPrefetchTreeNode {
 
     Collection getChildren() {
         return children;
+    }
+
+    /**
+     * Finds
+     */
+    // TODO: there should be a better solution..
+    void disableNodesConflictingWithQualifier(Expression qualifier) {
+
     }
 
     /**
@@ -204,7 +239,7 @@ class FlatPrefetchTreeNode {
 
     void connectToParent(DataObject object, DataObject parent) {
         if (parent != null && categorizeByParent) {
-            // TODO: this leaves a hole - duplicates 
+            // TODO: this leaves a hole - duplicates
             List peers = (List) partitionedByParent.get(parent);
             peers.add(object);
         }
@@ -271,26 +306,25 @@ class FlatPrefetchTreeNode {
      * Builds a prefetch tree for a cartesian product of joined DataRows from multiple
      * entities.
      */
-    private void buildTree(ObjEntity entity, Collection jointPrefetchKeys) {
+    private void buildTree(Collection jointPrefetchKeys, Collection qualifierDBKeys) {
 
         this.phantom = false;
-        this.entity = entity;
 
         // assemble tree...
-        Iterator i1 = jointPrefetchKeys.iterator();
-        while (i1.hasNext()) {
-            String prefetchPath = (String) i1.next();
-            addChildWithPath(entity, prefetchPath);
+        Iterator it = jointPrefetchKeys.iterator();
+        while (it.hasNext()) {
+            String prefetchPath = (String) it.next();
+            addChildWithPath(prefetchPath, qualifierDBKeys);
         }
 
         // tree is complete; now create descriptors of non-phantom nodes
         Closure c = new Closure() {
 
             public void execute(Object input) {
-                FlatPrefetchTreeNode resolver = (FlatPrefetchTreeNode) input;
-                if (!resolver.isPhantom()) {
-                    resolver.buildRowMapping();
-                    resolver.buildPKIndex();
+                FlatPrefetchTreeNode node = (FlatPrefetchTreeNode) input;
+                if (!node.isPhantom()) {
+                    node.buildRowMapping();
+                    node.buildPKIndex();
                 }
             }
         };
@@ -431,10 +465,9 @@ class FlatPrefetchTreeNode {
     }
 
     /**
-     * Returns a collection of all non-phantom nodes in the tree. Traversal starts from
-     * this node, proceeding to its children in a depth-first manner.
+     * Walks the tree in depth-first manner, executing provided closure with each node.
      */
-    private void executeDepthFirst(Closure closure) {
+    void executeDepthFirst(Closure closure) {
 
         closure.execute(this);
 
@@ -451,24 +484,62 @@ class FlatPrefetchTreeNode {
      * Processes path, linking all intermediate children to each other.
      */
     private FlatPrefetchTreeNode addChildWithPath(
-            ObjEntity rootEntity,
-            String prefetchPath) {
-        Iterator it = rootEntity.resolvePathComponents(prefetchPath);
+            String prefetchPath,
+            Collection qualifierDBKeys) {
+
+        Iterator it = entity.resolvePathComponents(prefetchPath);
 
         if (!it.hasNext()) {
             return null;
         }
 
+        ObjRelationship r = null;
         FlatPrefetchTreeNode lastChild = this;
 
         while (it.hasNext()) {
-            ObjRelationship r = (ObjRelationship) it.next();
+            r = (ObjRelationship) it.next();
             lastChild = lastChild.addChild(r);
         }
 
-        // mark last node as non-phantom
-        lastChild.setPhantom(false);
+        // mark last node as non-phantom if qualifier keys rules don't block it
+        boolean block = shouldBlockPrefetch(prefetchPath, r, qualifierDBKeys);
+
+        lastChild.setPhantom(block);
         return lastChild;
+    }
+
+    // a hack for blocking prefetches on to many with conflicting qualifier that would
+    // otherwise result in incorrect to-many list.
+    private boolean shouldBlockPrefetch(
+            String prefetchKey,
+            ObjRelationship lastRelationship,
+            Collection qualifierDBKeys) {
+
+        if (qualifierDBKeys.isEmpty()) {
+            return false;
+        }
+
+        if (lastRelationship == null || !lastRelationship.isToMany()) {
+            return false;
+        }
+
+        Expression dbPath = entity.translateToDbPath(Expression.fromString(prefetchKey));
+        String path = dbPath.getOperand(0).toString();
+
+        Iterator it = qualifierDBKeys.iterator();
+        while (it.hasNext()) {
+            String next = (String) it.next();
+            if (next.startsWith(path)) {
+                logObj.warn("*** Joint prefetch '"
+                        + path
+                        + "' was ignored as it conflicts with qualifier path '"
+                        + next
+                        + "'. Consider using regular prefetch.");
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -501,5 +572,37 @@ class FlatPrefetchTreeNode {
         }
 
         return child;
+    }
+
+    final class DBPathExtractor extends TraversalHelper {
+
+        Collection paths;
+        ObjEntity rootEntity;
+
+        DBPathExtractor(ObjEntity rootEntity) {
+            this.rootEntity = rootEntity;
+        }
+
+        Collection getPaths() {
+            return paths != null ? paths : Collections.EMPTY_SET;
+        }
+
+        public void startNode(Expression node, Expression parentNode) {
+            Expression dbPath;
+            if (node.getType() == Expression.OBJ_PATH) {
+                dbPath = rootEntity.translateToDbPath(node);
+            }
+            else if (node.getType() == Expression.DB_PATH) {
+                dbPath = node;
+            }
+            else {
+                return;
+            }
+
+            if (paths == null) {
+                paths = new HashSet();
+            }
+            paths.add(dbPath.getOperand(0));
+        }
     }
 }
