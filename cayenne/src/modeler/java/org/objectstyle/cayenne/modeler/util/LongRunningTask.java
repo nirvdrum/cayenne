@@ -67,7 +67,14 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * A base class for monitoring progress of long running tasks.
+ * A base class for monitoring progress of long running tasks. It can runshowing the exact
+ * percentage of the task progress or in "indeterminate" mode.
+ * <p>
+ * <i>Warning: If the task started via "startAndWait()", caller must ensure that she is
+ * not running in the Swing EventDispatchThread, otherwise an exception is thrown, as the
+ * EvenDispatchThread will be blocked, preventing LongRunningTask from showing progress
+ * dialog. </i>
+ * </p>
  * 
  * @author Andrei Adamchik
  */
@@ -117,6 +124,10 @@ public abstract class LongRunningTask {
         notifyAll();
     }
 
+    /**
+     * Configures the task to run in a separate thread, and immediately exits the method.
+     * This method is allowed to be invoked from EventDispatchThread.
+     */
     public void start() {
         // prepare...
         setCanceled(false);
@@ -188,7 +199,7 @@ public abstract class LongRunningTask {
      * Updates current state of the progress dialog.
      */
     protected void updateProgress() {
-        if(isCanceled()) {
+        if (isCanceled()) {
             stop();
             return;
         }
