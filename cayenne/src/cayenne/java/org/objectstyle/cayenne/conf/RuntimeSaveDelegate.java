@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.conf;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -140,7 +141,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         List maps = new ArrayList(findDomain(domainName).getDataMaps());
 
         // sort to satisfy dependencies
-        DataMap.sortMaps(maps);
+        Collections.sort(maps, new DataMap.MapComparator());
 
         return new TransformIterator(maps.iterator(), tr);
     }

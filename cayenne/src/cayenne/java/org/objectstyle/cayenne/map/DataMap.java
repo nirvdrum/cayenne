@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.apache.log4j.Logger;
@@ -85,22 +86,30 @@ public class DataMap {
     /** 
      * Contains a list of DataMaps that are used by this map.
      */
-    protected List dependencies = new ArrayList();
+	protected List dependencies = new ArrayList();
+	protected List dependenciesRef = Collections.unmodifiableList(dependencies);
 
     /** 
      * ObjEntities representing the data object classes.
      * The name of ObjEntity serves as a key. 
      */
     private CayenneMap objEntityMap = new CayenneMap(this);
-
-    /** DbEntities representing metadata for individual database tables.
-      * The name of DbEntity (which is also a database table
-      * name) serves as a key. */
-    private CayenneMap dbEntityMap = new CayenneMap(this);
+	private SortedMap objEntityMapRef = Collections.unmodifiableSortedMap(objEntityMap);
+	private Set objEntityNamesRef = Collections.unmodifiableSet(objEntityMap.keySet());
+	private Collection objEntityValuesRef = Collections.unmodifiableCollection(objEntityMap.values());
 
     /**
-     * Sorts an array of DataMaps in the right save order to satisfy inter-map
-     * dependencies.
+     * DbEntities representing metadata for individual database tables.
+     * The name of DbEntity (which is also a database table name) serves
+     * as a key.
+     */
+    private CayenneMap dbEntityMap = new CayenneMap(this);
+    private SortedMap dbEntityMapRef = Collections.unmodifiableSortedMap(dbEntityMap);
+
+    /**
+     * Sorts an array of DataMaps in the right save order to satisfy
+     * inter-map dependencies.
+	 * @deprecated Since 1.0 Beta1; use Collections.sort(List, Comparator) instead.
      */
     public static void sortMaps(List maps) {
         Collections.sort(maps, new MapComparator());
@@ -111,7 +120,9 @@ public class DataMap {
     	this("unnamed");
     }
 
-    /** Creates an empty DataMap and assigns it a <code>name</code>. */
+    /**
+     * Creates an empty DataMap and assigns it a <code>name</code>.
+     */
     public DataMap(String mapName) {
     	super();
         this.setName(mapName);
@@ -144,7 +155,7 @@ public class DataMap {
     }
 
     public List getDependencies() {
-        return Collections.unmodifiableList(dependencies);
+        return dependenciesRef;
     }
 
     /**
@@ -214,31 +225,37 @@ public class DataMap {
         }
     }
 
-    /** Returns "location" property value.
-      * Location is abstract and treated differently
-      * by different loaders. See Configuration class
-      * for more details on how location is resolved. */
+    /**
+     * Returns "location" property value.
+     * Location is abstract and treated differently
+     * by different loaders. See Configuration class
+     * for more details on how location is resolved.
+     */
     public String getLocation() {
         return location;
     }
 
-    /** Sets "location" property. Usually location is set by
-      * map loader when map is created from a XML file,
-      * or by a GUI tool when such a tool wants to change where 
-      * the map should be saved. */
+    /**
+     * Sets "location" property. Usually location is set by
+     * map loader when map is created from a XML file,
+     * or by a GUI tool when such a tool wants to change where 
+     * the map should be saved.
+     */
     public void setLocation(String location) {
         this.location = location;
     }
 
     public SortedMap getObjEntityMap() {
-        return Collections.unmodifiableSortedMap(objEntityMap);
+        return objEntityMapRef;
     }
 
-    /** Returns sorted unmodifiable map of DbEntities
-      * contained in this DataMap. Keys are DbEntity
-      * names (same as database table names). */
+    /**
+     * Returns sorted unmodifiable map of DbEntities
+     * contained in this DataMap. Keys are DbEntity
+     * names (same as database table names).
+     */
     public SortedMap getDbEntityMap() {
-        return Collections.unmodifiableSortedMap(dbEntityMap);
+    	return dbEntityMapRef;
     }
 
     /** 
@@ -265,85 +282,90 @@ public class DataMap {
         dbEntityMap.put(dbEntity.getName(), dbEntity);
     }
 
-    /**
-     * Returns a by copy array of object entities.
-     * @deprecated Since 1.0 Beta1; use #getObjEntitiesAsList() instead.
-     */
-    public ObjEntity[] getObjEntities() {
-        Collection objEnts = getObjEntityMap().values();
-        ObjEntity[] immutableEnts = null;
-        if (objEnts == null || objEnts.size() == 0) {
-            immutableEnts = new ObjEntity[0];
-        } else {
-            immutableEnts = new ObjEntity[objEnts.size()];
-            objEnts.toArray(immutableEnts);
-        }
-        return immutableEnts;
-    }
+	/**
+	 * Returns a list of ObjEntities stored in this DataMap.
+	 * @!deprecated Since 1.0 Beta1; use #getObjEntities() instead.
+	 */
+	public List getObjEntitiesAsList() {
+		return this.getObjEntitiesAsList(false);
+	}
 
-    /**
-     * Return an array of database entities (by copy)
-     * @deprecated Since 1.0 Beta1; use #getDbEntitiesAsList() instead.
-     */
-	public DbEntity[] getDbEntities() {
-        Collection dbEnts = getDbEntityMap().values();
-        DbEntity[] immutableEnts = null;
-        if (dbEnts == null || dbEnts.size() == 0) {
-            immutableEnts = new DbEntity[0];
-        } else {
-            immutableEnts = new DbEntity[dbEnts.size()];
-            dbEnts.toArray(immutableEnts);
-        }
-        return immutableEnts;
-    }
+	/**
+	 * Returns all ObjEntities in this DataMap, including entities
+	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+	 * @!deprecated Since 1.0 Beta1; use #getObjEntities(boolean) instead.
+	 */
+	public List getObjEntitiesAsList(boolean includeDeps) {
+		List ents = new ArrayList(objEntityMap.values());
 
-    /** Returns a list of ObjEntities stored in this DataMap. */
-    public List getObjEntitiesAsList() {
-        return getObjEntitiesAsList(false);
-    }
+		if (includeDeps) {
+			Iterator it = this.getDependencies().iterator();
+			while (it.hasNext()) {
+				DataMap dep = (DataMap) it.next();
+				// using "false" to avoid problems with circular dependencies
+				ents.addAll(dep.getObjEntitiesAsList(false));
+			}
+		}
 
-    /**
-     * Returns all ObjEntities in this DataMap, including entities
-     * from dependent maps if <code>includeDeps</code> is <code>true</code>.
-     */
-    public List getObjEntitiesAsList(boolean includeDeps) {
-        List ents = new ArrayList(objEntityMap.values());
+		return ents;
+	}
 
-        if (includeDeps) {
-            Iterator it = dependencies.iterator();
-            while (it.hasNext()) {
-                DataMap dep = (DataMap) it.next();
-                // using "false" to avoid problems with circular dependencies
-                ents.addAll(dep.getObjEntitiesAsList(false));
-            }
-        }
-        return ents;
-    }
+	/**
+	 * Returns a list of ObjEntities stored in this DataMap.
+	 */
+	public Collection getObjEntities() {
+		return this.getObjEntities(false);
+	}
 
-    /**
-     * Returns all DbEntities in this DataMap.
-     */
-    public List getDbEntitiesAsList() {
-        return getDbEntitiesAsList(false);
-    }
+	/**
+	 * Returns all ObjEntities in this DataMap, including entities
+	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+	 */
+	public Collection getObjEntities(boolean includeDeps) {
+		throw new UnsupportedOperationException("NYI!");
+	}
 
-    /**
-     * Returns all DbEntities in this DataMap, including entities
-     * from dependent maps if <code>includeDeps</code> is <code>true</code>.
-     */
-    public List getDbEntitiesAsList(boolean includeDeps) {
-        List ents = new ArrayList(dbEntityMap.values());
+	/**
+	 * Returns all DbEntities in this DataMap.
+	 * @!deprecated Since 1.0 Beta1; use #getDbEntities() instead.
+	 */
+	public List getDbEntitiesAsList() {
+		return this.getDbEntitiesAsList(false);
+	}
 
-        if (includeDeps) {
-            Iterator it = dependencies.iterator();
-            while (it.hasNext()) {
-                DataMap dep = (DataMap) it.next();
-                // using "false" to avoid problems with circular dependencies
-                ents.addAll(dep.getDbEntitiesAsList(false));
-            }
-        }
-        return ents;
-    }
+	/**
+	 * Returns all DbEntities in this DataMap, including entities
+	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+	 * @!deprecated Since 1.0 Beta1; use #getDbEntities(boolean) instead.
+	 */
+	public List getDbEntitiesAsList(boolean includeDeps) {
+		List ents = new ArrayList(dbEntityMap.values());
+
+		if (includeDeps) {
+			Iterator it = this.getDependencies().iterator();
+			while (it.hasNext()) {
+				DataMap dep = (DataMap) it.next();
+				// using "false" to avoid problems with circular dependencies
+				ents.addAll(dep.getDbEntitiesAsList(false));
+			}
+		}
+		return ents;
+	}
+
+	/**
+	 * Returns all DbEntities in this DataMap.
+	 */
+	public Collection getDbEntities() {
+		return this.getDbEntities(false);
+	}
+
+	/**
+	 * Returns all DbEntities in this DataMap, including entities
+	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+	 */
+	public Collection getDbEntities(boolean includeDeps) {
+		throw new UnsupportedOperationException("NYI!");
+	}
 
     /**
      * Returns a list of DbEntity names.
@@ -352,11 +374,10 @@ public class DataMap {
         List ents = new ArrayList(dbEntityMap.keySet());
 
         if (includeDeps) {
-            Iterator it = dependencies.iterator();
+            Iterator it = this.getDependencies().iterator();
             while (it.hasNext()) {
                 DataMap dep = (DataMap) it.next();
-                // using "false" to avoid problems with circular 
-                // dependencies
+                // using "false" to avoid problems with circular dependencies
                 ents.addAll(dep.getDbEntityNames(false));
             }
         }
@@ -368,20 +389,18 @@ public class DataMap {
      * dependencies will be searched.
      */
     public DbEntity getDbEntity(String dbEntityName) {
-        return getDbEntity(dbEntityName, false);
+        return this.getDbEntity(dbEntityName, false);
     }
 
-    public DbEntity getDbEntity(
-        String dbEntityName,
-        boolean searchDependencies) {
-        DbEntity ent = (DbEntity) dbEntityMap.get(dbEntityName);
+    public DbEntity getDbEntity(String dbEntityName, boolean searchDependencies) {
+        DbEntity ent = (DbEntity)dbEntityMap.get(dbEntityName);
         if (ent != null || !searchDependencies) {
             return ent;
         }
 
-        Iterator it = dependencies.iterator();
+        Iterator it = this.getDependencies().iterator();
         while (it.hasNext()) {
-            DataMap dep = (DataMap) it.next();
+            DataMap dep = (DataMap)it.next();
             // using "false" to avoid problems with circular dependencies
             DbEntity e = dep.getDbEntity(dbEntityName, false);
             if (e != null) {
@@ -391,20 +410,20 @@ public class DataMap {
         return null;
     }
 
-    /** Get ObjEntity by its name. */
+    /**
+     * Get ObjEntity by its name.
+     */
     public ObjEntity getObjEntity(String objEntityName) {
         return (ObjEntity) objEntityMap.get(objEntityName);
     }
 
-    public ObjEntity getObjEntity(
-        String objEntityName,
-        boolean searchDependencies) {
+    public ObjEntity getObjEntity(String objEntityName, boolean searchDependencies) {
         ObjEntity ent = (ObjEntity) objEntityMap.get(objEntityName);
         if (ent != null || !searchDependencies) {
             return ent;
         }
 
-        Iterator it = dependencies.iterator();
+        Iterator it = this.getDependencies().iterator();
         while (it.hasNext()) {
             DataMap dep = (DataMap) it.next();
             // using "false" to avoid problems with circular dependencies
@@ -417,24 +436,23 @@ public class DataMap {
     }
 
     /** 
-     * Returns a list of ObjEntities mapped to this DbEntity.
+     * Returns a list of ObjEntities mapped to the given DbEntity.
      */
     public List getMappedEntities(DbEntity dbEntity) {
-        List list = new ArrayList();
-
         if (dbEntity == null) {
             return null;
         }
 
-        Iterator iter = getObjEntitiesAsList(true).iterator();
+		List result = new ArrayList();
+        Iterator iter = this.getObjEntitiesAsList(true).iterator();
         while (iter.hasNext()) {
             ObjEntity objEnt = (ObjEntity) iter.next();
             if (objEnt.getDbEntity() == dbEntity) {
-                list.add(objEnt);
+                result.add(objEnt);
             }
         }
 
-        return list;
+        return result;
     }
 
     /** "Dirty" remove of the DbEntity from the data map. */
@@ -528,8 +546,10 @@ public class DataMap {
         }
     }
 
-    /** Used as a comparator to infer DataMap ordering */
-    static final class MapComparator implements Comparator {
+    /**
+     * Used as a comparator to infer DataMap ordering.
+     */
+    public static final class MapComparator implements Comparator {
 
         public final int compare(Object o1, Object o2) {
             DataMap m1 = (DataMap) o1;
