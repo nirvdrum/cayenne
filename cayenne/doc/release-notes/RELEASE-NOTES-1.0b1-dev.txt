@@ -14,3 +14,6 @@ relationship with a Nullify delete rule, where the inverse relationship is
 mandatory (based on mandatory attributes).
 
 2. Added Validation menu item on the File menu in the modeller.
+
+3. Initial support for PostgreSQL and HSQLDB.
+
