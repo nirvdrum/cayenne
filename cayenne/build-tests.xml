@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ========================================== -->
-<!-- Core Cayenne subproject buildfile.         -->
+<!-- Cayenne tests subproject buildfile.        -->
 <!-- ========================================== -->
 <project name="cayenne-tests" default="compile">
 	<property name="test.dist.src" value="${dist}/src/tests"/>
