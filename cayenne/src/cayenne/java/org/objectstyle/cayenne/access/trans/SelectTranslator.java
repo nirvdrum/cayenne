@@ -136,7 +136,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         buildGroupByList();
 
         // build ORDER BY
-        OrderingTranslator orderingTranslator = new OrderingTranslator(this); 
+        OrderingTranslator orderingTranslator = new OrderingTranslator(this);
         String orderByStr = orderingTranslator.doTranslation();
 
         // assemble
@@ -148,12 +148,11 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         }
 
         List selectColumnExpList = new ArrayList();
-        
-        for (int i = 0; i < columnList.size(); i++)
-        {
+
+        for (int i = 0; i < columnList.size(); i++) {
             selectColumnExpList.add(getColumn(i));
         }
-        
+
         // append any column expressions used in the order by if this query 
         // uses the DISTINCT modifier
         if (forceDistinct || getSelectQuery().isDistinct()) {
@@ -164,10 +163,11 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                     selectColumnExpList.add(orderByColumnExp);
             }
         }
-        
+
         // append columns (unroll the loop's first element)
         int columnCount = selectColumnExpList.size();
-        queryBuf.append((String) selectColumnExpList.get(0)); // assume there is at least 1 element
+        queryBuf.append((String) selectColumnExpList.get(0));
+        // assume there is at least 1 element
         for (int i = 1; i < columnCount; i++) {
             queryBuf.append(", ");
             queryBuf.append((String) selectColumnExpList.get(i));
@@ -204,7 +204,8 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 queryBuf.append(" AND (");
                 queryBuf.append(parentQualifierStr);
                 queryBuf.append(")");
-            } else {
+            }
+            else {
                 hasWhere = true;
                 queryBuf.append(" WHERE ");
                 queryBuf.append(parentQualifierStr);
@@ -231,12 +232,14 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             if (hasGroupBy) {
                 queryBuf.append(" HAVING ");
                 queryBuf.append(qualifierStr);
-            } else {
+            }
+            else {
                 if (hasWhere) {
                     queryBuf.append(" AND (");
                     queryBuf.append(qualifierStr);
                     queryBuf.append(")");
-                } else {
+                }
+                else {
                     hasWhere = true;
                     queryBuf.append(" WHERE ");
                     queryBuf.append(qualifierStr);
@@ -286,18 +289,18 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             List custAttrNames = q.getCustomDbAttributes();
             int len = custAttrNames.size();
             for (int i = 0; i < len; i++) {
-                Attribute attr =
-                    dbe.getAttribute((String) custAttrNames.get(i));
+                Attribute attr = dbe.getAttribute((String) custAttrNames.get(i));
                 if (attr == null) {
                     throw new CayenneRuntimeException(
                         "Attribute does not exist: " + custAttrNames.get(i));
                 }
                 columnList.add(attr);
             }
-        } else {
+        }
+        else {
             // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
-			ObjEntity oe = getRootEntity();
-			
+            ObjEntity oe = getRootEntity();
+
             // ObjEntity attrs
             Iterator attrs = oe.getAttributes().iterator();
             while (attrs.hasNext()) {
@@ -308,12 +311,12 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                     if (pathPart instanceof DbRelationship) {
                         DbRelationship rel = (DbRelationship) pathPart;
                         dbRelationshipAdded(rel);
-                    } else if (pathPart instanceof DbAttribute) {
+                    }
+                    else if (pathPart instanceof DbAttribute) {
                         DbAttribute dbAttr = (DbAttribute) pathPart;
                         if (dbAttr == null) {
                             throw new CayenneRuntimeException(
-                                "ObjAttribute has no DbAttribute: "
-                                    + oa.getName());
+                                "ObjAttribute has no DbAttribute: " + oa.getName());
                         }
                         columnList.add(dbAttr);
                     }
@@ -324,8 +327,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             Iterator rels = oe.getRelationships().iterator();
             while (rels.hasNext()) {
                 ObjRelationship rel = (ObjRelationship) rels.next();
-                DbRelationship dbRel =
-                    (DbRelationship) rel.getDbRelationships().get(0);
+                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
                 List joins = dbRel.getJoins();
                 int jLen = joins.size();
@@ -408,7 +410,8 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
 
             if (andFlag) {
                 queryBuf.append(" AND ");
-            } else {
+            }
+            else {
                 andFlag = true;
             }
 
@@ -439,8 +442,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             dbRelList.add(rel);
 
             // add alias for the destination table of the relationship
-            String newAlias =
-                newAliasForTable((DbEntity) rel.getTargetEntity());
+            String newAlias = newAliasForTable((DbEntity) rel.getTargetEntity());
             aliasLookup.put(rel, newAlias);
         }
     }
@@ -476,7 +478,8 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         int entIndex = tableList.indexOf(ent);
         if (entIndex >= 0) {
             return (String) aliasList.get(entIndex);
-        } else {
+        }
+        else {
             StringBuffer msg = new StringBuffer();
             msg
                 .append("Alias not found, DbEntity: '")
@@ -489,9 +492,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                     (tableList.get(i) != null)
                         ? ((DbEntity) tableList.get(i)).getName()
                         : "<null entity>";
-                msg.append("\n").append(aliasList.get(i)).append(
-                    " => ").append(
-                    dbeName);
+                msg.append("\n").append(aliasList.get(i)).append(" => ").append(dbeName);
             }
 
             throw new CayenneRuntimeException(msg.toString());
@@ -506,18 +507,17 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         if (columnList.size() == 0) {
             throw new CayenneRuntimeException("Call 'createStatement' first");
         }
-        
-		ResultDescriptor descriptor;
-			
-        if(getSelectQuery().isFetchingCustomAttributes()) {
-			descriptor = new ResultDescriptor(getAdapter().getExtendedTypes());
+
+        ResultDescriptor descriptor;
+
+        if (getSelectQuery().isFetchingCustomAttributes()) {
+            descriptor = new ResultDescriptor(getAdapter().getExtendedTypes());
         }
         else {
-		    descriptor = new ResultDescriptor(
-                getAdapter().getExtendedTypes(),
-                getRootEntity());
+            descriptor =
+                new ResultDescriptor(getAdapter().getExtendedTypes(), getRootEntity());
         }
-        
+
         descriptor.addColumns(columnList);
         descriptor.index();
         return descriptor;

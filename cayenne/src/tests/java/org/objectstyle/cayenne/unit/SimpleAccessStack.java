@@ -69,21 +69,14 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
 
     protected DataDomain domain;
 
-    public SimpleAccessStack(CayenneTestResources resources, DataMap map)
+    public SimpleAccessStack(CayenneTestResources resources, DataMap[] maps)
         throws Exception {
 
         this.resources = resources;
         this.domain = new DataDomain("domain");
-        initNode(map);
-    }
-
-    public SimpleAccessStack(CayenneTestResources resources, DataMap map1, DataMap map2)
-        throws Exception {
-
-        this.resources = resources;
-        this.domain = new DataDomain("domain");
-        initNode(map1);
-        initNode(map2);
+        for (int i = 0; i < maps.length; i++) {
+            initNode(maps[i]);
+        }
     }
 
     protected void initNode(DataMap map) throws Exception {
@@ -98,14 +91,6 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
 
         node.addDataMap(map);
         this.domain.addNode(node);
-    }
-
-    public void setGenerateSchema(boolean flag) throws Exception {
-        if (flag) {
-            dropSchema();
-            createSchema();
-            createPKSupport();
-        }
     }
 
     public DataDomain getDataDomain() {
@@ -138,6 +123,14 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         while (it.hasNext()) {
             DataNode node = (DataNode) it.next();
             createSchema(node, (DataMap) node.getDataMaps().iterator().next());
+        }
+    }
+
+    public void dropPKSupport() throws Exception {
+        Iterator it = domain.getDataNodes().iterator();
+        while (it.hasNext()) {
+            DataNode node = (DataNode) it.next();
+            dropPKSupport(node, (DataMap) node.getDataMaps().iterator().next());
         }
     }
 

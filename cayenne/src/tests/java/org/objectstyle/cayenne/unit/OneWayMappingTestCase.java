@@ -61,7 +61,7 @@ package org.objectstyle.cayenne.unit;
  * 
  * @author Andrei Adamchik
  */
-public class OneWayMappingTestCase extends CayenneTestCase {
+public abstract class OneWayMappingTestCase extends CayenneTestCase {
 
     protected AccessStack buildAccessStack() {
         return CayenneTestResources.getResources().getAccessStack(

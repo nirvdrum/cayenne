@@ -226,12 +226,7 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
     }
 
     /**
-     * Returns SQL string needed to drop database objects associated
-     * with automatic primary key generation. No actual database
-     * operations are performed.
-     *
-     * Not used in OpenBase
-     *
+     * Returns an empty list, since OpenBase doesn't support this operation.
      */
     public List dropAutoPkStatements(List dbEntities) {
         return Collections.EMPTY_LIST;

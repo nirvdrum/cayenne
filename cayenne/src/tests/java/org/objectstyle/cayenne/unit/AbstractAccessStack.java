@@ -257,8 +257,11 @@ public abstract class AbstractAccessStack {
             conn.close();
         }
 
-        // drop primary key support
-        node.getAdapter().getPkGenerator().dropAutoPk(node, list);
+    }
+
+    protected void dropPKSupport(DataNode node, DataMap map) throws Exception {
+        List filteredEntities = dbEntitiesInInsertOrder(node, map);
+        node.getAdapter().getPkGenerator().dropAutoPk(node, filteredEntities);
     }
 
     protected void createPKSupport(DataNode node, DataMap map) throws Exception {

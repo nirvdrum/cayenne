@@ -59,14 +59,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.testdo.inherit.AbstractPerson;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.testdo.inherit.CustomerRepresentative;
+import org.objectstyle.cayenne.testdo.inherit.Employee;
+import org.objectstyle.cayenne.testdo.inherit.Manager;
+import org.objectstyle.cayenne.unit.PeopleTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataContextQualifiedEntityTst extends CayenneTestCase {
+public class DataContextQualifiedEntityTst extends PeopleTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
@@ -75,7 +79,7 @@ public class DataContextQualifiedEntityTst extends CayenneTestCase {
     }
 
     public void testSelect() throws Exception {
-/*        setupData();
+        setupData();
 
         // just check that an appropriate qualifier was applied
         // no inhgeritance checks in this case...
@@ -95,7 +99,7 @@ public class DataContextQualifiedEntityTst extends CayenneTestCase {
 
         // select Managers
         List managers = context.performQuery(new SelectQuery(Manager.class));
-        assertEquals(2, managers.size()); */
+        assertEquals(2, managers.size());
     }
 
     private void setupData() throws Exception {

@@ -112,12 +112,26 @@ public class QualifierTranslator
     protected Expression extractQualifier() {
         Query q = queryAssembler.getQuery();
 
-        if (isTranslateParentQual()) {
-            return ((SelectQuery) q).getParentQualifier();
+        Expression qualifier =
+            (isTranslateParentQual())
+                ? ((SelectQuery) q).getParentQualifier()
+                : ((QualifiedQuery) q).getQualifier();
+
+        // append Entity qualifiers, taking inheritance into account
+        ObjEntity entity = getObjEntity();
+        while (entity != null) {
+            Expression entityQualifier = entity.getQualifier();
+            if (entityQualifier != null) {
+                qualifier =
+                    (qualifier != null)
+                        ? qualifier.andExp(entityQualifier)
+                        : entityQualifier;
+            }
+
+            entity = entity.getSuperEntity();
         }
-        else {
-            return ((QualifiedQuery) q).getQualifier();
-        }
+
+        return qualifier;
     }
 
     /**

@@ -93,11 +93,14 @@ public class CayenneTestResources implements BeanFactoryAware {
     public static final String PEOPLE_ACCESS_STACK = "PeopleStack";
     public static final String ONEWAY_ACCESS_STACK = "OneWayStack";
     public static final String MULTINODE_ACCESS_STACK = "MultiNodeStack";
+    public static final String SCHEMA_SETUP_STACK = "SchemaSetupStack";
 
     private static CayenneTestResources resources;
 
     static {
         Configuration.configureCommonLogging();
+
+        // bootstrap shared CayenneTestResources
 
         File testDir =
             new File(
@@ -122,6 +125,14 @@ public class CayenneTestResources implements BeanFactoryAware {
         // must finish config manually
         resources.setConnectionKey(System.getProperty(CONNECTION_NAME_KEY));
         resources.setTestResourcesDir(testDir);
+
+        try {
+            resources.rebuildSchema();
+        }
+        catch (Exception ex) {
+            logObj.error("Error generating schema...", ex);
+            throw new RuntimeException("Error generating schema");
+        }
     }
 
     protected File testDir;
@@ -146,6 +157,22 @@ public class CayenneTestResources implements BeanFactoryAware {
         setupTestDir();
     }
 
+    /**
+     * Completely rebuilds test schema.
+     */
+    public void rebuildSchema() throws Exception {
+        // generate schema using a special AccessStack that 
+        // combines all DataMaps that require schema support
+        // schema generation is done like that instead of 
+        // per stack on demand, to avoid conflicts when
+        // dropping and generating PK objects.
+        AccessStack stack = getAccessStack(SCHEMA_SETUP_STACK);
+        stack.dropSchema();
+        stack.dropPKSupport();
+        stack.createSchema();
+        stack.createPKSupport();
+    }
+
     public void setConnectionKey(String connectionKey) {
         if (connectionKey == null) {
             throw new RuntimeException("Null connection key.");
@@ -159,7 +186,6 @@ public class CayenneTestResources implements BeanFactoryAware {
         }
 
         logObj.info("test connection info: " + connectionInfo);
-
         this.dataSource = createDataSource();
     }
 

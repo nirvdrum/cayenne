@@ -70,21 +70,28 @@
 	<!-- ======================================= -->
 	<bean id="TestStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
-		<constructor-arg><ref bean="TestMap"/></constructor-arg>
-		<property name="generateSchema"><value>true</value></property>
+		<constructor-arg><list><ref bean="TestMap"/></list></constructor-arg>
 	</bean>
 	<bean id="PeopleStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
-		<constructor-arg><ref bean="PeopleMap"/></constructor-arg>
+		<constructor-arg><list><ref bean="PeopleMap"/></list></constructor-arg>
 	</bean>
 	<bean id="OneWayStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
-		<constructor-arg><ref bean="OneWayMap"/></constructor-arg>
+		<constructor-arg><list><ref bean="OneWayMap"/></list></constructor-arg>
 	</bean>
 	<bean id="MultiNodeStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
-		<constructor-arg><ref bean="DB1Map"/></constructor-arg>
-		<constructor-arg><ref bean="DB2Map"/></constructor-arg>
+		<constructor-arg>
+			<list><ref bean="DB1Map"/><ref bean="DB2Map"/></list>
+		</constructor-arg>
+	</bean>
+	<!-- Used to create DB schema to avoid conflicts when schema for individual stacks is generated. -->
+	<bean id="SchemaSetupStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
+		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg>
+			<list><ref bean="TestMap"/><ref bean="PeopleMap"/></list>
+		</constructor-arg>
 	</bean>
 	
 	<!-- ======================================= -->

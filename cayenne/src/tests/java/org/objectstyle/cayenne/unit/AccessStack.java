@@ -74,5 +74,7 @@ public interface AccessStack {
 
     public void createSchema() throws Exception;
 
+    public void dropPKSupport() throws Exception;
+
     public void createPKSupport() throws Exception;
 }
