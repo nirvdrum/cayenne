@@ -53,8 +53,7 @@
     
 	<path id="javacc-classpath">
 		<fileset dir="${otherlib.dir}">
-			<include name="*.jar"/>
-			<include name="*.zip"/>
+			<include name="javacc*.jar"/>
 		</fileset>
     </path>
 	
@@ -79,7 +78,7 @@
 			<fileset dir="${javacc.dir}" includes="**/*.java"/>
 		</delete>
 		
-		<java dir="${basedir}" fork="true" classname="COM.sun.labs.javacc.Main">
+		<java dir="${basedir}" fork="true" classname="javacc">
 			<classpath refid="javacc-classpath"/>
 			<arg value="-OUTPUT_DIRECTORY=${javacc.dir}"/>
 			<arg value="${javacc.grammar}"/>
