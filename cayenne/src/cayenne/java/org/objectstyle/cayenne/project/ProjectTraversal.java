@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -141,28 +142,22 @@ public class ProjectTraversal {
         if (rootNode instanceof Configuration) {
             traverseConfig((Configuration) rootNode, null);
         } else if (rootNode instanceof DataDomain) {
-            traverseDomains(listWrap(rootNode), null);
+            traverseDomains(Collections.singletonList(rootNode), null);
         } else if (rootNode instanceof DataMap) {
-            traverseMaps(listWrap(rootNode), null);
+            traverseMaps(Collections.singletonList(rootNode), null);
         } else if (rootNode instanceof Entity) {
-            traverseEntities(listWrap(rootNode), null);
+            traverseEntities(Collections.singletonList(rootNode), null);
         } else if (rootNode instanceof Attribute) {
-            traverseAttributes(listWrap(rootNode), null);
+            traverseAttributes(Collections.singletonList(rootNode), null);
         } else if (rootNode instanceof Relationship) {
-            traverseRelationships(listWrap(rootNode), null);
+            traverseRelationships(Collections.singletonList(rootNode), null);
         } else if (rootNode instanceof DataNode) {
-            traverseNodes(listWrap(rootNode), null);
+            traverseNodes(Collections.singletonList(rootNode), null);
         } else {
             String nodeClass =
                 (rootNode != null) ? rootNode.getClass().getName() : "(null)";
             throw new IllegalArgumentException("Unsupported root node: " + nodeClass);
         }
-    }
-
-    private List listWrap(Object object) {
-        ArrayList list = new ArrayList(1);
-        list.add(object);
-        return list;
     }
 
     /**
