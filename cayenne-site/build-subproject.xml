@@ -4,12 +4,13 @@
 <!-- Common documentation tasks. -->
 <!-- ================================================= -->
 <project default="userguide">
+
+    <target name="site" depends="doc,resources,api,tutorials,release-notes"/>
     
     <!-- ============================================= -->
     <!-- Builds a set of project documentation -->
     <!-- ============================================= -->
     <target name="doc" depends="check-properties,assemble-project-xml">
-    
     	<!-- Anakia is dumb as far as path resolution... so copy all XML files first -->
     	<copy todir="${build}/${subproject.name}/in">
 			<fileset dir="${cayenne.location}/xdocs" includes="${doc.include}"/>
@@ -25,6 +26,60 @@
 			includes="**/*.xml"
 			lastModifiedCheck="true"
 			/>
+    </target>
+    
+    <!-- ============================================= -->
+    <!-- Copies images and other resources. -->
+    <!-- ============================================= -->
+	<target name="resources" depends="check-properties">
+        <copy todir="${doc.root}/images">
+            <fileset dir="${cayenne.location}/xdocs/images" includes="**/**"/>
+        </copy>
+    </target>
+    
+	<!-- ============================================= -->
+    <!-- Installs API docs. -->
+    <!-- ============================================= -->
+	<target name="api" depends="check-properties,release-subproject">		
+        <copy todir="${doc.root}/api">
+            <fileset dir="${subproject.dist}/doc/api" excludes="index.html"/>
+           
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="SFLOGO" value="${sf.logo}"/>
+			</filterset>
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="JNLOGO" value="${java.net.logo}"/>
+			</filterset>
+        </copy>
+    </target>
+    
+	<!-- ============================================= -->
+    <!-- Installs tutorials code. -->
+    <!-- ============================================= -->
+	<target name="tutorials" depends="check-properties,release-subproject">         
+        <copy todir="${doc.root}/tutorials">
+            <fileset dir="${subproject.dist}/src/tutorials"/>
+        </copy>
+    </target>
+    
+	<!-- ============================================= -->
+    <!-- Installs all available release notes and upgrade notes. -->
+    <!-- ============================================= -->
+	<target name="release-notes" depends="check-properties">
+        <copy todir="${doc.root}">
+            <fileset dir="${cayenne.location}/doc" includes="**/RELEASE-NOTES*.txt, **/UPGRADE*.txt"/>
+        </copy>
+    </target>
+    
+	<!-- ============================================= -->
+    <!-- Performs a full release of specified Cayenne checkout. -->
+    <!-- ============================================= -->
+	<target name="release-subproject" depends="check-properties">
+        <ant 
+			antfile="${cayenne.location}/build.xml" 
+			target="release" 
+			dir="${cayenne.location}"
+			inheritAll="false"/>
     </target>
     
     
@@ -50,6 +105,11 @@
 **** FATAL: "cayenne.location" property must point to a cayenne checkout directory. Current value: "${cayenne.location}"
     	</fail>
     	
+    	<fail unless="subproject.dist">
+    	
+**** FATAL: "subproject.dist" property must point to a cayenne distribution directory. Current value: "${subproject.dist}"
+    	</fail>
+    	
     	<fail unless="subproject.name">
     	
 **** FATAL: No "subproject.name" property specified.
@@ -58,6 +118,11 @@
 		<fail unless="doc.include">
     	
 **** FATAL: No "doc.include" property specified.
+    	</fail>
+    	
+	<fail unless="doc.root">
+    	
+**** FATAL: No "doc.root" property specified.
     	</fail>
     </target>
 </project>

@@ -25,8 +25,8 @@
     <!-- and styles. -->
     <!-- ========================================== -->
     <target name="resources">
-        <!-- copy images -->
-        <copy todir="${dist}">
+        <!-- copy images, overwrite anything copied from subprojects... -->
+        <copy todir="${dist}" overwrite="true">
             <fileset dir="xdocs/resources" includes="**/**"/>
         </copy>
     </target>

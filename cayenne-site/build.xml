@@ -19,7 +19,7 @@
     <!-- derived from other properties. You probably -->
     <!-- don't want to redefine them. -->
     <!-- ============================================= -->
-    <property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
+    <property name="dist" value="${dist.base}/${project.name}-${project.version}/cayenne"/>
 
 
     <!-- ============================================= -->
