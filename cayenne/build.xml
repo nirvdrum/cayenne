@@ -91,6 +91,7 @@
     <target name="build">
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="dist-bin"/>
+		<ant antfile="build-performance.xml" target="dist-bin"/>
     </target>
     
     <!-- ========================================== -->

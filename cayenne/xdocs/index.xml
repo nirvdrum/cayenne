@@ -5,9 +5,21 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><strong><font color="#AAAAAA"><i>September 7:</i></font></strong> <strong>Cayenne 
-        Alpha 3 Is Out.</strong> 
-        This is a maintenance release. It contains a few serious bug fixes, 
+        <p><u><strong><i>September 10:</i> Note To Cayenne Users - deprecated API removed.</strong></u></p>
+        
+        <p>
+        API that is marked 
+        	as "deprecated" in Alpha 3 release is already removed from the development code. 
+        	It is no longer included in the nightly builds and will not be included with 
+        	future releases. If your code uses or overrides such API, please make sure it is replaced
+        	with non-deprected method calls. 
+        </p>
+        
+        
+        <p><u><strong><i>September 7:</i></strong> <strong>Cayenne 
+        Alpha 3 Is Out.</strong></u></p>
+        
+        <p>This is a maintenance release. It contains a few serious bug fixes, 
         so everybody is encouraged to upgrade. In this release:
         <ul>
         	<li>JDK1.3 port: Cayenne runtime libraries are now fully JDK1.3 compatible,
@@ -29,8 +41,10 @@
         </ul>
         </p>
         
-        <p><strong><font color="#AAAAAA"><i>July 29:</i></font></strong> <strong>Cayenne Comparison Chart.</strong> 
-        Having received multiple requests to compare Cayenne features
+        <p><u><strong><i>July 29:</i></strong> <strong>Cayenne 
+        Comparison Chart.</strong></u></p>
+        
+        <p>Having received multiple requests to compare Cayenne features
         with other O/R frameworks we decided to leverage the community collective knowledge
         to do this research. A WikiWiki page was setup to build a feature matrix at
         <a href="http://c2.com/cgi-bin/wiki?CayenneVsOther">http://c2.com/cgi-bin/wiki?CayenneVsOther</a>.

@@ -10,5 +10,5 @@ if [ "$CAYENNE_HOME" = "" ] ; then
     exit
 fi
 
-$JAVA_HOME/bin/java -jar $CAYENNE_HOME/lib/cayenne-perf.jar $@
+$JAVA_HOME/bin/java -jar $CAYENNE_HOME/lib/cayenne-performance.jar $@
 cd ..

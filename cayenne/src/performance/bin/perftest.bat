@@ -10,7 +10,7 @@ echo Please define CAYENNE_HOME to point to your Cayenne installation.
 goto eof
 
 :run_tests
-%JAVA_HOME%\bin\java -jar %CAYENNE_HOME%\lib\cayenne-perf.jar %@
+%JAVA_HOME%\bin\java -jar %CAYENNE_HOME%\lib\cayenne-performance.jar %@
 cd ..
 
 
