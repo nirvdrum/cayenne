@@ -55,68 +55,87 @@
  */
 package org.objectstyle.cayenne.query;
 
+import org.apache.commons.beanutils.PropertyUtils;
+import org.objectstyle.cayenne.unit.BasicTestCase;
+
 /**
- * Interface that defines API of a generic SELECT query 
- * from a DataContext perspective. It allows DataContext to
- * run different select queries that can be Cayenne based or use 
- * raw SQL.
+ * Tests various implementations of GenericSelectQuery.
  * 
  * @author Andrei Adamchik
  */
-public interface GenericSelectQuery extends Query {
-    public static final String FETCH_LIMIT_PROPERTY =
-        "cayenne.GenericSelectQuery.fetchLimit";
-    public static final int FETCH_LIMIT_DEFAULT = 0;
+public class GenericSelectQueryTst extends BasicTestCase {
 
-    public static final String PAGE_SIZE_PROPERTY = "cayenne.GenericSelectQuery.pageSize";
-    public static final int PAGE_SIZE_DEFAULT = 0;
+    public void testSelectQuery() throws Exception {
+        runTest(new SelectQuery("Dummy"));
+    }
 
-    public static final String FETCHING_DATA_ROWS_PROPERTY =
-        "cayenne.GenericSelectQuery.fetchingDataRows";
-    public static final boolean FETCHING_DATA_ROWS_DEFAULT = false;
-
-    public static final String REFRESHING_OBJECTS_PROPERTY =
-        "cayenne.GenericSelectQuery.refreshingObjects";
-    public static final boolean REFRESHING_OBJECTS_DEFAULT = true;
-
-    public static final String RESOLVING_INHERITED_PROPERTY =
-        "cayenne.GenericSelectQuery.resolvingInherited";
-    public static final boolean RESOLVING_INHERITED_DEFAULT = true;
+    public void testSQLTemplate() throws Exception {
+        runTest(new SQLTemplate("Dummy"));
+    }
 
     /**
-     * Returns <code>true</code> if this query 
-     * should produce a list of data rows as opposed
-     * to DataObjects, <code>false</code> for DataObjects. 
-     * This is a hint to QueryEngine executing this query.
+     * Tests properties for an unknown implementation of GenericSelectQuery.
+     * Assumes there are standard setters for all the properties.
      */
-    public boolean isFetchingDataRows();
+    protected void runTest(GenericSelectQuery q) throws Exception {
+        // fetchingDataRows
+        assertEquals(
+            GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT,
+            q.isFetchingDataRows());
 
-    /**
-     * Returns <code>true</code> if the query results should replace
-     * any currently cached values, returns <code>false</code> otherwise.
-     * If {@link #isFetchingDataRows()} returns <code>true</code>, this
-     * setting is not applicable and has no effect.
-     * 
-     * @since 1.1
-     */
-    public boolean isRefreshingObjects();
+        PropertyUtils.setProperty(q, "fetchingDataRows", Boolean.FALSE);
+        assertFalse(q.isFetchingDataRows());
 
-    /**
-     * Returns true if objects fetched via this query should be fully
-     * resolved according to the inheritance hierarchy.
-     * 
-     * @since 1.1
-     */
-    public boolean isResolvingInherited();
+        PropertyUtils.setProperty(q, "fetchingDataRows", Boolean.TRUE);
+        assertTrue(q.isFetchingDataRows());
 
-    /**
-     * Returns query page size. Page size is a hint
-     * to Cayenne that query should be performed page by
-     * page, instead of retrieveing all results at once.
-     * If the value returned is less than or equal to zero,
-     * no paging should occur.
-     */
-    public int getPageSize();
+        PropertyUtils.setProperty(q, "fetchingDataRows", Boolean.FALSE);
+        assertFalse(q.isFetchingDataRows());
 
-    public int getFetchLimit();
+        // refreshingObjects
+        assertEquals(
+            GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT,
+            q.isRefreshingObjects());
+
+        PropertyUtils.setProperty(q, "refreshingObjects", Boolean.FALSE);
+        assertFalse(q.isRefreshingObjects());
+
+        PropertyUtils.setProperty(q, "refreshingObjects", Boolean.TRUE);
+        assertTrue(q.isRefreshingObjects());
+
+        PropertyUtils.setProperty(q, "refreshingObjects", Boolean.FALSE);
+        assertFalse(q.isRefreshingObjects());
+
+        // resolvingInherited
+        assertEquals(
+            GenericSelectQuery.RESOLVING_INHERITED_DEFAULT,
+            q.isResolvingInherited());
+
+        PropertyUtils.setProperty(q, "resolvingInherited", Boolean.FALSE);
+        assertFalse(q.isResolvingInherited());
+
+        PropertyUtils.setProperty(q, "resolvingInherited", Boolean.TRUE);
+        assertTrue(q.isResolvingInherited());
+
+        PropertyUtils.setProperty(q, "resolvingInherited", Boolean.FALSE);
+        assertFalse(q.isResolvingInherited());
+
+        // fetchLimit
+        assertEquals(GenericSelectQuery.FETCH_LIMIT_DEFAULT, q.getFetchLimit());
+
+        PropertyUtils.setProperty(q, "fetchLimit", new Integer(1001));
+        assertEquals(1001, q.getFetchLimit());
+
+        PropertyUtils.setProperty(q, "fetchLimit", new Integer(0));
+        assertEquals(0, q.getFetchLimit());
+
+        // pageSize
+        assertEquals(GenericSelectQuery.PAGE_SIZE_DEFAULT, q.getPageSize());
+
+        PropertyUtils.setProperty(q, "pageSize", new Integer(1001));
+        assertEquals(1001, q.getPageSize());
+
+        PropertyUtils.setProperty(q, "pageSize", new Integer(0));
+        assertEquals(0, q.getPageSize());
+    }
 }

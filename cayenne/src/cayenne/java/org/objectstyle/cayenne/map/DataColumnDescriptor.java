@@ -53,70 +53,59 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+
+package org.objectstyle.cayenne.map;
 
 /**
- * Interface that defines API of a generic SELECT query 
- * from a DataContext perspective. It allows DataContext to
- * run different select queries that can be Cayenne based or use 
- * raw SQL.
+ * A descriptor for the tabular data value.
  * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public interface GenericSelectQuery extends Query {
-    public static final String FETCH_LIMIT_PROPERTY =
-        "cayenne.GenericSelectQuery.fetchLimit";
-    public static final int FETCH_LIMIT_DEFAULT = 0;
+public class DataColumnDescriptor {
+    protected int externalType;
+    protected String valueClassName;
+    protected String valueLabel;
+    protected boolean primaryKey;
 
-    public static final String PAGE_SIZE_PROPERTY = "cayenne.GenericSelectQuery.pageSize";
-    public static final int PAGE_SIZE_DEFAULT = 0;
+    public DataColumnDescriptor() {
+    }
 
-    public static final String FETCHING_DATA_ROWS_PROPERTY =
-        "cayenne.GenericSelectQuery.fetchingDataRows";
-    public static final boolean FETCHING_DATA_ROWS_DEFAULT = false;
+    public DataColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
+        this.valueLabel = dbAttribute.getName();
+        this.externalType = dbAttribute.getType();
+        this.primaryKey = dbAttribute.isPrimaryKey();
+        this.valueClassName = objAttribute.getType();
+    }
 
-    public static final String REFRESHING_OBJECTS_PROPERTY =
-        "cayenne.GenericSelectQuery.refreshingObjects";
-    public static final boolean REFRESHING_OBJECTS_DEFAULT = true;
+    public int getExternalType() {
+        return externalType;
+    }
 
-    public static final String RESOLVING_INHERITED_PROPERTY =
-        "cayenne.GenericSelectQuery.resolvingInherited";
-    public static final boolean RESOLVING_INHERITED_DEFAULT = true;
+    public String getValueLabel() {
+        return valueLabel;
+    }
 
-    /**
-     * Returns <code>true</code> if this query 
-     * should produce a list of data rows as opposed
-     * to DataObjects, <code>false</code> for DataObjects. 
-     * This is a hint to QueryEngine executing this query.
-     */
-    public boolean isFetchingDataRows();
+    public void setExternalType(int i) {
+        externalType = i;
+    }
 
-    /**
-     * Returns <code>true</code> if the query results should replace
-     * any currently cached values, returns <code>false</code> otherwise.
-     * If {@link #isFetchingDataRows()} returns <code>true</code>, this
-     * setting is not applicable and has no effect.
-     * 
-     * @since 1.1
-     */
-    public boolean isRefreshingObjects();
+    public void setValueLabel(String string) {
+        valueLabel = string;
+    }
+    public boolean isPrimaryKey() {
+        return primaryKey;
+    }
 
-    /**
-     * Returns true if objects fetched via this query should be fully
-     * resolved according to the inheritance hierarchy.
-     * 
-     * @since 1.1
-     */
-    public boolean isResolvingInherited();
+    public String getValueClassName() {
+        return valueClassName;
+    }
 
-    /**
-     * Returns query page size. Page size is a hint
-     * to Cayenne that query should be performed page by
-     * page, instead of retrieveing all results at once.
-     * If the value returned is less than or equal to zero,
-     * no paging should occur.
-     */
-    public int getPageSize();
+    public void setPrimaryKey(boolean b) {
+        primaryKey = b;
+    }
 
-    public int getFetchLimit();
+    public void setValueClassName(String string) {
+        valueClassName = string;
+    }
 }

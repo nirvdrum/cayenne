@@ -187,7 +187,7 @@ public class EOModelHelper {
      *  @return String representation for Java type corresponding 
      *  to String representation of Objective C type.
      * 
-     * @deprecated Since 1.1 use {@link javaTypeForEOModelerType(String,String)} to take "valueType"
+     * @deprecated Since 1.1 use {@link #javaTypeForEOModelerType(String,String)} to take "valueType"
      * into account.
      */
     public String javaTypeForEOModelerType(String type) {

@@ -92,13 +92,10 @@ public class SelectQuery
     protected List orderings = new ArrayList();
     protected Set prefetches = new HashSet();
     protected boolean distinct;
-    protected boolean fetchingDataRows;
-    protected boolean refreshingObjects = true;
-    protected boolean resolvingInherited = true;
-    protected int fetchLimit;
+
     protected Expression parentQualifier;
     protected String parentObjEntityName;
-    protected int pageSize;
+    protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
 
     /** Creates empty SelectQuery. */
     public SelectQuery() {
@@ -151,7 +148,7 @@ public class SelectQuery
     public SelectQuery(DbEntity root) {
         this(root, null);
     }
-    
+
     /**
      * Creates a SelectQuery  for the specifed DbEntity with the given qualifier.
      * 
@@ -192,10 +189,6 @@ public class SelectQuery
         }
 
         Object distinct = properties.get(DISTINCT_PROPERTY);
-        Object fetchLimit = properties.get(FETCH_LIMIT_PROPERTY);
-        Object pageSize = properties.get(PAGE_SIZE_PROPERTY);
-        Object refreshingObjects = properties.get(REFRESHING_OBJECTS_PROPERTY);
-        Object fetchingDataRows = properties.get(FETCHING_DATA_ROWS_PROPERTY);
 
         // init ivars from properties
         this.distinct =
@@ -203,25 +196,7 @@ public class SelectQuery
                 ? "true".equalsIgnoreCase(distinct.toString())
                 : DISTINCT_DEFAULT;
 
-        this.fetchLimit =
-            (fetchLimit != null)
-                ? Integer.parseInt(fetchLimit.toString())
-                : FETCH_LIMIT_DEFAULT;
-
-        this.pageSize =
-            (pageSize != null)
-                ? Integer.parseInt(pageSize.toString())
-                : PAGE_SIZE_DEFAULT;
-
-        this.refreshingObjects =
-            (refreshingObjects != null)
-                ? "true".equalsIgnoreCase(refreshingObjects.toString())
-                : REFRESHING_OBJECTS_DEFAULT;
-
-        this.fetchingDataRows =
-            (fetchingDataRows != null)
-                ? "true".equalsIgnoreCase(fetchingDataRows.toString())
-                : FETCHING_DATA_ROWS_DEFAULT;
+        selectProperties.initWithProperties(properties);
     }
 
     /**
@@ -271,26 +246,11 @@ public class SelectQuery
         encoder.indent(1);
 
         // print properties
-
         if (distinct != DISTINCT_DEFAULT) {
             encoder.printProperty(DISTINCT_PROPERTY, distinct);
         }
 
-        if (refreshingObjects != REFRESHING_OBJECTS_DEFAULT) {
-            encoder.printProperty(REFRESHING_OBJECTS_PROPERTY, refreshingObjects);
-        }
-
-        if (fetchingDataRows != FETCHING_DATA_ROWS_DEFAULT) {
-            encoder.printProperty(FETCHING_DATA_ROWS_PROPERTY, fetchingDataRows);
-        }
-
-        if (fetchLimit != FETCH_LIMIT_DEFAULT) {
-            encoder.printProperty(FETCH_LIMIT_PROPERTY, fetchLimit);
-        }
-
-        if (pageSize != PAGE_SIZE_DEFAULT) {
-            encoder.printProperty(PAGE_SIZE_PROPERTY, pageSize);
-        }
+        selectProperties.encodeAsXML(encoder);
 
         // encode qualifier
         if (qualifier != null) {
@@ -328,7 +288,7 @@ public class SelectQuery
     }
 
     /**
-     * A shortcut for {@link #queryWithParams(Map, boolean)}.
+     * A shortcut for {@link #queryWithParameters(Map, boolean)}.
      */
     public SelectQuery queryWithParameters(Map parameters) {
         return queryWithParameters(parameters, true);
@@ -345,11 +305,10 @@ public class SelectQuery
         // create a query replica
         SelectQuery query = new SelectQuery();
         query.setDistinct(distinct);
-        query.setFetchingDataRows(fetchingDataRows);
-        query.setRefreshingObjects(refreshingObjects);
-        query.setFetchLimit(fetchLimit);
+
+        this.selectProperties.copyToProperties(query.selectProperties);
+        
         query.setLoggingLevel(logLevel);
-        query.setPageSize(pageSize);
         query.setParentObjEntityName(parentObjEntityName);
         query.setParentQualifier(parentQualifier);
         query.setRoot(root);
@@ -501,7 +460,7 @@ public class SelectQuery
      * This is a hint to QueryEngine executing this query.
      */
     public boolean isFetchingDataRows() {
-        return this.isFetchingCustomAttributes() || fetchingDataRows;
+        return this.isFetchingCustomAttributes() || selectProperties.isFetchingDataRows();
     }
 
     /**	
@@ -513,7 +472,7 @@ public class SelectQuery
      * rows are always fetched.</i></p>
      */
     public void setFetchingDataRows(boolean flag) {
-        this.fetchingDataRows = flag;
+        selectProperties.setFetchingDataRows(flag);
     }
 
     /**
@@ -522,14 +481,14 @@ public class SelectQuery
      * @since 1.1
      */
     public boolean isRefreshingObjects() {
-        return refreshingObjects;
+        return selectProperties.isRefreshingObjects();
     }
 
     /**
      * @since 1.1
      */
     public void setRefreshingObjects(boolean flag) {
-        this.refreshingObjects = flag;
+        selectProperties.setRefreshingObjects(flag);
     }
 
     /**
@@ -537,7 +496,7 @@ public class SelectQuery
      * @return int
      */
     public int getFetchLimit() {
-        return fetchLimit;
+        return selectProperties.getFetchLimit();
     }
 
     /**
@@ -546,7 +505,7 @@ public class SelectQuery
      * @param fetchLimit The fetchLimit to set
      */
     public void setFetchLimit(int fetchLimit) {
-        this.fetchLimit = fetchLimit;
+        this.selectProperties.setFetchLimit(fetchLimit);
     }
 
     /** Setter for query's parent entity qualifier. */
@@ -621,7 +580,7 @@ public class SelectQuery
      * @return int
      */
     public int getPageSize() {
-        return pageSize;
+        return selectProperties.getPageSize();
     }
 
     /**
@@ -630,7 +589,7 @@ public class SelectQuery
      * @param pageSize The pageSize to set
      */
     public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
+        selectProperties.setPageSize(pageSize);
     }
 
     /**
@@ -640,7 +599,7 @@ public class SelectQuery
      * @since 1.1
      */
     public boolean isResolvingInherited() {
-        return resolvingInherited;
+        return selectProperties.isResolvingInherited();
     }
 
     /**
@@ -650,6 +609,6 @@ public class SelectQuery
      * @since 1.1
      */
     public void setResolvingInherited(boolean b) {
-        resolvingInherited = b;
+        selectProperties.setResolvingInherited(b);
     }
 }

@@ -79,11 +79,6 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         assertEquals(10, q.getPageSize());
     }
 
-    public void testFetchLimit1() throws Exception {
-        q.setFetchLimit(5);
-        assertEquals(5, q.getFetchLimit());
-    }
-
     public void testAddOrdering1() throws Exception {
         Ordering ord = new Ordering();
         q.addOrdering(ord);
@@ -114,13 +109,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         assertTrue(q.isDistinct());
     }
 
-    public void testFetchingDataRows1() {
-        assertFalse(q.isFetchingDataRows());
-        q.setFetchingDataRows(true);
-        assertTrue(q.isFetchingDataRows());
-    }
-
-    public void testFetchingDataRows2() {
+    public void testFetchingDataRowsSpecial() {
         assertFalse(q.isFetchingDataRows());
         q.addCustomDbAttribute("ARTIST_ID");
         assertTrue(q.isFetchingDataRows());
@@ -128,15 +117,6 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         // this shouldn't have any effect, since custom attributes are fetched
         q.setFetchingDataRows(false);
         assertTrue(q.isFetchingDataRows());
-    }
-    
-    public void testRefreshingObjects() {
-        
-        // default
-        assertTrue(q.isRefreshingObjects());
-        
-        q.setRefreshingObjects(false);
-        assertFalse(q.isRefreshingObjects());
     }
 
     public void testQueryAttributes() throws Exception {
@@ -170,8 +150,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.andParentQualifier(e1);
         assertSame(e1, q.getParentQualifier());
 
-        Expression e2 =
-            ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+        Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
         q.andParentQualifier(e2);
         assertEquals(Expression.AND, q.getParentQualifier().getType());
     }
@@ -183,8 +162,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.orParentQualifier(e1);
         assertSame(e1, q.getParentQualifier());
 
-        Expression e2 =
-            ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+        Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
         q.orParentQualifier(e2);
         assertEquals(Expression.OR, q.getParentQualifier().getType());
     }
@@ -197,7 +175,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
     }
 
     public void testQueryWithParams1() throws Exception {
-    	q.setRoot(Artist.class);
+        q.setRoot(Artist.class);
         q.setDistinct(true);
 
         SelectQuery q1 = q.queryWithParameters(new HashMap(), true);
@@ -208,18 +186,13 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 
     public void testQueryWithParams2() throws Exception {
         q.setRoot(Artist.class);
-        
+
         List list = new ArrayList();
-        list.add(
-            ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
-        list.add(
-            ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
-        list.add(
-            ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
-        list.add(
-            ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
+        list.add(ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
+        list.add(ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
+        list.add(ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
+        list.add(ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
         q.setQualifier(ExpressionFactory.joinExp(Expression.OR, list));
-        
 
         Map params = new HashMap();
         params.put("test2", "abc");
