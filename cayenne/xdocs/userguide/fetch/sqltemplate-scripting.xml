@@ -68,7 +68,7 @@ String sql = "SELECT"
 SQLTemplate select = new SQLTemplate(Artist.class, sql, true);
 ...
 DataContext context...;
-List artists = context.performNonSelectingQuery(select);
+List artists = context.performQuery(select);
 </source>
 	</subsection>
 		
