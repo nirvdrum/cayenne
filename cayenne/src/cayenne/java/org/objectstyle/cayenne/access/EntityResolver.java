@@ -202,19 +202,54 @@ public class EntityResolver {
     }
 
     /**
-     * Looks in the DataMap's that this object was created with for theDbEntity that maps to the
-     * specified object.  Object may be a Entity name, ObjEntity, or DataObject class 
-     * (Class object for a class which implements the DataObject interface)
+     * Looks in the DataMap's that this object was created with for the DbEntity
+     * that services the specified class
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+	public synchronized DbEntity lookupDbEntity(Class aClass) {
+		return this._lookupDbEntity(aClass);
+	}
+	
+    /**
+     * Looks in the DataMap's that this object was created with for the DbEntity
+     * that services the specified objentity
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+	public synchronized DbEntity lookupDbEntity(ObjEntity entity) {
+		return this._lookupDbEntity(entity);
+	}
+	
+    /**
+     * Looks in the DataMap's that this object was created with for the DbEntity
+     * that services the class with the given name
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+	public synchronized DbEntity lookupDbEntity(String entityName) {
+		return this._lookupDbEntity(entityName);
+	}
+	
+    /**
+     * Looks in the DataMap's that this object was created with for the DbEntity
+     * that services the specified data Object
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+	public synchronized DbEntity lookupDbEntity(DataObject dataObject) {
+		return this._lookupDbEntity(dataObject.getClass());
+	}
+	
+    /**
+     * Internal usage only - provides the type-unsafe implementation which services
+     * the four typesafe public lookupDbEntity methods
+     * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
+     * specified object.  Object may be a Entity name, ObjEntity, DataObject class 
+     * (Class object for a class which implements the DataObject interface), or a DataObject 
+     * instance itself
      * 
      * @return the required DbEntity, or null if none matches the specifier
      */
-    public synchronized DbEntity lookupDbEntity(Object object) {
+    private synchronized DbEntity _lookupDbEntity(Object object) {
         if (object instanceof DbEntity) {
             return (DbEntity) object;
-        }
-        
-        if (object instanceof DataObject) {
-            object = object.getClass();
         }
 
         DbEntity result = (DbEntity) dbEntityCache.get(object);
@@ -232,17 +267,59 @@ public class EntityResolver {
      * @return the root DbEntity of the query
      */
     public DbEntity lookupDbEntity(Query q) {
-        return this.lookupDbEntity(q.getRoot());
+		Object root=q.getRoot();
+		if(root instanceof DbEntity) {
+			return (DbEntity)root;
+		} else if (root instanceof Class) {
+			return this.lookupDbEntity((Class)root);
+		} else if (root instanceof ObjEntity) {
+			return this.lookupDbEntity((ObjEntity)root);
+		} else if (root instanceof String) {
+			return this.lookupDbEntity((String)root);
+		} else if (root instanceof DataObject) {
+			return this.lookupDbEntity((DataObject)root);
+		} 
+        return null;
     }
 
+
     /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
+     * services the specified class
+     * @return the required ObjEntity or null if there is none that matches the specifier
+     */
+	public synchronized ObjEntity lookupObjEntity(Class aClass) {
+		return this._lookupObjEntity(aClass);
+	}
+
+    /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
+     * services the class with the given name
+     * @return the required ObjEntity or null if there is none that matches the specifier
+     */
+	public synchronized ObjEntity lookupObjEntity(String entityName) {
+		return this._lookupObjEntity(entityName);
+	}
+	
+    /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity
+     * that services the specified data Object
+     * @return the required ObjEntity, or null if none matches the specifier
+     */
+	public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
+		return this._lookupObjEntity(dataObject.getClass());
+	}
+
+    /**
+     * Internal usage only - provides the type-unsafe implementation which services
+     * the three typesafe public lookupObjEntity methods
      * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
      * specified object. Object may be a Entity name, DataObject instance or DataObject class
      * (Class object for a class which implements the DataObject interface)
      * 
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
-    public synchronized ObjEntity lookupObjEntity(Object object) {
+    private synchronized ObjEntity _lookupObjEntity(Object object) {
         if (object instanceof ObjEntity) {
             return (ObjEntity) object;
         }
@@ -269,14 +346,23 @@ public class EntityResolver {
      * to rely on such behaviour).
      */
     public ObjEntity lookupObjEntity(Query q) {
-        Object root = q.getRoot();
-        if (root instanceof DbEntity) {
-            throw new CayenneRuntimeException(
+    	
+    	Object root=q.getRoot();
+		if(root instanceof DbEntity) {
+           throw new CayenneRuntimeException(
                 "Cannot safely resolve the ObjEntity for the query "
                     + q
                     + " because the root of the query is a DbEntity");
-        }
-        return this.lookupObjEntity(root);
+		} else if (root instanceof ObjEntity) {
+			return (ObjEntity)root;
+		} else if (root instanceof Class) {
+			return this.lookupObjEntity((Class)root);
+		} else if (root instanceof String) {
+			return this.lookupObjEntity((String)root);
+		} else if (root instanceof DataObject) {
+			return this.lookupObjEntity((DataObject)root);
+		} 
+        return null;
     }
 
 }

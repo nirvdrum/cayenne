@@ -55,6 +55,11 @@ public class EntityResolverTst extends CayenneTestCase {
     public void testLookupDbEntityByClass() throws Exception {
         assertIsArtistDbEntity(resolver.lookupDbEntity(Artist.class));
     }
+    
+    public void testLookupDbEntityByDataobject() throws Exception {
+    	Artist artist=(Artist)this.createDataContext().createAndRegisterNewObject("Artist");
+        assertIsArtistDbEntity(resolver.lookupDbEntity(artist));
+    }
 
     ////Test ObjEntity lookups
 
@@ -68,6 +73,11 @@ public class EntityResolverTst extends CayenneTestCase {
 
     public void testLookupObjEntityByInstance() throws Exception {
         assertIsArtistObjEntity(resolver.lookupObjEntity(new Artist()));
+    }
+
+    public void testLookupObjEntityByDataobject() throws Exception {
+    	Artist artist=(Artist)this.createDataContext().createAndRegisterNewObject("Artist");
+        assertIsArtistObjEntity(resolver.lookupObjEntity(artist));
     }
 
     public void testGetDataMapList() throws Exception {
