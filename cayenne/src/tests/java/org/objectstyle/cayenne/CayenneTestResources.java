@@ -83,7 +83,7 @@ public class CayenneTestResources {
 
     protected DataSourceInfo sharedConnInfo;
     protected DataDomain sharedDomain;
-    protected DatabaseSetup sharedDatabaseSetup;
+    protected CayenneTestDatabaseSetup sharedDatabaseSetup;
 
     public CayenneTestResources(String connectionKey) {
         sharedConnInfo =
@@ -91,6 +91,7 @@ public class CayenneTestResources {
 
         if (sharedConnInfo != null) {
             createSharedDomain();
+            createDbSetup();
             createTestDatabase();
         }
     }
@@ -123,8 +124,17 @@ public class CayenneTestResources {
      * Gets the sharedDatabaseSetup.
      * @return Returns a DatabaseSetup
      */
-    public DatabaseSetup getSharedDatabaseSetup() {
+    public CayenneTestDatabaseSetup getSharedDatabaseSetup() {
         return sharedDatabaseSetup;
+    }
+
+    protected void createDbSetup() {
+        try {
+            sharedDatabaseSetup = new CayenneTestDatabaseSetup(this, getSharedNode().getDataMaps()[0]);
+        } catch (Exception ex) {
+            logObj.error("Can not create shared DatabaseSetup.", ex);
+            throw new CayenneRuntimeException("Can not create shared DatabaseSetup.", ex);
+        }
     }
 
     protected void createSharedDomain() {
@@ -163,7 +173,7 @@ public class CayenneTestResources {
 
     protected void createTestDatabase() {
         try {
-            DatabaseSetup dbSetup = getSharedDatabaseSetup();
+            CayenneTestDatabaseSetup dbSetup = getSharedDatabaseSetup();
             dbSetup.dropTestTables();
             dbSetup.setupTestTables();
         } catch (Exception ex) {

@@ -96,6 +96,7 @@
     <target name="test">
 		<ant antfile="build-cayenne.xml" target="compile"/>
 		<ant antfile="build-modeler.xml" target="compile"/>
+		<ant antfile="build-tests.xml" target="test"/>
 		<ant antfile="build-tests-modeler.xml" target="test"/>
     </target>
 

@@ -113,7 +113,7 @@ public class TypesHandler {
 
             typesMap = ph.getTypes();
         } catch(Exception ex) {
-            ex.printStackTrace();
+            logObj.error("Error creating TypesHandler '" + typesConfigPath + "'.", ex);
             throw new CayenneRuntimeException("Error parsing types", ex);
         } finally {
             try {

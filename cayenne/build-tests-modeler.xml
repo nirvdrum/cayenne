@@ -15,7 +15,7 @@
 		<pathelement path="build/cayenne/classes"/>
 		<pathelement path="build/modeler/classes"/>
 		<pathelement path="build/tests-modeler/classes"/>
-    </path>  
+    </path>
     
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">

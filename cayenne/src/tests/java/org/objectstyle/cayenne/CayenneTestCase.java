@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared
@@ -80,6 +81,7 @@ public class CayenneTestCase extends TestCase {
     protected static CayenneTestResources resources;
 
     static {
+    	Configuration.configCommonLogging();
         probeJDKVersion();
         startDbConnections();
     }
