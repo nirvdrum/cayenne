@@ -133,7 +133,7 @@ public class ObjRelationship extends Relationship {
 	 * Returns true if underlying DbRelationships point to dependent entity.
 	 */
 	public boolean isToDependentEntity() {
-		return ((DbRelationship) dbRelationships.get(0)).isToDependentPK();
+		return ((DbRelationship)dbRelationships.get(0)).isToDependentPK();
 	}
 
 	/**

@@ -122,7 +122,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 
     public void testFetchingDataRows2() {
         assertFalse(q.isFetchingDataRows());
-        q.addCustDbAttribute("ARTIST_ID");
+        q.addCustomDbAttribute("ARTIST_ID");
         assertTrue(q.isFetchingDataRows());
 
         // this shouldn't have any effect, since custom attributes are fetched
@@ -131,18 +131,18 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
     }
 
     public void testQueryAttributes() throws Exception {
-        assertEquals(0, q.getCustDbAttributes().size());
+        assertEquals(0, q.getCustomDbAttributes().size());
 
-        q.addCustDbAttribute("ARTIST_ID");
-        assertEquals(1, q.getCustDbAttributes().size());
-        assertEquals("ARTIST_ID", q.getCustDbAttributes().get(0));
+        q.addCustomDbAttribute("ARTIST_ID");
+        assertEquals(1, q.getCustomDbAttributes().size());
+        assertEquals("ARTIST_ID", q.getCustomDbAttributes().get(0));
     }
 
     public void testUsingRootEntityAttributes() throws Exception {
-        assertFalse(q.isFetchingCustAttributes());
+        assertFalse(q.isFetchingCustomAttributes());
 
-        q.addCustDbAttribute("ARTIST_ID");
-        assertTrue(q.isFetchingCustAttributes());
+        q.addCustomDbAttribute("ARTIST_ID");
+        assertTrue(q.isFetchingCustomAttributes());
     }
 
     public void testSetParentQualifier() throws Exception {

@@ -148,7 +148,7 @@ public class ObjEntity extends Entity {
         Iterator it = getRelationshipMap().values().iterator();
         while (it.hasNext()) {
             ObjRelationship objRel = (ObjRelationship) it.next();
-            List relList = objRel.getDbRelationshipList();
+            List relList = objRel.getDbRelationships();
             if (relList.size() != 1)
                 continue;
 
@@ -208,11 +208,11 @@ public class ObjEntity extends Entity {
             }
         }
 
-        Iterator rel_it = getRelationshipList().iterator();
-        while (rel_it.hasNext()) {
-            ObjRelationship obj_rel = (ObjRelationship) rel_it.next();
-            obj_rel.clearDbRelationships();
+        Iterator rels = this.getRelationships().iterator();
+        while (rels.hasNext()) {
+            ((ObjRelationship)rels.next()).clearDbRelationships();
         }
+
         dbEntity = null;
     }
 

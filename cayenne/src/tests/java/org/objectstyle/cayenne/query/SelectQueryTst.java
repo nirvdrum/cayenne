@@ -196,7 +196,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
     public void testSelectCustAttributes() throws java.lang.Exception {
         query.setRoot(Artist.class);
-        query.addCustDbAttribute("ARTIST_NAME");
+        query.addCustomDbAttribute("ARTIST_NAME");
 
         List results = getDomain().createDataContext().performQuery(query);
 

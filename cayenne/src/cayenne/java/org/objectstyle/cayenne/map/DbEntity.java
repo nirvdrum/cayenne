@@ -132,7 +132,7 @@ public class DbEntity extends Entity {
      */
     public List getPrimaryKey() {
         List list = new ArrayList();
-        Iterator it = this.getAttributeList().iterator();
+        Iterator it = this.getAttributes().iterator();
         while (it.hasNext()) {
             DbAttribute dba = (DbAttribute) it.next();
             if (dba.isPrimaryKey())
@@ -146,7 +146,7 @@ public class DbEntity extends Entity {
         sb.append("\nTable name: ").append(this.getName());
 
         // 1. print attributes
-        Iterator attIt = attributes.values().iterator();
+        Iterator attIt = this.getAttributes().iterator();
         while (attIt.hasNext()) {
             DbAttribute dbAttribute = (DbAttribute) attIt.next();
             String name = dbAttribute.getName();
@@ -160,7 +160,7 @@ public class DbEntity extends Entity {
         }
 
         // 2. print relationships
-        Iterator relIt = getRelationshipList().iterator();
+        Iterator relIt = this.getRelationships().iterator();
         while (relIt.hasNext()) {
             DbRelationship dbRel = (DbRelationship) relIt.next();
             sb.append("\n   Rel. to: ").append(
@@ -188,7 +188,7 @@ public class DbEntity extends Entity {
             Iterator ents = map.getDbEntitiesAsList().iterator();
             while (ents.hasNext()) {
             	DbEntity ent = (DbEntity)ents.next();
-                Iterator it = ent.getRelationshipList().iterator();
+                Iterator it = ent.getRelationships().iterator();
                 while (it.hasNext()) {
                     DbRelationship rel = (DbRelationship) it.next();
                     Iterator joins = rel.getJoins().iterator();

@@ -490,7 +490,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
         try {
             // configure query with custom attributes
             q.setRoot(Artist.class);
-            q.addCustDbAttribute("ARTIST_ID");
+            q.addCustomDbAttribute("ARTIST_ID");
 
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();

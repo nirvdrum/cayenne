@@ -329,12 +329,11 @@ public class SelectTranslator extends SelectQueryAssembler {
         SelectQuery q = getSelectQuery();
 
         // extract custom attributes from the query
-        if (q.isFetchingCustAttributes()) {
-            List custAttrNames = q.getCustDbAttributes();
+        if (q.isFetchingCustomAttributes()) {
+            List custAttrNames = q.getCustomDbAttributes();
             int len = custAttrNames.size();
             for (int i = 0; i < len; i++) {
-                Attribute attr =
-                    dbe.getAttribute((String) custAttrNames.get(i));
+                Attribute attr = dbe.getAttribute((String)custAttrNames.get(i));
                 if (attr == null) {
                     throw new CayenneRuntimeException(
                         "Attribute does not exist: " + custAttrNames.get(i));
@@ -345,10 +344,9 @@ public class SelectTranslator extends SelectQueryAssembler {
             // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
 
             // ObjEntity attrs
-            List attrs = oe.getAttributeList();
-            int len = attrs.size();
-            for (int i = 0; i < len; i++) {
-                ObjAttribute oa = (ObjAttribute) attrs.get(i);
+            Iterator attrs = oe.getAttributes().iterator();
+            while (attrs.hasNext()) {
+                ObjAttribute oa = (ObjAttribute) attrs.next();
                 Iterator dbPathIterator = oa.getDbPathIterator();
                 while (dbPathIterator.hasNext()) {
                     Object pathPart = dbPathIterator.next();
@@ -356,7 +354,6 @@ public class SelectTranslator extends SelectQueryAssembler {
                         DbRelationship rel = (DbRelationship) pathPart;
                         dbRelationshipAdded(rel);
                     } else if (pathPart instanceof DbAttribute) {
-                        //                        Attribute dbAttr = oa.getDbAttribute();
                         DbAttribute dbAttr = (DbAttribute) pathPart;
                         if (dbAttr == null) {
                             throw new CayenneRuntimeException(
@@ -369,12 +366,10 @@ public class SelectTranslator extends SelectQueryAssembler {
             }
 
             // relationship keys
-            List rels = oe.getRelationshipList();
-            int rLen = rels.size();
-            for (int i = 0; i < rLen; i++) {
-                ObjRelationship rel = (ObjRelationship) rels.get(i);
-                DbRelationship dbRel =
-                    (DbRelationship) rel.getDbRelationshipList().get(0);
+            Iterator rels = oe.getRelationships().iterator();
+            while (rels.hasNext()) {
+                ObjRelationship rel = (ObjRelationship)rels.next();
+                DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(0);
 
                 List joins = dbRel.getJoins();
                 int jLen = joins.size();
@@ -388,10 +383,9 @@ public class SelectTranslator extends SelectQueryAssembler {
             }
 
             // add remaining needed attrs from DbEntity
-            List dbattrs = dbe.getAttributeList();
-            int dLen = dbattrs.size();
-            for (int i = 0; i < dLen; i++) {
-                DbAttribute dba = (DbAttribute) dbattrs.get(i);
+            Iterator dbattrs = dbe.getAttributes().iterator();
+            while (dbattrs.hasNext()) {
+                DbAttribute dba = (DbAttribute)dbattrs.next();
                 if (dba.isPrimaryKey()) {
                     if (!columnList.contains(dba)) {
                         columnList.add(dba);
@@ -408,8 +402,7 @@ public class SelectTranslator extends SelectQueryAssembler {
                     //Prefetching a single step toMany relationship which
                     // has no reverse obj relationship.  Add the FK attributes
                     // of the relationship (wouldn't otherwise be included)
-                    DbRelationship dbRel =
-                        (DbRelationship) r.getDbRelationshipList().get(0);
+                    DbRelationship dbRel = (DbRelationship)r.getDbRelationships().get(0);
 
                     List joins = dbRel.getJoins();
                     int jLen = joins.size();

@@ -106,9 +106,7 @@ public class SnapshotManager {
 		boolean isPartialSnapshot=false;
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
-			ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-//			String dbAttrName=attr.getDbAttribute().getName();
-
+			ObjAttribute attr = (ObjAttribute)attrMap.get(attrName);
             String dbAttrPath = attr.getDbAttributePath();
 			anObject.writePropertyDirectly(
 				attrName,
@@ -124,7 +122,7 @@ public class SnapshotManager {
 			}
 		}
 
-		Iterator rit = ent.getRelationshipList().iterator();
+		Iterator rit = ent.getRelationships().iterator();
 		while (rit.hasNext()) {
 			ObjRelationship rel = (ObjRelationship) rit.next();
 			if (rel.isToMany()) {
@@ -141,8 +139,7 @@ public class SnapshotManager {
 				continue;
 			}
 
-			DbRelationship dbRel =
-				(DbRelationship) rel.getDbRelationshipList().get(0);
+			DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(0);
 
 			// dependent to one relationship is optional and can be null.
 			if (dbRel.isToDependentPK()) {
@@ -197,11 +194,6 @@ public class SnapshotManager {
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
 			ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-//			String dbAttrName = attr.getDbAttribute().getName();
-//
-//			Object curVal = anObject.readPropertyDirectly(attrName);
-//			Object oldVal = oldSnap.get(dbAttrName);
-//			Object newVal = snapshot.get(dbAttrName);
 
             //processing compound attributes correctly
             String dbAttrPath = attr.getDbAttributePath();
@@ -223,7 +215,7 @@ public class SnapshotManager {
 	 * with empty lists.
 	 */
 	public void prepareForInsert(ObjEntity ent, DataObject anObject) {
-		Iterator it = ent.getRelationshipList().iterator();
+		Iterator it = ent.getRelationships().iterator();
 		while (it.hasNext()) {
 			ObjRelationship rel = (ObjRelationship) it.next();
 			if (rel.isToMany()) {
@@ -248,9 +240,6 @@ public class SnapshotManager {
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
             ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
-//			DbAttribute dbAttr = objAttr.getDbAttribute();
-//			map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
-
             //processing compound attributes correctly
             map.put(objAttr.getDbAttributePath(), anObject.readPropertyDirectly(attrName));
 		}
@@ -258,8 +247,8 @@ public class SnapshotManager {
 		Map relMap = ent.getRelationshipMap();
 		Iterator itr = relMap.keySet().iterator();
 		while (itr.hasNext()) {
-			String relName = (String) itr.next();
-			ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+			String relName = (String)itr.next();
+			ObjRelationship rel = (ObjRelationship)relMap.get(relName);
 
 			// to-many will be handled on the other side
 			if (rel.isToMany()) {
@@ -270,14 +259,11 @@ public class SnapshotManager {
 				continue;
 			}
 
-			DataObject target =
-				(DataObject) anObject.readPropertyDirectly(relName);
+			DataObject target = (DataObject)anObject.readPropertyDirectly(relName);
 			if (target == null) {
 				continue;
 			}
 
-			DbRelationship dbRel =
-				(DbRelationship) rel.getDbRelationshipList().get(0);
 			Map idParts = target.getObjectId().getIdSnapshot();
 
 			// this may happen in uncommitted objects
@@ -285,6 +271,7 @@ public class SnapshotManager {
 				continue;
 			}
 
+			DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(0);
 			Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
 			map.putAll(fk);
 		}
@@ -299,8 +286,9 @@ public class SnapshotManager {
 			Iterator itm = thisIdParts.keySet().iterator();
 			while (itm.hasNext()) {
 				Object nextKey = itm.next();
-				if (!map.containsKey(nextKey))
+				if (!map.containsKey(nextKey)) {
 					map.put(nextKey, thisIdParts.get(nextKey));
+				}
 			}
 		}
 		return map;
@@ -319,26 +307,25 @@ public class SnapshotManager {
 	 */
 	public void mergePrefetchResultsRelationships(
 		List rootObjects,
-		ObjRelationship theRelationship,
+		ObjRelationship relationship,
 		List destinationObjects) {
 
-		if(rootObjects.size()==0) {
-			return; //Nothing to do... avoid array index exceptions
+		if(rootObjects.size() == 0) {
+			// nothing to do
+			return;
 		}
 
 		Class sourceObjectClass=((DataObject)rootObjects.get(0)).getClass();
-
-		ObjRelationship reverseRelationship =
-			theRelationship.getReverseRelationship();
+		ObjRelationship reverseRelationship = relationship.getReverseRelationship();
 		//Might be used later on... obtain and cast only once
-		DbRelationship dbRelationship =
-			(DbRelationship) theRelationship.getDbRelationshipList().get(0);
+		DbRelationship dbRelationship = (DbRelationship)relationship.getDbRelationships().get(0);
 
 		Factory listFactory = new Factory() {
 			public Object create() {
 				return new ArrayList();
 			}
 		};
+
 		Map toManyLists = MapUtils.lazyMap(new HashMap(), listFactory);
 
 		Iterator destIterator = destinationObjects.iterator();
@@ -375,7 +362,7 @@ public class SnapshotManager {
 			DataObject thisRoot = (DataObject) rootIterator.next();
 			ToManyList toManyList =
 				(ToManyList) thisRoot.readPropertyDirectly(
-					theRelationship.getName());
+					relationship.getName());
 
 			toManyList.setObjectList((List) toManyLists.get(thisRoot));
 		}
