@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.*;
 
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
@@ -79,30 +79,30 @@ public class DefaultResultIterator implements ResultIterator {
 	protected ResultSet resultSet;
 	protected Map dataRow;
 	protected DbAttribute[] rowDescriptor;
-	protected String[] rowTypes;
 	protected ExtendedType[] converters;
+	protected int resultSize;
 
-    /** 
-     * Creates new DefaultResultIterator. Initializes it
-     * with ResultSet and query metadata.
-     */
+	/** 
+	 * Creates new DefaultResultIterator. Initializes it
+	 * with ResultSet and query metadata.
+	 */
 	public DefaultResultIterator(
 		ResultSet resultSet,
 		DbAdapter adapter,
 		SelectQueryAssembler queryAssembler)
 		throws SQLException, CayenneException {
-			
+
 		this.resultSet = resultSet;
 		this.rowDescriptor = queryAssembler.getSnapshotDesc(resultSet);
-        this.rowTypes = queryAssembler.getResultTypes(resultSet);
-                          
-        int len = rowDescriptor.length;
-        converters = new ExtendedType[len];
-        ExtendedTypeMap typeMap = adapter.getTypeConverter();
-        for (int i = 0; i < len; i++) {
-            converters[i] = typeMap.getRegisteredType(rowTypes[i]);
-        }
-          
+		String[] rowTypes = queryAssembler.getResultTypes(resultSet);
+
+		resultSize = rowDescriptor.length;
+		converters = new ExtendedType[resultSize];
+		ExtendedTypeMap typeMap = adapter.getTypeConverter();
+		for (int i = 0; i < resultSize; i++) {
+			converters[i] = typeMap.getRegisteredType(rowTypes[i]);
+		}
+
 		checkNextRow();
 	}
 
@@ -133,15 +133,61 @@ public class DefaultResultIterator implements ResultIterator {
 			throw new CayenneException("An attempt to read uninitialized row or past the end of the iterator.");
 		}
 
-		return dataRow;
+		Map row = dataRow;
+
+		try {
+			checkNextRow();
+		} catch (SQLException sqex) {
+			throw new CayenneException("Exception reading ResultSet.", sqex);
+		}
+
+		return row;
 	}
 
+    /**
+     * Returns all unread data rows from ResultSet and closes
+     * this iterator.
+     */
+    public List dataRows() throws CayenneException {
+    	ArrayList list = new ArrayList();
+    	while(this.hasNextRow()) {
+    		list.add(this.nextDataRow());
+    	}
+    	
+    	this.close();
+    	
+    	return list;
+    }
+    
 	/** 
 	 * Reads a row from the internal ResultSet at the current
 	 * cursor position.
 	 */
-	protected void readDataRow() throws CayenneException {
-		throw new CayenneException("Not implemented yet.");
+	protected void readDataRow() throws SQLException, CayenneException {
+		try {
+			dataRow = new HashMap();
+
+			// process result row columns,
+			// set object properties right away,
+			// FK & PK columns will be stored in temp maps that will be converted to id's later
+			Object fetchedValue = null;
+			for (int i = 0; i < resultSize; i++) {
+				// note: jdbc column indexes start from 1 , not 0 as in arrays
+				Object val =
+					converters[i].materializeObject(
+						resultSet,
+						i + 1,
+						rowDescriptor[i].getType());
+				dataRow.put(rowDescriptor[i].getName(), val);
+			}
+		} catch (CayenneException cex) {
+			// rethrow unmodified
+			throw cex;
+		} catch (Exception otherex) {
+			throw new CayenneException(
+				"Exception materializing column.",
+				otherex);
+		}
 	}
 
 	/** 
@@ -150,6 +196,11 @@ public class DefaultResultIterator implements ResultIterator {
 	 * Otherwise unused database resources will not be released properly.
 	 */
 	public void close() throws CayenneException {
-		throw new CayenneException("Not implemented yet.");
+		dataRow = null;
+		try {
+			resultSet.close();
+		} catch (SQLException sqex) {
+			throw new CayenneException("Exception closing ResultSet.", sqex);
+		}
 	}
 }

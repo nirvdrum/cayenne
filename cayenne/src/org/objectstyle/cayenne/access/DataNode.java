@@ -53,19 +53,18 @@
  * <http://objectstyle.org/>.
  *
  */
- 
+
 package org.objectstyle.cayenne.access;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
@@ -79,311 +78,285 @@ import org.objectstyle.cayenne.query.Query;
   * @author Andrei Adamchik
   */
 public class DataNode implements QueryEngine {
-    static Logger logObj = Logger.getLogger(DataNode.class.getName());
+	static Logger logObj = Logger.getLogger(DataNode.class.getName());
 
-    public static final String DEFAULT_ADAPTER_CLASS =
-        "org.objectstyle.cayenne.dba.JdbcAdapter";
+	public static final String DEFAULT_ADAPTER_CLASS =
+		"org.objectstyle.cayenne.dba.JdbcAdapter";
 
-    private static final DataMap[] noDataMaps = new DataMap[0];
+	private static final DataMap[] noDataMaps = new DataMap[0];
 
-    protected String name;
-    protected DataSource dataSource;
-    protected DataMap[] dataMaps;
-    protected DbAdapter adapter;
-    protected String dataSourceLocation;
-    protected String dataSourceFactory;
+	protected String name;
+	protected DataSource dataSource;
+	protected DataMap[] dataMaps;
+	protected DbAdapter adapter;
+	protected String dataSourceLocation;
+	protected String dataSourceFactory;
 
-    /** Creates unnamed DataNode */
-    public DataNode() {}
+	/** Creates unnamed DataNode */
+	public DataNode() {
+	}
 
-    /** Creates DataNode and assigns <code>name</code> to it. */
-    public DataNode(String name) {
-        this.name = name;
+	/** Creates DataNode and assigns <code>name</code> to it. */
+	public DataNode(String name) {
+		this.name = name;
 
-        // make sure it is not null - set to static immutable object
-        this.dataMaps = noDataMaps;
-    }
+		// make sure it is not null - set to static immutable object
+		this.dataMaps = noDataMaps;
+	}
 
-    // setters/getters
+	// setters/getters
 
-    /** Returns node "name" property. */
-    public String getName() {
-        return name;
-    }
+	/** Returns node "name" property. */
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /** Returns a location of DataSource of this node. */
-    public String getDataSourceLocation() {
-        return dataSourceLocation;
-    }
+	/** Returns a location of DataSource of this node. */
+	public String getDataSourceLocation() {
+		return dataSourceLocation;
+	}
 
-    public void setDataSourceLocation(String dataSourceLocation) {
-        this.dataSourceLocation = dataSourceLocation;
-    }
+	public void setDataSourceLocation(String dataSourceLocation) {
+		this.dataSourceLocation = dataSourceLocation;
+	}
 
-    /** Returns a name of DataSourceFactory class for this node. */
-    public String getDataSourceFactory() {
-        return dataSourceFactory;
-    }
+	/** Returns a name of DataSourceFactory class for this node. */
+	public String getDataSourceFactory() {
+		return dataSourceFactory;
+	}
 
-    public void setDataSourceFactory(String dataSourceFactory) {
-        this.dataSourceFactory = dataSourceFactory;
-    }
+	public void setDataSourceFactory(String dataSourceFactory) {
+		this.dataSourceFactory = dataSourceFactory;
+	}
 
-    public DataMap[] getDataMaps() {
-        return dataMaps;
-    }
+	public DataMap[] getDataMaps() {
+		return dataMaps;
+	}
 
-    public void setDataMaps(DataMap[] dataMaps) {
-        this.dataMaps = dataMaps;
-    }
+	public void setDataMaps(DataMap[] dataMaps) {
+		this.dataMaps = dataMaps;
+	}
 
-    public void addDataMap(DataMap map) {
-        // note to self - implement it as a List
-        // to avoid this ugly resizing in the future
-        if (dataMaps == null)
-            dataMaps = new DataMap[] { map };
-        else {
-            DataMap[] newMaps = new DataMap[dataMaps.length + 1];
-            System.arraycopy(dataMaps, 0, newMaps, 0, dataMaps.length);
-            newMaps[dataMaps.length] = map;
-            dataMaps = newMaps;
-        }
-    }
+	public void addDataMap(DataMap map) {
+		// note to self - implement it as a List
+		// to avoid this ugly resizing in the future
+		if (dataMaps == null)
+			dataMaps = new DataMap[] { map };
+		else {
+			DataMap[] newMaps = new DataMap[dataMaps.length + 1];
+			System.arraycopy(dataMaps, 0, newMaps, 0, dataMaps.length);
+			newMaps[dataMaps.length] = map;
+			dataMaps = newMaps;
+		}
+	}
 
-    public DataSource getDataSource() {
-        return dataSource;
-    }
+	public DataSource getDataSource() {
+		return dataSource;
+	}
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
-    /** Returns DbAdapter object. This is a plugin for
-      * that handles RDBMS vendor-specific features. */
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
+	/** Returns DbAdapter object. This is a plugin for
+	  * that handles RDBMS vendor-specific features. */
+	public DbAdapter getAdapter() {
+		return adapter;
+	}
 
-    public void setAdapter(DbAdapter adapter) {
-        this.adapter = adapter;
-    }
+	public void setAdapter(DbAdapter adapter) {
+		this.adapter = adapter;
+	}
 
-    // other methods
+	// other methods
 
-    /** 
-     * Returns this object if it can hanle queries for
-     * <code>objEntity</code>, returns null otherwise.
-     */
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return (lookupEntity(objEntity.getName()) != null) ? this : null;
-    }
+	/** 
+	 * Returns this object if it can hanle queries for
+	 * <code>objEntity</code>, returns null otherwise.
+	 */
+	public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+		return (lookupEntity(objEntity.getName()) != null) ? this : null;
+	}
 
-    /** Lookup an entity by name across all node maps. */
-    public ObjEntity lookupEntity(String objEntityName) {
-        DataMap[] maps = this.getDataMaps();
-        int mapLen = maps.length;
-        for (int i = 0; i < mapLen; i++) {
-            ObjEntity anEntity = maps[i].getObjEntity(objEntityName);
-            if (anEntity != null)
-                return anEntity;
-        }
-        return null;
-    }
+	/** Lookup an entity by name across all node maps. */
+	public ObjEntity lookupEntity(String objEntityName) {
+		DataMap[] maps = this.getDataMaps();
+		int mapLen = maps.length;
+		for (int i = 0; i < mapLen; i++) {
+			ObjEntity anEntity = maps[i].getObjEntity(objEntityName);
+			if (anEntity != null)
+				return anEntity;
+		}
+		return null;
+	}
 
-    /** Run multiple queries using one of the pooled connections. */
-    public void performQueries(List queries, OperationObserver opObserver) {
-        Level logLevel = opObserver.queryLogLevel();
+	/** Run multiple queries using one of the pooled connections. */
+	public void performQueries(List queries, OperationObserver opObserver) {
+		Level logLevel = opObserver.queryLogLevel();
 
-        int listSize = queries.size();
-        QueryLogger.logQueryStart(logLevel, listSize);
-        if (listSize == 0)
-            return;
+		int listSize = queries.size();
+		QueryLogger.logQueryStart(logLevel, listSize);
+		if (listSize == 0)
+			return;
 
-        Connection con = null;
-        boolean usesAutoCommit = opObserver.useAutoCommit();
-        boolean rolledBackFlag = false;
+		Connection con = null;
+		boolean usesAutoCommit = opObserver.useAutoCommit();
+		boolean rolledBackFlag = false;
 
-        try {
-            // check out connection, create statement
-            con = this.getDataSource().getConnection();
-            if (con.getAutoCommit() != usesAutoCommit) {
-                con.setAutoCommit(usesAutoCommit);
-            }
+		try {
+			// check out connection, create statement
+			con = this.getDataSource().getConnection();
+			if (con.getAutoCommit() != usesAutoCommit) {
+				con.setAutoCommit(usesAutoCommit);
+			}
 
-            // give a chance to order queries
-            queries = opObserver.orderQueries(this, queries);
+			// give a chance to order queries
+			queries = opObserver.orderQueries(this, queries);
 
-            // just in case recheck list size....
-            listSize = queries.size();
+			// just in case recheck list size....
+			listSize = queries.size();
 
-            for (int i = 0; i < listSize; i++) {
-                Query nextQuery = (Query) queries.get(i);
+			for (int i = 0; i < listSize; i++) {
+				Query nextQuery = (Query) queries.get(i);
 
-                // catch exceptions for each individual query
-                try {
-                    // 1. translate query
-                    QueryTranslator queryTranslator = getAdapter().getQueryTranslator(nextQuery);
-                    queryTranslator.setEngine(this);
-                    queryTranslator.setCon(con);
-                    PreparedStatement prepStmt = queryTranslator.createStatement(logLevel);
+				// catch exceptions for each individual query
+				try {
+					// 1. translate query
+					QueryTranslator queryTranslator =
+						getAdapter().getQueryTranslator(nextQuery);
+					queryTranslator.setEngine(this);
+					queryTranslator.setCon(con);
+					PreparedStatement prepStmt =
+						queryTranslator.createStatement(logLevel);
 
-                    try {
-                        if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-                            // 2.a execute query
-                            ResultSet rs = prepStmt.executeQuery();
-                            DbAttribute[] snapshotDesc =
-                                ((SelectQueryAssembler) queryTranslator).getSnapshotDesc(rs);
-                            String[] resultTypes =
-                                ((SelectQueryAssembler) queryTranslator).getResultTypes(rs);
-                            
-                            List resultSnapshots = snapshotsFromResultSet(rs, snapshotDesc, resultTypes);
-                            QueryLogger.logSelectCount(logLevel, resultSnapshots.size());
-                            rs.close();
+					try {
+						if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+							// 2.a execute query
+							ResultSet rs = prepStmt.executeQuery();
 
-                            // 3.a send results back to consumer
-                            opObserver.nextSnapshots(nextQuery, resultSnapshots);
-                        }
-                        else {
-                            // 2.b execute update
-                            int count = prepStmt.executeUpdate();
-                            QueryLogger.logUpdateCount(logLevel, count);
+							SelectQueryAssembler assembler =
+								(SelectQueryAssembler) queryTranslator;
+							DefaultResultIterator it =
+								new DefaultResultIterator(
+									rs,
+									this.getAdapter(),
+									assembler);
 
-                            // 3.b send results back to consumer
-                            opObserver.nextCount(nextQuery, count);
-                        }
-                    }
-                    finally {
-                        // important - prepared statement must be closed 
-                        // no matter what, or it will result in 
-                        // "leaks" of the database resources (in Oracle,
-                        // for example, this will result in 
-                        // "ORA-01000 maximum open cursors exceeded" error)
-                        prepStmt.close();
-                    }
-                }
-                catch (Exception queryEx) {
-                    QueryLogger.logQueryError(logLevel, queryEx);
+							List resultSnapshots = it.dataRows();
+							QueryLogger.logSelectCount(
+								logLevel,
+								resultSnapshots.size());
+							rs.close();
 
-                    // notify consumer of the exception,
-                    // stop running further queries
-                    opObserver.nextQueryException(nextQuery, queryEx);
+							// 3.a send results back to consumer
+							opObserver.nextSnapshots(
+								nextQuery,
+								resultSnapshots);
+						} else {
+							// 2.b execute update
+							int count = prepStmt.executeUpdate();
+							QueryLogger.logUpdateCount(logLevel, count);
 
-                    if (!usesAutoCommit) {
-                        // rollback transaction
-                        try {
-                            rolledBackFlag = true;
-                            con.rollback();
-                            QueryLogger.logRollbackTransaction(logLevel);
-                            opObserver.transactionRolledback();
-                        }
-                        catch (SQLException sqlEx) {
-                            opObserver.nextQueryException(nextQuery, sqlEx);
-                        }
-                    }
+							// 3.b send results back to consumer
+							opObserver.nextCount(nextQuery, count);
+						}
+					} finally {
+						// important - prepared statement must be closed 
+						// no matter what, or it will result in 
+						// "leaks" of the database resources (in Oracle,
+						// for example, this will result in 
+						// "ORA-01000 maximum open cursors exceeded" error)
+						prepStmt.close();
+					}
+				} catch (Exception queryEx) {
+					QueryLogger.logQueryError(logLevel, queryEx);
 
-                    break;
-                }
-            }
+					// notify consumer of the exception,
+					// stop running further queries
+					opObserver.nextQueryException(nextQuery, queryEx);
 
-            // commit transaction if needed
-            if (!rolledBackFlag && !usesAutoCommit) {
-                con.commit();
-                QueryLogger.logCommitTransaction(logLevel);
-                opObserver.transactionCommitted();
-            }
+					if (!usesAutoCommit) {
+						// rollback transaction
+						try {
+							rolledBackFlag = true;
+							con.rollback();
+							QueryLogger.logRollbackTransaction(logLevel);
+							opObserver.transactionRolledback();
+						} catch (SQLException sqlEx) {
+							opObserver.nextQueryException(nextQuery, sqlEx);
+						}
+					}
 
-        }
-        // catch stuff like connection allocation errors, etc...
-        catch (Exception globalEx) {
-            QueryLogger.logQueryError(logLevel, globalEx);
+					break;
+				}
+			}
 
-            if (!usesAutoCommit) {
-                // rollback failed transaction
-                rolledBackFlag = true;
+			// commit transaction if needed
+			if (!rolledBackFlag && !usesAutoCommit) {
+				con.commit();
+				QueryLogger.logCommitTransaction(logLevel);
+				opObserver.transactionCommitted();
+			}
 
-                try {
-                    con.rollback();
-                    QueryLogger.logRollbackTransaction(logLevel);
-                    opObserver.transactionRolledback();
-                }
-                catch (SQLException ex) {
-                    // do nothing....
-                }
-            }
+		}
+		// catch stuff like connection allocation errors, etc...
+		catch (Exception globalEx) {
+			QueryLogger.logQueryError(logLevel, globalEx);
 
-            opObserver.nextGlobalException(globalEx);
-        }
-        finally {
-            try {
-                // return connection to the pool if it was checked out
-                if (con != null)
-                    con.close();
-            }
-            // finally catch connection closing exceptions...
-            catch (Exception finalEx) {
-                opObserver.nextGlobalException(finalEx);
-            }
-        }
-    }
+			if (!usesAutoCommit) {
+				// rollback failed transaction
+				rolledBackFlag = true;
 
-    public void performQuery(Query query, OperationObserver opObserver) {
-        ArrayList qWrapper = new ArrayList(1);
-        qWrapper.add(query);
-        this.performQueries(qWrapper, opObserver);
-    }
+				try {
+					con.rollback();
+					QueryLogger.logRollbackTransaction(logLevel);
+					opObserver.transactionRolledback();
+				} catch (SQLException ex) {
+					// do nothing....
+				}
+			}
 
-    /** Creates primary key support for all node DbEntities.
-     *  Will use its facilities provided by DbAdapter to generate
-     *  any necessary database objects and data for primary
-     *  key support. */
-    public void createPkSupportForMapEntities() throws Exception {
-        // generate common PK support
-        adapter.getPkGenerator().createAutoPkSupport(this);
+			opObserver.nextGlobalException(globalEx);
+		} finally {
+			try {
+				// return connection to the pool if it was checked out
+				if (con != null)
+					con.close();
+			}
+			// finally catch connection closing exceptions...
+			catch (Exception finalEx) {
+				opObserver.nextGlobalException(finalEx);
+			}
+		}
+	}
 
-        // generate PK support for each indiv. entity.
-        int len = dataMaps.length;
-        for (int i = 0; i < len; i++) {
-            DbEntity[] ents = dataMaps[i].getDbEntities();
-            for (int j = 0; j < ents.length; j++) {
-                adapter.getPkGenerator().createAutoPkSupportForDbEntity(this, ents[j]);
-            }
-        }
-    }
+	public void performQuery(Query query, OperationObserver opObserver) {
+		ArrayList qWrapper = new ArrayList(1);
+		qWrapper.add(query);
+		this.performQueries(qWrapper, opObserver);
+	}
 
-    /** Will process a result set instantiating a list of maps with data. */
-    public List snapshotsFromResultSet(
-        ResultSet rs,
-        DbAttribute[] snapshotDesc,
-        String[] resultTypes)
-        throws Exception {
+	/** Creates primary key support for all node DbEntities.
+	 *  Will use its facilities provided by DbAdapter to generate
+	 *  any necessary database objects and data for primary
+	 *  key support. */
+	public void createPkSupportForMapEntities() throws Exception {
+		// generate common PK support
+		adapter.getPkGenerator().createAutoPkSupport(this);
 
-        ArrayList snapshots = new ArrayList();
-        int len = snapshotDesc.length;
-        ExtendedType[] converters = new ExtendedType[len];
-        ExtendedTypeMap typeMap = adapter.getTypeConverter();
-        for (int i = 0; i < len; i++) {
-            converters[i] = typeMap.getRegisteredType(resultTypes[i]);
-        }
-
-        while (rs.next()) {
-            HashMap map = new HashMap();
-            snapshots.add(map);
-
-            // process result row columns,
-            // set object properties right away,
-            // FK & PK columns will be stored in temp maps that will be converted to id's later
-            Object fetchedValue = null;
-            for (int i = 0; i < len; i++) {
-                // note: jdbc column indexes start from 1 , not 0 as in arrays
-                Object val = converters[i].materializeObject(rs, i + 1, snapshotDesc[i].getType());
-                map.put(snapshotDesc[i].getName(), val);
-            }
-        }
-
-        return snapshots;
-    }
+		// generate PK support for each indiv. entity.
+		int len = dataMaps.length;
+		for (int i = 0; i < len; i++) {
+			DbEntity[] ents = dataMaps[i].getDbEntities();
+			for (int j = 0; j < ents.length; j++) {
+				adapter.getPkGenerator().createAutoPkSupportForDbEntity(
+					this,
+					ents[j]);
+			}
+		}
+	}
 }

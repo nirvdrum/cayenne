@@ -12,4 +12,6 @@ Changes in this release:
 1. Added ResultIterator
 2. Added public method DataContext.objectFromDataRow (rather exposed 
 another private method).
+3. Removed public DataNode.snapshotsFromResultSet refactored into 
+DefaultResultIterator
 

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.sql.*;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -80,51 +81,72 @@ public class DefaultResultIteratorTst extends TestCase {
 		st = null;
 		rs = null;
 		it = null;
-		
+
 		TestMain.getSharedDatabaseSetup().cleanTableData();
 		new DataContextTst("noop").populateTables();
 	}
 
 	public void testCheckNextRow() throws java.lang.Exception {
-/*		try {
-			createIterator();
-            
-            assertNotNull(it.dataRow);
-            it.checkNextRow();
-            assertNotNull(it.dataRow);
-            
-		} finally {
-			cleanup();
-		}
-	} 
-	
-	public void testHasNextRow() throws java.lang.Exception {
 		try {
 			createIterator();
-            assertTrue(it.hasNextRow());            
+
+			assertNotNull(it.dataRow);
+			it.checkNextRow();
+			assertNotNull(it.dataRow);
+
 		} finally {
 			cleanup();
 		}
 	}
-	
+
+	public void testHasNextRow() throws java.lang.Exception {
+		try {
+			createIterator();
+			assertTrue(it.hasNextRow());
+		} finally {
+			cleanup();
+		}
+	}
+
 	public void testNextDataRow() throws java.lang.Exception {
 		try {
 			createIterator();
-			
+
 			// must be as many rows as we have artists
 			// inserted in the database
-			for(int i = 0; i < DataContextTst.artistCount; i++) {
-                  assertTrue(it.hasNextRow());
-                  it.nextDataRow();
+			for (int i = 0; i < DataContextTst.artistCount; i++) {
+				assertTrue(it.hasNextRow());
+				it.nextDataRow();
 			}
-			
+
 			// rows must end here
 			assertTrue(!it.hasNextRow());
-			
+
 		} finally {
 			cleanup();
-		} 
-		*/
+		}
+	}
+
+	public void testReadDataRow() throws java.lang.Exception {
+		try {
+			createIterator();
+
+			// must be as many rows as we have artists
+			// inserted in the database
+			Map dataRow = null;
+			for (int i = 1; i <= DataContextTst.artistCount; i++) {
+				assertTrue(it.hasNextRow());
+				dataRow = it.nextDataRow();
+			}
+
+			assertEquals(
+				"Failed row: " + dataRow,
+				new DataContextTst("noop").artistName(9),
+				dataRow.get("ARTIST_NAME"));
+
+		} finally {
+			cleanup();
+		}
 	}
 
 	protected void cleanup() throws SQLException {
@@ -142,18 +164,23 @@ public class DefaultResultIteratorTst extends TestCase {
 	}
 
 	protected void createIterator() throws Exception {
-		conn =  TestMain.getSharedConnection();
-			
+		conn = TestMain.getSharedConnection();
+
 		DbAdapter adapter = TestMain.getSharedNode().getAdapter();
 		SelectQuery q = new SelectQuery("Artist");
-		SelectQueryAssembler assembler = (SelectQueryAssembler)adapter.getQueryTranslator(q);
+		q.addOrdering("artistName", true);
+
+		SelectQueryAssembler assembler =
+			(SelectQueryAssembler) adapter.getQueryTranslator(q);
 		assembler.setEngine(TestMain.getSharedNode());
-		
-        assembler.setCon(conn);
-        
-		st = assembler.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);		
-	    rs = st.executeQuery();
-	    
-	    it = new DefaultResultIterator(rs, adapter, assembler);
+
+		assembler.setCon(conn);
+
+		st =
+			assembler.createStatement(
+				DefaultOperationObserver.DEFAULT_LOG_LEVEL);
+		rs = st.executeQuery();
+
+		it = new DefaultResultIterator(rs, adapter, assembler);
 	}
 }

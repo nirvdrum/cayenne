@@ -276,6 +276,10 @@ public class DataContextTst extends TestCase {
         return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }
 
+    public String artistName(int ind) {
+    	return "artist" + ind;
+    }
+    
     public void populateTables() throws java.lang.Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
@@ -290,7 +294,7 @@ public class DataContextTst extends TestCase {
 
             for (int i = 1; i <= artistCount; i++) {
                 stmt.setInt(1, i);
-                stmt.setString(2, "artist" + i);
+                stmt.setString(2, artistName(i));
                 stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
             }
