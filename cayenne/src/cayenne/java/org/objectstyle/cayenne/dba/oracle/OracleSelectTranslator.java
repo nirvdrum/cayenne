@@ -59,13 +59,11 @@ package org.objectstyle.cayenne.dba.oracle;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.map.DbAttribute;
 
 /** 
  * Select translator that implements Oracle-specific optimizations.
@@ -73,96 +71,98 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @author Andrei Adamchik
  */
 public class OracleSelectTranslator extends SelectTranslator {
-    private static Logger logObj = Logger.getLogger(OracleSelectTranslator.class);
+	private static Logger logObj =
+		Logger.getLogger(OracleSelectTranslator.class);
 
-    private static boolean testedDriver;
-    private static boolean useOptimizations;
-    private static Method statementDefineColumnType;
-    private static Method statementSetRowPrefetch;
-    private static final Object[] rowPrefetchArgs =
-        new Object[] { new Integer(100)};
+	private static boolean testedDriver;
+	private static boolean useOptimizations;
+	private static Method statementSetRowPrefetch;
 
-    /** 
-     * Determines if we can use Oracle optimizations.
-     * If yes, configure this object to use them via reflection.
-     */
-    private static final synchronized void testDriver(Statement st) {
-        if (testedDriver) {
-            return;
-        }
+	private static final Object[] rowPrefetchArgs =
+		new Object[] { new Integer(100)};
 
-        // invalid call.. give it another chance later
-        if (st == null) {
-            return;
-        }
+	/** 
+	 * Determines if we can use Oracle optimizations.
+	 * If yes, configure this object to use them via reflection.
+	 */
+	private static final synchronized void testDriver(Statement st) {
+		if (testedDriver) {
+			return;
+		}
 
-        testedDriver = true;
+		// invalid call.. give it another chance later
+		if (st == null) {
+			return;
+		}
 
-        try {
-            // search for matching methods in class and its superclasses
-            Class[] args1 = new Class[] { Integer.TYPE, Integer.TYPE };
-            statementDefineColumnType = st.getClass().getMethod("defineColumnType", args1);
+		testedDriver = true;
 
-            Class[] args2 = new Class[] { Integer.TYPE };
-            statementSetRowPrefetch = st.getClass().getMethod("setRowPrefetch", args2);
+		try {
+			// search for matching methods in class and its superclasses
 
-            useOptimizations = true;
-        }
-        catch (Exception ex) {
-            useOptimizations = false;
-            statementSetRowPrefetch = null;
-            statementDefineColumnType = null;
+			Class[] args2 = new Class[] { Integer.TYPE };
+			statementSetRowPrefetch =
+				st.getClass().getMethod("setRowPrefetch", args2);
 
-            StringBuffer buf = new StringBuffer();
-            buf
-                .append("Unknown Oracle statement type: [")
-                .append(st.getClass().getName())
-                .append("]. No Oracle optimizations applied.");
+			useOptimizations = true;
+		} catch (Exception ex) {
+			useOptimizations = false;
+			statementSetRowPrefetch = null;
 
-            logObj.info(buf.toString());
-        }
-    }
+			StringBuffer buf = new StringBuffer();
+			buf
+				.append("Unknown Oracle statement type: [")
+				.append(st.getClass().getName())
+				.append("]. No Oracle optimizations applied.");
 
-    /** 
-     * Translates internal query into PreparedStatement,
-     * applying Oracle optimizations if possible.
-     */
-    public PreparedStatement createStatement(Level logLevel) throws Exception {
-        String sqlStr = createSqlString();
-        QueryLogger.logQuery(logLevel, sqlStr, values);
-        PreparedStatement stmt = con.prepareStatement(sqlStr);
+			logObj.info(buf.toString());
+		}
+	}
 
-        initStatement(stmt);
+	/** 
+	 * Translates internal query into PreparedStatement,
+	 * applying Oracle optimizations if possible.
+	 */
+	public PreparedStatement createStatement(Level logLevel) throws Exception {
+		String sqlStr = createSqlString();
+		QueryLogger.logQuery(logLevel, sqlStr, values);
+		PreparedStatement stmt = con.prepareStatement(sqlStr);
 
-        if (!testedDriver) {
-            testDriver(stmt);
-        }
+		initStatement(stmt);
 
-        if (useOptimizations) {
-            // apply Oracle optimization of the statement
+		if (!testedDriver) {
+			testDriver(stmt);
+		}
 
-            // 1. name result columns
-            List columns = getColumns();
-            int len = columns.size();
-            Object[] args = new Object[2];
-            for (int i = 0; i < len; i++) {
-                DbAttribute attr = (DbAttribute) columns.get(i);
-                args[0] = new Integer(i + 1);
-                args[1] = new Integer(attr.getType());
-                statementDefineColumnType.invoke(stmt, args);
-            }
+		if (useOptimizations) {
+			// apply Oracle optimization of the statement
 
-            // 2. prefetch bigger batches of rows
-            // [This optimization didn't give any measurable performance
-            // increase. Keeping it for the future research]
-           
-            // Note that this is done by statement,
-            // instead of Connection, since we do not want to mess 
-            // with Connection that is potentially used by
-            // other people.
-            statementSetRowPrefetch.invoke(stmt, rowPrefetchArgs);
-        }
-        
-        return stmt;
-    }
+			// Performance tests conducted by Arndt (bug #699966) show
+			// that using explicit "defineColumnType" slows things down,
+			// so this is disabled now
+
+			// 1. name result columns
+			/*  List columns = getColumns();
+			  int len = columns.size();
+			  Object[] args = new Object[2];
+			  for (int i = 0; i < len; i++) {
+			      DbAttribute attr = (DbAttribute) columns.get(i);
+			      args[0] = new Integer(i + 1);
+			      args[1] = new Integer(attr.getType());
+			      statementDefineColumnType.invoke(stmt, args);
+			  } */
+
+			// 2. prefetch bigger batches of rows
+			// [This optimization didn't give any measurable performance
+			// increase. Keeping it for the future research]
+
+			// Note that this is done by statement,
+			// instead of Connection, since we do not want to mess 
+			// with Connection that is potentially used by
+			// other people.
+			statementSetRowPrefetch.invoke(stmt, rowPrefetchArgs);
+		}
+
+		return stmt;
+	}
 }

@@ -149,6 +149,9 @@ public class OracleAdapter extends JdbcAdapter {
 
         // create specially configured ByteArrayType handler
         map.registerType(new ByteArrayType(true, true));
+        
+        // override date handler with Oracle handler
+		map.registerType(new OracleUtilDateType());
     }
 
     /**
