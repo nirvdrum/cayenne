@@ -95,6 +95,24 @@ public abstract class SnapshotEvent extends CayenneEvent implements Serializable
 
     public abstract Collection deletedIds();
 
+
+    public String toString() {
+    	StringBuffer buffer = new StringBuffer();
+		buffer.append("[SnapshotEvent] root: ").append(getRootSource());
+		
+		Map modified = modifiedDiffs();
+		if(modified != null && !modified.isEmpty()) {
+			buffer.append(", modified " ).append(modified.size()).append(" id(s)");
+		}
+		
+		Collection deleted = deletedIds();
+		if(deleted != null && !deleted.isEmpty()) {
+			buffer.append(", deleted " ).append(deleted.size()).append(" id(s)");
+		}
+		
+    	return buffer.toString();
+    }
+    
     /**
      * Subclass of SnapshotEvent representing an event resent
      * as a result of receiving another event.

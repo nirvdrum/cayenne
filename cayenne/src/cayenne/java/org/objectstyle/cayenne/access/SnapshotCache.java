@@ -59,8 +59,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
-import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 //import org.shiftone.cache.Cache;
 //import org.shiftone.cache.CacheManager;
@@ -69,6 +69,8 @@ import org.objectstyle.cayenne.event.EventSubject;
  * @author Andrei Adamchik
  */
 public class SnapshotCache {
+    private static Logger logObj = Logger.getLogger(SnapshotCache.class);
+
     protected String name;
     protected EventSubject snapshotEventSubject;
     //   protected Cache snapshots;
@@ -113,6 +115,7 @@ public class SnapshotCache {
         if (!deleted.isEmpty()) {
             Iterator it = deleted.iterator();
             while (it.hasNext()) {
+                it.next();
                 //          snapshots.remove(it.next());
             }
         }
@@ -122,6 +125,7 @@ public class SnapshotCache {
         if (!updates.isEmpty()) {
             Iterator it = updates.keySet().iterator();
             while (it.hasNext()) {
+                it.next();
                 /*  Object key = it.next();
                 Map diff = (Map) updates.get(key);
                 
@@ -144,13 +148,17 @@ public class SnapshotCache {
      * set ot this SnapshotCache.
      */
     public void postSnapshotsChangeEvent(SnapshotEvent event) {
+        if (logObj.isDebugEnabled()) {
+            logObj.debug("postSnapshotsChangeEvent: " + event);
+        }
+
         // first do whatever is needed to update the internal cache
         processSnapshotsChangeEvent(event);
 
         // now notify children;
         // create a chained event so that its source is SnapshotCache.
-        EventManager.getDefaultManager().postEvent(
-            SnapshotEvent.createEvent(this, event),
-            snapshotEventSubject);
+        // EventManager.getDefaultManager().postEvent(
+        //     SnapshotEvent.createEvent(this, event),
+        //   snapshotEventSubject);
     }
 }

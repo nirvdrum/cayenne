@@ -61,6 +61,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -74,6 +75,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -86,6 +88,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     protected transient Map objectMap = new HashMap();
     protected transient Map newObjectMap = null;
     protected Map snapshotMap = new HashMap();
+
+    // TODO: this will be a shared object one day
+    protected transient SnapshotCache snapshotCache = new SnapshotCache("local");
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
@@ -107,6 +112,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
+        Collection ids = new ArrayList(objects.size());
         Iterator it = objects.iterator();
         while (it.hasNext()) {
             DataObject object = (DataObject) it.next();
@@ -121,7 +127,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
             // remove snapshot, but keep the object
             removeSnapshot(object.getObjectId());
+
+            // remember the id
+            ids.add(object.getObjectId());
         }
+
+        // send an event for removed snapshots
+        snapshotCache.postSnapshotsChangeEvent(
+            SnapshotEvent.createEvent(this, Collections.EMPTY_MAP, ids));
     }
 
     /**
@@ -144,6 +157,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             object.setObjectId(null);
             object.setPersistenceState(PersistenceState.TRANSIENT);
         }
+
+        // no snapshot events needed... snapshots are not evicted...
     }
 
     /**
@@ -175,13 +190,27 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         int size = objects.size();
+        Map diffs = new HashMap();
         for (int i = 0; i < size; i++) {
             DataObject object = (DataObject) objects.get(i);
+            ObjectId oid = object.getObjectId();
 
             // add snapshots if refresh is forced, or if a snapshot is missing
-            if (refresh || getSnapshot(object.getObjectId()) == null) {
-                addSnapshot(object.getObjectId(), (Map) snapshots.get(i));
+            if (refresh || getSnapshot(oid) == null) {
+                Map snapshot = (Map) snapshots.get(i);
+                addSnapshot(oid, snapshot);
+
+                // build a diff...
+                Map diff = buildSnapshotDiff(oid, snapshot);
+                if (!diff.isEmpty()) {
+                    diffs.put(oid, diff);
+                }
             }
+        }
+
+        if (!diffs.isEmpty()) {
+            snapshotCache.postSnapshotsChangeEvent(
+                SnapshotEvent.createEvent(this, diffs, Collections.EMPTY_LIST));
         }
     }
 
@@ -192,6 +221,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized void objectsCommitted() {
         Iterator objects = this.getObjectIterator();
         List modifiedIds = null;
+
+        // these will store snapshot changes
+        List deletedIds = null;
+        Map modifiedDiffs = null;
 
         while (objects.hasNext()) {
             DataObject object = (DataObject) objects.next();
@@ -214,14 +247,31 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
             // deleted
             if (state == PersistenceState.DELETED) {
-				objects.remove();
-				removeSnapshot(id);
+                objects.remove();
+                removeSnapshot(id);
                 object.setDataContext(null);
                 object.setPersistenceState(PersistenceState.TRANSIENT);
+
+                if (deletedIds == null) {
+                    deletedIds = new ArrayList();
+                }
+
+                deletedIds.add(id);
             }
             // modified
             else if (state == PersistenceState.MODIFIED) {
-                addSnapshot(id, object.getDataContext().takeObjectSnapshot(object));
+                Map snapshot = object.getDataContext().takeObjectSnapshot(object);
+
+                Map diff = buildSnapshotDiff(id, snapshot);
+                if (!diff.isEmpty()) {
+                    if (modifiedDiffs == null) {
+                        modifiedDiffs = new HashMap();
+                    }
+
+                    modifiedDiffs.put(id, diff);
+                }
+
+                addSnapshot(id, snapshot);
                 object.setPersistenceState(PersistenceState.COMMITTED);
             }
         }
@@ -237,6 +287,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     throw new CayenneRuntimeException("No object for id: " + id);
                 }
 
+                // store old snapshot as deleted,
+                // even though the object was modified, not deleted 
+                // from the common logic standpoint..
+                if (!id.isTemporary()) {
+                    if (deletedIds == null) {
+                        deletedIds = new ArrayList();
+                    }
+
+                    deletedIds.add(id);
+                }
+
                 object.setObjectId(id.getReplacementId());
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 addObject(object);
@@ -246,12 +307,57 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 removeObject(id);
             }
         }
+
+        // post change event 
+        if (deletedIds != null || modifiedDiffs != null) {
+            snapshotCache.postSnapshotsChangeEvent(
+                SnapshotEvent.createEvent(
+                    this,
+                    modifiedDiffs != null ? modifiedDiffs : Collections.EMPTY_MAP,
+                    deletedIds != null ? deletedIds : Collections.EMPTY_LIST));
+        }
+    }
+
+    /**
+     * Creates a map that contains only the keys that have values
+     * that differ in the registered snapshot for a given ObjectId and
+     * a given snapshot. It is assumed that key sets are the same in 
+     * both snapshots (since they should represent the same entity data).
+     * Returns an empty map if no differences are found.
+     */
+    protected Map buildSnapshotDiff(ObjectId oid, Map newSnapshot) {
+        Map oldSnapshot = getSnapshot(oid);
+
+        if (oldSnapshot == null) {
+            return newSnapshot;
+        }
+
+        // build a diff...
+        Map diff = null;
+
+        Iterator keys = oldSnapshot.keySet().iterator();
+        while (keys.hasNext()) {
+            Object key = keys.next();
+            Object oldValue = oldSnapshot.get(key);
+            Object newValue = newSnapshot.get(key);
+            if (!Util.nullSafeEquals(oldValue, newValue)) {
+                if (diff == null) {
+                    diff = new HashMap();
+                }
+                diff.put(key, newValue);
+            }
+        }
+
+        return (diff != null) ? diff : Collections.EMPTY_MAP;
     }
 
     /**
      * Reregisters an object using a new id as a key.
      * Returns the object if it is found, or null if
      * it is not registered in the object store.
+     * 
+     * @deprecated Since 1.1 all methods for snapshot manipulation 
+     * via ObjectStore are deprecated due to architecture changes.
      */
     public synchronized DataObject changeObjectKey(ObjectId oldId, ObjectId newId) {
         DataObject obj = (DataObject) objectMap.remove(oldId);
@@ -325,6 +431,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return (DataObject) objectMap.get(id);
     }
 
+    /**
+     * @deprecated Since 1.1 all methods for snapshot manipulation 
+     * via ObjectStore are deprecated due to architecture changes.
+     */
     public synchronized void addSnapshot(ObjectId id, Map snapshot) {
         snapshotMap.put(id, snapshot);
     }
@@ -333,6 +443,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return (Map) snapshotMap.get(id);
     }
 
+    /**
+      * @deprecated Since 1.1 all methods for snapshot manipulation 
+      * via ObjectStore are deprecated due to architecture changes.
+      */
     public synchronized void removeObject(ObjectId id) {
         if (id != null) {
             objectMap.remove(id);
@@ -340,6 +454,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
     }
 
+    /**
+     * @deprecated Since 1.1 all methods for snapshot manipulation 
+     * via ObjectStore are deprecated due to architecture changes.
+     */
     public synchronized void removeSnapshot(ObjectId id) {
         snapshotMap.remove(id);
     }
