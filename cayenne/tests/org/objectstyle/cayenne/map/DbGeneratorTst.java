@@ -53,32 +53,36 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+import java.util.*;
+import java.util.logging.*;
 import junit.framework.*;
-import junit.runner.*;
+import org.objectstyle.*;
+import java.sql.*;
 
-/** Combines test cases from org.objectstyle.cayenne.map package to 
-  * a test suite. 
+
+/** Test cases for DbGenerator.
   *
   * @author Andrei Adamchik
   */
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Map (org.objectstyle.cayenne.map)");
-        suite.addTestSuite(MapLoaderLoadTst.class);
-        suite.addTestSuite(DataMapTst.class);
-        suite.addTestSuite(EntityTst.class);
-        suite.addTestSuite(AttributeTst.class);
-        suite.addTestSuite(RelationshipTst.class);
-        suite.addTestSuite(ObjEntityTst.class);
-        suite.addTestSuite(ObjAttributeTst.class);
-        suite.addTestSuite(ObjRelationshipTst.class);
-        suite.addTestSuite(DbRelationshipTst.class);
-        suite.addTestSuite(DbEntityTst.class);
-        suite.addTestSuite(DbLoaderTst.class);
-        suite.addTestSuite(DbGeneratorTst.class);
-        suite.addTestSuite(ClassGeneratorTst.class);
-		return suite;
-	}
+public class DbGeneratorTst extends TestCase {
+    static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
+
+    protected DbGenerator gen;
+
+    public DbGeneratorTst(String name) {
+        super(name);
+    }
+
+    public void setUp() throws Exception {
+        gen = new DbGenerator(
+                  TestMain.getSharedConnection(),
+                  TestMain.getSharedNode().getAdapter());
+    }
+
+
+    public void testGetAdapter() throws Exception {
+        assertSame(TestMain.getSharedNode().getAdapter(), gen.getAdapter());
+    }
 }

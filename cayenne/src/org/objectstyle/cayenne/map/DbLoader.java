@@ -85,8 +85,8 @@ public class DbLoader {
 
 
     /** Creates new DbLoader. */
-    public DbLoader(Connection temp) {
-        this.con = temp;
+    public DbLoader(Connection con) {
+        this.con = con;
     }
 
 

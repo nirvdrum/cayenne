@@ -64,8 +64,10 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.*;
 
 
-/** Utility class for loading data from the specified database into DataMap.
- * Can be used from command line as well as from GUI tools. */
+/** Utility class for loading schema information from the specified 
+  * database into DataMap.
+  * <p>This class is an interface to DbLoader class. It can be used 
+  * from command line as well as from GUI tools.</p> */
 public class DbLoaderTool {
     public static final String NO_GUI_PROPERTY = "cayenne.nogui";
 

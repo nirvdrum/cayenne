@@ -148,6 +148,7 @@ public class DatabaseSetup {
     public Iterator tableCreateQueries() throws Exception {
         ArrayList queries = new ArrayList();
         DbAdapter adapter = org.objectstyle.TestMain.getSharedNode().getAdapter();
+        DbGenerator gen = new DbGenerator(org.objectstyle.TestMain.getSharedConnection(), adapter);
 
         // Oracle does not support more then 1 "LONG xx" column per table
         // PAINTING_INFO need to be fixed
@@ -159,7 +160,7 @@ public class DatabaseSetup {
             DbEntity ent = ("AUTO_PK_SUPPORT".equals(TEST_TABLES[i]))
                            ? pkEntity()
                            : map.getDbEntity(TEST_TABLES[i]);
-            queries.add(QueryHelper.createTableQuery(adapter, ent));
+            queries.add(gen.createTableQuery(ent));
         }
 
         // add FK constraints
@@ -169,7 +170,7 @@ public class DatabaseSetup {
                     continue;
 
                 DbEntity ent = map.getDbEntity(TEST_TABLES[i]);
-                List qs = QueryHelper.createFkConstraintsQueries(adapter, ent);
+                List qs = gen.createFkConstraintsQueries(ent);
                 queries.addAll(qs);
             }
         }
