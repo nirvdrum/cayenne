@@ -503,9 +503,15 @@ implements ActionListener
 		mediator.fireDomainEvent(new DomainEvent(this, domain, DomainEvent.ADD));
 		mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
 	}
-		
+
+	/** Creates a new data node. Data node may consist of two pieces of information:
+	  * 1. Name/location
+	  * 2. Database url/uid/password (for direct connection to DB).
+	  * First piece of info is stored directly into the cayenne.xml. 
+	  * Second piece of data should be stored in the separate file
+	  * if the factory requires it. */
 	private void createDataNode() {
-		DataNode node = new DataNode("Untitled");
+		DataNode node = new DataNode(NameGenerator.getDataNodeName());
 		GuiDataSource src;
 		src = new GuiDataSource(new DataSourceInfo());
 		node.setDataSource(src);
@@ -514,8 +520,8 @@ implements ActionListener
 		mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
 		mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
 	}
-		
-	
+
+
 	public void currentDomainChanged(DomainDisplayEvent e){
 		enableDomainMenu();
 		removeMenu.setText("Remove Domain");
