@@ -83,15 +83,18 @@ public class HSQLDBAdapter extends JdbcAdapter {
 		StringBuffer buf = new StringBuffer();
 		StringBuffer refBuf = new StringBuffer();
 
+		String srcName = ((DbEntity)rel.getSourceEntity()).getFullyQualifiedName();
+		String dstName = ((DbEntity)rel.getTargetEntity()).getFullyQualifiedName();
+
 		buf.append("ALTER TABLE ");
-		buf.append(((DbEntity)rel.getSourceEntity()).getFullyQualifiedName());
+		buf.append(srcName);
 
 		// hsqldb requires the ADD CONSTRAINT statement
-		String constraintName = this.getConstraintNameForRelationship(rel);
-		if (constraintName != null) {
-			buf.append(" ADD CONSTRAINT ");
-			buf.append(constraintName);
-		}
+		buf.append(" ADD CONSTRAINT ");
+		buf.append("C_");
+		buf.append(srcName);
+		buf.append("_");
+		buf.append((long)(System.currentTimeMillis()/(Math.random()*100000)));
 
 		buf.append(" FOREIGN KEY (");
 
@@ -110,7 +113,7 @@ public class HSQLDBAdapter extends JdbcAdapter {
 		}
 
 		buf.append(") REFERENCES ");
-		buf.append(((DbEntity)rel.getTargetEntity()).getFullyQualifiedName());
+		buf.append(dstName);
 		buf.append(" (");
 		buf.append(refBuf.toString());
 		buf.append(')');
@@ -118,17 +121,10 @@ public class HSQLDBAdapter extends JdbcAdapter {
 		return buf.toString();
 	}
 
-	protected String getConstraintNameForRelationship(DbRelationship rel) {
-		StringBuffer buf = new StringBuffer(64);
-
-		buf.append("FK_");
-		buf.append(((DbEntity)rel.getSourceEntity()).getFullyQualifiedName());
-		buf.append("_");
-		buf.append((int)(Math.random()*100));
-
-		return buf.toString();
-	}
-
+	/**
+	 * Returns an OperationSorter to handle constraints.
+	 * @see JdbcAdapter#getOpSorter(DataNode)
+	 */
 	public OperationSorter getOpSorter(DataNode node) {
 		synchronized (sorters) {
 			OperationSorter sorter = (OperationSorter) sorters.get(node);
