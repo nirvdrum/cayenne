@@ -56,11 +56,26 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import java.io.*;
-import org.jdom.*;
-import org.jdom.input.*;
-import org.jdom.output.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 /**
  * This class defines cayenne project.
@@ -178,9 +193,7 @@ public class CayenneProject {
       List views = root.getChildren("view");
       views.clear();
       XMLOutputter out = new XMLOutputter();
-      out.setIndent("    ");
-      out.setNewlines(true);
-      out.setTextNormalize(true);
+      out.setFormat(Format.getPrettyFormat());
 
       Set dataViewsElementsKeys = dataViewsElements.keySet();
       for (Iterator i = dataViewsElementsKeys.iterator(); i.hasNext(); ) {
