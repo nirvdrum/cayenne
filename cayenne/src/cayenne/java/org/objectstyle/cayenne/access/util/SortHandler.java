@@ -60,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.QueryEngine;
 
@@ -70,11 +71,13 @@ import org.objectstyle.cayenne.access.QueryEngine;
  * @author Andrei Adamchik
  */
 public class SortHandler {
+    private static Logger logObj = Logger.getLogger(SortHandler.class);
     protected static Class defaultSorterClass = DefaultSorter.class;
 
     protected DependencySorter sorter;
     protected Class sorterClass;
     protected QueryEngine queryEngine;
+    protected boolean dirty;
 
     public static Class getDefaultSorterClass() {
         return defaultSorterClass;
@@ -113,10 +116,24 @@ public class SortHandler {
         this.sorterClass = sorterClass;
         this.queryEngine = queryEngine;
         
-        indexSorter();
+        this.dirty = true;
     }
 
+    /**
+     * Marks itself as "dirty", so that it will be indexed lazily on next
+     * invocation.
+     */
     public void indexSorter() {
+        dirty = true;
+    }
+    
+    /**
+     * Reindexes internal sorter.
+     */
+    protected synchronized void _indexSorter() {
+    	if(!dirty) {
+    		return;
+    	}
         DependencySorter newSorter;
 
         try {
@@ -128,8 +145,9 @@ public class SortHandler {
                 ex);
         }
 
-        newSorter.initSorter(queryEngine, queryEngine.getDataMapsAsList());
+        newSorter.initSorter(queryEngine);
         this.sorter = newSorter;
+        this.dirty = false;
     }
 
     /**
@@ -137,6 +155,8 @@ public class SortHandler {
       * an unsorted array.
       */
     public List sortedQueries(List unsortedQueries) {
+        _indexSorter();
+        
         Object[] array = unsortedQueries.toArray();
         Arrays.sort(array, sorter.getQueryComparator());
         return Arrays.asList(array);
@@ -148,8 +168,10 @@ public class SortHandler {
      * or creating the tables of, those entities.
      */
     public List sortedDbEntitiesInInsertOrder(List dbEntities) {
+        _indexSorter();
+        
         Object[] array = dbEntities.toArray();
-        Arrays.sort(array, sorter.getDbEntityComparator(true));
+        Arrays.sort(array, sorter.getDbEntityComparator(false));
         return Arrays.asList(array);
     }
 
@@ -158,8 +180,10 @@ public class SortHandler {
       *  in the correct order for deleting objects from or removing the tables of, those entities.
       */
     public List sortedDbEntitiesInDeleteOrder(List dbEntities) {
+        _indexSorter();
+        
         Object[] array = dbEntities.toArray();
-        Arrays.sort(array, sorter.getDbEntityComparator(false));
+        Arrays.sort(array, sorter.getDbEntityComparator(true));
         return Arrays.asList(array);
     }
 
@@ -171,7 +195,9 @@ public class SortHandler {
      *  object, and reflexive relationships are correctly handled
      */
     public void sortObjectsInInsertOrder(List objects) {
-        Collections.sort(objects, sorter.getDataObjectComparator(true));
+        _indexSorter();
+        
+        Collections.sort(objects, sorter.getDataObjectComparator(false));
     }
 
     /**
@@ -182,6 +208,8 @@ public class SortHandler {
      *  object and reflexive relationships are correctly handled
      */
     public void sortObjectsInDeleteOrder(List objects) {
-        Collections.sort(objects, sorter.getDataObjectComparator(false));
+        _indexSorter();
+        
+        Collections.sort(objects, sorter.getDataObjectComparator(true));
     }
 }

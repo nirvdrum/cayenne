@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.util.Comparator;
-import java.util.List;
 
 import org.objectstyle.cayenne.access.QueryEngine;
 
@@ -68,40 +67,40 @@ import org.objectstyle.cayenne.access.QueryEngine;
  * @author Andrei Adamchik
  */
 public interface DependencySorter {
-	public void initSorter(QueryEngine queryEngine, List dataMaps);
+	public void initSorter(QueryEngine queryEngine);
 	
 	/**
 	 * Returns a comparator for sorting DbEntities to satisfy their
 	 * dependencies.
 	 * 
-	 * @param dependentLast If set to <code>true</code>, this comparator will
-	 * place dependent objects after the the objects they depend upon.
+	 * @param dependentFirst If set to <code>true</code>, this comparator will
+	 * place dependent objects before the the objects they depend upon.
 	 * 
 	 * @return Comparator
 	 */
-    public Comparator getDbEntityComparator(boolean dependentLast);
+    public Comparator getDbEntityComparator(boolean dependentFirst);
 
     /**
      * Returns a comparator for sorting ObjEntities to satisfy their
      * dependencies.
      *
-     * @param dependentLast If set to <code>true</code>, this comparator will
-     * place dependent objects after the the objects they depend upon.
+     * @param dependentFirst If set to <code>true</code>, this comparator will
+     * place dependent objects before the the objects they depend upon.
      *
      * @return Comparator
      */
-    public Comparator getObjEntityComparator(boolean dependentLast);
+    public Comparator getObjEntityComparator(boolean dependentFirst);
 
     /**
      * Returns a comparator for sorting DataObjects to satisfy their
      * dependencies.
      *
-     * @param dependentLast If set to <code>true</code>, this comparator will
-     * place dependent objects after the the objects they depend upon.
+     * @param dependentFirst If set to <code>true</code>, this comparator will
+     * place dependent objects before the the objects they depend upon.
      *
      * @return Comparator
      */
-    public Comparator getDataObjectComparator(boolean dependentLast);
+    public Comparator getDataObjectComparator(boolean dependentFirst);
 
     /**
      * Returns a comparator for sorting queries to satisfy their dependencies.
