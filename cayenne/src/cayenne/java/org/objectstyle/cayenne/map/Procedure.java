@@ -183,4 +183,21 @@ public class Procedure extends MapObject {
     public void setReturningValue(boolean returningValue) {
         this.returningValue = returningValue;
     }
+    
+    public String getCatalog() {
+        return catalog;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setCatalog(String string) {
+        catalog = string;
+    }
+
+    public void setSchema(String string) {
+        schema = string;
+    }
+
 }

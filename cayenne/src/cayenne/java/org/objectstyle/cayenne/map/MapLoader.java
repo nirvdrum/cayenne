@@ -96,13 +96,17 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_ENTITY_TAG = "db-entity";
     public static final String OBJ_ENTITY_TAG = "obj-entity";
     public static final String DB_ATTRIBUTE_TAG = "db-attribute";
-    public static final String DB_ATTRIBUTE_DERIVED_TAG = "db-attribute-derived";
+    public static final String DB_ATTRIBUTE_DERIVED_TAG =
+        "db-attribute-derived";
     public static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
     public static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
     public static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
     public static final String DB_RELATIONSHIP_TAG = "db-relationship";
     public static final String DB_RELATIONSHIP_REF_TAG = "db-relationship-ref";
     public static final String DB_ATTRIBUTE_PAIR_TAG = "db-attribute-pair";
+    public static final String PROCEDURE_TAG = "procedure";
+    public static final String PROCEDURE_PARAMETER_TAG = "procedure-parameter";
+
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
@@ -119,6 +123,7 @@ public class MapLoader extends DefaultHandler {
     private ObjRelationship objRelationship;
     private DbAttribute attrib;
     private Map dbRelationshipMap;
+    private Procedure procedure;
 
     private String currentTag;
     private StringBuffer charactersBuffer;
@@ -271,6 +276,10 @@ public class MapLoader extends DefaultHandler {
             processStartObjRelationship(atts);
         } else if (local_name.equals(DB_RELATIONSHIP_REF_TAG)) {
             processStartDbRelationshipRef(atts);
+        } else if (local_name.equals(PROCEDURE_PARAMETER_TAG)) {
+            processStartProcedureParameter(atts);
+        } else if (local_name.equals(PROCEDURE_TAG)) {
+            processStartProcedure(atts);
         } else if (local_name.equals(DB_KEY_GENERATOR_TAG)) {
             processStartDbKeyGenerator(atts);
         } else if (local_name.equals(DB_GENERATOR_TYPE_TAG)) {
@@ -307,7 +316,12 @@ public class MapLoader extends DefaultHandler {
             processEndDbGeneratorName();
         } else if (local_name.equals(DB_KEY_CACHE_SIZE_TAG)) {
             processEndDbKeyCacheSize();
+        } else if (local_name.equals(PROCEDURE_PARAMETER_TAG)) {
+            processEndProcedureParameter();
+        } else if (local_name.equals(PROCEDURE_TAG)) {
+            processEndProcedure();
         }
+
         resetCurrentTag();
         charactersBuffer = null;
     }
@@ -650,7 +664,8 @@ public class MapLoader extends DefaultHandler {
             out.print(" toMany=\"" + (rel.isToMany() ? TRUE : FALSE) + '\"');
 
             String deleteRule = DeleteRule.deleteRuleName(rel.getDeleteRule());
-            if (rel.getDeleteRule() != DeleteRule.NO_ACTION && deleteRule != null) {
+            if (rel.getDeleteRule() != DeleteRule.NO_ACTION
+                && deleteRule != null) {
                 out.print(" deleteRule=\"" + deleteRule + '\"');
             }
             out.println('>');
@@ -1065,12 +1080,82 @@ public class MapLoader extends DefaultHandler {
         source.addRelationship(objRelationship);
     }
 
+    private void processStartProcedure(Attributes attributes)
+        throws SAXException {
+
+        String name = attributes.getValue("", "name");
+        if (null == name) {
+            throw new SAXException(
+                "MapLoaderImpl::processStartProcedure(),"
+                    + " no procedure name.");
+        }
+
+        String schema = attributes.getValue("", "schema");
+        String catalog = attributes.getValue("", "catalog");
+        String returningValue = attributes.getValue("", "returningValue");
+
+        procedure = new Procedure(name);
+        procedure.setReturningValue(
+            returningValue != null && returningValue.equalsIgnoreCase(TRUE));
+        procedure.setSchema(schema);
+        procedure.setCatalog(catalog);
+        dataMap.addProcedure(procedure);
+    }
+
+    private void processStartProcedureParameter(Attributes attributes)
+        throws SAXException {
+
+        String name = attributes.getValue("", "name");
+        if (name == null) {
+            throw new SAXException(
+                "MapLoaderImpl::processStartProcedureParameter(),"
+                    + " no procedure parameter name.");
+        }
+
+        ProcedureParameter parameter = new ProcedureParameter(name);
+
+        String type = attributes.getValue("", "type");
+        if (type != null) {
+            parameter.setType(TypesMapping.getSqlTypeByName(type));
+        }
+
+        String length = attributes.getValue("", "length");
+        if (length != null) {
+            parameter.setMaxLength(Integer.parseInt(length));
+        }
+
+        String precision = attributes.getValue("", "precision");
+        if (precision != null) {
+            attrib.setPrecision(Integer.parseInt(precision));
+        }
+
+        String direction = attributes.getValue("", "direction");
+        if ("in".equals(direction)) {
+            parameter.setDirection(ProcedureParameter.IN_PARAMETER);
+        } else if ("out".equals(direction)) {
+            parameter.setDirection(ProcedureParameter.OUT_PARAMETER);
+        } else if ("in_out".equals(direction)) {
+            parameter.setDirection(ProcedureParameter.IN_OUT_PARAMETER);
+        } else {
+            parameter.setDirection(ProcedureParameter.VOID_PARAMETER);
+        }
+
+        procedure.addCallParameter(parameter);
+    }
+
     private void processEndDbAttribute() throws SAXException {
         attrib = null;
     }
 
     private void processEndDbEntity() {
         dbEntity = null;
+    }
+
+    private void processEndProcedure() {
+        procedure = null;
+    }
+
+    private void processEndProcedureParameter() {
     }
 
     private void processEndDbGeneratorType() {
@@ -1152,7 +1237,9 @@ public class MapLoader extends DefaultHandler {
             }
         }
         if (derived.size() > 1) {
-            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
+            Collections.sort(
+                derived,
+                new PropertyComparator("name", DbEntity.class));
         }
         return derived;
     }
@@ -1167,7 +1254,9 @@ public class MapLoader extends DefaultHandler {
             }
         }
         if (derived.size() > 1) {
-            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
+            Collections.sort(
+                derived,
+                new PropertyComparator("name", DbEntity.class));
         }
         return derived;
     }
@@ -1186,13 +1275,17 @@ public class MapLoader extends DefaultHandler {
 
     protected List sortedRelationships(Entity ent) {
         List list = new ArrayList(ent.getRelationships());
-        Collections.sort(list, new PropertyComparator("name", Relationship.class));
+        Collections.sort(
+            list,
+            new PropertyComparator("name", Relationship.class));
         return list;
     }
 
     protected List sortedRelationships(List rels) {
         List list = new ArrayList(rels);
-        Collections.sort(list, new PropertyComparator("name", Relationship.class));
+        Collections.sort(
+            list,
+            new PropertyComparator("name", Relationship.class));
         return list;
     }
 
@@ -1244,4 +1337,3 @@ public class MapLoader extends DefaultHandler {
         }
     }
 }
-
