@@ -50,6 +50,7 @@ import java.util.List;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.query.GenericSelectQuery;

@@ -65,8 +65,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;

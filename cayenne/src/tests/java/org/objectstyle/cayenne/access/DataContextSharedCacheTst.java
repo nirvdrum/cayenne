@@ -47,6 +47,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;

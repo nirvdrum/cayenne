@@ -64,6 +64,7 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.ProcedureQuery;

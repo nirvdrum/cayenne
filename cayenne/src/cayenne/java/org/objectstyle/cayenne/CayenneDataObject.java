@@ -67,7 +67,6 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.access.util.RelationshipFault;

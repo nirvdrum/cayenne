@@ -56,6 +56,7 @@ import java.util.TreeSet;
 import org.apache.commons.collections.SequencedHashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;

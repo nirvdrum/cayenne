@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
