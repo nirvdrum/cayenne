@@ -59,7 +59,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.objectstyle.cayenne.modeler.control.ProjectTypeSelectControl;
+import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
 
 /**
  * @author Andrei Adamchik

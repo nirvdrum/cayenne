@@ -67,9 +67,9 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.model.TopModel;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.TopModel;
+import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public abstract class CayenneAction extends AbstractAction {
     /** Defines path to the images. */
-    public static final String RESOURCE_PATH = "org/objectstyle/cayenne/modeler/";
+    public static final String RESOURCE_PATH = "org/objectstyle/cayenne/modeler/images/";
 
     protected boolean alwaysOn;
 

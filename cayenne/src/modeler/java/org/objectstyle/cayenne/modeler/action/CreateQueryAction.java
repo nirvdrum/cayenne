@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.control.ClassGeneratorController;
+import org.objectstyle.cayenne.modeler.dialog.classgen.ClassGeneratorController;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 

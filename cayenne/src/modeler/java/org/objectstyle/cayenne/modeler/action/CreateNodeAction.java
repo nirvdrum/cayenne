@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectDataSource;

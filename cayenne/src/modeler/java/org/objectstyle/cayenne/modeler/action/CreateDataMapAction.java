@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 

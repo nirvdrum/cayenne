@@ -69,8 +69,8 @@ import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapObject;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
-import org.objectstyle.cayenne.modeler.control.EventController;
 
 /**
  * Various unorganized utility methods used by CayenneModeler.

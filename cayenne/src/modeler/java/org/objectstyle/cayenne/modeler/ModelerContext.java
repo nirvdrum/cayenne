@@ -61,6 +61,7 @@ import java.awt.Window;
 
 import javax.swing.JRootPane;
 
+import org.objectstyle.cayenne.modeler.util.*;
 import org.scopemvc.controller.basic.ViewContext;
 import org.scopemvc.controller.swing.SwingContext;
 import org.scopemvc.core.View;

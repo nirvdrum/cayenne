@@ -64,10 +64,10 @@ import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
-import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
-import org.objectstyle.cayenne.modeler.view.ProjectOpener;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
+import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
+import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.Validator;

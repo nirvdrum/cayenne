@@ -63,11 +63,11 @@ import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
+import org.objectstyle.cayenne.modeler.ModelerController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
-import org.objectstyle.cayenne.modeler.control.ModelerController;
+import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
+import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
-import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
 import org.scopemvc.core.Control;

@@ -78,6 +78,7 @@ import javax.swing.text.Keymap;
 
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 

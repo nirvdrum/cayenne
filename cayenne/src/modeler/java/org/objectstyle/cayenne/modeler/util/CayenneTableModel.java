@@ -59,7 +59,7 @@ import java.util.Collections;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.Util;
 

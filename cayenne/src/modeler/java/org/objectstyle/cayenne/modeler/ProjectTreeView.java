@@ -90,7 +90,6 @@ import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureListener;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.map.event.QueryListener;
-import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;

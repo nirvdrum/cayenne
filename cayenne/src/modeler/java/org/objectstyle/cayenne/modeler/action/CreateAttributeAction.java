@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
-import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;

@@ -59,9 +59,9 @@ import java.awt.event.ActionEvent;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.control.ModelerController;
-import org.objectstyle.cayenne.modeler.view.UnsavedChangesDialog;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ModelerController;
+import org.objectstyle.cayenne.modeler.dialog.UnsavedChangesDialog;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
 
