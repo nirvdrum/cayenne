@@ -1432,13 +1432,7 @@ public class DataContext implements QueryEngine, Serializable {
                     + query);
         }
 
-        GenericSelectQuery selectQuery = (GenericSelectQuery) query;
-
-        if (refresh) {
-            // TODO: decorate the query with refresh flag
-        }
-
-        return performQuery(selectQuery);
+        return performQuery((GenericSelectQuery) query, refresh);
     }
     
     

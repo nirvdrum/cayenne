@@ -57,16 +57,24 @@
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.Icon;
+import javax.swing.JList;
 
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.scopemvc.view.swing.SCheckBox;
+import org.scopemvc.view.swing.SComboBox;
 import org.scopemvc.view.swing.SLabel;
+import org.scopemvc.view.swing.SListCellRenderer;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STextField;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
@@ -76,6 +84,18 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Andrei Adamchik
  */
 public class SelectQueryMainPanel extends SPanel {
+
+    private static final String NO_CACHE_LABEL = "No Result Caching";
+    private static final String LOCAL_CACHE_LABEL = "DataContext Cache";
+    private static final String SHARED_CACHE_LABEL = "Shared Cache";
+
+    private static final Map cachePolicyLabels = new HashMap();
+
+    static {
+        cachePolicyLabels.put(GenericSelectQuery.NO_CACHE, NO_CACHE_LABEL);
+        cachePolicyLabels.put(GenericSelectQuery.LOCAL_CACHE, LOCAL_CACHE_LABEL);
+        cachePolicyLabels.put(GenericSelectQuery.SHARED_CACHE, SHARED_CACHE_LABEL);
+    }
 
     protected SLabel rootLabel;
 
@@ -106,26 +126,46 @@ public class SelectQueryMainPanel extends SPanel {
         STextField pageSize = new STextField(7);
         pageSize.setSelector(SelectQueryModel.PAGE_SIZE_SELECTOR);
 
+        SComboBox cachePolicy = new SComboBox();
+        cachePolicy.setSelectionSelector(SelectQueryModel.CACHE_POLICY_SELECTOR);
+        cachePolicy.setSelector(SelectQueryModel.CACHE_POLICIES_SELECTOR);
+        cachePolicy.setRenderer(new CachePolicyRenderer());
+
         rootLabel = new SLabel();
         rootLabel.setSelector(QueryModel.ROOT_NAME_SELECTOR);
 
         // assemble
         setLayout(new BorderLayout());
 
-        FormLayout layout =
-            new FormLayout("right:max(50dlu;pref), 3dlu, left:max(200dlu;pref)", "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        CellConstraints cc = new CellConstraints();
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, left:max(50dlu;pref) fill:max(120dlu;pref)",
+                "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, "
+                        + "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
+        PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
-        builder.appendSeparator("SelectQuery Settings");
-        builder.append("Query Root:", rootLabel);
-        builder.append("Query Name:", name);
-        builder.append("Qualifier:", qualifier);
-        builder.appendSeparator();
-        builder.append("Distinct:", distinct);
-        builder.append("Fetch Data Rows:", dataRows);
-        builder.append("Refresh Objects:", refreshesResults);
-        builder.append("Fetch Limit, Rows:", fetchLimit);
-        builder.append("Page Size:", pageSize);
+
+        builder.addSeparator("SelectQuery Settings", cc.xywh(1, 1, 4, 1));
+        builder.addLabel("Query Root:", cc.xy(1, 3));
+        builder.add(rootLabel, cc.xy(3, 3));
+        builder.addLabel("Query Name:", cc.xy(1, 5));
+        builder.add(name, cc.xywh(3, 5, 2, 1));
+        builder.addLabel("Qualifier:", cc.xy(1, 7));
+        builder.add(qualifier, cc.xywh(3, 7, 2, 1));
+
+        builder.addSeparator("", cc.xywh(1, 9, 4, 1));
+        builder.addLabel("Result Caching:", cc.xy(1, 11));
+        builder.add(cachePolicy, cc.xywh(3, 11, 2, 1));
+        builder.addLabel("Distinct:", cc.xy(1, 13));
+        builder.add(distinct, cc.xy(3, 13));
+        builder.addLabel("Fetch Data Rows:", cc.xy(1, 15));
+        builder.add(dataRows, cc.xy(3, 15));
+        builder.addLabel("Refresh Objects:", cc.xy(1, 17));
+        builder.add(refreshesResults, cc.xy(3, 17));
+        builder.addLabel("Fetch Limit, Rows:", cc.xy(1, 19));
+        builder.add(fetchLimit, cc.xy(3, 19));
+        builder.addLabel("Page Size:", cc.xy(1, 21));
+        builder.add(pageSize, cc.xy(3, 21));
 
         add(builder.getPanel(), BorderLayout.CENTER);
     }
@@ -138,6 +178,24 @@ public class SelectQueryMainPanel extends SPanel {
             Object root = ((QueryModel) model).getRoot();
             Icon icon = CellRenderers.iconForObject(root);
             rootLabel.setIcon(icon);
+        }
+    }
+
+    final class CachePolicyRenderer extends SListCellRenderer {
+
+        public Component getListCellRendererComponent(
+                JList list,
+                Object object,
+                int arg2,
+                boolean arg3,
+                boolean arg4) {
+
+            object = cachePolicyLabels.get(object);
+            if (object == null) {
+                object = NO_CACHE_LABEL;
+            }
+
+            return super.getListCellRendererComponent(list, object, arg2, arg3, arg4);
         }
     }
 }

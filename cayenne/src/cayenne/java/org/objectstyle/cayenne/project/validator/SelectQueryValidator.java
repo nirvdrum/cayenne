@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.project.validator;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
@@ -95,26 +95,25 @@ public class SelectQueryValidator extends TreeNodeValidator {
             Iterator orderings = query.getOrderings().iterator();
             while (orderings.hasNext()) {
                 validateOrdering(
-                    root,
-                    (Ordering) orderings.next(),
-                    treeNodePath,
-                    validator);
+                        root,
+                        (Ordering) orderings.next(),
+                        treeNodePath,
+                        validator);
             }
 
             Iterator prefecthes = query.getPrefetches().iterator();
             while (prefecthes.hasNext()) {
                 validatePrefetch(
-                    root,
-                    (String) prefecthes.next(),
-                    treeNodePath,
-                    validator);
+                        root,
+                        (String) prefecthes.next(),
+                        treeNodePath,
+                        validator);
             }
         }
     }
 
     protected Entity validateRoot(Query query, ProjectPath path, Validator validator) {
-        DataMap map = (DataMap) path.getObjectParent();
-
+        DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);
         if (query.getRoot() == null && map != null) {
             validator.registerWarning("Query has no root", path);
             return null;
@@ -130,13 +129,21 @@ public class SelectQueryValidator extends TreeNodeValidator {
             return (query.getRoot() instanceof Entity) ? (Entity) query.getRoot() : null;
         }
 
-        // resolve entity
-        EntityResolver resolver = new EntityResolver();
-        resolver.addDataMap(map);
-        Entity entity = resolver.lookupObjEntity(query);
+        // can't validate Class root - it is likely not accessible from here...
+        if (query.getRoot() instanceof Class) {
+            return null;
+        }
 
+        // resolve entity
+        QueryEngine parent = (QueryEngine) path.firstInstanceOf(QueryEngine.class);
+
+        if (parent == null) {
+            return null;
+        }
+
+        Entity entity = parent.getEntityResolver().lookupObjEntity(query);
         if (entity == null) {
-            entity = resolver.lookupDbEntity(query);
+            entity = parent.getEntityResolver().lookupDbEntity(query);
         }
 
         // if no entity is found register warning and return null
@@ -178,26 +185,26 @@ public class SelectQueryValidator extends TreeNodeValidator {
     }
 
     protected void validateQualifier(
-        Entity entity,
-        Expression qualifier,
-        ProjectPath path,
-        Validator validator) {
+            Entity entity,
+            Expression qualifier,
+            ProjectPath path,
+            Validator validator) {
 
         try {
             testExpression(entity, qualifier);
         }
         catch (ExpressionException e) {
-            validator.registerWarning(
-                buildValidationMessage(e, "Invalid path in qualifier"),
-                path);
+            validator.registerWarning(buildValidationMessage(
+                    e,
+                    "Invalid path in qualifier"), path);
         }
     }
 
     protected void validateOrdering(
-        Entity entity,
-        Ordering ordering,
-        ProjectPath path,
-        Validator validator) {
+            Entity entity,
+            Ordering ordering,
+            ProjectPath path,
+            Validator validator) {
 
         if (ordering == null) {
             return;
@@ -207,17 +214,16 @@ public class SelectQueryValidator extends TreeNodeValidator {
             testExpression(entity, ordering.getSortSpec());
         }
         catch (ExpressionException e) {
-            validator.registerWarning(
-                buildValidationMessage(e, "Invalid ordering"),
-                path);
+            validator
+                    .registerWarning(buildValidationMessage(e, "Invalid ordering"), path);
         }
     }
 
     protected void validatePrefetch(
-        Entity entity,
-        String prefetch,
-        ProjectPath path,
-        Validator validator) {
+            Entity entity,
+            String prefetch,
+            ProjectPath path,
+            Validator validator) {
 
         if (prefetch == null) {
             return;
@@ -227,14 +233,13 @@ public class SelectQueryValidator extends TreeNodeValidator {
             testExpression(entity, Expression.fromString(prefetch));
         }
         catch (ExpressionException e) {
-            validator.registerWarning(
-                buildValidationMessage(e, "Invalid prefetch"),
-                path);
+            validator
+                    .registerWarning(buildValidationMessage(e, "Invalid prefetch"), path);
         }
     }
 
     private void testExpression(Entity rootEntity, Expression exp)
-        throws ExpressionException {
+            throws ExpressionException {
 
         if (exp != null) {
             exp.traverse(new EntityExpressionValidator(rootEntity));
@@ -252,6 +257,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
     }
 
     final class EntityExpressionValidator extends TraversalHelper {
+
         Entity rootEntity;
 
         EntityExpressionValidator(Entity rootEntity) {
@@ -261,7 +267,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
         public void startNode(Expression node, Expression parentNode) {
             // check if path nodes are compatibe with root entity
             if (node.getType() == Expression.OBJ_PATH
-                || node.getType() == Expression.DB_PATH) {
+                    || node.getType() == Expression.DB_PATH) {
                 // this will throw an exception if the path is invalid
                 node.evaluate(rootEntity);
             }

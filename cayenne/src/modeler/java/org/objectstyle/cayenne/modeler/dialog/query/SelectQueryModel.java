@@ -62,6 +62,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -75,25 +76,35 @@ import org.scopemvc.model.collection.ListModel;
  * @author Andrei Adamchik
  */
 public class SelectQueryModel extends QueryModel {
+
+    private static final Object[] cachePolicies = new Object[] {
+            GenericSelectQuery.NO_CACHE, GenericSelectQuery.LOCAL_CACHE,
+            GenericSelectQuery.SHARED_CACHE
+    };
+
     public static final Selector QUALIFIER_SELECTOR = Selector.fromString("qualifier");
     public static final Selector FETCH_LIMIT_SELECTOR = Selector.fromString("fetchLimit");
     public static final Selector PAGE_SIZE_SELECTOR = Selector.fromString("pageSize");
-    public static final Selector REFRESHING_OBJECTS_SELECTOR =
-        Selector.fromString("refreshingObjects");
-    public static final Selector FETCHING_DATA_ROWS_SELECTOR =
-        Selector.fromString("fetchingDataRows");
+    public static final Selector REFRESHING_OBJECTS_SELECTOR = Selector
+            .fromString("refreshingObjects");
+    public static final Selector CACHE_POLICY_SELECTOR = Selector
+            .fromString("cachePolicy");
+    public static final Selector CACHE_POLICIES_SELECTOR = Selector
+            .fromString("cachePolicies");
+    public static final Selector FETCHING_DATA_ROWS_SELECTOR = Selector
+            .fromString("fetchingDataRows");
     public static final Selector DISTINCT_SELECTOR = Selector.fromString("distinct");
 
-    public static final Selector NAVIGATION_PATH_SELECTOR =
-        Selector.fromString("navigationPath");
+    public static final Selector NAVIGATION_PATH_SELECTOR = Selector
+            .fromString("navigationPath");
 
     public static final Selector ORDERINGS_SELECTOR = Selector.fromString("orderings");
-    public static final Selector SELECTED_ORDERING_SELECTOR =
-        Selector.fromString("selectedOrdering");
+    public static final Selector SELECTED_ORDERING_SELECTOR = Selector
+            .fromString("selectedOrdering");
 
     public static final Selector PREFETCHES_SELECTOR = Selector.fromString("prefetches");
-    public static final Selector SELECTED_PREFETCH_SELECTOR =
-        Selector.fromString("selectedPrefetch");
+    public static final Selector SELECTED_PREFETCH_SELECTOR = Selector
+            .fromString("selectedPrefetch");
 
     // navigation path from the root entity
     // used for ordering or prefetches picking
@@ -105,6 +116,7 @@ public class SelectQueryModel extends QueryModel {
     protected int pageSize;
     protected boolean refreshingObjects;
     protected boolean fetchingDataRows;
+    protected String cachePolicy;
     protected boolean distinct;
 
     // prefetch related
@@ -134,6 +146,7 @@ public class SelectQueryModel extends QueryModel {
         this.refreshingObjects = selectQuery.isRefreshingObjects();
         this.fetchingDataRows = selectQuery.isFetchingDataRows();
         this.qualifier = selectQuery.getQualifier();
+        this.cachePolicy = selectQuery.getCachePolicy();
 
         initOrderings(selectQuery);
         initPrefetches(selectQuery);
@@ -175,6 +188,7 @@ public class SelectQueryModel extends QueryModel {
         selectQuery.setRefreshingObjects(refreshingObjects);
         selectQuery.setFetchingDataRows(fetchingDataRows);
         selectQuery.setDistinct(distinct);
+        selectQuery.setCachePolicy(cachePolicy);
 
         selectQuery.clearPrefetches();
         selectQuery.addPrefetches(prefetches);
@@ -195,9 +209,13 @@ public class SelectQueryModel extends QueryModel {
         }
     }
 
+    public Object[] getCachePolicies() {
+        return cachePolicies;
+    }
+
     /**
-     * Helper method to create a new ordering model from the current 
-     * navigation path. Returns null if there is no valid selection.
+     * Helper method to create a new ordering model from the current navigation path.
+     * Returns null if there is no valid selection.
      */
     public OrderingModel createOrderingFromNavigationPath() {
         String path = navigationPathString();
@@ -205,8 +223,8 @@ public class SelectQueryModel extends QueryModel {
     }
 
     /**
-     * Helper method to create a new ordering model from the current 
-     * navigation path. Returns null if there is no valid selection.
+     * Helper method to create a new ordering model from the current navigation path.
+     * Returns null if there is no valid selection.
      */
     public PrefetchModel createPrefetchFromNavigationPath() {
         String path = navigationPathString();
@@ -279,6 +297,17 @@ public class SelectQueryModel extends QueryModel {
         }
     }
 
+    public String getCachePolicy() {
+        return cachePolicy;
+    }
+
+    public void setCachePolicy(String cachePolicy) {
+        if (!Util.nullSafeEquals(this.cachePolicy, cachePolicy)) {
+            this.cachePolicy = cachePolicy;
+            fireModelChange(VALUE_CHANGED, CACHE_POLICY_SELECTOR);
+        }
+    }
+
     public Expression getQualifier() {
         return qualifier;
     }
@@ -334,7 +363,7 @@ public class SelectQueryModel extends QueryModel {
     public void setNavigationPath(Object[] navigationPath) {
         this.navigationPath = navigationPath;
         // don't fire an event - navigation path only concerns
-        // this instance.... 
+        // this instance....
     }
 
     public OrderingModel getSelectedOrdering() {

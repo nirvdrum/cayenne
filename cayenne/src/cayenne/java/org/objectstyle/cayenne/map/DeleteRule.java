@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 /**
- * Defines constants for the possible deleteRule values of an ObjRelationship
+ * Defines constants for the possible values of ObjRelationship delete rules.
  * 
  * @author Craig Miskell
  */

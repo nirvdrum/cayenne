@@ -207,6 +207,10 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
         // for now just allow ObjEntity
 
         DataMap map = eventController.getCurrentDataMap();
+        
+        // TODO: now we only allow ObjEntities from the current map,
+        // since query root is fully resolved during map loading,
+        // making it impossible to reference other DataMaps.
         Object[] entities = map.getObjEntities().toArray();
 
         if (entities.length > 1) {
