@@ -10,26 +10,26 @@ import org.objectstyle.cayenne.*;
   */
 public class _Artist extends CayenneDataObject {
 
-    public void setDateOfBirth(java.sql.Time dateOfBirth) {
-        writeProperty("dateOfBirth", dateOfBirth);
-    }
-    public java.sql.Time getDateOfBirth() {
-        return (java.sql.Time)readProperty("dateOfBirth");
-    }
-    
-    
-    public void setArtistName(java.lang.String artistName) {
+    public void setArtistName(String artistName) {
         writeProperty("artistName", artistName);
     }
-    public java.lang.String getArtistName() {
-        return (java.lang.String)readProperty("artistName");
+    public String getArtistName() {
+        return (String)readProperty("artistName");
     }
     
     
-    public void addToPaintingArray(test.Painting obj) {
+    public void setDateOfBirth(java.sql.Date dateOfBirth) {
+        writeProperty("dateOfBirth", dateOfBirth);
+    }
+    public java.sql.Date getDateOfBirth() {
+        return (java.sql.Date)readProperty("dateOfBirth");
+    }
+    
+    
+    public void addToPaintingArray(Painting obj) {
         addToManyTarget("paintingArray", obj, true);
     }
-    public void removeFromPaintingArray(test.Painting obj) {
+    public void removeFromPaintingArray(Painting obj) {
         removeToManyTarget("paintingArray", obj, true);
     }
     public List getPaintingArray() {

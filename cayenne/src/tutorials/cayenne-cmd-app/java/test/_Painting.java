@@ -18,29 +18,29 @@ public class _Painting extends CayenneDataObject {
     }
     
     
-    public void setPaintingTitle(java.lang.String paintingTitle) {
+    public void setPaintingTitle(String paintingTitle) {
         writeProperty("paintingTitle", paintingTitle);
     }
-    public java.lang.String getPaintingTitle() {
-        return (java.lang.String)readProperty("paintingTitle");
+    public String getPaintingTitle() {
+        return (String)readProperty("paintingTitle");
     }
     
     
-    public void setToGallery(test.Gallery toGallery) {
-        setToOneTarget("toGallery", toGallery, true);
-    }
-    
-    public test.Gallery getToGallery() {
-        return (test.Gallery)readProperty("toGallery");
-    } 
-    
-    
-    public void setToArtist(test.Artist toArtist) {
+    public void setToArtist(Artist toArtist) {
         setToOneTarget("toArtist", toArtist, true);
     }
     
-    public test.Artist getToArtist() {
-        return (test.Artist)readProperty("toArtist");
+    public Artist getToArtist() {
+        return (Artist)readProperty("toArtist");
+    } 
+    
+    
+    public void setToGallery(Gallery toGallery) {
+        setToOneTarget("toGallery", toGallery, true);
+    }
+    
+    public Gallery getToGallery() {
+        return (Gallery)readProperty("toGallery");
     } 
     
     

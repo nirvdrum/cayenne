@@ -15,11 +15,10 @@
     	using Cayenne. For a more detailed discussion read <a href="../appguide/index.html">"Writing 
     	Cayenne Applications"</a> section.</p>
     	
-    	<ul>
-    		<li><strong><a href=
-    		"http://objectstyle.org/cayenne/tutorial/cayenne-cmd-app.tar.gz">Download
-    		full tutorial source</a></strong></li>
-    	</ul>
+    	<panel name="Note:">
+    		Full tutorial source code is included in Cayenne distribution under 
+    		<code>src/tutorials</code> folder.
+    	</panel>
     		
     	
     	<p>Tutorial steps:</p>
@@ -43,14 +42,16 @@
     		put it in JRE extendsions directory - eventually this will lead to 
     		ClassNotFoundException problems.</p>
     		
-    		<p>- Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>)
-    		anywhere in the filesystem. A new directory named <code>cayenne-cmd-app</code>
-    		will be created. This directory is referred to as "project directory" further in 
-    		this tutorial.</p>
+    		<p>- Create a new folder named <code>cayenne-cmd-app</code> 
+    		anywhere in the filesystem. This directory is referred to as 
+    		"project directory" further in this chapter. Note that when you
+    		are finished going through all the steps below, project directory 
+    		will become a mirror of this tutorial source folder distributed
+    		with Cayenne.</p>
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
-    		<p>Run <a href="../../tutorial/cayenne-cmd-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		<p>Run <a href="../../tutorials/cayenne-cmd-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
     		script located in the project directory to create test tables. 
     		This script is tested on MySQL, but it should be easy to port to any other RDBMS.</p>
     	</subsection>
@@ -59,9 +60,9 @@
     		<p>Configuration files included in this tutorial are:
     		
     		<ul>
-    			<li><a href="../../tutorial/cayenne-cmd-app/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/driverinfo.xml">driverinfo.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
     		Open <code>cayenne.xml</code> 
@@ -84,45 +85,48 @@
     	</subsection>
     	
     	<subsection name="3.2.5 Generate Java Code for DataObjects" anchor="5">
-    		<p>Use CayenneModeler to generate Java classes for DataObjects by going to 
-    		<strong>"Tools -> Generate Classes"</strong> and selecting the project directory
-    		in the opened popup:</p>
+    		<p>Create "<code>java</code>" subdirectory in the project directory.
+    		Use CayenneModeler to generate Java classes for DataObjects by going to 
+    		<strong>"Tools -> Generate Classes"</strong> and selecting the newly created
+    		"java" directory in the opened popup:</p>
     		<img src="/images/classgen.gif" width="546" height="489" border="0" align="middle"
 			alt="Generate Classes Dialog"/>
 			
     		<p>After the generation 
-    		is done, the following files should appear in the <code>test</code> subdirectory of the 
+    		is done, the following files should appear in the <code>java/test</code> subdirectory of the 
     		project directory:
     		
     		<ul>
-    			<li><a href="../../tutorial/cayenne-cmd-app/test/_Artist.java">_Artist.java</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/test/Artist.java">Artist.java</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/test/_Painting.java">_Painting.java</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/test/Painting.java">Painting.java</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/test/_Gallery.java">_Gallery.java</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/test/Gallery.java">Gallery.java</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/java/test/_Artist.java">_Artist.java</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/java/test/Artist.java">Artist.java</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/java/test/_Painting.java">_Painting.java</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/java/test/Painting.java">Painting.java</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/java/test/_Gallery.java">_Gallery.java</a></li>
+    			<li><a href="../../tutorials/cayenne-cmd-app/java/test/Gallery.java">Gallery.java</a></li>
     		</ul>
     		</p>    	
     	</subsection>
     	
     	<subsection name="3.2.6 Application Code" anchor="6">
     		<p>A simple application that uses Cayenne is located in 
-			   <a href="../../tutorial/cayenne-cmd-app/test/Main.java">Main.java</a>.
+			   <a href="../../tutorials/cayenne-cmd-app/java/test/Main.java">Main.java</a>.
+			   Copy the source file to the java/test project subdirectory.
             </p>    	
     	</subsection>
     	
     	<subsection name="3.2.7 Compile and Run the Application" anchor="7">
-    		<p>Compile the source code (assume that JAVA_HOME variable points to the JSDK 1.4 installation). 
+    		<p>Compile the source code 
+    		(assume that JAVA_HOME variable points to the JSDK 1.4 installation). 
     		On Windows:</p>
 <source>
 projectdir> set CLASSPATH=%CLASSPATH%;%CAYENNE_HOME%\lib\cayenne.jar
-projectdir> %JAVA_HOME%\bin\javac test\*.java
+projectdir> %JAVA_HOME%\bin\javac java\test\*.java
 </source>
 
     		<p>On UNIX:</p>
 <source>
 projectdir# export CLASSPATH=$CLASSPATH:$CAYENNE_HOME/lib/cayenne.jar
-projectdir# $JAVA_HOME/bin/javac test/*.java
+projectdir# $JAVA_HOME/bin/javac java/test/*.java
 </source>
 
 
@@ -132,7 +136,7 @@ projectdir# $JAVA_HOME/bin/javac test/*.java
 			to the found gallery. To run the tutorial do something like this (example given for Windows):
 			</p>
 <source>
-projectdir> set CLASSPATH=%CLASSPATH%;.
+projectdir> set CLASSPATH=%CLASSPATH%;java
 projectdir> %JAVA_HOME%\bin\java test.Main metro
 </source>
 			

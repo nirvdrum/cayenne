@@ -10,18 +10,18 @@ import org.objectstyle.cayenne.*;
   */
 public class _Gallery extends CayenneDataObject {
 
-    public void setGalleryName(java.lang.String galleryName) {
+    public void setGalleryName(String galleryName) {
         writeProperty("galleryName", galleryName);
     }
-    public java.lang.String getGalleryName() {
-        return (java.lang.String)readProperty("galleryName");
+    public String getGalleryName() {
+        return (String)readProperty("galleryName");
     }
     
     
-    public void addToPaintingArray(test.Painting obj) {
+    public void addToPaintingArray(Painting obj) {
         addToManyTarget("paintingArray", obj, true);
     }
-    public void removeFromPaintingArray(test.Painting obj) {
+    public void removeFromPaintingArray(Painting obj) {
         removeToManyTarget("paintingArray", obj, true);
     }
     public List getPaintingArray() {
