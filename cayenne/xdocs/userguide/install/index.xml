@@ -49,8 +49,9 @@
         </subsection>
 
         <subsection name="2.2 Installation" anchor="inst">
-            <p>This section describes the steps needed to install Cayenne source or 
-            binary distribution.</p>
+            <p>There is not really an installation of Cayenne, 
+            as Cayenne is not an application but a framework. Thus, installing Cayenne 
+            simply means to understand what jars are needed. This is discussed below. </p>
             
             <p>Download Cayenne from <a href=
             "http://objectstyle.org/cayenne/download.html">
@@ -90,14 +91,16 @@
             that run unit tests and start CayenneModeler. 
             They are probably not needed on a deployment machine.</i>
             </p>
-            
-            <p>Installation is complete.</p>
         </subsection>
         
         
         <subsection name="2.3 Cayenne JAR Files" anchor="jar">
             <p>There are two JAR files in <code>[cayenne_install_dir]/lib</code>
-            directory: <code>cayenne.jar</code> and <code>cayenne-nodeps.jar</code>. 
+            directory: <ul>
+            	<li><code>cayenne.jar</code></li>
+				<li><code>cayenne-nodeps.jar</code></li>
+			</ul>
+			
             Either one or another should be used (<strong>but not both of them</strong>
             at the same time).
             In most cases <code>cayenne.jar</code> is the best choice. It has 
