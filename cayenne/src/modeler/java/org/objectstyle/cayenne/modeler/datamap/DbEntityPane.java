@@ -91,267 +91,233 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class DbEntityPane
-	extends JPanel
-	implements DbEntityDisplayListener, ExistingSelectionProcessor, ActionListener {
+    extends JPanel
+    implements ExistingSelectionProcessor, DbEntityDisplayListener, ActionListener {
 
-	protected EventController mediator;
+    protected EventController mediator;
 
-	protected JTextField name;
-	protected JTextField catalog;
-	protected JTextField schema;
-	protected JComboBox parentEntities;
-	protected JButton parentLabel;
-	protected JLabel schemaLabel;
-	protected JLabel catalogLabel;
+    protected JTextField name;
+    protected JTextField schema;
+    protected JComboBox parentEntities;
+    protected JButton parentLabel;
+    protected JLabel schemaLabel;
 
-	/** 
-	 * Cludge to prevent marking data map as dirty 
-	 * during initial load. 
-	 */
-	private boolean ignoreChange;
+    /** 
+     * Cludge to prevent marking data map as dirty 
+     * during initial load. 
+     */
+    private boolean ignoreChange;
 
-	public DbEntityPane(EventController mediator) {
-		super();
-		this.mediator = mediator;
-		mediator.addDbEntityDisplayListener(this);
+    public DbEntityPane(EventController mediator) {
+        super();
+        this.mediator = mediator;
+        mediator.addDbEntityDisplayListener(this);
 
-		// Create and layout components
-		init();
+        // Create and layout components
+        init();
 
-		// Add listeners
-		InputVerifier inputCheck = new FieldVerifier();
-		name.setInputVerifier(inputCheck);
-		catalog.setInputVerifier(inputCheck);
-		schema.setInputVerifier(inputCheck);
+        // Add listeners
+        InputVerifier inputCheck = new FieldVerifier();
+        name.setInputVerifier(inputCheck);
+        schema.setInputVerifier(inputCheck);
 
-		parentEntities.addActionListener(this);
-		parentLabel.addActionListener(this);
-	}
+        parentEntities.addActionListener(this);
+        parentLabel.addActionListener(this);
+    }
 
-	private void init() {
-		setLayout(new BorderLayout());
+    private void init() {
+        setLayout(new BorderLayout());
 
-		JLabel nameLabel = new JLabel("Entity name: ");
-		name = new CayenneTextField(25);
+        JLabel nameLabel = new JLabel("Entity name: ");
+        name = new CayenneTextField(25);
 
-		catalogLabel = new JLabel("Catalog: ");
-		catalog = new CayenneTextField(25);
+        schemaLabel = new JLabel("Schema: ");
+        schema = new CayenneTextField(25);
 
-		schemaLabel = new JLabel("Schema: ");
-		schema = new CayenneTextField(25);
+        parentLabel = PanelFactory.createLabelButton("Parent entity: ");
+        parentLabel.setEnabled(false);
+        parentEntities = new JComboBox();
+        parentEntities.setEditable(false);
+        parentEntities.setEnabled(false);
 
-		parentLabel = PanelFactory.createLabelButton("Parent entity: ");
-		parentLabel.setEnabled(false);
-		parentEntities = new JComboBox();
-		parentEntities.setEditable(false);
-		parentEntities.setEnabled(false);
+        Component[] leftCol =
+            new Component[] { nameLabel, schemaLabel, parentLabel };
 
-		Component[] leftCol =
-			new Component[] {
-				nameLabel,
-				catalogLabel,
-				schemaLabel,
-				parentLabel };
+        Component[] rightCol = new Component[] { name, schema, parentEntities };
 
-		Component[] rightCol =
-			new Component[] { name, catalog, schema, parentEntities };
+        add(
+            PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
+            BorderLayout.NORTH);
+    }
 
-		add(
-			PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
-			BorderLayout.NORTH);
-	}
+    public void processExistingSelection() {
+        EntityDisplayEvent e;
+        e =
+            new EntityDisplayEvent(
+                this,
+                mediator.getCurrentDbEntity(),
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain());
+        mediator.fireDbEntityDisplayEvent(e);
+    }
 
-	public void processExistingSelection() {
-		EntityDisplayEvent e;
-		e =
-			new EntityDisplayEvent(
-				this,
-				mediator.getCurrentDbEntity(),
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
-		mediator.fireDbEntityDisplayEvent(e);
-	}
+    public void currentDbEntityChanged(EntityDisplayEvent e) {
+        DbEntity entity = (DbEntity) e.getEntity();
+        if (null == entity || !e.isEntityChanged()) {
+            return;
+        }
 
-	public void currentDbEntityChanged(EntityDisplayEvent e) {
-		DbEntity entity = (DbEntity) e.getEntity();
-		if (null == entity || !e.isEntityChanged()) {
-			return;
-		}
+        ignoreChange = true;
+        name.setText(entity.getName());
+        schema.setText(entity.getSchema());
+        ignoreChange = false;
 
-		ignoreChange = true;
-		name.setText(entity.getName());
-		catalog.setText(entity.getCatalog());
-		schema.setText(entity.getSchema());
-		ignoreChange = false;
-
-		if (entity instanceof DerivedDbEntity) {
-			updateState(true);
+        if (entity instanceof DerivedDbEntity) {
+            updateState(true);
 
             // build a list consisting of non-derived entities
-			java.util.List ents = new ArrayList();
-			ents.add("");
-			
-			Iterator it = mediator.getCurrentDataMap().getDbEntitiesAsList(true).iterator();
-			while(it.hasNext()) {
-				DbEntity ent = (DbEntity)it.next();
-				if(!(ent instanceof DerivedDbEntity)) {
-					ents.add(ent.getName());
-				}
-			}			
+            java.util.List ents = new ArrayList();
+            ents.add("");
 
-			DefaultComboBoxModel model =
-				new DefaultComboBoxModel(ents.toArray());
-			DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
-			if (parent != null) {
-				model.setSelectedItem(parent.getName());
-			}
+            Iterator it =
+                mediator
+                    .getCurrentDataMap()
+                    .getDbEntitiesAsList(true)
+                    .iterator();
+            while (it.hasNext()) {
+                DbEntity ent = (DbEntity) it.next();
+                if (!(ent instanceof DerivedDbEntity)) {
+                    ents.add(ent.getName());
+                }
+            }
 
-			parentEntities.setModel(model);
-		} else {
-			updateState(false);
-			parentEntities.setSelectedIndex(-1);
-		}
-	}
+            DefaultComboBoxModel model =
+                new DefaultComboBoxModel(ents.toArray());
+            DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
+            if (parent != null) {
+                model.setSelectedItem(parent.getName());
+            }
 
-	/**
-	 * Enables or disbales form fields depending on the
-	 * type of entity shown.
-	 */
-	protected void updateState(boolean isDerivedEntity) {
-		catalogLabel.setEnabled(!isDerivedEntity);
-		catalog.setEnabled(!isDerivedEntity);
-		schemaLabel.setEnabled(!isDerivedEntity);
-		schema.setEnabled(!isDerivedEntity);
+            parentEntities.setModel(model);
+        } else {
+            updateState(false);
+            parentEntities.setSelectedIndex(-1);
+        }
+    }
 
-		parentLabel.setEnabled(isDerivedEntity);
-		parentEntities.setEnabled(isDerivedEntity);
-		parentLabel.setVisible(isDerivedEntity);
-		parentEntities.setVisible(isDerivedEntity);
-	}
+    /**
+     * Enables or disbales form fields depending on the
+     * type of entity shown.
+     */
+    protected void updateState(boolean isDerivedEntity) {
+        schemaLabel.setEnabled(!isDerivedEntity);
+        schema.setEnabled(!isDerivedEntity);
 
-	/**
-	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == parentEntities) {
-			DbEntity current = mediator.getCurrentDbEntity();
+        parentLabel.setEnabled(isDerivedEntity);
+        parentEntities.setEnabled(isDerivedEntity);
+        parentLabel.setVisible(isDerivedEntity);
+        parentEntities.setVisible(isDerivedEntity);
+    }
 
-			if (current instanceof DerivedDbEntity) {
-				DerivedDbEntity derived = (DerivedDbEntity) current;
-				String name = (String) parentEntities.getSelectedItem();
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == parentEntities) {
+            DbEntity current = mediator.getCurrentDbEntity();
 
-				DbEntity ent =
-					(name != null && name.trim().length() > 0)
-						? mediator.getCurrentDataMap().getDbEntity(name, true)
-						: null;
+            if (current instanceof DerivedDbEntity) {
+                DerivedDbEntity derived = (DerivedDbEntity) current;
+                String name = (String) parentEntities.getSelectedItem();
 
-				if (ent != null && ent != derived.getParentEntity()) {
-					derived.setParentEntity(ent);
-					derived.resetToParentView();
-					MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
+                DbEntity ent =
+                    (name != null && name.trim().length() > 0)
+                        ? mediator.getCurrentDataMap().getDbEntity(name, true)
+                        : null;
 
-					EntityEvent event = new EntityEvent(this, current);
-					mediator.fireDbEntityEvent(event);
-				}
-			}
+                if (ent != null && ent != derived.getParentEntity()) {
+                    derived.setParentEntity(ent);
+                    derived.resetToParentView();
+                    MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
-		} else if (parentLabel == e.getSource()) {
-			DbEntity current = mediator.getCurrentDbEntity();
+                    EntityEvent event = new EntityEvent(this, current);
+                    mediator.fireDbEntityEvent(event);
+                }
+            }
 
-			if (current instanceof DerivedDbEntity) {
-				DbEntity parent = ((DerivedDbEntity) current).getParentEntity();
-				if (parent != null) {
-					DataDomain dom = mediator.getCurrentDataDomain();
-					DataMap map = dom.getMapForDbEntity(parent.getName());
-					mediator.fireDbEntityDisplayEvent(
-						new EntityDisplayEvent(this, parent, map, dom));
-				}
-			}
+        } else if (parentLabel == e.getSource()) {
+            DbEntity current = mediator.getCurrentDbEntity();
 
-		}
-	}
+            if (current instanceof DerivedDbEntity) {
+                DbEntity parent = ((DerivedDbEntity) current).getParentEntity();
+                if (parent != null) {
+                    DataDomain dom = mediator.getCurrentDataDomain();
+                    DataMap map = dom.getMapForDbEntity(parent.getName());
+                    mediator.fireDbEntityDisplayEvent(
+                        new EntityDisplayEvent(this, parent, map, dom));
+                }
+            }
 
-	class FieldVerifier extends InputVerifier {
-		public boolean verify(JComponent input) {
-			if (input == name) {
-				return verifyName();
-			} else if (input == catalog) {
-				return verifyCatalog();
-			} else if (input == schema) {
-				return verifySchema();
-			} else {
-				return true;
-			}
-		}
+        }
+    }
 
-		protected boolean verifyName() {
-			String text = name.getText();
-			if (text != null && text.trim().length() == 0) {
-				text = null;
-			}
+    class FieldVerifier extends InputVerifier {
+        public boolean verify(JComponent input) {
+            if (input == name) {
+                return verifyName();
+            } else if (input == schema) {
+                return verifySchema();
+            } else {
+                return true;
+            }
+        }
 
-			DataMap map = mediator.getCurrentDataMap();
-			DbEntity ent = mediator.getCurrentDbEntity();
+        protected boolean verifyName() {
+            String text = name.getText();
+            if (text != null && text.trim().length() == 0) {
+                text = null;
+            }
 
-			DbEntity matchingEnt = map.getDbEntity(text);
+            DataMap map = mediator.getCurrentDataMap();
+            DbEntity ent = mediator.getCurrentDbEntity();
 
-			if (matchingEnt == null) {
-				// completely new name, set new name for entity
-				EntityEvent e = new EntityEvent(this, ent, ent.getName());
-				MapUtil.setDbEntityName(map, ent, text);
-				mediator.fireDbEntityEvent(e);
-				return true;
-			} else if (matchingEnt == ent) {
-				// no name changes, just return
-				return true;
-			} else {
-				// there is an entity with the same name
-				return false;
-			}
-		}
+            DbEntity matchingEnt = map.getDbEntity(text);
 
-		protected boolean verifyCatalog() {
-			String text = catalog.getText();
-			if (text != null && text.trim().length() == 0) {
-				text = null;
-			}
+            if (matchingEnt == null) {
+                // completely new name, set new name for entity
+                EntityEvent e = new EntityEvent(this, ent, ent.getName());
+                MapUtil.setDbEntityName(map, ent, text);
+                mediator.fireDbEntityEvent(e);
+                return true;
+            } else if (matchingEnt == ent) {
+                // no name changes, just return
+                return true;
+            } else {
+                // there is an entity with the same name
+                return false;
+            }
+        }
 
-			DbEntity ent = mediator.getCurrentDbEntity();
+        protected boolean verifySchema() {
+            String text = schema.getText();
+            if (text != null && text.trim().length() == 0) {
+                text = null;
+            }
 
-			if (!org
-				.objectstyle
-				.cayenne
-				.util
-				.Util
-				.nullSafeEquals(ent.getCatalog(), text)) {
+            DbEntity ent = mediator.getCurrentDbEntity();
 
-				ent.setCatalog(text);
-				mediator.fireDbEntityEvent(new EntityEvent(this, ent));
-			}
+            if (!org
+                .objectstyle
+                .cayenne
+                .util
+                .Util
+                .nullSafeEquals(ent.getSchema(), text)) {
 
-			return true;
-		}
+                ent.setSchema(text);
+                mediator.fireDbEntityEvent(new EntityEvent(this, ent));
+            }
 
-		protected boolean verifySchema() {
-			String text = schema.getText();
-			if (text != null && text.trim().length() == 0) {
-				text = null;
-			}
-
-			DbEntity ent = mediator.getCurrentDbEntity();
-
-			if (!org
-				.objectstyle
-				.cayenne
-				.util
-				.Util
-				.nullSafeEquals(ent.getSchema(), text)) {
-
-				ent.setSchema(text);
-				mediator.fireDbEntityEvent(new EntityEvent(this, ent));
-			}
-
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }
