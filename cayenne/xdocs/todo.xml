@@ -28,11 +28,21 @@
         Normally code and documentation contributions are made via patches sent
         to developer list. If your contributions are significant and you are willing 
         to join the core team, current committers can vote to give you CVS write access 
-        and other committer rights.
-        A good discussion on how to create and submit code patches is located at 
-        <a href="http://jakarta.apache.org/site/source.html">Jakarta Apache</a> site.
-        You can use all these hints as related to Cayenne.
+        and other committer rights.</p>
+        
+        <subsection name="How to Create a Patch">
+        <p>Preferred way to create a patch is to check out Cayenne source tree from CVS,
+        make changes to the local copy, and then run the following command (GUI CVS clients
+        usually have support for this feature as well):
         </p>
+<source>
+cd cayenne
+cvs diff -u > patch.txt
+</source>
+
+		<p>Resulting <code>patch.txt</code> file will contain changes to all Cayenne files
+		as compared to the latest CVS version.</p>
+        </subsection>
         </section>
     </body>
 </document>
