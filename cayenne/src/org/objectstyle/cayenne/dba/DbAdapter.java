@@ -60,7 +60,6 @@ import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 
-
 /** Defines API needed to handle differences between
   * various databases accessed via JDBC. Implementing classed are 
   * intended to be pluggable database specific adapters.
@@ -69,11 +68,16 @@ import org.objectstyle.cayenne.map.DbRelationship;
   */
 public interface DbAdapter {
 
-	public static final String JDBC =     "org.objectstyle.cayenne.dba.JdbcAdapter";
-	public static final String MYSQL =    "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
-	public static final String ORACLE =   "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
-	public static final String SYBASE =   "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
-	public static final String POSTGRES = "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+    public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
+    public static final String MYSQL =
+        "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
+    public static final String ORACLE =
+        "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
+    public static final String SYBASE =
+        "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
+    public static final String POSTGRES =
+        "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+
 
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
@@ -82,44 +86,20 @@ public interface DbAdapter {
       * a database table corresponding to <code>ent</code> parameter. */
     public String dropTable(DbEntity ent);
 
-
     /** Returns a SQL string that can be used to create
       * a foreign key constraint for the relationship. */
     public String createFkConstraint(DbRelationship rel);
 
-
-    /** Creates necessary database objects to do automatic primary 
-     * key generation later. This may involve creation of a special primary
-     * key lookup table, stored procedures, sequnces, etc. */
-    public void createAutoPkSupport(DataNode dataNode) throws Exception;
-
-
-    /** Drops any database objects associated with automatic primary 
-     * key generation process. */
-    public void dropAutoPkSupport(DataNode dataNode) throws Exception;
-
-
-    /** Performs necessary database operations to do primary key generation
-     *  for a particular DbEntity. This  may require a prior call to 
-     *  <code>"createAutoPkSupport"<code> method.
-     *
-     *  @param dataNode node that provides connection layer for PkGenerator.
-     *  @param dbEntity DbEntity that needs an auto PK support
-     */
-    public void createAutoPkSupportForDbEntity(DataNode dataNode, DbEntity dbEntity) throws Exception;
-
-
-    /** Generates unique and non-repeating primary key for specified dbEntity. */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity) throws Exception;
-
     /** Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
       * Valid types are defined in java.sql.Types. */
     public String[] externalTypesForJdbcType(int type);
-
 
     /** Returns an operation sorter or null if no sorting
       * is required. Operation sorter is needed for databases
       * (like Sybase) that do not have deferred constraint checking
       * and need appropriate operation ordering within transactions. */
     public OperationSorter getOpSorter(DataNode node);
+
+    /** Returns primary key generator associated with this DbAdapter. */
+    public PkGenerator getPkGenerator();
 }

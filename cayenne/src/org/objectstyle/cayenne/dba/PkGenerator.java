@@ -67,8 +67,8 @@ import org.objectstyle.cayenne.map.DbEntity;
 public interface PkGenerator {
 
     /** 
-     * Generates necessary database objects to provide
-     * automatic primary key support. 
+     * Generates necessary database objects to provide automatic primary 
+     * key support. 
      * 
      * @param node node that provides access to a DataSource.
      */
@@ -76,14 +76,15 @@ public interface PkGenerator {
 
 
     /** 
-     * Drops table named "AUTO_PK_SUPPORT" if it exists in the database. 
+     * Drops any database objects associated with automatic primary 
+     * key generation process. This may be lookup tables, special stored
+     * procedures or sequences. 
      */
     public void dropAutoPkSupport(DataNode node) throws Exception;
 
     /** 
-     * Performs necessary database operations to do primary key generation
-     * for a particular DbEntity. This may require a prior call 
-     * to <code>createAutoPkSupport<code> method.
+     * Performs database operations necessary for primary key 
+     * generation for a particular DbEntity.
      * 
      * <p>This operation should be "safe" in that it shouldn't override any 
      * existing database objects.</p>
@@ -95,8 +96,8 @@ public interface PkGenerator {
         throws Exception;
 
     /**
-     * <p>Generate new (unique and non-repeating) primary key for specified 
-     * DbEntity.</p>
+     * Generates new (unique and non-repeating) primary key for specified 
+     * DbEntity.
      *
      *  @param ent DbEntity for which automatic PK is generated.
      */

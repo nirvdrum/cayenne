@@ -335,14 +335,14 @@ public class DataNode implements QueryEngine {
      *  key support. */
     public void createPkSupportForMapEntities() throws Exception {
         // generate common PK support
-        adapter.createAutoPkSupport(this);
+        adapter.getPkGenerator().createAutoPkSupport(this);
 
         // generate PK support for each indiv. entity.
         int len = dataMaps.length;
         for (int i = 0; i < len; i++) {
             DbEntity[] ents = dataMaps[i].getDbEntities();
             for (int j = 0; j < ents.length; j++) {
-                adapter.createAutoPkSupportForDbEntity(this, ents[j]);
+                adapter.getPkGenerator().createAutoPkSupportForDbEntity(this, ents[j]);
             }
         }
     }

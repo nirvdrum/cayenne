@@ -75,9 +75,9 @@ public class DataNodeExtrasTst extends TestCase {
         node.createPkSupportForMapEntities();
         
         DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();
-        assertNotNull(node.getAdapter().generatePkForDbEntity(node, artistEnt));
+        assertNotNull(node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
         
         DbEntity exhibitEnt = node.lookupEntity("Exhibit").getDbEntity();
-        assertNotNull(node.getAdapter().generatePkForDbEntity(node, exhibitEnt));
+        assertNotNull(node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
     }
 }

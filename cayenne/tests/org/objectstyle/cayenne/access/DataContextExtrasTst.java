@@ -92,7 +92,7 @@ public class DataContextExtrasTst extends TestCase {
         ctxt.registerNewObject(o1, "Artist");
 
         // this should cause PK generation exception in commit later
-        TestMain.getSharedNode().getAdapter().dropAutoPkSupport(
+        TestMain.getSharedNode().getAdapter().getPkGenerator().dropAutoPkSupport(
             TestMain.getSharedNode());
 
         // disable logging for thrown exceptions

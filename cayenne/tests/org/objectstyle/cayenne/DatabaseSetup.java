@@ -106,10 +106,10 @@ public class DatabaseSetup {
         DbAdapter adapter = node.getAdapter();
 
         // drop
-        adapter.dropAutoPkSupport(node);
+        adapter.getPkGenerator().dropAutoPkSupport(node);
 
         // create
-        adapter.createAutoPkSupport(node);
+        adapter.getPkGenerator().createAutoPkSupport(node);
     }
 
     /** Drops all test tables. */
@@ -160,7 +160,7 @@ public class DatabaseSetup {
         }
 
         // drop primary key support
-        adapter.dropAutoPkSupport(node);
+        adapter.getPkGenerator().dropAutoPkSupport(node);
     }
 
     /** Creates all test tables in the database. */
@@ -183,7 +183,7 @@ public class DatabaseSetup {
         // create primary key support
         DataNode node = TestMain.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        adapter.createAutoPkSupport(node);
+        adapter.getPkGenerator().createAutoPkSupport(node);
     }
 
     /** Oracle 8i does not support more then 1 "LONG xx" column per table

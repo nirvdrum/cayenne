@@ -72,12 +72,12 @@ import org.objectstyle.cayenne.map.*;
 public class JdbcAdapter implements DbAdapter {
     static Logger logObj = Logger.getLogger(JdbcAdapter.class.getName());
 
-    protected PkGenerator pkGen;
+    protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
 
     public JdbcAdapter() {
         // create Pk generator
-        pkGen = createPkGenerator();
+        pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
     }
 
@@ -89,6 +89,12 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator createPkGenerator() {
         return new JdbcPkGenerator();
     }
+    
+    /** Returns primary key generator associated with this DbAdapter. */
+    public PkGenerator getPkGenerator() {
+        return pkGenerator;
+    }
+    
 
     /** Returns true. */
     public boolean supportsFkConstraints() {
@@ -132,37 +138,6 @@ public class JdbcAdapter implements DbAdapter {
             .append(refBuf)
             .append(')');
         return buf.toString();
-    }
-
-    /** Generates database objects to provide
-     *  automatic primary key support. This implementation will create
-     *  a lookup table like that:
-     * 
-     *<pre>
-     * CREATE TABLE AUTO_PK_SUPPORT (
-     *    TABLE_NAME  CHAR(100) NOT NULL,
-     *    NEXT_ID INTEGER NOT NULL
-     * )
-     *</pre>
-     *
-     *  @param dataNode node that provides access to a DataSource.
-     */
-    public void createAutoPkSupport(DataNode dataNode) throws Exception {
-        pkGen.createAutoPkSupport(dataNode);
-    }
-
-    public void dropAutoPkSupport(DataNode node) throws Exception {
-        pkGen.dropAutoPkSupport(node);
-    }
-
-    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity dbEntity)
-        throws Exception {
-        pkGen.createAutoPkSupportForDbEntity(node, dbEntity);
-    }
-
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
-        throws Exception {
-        return pkGen.generatePkForDbEntity(dataNode, dbEntity);
     }
 
     public String[] externalTypesForJdbcType(int type) {

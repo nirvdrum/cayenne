@@ -60,7 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
 
@@ -670,8 +670,8 @@ public class DataContext implements QueryEngine {
             }
             
             try {
-                DbAdapter dba = aNode.getAdapter();
-                Object pk = dba.generatePkForDbEntity(aNode, objEntity.getDbEntity());
+                PkGenerator gen = aNode.getAdapter().getPkGenerator();
+                Object pk = gen.generatePkForDbEntity(aNode, objEntity.getDbEntity());
                 autoPkDone = true;
                 idMap.put(attr.getName(), pk);
             }
