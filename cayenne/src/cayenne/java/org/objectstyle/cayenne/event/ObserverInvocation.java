@@ -56,94 +56,101 @@
 
 package org.objectstyle.cayenne.event;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.Logger;
 
-import junit.framework.Assert;
-
-public class InvocationTst extends CayenneTestCase {
-	private Method _method;
-
-	public InvocationTst(String arg0) throws NoSuchMethodException {
-		super(arg0);
-		_method = this.getClass().getMethod("method", null);
-	}
-
-	public void testReflexive() throws Exception {
-		Invocation inv = new Invocation(this, _method);		
-
-		Assert.assertEquals(inv, inv);
-	}
-
-	public void testSymmetric() throws Exception {
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, _method);
-		
-		Assert.assertEquals(inv, inv2);
-		Assert.assertEquals(inv2, inv);
-	}
-
-	public void testTransitive() throws Exception {
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, _method);
-		Invocation inv3 = new Invocation(this, _method);
-		
-		Assert.assertEquals(inv, inv2);
-		Assert.assertEquals(inv2, inv3);
-		Assert.assertEquals(inv, inv3);
-	}
-
-	public void testNull() {
-		Invocation inv = new Invocation(this, _method);
-		Assert.assertTrue(inv.equals(null) == false);
-	}
-
-	public void testDifferentMethods() throws Exception  {
-		Method m2 = this.getClass().getMethod("anotherMethod", null);
-
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, m2);
-
-		Assert.assertTrue(inv.equals(inv2) == false);
-	}
-
-	public void testAddToSet() throws Exception {
-		HashSet set = new HashSet();
-		
-		Invocation inv = new Invocation(this, _method);
-		set.add(inv);
-		set.add(inv);
-		Assert.assertEquals(1, set.size());
-	}
-
-	public void testAddTwo() {
-		HashSet set = new HashSet();
-		
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, _method);
-		
-		set.add(inv);
-		set.add(inv2);
-		Assert.assertEquals(1, set.size());
-	}
-
-	public void testGarbageCollection() throws NoSuchMethodException {
-		// create an invocation with an observer that will be garbage collected
-		Invocation inv = new Invocation(new String(), String.class.getMethod("toString", null));
-		
-		// (hopefully) make the observer go away
-		System.gc();
-		System.gc();
-
-		Assert.assertEquals(false, inv.fire(new ObserverEvent(this, null)));
-	}
+public class ObserverInvocation extends Object {
+	private static final Logger log = Logger.getLogger(ObserverInvocation.class);
 	
-	// these methods exist for the test of Invocation equality
-	public void method() {
+	private Method _method;
+	private WeakReference _target;
+	
+	public ObserverInvocation(Object target, Method method) {
+		super();
+
+		if (target == null) {
+			throw new IllegalArgumentException("target argument must not be null");
+		}
+
+		if (method == null) {
+			throw new IllegalArgumentException("method argument must not be null");
+		}	
+
+		_method = method;
+		_target = new WeakReference(target);
 	}
 
-	public void anotherMethod() {
+	public boolean fire(ObserverEvent event) {
+		boolean success = true;
+
+		if (event == null) {
+			throw new IllegalArgumentException("event may not be null!");
+		}
+
+		Object currentTarget = _target.get();
+
+		if (currentTarget != null) {
+			try {	
+				_method.invoke(currentTarget, new Object[] { event });
+			}
+
+			catch (Exception ex) {
+				log.error("exception while firing '" + _method.getName() + "'", ex);
+				success = false;
+			}
+		}
+		else {
+			success = false;
+		}
+
+		return success;
+	}
+
+	public boolean equals(Object obj) {
+		if ((obj != null) && (obj.getClass().equals(this.getClass()))) {
+			ObserverInvocation otherInvocation = (ObserverInvocation)obj;
+			if (_method.equals(otherInvocation.getMethod())) {
+				Object otherTarget = otherInvocation.getTarget();
+				Object target = _target.get();
+
+				if ((target == null) && (otherTarget == null)) {
+					return true;
+				}
+
+				if ((target == null) && (otherTarget != null)) {
+					return false;
+				}
+
+				if (target != null) {
+					return target.equals(otherTarget);
+				}
+			}
+
+			return false;
+		}
+		else {
+			return super.equals(obj);
+		}
+	}
+
+	public int hashCode() {
+		int hash = 42, hashMultiplier = 59;
+		hash = hash * hashMultiplier + _method.hashCode();
+
+		if (_target.get() != null) {
+			hash = hash * hashMultiplier + _target.get().hashCode();
+		}
+
+		return hash;
+	}
+
+	protected Method getMethod() {
+		return _method;
+	}
+
+	protected Object getTarget() {
+		return _target.get();
 	}
 }
