@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.map;
 
+import java.util.Iterator;
+
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
@@ -129,6 +131,30 @@ public class DbAttribute extends Attribute {
 	public boolean isPrimaryKey() {
 		return primaryKey;
 	}
+    
+    /**
+     * Returns <code>true</code> if the DB column represented by this
+     * attribute is a foreign key, referencing another table.
+     * 
+     * @since 1.1
+     */
+    public boolean isForeignKey() {
+        Iterator relationships = this.getEntity().getRelationships().iterator();
+        while (relationships.hasNext()) {
+            DbRelationship relationship = (DbRelationship) relationships.next();
+            Iterator joins = relationship.getJoins().iterator();
+            while (joins.hasNext()) {
+                DbAttributePair join = (DbAttributePair) joins.next();
+                if (join.getSource() == this
+                    && join.getTarget() != null
+                    && join.getTarget().isPrimaryKey()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
 	public void setPrimaryKey(boolean primaryKey) {
 		this.primaryKey = primaryKey;
