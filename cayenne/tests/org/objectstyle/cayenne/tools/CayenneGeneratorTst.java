@@ -65,7 +65,7 @@ import junit.framework.TestCase;
 
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
-
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.util.ResourceLocator;
 import org.objectstyle.util.Util;
 
@@ -89,7 +89,20 @@ public class CayenneGeneratorTst extends TestCase {
     protected CayenneGenerator task;
 
     private static void extractMap() {
-        URL url = ResourceLocator.findURLInClasspath("test_resources/testmap.xml");
+    	ResourceLocator locator = new ResourceLocator();
+		locator.setSkipAbsPath(true);
+		locator.setSkipClasspath(false);
+		locator.setSkipCurDir(true);
+		locator.setSkipHomeDir(true);
+		
+		// Configuration superclass statically defines what 
+		// ClassLoader to use for resources. This
+		// allows applications to control where resources 
+		// are loaded from.
+		locator.setClassLoader(Configuration.getResourceLoader());
+		
+		
+        URL url = locator.findResource("test_resources/testmap.xml");
         Util.copy(url, map);
     }
 
