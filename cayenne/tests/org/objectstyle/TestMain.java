@@ -83,22 +83,28 @@ public class TestMain implements TestConstants {
     static Logger logObj = Logger.getLogger(TestMain.class.getName());
 
     private static TestResources resources = new TestResources();
+    private static boolean noGui;
 
 
     public static TestResources getResources() {
         return resources;
     }
 
+    public static boolean noGui() {
+        return noGui;
+    }
 
     public static void main(String[] args) {
         // check for "-nogui" flag
-        boolean noGui = false;
+        noGui = false;
         boolean xmlDataSource = false;
         if(args != null && args.length > 0) {
             if("-nogui".equals(args[0]))
                 noGui = true;
-            else if("-xml".equals(args[0]))
+            else if("-xml".equals(args[0])) {
+                noGui = true;
                 xmlDataSource = true;
+            }
         }
 
         // configure properties

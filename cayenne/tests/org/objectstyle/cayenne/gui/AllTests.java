@@ -53,16 +53,20 @@ package org.objectstyle.cayenne.gui;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import junit.runner.*;
 
 public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("GUI Package Tests");
-        suite.addTestSuite(DbLoginPanelTst.class);
-        suite.addTestSuite(CommandLineLoginTst.class);
-		return suite;
-	}
+    public static TestSuite suite() {
+        TestSuite suite = new TestSuite("GUI Package Tests");
+
+        // don't test GUI if no graphics environment present
+        if(!org.objectstyle.TestMain.noGui()) {
+            suite.addTestSuite(DbLoginPanelTst.class);
+            suite.addTestSuite(CommandLineLoginTst.class);
+        }
+        return suite;
+    }
 }
