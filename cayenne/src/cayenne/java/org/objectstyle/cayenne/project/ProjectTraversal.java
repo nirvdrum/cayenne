@@ -141,8 +141,8 @@ public class ProjectTraversal {
             handler.projectNode(domainPath);
 
             if (handler.shouldReadChildren(domain, path)) {
-                traverseNodes(domain.getDataNodeList(), domainPath);
                 traverseMaps(domain.getMapList(), domainPath);
+                traverseNodes(domain.getDataNodeList(), domainPath);
             }
         }
     }
