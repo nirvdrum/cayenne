@@ -7,6 +7,12 @@
 </navigator>
 <body>
     <section name="4. Design">
+    	<p>This chapter describes design ideas implemented in Cayenne and the underlying
+    	architecture. It does not contain any "hands on" information on application development and 
+    	is not required to start using Cayenne. Those 
+    	interested in Cayenne "recepies" should skip to the next chapters. 
+    	</p>
+    	
         <subsection name="4.1 Object Relational Mapping" anchor="or_map">
             <p>Normally mapping is done between a Java class and a database table or view. 
             Instances of such class will correspond to single rows in the database.
