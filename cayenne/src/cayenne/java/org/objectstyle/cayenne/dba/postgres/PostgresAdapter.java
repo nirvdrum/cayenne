@@ -55,6 +55,11 @@
  */
 package org.objectstyle.cayenne.dba.postgres;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -64,6 +69,8 @@ import org.objectstyle.cayenne.map.DbRelationship;
 /** DbAdapter implementation for <a href="http://postgresql.org">PostgreSQL RDBMS</a>. */
 public class PostgresAdapter extends JdbcAdapter
 {
+	protected Map sorters = new HashMap();
+
 	public PostgresAdapter() {
 		super();
 		// register CharType so that all CHAR types will be trimmed
@@ -71,20 +78,41 @@ public class PostgresAdapter extends JdbcAdapter
 	}
 
 	/**
-	* Returns a SQL string to drop a table corresponding
-	* to <code>ent</code> DbEntity.
-	*/
+	 * Adds the CASCADE option to the DROP TABLE clause.
+	 * @see JdbcAdapter#dropTable(DbEntity)
+	 */
 	public String dropTable(DbEntity ent) {
 		return super.dropTable(ent) + " CASCADE";
 	}
 
+	/**
+	 * @see JdbcAdapter#createPkGenerator()
+	 */
 	protected PkGenerator createPkGenerator() {
 		return new PostgresPkGenerator();
 	}
 
+	/**
+	 * Adds the DEFERRABLE INITIALLY DEFERRED options to a relationship constraint.
+	 * @see JdbcAdapter#createFkConstraint(DbRelationship)
+	 */
 	public String createFkConstraint(DbRelationship rel) {
-		String fkConstraint = super.createFkConstraint(rel);
-		return fkConstraint + " DEFERRABLE INITIALLY DEFERRED";
+		return super.createFkConstraint(rel) + " DEFERRABLE INITIALLY DEFERRED";
+	}
+
+	/**
+	 * Returns an OperationSorter to handle constraints.
+	 * @see JdbcAdapter#getOpSorter(DataNode)
+	 */
+	public OperationSorter getOpSorter(DataNode node) {
+		synchronized (sorters) {
+			OperationSorter sorter = (OperationSorter) sorters.get(node);
+			if (sorter == null) {
+				sorter = new OperationSorter(node, node.getDataMapsAsList());
+				sorters.put(node, sorter);
+			}
+			return sorter;
+		}
 	}
 
 }
