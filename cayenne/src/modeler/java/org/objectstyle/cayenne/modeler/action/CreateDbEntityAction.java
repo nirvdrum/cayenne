@@ -70,9 +70,9 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class CreateDbEntityAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Create DbEntity";
-	}
+    public static String getActionName() {
+        return "Create DbEntity";
+    }
 
     /**
      * Constructor for CreateDbEntityAction.
@@ -86,8 +86,8 @@ public class CreateDbEntityAction extends CayenneAction {
     }
 
     /**
-     * Creates new DbEntity, adds it to the current DataMap,
-     * fires DbEntityEvent and DbEntityDisplayEvent.
+     * Creates new DbEntity, adds it to the current DataMap, fires DbEntityEvent and
+     * DbEntityDisplayEvent.
      * 
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
@@ -96,18 +96,15 @@ public class CreateDbEntityAction extends CayenneAction {
         DbEntity entity = createEntity(mediator.getCurrentDataMap());
 
         mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-        mediator.fireDbEntityDisplayEvent(
-            new EntityDisplayEvent(
-                this,
-                entity,
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataDomain()));
+        EntityDisplayEvent displayEvent = new EntityDisplayEvent(this, entity, mediator
+                .getCurrentDataMap(), mediator.getCurrentDataNode(), mediator
+                .getCurrentDataDomain());
+        displayEvent.setTabReset(true);
+        mediator.fireDbEntityDisplayEvent(displayEvent);
     }
 
     /**
-     * Constructs and returns a new DbEntity. Entity returned
-     * is added to the DataMap.
+     * Constructs and returns a new DbEntity. Entity returned is added to the DataMap.
      */
     protected DbEntity createEntity(DataMap map) {
         DbEntity entity = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);

@@ -89,7 +89,7 @@ public class ObjRelationshipInfoController extends BasicController {
             ObjRelationship relationship) {
 
         this.mediator = mediator;
-        Collection objEntities = mediator.getCurrentDataMap().getObjEntities(true);
+        Collection objEntities = mediator.getCurrentDataMap().getNamespace().getObjEntities();
         ObjRelationshipInfoModel model = new ObjRelationshipInfoModel(
                 relationship,
                 objEntities);

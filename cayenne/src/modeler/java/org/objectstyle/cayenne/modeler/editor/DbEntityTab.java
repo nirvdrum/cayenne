@@ -161,7 +161,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         // assemble
         setLayout(new BorderLayout());
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -345,7 +345,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
 
         DbEntity entity = mediator.getCurrentDbEntity();
 
-        if (Util.nullSafeEquals(newName, entity.getName())) {
+        if (entity == null || Util.nullSafeEquals(newName, entity.getName())) {
             return;
         }
 

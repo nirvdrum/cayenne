@@ -129,8 +129,10 @@ public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplay
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
-        if (e.getEntity() == null)
+        if (e.getEntity() == null) {
             setVisible(false);
+        }
+        
         else {
             if (e.isTabReset()) {
                 setSelectedIndex(0);

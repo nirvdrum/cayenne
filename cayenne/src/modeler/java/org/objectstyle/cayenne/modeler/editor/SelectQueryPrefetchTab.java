@@ -179,8 +179,10 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
         String[] prefetches;
 
         PrefetchModel() {
-            prefetches = new String[selectQuery.getPrefetches().size()];
-            selectQuery.getPrefetches().toArray(prefetches);
+            if (selectQuery != null) {
+                prefetches = new String[selectQuery.getPrefetches().size()];
+                selectQuery.getPrefetches().toArray(prefetches);
+            }
         }
 
         public int getColumnCount() {
@@ -188,7 +190,7 @@ public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
         }
 
         public int getRowCount() {
-            return prefetches.length;
+            return (prefetches != null) ? prefetches.length : 0;
         }
 
         public Object getValueAt(int row, int column) {

@@ -93,7 +93,6 @@ import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.scopemvc.util.convertor.StringConvertor;
 import org.scopemvc.util.convertor.StringConvertors;
-import org.scopemvc.view.swing.ValidationHelper;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -118,7 +117,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     protected TextFieldAdapter name;
     protected JTextField className;
     protected JTextField superClassName;
-    protected JTextField qualifier;
+    protected TextFieldAdapter qualifier;
     protected JComboBox dbEntityCombo;
     protected JComboBox superEntityCombo;
     protected JButton tableLabel;
@@ -141,7 +140,12 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         };
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
-        qualifier = CayenneWidgetFactory.createTextField();
+        qualifier = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+
+            protected void initModel(String text) {
+                setQualifier(text);
+            }
+        };
 
         dbEntityCombo = CayenneWidgetFactory.createComboBox();
         superEntityCombo = CayenneWidgetFactory.createComboBox();
@@ -154,7 +158,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         // assemble
         setLayout(new BorderLayout());
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -168,7 +172,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
         builder.append("Java Class:", className);
         builder.append("Superclass:", superClassName);
-        builder.append("Qualifier", qualifier);
+        builder.append("Qualifier", qualifier.getTextField());
         builder.append("Read-Only:", readOnly);
         builder.append("Optimistic Locking:", optimisticLocking);
 
@@ -179,40 +183,6 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         // initialize events processing and tracking of UI updates...
 
         mediator.addObjEntityDisplayListener(this);
-
-        qualifier.setInputVerifier(new InputVerifier() {
-
-            public boolean verify(JComponent input) {
-                String text = qualifier.getText();
-                if (text != null && text.trim().length() == 0) {
-                    text = null;
-                }
-
-                ObjEntity ent = mediator.getCurrentObjEntity();
-
-                if (ent != null) {
-                    Expression exp = null;
-                    StringConvertor convertor = StringConvertors
-                            .forClass(Expression.class);
-
-                    try {
-                        exp = (Expression) convertor.stringAsValue(text);
-                        ent.setDeclaredQualifier(exp);
-                        mediator.fireObjEntityEvent(new EntityEvent(this, ent));
-
-                        // TODO: this is a hack until we implement a real MVC
-                        qualifier.setBackground(Color.WHITE);
-                    }
-                    catch (IllegalArgumentException ex) {
-                        // unparsable qualifier
-                        qualifier
-                                .setBackground(ValidationHelper.DEFAULT_VALIDATION_FAILED_COLOR);
-                    }
-                }
-
-                return true;
-            }
-        });
 
         className.setInputVerifier(new InputVerifier() {
 
@@ -350,7 +320,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
      */
     private void initFromModel(final ObjEntity entity) {
         // TODO: this is a hack until we implement a real MVC
-        qualifier.setBackground(Color.WHITE);
+        qualifier.getTextComponent().setBackground(Color.WHITE);
 
         name.setText(entity.getName());
         superClassName.setText(entity.getSuperClassName() != null ? entity
@@ -411,18 +381,43 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         superEntityCombo.setModel(superEntityModel);
     }
 
+    void setQualifier(String text) {
+        if (text != null && text.trim().length() == 0) {
+            text = null;
+        }
+
+        ObjEntity entity = mediator.getCurrentObjEntity();
+        if (entity != null) {
+
+            StringConvertor convertor = StringConvertors.forClass(Expression.class);
+            try {
+                String oldQualifier = convertor.valueAsString(entity
+                        .getDeclaredQualifier());
+                if (!Util.nullSafeEquals(oldQualifier, text)) {
+                    Expression exp = (Expression) convertor.stringAsValue(text);
+                    entity.setDeclaredQualifier(exp);
+                    mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                }
+            }
+            catch (IllegalArgumentException ex) {
+                // unparsable qualifier
+                throw new ValidationException(ex.getMessage());
+            }
+        }
+    }
+
     void setEntityName(String newName) {
         if (newName != null && newName.trim().length() == 0) {
             newName = null;
         }
 
         ObjEntity entity = mediator.getCurrentObjEntity();
-        
-        if(Util.nullSafeEquals(newName, entity.getName())) {
+
+        if (Util.nullSafeEquals(newName, entity.getName())) {
             return;
         }
 
-        if(newName == null) {
+        if (newName == null) {
             throw new ValidationException("Entity name is required.");
         }
         else if (entity.getDataMap().getObjEntity(newName) == null) {

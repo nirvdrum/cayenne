@@ -66,8 +66,6 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
@@ -80,6 +78,8 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
+import org.scopemvc.util.convertor.StringConvertor;
+import org.scopemvc.util.convertor.StringConvertors;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -133,7 +133,7 @@ public class SelectQueryMainTab extends JPanel {
         // assemble
         CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
-                "right:max(80dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "right:max(80dlu;pref), 3dlu, fill:max(200dlu;pref)",
                 "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
         PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -230,29 +230,25 @@ public class SelectQueryMainTab extends JPanel {
     /**
      * Initializes Query qualifier from string.
      */
-    void setQueryQualifier(String string) {
-        string = (string == null) ? "" : string.trim();
-
-        SelectQuery query = getQuery();
-        Expression qualifier = null;
-
-        if (string.length() > 0) {
-            try {
-                qualifier = Expression.fromString(string);
-            }
-            catch (ExpressionException ex) {
-                // this is likely a parse exception... show detailed message
-                Throwable cause = Util.unwindException(ex);
-                String message = (cause instanceof ParseException)
-                        ? cause.getMessage()
-                        : "Invalid qualifier: " + string;
-                throw new ValidationException(message);
-
-            }
+    void setQueryQualifier(String text) {
+        if (text != null && text.trim().length() == 0) {
+            text = null;
         }
 
-        query.setQualifier(qualifier);
-        mediator.fireQueryEvent(new QueryEvent(this, query));
+        SelectQuery query = getQuery();
+        StringConvertor convertor = StringConvertors.forClass(Expression.class);
+        try {
+            String oldQualifier = convertor.valueAsString(query.getQualifier());
+            if (!Util.nullSafeEquals(oldQualifier, text)) {
+                Expression exp = (Expression) convertor.stringAsValue(text);
+                query.setQualifier(exp);
+                mediator.fireQueryEvent(new QueryEvent(this, query));
+            }
+        }
+        catch (IllegalArgumentException ex) {
+            // unparsable qualifier
+            throw new ValidationException(ex.getMessage());
+        }
     }
 
     /**
@@ -262,17 +258,17 @@ public class SelectQueryMainTab extends JPanel {
         if (newName != null && newName.trim().length() == 0) {
             newName = null;
         }
-        
+
         Query query = getQuery();
-        
+
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;
         }
-        
+
         if (newName == null) {
             throw new ValidationException("SelectQuery name is required.");
         }
-        
+
         DataMap map = mediator.getCurrentDataMap();
         Query matchingQuery = map.getQuery(newName);
 

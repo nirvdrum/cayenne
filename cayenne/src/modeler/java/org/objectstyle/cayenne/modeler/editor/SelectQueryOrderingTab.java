@@ -97,6 +97,10 @@ public class SelectQueryOrderingTab extends JPanel {
     static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
     static final Dimension TABLE_DIM = new Dimension(460, 60);
 
+    static final String PATH_HEADER = "Path";
+    static final String ASCENDING_HEADER = "Ascending";
+    static final String IGNORE_CASE_HEADER = "Ignore Case";
+
     protected EventController mediator;
     protected SelectQuery selectQuery;
 
@@ -136,7 +140,7 @@ public class SelectQueryOrderingTab extends JPanel {
                 "3dlu, top:p:grow, 3dlu, fill:100dlu"));
 
         // orderings table must grow as the panel is resized
-        builder.add(table, cc.xywh(1, 1, 1, 2, "d, fill"));
+        builder.add(new JScrollPane(table), cc.xywh(1, 1, 1, 2, "d, fill"));
         builder.add(removeButton, cc.xy(3, 2, "d, top"));
         builder.add(new JScrollPane(
                 browser,
@@ -291,7 +295,7 @@ public class SelectQueryOrderingTab extends JPanel {
         }
 
         public int getRowCount() {
-            return selectQuery.getOrderings().size();
+            return (selectQuery != null) ? selectQuery.getOrderings().size() : 0;
         }
 
         public Object getValueAt(int row, int column) {
@@ -324,11 +328,11 @@ public class SelectQueryOrderingTab extends JPanel {
         public String getColumnName(int column) {
             switch (column) {
                 case 0:
-                    return "Path";
+                    return PATH_HEADER;
                 case 1:
-                    return "Ascending";
+                    return ASCENDING_HEADER;
                 case 2:
-                    return "Ignore Case";
+                    return IGNORE_CASE_HEADER;
                 default:
                     throw new IndexOutOfBoundsException("Invalid column: " + column);
             }

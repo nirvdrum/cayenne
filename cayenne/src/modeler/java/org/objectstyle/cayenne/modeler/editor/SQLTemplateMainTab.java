@@ -127,7 +127,7 @@ public class SQLTemplateMainTab extends JPanel {
         // assemble
         CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
-                "right:max(80dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "right:max(80dlu;pref), 3dlu, fill:max(200dlu;pref)",
                 "p, 3dlu, p, 3dlu, p");
         PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
