@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.gui.validator;
 
+import org.objectstyle.cayenne.project.*;
+
 import junit.framework.TestSuite;
 
 public class AllTests {
@@ -68,7 +70,6 @@ public class AllTests {
 
 		// continue with noGUI tests
 		suite.addTestSuite(ErrorMsgTst.class);
-		suite.addTestSuite(ValidatorTst.class);
 		return suite;
 	}
 }

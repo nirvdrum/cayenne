@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.gui.validator;
+package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.sql.Types;
@@ -104,19 +104,19 @@ public class ValidatorTst extends CayenneTestCase {
 		DataDomain d1 = new DataDomain("abc");
 		validator.reset();
 		validator.validateDomains(new DataDomain[] { d1 });
-		assertValidator(ErrorMsg.NO_ERROR);
+		assertValidator(ValidationResult.VALID);
 
 		// should complain about no name
 		DataDomain d2 = new DataDomain();
 		validator.reset();
 		validator.validateDomains(new DataDomain[] { d2 });
-		assertValidator(ErrorMsg.ERROR);
+		assertValidator(ValidationResult.ERROR);
 
 		// should complain about duplicate name
 		DataDomain d3 = new DataDomain(d1.getName());
 		validator.reset();
 		validator.validateDomains(new DataDomain[] { d1, d3 });
-		assertValidator(ErrorMsg.ERROR);
+		assertValidator(ValidationResult.ERROR);
 	}
 
 	public void testValidateDataNodes() throws Exception {
@@ -127,7 +127,7 @@ public class ValidatorTst extends CayenneTestCase {
 		n1.setDataSourceFactory("123");
 		validator.reset();
 		validator.validateDataNodes(d1, new DataNode[] { n1 });
-		assertValidator(ErrorMsg.NO_ERROR);
+		assertValidator(ValidationResult.VALID);
 
 		// should complain about no name
 		DataNode n2 = new DataNode();
@@ -135,7 +135,7 @@ public class ValidatorTst extends CayenneTestCase {
 		n2.setDataSourceFactory("123");
 		validator.reset();
 		validator.validateDataNodes(d1, new DataNode[] { n2 });
-		assertValidator(ErrorMsg.ERROR);
+		assertValidator(ValidationResult.ERROR);
 
 		// should complain about duplicate name
 		DataNode n3 = new DataNode(n1.getName());
@@ -143,7 +143,7 @@ public class ValidatorTst extends CayenneTestCase {
 		n3.setDataSourceFactory("123");
 		validator.reset();
 		validator.validateDataNodes(d1, new DataNode[] { n1, n3 });
-		assertValidator(ErrorMsg.ERROR);
+		assertValidator(ValidationResult.ERROR);
 	}
 
 	public void testValidateObjAttributes() throws Exception {
@@ -153,12 +153,12 @@ public class ValidatorTst extends CayenneTestCase {
 		
 		validator.reset();
 		validator.validateObjAttributes(d1, map, (ObjEntity)oa1.getEntity());
-		assertValidator(ErrorMsg.NO_ERROR);
+		assertValidator(ValidationResult.VALID);
 		
 		oa1.setDbAttribute(null);
 		validator.reset();
 		validator.validateObjAttributes(d1, map, (ObjEntity)oa1.getEntity());
-		assertValidator(ErrorMsg.WARNING);
+		assertValidator(ValidationResult.WARNING);
 	}
 	
 	public void testValidateDbAttributes() throws Exception {
@@ -174,7 +174,7 @@ public class ValidatorTst extends CayenneTestCase {
 		e1.addAttribute(a1);
 		validator.reset();
 		validator.validateDbAttributes(d1, map, e1);
-		assertValidator(ErrorMsg.NO_ERROR);
+		assertValidator(ValidationResult.VALID);
 
 		// should complain about no max length
 		DbAttribute a3 = new DbAttribute();
@@ -185,7 +185,7 @@ public class ValidatorTst extends CayenneTestCase {
 		e3.addAttribute(a3);
 		validator.reset();
 		validator.validateDbAttributes(d1, map, e3);
-		assertValidator(ErrorMsg.WARNING);
+		assertValidator(ValidationResult.WARNING);
 
 		// should complain about no type
 		DbAttribute a4 = new DbAttribute();
@@ -195,7 +195,7 @@ public class ValidatorTst extends CayenneTestCase {
 		e4.addAttribute(a4);
 		validator.reset();
 		validator.validateDbAttributes(d1, map, e4);
-		assertValidator(ErrorMsg.WARNING);
+		assertValidator(ValidationResult.WARNING);
 	}
 
 	public void testValidateObjRels() throws Exception {
@@ -204,28 +204,28 @@ public class ValidatorTst extends CayenneTestCase {
 		ObjRelationship or1 = buildValidObjRelationship("r1");
 		validator.reset();
 		validator.validateObjRels(d1, map, (ObjEntity) or1.getSourceEntity());
-		assertValidator(ErrorMsg.NO_ERROR);
+		assertValidator(ValidationResult.VALID);
 
 		// no target entity, must give a warning
 		ObjRelationship or2 = buildValidObjRelationship("r2");
 		or2.setTargetEntity(null);
 		validator.reset();
 		validator.validateObjRels(d1, map, (ObjEntity) or2.getSourceEntity());
-		assertValidator(ErrorMsg.WARNING);
+		assertValidator(ValidationResult.WARNING);
 
 		// no DbRelationship mapping, must give a warning
 		ObjRelationship or3 = buildValidObjRelationship("r2");
 		or3.clearDbRelationships();
 		validator.reset();
 		validator.validateObjRels(d1, map, (ObjEntity) or3.getSourceEntity());
-		assertValidator(ErrorMsg.WARNING);
+		assertValidator(ValidationResult.WARNING);
 
 		// no name, must give an error
 		ObjRelationship or4 = buildValidObjRelationship("r2");
 		or4.setName(null);
 		validator.reset();
 		validator.validateObjRels(d1, map, (ObjEntity) or4.getSourceEntity());
-		assertValidator(ErrorMsg.ERROR);
+		assertValidator(ValidationResult.ERROR);
 	}
 	
     public void testValidateDbRels() throws Exception {
@@ -234,28 +234,28 @@ public class ValidatorTst extends CayenneTestCase {
 		DbRelationship dr1 = buildValidDbRelationship("r1");
 		validator.reset();
 		validator.validateDbRels(d1, map, (DbEntity) dr1.getSourceEntity());
-		assertValidator(ErrorMsg.NO_ERROR);
+		assertValidator(ValidationResult.VALID);
 		
 		// no target entity
 		DbRelationship dr2 = buildValidDbRelationship("r2");
 		dr2.setTargetEntity(null);
 		validator.reset();
 		validator.validateDbRels(d1, map, (DbEntity) dr2.getSourceEntity());
-		assertValidator(ErrorMsg.WARNING);
+		assertValidator(ValidationResult.WARNING);
 		
     	// no name
 		DbRelationship dr3 = buildValidDbRelationship("r3");
 		dr3.setName(null);
 		validator.reset();
 		validator.validateDbRels(d1, map, (DbEntity) dr3.getSourceEntity());
-		assertValidator(ErrorMsg.ERROR);		
+		assertValidator(ValidationResult.ERROR);		
 		
 		// no joins
 		DbRelationship dr4 = buildValidDbRelationship("r4");
 		dr4.removeAllJoins();
 		validator.reset();
 		validator.validateDbRels(d1, map, (DbEntity) dr4.getSourceEntity());
-		assertValidator(ErrorMsg.WARNING);		
+		assertValidator(ValidationResult.WARNING);		
 	}
 
 	protected DbRelationship buildValidDbRelationship(String name) {

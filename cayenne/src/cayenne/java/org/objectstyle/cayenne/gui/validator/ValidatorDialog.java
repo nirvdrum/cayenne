@@ -55,18 +55,26 @@
  */
 package org.objectstyle.cayenne.gui.validator;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.gui.*;
+import org.objectstyle.cayenne.gui.CayenneDialog;
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.Mediator;
 
 /** 
@@ -80,7 +88,7 @@ public class ValidatorDialog
 	implements ListSelectionListener, ActionListener {
 
 	protected Mediator mediator;
-	protected Vector errMsg;
+	protected List errMsg;
 	protected JTable messages;
 	protected JButton closeBtn;
 
@@ -88,7 +96,7 @@ public class ValidatorDialog
 	public ValidatorDialog(
 		Editor editor,
 		Mediator mediator,
-		Vector errMsg,
+		List errMsg,
 		int severity) {
 			
 		super(editor, "Validation Errors", false);
@@ -147,9 +155,9 @@ public class ValidatorDialog
 }
 
 class ValidatorTableModel extends AbstractTableModel {
-	Vector errMsg;
+	List errMsg;
 
-	public ValidatorTableModel(Vector err_msg) {
+	public ValidatorTableModel(List err_msg) {
 		errMsg = err_msg;
 	}
 

@@ -75,11 +75,11 @@ import org.objectstyle.cayenne.conf.DomainHelper;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.validator.ErrorMsg;
-import org.objectstyle.cayenne.gui.validator.Validator;
 import org.objectstyle.cayenne.gui.validator.ValidatorDialog;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.project.ProjectDataSource;
+import org.objectstyle.cayenne.project.Validator;
 
 /** 
  * Parent class for all Editor actions related to saving project.

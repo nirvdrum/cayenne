@@ -54,7 +54,7 @@
  *
  */
 
-package org.objectstyle.cayenne.gui.validator;
+package org.objectstyle.cayenne.project;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,6 +65,13 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.gui.validator.AttributeErrorMsg;
+import org.objectstyle.cayenne.gui.validator.DataMapErrorMsg;
+import org.objectstyle.cayenne.gui.validator.DataNodeErrorMsg;
+import org.objectstyle.cayenne.gui.validator.DomainErrorMsg;
+import org.objectstyle.cayenne.gui.validator.EntityErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.gui.validator.RelationshipErrorMsg;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -74,7 +81,6 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.project.Project;
 
 /** 
  * Used for validating dirty elements in the Mediator.
@@ -85,7 +91,7 @@ import org.objectstyle.cayenne.project.Project;
  */
 public class Validator {
 	protected Project project;
-	protected Vector errorMessages;
+	protected List errorMessages;
 	protected int errorSeverity;
 
     public Validator() {}
@@ -138,7 +144,7 @@ public class Validator {
 	}
 
 	/** Return collection of ErrorMsg objects from last validation. */
-	public Vector getErrorMessages() {
+	public List getErrorMessages() {
 		return errorMessages;
 	}
 
