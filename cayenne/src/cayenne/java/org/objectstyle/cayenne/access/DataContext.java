@@ -445,11 +445,11 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    obj = DataContext.newDataObject(oid.getObjClass().getName());
+                    obj = DataContext.newDataObject(oid.getObjectClass().getName());
                 }
                 catch (Exception ex) {
                     String entity = (oid != null) ? getEntityResolver().lookupObjEntity(
-                            oid.getObjClass()).getName() : null;
+                            oid.getObjectClass()).getName() : null;
                     throw new CayenneRuntimeException(
                             "Error creating object for entity '" + entity + "'.",
                             ex);

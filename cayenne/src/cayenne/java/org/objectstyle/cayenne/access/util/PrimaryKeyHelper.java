@@ -191,7 +191,7 @@ public class PrimaryKeyHelper {
             }
 
             // create permanent ObjectId and attach it to the temporary id
-            id.setReplacementId(new ObjectId(id.getObjClass(), idMap));
+            id.setReplacementId(new ObjectId(id.getObjectClass(), idMap));
         }
     }
 
@@ -228,7 +228,7 @@ public class PrimaryKeyHelper {
                 throw new CayenneException(
                     noMasterPkMsg(
                         objEntity.getName(),
-                        targetKey.getObjClass().toString(),
+                        targetKey.getObjectClass().toString(),
                         dbRel.getName()));
             map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
             useful = true;

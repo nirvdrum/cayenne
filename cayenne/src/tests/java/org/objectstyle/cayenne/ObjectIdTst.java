@@ -67,7 +67,7 @@ public class ObjectIdTst extends CayenneTestCase {
     public void testObjEntityName() throws Exception {
         Class class1 = Number.class;
         ObjectId oid = new ObjectId(class1, null);
-        assertEquals(class1, oid.getObjClass());
+        assertEquals(class1, oid.getObjectClass());
     }
 
     public void testEquals0() throws Exception {

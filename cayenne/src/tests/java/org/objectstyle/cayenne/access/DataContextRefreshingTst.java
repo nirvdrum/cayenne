@@ -316,7 +316,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
      */
     protected void updateRow(ObjectId id, String dbAttribute, Object newValue) {
         UpdateQuery updateQuery = new UpdateQuery();
-        updateQuery.setRoot(id.getObjClass());
+        updateQuery.setRoot(id.getObjectClass());
         updateQuery.addUpdAttribute(dbAttribute, newValue);
 
         // set qualifier
@@ -330,7 +330,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
 
     protected void deleteRow(ObjectId id) {
         DeleteQuery deleteQuery = new DeleteQuery();
-        deleteQuery.setRoot(id.getObjClass());
+        deleteQuery.setRoot(id.getObjectClass());
         deleteQuery.setQualifier(
             ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
         getNode().performQueries(

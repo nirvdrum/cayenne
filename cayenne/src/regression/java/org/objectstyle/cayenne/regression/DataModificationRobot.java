@@ -229,7 +229,7 @@ public class DataModificationRobot {
       Iterator it = context.getObjectStore().getObjectIterator();
       while (it.hasNext()) {
           DataObject o = (DataObject) it.next();
-          Class objEntityClass = o.getObjectId().getObjClass();
+          Class objEntityClass = o.getObjectId().getObjectClass();
           ObjEntity entity = context.getEntityResolver().lookupObjEntity(objEntityClass);
           List objectsForObjEntity = (List)objectsByObjEntity.get(entity);
           if (objectsForObjEntity == null) {

@@ -86,7 +86,7 @@ public class QueryUtils {
      */
     public static SelectQuery selectObjectForId(ObjectId oid) {
         return new SelectQuery(
-            oid.getObjClass(),
+            oid.getObjectClass(),
             ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
     }
 
@@ -101,7 +101,7 @@ public class QueryUtils {
         }
 
         SelectQuery sel = new SelectQuery();
-        sel.setRoot(((ObjectId) oids.get(0)).getObjClass());
+        sel.setRoot(((ObjectId) oids.get(0)).getObjectClass());
 
         Iterator it = oids.iterator();
 

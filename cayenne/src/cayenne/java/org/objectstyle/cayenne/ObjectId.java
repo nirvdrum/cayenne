@@ -260,11 +260,19 @@ public class ObjectId implements Serializable {
     }
 
     /**
-     * Returns the class of object that this ObjectId is acting for
-     * @return Class
+     * Returns a Java class of persistent objects identified by this id.
+     * 
+     * @since 1.2 Renamed from getObjClass().
+     */
+    public Class getObjectClass() {
+        return objectClass;
+    }
+    
+    /**
+     * @deprecated since 1.2 use getObjectClass().
      */
     public Class getObjClass() {
-        return objectClass;
+        return getObjectClass();
     }
 
     /**

@@ -232,7 +232,7 @@ class CommitObserver extends DefaultOperationObserver implements
             }
 
             Object value = key.values().iterator().next();
-            ObjectId replacementId = new ObjectId(id.getObjClass(), batch
+            ObjectId replacementId = new ObjectId(id.getObjectClass(), batch
                     .getGeneratedColumn(), value);
             id.setReplacementId(replacementId);
         }

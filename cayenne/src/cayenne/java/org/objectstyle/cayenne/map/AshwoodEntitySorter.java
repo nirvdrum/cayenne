@@ -239,7 +239,7 @@ public class AshwoodEntitySorter implements EntitySorter {
                         findReflexiveMaster(
                             current,
                             (ObjRelationship) objEntity.getRelationship(reflexiveRelName),
-                            current.getObjectId().getObjClass());
+                            current.getObjectId().getObjectClass());
                 }
 
                 if (masters[k] != null) {

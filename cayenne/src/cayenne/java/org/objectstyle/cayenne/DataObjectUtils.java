@@ -278,7 +278,7 @@ public final class DataObjectUtils {
         // TODO: investigate moving this to the ObjectStore "getObject()" - this should
         // really be global...
 
-        ObjEntity entity = context.getEntityResolver().lookupObjEntity(id.getObjClass());
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(id.getObjectClass());
         EntityInheritanceTree inheritanceHandler = context
                 .getEntityResolver()
                 .lookupInheritanceTree(entity);
@@ -306,7 +306,7 @@ public final class DataObjectUtils {
         DataRow row = objectStore.getSnapshot(id, context);
 
         return (row != null)
-                ? context.objectFromDataRow(id.getObjClass(), row, false)
+                ? context.objectFromDataRow(id.getObjectClass(), row, false)
                 : null;
     }
 

@@ -403,7 +403,7 @@ public class CayenneDataObject implements DataObject {
     protected void setReverseRelationship(String relName, DataObject val) {
         ObjRelationship rel = (ObjRelationship) dataContext
                 .getEntityResolver()
-                .lookupObjEntity(objectId.getObjClass())
+                .lookupObjEntity(objectId.getObjectClass())
                 .getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
@@ -419,7 +419,7 @@ public class CayenneDataObject implements DataObject {
      * this object.
      */
     protected void unsetReverseRelationship(String relName, DataObject val) {
-        Class aClass = objectId.getObjClass();
+        Class aClass = objectId.getObjectClass();
         EntityResolver resolver = dataContext.getEntityResolver();
         ObjEntity entity = resolver.lookupObjEntity(aClass);
 

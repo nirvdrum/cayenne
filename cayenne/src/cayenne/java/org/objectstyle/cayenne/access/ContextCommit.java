@@ -442,7 +442,7 @@ class ContextCommit {
 
                     if (isRootDbEntity) {
                         ObjectId updId = updatedId(
-                                o.getObjectId().getObjClass(),
+                                o.getObjectId().getObjectClass(),
                                 idSnapshot,
                                 snapshot);
                         if (updId != null) {
@@ -645,7 +645,7 @@ class ContextCommit {
             List objEntities,
             int operationType) {
 
-        Class objEntityClass = o.getObjectId().getObjClass();
+        Class objEntityClass = o.getObjectId().getObjectClass();
         ObjEntity entity = context.getEntityResolver().lookupObjEntity(objEntityClass);
         Collection objectsForObjEntity = (Collection) objectsByObjEntity
                 .get(objEntityClass.getName());

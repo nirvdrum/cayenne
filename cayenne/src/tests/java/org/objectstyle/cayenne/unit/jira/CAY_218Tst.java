@@ -129,7 +129,7 @@ public class CAY_218Tst extends PeopleTestCase {
         assertTrue(object instanceof Manager);
 
         // also test that the ObjectID is that of manager
-        assertSame(Manager.class, object.getObjectId().getObjClass());
+        assertSame(Manager.class, object.getObjectId().getObjectClass());
 
         // ... and that it is used by the ObjectStore
         assertNull(context.getObjectStore().getObject(employeeID));

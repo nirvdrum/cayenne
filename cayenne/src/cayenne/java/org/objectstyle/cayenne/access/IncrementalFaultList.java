@@ -790,7 +790,7 @@ public class IncrementalFaultList implements List {
 
             if (!dataObj
                 .getObjectId()
-                .getObjClass()
+                .getObjectClass()
                 .getName()
                 .equals(rootEntity.getClassName())) {
                 return true;
