@@ -84,7 +84,7 @@ public class ValidatorTst extends CayenneTestCase {
 
 	public void setUp() throws Exception {
 		map = new DataMap();
-		validator = new Validator(Mediator.getMediator());
+		validator = new Validator(new Mediator());
 	}
 
 	public void testValidateDomains() throws Exception {

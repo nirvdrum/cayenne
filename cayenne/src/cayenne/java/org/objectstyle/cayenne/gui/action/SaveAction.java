@@ -179,13 +179,13 @@ public class SaveAction extends CayenneAction {
 
 	protected void saveProject() throws Exception {
 		Mediator mediator = getMediator();
-		File file = tempFileForFile(mediator.getConfig().getProjFile());
+		File file = tempFileForFile(Editor.getProject().getMainProjectFile());
 		String masterPath = ((File) tempLookup.get(file)).getAbsolutePath();
 
 		FileWriter fw = new FileWriter(file);
 
 		try {
-			DomainHelper.storeDomains(new PrintWriter(fw), mediator.getDomains());
+			DomainHelper.storeDomains(new PrintWriter(fw), Editor.getProject().getDomains());
 			Editor.getFrame().addToLastProjList(masterPath);
 		} finally {
 			fw.flush();
@@ -196,7 +196,7 @@ public class SaveAction extends CayenneAction {
 	/** Save data source info if data source factory is DIRECT_FACTORY. */
 	protected void saveDataNode(DataNode node) throws Exception {
 		Mediator mediator = getMediator();
-		File projDir = new File(mediator.getConfig().getProjDir());
+		File projDir = Editor.getProject().getProjectDir();
 		File file = tempFileForFile(new File(projDir, node.getDataSourceLocation()));
 
 		FileWriter fw = new FileWriter(file);
@@ -215,7 +215,7 @@ public class SaveAction extends CayenneAction {
 
 	/** Save data map to the file. */
 	protected void saveDataMap(DataMap map) throws Exception {
-		File projDir = new File(getMediator().getConfig().getProjDir());
+		File projDir = Editor.getProject().getProjectDir();
 		File file = tempFileForFile(new File(projDir, map.getLocation()));
 
 		MapLoader saver = new MapLoader();

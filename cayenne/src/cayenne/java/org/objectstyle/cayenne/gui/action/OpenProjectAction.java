@@ -154,9 +154,7 @@ public class OpenProjectAction extends ProjectAction {
 			// uncomment to debug GUI
 			Configuration.setLoggingLevel(Level.INFO);
 
-			GuiConfiguration.initSharedConfig(file);
-			setMediator(Mediator.createMediator(GuiConfiguration.getGuiConfig()));
-
+			setMediator(new Mediator());
 			Editor.getFrame().projectOpened(file);
 			Editor.getFrame().setProjectTitle(file.getAbsolutePath());
 

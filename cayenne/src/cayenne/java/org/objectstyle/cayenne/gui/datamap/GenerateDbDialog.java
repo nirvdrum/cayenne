@@ -233,15 +233,9 @@ public class GenerateDbDialog
     }
 
     protected void storeSQL() {
-        String projDirStr = getMediator().getConfig().getProjDir();
-        File projDir = null;
-        if (projDirStr != null) {
-            projDir = new File(projDirStr);
-        }
-
-        JFileChooser fc;
+        File projDir = Editor.getProject().getProjectDir();
         FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
-        fc = new JFileChooser(fileView);
+        JFileChooser fc = new JFileChooser(fileView);
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setDialogTitle("Create database");
         if (null != projDir) {

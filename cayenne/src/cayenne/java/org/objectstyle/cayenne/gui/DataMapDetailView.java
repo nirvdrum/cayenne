@@ -86,269 +86,263 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class DataMapDetailView
-	extends JPanel
-	implements DocumentListener, ActionListener, DataMapDisplayListener, ItemListener {
+    extends JPanel
+    implements DocumentListener, ActionListener, DataMapDisplayListener, ItemListener {
 
-	static Logger logObj = Logger.getLogger(DataMapDetailView.class.getName());
+    static Logger logObj = Logger.getLogger(DataMapDetailView.class.getName());
 
-	Mediator mediator;
+    Mediator mediator;
 
-	JLabel nameLabel;
-	JTextField name;
-	String oldName;
+    JLabel nameLabel;
+    JTextField name;
+    String oldName;
 
-	JLabel locationLabel;
-	JTextField location;
-	JButton fileBtn;
-	protected JPanel fileChooser;
-	protected JPanel depMapsPanel;
+    JLabel locationLabel;
+    JTextField location;
+    JButton fileBtn;
+    protected JPanel fileChooser;
+    protected JPanel depMapsPanel;
 
-	protected HashMap mapLookup = new HashMap();
+    protected HashMap mapLookup = new HashMap();
 
-	/** Cludge to prevent marking map as dirty during initial load. */
-	private boolean ignoreChange;
+    /** Cludge to prevent marking map as dirty during initial load. */
+    private boolean ignoreChange;
 
-	public DataMapDetailView(Mediator mediator) {
-		super();
-		this.mediator = mediator;
-		mediator.addDataMapDisplayListener(this);
-		// Create and layout components
-		init();
+    public DataMapDetailView(Mediator mediator) {
+        super();
+        this.mediator = mediator;
+        mediator.addDataMapDisplayListener(this);
+        // Create and layout components
+        init();
 
-		// Add listeners
-		location.getDocument().addDocumentListener(this);
-		name.getDocument().addDocumentListener(this);
-		fileBtn.addActionListener(this);
-	}
+        // Add listeners
+        location.getDocument().addDocumentListener(this);
+        name.getDocument().addDocumentListener(this);
+        fileBtn.addActionListener(this);
+    }
 
-	private void init() {
-		BorderLayout layout = new BorderLayout();
-		this.setLayout(layout);
-		nameLabel = new JLabel("Data map name: ");
-		name = new JTextField(20);
-		locationLabel = new JLabel("Location: ");
-		location = new JTextField(25);
-		location.setEditable(false);
-		fileBtn = new JButton("...");
+    private void init() {
+        BorderLayout layout = new BorderLayout();
+        this.setLayout(layout);
+        nameLabel = new JLabel("Data map name: ");
+        name = new JTextField(20);
+        locationLabel = new JLabel("Location: ");
+        location = new JTextField(25);
+        location.setEditable(false);
+        fileBtn = new JButton("...");
 
-		fileChooser = this.formatFileChooser(location, fileBtn);
+        fileChooser = this.formatFileChooser(location, fileBtn);
 
-		Component[] leftComp = new Component[2];
-		leftComp[0] = nameLabel;
-		leftComp[1] = locationLabel;
+        Component[] leftComp = new Component[2];
+        leftComp[0] = nameLabel;
+        leftComp[1] = locationLabel;
 
-		Component[] rightComp = new Component[2];
-		rightComp[0] = name;
-		rightComp[1] = fileChooser;
+        Component[] rightComp = new Component[2];
+        rightComp[0] = name;
+        rightComp[1] = fileChooser;
 
-		JPanel temp = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
-		add(temp, BorderLayout.NORTH);
-	}
+        JPanel temp = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
+        add(temp, BorderLayout.NORTH);
+    }
 
-	private JPanel formatFileChooser(JTextField fld, JButton btn) {
-		JPanel panel = new JPanel();
+    private JPanel formatFileChooser(JTextField fld, JButton btn) {
+        JPanel panel = new JPanel();
 
-		panel.setLayout(new BorderLayout());
-		panel.add(fld, BorderLayout.CENTER);
-		panel.add(btn, BorderLayout.EAST);
+        panel.setLayout(new BorderLayout());
+        panel.add(fld, BorderLayout.CENTER);
+        panel.add(btn, BorderLayout.EAST);
 
-		return panel;
-	}
+        return panel;
+    }
 
-	public void insertUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-	public void changedUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-	public void removeUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
+    public void insertUpdate(DocumentEvent e) {
+        textFieldChanged(e);
+    }
+    public void changedUpdate(DocumentEvent e) {
+        textFieldChanged(e);
+    }
+    public void removeUpdate(DocumentEvent e) {
+        textFieldChanged(e);
+    }
 
-	private void textFieldChanged(DocumentEvent e) {
-		if (ignoreChange) {
-			return;
-		}
+    private void textFieldChanged(DocumentEvent e) {
+        if (ignoreChange) {
+            return;
+        }
 
-		DataMap map = mediator.getCurrentDataMap();
-		DataMapEvent event;
-		if (e.getDocument() == name.getDocument()) {
-			String new_name = name.getText();
-			// If name hasn't changed, do nothing
-			if (oldName != null && new_name.equals(oldName))
-				return;
-			map.setName(new_name);
-			event = new DataMapEvent(this, map, oldName);
-			mediator.fireDataMapEvent(event);
-			oldName = new_name;
-		} else if (e.getDocument() == location.getDocument()) {
-			if (map.getLocation().equals(location.getText()))
-				return;
-			map.setLocation(location.getText());
-			event = new DataMapEvent(this, map);
-			mediator.fireDataMapEvent(event);
-		}
-	}
+        DataMap map = mediator.getCurrentDataMap();
+        DataMapEvent event;
+        if (e.getDocument() == name.getDocument()) {
+            String new_name = name.getText();
+            // If name hasn't changed, do nothing
+            if (oldName != null && new_name.equals(oldName))
+                return;
+            map.setName(new_name);
+            event = new DataMapEvent(this, map, oldName);
+            mediator.fireDataMapEvent(event);
+            oldName = new_name;
+        } else if (e.getDocument() == location.getDocument()) {
+            if (map.getLocation().equals(location.getText()))
+                return;
+            map.setLocation(location.getText());
+            event = new DataMapEvent(this, map);
+            mediator.fireDataMapEvent(event);
+        }
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		if (src == fileBtn) {
-			selectMapLocation();
-		}
-	}
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+        if (src == fileBtn) {
+            selectMapLocation();
+        }
+    }
 
-	protected void selectMapLocation() {
-		DataMap map = mediator.getCurrentDataMap();
+    protected void selectMapLocation() {
+        DataMap map = mediator.getCurrentDataMap();
 
-		SaveHandler saveHandler = new SaveHandler(mediator);
-		String oldLocation = map.getLocation();
+        SaveHandler saveHandler = new SaveHandler(mediator);
+        String oldLocation = map.getLocation();
 
-		String projDirStr = mediator.getConfig().getProjDir();
-		File projDir = (projDirStr != null) ? new File(projDirStr) : null;
+        File projDir = Editor.getProject().getProjectDir();
 
-		try {
-			// don't allow changes on unsaved project
-			if (!saveHandler.shouldProceed()) {
-				return;
-			}
+        try {
+            // don't allow changes on unsaved project
+            if (!saveHandler.shouldProceed()) {
+                return;
+            }
 
-			FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
-			JFileChooser fc = new JFileChooser(fileView);
-			fc.setDialogType(JFileChooser.SAVE_DIALOG);
-			fc.setDialogTitle("Data Map Location");
-			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
+            JFileChooser fc = new JFileChooser(fileView);
+            fc.setDialogType(JFileChooser.SAVE_DIALOG);
+            fc.setDialogTitle("Data Map Location");
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-			if (projDir != null) {
-				fc.setCurrentDirectory(projDir);
-			}
+            if (projDir != null) {
+                fc.setCurrentDirectory(projDir);
+            }
 
-			if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
-				return;
-			}
+            if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
 
-			File file = fc.getSelectedFile();
+            File file = fc.getSelectedFile();
+            String relLocation = Editor.getProject().resolveSymbolicName(file);
+            if(relLocation == null) {
+            	logObj.info("Selected location is not the child of project directory, ignoring.");
+            	return;
+            }
+            
+            if (relLocation.equals(map.getLocation())) {
+                return;
+            }
 
-			// Determine and set new data map location
-			String newFileLocation = file.getAbsolutePath();
+            // Create new file
+            if (!file.exists()) {
+                file.createNewFile();
+            }
 
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			String relLocation =
-				(projDirStr == null)
-					? newFileLocation
-					: newFileLocation.substring(projDirStr.length() + 1);
+            map.setLocation(relLocation);
+            location.setText(relLocation);
+        } catch (IOException ioex) {
+            ErrorDebugDialog.guiWarning(ioex, "Error renaming map.");
+            return;
+        } catch (Throwable th) {
+            ErrorDebugDialog.guiException(th);
+            return;
+        }
 
-			if (relLocation.equals(map.getLocation())) {
-				return;
-			}
+        // Map location changed
+        mediator.fireDataMapEvent(new DataMapEvent(this, map));
+        saveHandler.saveProject();
 
-			// Create new file
-			if (!file.exists()) {
-				file.createNewFile();
-			}
+        // remove old location
+        if (oldLocation != null) {
+            File oldFile =
+                (projDir != null)
+                    ? new File(projDir, oldLocation)
+                    : new File(oldLocation);
+            if (!oldFile.delete()) {
+                logObj.info("Can't delete old file: " + oldFile);
+            }
+        }
+    }
 
-			map.setLocation(relLocation);
-			location.setText(relLocation);
-		} catch (IOException ioex) {
-			ErrorDebugDialog.guiWarning(ioex, "Error renaming map.");
-			return;
-		} catch (Throwable th) {
-			ErrorDebugDialog.guiException(th);
-			return;
-		}
+    public void currentDataMapChanged(DataMapDisplayEvent e) {
+        DataMap map = e.getDataMap();
+        if (null == map) {
+            return;
+        }
 
-		// Map location changed
-		mediator.fireDataMapEvent(new DataMapEvent(this, map));
-		saveHandler.saveProject();
+        oldName = map.getName();
+        ignoreChange = true;
+        name.setText(oldName);
+        location.setText(map.getLocation());
+        ignoreChange = false;
 
-		// remove old location
-		if (oldLocation != null) {
-			File oldFile =
-				(projDir != null)
-					? new File(projDir, oldLocation)
-					: new File(oldLocation);
-			if (!oldFile.delete()) {
-				logObj.info("Can't delete old file: " + oldFile);
-			}
-		}
-	}
+        if (depMapsPanel != null) {
+            remove(depMapsPanel);
+            depMapsPanel = null;
+        }
 
-	public void currentDataMapChanged(DataMapDisplayEvent e) {
-		DataMap map = e.getDataMap();
-		if (null == map) {
-			return;
-		}
+        mapLookup.clear();
 
-		oldName = map.getName();
-		ignoreChange = true;
-		name.setText(oldName);
-		location.setText(map.getLocation());
-		ignoreChange = false;
+        // add a list of dependencies
+        java.util.List maps = mediator.getCurrentDataDomain().getMapList();
 
-		if (depMapsPanel != null) {
-			remove(depMapsPanel);
-			depMapsPanel = null;
-		}
+        if (maps.size() < 2) {
+            return;
+        }
 
-		mapLookup.clear();
+        Component[] leftComp = new Component[maps.size() - 1];
+        Component[] rightComp = new Component[maps.size() - 1];
 
-		// add a list of dependencies
-		java.util.List maps = mediator.getCurrentDataDomain().getMapList();
+        Iterator it = maps.iterator();
+        int i = 0;
+        while (it.hasNext()) {
+            DataMap nextMap = (DataMap) it.next();
+            if (nextMap != map) {
+                JCheckBox check = new JCheckBox();
+                JLabel label = new JLabel(nextMap.getName());
 
-		if (maps.size() < 2) {
-			return;
-		}
+                check.addItemListener(this);
+                if (nextMap.isDependentOn(map)) {
+                    check.setEnabled(false);
+                    label.setEnabled(false);
+                }
 
-		Component[] leftComp = new Component[maps.size() - 1];
-		Component[] rightComp = new Component[maps.size() - 1];
+                if (map.isDependentOn(nextMap)) {
+                    check.setSelected(true);
+                }
 
-		Iterator it = maps.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			DataMap nextMap = (DataMap) it.next();
-			if (nextMap != map) {
-				JCheckBox check = new JCheckBox();
-				JLabel label = new JLabel(nextMap.getName());
+                mapLookup.put(check, nextMap);
+                leftComp[i] = label;
+                rightComp[i] = check;
+                i++;
+            }
+        }
 
-				check.addItemListener(this);
-				if (nextMap.isDependentOn(map)) {
-					check.setEnabled(false);
-					label.setEnabled(false);
-				}
+        depMapsPanel = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
+        depMapsPanel.setBorder(BorderFactory.createTitledBorder("Depends on DataMaps"));
+        add(depMapsPanel, BorderLayout.CENTER);
+        validate();
+    }
 
-				if (map.isDependentOn(nextMap)) {
-					check.setSelected(true);
-				}
+    /**
+     * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
+     */
+    public void itemStateChanged(ItemEvent e) {
+        JCheckBox src = (JCheckBox) e.getSource();
+        DataMap map = (DataMap) mapLookup.get(src);
 
-				mapLookup.put(check, nextMap);
-				leftComp[i] = label;
-				rightComp[i] = check;
-				i++;
-			}
-		}
+        if (map != null) {
+            DataMap curMap = mediator.getCurrentDataMap();
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                curMap.addDependency(map);
+            } else if (e.getStateChange() == ItemEvent.DESELECTED) {
+                curMap.removeDependency(map);
+            }
 
-		depMapsPanel = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
-		depMapsPanel.setBorder(BorderFactory.createTitledBorder("Depends on DataMaps"));
-		add(depMapsPanel, BorderLayout.CENTER);
-		validate();
-	}
-
-	/**
-	 * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		JCheckBox src = (JCheckBox) e.getSource();
-		DataMap map = (DataMap) mapLookup.get(src);
-
-		if (map != null) {
-			DataMap curMap = mediator.getCurrentDataMap();
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-				curMap.addDependency(map);
-			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-				curMap.removeDependency(map);
-			}
-
-			mediator.fireDataMapEvent(new DataMapEvent(this, curMap));
-		}
-	}
+            mediator.fireDataMapEvent(new DataMapEvent(this, curMap));
+        }
+    }
 }

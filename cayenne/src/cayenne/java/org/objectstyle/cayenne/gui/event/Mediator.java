@@ -58,16 +58,21 @@ package org.objectstyle.cayenne.gui.event;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
 
 import javax.swing.event.EventListenerList;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.GuiConfiguration;
 import org.objectstyle.cayenne.gui.util.DataMapWrapper;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /** 
  * Implementation of event dispatching in CayenneModeler using <code>Mediator</code>
@@ -89,11 +94,6 @@ public class Mediator {
 
 	protected static Logger logObj = Logger.getLogger(Mediator.class.getName());
 
-	// this is used for debugging of listeners
-	// if there number of listeners for any given event exceeds
-	// this value, a warning will be printed in the logs
-	private static final int LISTENER_THRESHOLD = 3;
-
 	protected EventListenerList listenerList;
 
 	/** The list of the currently open DataMapModel's */
@@ -113,38 +113,14 @@ public class Mediator {
 	ArrayList dirtyMaps = new ArrayList();
 	/** The list of changed data nodes.*/
 	ArrayList dirtyNodes = new ArrayList();
-
-	GuiConfiguration config;
 	
 	/** Changes have been made, need to be saved. */
 	boolean dirty;
 	
-	private static Mediator mediator;
-
-	private Mediator() {
+	public Mediator() {
 		listenerList = new EventListenerList();
 	}
-
-	private Mediator(GuiConfiguration config) {
-		this();
-		this.config = config;
-	}
-
-	public static Mediator getMediator() {
-		if (mediator == null) {
-			mediator = new Mediator();
-		}
-		return mediator;
-	}
-
-	public static Mediator createMediator(GuiConfiguration config) {
-		mediator = new Mediator(config);
-		return mediator;
-	}
-
-	public GuiConfiguration getConfig() {
-		return config;
-	}
+	
 
 	public boolean isDirty() {
 		return dirty;
@@ -229,13 +205,6 @@ public class Mediator {
 	/** Gets data map under specified name. */
 	public DataMapWrapper getDataMap(String name) {
 		return null;
-	}
-
-	public DataDomain[] getDomains() {
-		java.util.List domains = config.getDomainList();
-		if (null == domains)
-			return new DataDomain[0];
-		return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
 	}
 
 	public DataNode getCurrentDataNode() {
@@ -755,7 +724,7 @@ public class Mediator {
 		Object src,
 		DataDomain domain,
 		boolean make_current) {
-		config.addDomain(domain);
+		Editor.getProject().getConfig().addDomain(domain);
 		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.ADD));
 		if (make_current)
 			fireDomainDisplayEvent(new DomainDisplayEvent(src, domain));

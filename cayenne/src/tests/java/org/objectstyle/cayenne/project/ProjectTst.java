@@ -75,7 +75,7 @@ public class ProjectTst extends CayenneTestCase {
     public void testConstructor() throws Exception {
     	File f = new File("xyz");
     	Project p = new Project("abc", f);
-    	assertEquals(f, p.getProjectFile());
+    	assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
     	assertEquals("abc", p.getName());
     }
 }

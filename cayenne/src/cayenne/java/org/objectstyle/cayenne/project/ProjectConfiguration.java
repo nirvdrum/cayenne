@@ -81,16 +81,19 @@ public class ProjectConfiguration extends DefaultConfiguration {
 
     public ProjectConfiguration(File projectFile) {
         this.projectFile = projectFile;
-        try {
-            init();
-        } catch (Exception e) {
-            throw new ProjectException("Error initializing configuration.", e);
+
+        if (projectFile.isFile()) {
+            try {
+                init();
+            } catch (Exception e) {
+                throw new ProjectException("Error initializing configuration.", e);
+            }
         }
     }
 
     /** Returns project directory. */
     public File getProjectDir() {
-    	String parent = (projectFile != null) ? projectFile.getParent() : null;
+        String parent = (projectFile != null) ? projectFile.getParent() : null;
         return (parent != null) ? new File(parent) : null;
     }
 
@@ -136,7 +139,7 @@ public class ProjectConfiguration extends DefaultConfiguration {
             throw new ProjectException("Error creating DataSourceFactory.", e);
         }
     }
-    
+
     /**
      * Returns the projectFile.
      * @return File

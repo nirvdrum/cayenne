@@ -59,18 +59,18 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
+import org.objectstyle.cayenne.conf.Configuration;
+
 /**
  * FileFilter used to select Cayenne project files.
  */
 public class ProjectFileFilter extends FileFilter {
 	
-	public static final String PROJ_FILE_NAME = "cayenne.xml";
-	
   	/**
   	 * Accepts all directories and all cayenne.xml files.
   	 */
   	public boolean accept(File f) {
-		return f.isDirectory() || PROJ_FILE_NAME.equals(f.getName());
+		return f.isDirectory() || Configuration.DOMAIN_FILE.equals(f.getName());
 	}
 
   	/**

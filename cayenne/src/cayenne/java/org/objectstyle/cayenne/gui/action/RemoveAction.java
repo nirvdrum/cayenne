@@ -129,7 +129,7 @@ public class RemoveAction extends CayenneAction {
 	protected void removeDomain() {
 		Mediator mediator = getMediator();
 		DataDomain domain = mediator.getCurrentDataDomain();
-		mediator.getConfig().removeDomain(domain.getName());
+		Editor.getProject().getConfig().removeDomain(domain.getName());
 		mediator.fireDomainEvent(new DomainEvent(Editor.getFrame(), domain, DomainEvent.REMOVE));
 	}
 	

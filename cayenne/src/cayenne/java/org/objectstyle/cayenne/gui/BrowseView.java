@@ -167,7 +167,7 @@ public class BrowseView
 		// create tree model with root objects
 		model = new DefaultTreeModel(rootNode);
 		// Populate obj tree
-		DataDomain[] temp_domains = mediator.getDomains();
+		DataDomain[] temp_domains = Editor.getProject().getDomains();
 		for (int i = 0; i < temp_domains.length; i++) {
 			DefaultMutableTreeNode domain_ele;
 			domain_ele = loadDomain(temp_domains[i]);

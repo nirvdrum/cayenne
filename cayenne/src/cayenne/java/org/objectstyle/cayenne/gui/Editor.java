@@ -230,7 +230,8 @@ public class Editor
     
     /**
      * Returns a project that is currently a current project of an 
-     * Editor singleton instance.
+     * Editor singleton instance. This will be changed if CayenneModeler
+     * ever starts supporting multiple open projects.
      */
     public static Project getProject() {
     	return getFrame().projects.getCurrentProject();
@@ -473,6 +474,8 @@ public class Editor
     }
 
     public void projectOpened(File projectFile) {
+    	logObj.debug("Creting new project in " + projectFile);
+    	
     	// create a new project
     	projects.createProject(DEFAULT_PROJECT_NAME, projectFile, true);
         view = new EditorView(mediator);

@@ -58,7 +58,10 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.event.DomainDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DomainEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**
@@ -91,8 +94,8 @@ public class CreateDomainAction extends CayenneAction {
 		DataDomain domain =
 			(DataDomain) NamedObjectFactory.createObject(
 				DataDomain.class,
-				mediator.getConfig());
-		mediator.getConfig().addDomain(domain);
+				Editor.getProject().getConfig());
+		Editor.getProject().getConfig().addDomain(domain);
 		mediator.fireDomainEvent(
 			new DomainEvent(this, domain, DomainEvent.ADD));
 		mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));

@@ -441,9 +441,7 @@ public class DataNodeDetailView
         SaveHandler saveHandler = new SaveHandler(mediator);
         String oldLocation = node.getDataSourceLocation();
 
-        String projDirStr = mediator.getConfig().getProjDir();
-        File projDir = (projDirStr != null) ? new File(projDirStr) : null;
-
+        File projDir = Editor.getProject().getProjectDir();
         try {
             // don't allow changes on unsaved project,
             // unless this node was just recently added and doesn't have 
@@ -473,19 +471,12 @@ public class DataNodeDetailView
 
             // If it is set, use path striped of proj dir and following separator
             // If proj dir not set, use absolute location.
-            String relLocation = null;
-            
-            if(projDirStr == null) {
-            	relLocation = newFileLocation;
-            }
-            else if(!newFileLocation.startsWith(projDirStr)) {
-            	logObj.info("Location was selected that is not the child of project directory, ignore.");
+            String relLocation = Editor.getProject().resolveSymbolicName(file);
+            if(relLocation == null) {
+            	logObj.info("Selected location is not the child of project directory, ignoring.");
             	return;
             }
-            else {
-            	relLocation = newFileLocation.substring(projDirStr.length() + 1);
-            }
-
+ 
             if (relLocation.equals(node.getDataSourceLocation())) {
                 return;
             }

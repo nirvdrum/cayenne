@@ -56,8 +56,10 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 
@@ -66,19 +68,101 @@ import org.objectstyle.cayenne.conf.Configuration;
  * files in the filesystem describing storing Cayenne DataMaps,
  * DataNodes and other information.
  * 
+ * <p>Project has a project directory, which is a canonical directory. 
+ * All project files are relative to the project directory.
+ * </p>
+ * 
  * @author Andrei Adamchik
  */
 public class Project {
+    static Logger logObj = Logger.getLogger(Project.class.getName());
+
     protected String name;
     protected Configuration config;
-    protected File projectFile;
+
+    protected File projectDir;
+    protected String mainProjectFile;
 
     /**
-     * Constructor for Project.
+     * Constructor for Project. <code>projectFile</code> must denote 
+     * a file (existent or non-existent) in an existing directory. 
+     * If projectFile has no parent directory, current directory is assumed.
      */
     public Project(String name, File projectFile) {
-        this.projectFile = projectFile;
         this.name = name;
+
+        File parent = projectFile.getParentFile();
+        if (parent == null) {
+            parent = new File(System.getProperty("user.dir"));
+        }
+
+        if (!parent.isDirectory()) {
+            throw new ProjectException(
+                "Project directory does not exist or is not a directory: " + parent);
+        }
+
+        try {
+            this.projectDir = parent.getCanonicalFile();
+        } catch (IOException e) {
+            throw new ProjectException("Error creating project.", e);
+        }
+
+        this.mainProjectFile = projectFile.getName();
+    }
+
+    /**
+     * Returns a canonical file built from symbolic name.
+     */
+    public File resolveFile(String symbolicName) {
+        try {
+            // substitute to Windows backslashes if needed
+            if (File.separatorChar != '/') {
+                symbolicName = symbolicName.replace('/', File.separatorChar);
+            }
+            return new File(projectDir, symbolicName).getCanonicalFile();
+        } catch (IOException e) {
+            // error converting path
+            logObj.info("Can't convert to canonical form.", e);
+            return null;
+        }
+    }
+
+    /**
+      * Returns a "symbolic" name of a file. Returns null if file 
+      * is invalid. Symbolic name is a string path of a file relative
+      * to the project directory. It is built in a platform independent
+      * fashion.
+      */
+    public String resolveSymbolicName(File file) {
+        String symbolicName = null;
+        try {
+            if (file.isAbsolute()) {
+                // accept absolute files only when 
+                // they are in the project directory
+                String otherPath = file.getCanonicalFile().getPath();
+                String thisPath = projectDir.getPath();
+
+                // invalid absolute pathname, can't continue
+                if (otherPath.length() + 1 <= thisPath.length()
+                    || !otherPath.startsWith(thisPath)) {
+                    return null;
+                }
+
+                symbolicName = otherPath.substring(thisPath.length() + 1);
+            }
+
+            // substitute Windows backslashes if needed
+            if (File.separatorChar != '/') {
+                symbolicName = symbolicName.replace(File.separatorChar, '/');
+            }
+
+            return symbolicName;
+
+        } catch (IOException e) {
+            // error converting path
+            logObj.info("Can't convert to canonical form.", e);
+            return null;
+        }
     }
 
     /**
@@ -87,12 +171,12 @@ public class Project {
      * on demand.
      */
     public Configuration getConfig() {
-        if (projectFile == null) {
+        if (mainProjectFile == null) {
             return null;
         }
 
         if (config == null) {
-            config = new ProjectConfiguration(projectFile);
+            config = new ProjectConfiguration(getMainProjectFile());
         }
         return config;
     }
@@ -102,17 +186,16 @@ public class Project {
      * 
      * @return File
      */
-    public File getProjectFile() {
-        return projectFile;
+    public File getMainProjectFile() {
+        return resolveFile(mainProjectFile);
     }
-    
+
     /** 
      * Returns project directory. This is a directory where
      * project file is located.
      */
     public File getProjectDir() {
-    	String parent = (projectFile != null) ? projectFile.getParent() : null;
-        return (parent != null) ? new File(parent) : null;
+        return projectDir;
     }
 
     /**

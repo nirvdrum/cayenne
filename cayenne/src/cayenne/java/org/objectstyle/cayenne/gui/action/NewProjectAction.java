@@ -58,16 +58,17 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import org.apache.log4j.Level;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+
 import org.apache.log4j.Logger;
-
-import javax.swing.*;
-
 import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.GuiConfiguration;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.cayenne.util.Preferences;
 
 /**
@@ -122,6 +123,7 @@ public class NewProjectAction extends ProjectAction {
                 }
 
                 file = fileChooser.getSelectedFile();
+                
                 if (!file.exists()) {
                     file.mkdirs();
                 } else if (!file.isDirectory()) {
@@ -130,7 +132,8 @@ public class NewProjectAction extends ProjectAction {
                         "Can't create directory " + file);
                     return;
                 }
-                projectFile = new File(file, ProjectFileFilter.PROJ_FILE_NAME);
+                
+                projectFile = new File(file, Configuration.DOMAIN_FILE);
                 if (projectFile.exists()) {
                     int ret =
                         JOptionPane.showConfirmDialog(
@@ -153,13 +156,7 @@ public class NewProjectAction extends ProjectAction {
 
             // Save dir path to the preferences
             pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
-            try {
-                GuiConfiguration.initSharedConfig(projectFile, false);
-            } catch (ConfigException e) {
-                logObj.warn(e);
-            }
-
-            setMediator(Mediator.createMediator(GuiConfiguration.getGuiConfig()));
+            setMediator(new Mediator());
             Editor.getFrame().projectOpened(projectFile);
 
             // Set title to contain proj file path

@@ -77,82 +77,73 @@ import org.objectstyle.cayenne.util.Preferences;
  * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
-	static Logger logObj =
-		Logger.getLogger(CreateDataMapAction.class.getName());
+    static Logger logObj = Logger.getLogger(CreateDataMapAction.class.getName());
 
-	public static final String ACTION_NAME = "Create DataMap";
+    public static final String ACTION_NAME = "Create DataMap";
 
-	public CreateDataMapAction() {
-		super(ACTION_NAME);
-	}
+    public CreateDataMapAction() {
+        super(ACTION_NAME);
+    }
 
-	public String getIconName() {
-		return "icon-datamap.gif";
-	}
+    public String getIconName() {
+        return "icon-datamap.gif";
+    }
 
-	/** Calls addDataMap() or creates new data map if no data node selected.*/
-	protected void createDataMap() {
-		Mediator mediator = getMediator();
-		String relative_location = getMapLocation(mediator);
-		if (null == relative_location) {
-			return;
-		}
+    /** Calls addDataMap() or creates new data map if no data node selected.*/
+    protected void createDataMap() {
+        Mediator mediator = getMediator();
+        String relative_location = getMapLocation(mediator);
+        if (null == relative_location) {
+            return;
+        }
 
-		DataDomain currentDomain = mediator.getCurrentDataDomain();
-		DataMap map =
-			(DataMap) NamedObjectFactory.createObject(
-				DataMap.class,
-				currentDomain);
-		map.setLocation(relative_location);
-		mediator.addDataMap(this, map);
-	}
+        DataDomain currentDomain = mediator.getCurrentDataDomain();
+        DataMap map =
+            (DataMap) NamedObjectFactory.createObject(DataMap.class, currentDomain);
+        map.setLocation(relative_location);
+        mediator.addDataMap(this, map);
+    }
 
-	/** Returns location relative to Project or null if nothing selected. */
-	static String getMapLocation(Mediator mediator) {
-		Preferences pref = Preferences.getPreferences();
-		String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
-		// Data map file
-		File file = null;
-		// Map location relative to proj dir
-		String relative_location = null;
-		try {
-			String proj_dir_str = mediator.getConfig().getProjDir();
-			File proj_dir = null;
-			if (proj_dir_str != null)
-				proj_dir = new File(proj_dir_str);
-			JFileChooser fc;
-			FileSystemViewDecorator file_view;
-			file_view = new FileSystemViewDecorator(proj_dir);
-			// Get the data map file name
-			fc = new JFileChooser(file_view);
-			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			fc.setDialogTitle("Enter data map file name");
-			if (null != init_dir) {
-				File init_dir_file = new File(init_dir);
-				if (init_dir_file.exists())
-					fc.setCurrentDirectory(init_dir_file);
-			}
-			int ret_code = fc.showSaveDialog(Editor.getFrame());
-			if (ret_code != JFileChooser.APPROVE_OPTION)
-				return relative_location;
-			file = fc.getSelectedFile();
-			if (!file.exists())
-				file.createNewFile();
-			String new_file_location = file.getAbsolutePath();
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-				relative_location = new_file_location;
-			else
-				relative_location =
-					new_file_location.substring(proj_dir_str.length() + 1);
-		} catch (Exception e) {
-			logObj.warn("Error creating data map file.", e);
-		}
-		return relative_location;
-	}
+    /** Returns location relative to Project or null if nothing selected. */
+    static String getMapLocation(Mediator mediator) {
+        Preferences pref = Preferences.getPreferences();
+        String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
+        // Data map file
+        File file = null;
 
-	public void performAction(ActionEvent e) {
-		createDataMap();
-	}
+        try {
+
+            File proj_dir = Editor.getProject().getProjectDir();
+            JFileChooser fc;
+            FileSystemViewDecorator file_view;
+            file_view = new FileSystemViewDecorator(proj_dir);
+            // Get the data map file name
+            fc = new JFileChooser(file_view);
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fc.setDialogTitle("Enter data map file name");
+            if (null != init_dir) {
+                File init_dir_file = new File(init_dir);
+                if (init_dir_file.exists())
+                    fc.setCurrentDirectory(init_dir_file);
+            }
+            int ret_code = fc.showSaveDialog(Editor.getFrame());
+            if (ret_code != JFileChooser.APPROVE_OPTION) {
+                return null;
+            }
+
+            file = fc.getSelectedFile();
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            return Editor.getProject().resolveSymbolicName(file);
+        } catch (Exception e) {
+            logObj.warn("Error creating data map file.", e);
+        }
+        return null;
+    }
+
+    public void performAction(ActionEvent e) {
+        createDataMap();
+    }
 }
