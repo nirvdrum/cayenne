@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.regression;
 
 import javax.sql.DataSource;
 
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -66,7 +67,7 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 
 /**
- * Runs regression test based on a set of properties 
+ * Runs regression test based on a set of properties
  * @author Andrei Adamchik
  */
 public class AntMain extends Main {
@@ -99,6 +100,9 @@ public class AntMain extends Main {
     }
 
     protected DataDomain createDomain() throws Exception {
+        ClassLoader loader = new DOStubClassLoader();
+        Configuration.bootstrapSharedConfig(loader.loadClass("Table"));
+
         DataSourceInfo info = ((TestPreferences) prefs).getConnectionInfo();
 
         // data source
