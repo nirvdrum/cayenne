@@ -11,53 +11,10 @@
 	<p>In addition to mapping database tables and views as entities, Cayenne allows mapping
 	and executing database stored procedures. Just like table structure is described by DbEntities,
 	stored procedures are described by <a 
-	href="../../api/cayenne/org/objectstyle/cayenne/map/Procedure.html">Procedure</a> class. Stored
-	procedures are executed using <a 
+	href="../../api/cayenne/org/objectstyle/cayenne/map/Procedure.html">Procedure</a> class. 
+	Stored procedures are created using CayenneModeler, and are executed using <a 
 	href="../../api/cayenne/org/objectstyle/cayenne/query/ProcedureQuery.html">ProcedureQuery</a>,
 	as described in the following chapters.</p>
-	
-	<panel name="Note:">
-		Currently CayenneModeler does not support GUI mapping of stored procedures. Other than
-		that, stored procedures are supported just like normal entities. They can be added to 
-		DataMaps, saved and restored from XML. GUI support is coming. For now Procedure objects
-		have to be created in the code, or (preferred) by editing DataMap XML files. 
-	</panel>
-	
-	<p>Stored procedure creation examples are relevant until CayenneModeler will fully support stored procedures:
-	</p>
-	
-	<p><strong>Creating stored procedure in the code.</strong></p>
-<source>
-Procedure procedure = new Procedure("some_stored_procedure");
-ProcedureParameter param1 =
-  new ProcedureParameter(
-            "in_param",
-             java.sql.Types.INTEGER,
-             ProcedureParameter.IN_PARAMETER);
-ProcedureParameter param2 =
-  new ProcedureParameter(
-            "out_param",
-             java.sql.Types.INTEGER,
-             ProcedureParameter.OUT_PARAMETER);
-procedure.addCallParameter(param1);
-procedure.addCallParameter(param2);
-
-// IMPORTANT! Add new procedure to a DataMap
-DataMap map; // assume this exists
-map.addProcedure(procedure);
-</source>
-	
-	<p><strong>Creating stored procedure by manually editing XML.</strong> Same procedure as above. Note that 
-	subsequent editing of the data map in the Modeler shouldn't affect the stored procedure 
-	XML section.</p>
-	
-<source>&amp;lt;data-map project-version="1.0"&amp;gt;
-   ...
-   &amp;lt;procedure name="some_stored_procedure"&amp;gt;
-      &amp;lt;procedure-parameter name="in_param" type="INTEGER" direction="in"/&amp;gt;
-      &amp;lt;procedure-parameter name="out_param" type="INTEGER" direction="out"/&amp;gt;
-   &amp;lt;/procedure&gt;
-   ...</source>	
 	
     </section>
 </body>

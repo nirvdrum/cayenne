@@ -33,6 +33,15 @@
         		special database objects may need to be created to support automated primary key
         		generation.
         		</li>
+        		
+        		<li>Display order of attributes and relationships is alphabetic and does not affect 
+        		Cayenne runtime behavior.
+        		</li>
+        		
+        		<li>Display order of Procedure Parameters is important - this is the order in which 
+        		stored procedure parameters will be bound. Use "Up" and "Down" buttons in the bottom
+        		of the "Parameters" tab to change parameter position.
+        		</li>
         	</ul>
         </section>
     </body>

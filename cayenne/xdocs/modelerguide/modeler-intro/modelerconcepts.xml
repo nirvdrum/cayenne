@@ -106,6 +106,25 @@
 		concept in the database world (Primary Key - Foreign Key association).
 		ObjRelationship consists of one or more DbRelationships.
 		</p>
+		
+		<p><strong>Procedures:</strong><img src="../../images/modeler/icon-stored-procedure.gif" width="16" height="16"/>
+		</p>
+		
+		<p>
+		Procedure is a decriptor of a database stored procedure. It can be created in the modeler
+		and later invoked using ProcedureQuery. Note that not all databases support stored
+		procedures.
+		</p>
+		
+		<p><strong>ProcedureParameters:</strong><img src="../../images/modeler/icon-attribute.gif" width="16" height="16"/>
+		</p>
+		
+		<p>
+		ProcedureParameters (though they use the same icon as entity attributes) define
+		positional parameters used to call stored procedures. After ProcedureParameter
+		is assigned to a Procedure in a particular position, it can later be referred
+		by name in ProcedureQuery. ProcedureParameters are directional and can be IN, OUT, IN_OUT.
+		</p>
 		</subsection>
     </section>
 </body>

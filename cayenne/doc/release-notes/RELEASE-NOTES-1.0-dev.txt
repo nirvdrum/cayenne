@@ -31,3 +31,6 @@ such as Attributes and relationships. Bugs 707926, 664516.
 8. Configuration will detect an existing Log4j setup and use it instead of trying
 to reconfigure itself.
 
+9. {Modeler} Full support of stored procedures mapping in the modeler.
+
+
