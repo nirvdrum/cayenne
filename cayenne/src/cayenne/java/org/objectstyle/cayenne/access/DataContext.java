@@ -143,8 +143,6 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient ObjectStore objectStore;
     protected transient SnapshotManager snapshotManager;
 
-    protected transient PrimaryKeyGenerationSupport keyGenerator;
-
     /**
      * Convenience method to create a new instance of
      * DataContext based on default domain. If more
@@ -206,7 +204,6 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void setParent(QueryEngine parent) {
         this.parent = parent;
-        createKeyGenerator();
     }
 
     public SnapshotManager getSnapshotManager() {
@@ -1185,14 +1182,6 @@ public class DataContext implements QueryEngine, Serializable {
             : Collections.EMPTY_LIST;
     }
 
-    private void createKeyGenerator() {
-        keyGenerator =
-            (parent != null ? new PrimaryKeyGenerationSupport(this) : null);
-    }
-
-    PrimaryKeyGenerationSupport getKeyGenerator() {
-        return keyGenerator;
-    }
 
     void fireWillCommit() {
         // post event: WILL_COMMIT
