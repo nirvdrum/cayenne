@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
@@ -118,6 +119,7 @@ public class ActionController extends ModelerController {
 		getAction(ValidateAction.getActionName()).setEnabled(false);
 		getAction(ProjectAction.getActionName()).setEnabled(false);
         getAction(SaveAction.getActionName()).setEnabled(false);
+        getAction(SaveAsAction.getActionName()).setEnabled(false);
         getAction(CreateDomainAction.getActionName()).setEnabled(false);
 
         updateRemoveAction(null);
@@ -187,6 +189,7 @@ public class ActionController extends ModelerController {
         getAction(CreateDomainAction.getActionName()).setEnabled(true);
 		getAction(ProjectAction.getActionName()).setEnabled(true);
 		getAction(ValidateAction.getActionName()).setEnabled(true);
+        getAction(SaveAsAction.getActionName()).setEnabled(true);
     }
 
     /**

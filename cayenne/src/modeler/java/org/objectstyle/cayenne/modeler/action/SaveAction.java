@@ -58,32 +58,19 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
 
 import javax.swing.KeyStroke;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
-import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
-import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.validator.Validator;
 
-/** 
- * Parent class for all Editor actions related to saving project.
- * 
- * @author Misha Shengaout
+/**
+ * An action that saves a project using to its default location.
  */
-public class SaveAction extends CayenneAction {
+public class SaveAction extends SaveAsAction {
 
-	public static String getActionName() {
-		return "Save";
-	}
-
-    protected ProjectOpener fileChooser = new ProjectOpener();
+    public static String getActionName() {
+        return "Save";
+    }
 
     public SaveAction() {
         super(getActionName());
@@ -97,69 +84,7 @@ public class SaveAction extends CayenneAction {
         return "icon-save.gif";
     }
 
-    /** 
-     * Saves project and related files. Saving is done to temporary files, 
-     * and only on successful save, master files are replaced with new versions. 
-     */
-    protected boolean saveAll() throws Exception {
-        Project p = CayenneModelerFrame.getProject();
-
-        if (p.isLocationUndefined()) {
-            File projectDir = fileChooser.newProjectDir(CayenneModelerFrame.getFrame(), p);
-            if (projectDir == null) {
-                return false;
-            }
-
-            p.setProjectDirectory(projectDir);
-        }
-
-        p.save();
-        CayenneModelerFrame.getFrame().updateTitle();
-        CayenneModelerFrame.getFrame().addToLastProjList(p.getMainFile().getAbsolutePath());
-        return true;
-    }
-
-    /**
-     * This method is synchronized to prevent problems on double-clicking "save".
-     */
-    public synchronized void performAction(ActionEvent e) {
-        performAction(ValidationDisplayHandler.WARNING);
-    }
-
-    public synchronized void performAction(int warningLevel) {
-        EventController mediator = getMediator();
-        Validator val = CayenneModelerFrame.getProject().getValidator();
-        int validationCode = val.validate();
-
-        // If no serious errors, perform save.
-        if (validationCode < ValidationDisplayHandler.ERROR) {
-            try {
-                if (!saveAll()) {
-                    return;
-                }
-            } catch (Exception ex) {
-                throw new CayenneRuntimeException("Error on save", ex);
-            }
-
-            mediator.setDirty(false);
-        }
-
-        // If there were errors or warnings at validation, display them
-        if (validationCode >= warningLevel) {
-            ValidatorDialog.showDialog(CayenneModelerFrame.getFrame(), mediator, val);
-        }
-    }
-
-    /**
-    * Returns <code>true</code> if path contains a Project object 
-    * and the project is modified.
-    */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
-        }
-
-        Project project = (Project)path.firstInstanceOf(Project.class);
-        return project != null  && project.isModified();
+    protected boolean chooseDestination(Project p) {
+        return (p.isLocationUndefined()) ? super.chooseDestination(p) : true;
     }
 }

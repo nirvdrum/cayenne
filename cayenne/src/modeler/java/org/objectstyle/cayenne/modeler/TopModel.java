@@ -83,6 +83,7 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -128,6 +129,9 @@ public class TopModel {
 
         CayenneAction saveAction = new SaveAction();
         actionMap.put(saveAction.getKey(), saveAction);
+        
+        CayenneAction saveAsAction = new SaveAsAction();
+        actionMap.put(saveAsAction.getKey(), saveAsAction);
 
         CayenneAction validateAction = new ValidateAction();
         actionMap.put(validateAction.getKey(), validateAction);

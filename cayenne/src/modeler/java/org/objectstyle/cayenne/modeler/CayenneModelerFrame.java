@@ -98,6 +98,7 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -281,6 +282,7 @@ public class CayenneModelerFrame
         fileMenu.add(getAction(ImportDataMapAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
         fileMenu.add(getAction(SaveAction.getActionName()).buildMenu());
+        fileMenu.add(getAction(SaveAsAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();

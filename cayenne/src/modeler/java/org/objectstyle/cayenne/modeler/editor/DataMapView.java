@@ -170,21 +170,21 @@ public class DataMapView extends JPanel {
         builder.append("File:", location, 3);
         builder.append("DataNode:", nodeSelector, 3);
 
-        builder.appendSeparator("Default Entity Settings");
+        builder.appendSeparator("Entity Defaults");
         builder.append(
-                "Default DB Schema:",
+                "DB Schema:",
                 defaultSchema.getTextField(),
                 updateDefaultSchema);
         builder.append(
-                "Default Java Package:",
+                "Java Package:",
                 defaultPackage.getTextField(),
                 updateDefaultPackage);
         builder.append(
-                "Default DataObject Superclass:",
+                "DataObject Superclass:",
                 defaultSuperclass.getTextField(),
                 updateDefaultSuperclass);
         builder.append(
-                "Default Optimistic Locking:",
+                "Optimistic Locking:",
                 defaultLockType,
                 updateDefaultLockType);
 
