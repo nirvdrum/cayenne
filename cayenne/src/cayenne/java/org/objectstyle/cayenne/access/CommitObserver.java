@@ -235,9 +235,10 @@ class CommitObserver extends DefaultOperationObserver implements
             // DB DEFAULT values. Ignore those.
             if (attribute.isPrimaryKey()) {
                 Object value = key.values().iterator().next();
-                ObjectId replacementId = new ObjectId(id.getObjectClass(), attribute
-                        .getName(), value);
-                id.setReplacementId(replacementId);
+
+                // I guess we should override any existing value,
+                // as generated key is the latest thing that exists in the DB.
+                id.getReplacementIdMap().put(attribute.getName(), value);
                 break;
             }
         }

@@ -475,7 +475,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             int state = object.getPersistenceState();
             ObjectId id = object.getObjectId();
 
-            if (id.getReplacementId() != null) {
+            if (id.isReplacementIdAttached()) {
                 if (modifiedIds == null) {
                     modifiedIds = new ArrayList();
                 }
@@ -546,12 +546,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     modifiedSnapshots = new HashMap();
                 }
 
+                ObjectId replacementId = id.createReplacementId();
                 DataRow dataRow = object.getDataContext().currentSnapshot(object);
-                modifiedSnapshots.put(id.getReplacementId(), dataRow);
+                modifiedSnapshots.put(replacementId, dataRow);
                 dataRow.setReplacesVersion(object.getSnapshotVersion());
 
                 // fix object state
-                object.setObjectId(id.getReplacementId());
+                object.setObjectId(replacementId);
                 object.setSnapshotVersion(dataRow.getVersion());
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 addObject(object);

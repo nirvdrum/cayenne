@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -81,7 +82,11 @@ public class ObjectId implements Serializable {
     // Values: database values of the corresponding attribute
     protected Map objectIdKeys;
     protected Class objectClass;
-    protected ObjectId replacementId;
+
+    /**
+     * @since 1.2
+     */
+    protected Map replacementIdMap;
 
     // cache hasCode, since ObjectId is immutable
     private int hashCode = Integer.MIN_VALUE;
@@ -89,23 +94,23 @@ public class ObjectId implements Serializable {
     /**
      * Convenience constructor for entities that have a single Integer as their id.
      */
-    public ObjectId(Class objClass, String keyName, int id) {
-        this(objClass, keyName, new Integer(id));
+    public ObjectId(Class objectClass, String keyName, int id) {
+        this(objectClass, keyName, new Integer(id));
     }
 
     /**
      * Convenience constructor for entities that have a single column as their id.
      */
-    public ObjectId(Class objClass, String keyName, Object id) {
-        this.objectClass = objClass;
+    public ObjectId(Class objectClass, String keyName, Object id) {
+        this.objectClass = objectClass;
         this.setIdKeys(Collections.singletonMap(keyName, id));
     }
 
     /**
      * Creates a new ObjectId.
      */
-    public ObjectId(Class objClass, Map idKeys) {
-        this.objectClass = objClass;
+    public ObjectId(Class objectClass, Map idKeys) {
+        this.objectClass = objectClass;
         if (idKeys != null) {
             this.setIdKeys(Collections.unmodifiableMap(idKeys));
         }
@@ -273,15 +278,60 @@ public class ObjectId implements Serializable {
      * Returns a replacement ObjectId associated with this id. Replacement ObjectId is
      * either a permananent ObjectId for an uncommitted object or a new id for object
      * whose id depends on its relationships.
+     * 
+     * @deprecated Since 1.2 replacement id is built by appending to replacementIdMap.
      */
     public ObjectId getReplacementId() {
-        return replacementId;
+        return (isReplacementIdAttached()) ? createReplacementId() : null;
     }
 
     /**
      * Initializes a replacement ObjectId.
+     * 
+     * @deprecated Since 1.2 replacement id is built by appending to replacementIdMap.
      */
     public void setReplacementId(ObjectId replacementId) {
-        this.replacementId = replacementId;
+        if(replacementId == null) {
+            replacementIdMap = null;
+        }
+        else {
+            Map map = getReplacementIdMap();
+            map.clear();
+            map.putAll(replacementId.getIdSnapshot());
+        }
+    }
+
+    /**
+     * Returns non-null mutable map that can be used to append replacement id values. This
+     * allows to incrementally build a replacement ObjectId.
+     * 
+     * @since 1.2
+     */
+    public Map getReplacementIdMap() {
+        if (replacementIdMap == null) {
+            replacementIdMap = new HashMap();
+        }
+
+        return replacementIdMap;
+    }
+
+    /**
+     * Creates and returns a replacement ObjectId. No validation of ID is done.
+     * 
+     * @since 1.2
+     */
+    public ObjectId createReplacementId() {
+        return new ObjectId(getObjectClass(), replacementIdMap);
+    }
+
+    /**
+     * Returns true if there is full or partial replacement id attached to this id. This
+     * method is preferrable to "!getReplacementIdMap().isEmpty()" as it avoids unneeded
+     * replacement id map creation.
+     * 
+     * @since 1.2
+     */
+    public boolean isReplacementIdAttached() {
+        return replacementIdMap != null && !replacementIdMap.isEmpty();
     }
 }

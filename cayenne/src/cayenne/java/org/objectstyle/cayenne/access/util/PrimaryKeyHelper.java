@@ -134,9 +134,9 @@ public class PrimaryKeyHelper {
         }
 
         PkGenerator pkGenerator = owner.getAdapter().getPkGenerator();
+        boolean supportsGeneratedKeys = owner.getAdapter().supportsGeneratedKeys();
         List pkAttributes = dbEntity.getPrimaryKey();
 
-        HashMap idMap = null;
         boolean pkFromMaster = true;
         Iterator i = dataObjects.iterator();
         while (i.hasNext()) {
@@ -147,13 +147,8 @@ public class PrimaryKeyHelper {
                 continue;
             }
 
-            if (id.getReplacementId() != null) {
-                continue;
-                //An id already exists... nothing further required (definitely do not
-                // create another)
-            }
-
-            idMap = new HashMap(idMap != null ? idMap.size() : 1);
+            // modify replacement id directly...
+            Map idMap = id.getReplacementIdMap();
 
             // first get values delivered via relationships
             if (pkFromMaster) {
@@ -161,7 +156,8 @@ public class PrimaryKeyHelper {
                         idMap,
                         object,
                         objEntity,
-                        dbEntity);
+                        dbEntity,
+                        supportsGeneratedKeys);
             }
 
             boolean autoPkDone = false;
@@ -169,6 +165,12 @@ public class PrimaryKeyHelper {
             while (it.hasNext()) {
                 DbAttribute dbAttr = (DbAttribute) it.next();
                 String dbAttrName = dbAttr.getName();
+
+                // skip generated keys...
+                if (supportsGeneratedKeys && dbAttr.isGenerated()) {
+                    continue;
+                }
+
                 if (idMap.containsKey(dbAttrName)) {
                     continue;
                 }
@@ -196,47 +198,63 @@ public class PrimaryKeyHelper {
                             ex);
                 }
             }
-
-            // create permanent ObjectId and attach it to the temporary id
-            id.setReplacementId(new ObjectId(id.getObjectClass(), idMap));
         }
     }
 
     private boolean appendPkFromMasterRelationships(
-            Map map,
+            Map idMap,
             DataObject dataObject,
             ObjEntity objEntity,
-            DbEntity dbEntity) throws CayenneException {
+            DbEntity dbEntity,
+            boolean supportsGeneratedKeys) throws CayenneException {
+
         boolean useful = false;
-        Iterator it = dbEntity.getRelationshipMap().values().iterator();
+        Iterator it = dbEntity.getRelationships().iterator();
         while (it.hasNext()) {
             DbRelationship dbRel = (DbRelationship) it.next();
-            if (!dbRel.isToMasterPK())
+            if (!dbRel.isToMasterPK()) {
                 continue;
+            }
 
             ObjRelationship rel = objEntity.getRelationshipForDbRelationship(dbRel);
-            if (rel == null)
+            if (rel == null) {
                 continue;
+            }
 
             DataObject targetDo = (DataObject) dataObject.readPropertyDirectly(rel
                     .getName());
 
-            if (targetDo == null)
+            if (targetDo == null) {
                 throw new CayenneException(
                         "Null master object, can't create primary key for: "
                                 + dataObject.getClass()
                                 + "."
                                 + dbRel.getName());
+            }
 
             ObjectId targetKey = targetDo.getObjectId();
-            Map idMap = targetKey.getIdSnapshot();
-            if (idMap == null)
+            Map targetKeyMap = targetKey.getIdSnapshot();
+            if (targetKeyMap == null) {
                 throw new CayenneException(noMasterPkMsg(objEntity.getName(), targetKey
                         .getObjectClass()
                         .toString(), dbRel.getName()));
-            map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
+            }
+
+            // make sure we do not override any keys set by user already
+            Iterator fk = dbRel
+                    .srcFkSnapshotWithTargetSnapshot(targetKeyMap)
+                    .entrySet()
+                    .iterator();
+            while (fk.hasNext()) {
+                Map.Entry next = (Map.Entry) fk.next();
+                if (!idMap.containsKey(next.getKey())) {
+                    idMap.put(next.getKey(), next.getValue());
+                }
+            }
+
             useful = true;
         }
+
         return useful;
     }
 

@@ -11,6 +11,9 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 Changes:
 
 - Removed almost all classes and methods deprecated in 1.1.
+- Changed ObjectId.replacementId API. If your code relies on replacementId 
+  (e.g. if you create custom ObjectIds), it is strongly advised that you switch 
+  to the new API (which It is actually simpler....)
 - Upgraded JDOM library to v. 1.0
 - Removed system CLASSPATH from Modeler startup scripts.
 - Thread-local static ClassLoader in Configuration.

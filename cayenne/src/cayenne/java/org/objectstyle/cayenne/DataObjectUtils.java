@@ -107,14 +107,13 @@ public final class DataObjectUtils {
      * thrown.
      */
     public static Object pkForObject(DataObject dataObject) {
-        ObjectId id = extractObjectId(dataObject);
-        Map pk = id.getIdSnapshot();
+        Map pk = extractObjectId(dataObject);
 
         if (pk.size() != 1) {
             throw new CayenneRuntimeException("Expected single column PK, got "
                     + pk.size()
                     + " columns, ID: "
-                    + id);
+                    + pk);
         }
 
         Map.Entry pkEntry = (Map.Entry) pk.entrySet().iterator().next();
@@ -127,26 +126,32 @@ public final class DataObjectUtils {
      * primary keys. If a DataObjects is transient, an exception is thrown.
      */
     public static Map compoundPKForObject(DataObject dataObject) {
-        ObjectId id = extractObjectId(dataObject);
-        return Collections.unmodifiableMap(id.getIdSnapshot());
+        return Collections.unmodifiableMap(extractObjectId(dataObject));
     }
 
-    static ObjectId extractObjectId(DataObject dataObject) {
+    static Map extractObjectId(DataObject dataObject) {
         if (dataObject == null) {
             throw new IllegalArgumentException("Null DataObject");
         }
 
         ObjectId id = dataObject.getObjectId();
-        if (id.isTemporary()) {
-            if (id.getReplacementId() == null) {
-                throw new CayenneRuntimeException(
-                        "Can't get primary key from temporary id.");
-            }
-
-            return id.getReplacementId();
+        if (!id.isTemporary()) {
+            return id.getIdSnapshot();
         }
 
-        return id;
+        // replacement ID is more tricky... do some sanity check...
+        if (id.isReplacementIdAttached()) {
+            DbEntity entity = dataObject
+                    .getDataContext()
+                    .getEntityResolver()
+                    .lookupDbEntity(dataObject);
+            
+            if(entity != null && entity.isFullReplacementIdAttached(id)) {
+                return id.getReplacementIdMap();
+            }
+        }
+
+        throw new CayenneRuntimeException("Can't get primary key from temporary id.");
     }
 
     /**
@@ -278,7 +283,8 @@ public final class DataObjectUtils {
         // TODO: investigate moving this to the ObjectStore "getObject()" - this should
         // really be global...
 
-        ObjEntity entity = context.getEntityResolver().lookupObjEntity(id.getObjectClass());
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(
+                id.getObjectClass());
         EntityInheritanceTree inheritanceHandler = context
                 .getEntityResolver()
                 .lookupInheritanceTree(entity);

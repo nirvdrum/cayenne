@@ -139,6 +139,12 @@ public class IdentityColumnsTst extends CayenneTestCase {
         }
     }
 
+    public void testCompoundPKWithGeneratedColumn() throws Exception {
+        if (getAccessStackAdapter().getAdapter().supportsGeneratedKeys()) {
+            fail("TODO: build test case for a compound PK with one generated column...");
+        }
+    }
+
     public void testPropagateToDependent() throws Exception {
         GeneratedColumnTest idObject = (GeneratedColumnTest) createDataContext()
                 .createAndRegisterNewObject(GeneratedColumnTest.class);

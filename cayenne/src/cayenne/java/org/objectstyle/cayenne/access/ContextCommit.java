@@ -72,7 +72,6 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
@@ -159,7 +158,7 @@ class ContextCommit {
                         insObjects,
                         updObjects,
                         delObjects);
-                
+
                 observer.setLoggingLevel(logLevel);
 
                 if (context.isTransactionEventsEnabled()) {
@@ -440,14 +439,10 @@ class ContextCommit {
                     batch.add(qualifierSnapshot, snapshot);
 
                     if (isRootDbEntity) {
-                        ObjectId updId = updatedId(
-                                o.getObjectId().getObjectClass(),
+                        updateId(
                                 idSnapshot,
+                                o.getObjectId().getReplacementIdMap(),
                                 snapshot);
-                        if (updId != null) {
-                            o.getObjectId().setReplacementId(updId);
-                        }
-
                         updObjects.add(o);
                     }
                 }
@@ -746,18 +741,18 @@ class ContextCommit {
         }
     }
 
-    private ObjectId updatedId(Class objEntityClass, Map idMap, Map updAttrs) {
-        Iterator it = updAttrs.keySet().iterator();
-        HashMap newIdMap = null;
+    // 
+    private void updateId(Map oldID, Map replacementID, Map updatedKeys) {
+        Iterator it = updatedKeys.entrySet().iterator();
+
         while (it.hasNext()) {
-            Object key = it.next();
-            if (!idMap.containsKey(key))
-                continue;
-            if (newIdMap == null)
-                newIdMap = new HashMap(idMap);
-            newIdMap.put(key, updAttrs.get(key));
+            Map.Entry entry = (Map.Entry) it.next();
+            Object key = entry.getKey();
+
+            if (oldID.containsKey(key) && !replacementID.containsKey(key)) {
+                replacementID.put(key, entry.getValue());
+            }
         }
-        return (newIdMap != null) ? new ObjectId(objEntityClass, newIdMap) : null;
     }
 
     private void groupObjEntitiesBySpannedDbEntities(

@@ -117,7 +117,7 @@ public class PreferenceDetail extends CayenneDataObject {
 
             other.setKey(otherName);
         }
-        
+
         domainPrefrence.setKey(newKey);
     }
 
@@ -166,19 +166,14 @@ public class PreferenceDetail extends CayenneDataObject {
 
             DataContext context = getDataContext();
 
-            if (context != null) {
-                ObjectId oid = getObjectId();
+            if (context != null && getObjectId() != null) {
+                int pk = DataObjectUtils.intPKForObject(this);
 
-                if (oid.isTemporary()) {
-                    oid = oid.getReplacementId();
-                }
+                domainPreference = (DomainPreference) DataObjectUtils.objectForPK(
+                        context,
+                        DomainPreference.class,
+                        pk);
 
-                if (oid != null) {
-                    domainPreference = (DomainPreference) DataObjectUtils.objectForPK(
-                            context,
-                            DomainPreference.class,
-                            oid.getIdSnapshot());
-                }
             }
         }
 
@@ -194,7 +189,7 @@ public class PreferenceDetail extends CayenneDataObject {
 
             ObjectId oid = getObjectId();
             if (oid != null && oid.isTemporary()) {
-                oid.setReplacementId(buildPermanentId());
+                oid.getReplacementIdMap().put("id", new Integer(buildPermanentId()));
             }
         }
     }
@@ -214,7 +209,7 @@ public class PreferenceDetail extends CayenneDataObject {
     /**
      * Creates permanent ID based on DomainPreference id.
      */
-    protected ObjectId buildPermanentId() {
+    protected int buildPermanentId() {
         ObjectId otherId = getDomainPreference().getObjectId();
         if (otherId == null) {
             throw new PreferenceException(
@@ -222,7 +217,7 @@ public class PreferenceDetail extends CayenneDataObject {
         }
 
         // force creation of otherId
-        if (otherId.isTemporary() && otherId.getReplacementId() == null) {
+        if (otherId.isTemporary() && !otherId.isReplacementIdAttached()) {
             DbEntity entity = getDataContext().getEntityResolver().lookupDbEntity(
                     domainPreference);
 
@@ -232,12 +227,7 @@ public class PreferenceDetail extends CayenneDataObject {
                 Object pk = node.getAdapter().getPkGenerator().generatePkForDbEntity(
                         node,
                         entity);
-
-                ObjectId permanentOtherId = new ObjectId(
-                        DomainPreference.class,
-                        DomainPreference.ID_PK_COLUMN,
-                        pk);
-                otherId.setReplacementId(permanentOtherId);
+                otherId.getReplacementIdMap().put(DomainPreference.ID_PK_COLUMN, pk);
             }
             catch (Throwable th) {
                 throw new PreferenceException("Error creating primary key", Util
@@ -245,7 +235,6 @@ public class PreferenceDetail extends CayenneDataObject {
             }
         }
 
-        int id = DataObjectUtils.intPKForObject(domainPreference);
-        return new ObjectId(getClass(), "id", id);
+        return DataObjectUtils.intPKForObject(domainPreference);
     }
 }

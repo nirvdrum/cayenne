@@ -58,11 +58,10 @@ package org.objectstyle.cayenne;
 import java.util.Collections;
 import java.util.Map;
 
-/** 
- * An ObjectId for new objects that hasn't been committed
- * to the external data store. On commit, a TempObjectId is 
- * replaced with a permanent ObjectId tied to a primary key 
- * of an object in the external data store. 
+/**
+ * An ObjectId for new objects that hasn't been committed to the external data store. On
+ * commit, a TempObjectId is replaced with a permanent ObjectId tied to a primary key of
+ * an object in the external data store.
  * 
  * @author Andrei Adamchik
  */
@@ -72,26 +71,24 @@ public class TempObjectId extends ObjectId {
         super(objClass, null);
     }
 
-    /** 
-     * TempObjectId equality condition is based on 
-     * object reference comparison. This is possible 
-     * since each object in a "new" state is unique, 
-     * and TempObjectId is only used for "new" objects. 
+    /**
+     * TempObjectId equality condition is based on object reference comparison. This is
+     * possible since each object in a "new" state is unique, and TempObjectId is only
+     * used for "new" objects.
      */
     public boolean equals(Object object) {
-        // TODO: shouldn't we also override hashCode() 
+        // TODO: shouldn't we also override hashCode()
         // to use the one from Object, not ObjectId?
         return object == this;
     }
 
-    /** 
-     * Returns an empty map if there is no replacement id available,
-     * or a snapshot of a replacement id otherwise.
+    /**
+     * Returns an empty map if there is no replacement id available, or a snapshot of a
+     * replacement id otherwise. Note that if a replacement id map is returned there is no
+     * guarantee that it is complete and has all keys.
      */
     public Map getIdSnapshot() {
-        return (replacementId == null)
-            ? Collections.EMPTY_MAP
-            : replacementId.getIdSnapshot();
+        return (replacementIdMap == null) ? Collections.EMPTY_MAP : replacementIdMap;
     }
 
     /**

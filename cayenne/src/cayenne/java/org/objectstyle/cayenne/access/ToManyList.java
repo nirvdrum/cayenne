@@ -294,13 +294,9 @@ public class ToManyList implements List, Serializable {
                     else {
                         ObjectId oid = source.getObjectId();
                         if (oid.isTemporary()) {
-                            oid = oid.getReplacementId();
-
-                            if (oid == null) {
-                                throw new CayenneRuntimeException(
+                            throw new CayenneRuntimeException(
                                     "Can't resolve relationship for temporary id: "
-                                        + source.getObjectId());
-                            }
+                                            + source.getObjectId());
                         }
 
                         DataContext context = source.getDataContext();
