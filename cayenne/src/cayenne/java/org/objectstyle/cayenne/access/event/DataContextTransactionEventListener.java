@@ -56,9 +56,9 @@
 
 package org.objectstyle.cayenne.access.event;
 
-import org.objectstyle.cayenne.event.ObserverEventListener;
+import java.util.EventListener;
 
-public interface DataContextEventListener extends ObserverEventListener {
+public interface DataContextTransactionEventListener extends EventListener {
 	public void dataContextWillCommit(DataContextEvent event);
 	public void dataContextDidCommit(DataContextEvent event);
 	public void dataContextDidRollback(DataContextEvent event);
