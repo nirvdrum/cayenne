@@ -125,8 +125,6 @@ public class SelectQueryTst extends SelectQueryBase {
                 "artistName",
                 "artist11%");
         query.setQualifier(qual);
-
-        query.setLoggingLevel(Level.WARN);
         performQuery();
 
         // check query results
