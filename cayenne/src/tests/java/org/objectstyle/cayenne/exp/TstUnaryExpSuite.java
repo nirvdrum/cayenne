@@ -83,7 +83,7 @@ public class TstUnaryExpSuite extends TstExpressionSuite {
         e1.setOperand(0, e10);
         return new TstExpressionCase("Painting",
         e1, 
-        "-<ta.>ESTIMATED_PRICE",
+        "-ta.ESTIMATED_PRICE",
         2, 1
         );
     }
@@ -96,7 +96,7 @@ public class TstUnaryExpSuite extends TstExpressionSuite {
         e1.setOperand(0, e10);
         return new TstExpressionCase("Exhibit",
         e1, 
-        "-<ta.>ESTIMATED_PRICE",
+        "-ta.ESTIMATED_PRICE",
         2, 1
         );
     }

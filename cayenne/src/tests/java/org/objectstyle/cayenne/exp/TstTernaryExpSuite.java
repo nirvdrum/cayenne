@@ -73,7 +73,7 @@ public class TstTernaryExpSuite extends TstExpressionSuite {
         e1.setOperand(2, new Integer(15000));
         return new TstExpressionCase("Exhibit",
         e1, 
-        "<ta.>ESTIMATED_PRICE BETWEEN ? AND ?",
+        "ta.ESTIMATED_PRICE BETWEEN ? AND ?",
         2, 3);
     }
     

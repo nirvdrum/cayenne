@@ -55,74 +55,67 @@ package org.objectstyle.cayenne;
  *
  */
 
-import org.apache.oro.text.perl.Perl5Util;
-
 import junit.framework.Assert;
 
+import org.apache.log4j.Logger;
+import org.apache.oro.text.perl.Perl5Util;
+
 public class TranslationTestCase {
-	public static final Perl5Util regexUtil = new Perl5Util();
+    private static Logger logObj = Logger.getLogger(TranslationTestCase.class);
 
-	public static final String ALIAS_TOKEN = "<ta.>";
-	// private static final Pattern aliasPattern = Pattern.compile("\\b\\w+\\.");
-	// private static final Pattern aliasStripPattern = Pattern.compile("<ta\\.>");
+    public static final Perl5Util regexUtil = new Perl5Util();
 
-	protected Object tstObject;
-	protected String sqlExp;
-	protected String sqlExpNoAlias;
-	protected String rootEntity;
+    protected Object tstObject;
+    protected String sqlExp;
+    protected String rootEntity;
 
-	public TranslationTestCase(
-		String rootEntity,
-		Object tstObject,
-		String sqlExp) {
-		this.tstObject = tstObject;
-		this.sqlExp = sqlExp;
-		this.rootEntity = rootEntity;
+    public TranslationTestCase(
+        String rootEntity,
+        Object tstObject,
+        String sqlExp) {
+        this.tstObject = tstObject;
+        this.rootEntity = rootEntity;
+        this.sqlExp = trim("\\b\\w+\\.", sqlExp);
+    }
 
-		sqlExpNoAlias = trim("<ta\\.>", sqlExp);
-	}
+    protected String trim(String pattern, String str) {
+        return trim(pattern, str, "");
+    }
 
-	protected String trim(String pattern, String str) {
-		return trim(pattern, str, "");
-	}
+    protected String trim(String pattern, String str, String subst) {
+        return (regexUtil.match("/" + pattern + "/", str))
+            ? regexUtil.substitute("s/" + pattern + "/" + subst + "/", str)
+            : str;
+    }
 
-	protected String trim(String pattern, String str, String subst) {
-		return (regexUtil.match("/" + pattern + "/", sqlExp))
-			? regexUtil.substitute("s/" + pattern + "<ta\\.>/" + subst + "/", sqlExp)
-			: str;
-	}
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append(this.getClass().getName()).append(tstObject);
+        return buf.toString();
+    }
 
-	public String toString() {
-		StringBuffer buf = new StringBuffer();
-		buf.append(this.getClass().getName()).append(tstObject);
-		return buf.toString();
-	}
+    public void assertTranslatedWell(String translated) {
+        if (sqlExp == null) {
+            Assert.assertNull(translated);
+            return;
+        }
 
-	public void assertTranslatedWell(String translated, boolean usedAliases) {
-		if (sqlExp == null) {
-			Assert.assertNull(translated);
-			return;
-		}
+        Assert.assertNotNull(translated);
 
-		Assert.assertNotNull(translated);
+        // strip column aliases
+        String aliasSubstituted = trim("\\b\\w+\\.", translated);
+        logObj.warn(translated + " -> " + aliasSubstituted);
+        Assert.assertEquals(
+            "Unexpected translation: " + translated + "....",
+            sqlExp,
+            aliasSubstituted);
+    }
 
-		if (usedAliases) {
-			// replace column aliases with dummy string 
-			String aliasSubstituted =
-				trim("\\b\\w+\\.", translated, ALIAS_TOKEN);
-			Assert.assertEquals(sqlExp, aliasSubstituted);
-		} else {
-			// strip column aliases
-			String aliasSubstituted = trim("\\b\\w+\\.", translated);
-			Assert.assertEquals(sqlExpNoAlias, aliasSubstituted);
-		}
-	}
+    public String getRootEntity() {
+        return rootEntity;
+    }
 
-	public String getRootEntity() {
-		return rootEntity;
-	}
-
-	public String getSqlExp() {
-		return sqlExp;
-	}
+    public String getSqlExp() {
+        return sqlExp;
+    }
 }

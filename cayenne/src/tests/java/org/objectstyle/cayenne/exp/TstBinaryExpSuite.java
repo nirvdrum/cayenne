@@ -58,12 +58,19 @@ package org.objectstyle.cayenne.exp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A suite of binary expression tests.
+ * 
+ * @author Andrei Adamchik
+ */
 public class TstBinaryExpSuite extends TstExpressionSuite {
 
     private static final TstExpressionCase like1 = buildLike1();
     private static final TstExpressionCase likeic1 = buildLikeIgnoreCase1();
     private static final TstExpressionCase in1 = buildIn1();
     private static final TstExpressionCase in2 = buildIn2();
+    private static final TstExpressionCase isNull = buildIsNull();
+    private static final TstExpressionCase isNotNull = buildIsNotNull();
 
     /** Cayenne syntax: "toGallery.galleryName in ('g1', 'g2', g3')" */
     private static TstExpressionCase buildIn1() {
@@ -86,8 +93,43 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
         return new TstExpressionCase(
             "Exhibit",
             e1,
-            "<ta.>GALLERY_NAME IN (?, ?, ?)",
+            "ta.GALLERY_NAME IN (?, ?, ?)",
             3,
+            2);
+    }
+
+    private static TstExpressionCase buildIsNull() {
+        Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+
+        Expression e10 =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        e10.setOperand(0, "toGallery.galleryName");
+        e1.setOperand(0, e10);
+        e1.setOperand(1, null);
+
+        return new TstExpressionCase(
+            "Exhibit",
+            e1,
+            "ta.GALLERY_NAME IS NULL",
+            2,
+            2);
+    }
+
+    private static TstExpressionCase buildIsNotNull() {
+        Expression e1 =
+            ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+
+        Expression e10 =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        e10.setOperand(0, "toGallery.galleryName");
+        e1.setOperand(0, e10);
+        e1.setOperand(1, null);
+
+        return new TstExpressionCase(
+            "Exhibit",
+            e1,
+            "ta.GALLERY_NAME IS NOT NULL",
+            2,
             2);
     }
 
@@ -110,7 +152,7 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
         return new TstExpressionCase(
             "Exhibit",
             e1,
-            "<ta.>GALLERY_NAME IN (?, ?, ?)",
+            "ta.GALLERY_NAME IN (?, ?, ?)",
             3,
             2);
     }
@@ -126,7 +168,7 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
         return new TstExpressionCase(
             "Exhibit",
             e1,
-            "<ta.>GALLERY_NAME LIKE ?",
+            "ta.GALLERY_NAME LIKE ?",
             2,
             2);
     }
@@ -143,7 +185,7 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
         return new TstExpressionCase(
             "Exhibit",
             e1,
-            "UPPER(<ta.>GALLERY_NAME) LIKE UPPER(?)",
+            "UPPER(ta.GALLERY_NAME) LIKE UPPER(?)",
             2,
             2);
     }
@@ -153,5 +195,7 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
         addCase(likeic1);
         addCase(in1);
         addCase(in2);
+        addCase(isNull);
+        addCase(isNotNull);
     }
 }

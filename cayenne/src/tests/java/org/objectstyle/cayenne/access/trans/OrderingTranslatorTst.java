@@ -64,7 +64,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class OrderingTranslatorTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class);
+    private static Logger logObj =
+        Logger.getLogger(OrderingTranslatorTst.class);
 
     protected TstQueryAssembler qa;
     protected SelectQuery q;
@@ -78,59 +79,68 @@ public class OrderingTranslatorTst extends CayenneTestCase {
         q = (SelectQuery) qa.getQuery();
     }
 
-    public void testDoTranslation1() throws java.lang.Exception {
+    /**
+     * Tests ascending ordering on string attribute.
+     */
+    public void testDoTranslation1() throws Exception {
         try {
             TranslationTestCase tstCase =
-                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
+                new TranslationTestCase("Artist", null, "ta.ARTIST_NAME");
             q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.ASC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
             assertNotNull(orderBySql);
-            tstCase.assertTranslatedWell(orderBySql, true);
+            tstCase.assertTranslatedWell(orderBySql);
         } finally {
             qa.dispose();
         }
     }
 
-    public void testDoTranslation2() throws java.lang.Exception {
+    /**
+     * Tests descending ordering on string attribute.
+     */
+    public void testDoTranslation2() throws Exception {
         try {
             TranslationTestCase tstCase =
-                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME DESC");
+                new TranslationTestCase("Artist", null, "ta.ARTIST_NAME DESC");
             q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.DESC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
             assertNotNull(orderBySql);
-            tstCase.assertTranslatedWell(orderBySql, true);
+            tstCase.assertTranslatedWell(orderBySql);
         } finally {
             qa.dispose();
         }
     }
 
-    public void testDoTranslation4() throws java.lang.Exception {
+    /**
+     * Tests ascending caese-insensitive ordering on string attribute.
+     */
+    public void testDoTranslation4() throws Exception {
         try {
             TranslationTestCase tstCase =
-                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
+                new TranslationTestCase("Artist", null, "UPPER(ta.ARTIST_NAME)");
             q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.ASC, true);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
             assertNotNull(orderBySql);
             assertTrue(orderBySql.indexOf("UPPER(") != -1);
-            tstCase.assertTranslatedWell(orderBySql, true);
+            tstCase.assertTranslatedWell(orderBySql);
         } finally {
             qa.dispose();
         }
     }
 
-    public void testDoTranslation5() throws java.lang.Exception {
+    public void testDoTranslation5() throws Exception {
         try {
             TranslationTestCase tstCase =
                 new TranslationTestCase(
                     "Artist",
                     null,
-                    "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
+                    "UPPER(ta.ARTIST_NAME) DESC, ta.ESTIMATED_PRICE");
             q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.DESC, true);
             q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
@@ -143,19 +153,19 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 
             // and ensure there is only ONE upper modifier
             assertTrue(orderBySql.indexOf("UPPER(", indexOfUpper + 1) == -1);
-            tstCase.assertTranslatedWell(orderBySql, true);
+            tstCase.assertTranslatedWell(orderBySql);
         } finally {
             qa.dispose();
         }
     }
 
-    public void testDoTranslation6() throws java.lang.Exception {
+    public void testDoTranslation6() throws Exception {
         try {
             TranslationTestCase tstCase =
                 new TranslationTestCase(
                     "Artist",
                     null,
-                    "<ta.>ARTIST_NAME, <ta.>ESTIMATED_PRICE");
+                    "UPPER(ta.ARTIST_NAME), UPPER(ta.ESTIMATED_PRICE)");
             q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.ASC, true);
             q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC, true);
@@ -169,26 +179,26 @@ public class OrderingTranslatorTst extends CayenneTestCase {
             // and ensure there is another after it
             assertTrue(orderBySql.indexOf("UPPER(", indexOfUpper + 1) != -1);
 
-            tstCase.assertTranslatedWell(orderBySql, true);
+            tstCase.assertTranslatedWell(orderBySql);
         } finally {
             qa.dispose();
         }
     }
 
-    public void testDoTranslation3() throws java.lang.Exception {
+    public void testDoTranslation3() throws Exception {
         try {
             TranslationTestCase tstCase =
                 new TranslationTestCase(
                     "Artist",
                     null,
-                    "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
+                    "ta.ARTIST_NAME DESC, ta.ESTIMATED_PRICE");
             q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.DESC);
             q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
             assertNotNull(orderBySql);
-            tstCase.assertTranslatedWell(orderBySql, true);
+            tstCase.assertTranslatedWell(orderBySql);
         } finally {
             qa.dispose();
         }

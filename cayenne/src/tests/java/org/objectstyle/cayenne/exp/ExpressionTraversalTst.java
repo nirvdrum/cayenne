@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.exp;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -68,29 +68,29 @@ public class ExpressionTraversalTst extends CayenneTestCase {
     }
     
     
-    protected void setUp() throws java.lang.Exception {                
+    protected void setUp() throws Exception {                
         handler = new TstTraversalHandler();
         walker = new ExpressionTraversal(); 
         walker.setHandler(handler);
     }
     
     
-    public void testUnary() throws java.lang.Exception {
+    public void testUnary() throws Exception {
         doExpressionTest(new TstUnaryExpSuite());
     }
     
     
-    public void testBinary() throws java.lang.Exception {
+    public void testBinary() throws Exception {
         doExpressionTest(new TstBinaryExpSuite());
     }
     
     
-    public void testTernary() throws java.lang.Exception {
+    public void testTernary() throws Exception {
         doExpressionTest(new TstTernaryExpSuite());
     } 
     
     
-    private void doExpressionTest(TstExpressionSuite suite) throws java.lang.Exception {
+    private void doExpressionTest(TstExpressionSuite suite) throws Exception {
         TstExpressionCase[] cases = suite.cases();
         
         int len = cases.length;
