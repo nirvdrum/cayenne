@@ -166,9 +166,10 @@ public class OpenProjectAction extends ProjectAction {
         if (returnCode == JOptionPane.NO_OPTION) {
             return false;
         }
+        
         // perform upgrade
         logObj.info("Will upgrade project " + project.getMainFile());
-        project.save();
+        project.upgrade();
         return true;
     }
 }

@@ -89,6 +89,14 @@ public class DataMapProject extends Project {
     }
 
     /**
+     * @since 1.1
+     */
+    public void upgrade() throws ProjectException {
+        // upgrades not supported in this type of project
+        throw new ProjectException("'DataMapProject' does not support upgrades.");
+    }
+    
+    /**
      * Does nothing.
      */
     public void checkForUpgrades() {

@@ -55,64 +55,30 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.objectstyle.cayenne.conf.ConfigStatus;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
- * Concrete subclass of Project used for testing purposes.
- * 
  * @author Andrei Adamchik
  */
-public class TstProject extends Project {
+public class ApplicationUpgradeHandlerTst extends CayenneTestCase {
 
-    /**
-     * Constructor for TstProject.
-     * @param name
-     * @param projectFile
-     */
-    public TstProject(File projectFile) {
-        super(projectFile);   
+    public void testCreateUpgradeHandler() throws Exception {
+        ApplicationUpgradeHandler handler = ApplicationUpgradeHandler.sharedHandler();
+        assertEquals(Project.CURRENT_PROJECT_VERSION, handler.supportedVersion());
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.Project#checkForUpgrades()
-     */
-    public void checkForUpgrades() {}
-
-    /**
-     * @see org.objectstyle.cayenne.project.Project#treeNodes()
-     */
-    public Iterator treeNodes() {
-        return new ArrayList().iterator();
-    }
-    
-    /**
-     * @see org.objectstyle.cayenne.project.Project#getChildren()
-     */
-    public List getChildren() {
-        return new ArrayList();
+    public void testDecodeVersion() throws Exception {
+        assertEquals(1.1, ApplicationUpgradeHandler.decodeVersion("1.1"), 0.000001);
+        assertEquals(1.12, ApplicationUpgradeHandler.decodeVersion("1.1.2"), 0.000001);
+        assertEquals(1.123, ApplicationUpgradeHandler.decodeVersion("1.1.2.3"), 0.000001);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.Project#projectFileForObject(Object)
-     */
-    public ProjectFile projectFileForObject(Object obj) {
-        return null;
-    }
-    
-    /**
-     * @see org.objectstyle.cayenne.project.Project#projectLoadStatus()
-     */
-    public ConfigStatus getLoadStatus() {
-        return null;
-    }
-    
-    public void upgrade() throws ProjectException {
-
+    public void testCompareVersion() throws Exception {
+        ApplicationUpgradeHandler handler = ApplicationUpgradeHandler.sharedHandler();
+        assertEquals(1.1, ApplicationUpgradeHandler.decodeVersion("1.1"), 0.000001);
+        assertEquals(-1, handler.compareVersion("1.2"));
+        assertEquals(0, handler.compareVersion("1.1"));
+        assertEquals(1, handler.compareVersion("1.0.1"));
+        assertEquals(1, handler.compareVersion("1.0"));
     }
 }
-

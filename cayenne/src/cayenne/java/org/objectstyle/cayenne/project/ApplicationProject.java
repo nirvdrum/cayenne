@@ -67,10 +67,12 @@ import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.map.DataMap;
 
 /**
+ * Represents Cayenne application project.
+ * 
  * @author Andrei Adamchik
  */
 public class ApplicationProject extends Project {
-	private static Logger logObj = Logger.getLogger(ApplicationProject.class);
+    private static Logger logObj = Logger.getLogger(ApplicationProject.class);
 
     protected ProjectConfiguration configuration;
 
@@ -84,33 +86,43 @@ public class ApplicationProject extends Project {
     }
 
     /**
+     * @since 1.1
+     */
+    public void upgrade() throws ProjectException {
+        ApplicationUpgradeHandler.sharedHandler().performUpgrade(this);
+    }
+
+    /**
      * Initializes internal <code>Configuration</code> object and then calls super.
      */
     protected void postInitialize(File projectFile) {
-    	logObj.debug("postInitialize: " + projectFile);
+        logObj.debug("postInitialize: " + projectFile);
 
         try {
-        	// if the projectFile is real..
+            // if the projectFile is real..
             if (projectFile != null) {
-            	// see whether it's a directory
-            	if (projectFile.isDirectory()) {
-            		// if so, create a new default file with full path
-            		projectFile = new File(projectFile.getPath()
-            								+ File.separator
-            								+ Configuration.DEFAULT_DOMAIN_FILE);
-            	}
+                // see whether it's a directory
+                if (projectFile.isDirectory()) {
+                    // if so, create a new default file with full path
+                    projectFile =
+                        new File(
+                            projectFile.getPath()
+                                + File.separator
+                                + Configuration.DEFAULT_DOMAIN_FILE);
+                }
 
-            	projectFile = projectFile.getCanonicalFile();
+                projectFile = projectFile.getCanonicalFile();
             }
 
             loadProject(projectFile);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
 
         super.postInitialize(projectFile);
     }
-    
+
     /**
      * @since 1.1
      */
@@ -141,9 +153,9 @@ public class ApplicationProject extends Project {
     }
 
     public void checkForUpgrades() {
-        if (hasRenamedFiles()) {
-            upgradeMessages.add("Some files require renaming.");
-        }
+        ApplicationUpgradeHandler.sharedHandler().checkForUpgrades(
+            configuration,
+            upgradeMessages);
     }
 
     /**
@@ -161,11 +173,13 @@ public class ApplicationProject extends Project {
     */
     public ProjectFile projectFileForObject(Object obj) {
         if (requiresProjectFile(obj)) {
-        	String domainFileName = this.getConfiguration().getDomainConfigurationName();
+            String domainFileName = this.getConfiguration().getDomainConfigurationName();
             return new ApplicationProjectFile(this, domainFileName);
-        } else if (requiresMapFile(obj)) {
+        }
+        else if (requiresMapFile(obj)) {
             return new DataMapFile(this, (DataMap) obj);
-        } else if (requiresNodeFile(obj)) {
+        }
+        else if (requiresNodeFile(obj)) {
             return new DataNodeFile(this, (DataNode) obj);
         }
 
@@ -195,9 +209,10 @@ public class ApplicationProject extends Project {
 
         return false;
     }
-    
 
     public ConfigStatus getLoadStatus() {
-        return (configuration != null) ? configuration.getLoadStatus() : new ConfigStatus();
+        return (configuration != null)
+            ? configuration.getLoadStatus()
+            : new ConfigStatus();
     }
 }

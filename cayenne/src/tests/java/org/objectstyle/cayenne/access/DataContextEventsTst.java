@@ -77,7 +77,8 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         setup.cleanTableData();
 
         DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
+        setup.createPkSupportForMapEntities(
+            (DataNode) dom.getDataNodes().iterator().next());
 
         context = dom.createDataContext();
         context.setTransactionEventsEnabled(true);
@@ -89,7 +90,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
 
     public void testDataContext() throws Exception {
         assertTrue(context.isTransactionEventsEnabled());
-        
+
         assertFalse(context.hasChanges());
         assertFalse(artist.receivedWillCommit());
         assertFalse(artist.receivedDidCommit());
@@ -105,14 +106,19 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     }
 
     public void testDataContextRolledBackTransaction() throws Exception {
-    	// This test will not work on MySQL, since transaction support
-    	// is either non-existent or dubious (depending on your view).
-    	// See: http://www.mysql.com/doc/en/Design_Limitations.html
-    	if(((DataNode)getDomain().getDataNodes().iterator().next())
-    			.getAdapter().getClass() == MySQLAdapter.class) {
-    		return;
-    	}
-    	
+        // This test will not work on MySQL, since transaction support
+        // is either non-existent or dubious (depending on your view).
+        // See: http://www.mysql.com/doc/en/Design_Limitations.html
+        if (((DataNode) getDomain().getDataNodes().iterator().next())
+            .getAdapter()
+            .getClass()
+            == MySQLAdapter.class) {
+            return;
+        }
+
+        // turn off cayenne validation
+        context.setValidatingObjectsOnCommit(false);
+
         assertFalse(context.hasChanges());
         assertFalse(artist.receivedWillCommit());
         assertFalse(artist.receivedDidCommit());
@@ -124,9 +130,9 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
             // commit the pending changes
             context.commitChanges(Level.WARN);
             fail("No exception on saving invalid data.");
-        } catch (CayenneRuntimeException ex) {
-            // exception expected
-            ex.printStackTrace();
+        }
+        catch (CayenneRuntimeException ex) {
+            // expected
         }
 
         assertTrue(artist.receivedWillCommit());
@@ -138,7 +144,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         assertFalse(context.hasChanges());
         assertFalse(artist.receivedWillCommit());
         assertFalse(artist.receivedDidCommit());
-        
+
         // commit without any pending changes
         context.commitChanges(Level.WARN);
 

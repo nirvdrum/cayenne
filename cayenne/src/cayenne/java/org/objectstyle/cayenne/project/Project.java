@@ -79,9 +79,9 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Andrei Adamchik
  */
 public abstract class Project {
-    private static volatile Logger logObj = Logger.getLogger(Project.class);
+    private static final Logger logObj = Logger.getLogger(Project.class);
 
-    public static final String CURRENT_PROJECT_VERSION = "1.0";
+    public static final String CURRENT_PROJECT_VERSION = "1.1";
 
     protected File projectDir;
     protected List files = new ArrayList();
@@ -348,6 +348,11 @@ public abstract class Project {
             .flattenProjectTree(this)
             .iterator();
     }
+    
+    /**
+     * @since 1.1
+     */
+    public abstract void upgrade() throws ProjectException;
 
     /** 
      * Saves project. All currently existing files are updated,
