@@ -260,6 +260,7 @@ public class DataModificationRobot {
                   }
               } else if (entity.equals(relation.getTargetEntity())) {
                   ObjRelationship reverse = relation.getReverseRelationship();
+//                  removeFromReflexiveToOne(objectToDelete, objects, reverse.getName());
                   DataObject master = (DataObject)objectToDelete.readPropertyDirectly(reverse.getName());
                   for (Iterator j = dependentObjects.iterator(); j.hasNext();) {
                       DataObject dependent = (DataObject)j.next();
@@ -270,6 +271,7 @@ public class DataModificationRobot {
                           objectToDelete.equals(master))
                           dependent.addToManyTarget(relation.getName(), dependent, true);
                       else master.addToManyTarget(relation.getName(), dependent, true);
+                      dependent.setToOneTarget(reverse.getName(), dependent, true);
                   }
               } else {
                   for (Iterator j = dependentObjects.iterator(); j.hasNext();) {
@@ -281,6 +283,15 @@ public class DataModificationRobot {
               }
           }
           context.deleteObject(objectToDelete);
+      }
+  }
+
+  private void removeFromReflexiveToOne(Object master, List objects, String objRelName) {
+      for (Iterator i = objects.iterator(); i.hasNext(); ) {
+          DataObject object = (DataObject)i.next();
+          if (master.equals(object.readPropertyDirectly(objRelName))) {
+              object.setToOneTarget(objRelName, object, true);
+          }
       }
   }
 }

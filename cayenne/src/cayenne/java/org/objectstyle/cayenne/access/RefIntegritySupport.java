@@ -76,6 +76,7 @@ import org.objectstyle.ashwood.graph.MapDigraph;
 import org.objectstyle.ashwood.graph.StrongConnection;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -222,7 +223,6 @@ public class RefIntegritySupport {
                     : null);
             objRelNames[i] = (objRel != null ? objRel.getName() : null);
         }
-        //HashSet lookup = new HashSet(dataObjects);
         List sortedObjects = new ArrayList(dataObjects.size());
         Digraph objectDependencyGraph =
             new MapDigraph(MapDigraph.HASHMAP_FACTORY);
@@ -239,6 +239,11 @@ public class RefIntegritySupport {
                     (objRelName != null
                         ? (DataObject) current.readPropertyDirectly(objRelName)
                         : null);
+                if (masters[k] == null) {
+                    masters[k] = findReflexiveMaster(current,
+                            (ObjRelationship)objEntity.getRelationship(objRelName),
+                            current.getObjectId().getObjClass());
+                }
                 if (masters[k] != null)
                     actualMasterCount++;
             }
@@ -272,6 +277,22 @@ public class RefIntegritySupport {
             sortedObjects.add(o);
         }
         return sortedObjects;
+    }
+
+    private DataObject findReflexiveMaster(DataObject obj, ObjRelationship toOneRel, Class targetClass) {
+        DbRelationship finalRel= (DbRelationship) toOneRel.getDbRelationshipList().get(0);
+        Map snapshot=obj.getCommittedSnapshot();
+        if(snapshot==null) {
+            snapshot=obj.getCurrentSnapshot();
+        }
+
+        Map pksnapshot=finalRel.targetPkSnapshotWithSrcSnapshot(snapshot);
+        if(pksnapshot!=null) {
+            ObjectId destId = new ObjectId(targetClass, pksnapshot);
+            return obj.getDataContext().registeredObject(destId);
+        }
+
+        return null;
     }
 
     private void init() throws SQLException {

@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
- 
+
 package org.objectstyle.cayenne.regression;
 
 import java.io.File;
@@ -393,8 +393,10 @@ public class RandomDomainBuilder {
 
         ObjRelationship objForwardRel = new ObjRelationship(forwardRelation.getName());
         objForwardRel.addDbRelationship(forwardRelation);
-        if (forwardRelation.isToDependentPK()) objForwardRel.setDeleteRule(DeleteRule.DENY);
-        else objForwardRel.setDeleteRule(DeleteRule.NULLIFY);
+        if (forwardRelation.isToDependentPK())
+            objForwardRel.setDeleteRule(DeleteRule.DENY);
+        else
+            objForwardRel.setDeleteRule(DeleteRule.NULLIFY);
         objForwardRel.setToMany(forwardRelation.isToMany());
         objForwardRel.setSourceEntity(pkObjEntity);
         objForwardRel.setTargetEntity(fkObjEntity);

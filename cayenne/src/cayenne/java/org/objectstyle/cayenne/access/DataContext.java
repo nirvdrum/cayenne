@@ -342,7 +342,7 @@ public class DataContext implements QueryEngine, Serializable {
                     objEntity,
                     obj,
                     dataRow);
-                    
+
                 //The merge might leave the object in hollow state if
                 // dataRow was only partial.  If so, do not add the snapshot
                 // to the objectstore.

@@ -341,14 +341,15 @@ class ContextCommit {
                 logObj.debug(
                     "Creating DeleteBatchQuery for DbEntity "
                         + entity.getDbEntity().getName());
+
             for (ListIterator j = objects.listIterator(objects.size());
                 j.hasPrevious();
                 ) {
                 DataObject o = (DataObject) j.previous();
                 Map id = o.getObjectId().getIdSnapshot();
-                if (id != null && !id.isEmpty())
+                if (id != null && !id.isEmpty()) {
                     batch.add(id);
-                //queries.add(QueryHelper.deleteQuery(o));
+                }
             }
 
             commitHelper.getQueries().add(batch);
@@ -404,17 +405,6 @@ class ContextCommit {
                 if (updId != null)
                     updatedIds.put(o.getObjectId(), updId);
                 updObjects.add(o);
-                /*
-                UpdateQuery query = QueryHelper.updateQuery(o);
-                if (query == null) {
-                  o.setPersistenceState(PersistenceState.COMMITTED);
-                  continue;
-                }
-                queries.add(query);
-                ObjectId updId = updatedId(o.getObjectId(), query);
-                if (updId != null) updatedIds.put(o.getObjectId(), updId);
-                */
-
             }
 
             commitHelper.getQueries().addAll(batches.values());
