@@ -33,7 +33,7 @@ public class DataContextSharedCacheEmpiricTst extends CayenneTestCase {
         // prepare a single artist record
         SQLTemplate insert = new SQLTemplate(
                 Artist.class,
-                "insert into artist (artist_id, artist_name) values (1, 'version1')",
+                "insert into ARTIST (ARTIST_ID, ARTIST_NAME) values (1, 'version1')",
                 false);
         c1.performNonSelectingQuery(insert);
     }
