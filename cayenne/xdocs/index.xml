@@ -5,31 +5,26 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>June 16, 2003:</i></strong> <strong>Cayenne Beta 4 Released.</strong></u></p>
+        <p><u><strong><i>July 21, 2003:</i></strong> <strong>Cayenne Release Candidate is out.</strong></u></p>
         
-        <p>Among other things, this release includes a number of CayenneModeler updates and 
-        bugfixes. For details see the <a href="RELEASE-NOTES-1.0b4.txt">release notes</a>. 
-        Download the release <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
+        <p><a href="RELEASE-NOTES-1.0rc1.txt">Cayenne 1.0 Release Candidate</a> is available for download. 
+        Cayenne team is well on track to make a final release later this fall.
+        Download RC1 <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
         here</a>.
         
         Changes in this release:
         <ul>
-        	<li>Full mapping support for stored procedures in CayenneModeler.</li>
-        	<li>Linking DataMaps to DataNodes is moved to the DataMap screen from the menu.</li>
-        	<li>CayenneModeler look and feel made more consistent (e.g. dialogs 
-        	will close on ESC, scrollbars will appear when needed, UI widgets
-        	are made the same size, etc.)</li>
-        	<li>Added some missing Expression API (parameterized LIKE expressions,
-        	NOT_LIKE, NOT_IN expressions, etc.)</li>
-        	<li>Cayenne will no longer try to impose its Log4J configuration if it
-        	detects that Log4J is already configured.</li>
+        	<li>New website and documentation design, including contextual table of contents
+        	in all Guides.</li>
+        	<li>Initial DB2 support.</li>
+        	<li>Fixed a number of bugs related to refreshing and refetching objects.</li>
+        	<li>Fixed nasty bug in the Modeler that would delete entities when a user
+        	deletes entity attributes. <font color="red">For Beta 4 users CayenneModeler
+        	upgrade is required.</font></li>
         </ul>
         
-        <i>Note on deprecated API: There is still some deprecated API created among Beta releases.
-        All deprecated
-        code will be preserved for a while, but will NOT be included in the final 1.0 release.
-        Make sure to replace calls to the deprecated methods and classes
-        in your applications with suggested alternatives.</i>
+        <i>Note on deprecated API: The next release will most likely clean up all
+        the deprecated method and classes. Please update your code now.</i>
         </p>
         
         <p><img src="images/other/nhl_logo.gif"/> 
