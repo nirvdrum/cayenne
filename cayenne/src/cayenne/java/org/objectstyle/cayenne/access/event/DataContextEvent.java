@@ -56,29 +56,30 @@
 
 package org.objectstyle.cayenne.access.event;
 
-import java.util.Collections;
 import java.util.Map;
 
-import org.objectstyle.cayenne.event.ObserverEvent;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.event.CayenneEvent;
 
 /**
- * Encapsulates optional information for events sent by DataContext.
+ * Represents events sent by DataContext.
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstätte
  */
 
-public class DataContextEvent extends ObserverEvent {
+public class DataContextEvent extends CayenneEvent {
 
-	private Map _info;
-
-	public DataContextEvent(Object src, Map info) {
+	public DataContextEvent(DataContext src) {
 		super(src);
-		_info = (info != null ? info : Collections.EMPTY_MAP);
 	}
 
-	public Map getInfo() {
-		return _info;
+	public DataContextEvent(DataContext src, Map info) {
+		super(src, info);
+	}
+
+	public DataContext getDataContext() {
+		return (DataContext)super.getSource();
 	}
 
 }
