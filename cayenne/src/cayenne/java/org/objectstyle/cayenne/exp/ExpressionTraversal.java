@@ -56,14 +56,25 @@
 package org.objectstyle.cayenne.exp;
 
 /** 
- * Class that allows to walk through Expression nodes tree. 
- * It will notify registered handler when going through
- * individual nodes. 
+ * Implements a depth-first algorithm for Expression tree traversal. 
+ * Delegates any actions that need to be performed at certain points
+ * during traversal to a TraversalHandler instance. 
  * 
  * @author Andrei Adamchik
  */
 public class ExpressionTraversal {
     private TraversalHandler handler;
+
+    public ExpressionTraversal() {
+
+    }
+
+    /**
+     * @since 1.0.6
+     */
+    public ExpressionTraversal(TraversalHandler handler) {
+        setHandler(handler);
+    }
 
     /** Sets traversal handler. The whole expression traversal process
       * is done for the benefit of handler, since ExpressionTraversal
@@ -72,16 +83,23 @@ public class ExpressionTraversal {
         this.handler = handler;
     }
 
-    /** Returns TraversalHandler. */
+    /** 
+     * Returns TraversalHandler used to process expressions being traversed. 
+     */
     public TraversalHandler getHandler() {
         return handler;
     }
 
-    /** Will walk through the expression node tree. 
-      * When passing through points of interest, will invoke callback
-      * methods on TraversalHandler. */
-    public void traverseExpression(Expression expr) {
-        traverseExpression(expr, null);
+    /** 
+     * Walks the expression tree, depth-first. When passing through 
+     * points of interest, invokes callback methods on TraversalHandler. 
+     */
+    public void traverseExpression(Expression expression) {
+        if(handler == null) {
+            throw new NullPointerException("Null handler.");
+        }
+        
+        traverseExpression(expression, null);
     }
 
     protected void traverseExpression(Object expObj, Expression parentExp) {
@@ -93,11 +111,12 @@ public class ExpressionTraversal {
 
         Expression exp = (Expression) expObj;
         int count = exp.getOperandCount();
-        
+
         // announce start node
         if (exp instanceof ListExpression) {
             handler.startListNode(exp, parentExp);
-        } else {
+        }
+        else {
             switch (count) {
                 case 2 :
                     handler.startBinaryNode(exp, parentExp);
@@ -119,11 +138,12 @@ public class ExpressionTraversal {
             // announce finished child
             handler.finishedChild(exp, i, i < count_1);
         }
-        
+
         // announce the end of traversal
         if (exp instanceof ListExpression) {
             handler.endListNode(exp, parentExp);
-        } else {
+        }
+        else {
             switch (count) {
                 case 2 :
                     handler.endBinaryNode(exp, parentExp);
@@ -137,5 +157,4 @@ public class ExpressionTraversal {
             }
         }
     }
-
 }

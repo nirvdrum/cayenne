@@ -512,6 +512,14 @@ public class ExpressionFactory {
 	public static Expression notInExp(String pathSpec, List values) {
 		return binaryPathExp(Expression.NOT_IN, pathSpec, wrapPathOperand(values));
 	}
+    
+    /**
+     * A convenience shortcut for building NOT_IN expression.
+     * @since 1.0.6
+     */
+    public static Expression notInExp(String pathSpec, Object[] values) {
+        return binaryPathExp(Expression.NOT_IN, pathSpec, wrapPathOperand(values));
+    }
 
     /**
      * A convenience shortcut for building BETWEEN expressions.

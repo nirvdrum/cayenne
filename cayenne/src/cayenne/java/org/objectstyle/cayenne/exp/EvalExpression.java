@@ -65,6 +65,10 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * Class that performs in-memory Cayenne expressions evaluation.
  * 
+ * @deprecated since 1.0.6 expressions evaluation has been reimplemented, and this class
+ * is no longer supported (with all its current defficiencies). Use API provided by 
+ * Expression class to do in-memory evaluation.
+ * 
  * @author Andrei Adamchik
  */
 public class EvalExpression extends ExpressionTraversal {

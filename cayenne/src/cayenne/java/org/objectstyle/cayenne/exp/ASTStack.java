@@ -55,57 +55,90 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import java.util.LinkedList;
 
 /**
+ * AST evaluation stack.
+ * 
  * @author Andrei Adamchik
- * @deprecated since 1.0.6 EvalExpression is deprecated.
+ * @since 1.0.6
  */
-public class EvalExpressionTst extends CayenneTestCase {
+final class ASTStack extends LinkedList {
+    static boolean booleanFromObject(Object object) {
+        // TODO: pull conversion to boolean to utils, or use 3rd party converter
+        if (object instanceof Boolean) {
+            return ((Boolean) object).booleanValue();
+        }
 
-	public void testEvaluateEqualTo() throws Exception {
-		Expression e = ExpressionFactory.matchExp("artistName", "abc");
-		EvalExpression eval = new EvalExpression(e);
+        if (object instanceof Number) {
+            return ((Number) object).intValue() != 0;
+        }
 
-		Artist match = new Artist();
-		match.setArtistName("abc");
-		assertTrue(eval.evaluate(match));
+        return object != null;
+    }
 
-		Artist noMatch = new Artist();
-		noMatch.setArtistName("123");
-		assertFalse(eval.evaluate(noMatch));
-	}
+    /** 
+      * Pops a value from the stack.
+      */
+    Object pop() {
+        return remove(size() - 1);
+    }
 
-	public void testEvaluateAnd() throws Exception {
-		Expression e = ExpressionFactory.matchExp("artistName", "abc");
-		e = e.andExp(ExpressionFactory.matchExp("artistName", "abc"));
-		EvalExpression eval = new EvalExpression(e);
+    /** 
+     * Pops a value from the stack, converting it to boolean.
+     */
+    boolean popBoolean() {
+        Object obj = pop();
+        return booleanFromObject(obj);
+    }
 
-		Artist match = new Artist();
-		match.setArtistName("abc");
-		assertTrue(eval.evaluate(match));
+    /** 
+     * Pops a value from the stack, casting it to Comparable.
+     */
+    Comparable popComparable() {
+        return (Comparable) pop();
+    }
 
-		Artist noMatch = new Artist();
-		noMatch.setArtistName("123");
-		assertFalse(eval.evaluate(noMatch));
-	}
+    /** 
+     * Pops a value from the stack, converting it to int.
+     */
+    int popInt() {
+        return ((Integer) pop()).intValue();
+    }
 
-	public void testEvaluateOr() throws Exception {
-		Expression e = ExpressionFactory.matchExp("artistName", "abc");
-		e = e.orExp(ExpressionFactory.matchExp("artistName", "xyz"));
-		EvalExpression eval = new EvalExpression(e);
+    /** 
+     * Returns a value from the stack without removing it.
+     */
+    Object peek() {
+        return get(size() - 1);
+    }
 
-		Artist match1 = new Artist();
-		match1.setArtistName("abc");
-		assertTrue("Failed: " + e, eval.evaluate(match1));
+    /** 
+     * Returns a value from the stack without removing it, converting it to boolean.
+     */
+    boolean peekBoolean() {
+        Object obj = peek();
+        return booleanFromObject(obj);
+    }
 
-		Artist match2 = new Artist();
-		match2.setArtistName("xyz");
-		assertTrue("Failed: " + e, eval.evaluate(match2));
+    /** 
+     * Returns a value from the stack without removing it, converting it to int.
+     */
+    int peekInt() {
+        return ((Integer) peek()).intValue();
+    }
 
-		Artist noMatch = new Artist();
-		noMatch.setArtistName("123");
-		assertTrue("Failed: " + e, !eval.evaluate(noMatch));
-	}
+    /**
+     * Pushes a value to the stack.
+     */
+    void push(Object obj) {
+        add(obj);
+    }
+
+    /**
+     * Pushes a boolean value to the stack.
+     */
+    void push(boolean b) {
+        add(b ? Boolean.TRUE : Boolean.FALSE);
+    }
 }

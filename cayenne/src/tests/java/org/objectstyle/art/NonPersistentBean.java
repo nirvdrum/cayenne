@@ -53,59 +53,31 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.exp;
-
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+package org.objectstyle.art;
 
 /**
+ * JavaBean used for testing of things other than DataObjects.
+ * 
  * @author Andrei Adamchik
- * @deprecated since 1.0.6 EvalExpression is deprecated.
+ * @since 1.0.6
  */
-public class EvalExpressionTst extends CayenneTestCase {
+public class NonPersistentBean {
+    protected String property1;
+    protected int property2;
 
-	public void testEvaluateEqualTo() throws Exception {
-		Expression e = ExpressionFactory.matchExp("artistName", "abc");
-		EvalExpression eval = new EvalExpression(e);
+    public String getProperty1() {
+        return property1;
+    }
 
-		Artist match = new Artist();
-		match.setArtistName("abc");
-		assertTrue(eval.evaluate(match));
+    public void setProperty1(String property1) {
+        this.property1 = property1;
+    }
 
-		Artist noMatch = new Artist();
-		noMatch.setArtistName("123");
-		assertFalse(eval.evaluate(noMatch));
-	}
+    public int getProperty2() {
+        return property2;
+    }
 
-	public void testEvaluateAnd() throws Exception {
-		Expression e = ExpressionFactory.matchExp("artistName", "abc");
-		e = e.andExp(ExpressionFactory.matchExp("artistName", "abc"));
-		EvalExpression eval = new EvalExpression(e);
-
-		Artist match = new Artist();
-		match.setArtistName("abc");
-		assertTrue(eval.evaluate(match));
-
-		Artist noMatch = new Artist();
-		noMatch.setArtistName("123");
-		assertFalse(eval.evaluate(noMatch));
-	}
-
-	public void testEvaluateOr() throws Exception {
-		Expression e = ExpressionFactory.matchExp("artistName", "abc");
-		e = e.orExp(ExpressionFactory.matchExp("artistName", "xyz"));
-		EvalExpression eval = new EvalExpression(e);
-
-		Artist match1 = new Artist();
-		match1.setArtistName("abc");
-		assertTrue("Failed: " + e, eval.evaluate(match1));
-
-		Artist match2 = new Artist();
-		match2.setArtistName("xyz");
-		assertTrue("Failed: " + e, eval.evaluate(match2));
-
-		Artist noMatch = new Artist();
-		noMatch.setArtistName("123");
-		assertTrue("Failed: " + e, !eval.evaluate(noMatch));
-	}
+    public void setProperty2(int property2) {
+        this.property2 = property2;
+    }
 }
