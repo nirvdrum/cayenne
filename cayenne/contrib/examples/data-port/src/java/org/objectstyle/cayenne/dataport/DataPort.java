@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * and write to another. It uses DataPortDelegate interface to decouple porting logic 
  * from such things like filtering entities (include/exclude from port based on some criteria),
  * logging the progress of port operation, qualifying the queries, etc. It is possible to build 
- * various configurable interfaces to the this tool. E.g. Cayenne implements CayenneDataPort 
+ * various configurable interfaces for this tool. E.g. Cayenne implements CayenneDataPort 
  * Ant task.
  * </p>
  * 

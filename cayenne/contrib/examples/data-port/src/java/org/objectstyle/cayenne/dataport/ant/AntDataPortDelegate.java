@@ -102,6 +102,17 @@ public class AntDataPortDelegate implements DataPortDelegate
     entityExcludeFilters = tokenizePattern(excludeEntitiesPattern);
   }
 
+  /**
+   * Returns an array of valid Jakarta ORO regular expressions.
+   * Takes a comma-separated list of patterns, attempting to convert them to
+   * the ORO syntax. E.g.
+   * 
+   * <p>
+   * <code>"billing_*,user?"</code> will become a set of two expressions:
+   * <p>
+   * <code>/billing_.* /</code><br>
+   * <code>/user.?/</code><br>
+   */
   protected String[] tokenizePattern(String pattern)
   {
     if (pattern != null && pattern.length() > 0)
@@ -209,6 +220,10 @@ public class AntDataPortDelegate implements DataPortDelegate
     return entities;
   }
 
+  /**
+   * Returns true if the entity passes a set of DataMap filters or
+   * if there is no DataMap filters.
+   */
   protected boolean passedDataMapFilter(DbEntity entity)
   {
     if (mapFilters.length == 0)
@@ -234,6 +249,10 @@ public class AntDataPortDelegate implements DataPortDelegate
     return false;
   }
 
+  /**
+   * Returns true if the entity matches any one of the "include" patterns, 
+   * or if there is no "include" patterns defined.
+   */
   protected boolean passedEntityIncludeFilter(DbEntity entity)
   {
     if (entityIncludeFilters.length == 0)
@@ -252,7 +271,11 @@ public class AntDataPortDelegate implements DataPortDelegate
 
     return false;
   }
-
+  
+  /**
+   * Returns true if the entity does not match any one of the "exclude" patterns, 
+   * or if there is no "exclude" patterns defined.
+   */
   protected boolean passedEntityExcludeFilter(DbEntity entity)
   {
     if (entityExcludeFilters.length == 0)
@@ -272,11 +295,18 @@ public class AntDataPortDelegate implements DataPortDelegate
     return true;
   }
 
+  /**
+   * Implements the delegate method to filter the list of entities applying
+   * filtering rules encapsulated by this object.
+   */
   public List willPortEntities(DataPort portTool, List entities)
   {
     return filterEntities(entities);
   }
-
+  
+  /**
+   * Logs entity porting event using Ant logger.
+   */
   public void willPortEntity(DataPort portTool, DbEntity entity, Query query)
   {
     parentTask.log("  Porting '" + entity.getName() + "'");
