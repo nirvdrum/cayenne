@@ -62,6 +62,7 @@ import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
@@ -77,6 +78,11 @@ import org.xml.sax.InputSource;
  */
 public class CayenneGenerator extends Task {
 
+    static {
+       // init logging properties
+       Configuration.configCommonLogging();	
+    }
+    
 	protected File map;
 	protected File[] mapDeps;
 	protected DefaultClassGenerator generator;
