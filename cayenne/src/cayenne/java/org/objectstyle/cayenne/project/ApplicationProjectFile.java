@@ -73,15 +73,26 @@ import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
 public class ApplicationProjectFile extends ProjectFile {
     protected ConfigSaverDelegate saveDelegate;
 
-    public ApplicationProjectFile() {
+	private String objectName = null;
+
+    private ApplicationProjectFile() {
+    	super();
     }
 
-    /**
-     * Constructor for ApplicationProjectFile.
-     */
-    public ApplicationProjectFile(Project project) {
-        super(project, Configuration.DEFAULT_DOMAIN_FILE);
-    }
+	/**
+	 * Constructor for default ApplicationProjectFile.
+	 */
+	public ApplicationProjectFile(Project project) {
+		this(project, Configuration.DEFAULT_DOMAIN_FILE);
+	}
+
+	/**
+	 * Constructor for ApplicationProjectFile with an existing file.
+	 */
+	public ApplicationProjectFile(Project project, String fileName) {
+		super(project, fileName);
+		this.objectName = fileName.substring(0, fileName.lastIndexOf(this.getLocationSuffix()));
+	}
 
     /**
      * Returns suffix to append to object name when 
@@ -103,7 +114,7 @@ public class ApplicationProjectFile extends ProjectFile {
      * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
      */
     public String getObjectName() {
-        return "cayenne";
+        return this.objectName;
     }
 
     public void save(PrintWriter out) throws Exception {

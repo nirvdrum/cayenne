@@ -145,7 +145,8 @@ public class ApplicationProject extends Project {
     */
     public ProjectFile projectFileForObject(Object obj) {
         if (requiresProjectFile(obj)) {
-            return new ApplicationProjectFile(this);
+        	String domainFileName = this.getConfiguration().getDomainConfigurationName();
+            return new ApplicationProjectFile(this, domainFileName);
         } else if (requiresMapFile(obj)) {
             return new DataMapFile(this, (DataMap) obj);
         } else if (requiresNodeFile(obj)) {
