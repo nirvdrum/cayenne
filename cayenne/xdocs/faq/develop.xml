@@ -21,19 +21,7 @@
     	Adapters for other engines are constantly added. Users can create their own adapters as well.</p>
     	</subsection>
     	
-		<subsection name="Q 3.2 When I start my application, Cayenne immediately connects to the database. How about lazy connection that happens on the first database call?" 
-		anchor="lazy_connection">
-    	
-    	<p>This question implies that you are not using a container-provided 
-    	DataSource, and rather use DriverDataSource to connect to the database 
-    	using a JDBC driver. Fix is simple - in the modeler set "minimum 
-    	connections" for all Data Nodes to zero, maximum - to 1 or 
-    	bigger number. This will ensure that no connections are created on 
-    	startup until the first query is executed.
-    	</p>
-    	</subsection>
-    	
-        <subsection name="Q 3.3 I am getting exceptions similar to 'Error generating PK' or 'No suitable DataNode to handle entity 'XYZ'." 
+        <subsection name="Q 3.2 I am getting exceptions like 'Error generating PK' or 'No suitable DataNode to handle entity 'XYZ'." 
 		anchor="linking">
     	
     	<p>Likely cause of these errors is that one of your Cayenne DataMaps is not 
@@ -52,24 +40,14 @@
     	</p>
     	</subsection>
     	
-    	<subsection name="Q 3.4 I reverse-engineered my Oracle database. Why is that all FLOAT columns are not showing properly?" 
-		anchor="float">
-    	
-    	<p>This seems to be a problem with Oracle JDBC driver. It's connection.getMetadata().getColumns() 
-    	returns FLOAT type as Types.OTHER. Depending on the version of Cayenne you are using, 
-    	you will see it in the modeler as "OTHER" or just as an empty type. If there is a 
-    	solution to this problem, please post it on Cayenne developer mailing list.
-    	</p>
-    	</subsection>
-    	
-    	<subsection name="Q 3.5 How do I log an output of a single query?" 
+    	<subsection name="Q 3.3 How do I log an output of a single query?" 
 		anchor="log_query">
     	
     	<p>Cayenne logging system is based on Jakarta 
     	<a href="http://jakarta.apache.org/log4j/">Log4J</a> package.
     	To increase logging level of the execution of a 
     	single select query do something like this:</p>
-
+    	
 <source>
   SelectQuery selectQuery = ...;
   selectQuery.setLoggingLevel(org.apache.log4j.Level.WARN);
@@ -79,6 +57,22 @@
 <source>
   dataContext.commitChanges(org.apache.log4j.Level.WARN);
 </source>
+    	</subsection>
+    	
+    	<subsection name="Q 3.4 I am on MySQL and I keep getting 'Can't disable AUTO_COMMIT' error. How do I fix it?" 
+		anchor="auto_commit">
+    	
+    	<p>Errors like the one below may happen when using an outdated MySQL JDBC driver:</p>
+    	<pre>java.sql.SQLException: Cannot disable AUTO_COMMIT
+	at org.gjt.mm.mysql.Connection.setAutoCommit(Connection.java:396)
+	at org.objectstyle.cayenne.conn.ConnectionWrapper.setAutoCommit(ConnectionWrapper.java:343)
+	at org.objectstyle.cayenne.access.DataNode.performQueries(DataNode.java:245)
+    	</pre>
+    	
+    	<p>Though MySQL technically does not support transactions (stable release
+    	as of this writing), call to "setAutoCommit" is completely legitimate and shouldn't fail.
+    	Downloading the latest stable driver from <a href="http://www.mysql.com/products/connector-j/index.html">MySQL 
+    	website</a> should fix this problem.</p>
     	</subsection>
     </section>
 </body>

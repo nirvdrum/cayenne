@@ -6,7 +6,8 @@
     	<p> This is a list of Cayenne Frequently Asked Questions.
     	If you have a question not answered here, feel free to ask it on 
     	<a href="http://objectstyle.org/cayenne/lists.html">cayenne-user</a> 
-    	mailing list.
+    	mailing list. Many of the questions here were originally discussed on that
+    	list.
     		<ul>
     			<li><a href="general.html">FAQ 1. General</a>
     				<ul>
@@ -18,6 +19,8 @@
     					How does Cayenne compare to XYZ O/R tool?</a></li>
     					<li><a href="general.html#license">Q 1.4 
     					What License covers Cayenne source?</a></li>
+    					<li><a href="general.html#license">Q 1.5 
+    					Cayenne History</a></li>
     				</ul>
     				<br/>
     			</li>
@@ -33,17 +36,13 @@
     				<ul>
     					<li><a href="develop.html#db">Q 3.1 
     					What databases are currently supported?</a></li>
-    				   	<li><a href="develop.html#lazy_connection">Q 3.2 
-    					When I start my application, Cayenne immediately connects to the database. 
-    					How about lazy connection that happens on the first database call?</a></li>
-    					<li><a href="develop.html#linking">Q 3.3 
-    					I am getting exceptions similar to 'Error generating PK' or 
+    					<li><a href="develop.html#linking">Q 3.2 
+    					I am getting exceptions like 'Error generating PK' or 
     					'No suitable DataNode to handle entity 'XYZ'.</a></li>
-    					<li><a href="develop.html#float">Q 3.4 
-    					I reverse-engineered my Oracle database. Why is that all FLOAT columns are 
-    					not showing properly?</a></li>
-    					<li><a href="develop.html#log_query">Q 3.5 
+    					<li><a href="develop.html#log_query">Q 3.3
     					How do I log an output of a single query?</a></li>
+    					<li><a href="develop.html#auto_commit">Q 3.4
+    					I am on MySQL and I keep getting "Can't disable AUTO_COMMIT" error. How do I fix it?</a></li>
     				</ul>
     				<br/>
     			</li>

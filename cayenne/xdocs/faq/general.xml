@@ -10,6 +10,7 @@
     	community via cayenne-user mailing list. For details how to 
     	subscribe and for earlier archives, go to 
     	<a href="http://objectstyle.org/cayenne/lists.html">http://objectstyle.org/cayenne/lists.html</a>.
+    	Commerical support and consulting services are also available directly from the authors of Cayenne.
     	</p>
     	</subsection>
     	
@@ -33,6 +34,19 @@
     	modifications are allowed, modifications and products built with Cayenne can be 
     	distributed unrestricted. The only requirement - give Cayenne authors a written 
     	credit when using Cayenne in a derivative work.</p>
+    	</subsection>
+    	
+    	<subsection name="Q 1.5 Cayenne History" anchor="history">
+    	<p>Idea of Cayenne was conceived back in 2001 by a few programmers in 
+        Atlanta, USA. Current version is based on that original idea and is under active 
+        development since December 2001.</p>
+        
+        <p>Later two of the original authors of Cayenne (Andrus and Misha)
+        started a company ObjectStyle LLC to provide commercial support and 
+        consulting services for the product.</p>
+        
+        <p>Nevertheless, core product is fully OpenSource under the most liberal license, 
+        and will stay that way. Right now Cayenne has a growing international user and developer community.</p>
     	</subsection>
     </section>
 </body>
