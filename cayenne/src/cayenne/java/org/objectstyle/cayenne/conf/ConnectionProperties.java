@@ -95,6 +95,13 @@ public class ConnectionProperties {
     }
 
     /**
+     * Returns ConnectionProperties singleton.
+     */
+    public static ConnectionProperties getInstance() {
+    	return sharedInstance;
+    }
+    
+    /**
      * Loads connection properties from $HOME/.cayenne/connection.properties.
      */
     protected static ConnectionProperties loadDefaultProperties() {

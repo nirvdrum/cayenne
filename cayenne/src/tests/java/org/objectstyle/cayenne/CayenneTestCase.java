@@ -59,6 +59,7 @@ import java.sql.Connection;
 
 import junit.framework.TestCase;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -72,47 +73,75 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
  * @author Andrei Adamchik
  */
 public class CayenneTestCase extends TestCase {
-	static boolean hasJSDK14;
-	
-	static {
-		try {
-			Class c = Class.forName("java.sql.Savepoint");
-			hasJSDK14 = true;
-		}
-		catch(Exception ex) {
-			hasJSDK14 = false;
-		}		
-	}
-	
-	/**
-	 * Constructor for CayenneTestCase.
-	 * @param arg0
-	 */
-	public CayenneTestCase(String arg0) {
-		super(arg0);
-	}
-	
-	public static boolean hasJSDK14() {
-		return hasJSDK14;
-	}
+    static Logger logObj = Logger.getLogger(CayenneTestCase.class);
+    public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
 
-	public Connection getSharedConnection() {
-		return TestMain.getResources().getSharedConnection();
-	}
+    protected static boolean hasJSDK14;
+    protected static CayenneTestResources resources;
 
-	public DataDomain getSharedDomain() {
-		return TestMain.getResources().getSharedDomain();
-	}
+    static {
+        probeJDKVersion();
+        // startDbConnections();
+    }
 
-	public DataNode getSharedNode() {
-		return TestMain.getResources().getSharedNode();
-	}
+    protected static void startDbConnections() {
+        String prop = System.getProperty(CONNECTION_NAME_KEY);
 
-	public DataSourceInfo getFreshConnInfo() throws Exception {
-		return TestMain.getResources().getFreshConnInfo();
-	}
-	
-	public DataContext createDataContext() {
-		return getSharedDomain().createDataContext();
-	}
+        if (prop == null) {
+            logObj.warn(
+                "No property for '"
+                    + CONNECTION_NAME_KEY
+                    + "' set. Good luck running unit tests.");
+        }
+
+        resources = new CayenneTestResources(prop);
+    }
+
+    protected static void probeJDKVersion() {
+        try {
+            Class c = Class.forName("java.sql.Savepoint");
+            hasJSDK14 = true;
+        } catch (Exception ex) {
+            hasJSDK14 = false;
+        }
+
+        if (CayenneTestCase.hasJSDK14()) {
+            logObj.info("JDK 1.4 detected.");
+        } else {
+            logObj.info("No JDK 1.4 detected, assuming JDK1.3.");
+        }
+    }
+
+
+    /**
+     * Constructor for CayenneTestCase.
+     * @param arg0
+     */
+    public CayenneTestCase(String arg0) {
+        super(arg0);
+    }
+
+    public static boolean hasJSDK14() {
+        return hasJSDK14;
+    }
+
+    public Connection getSharedConnection() {
+        return TestMain.getResources().getSharedConnection();
+    }
+
+    public DataDomain getSharedDomain() {
+        return TestMain.getResources().getSharedDomain();
+    }
+
+    public DataNode getSharedNode() {
+        return TestMain.getResources().getSharedNode();
+    }
+
+    public DataSourceInfo getFreshConnInfo() throws Exception {
+        return TestMain.getResources().getFreshConnInfo();
+    }
+
+    public DataContext createDataContext() {
+        return getSharedDomain().createDataContext();
+    }
 }
