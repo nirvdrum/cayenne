@@ -56,9 +56,8 @@
 
 package org.objectstyle.cayenne.dba;
 
-import java.sql.Connection;
-
 import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.Query;
@@ -104,6 +103,13 @@ public interface DbAdapter {
     /** Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
       * Valid types are defined in java.sql.Types. */
     public String[] externalTypesForJdbcType(int type);
+    
+    /** 
+     * Returns a map of type converters (ExtendedType objects)
+     * that can be used to translate between simple Java types 
+     * and JDBC formats.
+     */
+    public ExtendedTypeMap getTypeConverter();
 
     /** Returns an operation sorter or null if no sorting
       * is required. Operation sorter is needed for databases

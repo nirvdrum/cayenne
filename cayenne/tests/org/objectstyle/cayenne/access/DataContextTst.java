@@ -161,6 +161,32 @@ public class DataContextTst extends TestCase {
         assertNotNull(ctxt.lookupEntity("Artist"));
         assertNull(ctxt.lookupEntity("NonExistent"));
     }
+    
+    /** 
+     * Tests how CHAR field is handled during fetch.
+     * Some databases (Oracle...) would pad a CHAR column
+     * with extra spaces, returned to the client. Cayenne
+     * should trim it.
+     */
+    public void testCharFetch() throws Exception {
+        SelectQuery q = new SelectQuery("Artist");
+        List artists = ctxt.performQuery(q);
+        Artist a = (Artist)artists.get(0);
+        assertEquals(a.getArtistName().trim(), a.getArtistName());
+    }
+    
+    /** 
+     * Tests how CHAR field is handled during fetch in the WHERE clause.
+     * Some databases (Oracle...) would pad a CHAR column
+     * with extra spaces, returned to the client. Cayenne
+     * should trim it.
+     */
+    public void testCharInQualifier() throws Exception {
+        Expression e = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
+        SelectQuery q = new SelectQuery("Artist", e);
+        List artists = ctxt.performQuery(q);
+        assertEquals(1, artists.size());
+    }
 
     /** 
      * Test that all queries specified in prefetch are executed

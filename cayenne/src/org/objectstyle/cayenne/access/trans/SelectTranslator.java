@@ -289,7 +289,7 @@ public class SelectTranslator extends SelectQueryAssembler {
         return (entIndex >= 0) ? (String) aliasList.get(entIndex) : null;
     }
 
-    public boolean supportsTableAlases() {
+    public boolean supportsTableAliases() {
         return true;
     }
 }

@@ -64,25 +64,27 @@ public class UtilDateType implements ExtendedType {
     }
 
     public Object toJdbcObject(Object val, int type) throws Exception {
-        if(type == Types.DATE)
-            return new java.sql.Date(((java.util.Date)val).getTime());
-        else if(type == Types.TIME)
-            return new java.sql.Time(((java.util.Date)val).getTime());
-        else if(type == Types.TIMESTAMP)
-            return new java.sql.Timestamp(((java.util.Date)val).getTime());
+        if (type == Types.DATE)
+            return new java.sql.Date(((java.util.Date) val).getTime());
+        else if (type == Types.TIME)
+            return new java.sql.Time(((java.util.Date) val).getTime());
+        else if (type == Types.TIMESTAMP)
+            return new java.sql.Timestamp(((java.util.Date) val).getTime());
         else
-            throw new IllegalArgumentException("Only date/time types can be used for '" + getClassName() + "'.");
+            throw new IllegalArgumentException(
+                "Only date/time types can be used for '" + getClassName() + "'.");
     }
-
 
     public Object materializeObject(ResultSet rs, int index) throws Exception {
         Object val = rs.getObject(index);
-        
+
         // all sql time/date classes are subclasses of java.util.Date,
         // so lets cast it to Date,
         // if it is not date, ClasscastException will be thrown,
         // which is what we want
-        return new java.util.Date(((java.util.Date)val).getTime());
+        return (rs.wasNull())
+            ? null
+            : new java.util.Date(((java.util.Date) val).getTime());
     }
 
 }

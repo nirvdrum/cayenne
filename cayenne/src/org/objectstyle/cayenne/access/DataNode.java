@@ -368,7 +368,7 @@ public class DataNode implements QueryEngine {
         ArrayList snapshots = new ArrayList();
         int len = snapshotLabels.length;
         ExtendedType[] converters = new ExtendedType[len];
-        ExtendedTypeMap typeMap = ExtendedTypeMap.sharedInstance();
+        ExtendedTypeMap typeMap = adapter.getTypeConverter();
         for (int i = 0; i < len; i++) {
             converters[i] = typeMap.getRegisteredType(resultTypes[i]);
         }

@@ -55,18 +55,16 @@ package org.objectstyle.cayenne.access.trans;
  *
  */
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.Query;
 
 /** Abstract superclass of Query translators.
  *  Defines callback methods for helper classes 
@@ -110,7 +108,7 @@ public abstract class QueryAssembler extends QueryTranslator {
 
     /** Returns <code>true</code> if table aliases are supported.
       * Default implementation returns false. */
-    public boolean supportsTableAlases() {
+    public boolean supportsTableAliases() {
         return false;
     }
 
@@ -161,7 +159,7 @@ public abstract class QueryAssembler extends QueryTranslator {
                         stmt.setNull(i + 1, type);
                     else {
                         ExtendedType map =
-                            ExtendedTypeMap.sharedInstance().getRegisteredType(val.getClass().getName());
+                            adapter.getTypeConverter().getRegisteredType(val.getClass().getName());
                         Object jdbcVal = (map == null) ? val : map.toJdbcObject(val, type);
                         stmt.setObject(i + 1, jdbcVal, type, precision);
                     }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.types;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,7 @@ package org.objectstyle.cayenne.access.types;
  *
  */
 
+package org.objectstyle.cayenne.access.types;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -69,21 +69,16 @@ import java.util.logging.Logger;
   * TIME and TIMESTAMP. 
   * 
   * <p>Class uses singleton model, since mapping is usually shared within
-  * the application. </p>*/
+  * the application. </p>
+  */
 public class ExtendedTypeMap {
     static Logger logObj = Logger.getLogger(ExtendedTypeMap.class.getName());
-
-    private static final ExtendedTypeMap sharedInstance = new ExtendedTypeMap();
-
-    public static ExtendedTypeMap sharedInstance() {
-        return sharedInstance;
-    }
 
     protected HashMap typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();
 
 
-    protected ExtendedTypeMap() {
+    public ExtendedTypeMap() {
         initDefaultTypes();
     }
 
@@ -115,14 +110,18 @@ public class ExtendedTypeMap {
         return (type != null) ? type : defaultType;
     }
 
-    /** Removes registered ExtendedType object corresponding to
-      * <code>javaClassName</code> parameter. */
+    /** 
+     * Removes registered ExtendedType object corresponding to
+     * <code>javaClassName</code> parameter. 
+     */
     public void unregisterType(String javaClassName) {
         typeMap.remove(javaClassName);
     }
 
-    /** Returns array of Java class names supported by Cayenne 
-      * for JDBC mapping. */
+    /** 
+     * Returns array of Java class names supported by Cayenne 
+     * for JDBC mapping. 
+     */
     public String[] getRegisteredTypeNames() {
         Set keys = typeMap.keySet();
         int len = keys.size();

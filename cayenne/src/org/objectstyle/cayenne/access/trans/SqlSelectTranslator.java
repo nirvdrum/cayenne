@@ -177,7 +177,7 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
     }
 
 
-    public boolean supportsTableAlases() {
+    public boolean supportsTableAliases() {
         return false;
     }
 }

@@ -61,6 +61,7 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
 
@@ -76,11 +77,13 @@ public class JdbcAdapter implements DbAdapter {
 
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
+    protected ExtendedTypeMap typeConverter;
 
     public JdbcAdapter() {
         // create Pk generator
         pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
+        typeConverter = new ExtendedTypeMap();
     }
 
     /** 
@@ -196,5 +199,9 @@ public class JdbcAdapter implements DbAdapter {
     /** Returns null - by default no operation sorter is used. */
     public OperationSorter getOpSorter(DataNode node) {
         return null;
+    }
+    
+    public ExtendedTypeMap getTypeConverter() {
+        return typeConverter;
     }
 }

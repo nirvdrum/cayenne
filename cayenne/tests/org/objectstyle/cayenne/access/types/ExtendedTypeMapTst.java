@@ -67,7 +67,7 @@ public class ExtendedTypeMapTst extends TestCase {
     }
 
     public void testRegisterType() throws Exception {
-        ExtendedTypeMap map = ExtendedTypeMap.sharedInstance();
+        ExtendedTypeMap map = new ExtendedTypeMap();
         TestExtType tstType = new TestExtType();
 
         assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));

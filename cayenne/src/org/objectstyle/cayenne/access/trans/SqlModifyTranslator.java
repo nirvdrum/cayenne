@@ -86,7 +86,7 @@ public class SqlModifyTranslator extends QueryAssembler {
     }
 
 
-    public boolean supportsTableAlases() {
+    public boolean supportsTableAliases() {
         return false;
     }
 }

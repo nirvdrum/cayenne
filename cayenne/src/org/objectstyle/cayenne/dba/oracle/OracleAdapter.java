@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba.oracle;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,8 @@ package org.objectstyle.cayenne.dba.oracle;
  *
  */
 
+package org.objectstyle.cayenne.dba.oracle;
+
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -72,6 +73,11 @@ public class OracleAdapter extends JdbcAdapter {
 
     protected HashMap sorters = new HashMap();
 
+    public OracleAdapter() {
+        super();
+        typeConverter.registerType(new OracleCharType());
+    }
+    
     /** 
      * Creates and returns a primary key generator. 
      * Overrides superclass implementation to return an

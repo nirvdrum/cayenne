@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,58 +52,31 @@ package org.objectstyle.cayenne.gui.datamap;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.ArrayList;
-import java.util.Iterator;
+package org.objectstyle.cayenne.dba.oracle;
 
-import org.objectstyle.cayenne.access.types.DefaultType;
-import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
+import java.sql.ResultSet;
+import java.util.logging.Logger;
 
-public class Util
-{
-	/** Get array of db attribute names for DbEntity mapped to current ObjEntity. */
-	public static String[] getDbAttributeNames(Mediator mediator, DbEntity entity) {
-		java.util.List list = entity.getAttributeList();
-		int list_size = list.size() + 1;
-		String[] arr = new String[list_size];
-		arr[0] = "";
-		for (int i = 1; i < list_size; i++) {
-			DbAttribute attribute = (DbAttribute)list.get(i-1);
-			arr[i] = attribute.getName();
-		}
-		return arr;
-	}
-	
-	public static String[] getRegisteredTypeNames()
-	{
-	    Iterator it = DefaultType.defaultTypes();
-	    ArrayList list = new ArrayList();
-	    while(it.hasNext()) {
-	        list.add(it.next());
-	    }
-	    
-	    // can't use this anymore, ExtendedTypes are no longer a singleton
-		// String [] arr = ExtendedTypeMap.sharedInstance().getRegisteredTypeNames();
-		
-		String[] ret_arr = new String[list.size() + 1];
-		ret_arr[0] = "";
-		for (int i = 0; i < list.size(); i++) ret_arr[i+1] = (String)list.get(i);
-		return ret_arr;
-	}
+import org.objectstyle.cayenne.access.types.ExtendedType;
 
-	public static String[] getDatabaseTypes()
-	{
-		// FIXME!!! Need to have a reference TypesMapping instance
-		//String [] arr;
-		//arr = TypesMapping.getDatabaseTypes();
-		//String[] ret_arr = new String[arr.length + 1];
-		String[] ret_arr = new String[1];
-		ret_arr[0] = "";
-		//for (int i = 0; i < arr.length; i++) ret_arr[i+1] = arr[i];
-		return ret_arr;
-	}
+/** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
+public class OracleCharType implements ExtendedType {
+    static Logger logObj = Logger.getLogger(OracleCharType.class.getName());
+
+    public String getClassName() {
+        return "java.lang.String";
+    }
+
+    public Object toJdbcObject(Object val, int type) throws Exception {
+        return val;
+    }
+
+    /** Return trimmed string. */
+    public Object materializeObject(ResultSet rs, int index) throws Exception {
+        String val = rs.getString(index);
+        return (val != null) ? val.trim() : null;
+    }
 
 }

@@ -109,7 +109,7 @@ public class TstQueryAssembler extends QueryAssembler {
         return "ta";
     }
 
-    public boolean supportsTableAlases() {
+    public boolean supportsTableAliases() {
         return true;
     }
 

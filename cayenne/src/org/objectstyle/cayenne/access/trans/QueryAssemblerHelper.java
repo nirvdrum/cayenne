@@ -128,7 +128,7 @@ public abstract class QueryAssemblerHelper {
 
     /** Appends column name of a column in a root entity. */
     protected void processColumn(StringBuffer buf, Expression nameExp) {
-        if (queryAssembler.supportsTableAlases()) {
+        if (queryAssembler.supportsTableAliases()) {
             String alias =
                 queryAssembler.aliasForTable(getQueryAssembler().getRootEntity().getDbEntity());
             buf.append(alias).append('.');
@@ -138,7 +138,7 @@ public abstract class QueryAssemblerHelper {
     }
 
     protected void processColumn(StringBuffer buf, DbAttribute dbAttr) {
-        if (queryAssembler.supportsTableAlases()) {
+        if (queryAssembler.supportsTableAliases()) {
             String alias = queryAssembler.aliasForTable((DbEntity) dbAttr.getEntity());
             buf.append(alias).append('.');
         }
