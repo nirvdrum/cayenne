@@ -127,6 +127,7 @@ public class EditorView
 
 		ModelerPreferences prefs = ModelerPreferences.getPreferences();
 		int preferredSize = prefs.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
+		prefs.put(ModelerPreferences.EDITOR_TREE_WIDTH, String.valueOf(preferredSize));
 		treePanel.setPreferredSize(new Dimension(preferredSize, this.getHeight()));
 
         detailLayout = new CardLayout();
