@@ -92,4 +92,13 @@ public class SybaseDelegate extends DatabaseSetupDelegate {
     public boolean supportsLobs() {
         return true;
     }
+    /**
+     *
+     */
+
+    public boolean handlesNullVsEmptyLOBs() {
+        // TODO Sybase handling of this must be fixed
+        return false;
+    }
+
 }

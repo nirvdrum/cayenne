@@ -76,9 +76,13 @@ public class DataContextClobTst extends CayenneTestCase {
     protected boolean skipTests() {
         return !super.getDatabaseSetupDelegate().supportsLobs();
     }
+    
+	protected boolean skipEmptyLOBTests() {
+		return !super.getDatabaseSetupDelegate().handlesNullVsEmptyLOBs();
+	}
 
     public void testEmptyClob() throws Exception {
-        if (skipTests()) {
+        if (skipEmptyLOBTests()) {
             return;
         }
         runWithClobSize(0);
@@ -140,12 +144,17 @@ public class DataContextClobTst extends CayenneTestCase {
         ClobTest clobObj1 = (ClobTest) ctxt.createAndRegisterNewObject("ClobTest");
 
         // init CLOB of a specified size
-        byte[] bytes = new byte[sizeBytes];
-        for (int i = 0; i < sizeBytes; i++) {
-            bytes[i] = (byte) (65 + (50 + i) % 50);
+        if (sizeBytes == 0) {
+            clobObj1.setClobCol("");
         }
-
-        clobObj1.setClobCol(new String(bytes));
+        else {
+            byte[] bytes = new byte[sizeBytes];
+            for (int i = 0; i < sizeBytes; i++) {
+                bytes[i] = (byte) (65 + (50 + i) % 50);
+            }
+            clobObj1.setClobCol(new String(bytes));
+        }
+        
         ctxt.commitChanges();
 
         // read the CLOB in the new context

@@ -181,4 +181,8 @@ public class DatabaseSetupDelegate {
                 database),
             name);
     }
+
+    public boolean handlesNullVsEmptyLOBs() {
+        return supportsLobs();
+    }
 }

@@ -77,9 +77,13 @@ public class DataContextBlobTst extends CayenneTestCase {
     protected boolean skipTests() {
         return !super.getDatabaseSetupDelegate().supportsLobs();
     }
+    
+	protected boolean skipEmptyLOBTests() {
+		return !super.getDatabaseSetupDelegate().handlesNullVsEmptyLOBs();
+	}
 
     public void testEmptyBlob() throws Exception {
-        if (skipTests()) {
+        if (skipEmptyLOBTests()) {
             return;
         }
         runWithBlobSize(0);
