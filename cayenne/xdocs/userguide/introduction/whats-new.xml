@@ -1,33 +1,40 @@
 <document>
-<title>User Guide - Introduction</title>
-<toc name="toc-user-guide" chapter="1. Introduction"/>
-<body>
-    <section name="1. Introduction">     
-        <subsection name="1.1 Guide to 1.2 Features">
-        	<p></p>
-        	
-        	<subsection name="1.1.1 DTD Additions.">
-        	<p>Latest "cayenne.xml" and "*.map.xml" DTD's are located here:</p>
-        	
-        	<ul>
-           	 	<li><a href="../../dtd/cayenne-project-1_1.dtd">cayenne-project-1_1.dtd</a></li>
-            		<li><a href="../../dtd/cayenne-data-map-1_2.dtd">cayenne-data-map-1_2.dtd</a></li>
-            </ul>
-            </subsection>
-            
-			<subsection name="1.1.2 Support for 'generated' columns">
-            <p>Some databases support "auto increment" or "identity" columns. Such columns are normally
-            used for auto-generation of primary keys at the database level. Support for them (and even term 
-            used for this feature) varies across RDBMS.</p>
-            
-            <p> In 1.2 Cayenne DbAttribute (i.e. table column descriptors) has a new boolean property - 
-            "generated". It tells Cayenne that a column value is expected to be set on the database during INSERT.
-            In addition this information is used by DbAdapter to still allow the values generated on the client
-            to be saved in such columns. E.g. SQLServerAdapter implements special handling of INSERT queries 
-            for tables that have identity columns.</p>
-            </subsection>
-            
-           </subsection>
-    </section>
-</body>
+	<title>User Guide - Introduction</title>
+	<toc name="toc-user-guide" chapter="1. Introduction"/>
+	<body>
+		<section name="1. Introduction">
+			<subsection name="1.1 Guide to 1.2 Features">
+				<p></p>
+				<subsection name="1.1.1 DTD Additions.">
+					<p>Latest "cayenne.xml" and "*.map.xml" DTD's are located 
+						here:</p>
+					<ul>
+						<li>
+							<a href="../../dtd/cayenne-project-1_1.dtd"> 
+								cayenne-project-1_1.dtd</a>
+						</li>
+						<li>
+							<a href="../../dtd/cayenne-data-map-1_2.dtd"> 
+								cayenne-data-map-1_2.dtd</a>
+						</li>
+					</ul>
+				</subsection>
+				<subsection name="1.1.2 Support for 'generated' columns">
+					<p>Some databases support "auto increment" or "identity" 
+						columns, normally used for auto-generation of primary 
+						keys at the database level. Support for them (and even 
+						term used for this feature) varies across RDBMS.</p>
+					<p> In 1.2 Cayenne DbAttribute (i.e. table column 
+						descriptors) has a new boolean property - "generated". 
+						It tells Cayenne that a column value is expected to be 
+						set by the database during INSERT.</p>
+				</subsection>
+				<subsection name="1.1.3 WebApplicationContextFilter">
+					<p>A Servlet Specification 2.3 compatible way to bind 
+						DataContext to the request thread. More information can 
+						be found <a href="../deploy/webapplicationcontextfilter.html">here</a>.</p>
+				</subsection>
+			</subsection>
+		</section>
+	</body>
 </document>
