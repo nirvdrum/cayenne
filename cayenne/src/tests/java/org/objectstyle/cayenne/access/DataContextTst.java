@@ -544,12 +544,13 @@ public class DataContextTst extends CayenneTestCase {
 		SelectQuery q = new SelectQuery(Painting.class, exp);
 		q.addPrefetch("toArtist");
 		
-		ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
 		//The rest of this test causes failures.  Do we even need to fix this
 		// given the rather odd nature of what is trying to be done 
 		// (prefetching an object which we used to create the root query
 		// qualifier in the first place)?
-		/*try {
+		/*
+		ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+		try {
 			ctxt.performQuery(q, o);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -565,7 +566,7 @@ public class DataContextTst extends CayenneTestCase {
 		assertEquals(
 			PersistenceState.COMMITTED,
 			painting.getToArtist().getPersistenceState());
-			*/
+		*/
 
 	}
 	/**
