@@ -75,6 +75,15 @@ example2.jdbc.driver = com.xyz.MyDriverClass
 		generated in HTML format under <code>....cayenne/build/tests/report/example1/index.html</code>
 		and can be viewed using a web browser (again, substitute "example1" in this
 		path with the name of data source used).</p>
+		
+		<p>To run only a subset of existing Cayenne test cases, Ant-style pattern matching 
+		can be used. A property called 
+		<code>test.filter</code> defines a set of class files to be run. For instance to run only 
+		tests from the "tools" package, 
+		the following startup parameters can be used:</p>
+		
+<source># cd cayenne
+# ant test -Dcayenne.test.connection=example1 -Dtest.filter="**/tools/*Tst.class"</source>
 
         </subsection>
         <subsection name="Using Eclipse IDE" anchor="eclipse">
