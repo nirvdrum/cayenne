@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * 
  * @author Andrei Adamchik
  */
-public class ASTLike extends SimpleNode {
+public class ASTLike extends ConditionNode {
 
     public ASTLike(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTLIKE);

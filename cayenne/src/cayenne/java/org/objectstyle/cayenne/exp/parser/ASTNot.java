@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTNot extends SimpleNode {
+public class ASTNot extends AggregatedConditionNode {
     public ASTNot(Node expression) {
         super(ExpressionParserTreeConstants.JJTNOT);
         jjtAddChild(expression, 0);

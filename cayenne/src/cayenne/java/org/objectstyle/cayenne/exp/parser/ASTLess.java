@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTLess extends SimpleNode {
+public class ASTLess extends ConditionNode {
     public ASTLess(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTLESS);
         jjtAddChild(path, 0);

@@ -101,4 +101,9 @@ public class ASTAdd extends SimpleNode {
     public int getType() {
         return Expression.ADD;
     }
+
+    public void jjtClose() {
+        super.jjtClose();
+        flattenTree();
+    }
 }

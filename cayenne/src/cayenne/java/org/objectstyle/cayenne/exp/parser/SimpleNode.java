@@ -163,7 +163,9 @@ public abstract class SimpleNode extends Expression implements Node {
     }
 
     protected Node wrapChild(Object child) {
-        return (child instanceof Node) ? (Node) child : new ASTScalar(child);
+        return (child instanceof Node || child == null)
+            ? (Node) child
+            : new ASTScalar(child);
     }
 
     protected Object unwrapChild(Node child) {

@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * 
  * @author Andrei Adamchik
  */
-public class ASTNotEqual extends SimpleNode {
+public class ASTNotEqual extends ConditionNode {
     ASTNotEqual(int id) {
         super(id);
     }

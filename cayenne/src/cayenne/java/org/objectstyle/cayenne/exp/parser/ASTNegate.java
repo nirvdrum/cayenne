@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
+
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
@@ -70,7 +72,7 @@ public class ASTNegate extends SimpleNode {
     }
 
     public ASTNegate(Object node) {
-        super(ExpressionParserTreeConstants.JJTMULTIPLY);
+        super(ExpressionParserTreeConstants.JJTNEGATE);
         jjtAddChild(wrapChild(node), 0);
     }
 
@@ -81,14 +83,37 @@ public class ASTNegate extends SimpleNode {
         return new ASTNegate(id);
     }
 
+    public void encodeAsString(PrintWriter pw) {
+        if ((children != null) && (children.length > 0)) {
+            pw.print("-");
+
+            SimpleNode child = (SimpleNode) children[0];
+
+            // don't call super - we have our own parenthesis policy 
+            boolean useParen =
+                parent != null
+                    && !((child instanceof ASTScalar) || (child instanceof ASTPath));
+            if (useParen) {
+                pw.print("(");
+            }
+
+            child.encodeAsString(pw);
+
+            if (useParen) {
+                pw.print(')');
+            }
+        }
+    }
+
     protected String getExpressionOperator(int index) {
-        return "-";
+        throw new UnsupportedOperationException(
+            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
     }
 
     public int getType() {
         return Expression.NEGATIVE;
     }
-    
+
     public int getOperandCount() {
         return 1;
     }

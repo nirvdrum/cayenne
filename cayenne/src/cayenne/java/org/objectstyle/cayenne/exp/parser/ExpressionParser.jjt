@@ -102,40 +102,37 @@ PARSER_END(ExpressionParser)
 
 Expression expression() : {}
 {
-    orExpression() <EOF> 
+	aggregatedCondition() <EOF> 
     { 
         return (Expression) jjtree.rootNode(); 
     }
 }
 
-
-void orExpression() : {}
+void aggregatedCondition() : {}
 {
-    andExpression() ("or" andExpression() #Or(2) )*
+	orCondition()
 }
 
-
-void andExpression() : {} 
+void orCondition() : {}
 {
-	notExpression() ("and" notExpression() #And(2) )*
+	andCondition() ( "or" andCondition() #Or(2) )*
 }
 
-void notExpression() : {} 
+void andCondition() : {}
 {
-	  (  ("not" | "!" ) condition() #Not(1) )
+	notCondition() ( "and" notCondition() #And(2) )*
+}
+
+void notCondition() : {}
+{
+		( "not" | "!" ) simpleCondition() #Not(1)
 	|
-	  condition()
-}
-
-void condition() : {} 
-{
-	simpleCondition() | "(" orExpression() ")"
+		simpleCondition()
 }
 
 void simpleCondition() : {} 
 {
-	  scalarExpression() 
-	  
+	  scalarExpression()
 	(
 	   simpleNotCondition()
 	| 
@@ -158,7 +155,7 @@ void simpleCondition() : {}
 		"in"  "(" scalarCommaList() ")"  #In(2)
 	|  
 		"between"  scalarExpression() "and" scalarExpression() #Between(3)
-	)
+	)?
 }
 
 void simpleNotCondition() : {} 
@@ -247,6 +244,11 @@ void numericTerm() : {}
 
 void numericPrimary() : {} 
 {
+		// technically we shouldn't make a condition a child of scalar expression
+		// but this will be handled in the code to avoid long lookaheads
+		
+		"(" aggregatedCondition() ")"
+	|
 		pathExpression()
 	|
 		namedParameter()

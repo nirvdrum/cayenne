@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * 
  * @author Andrei Adamchik
  */
-public class ASTNotIn extends SimpleNode {
+public class ASTNotIn extends ConditionNode {
     ASTNotIn(int id) {
         super(id);
     }

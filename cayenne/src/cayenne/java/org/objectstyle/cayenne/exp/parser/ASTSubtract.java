@@ -103,4 +103,9 @@ public class ASTSubtract extends SimpleNode {
     public int getType() {
         return Expression.SUBTRACT;
     }
+    
+    public void jjtClose() {
+        super.jjtClose();
+        flattenTree();
+    }
 }

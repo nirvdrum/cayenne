@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTEqual extends SimpleNode {
+public class ASTEqual extends ConditionNode {
 
     /**
      * Creates "Equal To" expression.

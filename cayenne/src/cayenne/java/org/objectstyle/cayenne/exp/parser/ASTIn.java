@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * 
  * @author Andrei Adamchik
  */
-public class ASTIn extends SimpleNode {
+public class ASTIn extends ConditionNode {
 
     /**
      * Constructor used by expression parser. Do not invoke directly.

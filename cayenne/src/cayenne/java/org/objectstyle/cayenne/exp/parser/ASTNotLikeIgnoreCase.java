@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * 
  * @author Andrei Adamchik
  */
-public class ASTNotLikeIgnoreCase extends SimpleNode {
+public class ASTNotLikeIgnoreCase extends ConditionNode {
     public ASTNotLikeIgnoreCase(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTNOTLIKEIGNORECASE);
         jjtAddChild(path, 0);

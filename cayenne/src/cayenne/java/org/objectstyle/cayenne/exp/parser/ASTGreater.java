@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * 
  * @author Andrei Adamchik
  */
-public class ASTGreater extends SimpleNode {
+public class ASTGreater extends ConditionNode {
     public ASTGreater(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTGREATER);
         jjtAddChild(path, 0);

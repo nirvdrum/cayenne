@@ -102,4 +102,9 @@ public class ASTDivide extends SimpleNode {
     public int getType() {
         return Expression.DIVIDE;
     }
+
+    public void jjtClose() {
+        super.jjtClose();
+        flattenTree();
+    }
 }

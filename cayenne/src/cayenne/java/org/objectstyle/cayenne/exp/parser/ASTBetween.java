@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTBetween extends SimpleNode {
+public class ASTBetween extends ConditionNode {
 
     ASTBetween(int id) {
         super(id);

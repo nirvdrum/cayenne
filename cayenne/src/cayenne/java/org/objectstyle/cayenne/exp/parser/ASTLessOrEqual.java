@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTLessOrEqual extends SimpleNode {
+public class ASTLessOrEqual extends ConditionNode {
 
     public ASTLessOrEqual(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTLESSOREQUAL);

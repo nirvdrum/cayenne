@@ -103,4 +103,9 @@ public class ASTMultiply extends SimpleNode {
     public int getType() {
         return Expression.MULTIPLY;
     }
+    
+    public void jjtClose() {
+        super.jjtClose();
+        flattenTree();
+    }
 }
