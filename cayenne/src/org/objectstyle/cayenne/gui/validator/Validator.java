@@ -505,7 +505,9 @@ public class Validator {
 						== null) {
 				addErrorMessage(
 					new EntityErrorMsg(
-						"No parent selected for derived entity \"" + name + "\".",
+						"No parent selected for derived entity \""
+							+ name
+							+ "\".",
 						ErrorMsg.ERROR,
 						domain,
 						map,
@@ -549,6 +551,33 @@ public class Validator {
 						domain,
 						map,
 						attribute));
+			} else if (attribute instanceof DerivedDbAttribute) {
+				DerivedDbAttribute derived = (DerivedDbAttribute) attribute;
+				int paramCount = derived.getParams().size();
+
+				String spec = derived.getExpressionSpec();
+				int paramsExpected = 0;
+				if (spec != null) {
+					// count tokens
+					int ind = -DerivedDbAttribute.ATTRIBUTE_TOKEN.length();
+					while ((ind =
+						spec.indexOf(DerivedDbAttribute.ATTRIBUTE_TOKEN, ind + DerivedDbAttribute.ATTRIBUTE_TOKEN.length()))
+						>= 0) {
+						paramsExpected++;
+					}
+				}
+
+				if (paramsExpected != paramCount) {
+					addErrorMessage(
+						new AttributeErrorMsg(
+							"Derived Attribute's \""
+								+ attribute.getName()
+								+ "\" parameter mismatch.",
+							ErrorMsg.WARNING,
+							domain,
+							map,
+							attribute));
+				}
 			}
 			// VARCHAR and CHAR attributes must have max length
 			else if (
