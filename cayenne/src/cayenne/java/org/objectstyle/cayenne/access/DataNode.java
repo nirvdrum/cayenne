@@ -133,6 +133,20 @@ public class DataNode implements QueryEngine {
 		this.dataSourceFactory = dataSourceFactory;
 	}
 
+    /**
+     * Returns a list of linked DataMaps.
+     */
+    public List getMapList() {
+    	ArrayList list = new ArrayList();
+    	
+    	if(dataMaps != null && dataMaps.length > 0) {
+    	   for(int i = 0; i < dataMaps.length; i++) {
+    	   	   list.add(dataMaps[i]);
+    	   }
+    	}
+    	return list;
+    }
+    
 	public DataMap[] getDataMaps() {
 		return dataMaps;
 	}

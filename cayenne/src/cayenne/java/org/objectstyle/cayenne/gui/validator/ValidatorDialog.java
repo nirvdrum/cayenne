@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.gui.validator;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -77,6 +79,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.gui.CayenneDialog;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.PanelFactory;
@@ -94,9 +97,11 @@ public class ValidatorDialog
     extends CayenneDialog
     implements ListSelectionListener, ActionListener {
 
+    static Logger logObj = Logger.getLogger(ValidatorDialog.class.getName());
+
     protected static ValidatorDialog instance;
-    public static final Color WARNING_COLOR = new Color(255, 220, 220);
-    public static final Color ERROR_COLOR = new Color(255, 100, 100);
+    public static final Color WARNING_COLOR = new Color(245, 194, 194);
+    public static final Color ERROR_COLOR = new Color(237, 121, 121);
 
     protected Mediator mediator;
     protected Validator validator;
@@ -140,6 +145,7 @@ public class ValidatorDialog
                 ? "Saved project with validation warnings."
                 : "Validation errors. Project can not be saved.";
         JLabel label = new JLabel(msg);
+
         messagePanel.add(label);
         getContentPane().add(messagePanel, BorderLayout.NORTH);
 
@@ -181,16 +187,19 @@ public class ValidatorDialog
     }
 
     class ValidatorTable extends JTable {
-        protected DefaultTableCellRenderer errorRenderer;
-        protected DefaultTableCellRenderer warnRenderer;
+        protected CellRenderer errorRenderer;
+        protected CellRenderer errorMsgRenderer;
+
+        protected CellRenderer warnRenderer;
+        protected CellRenderer warnMsgRenderer;
 
         public ValidatorTable(TableModel model) {
             super(model);
-            errorRenderer = new DefaultTableCellRenderer();
-            errorRenderer.setBackground(ERROR_COLOR);
 
-            warnRenderer = new DefaultTableCellRenderer();
-            warnRenderer.setBackground(WARNING_COLOR);
+            errorRenderer = new CellRenderer(ERROR_COLOR, true);
+            errorMsgRenderer = new CellRenderer(ERROR_COLOR, false);
+            warnRenderer = new CellRenderer(WARNING_COLOR, true);
+            warnMsgRenderer = new CellRenderer(WARNING_COLOR, false);
         }
 
         /**
@@ -204,8 +213,8 @@ public class ValidatorDialog
             ValidationResult rowObj =
                 (ValidationResult) validator.validationResults().get(row);
             return (rowObj.getSeverity() == ValidationResult.ERROR)
-                ? errorRenderer
-                : warnRenderer;
+                ? ((column == 0) ? errorRenderer : errorMsgRenderer)
+                : ((column == 0) ? warnRenderer : warnMsgRenderer);
         }
     }
 
@@ -252,6 +261,62 @@ public class ValidatorDialog
 
         public ValidationResult getValue(int row) {
             return (ValidationResult) validationObjects.get(row);
+        }
+    }
+
+    public class CellRenderer extends DefaultTableCellRenderer {
+        protected Font rendererFont;
+
+        public CellRenderer(Color bg, boolean bold) {
+            if (bg != null) {
+                setBackground(bg);
+            }
+
+            if (bold && getFont() != null) {
+                rendererFont = getFont().deriveFont(Font.BOLD);
+            }
+        }
+
+        /**
+         * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(JTable, Object, boolean, boolean, int, int)
+         */
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
+            Component comp =
+                super.getTableCellRendererComponent(
+                    table,
+                    value,
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
+
+            if (rendererFont != null) {
+                comp.setFont(rendererFont);
+            }
+
+            return comp;
+        }
+
+        /**
+         * Returns the rendererFont.
+         * @return Font
+         */
+        public Font getRendererFont() {
+            return rendererFont;
+        }
+
+        /**
+         * Sets the rendererFont.
+         * @param rendererFont The rendererFont to set
+         */
+        public void setRendererFont(Font rendererFont) {
+            this.rendererFont = rendererFont;
         }
     }
 }

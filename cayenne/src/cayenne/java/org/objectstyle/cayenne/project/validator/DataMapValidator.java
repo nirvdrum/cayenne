@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.project.validator;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.util.Util;
@@ -80,6 +81,32 @@ public class DataMapValidator extends TreeNodeValidator {
 
         if (Util.isEmptyString(map.getLocation())) {
             validator.registerError("Unspecified DataMap location.", path);
+        }
+
+        // check if data map is not attached to any nodes
+        validateNodeLinks(map, path, validator);
+    }
+
+    protected void validateNodeLinks(DataMap map, Object[] path, Validator validator) {
+        DataDomain domain = (DataDomain) ProjectTraversal.objectParentFromPath(path);
+        if (domain == null) {
+            return;
+        }
+        
+        boolean unlinked = true;
+        int nodeCount = 0;
+        Iterator it = domain.getDataNodeList().iterator();
+        while(it.hasNext()) {
+        	DataNode node = (DataNode)it.next();
+        	nodeCount++;
+        	if(node.getMapList().contains(map)) {
+        		unlinked = false;
+        		break;
+        	}
+        }
+        
+        if(unlinked && nodeCount > 0) {
+        	 validator.registerWarning("DataMap is not linked to any DataNodes.", path);
         }
     }
 
