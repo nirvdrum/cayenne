@@ -235,12 +235,10 @@ public class Main {
             try {
                 out.close();
             } catch (Exception ex) {
-                hasFailures = true;
             }
             try {
                 fileOut.close();
             } catch (Exception ex) {
-                hasFailures = true;
             }
         }
 

@@ -35,6 +35,14 @@
 			<jvmarg value="-Xmx60m"/>
 			
 			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
+			<sysproperty key="test.new_objects_per_table" value="${regression.new_objects_per_table}"/>
+			<sysproperty key="test.delete_objects_per_table" value="${regression.delete_objects_per_table}"/>
+			<sysproperty key="test.max_references_per_table" value="${regression.max_references_per_table}"/>
+			<sysproperty key="test.max_foreign_keys_per_table" value="${regression.max_foreign_keys_per_table}"/>
+			<sysproperty key="test.loop_count" value="${regression.loop_count}"/>
+			<sysproperty key="test.max_loops_per_table" value="${regression.max_loops_per_table}"/>
+			<sysproperty key="test.schema_count" value="${regression.schema_count}"/>
+			<sysproperty key="test.commits_per_schema" value="${regression.commits_per_schema}"/>
 		</java>
 	</target>
 	
