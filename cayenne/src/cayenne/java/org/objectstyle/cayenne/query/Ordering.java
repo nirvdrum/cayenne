@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.query;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -75,7 +77,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  * @author Craig Miskell
  */
-public class Ordering implements Comparator, XMLSerializable {
+public class Ordering implements Comparator, Serializable, XMLSerializable {
     private static Logger logObj = Logger.getLogger(Ordering.class);
 
     /** Symbolic representation of ascending ordering criterion. */
@@ -108,7 +110,7 @@ public class Ordering implements Comparator, XMLSerializable {
     }
 
     public Ordering(String sortPathSpec, boolean ascending, boolean caseInsensitive) {
-        setSortSpec(sortPathSpec);
+        setSortSpecString(sortPathSpec);
         this.ascending = ascending;
         this.caseInsensitive = caseInsensitive;
     }
@@ -136,16 +138,19 @@ public class Ordering implements Comparator, XMLSerializable {
     public void setSortSpec(String sortSpecString) {
         this.sortSpec = ExpressionFactory.expressionFromString(sortSpecString);
     }
-    
+
     /** 
      * Sets sortSpec to be an expression represented by string argument.
      * 
      * @since 1.1
      */
     public void setSortSpecString(String sortSpecString) {
-        this.sortSpec = ExpressionFactory.expressionFromString(sortSpecString);
+        this.sortSpec =
+            (sortSpecString != null)
+                ? ExpressionFactory.expressionFromString(sortSpecString)
+                : null;
     }
-    
+
     /** 
      * Returns sortSpec string representation.
      * 
@@ -285,13 +290,29 @@ public class Ordering implements Comparator, XMLSerializable {
      */
     public void encodeAsXML(PrintWriter pw, String linePadding) {
         pw.print(linePadding);
-        pw.print("<ordering path=\"");
-        pw.print(sortSpec);
+        pw.print("<ordering");
 
         if (!ascending) {
-            pw.println("\" ascending=\"false");
+            pw.print(" descending=\"true\"");
         }
 
-        pw.println("\"/>");
+        if (caseInsensitive) {
+            pw.print(" ignore-case=\"true\"");
+        }
+
+        pw.print('>');
+        if (sortSpec != null) {
+            sortSpec.encodeAsXML(pw, "");
+        }
+        pw.println("</ordering>");
+    }
+
+    public String toString() {
+        StringWriter buffer = new StringWriter();
+        PrintWriter pw = new PrintWriter(buffer);
+        encodeAsXML(pw, "");
+        pw.close();
+        buffer.flush();
+        return buffer.toString();
     }
 }

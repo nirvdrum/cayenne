@@ -411,14 +411,14 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
     
     /**
-     * Encodes itself as a query qualifier.
+     * Encodes itself, wrapping the string into XML CDATA section.
      * @since 1.1
      */
     public void encodeAsXML(PrintWriter pw, String linePadding) {
         pw.print(linePadding);
-        pw.print("<qualifier><![CDATA[");
+        pw.print("<![CDATA[");
         encodeAsString(pw);
-        pw.println("]]></qualifier>");
+        pw.print("]]>");
     }
     
     /**

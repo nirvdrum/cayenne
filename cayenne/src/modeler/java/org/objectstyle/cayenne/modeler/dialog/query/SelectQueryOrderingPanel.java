@@ -57,9 +57,7 @@ package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -75,6 +73,10 @@ import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STable;
 import org.scopemvc.view.swing.STableModel;
 
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
 /**
  * A panel for configuring SelectQuery ordering.
  * 
@@ -85,7 +87,7 @@ public class SelectQueryOrderingPanel extends SPanel {
     private static Logger logObj = Logger.getLogger(SelectQueryOrderingPanel.class);
 
     private static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
-    private static final Dimension TABLE_DIM = new Dimension(460, 100);
+    private static final Dimension TABLE_DIM = new Dimension(460, 120);
 
     protected MultiColumnBrowser browser;
     protected STable orderingsTable;
@@ -111,43 +113,50 @@ public class SelectQueryOrderingPanel extends SPanel {
 
         orderingsTable = new OrderingsTable();
         STableModel orderingsTableModel = new STableModel(orderingsTable);
-        orderingsTableModel.setSelector(SelectQueryOrderingModel.ORDERINGS_SELECTOR);
+        orderingsTableModel.setSelector(SelectQueryModel.ORDERINGS_SELECTOR);
         orderingsTableModel.setColumnNames(
-            new String[] { "Path", "Direction", "Case Sensitive" });
+            new String[] { "Path", "Ascending", "Ignore Case" });
         orderingsTableModel.setColumnSelectors(
             new Selector[] {
-                SelectQueryOrderingModel.ORDERING_SPEC_SELECTOR,
-                SelectQueryOrderingModel.ORDERING_SPEC_SELECTOR,
-                SelectQueryOrderingModel.ORDERING_SPEC_SELECTOR });
+                OrderingModel.PATH_SELECTOR,
+                OrderingModel.ASCENDING_SELECTOR,
+                OrderingModel.CASE_SELECTOR });
 
         orderingsTable.setModel(orderingsTableModel);
-        //   orderingsTable.setSelectionSelector(
-        //     ObjRelationshipInfoModel.SELECTED_PATH_COMPONENT_SELECTOR);
+        orderingsTable.setSelectionSelector(SelectQueryModel.SELECTED_ORDERING_SELECTOR);
 
         // assemble
         setLayout(new BorderLayout());
 
-        JScrollPane scroller =
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder =
+            new PanelBuilder(
+                new FormLayout(
+                    "fill:min(400dlu;pref), 3dlu, fill:min(100dlu;pref)",
+                    "top:p:grow, 3dlu, fill:100dlu"));
+
+        // orderings table must grow as the dialog is resized
+        builder.add(new JScrollPane(orderingsTable), cc.xy(1, 1, "d, fill"));
+        builder.add(removeButton, cc.xywh(3, 1, 1, 1));
+        builder.add(
             new JScrollPane(
                 browser,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        add(scroller, BorderLayout.NORTH);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+            cc.xywh(1, 3, 1, 1));
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttons.add(addButton);
-        buttons.add(removeButton);
-        add(buttons, BorderLayout.CENTER);
-        add(new JScrollPane(orderingsTable), BorderLayout.SOUTH);
+        // while browser must fill the whole are, button must stay on top
+        builder.add(addButton, cc.xy(3, 3, "d, top"));
+        add(builder.getPanel(), BorderLayout.CENTER);
     }
 
     private void initController() {
-        setSelector(SelectQueryModel.ORDERINGS_SELECTOR);
 
         browser.addTreeSelectionListener(new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent e) {
+                logObj.warn("setting path: " + e.getPath());
                 Object[] path = e.getPath() != null ? e.getPath().getPath() : null;
-                ((SelectQueryOrderingModel) getShownModel()).setCurrentPath(path);
+                ((SelectQueryModel) getShownModel()).setNavigationPath(path);
             }
         });
     }
@@ -155,19 +164,19 @@ public class SelectQueryOrderingPanel extends SPanel {
     public void setBoundModel(Object model) {
         super.setBoundModel(model);
 
-        Object submodel = getShownModel();
+        Object shownModel = getShownModel();
 
-        logObj.warn("B model: " + submodel);
-
-        // init root icon
-        if (submodel instanceof SelectQueryOrderingModel) {
-            Object root = ((SelectQueryOrderingModel) submodel).getRoot();
+        // init tree model of the browser
+        if (shownModel instanceof SelectQueryModel) {
+            Object root = ((SelectQueryModel) shownModel).getRoot();
             if (root instanceof Entity) {
                 EntityTreeModel treeModel = new EntityTreeModel((Entity) root);
-                logObj.warn("model: " + treeModel);
                 browser.setModel(treeModel);
             }
         }
+
+        // init column sizes
+        orderingsTable.getColumnModel().getColumn(0).setPreferredWidth(250);
     }
 
     final class OrderingsTable extends STable {

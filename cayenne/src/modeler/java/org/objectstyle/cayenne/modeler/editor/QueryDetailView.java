@@ -69,6 +69,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
@@ -91,6 +92,8 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Andrei Adamchik
  */
 public class QueryDetailView extends JPanel implements QueryDisplayListener {
+    static final Logger logObj = Logger.getLogger(QueryDetailView.class);
+    
     protected EventController eventController;
     protected JTextField name;
     protected JComboBox queryRoot;
@@ -179,7 +182,12 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
             public void actionPerformed(ActionEvent event) {
                 Query query = eventController.getCurrentQuery();
                 if (query != null) {
+                    try {
                     new SelectQueryController(eventController, query).startup();
+                    }
+                    catch(Exception ex) {
+                        logObj.warn("EEEEE", ex);
+                    }
                 }
             }
         });

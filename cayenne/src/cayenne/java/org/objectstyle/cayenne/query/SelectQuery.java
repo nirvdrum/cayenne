@@ -292,8 +292,11 @@ public class SelectQuery
         
         String childPadding = linePadding + "\t";
         // encode qualifier
-        if(qualifier != null) {
-            qualifier.encodeAsXML(pw, childPadding);
+        if (qualifier != null) {
+            pw.print(childPadding);
+            pw.print("<qualifier>");
+            qualifier.encodeAsXML(pw, "");
+            pw.println("</qualifier>");
         }
         
         // encode ordering

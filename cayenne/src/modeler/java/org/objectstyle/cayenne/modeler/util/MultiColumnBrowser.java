@@ -85,8 +85,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.event.EventManager;
-import org.objectstyle.cayenne.event.EventSubject;
 
 /**
  * A simple non-editable tree browser with multiple columns 
@@ -114,8 +112,6 @@ public class MultiColumnBrowser extends JPanel {
 
     private static final ImageIcon rightArrow =
         CellRenderers.buildIcon("scroll_right.gif");
-    private static final EventSubject treeSelectionSubject =
-        EventSubject.getSubject(MultiColumnBrowser.class, "TreeSelectionEvent");
 
     public static final int DEFAULT_MIN_COLUMNS_COUNT = 3;
 
@@ -127,6 +123,7 @@ public class MultiColumnBrowser extends JPanel {
 
     private List columns;
     private ListSelectionListener browserSelector;
+    private List treeSelectionListeners;
 
     public MultiColumnBrowser() {
         this(DEFAULT_MIN_COLUMNS_COUNT);
@@ -143,16 +140,34 @@ public class MultiColumnBrowser extends JPanel {
 
         this.minColumns = minColumns;
         this.browserSelector = new PanelController();
+        this.treeSelectionListeners = Collections.synchronizedList(new ArrayList());
         initView();
     }
 
     public void addTreeSelectionListener(TreeSelectionListener listener) {
-        EventManager.getDefaultManager().addListener(
-            listener,
-            "valueChanged",
-            TreeSelectionEvent.class,
-            treeSelectionSubject,
-            this);
+        synchronized (treeSelectionListeners) {
+            if (listener != null && !treeSelectionListeners.contains(listener)) {
+                treeSelectionListeners.add(listener);
+            }
+        }
+    }
+
+    public void removeTreeSelectionListener(TreeSelectionListener listener) {
+        synchronized (treeSelectionListeners) {
+            treeSelectionListeners.remove(listener);
+        }
+    }
+
+    protected void fireTreeSelectionEvent(Object[] selectionPath) {
+        TreeSelectionEvent e =
+            new TreeSelectionEvent(this, new TreePath(selectionPath), false, null, null);
+        synchronized (treeSelectionListeners) {
+            Iterator it = treeSelectionListeners.iterator();
+            while (it.hasNext()) {
+                TreeSelectionListener listener = (TreeSelectionListener) it.next();
+                listener.valueChanged(e);
+            }
+        }
     }
 
     /**
@@ -405,9 +420,7 @@ public class MultiColumnBrowser extends JPanel {
             scrollToColumn(panelIndex);
         }
 
-        TreeSelectionEvent e =
-            new TreeSelectionEvent(this, new TreePath(selectionPath), false, null, null);
-        EventManager.getDefaultManager().postEvent(e, treeSelectionSubject);
+        fireTreeSelectionEvent(selectionPath);
     }
 
     /** 

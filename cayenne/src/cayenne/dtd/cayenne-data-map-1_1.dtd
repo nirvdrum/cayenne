@@ -159,10 +159,10 @@ $param2".
 <!-- ===================================================
 Defines a query ordering.
 -->
-<!ELEMENT ordering>
+<!ELEMENT ordering (#PCDATA)>
 <!ATTLIST ordering
-	path CDATA #REQUIRED
-	ascending  (true | false) "true"
+	descending  (true | false) "false"
+	ignore-case  (true | false) "false"
 >
 
 <!-- ===================================================

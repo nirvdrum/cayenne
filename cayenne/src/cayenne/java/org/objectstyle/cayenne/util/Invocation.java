@@ -218,6 +218,7 @@ public class Invocation extends Object {
 
         Object currentTarget = _target.get();
         if (currentTarget == null) {
+            log.info("null target for: " + _method.getName());
             return false;
         }
 

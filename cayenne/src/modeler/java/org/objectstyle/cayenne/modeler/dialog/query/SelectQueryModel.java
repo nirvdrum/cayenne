@@ -56,13 +56,17 @@
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
+import org.scopemvc.model.collection.ListModel;
 
 /**
  * @since 1.1
@@ -77,8 +81,19 @@ public class SelectQueryModel extends QueryModel {
     public static final Selector FETCHING_DATA_ROWS_SELECTOR =
         Selector.fromString("fetchingDataRows");
     public static final Selector DISTINCT_SELECTOR = Selector.fromString("distinct");
-    public static final Selector ORDERINGS_SELECTOR = Selector.fromString("orderings");
 
+    public static final Selector NAVIGATION_PATH_SELECTOR =
+        Selector.fromString("navigationPath");
+
+    public static final Selector ORDERINGS_SELECTOR = Selector.fromString("orderings");
+    public static final Selector SELECTED_ORDERING_SELECTOR =
+        Selector.fromString("selectedOrdering");
+
+    // navigation path from the root entity
+    // used for ordering or prefetches picking
+    protected Object[] navigationPath;
+
+    // Main query panel stuff
     protected Expression qualifier;
     protected int fetchLimit;
     protected int pageSize;
@@ -86,7 +101,10 @@ public class SelectQueryModel extends QueryModel {
     protected boolean fetchingDataRows;
     protected boolean distinct;
     protected List prefetches;
-    protected SelectQueryOrderingModel orderings;
+
+    // orderings-related
+    protected OrderingModel selectedOrdering;
+    protected ListModel orderings;
 
     public SelectQueryModel(Query query) {
         super(query);
@@ -108,8 +126,21 @@ public class SelectQueryModel extends QueryModel {
         this.fetchingDataRows = selectQuery.isFetchingDataRows();
         this.qualifier = selectQuery.getQualifier();
 
-        this.orderings = new SelectQueryOrderingModel(selectQuery);
+        initOrderings(selectQuery);
+
         this.prefetches = new ArrayList(selectQuery.getPrefetches());
+    }
+
+    protected void initOrderings(SelectQuery query) {
+        List originalOrderings = query.getOrderings();
+        List modelOrderings = new ArrayList(originalOrderings.size());
+
+        Iterator it = originalOrderings.iterator();
+        while (it.hasNext()) {
+            modelOrderings.add(new OrderingModel((Ordering) it.next()));
+        }
+
+        setOrderings(new ListModel(modelOrderings));
     }
 
     public void updateQuery() {
@@ -127,7 +158,43 @@ public class SelectQueryModel extends QueryModel {
         selectQuery.addPrefetches(prefetches);
 
         // update with submodel changes 
-        orderings.updateQuery();
+        selectQuery.clearOrderings();
+        Iterator orderingsIt = orderings.iterator();
+        while (orderingsIt.hasNext()) {
+            OrderingModel orderingModel = (OrderingModel) orderingsIt.next();
+            selectQuery.addOrdering(orderingModel.createOrdering());
+        }
+    }
+
+    /**
+     * Helper method to create a new ordering model from the current 
+     * navigation path. Returns null if there is no valid selection.
+     */
+    public OrderingModel createOrderingFromNavigationPath() {
+        String path = navigationPathString();
+        return (path != null) ? new OrderingModel(path) : null;
+    }
+
+    private String navigationPathString() {
+        // first item in the path is Entity, so we must have
+        // at least two elements to constitute a valid ordering path
+
+        if (navigationPath == null || navigationPath.length < 2) {
+            return null;
+        }
+
+        StringBuffer buffer = new StringBuffer();
+
+        // attribute or relationships
+        CayenneMapEntry first = (CayenneMapEntry) navigationPath[1];
+        buffer.append(first.getName());
+
+        for (int i = 2; i < navigationPath.length; i++) {
+            CayenneMapEntry pathEntry = (CayenneMapEntry) navigationPath[i];
+            buffer.append(".").append(pathEntry.getName());
+        }
+
+        return buffer.toString();
     }
 
     public boolean isDistinct() {
@@ -196,7 +263,37 @@ public class SelectQueryModel extends QueryModel {
         }
     }
 
-    public SelectQueryOrderingModel getOrderings() {
+    public ListModel getOrderings() {
         return orderings;
+    }
+
+    public void setOrderings(ListModel orderings) {
+        if (this.orderings != orderings) {
+            unlistenOldSubmodel(ORDERINGS_SELECTOR);
+            this.orderings = orderings;
+            listenNewSubmodel(ORDERINGS_SELECTOR);
+            fireModelChange(VALUE_CHANGED, ORDERINGS_SELECTOR);
+        }
+    }
+
+    public Object[] getNavigationPath() {
+        return navigationPath;
+    }
+
+    public void setNavigationPath(Object[] navigationPath) {
+        this.navigationPath = navigationPath;
+        // don't fire an event - navigation path only concerns
+        // this instance.... 
+    }
+
+    public OrderingModel getSelectedOrdering() {
+        return selectedOrdering;
+    }
+
+    public void setSelectedOrdering(OrderingModel selectedOrdering) {
+        this.selectedOrdering = selectedOrdering;
+
+        // don't fire an event - ordering selection only concerns
+        // this instance.... at least for now...
     }
 }

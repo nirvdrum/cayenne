@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.awt.Component;
+import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
@@ -65,6 +66,7 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -117,6 +119,44 @@ public class SelectQueryController extends BasicController {
         }
         else if (control.matchesID(SAVE_CONTROL)) {
             saveQuery();
+        }
+        else if (control.matchesID(ADD_ORDERING_CONTROL)) {
+            addOrdering();
+        }
+        else if (control.matchesID(REMOVE_ORDERING_CONTROL)) {
+            removeOrdering();
+        }
+    }
+
+    protected void addOrdering() {
+        SelectQueryModel model = (SelectQueryModel) getModel();
+        OrderingModel newOrdering = model.createOrderingFromNavigationPath();
+
+        if (newOrdering == null) {
+            return;
+        }
+
+        // check that there are no orderings for 
+        // the same path..
+        Iterator it = model.getOrderings().iterator();
+        while (it.hasNext()) {
+            OrderingModel ordering = (OrderingModel) it.next();
+            if (Util.nullSafeEquals(ordering.getPath(), newOrdering.getPath())) {
+                return;
+            }
+        }
+
+        model.getOrderings().add(newOrdering);
+        modified = true;
+    }
+
+    protected void removeOrdering() {
+        SelectQueryModel model = (SelectQueryModel) getModel();
+        OrderingModel removeOrdering = model.getSelectedOrdering();
+
+        if (removeOrdering != null) {
+            model.getOrderings().remove(removeOrdering);
+            modified = true;
         }
     }
 

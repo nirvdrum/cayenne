@@ -159,13 +159,17 @@ public abstract class QueryBuilder {
         resultColumns.add(new ResultColumn(label, dbType, objectType));
     }
 
-    public void addOrdering(String path, String ascending) {
+    public void addOrdering(String path, String descending, String ignoreCase) {
         if (orderings == null) {
             orderings = new ArrayList();
         }
 
-        boolean isAscending = "true".equalsIgnoreCase(ascending);
-        orderings.add(new Ordering(path, !isAscending));
+        if (path != null && path.trim().length() == 0) {
+            path = null;
+        }
+        boolean isDescending = "true".equalsIgnoreCase(descending);
+        boolean isIgnoringCase = "true".equalsIgnoreCase(ignoreCase);
+        orderings.add(new Ordering(path, !isDescending, isIgnoringCase));
     }
 
     public void addPrefetch(String path) {

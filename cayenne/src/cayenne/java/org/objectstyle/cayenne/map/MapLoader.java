@@ -140,9 +140,13 @@ public class MapLoader extends DefaultHandler {
     private Map dbRelationshipMap;
     private Procedure procedure;
     private QueryBuilder queryBuilder;
+    private String descending;
+    private String ignoreCase;
+
 
     private String currentTag;
     private StringBuffer charactersBuffer;
+    private Map attributes;
 
     // Saving to XML
     private List objRelationships;
@@ -341,6 +345,7 @@ public class MapLoader extends DefaultHandler {
             processStartQueryResultColumn(atts);
         }
         else if (local_name.equals(QUERY_ORDERING_TAG)) {
+            charactersBuffer = new StringBuffer();
             processStartQueryOrdering(atts);
         }
         else if (local_name.equals(QUERY_PREFETCH_TAG)) {
@@ -413,6 +418,9 @@ public class MapLoader extends DefaultHandler {
         }
         else if (local_name.equals(QUERY_QUALIFIER_TAG)) {
             processEndQueryQualifier();
+        }
+        else if (local_name.equals(QUERY_ORDERING_TAG)) {
+            processEndQueryOrdering();
         }
 
         resetCurrentTag();
@@ -1350,16 +1358,6 @@ public class MapLoader extends DefaultHandler {
         queryBuilder.addResultColumn(label, dbType, javaType);
     }
     
-    private void processStartQueryOrdering(Attributes attributes) throws SAXException {
-        String path = attributes.getValue("", "path");
-        if (path == null) {
-            throw new SAXException("MapLoader::processStartQueryOrdering(), no path.");
-        }
-
-        String ascending = attributes.getValue("", "ascending");
-        queryBuilder.addOrdering(path, ascending);
-    }
-    
     private void processStartQueryPrefetch(Attributes attributes) throws SAXException {
         String path = attributes.getValue("", "path");
         if (path == null) {
@@ -1367,6 +1365,11 @@ public class MapLoader extends DefaultHandler {
         }
         
         queryBuilder.addPrefetch(path);
+    }
+    
+    private void processStartQueryOrdering(Attributes attributes) throws SAXException {
+        descending = attributes.getValue("", "descending");
+        ignoreCase = attributes.getValue("", "ignore-case");
     }
     
     private void processEndQuery() throws SAXException {
@@ -1380,6 +1383,11 @@ public class MapLoader extends DefaultHandler {
     
     private void processEndQueryQualifier() throws SAXException {
        queryBuilder.setQualifier(charactersBuffer.toString());
+    }
+    
+    private void processEndQueryOrdering() throws SAXException {
+        String path = charactersBuffer.toString();
+        queryBuilder.addOrdering(path, descending, ignoreCase);
     }
 
     private void processEndDbAttribute() throws SAXException {

@@ -55,55 +55,76 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.query;
 
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
-import org.scopemvc.model.collection.ListModel;
+import org.scopemvc.model.basic.BasicModel;
 
 /**
- * Scope model for editing Orderings of queries.
+ * Scope model for editing a single Ordering of queries.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class SelectQueryOrderingModel extends QueryModel {
+public class OrderingModel extends BasicModel {
 
-    public static final Selector CURRENT_PATH_SELECTOR =
-        Selector.fromString("currentPath");
-    public static final Selector ORDERINGS_SELECTOR = Selector.fromString("orderings");
-    public static final Selector ORDERING_DIRECTION_SELECTOR =
-        Selector.fromString("direction");
-    public static final Selector ORDERING_SPEC_SELECTOR = Selector.fromString("sortSpec");
+    public static final Selector ASCENDING_SELECTOR = Selector.fromString("ascending");
+    public static final Selector CASE_SELECTOR = Selector.fromString("caseInsensitive");
+    public static final Selector PATH_SELECTOR = Selector.fromString("path");
 
-    protected Object[] currentPath;
-    protected ListModel orderings;
+    protected boolean ascending;
+    protected boolean caseInsensitive;
+    protected String path;
 
-    public SelectQueryOrderingModel(Query query) {
-        super(query);
-        
-        // TODO: must copy orderings to allow "cancel"
-        this.orderings = new ListModel(((SelectQuery) query).getOrderings());
+    public OrderingModel(String path) {
+        this.path = path;
+        this.ascending = true;
+        this.caseInsensitive = false;
     }
 
-    public void updateQuery() {
-        SelectQuery selectQuery = (SelectQuery) query;
-
-        selectQuery.clearOrderings();
-        selectQuery.addOrderings(orderings);
+    public OrderingModel(Ordering ordering) {
+        this.ascending = ordering.isAscending();
+        this.caseInsensitive = ordering.isCaseInsensitive();
+        this.path = ordering.getSortSpecString();
     }
 
     /**
-     * Returns "currentPath" property 
+     * Creates a new Ordering out of internal data.
      */
-    public Object[] getCurrentPath() {
-        return currentPath;
+    public Ordering createOrdering() {
+        return new Ordering(path, ascending, caseInsensitive);
     }
 
-    public void setCurrentPath(Object[] currentPath) {
-        this.currentPath = currentPath;
+    public boolean isAscending() {
+        return ascending;
     }
 
-    public ListModel getOrderings() {
-        return orderings;
+    public void setAscending(boolean ascending) {
+        if (this.ascending != ascending) {
+            this.ascending = ascending;
+            fireModelChange(VALUE_CHANGED, ASCENDING_SELECTOR);
+        }
+    }
+
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        if (this.caseInsensitive != caseInsensitive) {
+            this.caseInsensitive = caseInsensitive;
+            fireModelChange(VALUE_CHANGED, CASE_SELECTOR);
+        }
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        if (!Util.nullSafeEquals(this.path, path)) {
+            this.path = path;
+            fireModelChange(VALUE_CHANGED, PATH_SELECTOR);
+        }
     }
 }

@@ -168,7 +168,7 @@ public class EditorView
         addPanelToDetailView(procedureView, PROCEDURE_VIEW);
         
         queryView = new QueryDetailView(eventController);
-        addPanelToDetailView(queryView, QUERY_VIEW);
+        addPanelToDetailView(new JScrollPane(queryView), QUERY_VIEW);
         
         objDetailView = new ObjDetailView(eventController);
         addPanelToDetailView(objDetailView, OBJ_VIEW);
