@@ -56,15 +56,15 @@ package org.objectstyle.cayenne.access.trans;
  */ 
 
 
-import java.util.*;
+import java.sql.Connection;
+import java.util.logging.Logger;
 
-import java.sql.*;
-import java.util.logging.*;
-
+import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 
 /** Class works as a translator of raw SELECT queries to JDBC statements. */

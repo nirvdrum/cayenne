@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.*;
-import java.util.*;
-import java.util.logging.*;
 
 /** Translates parts of the query to SQL.
  * Always works in the context of parent Translator. */

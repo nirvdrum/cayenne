@@ -56,16 +56,18 @@ package org.objectstyle.cayenne.access.trans;
  */ 
 
 
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.query.Query;
 
 
 /** Abstract superclass of Query translators.

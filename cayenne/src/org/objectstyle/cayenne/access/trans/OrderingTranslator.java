@@ -55,13 +55,12 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.*;
-import java.util.*;
-import java.util.logging.*;
 
 /** Translates query qualifier to SQL. */
 public class OrderingTranslator extends QueryAssemblerHelper {
