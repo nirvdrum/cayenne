@@ -55,7 +55,7 @@ with non-JDBC data sources, such as LDAP.
 14. Configuration is now significantly easier to use and subclass;
 DefaultConfiguration now properly handles files in packages or other paths.
 
-15. significantly better logging in ResourceLocator; this should help when
+15. Significantly better logging in ResourceLocator; this should help when
 diagnosing e.g. Configuration loading problems.
 
 16. Modeler's logfile path can be customized or disabled by editing
@@ -81,3 +81,4 @@ in a HOLLOW object that will be fully fetched when it is
 23. ObjRelationship.isToMany is now derived directly from the underlying DbRelationship(s).  
 setIsToMany has been removed.  The toMany checkbox in modeller is now disabled (for ObjRelationship)
 
+24. Configuration exceptions are now much more informative.
