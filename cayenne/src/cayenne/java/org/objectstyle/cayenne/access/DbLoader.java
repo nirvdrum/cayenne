@@ -345,6 +345,7 @@ public class DbLoader {
                     boolean allowNulls = rs.getBoolean("NULLABLE");
                     int columnType = rs.getInt("DATA_TYPE");
                     int columnSize = rs.getInt("COLUMN_SIZE");
+                    String typeName = rs.getString("TYPE_NAME");
 
                     // ignore precision of non-decimal columns
                     int decimalDigits = -1;
@@ -359,6 +360,7 @@ public class DbLoader {
                     DbAttribute attr =
                         adapter.buildAttribute(
                             columnName,
+                            typeName,
                             columnType,
                             columnSize,
                             decimalDigits,
@@ -579,17 +581,17 @@ public class DbLoader {
      * @deprecated Since Beta 1 use <code>createDataMapFromDB</code> with table
      * name pattern parameter.
      */
-     public DataMap createDataMapFromDB(String schemaName) throws SQLException {
-     	return createDataMapFromDB(schemaName, WILDCARD);
-     }
-     	
-     	
+    public DataMap createDataMapFromDB(String schemaName) throws SQLException {
+        return createDataMapFromDB(schemaName, WILDCARD);
+    }
+
     /** 
      * Performs database reverse engineering and generates DataMap
      * that contains default mapping of the tables and views. 
      * By default will include regular tables and views.
      */
-    public DataMap createDataMapFromDB(String schemaName, String tablePattern) throws SQLException {
+    public DataMap createDataMapFromDB(String schemaName, String tablePattern)
+        throws SQLException {
 
         String viewType = adapter.tableTypeForView();
         String tableType = adapter.tableTypeForTable();
@@ -663,10 +665,10 @@ public class DbLoader {
         DataMap dataMap)
         throws SQLException {
 
-        if(tablePattern == null) {
+        if (tablePattern == null) {
             tablePattern = WILDCARD;
         }
-        
+
         if (!loadDbEntities(dataMap,
             getTables(null, schemaName, tablePattern, tableTypes))) {
             return dataMap;

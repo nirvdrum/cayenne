@@ -343,13 +343,17 @@ public class TypesMapping {
         return ((TypeInfo) list.get(0)).name;
     }
 
-    /** Gets the JDBC code for SQL type by its name.*/
+    /** 
+     * Returns a JDBC int type for SQL typem name.
+     */
     public static int getSqlTypeByName(String typeName) {
         Integer tmp = (Integer) sqlStringType.get(typeName);
         return (null == tmp) ? NOT_DEFINED : tmp.intValue();
     }
 
-    /** Gets the String representation of the SQL type from its JDBC code.*/
+    /** 
+     * Returns a String representation of the SQL type from its JDBC code.
+     */
     public static String getSqlNameByType(int type) {
         return (String) sqlEnumType.get(new Integer(type));
     }

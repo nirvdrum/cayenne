@@ -24,3 +24,7 @@ configurable in modeler.preferences (for now).
 
 6. updated to commons-beanutils 1.6.1 and log4j 1.2.8.
 
+7. DbAdapter.buildAttribute now takes an extra parameter - a 
+database specific strint typeName to allow reverse engineering of 
+unhandled types.
+

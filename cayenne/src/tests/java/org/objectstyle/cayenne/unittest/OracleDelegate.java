@@ -98,4 +98,8 @@ public class OracleDelegate extends DatabaseSetupDelegate {
         executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
         executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
     }
+
+    public boolean supportsLobs() {
+        return true;
+    }
 }

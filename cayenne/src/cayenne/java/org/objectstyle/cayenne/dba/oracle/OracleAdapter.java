@@ -61,13 +61,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.access.BatchInterpreter;
-import org.objectstyle.cayenne.access.types.CharType;
-import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
+import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -91,6 +91,10 @@ test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
  */
 public class OracleAdapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(OracleAdapter.class);
+
+    public static final String ORACLE_FLOAT = "FLOAT";
+    public static final String ORACLE_BLOB = "BLOB";
+    public static final String ORACLE_CLOB = "CLOB";
 
     protected Map sorters = new HashMap();
 
@@ -127,7 +131,9 @@ public class OracleAdapter extends JdbcAdapter {
      * to drop all related foreign key constraints.
      */
     public String dropTable(DbEntity ent) {
-        return "DROP TABLE " + ent.getFullyQualifiedName() + " CASCADE CONSTRAINTS";
+        return "DROP TABLE "
+            + ent.getFullyQualifiedName()
+            + " CASCADE CONSTRAINTS";
     }
 
     /**
@@ -137,15 +143,34 @@ public class OracleAdapter extends JdbcAdapter {
      */
     public DbAttribute buildAttribute(
         String name,
+        String typeName,
         int type,
         int size,
         int precision,
         boolean allowNulls) {
 
-        DbAttribute attr = super.buildAttribute(name, type, size, precision, allowNulls);
-        if(type == Types.DECIMAL && precision <= 0) {
+        DbAttribute attr =
+            super.buildAttribute(
+                name,
+                typeName,
+                type,
+                size,
+                precision,
+                allowNulls);
+
+        if (type == Types.DECIMAL && precision <= 0) {
             attr.setType(Types.INTEGER);
             attr.setPrecision(-1);
+        } else if (type == Types.OTHER) {
+            // in this case we need to guess the attribute type 
+            // based on its string value
+            if (ORACLE_FLOAT.equals(typeName)) {
+                attr.setType(Types.FLOAT);
+            } else if (ORACLE_BLOB.equals(typeName)) {
+                attr.setType(Types.BLOB);
+            } else if (ORACLE_CLOB.equals(typeName)) {
+                attr.setType(Types.CLOB);
+            }
         }
 
         return attr;
@@ -155,8 +180,7 @@ public class OracleAdapter extends JdbcAdapter {
     protected Class queryTranslatorClass(Query q) {
         if (q instanceof SelectQuery) {
             return OracleSelectTranslator.class;
-        }
-        else {
+        } else {
             return super.queryTranslatorClass(q);
         }
     }

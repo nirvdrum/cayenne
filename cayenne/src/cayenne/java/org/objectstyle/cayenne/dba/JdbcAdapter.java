@@ -383,6 +383,7 @@ public class JdbcAdapter implements DbAdapter {
 
     public DbAttribute buildAttribute(
         String name,
+        String typeName, 
         int type,
         int size,
         int precision,

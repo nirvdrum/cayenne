@@ -84,18 +84,17 @@ import org.objectstyle.cayenne.query.Query;
  */
 public interface DbAdapter {
 
-    public static final String JDBC =
-		"org.objectstyle.cayenne.dba.JdbcAdapter";
+    public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
     public static final String MYSQL =
         "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
     public static final String ORACLE =
         "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
     public static final String SYBASE =
         "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
-	public static final String POSTGRES =
-		"org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
-	public static final String HSQLDB =
-		"org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
+    public static final String POSTGRES =
+        "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+    public static final String HSQLDB =
+        "org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
 
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
@@ -109,9 +108,9 @@ public interface DbAdapter {
 
     /**
      * Returns a SQL string that can be used to create database table
-	 * corresponding to <code>ent</code> parameter.
-	 */
-	public String createTable(DbEntity ent);
+     * corresponding to <code>ent</code> parameter.
+     */
+    public String createTable(DbEntity ent);
 
     /**
      *  Returns a SQL string that can be used to create
@@ -145,7 +144,6 @@ public interface DbAdapter {
      */
     public PkGenerator getPkGenerator();
 
-
     /**
      * Creates and returns a QueryTranslator appropriate for the
      * specified <code>query</code> parameter. Sets translator
@@ -164,12 +162,20 @@ public interface DbAdapter {
      * (usually obtained from database meta data).
      *
      * @param name database column name
+     * @param typeName database specific type name, may be used as a hint to
+     * determine the right JDBC type.
      * @param type JDBC column type
      * @param size database column size (ignored if less than zero)
      * @param precision database column precision (ignored if less than zero)
      * @param allowNulls database column nullable parameter
      */
-    public DbAttribute buildAttribute(String name, int type, int size, int precision, boolean allowNulls);
+    public DbAttribute buildAttribute(
+        String name,
+        String typeName,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls);
 
     /**
      * Returns the name of the table type (as returned by
