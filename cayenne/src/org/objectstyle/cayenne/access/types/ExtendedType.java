@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.access.types;
 import java.sql.ResultSet;
 
 
-/** Defines methods read Java objects from JDBC result sets 
+/** Defines methods to read Java objects from JDBC result sets 
   * and write as parameters of PreparedStatements. */
 public interface ExtendedType {
     /** Returns a full name of Java class that this map supports. */
