@@ -77,7 +77,6 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
@@ -187,7 +186,7 @@ public class DataNodeDetailView
         adapterLabel = new JLabel("DB adapter:");
         adapter = new JComboBox();
         adapter.setEditable(true);
-        model = new DefaultComboBoxModel(JdbcAdapter.availableAdapterClassNames());
+        model = new DefaultComboBoxModel(DbAdapter.availableAdapterClassNames);
         adapter.setModel(model);
         adapter.setSelectedIndex(-1);
 

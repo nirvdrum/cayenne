@@ -106,23 +106,6 @@ public class JdbcAdapter implements DbAdapter {
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
 
-    /**
-     * Returns an array of all available DbAdapter subclass names.
-     * This should probably better be in DbAdapter but interfaces cannot
-     * contain implementations..
-     * 
-     * @return String[] array of DbAdapter subclass names
-     */
-    public static String[] availableAdapterClassNames() {
-        return new String[] {
-            DbAdapter.JDBC,
-            DbAdapter.HSQLDB,
-            DbAdapter.MYSQL,
-            DbAdapter.ORACLE,
-            DbAdapter.POSTGRES,
-            DbAdapter.SYBASE };
-    }
-
     public JdbcAdapter() {
         // create Pk generator
         pkGenerator = this.createPkGenerator();

@@ -78,7 +78,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 
 /**
@@ -157,7 +157,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 			pwdInput.setText(dataSrcInfo.getPassword());
 			drInput.setText(dataSrcInfo.getJdbcDriver());
 			urlInput.setText(dataSrcInfo.getDataSourceUrl());
-			adapterInput.setText(dataSrcInfo.getAdapterClass());
+			adapterInput.setText(dataSrcInfo.getAdapterClassName());
 		}
 	}
 
@@ -187,7 +187,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 		adapterInput =
 			new PreferenceField(
 				ModelerPreferences.RDBMS_ADAPTER,
-				Arrays.asList(JdbcAdapter.availableAdapterClassNames()));
+				Arrays.asList(DbAdapter.availableAdapterClassNames));
 		disableVKEvents(adapterInput);
 
 		Component[] left =
@@ -259,7 +259,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 			String adapter = adapterInput.getText();
 			if (adapter != null && adapter.length() == 0)
 				adapter = null;
-			dataSrcInfo.setAdapterClass(adapter);
+			dataSrcInfo.setAdapterClassName(adapter);
 
 			// set some reasonable pool size
 			if (dataSrcInfo.getMinConnections() <= 0)
