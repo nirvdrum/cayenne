@@ -118,6 +118,7 @@ public class InsertBatchQuery extends BatchQuery {
         Object value = currentSnapshot.get(attribute.getName());
 
         // if a value is a Factory, resolve it here...
+        // slight chance that a normal value will implement Factory interface???
         if (value instanceof Factory) {
             value = ((Factory) value).create();
 
@@ -136,6 +137,7 @@ public class InsertBatchQuery extends BatchQuery {
 
                 ObjectId id = getObjectId();
                 if (id != null) {
+                    // always override with fresh value as this is what's in the DB
                     id.getReplacementIdMap().put(attribute.getName(), value);
                 }
             }
