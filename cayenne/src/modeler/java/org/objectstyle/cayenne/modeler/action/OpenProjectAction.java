@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
+import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
 /**
@@ -75,6 +76,9 @@ import org.objectstyle.cayenne.project.ProjectException;
 public class OpenProjectAction extends ProjectAction {
     static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
     public static final String ACTION_NAME = "Open Project";
+
+    protected ProjectOpener fileChooser = new ProjectOpener();
+
     /**
      * Constructor for OpenProjectAction.
      */
@@ -109,7 +113,6 @@ public class OpenProjectAction extends ProjectAction {
         try {
             // Get the project file name (always cayenne.xml)
             File file = fileChooser.openProjectFile(Editor.getFrame());
-
             if (file != null) {
                 openProject(file);
             }
@@ -117,8 +120,7 @@ public class OpenProjectAction extends ProjectAction {
             logObj.warn("Error loading project file.", e);
         }
     }
-    
-    
+
     /** Opens specified project file. File must already exist. */
     protected void openProject(File file) {
         // Save and close (if needed) currently open project.

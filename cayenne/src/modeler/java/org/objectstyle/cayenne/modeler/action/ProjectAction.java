@@ -61,14 +61,11 @@ import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.event.Mediator;
-import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 
 /**
  * @author Andrei Adamchik
  */
 public abstract class ProjectAction extends CayenneAction {
-    protected ProjectOpener fileChooser = new ProjectOpener();
-
     /**
      * Constructor for ProjectAction.
      * @param name

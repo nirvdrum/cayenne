@@ -107,20 +107,23 @@ public abstract class Project {
      * If projectFile has no parent directory, current directory is assumed.
      */
     public Project(File projectFile) {
-        File parent = projectFile.getParentFile();
-        if (parent == null) {
-            parent = new File(System.getProperty("user.dir"));
-        }
 
-        if (!parent.isDirectory()) {
-            throw new ProjectException(
-                "Project directory does not exist or is not a directory: " + parent);
-        }
+        if (projectFile != null) {
+            File parent = projectFile.getParentFile();
+            if (parent == null) {
+                parent = new File(System.getProperty("user.dir"));
+            }
 
-        try {
-            projectDir = parent.getCanonicalFile();
-        } catch (IOException e) {
-            throw new ProjectException("Error creating project.", e);
+            if (!parent.isDirectory()) {
+                throw new ProjectException(
+                    "Project directory does not exist or is not a directory: " + parent);
+            }
+
+            try {
+                projectDir = parent.getCanonicalFile();
+            } catch (IOException e) {
+                throw new ProjectException("Error creating project.", e);
+            }
         }
 
         postInit(projectFile);
@@ -134,11 +137,19 @@ public abstract class Project {
     protected void postInit(File projectFile) {
         // take a snapshot of files used by the project
         files = Collections.synchronizedList(buildFileList());
-        
+
         upgradeMessages = Collections.synchronizedList(new ArrayList());
         checkForUpgrades();
     }
 
+    /**
+     * Returns true if project location is not defined. For instance,
+     * when project was created in memory and is not tied to a file yet.
+     */
+    public boolean isLocationUndefined() {
+    	return getMainFile() == null;
+    }
+    
     /**
      * Returns true if the project needs to be upgraded.
      */
@@ -289,15 +300,23 @@ public abstract class Project {
     public File getProjectDir() {
         return projectDir;
     }
+    
+    public void setProjectDir(File dir) {
+    	this.projectDir = dir;
+    }
 
     /**
      * Returns a main file associated with this project.
      */
     public File getMainFile() {
-    	ProjectFile f = ProjectFile.projectFileForObject(this, getRootNode());
-    	return (f != null) ? resolveFile(f.getLocation()) : null;
+    	if(projectDir == null) {
+    		return null;
+    	}
+    	
+        ProjectFile f = ProjectFile.projectFileForObject(this, getRootNode());
+        return (f != null) ? resolveFile(f.getLocation()) : null;
     }
-    
+
     /**
      * Returns the topmost object (node) on the project tree.
      */
@@ -309,7 +328,7 @@ public abstract class Project {
      * information.
      */
     public abstract void checkForUpgrades();
-    
+
     /**
      * Returns an Iterator over project tree of objects.
      */
@@ -325,6 +344,11 @@ public abstract class Project {
      * as needed, unused files are deleted.
      */
     public void save() throws ProjectException {
+    	
+    	// sanity check
+    	if(isLocationUndefined()) {
+    		throw new ProjectException("Project location is undefined.");
+    	}
 
         // 1. Traverse project tree to find file wrappers that require update.
         List filesToSave = new ArrayList();

@@ -156,7 +156,6 @@ public class Editor
         DbRelationshipDisplayListener {
     static Logger logObj = Logger.getLogger(Editor.class.getName());
 
-
     /** 
      * Label that indicates as a part of the title that
      * the project has unsaved changes. 
@@ -501,7 +500,7 @@ public class Editor
 
         // repaint is needed, since there is a trace from menu left on the screen
         repaint();
-        setProjectTitle(null);
+        updateTitle();
     }
 
     public void projectOpened(Project project) {
@@ -521,10 +520,17 @@ public class Editor
         enableProjectMenu();
         validate();
 
-        setProjectTitle(project.getMainFile().getAbsolutePath());
+        updateTitle();
 
-        controller.handleControl(
-            new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
+        // do this after title is set
+        if (project.isLocationUndefined()) {
+            mediator.setDirty(true);
+            controller.handleControl(
+                new Control(TopModel.STATUS_MESSAGE_KEY, "New project created..."));
+        } else {
+            controller.handleControl(
+                new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
+        }
     }
 
     /**
@@ -569,12 +575,12 @@ public class Editor
         String title = getTitle();
         if (flag) {
             getAction(SaveAction.ACTION_NAME).setEnabled(true);
-            if (!title.startsWith(DIRTY_STRING)) {
+            if (title == null || !title.startsWith(DIRTY_STRING)) {
                 setTitle(DIRTY_STRING + title);
             }
         } else {
             getAction(SaveAction.ACTION_NAME).setEnabled(false);
-            if (title.startsWith(DIRTY_STRING)) {
+            if (title != null && title.startsWith(DIRTY_STRING)) {
                 setTitle(title.substring(DIRTY_STRING.length(), title.length()));
             }
         }
@@ -804,8 +810,24 @@ public class Editor
         this.mediator = mediator;
     }
 
-    public void setProjectTitle(String projectPath) {
-    	setTitle(ModelerUtil.buildTitle(projectPath));
+    public void updateTitle() {
+        String title = null;
+        Project project = getProject();
+
+        if (project != null) {
+            if (project.isLocationUndefined()) {
+                title = "[New]";
+            } else {
+                title = project.getMainFile().getAbsolutePath();
+            }
+        }
+
+        if (title != null) {
+            title = ModelerUtil.buildTitle(title);
+
+        }
+
+        setTitle(title);
     }
 
     /**
@@ -816,13 +838,13 @@ public class Editor
     public EditorView getView() {
         return view;
     }
-    
+
     /**
      * Returns the controller.
      * 
      * @return TopController
      */
     public TopController getController() {
-      return controller;
+        return controller;
     }
 }

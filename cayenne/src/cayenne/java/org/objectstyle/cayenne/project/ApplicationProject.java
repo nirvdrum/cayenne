@@ -85,7 +85,8 @@ public class ApplicationProject extends Project {
      */
     protected void postInit(File projectFile) {
         try {
-            config = new ProjectConfiguration(projectFile.getCanonicalFile());
+        	File f = (projectFile != null) ? projectFile.getCanonicalFile() : null;
+            config = new ProjectConfiguration(f);
         } catch (IOException e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }

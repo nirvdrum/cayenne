@@ -81,7 +81,7 @@ public class ProjectConfiguration extends DefaultConfiguration {
     public ProjectConfiguration(File projectFile) {
         this.projectFile = projectFile;
 
-        if (projectFile.isFile()) {
+        if (projectFile != null && projectFile.isFile()) {
             try {
                 init();
             } catch (Exception e) {

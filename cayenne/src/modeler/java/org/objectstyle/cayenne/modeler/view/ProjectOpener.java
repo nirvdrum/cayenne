@@ -60,6 +60,8 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.util.ApplicationFileFilter;
 import org.objectstyle.cayenne.modeler.util.DataMapFileFilter;
@@ -69,6 +71,7 @@ import org.objectstyle.cayenne.modeler.util.ModelerUtil;
  * @author Andrei Adamchik
  */
 public class ProjectOpener extends JFileChooser {
+    static Logger logObj = Logger.getLogger(ProjectOpener.class);
 
     /**
      * Constructor for ProjectOpener.
@@ -77,6 +80,67 @@ public class ProjectOpener extends JFileChooser {
         super();
     }
 
+    /**
+     * Runs a dialog to select a directory for the new 
+     * Cayenne application project.
+     */
+    public File newApplicationProjectDir(Frame f) {
+        // configure dialog
+        setDialogTitle("Select Project Directory");
+        setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        setCurrentDirectory(getDefaultStartDir());
+        
+        // preselect current directory
+        if(getCurrentDirectory() != null) {
+        	setSelectedFile(getCurrentDirectory());
+        }
+
+        // configure filters
+        resetChoosableFileFilters();
+        // allow users to see directories with cayenne.xml files
+        addChoosableFileFilter(ApplicationFileFilter.getInstance());
+
+        File selectedDir;
+
+        while (true) {
+            int status = showDialog(f, "Select");
+            selectedDir = getSelectedFile();
+            if (status != JFileChooser.APPROVE_OPTION || selectedDir == null) {
+                logObj.info("Save canceled.");
+                return null;
+            }
+
+            // normalize selection
+            logObj.info("Selected: " + selectedDir);
+            if (!selectedDir.isDirectory()) {
+                selectedDir = getSelectedFile().getParentFile();
+            }
+
+            // check for overwrite
+            File projectFile = new File(selectedDir, Configuration.DOMAIN_FILE);
+            if (projectFile.exists()) {
+                OverwriteDialog dialog = new OverwriteDialog(projectFile, f);
+                dialog.show();
+
+                if (dialog.shouldOverwrite()) {
+                    break;
+                } else if (dialog.shouldSelectAnother()) {
+                    continue;
+                } else {
+                    // canceled
+                    return null;
+                }
+            } else {
+                break;
+            }
+        }
+
+        return selectedDir;
+    }
+
+    /**
+     * Runs a dialog to open Cayenne project.
+     */
     public File openProjectFile(Frame f) {
 
         // configure dialog
@@ -88,7 +152,7 @@ public class ProjectOpener extends JFileChooser {
         resetChoosableFileFilters();
         addChoosableFileFilter(ApplicationFileFilter.getInstance());
         addChoosableFileFilter(DataMapFileFilter.getInstance());
-        
+
         // default to App projects
         setFileFilter(ApplicationFileFilter.getInstance());
 

@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.KeyStroke;
 
@@ -67,6 +68,7 @@ import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
+import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
 
@@ -76,9 +78,11 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Misha Shengaout
  */
 public class SaveAction extends CayenneAction {
-    static Logger logObj = Logger.getLogger(SaveAction.class.getName());
+    static Logger logObj = Logger.getLogger(SaveAction.class);
 
     public static final String ACTION_NAME = "Save";
+
+    protected ProjectOpener fileChooser = new ProjectOpener();
 
     public SaveAction() {
         super(ACTION_NAME);
@@ -96,10 +100,22 @@ public class SaveAction extends CayenneAction {
      * Saves project and related files. Saving is done to temporary files, 
      * and only on successful save, master files are replaced with new versions. 
      */
-    protected void saveAll() throws Exception {
-    	Project p = Editor.getProject();
+    protected boolean saveAll() throws Exception {
+        Project p = Editor.getProject();
+
+        if (p.isLocationUndefined()) {
+            File projectDir = fileChooser.newApplicationProjectDir(Editor.getFrame());
+            if (projectDir == null) {
+                return false;
+            }
+            
+            p.setProjectDir(projectDir);
+        }
+
         p.save();
+        Editor.getFrame().updateTitle();
         Editor.getFrame().addToLastProjList(p.getMainFile().getAbsolutePath());
+        return true;
     }
 
     /**
@@ -117,7 +133,9 @@ public class SaveAction extends CayenneAction {
         // If no serious errors, perform save.
         if (validationCode < ValidationDisplayHandler.ERROR) {
             try {
-                saveAll();
+                if(!saveAll()) {
+                	return;
+                }
             } catch (Exception ex) {
                 throw new CayenneRuntimeException("Error on save", ex);
             }
