@@ -74,12 +74,13 @@ import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
  */
 public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
     protected void setUp() throws Exception {
+        super.setUp();
         deleteTestData();
     }
 
     public void testExecuteUpdate() throws Exception {
 
-        SQLTemplate template = new SQLTemplate(Object.class);
+        SQLTemplate template = new SQLTemplate(Object.class, false);
         template.setDefaultTemplate(
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))");
@@ -124,7 +125,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
     public void testExecuteUpdateNoParameters() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        SQLTemplate template = new SQLTemplate(Object.class);
+        SQLTemplate template = new SQLTemplate(Object.class, false);
         template.setDefaultTemplate("delete from ARTIST");
         SQLTemplateExecutionPlan plan =
             new SQLTemplateExecutionPlan(getAccessStackAdapter().getAdapter());
@@ -147,7 +148,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
 
     public void testExecuteUpdateBatch() throws Exception {
 
-        SQLTemplate template = new SQLTemplate(Object.class);
+        SQLTemplate template = new SQLTemplate(Object.class, false);
         template.setDefaultTemplate(
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))");

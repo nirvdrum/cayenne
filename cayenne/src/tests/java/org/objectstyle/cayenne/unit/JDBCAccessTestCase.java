@@ -54,31 +54,35 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
+ * Superclass of test cases that require JDBC Connection facilities. Contains
+ * setup and cleanup methods to release connections, etc.
+ * 
  * @author Andrei Adamchik
  */
-public class IteratorTestBase extends CayenneTestCase {
-    protected Connection conn;
+public abstract class JDBCAccessTestCase extends CayenneTestCase {
+    protected Connection connection;
     protected PreparedStatement st;
-    protected QueryTranslator transl;
+    protected QueryTranslator translator;
     protected SelectQuery query;
 
     protected void setUp() throws Exception {
         super.setUp();
 
-        conn = null;
+        connection = null;
         st = null;
-        transl = null;
+        translator = null;
         query = null;
 
         deleteTestData();
@@ -89,16 +93,16 @@ public class IteratorTestBase extends CayenneTestCase {
      * Initializes internal state.
      */
     protected void init() throws Exception {
-        conn = getConnection();
+        connection = getConnection();
 
         query = new SelectQuery(Artist.class);
         query.addOrdering("artistName", true);
 
-        transl = getNode().getAdapter().getQueryTranslator(query);
-        transl.setEngine(getNode());
-        transl.setCon(conn);
+        translator = getNode().getAdapter().getQueryTranslator(query);
+        translator.setEngine(getNode());
+        translator.setCon(connection);
 
-        st = transl.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
+        st = translator.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
     }
 
     /**
@@ -109,8 +113,8 @@ public class IteratorTestBase extends CayenneTestCase {
             st.close();
         }
 
-        if (conn != null) {
-            conn.close();
+        if (connection != null) {
+            connection.close();
         }
     }
 }

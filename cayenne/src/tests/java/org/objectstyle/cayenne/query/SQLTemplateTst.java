@@ -68,13 +68,13 @@ import org.objectstyle.cayenne.unit.BasicTestCase;
  */
 public class SQLTemplateTst extends BasicTestCase {
     public void testGetDefaultTemplate() throws Exception {
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(false);
         query.setDefaultTemplate("AAA # BBB");
         assertEquals("AAA # BBB", query.getDefaultTemplate());
     }
 
     public void testGetTemplate() throws Exception {
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(false);
 
         // no template for key, no default template... must be null
         assertNull(query.getTemplate("key1"));
@@ -94,7 +94,7 @@ public class SQLTemplateTst extends BasicTestCase {
     }
 
     public void testResultColumns() throws Exception {
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(false);
 
         assertNull(query.getResultColumns());
 
@@ -107,7 +107,7 @@ public class SQLTemplateTst extends BasicTestCase {
     }
 
     public void testQueryType() throws Exception {
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(false);
 
         assertEquals(Query.UNKNOWN_QUERY, query.getQueryType());
 
@@ -115,14 +115,14 @@ public class SQLTemplateTst extends BasicTestCase {
         assertEquals(Query.UNKNOWN_QUERY, query.getQueryType());
 
         query.setResultColumns(new DataColumnDescriptor[2]);
-        assertEquals(Query.SELECT_QUERY, query.getQueryType());
-
-        query.setResultColumns(null);
         assertEquals(Query.UNKNOWN_QUERY, query.getQueryType());
+
+        query.setSelecting(true);
+        assertEquals(Query.SELECT_QUERY, query.getQueryType());
     }
 
     public void testSingleParameterSet() throws Exception {
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(false);
 
         assertNotNull(query.getParameters());
         assertTrue(query.getParameters().isEmpty());
@@ -145,7 +145,7 @@ public class SQLTemplateTst extends BasicTestCase {
     }
 
     public void testBatchParameterSet() throws Exception {
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(false);
 
         assertNotNull(query.getParameters());
         assertTrue(query.getParameters().isEmpty());

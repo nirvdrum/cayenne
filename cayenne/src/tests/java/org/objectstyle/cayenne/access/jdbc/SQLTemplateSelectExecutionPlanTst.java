@@ -53,41 +53,58 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.access.jdbc;
 
-package org.objectstyle.cayenne.access;
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.unit.BasicTestCase;
+import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
 
-public class DataNodeTst extends BasicTestCase {
-
-    public void testName() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getName());
-        node.setName(tstName);
-        assertEquals(tstName, node.getName());
+/**
+ * @author Andrei Adamchik
+ */
+public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
+    protected void setUp() throws Exception {
+        super.setUp();
+        deleteTestData();
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
     }
 
-    public void testDataSourceLocation() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getDataSourceLocation());
-        node.setDataSourceLocation(tstName);
-        assertEquals(tstName, node.getDataSourceLocation());
-    }
+    public void testExecuteSelect() throws Exception {
+        SQLTemplate template = new SQLTemplate(Object.class, true);
+        template.setDefaultTemplate("SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)");
 
-    public void testDataSourceFactory() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getDataSourceFactory());
-        node.setDataSourceFactory(tstName);
-        assertEquals(tstName, node.getDataSourceFactory());
-    }
+        Map bindings = new HashMap();
+        bindings.put("id", new Integer(33005));
+        template.setParameters(bindings);
 
+        SQLTemplateSelectExecutionPlan plan =
+            new SQLTemplateSelectExecutionPlan(getAccessStackAdapter().getAdapter());
+        assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
 
-    public void testEmptyNodeEntityResolver() {
-        //Test a brand new otherwise empty node
-        DataNode node = new DataNode();
-        assertNotNull(node.getEntityResolver());
+        MockupOperationObserver observer = new MockupOperationObserver();
+        Connection c = getConnection();
+        try {
+
+            plan.execute(c, template, observer);
+
+        }
+        finally {
+            c.close();
+        }
+
+        List rows = observer.rowsForQuery(template);
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
+
+        assertEquals(bindings.get("id"), row.get("ARTIST_ID"));
+        assertEquals("artist5", row.get("ARTIST_NAME"));
+        assertTrue(row.containsKey("DATE_OF_BIRTH"));
     }
 }

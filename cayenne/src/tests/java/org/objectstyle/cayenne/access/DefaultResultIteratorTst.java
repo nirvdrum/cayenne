@@ -59,18 +59,19 @@ import java.sql.ResultSet;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
+import org.objectstyle.cayenne.unit.*;
 
-public class DefaultResultIteratorTst extends IteratorTestBase {
+public class DefaultResultIteratorTst extends JDBCAccessTestCase {
     protected DefaultResultIterator it;
 
     protected void init() throws Exception {
         super.init();
-        SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
+        SelectQueryTranslator assembler = (SelectQueryTranslator) translator;
         ResultSet rs = st.executeQuery();
 
         it =
             new DefaultResultIterator(
-                transl.getCon(),
+                translator.getCon(),
                 st,
                 rs,
                 assembler.getResultDescriptor(rs),
@@ -89,28 +90,28 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
     public void testClose1() throws Exception {
         try {
             init();
-            assertFalse(conn.isClosed());
+            assertFalse(connection.isClosed());
 
             it.setClosingConnection(false);
             it.close();
 
             // caller must close the connection
-            assertFalse(conn.isClosed());
+            assertFalse(connection.isClosed());
         }
         finally {
-            conn.close();
+            connection.close();
         }
     }
 
     public void testClose2() throws Exception {
         init();
-        assertFalse(conn.isClosed());
+        assertFalse(connection.isClosed());
 
         it.setClosingConnection(true);
         it.close();
 
         // iterator must close the connection
-        assertTrue(conn.isClosed());
+        assertTrue(connection.isClosed());
     }
 
     public void testCheckNextRow() throws Exception {

@@ -56,64 +56,72 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.sql.Date;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Exhibit;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
 
-public class DataNodeExtrasTst extends CayenneTestCase {
-
-    public void testName() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getName());
-        node.setName(tstName);
-        assertEquals(tstName, node.getName());
-    }
-
-    public void testDataSourceLocation() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getDataSourceLocation());
-        node.setDataSourceLocation(tstName);
-        assertEquals(tstName, node.getDataSourceLocation());
-    }
-
-    public void testDataSourceFactory() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getDataSourceFactory());
-        node.setDataSourceFactory(tstName);
-        assertEquals(tstName, node.getDataSourceFactory());
+/** 
+ * DataNode test cases.
+ * 
+ * @author Andrei Adamchik
+ */
+public class DataNodeQueriesTst extends CayenneTestCase {
+    protected void setUp() throws Exception {
+        super.setUp();
+        deleteTestData();
     }
 
     public void testCreatePkSupportForMapEntities() throws Exception {
-        getAccessStack().deleteTestData();
         getAccessStack().createPKSupport();
-       
-        DataNode node = (DataNode) getDomain().getDataNodes().iterator().next();
-       
 
-        DbEntity artistEnt =
-            node.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
+        DataNode node = getNode();
+
+        DbEntity artistEnt = node.getEntityResolver().lookupDbEntity(Artist.class);
         assertNotNull(
             node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
 
-        DbEntity exhibitEnt =
-            node.getEntityResolver().lookupObjEntity("Exhibit").getDbEntity();
+        DbEntity exhibitEnt = node.getEntityResolver().lookupDbEntity(Exhibit.class);
         assertNotNull(
             node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
     }
 
-    public void testPopulatedNodeEntityResolver() {
-        //Test shared node (one loaded with a real model)
-        assertNotNull(
-            ((DataNode) getDomain().getDataNodes().iterator().next())
-                .getEntityResolver());
-    }
+    public void testPerfomQueriesSQLTemplate() throws Exception {
+        SQLTemplate query = new SQLTemplate(Object.class, false);
+        query.setDefaultTemplate(
+            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
+                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))");
 
-    public void testEmptyNodeEntityResolver() {
-        //Test a brand new otherwise empty node
-        DataNode node = new DataNode();
-        assertNotNull(node.getEntityResolver());
-    }
+        Map bindings = new HashMap();
+        bindings.put("id", new Integer(1));
+        bindings.put("name", "a1");
+        bindings.put("dob", new Date(System.currentTimeMillis()));
+        query.setParameters(bindings);
 
+        MockupOperationObserver observer = new MockupOperationObserver();
+        getNode().performQueries(Collections.singletonList(query), observer);
+        assertNotNull(observer.countsForQuery(query));
+        assertEquals(1, observer.countsForQuery(query)[0]);
+
+        // check the data
+        MockupOperationObserver checkObserver = new MockupOperationObserver();
+        SelectQuery checkQuery = new SelectQuery(Artist.class);
+        getDomain().performQueries(Collections.singletonList(checkQuery), checkObserver);
+        List data = checkObserver.rowsForQuery(checkQuery);
+        assertEquals(1, data.size());
+        Map row = (Map) data.get(0);
+        assertEquals(bindings.get("id"), row.get("ARTIST_ID"));
+        assertEquals(bindings.get("name"), row.get("ARTIST_NAME"));
+        // to compare dates we need to create the binding correctly
+        // assertEquals(bindings.get("dob"), row.get("DATE_OF_BIRTH"));
+    }
 }

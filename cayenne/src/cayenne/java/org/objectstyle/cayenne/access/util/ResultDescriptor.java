@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DataColumnDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -132,15 +133,59 @@ public class ResultDescriptor {
                 DbAttribute desc = new DbAttribute();
                 desc.setName(name);
                 desc.setType(md.getColumnType(i + 1));
-                
+
                 descriptor.addDbAttribute(desc);
-                descriptor.addJavaType(TypesMapping.getJavaBySqlType(sqlType, length, precision));
+                descriptor.addJavaType(
+                    TypesMapping.getJavaBySqlType(sqlType, length, precision));
             }
-        } catch (SQLException sqex) {
+        }
+        catch (SQLException sqex) {
             throw new CayenneRuntimeException("Error reading metadata.", sqex);
         }
 
         descriptor.index();
+        return descriptor;
+    }
+
+    /**
+     * Creates and returns a ResultDescriptor for an array of DataColumnDescriptors.
+     * 
+     * @since 1.1
+     */
+    public static ResultDescriptor createDescriptor(
+        DataColumnDescriptor[] columns,
+        ExtendedTypeMap typeConverters) {
+
+        ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
+
+        int len = columns.length;
+        descriptor.names = new String[len];
+        descriptor.jdbcTypes = new int[len];
+        descriptor.converters = new ExtendedType[len];
+        int idWidth = 0;
+
+        for (int i = 0; i < len; i++) {
+            descriptor.names[i] = columns[i].getValueLabel();
+            descriptor.jdbcTypes[i] = columns[i].getExternalType();
+            descriptor.converters[i] =
+                typeConverters.getRegisteredType(columns[i].getValueClassName());
+            if (columns[i].isPrimaryKey()) {
+                idWidth++;
+            }
+        }
+
+        if (idWidth == 0) {
+            descriptor.idIndexes = emptyInt;
+        }
+        else {
+            descriptor.idIndexes = new int[idWidth];
+            for (int i = 0, j = 0; i < len; i++) {
+                if (columns[i].isPrimaryKey()) {
+                    descriptor.idIndexes[j++] = i;
+                }
+            }
+        }
+
         return descriptor;
     }
 
@@ -153,7 +198,8 @@ public class ResultDescriptor {
         ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
         Iterator it = procedure.getCallParameters().iterator();
         while (it.hasNext()) {
-            descriptor.addDbAttribute(new ProcedureParameterWrapper((ProcedureParameter) it.next()));
+            descriptor.addDbAttribute(
+                new ProcedureParameterWrapper((ProcedureParameter) it.next()));
         }
 
         descriptor.index();
@@ -164,9 +210,7 @@ public class ResultDescriptor {
         this(typesMapping, null);
     }
 
-    public ResultDescriptor(
-        ExtendedTypeMap typesMapping,
-        ObjEntity rootEntity) {
+    public ResultDescriptor(ExtendedTypeMap typesMapping, ObjEntity rootEntity) {
         this.typesMapping = typesMapping;
         this.rootEntity = rootEntity;
     }
@@ -221,8 +265,7 @@ public class ResultDescriptor {
             // figure out name
             String name = null;
             if (rootEntity != null) {
-                ObjAttribute objAttr =
-                    rootEntity.getAttributeForDbAttribute(attr);
+                ObjAttribute objAttr = rootEntity.getAttributeForDbAttribute(attr);
                 if (objAttr != null) {
                     name = objAttr.getDbAttributePath();
                 }
@@ -237,7 +280,8 @@ public class ResultDescriptor {
 
         if (idWidth == 0) {
             this.idIndexes = emptyInt;
-        } else {
+        }
+        else {
             this.idIndexes = new int[idWidth];
             for (int i = 0, j = 0; i < resultWidth; i++) {
                 DbAttribute attr = (DbAttribute) dbAttributes.get(i);
@@ -251,7 +295,8 @@ public class ResultDescriptor {
 
         if (outWidth == 0) {
             this.outParamIndexes = emptyInt;
-        } else {
+        }
+        else {
             this.outParamIndexes = new int[outWidth];
             for (int i = 0, j = 0; i < resultWidth; i++) {
                 DbAttribute attr = (DbAttribute) dbAttributes.get(i);
@@ -269,9 +314,11 @@ public class ResultDescriptor {
         // since this may depend on some of the indexed data
         if (javaTypes.size() > 0) {
             initConvertersFromJavaTypes();
-        } else if (rootEntity != null) {
+        }
+        else if (rootEntity != null) {
             initConvertersFromMapping();
-        } else {
+        }
+        else {
             initDefaultConverters();
         }
     }
@@ -281,8 +328,7 @@ public class ResultDescriptor {
         this.converters = new ExtendedType[resultWidth];
 
         for (int i = 0; i < resultWidth; i++) {
-            converters[i] =
-                typesMapping.getRegisteredType((String) javaTypes.get(i));
+            converters[i] = typesMapping.getRegisteredType((String) javaTypes.get(i));
         }
     }
 
@@ -316,7 +362,8 @@ public class ResultDescriptor {
             ObjAttribute objAttr = rootEntity.getAttributeForDbAttribute(attr);
             if (objAttr != null) {
                 javaType = objAttr.getType();
-            } else {
+            }
+            else {
                 javaType = TypesMapping.getJavaBySqlType(attr.getType());
             }
 
@@ -350,17 +397,17 @@ public class ResultDescriptor {
     public int[] getOutParamIndexes() {
         return outParamIndexes;
     }
-    
+
     // [UGLY HACK AHEAD] wrapper to make a ProcedureParameter
     // look like a DbAttribute. A better implementation would
     // probably be a common interface for both.
     static class ProcedureParameterWrapper extends DbAttribute {
         ProcedureParameter parameter;
-        
+
         ProcedureParameterWrapper(ProcedureParameter parameter) {
             this.parameter = parameter;
         }
-        
+
         public int getMaxLength() {
             return parameter.getMaxLength();
         }
@@ -380,7 +427,7 @@ public class ResultDescriptor {
         public Object getParent() {
             return parameter.getParent();
         }
-        
+
         public ProcedureParameter getParameter() {
             return parameter;
         }

@@ -72,6 +72,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateExecutionPlan;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
@@ -90,6 +91,7 @@ import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
@@ -248,7 +250,8 @@ public class DataNode implements QueryEngine {
     }
 
     /** 
-     * Calls "performQueries()" wrapping a query argument into a list.
+     * Calls {@link #performQueries(Collection, OperationObserver)}" wrapping a query argument 
+     * into a list.
      * 
      * @deprecated Since 1.1 use performQueries(List, OperationObserver).
      * This method is redundant and doesn't add value.
@@ -317,7 +320,15 @@ public class DataNode implements QueryEngine {
             try {
 
                 // figure out query type and call appropriate worker method
-                if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                if (nextQuery instanceof SQLTemplate) {
+                    SQLTemplateExecutionPlan executionPlan =
+                        new SQLTemplateExecutionPlan(getAdapter());
+                    executionPlan.execute(
+                        connection,
+                        (SQLTemplate) nextQuery,
+                        resultConsumer);
+                }
+                else if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                     runSelect(connection, nextQuery, resultConsumer);
                 }
                 else if (nextQuery instanceof BatchQuery) {

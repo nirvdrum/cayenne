@@ -70,8 +70,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 
@@ -202,7 +202,7 @@ public class DefaultResultIterator implements ResultIterator {
             throw new CayenneException("Exception reading ResultSet.", sqex);
         }
     }
-    
+
     /**
      * Returns the number of columns in the result row.
      * 

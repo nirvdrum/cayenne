@@ -62,8 +62,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -91,8 +89,9 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-
+        
         node = new NodeSwitchingMockup();
+        node.setDataSource(getNode().getDataSource());
     }
 
     public void testSelectQuery() throws Exception {
@@ -177,11 +176,5 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
         public List getMethodsCalled() {
             return methodsCalled;
         }
-
-        public DataSource getDataSource() {
-            return getNode().getDataSource();
-        }
-
     }
-
 }

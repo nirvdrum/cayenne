@@ -109,26 +109,32 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     protected String defaultTemplate;
     protected Map templates;
     protected Map[] parameters;
+    protected boolean selecting;
 
     /** 
      * Creates an empty SQLTemplate. 
      */
-    public SQLTemplate() {
+    public SQLTemplate(boolean selecting) {
+        setSelecting(selecting);
     }
 
-    public SQLTemplate(ObjEntity root) {
+    public SQLTemplate(ObjEntity root, boolean selecting) {
+        setSelecting(selecting);
         setRoot(root);
     }
 
-    public SQLTemplate(Class rootClass) {
+    public SQLTemplate(Class rootClass, boolean selecting) {
+        setSelecting(selecting);
         setRoot(rootClass);
     }
 
-    public SQLTemplate(DbEntity root) {
+    public SQLTemplate(DbEntity root, boolean selecting) {
+        setSelecting(selecting);
         setRoot(root);
     }
 
-    public SQLTemplate(String objEntityName) {
+    public SQLTemplate(String objEntityName, boolean selecting) {
+        setSelecting(selecting);
         setRoot(objEntityName);
     }
 
@@ -165,7 +171,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
      */
     public SQLTemplate queryWithParameters(Map[] parameters) {
         // create a query replica
-        SQLTemplate query = new SQLTemplate();
+        SQLTemplate query = new SQLTemplate(isSelecting());
 
         query.setLoggingLevel(logLevel);
         query.setRoot(root);
@@ -222,8 +228,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
      * result columns are defined.
      */
     public int getQueryType() {
-        return resultColumns != null
-            && resultColumns.length > 0 ? SELECT_QUERY : UNKNOWN_QUERY;
+        return isSelecting() ? SELECT_QUERY : UNKNOWN_QUERY;
     }
 
     public DataColumnDescriptor[] getResultColumns() {
@@ -290,5 +295,13 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
 
     public void setParameters(Map[] parameters) {
         this.parameters = parameters;
+    }
+
+    public boolean isSelecting() {
+        return selecting;
+    }
+
+    public void setSelecting(boolean b) {
+        selecting = b;
     }
 }

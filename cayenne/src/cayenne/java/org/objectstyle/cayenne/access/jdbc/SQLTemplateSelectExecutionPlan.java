@@ -53,11 +53,11 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,40 +66,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * Implements a stateless strategy for execution of updating {@link SQLTemplate} 
- * queries.
+ * Implements a stateless strategy for execution of selecting {@link SQLTemplate} queries.
  * 
- * @author Andrei Adamchik
  * @since 1.1
+ * @author Andrei Adamchik
  */
-// TODO: it is very likely that there will be an ExecutionPlan interface 
-// soon, and all query types will be run by an execution plan instead of
-// a DataNode. Then ExecutionPlan will become a true Strategy pattern...
-public class SQLTemplateExecutionPlan {
-    private static Logger logObj = Logger.getLogger(SQLTemplateExecutionPlan.class);
+public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
 
-    protected DbAdapter adapter;
-
-    public SQLTemplateExecutionPlan(DbAdapter adapter) {
-        this.adapter = adapter;
+    public SQLTemplateSelectExecutionPlan(DbAdapter adapter) {
+        super(adapter);
     }
 
     /**
-     * Returns DbAdapter associated with this execution plan object.
-     */
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
-
-    /**
-     * Runs a SQLTemplate query as an update.
+     * Runs a SQLTemplate query as a select.
      */
     public void execute(
         Connection connection,
@@ -115,12 +102,11 @@ public class SQLTemplateExecutionPlan {
 
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
-        int[] counts = new int[size > 0 ? size : 1];
         Iterator it =
             (size > 0)
                 ? query.parametersIterator()
                 : IteratorUtils.singletonIterator(Collections.EMPTY_MAP);
-        for (int i = 0; i < counts.length; i++) {
+        while (it.hasNext()) {
             Map nextParameters = (Map) it.next();
 
             // reset bindings
@@ -130,39 +116,63 @@ public class SQLTemplateExecutionPlan {
                 templateProcessor.processTemplate(template, nextParameters, bindings);
 
             QueryLogger.logQuery(query.getLoggingLevel(), sqlString, bindings);
+            long t1 = System.currentTimeMillis();
 
             // TODO: we may cache prep statements for this loop, using merged string as a key
             // since it is very likely that it will be the same for multiple parameter sets...
             PreparedStatement statement = connection.prepareStatement(sqlString);
             try {
                 bind(statement, bindings);
-                counts[i] = statement.executeUpdate();
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), counts[i]);
+                ResultSet rs = statement.executeQuery();
+
+                ResultDescriptor descriptor;
+                if (query.getResultColumns() != null
+                    && query.getResultColumns().length > 0) {
+                    descriptor =
+                        ResultDescriptor.createDescriptor(
+                            query.getResultColumns(),
+                            adapter.getExtendedTypes());
+                }
+                else {
+                    descriptor =
+                        ResultDescriptor.createDescriptor(rs, adapter.getExtendedTypes());
+                }
+
+                DefaultResultIterator result =
+                    new DefaultResultIterator(
+                        connection,
+                        statement,
+                        rs,
+                        descriptor,
+                        query.getFetchLimit());
+
+                // TODO: Should do something about closing ResultSet and PreparedStatement in this method,
+                // instead of relying on DefaultResultIterator to do that later
+
+                if (!observer.isIteratedResult()) {
+                    // note that we don't need to close ResultIterator
+                    // since "dataRows" will do it internally
+                    List resultRows = result.dataRows(true);
+                    QueryLogger.logSelectCount(
+                        query.getLoggingLevel(),
+                        resultRows.size(),
+                        System.currentTimeMillis() - t1);
+
+                    observer.nextDataRows(query, resultRows);
+                }
+                else {
+                    try {
+                        result.setClosingConnection(true);
+                        observer.nextDataRows(query, result);
+                    }
+                    catch (Exception ex) {
+                        result.close();
+                        throw ex;
+                    }
+                }
             }
             finally {
                 statement.close();
-            }
-        }
-
-        observer.nextBatchCount(query, counts);
-    }
-
-    /**
-     * Binds parameters to the PreparedStatement.
-     */
-    protected void bind(PreparedStatement preparedStatement, List bindings)
-        throws SQLException, Exception {
-        // bind parameters
-        if (bindings != null && !bindings.isEmpty()) {
-            int len = bindings.size();
-            for (int i = 0; i < len; i++) {
-                DataBinding binding = (DataBinding) bindings.get(i);
-                adapter.bindParameter(
-                    preparedStatement,
-                    binding.getValue(),
-                    i + 1,
-                    binding.getJdbcType(),
-                    binding.getPrecision());
             }
         }
     }
