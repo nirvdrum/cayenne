@@ -48,6 +48,7 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,8 @@ import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -68,6 +71,45 @@ import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataContextTst extends DataContextTestBase {
+    
+    public void testLocalObjects() throws Exception {
+        List artists = context.performQuery(new SelectQuery(Artist.class));
+
+        DataContext altContext = createDataContext();
+
+        List altArtists = altContext.localObjects(artists);
+        assertNotNull(altArtists);
+        assertEquals(artists.size(), altArtists.size());
+
+        // verify new artsists
+        Iterator it = altArtists.iterator();
+        while (it.hasNext()) {
+            DataObject a = (DataObject) it.next();
+            assertSame(altContext, a.getDataContext());
+        }
+
+        // verify original artsists
+        it = artists.iterator();
+        while (it.hasNext()) {
+            DataObject a = (DataObject) it.next();
+            assertSame(context, a.getDataContext());
+        }
+    }
+    
+    public void testLocalObjectsSanity() throws Exception {
+        List artists = context.performQuery(new SelectQuery(Artist.class));
+        Artist a = (Artist)artists.get(0);
+        a.setArtistName("new name");
+
+        DataContext altContext = createDataContext();
+        try {
+            altContext.localObjects(Collections.singletonList(a));
+            fail("Shouldn't allow transfers of modified objects.");
+        }
+        catch(CayenneRuntimeException ex) {
+            // expected
+        }
+    }
 
     public void testCreatePermId1() throws Exception {
         Artist artist = new Artist();

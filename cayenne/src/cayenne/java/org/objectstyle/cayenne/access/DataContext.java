@@ -470,6 +470,55 @@ public class DataContext implements QueryEngine, Serializable {
     public Map takeObjectSnapshot(DataObject anObject) {
         return currentSnapshot(anObject);
     }
+    
+    /**
+     * Creates a list of DataObjects local to this DataContext from a list 
+     * of DataObjects coming from a different DataContext. Note that all objects
+     * in the source list must be either in COMMITTED or in HOLLOW state.
+     * 
+     * @since 1.1
+     */
+    public List localObjects(List objects) {
+        
+        List localObjects = new ArrayList(objects.size());
+        Class objectClass = null;
+        ObjEntity entity = null;
+        
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            
+            // sanity check
+            if (object.getPersistenceState() != PersistenceState.COMMITTED
+                && object.getPersistenceState() != PersistenceState.HOLLOW) {
+                throw new CayenneRuntimeException(
+                    "Only COMMITTED and HOLLOW objects can be transferred between contexts. "
+                        + "Invalid object state '"
+                        + PersistenceState.persistenceStateName(
+                            object.getPersistenceState())
+                        + "', ObjectId: "
+                        + object.getObjectId());
+            }      
+              
+            DataObject localObject;
+
+            if (object.getDataContext() != this) {
+                Class currentClass = object.getObjectId().getObjClass();
+                if (entity == null || currentClass != objectClass) {
+                    entity = getEntityResolver().lookupObjEntity(currentClass);
+                    objectClass = currentClass;
+                }
+                
+                localObject = objectFromDataRow(entity, currentSnapshot(object), true);
+            } else {
+                localObject = object;
+            }
+
+            localObjects.add(localObject);
+        }
+
+        return localObjects;
+    }
 
     /**
      * Converts a list of data rows to a list of DataObjects. 

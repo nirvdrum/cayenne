@@ -63,6 +63,7 @@
     		<item name="6.1 Obtaining DataContext"  href="/userguide/datactxt/create.html"/>
     		<item name="6.2 Running Queries"  href="/userguide/datactxt/performquery.html"/>
     		<item name="6.3 DataObject State Management"  href="/userguide/datactxt/statemanagement.html"/>
+    		<item name="6.4 Moving Objects Between Contexts"  href="/userguide/datactxt/moving-objects.html"/>
     	</item>
  
     	<item name="7. Using Queries"  href="/userguide/fetch/index.html">
