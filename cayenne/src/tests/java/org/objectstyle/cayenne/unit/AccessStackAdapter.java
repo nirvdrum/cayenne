@@ -58,11 +58,20 @@ package org.objectstyle.cayenne.unit;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
 
@@ -82,13 +91,40 @@ public class AccessStackAdapter {
     public AccessStackAdapter(DbAdapter adapter) {
         this.adapter = adapter;
     }
-    
+
     public DbAdapter getAdapter() {
         return adapter;
     }
 
-    public void willDropTables(Connection con, DataMap map) throws Exception {
+    /**
+     * Drops all table constraints.
+     */
+    public void willDropTables(Connection conn, DataMap map) throws Exception {
 
+        if (adapter.supportsFkConstraints()) {
+            Map constraintsMap = getConstraints(conn, map);
+
+            Iterator it = constraintsMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+
+                Collection constraints = (Collection) entry.getValue();
+                if (constraints == null || constraints.isEmpty()) {
+                    continue;
+                }
+
+                Object tableName = entry.getKey();
+                Iterator cit = constraints.iterator();
+                while (cit.hasNext()) {
+                    Object constraint = cit.next();
+                    StringBuffer drop = new StringBuffer();
+                    drop.append("alter table ").append(tableName).append(
+                        " drop constraint ").append(
+                        constraint);
+                    executeDDL(conn, drop.toString());
+                }
+            }
+        }
     }
 
     public void droppedTables(Connection con, DataMap map) throws Exception {
@@ -169,5 +205,48 @@ public class AccessStackAdapter {
 
     public boolean handlesNullVsEmptyLOBs() {
         return supportsLobs();
+    }
+
+    /**
+     * Returns a map of database constraints with DbEntity names used as keys,
+     * and Collections of constraint names as values.
+     */
+    protected Map getConstraints(Connection conn, DataMap map) throws SQLException {
+        Map constraintMap = new HashMap();
+
+        DatabaseMetaData metadata = conn.getMetaData();
+        Iterator it = map.getDbEntities().iterator();
+        while (it.hasNext()) {
+            DbEntity entity = (DbEntity) it.next();
+
+            // Get all constraints for the table
+            ResultSet rs =
+                metadata.getExportedKeys(
+                    entity.getCatalog(),
+                    entity.getSchema(),
+                    entity.getName());
+            try {
+                while (rs.next()) {
+                    String fk = rs.getString("FK_NAME");
+                    String fkTable = rs.getString("FKTABLE_NAME");
+
+                    if (fk != null && fkTable != null) {
+                        Collection constraints = (Collection) constraintMap.get(fkTable);
+                        if (constraints == null) {
+                            // use a set to avoid duplicate constraints
+                            constraints = new HashSet();
+                            constraintMap.put(fkTable, constraints);
+                        }
+
+                        constraints.add(fk);
+                    }
+                }
+            }
+            finally {
+                rs.close();
+            }
+        }
+
+        return constraintMap;
     }
 }

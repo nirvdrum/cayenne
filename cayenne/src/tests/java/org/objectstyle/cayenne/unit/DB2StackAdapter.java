@@ -1,7 +1,10 @@
 package org.objectstyle.cayenne.unit;
 
+import java.sql.Connection;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
@@ -11,6 +14,10 @@ public class DB2StackAdapter extends AccessStackAdapter {
 
     public DB2StackAdapter(DbAdapter adapter) {
         super(adapter);
+    }
+    
+    public void willDropTables(Connection conn, DataMap map) throws Exception {
+        // avoid dropping constraints...  
     }
 
     public boolean supportsBinaryPK() {

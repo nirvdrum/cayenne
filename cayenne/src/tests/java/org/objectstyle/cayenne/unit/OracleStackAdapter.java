@@ -88,6 +88,10 @@ public class OracleStackAdapter extends AccessStackAdapter {
         return true;
     }
 
+    public void willDropTables(Connection conn, DataMap map) throws Exception {
+        // avoid dropping constraints...  
+    }
+
     /**
      * Oracle 8i does not support more then 1 "LONG xx" column per table
      * PAINTING_INFO need to be fixed.

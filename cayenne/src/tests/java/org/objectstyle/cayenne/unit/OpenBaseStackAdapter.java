@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.unit;
 
+import java.sql.Connection;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
@@ -64,6 +67,10 @@ public class OpenBaseStackAdapter extends AccessStackAdapter {
 
     public OpenBaseStackAdapter(DbAdapter adapter) {
         super(adapter);
+    }
+    
+    public void willDropTables(Connection conn, DataMap map) throws Exception {
+        // avoid dropping constraints...  
     }
 
     public boolean supportsHaving() {

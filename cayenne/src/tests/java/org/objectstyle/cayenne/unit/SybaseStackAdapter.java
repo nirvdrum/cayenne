@@ -90,16 +90,13 @@ public class SybaseStackAdapter extends AccessStackAdapter {
     }
 
     public void willDropTables(Connection con, DataMap map) throws Exception {
+        super.willDropTables(con, map);
+
         if (map.getProcedure("cayenne_tst_select_proc") != null) {
             executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
         }
-
-        if (map.getDbEntity("DEPARTMENT") != null) {
-            dropConstraints(con, "DEPARTMENT");
-        }
-
     }
 
     protected void dropConstraints(Connection con, String tableName) throws Exception {
