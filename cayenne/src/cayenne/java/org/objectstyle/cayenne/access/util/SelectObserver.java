@@ -213,7 +213,7 @@ public class SelectObserver extends DefaultOperationObserver {
             }
         }
 
-        return tree.resolveObjectTree(dataContext, entity, refresh, resolveHierarchy);
+        return tree.resolveObjectTree(dataContext, refresh, resolveHierarchy);
     }
 
     /**
