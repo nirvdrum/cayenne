@@ -76,6 +76,7 @@ public class DefaultOperationObserver implements OperationObserver {
     protected HashMap queryExceptions = new HashMap();
     protected boolean transactionCommitted;
     protected boolean transactionRolledback;
+    protected Level queryLogLevel = DEFAULT_LOG_LEVEL;
     
 
     /** Returns a list of global exceptions that occured during data operation run. */
@@ -107,7 +108,11 @@ public class DefaultOperationObserver implements OperationObserver {
     
     /** Returns Level.INFO as a default logging level. */
     public Level queryLogLevel() {
-        return DEFAULT_LOG_LEVEL;
+        return queryLogLevel;
+    }
+    
+    public void setQueryLogLevel(Level level) {
+        this.queryLogLevel = level;
     }
     
     public void nextCount(Query query, int resultCount) {

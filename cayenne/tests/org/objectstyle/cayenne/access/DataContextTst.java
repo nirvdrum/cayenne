@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
@@ -166,6 +167,7 @@ public class DataContextTst extends TestCase {
         q.addPrefetch("paintingArray");
         
         SelectOperationObserver o = new SelectOperationObserver();
+        // o.setQueryLogLevel(Level.SEVERE);
         ctxt.performQuery(q, o);
         assertEquals(2, o.getSelectCount());
     }
