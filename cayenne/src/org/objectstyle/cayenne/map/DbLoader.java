@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
 import org.objectstyle.util.NameConverter;
@@ -86,10 +87,12 @@ public class DbLoader {
     }
 
     private Connection con;
+    private DbAdapter adapter;
     private DatabaseMetaData metaData;
 
     /** Creates new DbLoader. */
-    public DbLoader(Connection con) {
+    public DbLoader(Connection con, DbAdapter adapter) {
+        this.adapter = adapter;
         this.con = con;
     }
 
@@ -266,9 +269,11 @@ public class DbLoader {
                 dbAttribute.setMandatory(!rs.getBoolean("NULLABLE"));
                 dbEntity.addAttribute(dbAttribute);
 
-                int decimalDigits = rs.getInt("DECIMAL_DIGITS");
-                if (!rs.wasNull() && TypesMapping.isNumeric(columnType)) {
-                    dbAttribute.setPrecision(decimalDigits);
+                if (TypesMapping.isDecimal(columnType)) {
+                    int decimalDigits = rs.getInt("DECIMAL_DIGITS");
+                    if (!rs.wasNull()) {
+                        dbAttribute.setPrecision(decimalDigits);
+                    }
                 }
             }
             rs.close();

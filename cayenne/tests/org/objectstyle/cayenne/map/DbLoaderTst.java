@@ -75,7 +75,7 @@ public class DbLoaderTst extends TestCase {
     }
 
     public void setUp() throws Exception {
-        loader = new DbLoader(TestMain.getSharedConnection());
+        loader = new DbLoader(TestMain.getSharedConnection(), TestMain.getSharedNode().getAdapter());
     }
 
     /** 

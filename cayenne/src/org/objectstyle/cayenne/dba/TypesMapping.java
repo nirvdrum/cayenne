@@ -229,6 +229,16 @@ public class TypesMapping {
             || type == Types.SMALLINT
             || type == Types.TINYINT;
     }
+    
+    /** 
+     * Returns true if supplied type is a decimal type.
+     */
+    public static boolean isDecimal(int type) {
+        return type == Types.DECIMAL
+            || type == Types.DOUBLE
+            || type == Types.FLOAT
+            || type == Types.REAL;
+    }
 
     /** Returns an array of string names of the default JDBC data types.*/
     public static String[] getDatabaseTypes() {

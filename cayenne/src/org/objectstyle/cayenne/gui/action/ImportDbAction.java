@@ -56,27 +56,21 @@ package org.objectstyle.cayenne.gui.action;
  */
 
 import java.awt.event.ActionEvent;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-import java.io.*;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
+
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.GuiDataSource;
 import org.objectstyle.cayenne.gui.InteractiveLogin;
-import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.datamap.ChooseSchemaDialog;
-import org.objectstyle.cayenne.gui.util.*;
-import org.objectstyle.cayenne.gui.validator.*;
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbLoader;
 
 
 /** Action to Import DB structure into a data map.
@@ -94,6 +88,8 @@ public class ImportDbAction extends AbstractAction
 	protected void importDb() {
         DataSourceInfo dsi = new DataSourceInfo();
         Connection conn = null;
+        DbAdapter adapter = null;
+        
         // Get connection
         while (conn == null) {
 	        InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
@@ -103,6 +99,19 @@ public class ImportDbAction extends AbstractAction
 	        if (null == dsi) {
 	        	return;
 	        }
+	        
+	        // load adapter
+	       	try {
+		        adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
+		    }
+		    catch(Exception e) {
+		        e.printStackTrace();
+				JOptionPane.showMessageDialog(Editor.getFrame()
+							, e.getMessage(), "Error loading adapter"
+							, JOptionPane.ERROR_MESSAGE);
+				continue;
+		    }
+	        
 	        try {
 		        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
 		        conn = DriverManager.getConnection(
@@ -129,8 +138,9 @@ public class ImportDbAction extends AbstractAction
 			}
 		}// End while()
 
+		
 		ArrayList schemas;
-		DbLoader loader = new DbLoader(conn);
+		DbLoader loader = new DbLoader(conn, adapter);
 		try {
 			schemas = loader.getSchemas();
 		} catch (SQLException e) {

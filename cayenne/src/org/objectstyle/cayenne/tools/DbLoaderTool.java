@@ -59,6 +59,7 @@ import java.io.PrintWriter;
 import java.sql.*;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.InteractiveLogin;
 import org.objectstyle.cayenne.map.*;
 
@@ -78,12 +79,15 @@ public class DbLoaderTool {
 
         DataMap map = null;
         try {
-            Connection conn = openConnection(getConnectionInfo(!noGui));
+            DataSourceInfo dsi = getConnectionInfo(!noGui);
+            DbAdapter adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
+            Connection conn = openConnection(dsi);
             if (null == conn) {
                 System.out.println("Cancel loading...");
                 return;
             }
-            map = new DbLoader(conn).createDataMapFromDB(null);
+            
+            map = new DbLoader(conn, adapter).createDataMapFromDB(null);
             conn.close();
         } catch (Exception ex) {
             ex.printStackTrace();
