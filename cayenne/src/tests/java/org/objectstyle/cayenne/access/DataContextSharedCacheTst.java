@@ -1,57 +1,45 @@
-/* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group 
- * and individual authors of the software.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
- *        ObjectStyle Group (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
- *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
- *    permission, please contact andrus@objectstyle.org.
- *
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    nor may "ObjectStyle" appear in their names without prior written
- *    permission of the ObjectStyle Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+/*
  * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the ObjectStyle Group.  For more
- * information on the ObjectStyle Group, please see
- * <http://objectstyle.org/>.
- *
+ * 
+ * The ObjectStyle Group Software License, Version 1.0
+ * 
+ * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
+ * software. All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 1.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. 2. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution. 3. The end-user documentation
+ * included with the redistribution, if any, must include the following
+ * acknowlegement: "This product includes software developed by the ObjectStyle
+ * Group (http://objectstyle.org/)." Alternately, this acknowlegement may
+ * appear in the software itself, if and wherever such third-party
+ * acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this
+ * software without prior written permission. For written permission, please
+ * contact andrus@objectstyle.org. 5. Products derived from this software may
+ * not be called "ObjectStyle" nor may "ObjectStyle" appear in their names
+ * without prior written permission of the ObjectStyle Group.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
+ * Group, please see <http://objectstyle.org/> .
+ *  
  */
 package org.objectstyle.cayenne.access;
 
@@ -75,7 +63,7 @@ import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
 
 /**
- * Test suite for testing behavior of multiple DataContexts that share the same 
+ * Test suite for testing behavior of multiple DataContexts that share the same
  * underlying DataDomain.
  * 
  * @author Andrei Adamchik
@@ -98,11 +86,11 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-      * Test case to prove that refreshing snapshots as a result of the database fetch
-      * will be propagated accross DataContexts. 
-      * 
-      * @throws Exception
-      */
+	 * Test case to prove that refreshing snapshots as a result of the database
+	 * fetch will be propagated accross DataContexts.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotChangePropagationOnSelect() throws Exception {
         String originalName = artist.getArtistName();
         final String newName = "version2";
@@ -125,7 +113,8 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
             Collections.singletonList(update),
             new DefaultOperationObserver());
 
-        // fetch updated artist into the new context, and see if the original one gets updated
+        // fetch updated artist into the new context, and see if the original
+        // one gets updated
         Expression qual = ExpressionFactory.matchExp("artistName", newName);
         List artists = altContext.performQuery(new SelectQuery(Artist.class, qual));
         assertEquals(1, artists.size());
@@ -153,12 +142,12 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that changes made to an object in one ObjectStore
-     * and committed to the database will be reflected in the peer ObjectStore
-     * using the same DataRowCache.
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that changes made to an object in one ObjectStore and
+	 * committed to the database will be reflected in the peer ObjectStore
+	 * using the same DataRowCache.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotChangePropagation() throws Exception {
         String originalName = artist.getArtistName();
         final String newName = "version2";
@@ -167,7 +156,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
@@ -199,13 +188,13 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that changes made to an object in one ObjectStore
-     * and committed to the database will be correctly merged in the peer ObjectStore
-     * using the same DataRowCache. E.g. modified objects will be merged so that no
-     * new changes are lost.
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that changes made to an object in one ObjectStore and
+	 * committed to the database will be correctly merged in the peer
+	 * ObjectStore using the same DataRowCache. E.g. modified objects will be
+	 * merged so that no new changes are lost.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotChangePropagationToModifiedObjects() throws Exception {
         String originalName = artist.getArtistName();
         Date originalDate = artist.getDateOfBirth();
@@ -217,7 +206,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
@@ -253,20 +242,20 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that deleting an object in one ObjectStore
-     * and committed to the database will be reflected in the peer ObjectStore
-     * using the same DataRowCache. By default COMMITTED objects will be changed 
-     * to TRANSIENT.
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that deleting an object in one ObjectStore and
+	 * committed to the database will be reflected in the peer ObjectStore
+	 * using the same DataRowCache. By default COMMITTED objects will be
+	 * changed to TRANSIENT.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotDeletePropagationToCommitted() throws Exception {
 
         // two contexts being tested
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
@@ -295,20 +284,20 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that deleting an object in one ObjectStore
-     * and committed to the database will be reflected in the peer ObjectStore
-     * using the same DataRowCache. By default HOLLOW objects will be changed 
-     * to TRANSIENT.
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that deleting an object in one ObjectStore and
+	 * committed to the database will be reflected in the peer ObjectStore
+	 * using the same DataRowCache. By default HOLLOW objects will be changed
+	 * to TRANSIENT.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotDeletePropagationToHollow() throws Exception {
 
         // two contexts being tested
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
@@ -336,20 +325,20 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that deleting an object in one ObjectStore
-     * and committed to the database will be reflected in the peer ObjectStore
-     * using the same DataRowCache. By default MODIFIED objects will be changed 
-     * to NEW.
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that deleting an object in one ObjectStore and
+	 * committed to the database will be reflected in the peer ObjectStore
+	 * using the same DataRowCache. By default MODIFIED objects will be changed
+	 * to NEW.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotDeletePropagationToModified() throws Exception {
 
         // two contexts being tested
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
@@ -377,7 +366,8 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         };
         helper.assertWithTimeout(3000);
 
-        // check if now we can save this object again, and with the original ObjectId
+        // check if now we can save this object again, and with the original
+        // ObjectId
         ObjectId id = altArtist.getObjectId();
         assertNotNull(id);
         assertNotNull(id.getValueForAttribute(Artist.ARTIST_ID_PK_COLUMN));
@@ -394,20 +384,20 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that deleting an object in one ObjectStore
-     * and committed to the database will be reflected in the peer ObjectStore
-     * using the same DataRowCache. By default DELETED objects will be changed 
-     * to TRANSIENT.
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that deleting an object in one ObjectStore and
+	 * committed to the database will be reflected in the peer ObjectStore
+	 * using the same DataRowCache. By default DELETED objects will be changed
+	 * to TRANSIENT.
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotDeletePropagationToDeleted() throws Exception {
 
         // two contexts being tested
         DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
@@ -439,13 +429,13 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that deleting an object in one ObjectStore
-     * and committed to the database will be reflected in the peer ObjectStore
-     * using the same DataRowCache, including proper processing of deleted object
-     * being held in to-many collections
-     * 
-     * @throws Exception
-     */
+	 * Test case to prove that deleting an object in one ObjectStore and
+	 * committed to the database will be reflected in the peer ObjectStore
+	 * using the same DataRowCache, including proper processing of deleted
+	 * object being held in to-many collections
+	 * 
+	 * @throws Exception
+	 */
     public void testSnapshotDeletePropagationToManyRefresh() throws Exception {
         DataContext context = artist.getDataContext();
 
@@ -461,14 +451,17 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         DataContext altContext = mirrorDataContext(context);
 
-        // make sure we have a fully resolved copy of an artist and painting objects
+        // make sure we have a fully resolved copy of an artist and painting
+        // objects
         // in the second context
+
         final Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         final Painting altPainting1 =
             (Painting) altContext.getObjectStore().getObject(painting1.getObjectId());
         final Painting altPainting2 =
             (Painting) altContext.getObjectStore().getObject(painting2.getObjectId());
+
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
         assertEquals(painting1.getPaintingTitle(), altPainting1.getPaintingTitle());
         assertEquals(painting2.getPaintingTitle(), altPainting2.getPaintingTitle());
@@ -477,7 +470,14 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertEquals(PersistenceState.COMMITTED, altPainting1.getPersistenceState());
         assertEquals(PersistenceState.COMMITTED, altPainting2.getPersistenceState());
 
-        // Update Artist
+        // make sure toOne relationships from Paintings
+        // are resolved...
+        altPainting1.getToArtist();
+        altPainting2.getToArtist();
+        assertSame(altArtist, altPainting1.readPropertyDirectly("toArtist"));
+        assertSame(altArtist, altPainting2.readPropertyDirectly("toArtist"));
+
+        // delete painting
         context.deleteObject(painting1);
         context.commitChanges();
 
@@ -489,9 +489,13 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         // check peer artist
         ThreadedTestHelper helper = new ThreadedTestHelper() {
             protected void assertResult() throws Exception {
-                assertEquals(PersistenceState.TRANSIENT, altPainting1.getPersistenceState());
+                assertEquals(
+                    PersistenceState.TRANSIENT,
+                    altPainting1.getPersistenceState());
+                assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
                 
-                ToManyList list = (ToManyList)altArtist.getPaintingArray();
+
+                ToManyList list = (ToManyList) altArtist.getPaintingArray();
                 assertFalse(list.needsFetch());
                 assertEquals(1, list.size());
                 assertFalse(list.contains(altPainting1));
@@ -501,11 +505,11 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Checks that cache is not refreshed when a query "refreshingObjects"
-     * property is set to false.
-     * 
-     * @throws Exception
-     */
+	 * Checks that cache is not refreshed when a query "refreshingObjects"
+	 * property is set to false.
+	 * 
+	 * @throws Exception
+	 */
     public void testCacheNonRefreshingOnSelect() throws Exception {
         String originalName = artist.getArtistName();
         final String newName = "version2";
@@ -550,11 +554,11 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Checks that cache is refreshed when a query "refreshingObjects"
-     * property is set to true.
-     * 
-     * @throws Exception
-     */
+	 * Checks that cache is refreshed when a query "refreshingObjects" property
+	 * is set to true.
+	 * 
+	 * @throws Exception
+	 */
     public void testCacheRefreshingOnSelect() throws Exception {
         String originalName = artist.getArtistName();
         final String newName = "version2";
@@ -647,7 +651,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
 
-        // modify object PRIOR to killing the snapshot 
+        // modify object PRIOR to killing the snapshot
         artist.setArtistName(newName);
 
         context.getObjectStore().getDataRowCache().forgetSnapshot(artist.getObjectId());
@@ -673,7 +677,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
 
-        // modify object PRIOR to killing the snapshot 
+        // modify object PRIOR to killing the snapshot
         artist.setArtistName(newName);
 
         context.getObjectStore().getDataRowCache().forgetSnapshot(artist.getObjectId());
@@ -712,7 +716,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
 
-        // delete object PRIOR to killing the snapshot 
+        // delete object PRIOR to killing the snapshot
         context.deleteObject(artist);
 
         context.getObjectStore().getDataRowCache().forgetSnapshot(id);

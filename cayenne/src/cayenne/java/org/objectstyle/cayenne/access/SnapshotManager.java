@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -151,8 +151,7 @@ public class SnapshotManager {
 				// A flattened toOne relationship must be a series of
 				 // toOne dbRelationships.  Initialize fault for it, since 
 				 // creating a hollow object won't be right...
-				 RelationshipFault fault = new RelationshipFault(anObject, rel.getName());
-				 anObject.writePropertyDirectly(rel.getName(), fault);
+				 anObject.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
 				 continue;
             }
 
@@ -162,8 +161,7 @@ public class SnapshotManager {
 			// dependent to one relationship is optional 
 			// use fault, since we do not know whether it is null or not...
 			if (dbRel.isToDependentPK()) {
-				RelationshipFault fault = new RelationshipFault(anObject, rel.getName());
-				anObject.writePropertyDirectly(rel.getName(), fault);
+				anObject.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
 				continue;
 			}
 

@@ -75,14 +75,14 @@ public class DataRowStoreTst extends CayenneTestCase {
         Map diff3 = new HashMap();
         diff3.put(key3, new DataRow(1));
 
-        cache.processSnapshotChanges(this, diff1, Collections.EMPTY_LIST);
+        cache.processSnapshotChanges(this, diff1, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         assertEquals(1, cache.size());
 
-        cache.processSnapshotChanges(this, diff2, Collections.EMPTY_LIST);
+        cache.processSnapshotChanges(this, diff2, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         assertEquals(2, cache.size());
 
         // this addition must overflow the cache, and throw out the first item
-        cache.processSnapshotChanges(this, diff3, Collections.EMPTY_LIST);
+        cache.processSnapshotChanges(this, diff3, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         assertEquals(2, cache.size());
         assertNotNull(cache.getCachedSnapshot(key2));
         assertNotNull(cache.getCachedSnapshot(key3));

@@ -67,7 +67,6 @@ import org.objectstyle.art.FlattenedTest3;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.MockupDataRowUtils;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -299,13 +298,13 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         assertEquals(1, ft3s.size());
         FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
 
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof RelationshipFault);
+        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
 
         // test that taking a snapshot does not trigger a fault, and generally works well 
         Map snapshot = ctxt.currentSnapshot(ft3);
 
         assertEquals("ft3", snapshot.get("NAME"));
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof RelationshipFault);
+        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
 
     }
 
@@ -320,7 +319,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         // mark as dirty for the purpose of the test...
         ft3.setPersistenceState(PersistenceState.MODIFIED);
 
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof RelationshipFault);
+        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
 
         // test that checking for modifications does not trigger a fault, and generally works well
         ObjEntity entity = ctxt.getEntityResolver().lookupObjEntity(FlattenedTest3.class);
@@ -330,7 +329,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
                 flattenedRel,
                 ft3,
                 ctxt.getObjectStore().getCachedSnapshot(ft3.getObjectId())));
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof RelationshipFault);
+        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
     }
 
     public void testRefetchWithFlattenedFaultToOneTarget1() throws Exception {
@@ -341,11 +340,11 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         assertEquals(1, ft3s.size());
         FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
 
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof RelationshipFault);
+        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
 
         // refetch
         ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof RelationshipFault);
+        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
     }
 
     private void prepareSnapshotManagerTest() {

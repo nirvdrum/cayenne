@@ -148,14 +148,15 @@ public class ObjEntity extends Entity {
     }
 
     /**
-     * Returns ObjAttribute of this entity that maps to <code>dbAttr</code>
+     * Returns ObjAttribute of this entity that maps to <code>dbAttribute</code>
      * parameter. Returns null if no such attribute is found.
      */
-    public ObjAttribute getAttributeForDbAttribute(DbAttribute dbAttr) {
-        Iterator it = getAttributeMap().values().iterator();
+    public ObjAttribute getAttributeForDbAttribute(DbAttribute dbAttribute) {
+        Iterator it = getAttributeMap().entrySet().iterator();
         while (it.hasNext()) {
-            ObjAttribute objAttr = (ObjAttribute) it.next();
-            if (objAttr.getDbAttribute() == dbAttr)
+            Map.Entry entry = (Map.Entry) it.next();
+            ObjAttribute objAttr = (ObjAttribute) entry.getValue();
+            if (objAttr.getDbAttribute() == dbAttribute)
                 return objAttr;
         }
         return null;
@@ -163,19 +164,23 @@ public class ObjEntity extends Entity {
 
     /**
      * Returns ObjRelationship of this entity that maps to
-     * <code>dbRel</code> parameter. Returns null if no
+     * <code>dbRelationship</code> parameter. Returns null if no
      * such relationship is found.
      */
-    public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRel) {
-        Iterator it = getRelationshipMap().values().iterator();
+    public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRelationship) {
+        Iterator it = getRelationshipMap().entrySet().iterator();
         while (it.hasNext()) {
-            ObjRelationship objRel = (ObjRelationship) it.next();
+            Map.Entry entry = (Map.Entry) it.next();
+            ObjRelationship objRel = (ObjRelationship) entry.getValue();
+            
             List relList = objRel.getDbRelationships();
-            if (relList.size() != 1)
+            if (relList.size() != 1) {
                 continue;
+            }
 
-            if (relList.get(0) == dbRel)
+            if (relList.get(0) == dbRelationship) {
                 return objRel;
+            }
         }
         return null;
     }

@@ -60,7 +60,6 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
 
 public class CDOOne2OneDepTst extends CayenneDOTestBase {
 
@@ -137,13 +136,13 @@ public class CDOOne2OneDepTst extends CayenneDOTestBase {
         ctxt = createDataContext();
         Painting painting = fetchPainting();
 
-        assertTrue(painting.readPropertyDirectly("toPaintingInfo") instanceof RelationshipFault);
+        assertTrue(painting.readPropertyDirectly("toPaintingInfo") instanceof Fault);
 
         // test that taking a snapshot does not trigger a fault, and generally works well 
         Map snapshot = ctxt.currentSnapshot(painting);
 
         assertEquals(paintingName, snapshot.get("PAINTING_TITLE"));
-        assertTrue(painting.readPropertyDirectly("toPaintingInfo") instanceof RelationshipFault);
+        assertTrue(painting.readPropertyDirectly("toPaintingInfo") instanceof Fault);
     }
 
 }

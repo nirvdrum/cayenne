@@ -117,7 +117,7 @@ public class EventBridgeTst extends CayenneTestCase {
         EventManager manager = EventManager.getDefaultManager();
         bridge.startup(manager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
 
-        final SnapshotEvent event = new SnapshotEvent(this, this, null, null);
+        final SnapshotEvent event = new SnapshotEvent(this, this, null, null, null);
 
         manager.postEvent(event, local);
 

@@ -62,8 +62,9 @@ import java.util.Map;
 import org.objectstyle.cayenne.event.CayenneEvent;
 
 /**
- * Event sent on modification of the SnapshotCache.  
+ * Event sent on modification of the DataRowStore. 
  * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
 public class SnapshotEvent extends CayenneEvent {
@@ -71,18 +72,21 @@ public class SnapshotEvent extends CayenneEvent {
     protected long timestamp;
     protected Collection deletedIds;
     protected Map modifiedDiffs;
+    protected Collection relatedIds;
 
     public SnapshotEvent(
         Object source,
         Object postedBy,
         Map modifiedDiffs,
-        Collection deletedIds) {
+        Collection deletedIds,
+        Collection relatedIds) {
             
         super(source, postedBy, null);
     
         this.timestamp = System.currentTimeMillis();
         this.modifiedDiffs = modifiedDiffs;
         this.deletedIds = deletedIds;
+        this.relatedIds = relatedIds;
     }
 
     public long getTimestamp() {
@@ -96,19 +100,28 @@ public class SnapshotEvent extends CayenneEvent {
     public Collection deletedIds() {
         return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
     }
+    
+    public Collection relatedIds() {
+        return (relatedIds != null) ? relatedIds : Collections.EMPTY_LIST;
+    }
 
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[SnapshotEvent] source: ").append(getSource());
 
         Map modified = modifiedDiffs();
-        if (modified != null && !modified.isEmpty()) {
+        if (!modified.isEmpty()) {
             buffer.append(", modified ").append(modified.size()).append(" id(s)");
         }
 
         Collection deleted = deletedIds();
-        if (deleted != null && !deleted.isEmpty()) {
+        if (!deleted.isEmpty()) {
             buffer.append(", deleted ").append(deleted.size()).append(" id(s)");
+        }
+        
+        Collection related = relatedIds();
+        if (!related.isEmpty()) {
+            buffer.append(", related ").append(related.size()).append(" id(s)");
         }
 
         return buffer.toString();

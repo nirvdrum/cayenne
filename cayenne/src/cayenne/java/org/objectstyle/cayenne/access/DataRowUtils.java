@@ -1,57 +1,45 @@
-/* ====================================================================
- *
- * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group
- * and individual authors of the software.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        ObjectStyle Group (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "ObjectStyle Group" and "Cayenne"
- *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact andrus@objectstyle.org.
- *
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    nor may "ObjectStyle" appear in their names without prior written
- *    permission of the ObjectStyle Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+/*
  * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the ObjectStyle Group.  For more
- * information on the ObjectStyle Group, please see
- * <http://objectstyle.org/>.
- *
+ * 
+ * The ObjectStyle Group Software License, Version 1.0
+ * 
+ * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
+ * software. All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 1.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. 2. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution. 3. The end-user documentation
+ * included with the redistribution, if any, must include the following
+ * acknowlegement: "This product includes software developed by the ObjectStyle
+ * Group (http://objectstyle.org/)." Alternately, this acknowlegement may
+ * appear in the software itself, if and wherever such third-party
+ * acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this
+ * software without prior written permission. For written permission, please
+ * contact andrus@objectstyle.org. 5. Products derived from this software may
+ * not be called "ObjectStyle" nor may "ObjectStyle" appear in their names
+ * without prior written permission of the ObjectStyle Group.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
+ * Group, please see <http://objectstyle.org/> .
+ *  
  */
 
 package org.objectstyle.cayenne.access;
@@ -63,7 +51,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -72,19 +60,19 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * DataRowUtils contains a number of static methods to work with DataRows.
- * This is a helper class for DataContext and ObjectStore
- *
+ * DataRowUtils contains a number of static methods to work with DataRows. This
+ * is a helper class for DataContext and ObjectStore
+ * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 class DataRowUtils {
 
-    /** 
-     * Replaces all object attribute values with snapshot values. 
-     * Sets object state to COMMITTED, unless the snapshot is partial
-     * in which case the state is set to HOLLOW
-     */
+    /**
+	 * Replaces all object attribute values with snapshot values. Sets object
+	 * state to COMMITTED, unless the snapshot is partial in which case the
+	 * state is set to HOLLOW
+	 */
     static void refreshObjectWithSnapshot(
         ObjEntity objEntity,
         DataObject object,
@@ -105,68 +93,61 @@ class DataRowUtils {
                 // for that key and
                 // 2) returning null because 'null' was the value mapped
                 // for that key.
-                // If the first case (this clause) then snapshot is only partial
+                // If the first case (this clause) then snapshot is only
+                // partial
                 isPartialSnapshot = true;
             }
         }
-
-        DataContext context = object.getDataContext();
-        ToManyListDataSource relDataSource = context.getRelationshipDataSource();
 
         Iterator rit = objEntity.getRelationships().iterator();
         while (rit.hasNext()) {
             ObjRelationship rel = (ObjRelationship) rit.next();
             if (rel.isToMany()) {
 
-                // "to many" relationships have no information to collect from snapshot
-                // initialize a new empty list if requested, but otherwise 
+                // "to many" relationships have no information to collect from
+                // snapshot
+                // initialize a new empty list if requested, but otherwise
                 // ignore snapshot data
 
-                ToManyList toManyList =
-                    (ToManyList) object.readPropertyDirectly(rel.getName());
+                Object toManyList = object.readPropertyDirectly(rel.getName());
 
                 if (toManyList == null) {
                     object.writePropertyDirectly(
                         rel.getName(),
-                        new ToManyList(
-                            relDataSource,
-                            object.getObjectId(),
-                            rel.getName()));
+                        Fault.getToManyFault());
                 }
-                else if (invalidateToManyRelationships) {
-                    toManyList.invalidateObjectList();
+                else if (
+                    invalidateToManyRelationships && toManyList instanceof ToManyList) {
+                    ((ToManyList) toManyList).invalidateObjectList();
                 }
 
                 continue;
             }
 
-            ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
-            Class targetClass = targetEntity.getJavaClass();
-
-            // handle toOne flattened relationship
-            if (rel.isFlattened()) {
-                // A flattened toOne relationship must be a series of
-                // toOne dbRelationships.  Initialize fault for it, since 
-                // creating a hollow object won't be right...
-                RelationshipFault fault = new RelationshipFault(object, rel.getName());
-                object.writePropertyDirectly(rel.getName(), fault);
-                continue;
-            }
-
-            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
-
-            // dependent to one relationship is optional 
-            // use fault, since we do not know whether it is null or not...
-            if (dbRel.isToDependentPK()) {
-                RelationshipFault fault = new RelationshipFault(object, rel.getName());
-                object.writePropertyDirectly(rel.getName(), fault);
-                continue;
-            }
-
-            ObjectId id = snapshot.createTargetObjectId(targetClass, dbRel);
-            DataObject targetObject = (id != null) ? context.registeredObject(id) : null;
-
-            object.writePropertyDirectly(rel.getName(), targetObject);
+            // set a shared fault to indicate any kind of unresolved to-one
+            object.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
+            /*
+			 * ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
+			 * Class targetClass = targetEntity.getJavaClass(); // handle toOne
+			 * flattened relationship if (rel.isFlattened()) { // A flattened
+			 * toOne relationship must be a series of // toOne dbRelationships.
+			 * Initialize fault for it, since // creating a hollow object won't
+			 * be right...
+			 * 
+			 * continue; }
+			 * 
+			 * DbRelationship dbRel = (DbRelationship)
+			 * rel.getDbRelationships().get(0); // dependent to one
+			 * relationship is optional // use fault, since we do not know
+			 * whether it is null or not... if (dbRel.isToDependentPK()) {
+			 * object.writePropertyDirectly(rel.getName(),
+			 * RelationshipFault.getInstance()); continue; }
+			 * 
+			 * ObjectId id = snapshot.createTargetObjectId(targetClass, dbRel);
+			 * DataObject targetObject = (id != null) ?
+			 * context.registeredObject(id) : null;
+			 *  
+			 */
         }
 
         if (isPartialSnapshot) {
@@ -198,7 +179,7 @@ class DataRowUtils {
             String dbAttrPath = attr.getDbAttributePath();
 
             // supports merging of partial snapshots...
-            // check for null is cheaper than double lookup 
+            // check for null is cheaper than double lookup
             // for a key... so check for partial snapshot
             // only if the value is null
             Object newVal = snapshot.get(dbAttrPath);
@@ -225,7 +206,8 @@ class DataRowUtils {
                 continue;
             }
 
-            // TODO: will this work for flattened, how do we save snapshots for them?
+            // TODO: will this work for flattened, how do we save snapshots for
+            // them?
 
             // if value not modified, update it from snapshot,
             // otherwise leave it alone
@@ -247,17 +229,17 @@ class DataRowUtils {
     }
 
     /**
-     * Merges changes reflected in snapshot map to the object. Changes
-     * made to attributes and to-one relationships will be merged. 
-     * In case an object is already modified, modified properties will
-     * not be overwritten.
-     */
+	 * Merges changes reflected in snapshot map to the object. Changes made to
+	 * attributes and to-one relationships will be merged. In case an object is
+	 * already modified, modified properties will not be overwritten.
+	 */
     static void mergeObjectWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
         Map snapshot) {
 
-        // TODO: once we use DataRow consistently instead of a Map, this line should go away.
+        // TODO: once we use DataRow consistently instead of a Map, this line
+        // should go away.
         // Instead method signiture should include "DataRow".
         DataRow dataRow =
             (snapshot instanceof DataRow) ? (DataRow) snapshot : new DataRow(snapshot);
@@ -267,7 +249,8 @@ class DataRowUtils {
             refreshObjectWithSnapshot(entity, anObject, dataRow, true);
         }
         else if (anObject.getPersistenceState() == PersistenceState.COMMITTED) {
-            // do not invalidate to-many relationships, since they might have just been prefetched...
+            // do not invalidate to-many relationships, since they might have
+            // just been prefetched...
             refreshObjectWithSnapshot(entity, anObject, dataRow, false);
         }
         else {
@@ -276,9 +259,9 @@ class DataRowUtils {
     }
 
     /**
-     * Checks if a new snapshot has a modified to-one relationship compared to
-     * the cached snapshot.
-     */
+	 * Checks if a new snapshot has a modified to-one relationship compared to
+	 * the cached snapshot.
+	 */
     static boolean isJoinAttributesModified(
         ObjRelationship relationship,
         Map newSnapshot,
@@ -292,7 +275,8 @@ class DataRowUtils {
             DbAttributePair join = (DbAttributePair) it.next();
             String propertyName = join.getSource().getName();
 
-            // for equality to be true, snapshot must contain all matching pk values
+            // for equality to be true, snapshot must contain all matching pk
+            // values
             if (!Util
                 .nullSafeEquals(
                     newSnapshot.get(propertyName),
@@ -305,8 +289,9 @@ class DataRowUtils {
     }
 
     /**
-     * Checks if an object has its to-one relationship target modified in memory.
-     */
+	 * Checks if an object has its to-one relationship target modified in
+	 * memory.
+	 */
     static boolean isToOneTargetModified(
         ObjRelationship relationship,
         DataObject object,
@@ -317,7 +302,7 @@ class DataRowUtils {
         }
 
         Object targetObject = object.readPropertyDirectly(relationship.getName());
-        if (targetObject instanceof RelationshipFault) {
+        if (targetObject instanceof Fault) {
             return false;
         }
 
@@ -342,8 +327,10 @@ class DataRowUtils {
                 }
             }
             else {
-                // for equality to be true, snapshot must contain all matching pk values
-                // note that we must use target entity names to extract id values.
+                // for equality to be true, snapshot must contain all matching
+                // pk values
+                // note that we must use target entity names to extract id
+                // values.
                 if (!Util
                     .nullSafeEquals(
                         currentId.getValueForAttribute(join.getTarget().getName()),
@@ -357,8 +344,8 @@ class DataRowUtils {
     }
 
     /**
-     * Instantiation is not allowed.
-     */
+	 * Instantiation is not allowed.
+	 */
     DataRowUtils() {
         super();
     }

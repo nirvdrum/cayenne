@@ -76,13 +76,13 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.RelationshipDataSource;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -516,7 +516,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
 
             Object targetObject = anObject.readPropertyDirectly(relName);
-            if (targetObject == null || (targetObject instanceof RelationshipFault)) {
+            if (targetObject == null || (targetObject instanceof Fault)) {
                 continue;
             }
 
@@ -1091,6 +1091,12 @@ public class DataContext implements QueryEngine, Serializable {
                         // this will clean any modifications and defer refresh from snapshot
                         // till the next object accessor is called
                         thisObject.setPersistenceState(PersistenceState.HOLLOW);
+                        
+                        // TODO: whole rollback operation should likely be moved to the
+                        // ObjectStore level... for now we are using ugly direct access
+                        // to ObjectStore ivars
+                        getObjectStore().indirectlyModifiedIds.remove(thisObject.getObjectId());
+                        
                         break;
                     default :
                         //Transient, committed and hollow need no handling

@@ -100,11 +100,20 @@ public interface DataObject extends java.io.Serializable {
     /** Allows Cayenne framework classes to modify object property values. */
     public void writePropertyDirectly(String propName, Object val);
 
-    /** Allows Cayenne framework classes to read object property values. */
-    public Object readPropertyDirectly(String propName);
+    /** 
+     * Returns mapped property value as curently stored in the DataObject.
+     * Returned value maybe a fault or a real value. This method will not attempt 
+     * to resolve faults, or to read unmapped properties.
+     */
+    public Object readPropertyDirectly(String propertyName);
 
     /**
-     * Returns the value of a property path. Property path (or nested property) is a 
+     * Returns a value of the property identified by a property path. Supports reading both
+     * mapped and unmapped properties. Unmapped properties are accessed in a manner consistent 
+     * with JavaBeans specification.
+     * 
+     * <p>
+     * Property path (or nested property) is a 
      * dot-separated path used to traverse object relationships until the final object 
      * is found. If a null object found while traversing path, null is returned. If a 
      * list is encountered in the middle of the path, CayenneRuntimeException is thrown. 

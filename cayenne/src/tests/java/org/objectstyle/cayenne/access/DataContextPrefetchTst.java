@@ -1,57 +1,45 @@
-/* ====================================================================
- *
- * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group
- * and individual authors of the software.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        ObjectStyle Group (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "ObjectStyle Group" and "Cayenne"
- *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact andrus@objectstyle.org.
- *
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    nor may "ObjectStyle" appear in their names without prior written
- *    permission of the ObjectStyle Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+/*
  * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the ObjectStyle Group.  For more
- * information on the ObjectStyle Group, please see
- * <http://objectstyle.org/>.
- *
+ * 
+ * The ObjectStyle Group Software License, Version 1.0
+ * 
+ * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
+ * software. All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 1.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. 2. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution. 3. The end-user documentation
+ * included with the redistribution, if any, must include the following
+ * acknowlegement: "This product includes software developed by the ObjectStyle
+ * Group (http://objectstyle.org/)." Alternately, this acknowlegement may
+ * appear in the software itself, if and wherever such third-party
+ * acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this
+ * software without prior written permission. For written permission, please
+ * contact andrus@objectstyle.org. 5. Products derived from this software may
+ * not be called "ObjectStyle" nor may "ObjectStyle" appear in their names
+ * without prior written permission of the ObjectStyle Group.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
+ * Group, please see <http://objectstyle.org/> .
+ *  
  */
 package org.objectstyle.cayenne.access;
 
@@ -69,6 +57,8 @@ import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
@@ -76,6 +66,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 
@@ -84,9 +75,9 @@ import org.objectstyle.cayenne.query.SqlModifyQuery;
  */
 public class DataContextPrefetchTst extends DataContextTestBase {
     /**
-      * Test that all queries specified in prefetch are executed
-      * with a single prefetch path.
-      */
+	 * Test that all queries specified in prefetch are executed with a single
+	 * prefetch path.
+	 */
     public void testPrefetch1() throws Exception {
         Expression e = ExpressionFactory.matchExp("artistName", "a");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -99,9 +90,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test that all queries specified in prefetch are executed
-     * in a more complex prefetch scenario.
-     */
+	 * Test that all queries specified in prefetch are executed in a more
+	 * complex prefetch scenario.
+	 */
     public void testPrefetch2() throws Exception {
         Expression e = ExpressionFactory.matchExp("artistName", "a");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -116,10 +107,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test that all queries specified in prefetch are executed
-     * in a more complex prefetch scenario with no reverse 
-     * obj relationships
-     */
+	 * Test that all queries specified in prefetch are executed in a more
+	 * complex prefetch scenario with no reverse obj relationships
+	 */
     public void testPrefetch2b() throws Exception {
         this.populatePaintings();
         EntityResolver er = context.getEntityResolver();
@@ -163,8 +153,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test that a to-many relationship is initialized.
-     */
+	 * Test that a to-many relationship is initialized.
+	 */
     public void testPrefetch3() throws Exception {
         populatePaintings();
 
@@ -197,9 +187,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test that a to-many relationship is initialized when there
-     * is no inverse relationship
-     */
+	 * Test that a to-many relationship is initialized when there is no inverse
+	 * relationship
+	 */
     public void testPrefetch3a() throws Exception {
         populatePaintings();
 
@@ -231,9 +221,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test that a to-many relationship is initialized when there
-     * is no inverse relationship and the root query is qualified
-     */
+	 * Test that a to-many relationship is initialized when there is no inverse
+	 * relationship and the root query is qualified
+	 */
     public void testPrefetch3b() throws Exception {
         populatePaintings();
 
@@ -266,23 +256,42 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test that a to-one relationship is initialized.
-     */
+	 * Test that a to-one relationship is initialized.
+	 */
     public void testPrefetch4() throws Exception {
         populatePaintings();
 
         SelectQuery q = new SelectQuery("Painting");
         q.addPrefetch("toArtist");
 
-        CayenneDataObject p1 = (CayenneDataObject) context.performQuery(q).get(0);
-        CayenneDataObject a1 = (CayenneDataObject) p1.readPropertyDirectly("toArtist");
+        DataObject p1 = (DataObject) context.performQuery(q).get(0);
 
+        // resolving the fault must not result in extra queries, since
+        // artist must have been prefetched
+        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+            public GenericSelectQuery willPerformSelect(
+                DataContext context,
+                GenericSelectQuery query) {
+                throw new CayenneRuntimeException(
+                    "No query expected.. attempt to run: " + query);
+            }
+        };
+
+        p1.getDataContext().setDelegate(delegate);
+
+        Object toOnePrefetch = p1.readNestedProperty("toArtist");
+        assertNotNull(toOnePrefetch);
+        assertTrue(
+            "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
+            toOnePrefetch instanceof DataObject);
+
+        DataObject a1 = (DataObject) toOnePrefetch;
         assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
     }
 
     /**
-     * Test prefetching with queries using DB_PATH.
-     */
+	 * Test prefetching with queries using DB_PATH.
+	 */
     public void testPrefetch5() throws Exception {
         populatePaintings();
 
@@ -296,8 +305,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test prefetching with queries using OBJ_PATH.
-     */
+	 * Test prefetching with queries using OBJ_PATH.
+	 */
     public void testPrefetch6() throws Exception {
         populatePaintings();
 
@@ -310,8 +319,8 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test prefetching with the prefetch on a reflexive relationship
-     */
+	 * Test prefetching with the prefetch on a reflexive relationship
+	 */
     public void testPrefetch7() throws Exception {
         ArtGroup parent = (ArtGroup) context.createAndRegisterNewObject("ArtGroup");
         parent.setName("parent");
@@ -346,9 +355,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test prefetching with qualifier on the root query 
-     * containing the path to the prefetch
-     */
+	 * Test prefetching with qualifier on the root query containing the path to
+	 * the prefetch
+	 */
     public void testPrefetch8() throws Exception {
         this.populatePaintings();
         Expression exp =
@@ -379,9 +388,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     }
 
     /**
-     * Test prefetching with qualifier on the root query 
-     * being the path to the prefetch
-     */
+	 * Test prefetching with qualifier on the root query being the path to the
+	 * prefetch
+	 */
     public void testPrefetch9() throws Exception {
         this.populatePaintings();
         Expression artistExp =
@@ -395,35 +404,29 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery(Painting.class, exp);
         q.addPrefetch("toArtist");
 
-        //The rest of this test causes failures.  Do we even need to fix this
-        // given the rather odd nature of what is trying to be done 
+        //The rest of this test causes failures. Do we even need to fix this
+        // given the rather odd nature of what is trying to be done
         // (prefetching an object which we used to create the root query
         // qualifier in the first place)?
         /*
-        ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
-        try {
-        	 ctxt.performQuery(q, o);
-        } catch (Exception e) {
-        	 e.printStackTrace();
-        	 fail("Should not have failed with exception " + e.getMessage());
-        }
-        assertEquals(2, o.getSelectCount());
-        
-        List results = o.getResults(q);
-        assertEquals(1, results.size());
-        
-        Painting painting = (Painting) results.get(0);
-        //The parent must be fully fetched, not just HOLLOW (a fault)
-        assertEquals(
-        	 PersistenceState.COMMITTED,
-        	 painting.getToArtist().getPersistenceState());
-        */
+		 * ContextSelectObserver o = new ContextSelectObserver(ctxt,
+		 * Level.WARN); try { ctxt.performQuery(q, o); } catch (Exception e) {
+		 * e.printStackTrace(); fail("Should not have failed with exception " +
+		 * e.getMessage()); } assertEquals(2, o.getSelectCount());
+		 * 
+		 * List results = o.getResults(q); assertEquals(1, results.size());
+		 * 
+		 * Painting painting = (Painting) results.get(0); //The parent must be
+		 * fully fetched, not just HOLLOW (a fault) assertEquals(
+		 * PersistenceState.COMMITTED,
+		 * painting.getToArtist().getPersistenceState());
+		 */
 
     }
 
     /**
-     * Tests to-one prefetching over relationships with compound keys.
-     */
+	 * Tests to-one prefetching over relationships with compound keys.
+	 */
     public void testPrefetch10() throws Exception {
         populateCompoundKeyEntities();
 
@@ -434,16 +437,34 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         List objects = context.performQuery(q);
         assertEquals(1, objects.size());
         CayenneDataObject fk1 = (CayenneDataObject) objects.get(0);
-        CayenneDataObject pk1 =
-            (CayenneDataObject) fk1.readPropertyDirectly("toCompoundPk");
 
+        // resolving the fault must not result in extra queries, since
+        // artist must have been prefetched
+        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+            public GenericSelectQuery willPerformSelect(
+                DataContext context,
+                GenericSelectQuery query) {
+                throw new CayenneRuntimeException(
+                    "No query expected.. attempt to run: " + query);
+            }
+        };
+
+        fk1.getDataContext().setDelegate(delegate);
+
+        Object toOnePrefetch = fk1.readNestedProperty("toCompoundPk");
+        assertNotNull(toOnePrefetch);
+        assertTrue(
+            "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
+            toOnePrefetch instanceof DataObject);
+
+        DataObject pk1 = (DataObject) toOnePrefetch;
         assertEquals(PersistenceState.COMMITTED, pk1.getPersistenceState());
         assertEquals("CPK2", pk1.readPropertyDirectly("name"));
     }
 
     /**
-     * Tests to-many prefetching over relationships with compound keys.
-     */
+	 * Tests to-many prefetching over relationships with compound keys.
+	 */
     public void testPrefetch11() throws Exception {
         populateCompoundKeyEntities();
 
@@ -466,7 +487,6 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         CayenneDataObject fk2 = (CayenneDataObject) toMany.get(1);
         assertEquals(PersistenceState.COMMITTED, fk2.getPersistenceState());
     }
-    
 
     protected void populateCompoundKeyEntities() {
         List queries = new ArrayList(6);

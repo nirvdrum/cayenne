@@ -375,7 +375,7 @@ public class DataRowStore implements Serializable {
         synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
             processUpdateDiffs(diffs);
-            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds);
+            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds, event.relatedIds());
         }
     }
 
@@ -387,7 +387,8 @@ public class DataRowStore implements Serializable {
     public void processSnapshotChanges(
         Object source,
         Map updatedSnapshots,
-        Collection deletedSnapshotIds) {
+        Collection deletedSnapshotIds,
+        Collection relatedSnapshotIds) {
 
         // update the internal cache, prepare snapshot event
 
@@ -396,10 +397,10 @@ public class DataRowStore implements Serializable {
             return;
         }
 
-        synchronized (this) {
+        synchronized (this) {        
             processDeletedIDs(deletedSnapshotIds);
             Map diffs = processUpdatedSnapshots(updatedSnapshots);
-            sendUpdateNotification(source, diffs, deletedSnapshotIds);
+            sendUpdateNotification(source, diffs, deletedSnapshotIds, relatedSnapshotIds);
         }
     }
 
@@ -489,13 +490,15 @@ public class DataRowStore implements Serializable {
     private void sendUpdateNotification(
         Object source,
         Map diffs,
-        Collection deletedSnapshotIDs) {
+        Collection deletedSnapshotIDs,
+        Collection relatedModifiedIds) {
 
-        //      do not send bogus events... e.g. inserted objects are not counted
+        // do not send bogus events... e.g. inserted objects are not counted
         if ((diffs != null && !diffs.isEmpty())
             || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())) {
+            
             SnapshotEvent event =
-                new SnapshotEvent(source, this, diffs, deletedSnapshotIDs);
+                new SnapshotEvent(source, this, diffs, deletedSnapshotIDs, relatedModifiedIds);
 
             if (logObj.isDebugEnabled()) {
                 logObj.debug("postSnapshotsChangeEvent: " + event);

@@ -1,57 +1,45 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group
- * and individual authors of the software.  All rights reserved.
- *
+ * 
+ * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
+ * software. All rights reserved.
+ * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        ObjectStyle Group (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "ObjectStyle Group" and "Cayenne"
- *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact andrus@objectstyle.org.
- *
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    nor may "ObjectStyle" appear in their names without prior written
- *    permission of the ObjectStyle Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * modification, are permitted provided that the following conditions are met:
+ *  1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *  3. The end-user documentation included with the redistribution, if any,
+ * must include the following acknowlegement: "This product includes software
+ * developed by the ObjectStyle Group (http://objectstyle.org/)." Alternately,
+ * this acknowlegement may appear in the software itself, if and wherever such
+ * third-party acknowlegements normally appear.
+ *  4. The names "ObjectStyle Group" and "Cayenne" must not be used to endorse
+ * or promote products derived from this software without prior written
+ * permission. For written permission, please contact andrus@objectstyle.org.
+ *  5. Products derived from this software may not be called "ObjectStyle" nor
+ * may "ObjectStyle" appear in their names without prior written permission of
+ * the ObjectStyle Group.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the ObjectStyle Group.  For more
- * information on the ObjectStyle Group, please see
- * <http://objectstyle.org/>.
- *
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
+ * Group, please see <http://objectstyle.org/> .
+ *  
  */
 package org.objectstyle.cayenne;
 
@@ -68,15 +56,14 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
 
 /**
- * A default implementation of DataObject interface. It is normally used as 
- * a superclass of Cayenne persistent objects.
- *
+ * A default implementation of DataObject interface. It is normally used as a
+ * superclass of Cayenne persistent objects.
+ * 
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
@@ -89,12 +76,11 @@ public class CayenneDataObject implements DataObject {
     protected transient DataContext dataContext;
     protected Map values = new HashMap();
 
-    /** 
-     * Returns a DataContext that holds this object. Object becomes
-     * assocaiated with a DataContext either when the object is fetched
-     * using a query, or when a new object is registered explicitly with
-     * a DataContext.
-     */
+    /**
+	 * Returns a DataContext that holds this object. Object becomes assocaiated
+	 * with a DataContext either when the object is fetched using a query, or
+	 * when a new object is registered explicitly with a DataContext.
+	 */
     public DataContext getDataContext() {
         return dataContext;
     }
@@ -132,9 +118,9 @@ public class CayenneDataObject implements DataObject {
         CayenneDataObject dataObject = this;
         String[] tokenized = tokenizePath(path);
         int length = tokenized.length;
-        
+
         for (int i = 0; i < length; i++) {
-            
+
             object = dataObject.readSimpleProperty(tokenized[i]);
 
             if (object == null) {
@@ -150,7 +136,7 @@ public class CayenneDataObject implements DataObject {
 
         return object;
     }
-    
+
     private static final String[] tokenizePath(String path) {
         if (path == null) {
             throw new NullPointerException("Null property path.");
@@ -164,24 +150,23 @@ public class CayenneDataObject implements DataObject {
         if (path.indexOf(".") < 0) {
             return new String[] { path };
         }
-        
+
         StringTokenizer tokens = new StringTokenizer(path, ".");
         int length = tokens.countTokens();
         String[] tokenized = new String[length];
-        for(int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             tokenized[i] = tokens.nextToken();
         }
-        
+
         return tokenized;
     }
-    
+
     private final Object readSimpleProperty(String property) {
         // side effect - resolves HOLLOW object
         Object object = readProperty(property);
 
-        // if a null value is returned, 
-        // there is still a chance to find a non-persistent property
-        // via reflection
+        // if a null value is returned, there is still a chance to
+        // find a non-persistent property via reflection
         if (object == null && !values.containsKey(property)) {
             try {
                 object = PropertyComparator.readProperty(property, this);
@@ -200,19 +185,17 @@ public class CayenneDataObject implements DataObject {
                 // ignoring, no such property exists
             }
         }
-        
+
         return object;
     }
 
     /**
-     * @since 1.1
-     */
+	 * @since 1.1
+	 */
     public void resolveFault() {
-        if (getPersistenceState() != PersistenceState.HOLLOW || dataContext == null) {
-            return;
+        if (getPersistenceState() == PersistenceState.HOLLOW && dataContext != null) {
+            dataContext.getObjectStore().resolveHollow(this);
         }
-        
-        dataContext.getObjectStore().resolveFault(this);
     }
 
     protected Object readProperty(String propName) {
@@ -221,10 +204,8 @@ public class CayenneDataObject implements DataObject {
         Object object = readPropertyDirectly(propName);
 
         // must resolve faults immediately
-        if (object instanceof RelationshipFault) {
-            // for now assume we just have to-one faults...
-            // after all to-many are represented by ToManyList
-            object = ((RelationshipFault) object).resolveToOne();
+        if (object instanceof Fault) {
+            object = ((Fault) object).resolveFault(this, propName);
             writePropertyDirectly(propName, object);
         }
 
@@ -255,17 +236,22 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * @deprecated Since 1.0.1 this method is no longer needed, since "readProperty(String)" 
-     * supports to-one dependent targets.
-     */
+	 * @deprecated Since 1.0.1 this method is no longer needed, since
+	 *             "readProperty(String)" supports to-one dependent targets.
+	 */
     public DataObject readToOneDependentTarget(String relName) {
         return (DataObject) readProperty(relName);
     }
 
     public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
         ObjRelationship relationship = this.getRelationshipNamed(relName);
-        //Only delete the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
-        //This kind of doubles up the meaning of that flag, so we may need to add another?
+        
+        getDataContext().getObjectStore().objectRelationshipChanged(this, relationship);
+        
+        //Only delete the internal object if we should "setReverse" (or
+		// rather, if we aren't not setting the reverse).
+        //This kind of doubles up the meaning of that flag, so we may need to
+		// add another?
         if (relationship.isFlattened() && setReverse) {
             if (relationship.isReadOnly()) {
                 throw new CayenneRuntimeException(
@@ -275,7 +261,8 @@ public class CayenneDataObject implements DataObject {
             dataContext.registerFlattenedRelationshipDelete(this, relationship, val);
         }
 
-        //Now do the rest of the normal handling (regardless of whether it was flattened or not)
+        //Now do the rest of the normal handling (regardless of whether it was
+		// flattened or not)
         List relList = (List) readProperty(relName);
         relList.remove(val);
         if (persistenceState == PersistenceState.COMMITTED) {
@@ -294,6 +281,7 @@ public class CayenneDataObject implements DataObject {
                     + relName
                     + " because it is in a different DataContext");
         }
+        
         ObjRelationship relationship = this.getRelationshipNamed(relName);
         if (relationship == null) {
             throw new CayenneRuntimeException(
@@ -301,8 +289,13 @@ public class CayenneDataObject implements DataObject {
                     + relName
                     + " because there is no relationship by that name");
         }
-        //Only create the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
-        //This kind of doubles up the meaning of that flag, so we may need to add another?
+        
+        getDataContext().getObjectStore().objectRelationshipChanged(this, relationship);
+        
+        //Only create the internal object if we should "setReverse" (or
+		// rather, if we aren't not setting the reverse).
+        //This kind of doubles up the meaning of that flag, so we may need to
+		// add another?
         if (relationship.isFlattened() && setReverse) {
             if (relationship.isReadOnly()) {
                 throw new CayenneRuntimeException(
@@ -312,7 +305,8 @@ public class CayenneDataObject implements DataObject {
             dataContext.registerFlattenedRelationshipInsert(this, relationship, val);
         }
 
-        //Now do the rest of the normal handling (regardless of whether it was flattened or not)
+        //Now do the rest of the normal handling (regardless of whether it was
+		// flattened or not)
         List relList = (List) readProperty(relName);
         relList.add(val);
         if (persistenceState == PersistenceState.COMMITTED) {
@@ -324,10 +318,10 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * @deprecated Since 1.0.1 this method is no longer needed, since 
-     * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
-     * as well.
-     */
+	 * @deprecated Since 1.0.1 this method is no longer needed, since
+	 *             "setToOneTarget(String, DataObject, boolean)" supports
+	 *             dependent targets as well.
+	 */
     public void setToOneDependentTarget(String relName, DataObject val) {
         setToOneTarget(relName, val, true);
     }
@@ -343,12 +337,16 @@ public class CayenneDataObject implements DataObject {
                     + " because it is in a different DataContext");
         }
 
-        Object oldTarget = readPropertyDirectly(relationshipName);
+        Object oldTarget = readProperty(relationshipName);
         if (oldTarget == value) {
             return;
         }
 
         ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
+        
+        getDataContext().getObjectStore().objectRelationshipChanged(this, relationship);
+
+        // Handle adding to a flattened relationship
         if (relationship.isFlattened()) {
             if (relationship.isReadOnly()) {
                 throw new CayenneRuntimeException(
@@ -356,7 +354,6 @@ public class CayenneDataObject implements DataObject {
                         + relationshipName);
             }
 
-            // Handle adding to a flattened relationship
             dataContext.registerFlattenedRelationshipInsert(this, relationship, value);
         }
 
@@ -383,12 +380,12 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Initializes reverse relationship from object <code>val</code>
-     * to this object.
-     *
-     * @param relName name of relationship from this object
-     * to <code>val</code>.
-     */
+	 * Initializes reverse relationship from object <code>val</code> to this
+	 * object.
+	 * 
+	 * @param relName
+	 *            name of relationship from this object to <code>val</code>.
+	 */
     protected void setReverseRelationship(String relName, DataObject val) {
         ObjRelationship rel =
             (ObjRelationship) dataContext
@@ -404,10 +401,10 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
-    /** 
-     * Removes current object from reverse relationship of object
-     * <code>val</code> to this object.
-     */
+    /**
+	 * Removes current object from reverse relationship of object <code>val</code>
+	 * to this object.
+	 */
     protected void unsetReverseRelationship(String relName, DataObject val) {
         Class aClass = objectId.getObjClass();
         EntityResolver resolver = dataContext.getEntityResolver();
@@ -430,22 +427,25 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * @deprecated Since 1.1 use 
-     * getDataContext().getObjectStore().getSnapshot(this.getObjectId(), getDataContext())
-     */
+	 * @deprecated Since 1.1 use
+	 *             getDataContext().getObjectStore().getSnapshot(this.getObjectId(),
+	 *             getDataContext())
+	 */
     public Map getCommittedSnapshot() {
         return dataContext.getObjectStore().getSnapshot(getObjectId(), dataContext);
     }
 
     /**
-     * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
-     */
+	 * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
+	 */
     public Map getCurrentSnapshot() {
         return dataContext.currentSnapshot(this);
     }
 
-    /** A variation of  "toString" method, that may be more efficient in some cases.
-     *  For example when printing a list of objects into the same String. */
+    /**
+	 * A variation of "toString" method, that may be more efficient in some
+	 * cases. For example when printing a list of objects into the same String.
+	 */
     public StringBuffer toStringBuffer(StringBuffer buf, boolean fullDesc) {
         // log all properties
         buf.append('{');
@@ -490,10 +490,10 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Default implementation does nothing.
-     *
-     * @see org.objectstyle.cayenne.DataObject#fetchFinished()
-     */
+	 * Default implementation does nothing.
+	 * 
+	 * @see org.objectstyle.cayenne.DataObject#fetchFinished()
+	 */
     public void fetchFinished() {
     }
 
@@ -536,22 +536,23 @@ public class CayenneDataObject implements DataObject {
         this.objectId = (ObjectId) in.readObject();
 
         // DataContext will be set *IF* the DataContext it came from is also
-        // deserialized.  Setting of DataContext is handled by the DataContext itself
+        // deserialized. Setting of DataContext is handled by the DataContext
+		// itself
     }
 
     /**
-     * Returns a version of a DataRow snapshot that was used to 
-     * create this object.
-     * 
-     * @since 1.1
-     */
+	 * Returns a version of a DataRow snapshot that was used to create this
+	 * object.
+	 * 
+	 * @since 1.1
+	 */
     public long getSnapshotVersion() {
         return snapshotVersion;
     }
 
     /**
-     * @since 1.1
-     */
+	 * @since 1.1
+	 */
     public void setSnapshotVersion(long snapshotVersion) {
         this.snapshotVersion = snapshotVersion;
     }

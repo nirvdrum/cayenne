@@ -293,7 +293,7 @@ public class SelectObserver extends DefaultOperationObserver {
             DataObject sourceObject = null;
             if (reverseRelationship != null) {
                 sourceObject =
-                    (DataObject) thisDestinationObject.readPropertyDirectly(
+                    (DataObject) thisDestinationObject.readNestedProperty(
                         reverseRelationship.getName());
             }
             else {
@@ -313,15 +313,14 @@ public class SelectObserver extends DefaultOperationObserver {
 
         }
 
-        //destinationObjects has now been partitioned into a list per
-        //source object...
-        //Iterate over the source objects and fix up the relationship on
-        //each
+        // destinationObjects has now been partitioned into a list per
+        // source object... Iterate over the source objects and fix up 
+        // the relationship on each.
         Iterator rootIterator = rootObjects.iterator();
         while (rootIterator.hasNext()) {
             DataObject thisRoot = (DataObject) rootIterator.next();
             ToManyList toManyList =
-                (ToManyList) thisRoot.readPropertyDirectly(relationship.getName());
+                (ToManyList) thisRoot.readNestedProperty(relationship.getName());
 
             toManyList.setObjectList((List) toManyLists.get(thisRoot));
         }

@@ -69,12 +69,10 @@ import org.objectstyle.cayenne.CayenneException;
  * @author Andrei Adamchik
  */
 public class ObjAttribute extends Attribute {
-    // Full name of Java class representing the property type.
-    protected String attrType;
-
-    // The name of the corresponding database table column
+    protected String type;
     private String dbAttributePath;
 
+    
 	public ObjAttribute() {}
 
 	public ObjAttribute(String name) {
@@ -89,23 +87,25 @@ public class ObjAttribute extends Attribute {
 	}
 
 
-	/** Gets the type of the data object property.
-     * Type returned is a string that specifies full name of a Java class
-     * used to represent this attribute. */
+	/** 
+     * Returns fully qualified Java class name of the data object property represented
+     * by this attribute.
+     */
 	public String getType() {
-        return attrType;
+        return type;
     }
 
 
-	/** Sets the type of the data object property.*/
+	/** 
+     * Sets the type of the data object property.
+     */
     public void setType(String type) {
-        this.attrType = type;
+        this.type = type;
     }
 
 
 	/**
-	 * Returns an attribute describing a mapped database
-	 * table column.
+	 * Returns a DbAttribute mapped by this ObjAttribute.
 	 */
     public DbAttribute getDbAttribute() {
         Iterator pathIterator = getDbPathIterator();
@@ -144,8 +144,9 @@ public class ObjAttribute extends Attribute {
     }
 
 
-	/** Set the corresponding database table column.
-     *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
+	/**
+     * Set mapped DbAttribute.
+     */
     public void setDbAttribute(DbAttribute dbAttribute) {
     	if(dbAttribute == null) {
     		this.setDbAttributePath(null);
