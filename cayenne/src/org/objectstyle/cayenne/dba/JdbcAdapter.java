@@ -98,37 +98,51 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     public QueryTranslator getQueryTranslator(Query query) throws Exception {
-        QueryTranslator t = null;
-        
-        if (query == null) {
+        Class queryClass = queryTranslatorClass(query);
+
+        try {
+            QueryTranslator t = (QueryTranslator) queryClass.newInstance();
+            t.setQuery(query);
+            t.setAdapter(this);
+            return t;
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Can't load query class: " + queryClass);
+        }
+    }
+
+    /** 
+     * Returns a class of the query translator that
+     * should be used to translate the query <code>q</code>
+     * to SQL. Exists mainly for the benefit of subclasses
+     * that can override this method providing their own translator.
+     */
+    protected Class queryTranslatorClass(Query q) {
+        if (q == null) {
             throw new NullPointerException("Null query.");
         }
-        else if (query instanceof SelectQuery) {
-            t = new SelectTranslator();
+        else if (q instanceof SelectQuery) {
+            return SelectTranslator.class;
         }
-        else if (query instanceof UpdateQuery) {
-            t = new UpdateTranslator();
+        else if (q instanceof UpdateQuery) {
+            return UpdateTranslator.class;
         }
-        else if (query instanceof InsertQuery) {
-            t = new InsertTranslator(); 
+        else if (q instanceof InsertQuery) {
+            return InsertTranslator.class;
         }
-        else if (query instanceof DeleteQuery) {
-            t = new DeleteTranslator();
+        else if (q instanceof DeleteQuery) {
+            return DeleteTranslator.class;
         }
-        else if (query instanceof SqlSelectQuery) {
-            t = new SqlSelectTranslator();
+        else if (q instanceof SqlSelectQuery) {
+            return SqlSelectTranslator.class;
         }
-        else if (query instanceof SqlModifyQuery) {
-            t = new SqlModifyTranslator();
+        else if (q instanceof SqlModifyQuery) {
+            return SqlModifyTranslator.class;
         }
         else {
             throw new CayenneRuntimeException(
-                "Unrecognized query class..." + query.getClass().getName());
+                "Unrecognized query class..." + q.getClass().getName());
         }
-        
-        t.setQuery(query);
-        t.setAdapter(this);
-        return t;
     }
 
     /** Returns true. */
