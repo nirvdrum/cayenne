@@ -53,10 +53,10 @@
 
 	<target name="dist-bin" depends="jar-nodeps,jar">        
         <!-- Ant JAR is required for the Ant-specific tests to run. -->
-        <copy file="otherlib/ant.jar" todir="${dist}/lib"/>
+        <copy file="${otherlib.dir}/${ant.jar}" todir="${dist}/lib"/>
         
         <!-- Servlet JAR is required to complie Cayenne from src distro. -->
-        <copy file="otherlib/servlet.jar" todir="${dist}/lib"/>
+        <copy file="${otherlib.dir}/${servlet.jar}" todir="${dist}/lib"/>
 	</target>
 	
 	
@@ -130,11 +130,11 @@
 	
 	<target name="unjar-deps" unless="core.deps.exist"> 
 		<mkdir dir="${core.build.deps}"/>
-        <unjar src="${velocity.jar}" dest="${core.build.deps}"/>
-        <unjar src="${log4j.jar}" dest="${core.build.deps}"/>
-        <unjar src="${commons.logging.jar}" dest="${core.build.deps}"/>
-        <unjar src="${commons.collections.jar}" dest="${core.build.deps}"/>
-        <unjar src="${commons.beanutils.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${velocity.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${log4j.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${commons.logging.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${commons.collections.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${commons.beanutils.jar}" dest="${core.build.deps}"/>
         
         <!-- clean up unused classes -->
         <delete includeEmptyDirs="true">

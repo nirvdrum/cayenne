@@ -4,14 +4,15 @@
 <!-- CayenneModeler tests subproject buildfile. -->
 <!-- ========================================== -->
 <project name="cayenne-tests-modeler" default="test">
+    <property file="default.properties" />
 	<property name="test.build" value="build/tests-modeler"/>
 	<property name="test.output" value="${test.build}/out"/>
 	<property name="test.report" value="${test.build}/report"/>
 	<property name="test.filter" value="**/*Tst.class"/>
 	
 	<path id="classpath">
-	   	<fileset dir="otherlib">
-			<include name="junit.jar"/>
+    	<fileset dir="${otherlib.dir}">
+			<include name="${junit.jar}"/>
 		</fileset>
 	   	<fileset dir="${ant.home}/lib">
 			<include name="ant.jar"/>

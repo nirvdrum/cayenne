@@ -1,1 +1,3 @@
-Copy ognl.jar and net.sf.tapestry.jar in this directory
+
+Copy ognl-*.jar and net.sf.tapestry-*.jar into this directory!
+

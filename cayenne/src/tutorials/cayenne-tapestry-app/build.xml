@@ -11,7 +11,7 @@
     <property name="tutorial.dist" value="${dist}/src/${tutorial.subpath}"/>
     
     <path id="classpath">
-		<fileset dir="otherlib">
+		<fileset dir="${otherlib.dir}">
 			<include name="*.jar"/>
 		</fileset>
 		<pathelement path="${build}/cayenne/classes"/>

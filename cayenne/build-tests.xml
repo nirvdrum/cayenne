@@ -14,8 +14,8 @@
 	<property name="test.filter" value="**/*Tst.class"/>
 	
     <path id="classpath">
-    	<fileset dir="otherlib">
-			<include name="junit.jar"/>
+    	<fileset dir="${otherlib.dir}">
+			<include name="${junit.jar}"/>
 		</fileset>
     	<fileset dir="${ant.home}/lib">
 			<include name="*.jar"/>		
@@ -43,7 +43,7 @@
 
 	<target name="dist-bin" depends="jar">        
         <!-- JUnit JAR is required for the tests to run. -->
-        <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
+        <copy file="${otherlib.dir}/${junit.jar}" todir="${dist}/lib"/>
 	</target>
   
   

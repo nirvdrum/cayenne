@@ -1,5 +1,5 @@
 
-Sample eclipse IDE (http://eclipse.org) Cayenne project files.
+This directory contains project files for the eclipse IDE (http://www.eclipse.org).
 
 To setup Cayenne as an eclipse project, check out the code, and copy the two
 files in this directory (.classpath and .project) into the root "cayenne"

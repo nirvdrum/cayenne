@@ -17,7 +17,7 @@
     <!-- things).                                   -->
     <!-- ========================================== -->    
 	<path id="classpath-cayenne">
-		<fileset dir="otherlib">
+		<fileset dir="${otherlib.dir}">
 			<include name="*.jar"/>
 		</fileset>
     </path>
@@ -42,7 +42,7 @@
     </path>
     
 	<path id="javacc-classpath">
-		<fileset dir="otherlib">
+		<fileset dir="${otherlib.dir}">
 			<include name="*.jar"/>
 			<include name="*.zip"/>
 		</fileset>

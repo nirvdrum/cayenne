@@ -7,7 +7,7 @@
 <project name="cayenne-doc" default="doc" basedir=".">	  
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
-        <fileset dir="otherlib">
+        <fileset dir="${otherlib.dir}">
             <include name="**.jar"/>
         </fileset>
     </path>

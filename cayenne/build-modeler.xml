@@ -44,7 +44,7 @@
             </fileset>
         </chmod>        
         
-        <copy file="otherlib/scope-bin.jar" todir="${dist}/lib/modeler"/>
+        <copy file="${otherlib.dir}/${scope.jar}" todir="${dist}/lib/modeler"/>
 	</target>
 	
 	
