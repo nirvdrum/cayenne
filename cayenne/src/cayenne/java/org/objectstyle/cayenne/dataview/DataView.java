@@ -207,7 +207,7 @@ public class DataView {
     Validate.isTrue(name != null && !objEntityViews.containsKey(name));
     String objEntityName = element.getAttributeValue("obj-entity-name");
     Validate.notNull(objEntityName);
-    ObjEntity objEntity = entityResolver.lookupObjEntity(objEntityName);
+    ObjEntity objEntity = entityResolver.getObjEntity(objEntityName);
     ObjEntityView entityView = new ObjEntityView();
     entityView.setName(name);
     entityView.setObjEntity(objEntity);

@@ -282,11 +282,6 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(new Integer(33002), snapshot.get("GALLERY_ID"));
     }
 
-    public void testLookupEntity() throws Exception {
-        assertNotNull(context.getEntityResolver().lookupObjEntity(Artist.class));
-        assertNull(context.getEntityResolver().lookupObjEntity("NonExistent"));
-    }
-
     /**
      * Tests how CHAR field is handled during fetch. Some databases (Oracle...)
      * would pad a CHAR column with extra spaces, returned to the client.

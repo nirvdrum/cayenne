@@ -58,46 +58,51 @@ package org.objectstyle.cayenne.dba;
 import java.sql.Types;
 
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class JdbcAdapterTst extends CayenneTestCase {
-	protected JdbcAdapter adapter;
+    protected JdbcAdapter adapter;
 
-	protected void setUp() throws java.lang.Exception {
-		adapter = new JdbcAdapter();
-	}
-	
-	public void testCreateDataNode() throws Exception {
-		DataNode node = adapter.createDataNode("1234");
-		assertNotNull(node);
-		assertEquals("1234", node.getName());
-		assertSame(adapter, node.getAdapter());
-	}
-
-	public void testExternalTypesForJdbcType() throws Exception {
-		// check a few types
-		checkType(Types.BLOB);
-		checkType(Types.ARRAY);
-		checkType(Types.DATE);
-		checkType(Types.VARCHAR);
-	}
-
-	public void testCreateTable() throws Exception {
-		// an attempt to create a derived table must generate an exception
-		try {
-			ObjEntity e = getDomain().getEntityResolver().lookupObjEntity("ArtistAssets");
-			adapter.createTable(e.getDbEntity());
-			fail("Derived tables shouldn't be allowed in 'create'."); 
-		} catch (Exception ex) {
-			// exception expected
-		}
+    protected void setUp() throws java.lang.Exception {
+        adapter = new JdbcAdapter();
     }
 
-	private void checkType(int type) throws java.lang.Exception {
-		String[] types = adapter.externalTypesForJdbcType(type);
-		assertNotNull(types);
-		assertEquals(1, types.length);
-		assertEquals(TypesMapping.getSqlNameByType(type), types[0]);
-	}
+    public void testCreateDataNode() throws Exception {
+        DataNode node = adapter.createDataNode("1234");
+        assertNotNull(node);
+        assertEquals("1234", node.getName());
+        assertSame(adapter, node.getAdapter());
+    }
+
+    public void testExternalTypesForJdbcType() throws Exception {
+        // check a few types
+        checkType(Types.BLOB);
+        checkType(Types.ARRAY);
+        checkType(Types.DATE);
+        checkType(Types.VARCHAR);
+    }
+
+    public void testCreateTable() throws Exception {
+        DbEntity e = getDbEntity("ARTIST_ASSETS");
+        assertNotNull(e);
+        assertTrue(e instanceof DerivedDbEntity);
+        
+        // an attempt to create a derived table must generate an exception
+        try {
+            adapter.createTable(e);
+            fail("Derived tables shouldn't be allowed in 'create'.");
+        }
+        catch (Exception ex) {
+            // exception expected
+        }
+    }
+
+    private void checkType(int type) throws java.lang.Exception {
+        String[] types = adapter.externalTypesForJdbcType(type);
+        assertNotNull(types);
+        assertEquals(1, types.length);
+        assertEquals(TypesMapping.getSqlNameByType(type), types[0]);
+    }
 }

@@ -820,7 +820,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @see #createAndRegisterNewObject(Class)
      */
     public DataObject createAndRegisterNewObject(String objEntityName) {
-        ObjEntity entity = this.getEntityResolver().lookupObjEntity(objEntityName);
+        ObjEntity entity = this.getEntityResolver().getObjEntity(objEntityName);
 
         if (entity == null) {
             throw new IllegalArgumentException("Invalid entity name: " + objEntityName);

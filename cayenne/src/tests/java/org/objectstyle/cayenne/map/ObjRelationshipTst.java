@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjRelationshipTst extends CayenneTestCase {
@@ -92,9 +91,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testGetReverseRel1() throws Exception {
-        DataDomain dom = getDomain();
-        ObjEntity artistObjEnt = dom.getEntityResolver().lookupObjEntity("Artist");
-        ObjEntity paintingObjEnt = dom.getEntityResolver().lookupObjEntity("Painting");
+        ObjEntity artistObjEnt = getObjEntity("Artist");
+        ObjEntity paintingObjEnt = getObjEntity("Painting");
 
         // start with "to many"
         ObjRelationship r1 =
@@ -106,9 +104,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
 
     public void testGetReverseRel2() throws Exception {
-        DataDomain dom = getDomain();
-        ObjEntity artistEnt = dom.getEntityResolver().lookupObjEntity("Artist");
-        ObjEntity paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting");
+        ObjEntity artistEnt = getObjEntity("Artist");
+        ObjEntity paintingEnt = getObjEntity("Painting");
 
         // start with "to one"
         ObjRelationship r1 = (ObjRelationship) paintingEnt.getRelationship("toArtist");
@@ -209,7 +206,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     //Test a relationship loaded from the test datamap that we know should be flattened
     public void testKnownFlattenedRelationship() {
-        ObjEntity artistEnt = getDomain().getEntityResolver().lookupObjEntity("Artist");
+        ObjEntity artistEnt = getObjEntity("Artist");
         ObjRelationship theRel =
             (ObjRelationship) artistEnt.getRelationship("groupArray");
         assertNotNull(theRel);

@@ -322,7 +322,7 @@ public class EntityResolver {
      *
      * @return the required DbEntity, or null if none matches the specifier
      */
-    private DbEntity _lookupDbEntity(Object object) {
+    protected DbEntity _lookupDbEntity(Object object) {
         if (object instanceof DbEntity) {
             return (DbEntity) object;
         }
@@ -424,7 +424,7 @@ public class EntityResolver {
      *
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
-    private ObjEntity _lookupObjEntity(Object object) {
+    protected ObjEntity _lookupObjEntity(Object object) {
         if (object instanceof ObjEntity) {
             return (ObjEntity) object;
         }

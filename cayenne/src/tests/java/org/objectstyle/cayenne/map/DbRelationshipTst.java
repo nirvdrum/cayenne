@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.map;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DbRelationshipTst extends CayenneTestCase {
@@ -67,10 +66,9 @@ public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity galleryEnt;
     
     public void setUp() throws Exception {
-        DataDomain dom = getDomain();
-        artistEnt = dom.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
-        paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
-        galleryEnt = dom.getEntityResolver().lookupObjEntity("Gallery").getDbEntity();
+        artistEnt = getDbEntity("ARTIST");
+        paintingEnt = getDbEntity("PAINTING");
+        galleryEnt = getDbEntity("GALLERY");
     }
     
     public void testSrcFkSnapshotWithTargetSnapshot() throws Exception {

@@ -207,8 +207,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         createArtist(1000.0);
 
         // test ProcedureQuery with Procedure as root
-        Procedure proc =
-            ctxt.getEntityResolver().lookupProcedure(SELECT_STORED_PROCEDURE);
+        Procedure proc = ctxt.getEntityResolver().getProcedure(SELECT_STORED_PROCEDURE);
         ProcedureQuery q = new ProcedureQuery(proc);
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));

@@ -84,8 +84,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         q = new SelectQuery();
-        artistEnt =
-            getDomain().getEntityResolver().lookupObjEntity("Artist").getDbEntity();
+        artistEnt = getDbEntity("ARTIST");
     }
 
     private SelectTranslator buildTranslator(Connection con) throws Exception {

@@ -508,7 +508,7 @@ public class QualifierTranslator
     public ObjEntity getObjEntity() {
         if (isTranslateParentQual()) {
             SelectQuery query = (SelectQuery) queryAssembler.getQuery();
-            return queryAssembler.getEngine().getEntityResolver().lookupObjEntity(
+            return queryAssembler.getEngine().getEntityResolver().getObjEntity(
                 query.getParentObjEntityName());
         }
         else {

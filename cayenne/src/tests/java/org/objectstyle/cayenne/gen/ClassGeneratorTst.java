@@ -72,7 +72,7 @@ public class ClassGeneratorTst extends CayenneTestCase {
 
     public void setUp() throws Exception {
         cgen = new ClassGenerator(MapClassGenerator.SUPERCLASS_TEMPLATE);
-        testEntity = getDomain().getEntityResolver().lookupObjEntity("Painting");
+        testEntity = getObjEntity("Painting");
 
         // add attribute with reserved keyword name
         ObjAttribute reservedAttribute = new ObjAttribute("abstract");

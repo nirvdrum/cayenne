@@ -62,8 +62,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockupQuery;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver resolver;
@@ -74,7 +76,6 @@ public class EntityResolverTst extends CayenneTestCase {
         resolver = new EntityResolver(getDomain().getDataMaps());
     }
 
- 
     private void assertIsArtistDbEntity(DbEntity ae) {
         assertNotNull(ae);
         assertEquals(ae, getDbEntity("ARTIST"));
@@ -113,8 +114,8 @@ public class EntityResolverTst extends CayenneTestCase {
 
     ////Test ObjEntity lookups
 
-    public void testLookupObjEntityByEntityName() throws Exception {
-        assertIsArtistObjEntity(resolver.lookupObjEntity("Artist"));
+    public void testGetObjEntity() throws Exception {
+        assertIsArtistObjEntity(resolver.getObjEntity("Artist"));
     }
 
     public void testLookupObjEntityByClass() throws Exception {
@@ -220,22 +221,20 @@ public class EntityResolverTst extends CayenneTestCase {
         assertSame(q, resolver.lookupQuery(Object.class, "abc"));
     }
 
-    public void testLookupQuery() throws Exception {
+    public void testGetQuery() throws Exception {
         // create a resolver with a single map
         DataMap m1 = new DataMap();
-        SelectQuery q = new SelectQuery();
-        q.setName("query1");
+        Query q = new MockupQuery("query1");
         m1.addQuery(q);
 
         EntityResolver resolver = new EntityResolver(Collections.singleton(m1));
-        assertSame(q, resolver.lookupQuery("query1"));
+        assertSame(q, resolver.getQuery("query1"));
 
         // check that the query added on-the-fly will be recognized
-        assertNull(resolver.lookupQuery("query2"));
+        assertNull(resolver.getQuery("query2"));
 
-        SelectQuery q2 = new SelectQuery();
-        q2.setName("query2");
+        Query q2 = new MockupQuery("query2");
         m1.addQuery(q2);
-        assertSame(q2, resolver.lookupQuery("query2"));
+        assertSame(q2, resolver.getQuery("query2"));
     }
 }

@@ -71,8 +71,7 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class QualifierTranslatorTst extends CayenneTestCase {
-    private static Logger logObj =
-        Logger.getLogger(QualifierTranslatorTst.class);
+    private static Logger logObj = Logger.getLogger(QualifierTranslatorTst.class);
 
     protected TstQueryAssembler qa;
 
@@ -87,9 +86,11 @@ public class QualifierTranslatorTst extends CayenneTestCase {
         try {
             new QualifierTranslator(qa).doTranslation();
             fail();
-        } catch (ClassCastException ccex) {
+        }
+        catch (ClassCastException ccex) {
             // exception expected
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -97,7 +98,8 @@ public class QualifierTranslatorTst extends CayenneTestCase {
     public void testNullQualifier() throws Exception {
         try {
             assertNull(new QualifierTranslator(qa).doTranslation());
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -121,7 +123,6 @@ public class QualifierTranslatorTst extends CayenneTestCase {
         Gallery g2 = new Gallery();
         g1.setObjectId(oid1);
         g2.setObjectId(oid2);
-        
 
         Expression e1 = ExpressionFactory.matchExp("toGallery", g1);
         Expression e2 = e1.orExp(ExpressionFactory.matchExp("toGallery", g2));
@@ -150,20 +151,19 @@ public class QualifierTranslatorTst extends CayenneTestCase {
                 try {
                     ((QualifiedQuery) qa.getQuery()).setQualifier(
                         cases[i].getCayenneExp());
-                    ObjEntity ent =
-                        getDomain().getEntityResolver().lookupObjEntity(
-                            cases[i].getRootEntity());
+                    ObjEntity ent = getObjEntity(cases[i].getRootEntity());
                     assertNotNull(ent);
                     qa.getQuery().setRoot(ent);
-                    String translated =
-                        new QualifierTranslator(qa).doTranslation();
+                    String translated = new QualifierTranslator(qa).doTranslation();
                     cases[i].assertTranslatedWell(translated);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     logObj.error("Failed case: [" + i + "]: " + cases[i]);
                     throw ex;
                 }
             }
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }

@@ -61,16 +61,20 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Represents a virtual shared namespace for a number of DataMaps.
- * DataMaps can be added or removed dynamically at runtime. Can 
- * resolve between queries, ObjEntities, Java classes and DbEntities. 
+ * Represents a virtual shared namespace for zero or more DataMaps. 
+ * EntityResolver is used by Cayenne runtime and in addition to 
+ * EntityNamespace interface methods implements other convenience 
+ * lookups, resolving entities for Queries, Java classes, etc. DataMaps 
+ * can be added or removed dynamically at runtime.
  * 
  * <p>EntityResolver is thread-safe.</p>
  * 
  * @since 1.1 In 1.1 EntityResolver was moved from the access package.
- * @author Craig Miskell, Andrei Adamchik
+ * @author Andrei Adamchik
  */
-public class EntityResolver extends org.objectstyle.cayenne.access.EntityResolver {
+public class EntityResolver
+    extends org.objectstyle.cayenne.access.EntityResolver
+    implements EntityNamespace {
     // NOTE: this class explicitly overrides all superclass methods to avoid
     // deprecation warnings all over the code.
 
@@ -80,6 +84,22 @@ public class EntityResolver extends org.objectstyle.cayenne.access.EntityResolve
 
     public EntityResolver(Collection dataMaps) {
         super(dataMaps);
+    }
+
+    public DbEntity getDbEntity(String name) {
+        return _lookupDbEntity(name);
+    }
+
+    public ObjEntity getObjEntity(String name) {
+        return _lookupObjEntity(name);
+    }
+
+    public Procedure getProcedure(String name) {
+        return lookupProcedure(name);
+    }
+
+    public Query getQuery(String name) {
+        return lookupQuery(name);
     }
 
     public synchronized void addDataMap(DataMap map) {
@@ -134,20 +154,8 @@ public class EntityResolver extends org.objectstyle.cayenne.access.EntityResolve
         return super.lookupObjEntity(q);
     }
 
-    public synchronized ObjEntity lookupObjEntity(String entityName) {
-        return super.lookupObjEntity(entityName);
-    }
-
     public Procedure lookupProcedure(Query q) {
         return super.lookupProcedure(q);
-    }
-
-    public Procedure lookupProcedure(String procedureName) {
-        return super.lookupProcedure(procedureName);
-    }
-
-    public synchronized Query lookupQuery(String name) {
-        return super.lookupQuery(name);
     }
 
     public synchronized void removeDataMap(DataMap map) {
