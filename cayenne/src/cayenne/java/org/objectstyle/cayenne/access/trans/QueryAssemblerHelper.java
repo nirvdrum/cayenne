@@ -139,9 +139,11 @@ public abstract class QueryAssemblerHelper {
             } else {
                 ObjAttribute objAttr = (ObjAttribute) pathComp;
                 if (lastRelationship != null) {
-                    DbRelationship lastDbRel = (DbRelationship)lastRelationship
-                    								.getDbRelationships()
-                    								.get(0);
+                    DbRelationship lastDbRel =
+                        (DbRelationship) lastRelationship
+                            .getDbRelationships()
+                            .get(
+                            0);
                     processColumn(buf, objAttr.getDbAttribute(), lastDbRel);
                 } else {
                     processColumn(buf, objAttr.getDbAttribute());
@@ -329,8 +331,7 @@ public abstract class QueryAssemblerHelper {
     }
 
     /** 
-     *  Processes ObjRelationship. Decomposes it into DbRelationships 
-     *  and appends parts to the query buffer. 
+     *  @deprected Since 1.0Beta1 this method is no longer used.
      */
     protected void processRelParts(ObjRelationship rel) {
         Iterator it = rel.getDbRelationships().iterator();
@@ -347,43 +348,12 @@ public abstract class QueryAssemblerHelper {
     protected void processRelTermination(
         StringBuffer buf,
         ObjRelationship rel) {
-        if (rel.isToMany()) {
-            // append joins
-            processRelParts(rel);
-        }
 
         List dbRels = rel.getDbRelationships();
 
         // get last DbRelationship on the list
-        DbRelationship dbRel = (DbRelationship)dbRels.get(dbRels.size() - 1);
-        List joins = dbRel.getJoins();
-        if (joins.size() != 1) {
-            StringBuffer msg = new StringBuffer();
-            msg
-                .append("OBJ_PATH expressions are only supported ")
-                .append("for a single-join relationships. ")
-                .append("This relationship has ")
-                .append(joins.size())
-                .append(" joins.");
-
-            throw new CayenneRuntimeException(msg.toString());
-        }
-
-        DbAttributePair join = (DbAttributePair)joins.get(0);
-
-        if (rel.isToMany()) {
-            DbEntity dest = (DbEntity) join.getTarget().getEntity();
-            List pk = dest.getPrimaryKey();
-            
-            if (pk.size() != 1) {
-                throw new CayenneRuntimeException("Multi-column PK is not supported in relationship joins.");
-            }
-            
-            processColumn(buf, (DbAttribute)pk.get(0));
-        } else {
-            DbAttribute att = join.getSource();
-            processColumn(buf, att);
-        }
+        DbRelationship dbRel = (DbRelationship) dbRels.get(dbRels.size() - 1);
+        processRelTermination(buf, dbRel);
     }
 
     /** 
@@ -414,7 +384,7 @@ public abstract class QueryAssemblerHelper {
             throw new CayenneRuntimeException(msg.toString());
         }
 
-        DbAttributePair join = (DbAttributePair)joins.get(0);
+        DbAttributePair join = (DbAttributePair) joins.get(0);
 
         DbAttribute att = null;
 
