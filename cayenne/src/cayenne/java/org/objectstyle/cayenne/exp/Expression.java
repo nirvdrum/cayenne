@@ -81,7 +81,9 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * API for expressions use.
  */
 public abstract class Expression implements Serializable, XMLSerializable {
-    private static Logger logObj = Logger.getLogger(Expression.class);
+    private final static Logger logObj = Logger.getLogger(Expression.class);
+    
+    private final static Object nullValue = new Object();
 
     public static final int AND = 0;
     public static final int OR = 1;
@@ -368,8 +370,12 @@ public abstract class Expression implements Serializable, XMLSerializable {
                     }
                 }
                 else {
-                    // wrap lists (for now)
-                    return ExpressionFactory.wrapPathOperand(parameters.get(name));
+                    Object value = parameters.get(name);
+
+                    // wrap lists (for now); also support null parameters
+                    return (value != null)
+                            ? ExpressionFactory.wrapPathOperand(value)
+                            : nullValue;
                 }
             }
         };
@@ -602,7 +608,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
             }
 
             if (transformedChild != null) {
-                copy.setOperand(j, transformedChild);
+                Object value = (transformedChild != nullValue) ? transformedChild : null;
+                copy.setOperand(j, value);
                 j++;
             }
             else if (pruneNodeForPrunedChild(operand)) {

@@ -69,8 +69,8 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 public class ParametrizedExpressionTst extends CayenneTestCase {
 
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
      * 
      * @throws Exception
      */
@@ -85,9 +85,9 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
     }
 
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
-     *
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
+     * 
      * @throws Exception
      */
     public void testCopy2() throws Exception {
@@ -106,25 +106,25 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
     }
 
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
-     *
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
+     * 
      * @throws Exception
      */
     public void testInParameter() throws Exception {
         Expression inExp = Expression.fromString("k1 in $test");
         Expression e1 = Expression.fromString("k1 in ('a', 'b')");
 
-        TstTraversalHandler.compareExps(
-            e1,
-            inExp.expWithParameters(
-                Collections.singletonMap("test", new Object[] { "a", "b" })));
+        TstTraversalHandler.compareExps(e1, inExp.expWithParameters(Collections
+                .singletonMap("test", new Object[] {
+                        "a", "b"
+                })));
     }
 
     /**
-     * Tests how parameter substitution algorithm works on an expression
-     * with no parameters.
-     *
+     * Tests how parameter substitution algorithm works on an expression with no
+     * parameters.
+     * 
      * @throws Exception
      */
     public void testFailOnMissingParams() throws Exception {
@@ -218,5 +218,40 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         assertEquals(2, e2.getOperandCount());
         assertEquals("123", e2.getOperand(1));
         assertEquals("k4", ((Expression) e2.getOperand(0)).getOperand(0));
+    }
+
+    public void testNullOptionalParameter() throws Exception {
+        Expression e = Expression.fromString("abc = 3 and x = $a");
+
+        Expression e1 = e.expWithParameters(Collections.EMPTY_MAP, true);
+
+        // $a must be pruned
+        assertEquals(Expression.fromString("abc = 3"), e1);
+
+        Map params = new HashMap();
+        params.put("a", null);
+        Expression e2 = e.expWithParameters(params, true);
+
+        // null must be preserved
+        assertEquals(Expression.fromString("abc = 3 and x = null"), e2);
+    }
+
+    public void testNullRequiredParameter() throws Exception {
+        Expression e1 = Expression.fromString("abc = 3 and x = $a");
+
+        try {
+            e1.expWithParameters(Collections.EMPTY_MAP, false);
+            fail("one parameter missing....must fail..");
+        }
+        catch (ExpressionException ex) {
+            // expected
+        }
+
+        Map params = new HashMap();
+        params.put("a", null);
+        Expression e2 = e1.expWithParameters(params, false);
+
+        // null must be preserved
+        assertEquals(Expression.fromString("abc = 3 and x = null"), e2);
     }
 }
