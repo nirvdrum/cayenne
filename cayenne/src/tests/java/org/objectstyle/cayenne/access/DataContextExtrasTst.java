@@ -59,13 +59,14 @@ package org.objectstyle.cayenne.access;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.log4j.Level;
 
+import org.apache.log4j.Level;
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
@@ -102,6 +103,26 @@ public class DataContextExtrasTst extends CayenneTestCase {
 		assertTrue(ctxt.newObjects().contains(a1));
 	}
 
+    public void testUnregisterObject() throws Exception {
+    	Map row = new HashMap();
+		row.put("ARTIST_ID", new Integer(1));
+		row.put("ARTIST_NAME", "ArtistXYZ");
+		row.put("DATE_OF_BIRTH", new Date());
+		DataObject obj = ctxt.objectFromDataRow("Artist", row);
+		ObjectId oid = obj.getObjectId();
+		
+		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
+		assertSame(ctxt, obj.getDataContext());
+		assertSame(obj, ctxt.registeredExistingObject(oid));
+		
+		ctxt.unregisterObject(obj);
+		
+	    assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
+		assertNull(obj.getDataContext());
+		assertNull(obj.getObjectId());
+		assertNull(ctxt.registeredMap.get(oid));
+    }
+    
 	public void testIdObjectFromDataRow() throws Exception {
 		Map row = new HashMap();
 		row.put("ARTIST_ID", new Integer(1));

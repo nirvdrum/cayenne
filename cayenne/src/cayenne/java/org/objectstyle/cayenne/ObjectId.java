@@ -82,7 +82,6 @@ public class ObjectId {
 	// Values database values of the corresponding attribute
 	protected Map idKeys;
 	protected String objEntityName;
-	protected int hash;
 
 	/**
 	 * Convenience constructor for entities that have a 
@@ -114,16 +113,14 @@ public class ObjectId {
 		this.idKeys = idKeys;
 	}
 
-	public int hashCode() {
-		return hash;
-	}
-
 	public boolean equals(Object object) {
-		if (!(object instanceof ObjectId))
+		if (!(object instanceof ObjectId)) {
 			return false;
+		}
 
-		if (this == object)
+		if (this == object) {
 			return true;
+		}
 
 		ObjectId id = (ObjectId) object;
 		return objEntityName.equals(id.objEntityName) && Util.nullSafeEquals(id.idKeys, this.idKeys);
@@ -172,4 +169,12 @@ public class ObjectId {
 		}
 		return buf.toString();
 	}
+	
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+    	int mapHash = (idKeys != null) ? idKeys.hashCode() : 0;
+        return objEntityName.hashCode() + mapHash;
+    }
 }

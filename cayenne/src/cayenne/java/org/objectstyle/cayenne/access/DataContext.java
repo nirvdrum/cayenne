@@ -84,7 +84,7 @@ public class DataContext implements QueryEngine {
 
     protected QueryEngine parent;
     protected Map registeredMap = Collections.synchronizedMap(new HashMap());
-    protected HashMap committedSnapshots = new HashMap();
+    protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
     protected RelationshipDataSource relDataSource = new RelationshipDataSource();
 
     public DataContext() {
@@ -520,6 +520,27 @@ public class DataContext implements QueryEngine {
         dataObject.setPersistenceState(PersistenceState.NEW);
         registeredMap.put(tempId, dataObject);
         dataObject.setDataContext(this);
+    }
+    
+    /**
+     * Unregisters a DataObject from the context.
+     * This would remove object from the internal cache,
+     * remove its snapshot, unset object's DataContext and ObjectId
+     * and change its state to TRANSIENT.
+     */
+    public void unregisterObject(DataObject dataObj) {
+    	// we don't care about objects that are not ours    		
+    	if(dataObj.getDataContext() != this) {
+    		return;
+    	}
+    	
+    	ObjectId oid = dataObj.getObjectId();
+    	registeredMap.remove(oid);
+    	committedSnapshots.remove(oid);
+    	
+    	dataObj.setDataContext(null);
+    	dataObj.setObjectId(null);
+    	dataObj.setPersistenceState(PersistenceState.TRANSIENT);
     }
 
     /** 

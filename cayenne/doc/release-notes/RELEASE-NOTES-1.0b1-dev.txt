@@ -9,4 +9,6 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-0. 
+1. Synchronized internal DataContext cache access.
+
+2. Added "unregisterObject" method to DataContext 
