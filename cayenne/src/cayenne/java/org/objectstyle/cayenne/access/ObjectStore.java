@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
-import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -641,6 +640,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     /**
      * SnapshotEventListener implementation that processes snapshot change
      * event, updating DataObjects that have the changes.
+     * 
+     * @since 1.1
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
@@ -655,6 +656,36 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         synchronized (this) {
             processUpdatedSnapshots(event.modifiedDiffs());
             processDeletedIDs(event.deletedIds());
+        }
+    }
+
+    /**
+     * Attempts to initialize object with data from cache or from the database,
+     * if the object is a "fault", i.e. not fully resolved.
+     * 
+     * @since 1.1
+     */
+    public void resolveFault(DataObject object) {
+        if (object.getPersistenceState() != PersistenceState.HOLLOW) {
+            return;
+        }
+
+        // no way to resolve faults outside of DataContext.
+        DataContext context = object.getDataContext();
+        if (context == null) {
+            object.setPersistenceState(PersistenceState.TRANSIENT);
+            return;
+        }
+
+        synchronized (this) {
+            DataRow snapshot = getSnapshot(object.getObjectId(), context);
+
+            ObjEntity entity = context.getEntityResolver().lookupObjEntity(object);
+            DataRowUtils.refreshObjectWithSnapshot(entity, object, snapshot, true);
+
+            if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+                object.setPersistenceState(PersistenceState.COMMITTED);
+            }
         }
     }
 

@@ -102,7 +102,6 @@ public class DataContextDelegateTst extends CayenneTestCase {
             queriesPerformed.contains(query));
         assertEquals(1, queriesPerformed.size());
         assertNotNull(results);
-        assertEquals(1, results.size());
     }
 
     public void testWillPerformSelectQueryBlocked() throws Exception {

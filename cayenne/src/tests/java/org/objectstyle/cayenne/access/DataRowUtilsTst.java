@@ -53,14 +53,13 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 

@@ -56,17 +56,24 @@
 
 package org.objectstyle.cayenne.access.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Factory;
+import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.ToManyList;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -181,9 +188,9 @@ public class SelectObserver extends DefaultOperationObserver {
         Iterator queries = results.keySet().iterator();
         while (queries.hasNext()) {
             Query nextQuery = (Query) queries.next();
-            
-            if(rootQuery == nextQuery) {
-            	continue;
+
+            if (rootQuery == nextQuery) {
+                continue;
             }
 
             List nextDataRows = getResults(nextQuery);
@@ -215,10 +222,7 @@ public class SelectObserver extends DefaultOperationObserver {
                 continue;
             }
 
-            DataRowUtils.mergePrefetchResultsRelationships(
-                objects,
-                relationship,
-                nextObjects);
+            mergePrefetchResultsRelationships(objects, relationship, nextObjects);
         }
 
         return objects;
@@ -239,5 +243,80 @@ public class SelectObserver extends DefaultOperationObserver {
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
         throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
+    }
+
+    /**
+     * Takes a list of "root" (or "source") objects,
+     * a list of destination objects, and the relationship which relates them
+     * (from root to destination).  It then merges the destination objects
+     * into the toMany relationships of the relevant root objects, thus clearing
+     * the toMany fault.  This method is typically only used internally by Cayenne
+     * and is not intended for client use.
+     * @param rootObjects
+     * @param theRelationship
+     * @param destinationObjects
+     */
+    static void mergePrefetchResultsRelationships(
+        List rootObjects,
+        ObjRelationship relationship,
+        List destinationObjects) {
+
+        if (rootObjects.size() == 0) {
+            // nothing to do
+            return;
+        }
+
+        Class sourceObjectClass = ((DataObject) rootObjects.get(0)).getClass();
+        ObjRelationship reverseRelationship = relationship.getReverseRelationship();
+        //Might be used later on... obtain and cast only once
+        DbRelationship dbRelationship =
+            (DbRelationship) relationship.getDbRelationships().get(0);
+
+        Factory listFactory = new Factory() {
+            public Object create() {
+                return new ArrayList();
+            }
+        };
+
+        Map toManyLists = MapUtils.lazyMap(new HashMap(), listFactory);
+
+        Iterator destIterator = destinationObjects.iterator();
+        while (destIterator.hasNext()) {
+            DataObject thisDestinationObject = (DataObject) destIterator.next();
+            DataObject sourceObject = null;
+            if (reverseRelationship != null) {
+                sourceObject =
+                    (DataObject) thisDestinationObject.readPropertyDirectly(
+                        reverseRelationship.getName());
+            }
+            else {
+                //Reverse relationship doesn't exist... match objects manually
+                DataContext context = thisDestinationObject.getDataContext();
+                Map sourcePk =
+                    dbRelationship.srcPkSnapshotWithTargetSnapshot(
+                        context.getObjectStore().getSnapshot(
+                            thisDestinationObject.getObjectId(),
+                            context));
+                sourceObject =
+                    context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
+            }
+            //Find the list so far for this sourceObject
+            List thisList = (List) toManyLists.get(sourceObject);
+            thisList.add(thisDestinationObject);
+
+        }
+
+        //destinationObjects has now been partitioned into a list per
+        //source object...
+        //Iterate over the source objects and fix up the relationship on
+        //each
+        Iterator rootIterator = rootObjects.iterator();
+        while (rootIterator.hasNext()) {
+            DataObject thisRoot = (DataObject) rootIterator.next();
+            ToManyList toManyList =
+                (ToManyList) thisRoot.readPropertyDirectly(relationship.getName());
+
+            toManyList.setObjectList((List) toManyLists.get(thisRoot));
+        }
     }
 }

@@ -54,23 +54,16 @@
  *
  */
 
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.Factory;
-import org.apache.commons.collections.MapUtils;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ToManyList;
-import org.objectstyle.cayenne.access.ToManyListDataSource;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -80,18 +73,19 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * DataRowUtils contains a number of static methods to work with DataRows.
- * This is a helper class that works in conjunction with DataContext.
+ * This is a helper class for DataContext and ObjectStore
  *
  * @author Andrei Adamchik
+ * @since 1.1
  */
-public class DataRowUtils {
+class DataRowUtils {
 
     /** 
      * Replaces all object attribute values with snapshot values. 
      * Sets object state to COMMITTED, unless the snapshot is partial
      * in which case the state is set to HOLLOW
      */
-    public static void refreshObjectWithSnapshot(
+    static void refreshObjectWithSnapshot(
         ObjEntity objEntity,
         DataObject object,
         DataRow snapshot,
@@ -184,8 +178,7 @@ public class DataRowUtils {
 
     }
 
-
-    public static void forceMergeWithSnapshot(
+    static void forceMergeWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
         DataRow snapshot) {
@@ -259,7 +252,7 @@ public class DataRowUtils {
      * In case an object is already modified, modified properties will
      * not be overwritten.
      */
-    public static void mergeObjectWithSnapshot(
+    static void mergeObjectWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
         Map snapshot) {
@@ -286,7 +279,7 @@ public class DataRowUtils {
      * Checks if a new snapshot has a modified to-one relationship compared to
      * the cached snapshot.
      */
-    protected static boolean isJoinAttributesModified(
+    static boolean isJoinAttributesModified(
         ObjRelationship relationship,
         Map newSnapshot,
         Map storedSnapshot) {
@@ -314,7 +307,7 @@ public class DataRowUtils {
     /**
      * Checks if an object has its to-one relationship target modified in memory.
      */
-    protected static boolean isToOneTargetModified(
+    static boolean isToOneTargetModified(
         ObjRelationship relationship,
         DataObject object,
         Map storedSnapshot) {
@@ -322,7 +315,7 @@ public class DataRowUtils {
         if (object.getPersistenceState() != PersistenceState.MODIFIED) {
             return false;
         }
-        
+
         Object targetObject = object.readPropertyDirectly(relationship.getName());
         if (targetObject instanceof RelationshipFault) {
             return false;
@@ -364,85 +357,9 @@ public class DataRowUtils {
     }
 
     /**
-     * Takes a list of "root" (or "source") objects,
-     * a list of destination objects, and the relationship which relates them
-     * (from root to destination).  It then merges the destination objects
-     * into the toMany relationships of the relevant root objects, thus clearing
-     * the toMany fault.  This method is typically only used internally by Cayenne
-     * and is not intended for client use.
-     * @param rootObjects
-     * @param theRelationship
-     * @param destinationObjects
-     */
-    public static void mergePrefetchResultsRelationships(
-        List rootObjects,
-        ObjRelationship relationship,
-        List destinationObjects) {
-
-        if (rootObjects.size() == 0) {
-            // nothing to do
-            return;
-        }
-
-        Class sourceObjectClass = ((DataObject) rootObjects.get(0)).getClass();
-        ObjRelationship reverseRelationship = relationship.getReverseRelationship();
-        //Might be used later on... obtain and cast only once
-        DbRelationship dbRelationship =
-            (DbRelationship) relationship.getDbRelationships().get(0);
-
-        Factory listFactory = new Factory() {
-            public Object create() {
-                return new ArrayList();
-            }
-        };
-
-        Map toManyLists = MapUtils.lazyMap(new HashMap(), listFactory);
-
-        Iterator destIterator = destinationObjects.iterator();
-        while (destIterator.hasNext()) {
-            DataObject thisDestinationObject = (DataObject) destIterator.next();
-            DataObject sourceObject = null;
-            if (reverseRelationship != null) {
-                sourceObject =
-                    (DataObject) thisDestinationObject.readPropertyDirectly(
-                        reverseRelationship.getName());
-            }
-            else {
-                //Reverse relationship doesn't exist... match objects manually
-                DataContext context = thisDestinationObject.getDataContext();
-                Map sourcePk =
-                    dbRelationship.srcPkSnapshotWithTargetSnapshot(
-                        context.getObjectStore().getSnapshot(
-                            thisDestinationObject.getObjectId(),
-                            context));
-                sourceObject =
-                    context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
-            }
-            //Find the list so far for this sourceObject
-            List thisList = (List) toManyLists.get(sourceObject);
-            thisList.add(thisDestinationObject);
-
-        }
-
-        //destinationObjects has now been partitioned into a list per
-        //source object...
-        //Iterate over the source objects and fix up the relationship on
-        //each
-        Iterator rootIterator = rootObjects.iterator();
-        while (rootIterator.hasNext()) {
-            DataObject thisRoot = (DataObject) rootIterator.next();
-            ToManyList toManyList =
-                (ToManyList) thisRoot.readPropertyDirectly(relationship.getName());
-
-            toManyList.setObjectList((List) toManyLists.get(thisRoot));
-        }
-    }
-
-    /**
      * Instantiation is not allowed.
      */
-    protected DataRowUtils() {
+    DataRowUtils() {
         super();
     }
-
 }

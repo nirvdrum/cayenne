@@ -68,7 +68,6 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
-import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -210,33 +209,11 @@ public class CayenneDataObject implements DataObject {
      * @since 1.1
      */
     public void resolveFault() {
-        if (persistenceState != PersistenceState.HOLLOW) {
+        if (getPersistenceState() != PersistenceState.HOLLOW || dataContext == null) {
             return;
         }
         
-        // no way to resolve faults outside of DataContext.
-        if (dataContext == null) {
-            setPersistenceState(PersistenceState.TRANSIENT);
-            return;
-        }
-
-        try {
-            DataRow snapshot =
-                dataContext.getObjectStore().getSnapshot(objectId, dataContext);
-
-            ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
-            DataRowUtils.refreshObjectWithSnapshot(entity, this, snapshot, true);
-        }
-        catch (Exception ex) {
-            // TODO: add some sort of delegate method here. Quietly
-            // making object TRANSIENT doesn't seem right
-            logObj.info("Error refetching object, making transient.", ex);
-            setPersistenceState(PersistenceState.TRANSIENT);
-        }
-
-        if (persistenceState == PersistenceState.HOLLOW) {
-            persistenceState = PersistenceState.COMMITTED;
-        }
+        dataContext.getObjectStore().resolveFault(this);
     }
 
     protected Object readProperty(String propName) {
@@ -376,14 +353,14 @@ public class CayenneDataObject implements DataObject {
         if (relationship.isFlattened()) {
             if (relationship.isReadOnly()) {
                 throw new CayenneRuntimeException(
-                    "Cannot modify the read-only flattened relationship " + relationshipName);
+                    "Cannot modify the read-only flattened relationship "
+                        + relationshipName);
             }
-            
+
             // Handle adding to a flattened relationship
             dataContext.registerFlattenedRelationshipInsert(this, relationship, value);
         }
-        
-               
+
         if (setReverse) {
             // unset old reverse relationship
             if (oldTarget instanceof DataObject) {

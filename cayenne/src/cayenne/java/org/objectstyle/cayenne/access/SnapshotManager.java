@@ -79,8 +79,8 @@ import org.objectstyle.cayenne.util.Util;
  * SnapshotManager handles snapshot (data row) operations on objects.
  * This is a helper class that works in conjunction with DataContext.
  * 
- * @deprecated Since 1.1 DataRowUtils static methods perform all the operations
- * previously performed by SnapshotManager instances.
+ * @deprecated Since 1.1 non-public static DataRowUtils class performs all the operations 
+ * formerly performed by SnapshotManager. SnapshotManager class is no longer supported.
  *
  * @author Andrei Adamchik
  */

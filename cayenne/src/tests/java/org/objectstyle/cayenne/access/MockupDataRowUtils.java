@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
