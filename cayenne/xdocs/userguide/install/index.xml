@@ -66,9 +66,10 @@
             "http://objectstyle.org/cayenne/download.html">
             http://objectstyle.org/cayenne/download.html</a>. 
             Choose the type of download that fits your needs. If you need
-            a stable version, download source or binary <strong>release</strong>.
-            To get the latest features, download source or binary <strong>nightly
-            build</strong> (of course when using nightly builds users run into the risks 
+            a stable version, download a <strong>release distribution</strong>.
+            To get the latest features, download a <strong>nightly
+            build distribution</strong> (of course when using nightly
+			builds users run into the risks 
             accociated with running development code). Downloaded file is called 
             something like <code>cayenne-[release-suffix].tar.gz</code>.
             </p>
@@ -213,7 +214,7 @@ GRANT CREATE VIEW TO "AUSER"
 		    <p><strong>JSDK1.4 must be present to compile Cayenne.</strong></p>
 		    
 			<panel name="Note:">Normally users don't need to build Cayenne from source. 
-            Prebuilt JAR's are included with both source and binary distributions.</panel>
+            Prebuilt JAR's are included with a distribution.</panel>
 
 			<p>For those users who need to recompile Cayenne (for example if they modified the
 			source code to customize or test certain aspects), Cayenne source distribution
