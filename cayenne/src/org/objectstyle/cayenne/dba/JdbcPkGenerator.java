@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,8 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
+package org.objectstyle.cayenne.dba;
+
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -78,7 +79,7 @@ public class JdbcPkGenerator implements PkGenerator {
         new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
 
     protected HashMap pkCache = new HashMap();
-    protected int pkCacheSize = 10;
+    protected int pkCacheSize = 20;
 
     /** Generates database objects to provide
      *  automatic primary key support. This implementation will create
@@ -229,17 +230,28 @@ public class JdbcPkGenerator implements PkGenerator {
      */
     public Object generatePkForDbEntity(DataNode node, DbEntity ent)
         throws Exception {
-        return pkFromDatabase(node, ent).getNextPrimaryKey();
+            
+        PkRange r = (PkRange) pkCache.get(ent.getName());
+        if (r == null || r.isExhausted()) {
+            int val = pkFromDatabase(node, ent);
+            r = new PkRange(val, val + pkCacheSize - 1);
+            pkCache.put(ent.getName(), r);
+        }
+
+        return r.getNextPrimaryKey();
     }
-    
+
     /** 
-     * Performs primary key generation ignoring cache. This method is called 
-     * internally from "generatePkForDbEntity" and then saved in cache 
-     * for performance. Subclasses that implement different primary key 
-     * generation solutions should override this method, not 
-     * "generatePkForDbEntity".
+     * Performs primary key generation ignoring cache. Generates 
+     * a range of primary keys as specified by
+     * "pkCacheSize" bean property. 
+     * 
+     * <p>This method is called internally from "generatePkForDbEntity" 
+     * and then saved in cache for performance. Subclasses that 
+     * implement different primary key generation solutions should 
+     * override this method, not "generatePkForDbEntity".</p>
      */
-    protected PkRange pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
+    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
         ArrayList queries = new ArrayList(2);
 
         StringBuffer b1 = new StringBuffer();
@@ -265,15 +277,14 @@ public class JdbcPkGenerator implements PkGenerator {
             throw new CayenneRuntimeException("Error generating PK.");
         }
         else {
-            int val = pkProcessor.nextId.intValue();
-            PkRange range = new PkRange(val, val);
-            return range;
+            return pkProcessor.nextId.intValue();
         }
     }
 
     /**
      * Returns a size of the entity primary key cache.
-     * 10 is default, 0 means no caching.
+     * 20 is default, if cache size is set to a value
+     * less or equals than 1, no primary key caching is done.
      */
     public int getPkCacheSize() {
         return pkCacheSize;
@@ -281,9 +292,11 @@ public class JdbcPkGenerator implements PkGenerator {
 
     /**
      * Sets the size of the entity primary key cache.
+     * If <code>pkCacheSize</code> parameter is less than 1,
+     * cache size is set to 1.
      */
     public void setPkCacheSize(int pkCacheSize) {
-        this.pkCacheSize = pkCacheSize;
+        this.pkCacheSize = (pkCacheSize < 1) ? 1 : pkCacheSize;
     }
 
     /** OperationObserver for primary key retrieval. */
@@ -306,12 +319,14 @@ public class JdbcPkGenerator implements PkGenerator {
             super.nextSnapshots(query, resultObjects);
 
             // process selected object, issue an update query
-            if (resultObjects == null || resultObjects.size() == 0)
+            if (resultObjects == null || resultObjects.size() == 0) {
                 throw new CayenneRuntimeException(
                     "Error generating PK : entity not supported: " + entName);
-            if (resultObjects.size() > 1)
+            }
+            if (resultObjects.size() > 1) {
                 throw new CayenneRuntimeException(
                     "Error generating PK : too many rows for entity: " + entName);
+            }
 
             Map lastPk = (Map) resultObjects.get(0);
             nextId = (Integer) lastPk.get("nextId");
@@ -324,7 +339,7 @@ public class JdbcPkGenerator implements PkGenerator {
             StringBuffer buf = new StringBuffer();
             buf
                 .append("UPDATE AUTO_PK_SUPPORT SET NEXT_ID = ")
-                .append(nextId.intValue() + 1)
+                .append(nextId.intValue() + pkCacheSize)
                 .append(" WHERE TABLE_NAME = '")
                 .append(entName)
                 .append("' AND NEXT_ID = ")

@@ -62,6 +62,7 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
+import org.objectstyle.cayenne.dba.PkRange;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
@@ -98,10 +99,10 @@ public class SybasePkGenerator extends JdbcPkGenerator {
      * </pre>
      * 
      * <p>3. Executed under any circumstances. </p>
-     * CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32) AS
+     * CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32), @pkbatchsize INT AS
      * BEGIN
      *      BEGIN TRANSACTION
-     *         UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + 1 
+     *         UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + @pkbatchsize 
      *         WHERE TABLE_NAME = @tname
      * 
      *         SELECT NEXT_ID from AUTO_PK_SUPPORT where NEXT_ID = @tname
@@ -145,31 +146,26 @@ public class SybasePkGenerator extends JdbcPkGenerator {
         super.runSchemaUpdate(node, safePkTableDrop());
     }
 
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
-        throws Exception {
-
-        Connection con = dataNode.getDataSource().getConnection();
-
+    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
+        Connection con = node.getDataSource().getConnection();
         try {
-            CallableStatement st = con.prepareCall("{call auto_pk_for_table(?)}");
-
+            CallableStatement st = con.prepareCall("{call auto_pk_for_table(?, ?)}");
             try {
-                st.setString(1, dbEntity.getName());
+                st.setString(1, ent.getName());
+                st.setInt(2, super.getPkCacheSize());
                 ResultSet rs = st.executeQuery();
-
-                Object pk = null;
-                if (rs.next()) {
-                    pk = new Integer(rs.getInt(1));
+                try {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    else {
+                        throw new CayenneRuntimeException(
+                            "Error generating pk for DbEntity " + ent.getName());
+                    }
                 }
-
-                rs.close();
-
-                if (pk == null) {
-                    throw new CayenneRuntimeException(
-                        "Error generating pk for DbEntity " + dbEntity.getName());
+                finally {
+                    rs.close();
                 }
-
-                return pk;
             }
             finally {
                 st.close();
@@ -208,10 +204,10 @@ public class SybasePkGenerator extends JdbcPkGenerator {
     private String unsafePkProcCreate() {
         StringBuffer buf = new StringBuffer();
         buf
-            .append(" CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32) AS")
+            .append(" CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32), @pkbatchsize INT AS")
             .append(" BEGIN")
             .append(" BEGIN TRANSACTION")
-            .append(" UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + 1")
+            .append(" UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + @pkbatchsize")
             .append(" WHERE TABLE_NAME = @tname")
             .append(" SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = @tname")
             .append(" COMMIT")
