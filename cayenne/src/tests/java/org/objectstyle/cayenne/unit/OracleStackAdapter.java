@@ -104,10 +104,12 @@ public class OracleStackAdapter extends AccessStackAdapter {
     }
 
     public void createdTables(Connection con, DataMap map) throws Exception {
-        executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
-        executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
-        executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
-        executeDDL(con, super.ddlFile("oracle", "create-out-sp.sql"));
+        if (map.getProcedure("cayenne_tst_select_proc") != null) {
+            executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
+            executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
+            executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
+            executeDDL(con, super.ddlFile("oracle", "create-out-sp.sql"));
+        }
     }
 
     public boolean supportsLobs() {
