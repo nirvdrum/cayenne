@@ -68,7 +68,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 /**
  * Helper class to process tokens in the translated queries. Tokens are inserted 
  * in the query string in the situations when translator can't create valid SQL due 
- * to lookahead limitations, e.g. in case of compound keys used in joins.
+ * to lookahead limitations, e.g. in case of compound keys used in joins. On the long run 
+ * a more reliable and integrated solution is needed.
  * 
  * @author Andrei Adamchik
  */
@@ -141,7 +142,7 @@ public class TranslatorTokens {
                             + input);
                 }
 
-                processToken(buf, matcher.getMatch());
+                processToken(buf, matcher.getMatch(), i);
             }
 
             if (matcher.match(TOKEN_PAIR_RE, input)) {
@@ -154,7 +155,7 @@ public class TranslatorTokens {
         }
     }
 
-    protected void processToken(StringBuffer buf, MatchResult result) {
+    protected void processToken(StringBuffer buf, MatchResult result, int index) {
 
     }
 }

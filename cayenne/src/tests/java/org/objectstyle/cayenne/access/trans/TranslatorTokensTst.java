@@ -140,7 +140,7 @@ public class TranslatorTokensTst extends TestCase {
     class TestTokenizer extends TranslatorTokens {
         protected List tokens = new ArrayList();
 
-        protected void processToken(StringBuffer buf, MatchResult result) {
+        protected void processToken(StringBuffer buf, MatchResult result, int index) {
             tokens.add(result.group(0));
         }
 
