@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Test type="org.objectstyle.cayenne.xml.TestObject">
+  <children type="java.util.ArrayList">
+    <element type="java.lang.String">Bill</element>
+    <element type="java.lang.String">Sue</element>
+  </children>
+</Test>
+

@@ -70,10 +70,14 @@ import org.jdom.Element;
 public class XMLDecoderTst extends TestCase {
 
     static final String XML_DATA_DIR = "src/tests/resources/test-resources/xmlcoding/";
+    protected XMLDecoder decoder;
+    
+    public void setUp() {
+        decoder = new XMLDecoder();
+    }
 
     public void testParse() throws Exception {
         Reader xml = new FileReader(XML_DATA_DIR + "parser-test.xml");
-        XMLDecoder decoder = new XMLDecoder();
         Document document = decoder.parse(xml);
 
         assertNotNull(document);
@@ -87,7 +91,6 @@ public class XMLDecoderTst extends TestCase {
 
     public void testDecode() throws Exception {
         Reader xml = new FileReader(XML_DATA_DIR + "encoded-object.xml");
-        XMLDecoder decoder = new XMLDecoder();
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
@@ -96,10 +99,39 @@ public class XMLDecoderTst extends TestCase {
         assertEquals(5, test.getAge());
         assertEquals(true, test.isOpen());
     }
+    
+    /**
+     * Test decoding with a mapping file.
+     * 
+     * @throws Exception
+     */
+    public void testDecodeMapping() throws Exception {
+        Reader xml = new FileReader(XML_DATA_DIR + "simple-mapped.xml");
+        Object object = decoder.decode(xml, XML_DATA_DIR + "simple-mapping.xml");
+        
+        assertTrue(object instanceof TestObject);
+        TestObject test = (TestObject) object;
+        assertEquals("George", test.getName());
+        assertEquals(57, test.getAge());
+        assertEquals(false, test.isOpen());
+    }
+    
+    // TODO Test decode of collections.
+    public void testDecodeCollections() throws Exception {
+        Reader xml = new FileReader(XML_DATA_DIR + "encoded-simple-collection.xml");
+        Object object = decoder.decode(xml);
+        
+        assertTrue(object instanceof TestObject);
+        TestObject test = (TestObject) object;
+        assertEquals(2, test.getChildren().size());
+    }
+    
+    // TODO Test decode with mapping file & data context.
+    
+    // TODO Test decode with data context.
 
     public void testDecodePrimitives() throws Exception {
         Reader xml = new FileReader(XML_DATA_DIR + "encoded-object-primitives.xml");
-        XMLDecoder decoder = new XMLDecoder();
         Object object = decoder.decode(xml);
 
         assertTrue(object instanceof TestObject);
