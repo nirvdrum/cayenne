@@ -55,9 +55,9 @@ package org.objectstyle.cayenne.dba;
  *
  */ 
 
-import junit.framework.*;
-import java.util.*;
 import java.sql.*;
+
+import junit.framework.TestCase;
 
 public class JdbcAdapterTst extends TestCase {
     protected JdbcAdapter adapter;
@@ -88,8 +88,8 @@ public class JdbcAdapterTst extends TestCase {
     }
     
     
-    /*// check for Oracle open cursors - used for debugging. 
-    public static void testOpenCursors() {
+    // check for Oracle open cursors - used for debugging. 
+    public static void testOpenCursors(Connection c) {
         try {
             Statement st = c.createStatement();
             ResultSet rs =
@@ -111,5 +111,5 @@ public class JdbcAdapterTst extends TestCase {
             ex.printStackTrace();
             System.exit(1);
         }
-    } */
+    } 
 }

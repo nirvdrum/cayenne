@@ -214,27 +214,38 @@ public class DataNode implements QueryEngine {
                     QueryTranslator queryTranslator =
                         QueryTranslator.queryTranslator(this, con, getAdapter(), nextQuery);
                     PreparedStatement prepStmt = queryTranslator.createStatement(logLevel);
-                    if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-                        // 2.a execute query
-                        ResultSet rs = prepStmt.executeQuery();
-                        String[] snapshotLabels =
-                            ((SelectQueryAssembler) queryTranslator).getSnapshotLabels(rs);
-                        String[] resultTypes =
-                            ((SelectQueryAssembler) queryTranslator).getResultTypes(rs);
-                        List resultSnapshots = snapshotsFromResultSet(rs, snapshotLabels, resultTypes);
-                        QueryLogger.logSelectCount(logLevel, resultSnapshots.size());
-                        rs.close();
 
-                        // 3.a send results back to consumer
-                        opObserver.nextSnapshots(nextQuery, resultSnapshots);
+                    try {
+                        if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                            // 2.a execute query
+                            ResultSet rs = prepStmt.executeQuery();
+                            String[] snapshotLabels =
+                                ((SelectQueryAssembler) queryTranslator).getSnapshotLabels(rs);
+                            String[] resultTypes =
+                                ((SelectQueryAssembler) queryTranslator).getResultTypes(rs);
+                            List resultSnapshots = snapshotsFromResultSet(rs, snapshotLabels, resultTypes);
+                            QueryLogger.logSelectCount(logLevel, resultSnapshots.size());
+                            rs.close();
+
+                            // 3.a send results back to consumer
+                            opObserver.nextSnapshots(nextQuery, resultSnapshots);
+                        }
+                        else {
+                            // 2.b execute update
+                            int count = prepStmt.executeUpdate();
+                            QueryLogger.logUpdateCount(logLevel, count);
+
+                            // 3.b send results back to consumer
+                            opObserver.nextCount(nextQuery, count);
+                        }
                     }
-                    else {
-                        // 2.b execute update
-                        int count = prepStmt.executeUpdate();
-                        QueryLogger.logUpdateCount(logLevel, count);
-
-                        // 3.b send results back to consumer
-                        opObserver.nextCount(nextQuery, count);
+                    finally {
+                        // important - prepared statement must be closed 
+                        // no matter what, or it will result in 
+                        // "leaks" of the database resources (in Oracle,
+                        // for example, this will result in 
+                        // "ORA-01000 maximum open cursors exceeded" error
+                        prepStmt.close();
                     }
                 }
                 catch (Exception queryEx) {
@@ -332,7 +343,7 @@ public class DataNode implements QueryEngine {
         String[] snapshotLabels,
         String[] resultTypes)
         throws Exception {
-            
+
         ArrayList snapshots = new ArrayList();
         int len = snapshotLabels.length;
         ExtendedType[] converters = new ExtendedType[len];
