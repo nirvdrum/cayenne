@@ -136,7 +136,7 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      * @deprecated Since 1.1 use {@link #setSortSpecString(String)}
      */
     public void setSortSpec(String sortSpecString) {
-        this.sortSpec = ExpressionFactory.expressionFromString(sortSpecString);
+        this.sortSpec = ExpressionFactory.expFromString(sortSpecString);
     }
 
     /** 
@@ -147,7 +147,7 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
     public void setSortSpecString(String sortSpecString) {
         this.sortSpec =
             (sortSpecString != null)
-                ? ExpressionFactory.expressionFromString(sortSpecString)
+                ? ExpressionFactory.expFromString(sortSpecString)
                 : null;
     }
 

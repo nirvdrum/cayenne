@@ -85,7 +85,7 @@ public class ExpressionConvertor implements StringConvertor {
 
     public Object stringAsValue(String string) throws IllegalArgumentException {
         try {
-            return ExpressionFactory.expressionFromString(string);
+            return ExpressionFactory.expFromString(string);
         }
         catch (ExpressionException eex) {
             // this is likely a parse exception... show detailed message

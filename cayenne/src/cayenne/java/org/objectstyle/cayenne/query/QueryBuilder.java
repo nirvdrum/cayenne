@@ -139,7 +139,7 @@ public abstract class QueryBuilder {
             this.qualifier = null;
         }
         else {
-            this.qualifier = ExpressionFactory.expressionFromString(qualifier.trim());
+            this.qualifier = ExpressionFactory.expFromString(qualifier.trim());
         }
     }
 

@@ -73,10 +73,10 @@ public class ExpressionParser/*@bgen(jjtree)*/implements ExpressionParserTreeCon
   protected JJTExpressionParserState jjtree = new JJTExpressionParserState();public static void main(String[] arg) {
         // since Main is used for some basic speed measuring,
         // lets run it twice to "warm up" the parser
-        ExpressionFactory.expressionFromString(arg[0]);
+        ExpressionFactory.expFromString(arg[0]);
 
         long start = System.currentTimeMillis();
-        Expression exp = ExpressionFactory.expressionFromString(arg[0]);
+        Expression exp = ExpressionFactory.expFromString(arg[0]);
         long end = System.currentTimeMillis();
 
         System.out.println(exp);

@@ -194,7 +194,7 @@ public class ExpressionFactory {
      * 
      * @since 1.1
      */
-    public static Expression expressionFromString(String expressionString) {
+    public static Expression expFromString(String expressionString) {
         if (expressionString == null) {
             throw new NullPointerException("Null expression string.");
         }
