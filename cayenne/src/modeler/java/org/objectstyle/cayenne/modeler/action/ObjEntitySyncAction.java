@@ -65,6 +65,9 @@ import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 
 /**
+ * Action that synchronizes a given ObjEntity with the current state of the
+ * underlying DbEntity.
+ * 
  * @author Andrei Adamchik
  */
 public class ObjEntitySyncAction extends CayenneAction {

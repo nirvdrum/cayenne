@@ -84,6 +84,18 @@ public class EntityMergeSupport {
     }
 
     /**
+     * Updates each one of the list of ObjEntities, adding 
+     * attributes and relationships based on the current state 
+     * of its DbEntity.
+     */
+    public void synchronizeWithDbEntities(List objEntities) {
+        Iterator it = objEntities.iterator();
+        while (it.hasNext()) {
+            this.synchronizeWithDbEntity((ObjEntity) it.next());
+        }
+    }
+
+    /**
      * Updates ObjEntity attributes and relationships
      * based on the current state of its DbEntity.
      */
@@ -103,8 +115,7 @@ public class EntityMergeSupport {
             Iterator ait = addAttributes.iterator();
             while (ait.hasNext()) {
                 DbAttribute da = (DbAttribute) ait.next();
-                String attName =
-                    NameConverter.undescoredToJava(da.getName(), false);
+                String attName = NameConverter.undescoredToJava(da.getName(), false);
                 String type = TypesMapping.getJavaBySqlType(da.getType());
 
                 ObjAttribute oa = new ObjAttribute(attName, type, entity);
@@ -116,16 +127,18 @@ public class EntityMergeSupport {
             Iterator rit = addRelationships.iterator();
             while (rit.hasNext()) {
                 DbRelationship dr = (DbRelationship) rit.next();
-                List mappedTargets =
+                Collection mappedTargets =
                     map.getMappedEntities((DbEntity) dr.getTargetEntity());
                 if (mappedTargets.size() == 0) {
                     continue;
                 }
+                
+                Entity mappedTarget = (Entity) mappedTargets.iterator().next();
 
                 ObjRelationship or = new ObjRelationship(dr.getName());
                 or.addDbRelationship(dr);
                 or.setSourceEntity(entity);
-                or.setTargetEntity((Entity) mappedTargets.get(0));
+                or.setTargetEntity(mappedTarget);
                 entity.addRelationship(or);
             }
         }

@@ -60,8 +60,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -76,10 +76,10 @@ import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.util.EntityMergeSupport;
 import org.objectstyle.cayenne.util.NameConverter;
 
 /** Utility class that does reverse engineering of the database. 
@@ -282,13 +282,12 @@ public class DbLoader {
      * @return true if need to continue, false if must stop loading. 
      */
     public boolean loadDbEntities(DataMap map, List tables) throws SQLException {
-        boolean ret_code = true;
         dbEntityList = new ArrayList();
         Iterator iter = tables.iterator();
         while (iter.hasNext()) {
             Table table = (Table) iter.next();
 
-            // Check if there already is db entity under such name
+            // Check if there already is a DbEntity under such name
             // if so, consult the delegate what to do
             DbEntity oldEnt = map.getDbEntity(table.getName());
             if (oldEnt != null) {
@@ -406,24 +405,37 @@ public class DbLoader {
                 rs.close();
             }
         }
-        return ret_code;
+        return true;
     }
 
     /** 
-     * Creates ObjEntities from DbEntities. Uses NameConverter class to
-     * change database table and attribute names into whatever
-     * user wants them to be, e.g. from EMPLOYEE_NAME to employeeName. 
+     * Creates an ObjEntity for each DbEntity in the map.
+     * ObjEntities are created empty without 
      */
     public void loadObjEntities(DataMap map) {
-        Iterator it = dbEntityList.iterator();
-        while (it.hasNext()) {
-            DbEntity dbEntity = (DbEntity) it.next();
+
+        Iterator dbEntities = dbEntityList.iterator();
+        if (!dbEntities.hasNext()) {
+            return;
+        }
+
+        List loadedEntities = new ArrayList(dbEntityList.size());
+
+        // load empty ObjEntities for all the tables 
+        while (dbEntities.hasNext()) {
+            DbEntity dbEntity = (DbEntity) dbEntities.next();
+
+            // check if there are existing entities
+            Collection existing = map.getMappedEntities(dbEntity);
+            if(existing.size() > 0) {
+            	loadedEntities.addAll(existing);
+            	continue;
+            }
 
             String objEntityName =
                 NameConverter.undescoredToJava(dbEntity.getName(), true);
             // this loop will terminate even if no valid name is found
             // to prevent loader from looping forever (though such case is very unlikely)
-
             String baseName = objEntityName;
             for (int i = 1; i < 1000 && map.getObjEntity(objEntityName) != null; i++) {
                 objEntityName = baseName + i;
@@ -433,47 +445,16 @@ public class DbLoader {
             objEntity.setDbEntity(dbEntity);
             objEntity.setClassName(objEntity.getName());
             map.addObjEntity(objEntity);
+            loadedEntities.add(objEntity);
 
-            Iterator colIt = dbEntity.getAttributeMap().values().iterator();
-            while (colIt.hasNext()) {
-                DbAttribute dbAtt = (DbAttribute) colIt.next();
-                if (dbAtt.isPrimaryKey())
-                    continue;
-
-                String attName = NameConverter.undescoredToJava(dbAtt.getName(), false);
-                String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
-
-                if (logObj.isDebugEnabled()) {
-                    if (type == null || type.trim().length() == 0) {
-                        logObj.debug(
-                            "DbLoader::loadObjEntities(), Entity "
-                                + dbEntity.getName()
-                                + ", attribute "
-                                + attName
-                                + " db type "
-                                + dbAtt.getType());
-                    }
-
-                    if (dbAtt.getType() == Types.CLOB) {
-                        logObj.debug(
-                            "DbLoader::loadObjEntities(), Entity "
-                                + dbEntity.getName()
-                                + ", attribute "
-                                + attName
-                                + " type "
-                                + type);
-                    }
-                }
-
-                ObjAttribute objAtt = new ObjAttribute(attName, type, objEntity);
-                objAtt.setDbAttribute(dbAtt);
-                objEntity.addAttribute(objAtt);
-            }
-
+            // added entity without attributes or relationships...
             if (delegate != null) {
                 delegate.objEntityAdded(objEntity);
             }
         }
+
+        // update ObjEntity attributes and relationships
+        new EntityMergeSupport(map).synchronizeWithDbEntities(loadedEntities);
     }
 
     /** Loads database relationships into a DataMap. */
@@ -552,14 +533,19 @@ public class DbLoader {
         }
     }
 
-    /** Creates ObjRelationships based on map's previously loaded DbRelationships. */
+    /** 
+     * Creates ObjRelationships based on map's previously loaded DbRelationships. 
+     * 
+     * @deprecated Since 1.0b5 this method is no longer used, since loadObjEntities 
+     * takes care of loading attributes and relationships.
+     */
     public void loadObjRelationships(DataMap map) throws SQLException {
         Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity objEnt = (ObjEntity) it.next();
             DbEntity dbEnt = objEnt.getDbEntity();
 
-            // bug #578419: no assumptions should be made about current state of the model,
+            // no assumptions should be made about current state of the model,
             // it might as well contain ObjEntities without DbEntities
             if (dbEnt == null) {
                 continue;
@@ -568,12 +554,15 @@ public class DbLoader {
             Iterator relIt = dbEnt.getRelationships().iterator();
             while (relIt.hasNext()) {
                 DbRelationship dbRel = (DbRelationship) relIt.next();
-                ObjEntity targetEntity =
-                    (ObjEntity) map.getMappedEntities(
-                        (DbEntity) dbRel.getTargetEntity()).get(
-                        0);
 
-                String name = uniqueRelName(objEnt, targetEntity.getName(), dbRel.isToMany());
+                ObjEntity targetEntity =
+                    (ObjEntity) map
+                        .getMappedEntities((DbEntity) dbRel.getTargetEntity())
+                        .iterator()
+                        .next();
+
+                String name =
+                    uniqueRelName(objEnt, targetEntity.getName(), dbRel.isToMany());
                 ObjRelationship objRel = new ObjRelationship(name);
                 objRel.addDbRelationship(dbRel);
                 objRel.setSourceEntity(objEnt);
@@ -651,7 +640,6 @@ public class DbLoader {
 
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);
-        loadObjRelationships(dataMap);
         return dataMap;
     }
 }

@@ -431,7 +431,7 @@ public class DataMap {
     /** 
      * Returns a list of ObjEntities mapped to the given DbEntity.
      */
-    public List getMappedEntities(DbEntity dbEntity) {
+    public Collection getMappedEntities(DbEntity dbEntity) {
         if (dbEntity == null) {
             return Collections.EMPTY_LIST;
         }

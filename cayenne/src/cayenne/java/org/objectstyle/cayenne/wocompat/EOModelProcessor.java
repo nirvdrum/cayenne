@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.wocompat;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -357,7 +358,7 @@ public class EOModelProcessor {
             if ((firstRel != null) && (lastRel != null)) {
                 flatRel.setSourceEntity(e);
 
-                List potentialTargets =
+                Collection potentialTargets =
                     e.getDataMap().getMappedEntities(
                         (DbEntity) lastRel.getTargetEntity());
 
@@ -371,8 +372,7 @@ public class EOModelProcessor {
                             + potentialTargets.size());
                 }
 
-                flatRel.setTargetEntity((ObjEntity) potentialTargets.get(0));
-
+                flatRel.setTargetEntity((ObjEntity) potentialTargets.iterator().next());
                 e.addRelationship(flatRel);
             }
             else {

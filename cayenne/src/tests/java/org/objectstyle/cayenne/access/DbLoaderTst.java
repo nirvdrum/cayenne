@@ -127,8 +127,6 @@ public class DbLoaderTst extends CayenneTestCase {
             }
 
             if (supportsFK) {
-                // *** TESTING THIS ***
-                loader.loadObjRelationships(map);
                 Collection rels = ae.getRelationships();
                 assertNotNull(rels);
                 assertTrue(rels.size() > 0);
@@ -182,7 +180,7 @@ public class DbLoaderTst extends CayenneTestCase {
 
         // BLOBs should be mapped as byte[]
         ObjAttribute blobAttr = (ObjAttribute) blobEnt.getAttribute("blobCol");
-        assertNotNull(blobAttr);
+        assertNotNull("BlobTest.blobCol failed to load", blobAttr);
         assertEquals("byte[]", blobAttr.getType());
 
         ObjEntity clobEnt = map.getObjEntity("ClobTest");
