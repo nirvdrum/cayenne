@@ -146,4 +146,11 @@
 		</constructor-arg>
 		<property name="testResourcesDir"><value>build/tests/deps/test-resources</value></property>
 	</bean>
+	
+	<!-- ======================================= -->
+	<!-- SQLTemplate Customizer (external reference) -->
+	<!-- ======================================= -->
+	<bean id="SQLTemplateCustomizer" class="org.objectstyle.cayenne.unit.SpringResourceFactory">
+		<constructor-arg><value>src/tests/resources/test-resources/dml/unit.util.SQLTemplateCustomizer.xml</value></constructor-arg>
+	</bean>
 </beans>

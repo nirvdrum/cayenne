@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.unit.util.SQLTemplateCustomizer;
 import org.objectstyle.cayenne.util.Util;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -90,6 +91,7 @@ public class CayenneTestResources implements BeanFactoryAware {
     public static final String TEST_DIR_KEY = "cayenne.test.dir";
 
     public static final String SCHEMA_SETUP_STACK = "SchemaSetupStack";
+    public static final String SQL_TEMPLATE_CUSTOMIZER = "SQLTemplateCustomizer";
 
     private static CayenneTestResources resources;
 
@@ -193,6 +195,14 @@ public class CayenneTestResources implements BeanFactoryAware {
 
     public AccessStack getAccessStack(String name) {
         return (AccessStack) beanFactory.getBean(name, AccessStack.class);
+    }
+
+    public SQLTemplateCustomizer getSQLTemplateCustomizer() {
+        BeanFactory child =
+            (BeanFactory) beanFactory.getBean(SQL_TEMPLATE_CUSTOMIZER, BeanFactory.class);
+        return (SQLTemplateCustomizer) child.getBean(
+            SQL_TEMPLATE_CUSTOMIZER,
+            SQLTemplateCustomizer.class);
     }
 
     /**

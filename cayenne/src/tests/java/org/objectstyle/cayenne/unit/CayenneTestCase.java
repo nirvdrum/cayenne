@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.unit.util.SQLTemplateCustomizer;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared
@@ -120,6 +121,10 @@ public abstract class CayenneTestCase extends BasicTestCase {
 
     protected DataDomain getDomain() {
         return accessStack.getDataDomain();
+    }
+
+    protected SQLTemplateCustomizer getSQLTemplateCustomizer() {
+        return CayenneTestResources.getResources().getSQLTemplateCustomizer();
     }
 
     /**

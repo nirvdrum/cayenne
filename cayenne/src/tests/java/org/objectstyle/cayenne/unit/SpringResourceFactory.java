@@ -53,60 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.unit;
 
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.SQLTemplate;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
+ * A bean that loads other Spring beans from the specified location.
+ * 
  * @author Andrei Adamchik
  */
-public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
-    protected void setUp() throws Exception {
-        super.setUp();
-        deleteTestData();
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+public class SpringResourceFactory implements FactoryBean {
+
+    protected String location;
+    protected BeanFactory factory;
+
+    public SpringResourceFactory(String location) {
+        this.location = location;
     }
 
-    public void testExecuteSelect() throws Exception {
-        DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplate template = new SQLTemplate(Object.class, true);
-        template.setDefaultTemplate("SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)");
-        getSQLTemplateCustomizer().updateSQLTemplate(template, adapter);
-
-        Map bindings = new HashMap();
-        bindings.put("id", new Integer(33005));
-        template.setParameters(bindings);
-
-        SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
-        assertSame(adapter, plan.getAdapter());
-
-        MockupOperationObserver observer = new MockupOperationObserver();
-        Connection c = getConnection();
-        try {
-
-            plan.execute(c, template, observer);
-
+    public Object getObject() throws Exception {
+        if (factory == null) {
+            InputStream in = new FileInputStream(new File(location));
+            this.factory = new XmlBeanFactory(in);
         }
-        finally {
-            c.close();
-        }
+        return factory;
+    }
 
-        List rows = observer.rowsForQuery(template);
-        assertNotNull(rows);
-        assertEquals(1, rows.size());
-        Map row = (Map) rows.get(0);
+    public Class getObjectType() {
+        return BeanFactory.class;
+    }
 
-        assertEquals(bindings.get("id"), row.get("ARTIST_ID"));
-        assertEquals("artist5", row.get("ARTIST_NAME"));
-        assertTrue(row.containsKey("DATE_OF_BIRTH"));
+    public boolean isSingleton() {
+        return true;
     }
 }

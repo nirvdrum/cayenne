@@ -60,7 +60,6 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -81,11 +80,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        // customize for postgres, since it converts attributes to lowercase
-        query.setTemplate(
-            PostgresAdapter.class.getName(),
-            "SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH')"
-                + " FROM ARTIST ORDER BY ARTIST_ID");
+        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
 
         query.setFetchingDataRows(true);
 
@@ -103,11 +98,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        // customize for postgres, since it converts attributes to lowercase
-        query.setTemplate(
-            PostgresAdapter.class.getName(),
-            "SELECT #result('ARTIST_ID'), RTRIM(#result('ARTIST_NAME')), #result('DATE_OF_BIRTH')"
-                + " FROM ARTIST ORDER BY ARTIST_ID");
+        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
 
         query.setFetchingDataRows(false);
 
@@ -129,11 +120,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        // customize for postgres, since it converts attributes to lowercase
-        query.setTemplate(
-            PostgresAdapter.class.getName(),
-            "SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH')"
-                + " FROM ARTIST ORDER BY ARTIST_ID");
+        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
 
         query.setFetchLimit(fetchLimit);
 
@@ -152,11 +139,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        // customize for postgres, since it converts attributes to lowercase
-        query.setTemplate(
-            PostgresAdapter.class.getName(),
-            "SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH')"
-                + " FROM ARTIST ORDER BY ARTIST_ID");
+        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
 
         query.setPageSize(pageSize);
 
@@ -186,11 +169,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        // customize for postgres, since it converts attributes to lowercase
-        query.setTemplate(
-            PostgresAdapter.class.getName(),
-            "SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH')"
-                + " FROM ARTIST ORDER BY ARTIST_ID");
+        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
 
         ResultIterator it = context.performIteratedQuery(query);
 
