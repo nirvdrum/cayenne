@@ -40,7 +40,9 @@
     		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.0.3.
        		It should work with any other container that is compliant with Servlet 2.3
        		specification (older containers should also work, but you will not be able
-       		to use some of ServletConfiguration features discussed below).</p>
+       		to use some of ServletConfiguration features discussed below). All
+       		references to Tomcat below should apply in some form to other web containers
+       		as well.</p>
     		
     		<p>- Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>)
     		anywhere in the filesystem. A new directory named <code>cayenne-web-app</code>
@@ -144,41 +146,17 @@ cayenne-web-app\WEB-INF\classes> %JAVA_HOME%\bin\javac test\*.java formbean\*.ja
 
     		<p>On UNIX:</p>
 <source>
-cayenne-web-app# export CLASSPATH=$CLASSPATH:$CAYENNE_HOME/lib/cayenne.jar
-cayenne-web-app# $JAVA_HOME/bin/javac test/*.java
+cayenne-web-app# cd WEB-INF/classes
+cayenne-web-app# export CLASSPATH=$CLASSPATH:[servlet.jar]:../lib/struts.jar:../lib/cayenne.jar
+cayenne-web-app# $JAVA_HOME/bin/javac test/*.java formbean/*.java action/*.java
 </source>
 
-
-			<p>Main tutorial class is "test.Main". It takes a single parameter - a search
-			word to look up a gallery by name. It will try to find a matching gallery, then
-			create a new artist (Salvador Dali) with a single painting and add this painting 
-			to the found gallery. To run the tutorial do something like this (example given for Windows):
+			<p>To deploy, simply copy <code>cayenne-web-app</code> directory to Tomcat 
+			<code>webapps</code> directory and restart the Tomcat. URL of the new applications
+			is <a href=
+			"http://localhost:8080/cayenne-web-app/">http://localhost:8080/cayenne-web-app/</a>
+			(on containers other then Tomcat, this will be different).
 			</p>
-<source>
-projectdir> set CLASSPATH=%CLASSPATH%;.
-projectdir> %JAVA_HOME%\bin\java -classpath . test.Main metro
-</source>
-			
-			<p>If there is a gallery matching search criteria (in our case "Metropolitan Museum of Art"
-			would match the word "metro"), the following output will be printed:
-			</p>
-<source>
-SEVERE access.QueryLogger 0: --- will run 1 query.
-SEVERE access.QueryLogger 40: SELECT t0.GALLERY_NAME, t0.GALLERY_ID FROM GALLERY t0 
-WHERE UPPER(t0.GALLERY_NAME) LIKE UPPER(?) [params: '%metro%']
-SEVERE access.QueryLogger 140: === returned 1 row.
-
-Found gallery 'The Metropolitan Museum of Art'.
-
-SEVERE access.QueryLogger 210: --- will run 2 queries.
-SEVERE access.QueryLogger 220: INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) 
-VALUES (?, ?, ?) [params: 41, NULL, 'Salvador Dali']
-SEVERE access.QueryLogger 220: === updated 1 row.
-SEVERE access.QueryLogger 230: INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, 
-ESTIMATED_PRICE, ARTIST_ID) VALUES (?, ?, ?, ?) [params: 41, 'Sleep', NULL, 41]
-SEVERE access.QueryLogger 240: === updated 1 row.
-SEVERE access.QueryLogger 250: +++ transaction committed.
-</source>
     	</subsection>
     	</subsection>
     </section>

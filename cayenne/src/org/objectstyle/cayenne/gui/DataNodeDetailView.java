@@ -120,7 +120,7 @@ public class DataNodeDetailView
 	JTextField maxConnections;
 
 	/** Cludge to prevent marking domain as dirty during initial load. */
-	private boolean ignoreChange = false;
+	private boolean ignoreChange;
 
 	public DataNodeDetailView(Mediator temp_mediator) {
 		super();
@@ -128,6 +128,7 @@ public class DataNodeDetailView
 		mediator.addDataNodeDisplayListener(this);
 		// Create and layout components
 		init();
+
 		// Add listeners
 		location.getDocument().addDocumentListener(this);
 		name.getDocument().addDocumentListener(this);
@@ -163,12 +164,11 @@ public class DataNodeDetailView
 		factoryLabel = new JLabel("Data source factory:");
 		factory = new JComboBox();
 		factory.setEditable(true);
-		DefaultComboBoxModel model;
-		String[] arr =
-			{
-				DataSourceFactory.JNDI_FACTORY,
-				DataSourceFactory.DIRECT_FACTORY };
-		model = new DefaultComboBoxModel(arr);
+		DefaultComboBoxModel model =
+			new DefaultComboBoxModel(
+				new String[] {
+					DataSourceFactory.JNDI_FACTORY,
+					DataSourceFactory.DIRECT_FACTORY});
 		factory.setModel(model);
 		factory.setSelectedIndex(-1);
 
@@ -300,21 +300,27 @@ public class DataNodeDetailView
 		} else if (e.getDocument() == userName.getDocument()) {
 
 			String nameStr =
-				(userName.getText().trim().length() > 0) ? userName.getText().trim() : null;
+				(userName.getText().trim().length() > 0)
+					? userName.getText().trim()
+					: null;
 			info.setUserName(nameStr);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
 		} else if (e.getDocument() == driver.getDocument()) {
 
 			String driverStr =
-				(driver.getText().trim().length() > 0) ? driver.getText().trim() : null;
+				(driver.getText().trim().length() > 0)
+					? driver.getText().trim()
+					: null;
 			info.setJdbcDriver(driverStr);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
 		} else if (e.getDocument() == url.getDocument()) {
 
 			String urlStr =
-				(url.getText().trim().length() > 0) ? url.getText().trim() : null;
+				(url.getText().trim().length() > 0)
+					? url.getText().trim()
+					: null;
 			info.setDataSourceUrl(urlStr);
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
@@ -347,27 +353,37 @@ public class DataNodeDetailView
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		if (null == node)
+		if (null == node) {
 			return;
-		GuiDataSource data_src = (GuiDataSource) node.getDataSource();
-		DataSourceInfo info = data_src.getDataSourceInfo();
-		DataNodeEvent event;
+		}
 
+		Object src = e.getSource();
+		DataSourceInfo info =
+			((GuiDataSource) node.getDataSource()).getDataSourceInfo();
+
+		DataNode aNode = mediator.getCurrentDataNode();
 		if (src == factory) {
 			String ele = (String) factory.getModel().getSelectedItem();
-			if (null != ele && ele.trim().length() > 0) {
+			if (ele != null && ele.trim().length() > 0) {
 				if (ele.equals(DataSourceFactory.DIRECT_FACTORY)) {
 					fileBtn.setVisible(true);
 					location.setEditable(false);
-					location.setText("");
 				} else {
 					fileBtn.setVisible(false);
 					location.setEditable(true);
 				}
-				mediator.getCurrentDataNode().setDataSourceFactory(ele);
-			} else
-				mediator.getCurrentDataNode().setDataSourceFactory(null);
+
+				if (!ele.equals(aNode.getDataSourceFactory())) {
+					aNode.setDataSourceFactory(ele);
+					mediator.setDirty(true);
+				}
+			} else {
+				if (aNode.getDataSourceFactory() != null) {
+					aNode.setDataSourceFactory(null);
+					mediator.setDirty(true);
+				}
+			}
+
 		} else if (src == adapter) {
 			String ele = (String) adapter.getModel().getSelectedItem();
 			DbAdapter adapt = null;
@@ -449,7 +465,6 @@ public class DataNodeDetailView
 			location.setText(relative_location);
 			// Node location changed - mark current domain dirty
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-
 		} catch (Exception e) {
 			System.out.println(
 				"Error setting node file location, " + e.getMessage());
@@ -460,7 +475,6 @@ public class DataNodeDetailView
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
 		node = e.getDataNode();
 		if (null == node) {
-			logObj.fine("Node reset to null");
 			return;
 		}
 		GuiDataSource src = (GuiDataSource) node.getDataSource();
@@ -491,8 +505,8 @@ public class DataNodeDetailView
 					found = true;
 					break;
 				}
-			} // End for()
-			// In case if there is unknown factory
+			}
+
 			if (!found) {
 				model.addElement(selected_class);
 				model.setSelectedItem(selected_class);
@@ -512,8 +526,7 @@ public class DataNodeDetailView
 					// If direct connection, 
 					// show File button and disable text field.
 					// Otherwise hide File button and enable text field.
-					if (selected_class
-						.equals(DataSourceFactory.DIRECT_FACTORY)) {
+					if (selected_class.equals(DataSourceFactory.DIRECT_FACTORY)) {
 						fileBtn.setVisible(true);
 						location.setEditable(false);
 					} else {
@@ -523,8 +536,8 @@ public class DataNodeDetailView
 
 					break;
 				}
-			} // End for()
-			// In case if there is unknown factory
+			}
+
 			if (!found) {
 				model.addElement(selected_class);
 				model.setSelectedItem(selected_class);
@@ -542,5 +555,4 @@ public class DataNodeDetailView
 		minConnections.setText(String.valueOf(info.getMinConnections()));
 		maxConnections.setText(String.valueOf(info.getMaxConnections()));
 	} //end populateDataSourceInfo()
-
 } // End class DataNodeDetailView
