@@ -100,7 +100,7 @@ public class EditorView
     private static final String OBJ_VIEW = "ObjView";
     private static final String DB_VIEW = "DbView";
 
-    protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     protected BrowseView treePanel;
     protected JPanel detailPanel = new JPanel();
     protected JPanel emptyPanel = new JPanel();
