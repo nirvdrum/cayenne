@@ -62,7 +62,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -70,6 +70,7 @@ import java.util.ListIterator;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbGenerator;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -103,7 +104,7 @@ public class CayenneTestDatabaseSetup {
 
         Connection conn = resources.getSharedConnection();
 
-        List list = this.dbEntitiesInInsertOrder();
+        List list = this.dbEntitiesInInsertOrder(map);
         try {
             if (conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
@@ -151,7 +152,7 @@ public class CayenneTestDatabaseSetup {
         Connection conn = resources.getSharedConnection();
         DataNode node = resources.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        List list = this.dbEntitiesInInsertOrder();
+        List list = this.dbEntitiesInInsertOrder(map);
 
         try {
             delegate.willDropTables(conn, map);
@@ -208,10 +209,10 @@ public class CayenneTestDatabaseSetup {
         try {
             delegate.willCreateTables(conn, map);
             Statement stmt = conn.createStatement();
-            Iterator it = tableCreateQueries();
+            Iterator it = tableCreateQueries(map);
             while (it.hasNext()) {
                 String query = (String) it.next();
-                logObj.info("Create table: " + query);
+                QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, query, Collections.EMPTY_LIST);
                 stmt.execute(query);
             }
             delegate.createdTables(conn, map);
@@ -223,9 +224,10 @@ public class CayenneTestDatabaseSetup {
         // create primary key support
         DataNode node = resources.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        Collection ents =
-            ((DataMap) node.getDataMaps().iterator().next()).getDbEntities();
-        adapter.getPkGenerator().createAutoPk(node, new ArrayList(ents));
+        List filteredEntities =
+            this.dbEntitiesInInsertOrder(
+                ((DataMap) node.getDataMaps().iterator().next()));
+        adapter.getPkGenerator().createAutoPk(node, filteredEntities);
     }
 
     /** 
@@ -237,16 +239,19 @@ public class CayenneTestDatabaseSetup {
     public void createPkSupportForMapEntities(DataNode node) throws Exception {
         Iterator dataMaps = node.getDataMaps().iterator();
         while (dataMaps.hasNext()) {
-            Collection ents = ((DataMap) dataMaps.next()).getDbEntities();
-            node.getAdapter().getPkGenerator().createAutoPk(node, new ArrayList(ents));
+            List filteredEntities =
+                this.dbEntitiesInInsertOrder(((DataMap) dataMaps.next()));
+            node.getAdapter().getPkGenerator().createAutoPk(node, filteredEntities);
         }
     }
+    
+    
 
     /** Returns iterator of preprocessed table create queries */
-    public Iterator tableCreateQueries() throws Exception {
+    protected Iterator tableCreateQueries(DataMap map) throws Exception {
         DbAdapter adapter = resources.getSharedNode().getAdapter();
         DbGenerator gen = new DbGenerator(adapter, map);
-        List orderedEnts = this.dbEntitiesInInsertOrder();
+        List orderedEnts = this.dbEntitiesInInsertOrder(map);
         List queries = new ArrayList();
 
         // table definitions
@@ -281,7 +286,7 @@ public class CayenneTestDatabaseSetup {
      * Helper method that orders DbEntities to satisfy referential
      * constraints and returns an ordered list.
      */
-    private List dbEntitiesInInsertOrder() {
+    private List dbEntitiesInInsertOrder(DataMap map) {
         List entities = new ArrayList(map.getDbEntities());
 
         // filter out BLOB/CLOB tables if database does not support them
