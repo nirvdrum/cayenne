@@ -37,25 +37,25 @@
         	<p>
         	This becomes even a bigger problem in a generic product like Cayenne that should
         	support any database. Therefore Cayenne provides <a href=
-        	"../../api/org/objectstyle/cayenne/dba/package-summary.html">DbAdapter 
+        	"../../api/cayenne/org/objectstyle/cayenne/dba/package-summary.html">DbAdapter 
         	architecture</a> as a way of handling database differences. It works in 
         	conjunction with JDBC.
         	</p>
         	
         	<subsection name="4.5.1 DbAdapter Design Overview">
         	<p>DataNode (Cayenne access class closest to DataSource) always has a <a href=
-        	"../../api/org/objectstyle/cayenne/dba/DbAdapter.html">DbAdapter</a>
+        	"../../api/cayenne/org/objectstyle/cayenne/dba/DbAdapter.html">DbAdapter</a>
         	object associated with it. DataNode delegates certain database-related functions
         	to DbAdapter, so that adapter could perform them in a way appropriate for
         	the specific database.</p>
         	
         	<p>There is a generic implementation of DbAdapter -
         	<a href=
-        	"../../api/org/objectstyle/cayenne/dba/JdbcAdapter.html">JdbcAdapter</a>. 
+        	"../../api/cayenne/org/objectstyle/cayenne/dba/JdbcAdapter.html">JdbcAdapter</a>. 
         	For most operations it works with almost any database as is. Database-specific 
         	implementations of DbAdapter are usually created to refine certain functions 
         	of JdbcAdapter. For example <a href=
-        	"../../api/org/objectstyle/cayenne/dba/oracle/OracleAdapter.html">OracleAdapter</a>
+        	"../../api/cayenne/org/objectstyle/cayenne/dba/oracle/OracleAdapter.html">OracleAdapter</a>
         	extends JdbcAdapter to provide a special PkGenerator and to optimize certain 
         	operations for Oracle. Class diagram with DbAdapter and related classes is shown below:
         	</p>
@@ -66,7 +66,7 @@
         	<ul>
         		<li>maps database data types to JDBC "standard" types.</li>
         		<li>serves as a factory of <a href=
-        	    "../../api/org/objectstyle/cayenne/access/QueryTranslator.html">QueryTranslator</a>
+        	    "../../api/cayenne/org/objectstyle/cayenne/access/QueryTranslator.html">QueryTranslator</a>
         	    objects.</li>
         	    <li>provides information about the features supported by a target database.</li>
         	    <li>provides <a href="autopk.html">automatic primary key 

@@ -13,14 +13,14 @@
             that create abstraction independent from SQL dialect used by the
             target database. SQL queries not covered by Cayenne can also be performed. 
             This is done using wrappers around SQL statements (<a href=
-            "../../api/org/objectstyle/cayenne/query/SqlSelectQuery.html">SqlSelectQuery</a>
+            "../../api/cayenne/org/objectstyle/cayenne/query/SqlSelectQuery.html">SqlSelectQuery</a>
             and <a href=
-            "../../api/org/objectstyle/cayenne/query/SqlModifyQuery.html">SqlModfyQuery</a>).
+            "../../api/cayenne/org/objectstyle/cayenne/query/SqlModifyQuery.html">SqlModfyQuery</a>).
             </p>
             
             <subsection name="4.3.1 Cayenne Select Queries">
             <p>To fetch a list of objects from the database, a <a href=
-            "../../api/org/objectstyle/cayenne/query/SelectQuery.html">SelectQuery</a>
+            "../../api/cayenne/org/objectstyle/cayenne/query/SelectQuery.html">SelectQuery</a>
             must be created. It consists of a root entity, qualifier expression and orderings list.
             Here is a logical correspondence of Cayenne SelectQuery parts and 
             SQL constructs:
@@ -61,9 +61,9 @@ SelectQuery query = new SelectQuery("Artist");
 			control of what objects should be retrieved from the database. In this
 			case qualifier expression should be used. Qualifier is an instance of
 			a class implementing <a href=
-            "../../api/org/objectstyle/cayenne/exp/Expression.html">Expression interface</a>.
+            "../../api/cayenne/org/objectstyle/cayenne/exp/Expression.html">Expression interface</a>.
 			The easiest way to build valid expressions is by using <a href=
-            "../../api/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory
+            "../../api/cayenne/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory
             class</a>. Extending the previous example, the following code builds a query  
             that would tell Cayenne to fetch artists that have a name that starts with "A"
             ignoring case:
@@ -83,7 +83,7 @@ query.setQualifier(qualifier);
    			"Binary" indicates the fact that the target expression has two operands.
    			"Path" indicates that second argument, the left hand operand of a binary expression ("artistName"),
    			will be converted to a "path expression" - expression of type <a href=
-            "../../api/org/objectstyle/cayenne/exp/Expression.html#OBJ_PATH">Expression.OBJ_PATH</a>.
+            "../../api/cayenne/org/objectstyle/cayenne/exp/Expression.html#OBJ_PATH">Expression.OBJ_PATH</a>.
             This is a special type of expressions that allows to specify attributes and related entities
             relative to the query root entity. So in this example "artistName" when resolved relative 
             to the entity "Artist" is just an attribute of "Artist". More complex path expressions

@@ -15,7 +15,7 @@
             <p>Java classes can be generated from an existing DataMap using CayenneModeler
             tool or a special <a href="http://jakarat.apache.org/ant/">Ant</a> task, 
             <code>Cgen</code> (short for "Cayenne Class Generator"), implemented by <a href=
-            "../../api/org/objectstyle/cayenne/tools/CayenneGenerator.html">CayenneGenerator</a>
+            "../../api/cayenne/org/objectstyle/cayenne/tools/CayenneGenerator.html">CayenneGenerator</a>
             Java class. 
             This chapter describes how to use <code>Cgen</code> task. For details on 
             how class generation can be done using GUI see 

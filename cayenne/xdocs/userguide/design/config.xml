@@ -9,7 +9,7 @@
     <section name="4. Design">
        <subsection name="4.8 Configuration" anchor="config">
             <p>Central piece in Cayenne configuration is 
-            <a href="../../api/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
+            <a href="../../api/cayenne/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
             class. It creates DataDomain objects used later to access the database. Database
             access is configured based
             on the data found in Cayenne configuration files.
@@ -23,7 +23,7 @@
 Configuration conf = Configuration.getSharedConfig();
 </source>
             <p>By default shared object returned will be an instance of 
-            <a href="../../api/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>.
+            <a href="../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>.
             Sometimes an additional line of code is needed for it to find application configuration files
             jarred with the application. This normally happenes when cayenne.jar is placed in extensions
             directory ($JRE_HOME/lib/ext) and application is run from the CLASSPATH location. This code is 
@@ -46,7 +46,7 @@ Configuration conf = Configuration.getSharedConfig();
             non-standard locations, as well as to automatically 
             configure Cayenne during different events that happen in deployment containers.
             For example, in addition to DefaultConfiguration, Cayenne framework provides
-            <a href="../../api/org/objectstyle/cayenne/conf/ServletConfiguration.html">ServletConfiguration</a>
+            <a href="../../api/cayenne/org/objectstyle/cayenne/conf/ServletConfiguration.html">ServletConfiguration</a>
             class that is able to configure Cayenne when a web application is started
             and locates resources relative to WEB-INF directory
             of a deployed web application. More information on the types and locations of configuration 

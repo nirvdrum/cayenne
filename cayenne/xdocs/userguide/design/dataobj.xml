@@ -14,9 +14,9 @@
             required to provide objects persistence.</p>
             
             <p>All objects that represent database data in Cayenne must implement <a href=
-            "../../api/org/objectstyle/cayenne/DataObject.html">DataObject</a> interface.
+            "../../api/cayenne/org/objectstyle/cayenne/DataObject.html">DataObject</a> interface.
             Default implementation of DataObject is <a href=
-            "../../api/org/objectstyle/cayenne/CayenneDataObject.html">CayenneDataObject</a>.
+            "../../api/cayenne/org/objectstyle/cayenne/CayenneDataObject.html">CayenneDataObject</a>.
             Normally application classes that are used for data access would extend 
             CayenneDataObject. Class diagram of DataObject and its components is shown below
             (details explained in the following subsections):
@@ -26,7 +26,7 @@
 
             <subsection name="4.2.1 ObjectId">
             	<p>Each object in Cayenne is identified by <a href=
-            	"../../api/org/objectstyle/cayenne/ObjectId.html">ObjectId</a>. 
+            	"../../api/cayenne/org/objectstyle/cayenne/ObjectId.html">ObjectId</a>. 
             	ObjectId is an abstraction similar to the Primary Key concept in
             	relational databases. Its internal implementation in fact uses 
             	primary key values from the database. Cayenne takes care of creating 

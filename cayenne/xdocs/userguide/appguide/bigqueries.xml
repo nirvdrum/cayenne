@@ -85,7 +85,7 @@ Artist artist = (Artist)ctxt.objectFromDataRow("Artist", row);
 			
 			<p>Cayenne solves this by allowing to 
 			obtain results in the form of <a href=
-			"../../api/org/objectstyle/cayenne/access/ResultIterator.html"><code>ResultIterator</code></a>. 
+			"../../api/cayenne/org/objectstyle/cayenne/access/ResultIterator.html"><code>ResultIterator</code></a>. 
 			<code>ResultIterator</code> is connected
 			to an open <code>java.sql.ResultSet</code>, therefore it's methods may throw checked 
 			exceptions. ResultIterator returns data rows (not DataObjects) one at a time, reading them

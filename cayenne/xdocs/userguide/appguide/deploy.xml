@@ -24,7 +24,7 @@
            
            <subsection name="5.9.1 Standalone Applications" anchor="standalone">
                <p>In a standalone Java application, normally a <a href=
-               "../../api/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a> 
+               "../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a> 
                 will be used to locate and load configuration files. This approach
                 does not require any special Java code. Shared configuration objects
                 can simply be obtained by calling <code>getSharedConfig</code>:</p>
@@ -42,7 +42,7 @@ Configuration conf = Configuration.getSharedConfig();
               <p>Location of the datasource files referenced in <code>cayenne.xml</code>
               depends on what factory was assigned to each datasource in <code>cayenne.xml</code>.
               Normally this would be a <a href=
-               "../../api/org/objectstyle/cayenne/conf/DriverDataSourceFactory.html"
+               "../../api/cayenne/org/objectstyle/cayenne/conf/DriverDataSourceFactory.html"
                >org.objectstyle.cayenne.conf.DriverDataSourceFactory</a>. It would use
                the following lookup order to resolve location:
                
@@ -78,7 +78,7 @@ Configuration conf = Configuration.getSharedConfig();
                <p>When deploying an application in a web container, it is still possible 
                to use the procedure described for the standalone applications above.
                But Cayenne provides a better way to do that. Suggested way is to use <a href=
-               "../../api/org/objectstyle/cayenne/conf/BasicServletConfiguration.html"
+               "../../api/cayenne/org/objectstyle/cayenne/conf/BasicServletConfiguration.html"
                >BasicServletConfiguration</a> subclass of Configuration. It does <code>cayenne.xml</code>
                and datamap files lookup relative to the WEB-INF directory of a deployed application.
                Since WEB-INF is a standard place to put configuration files, this approach makes
@@ -132,7 +132,7 @@ public class MyServlet extends HttpServlet {
                introduces a set of container events that can be sent to the interested
                listeners. Cayenne contains a subclass of BasicServletConfiguration called
                <a href=
-               "../../api/org/objectstyle/cayenne/conf/ServletConfiguration.html"
+               "../../api/cayenne/org/objectstyle/cayenne/conf/ServletConfiguration.html"
                >ServletConfiguration</a> that implements container listener interfaces
                and can be registered as a listener to initialize Cayenne on context 
                startup and to assign a new DataContext object to every new session

@@ -26,16 +26,16 @@
             </p>
             
             <p><strong>- Generate Java classes : </strong> In Cayenne
-            <a href="../../api/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
+            <a href="../../api/cayenne/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
             map to Java classes that implement 
-            <a href="../../api/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
+            <a href="../../api/cayenne/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
             CayenneModeler can be used to generate and maintain such Java classes.            
             </p>
             
             <p><strong>- Access Cayenne classes from your Java code : </strong> 
             Access to Cayenne functionality at the user (Java developer) level 
             is done via  <a 
-            href="../../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
+            href="../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
             class.      
             </p>
             

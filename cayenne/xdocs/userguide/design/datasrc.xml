@@ -27,7 +27,7 @@
         	</p>
             
             <p>Cayenne DataSource is implemented in <a href=
-            "../../api/org/objectstyle/cayenne/conn/package-summary.html">org.objectstyle.cayenne.conn</a>
+            "../../api/cayenne/org/objectstyle/cayenne/conn/package-summary.html">org.objectstyle.cayenne.conn</a>
             package. The following class diagram shows how Cayenne connection package classes
         	(shown in light blue) implement java.sql and javax.sql interfaces 
         	(shown in yellow) to provide DataSource 
@@ -36,14 +36,14 @@
         	<img src="/images/conn-chart.gif" alt="DataSource Implementation Diagram"/>
         	
         	<p>Normally instances of <a href=
-        	"../../api/org/objectstyle/cayenne/conn/PoolManager.html">PoolManager</a>
+        	"../../api/cayenne/org/objectstyle/cayenne/conn/PoolManager.html">PoolManager</a>
         	class serve as a publicly accessible DataSource objects. They use 
-        	<a href="../../api/org/objectstyle/cayenne/conn/PoolDataSource.html">PoolDataSource</a>
+        	<a href="../../api/cayenne/org/objectstyle/cayenne/conn/PoolDataSource.html">PoolDataSource</a>
             internally as a factory of PooledConnections. Each 
-        	<a href="../../api/org/objectstyle/cayenne/conn/PooledConnectionImpl.html">PooledConnectionImpl</a> 
+        	<a href="../../api/cayenne/org/objectstyle/cayenne/conn/PooledConnectionImpl.html">PooledConnectionImpl</a> 
         	produces a JDBC Connection object that is used to connect to the database.
         	JDBC Connections are returned to the user as   
-        	<a href="../../api/org/objectstyle/cayenne/conn/ConnectionWrapper.html">ConnectionWrapper</a> 
+        	<a href="../../api/cayenne/org/objectstyle/cayenne/conn/ConnectionWrapper.html">ConnectionWrapper</a> 
         	objects that delegate all database operations to the underlying connection 
         	and notify parent PooledConnection about SQLExceptions.	
         	</p>

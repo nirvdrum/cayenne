@@ -56,7 +56,7 @@
             </p>  
             
             <p>Cayenne organizes mapping information into <a href=
-            "../../api/org/objectstyle/cayenne/map/DataMap.html">DataMap's</a>. Normally a DataMap is
+            "../../api/cayenne/org/objectstyle/cayenne/map/DataMap.html">DataMap's</a>. Normally a DataMap is
             saved in XML format. Other formats are also possible. For instance Cayenne can create DataMaps
             using WebObjects EOModel format. 
             Normally DataMaps are created and maintained using CayenneModeler GUI tool.

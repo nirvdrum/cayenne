@@ -10,7 +10,7 @@
             <subsection name="4.4 Access Classes" anchor="access_classes">
             <p>Cayenne database access module consists of a stack of objects, 
             all implementing <a href=
-            "../../api/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine
+            "../../api/cayenne/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine
             interface</a>:</p>
             
             <img src="/images/access-class.gif" alt="Cayenne Access Class Diagram"/>
@@ -20,7 +20,7 @@
             Each higher layer serves as a controller for the underlying layer, adding more
             functionality. Responsibilities of each class are described below:</p>
             
-            <p><a href="../../api/org/objectstyle/cayenne/access/DataNode.html">1.
+            <p><a href="../../api/cayenne/org/objectstyle/cayenne/access/DataNode.html">1.
             DataNode</a> - lowest layer controller class, closest to the database. Its
             functions are (some of them are delegated to helper classes):</p>
             
@@ -28,7 +28,7 @@
                 <li>connects to the database obtaining connection via a JDBC DataSource.</li>
                 
                 <li>converts <a href=
-                "../../api/org/objectstyle/cayenne/query/Query.html">Query</a>
+                "../../api/cayenne/org/objectstyle/cayenne/query/Query.html">Query</a>
                 objects into SQL statements and execute them.</li>
                 
                 <li>converts JDBC ResultSets into object snapshots (normally this
@@ -37,7 +37,7 @@
                 <li>generates primary keys for the newly inserted objects.</li>
             </ul>
             
-            <p><a href="../../api/org/objectstyle/cayenne/access/DataDomain.html">
+            <p><a href="../../api/cayenne/org/objectstyle/cayenne/access/DataDomain.html">
             2. DataDomain</a> - second layer controller class on top of DataNode.
             Provides following functionality:</p>
             <ul>
@@ -68,10 +68,10 @@
                 DataContexts.</li>
             </ul>
             
-            <p><a href="../../api/org/objectstyle/cayenne/access/DataContext.html">3.
+            <p><a href="../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html">3.
             DataContext</a> - highest layer controller class. This is the class directly
             accessed by users in most cases. Provides <a href=
-            "../../api/org/objectstyle/cayenne/DataObject.html">DataObjects</a>
+            "../../api/cayenne/org/objectstyle/cayenne/DataObject.html">DataObjects</a>
             management including these functions:</p>
             
             <ul>
@@ -85,7 +85,7 @@
                 commit them all at once without writing any SQL (or even without
                 creating a bunch of Query objects). DataContext tracks all changes to
                 objects, so it will do this for you. Just call &quot;<a href=
-                "../../api/org/objectstyle/cayenne/access/DataContext.html#commitChanges()">commitChanges</a>&quot;.
+                "../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html#commitChanges()">commitChanges</a>&quot;.
                 </li>
                 
                 <li>Caches DataObjects. Performs automatic lazy fetching of related objects.</li>
