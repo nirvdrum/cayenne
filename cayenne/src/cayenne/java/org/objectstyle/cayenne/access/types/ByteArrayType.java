@@ -97,9 +97,9 @@ public class ByteArrayType extends AbstractType {
         return dest;
     }
 
-    public ByteArrayType(boolean trimminBytes, boolean usingBlobs) {
+    public ByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
         this.usingBlobs = usingBlobs;
-        this.trimmingBytes = trimminBytes;
+        this.trimmingBytes = trimmingBytes;
     }
 
     public String getClassName() {
