@@ -525,7 +525,7 @@ public class DataContextTst extends DataContextTestBase {
             new SQLTemplate(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
-                    + "VALUES ($pid, '$pt', $aid, $price)",
+                    + "VALUES ($pid, '$pt', $aid, #bind($price 'DECIMAL' 2))",
                 false);
 
         Map[] maps = new Map[3];
@@ -534,7 +534,7 @@ public class DataContextTst extends DataContextTestBase {
             maps[i].put("pid", new Integer(1 + i));
             maps[i].put("pt", "P-" + i);
             maps[i].put("aid", new Integer(33002));
-            maps[i].put("price", new Double(1.1 * (i + 1)));
+            maps[i].put("price", new BigDecimal(1.1 * (i + 1)));
         }
 
         // single batch of parameters

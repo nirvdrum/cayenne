@@ -227,7 +227,8 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         Map row = (Map) rows.get(0);
 
         assertNotNull(row.get("DOB"));
-        assertEquals(java.sql.Timestamp.class, row.get("DOB").getClass());
+        // Sybase returns a Timestamp subclass... so can't test equality
+        assertTrue(java.sql.Timestamp.class.isAssignableFrom(row.get("DOB").getClass()));
     }
 
     private void setDate(Date date, int artistId) {
