@@ -260,8 +260,14 @@ public class CayenneGenerator extends Task {
                     destDir.getPath() + File.separator + className + ".java");
 
             if (dest.exists()) {
+                
+                // no overwrite of subclasses
+                if(makepairs) {
+                    return null;
+                }
+                
                 // skip if said so
-                if (!makepairs && !overwrite) {
+                if (!overwrite) {
                     return null;
                 }
                 
