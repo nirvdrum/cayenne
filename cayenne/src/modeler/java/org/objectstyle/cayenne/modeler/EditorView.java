@@ -77,8 +77,11 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 
-/** Panel for the Editor window. 
- *  @author Michael Misha Shengaout. */
+/** 
+ * Panel for the Editor window.
+ * 
+ *  @author Michael Misha Shengaout. 
+ */
 public class EditorView
     extends JPanel
     implements

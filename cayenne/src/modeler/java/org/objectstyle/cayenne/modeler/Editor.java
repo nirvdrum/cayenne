@@ -180,6 +180,7 @@ public class Editor
     protected Properties props;
     protected final JFileChooser fileChooser = new JFileChooser();
     protected XmlFilter xmlFilter = new XmlFilter();
+    protected StatusBarController status;
 
     /** Returns an editor singleton object. */
     public static Editor getFrame() {
@@ -267,10 +268,12 @@ public class Editor
             props = new Properties();
         }
 
+        ModelerContext.setupContext();
         initEmptyActions();
 
         initMenus();
         initToolbar();
+        initStatusBar();
 
         // these are legacy methods being refactored out
         initOther();
@@ -423,6 +426,13 @@ public class Editor
             }
         });
     }
+    
+    protected void initStatusBar() {
+    	StatusBarView statusBar = new StatusBarView();
+    	getContentPane().add(statusBar, BorderLayout.SOUTH);
+    	status = new StatusBarController();
+    	status.startup(statusBar);
+    }
 
     /** Initializes main toolbar. */
     protected void initToolbar() {
@@ -511,6 +521,8 @@ public class Editor
         validate();
 
         setProjectTitle(project.getMainProjectFile().getAbsolutePath());
+        
+        status.projectOpened();
     }
 
     /**
