@@ -177,7 +177,7 @@ public class DbLoaderHelper {
         final DbLoaderOptionsDialog dialog = new DbLoaderOptionsDialog(
                 schemas,
                 dbUserName,
-                true);
+                false);
 
         try {
             // since we are not inside EventDisptahcer Thread, must run it via

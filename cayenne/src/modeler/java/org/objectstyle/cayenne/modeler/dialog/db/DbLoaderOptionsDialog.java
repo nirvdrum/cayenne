@@ -126,15 +126,13 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
 
         // assemble
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(150dlu;pref)",
+                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         schemaLabel = builder.append("Select Schema:", schemaSelector);
-        builder.appendSeparator("Table/View Options");
         builder.append("Table Name Pattern:", tableNamePatternField);
-        builder.appendSeparator("Stored Procedure Options");
         builder.append("Load Procedures:", loadProcedures);
         procedureLabel = builder.append("Procedure Name Pattern:", procNamePatternField);
 
