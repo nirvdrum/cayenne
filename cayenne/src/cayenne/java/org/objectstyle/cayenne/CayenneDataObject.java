@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -103,12 +104,28 @@ public class CayenneDataObject implements DataObject {
         return dataContext;
     }
 
+    /**
+     * Initializes DataObject's persistence context.
+     */
     public void setDataContext(DataContext dataContext) {
         this.dataContext = dataContext;
 
         if (dataContext == null) {
             this.persistenceState = PersistenceState.TRANSIENT;
         }
+    }
+    
+    /**
+     * Returns mapped ObjEntity for this object. If an object is transient or is not
+     * mapped returns null.
+     * 
+     * @since 1.2
+     */
+    // TODO: maybe move to an already overloaded DataObject interface?
+    public ObjEntity getObjEntity() {
+        return (getDataContext() != null) ? getDataContext()
+                .getEntityResolver()
+                .lookupObjEntity(this) : null;
     }
 
     public ObjectId getObjectId() {
@@ -561,10 +578,18 @@ public class CayenneDataObject implements DataObject {
     protected void validateForSave(ValidationResult validationResult) {
 
         ObjEntity objEntity = getDataContext().getEntityResolver().lookupObjEntity(this);
-        ExtendedTypeMap types = getDataContext()
-                .lookupDataNode(objEntity.getDataMap())
-                .getAdapter()
-                .getExtendedTypes();
+        if (objEntity == null) {
+            throw new CayenneRuntimeException(
+                    "No ObjEntity mapping found for DataObject " + getClass().getName());
+        }
+        
+        DataNode node = getDataContext().lookupDataNode(objEntity.getDataMap());
+        if (node == null) {
+            throw new CayenneRuntimeException("No DataNode found for objEntity: "
+                    + objEntity.getName());
+        }
+        
+        ExtendedTypeMap types = node.getAdapter().getExtendedTypes();
 
         // validate mandatory attributes
 

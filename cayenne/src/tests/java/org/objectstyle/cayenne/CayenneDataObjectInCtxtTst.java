@@ -37,9 +37,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -52,6 +54,24 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         context = getDomain().createDataContext();
     }
 
+    public void testObjEntity() throws Exception {
+        Artist a = new Artist();
+        assertNull(a.getObjEntity());
+
+        context.registerNewObject(a);
+        ObjEntity e = a.getObjEntity();
+        assertNotNull(e);
+        assertEquals("Artist", e.getName());
+
+        Painting p = new Painting();
+        assertNull(p.getObjEntity());
+
+        context.registerNewObject(p);
+        ObjEntity e1 = p.getObjEntity();
+        assertNotNull(e1);
+        assertEquals("Painting", e1.getName());
+    }
+    
     public void testResolveFault() throws Exception {
         Artist o1 = newSavedArtist();
         context.invalidateObjects(Collections.singleton(o1));
