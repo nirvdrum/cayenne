@@ -63,9 +63,6 @@ import org.apache.log4j.Level;
  * run different select queries that can be Cayenne based or use 
  * raw SQL.
  * 
- * <p><i>Note that all implementing classes are expected to
- * inherit from Query.</i></p>
- * 
  * @author Andrei Adamchik
  */
 public interface GenericSelectQuery extends Query {

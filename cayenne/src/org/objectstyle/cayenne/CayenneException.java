@@ -62,7 +62,7 @@ package org.objectstyle.cayenne;
  * enhancements introduced in 1.4, namely chained exceptions.
  */
 public class CayenneException extends Exception {
-    private Throwable cause = this;
+    private Throwable cause;
     	
     /**
      * Creates new <code>CayenneException</code> without detail message.

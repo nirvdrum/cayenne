@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * @author Andrei Adamchik
  */
@@ -70,13 +73,13 @@ public class CayenneRuntimeExceptionTst extends CayenneTestCase {
 
 	public void testConstructor1() throws Exception {
 		CayenneRuntimeException ex = new CayenneRuntimeException();
-		assertSame(ex, ex.getCause());
+		assertNull(ex.getCause());
 		assertNull(ex.getMessage());
 	}
 
 	public void testConstructor2() throws Exception {
 		CayenneRuntimeException ex = new CayenneRuntimeException("abc");
-		assertSame(ex, ex.getCause());
+		assertNull(ex.getCause());
 		assertEquals("abc", ex.getMessage());
 	}
 
@@ -88,10 +91,32 @@ public class CayenneRuntimeExceptionTst extends CayenneTestCase {
 	}
 
 	public void testConstructor4() throws Exception {
-	    Throwable cause = new Throwable();
+		Throwable cause = new Throwable();
 		CayenneRuntimeException ex = new CayenneRuntimeException("abc", cause);
 		assertSame(cause, ex.getCause());
 		assertSame("abc", ex.getMessage());
 	}
-}
 
+	public void testThrow1() throws Exception {
+		try {
+			throw new CayenneRuntimeException();
+		} catch (CayenneRuntimeException rtex) {
+			StringWriter w = new StringWriter();
+			rtex.printStackTrace(new PrintWriter(w));
+		}
+	}
+
+	public void testThrow2() throws Exception {
+		try {
+			try {
+				throw new Throwable("Test Cause");
+			} catch (Throwable th) {
+				throw new CayenneRuntimeException(th);
+			}
+		} catch (CayenneRuntimeException rtex) {
+			StringWriter w = new StringWriter();
+			rtex.printStackTrace(new PrintWriter(w));
+		}
+	}
+	
+}

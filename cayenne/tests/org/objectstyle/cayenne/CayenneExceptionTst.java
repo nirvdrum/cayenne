@@ -70,13 +70,13 @@ public class CayenneExceptionTst extends CayenneTestCase {
 
 	public void testConstructor1() throws Exception {
 		CayenneException ex = new CayenneException();
-		assertSame(ex, ex.getCause());
+		assertNull(ex.getCause());
 		assertNull(ex.getMessage());
 	}
 
 	public void testConstructor2() throws Exception {
 		CayenneException ex = new CayenneException("abc");
-		assertSame(ex, ex.getCause());
+		assertNull(ex.getCause());
 		assertEquals("abc", ex.getMessage());
 	}
 

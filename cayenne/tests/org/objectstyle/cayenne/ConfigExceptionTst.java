@@ -70,13 +70,13 @@ public class ConfigExceptionTst extends CayenneTestCase {
 
 	public void testConstructor1() throws Exception {
 		ConfigException ex = new ConfigException();
-		assertSame(ex, ex.getCause());
+		assertNull(ex.getCause());
 		assertNull(ex.getMessage());
 	}
 
 	public void testConstructor2() throws Exception {
 		ConfigException ex = new ConfigException("abc");
-		assertSame(ex, ex.getCause());
+		assertNull(ex.getCause());
 		assertEquals("abc", ex.getMessage());
 	}
 
