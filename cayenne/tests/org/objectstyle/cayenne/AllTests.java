@@ -72,6 +72,7 @@ public class AllTests {
 		suite.addTestSuite(CDOOne2ManyTst.class);
 		suite.addTestSuite(CDOOne2OneDepTst.class);
 		suite.addTestSuite(ObjectIdTst.class);
+		suite.addTestSuite(DOPrefetchTst.class);
 		return suite;
 	}
 }
