@@ -53,45 +53,33 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.gui.action;
 
-import java.awt.event.ActionEvent;
-import java.util.List;
-import java.io.File;
-import javax.swing.JFileChooser;
 import javax.swing.AbstractAction;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.Preferences;
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.AddDataMapDialog;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.event.Mediator;
 
-
-/** 
- * Parent class for all Editor actions related to DataMap.
+/**
+ * Superclass of CayenneModeler actions that implements support 
+ * for some common functionality.
  * 
- * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
-public class AddDataMapAction extends CayenneAction {
-
-	public AddDataMapAction(Mediator mediator) {
-		super(mediator);
-	}
+public abstract class CayenneAction extends AbstractAction {
+	protected Mediator mediator;
 	
-	public void actionPerformed(ActionEvent e) {
-		addDataMap();
+	/**
+	 * Creates new CayenneAction, initalizing it with mediator.
+	 */
+	public CayenneAction(Mediator mediator) {
+		this.mediator = mediator;
 	}
 	
 	/** 
-	 * Adds a DataMap to the current data node. 
-	 */	
-	protected void addDataMap() {
-		DataNode node = mediator.getCurrentDataNode();
-		List map_list = mediator.getCurrentDataDomain().getMapList();
-		AddDataMapDialog dialog = new AddDataMapDialog(node, map_list);
-		mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+	 * Returns mediator associated with this action.
+	 */
+	public Mediator getMediator() {
+		return mediator;
 	}
 }

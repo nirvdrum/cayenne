@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.action;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -55,6 +54,8 @@ package org.objectstyle.cayenne.gui.action;
  *
  */
 
+package org.objectstyle.cayenne.gui.action;
+
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Iterator;
@@ -74,18 +75,17 @@ import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.validator.*;
 
 
-/** Parent class for all Editor actions related to saving project.
+/** 
+ * Parent class for all Editor actions related to saving project.
+ * 
+ * @author Misha Shengaout
  */
-public class SaveAction extends AbstractAction
-{
+public class SaveAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(SaveAction.class.getName());
 	
-	Mediator mediator;
-
-	public SaveAction(Mediator temp_mediator) {
-		mediator = temp_mediator;
+	public SaveAction(Mediator mediator) {
+		super(mediator);
 	}
-
 
 	protected void saveAll() {
 		Validator val = new Validator(mediator);

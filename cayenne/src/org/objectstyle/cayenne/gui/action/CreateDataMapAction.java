@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.action;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.action;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -70,21 +70,22 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
 
-/** Parent class for all Editor actions related to DataMap.
+/**
+ *  Action that creates new DataMap in the project.
  */
-public class CreateDataMapAction extends AbstractAction
-{
-	Mediator mediator;
+public class CreateDataMapAction extends CayenneAction {
 
-	public CreateDataMapAction(Mediator temp_mediator) {
-		mediator = temp_mediator;
+	public CreateDataMapAction(Mediator mediator) {
+		super(mediator);
 	}
 	
 	/** Calls addDataMap() or creates new data map if no data node selected.*/
 	protected void createDataMap() {
 		String relative_location = getMapLocation(mediator);
-		if (null == relative_location)
+		if (null == relative_location) {
 			return;
+		}
+		
 		DataMap map = new DataMap(NameGenerator.getDataMapName());
 		map.setLocation(relative_location);
 		mediator.addDataMap(this, map);

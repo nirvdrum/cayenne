@@ -93,7 +93,11 @@ implements ActionListener
 
     public static final String RESOURCE_PATH = "org/objectstyle/cayenne/gui/";
 	private static final String TITLE = "CayenneModeler";
-	/** To indicate in title that the proj is dirty. */
+	
+	/** 
+	 * Label that indicates as a part of the title that
+	 * the project has unsaved changes. 
+	 */
 	private static final String DIRTY_STRING = "* - ";
 
     EditorView view;
@@ -119,10 +123,11 @@ implements ActionListener
     JMenuItem removeMenu 			= new JMenuItem("Remove");
 
     JMenu  toolMenu   		= new JMenu("Tools");
-    JMenuItem importDbMenu  = new JMenuItem("Reverse engineer database");
+    JMenuItem importDbMenu  = new JMenuItem("Reverse Engineer Database");
+    JMenuItem importEOMMenu  = new JMenuItem("Import EOModel");
     JMenuItem generateMenu  = new JMenuItem("Generate Classes");
     JMenuItem generateDbMenu  = new JMenuItem("Generate Database");
-    JMenuItem setPackageMenu= new JMenuItem("Set Package Name For Obj Entities");
+    JMenuItem setPackageMenu= new JMenuItem("Set Package Name for Obj Entities");
 
     JMenu helpMenu				= new JMenu("Help");
     JMenuItem aboutMenu  		= new JMenuItem("About");
@@ -150,7 +155,6 @@ implements ActionListener
 		
 		try {
             props = loadProperties();
-            logObj.severe("props: " + props);
 		}
 		catch(IOException ioex) {
 			logObj.log(Level.SEVERE, "error", ioex);
@@ -184,6 +188,7 @@ implements ActionListener
         exitMenu.addActionListener(this);
 
         importDbMenu.addActionListener(this);
+        importEOMMenu.addActionListener(this);
         generateMenu.addActionListener(this);
         generateDbMenu.addActionListener(this);
         setPackageMenu.addActionListener(this);
@@ -239,6 +244,8 @@ implements ActionListener
         projectMenu.add(removeMenu);
 
         toolMenu.add(importDbMenu);
+        toolMenu.add(importEOMMenu); 
+        toolMenu.addSeparator();
         toolMenu.add(generateMenu);
         toolMenu.add(generateDbMenu);
         toolMenu.addSeparator();
@@ -262,6 +269,7 @@ implements ActionListener
 		actionMap.put("AddDataMap", new AddDataMapAction(mediator));
 		actionMap.put("SaveAll", new SaveAction(mediator));
 		actionMap.put("ImportDb", new ImportDbAction(mediator));
+		actionMap.put("ImportEOModel", new ImportEOModelAction(mediator));
 		actionMap.put("GenerateDb", new GenerateDbAction(mediator));
 		actionMap.put("Remove", new RemoveAction(mediator));
 	}
@@ -351,6 +359,10 @@ implements ActionListener
 		return frame;
 	}
 	
+	
+	/**
+	 * Reads properties from file "gui.properties" bundled with Cayenne.
+	 */
 	private Properties loadProperties() throws IOException {
 		Properties props = new Properties();
 		InputStream in = this.getClass().getClassLoader().getResourceAsStream(RESOURCE_PATH + "gui.properties");
@@ -442,6 +454,8 @@ implements ActionListener
         	actionMap.get("SaveAll").actionPerformed(e);
         } else if (src == importDbMenu) {
         	actionMap.get("ImportDb").actionPerformed(e);
+        } else if (src == importEOMMenu) {
+        	actionMap.get("ImportEOModel").actionPerformed(e);
         } else if (src == setPackageMenu) {
         	// Set the same package name for all obj entities.
             setPackageName();
@@ -799,9 +813,15 @@ implements ActionListener
 
 
 
-    /** Disables all menu  for the case when no project is open.
-      * The only menu-s never disabled are "New Project", "Open Project"
-      * and "Exit". */
+    /** 
+     * Disables all menu  for the case when no project is open.
+     * The only menus that are never disabled are:
+     * <ul>
+     * <li>"New Project"</li> 
+     * <li>"Open Project"</li>
+     * <li>"Exit"</li>
+     * </ul> 
+     */
     private void disableMenu() {
         createDataMapMenu.setEnabled(false);
         createDataSourceMenu.setEnabled(false);
@@ -813,6 +833,7 @@ implements ActionListener
         removeMenu.setEnabled(false);
 
         importDbMenu.setEnabled(false);
+        importEOMMenu.setEnabled(false);
         generateMenu.setEnabled(false);
         generateDbMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);

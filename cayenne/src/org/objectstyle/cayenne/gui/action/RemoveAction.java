@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.action;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -55,6 +54,8 @@ package org.objectstyle.cayenne.gui.action;
  *
  */
 
+package org.objectstyle.cayenne.gui.action;
+
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.io.File;
@@ -73,16 +74,18 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
 
-/** Removes proper Domain, DataNode, Entity, Attribute or Relationship.
+/** 
+ * Removes currently selected object from the project. This can be 
+ * Domain, DataNode, Entity, Attribute or Relationship.
+ * 
+ * @author Misha Shengaout
  */
-public class RemoveAction extends AbstractAction
+public class RemoveAction extends CayenneAction
 {
 	static Logger logObj = Logger.getLogger(RemoveAction.class.getName());
 
-	Mediator mediator;
-
-	public RemoveAction(Mediator temp_mediator) {
-		mediator = temp_mediator;
+	public RemoveAction(Mediator mediator) {
+		super(mediator);
 	}
 	
 	public void actionPerformed(ActionEvent e) {

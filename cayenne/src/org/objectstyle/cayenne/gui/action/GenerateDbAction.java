@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.action;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.action;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -80,16 +80,17 @@ import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.validator.*;
 
 
-/** Action to Generate DB structure from a data map.
+/** 
+ * Action that generates database tables from a DataMap.
+ * 
+ * @author Misha Shengaout
  */
-public class GenerateDbAction extends AbstractAction
-{
+public class GenerateDbAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(GenerateDbAction.class.getName());
 	
-	Mediator mediator;
 
-	public GenerateDbAction(Mediator temp_mediator) {
-		mediator = temp_mediator;
+	public GenerateDbAction(Mediator mediator) {
+		super(mediator);
 	}
 
 	protected void generateDb() {
