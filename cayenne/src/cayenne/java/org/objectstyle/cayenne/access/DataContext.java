@@ -509,7 +509,8 @@ public class DataContext implements QueryEngine, Serializable {
                     objectClass = currentClass;
                 }
                 
-                localObject = objectFromDataRow(entity, currentSnapshot(object), true);
+                DataRow snapshot = getObjectStore().getSnapshot(object.getObjectId(), this);
+                localObject = objectFromDataRow(entity, snapshot, true);
             } else {
                 localObject = object;
             }
