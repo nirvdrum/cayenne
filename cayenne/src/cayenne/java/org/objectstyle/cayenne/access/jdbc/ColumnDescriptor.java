@@ -71,9 +71,15 @@ public class ColumnDescriptor {
     protected String name;
     protected boolean primaryKey;
 
+    /**
+     * Creates a ColumnDescriptor 
+     */
     public ColumnDescriptor() {
     }
 
+    /**
+     * Creates a ColumnDescriptor from Cayenne ObjAttribute and DbAttribute.
+     */
     public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
         this.name = dbAttribute.getName();
         this.jdbcType = dbAttribute.getType();
