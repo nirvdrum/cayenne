@@ -4,43 +4,80 @@
 <body>
 	<section name="7. Using Queries"> 
 		<subsection name="7.7 Scripting SQLTemplate">
-		<p>Internal SQL String within SQLTemplate is not static. It is a dynamic Velocity script that is processed at 
-		runtime to generate PreparedStatement SQL. So it can be parameterized and conditionally exclude/include 
-		pieces of SQL depending on parameters.  </p>
-		
-		<subsection name="7.7.1 Dynamic Template">
-		<p></p>
-		</subsection>
-		
-		<subsection name="7.7.2 Binding Values">
-		<p></p>
-		</subsection>
-		
-		<subsection name="7.7.3 Describing the Results">
-		<p></p>
-		</subsection>
-		
-		<subsection name="7.7.4 Building Dynamic SQL">
-		<p></p>
-		</subsection>
-		
-		<subsection name="7.7.5 Customizing SQL Dialects">
-		<p>Even though SQL is an industry standard, different DB vendors still have their own dialects and
-		extensions. Two versions of the same query written for Oracle and PostgreSQL may look quiet 
-		different. If a SQLTemplate may potentially be executed using different target databases, it is desirable 
-		to have a way of providing different templates for the same query. SQLTemplate supports such template customization.
-		While the template provided in constructor is the default, internally SQLTemplate keeps a map of alternative templates. 
-		The map should use a fully-qualified name of the target DbAdapter as a key.
+		<p>SQLTemplate's internal SQL string is a dynamic script that is processed at runtime to generate 
+		PreparedStatement SQL code. Dynamic nature of SQLTemplate makes possible a few important things - it allows 
+		to bind parameter values on the fly; it provides a way to pass extra information to Cayenne that is not included
+		in the SQL text; it supports including/excluding chunks of SQL depending on runtime parameter values.
 		</p>
 		
-<source>// build template with default SQL
-SQLTemplate query = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+		<p>Scripting of SQL strings is done using <a href="http://jakarta.apache.org/velocity" target="_blank">Jakarta
+		Velocity</a>. Velocity was chosen primarily for its concise template language (no XML tags within SQL!). 
+		When creating dynamic SQL template, all standard Velocity directives are available, including <code>#set, #foreach, #if</code>.
+		However due to the nature of the SQL and the need to integrate it with Cayenne runtime, only a few Cayenne 
+		custom directives are normally used. These directives (<code>#bind..., #result, #chain, #chunk</code>) are described below.</p>
+		
+		<panel name="Velocity Syntax Note: Directives">Velocity directives start with pound sign (#) and have their parameters 
+		separated by space, not comma. E.g. #bind('SOMESTRING' 'VARCHAR' ).
+		</panel>
+		<p> </p>
 
-// for Postgres it would be nice to trim the CHAR ARTIST_NAME column 
-// or otherwise it will be returned padded with spaces
-String pgTemplate = "SELECT ARTIST_ID, RTRIM(ARTIST_NAME), DATE_OF_BIRTH FROM ARTIST";
-query.setTemplate(PostgresAdapter.class.getName(), pgTemplate);
+		<subsection name="7.7.1 Named Parameters"><p><code>SQLTemplate.setParameters(java.util.Map)</code> allows setting 
+		a number of named parameters that are used to build parts of the query. During template processing by Velocity all keys in the parameters
+		map are available as variables. For example if the map contains a key "name", its value can be referenced as "$name" in the template.
+		Value of the parameter will be insterted in the SQL unmodified:</p>
+		
+<source>// build SQLTemplate
+String sql = "delete from $tableName";
+SQLTemplate delete = new SQLTemplate(Artist.class, sql, false);
+...
+// this will create a query "delete from ARTIST"
+update.setParameters(Collections.singletonMap("tableName", "ARTIST"));
+...
+// this will create a query "delete from PAINTING"
+update.setParameters(Collections.singletonMap("tableName", "PAINTING"));
 </source>
+		</subsection>
+		
+		<subsection name="7.7.2 Binding Parameters -  #bind Directive">
+		<p>SQLTemplate uses <code>#bind</code> directive to indicate value binding. It has the same meaning as PreparedStatement 
+		question mark ("?" ), however it also tells Cayenne about the nature of the bound value,  so it should be used for all bindings.
+		<code>#bind()</code> directive can have a variable number of arguments. The following are the valid invocation formats: 
+		</p>
+		
+		<ul>
+ 		<li><code>#bind(value)</code> - e.g. #bind($xyz) or #bind('somestring')</li>
+ 		<li><code>#bind(value jdbc_type_name)</code> - e.g. #bind($xyz 'VARCHAR'). Second argument is the name of JDBC type for
+ 		this binding. Valid JDBC types are defined in java.sql.Types class. This form is the the most common and useful. 
+ 		It is generally preferred to the single argument form, as it allows </li>
+ 		<li><code>#bind(value jdbc_type_name precision)</code> - e.g. #bind($xyz 'DECIMAL' 2)</li>
+ 		</ul>
+ 		
+ 		<p><code>#bind</code> directive example:</p>
+<source>// build SQLTemplate
+String sql = "update ARTIST set ARTIST_NAME = #bind($name) where ARTIST_ID = #bind($id);
+SQLTemplate update = new SQLTemplate(Artist.class, sql, false);
+...
+// set parameters and run it...
+Map parameters = new HashMap();
+parameters.put("name", "Publo Picasso");
+parameters.put("id", new Integer(1001));
+update.setParameters(parameters);
+
+DataContext context...;
+context.performNonSelectingQuery(update);
+</source>
+		</subsection>
+		
+		<subsection name="7.7.3 Null Values in Bindings -  #bindEqual and #bindNotEqual Directives">
+		<p></p>
+		</subsection>
+		
+		<subsection name="7.7.4 Describing the Results - #result Directive">
+		<p></p>
+		</subsection>
+		
+		<subsection name="7.7.5 Building Dynamic SQL - #chain and #chunk Directives">
+		<p></p>
 		</subsection>
 		</subsection>
     </section>
