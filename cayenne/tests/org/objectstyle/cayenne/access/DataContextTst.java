@@ -253,43 +253,6 @@ public class DataContextTst extends CayenneTestCase {
 	}
 	
 	/** 
-	 * Test fetching query with multiple relationship
-	 * paths between the same 2 entities used in qualifier.
-	 */
-	public void testMultiObjRelFecth() throws Exception {
-		populatePaintings();
-		
-		SelectQuery q = new SelectQuery("Painting");
-		q.setDistinct(true);
-		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
-		q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(4)));
-
-        q.setLoggingLevel(Level.WARN);
-		List results = ctxt.performQuery(q);
-        
-        assertEquals(2, results.size());
-	}
-	
-	/** 
-	 * Test fetching query with multiple relationship
-	 * paths between the same 2 entities used in qualifier.
-	 */
-	public void testMultiDbRelFecth() throws Exception {
-		populatePaintings();
-		
-		SelectQuery q = new SelectQuery("Painting");
-		q.setDistinct(true);
-		q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
-		q.orQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
-
-        q.setLoggingLevel(Level.WARN);
-		List results = ctxt.performQuery(q);
-        
-        assertEquals(2, results.size());
-	}
-	
-	
-	/** 
 	 * Test that a to-one relationship is initialized.
 	 */
 	public void testPrefetch4() throws Exception {
@@ -302,6 +265,67 @@ public class DataContextTst extends CayenneTestCase {
         CayenneDataObject a1 = (CayenneDataObject)p1.readPropertyDirectly("toArtist");
         
         assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+	}
+	
+	
+	/** 
+	 * Test prefetching with queries using DB_PATH.
+	 */
+	public void testPrefetch5() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+		q.addPrefetch("toArtist");
+		q.setLoggingLevel(Level.WARN);
+		
+		List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
+	}
+	
+	/** 
+	 * Test prefetching with queries using OBJ_PATH.
+	 */
+	public void testPrefetch6() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
+		q.addPrefetch("toArtist");
+		q.setLoggingLevel(Level.WARN);
+		
+		List results = ctxt.performQuery(q);
+        assertEquals(1, results.size());
+	}
+	
+	/** 
+	 * Test fetching query with multiple relationship
+	 * paths between the same 2 entities used in qualifier.
+	 */
+	public void testMultiObjRelFetch() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
+		q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(4)));
+		List results = ctxt.performQuery(q);
+        
+        assertEquals(2, results.size());
+	}
+	
+	/** 
+	 * Test fetching query with multiple relationship
+	 * paths between the same 2 entities used in qualifier.
+	 */
+	public void testMultiDbRelFetch() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+		q.orQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
+		List results = ctxt.performQuery(q);
+        
+        assertEquals(2, results.size());
 	}
 
 	/** 

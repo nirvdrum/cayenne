@@ -256,10 +256,14 @@ public final class QueryHelper {
 	static final class ExpressionTranslator extends TraversalHelper {
 		protected HashMap expMap = new HashMap();
 		protected HashMap expFill = new HashMap();
+		protected String relPath;
+		protected String relDbPath;
 		protected String prependObjPath;
 		protected String prependDbPath;
 
 		public ExpressionTranslator(ObjEntity e, String relPath) {
+			this.relPath = relPath;
+			this.relDbPath = forwardDbPath(e, relPath);
 			this.prependObjPath = reversePath(e, relPath);
 			this.prependDbPath = reverseDbPath(e, relPath);
 		}
@@ -301,6 +305,27 @@ public final class QueryHelper {
 			return buf.toString();
 		}
 
+		public String forwardDbPath(ObjEntity e, String relPath) {
+			Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
+			Iterator it = e.resolvePathComponents(exp);
+			StringBuffer buf = new StringBuffer();
+			
+			while (it.hasNext()) {
+				ObjRelationship rel = (ObjRelationship) it.next();
+				Iterator dbRels = rel.getDbRelationshipList().iterator();
+                while(dbRels.hasNext()) {
+                	DbRelationship r = (DbRelationship)dbRels.next();
+                	if(buf.length() > 0) {
+                		buf.append(Entity.PATH_SEPARATOR);
+                	}
+                	
+                	buf.append(r.getName());
+                }	
+			}
+
+			return buf.toString();
+		}
+
 		/**
 		 * For a relationship path from source to target, builds a reverse path 
 		 * from target to source.
@@ -315,7 +340,7 @@ public final class QueryHelper {
 				ObjRelationship rel = (ObjRelationship) it.next();
 
 				Iterator dbRels = rel.getDbRelationshipList().iterator();
-				while(dbRels.hasNext()) {
+				while (dbRels.hasNext()) {
 					DbRelationship dbRel = (DbRelationship) dbRels.next();
 					DbRelationship reverse = dbRel.getReverseRelationship();
 
@@ -343,7 +368,6 @@ public final class QueryHelper {
 				exp.setType(e.getType());
 				return exp;
 			} catch (Exception ex) {
-				logObj.log(Level.INFO, "Error instantiating expression.", ex);
 				throw new ExpressionException("Error instantiating expression.", ex);
 			}
 		}
@@ -356,13 +380,27 @@ public final class QueryHelper {
 
 				// operands of object expression need translation
 				if (parentPeer.getType() == Expression.OBJ_PATH) {
-					operand = prependObjPath + Entity.PATH_SEPARATOR + operand;
-				}
-				else if(parentPeer.getType() == Expression.DB_PATH) {
-					operand = prependDbPath + Entity.PATH_SEPARATOR + operand;
+					operand = processPath((String) operand, relPath, prependObjPath);
+				} else if (parentPeer.getType() == Expression.DB_PATH) {
+					operand = processPath((String) operand, relDbPath, prependDbPath);
 				}
 
 				parentPeer.setOperand(ind, operand);
+			}
+		}
+
+		private String processPath(String path, String toPrefix, String fromPrefix) {
+			if (path.equals(toPrefix)) {
+				// 1. Path ends with prefetch entity - match PK
+				throw new CayenneRuntimeException(
+					"Prefetching with path ending on "
+						+ "prefetch entity is not supported yet.");
+			} else if (path.startsWith(toPrefix + Entity.PATH_SEPARATOR)) {
+				// 2. Path starts with prefetch entity - strip it.
+				return path.substring((toPrefix + Entity.PATH_SEPARATOR).length());
+			} else {
+				// 3. Path has nothing to do with prefetch entity - prepend rel from prefetch
+				return fromPrefix + Entity.PATH_SEPARATOR + path;
 			}
 		}
 
