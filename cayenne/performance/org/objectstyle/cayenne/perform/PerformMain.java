@@ -85,8 +85,22 @@ public class PerformMain implements TestConstants {
 	public static PerformanceTestSuite prepareTests() {
 		PerformanceTestSuite suite = new PerformanceTestSuite();
 		suite.addTestPair(
+		    "Insert",
+		    "Inserting " + CayennePerformanceTest.objCount + " records, Cayenne vs. JDBC.",
 			"org.objectstyle.cayenne.perform.test.InsertTest",
 			"org.objectstyle.cayenne.perform.test.InsertRefTest");
+
+		suite.addTestPair(
+		    "Select",
+		    "Select " + CayennePerformanceTest.objCount + " records, Cayenne objects vs. JDBC.",
+			"org.objectstyle.cayenne.perform.test.SelectTest",
+			"org.objectstyle.cayenne.perform.test.SelectRefTest");
+
+		suite.addTestPair(
+		    "Select",
+		    "Select " + CayennePerformanceTest.objCount + " records, Cayenne data rows vs. Cayenne objects.",
+			"org.objectstyle.cayenne.perform.test.SelectDataRowsTest",
+			"org.objectstyle.cayenne.perform.test.SelectTest");
 
 		return suite;
 	}

@@ -56,6 +56,7 @@
 
 package org.objectstyle.perform;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 /**
@@ -63,6 +64,7 @@ import java.util.Iterator;
  */
 public class PerformanceTestRunner {
 	protected ResultRenderer renderer;
+	protected HashMap resultCache = new HashMap();
 
 	/**
 	 * Constructor for PerformanceTestRunner.
@@ -73,6 +75,8 @@ public class PerformanceTestRunner {
 	}
 
 	public void runSuite(PerformanceTestSuite suite) {
+		resultCache.clear();
+		
 		Iterator it = suite.getPairs().iterator();
 		while (it.hasNext()) {
 			PerformanceTestPair pair = (PerformanceTestPair) it.next();
@@ -84,12 +88,24 @@ public class PerformanceTestRunner {
 		}
 	}
 
+    /** 
+     * Runs performance test. This implementation will cache test
+     * results, so that the same test case is never run more than once.
+     * This will allow to speed up testing by reusing reference test results.
+     */
 	protected TestResult runTest(PerformanceTest test) {
 		if (test == null) {
 			return null;
 		}
 
-		TestResult result = new TestResult();
+        
+        // use chached result when possible
+		TestResult result = (TestResult)resultCache.get(test.getClass());
+		if(result != null) {
+			return result;
+		}
+		
+		result = new TestResult();
 
 		try {
 			test.prepare();
@@ -108,6 +124,9 @@ public class PerformanceTestRunner {
 			}
 		}
 
+        // cache result
+        resultCache.put(test.getClass(), result);
+        
 		return result;
 	}
 }

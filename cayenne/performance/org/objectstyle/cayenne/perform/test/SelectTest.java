@@ -56,46 +56,38 @@
 
 package org.objectstyle.cayenne.perform.test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.util.List;
 
+import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.perform.CayennePerformanceTest;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class InsertRefTest extends CayennePerformanceTest {
+public class SelectTest extends CayennePerformanceTest {
+	protected DataContext ctxt;
 
 	/**
-	 * Constructor for InsertRefTst.
+	 * Constructor for SelectTest.
+	 * @param name
 	 */
-	public InsertRefTest(String name) {
-		super(name);
+	public SelectTest(String name) {
+		super("Select");
+		super.setDesc("Selection " + objCount + " objects, compared to JDBC.");
 	}
-	
+
 	public void prepare() throws Exception {
-		deleteArtists();
+		super.deleteArtists();
+		super.insertArtists();
+		ctxt = super.getDomain().createDataContext();
 	}
 
+	/**
+	 * @see org.objectstyle.perform.PerformanceTest#runTest()
+	 */
 	public void runTest() throws Exception {
-		Connection con = getConnection();
-		try {
-
-			con.setAutoCommit(false);
-			PreparedStatement st =
-				con.prepareStatement(
-					"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
-			for (int i = 1; i <= InsertTest.objCount; i++) {
-				st.setInt(1, i);
-				st.setString(2, "name_" + i);
-				st.executeUpdate();
-			}
-
-			// save all at once
-			con.commit();
-		} finally {
-			con.close();
-		}
+		SelectQuery q = new SelectQuery("Artist");
+		List artists = ctxt.performQuery(q);
 	}
-
 }

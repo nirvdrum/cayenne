@@ -81,11 +81,14 @@ public class PerformanceTestSuite {
 		pairs.add(new PerformanceTestPair(test, null));
 	}
 	
-	public void addTestPair(String mainTestClass, String refTestClass) {
+	public void addTestPair(String name, String desc, String mainTestClass, String refTestClass) {
 		try {
 			PerformanceTest mainTest = testForClass(mainTestClass);
 			PerformanceTest refTest = (refTestClass != null) ? testForClass(refTestClass) : null;
-			addTestPair(new PerformanceTestPair(mainTest, refTest));
+			PerformanceTestPair pair = new PerformanceTestPair(mainTest, refTest);
+			pair.setName(name);
+			pair.setDesc(desc);
+			addTestPair(pair);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();

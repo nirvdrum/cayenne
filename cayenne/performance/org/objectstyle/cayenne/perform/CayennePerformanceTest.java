@@ -56,17 +56,21 @@
 
 package org.objectstyle.cayenne.perform;
 
-import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.*;
 
 import org.objectstyle.TestConstants;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.perform.test.InsertTest;
 import org.objectstyle.perform.PerformanceTest;
 
 /**
  * @author Andrei Adamchik
  */
-public abstract class CayennePerformanceTest extends PerformanceTest implements TestConstants {
+public abstract class CayennePerformanceTest
+	extends PerformanceTest
+	implements TestConstants {
+		
+	public static final int objCount = 2000;	
 
 	/**
 	 * Constructor for CayennePerformanceTest.
@@ -75,9 +79,28 @@ public abstract class CayennePerformanceTest extends PerformanceTest implements 
 	public CayennePerformanceTest(String name) {
 		super(name);
 	}
-	
-	
-	public void cleanup() throws Exception {
+
+	protected void insertArtists() throws Exception {
+		Connection con = getConnection();
+		try {
+			con.setAutoCommit(false);
+			PreparedStatement st =
+				con.prepareStatement(
+					"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
+			for (int i = 1; i <= objCount; i++) {
+				st.setInt(1, i);
+				st.setString(2, "name_" + i);
+				st.executeUpdate();
+			}
+
+			// save all at once
+			con.commit();
+		} finally {
+			con.close();
+		}
+	}
+
+	protected void deleteArtists() throws Exception {
 		Connection c = getConnection();
 
 		try {
@@ -88,8 +111,7 @@ public abstract class CayennePerformanceTest extends PerformanceTest implements 
 			c.close();
 		}
 	}
-	
-	
+
 	public DataDomain getDomain() {
 		return PerformMain.sharedDomain;
 	}

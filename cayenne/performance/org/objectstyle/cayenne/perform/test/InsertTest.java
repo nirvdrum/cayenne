@@ -69,9 +69,7 @@ import org.objectstyle.cayenne.perform.PerformMain;
  *  then a select of the same rows. Compares performance of Cayenne and straight
  *  JDBC queries.
  */
-public class InsertTest extends CayennePerformanceTest {
-	public static final int objCount = 2000;
-	
+public class InsertTest extends CayennePerformanceTest {	
 	protected DataContext ctxt;
 
 	public InsertTest(String name) {
@@ -80,7 +78,8 @@ public class InsertTest extends CayennePerformanceTest {
 	}
 
 	public void prepare() throws Exception {
-		ctxt = PerformMain.sharedDomain.createDataContext();
+		deleteArtists();
+		ctxt = super.getDomain().createDataContext();
 	}
 	
 	
@@ -93,101 +92,4 @@ public class InsertTest extends CayennePerformanceTest {
 		// save all at once
 		ctxt.commitChanges();
 	}
-/*
-
-	private void testCayenneSmallInserts(DataContext ctxt) throws Exception {
-		long t1 = System.currentTimeMillis();
-
-		for (int j = 0; j < batchCount; j++) {
-			int startInd = j * 20;
-			for (int i = 0; i < 20; i++) {
-				Artist a = (Artist) ctxt.createAndRegisterNewObject("Artist");
-				a.setArtistName("name_" + (startInd + i));
-			}
-			// save batch
-			ctxt.commitChanges();
-		}
-
-		long t2 = System.currentTimeMillis();
-		insertCayenne1 = t2 - t1;
-	}
-
-	private void testCayenneSelect(DataContext ctxt) throws Exception {
-		long t2 = System.currentTimeMillis();
-
-		// fetch to the same context
-		SelectQuery q = new SelectQuery("Artist");
-		ctxt.performQuery(q);
-		long t3 = System.currentTimeMillis();
-
-		// fetch to a different context with no cache
-		domain.createDataContext().performQuery(q);
-		long t4 = System.currentTimeMillis();
-
-		// fetch into data domain 
-		domain.performQuery(q, new SelectObserver());
-		long t5 = System.currentTimeMillis();
-
-		// fetch into the new context in small chunks 
-		ArrayList in = new ArrayList();
-		Expression listE = ExpressionFactory.unaryExp(Expression.LIST, in);
-		Expression e =
-			ExpressionFactory.binaryPathExp(Expression.IN, "artistName", listE);
-		q.setQualifier(e);
-
-		for (int j = 0; j < batchCount; j++) {
-			int startInd = j * 20;
-			int endInd = startInd + 20;
-			in.clear();
-			for (int i = startInd; i < endInd; i++) {
-				in.add("name_" + i);
-			}
-			ctxt.performQuery(q);
-		}
-		long t6 = System.currentTimeMillis();
-
-		selectCayenne1 = t3 - t2;
-		selectCayenne2 = t4 - t3;
-		selectCayenne3 = t5 - t4;
-		selectCayenne4 = t6 - t5;
-	}
-
-	public void testJDBC() throws Exception {
-		cleanup();
-
-		long t1 = System.currentTimeMillis();
-		Connection con = getConnection();
-		con.setAutoCommit(false);
-		PreparedStatement st =
-			con.prepareStatement(
-				"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
-		for (int i = 1; i <= objCount; i++) {
-			st.setInt(1, i);
-			st.setString(2, "name_" + i);
-			st.executeUpdate();
-		}
-
-		// save all at once
-		con.commit();
-		con.close();
-		long t2 = System.currentTimeMillis();
-
-		// get connection again, since this 
-		// this way it is a fair comparison to Cayenne
-		con = getConnection();
-
-		Statement sel = con.createStatement();
-		ResultSet rs =
-			sel.executeQuery("SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST");
-		while (rs.next()) {
-			Artist a = new Artist();
-			a.setArtistName(rs.getString(2));
-		}
-		con.close();
-		long t3 = System.currentTimeMillis();
-
-		insertJDBC = t2 - t1;
-		selectJDBC = t3 - t2;
-	}
-*/
 }

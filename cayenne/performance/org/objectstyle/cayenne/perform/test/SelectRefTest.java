@@ -56,43 +56,47 @@
 
 package org.objectstyle.cayenne.perform.test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
+import java.util.ArrayList;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.perform.CayennePerformanceTest;
 
 /**
  * @author Andrei Adamchik
  */
-public class InsertRefTest extends CayennePerformanceTest {
+public class SelectRefTest extends CayennePerformanceTest {
 
 	/**
-	 * Constructor for InsertRefTst.
+	 * Constructor for SelectRefTest.
+	 * @param name
 	 */
-	public InsertRefTest(String name) {
+	public SelectRefTest(String name) {
 		super(name);
 	}
-	
+
 	public void prepare() throws Exception {
-		deleteArtists();
+		super.deleteArtists();
+		super.insertArtists();
 	}
 
+	/**
+	 * @see org.objectstyle.perform.PerformanceTest#runTest()
+	 */
 	public void runTest() throws Exception {
 		Connection con = getConnection();
 		try {
-
-			con.setAutoCommit(false);
-			PreparedStatement st =
-				con.prepareStatement(
-					"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
-			for (int i = 1; i <= InsertTest.objCount; i++) {
-				st.setInt(1, i);
-				st.setString(2, "name_" + i);
-				st.executeUpdate();
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery("SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST");
+			ArrayList artists = new ArrayList();
+			while(rs.next()) {
+				Artist artist = new Artist();
+				artist.setArtistName(rs.getString(2));
+                artists.add(artist);
+                
+				// read artist_id to provide closer comparison
+				Integer id = new Integer(rs.getInt(1));
 			}
-
-			// save all at once
-			con.commit();
 		} finally {
 			con.close();
 		}

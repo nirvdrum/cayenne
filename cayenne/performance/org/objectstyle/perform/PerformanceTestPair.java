@@ -61,6 +61,8 @@ package org.objectstyle.perform;
  * @author Andrei Adamchik
  */
 public class PerformanceTestPair {
+	protected String name;
+	protected String desc;
 	protected PerformanceTest mainTest;
 	protected PerformanceTest referenceTest;
 
@@ -82,11 +84,21 @@ public class PerformanceTestPair {
 	}
 	
 	public String getName() {
-		return mainTest.getName();
+		return (name != null) ? name : mainTest.getName();
 	}
 	
 	public String getDesc() {
-		return mainTest.getDesc();
+		return (desc != null) ? desc : mainTest.getDesc();
 	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
 }
 
