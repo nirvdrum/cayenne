@@ -107,9 +107,8 @@ public class ClassGenerator {
 					"org.apache.velocity.runtime.resource.loader.JarResourceLoader");
 				props.put("jar.resource.loader.path", classLoaderUrl);
 			} else if (classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
-
 				loaderProp = "file";
-				props.put("file.resource.loader.path", classLoaderUrl);
+				props.put("file.resource.loader.path", classLoaderUrl.substring(5));
 			}
 
 			// always add Filesystem loader for default templates
