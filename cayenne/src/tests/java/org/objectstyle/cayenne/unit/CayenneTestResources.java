@@ -85,7 +85,10 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
  */
 // TODO: switch to Spring
 public class CayenneTestResources implements BeanFactoryAware {
+
     private static Logger logObj = Logger.getLogger(CayenneTestResources.class);
+
+    public static final String CONFIG_KEY = "cayenne.test.config";
 
     public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
     public static final String TEST_DIR_KEY = "cayenne.test.dir";
@@ -100,23 +103,36 @@ public class CayenneTestResources implements BeanFactoryAware {
 
         // bootstrap shared CayenneTestResources
 
-        File testDir =
-            new File(
-                new File(new File(new File("build"), "tests"), "deps"),
-                "test-resources");
+        String testResourcesPath = System.getProperty(CONFIG_KEY);
+        File testResources = null;
+        
+        if(testResourcesPath != null) {
+            File altResources = new File(testResourcesPath);
+            if(altResources.isFile()) {
+                testResources = altResources;
+            }
+        }
 
+        if (testResources == null) {
+            File testDir = new File(
+                    new File(new File(new File("build"), "tests"), "deps"),
+                    "test-resources");
+            testResources = new File(testDir, "spring-test-resources.xml");
+        }
+        
         // configure shared resources instance with Spring
+        logObj.info("== Loading test configuration from " + testResources);
+        logObj.info("== To override set property '" + CONFIG_KEY + "'");
         InputStream in = null;
         try {
-            in = new FileInputStream(new File(testDir, "spring-test-resources.xml"));
+            in = new FileInputStream(testResources);
         }
         catch (IOException ioex) {
-            logObj.error("Can't open test resources...", ioex);
-            throw new RuntimeException("Error loading");
+            logObj.error("Can't open test resources..." + testResources, ioex);
+            throw new RuntimeException("Error loading", ioex);
         }
         BeanFactory factory = new XmlBeanFactory(in);
-        resources =
-            (CayenneTestResources) factory.getBean(
+        resources = (CayenneTestResources) factory.getBean(
                 "TestResources",
                 CayenneTestResources.class);
 
@@ -158,9 +174,9 @@ public class CayenneTestResources implements BeanFactoryAware {
      * Completely rebuilds test schema.
      */
     public void rebuildSchema() throws Exception {
-        // generate schema using a special AccessStack that 
+        // generate schema using a special AccessStack that
         // combines all DataMaps that require schema support
-        // schema generation is done like that instead of 
+        // schema generation is done like that instead of
         // per stack on demand, to avoid conflicts when
         // dropping and generating PK objects.
         AccessStack stack = getAccessStack(SCHEMA_SETUP_STACK);
@@ -175,8 +191,8 @@ public class CayenneTestResources implements BeanFactoryAware {
             throw new RuntimeException("Null connection key.");
         }
 
-        connectionInfo =
-            ConnectionProperties.getInstance().getConnectionInfo(connectionKey);
+        connectionInfo = ConnectionProperties.getInstance().getConnectionInfo(
+                connectionKey);
 
         if (connectionInfo == null) {
             throw new RuntimeException("Null connection info for key: " + connectionKey);
@@ -198,11 +214,12 @@ public class CayenneTestResources implements BeanFactoryAware {
     }
 
     public SQLTemplateCustomizer getSQLTemplateCustomizer() {
-        BeanFactory child =
-            (BeanFactory) beanFactory.getBean(SQL_TEMPLATE_CUSTOMIZER, BeanFactory.class);
+        BeanFactory child = (BeanFactory) beanFactory.getBean(
+                SQL_TEMPLATE_CUSTOMIZER,
+                BeanFactory.class);
         return (SQLTemplateCustomizer) child.getBean(
-            SQL_TEMPLATE_CUSTOMIZER,
-            SQLTemplateCustomizer.class);
+                SQL_TEMPLATE_CUSTOMIZER,
+                SQLTemplateCustomizer.class);
     }
 
     /**
@@ -212,10 +229,11 @@ public class CayenneTestResources implements BeanFactoryAware {
         AccessStackAdapter stackAdapter = null;
 
         if (adapter != null) {
-            stackAdapter =
-                (AccessStackAdapter) adapterMap.get(adapter.getClass().getName());
+            stackAdapter = (AccessStackAdapter) adapterMap.get(adapter
+                    .getClass()
+                    .getName());
         }
-        return stackAdapter != null ? stackAdapter : new AccessStackAdapter(null);
+        return stackAdapter != null ? stackAdapter : new AccessStackAdapter(adapter);
     }
 
     /**
@@ -244,8 +262,8 @@ public class CayenneTestResources implements BeanFactoryAware {
      * Creates new DataNode.
      */
     public DataNode newDataNode(String name) throws Exception {
-        DbAdapter adapter =
-            (DbAdapter) Class.forName(connectionInfo.getAdapterClassName()).newInstance();
+        DbAdapter adapter = (DbAdapter) Class.forName(
+                connectionInfo.getAdapterClassName()).newInstance();
         DataNode node = adapter.createDataNode(name);
         node.setDataSource(dataSource);
         node.setAdapter(adapter);
@@ -262,16 +280,15 @@ public class CayenneTestResources implements BeanFactoryAware {
     protected DataSource createDataSource() {
         try {
             // data source
-            PoolDataSource poolDS =
-                new PoolDataSource(
+            PoolDataSource poolDS = new PoolDataSource(
                     connectionInfo.getJdbcDriver(),
                     connectionInfo.getDataSourceUrl());
             return new PoolManager(
-                poolDS,
-                1,
-                1,
-                connectionInfo.getUserName(),
-                connectionInfo.getPassword());
+                    poolDS,
+                    1,
+                    1,
+                    connectionInfo.getUserName(),
+                    connectionInfo.getPassword());
         }
         catch (Exception ex) {
             logObj.error("Can not create shared data source.", ex);
@@ -285,8 +302,7 @@ public class CayenneTestResources implements BeanFactoryAware {
         if (testDirName == null) {
             testDirName = "testrun";
 
-            logObj.info(
-                "No property '"
+            logObj.info("No property '"
                     + TEST_DIR_KEY
                     + "' set. Using default directory: '"
                     + testDirName
@@ -298,8 +314,8 @@ public class CayenneTestResources implements BeanFactoryAware {
         // delete old tests
         if (testDir.exists()) {
             if (!Util.delete(testDirName, true)) {
-                throw new RuntimeException(
-                    "Error deleting test directory: " + testDirName);
+                throw new RuntimeException("Error deleting test directory: "
+                        + testDirName);
             }
         }
 

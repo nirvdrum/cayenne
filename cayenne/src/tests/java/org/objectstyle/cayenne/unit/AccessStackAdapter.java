@@ -69,6 +69,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -89,6 +90,9 @@ public class AccessStackAdapter {
     protected DbAdapter adapter;
 
     public AccessStackAdapter(DbAdapter adapter) {
+        if(adapter == null) {
+            throw new CayenneRuntimeException("Null adapter.");
+        }
         this.adapter = adapter;
     }
 

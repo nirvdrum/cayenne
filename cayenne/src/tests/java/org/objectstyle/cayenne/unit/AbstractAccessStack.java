@@ -109,6 +109,10 @@ public abstract class AbstractAccessStack {
             List filtered = new ArrayList();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity) it.next();
+                
+                if(ent instanceof DerivedDbEntity) {
+                    continue;
+                }
 
                 // check for LOB attributes
                 if (excludeLOB) {
