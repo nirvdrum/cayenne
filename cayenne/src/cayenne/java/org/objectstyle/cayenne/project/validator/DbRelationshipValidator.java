@@ -71,9 +71,6 @@ public class DbRelationshipValidator extends TreeNodeValidator {
         super();
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
-     */
     public void validateObject(ProjectPath path, Validator validator) {
         DbRelationship rel = (DbRelationship) path.getObject();
         if (rel.getTargetEntity() == null) {
@@ -86,5 +83,4 @@ public class DbRelationshipValidator extends TreeNodeValidator {
         	validator.registerError("Unnamed DbRelationship.", path);
         }
     }
-
 }

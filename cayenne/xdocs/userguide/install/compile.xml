@@ -9,16 +9,16 @@
 
 <body>
     <section name="2. Installation">        
-		<subsection name="2.4 Compiling Cayenne from Source" anchor="compile">
-		    <p><strong>JSDK1.4 must be present to compile Cayenne.</strong></p>
-		    
-			<panel name="Note:">Normally users don't need to build Cayenne from source. 
-            Prebuilt JAR's are included with a distribution.</panel>
-
-			<p>For those users who need to recompile Cayenne (for example if they modified the
-			source code to customize or test certain aspects), Cayenne source distribution
-			provides Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). To build
-			custom Cayenne jars execute the following commands. Windows:</p>
+		<subsection name="2.4 Compiling Cayenne from Source" anchor="compile">	
+			<panel name="Note:">JSDK1.4 and Ant must be present to compile Cayenne.</panel>
+	    
+			<p>Normally users wouldn't need to build Cayenne from source. 
+            All required prebuilt JAR's are included with the distribution. 
+            For those users who need to recompile Cayenne (for example if they modified the
+			source code to customize or test certain aspects), distribution includes
+			an Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). 
+			To rebuild Cayenne (possibly with custom changes) execute the following commands. 
+			Windows:</p>
 
 		<source>cd %CAYENNE_HOME%\src
 %ANT_HOME%\bin\ant.bat</source>
