@@ -53,75 +53,60 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.pref;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.util.Util;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
-public class DBConnectionInfo extends _DBConnectionInfo {
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-    /**
-     * Updates another DBConnectionInfo with its own values.
-     */
-    public boolean copyTo(DBConnectionInfo dataSourceInfo) {
-        boolean updated = false;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
-        if (!Util.nullSafeEquals(dataSourceInfo.getUrl(), getUrl())) {
-            dataSourceInfo.setUrl(getUrl());
-            updated = true;
-        }
+/**
+ * @author Andrei Adamchik
+ */
+public class DataSourceDuplicatorView extends JDialog {
 
-        if (!Util.nullSafeEquals(dataSourceInfo.getUserName(), getUserName())) {
-            dataSourceInfo.setUserName(getUserName());
-            updated = true;
-        }
+    protected JTextField dataSourceName;
+    protected JButton okButton;
+    protected JButton cancelButton;
 
-        if (!Util.nullSafeEquals(dataSourceInfo.getPassword(), getPassword())) {
-            dataSourceInfo.setPassword(getPassword());
-            updated = true;
-        }
+    public DataSourceDuplicatorView(String title) {
+        setTitle(title);
 
-        if (!Util.nullSafeEquals(dataSourceInfo.getJdbcDriver(), getJdbcDriver())) {
-            dataSourceInfo.setJdbcDriver(getJdbcDriver());
-            updated = true;
-        }
+        this.dataSourceName = new JTextField();
+        this.okButton = new JButton("Create");
+        this.cancelButton = new JButton("Cancel");
 
-        if (!Util.nullSafeEquals(dataSourceInfo.getDbAdapter(), getDbAdapter())) {
-            dataSourceInfo.setDbAdapter(getDbAdapter());
-            updated = true;
-        }
+        // assemble
+        FormLayout layout = new FormLayout("right:pref, 3dlu, fill:250", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
 
-        return updated;
+        builder.append("Name:", dataSourceName);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(okButton);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
+        getContentPane().add(buttons, BorderLayout.SOUTH);
     }
 
-    /**
-     * Updates DataSourceInfo with its own values.
-     */
-    public boolean copyTo(DataSourceInfo dataSourceInfo) {
-        boolean updated = false;
-
-        if (!Util.nullSafeEquals(dataSourceInfo.getDataSourceUrl(), getUrl())) {
-            dataSourceInfo.setDataSourceUrl(getUrl());
-            updated = true;
-        }
-
-        if (!Util.nullSafeEquals(dataSourceInfo.getUserName(), getUserName())) {
-            dataSourceInfo.setUserName(getUserName());
-            updated = true;
-        }
-
-        if (!Util.nullSafeEquals(dataSourceInfo.getPassword(), getPassword())) {
-            dataSourceInfo.setPassword(getPassword());
-            updated = true;
-        }
-
-        if (!Util.nullSafeEquals(dataSourceInfo.getJdbcDriver(), getJdbcDriver())) {
-            dataSourceInfo.setJdbcDriver(getJdbcDriver());
-            updated = true;
-        }
-
-        return updated;
+    public JButton getCancelButton() {
+        return cancelButton;
     }
 
+    public JTextField getDataSourceName() {
+        return dataSourceName;
+    }
+
+    public JButton getOkButton() {
+        return okButton;
+    }
 }
-

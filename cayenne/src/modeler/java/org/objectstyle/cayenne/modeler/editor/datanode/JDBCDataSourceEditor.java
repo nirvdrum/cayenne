@@ -130,7 +130,7 @@ public class JDBCDataSourceEditor extends DataSourceEditor {
                 .getPreferenceDetail(key, DBConnectionInfo.class, false);
 
         if (dataSource != null) {
-            if (dataSource.updateSettings(projectDS.getDataSourceInfo())) {
+            if (dataSource.copyTo(projectDS.getDataSourceInfo())) {
                 refreshView();
                 super.nodeChangeProcessor.modelUpdated(null, null, null);
                 mainController.updateStatus(null);

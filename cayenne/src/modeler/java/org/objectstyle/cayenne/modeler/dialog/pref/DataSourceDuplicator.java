@@ -56,24 +56,12 @@
 package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 
-import org.objectstyle.cayenne.dba.db2.DB2Adapter;
-import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
-import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
-import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
-import org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter;
-import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
-import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
-import org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter;
-import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
-import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
 import org.objectstyle.cayenne.swing.BindingBuilder;
@@ -81,78 +69,28 @@ import org.objectstyle.cayenne.swing.BindingBuilder;
 /**
  * @author Andrei Adamchik
  */
-public class DataSourceCreator extends CayenneController {
+public class DataSourceDuplicator extends CayenneController {
 
-    private static final String NO_ADAPTER = "Custom / Undefined";
-
-    // these should probably be a part of adapter-associated metadata..
-    private static final Map defaultDrivers = new HashMap();
-    private static final Map defaultUrls = new HashMap();
-
-    static {
-        defaultDrivers.put(
-                OracleAdapter.class.getName(),
-                "oracle.jdbc.driver.OracleDriver");
-        defaultDrivers.put(
-                SybaseAdapter.class.getName(),
-                "com.sybase.jdbc2.jdbc.SybDriver");
-        defaultDrivers.put(MySQLAdapter.class.getName(), "com.mysql.jdbc.Driver");
-        defaultDrivers.put(DB2Adapter.class.getName(), "com.ibm.db2.jcc.DB2Driver");
-        defaultDrivers.put(HSQLDBAdapter.class.getName(), "org.hsqldb.jdbcDriver");
-        defaultDrivers.put(PostgresAdapter.class.getName(), "org.postgresql.Driver");
-        defaultDrivers.put(
-                FirebirdAdapter.class.getName(),
-                "org.firebirdsql.jdbc.FBDriver");
-        defaultDrivers.put(OpenBaseAdapter.class.getName(), "com.openbase.jdbc.ObDriver");
-        defaultDrivers.put(
-                SQLServerAdapter.class.getName(),
-                "com.microsoft.jdbc.sqlserver.SQLServerDriver");
-
-        defaultUrls.put(
-                OracleAdapter.class.getName(),
-                "jdbc:oracle:thin:@host:1521:database");
-        defaultUrls.put(
-                SybaseAdapter.class.getName(),
-                "jdbc:sybase:Tds:host:port/database");
-        defaultUrls.put(MySQLAdapter.class.getName(), "jdbc:mysql://host/database");
-        defaultUrls.put(DB2Adapter.class.getName(), "jdbc:db2://host:port/database");
-        defaultUrls
-                .put(HSQLDBAdapter.class.getName(), "jdbc:hsqldb:hsql://host/database");
-        defaultUrls.put(
-                PostgresAdapter.class.getName(),
-                "jdbc:postgresql://host:5432/database");
-        defaultUrls.put(
-                FirebirdAdapter.class.getName(),
-                "jdbc:firebirdsql:host/port:/path/to/file.gdb");
-        defaultUrls.put(OpenBaseAdapter.class.getName(), "jdbc:openbase://host/database");
-        defaultUrls
-                .put(
-                        SQLServerAdapter.class.getName(),
-                        "jdbc:microsoft:sqlserver://host;databaseName=database;SelectMethod=cursor");
-    }
-
-    protected DataSourceCreatorView view;
+    protected DataSourceDuplicatorView view;
     protected PreferenceEditor editor;
     protected Domain domain;
     protected boolean canceled;
     protected Map dataSources;
+    protected String prototypeKey;
 
-    public DataSourceCreator(DataSourcePreferences parent) {
+    public DataSourceDuplicator(DataSourcePreferences parent, String prototypeKey) {
         super(parent);
-        this.view = new DataSourceCreatorView();
+        this.view = new DataSourceDuplicatorView("Create a copy of \""
+                + prototypeKey
+                + "\"");
         this.editor = parent.getEditor();
         this.domain = parent.getDataSourceDomain();
         this.dataSources = parent.getDataSources();
+        this.prototypeKey = prototypeKey;
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(DbAdapterInfo
-                .getStandardAdapters());
-        model.insertElementAt(NO_ADAPTER, 0);
-        this.view.getAdapters().setModel(model);
-        this.view.getAdapters().setSelectedIndex(0);
-
-        String suggestion = "DataSource0";
+        String suggestion = prototypeKey + "0";
         for (int i = 1; i <= dataSources.size(); i++) {
-            suggestion = "DataSource" + i;
+            suggestion = prototypeKey + i;
             if (!dataSources.containsKey(suggestion)) {
                 break;
             }
@@ -227,25 +165,14 @@ public class DataSourceCreator extends CayenneController {
             return null;
         }
 
+        DBConnectionInfo prototype = (DBConnectionInfo) dataSources.get(prototypeKey);
         DBConnectionInfo dataSource = (DBConnectionInfo) editor.createDetail(
                 domain,
                 getName(),
                 DBConnectionInfo.class);
 
-        Object adapter = view.getAdapters().getSelectedItem();
-        if (NO_ADAPTER.equals(adapter)) {
-            adapter = null;
-        }
-
-        if (adapter != null) {
-            String adapterString = adapter.toString();
-            dataSource.setDbAdapter(adapterString);
-
-            // guess adapter defaults...
-            dataSource.setJdbcDriver((String) defaultDrivers.get(adapterString));
-            dataSource.setUrl((String) defaultUrls.get(adapterString));
-        }
-
+        prototype.copyTo(dataSource);
         return dataSource;
     }
+
 }

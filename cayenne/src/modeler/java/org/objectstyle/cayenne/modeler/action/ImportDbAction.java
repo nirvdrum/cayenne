@@ -210,7 +210,7 @@ public class ImportDbAction extends CayenneAction {
             JOptionPane.showMessageDialog(
                     Application.getFrame(),
                     e.getMessage(),
-                    "Error Connecting to the Database",
+                    "Error Connecting to Database",
                     JOptionPane.ERROR_MESSAGE);
             return null;
         }
@@ -239,7 +239,7 @@ public class ImportDbAction extends CayenneAction {
             JOptionPane.showMessageDialog(
                     Application.getFrame(),
                     e.getMessage(),
-                    "Error Connecting to the Database",
+                    "Error Connecting to Database",
                     JOptionPane.ERROR_MESSAGE);
             return null;
         }

@@ -102,10 +102,14 @@ public class DataNodeEditor extends CayenneController {
     protected DataNodeView view;
     protected DataNode node;
     protected Map datasourceEditors;
-    protected ObjectBinding[] bindings;
+
     protected Map localDataSources;
-    protected BindingDelegate nodeChangeProcessor;
+
     protected DataSourceEditor defaultSubeditor;
+
+    protected BindingDelegate nodeChangeProcessor;
+    protected ObjectBinding[] bindings;
+    protected ObjectBinding localDataSourceBinding;
 
     public DataNodeEditor(ProjectController parent) {
         super(parent);
@@ -277,17 +281,19 @@ public class DataNodeEditor extends CayenneController {
 
         builder.setContext(this);
 
-        bindings = new ObjectBinding[4];
-        bindings[0] = builder.bindToComboSelection(
+        localDataSourceBinding = builder.bindToComboSelection(
                 view.getLocalDataSources(),
                 "parent.dataNodePreferences.localDataSource",
                 NO_LOCAL_DATA_SOURCE);
 
         // use delegate for the rest of them
+
         builder.setDelegate(nodeChangeProcessor);
-        bindings[1] = builder.bindToTextField(view.getDataNodeName(), "nodeName");
-        bindings[2] = builder.bindToComboSelection(view.getFactories(), "factoryName");
-        bindings[3] = builder.bindToComboSelection(view.getAdapters(), "adapterName");
+
+        bindings = new ObjectBinding[3];
+        bindings[0] = builder.bindToTextField(view.getDataNodeName(), "nodeName");
+        bindings[1] = builder.bindToComboSelection(view.getFactories(), "factoryName");
+        bindings[2] = builder.bindToComboSelection(view.getAdapters(), "adapterName");
 
         // one way bindings
         builder.bindToAction(
@@ -297,7 +303,7 @@ public class DataNodeEditor extends CayenneController {
 
     public void showDataSourceConfigAction() {
         PreferenceDialog prefs = new PreferenceDialog(this);
-        prefs.showDetailViewAction(PreferenceDialog.DATA_SOURCES_KEY);
+        prefs.showDataSourceEditorAction(view.getLocalDataSources().getSelectedItem());
         prefs.startupAction();
 
         refreshLocalDataSources();
@@ -322,6 +328,7 @@ public class DataNodeEditor extends CayenneController {
         }
 
         view.getLocalDataSources().setModel(new DefaultComboBoxModel(keys));
+        localDataSourceBinding.updateView();
     }
 
     /**

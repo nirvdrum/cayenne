@@ -143,6 +143,22 @@ public class PreferenceDialog extends CayenneController {
         view.dispose();
     }
 
+    /**
+     * Configures preferences dialog to display an editor for a local DataSource with
+     * specified name.
+     */
+    public void showDataSourceEditorAction(Object dataSourceKey) {
+        // this will install needed controller
+        showDetailViewAction(DATA_SOURCES_KEY);
+
+        DataSourcePreferences controller = (DataSourcePreferences) detailControllers
+                .get(DATA_SOURCES_KEY);
+        controller.editDataSourceAction(dataSourceKey);
+    }
+
+    /**
+     * Switches preference detail view to the editor identified by provided name.
+     */
     public void showDetailViewAction(String name) {
 
         if (!detailControllers.containsKey(name)) {

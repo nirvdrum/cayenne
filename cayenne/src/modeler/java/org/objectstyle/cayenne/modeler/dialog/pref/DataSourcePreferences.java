@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.Connection;
@@ -85,6 +83,7 @@ import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
 import org.objectstyle.cayenne.pref.PreferenceException;
+import org.objectstyle.cayenne.swing.BindingBuilder;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -143,26 +142,16 @@ public class DataSourcePreferences extends CayenneController {
     }
 
     protected void initBindings() {
-        view.getAddDataSource().addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                newDataSourceAction();
-            }
-        });
-
-        view.getRemoveDataSource().addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                removeDataSourceAction();
-            }
-        });
-
-        view.getTestDataSource().addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                testDataSourceAction();
-            }
-        });
+        BindingBuilder builder = new BindingBuilder(
+                getApplication().getBindingFactory(),
+                this);
+        builder.bindToAction(view.getAddDataSource(), "newDataSourceAction()");
+        builder
+                .bindToAction(
+                        view.getDuplicateDataSource(),
+                        "duplicateDataSourceAction()");
+        builder.bindToAction(view.getRemoveDataSource(), "removeDataSourceAction()");
+        builder.bindToAction(view.getTestDataSource(), "testDataSourceAction()");
 
         view.getDataSources().addItemListener(new ItemListener() {
 
@@ -203,9 +192,16 @@ public class DataSourcePreferences extends CayenneController {
         return editor;
     }
 
+    public Map getDataSources() {
+        return dataSources;
+    }
+
+    /**
+     * Shows a dialog to create new local DataSource configuration.
+     */
     public void newDataSourceAction() {
 
-        DataSourceCreator creatorWizard = new DataSourceCreator(this, dataSources);
+        DataSourceCreator creatorWizard = new DataSourceCreator(this);
         DBConnectionInfo dataSource = creatorWizard.startupAction();
 
         if (dataSource != null) {
@@ -216,6 +212,27 @@ public class DataSourcePreferences extends CayenneController {
             view.getDataSources().setModel(new DefaultComboBoxModel(keys));
             view.getDataSources().setSelectedItem(creatorWizard.getName());
             editDataSourceAction();
+        }
+    }
+
+    /**
+     * Shows a dialog to duplicate an existing local DataSource configuration.
+     */
+    public void duplicateDataSourceAction() {
+        Object selected = view.getDataSources().getSelectedItem();
+        if (selected != null) {
+            DataSourceDuplicator wizard = new DataSourceDuplicator(this, selected.toString());
+            DBConnectionInfo dataSource = wizard.startupAction();
+
+            if (dataSource != null) {
+                dataSources.put(wizard.getName(), dataSource);
+
+                Object[] keys = dataSources.keySet().toArray();
+                Arrays.sort(keys);
+                view.getDataSources().setModel(new DefaultComboBoxModel(keys));
+                view.getDataSources().setSelectedItem(wizard.getName());
+                editDataSourceAction();
+            }
         }
     }
 
@@ -230,6 +247,11 @@ public class DataSourcePreferences extends CayenneController {
             view.getDataSources().setSelectedItem("");
             editDataSourceAction();
         }
+    }
+
+    public void editDataSourceAction(Object dataSourceKey) {
+        view.getDataSources().setSelectedItem(dataSourceKey);
+        editDataSourceAction();
     }
 
     public void editDataSourceAction() {
