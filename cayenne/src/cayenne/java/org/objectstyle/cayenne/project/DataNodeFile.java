@@ -57,51 +57,47 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.access.DataNode;
 
 /**
- * RootProjectFile is a ProjectFile abstraction of the 
- * main project file in a Cayenne project. Right now Cayenne 
- * projects can not be renamed, so all the name tracking functionality 
- * is pretty much noop.
+ * DataNodeFile is a ProjectFile abstraction of the 
+ * DataNode file in a Cayenne project. 
  * 
  * @author Andrei Adamchik
  */
-public class RootProjectFile extends ProjectFile {
-	protected static final String ROOT_FILE_EXTENSION = "xml";
+public class DataNodeFile extends ProjectFile {
+	protected static final String NODE_FILE_EXTENSION = "xml";
 	
-	protected Configuration projectConfig;
-	
+	protected DataNode node;
 
     /**
-     * Constructor for RootProjectFile.
+     * Constructor for DataNodeFile.
      * @param name
      * @param extension
      */
-    public RootProjectFile(Configuration projectConfig) {
-        super("cayenne", ROOT_FILE_EXTENSION);
-        this.projectConfig = projectConfig;
+    public DataNodeFile(DataNode node) {
+        super(node.getName(), NODE_FILE_EXTENSION);
+        this.node = node;
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
      */
     public Object getObject() {
-        return projectConfig;
+        return node;
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
      */
     public String getObjectName() {
-        return "cayenne";
+        return node.getName();
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {
-        
-    }
+    public void saveToFile(File f) throws Exception {}
+
 }
 

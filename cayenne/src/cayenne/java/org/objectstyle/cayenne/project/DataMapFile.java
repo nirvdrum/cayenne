@@ -57,51 +57,46 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
- * RootProjectFile is a ProjectFile abstraction of the 
- * main project file in a Cayenne project. Right now Cayenne 
- * projects can not be renamed, so all the name tracking functionality 
- * is pretty much noop.
+ * DataMapFile is a ProjectFile abstraction of the 
+ * DataMap file in a Cayenne project. 
  * 
  * @author Andrei Adamchik
  */
-public class RootProjectFile extends ProjectFile {
-	protected static final String ROOT_FILE_EXTENSION = "xml";
+public class DataMapFile extends ProjectFile {
+	protected static final String MAP_FILE_EXTENSION = "xml";
 	
-	protected Configuration projectConfig;
-	
+	protected DataMap map;
 
     /**
-     * Constructor for RootProjectFile.
+     * Constructor for DataMapFile.
      * @param name
      * @param extension
      */
-    public RootProjectFile(Configuration projectConfig) {
-        super("cayenne", ROOT_FILE_EXTENSION);
-        this.projectConfig = projectConfig;
+    public DataMapFile(DataMap map) {
+        super(map.getName(), MAP_FILE_EXTENSION);
+        this.map = map;
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
      */
     public Object getObject() {
-        return projectConfig;
+        return map;
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
      */
     public String getObjectName() {
-        return "cayenne";
+        return map.getName();
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
      */
-    public void saveToFile(File f) throws Exception {
-        
-    }
+    public void saveToFile(File f) throws Exception {}
 }
 

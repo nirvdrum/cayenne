@@ -65,6 +65,8 @@ public class AllTests {
 		suite.addTestSuite(ProjectTraversalTst.class);
 		suite.addTestSuite(ProjectFileTst.class);
 		suite.addTestSuite(RootProjectFileTst.class);
+		suite.addTestSuite(DataMapFileTst.class);
+		suite.addTestSuite(DataNodeFileTst.class);
 		return suite;
 	}
 }

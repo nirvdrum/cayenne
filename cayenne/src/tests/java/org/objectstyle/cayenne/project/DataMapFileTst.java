@@ -55,53 +55,43 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
- * RootProjectFile is a ProjectFile abstraction of the 
- * main project file in a Cayenne project. Right now Cayenne 
- * projects can not be renamed, so all the name tracking functionality 
- * is pretty much noop.
- * 
  * @author Andrei Adamchik
  */
-public class RootProjectFile extends ProjectFile {
-	protected static final String ROOT_FILE_EXTENSION = "xml";
-	
-	protected Configuration projectConfig;
-	
-
+public class DataMapFileTst extends CayenneTestCase {
+    protected DataMapFile dmf;
+    protected DataMap map;
+    
     /**
-     * Constructor for RootProjectFile.
-     * @param name
-     * @param extension
+     * Constructor for MapFileTst.
+     * @param arg0
      */
-    public RootProjectFile(Configuration projectConfig) {
-        super("cayenne", ROOT_FILE_EXTENSION);
-        this.projectConfig = projectConfig;
+    public DataMapFileTst(String arg0) {
+        super(arg0);
     }
 
     /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+     * @see junit.framework.TestCase#setUp()
      */
-    public Object getObject() {
-        return projectConfig;
+    protected void setUp() throws Exception {
+        super.setUp();
+        map = new DataMap("m1");
+        dmf = new DataMapFile(map);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
-     */
-    public String getObjectName() {
-        return "cayenne";
+    public void testGetObject() throws Exception {
+    	assertSame(map, dmf.getObject());
     }
-
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
-     */
-    public void saveToFile(File f) throws Exception {
-        
+    
+    public void testGetObjectName() throws Exception {
+    	assertEquals(map.getName(), dmf.getObjectName());
+    }
+    
+    public void testGetFileName() throws Exception {
+    	assertEquals(map.getName() + ".xml", dmf.getFileName());
     }
 }
 

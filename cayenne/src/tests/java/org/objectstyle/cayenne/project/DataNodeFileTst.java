@@ -55,53 +55,44 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.access.DataNode;
 
 /**
- * RootProjectFile is a ProjectFile abstraction of the 
- * main project file in a Cayenne project. Right now Cayenne 
- * projects can not be renamed, so all the name tracking functionality 
- * is pretty much noop.
- * 
  * @author Andrei Adamchik
  */
-public class RootProjectFile extends ProjectFile {
-	protected static final String ROOT_FILE_EXTENSION = "xml";
-	
-	protected Configuration projectConfig;
-	
-
+public class DataNodeFileTst extends CayenneTestCase {
+    protected DataNodeFile dnf;
+    protected DataNode node;
+    
+    
     /**
-     * Constructor for RootProjectFile.
-     * @param name
-     * @param extension
+     * Constructor for DataNodeFileTst.
+     * @param arg0
      */
-    public RootProjectFile(Configuration projectConfig) {
-        super("cayenne", ROOT_FILE_EXTENSION);
-        this.projectConfig = projectConfig;
+    public DataNodeFileTst(String arg0) {
+        super(arg0);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+  /**
+     * @see junit.framework.TestCase#setUp()
      */
-    public Object getObject() {
-        return projectConfig;
+    protected void setUp() throws Exception {
+        super.setUp();
+        node = new DataNode("n1");
+        dnf = new DataNodeFile(node);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
-     */
-    public String getObjectName() {
-        return "cayenne";
+    public void testGetObject() throws Exception {
+    	assertSame(node, dnf.getObject());
     }
-
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
-     */
-    public void saveToFile(File f) throws Exception {
-        
+    
+    public void testGetObjectName() throws Exception {
+    	assertEquals(node.getName(), dnf.getObjectName());
+    }
+    
+    public void testGetFileName() throws Exception {
+    	assertEquals(node.getName() + ".xml", dnf.getFileName());
     }
 }
 
