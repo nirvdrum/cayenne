@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.map;
  */ 
 
 
-import java.util.*;
+
 
 /** Metadata for the column. Also used to map database table columns
  *  to data object properties. Here is the standard SQL to Java mapping
