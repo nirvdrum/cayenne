@@ -148,16 +148,16 @@
     		On Windows:</p>
 <source>
 cayenne-web-app> cd WEB-INF\classes
-cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;[servlet.jar] 
-cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;..\lib\struts.jar;..\lib\cayenne.jar
-cayenne-web-app\WEB-INF\classes> %JAVA_HOME%\bin\javac webtest\*.java formbean\*.java action\*.java
+classes> set CLASSPATH=%CLASSPATH%;[servlet.jar] 
+classes> set CLASSPATH=%CLASSPATH%;..\lib\struts.jar;..\lib\cayenne.jar
+classes> %JAVA_HOME%\bin\javac webtest\*.java formbean\*.java action\*.java
 </source>
 
     		<p>On UNIX:</p>
 <source>
 cayenne-web-app# cd WEB-INF/classes
-cayenne-web-app# export CLASSPATH=$CLASSPATH:[servlet.jar]:../lib/struts.jar:../lib/cayenne.jar
-cayenne-web-app# $JAVA_HOME/bin/javac webtest/*.java formbean/*.java action/*.java
+classes# export CLASSPATH=$CLASSPATH:[servlet.jar]:../lib/struts.jar:../lib/cayenne.jar
+classes# $JAVA_HOME/bin/javac webtest/*.java formbean/*.java action/*.java
 </source>
 
 			<p>To deploy, simply copy <code>cayenne-web-app</code> directory to Tomcat 

@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-#set ($centralWidth = "80%")
+#set ($centralWidth = "83%")
 #set ($rightWidth = "10%")
 #set ($rightBG = "${relativePath}/images/778899.gif")
 #if ($root.getChild("toc"))
     #set ($centralWidth = "65%")
-    #set ($rightWidth = "25%")  
+    #set ($rightWidth = "28%")  
     #set ($rightBG = "${relativePath}/images/666633.gif")
 #end
 
@@ -23,7 +23,7 @@
 <br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tbody><tr>
-    <td width="15%" height="70" align="right" valign="top" background="${relativePath}/images/778899.gif">
+    <td width="12%" height="70" align="right" valign="top" background="${relativePath}/images/778899.gif">
        <a href="http://objectstyle.org/"><img border="0" src="${relativePath}/images/os_logo.gif" width="160" height="32"></a>
     </td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
@@ -34,7 +34,7 @@
     <td width="${rightWidth}" background="${rightBG}"> </td>
   </tr>
   <tr>
-    <td width="15%" valign="top" bgcolor="#778899"><table width="100%" border="0" cellspacing="10" cellpadding="0">
+    <td width="12%" valign="top" bgcolor="#778899"><table width="100%" border="0" cellspacing="10" cellpadding="0">
     <tbody>
       <tr>
         <td align="right" class="normal">
@@ -42,13 +42,17 @@
         </td>
       </tr>
     </tbody>
-    </table><table width="100%" border="0" cellspacing="10" cellpadding="0" class="body-black">
+    </table>
+    <table width="100%" border="0" cellspacing="10" cellpadding="0" class="body-black">
       <tbody><tr>
         <td align="right"><form onsubmit="q.value = query.value + ' site:objectstyle.org'" action="http://www.google.com/search" method="get">
             <input name="q" type="hidden"><input id="query" type="text" class="input" size="20">
             <br>
 
 search          </form>          </td>
+      </tr>
+      <tr>
+        <td align="right"><!--SFLOGO--></td>
       </tr>
     </tbody></table></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
@@ -64,14 +68,14 @@ search          </form>          </td>
     #tableOfContents()
   </tr>  <tr>
 
-    <td width="15%" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
+    <td width="12%" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="1" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="1" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${rightWidth}" height="1" bgcolor="#333333"><img border="0" src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr>
-    <td width="15%"></td>
+    <td width="12%"></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" valign="top"><table width="100%" border="0" cellspacing="10" cellpadding="0" class="body-black">
       <tbody><tr>
@@ -87,19 +91,6 @@ search          </form>          </td>
 </html>
 
 ## Velocity Macros
-#macro ( navigator $nav)
-<table width="100%" cellpadding="0" cellspacing="0">
-	<tr>
-		<td class="small-black" align="right">
-			#if ($nav.getChild("prev"))<a href='$relativePath$nav.getChild("prev").getText()'><img border="0" src="$relativePath/images/left-arrow.gif"></a>#end
-			#if ($nav.getChild("up"))<a href='$relativePath$nav.getChild("up").getText()'><img border="0" src="$relativePath/images/up-arrow.gif"></a>#end
-			#if ($nav.getChild("next"))<a href='$relativePath$nav.getChild("next").getText()'><img border="0" src="$relativePath/images/right-arrow.gif"></a>#end
-		</td>
-		<td width="10">&nbsp;</td>
-	</tr>
-</table>
-#end
-
 ## Creates mailing list archive placeholder
 #macro ( listarch $arch)
 <!-- Do not change comments below, it is a placeholder to create archive links -->
@@ -184,9 +175,9 @@ $panel.getText()<br></td>
 
 #macro ( menuprojectanchor $name $value )
 #if ($value.startsWith("http://"))
-    <a href="$value" class="body-white">$name</a>
+    <a href="$value" class="body-white-small">$name</a>
 #else
-    <a href="$relativePath$value"  class="body-white">$name</a>
+    <a href="$relativePath$value" class="body-white-small">$name</a>
 #end
 #end
 
@@ -289,7 +280,7 @@ $tag
 
 #macro ( tableOfContents)
     #if ($root.getChild("toc"))
-    <td width="25%" valign="top" bgcolor="#999966"><table width="100%" border="0" cellspacing="10" cellpadding="0">
+    <td width="30%" valign="top" bgcolor="#999966"><table width="100%" border="0" cellspacing="10" cellpadding="0">
       <tbody>
        	<tr>
        		<td align="left" class="normal">
@@ -303,7 +294,7 @@ $tag
        		#if($name == $root.getChild("toc").getAttributeValue("chapter"))
        		#foreach ( $subitem in $item.getChildren("item"))
        		   #set ($subname = $subitem.getAttributeValue("name"))
-       		   &nbsp;&nbsp;#menuprojectanchor($subname $subitem.getAttributeValue("href"))<br>
+       		   &nbsp;#menuprojectanchor($subname $subitem.getAttributeValue("href"))<br>
        		#end
        		#end</p>
     	 #end

@@ -67,13 +67,12 @@ if(realExpensiveArt.size() > 0) {
 <source>
 [main 12-22 15:50:19] QueryLogger: --- will run 2 queries.
 [main 12-22 15:50:19] QueryLogger: INSERT INTO PAINTING 
-                                   (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE, ARTIST_ID) 
-                                   VALUES (?, ?, ?, ?) 
-                                   [params: 200, 'Sunset as it is', 5000000, 10]
+(PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE, ARTIST_ID) 
+VALUES (?, ?, ?, ?) [params: 200, 'Sunset as it is', 5000000, 10]
 [main 12-22 15:50:19] QueryLogger: === updated 1 row.
-[main 12-22 15:50:19] QueryLogger: UPDATE PAINTING SET ESTIMATED_PRICE = ? 
-                                   WHERE PAINTING_ID = ? 
-                                   [params: 2000000, 34]
+[main 12-22 15:50:19] QueryLogger: UPDATE PAINTING SET 
+ESTIMATED_PRICE = ? WHERE PAINTING_ID = ? 
+[params: 2000000, 34]
 [main 12-22 15:50:19] QueryLogger: === updated 1 row.
 [main 12-22 15:50:19] QueryLogger: +++ transaction committed.
 </source>

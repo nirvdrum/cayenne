@@ -9,23 +9,18 @@
     <body>
         <!-- Contributors section -->
         <section name="Downloads">
-        	<ul>
-                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=165974">Latest 
-                release link</a>
-                </li>
-            </ul>
-            <hr/>
-   
-            <p>Cayenne distribution contains precompiled JAR files, full 
-            documentation and source code. The following types of downloads are 
-            available.
-            
             <ul>
+                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=165974">Latest 
+                Stable Release</a><br/><br/>
+                </li>
                 <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132">Release Builds</a></li>
-                <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a> 
-                (note that usually only about 7 latest nightly builds are available, older ones are 
-                automatically deleted from the archive)</li>
-            </ul>            
+                <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
+            </ul>
+   
+            <p>All Cayenne distributions contain precompiled JAR files, full documentation and source code. 
+            Nightly builds undergo automated testing, but may contain incomplete features and unstable
+            code. Use them at your own risk. Note that usually only about 7 latest nightly builds 
+            are available, older ones are automatically deleted from the archive.
             </p>
         </section>
     </body>

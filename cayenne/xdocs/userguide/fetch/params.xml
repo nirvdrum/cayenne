@@ -1,4 +1,4 @@
-<document>
+	<document>
 <title>User Guide - Using SelectQueries</title>
 <toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
 <body>
@@ -25,10 +25,13 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 ...
 
-// create a qualifier with two named parameters: "pname" and "aname"
+// create a qualifier with two named parameters: 
+//   "pname" and "aname"
 List list = new ArrayList();
-list.add(ExpressionFactory.matchExp("paintingTitle", new ExpressionParameter("pname")));
-list.add(ExpressionFactory.matchExp("toArtist.artistName", new ExpressionParameter("aname")));
+list.add(ExpressionFactory.matchExp("paintingTitle", 
+         new ExpressionParameter("pname")));
+list.add(ExpressionFactory.matchExp("toArtist.artistName", 
+         new ExpressionParameter("aname")));
 Expression qual = ExpressionFactory.joinExp(Expression.OR, list);
 
 // build a prototype of a query
@@ -116,7 +119,8 @@ DataContext context;
 
 ...
 
-SelectQuery queryProto = context.getEntityResolver().lookupQuery(Artist.class, "MyQuery")
+SelectQuery queryProto = 
+      context.getEntityResolver().lookupQuery(Artist.class, "MyQuery");
 </source>
 
 		</subsection>       

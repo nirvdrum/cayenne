@@ -16,7 +16,8 @@
     		<li><a href="http://www.sybase.com/">Sybase (11.9)</a></li>
     		<li><a href="http://www.mysql.com/">MySQL</a></li>
     		<li><a href="http://www.postgresql.org/">PostgreSQL</a> (7.3 and newer)</li>
-    		<li><a href="http://hsqldb.sourceforge.net/">HSQLDB</a></li> 
+    		<li><a href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
+    		<li><a href="http://www.ibm.com/db2/">DB2</a></li> 
     	</ul>
     	
     	Adapters for other engines are constantly added. Users can create their own adapters as well.

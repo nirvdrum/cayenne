@@ -2,6 +2,7 @@
   .body-black {font-family:  Verdana, Arial, Helvetica, sans-serif; color:#000000; font-size: 9pt; letter-spacing: normal }
   .body-black:hover {font-family:  Verdana, Arial, Helvetica, sans-serif; color:#000000; font-size: 9pt; letter-spacing: normal }
   .body-white {font-family:  Verdana, Arial, Helvetica, sans-serif; color:#ffffff; font-size: 9pt; letter-spacing: normal }
+  .body-white-small {font-family:  Verdana, Arial, Helvetica, sans-serif; color:#ffffff; font-size: 8pt; letter-spacing: normal }
   .small {font-family:  Verdana, Arial, Helvetica, sans-serif; font-size: 9px; letter-spacing: normal }
   .big {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12pt }
   .normal {font-family:  Verdana, Arial, Helvetica, sans-serif; font-size:  10pt; letter-spacing: normal}
