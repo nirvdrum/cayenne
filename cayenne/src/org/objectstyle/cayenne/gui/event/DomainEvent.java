@@ -62,6 +62,9 @@ import org.objectstyle.cayenne.access.DataDomain;
 /** 
  * Represents events resulted from DataDomain changes 
  * in CayenneModeler.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
 public class DomainEvent extends ModelerEvent {
 	protected DataDomain domain;

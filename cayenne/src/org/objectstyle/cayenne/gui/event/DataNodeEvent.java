@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,61 +52,52 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.event;
 
 import java.util.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.*;
 
+/** 
+ * Represents events resulted from DataNode changes 
+ * in CayenneModeler.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class DataNodeEvent extends ModelerEvent {
+	protected DataNode dataNode;
 
-/** Events pertaining to DataNode status change. 
-  * We don't need to store Domain information in this type of
-    event as it is always currentDomain. */
-public class DataNodeEvent extends EventObject
-{
-	/** DataNode changed. Display or re-display it.*/
-	public static final int CHANGE 	= 1;
-	/** New dataNode created. Display it or add to the list, if applicable.*/
-	public static final int ADD		= 2;
-	/** DataNode removed. Display another one and/or remove this one from lists.*/
-	public static final int REMOVE	= 3;
-	
-	private int	id = CHANGE;
-	private DataNode dataNode;
-	private String oldName;
-	private String newName;
-	
-	/** DataNode property(-ies) changed. */
-	public DataNodeEvent(Object src, DataNode temp_data_node)
-	{
+	/** Creates a node change event. */
+	public DataNodeEvent(Object src, DataNode node) {
 		super(src);
-		dataNode = temp_data_node;
-		oldName = newName = temp_data_node.getName();
+		setDataNode(node);
 	}
 
-	/** DataNode added or removed. */
-	public DataNodeEvent(Object src, DataNode temp_data_node, int temp_id)
-	{
-		this(src, temp_data_node);
-		id = temp_id;
+	/** Creates a node event of a specified type. */
+	public DataNodeEvent(Object src, DataNode node, int id) {
+		this(src, node);
+		setId(id);
 	}
 
-	/** DataNode name changed.*/
-	public DataNodeEvent(Object src, DataNode temp_data_node, String old_name)
-	{
-		this(src, temp_data_node, CHANGE);
-		oldName = old_name;
+	/** Creates a node name change event.*/
+	public DataNodeEvent(Object src, DataNode node, String oldName) {
+		this(src, node);
+		setOldName(oldName);
 	}
-	
-	/** Get dataNode (obj or db). */
-	public DataNode getDataNode() {return dataNode;}
-	/** Get the type of the event.
-	 *  @return CHANGE, ADD or REMOVE.*/
-	public int getId() {return id;}
-	
-	/** Returns the old dataNode name. Used only in CHANGE event. */
-	public String getOldName() {return oldName;}
-	
-	/** Returns the new dataNode name. Used only in CHANGE event.*/
-	public String getNewName() {return newName;}
+
+	/** Returns node object associated with this event. */
+	public DataNode getDataNode() {
+		return dataNode;
+	}
+
+	/**
+	 * Sets the dataNode.
+	 * 
+	 * @param dataNode The dataNode to set
+	 */
+	public void setDataNode(DataNode dataNode) {
+		this.dataNode = dataNode;
+	}
 }
