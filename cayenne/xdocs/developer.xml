@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <document>
-    <title>Downloads</title>
+    <title>Developer</title>
 
     <properties>
         <author>Andrei Adamchik</author>
@@ -9,12 +9,11 @@
     <body>
         <!-- CVS section -->
         <section name="CVS Access">
-            <p>To get the source code, set up your machine for CVS and get CVS/SSH account 
-            by following instructions on <a href="http://objectstyle.org/developer/cvs.html">this page</a>. 
-            Root project module name is "cayenne". To do a check out type from the command line 
-            (or do whatever is needed in your graphic tool):</p>
-
-            <source>cvs -z 5 co cayenne</source>
+            <p>To get Cayenne code via CVS, follow the instructions on 
+            <a href="http://sourceforge.net/cvs/?group_id=48132">this page</a>. 
+            Module name is <code>cayenne</code>. Also you may find <a href="http://objectstyle.org/developer/cvs.html">
+            this page</a> helpful if you are trying to setup CVS/SSH
+            access on Windows.</p>
         </section>
         
         <!-- Compile section -->
