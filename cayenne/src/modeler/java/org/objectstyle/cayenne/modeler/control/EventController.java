@@ -104,10 +104,12 @@ import org.objectstyle.cayenne.modeler.model.TopModel;
 
 /** 
  * Implementation of event dispatching in CayenneModeler using <i>mediator</i>
- * design pattern. Views responsible for the display of the 
- * groups of properties of the project elements, such as Entities, 
- * attributes and relationships, register themselves as listeners to the 
- * different types of events and act as controllers.
+ * design pattern. 
+ * 
+ * <p>TODO: Refactor the event model, so that events are generic and contain "path"
+ * to a project node in question. After this is done, EventController should no longer
+ * maintain the selection model (currentXYZ ivars), rather it should update internal model.  
+ * </p>
  * 
  * @author Andrei Adamchik
  */
@@ -501,8 +503,6 @@ public class EventController {
     }
 
     public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e) {
-        if (e.getAttribute() == this.getCurrentDbAttribute())
-            e.setAttributeChanged(false);
         this.fireDbEntityDisplayEvent(e);
         clearState();
         // Must follow DbEntityDisplayEvent, 
@@ -545,8 +545,6 @@ public class EventController {
     }
 
     public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e) {
-        if (e.getAttribute() == this.getCurrentObjAttribute())
-            e.setAttributeChanged(false);
         this.fireObjEntityDisplayEvent(e);
         // Must follow ObjEntityDisplayEvent, 
         // as it resets curr Attr and Rel values to null.

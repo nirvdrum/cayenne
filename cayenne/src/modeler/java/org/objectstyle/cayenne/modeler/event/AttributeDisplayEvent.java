@@ -53,34 +53,30 @@ package org.objectstyle.cayenne.modeler.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
 
 /** 
   * @author Michael Misha Shengaout
   */
+public class AttributeDisplayEvent extends EntityDisplayEvent {
+    protected Attribute attribute;
 
-public class AttributeDisplayEvent extends EntityDisplayEvent
-{
-	Attribute attribute;
-	/** True if different from current attribute */
-	boolean attributeChanged = true;
+    public AttributeDisplayEvent(
+        Object src,
+        Attribute temp_attribute,
+        Entity temp_entity,
+        DataMap data_map,
+        DataDomain temp_domain) {
+        super(src, temp_entity, data_map, temp_domain);
+        attribute = temp_attribute;
+    }
 
-	public AttributeDisplayEvent (Object src, Attribute temp_attribute
-	, Entity temp_entity, DataMap data_map, DataDomain temp_domain) 
-	{
-		super(src, temp_entity, data_map, temp_domain);
-		attribute = temp_attribute;
-	}
-
-	public Attribute getAttribute() {
-		return attribute;
-	}
-	
-	public boolean isAttributeChanged() {return attributeChanged;}
-	public void setAttributeChanged(boolean temp) {
-		attributeChanged = temp;
-	}
+    public Attribute getAttribute() {
+        return attribute;
+    }
 }
