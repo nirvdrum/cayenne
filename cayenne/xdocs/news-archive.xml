@@ -4,6 +4,18 @@
 
     <body>        
         <section name="Cayenne News Archive">
+         <p><u><i>[February 8, 2004]</i></u> <strong>Release 1.1a-pre2 of Cayenne and Cayenne Examples</strong></p>
+         <p>Cayenne and Cayenne Examples 1.1a-pre2 (Second Alpha Preview) are released. This release features 
+         1.1 release. Among its features are:
+         <ul>
+         <li>Modeler and API support for container-managed transactions</li>
+         <li>Cayenne with SessionBean facade JBoss example</li>
+         <li>"Import DataMap" function in CayenneModeler</li>
+         <li>MS SQL Server Adapter</li>
+         <li>various bug fixes</li>
+         </ul>
+         </p>
+         
         <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne 1.0.3 Release</strong></u></p>
         
         <p>Cayenne 1.0.3 is 

@@ -6,17 +6,8 @@
         <!-- News section -->
         <section name="Cayenne News">
         
-         <p><u><i>[February 8, 2004]</i></u> <strong>Release 1.1a-pre2 of Cayenne and Cayenne Examples</strong></p>
-         <p>Cayenne and Cayenne Examples 1.1a-pre2 (Second Alpha Preview) are released. This release features 
-         1.1 release. Among its features are:
-         <ul>
-         <li>Modeler and API support for container-managed transactions</li>
-         <li>Cayenne with SessionBean facade JBoss example</li>
-         <li>"Import DataMap" function in CayenneModeler</li>
-         <li>MS SQL Server Adapter</li>
-         <li>various bug fixes</li>
-         </ul>
-         
+         <p><u><i>[February 29, 2004]</i></u> <strong>M3 - New Cayenne 1.1 Milestone  Release</strong></p>
+         <p>This release features major enhancement of Expressions API and allows to build SelectQueries using CayenneModeler.
          For details see <a href="RELEASE-NOTES.txt">release notes</a> and <a href="UPGRADE.txt">upgrade instructions.</a>.
          </p>
          
@@ -33,7 +24,6 @@
          <br/><br/><br/><br/>
          </p>
 
-        
         <p><u><i>[May 1 2003]</i></u> <strong>National Hockey League Switches to Cayenne</strong></p>
         
         <p><img align="left" hspace="3" src="images/other/nhl_logo.gif"/> 
