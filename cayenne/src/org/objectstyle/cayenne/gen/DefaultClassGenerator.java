@@ -57,8 +57,10 @@
 package org.objectstyle.cayenne.gen;
 
 import java.io.*;
+import java.util.List;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /** 
  * Extends MapClassGenerator to allow target-specific filesystem locations 
@@ -67,18 +69,32 @@ import org.objectstyle.cayenne.map.DataMap;
  * 
  * @author Andrei Adamchik
  */
-public abstract class DefaultClassGenerator extends MapClassGenerator {
+public class DefaultClassGenerator extends MapClassGenerator {
     protected File destDir;
     protected boolean overwrite;
     protected boolean usepkgpath = true;
     protected boolean makepairs = true;
     protected File template;
     protected File supertemplate;
+    protected long timestamp = System.currentTimeMillis();
 
     public DefaultClassGenerator() {}
 
+    /** 
+     * Creates class generator and initializes it with DataMap.
+     * This will ensure generation of classes for all ObjEntities
+     * in the DataMap.
+     */
     public DefaultClassGenerator(DataMap map) {
-        super(map);
+        this(map.getObjEntitiesAsList());
+    }
+    
+    /** 
+     * Creates class generator and initializes it with the list of ObjEntities
+     * that will be used in class generation.
+     */
+    public DefaultClassGenerator(List objEntities) {
+        super(objEntities);
     }
 
     /** Runs class generation. */
@@ -167,6 +183,65 @@ public abstract class DefaultClassGenerator extends MapClassGenerator {
         out.close();
     }
 
+    public Writer openWriter(ObjEntity entity, String pkgName, String className)
+        throws Exception {
+        return (className.startsWith(SUPERCLASS_PREFIX))
+            ? writerForSuperclass(entity, pkgName, className)
+            : writerForClass(entity, pkgName, className);
+    }
+
+    private Writer writerForSuperclass(
+        ObjEntity entity,
+        String pkgName,
+        String className)
+        throws Exception {
+
+        File dest = new File(mkpath(destDir, pkgName), className + ".java");
+
+        // ignore newer files
+        if (dest.exists() && !isOld(dest)) {
+            return null;
+        }
+
+        return new FileWriter(dest);
+    }
+
+    private Writer writerForClass(
+        ObjEntity entity,
+        String pkgName,
+        String className)
+        throws Exception {
+
+        File dest = new File(mkpath(destDir, pkgName), className + ".java");
+        if (dest.exists()) {
+
+            // no overwrite of subclasses
+            if (makepairs) {
+                return null;
+            }
+
+            // skip if said so
+            if (!overwrite) {
+                return null;
+            }
+
+            // ignore newer files
+            if (!isOld(dest)) {
+                return null;
+            }
+        }
+
+        return new FileWriter(dest);
+    }
+
+    /** 
+     * Returns true if <code>file</code> parameter is older than internal 
+     * timestamp of this class generator.
+     */
+    protected boolean isOld(File file) {
+        return file.lastModified() <= getTimestamp();
+    }
+
     /** 
      *  Returns a File object corresponding to a directory where files
      *  that belong to <code>pkgName</code> package should reside. 
@@ -215,5 +290,17 @@ public abstract class DefaultClassGenerator extends MapClassGenerator {
         return (supertemplate != null)
             ? supertemplate.getCanonicalPath()
             : MapClassGenerator.SUPERCLASS_TEMPLATE;
+    }
+
+    /**
+     * Returns internal timestamp of this generator used to make
+     * decisions about overwriting individual files. 
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -60,16 +60,14 @@ import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.util.Hashtable;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.gen.MapClassGenerator;
+import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
@@ -205,10 +203,6 @@ implements ActionListener
 	}
 	
 	private void generateCode() {
-		GenerateClassTableModel model;
-		model = (GenerateClassTableModel)table.getModel();
-		Map to_generate = model.getSelectedEntities();
-		Generator generator;
 		String file_name = folder.getText();
 		if (outputFolder == null) {
 			JOptionPane.showMessageDialog(this, "Enter directory for source files");
@@ -226,23 +220,23 @@ implements ActionListener
 			chooseFolder.requestFocus(true);
 			return;
 		}
-		generator = new Generator(mediator.getCurrentDataMap()
-								, to_generate, outputFolder);
+		
+		List selected = ((GenerateClassTableModel)table.getModel()).getSelected();
+		DefaultClassGenerator generator = new DefaultClassGenerator(selected);
+		generator.setDestDir(outputFolder);
+		generator.setMakepairs(generatePair.isSelected());		
+		
 		try {
-			if (generatePair.isSelected())
-				generator.generateClassPairs();
-			else
-				generator.generateSingleClasses();
+			generator.execute();
 			JOptionPane.showMessageDialog(this, "Class generation finished");
 			hide();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Error generating classes - " 
 				+ e.getMessage());
 		}
 	}
-}// End GenerateClassDialog
+}
 
 
 class GenerateClassTableModel extends AbstractTableModel 
@@ -337,64 +331,17 @@ class GenerateClassTableModel extends AbstractTableModel
 			return false;
 	}// End isCellEditable()
 	
-	/** Returns map with the selected ObjEntities.
-	  * The key is obj entity and value - its name. */
-	public Map getSelectedEntities() {
-		Hashtable hash = new Hashtable();
+	
+	/** 
+	 * Returns a list containing selected ObjEntities.
+	 */
+	public List getSelected() {
+		List selectedEnts = new ArrayList();
 		for (int i = 0; i < selected.length; i++) {
 			if (selected[i] == true) {
-				hash.put(entities[i], entities[i].getName());
+				selectedEnts.add(entities[i]);
 			}
-		}// End for()
-		return hash;
-	}
-} // End GenerateClassTableModel
-
-
-/** Class actually opening and closing streams for the files.*/
-class Generator extends MapClassGenerator
-{
-	/** Entities for which to generate code. */
-	Map toGenerate;
-	DataMap map;
-	File folder;
-	
-	public Generator(DataMap temp_map, Map entities, File temp_folder) {
-		super(temp_map);
-		map = temp_map;
-		toGenerate = entities;
-		folder = temp_folder;
-		if (!folder.isDirectory() || !folder.exists())
-			throw new CayenneRuntimeException(folder.getName() 
-									+ " does not exist or is not a directory");
-	}
-	
-	/** FIXME: package name is ignored, need better handling of this. */
-    public Writer openWriter(ObjEntity entity, String pkgName, String className) throws Exception
-    {
-    	try {
-			if (!toGenerate.containsKey(entity))
-				return null;
-			File class_file = new File(folder, className + ".java");
-			if (!class_file.exists())
-				if (!class_file.createNewFile())
-					return null;
-			FileWriter writer = new FileWriter(class_file);
-			return writer;
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return null;
 		}
-    }
-
-
-    /** Closes writer after class code has been successfully written by ClassGenerator. */
-    public void closeWriter(Writer out) throws Exception {
-    	if (null == out)
-    		return;
-    	out.flush();
-    	out.close();
-    }
-
+		return selectedEnts;
+	}
 }

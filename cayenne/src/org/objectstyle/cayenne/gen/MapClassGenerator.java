@@ -57,7 +57,7 @@
 package org.objectstyle.cayenne.gen;
 
 import java.io.Writer;
-import java.util.Iterator;
+import java.util.*;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
@@ -78,13 +78,17 @@ public abstract class MapClassGenerator {
     public static final String SUPERCLASS_TEMPLATE = "dotemplates/superclass.vm";
     public static final String SUPERCLASS_PREFIX = "_";
 
-    protected DataMap map;
+    protected List objEntities;
     protected String superPkg;
 
     public MapClassGenerator() {}
 
     public MapClassGenerator(DataMap map) {
-        this.map = map;
+        this(map.getObjEntitiesAsList());
+    }
+    
+    public MapClassGenerator(List objEntities) {
+        this.objEntities = objEntities;
     }
 
     /** Provides child ClassGenerator with a Writer object
@@ -130,7 +134,7 @@ public abstract class MapClassGenerator {
         mainGen.setSuperPrefix(superPrefix);
         superGen.setSuperPrefix(superPrefix);
 
-        Iterator it = map.getObjEntitiesAsList().iterator();
+        Iterator it = objEntities.iterator();
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
 
@@ -174,7 +178,7 @@ public abstract class MapClassGenerator {
     public void generateSingleClasses(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate);
 
-        Iterator it = map.getObjEntitiesAsList().iterator();
+        Iterator it = objEntities.iterator();
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
             initClassGenerator(gen, ent, false);
@@ -241,19 +245,4 @@ public abstract class MapClassGenerator {
     public void setSuperPkg(String superPkg) {
         this.superPkg = superPkg;
     }
-
-    /**
-     * Returns DataMap used as information source about generated classes.
-     */
-    public DataMap getMap() {
-        return map;
-    }
-
-    /**
-     * Returns DataMap used as information source about generated classes.
-     */
-    public void setMap(DataMap map) {
-        this.map = map;
-    }
-
 }
