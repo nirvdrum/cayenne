@@ -1,103 +1,116 @@
 <document>
-<title>User Guide - Data Views</title>
-<toc name="toc-user-guide" chapter="14. Data Views"/>
+<title>User Guide - DataViews</title>
+<toc name="toc-user-guide" chapter="13. DataViews"/>
 <body>
-    <section name="14. Data Views">
-        <subsection name="14.1 Data View Concepts" anchor="dvconcepts">
+    <section name="13. DataViews">
+        <subsection name="13.2 DataView Concepts" >
+        
+        <subsection name="13.2.1 DataView Hierarchy">
             <p>The class diagram on the figure below captures the structure of Data
-    Views and how they rely on the classes in the Cayenne subpackages. As you
-    can see class DataView is the root of the Data View hierarchy. It serves
-    as a container for ObjEntityViews. While the Data View is represented by a
-    single object of type DataView it can incorporate the ObjEntityViews from
-    several Data View configuration files. This approach is different from the
-    one taken in the case of Cayenne Data Maps where DataMaps are created per
-    data map file. Thus, as opposite to the case of Data Maps ObjEntityViews
+    Views and how they rely on the classes in the Cayenne subpackages. 
+    Single <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/DataView.html">DataView</a> 
+    object is the root of the hierarchy. It serves as a container for 
+    <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/ObjEntityView.html">ObjEntityViews</a> from
+    one or more DataView configuration files.  Just like entities in the DataMaps,  ObjEntityViews
     can freely refer to each other whether they are defined in the same
     configuration file or different ones. The recommended practice is to store
-    closely related ObjEntityViews in the same XML &#34;module&#34; and define
-    several &#34;modules&#34; based on the criterion of such closeness. When
-    you load the list of XML files into the DataView all the (lookup)
+    closely related ObjEntityViews in the same XML "module" and define
+    several "modules" based on the criterion of such closeness. When
+    you load the list of XML files into the DataView, all the
     relationships are resolved automatically and the ObjEntityViews share the
-    same namespace (so give them different names even if they are located in
-    different XML files). The diagram also shows that DataView is associated
+    same namespace (so they must have  different names even if they are located in
+    different XML files).</p>
+    
+    <p>The diagram also shows that DataView is associated
     with several classes such as
-    org.objectstyle.cayenne.access.EntityResolver,
-    org.objectstyle.cayenne.dataview.DataTypeSpec,
-    org.objectstyle.cayenne.dataview.FormatFactory. The instances of these
-    classes participate in the process of loading actual Data View files. The
-    main unit of any Data View is ObjEntityView. It always refers to an
-    ObjEntity defined in one of the used data maps and defines various
+    <a href="../../api/cayenne/org/objectstyle/cayenne/map/EntityResolver.html">EntityResolver</a>,
+    <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/DataTypeSpec.html">DataTypeSpec</a>,
+    <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/FormatFactory.html">FormatFactory</a>. The instances of these
+    classes participate in the process of loading actual Data View files.</p>
+    
+    <p>The main unit of any Data View is ObjEntityView. It always refers to an
+    ObjEntity defined in one of the used DataMaps and defines various
     presentation rules for this entity. There can be several ObjEntityViews
     for an ObjEntity, each of them utilized by an application when
     appropriate. EntityResolver finds the corresponding ObjEntities by the
     names as the Data View is being loaded. Every ObjEntityView must have a
-    name unique in the DataView context. ObjEntityViews contain fields called
-    ObjEntityViewFields. They must be named uniquely within an ObjEntityView.
-    The fields can be of two sorts. The regular &#34;nocalc&#34; fields
-    reference ObjAttributes in the ObjEntity referred by the parent
-    ObjEntityView. A field describes how the related ObjAttribute will be
-    rendered and edited, the data type and the formats to use in the
-    presentation layer. It also defines the caption that is regularly used to
-    name a table column or label the corresponding input control on the form.
-    It also configures the editability and the visibility of this attribute.
-    You can setup an order in which the fields appear in a JTable (as columns)
-    or on a form with the preferred index. You can define the default values
-    for the fields if desired. The FormatFactory described below is used to
-    create actual Format classes used by the fields. There may be several
-    fields for an ObjAttribute in the ObjEntityView. The field&#39;s data type
-    deserves paying special heed. Cayenne defines the mapping between several
+    name unique in the DataView context.</p>
+    
+    <p>ObjEntityViews contain fields called 
+    <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/ObjEntityViewField.html">ObjEntityViewFields</a>. 
+    They must be named uniquely within an ObjEntityView. The fields can be of two sorts. The regular 
+    "nocalc" fields reference ObjAttributes in the ObjEntity referred by the parent
+    ObjEntityView. There may be several fields for a given ObjAttribute in the ObjEntityView. 
+    A field describes the following view parameters:</p>
+    
+    <ul>
+		<li>How the related ObjAttribute should be rendered and edited.</li>
+		<li>The data type and the formats to use in the presentation layer.</li>
+		<li>The caption that is usually used to name a table column or to label an input control in a form.</li>
+		<li>Editability and visibility of the attribute</li>
+		<li>An order in which the fields appear as columns in a JTable or in a form with the preferred index.</li>
+    </ul>
+    
+    <p>The other type of ObjEntityViewFields is "lookup" fields. They point to the fields defined in other 
+    ObjEntityViews so the actual values to display, edit, or select from come from those referenced fields.
+    Such a lookup field corresponds to an ObjRelationship with the ObjEntity referred by this its 
+    ObjEntityView as a source and the ObjEntity referred by the lookup ObjEntityView as a target 
+    instead of an ObjAttribute. Next the field identifies which lookup ObjEntityView and which particular field
+    it wants to use as a lookup. These dependencies are resolved when the data views are loaded into memory. 
+    Class LookupCache helps maintain and map to data objects lists of values used in lookup combo boxes 
+    and lists. Thus you can describe the rules of visual editing the relationships or make
+    aggregated views base on the related entities. </p>
+    <img src="/images/userguide/dataview/dataview-structure.gif" width="429" height="448" alt="DataView Structure"/>
+    <p> </p>
+    </subsection>
+    
+    <subsection name="13.2.2 Field Data Types">
+    
+    <p> Cayenne defines the mapping between several
     Java Class types and JDBC types. It is convenient to use and sufficient in
     many cases but there are all sorts of situations when one would like to
     define more specific data types to make use of, especially for the
     presentation purposes. In many cases when Integer is used as a flag you
     would like to map it to Boolean. Or you may have a Money type or Date type
-    that holds only year, month, and day values, and so forth. The
-    ObjEntityViewFields give you this opportunity. They provide the easily
+    that holds only year, month, and day values, and so forth.</p>
+    
+    <p>ObjEntityViewFields address that by  providing an  easily
     extensible system of data types often used in the business applications.
     This system takes care of converting values back and forth between Cayenne
     data types and application specific data types. It relies on two classes
-    DataTypeEnum and DataTypeSpec, and both of them can be extended to define
+    DataTypeEnum and DataTypeSpec, both of them can be extended to define
     new types of any sorts. While the entire thing may seem redundant at the
-    first glance, actually, it is a powerful concept that can save you a lot
-    of time usually spent on the manual conversions. Back to the kinds of
-    fields. The other sort of ObjEntityViewFields is &#34;lookup&#34; fields.
-    They point to the fields defined in other ObjEntityViews so the actual
-    values to display, edit, or select from come from those referenced fields.
-    Such a lookup field corresponds to an ObjRelationship with the ObjEntity
-    referred by this its ObjEntityView as a source and the ObjEntity referred
-    by the lookup ObjEntityView as a target instead of an ObjAttribute. Next
-    the field identifies which lookup ObjEntityView and which particular field
-    it wants to use as a lookup. These dependencies are resolved when the data
-    views are loaded into memory. Class LookupCache helps maintain and map to
-    data objects lists of values used in lookup combo boxes and lists. Thus
-    you can describe the rules of visual editing the relationships or make
-    aggregated views base on the related entities. One more useful feature is
-    a centralized EventDispatcher within the DataView class. It is used by the
-    fields to fire the events whenever their values are changed. Thus the
-    ObjAttribute/ObjRelationship modifications can be easily propagated to all
-    the listening components. </p>
+    first glance, actually, it is a powerful concept that can save a lot
+    of time spent on the manual conversions. </p>
+	</subsection>
+    
 
-    <img src="/images/userguide/dataview/dataview-structure.gif" width="429" height="448" alt="DataView Structure"/>
-
-    <p>org.objectstyle.cayenne.dataview.FormatFactory depicted on the next
+	<subsection name="13.2.3 FormatFactory">
+    <p><a href="../../api/cayenne/org/objectstyle/cayenne/dataview/FormatFactory.html">FormatFactory</a>
+    shown on the next
     figure provides the means to create instances of the edit and display
     formats used by ObjEntityViewFields. There are several formats defined in
-    the java.text package. In turn, the dataview library defines convenient
+    the java.text package. In addition the dataview library defines convenient
     MapFormat somewhat similar to java.text.ChoiceFormat. instead of
     formatting doubles by inclusion in range criterion as ChoiceFormat does it
     maps a set of objects of any type to string values. For example you can
-    map Booleans to &#34;Sure&#34; and &#34;No way&#34; strings or you can map
+    map Booleans to "Sure" and "No way" strings or you can map
     String keys to some descriptive String values, etc. It is easy for users
     to add custom formats of their own. They should subclass FormatFactory and
     create new Builders for their formats. That done, all they need is to
-    configure the display and edti formats in ObjEntityViewFields with the
+    configure the display and edit formats in ObjEntityViewFields with the
     class names of their Format classes and the patterns (and, maybe, some
     other properties).</p>
 
     <img src="/images/userguide/dataview/format-factory.gif" width="445" height="479" alt="DataView FormatFactory"/>
+    <p> </p>
+	</subsection>
+	
+	<subsection name="13.2.4 CellRenderers and CellEditors">
 
-    <p>The following figure presents the utility class CellRenderers and
-    several ready-to-use cell renderers for different types of
+    <p>The following figure presents the utility class 
+    <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/CellRenderers.html">CellRenderers</a>
+    and several ready-to-use cell renderers for different types of
     ObjEntityViewFields. They are used in JTables, JLists, and JComboBoxes.
     The methods defined in the CellRenderers class will save your time when
     configuring a JTable to render values of the types available for use with
@@ -119,13 +132,17 @@
     and JComboBoxes. In fact, they make the visual components data aware.
     </p>
 
-    <img src="/images/userguide/dataview/domodels.gif" width="417" height="325" alt="DataView DOModels"/>
-
-    <p>There is a Data View DTD included in the distribution along with the other dtds. 
-    There are no comments in it yet.
-    On the other hand it is small. And the names are self-explanatory once you
-    got to know the Data View structure. You can see the examples of its usage
-    in the next chapter.</p>
+	<img src="/images/userguide/dataview/domodels.gif" width="417" height="325" alt="DataView DOModels"/>
+	  <p> </p>
+	</subsection>
+	
+	<subsection name="13.2.5 Miscellaneous Features">
+	<p>One more useful feature is
+    a centralized EventDispatcher within the DataView class. It is used by the
+    fields to fire the events whenever their values are changed. Thus the
+    ObjAttribute/ObjRelationship modifications can be easily propagated to all
+    the listening components. </p>
+	</subsection>
         </subsection>
     </section>
 </body>

@@ -96,14 +96,15 @@
     		<item name="12.5 Deployment with Ant"  href="/userguide/deploy/cdeploy.html"/>
     		<item name="12.6 Configuring Logging"  href="/userguide/deploy/logging.html"/>
     	</item>
-    	
-    	<item name="13. Miscellaneous Information"  href="/userguide/misc.html">
-    		<item name="13.1 Cayenne and WebObjects"  href="/userguide/misc.html"/>
-    	</item>
 
-    	<item name="14. Data Views"  href="/userguide/dataview/index.html">
-    		<item name="14.1 Data View Concepts"  href="/userguide/dataview/dvconcepts.html"/>
-    		<item name="14.2 Data Views in Action"  href="/userguide/dataview/dvinaction.html"/>
+    	<item name="13. DataViews"  href="/userguide/dataview/index.html">
+    		<item name="13.1 Swing Applications"  href="/userguide/dataview/dvrationale.html"/>
+    		<item name="13.2 DataView Concepts"  href="/userguide/dataview/dvconcepts.html"/>
+    		<item name="13.3 DataViews in Action"  href="/userguide/dataview/dvinaction.html"/>
+    	</item>
+    	
+    	<item name="14. Miscellaneous Information"  href="/userguide/misc.html">
+    		<item name="14.1 Cayenne and WebObjects"  href="/userguide/misc.html"/>
     	</item>
     </toc-user-guide>
 

@@ -1,17 +1,16 @@
 <document>
-<title>User Guide - Data Views</title>
-<toc name="toc-user-guide" chapter="14. Data Views"/>
+<title>User Guide - DataViews</title>
+<toc name="toc-user-guide" chapter="13. DataViews"/>
 <body>
-    <section name="14. Data Views">
-        <subsection name="14.2 Data Views in Action" anchor="dvinaction">
+    <section name="13. DataViews">
+        <subsection name="13.3 DataViews in Action">
             <p>
-            Here we illustrate the discussion of Data Views with configuration samples and code snippets.
-            To support the Data View configuration the Cayenne project DTD was extended to include references
-            to data view configuration files. This information is loaded into the Cayenne Configuration instance
-            along with the Data Domain, Data Node, and Data Map configuration entries. Since the Data View 
-            functionality is optional and would not be very useful in some deployment scenarios (server-side 
-            applications) the Data View configiuration itself is not loaded at the time of initialization. Neither
-            Data View instances are created by the configuration process. You can create a Data View in your Swing
+            Here we illustrate the discussion of DataViews with configuration samples and code snippets.
+            Cayenne project DTD file supports references to data view configuration files. This information is loaded 
+            into the Cayenne Configuration instance along with the DataDomain, DataNode, and DataMap entries. 
+            Since the DataView functionality is optional and would not be very useful in some deployment scenarios 
+            (server-side applications) the DataView configiuration itself is not loaded at the time of initialization. Neither
+            DataView instances are created by the configuration process. A DataView can be created in a Swing
             application with the code similar to the following:
             </p>
             <source>
