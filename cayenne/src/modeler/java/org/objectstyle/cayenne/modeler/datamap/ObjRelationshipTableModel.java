@@ -100,10 +100,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 	}
 
 	public int getColumnCount() {
-		// Andrus: temporary changing from 4 to 3 for the release that does not support
-		// delete rules....
-	    // return 4;
-		return 3;
+	    return 4;
 	}
 
 	public String getColumnName(int column) {
