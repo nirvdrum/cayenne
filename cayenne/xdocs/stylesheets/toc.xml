@@ -126,7 +126,7 @@
     	<item name="2. ORM Case Study"  href="/modelerguide/object-relational-modeling/index.html">
     		<item name="2.1 Java Interface to an Existing Database"  href="/modelerguide/object-relational-modeling/existing-database.html"/>
     		<item name="2.2 New System"  href="/modelerguide/object-relational-modeling/no-existing-database.html"/>
-    		<item name="2.3 Converting an Existing Java Business Framework"  href="/modelerguide/object-relational-modeling/existing-java-framework.html"/>
+    		<item name="2.3 Converting an Existing Business Framework"  href="/modelerguide/object-relational-modeling/existing-java-framework.html"/>
     	</item>
     	
     	<item name="3. Cayenne Project Structure"  href="/modelerguide/model-structure/index.html">

@@ -3,7 +3,7 @@
 <toc name="toc-modeler-guide" chapter="2. ORM Case Study"/>
 <body>
 	<section name="2. ORM Case Study">
- 	 <subsection name="2.3 Converting an Existing Java Business Framework">
+ 	 <subsection name="2.3 Converting an Existing Business Framework">
  	 	<p>If there is an existing data layer (e.g. DAO) that needs to be converted to Cayenne, 
  	 	currently most of the mapping tasks will have to be done manually using the Modeler.
  	 	</p>

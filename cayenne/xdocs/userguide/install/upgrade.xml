@@ -19,6 +19,14 @@
     	compilation of all Java code that relies on Cayenne. Updating calls to deprecated methods is a good idea 
     	as well.</p>
     	</subsection>
+
+		<subsection name="2.5.3 Cleaning Stale Modeler Preferences">
+    	<p>Cayenne 1.1 almost completely switched its preferences engine to use an embedded HSQL database,
+		however a number of preferences are still loaded from the old preferences file. As a result a number of 
+		bugs associated with the old preferences may reappear in 1.1, even though they were fixed. To clean old
+		preferences shut down all running instances of CayenneModeler, then delete a file $HOME/.cayenne/modeler.preferences.
+		$HOME is a user home directory which is OS and machine specific. </p>
+    	</subsection>
         </subsection>
     </section>
 </body>
