@@ -267,7 +267,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    obj = newDataObject(oid.getObjClass().getName());
+                    obj = SnapshotManager.getSharedInstance().newDataObject(oid.getObjClass().getName());
                 }
                 catch (Exception ex) {
                     String entity =
@@ -288,17 +288,6 @@ public class DataContext implements QueryEngine, Serializable {
             }
             return obj;
         }
-    }
-
-    /**
-     * A factory method of DataObjects. Would use Configuration ClassLoader to
-     * instantaite the new instance of DataObject of a particular class.
-     */
-    private final DataObject newDataObject(String className) throws Exception {
-        return (DataObject) Configuration
-            .getResourceLoader()
-            .loadClass(className)
-            .newInstance();
     }
 
     /** Takes a snapshot of current object state. */
@@ -401,7 +390,7 @@ public class DataContext implements QueryEngine, Serializable {
         String objClassName = entity.getClassName();
         DataObject dobj = null;
         try {
-            dobj = newDataObject(objClassName);
+            dobj = SnapshotManager.getSharedInstance().newDataObject(objClassName);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);

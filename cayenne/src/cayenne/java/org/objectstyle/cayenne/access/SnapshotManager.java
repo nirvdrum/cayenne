@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.FlattenedObjectId;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -95,6 +96,17 @@ public class SnapshotManager {
      * Constructor for SnapshotManager. Shouldn't be called directly
      */
     protected SnapshotManager() {
+    }
+    
+    /**
+     * A factory method of DataObjects. Uses Configuration ClassLoader to
+     * instantiate a new instance of DataObject of a given class.
+     */
+    public final DataObject newDataObject(String className) throws Exception {
+        return (DataObject) Configuration
+            .getResourceLoader()
+            .loadClass(className)
+            .newInstance();
     }
 
     /** 
