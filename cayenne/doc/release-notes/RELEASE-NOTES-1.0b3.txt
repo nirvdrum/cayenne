@@ -1,0 +1,15 @@
+            Cayenne Release Notes 1.0 Beta 2
+                 Date: April 30, 2003
+         ============================================
+
+For the latest information go to the project web site at
+http://objectstyle.org/cayenne/
+
+
+
+Changes in this release (mostly bug fixes):
+
+1. Fixed regression bug with MySQL PK Generator to correctly generate PK ranges.
+
+2. Removed many deprecated methods, as announced.
+
