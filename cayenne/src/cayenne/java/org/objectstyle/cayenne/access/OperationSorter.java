@@ -314,16 +314,13 @@ public class OperationSorter {
 			Iterator entityIterator = allObjEntities.iterator();
 			while (entityIterator.hasNext()) {
 				ObjEntity thisEntity = (ObjEntity) entityIterator.next();
-				logObj.debug("Processing entity :" + thisEntity.getName());
 				Iterator relIterator = thisEntity.getRelationshipList().iterator();
 				Set handledRelationships = new HashSet();
 
 				while (relIterator.hasNext()) {
 					ObjRelationship thisRel = (ObjRelationship) relIterator.next();
 					//Target is the source... we've found a reflexive relationship
-					logObj.debug("Checking relationship :" + thisRel.getName());
 					if (thisRel.getTargetEntity().equals(thisEntity) && !handledRelationships.contains(thisRel)) {
-						logObj.debug("Relationship is reflexive, and not already handled");
 						List relList = (List) reflexiveEntities.get(thisEntity);
 						if (relList == null) {
 							relList = new ArrayList();
