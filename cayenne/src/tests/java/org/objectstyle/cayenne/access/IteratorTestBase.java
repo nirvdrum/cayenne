@@ -60,6 +60,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 

@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.event.DataContextTransactionEventListener;

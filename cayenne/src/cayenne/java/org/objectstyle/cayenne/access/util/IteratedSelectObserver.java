@@ -63,7 +63,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.query.Query;
 

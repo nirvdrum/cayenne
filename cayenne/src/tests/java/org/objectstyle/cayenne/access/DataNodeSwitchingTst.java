@@ -65,6 +65,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.BatchQuery;

@@ -94,17 +94,6 @@ public class ProcedureSelectQuery
         return fetchingDataRows;
     }
 
-    /**
-     * Sets query result type. If <code>flag</code> parameter is
-     * <code>true</code>, then results will be in the form of data rows.
-     *
-     * <p><i>Note that if <code>isFetchingCustAttributes()</code>
-     * returns <code>true</code>, this setting has no effect, and data
-     * rows are always fetched.</i></p>
-     */
-    public void setFetchingDataRows(boolean flag) {
-        this.fetchingDataRows = flag;
-    }
 
     public int getPageSize() {
         return pageSize;

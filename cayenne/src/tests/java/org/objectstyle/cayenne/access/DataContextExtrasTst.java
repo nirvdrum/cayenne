@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
@@ -84,7 +85,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
     protected DataContext ctxt;
 
-    protected void setUp() throws java.lang.Exception {
+    protected void setUp() throws Exception {
         ctxt = getDomain().createDataContext();
     }
 

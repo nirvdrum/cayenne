@@ -54,7 +54,7 @@
  *
  */
 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.access.util;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;

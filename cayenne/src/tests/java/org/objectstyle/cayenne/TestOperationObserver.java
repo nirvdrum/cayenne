@@ -62,7 +62,7 @@ import java.util.Map;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
 
 /** Helper class to process test queries results. */
