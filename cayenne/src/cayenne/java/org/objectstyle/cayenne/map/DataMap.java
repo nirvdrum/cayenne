@@ -438,16 +438,6 @@ public class DataMap {
         return list;
     }
 
-    /** Renames DbEntity. */
-    public void renameDbEntity(String oldName, String newName) {
-        getDbEntity(oldName).setName(newName);
-    }
-
-    /** Renames ObjEntity */
-    public void renameObjEntity(String oldName, String newName) {
-        getObjEntity(oldName).setName(newName);
-    }
-
     /** "Dirty" remove of the DbEntity from the data map. */
     public void removeDbEntity(String dbEntityName) {
         dbEntityMap.remove(dbEntityName);
