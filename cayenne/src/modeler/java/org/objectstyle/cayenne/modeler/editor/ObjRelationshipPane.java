@@ -219,11 +219,14 @@ public class ObjRelationshipPane
 
     /** Loads obj relationships into table. */
     public void currentObjEntityChanged(EntityDisplayEvent e) {
-        if (e.getSource() == this)
+        if (e.getSource() == this) {
             return;
+        }
 
         ObjEntity entity = (ObjEntity) e.getEntity();
-        if (entity != null && e.isEntityChanged()) {
+        // Important: process event even if this is the same entity,
+        // since the inheritance structure might have changed
+        if (entity != null) {
             rebuildTable(entity);
         }
 
@@ -254,9 +257,11 @@ public class ObjRelationshipPane
 
     public void objEntityChanged(EntityEvent e) {
     }
+
     public void objEntityAdded(EntityEvent e) {
         reloadEntityList(e);
     }
+
     public void objEntityRemoved(EntityEvent e) {
         reloadEntityList(e);
     }

@@ -181,11 +181,15 @@ public class ObjAttributePane
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
-        if (e.getSource() == this)
+        if (e.getSource() == this) {
             return;
+        }
 
         ObjEntity entity = (ObjEntity) e.getEntity();
-        if (entity != null && e.isEntityChanged()) {
+
+        // Important: process event even if this is the same entity,
+        // since the inheritance structure might have changed
+        if (entity != null) {
             rebuildTable(entity);
         }
 
@@ -196,8 +200,8 @@ public class ObjAttributePane
         }
     }
 
-    protected void rebuildTable(ObjEntity ent) {
-        ObjAttributeTableModel model = new ObjAttributeTableModel(ent, mediator, this);
+    protected void rebuildTable(ObjEntity entity) {
+        ObjAttributeTableModel model = new ObjAttributeTableModel(entity, mediator, this);
         table.setModel(model);
         table.setRowHeight(25);
         table.setRowMargin(3);

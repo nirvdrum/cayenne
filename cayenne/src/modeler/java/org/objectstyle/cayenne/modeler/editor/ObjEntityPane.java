@@ -204,7 +204,16 @@ public class ObjEntityPane
                     activateFields(name == null);
                     dbEntityCombo.getModel().setSelectedItem(entity.getDbEntity());
                     superClassName.setText(entity.getSuperClassName());
+
+                    // fire both EntityEvent and EntityDisplayEvent;
+                    // the later is to update attribute and relationship display
+
+                    DataDomain domain = mediator.getCurrentDataDomain();
+                    DataMap map = mediator.getCurrentDataMap();
+
                     mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                    mediator.fireObjEntityDisplayEvent(
+                        new EntityDisplayEvent(this, entity, map, domain));
                 }
             }
         });

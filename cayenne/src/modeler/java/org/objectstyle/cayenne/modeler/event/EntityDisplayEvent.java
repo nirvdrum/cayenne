@@ -101,7 +101,9 @@ public class EntityDisplayEvent extends DataMapDisplayEvent {
 		setDataMapChanged(false);
 	}
 
-	/** Get [new current] entity (obj or db). */
+	/** 
+     * Returns entity associated with this event. 
+     */
 	public Entity getEntity() {
 		return entity;
 	}
