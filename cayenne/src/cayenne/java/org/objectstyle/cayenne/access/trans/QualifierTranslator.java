@@ -183,6 +183,7 @@ public class QualifierTranslator
         matchingObject = false;
 
         boolean first = true;
+        DbRelationship relationship = objectMatchTranslator.getRelationship();
         Iterator it = objectMatchTranslator.keys();
         while (it.hasNext()) {
             if (first) {
@@ -195,8 +196,8 @@ public class QualifierTranslator
             String key = (String) it.next();
             DbAttribute attr = objectMatchTranslator.getAttribute(key);
             Object val = objectMatchTranslator.getValue(key);
-
-            processColumn(qualBuf, attr);
+           
+            processColumn(qualBuf, attr, relationship);
             qualBuf.append(objectMatchTranslator.getOperation());
             appendLiteral(qualBuf, val, attr, objectMatchTranslator.getExpression());
         }

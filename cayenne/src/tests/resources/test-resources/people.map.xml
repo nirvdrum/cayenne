@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-map project-version="1.1">
+	<property name="defaultPackage" value="org.objectstyle.cayenne.testdo.inherit"/>
 	<db-entity name="ADDRESS">
 		<db-attribute name="ADDRESS_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="CITY" type="VARCHAR" length="100"/>

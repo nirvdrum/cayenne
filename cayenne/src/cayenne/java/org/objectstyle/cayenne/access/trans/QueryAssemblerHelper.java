@@ -194,11 +194,25 @@ public abstract class QueryAssemblerHelper {
     protected void processColumn(
         StringBuffer buf,
         DbAttribute dbAttr,
-        DbRelationship rel) {
-        String alias =
-            (queryAssembler.supportsTableAliases())
-                ? queryAssembler.aliasForTable((DbEntity) dbAttr.getEntity(), rel)
-                : null;
+        DbRelationship relationship) {
+        String alias = null;
+
+        if (queryAssembler.supportsTableAliases()) {
+
+            if (relationship != null) {
+                alias = queryAssembler.aliasForTable(
+                        (DbEntity) dbAttr.getEntity(),
+                        relationship);
+            }
+
+            // sometimes lookup for relationship fails (any specific case other than
+            // relationship being null?), so lookup by entity. Note that as CAY-194
+            // shows, lookup by DbEntity may produce incorrect results for 
+            // reflexive relationships.
+            if (alias == null) {
+                alias = queryAssembler.aliasForTable((DbEntity) dbAttr.getEntity());
+            }
+        }
 
         buf.append(dbAttr.getAliasedName(alias));
     }

@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -297,9 +298,20 @@ public class EOModelHelper {
         return modelUrl;
     }
 
-    /** Returns an iterator of model names. */
+    /** 
+     * Returns an iterator of model names. 
+     */
     public Iterator modelNames() {
         return entityClassIndex.keySet().iterator();
+    }
+    
+    /**
+     * Returns a list of model entity names.
+     * 
+     * @since 1.1
+     */
+    public List modelNamesAsList() {
+        return new ArrayList(entityClassIndex.keySet());
     }
 
     public Map getPrototypeAttributeMapFor(String aPrototypeAttributeName) {
@@ -321,6 +333,7 @@ public class EOModelHelper {
 
                     String attrName = (String) attrMap.get("name");
 
+                    // TODO: why are we copying the original map? can we just use it as is?
                     Map prototypeAttrMap = new HashMap();
                     prototypeValues.put(attrName, prototypeAttrMap);
 
@@ -331,6 +344,7 @@ public class EOModelHelper {
                     prototypeAttrMap.put("width", attrMap.get("width"));
                     prototypeAttrMap.put("allowsNull", attrMap.get("allowsNull"));
                     prototypeAttrMap.put("scale", attrMap.get("scale"));
+                    prototypeAttrMap.put("valueType", attrMap.get("valueType"));
                 }
             }
         }

@@ -56,39 +56,58 @@
 
 package org.objectstyle.cayenne.dataview.dvmodeler;
 
-import javax.swing.*;
-import java.awt.event.*;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+
+import com.jgoodies.plaf.plastic.PlasticLookAndFeel;
+import com.jgoodies.plaf.plastic.PlasticTheme;
 import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
 
 /**
- *
+ * Main DVModeler class. Configures and starts the main application frame.
+ * 
  * @author Nataliya Kholodna
- * @version 1.0
  */
-
 public class Main {
 
-  public static void main(String[] args) {
-    try {
-      UIManager.setLookAndFeel("com.jgoodies.plaf.plastic.PlasticXPLookAndFeel");
-    } catch (ClassNotFoundException e){
-      e.printStackTrace();
-    } catch (InstantiationException e){
-      e.printStackTrace();
-    } catch (IllegalAccessException e){
-      e.printStackTrace();
-    } catch (UnsupportedLookAndFeelException e){
-      e.printStackTrace();
+    // note that some themse (e.g. "Desert Blue") do not support Chinese and
+    // Japanese chars
+    public static final String DEFAULT_THEME_NAME = "Sky Bluer";
+    public static final String DEFAULT_LAF_NAME = PlasticXPLookAndFeel.class.getName();
+
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(DEFAULT_LAF_NAME);
+            
+            PlasticTheme foundTheme = themeWithName(DEFAULT_THEME_NAME);
+            if (foundTheme != null) {
+                PlasticLookAndFeel.setMyCurrentTheme(foundTheme);
+            }
+        }
+        catch (Throwable th) {
+            th.printStackTrace();
+        }
+   
+        JFrame instance = new DVModelerFrame();
+
+        instance.setSize(800, 600);
+        instance.validate();
+        instance.setLocationRelativeTo(null);
+        instance.setVisible(true);
     }
-
-    JFrame instance = new DVModelerFrame();
-
-    instance.setSize(800,600);
-    instance.validate();
-
-
-    instance.setLocationRelativeTo(null);
-
-    instance.setVisible(true);
-  }
+    
+    static PlasticTheme themeWithName(String themeName) {
+        List availableThemes = PlasticLookAndFeel.getInstalledThemes();
+        for (Iterator i = availableThemes.iterator(); i.hasNext();) {
+            PlasticTheme aTheme = (PlasticTheme) i.next();
+            if (themeName.equals(aTheme.getName())) {
+                return aTheme;
+            }
+        }
+        
+        return null;
+    }
 }

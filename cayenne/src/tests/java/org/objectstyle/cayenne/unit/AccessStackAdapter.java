@@ -173,6 +173,10 @@ public class AccessStackAdapter {
     public boolean supportsCaseSensitiveLike() {
         return true;
     }
+    
+    public boolean supportsCaseInsensitiveOrder() {
+        return true;
+    }
 
     protected void executeDDL(Connection con, String ddl) throws Exception {
         logObj.info(ddl);

@@ -62,6 +62,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -152,38 +153,71 @@ public class EOModelProcessor {
         Iterator it = helper.modelNames();
         while (it.hasNext()) {
             String name = (String) it.next();
+            
+            // skip EOPrototypes
+            if(isPrototypesEntity(name)) {
+                continue;
+            }
+            
             // create and register entity
             makeEntity(helper, name, generateClientClass);
         }
+ 
+        List sortedModelNames = helper.modelNamesAsList();
+        Collections.sort(sortedModelNames, new InheritanceComparator(dataMap));
         
         // after all entities are loaded, process attributes
-        it = helper.modelNames();
+        it = sortedModelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
+            
+            // skip EOPrototypes
+            if(isPrototypesEntity(name)) {
+                continue;
+            }
+            
             EOObjEntity e = (EOObjEntity) dataMap.getObjEntity(name);
             // process entity attributes
             makeAttributes(helper, e);
         }
 
         // after all entities are loaded, process relationships
-        it = helper.modelNames();
+        it = sortedModelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
+            
+            // skip EOPrototypes
+            if(isPrototypesEntity(name)) {
+                continue;
+            }
+            
             makeRelationships(helper, dataMap.getObjEntity(name));
         }
 
         // after all normal relationships are loaded, process falttened relationships
-        it = helper.modelNames();
+        it = sortedModelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
+            
+            // skip EOPrototypes
+            if(isPrototypesEntity(name)) {
+                continue;
+            }
+            
             makeFlatRelationships(helper, dataMap.getObjEntity(name));
         }
 
         // now create missing reverse DB (but not OBJ) relationships
         // since Cayenne requires them
-        it = helper.modelNames();
+        it = sortedModelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
+            
+            // skip EOPrototypes
+            if(isPrototypesEntity(name)) {
+                continue;
+            }
+            
             DbEntity dbEntity = dataMap.getObjEntity(name).getDbEntity();
 
             if (dbEntity != null) {
@@ -192,19 +226,38 @@ public class EOModelProcessor {
         }
 
         // build SelectQueries out of EOFetchSpecifications...
-        it = helper.modelNames();
+        it = sortedModelNames.iterator();
         while (it.hasNext()) {
-            String entityName = (String) it.next();
-            Iterator queries = helper.queryNames(entityName);
+            String name = (String) it.next();
+            
+            // skip EOPrototypes
+            if(isPrototypesEntity(name)) {
+                continue;
+            }
+            
+            Iterator queries = helper.queryNames(name);
             while (queries.hasNext()) {
                 String queryName = (String) queries.next();
 
-                EOObjEntity entity = (EOObjEntity) dataMap.getObjEntity(entityName);
+                EOObjEntity entity = (EOObjEntity) dataMap.getObjEntity(name);
                 makeQuery(helper, entity, queryName);
             }
         }
 
         return dataMap;
+    }
+
+    /**
+     * Returns whether an Entity is an EOF EOPrototypes entity. According to EOF 
+     * conventions EOPrototypes and EO[Adapter]Prototypes entities are considered 
+     * to be prototypes.
+     * 
+     * @since 1.1 
+     */
+    protected boolean isPrototypesEntity(String entityName) {
+        return entityName != null
+                && entityName.startsWith("EO")
+                && entityName.endsWith("Prototypes");
     }
 
     /**
@@ -420,7 +473,7 @@ public class EOModelProcessor {
 
             if (dbAttrName != null && dbEntity != null) {
 
-                // if inherited atribute, skip it for DbEntity...
+                // if inherited attribute, skip it for DbEntity...
                 if (!singleTableInheritance || dbEntity.getAttribute(dbAttrName) == null) {
 
                     // create DbAttribute...since EOF allows the same column name for
@@ -473,8 +526,10 @@ public class EOModelProcessor {
                         || "Y".equals(attributeReadOnlyString)) {
                     attr.setReadOnly(true);
                 }
+                
 
-                attr.setDbAttribute(dbAttr);
+                // set name instead of the actual attribute, as it may be inherited....
+                attr.setDbAttributeName(dbAttrName);
                 objEntity.addAttribute(attr);
             }
         }
@@ -706,6 +761,8 @@ public class EOModelProcessor {
     /**
      * Special DbAttribute subclass that stores extra info needed to work with EOModels.
      */
+    // TODO: we have all EO-specific subclasses declared as public... Any reason to keep 
+    // this one as an inner class?
     static class EODbAttribute extends DbAttribute {
 
         protected String eoAttributeName;
@@ -734,6 +791,55 @@ public class EOModelProcessor {
 
         public void setEoAttributeName(String eoAttributeName) {
             this.eoAttributeName = eoAttributeName;
+        }
+    }
+
+    // sorts ObjEntities so that subentities in inheritance hierarchy are shown last
+    final class InheritanceComparator implements Comparator {
+
+        DataMap dataMap;
+
+        InheritanceComparator(DataMap dataMap) {
+            this.dataMap = dataMap;
+        }
+
+        public int compare(Object o1, Object o2) {
+            if (o1 == null) {
+                return o2 != null ? -1 : 0;
+            }
+            else if (o2 == null) {
+                return 1;
+            }
+
+            String name1 = o1.toString();
+            String name2 = o2.toString();
+
+            ObjEntity e1 = dataMap.getObjEntity(name1);
+            ObjEntity e2 = dataMap.getObjEntity(name2);
+
+            return compareEntities(e1, e2);
+        }
+
+        int compareEntities(ObjEntity e1, ObjEntity e2) {
+            if (e1 == null) {
+                return e2 != null ? -1 : 0;
+            }
+            else if (e2 == null) {
+                return 1;
+            }
+
+            // entity goes first if it is a direct or indirect superentity of another
+            // one
+            if (e1.isSubentityOf(e2)) {
+                return 1;
+            }
+
+            if (e2.isSubentityOf(e1)) {
+                return -1;
+            }
+
+            // sort alphabetically
+            return e1.getName().compareTo(e2.getName());
         }
     }
 }

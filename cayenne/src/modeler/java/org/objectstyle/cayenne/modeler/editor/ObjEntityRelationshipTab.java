@@ -75,6 +75,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
@@ -104,6 +105,8 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
  */
 public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplayListener,
         ObjEntityListener, ObjRelationshipListener, ExistingSelectionProcessor {
+    
+    private static final Logger logObj = Logger.getLogger(ObjEntityRelationshipTab.class);
 
     private static final Object[] deleteRules = new Object[] {
             DeleteRule.deleteRuleName(DeleteRule.NO_ACTION),
@@ -239,6 +242,18 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
      */
     private Object[] createObjEntityComboModel() {
         DataMap map = mediator.getCurrentDataMap();
+        
+        // this actually happens per CAY-221... can't reproduce though
+        if(map == null) {
+            logObj.warn("createObjEntityComboModel:: Null DataMap.");
+            return new Object[0];
+        }
+        
+        if(map.getNamespace() == null) {
+            logObj.warn("createObjEntityComboModel:: Null DataMap namespace - " + map);
+            return new Object[0];
+        }
+        
         Collection objEntities = map.getNamespace().getObjEntities();
         return objEntities.toArray();
     }

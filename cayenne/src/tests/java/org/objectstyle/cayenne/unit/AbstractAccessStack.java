@@ -62,6 +62,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -85,6 +86,12 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  */
 public abstract class AbstractAccessStack {
     private static Logger logObj = Logger.getLogger(AbstractAccessStack.class);
+    
+    // hardcoded dependent entities that should be excluded
+    // if LOBs are not supported
+    private static final String[] EXTRA_EXCLUDED_FOR_NO_LOB = new String[] {
+        "CLOB_DETAIL"
+    };
 
     protected CayenneTestResources resources;
 
@@ -116,12 +123,15 @@ public abstract class AbstractAccessStack {
 
                 // check for LOB attributes
                 if (excludeLOB) {
+                    if (Arrays.binarySearch(EXTRA_EXCLUDED_FOR_NO_LOB, ent.getName()) >= 0) {
+                        continue;
+                    }
+
                     boolean hasLob = false;
                     Iterator attrs = ent.getAttributes().iterator();
                     while (attrs.hasNext()) {
                         DbAttribute attr = (DbAttribute) attrs.next();
-                        if (attr.getType() == Types.BLOB
-                            || attr.getType() == Types.CLOB) {
+                        if (attr.getType() == Types.BLOB || attr.getType() == Types.CLOB) {
                             hasLob = true;
                             break;
                         }

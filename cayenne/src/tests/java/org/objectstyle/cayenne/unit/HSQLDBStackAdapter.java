@@ -68,4 +68,13 @@ public class HSQLDBStackAdapter extends AccessStackAdapter {
     public boolean supportsHaving() {
         return false;
     }
+    
+    /**
+     * Returns false. This is an HSQLDB bug - I opened a report here:
+     * https://sourceforge.net/tracker/?func=detail&aid=1020127&group_id=23316&atid=378131.
+     * Hopefully this will be fixed in the future releases.
+     */
+    public boolean supportsCaseInsensitiveOrder() {
+        return false;
+    }
 }

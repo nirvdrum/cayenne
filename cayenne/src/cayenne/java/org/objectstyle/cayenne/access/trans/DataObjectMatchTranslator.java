@@ -78,6 +78,7 @@ public class DataObjectMatchTranslator {
     protected Map values;
     protected String operation;
     protected Expression expression;
+    protected DbRelationship relationship;
 
     public Expression getExpression() {
         return expression;
@@ -92,6 +93,7 @@ public class DataObjectMatchTranslator {
         values = null;
         operation = null;
         expression = null;
+        relationship = null;
     }
 
     /**
@@ -99,6 +101,7 @@ public class DataObjectMatchTranslator {
      * with a DbRelationship.
      */
     public void setRelationship(DbRelationship rel) {
+        this.relationship = rel;
         attributes = new HashMap(rel.getJoins().size() * 2);
 
         if (rel.isToMany()) {
@@ -152,6 +155,10 @@ public class DataObjectMatchTranslator {
         }
 
         return attributes.keySet().iterator();
+    }
+    
+    public DbRelationship getRelationship() {
+        return relationship;
     }
 
     public DbAttribute getAttribute(String key) {

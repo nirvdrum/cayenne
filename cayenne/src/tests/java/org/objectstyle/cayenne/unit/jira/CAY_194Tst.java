@@ -53,40 +53,84 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.wocompat;
+package org.objectstyle.cayenne.unit.jira;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unit.BasicTestCase;
+import java.util.List;
+
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.testdo.relationship.ReflexiveAndToOne;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
+ * Testing qualifier translator correctness on reflexive relationships.
+ * 
  * @author Andrei Adamchik
  */
-public class EOModelProcessorInheritanceTst extends BasicTestCase {
-    protected EOModelProcessor processor;
+// TODO: this is really a qualifier translator general test... need to 
+// find an approprtaite place in unit tests..
+public class CAY_194Tst extends RelationshipTestCase {
 
-    public void setUp() throws Exception {
-        processor = new EOModelProcessor();
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        deleteTestData();
     }
 
-    public void testLoadAbstractEntity() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/inheritance.eomodeld");
+    public void testQualifyOnToMany() {
+        DataContext context = createDataContext();
 
-        ObjEntity abstractE = map.getObjEntity("AbstractEntity");
-        assertNotNull(abstractE);
-        assertNull(abstractE.getDbEntityName());
-        assertEquals("AbstractEntityClass", abstractE.getClassName());
+        ReflexiveAndToOne ox = (ReflexiveAndToOne) context
+                .createAndRegisterNewObject(ReflexiveAndToOne.class);
+        ox.setName("ox");
+        ReflexiveAndToOne o1 = (ReflexiveAndToOne) context
+                .createAndRegisterNewObject(ReflexiveAndToOne.class);
+        o1.setName("o1");
+
+        ReflexiveAndToOne o2 = (ReflexiveAndToOne) context
+                .createAndRegisterNewObject(ReflexiveAndToOne.class);
+        o2.setName("o2");
+        o2.setToParent(o1);
+
+        context.commitChanges();
+
+        Expression qualifier = ExpressionFactory.matchExp("children", o2);
+        List parents = context.performQuery(new SelectQuery(
+                ReflexiveAndToOne.class,
+                qualifier));
+        assertEquals(1, parents.size());
+        assertSame(o1, parents.get(0));
+
+        qualifier = ExpressionFactory.matchExp("children", o1);
+        parents = context
+                .performQuery(new SelectQuery(ReflexiveAndToOne.class, qualifier));
+        assertEquals(0, parents.size());
     }
 
-    public void testLoadConcreteEntity() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/inheritance.eomodeld");
+    public void testQualifyOnToOne() {
+        DataContext context = createDataContext();
 
-        ObjEntity concreteE = map.getObjEntity("ConcreteEntityOne");
-        assertNotNull(concreteE);
-        assertEquals("AbstractEntity", concreteE.getSuperEntityName());
-        
-        assertEquals("CONCRETE_ENTITY_ONE", concreteE.getDbEntityName());
-        assertEquals("ConcreteEntityClass", concreteE.getClassName());
-        assertEquals("AbstractEntityClass", concreteE.getSuperClassName());
+        ReflexiveAndToOne ox = (ReflexiveAndToOne) context
+                .createAndRegisterNewObject(ReflexiveAndToOne.class);
+        ox.setName("ox");
+        ReflexiveAndToOne o1 = (ReflexiveAndToOne) context
+                .createAndRegisterNewObject(ReflexiveAndToOne.class);
+        o1.setName("o1");
+
+        ReflexiveAndToOne o2 = (ReflexiveAndToOne) context
+                .createAndRegisterNewObject(ReflexiveAndToOne.class);
+        o2.setName("o2");
+        o2.setToParent(o1);
+
+        context.commitChanges();
+
+        Expression qualifier = ExpressionFactory.matchExp("toParent", o1);
+        List children = context.performQuery(new SelectQuery(
+                ReflexiveAndToOne.class,
+                qualifier));
+        assertEquals(1, children.size());
+        assertSame(o2, children.get(0));
     }
 }

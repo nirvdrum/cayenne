@@ -9,30 +9,12 @@ import java.util.List;
   */
 public class _Employee extends org.objectstyle.cayenne.testdo.inherit.AbstractPerson {
 
-    public static final String NAME_PROPERTY = "name";
-    public static final String PERSON_TYPE_PROPERTY = "personType";
     public static final String SALARY_PROPERTY = "salary";
     public static final String ADDRESSES_PROPERTY = "addresses";
     public static final String TO_DEPARTMENT_PROPERTY = "toDepartment";
 
     public static final String PERSON_ID_PK_COLUMN = "PERSON_ID";
 
-    public void setName(String name) {
-        writeProperty("name", name);
-    }
-    public String getName() {
-        return (String)readProperty("name");
-    }
-    
-    
-    public void setPersonType(String personType) {
-        writeProperty("personType", personType);
-    }
-    public String getPersonType() {
-        return (String)readProperty("personType");
-    }
-    
-    
     public void setSalary(Float salary) {
         writeProperty("salary", salary);
     }

@@ -414,6 +414,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testCaseInsensitiveOrdering() throws Exception {
+        if(!getAccessStackAdapter().supportsCaseInsensitiveOrder()) {
+            return;
+        }
+        
         // case insensitive ordering appends extra columns
         // to the query when query is using DISTINCT...
         // verify that the result is not messaged up

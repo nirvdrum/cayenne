@@ -53,40 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.wocompat;
+package org.objectstyle.cayenne.unit.jira;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unit.BasicTestCase;
+import java.util.List;
+
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataRowStore;
+import org.objectstyle.cayenne.access.ObjectStore;
+import org.objectstyle.cayenne.testdo.relationship.DeleteRuleFlatA;
+import org.objectstyle.cayenne.testdo.relationship.DeleteRuleFlatB;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class EOModelProcessorInheritanceTst extends BasicTestCase {
-    protected EOModelProcessor processor;
+public class CAY_237Tst extends RelationshipTestCase {
 
-    public void setUp() throws Exception {
-        processor = new EOModelProcessor();
+    protected void setUp() throws Exception {
+        deleteTestData();
     }
 
-    public void testLoadAbstractEntity() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/inheritance.eomodeld");
+    public void testRollbackInsert() throws Exception {
+        DataDomain domain = getDomain();
+        TestObjectStore os = new TestObjectStore(domain.getSharedSnapshotCache());
+        DataContext context = new DataContext(domain, os);
 
-        ObjEntity abstractE = map.getObjEntity("AbstractEntity");
-        assertNotNull(abstractE);
-        assertNull(abstractE.getDbEntityName());
-        assertEquals("AbstractEntityClass", abstractE.getClassName());
+        DeleteRuleFlatA a = (DeleteRuleFlatA) context
+                .createAndRegisterNewObject(DeleteRuleFlatA.class);
+
+        DeleteRuleFlatB b = (DeleteRuleFlatB) context
+                .createAndRegisterNewObject(DeleteRuleFlatB.class);
+
+        a.addToFlatB(b);
+
+        assertEquals(1, os.flattenedInserts().size());
+
+        context.rollbackChanges();
+
+        assertEquals(0, os.flattenedInserts().size());
     }
 
-    public void testLoadConcreteEntity() throws Exception {
-        DataMap map = processor.loadEOModel("test-resources/inheritance.eomodeld");
+    public void testRollbackDelete() throws Exception {
+        DataDomain domain = getDomain();
+        TestObjectStore os = new TestObjectStore(domain.getSharedSnapshotCache());
+        DataContext context = new DataContext(domain, os);
 
-        ObjEntity concreteE = map.getObjEntity("ConcreteEntityOne");
-        assertNotNull(concreteE);
-        assertEquals("AbstractEntity", concreteE.getSuperEntityName());
-        
-        assertEquals("CONCRETE_ENTITY_ONE", concreteE.getDbEntityName());
-        assertEquals("ConcreteEntityClass", concreteE.getClassName());
-        assertEquals("AbstractEntityClass", concreteE.getSuperClassName());
+        DeleteRuleFlatA a = (DeleteRuleFlatA) context
+                .createAndRegisterNewObject(DeleteRuleFlatA.class);
+
+        DeleteRuleFlatB b = (DeleteRuleFlatB) context
+                .createAndRegisterNewObject(DeleteRuleFlatB.class);
+
+        a.addToFlatB(b);
+        context.commitChanges();
+        assertEquals(0, os.flattenedInserts().size());
+        assertEquals(0, os.flattenedDeletes().size());
+
+        a.removeFromFlatB(b);
+        assertEquals(1, os.flattenedDeletes().size());
+
+        context.rollbackChanges();
+        assertEquals(0, os.flattenedDeletes().size());
+    }
+
+    class TestObjectStore extends ObjectStore {
+
+        public TestObjectStore(DataRowStore dataRowCache) {
+            super(dataRowCache);
+        }
+
+        List flattenedInserts() {
+            return flattenedInserts;
+        }
+
+        List flattenedDeletes() {
+            return flattenedDeletes;
+        }
     }
 }

@@ -314,7 +314,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     // this will clean any modifications and defer refresh from snapshot
                     // till the next object accessor is called
                     object.setPersistenceState(PersistenceState.HOLLOW);
-                    indirectlyModifiedIds.remove(object.getObjectId());
                     break;
                 default:
                     //Transient, committed and hollow need no handling
@@ -322,8 +321,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
 
-        // finally clear flattened inserts & deletes
-        // this.clearFlattenedUpdateQueries();
+        // clear caches 
+        // TODO: the same operation is performed on commit... must create a common method
+        this.retainedSnapshotMap.clear();
+        this.indirectlyModifiedIds.clear();
+        this.flattenedDeletes.clear();
+        this.flattenedInserts.clear();
     }
 
     /**

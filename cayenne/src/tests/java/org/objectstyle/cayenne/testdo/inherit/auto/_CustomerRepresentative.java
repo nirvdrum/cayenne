@@ -8,8 +8,6 @@ package org.objectstyle.cayenne.testdo.inherit.auto;
 public class _CustomerRepresentative extends org.objectstyle.cayenne.testdo.inherit.AbstractPerson {
 
     public static final String CLIENT_CONTACT_TYPE_PROPERTY = "clientContactType";
-    public static final String NAME_PROPERTY = "name";
-    public static final String PERSON_TYPE_PROPERTY = "personType";
     public static final String TO_CLIENT_COMPANY_PROPERTY = "toClientCompany";
 
     public static final String PERSON_ID_PK_COLUMN = "PERSON_ID";
@@ -19,22 +17,6 @@ public class _CustomerRepresentative extends org.objectstyle.cayenne.testdo.inhe
     }
     public String getClientContactType() {
         return (String)readProperty("clientContactType");
-    }
-    
-    
-    public void setName(String name) {
-        writeProperty("name", name);
-    }
-    public String getName() {
-        return (String)readProperty("name");
-    }
-    
-    
-    public void setPersonType(String personType) {
-        writeProperty("personType", personType);
-    }
-    public String getPersonType() {
-        return (String)readProperty("personType");
     }
     
     

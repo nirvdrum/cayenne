@@ -84,6 +84,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>.
@@ -116,6 +117,13 @@ public class OracleAdapter extends JdbcAdapter {
     protected static Method outputStreamFromBlobMethod;
     protected static Method writerFromClobMethod;
     protected static boolean supportsOracleLOB;
+    
+    static {
+        // TODO: as CAY-234 shows, having such initialization done in a static fashion
+        // makes it untestable and any potential problems hard to reproduce. Make this 
+        // an instance method (with all the affected vars) and write unit tests.
+        initDriverInformation();
+    }
 
     protected static void initDriverInformation() {
         initDone = true;
@@ -137,11 +145,11 @@ public class OracleAdapter extends JdbcAdapter {
                     new Class[0]);
             supportsOracleLOB = true;
 
-        } catch (Exception ex) {
+        } catch (Throwable th) {
             logObj.info(
                 "Error getting Oracle driver information, ignoring. "
                     + "Note that certain adapter features will be disabled.",
-                ex);
+                Util.unwindException(th));
         }
     }
     
@@ -149,6 +157,7 @@ public class OracleAdapter extends JdbcAdapter {
 		return outputStreamFromBlobMethod;
 	}
 
+	// TODO: rename to something that looks like English ...
 	public static boolean isSupportsOracleLOB() {
 		return supportsOracleLOB;
 	}
@@ -166,9 +175,6 @@ public class OracleAdapter extends JdbcAdapter {
      * result in an exception.
      */
     public static int getOracleCursorType() {
-        if (!initDone) {
-            initDriverInformation();
-        }
 
         if (oracleCursorType == Integer.MAX_VALUE) {
             throw new CayenneRuntimeException(
@@ -313,7 +319,7 @@ public class OracleAdapter extends JdbcAdapter {
         throws SQLException, Exception {
 
         // special handling for LOB updates
-        if (supportsOracleLOB && BatchQueryUtils.updatesLOBColumns(query)
+        if (isSupportsOracleLOB() && BatchQueryUtils.updatesLOBColumns(query)
             && (node instanceof OracleDataNode)) {
 
             OracleDataNode oracleNode = (OracleDataNode) node;

@@ -14,11 +14,11 @@ import java.util.List;
 public class ${classGen.superPrefix}${classGen.className} extends $classGen.superClassName {
 
 ## Create property names
-#foreach( $attr in ${classGen.Entity.Attributes} )
+#foreach( $attr in ${classGen.Entity.DeclaredAttributes} )
 #set( $classGen.Prop = $attr.Name )## let controller know about current property
     public static final String ${classGen.propAsConstantName}_PROPERTY = "${attr.Name}";
 #end
-#foreach( $rel in ${classGen.Entity.Relationships} )
+#foreach( $rel in ${classGen.Entity.DeclaredRelationships} )
 #set( $classGen.Prop = $rel.Name )## let controller know about current property
     public static final String ${classGen.propAsConstantName}_PROPERTY = "${rel.Name}";
 #end
@@ -31,7 +31,7 @@ public class ${classGen.superPrefix}${classGen.className} extends $classGen.supe
 #end
 
 ## Create attribute set/get methods
-#foreach( $attr in ${classGen.Entity.Attributes} )
+#foreach( $attr in ${classGen.Entity.DeclaredAttributes} )
 #set( $classGen.Prop = $attr.Name )## let controller know about current property
 #if ("true" != "${classGen.getEntity().isReadOnly()}")
     public void set${classGen.cappedProp}($classGen.formatJavaType(${attr.Type}) $classGen.formatVariableName(${attr.Name})) {
@@ -46,7 +46,7 @@ public class ${classGen.superPrefix}${classGen.className} extends $classGen.supe
 #end
 ##
 ## Create list add/remove/get methods
-#foreach( $rel in ${classGen.Entity.Relationships} )
+#foreach( $rel in ${classGen.Entity.DeclaredRelationships} )
 #set( $classGen.Prop = $rel.Name )## let controller know about current property
 #if( $rel.ToMany )
 #if ( ! $rel.ReadOnly )
