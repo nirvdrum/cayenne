@@ -60,15 +60,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Random;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import org.objectstyle.ashwood.dbutil.RandomSchema;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.access.QueryLogger;
 
 /**
  * Main configures and runs regression tests defined in RandomDomainBuilder and
