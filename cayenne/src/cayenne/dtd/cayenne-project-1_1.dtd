@@ -1,0 +1,46 @@
+<!-- ========================================== -->
+<!-- Domains (cayenne.xml) DTD file.            -->
+<!-- Author: Andrei Adamchik                    -->
+<!-- Version 1.1     -->
+<!-- ========================================== -->
+
+<!ELEMENT domains (domain*)>
+<!ATTLIST domains
+	project-version CDATA
+>
+
+<!ELEMENT domain (property*, map*, node*)>
+<!ATTLIST domain
+	name CDATA #REQUIRED
+>
+
+<!ELEMENT property>
+<!ATTLIST property
+	name CDATA #REQUIRED
+    value CDATA #REQUIRED
+>
+
+<!ELEMENT map (dep-map-ref*)>
+<!ATTLIST map
+	name CDATA #REQUIRED
+    location CDATA #REQUIRED
+>
+
+<!ELEMENT dep-map-ref>
+<!ATTLIST dep-map-ref
+	name CDATA #REQUIRED
+>
+
+<!ELEMENT node (map-ref*)>
+<!ATTLIST node
+	name CDATA #REQUIRED
+    factory CDATA #REQUIRED
+    datasource CDATA #REQUIRED
+    adapter CDATA #IMPLIED 
+>
+
+<!ELEMENT map-ref>
+<!ATTLIST map-ref
+	name CDATA #REQUIRED
+>
+

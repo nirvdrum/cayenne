@@ -1,0 +1,26 @@
+<!-- ========================================== -->
+<!-- Driver DTD file.                           -->
+<!-- Author: Andrei Adamchik                    -->
+<!-- ========================================== -->
+
+<!ELEMENT driver (url, connectionPool?, login?)>
+<!ATTLIST driver
+	class CDATA #REQUIRED
+>
+
+<!ELEMENT url EMPTY>
+<!ATTLIST url
+	value CDATA #REQUIRED
+>
+
+<!ELEMENT connectionPool>
+<!ATTLIST connectionPool
+	min CDATA #REQUIRED
+	max CDATA #REQUIRED
+>
+
+<!ELEMENT login>
+<!ATTLIST login
+	userName CDATA #REQUIRED
+	password CDATA #REQUIRED
+>
