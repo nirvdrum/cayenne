@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="8. Working with DataObjects"/>
 <body>
     <section name="8. Working with DataObjects">
-    	<subsection name="8.6 Handling Inheritance">
+    	<subsection name="8.7 Handling Inheritance">
     	<p>"Inheritance" is an Object Oriented concept absent in traditional RDBMS. Cayenne however allows to
     	map a hierarchical class tree to a single base table (so called "single table inheritance"). Such mapping
     	is <a href="../../modelerguide/modeling-object-layer/inheritance.html">described in detail</a> in the 
@@ -18,7 +18,7 @@
 		this will likely be handled in the mapping and completely outside of the Java classes, 
 		so the advise below will become obsolete.</panel>
     	
-		<subsection name="8.6.1 Inheritance and new DataObjects">
+		<subsection name="8.7.1 Inheritance and new DataObjects">
 		<p>Consider the following class hierarchy (also used in the Modeler Guide example): </p>
     	<img src="/images/modelerguide/inheritance-diagram.jpg" width="300" height="249"/>
     	
@@ -68,7 +68,7 @@ public class CustomerContact extends _CustomerContact {
 }</source>
     	</subsection>
     	
-    	<subsection name="8.6.2 Inheritance and SelectQueries">
+    	<subsection name="8.7.2 Inheritance and SelectQueries">
     	<p>When performing SelectQuery on a table that maps to inheritance hierarchy, Cayenne will
     	only return rows that belong to root class of the query and all its subclasses. No superclasses or
     	objects from parallel inheritance branches will be returned. For example executing a SelectQuery 

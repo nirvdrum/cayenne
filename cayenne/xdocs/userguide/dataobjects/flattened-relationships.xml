@@ -4,50 +4,20 @@
 <body>
     <section name="8. Working with DataObjects">
     	<subsection name="8.2 Flattened Relationships">
-    	<p>Working with flattened relationships is not much different 
-    	from working with normal relationships. Note that only many-to-many 
-    	flattened relationships are modifiable. In this case calling "addTo..." and
-    	"removeFrom..." will trigger creation or deletion of a join table record
-    	on commit.
+		<p>Flattened relationships represent relationship between two types of DataObjects that
+		is not direct in the underlying relational storage. Instead it is mapped across one or more
+		"join" tables. Still from the application point of view there is no diffrence in working with 
+		flattened relationships compared to the "normal" ones. Cayenne internally figures out how to 
+		build the needed query joins to retrieve related objects. On adding or removing an object to/from
+		a flattened relationship via a corresponding "addTo..." / "removeFrom..." method an appropriate
+		join record is created or removed.
 		</p>
 
-		<subsection name="8.2.1 Deleting Objects with Flattened Relationships">
-		<p>Given a many-to-many flattened relationship, deleting an object on one side of it
-		should delete the record in the join table, as well as the record for the object being deleted.
-		To achieve that, an object must be removed from the appropriate flattened relationship first,
-		and then deleted. E.g.:</p>
-		
-<source>
-Artist artist;
-DataContext context;
-
-// before deleting artist, remove all Exhibits manually
-// Iterate over the copy of the original collection to
-// avoid ConcurrentModificationExceptions
-Iterator it = new ArrayList(artist.getExhibitArray()).iterator();
-while(it.hasNext()) {
-    Exhibit nextExhibit = (Exhibit)it.next();
-    artist.removeFromUntitledRel1(nextExhibit);
-}
-context.deleteObject(artist);
-context.commitChanges();
-</source>
-	<p>If an artist had two exhibits, Cayenne may generate the output 
-	similar to this:</p>
-<source>
-[main 12-22 15:50:19] QueryLogger: --- will run 2 queries.
-[main 12-22 15:50:19] QueryLogger: DELETE FROM ARTIST_EXHIBIT WHERE 
-ARTIST_ID = ? AND EXHIBIT_ID = ?
-[main 12-22 15:50:19] QueryLogger: [bind: 280, 200]
-[main 12-22 15:50:19] QueryLogger: === updated 1 row.
-[main 12-22 15:50:19] QueryLogger: [bind: 280, 201]
-[main 12-22 15:50:19] QueryLogger: === updated 1 row.
-[main 12-22 15:50:19] QueryLogger: DELETE FROM ARTIST WHERE ARTIST_ID = ?
-[main 12-22 15:50:19] QueryLogger: [bind: 280]
-[main 12-22 15:50:19] QueryLogger: === updated 1 row.
-[main 12-22 15:50:19] QueryLogger: +++ transaction committed.
-</source>
-		</subsection>
+		<panel name="Flattened Relationships Limitations">Currently only many-to-many flattened
+		relatationships with a single join table can be modified. All other types of flattened relationships
+		can be used as "read-only". This is reflected in the DataObject code generated for such relationships -
+		no set/addTo/RemoveFrom methods are created for read-only relationships.
+		</panel>
     	</subsection>
     </section>
 </body>

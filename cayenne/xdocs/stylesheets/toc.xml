@@ -62,8 +62,9 @@
     		<item name="8.2 Flattened Relationships"  href="/userguide/dataobjects/flattened-relationships.html"/>
     		<item name="8.3 DataObjects Example"  href="/userguide/dataobjects/dataobjects-example.html"/>
     		<item name="8.4 Accessing PK/FK Values"  href="/userguide/dataobjects/unmapped-keys.html"/>
-    		<item name="8.5 DataObject Validation"  href="/userguide/dataobjects/validation.html"/>
-    		<item name="8.6 Handling Inheritance"  href="/userguide/dataobjects/dataobjects-inheritance.html"/>
+    		<item name="8.5 DataObjectUtils"  href="/userguide/dataobjects/dataobjectutils.html"/>
+    		<item name="8.6 DataObject Validation"  href="/userguide/dataobjects/validation.html"/>
+    		<item name="8.7 Handling Inheritance"  href="/userguide/dataobjects/dataobjects-inheritance.html"/>
     	</item>
     	
     	<item name="9. Using Stored Procedures"  href="/userguide/stored-procedures/index.html">

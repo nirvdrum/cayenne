@@ -39,25 +39,31 @@
             to save an object results in OptimisticLockingException.</p>
             </subsection>
             
-            <subsection name="1.1.4 Entity Inheritance">
+            <subsection name="1.1.4 DataObjectUtils - an easy way to map objects by PK">
+            <p><a href="../dataobjects/dataobjectutils.html">DataObjectUtils</a> is an often requested 
+            feature for easy retrieval of an object primary key, or locating an object for a known key. 
+            It works in a generic way for any type of DataObjects, even if a PK is not a class property.</p>
+            </subsection>
+            
+            <subsection name="1.1.5 Entity Inheritance">
             <p>Cayenne now supports entity inheritance for entities rooted in the same DB table (single 
             table inheritance).</p>
             </subsection>
             
-            <subsection name="1.1.5 Data Views and DVModeler">
+            <subsection name="1.1.6 Data Views and DVModeler">
             <p><a href="../dataview/index.html">Data Views</a> is a completely new addition to Cayenne. 
             This is a framework and a Swing modeler tool to quickly build Swing applications based on 
             Cayenne.</p>
             </subsection>
             
-            <subsection name="1.1.6 Generic Multithreaded and Distributed Events Mechanism">
+            <subsection name="1.1.7 Generic Multithreaded and Distributed Events Mechanism">
             <p>Cayenne now includes a <a href="../design/events.html">generic package</a> 
             "org.objectstyle.cayenne.event" for registering listeners 
             and sending events, both locally and remotely. It supports both blocking and non-blocking
             listeners and dispatches. Supported remote transports include JMS and JavaGroups.</p>
             </subsection>
             
-            <subsection name="1.1.7 DataObjects Validation">
+            <subsection name="1.1.8 DataObjects Validation">
             <p>DataContext now performs validation of DataObjects before committing them.
             There is a set of default validation checks being executed, based on the DataMap
             information. Developers can override DataObject validation methods to provide custom 
@@ -171,11 +177,7 @@
             will create UNIQUE constraint for a non-PK columns during schema generation.</p>
             </subsection>
             
-            <subsection name="1.1.20 New Default CayenneModeler Look and Feel">
-            <p></p>
-            </subsection>
-            
-            <subsection name="1.1.21 Support for Queries in CayenneModeler and DataMap DTD.">
+            <subsection name="1.1.20 Support for Queries in DataMap DTD.">
             <p>Queries are made first-class mapping objects. They can be modeled in CayenneModeler 
             and stored in DataMaps. Application code can then reuse such queries.
             </p>
@@ -186,35 +188,20 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.22 Non-refreshing Select Queries">
+            <subsection name="1.1.21 Non-refreshing Select Queries">
             <p></p>
             </subsection>
+           
+            <subsection name="1.1.22 CayenneModeler Enhancements.">
+            <p>The following is the incomplete list of enhancements: includes new professional look and feel, 
+            reenginnering of stored procedures, the ability to specify JDBC drivers location without the need 
+            to restart the modeler or set it in the command line, custom class generation templates, etc.
+            A number of Modeler tasks and dialogs have been redesigned to be more user-friendly
+            and consistent. </p>
             
-            <subsection name="1.1.23 CayenneModeler Support for Custom Class Templates.">
-            <p></p>
-            </subsection>
-            
-            <subsection name="1.1.24 CayenneModeler Support for UI Customizable Classpath for Jars.">
-            <p></p>
-            </subsection>
-            
-            <subsection name="1.1.25 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
-            <p>A dialog used to select mapping of ObjRelationship to one DbRelationship (simple relationship)
-            or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
-            can be selected. This dialog has been completely redesigned to remove this limitation.</p>
-            </subsection>
-            
-            <subsection name="1.1.26 CayenneModeler Productivity Enhancements.">
-            <p>CayenneModeler now uses defaults where appropriate when working with mappings. This is
-            to reduce manual operations. Some examples are:
+            <p>Also CayenneModeler supports mapping of all the new 1.1 framework features, such as DataMap queries,
+            cache synchronization configuration, etc.
             </p>
-            <ul>
-            <li><a href="../../modelerguide/common-tasks/datamap-defaults.html">DataMap defaults</a> 
-            allow to specify default values for all entities in the DataMap, reducing typing.</li>
-            
-            <li>When ObjRelationship target is selected, Modeler guesses underlying DbRelationship if
-            source and target entities can be connected in one step.</li>
-            </ul>
             </subsection>
         </subsection>
     </section>

@@ -4,12 +4,17 @@
 <body>
     <section name="8. Working with DataObjects">
     	<subsection name="8.1 Relationships">
+
+		<p>Relationships are special DataObject properties that reference other "related" objects.
+		Semantically there are two types of relationships - to-one pointing to just a single DataObjects
+		(e.g. Painting.toArtist), and to-many pointing to a collection of DataObjects of the same base type
+		(e.g. Artist.paintingArray).</p>
     	
     	<subsection name="8.1.1 To-One Relationships">
     	<p>"Get" methods for to-one relationships return the target DataObject.
     	If the object is not in memory yet, it will be fetched on demand. 
     	Modifying to-one relationships is no different from modifying attributes 
-    	- just simple call to a "set" method:
+    	- just a simple call to a "set" method:
     	</p>
 
 <source>
@@ -22,7 +27,7 @@ Artist originalArtist = painting.getToArtist();
 Artist newArtist = (Artist)context.createAndRegisterNewObject(Artist.class);
 painting.setToArtist(newArtist);
 
-// or temporarily remove Artist at all...
+// or remove Artist at all...
 // painting.setToArtist(null);
 </source>
     	</subsection>
@@ -33,7 +38,7 @@ painting.setToArtist(newArtist);
 		locate and modify an existing reverse relationship as appropriate.
 		</panel>
 		
-		<subsection name="8.1.2 To-Many Relationships"> 	
+		<subsection name="8.1.2 To-Many Relationships"> 
     	<p>"Get" methods for <strong>to-many</strong> relationships return Lists of DataObjects. 
     	Just like individual DataObjects, such lists are also resolved on demand (e.g. when 
     	a user tries to read an element from the list). For modification there are special 
@@ -56,6 +61,10 @@ if(paintings.size() > 0) {
 Painting newPainting = (Painting)context.createAndRegisterNewObject(Painting.class);
 artist.addToPaintingArray(newPainting);
 </source>
+<p> </p>
+<panel name="To-Many Note:">While to-many relationships in Cayenne are represented by Lists,
+		they are really ordered Sets, as they are not allowed to contain the same object more than once.
+		</panel>
     	</subsection>
     	</subsection>
     </section>

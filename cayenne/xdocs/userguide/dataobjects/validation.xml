@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="8. Working with DataObjects"/>
 <body>
     <section name="8. Working with DataObjects">
-    	<subsection name="8.5 DataObject Validation">
+    	<subsection name="8.6 DataObject Validation">
     	<p>DataObject implements a set of methods to validate its state. DataContext calls these methods 
     	before performing a commit. If validation fails, commit is aborted with <a href=
     	"../../api/cayenne/org/objectstyle/cayenne/validation/ValidationException.html">ValidationException</a>.
@@ -27,7 +27,7 @@
     		fewer things to track.</li>
     	</ul>
     	
-    	<subsection name="8.5.1 Validation API">
+    	<subsection name="8.6.1 Validation API">
     	<p>Each DataObject participating in commit operation (i.e. those in state NEW, DELETED or MODIFIED , in other words 
     	"non-committed")  will be validated by DataContext's ObjectStore during commit processing. Depending on the non-committed 
     	object state, ObjectStore calls one of the methods described below (description of method behavior is provided for 
@@ -83,7 +83,7 @@ public class Painting extends _Painting {
 </source>
 		</subsection>
 		
-		<subsection name="8.5.2 Turning Validation On/Off">
+		<subsection name="8.6.2 Turning Validation On/Off">
 		<p>Whether DataContext performs validation at all depends on the value of its property
 		"validatingObjectsOnCommit". Calling "isValidatingObjectsOnCommit()" returns currently 
 		configured value. Default value (usually "true") is propagated from the parent DataDomain
