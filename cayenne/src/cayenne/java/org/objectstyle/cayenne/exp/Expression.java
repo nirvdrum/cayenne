@@ -60,10 +60,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -345,18 +342,34 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * real values, or null if the whole expression was pruned, due to the
      * missing parameters.
      */
-    public Expression expWithParameters(Map parameters, boolean pruneMissing) {
-        ParametrizedExpressionBuilder builder =
-            new ParametrizedExpressionBuilder(this, parameters, pruneMissing);
-        this.traverse(builder);
-        Expression newExp = builder.getExpression();
+    public Expression expWithParameters(
+        final Map parameters,
+        final boolean pruneMissing) {
 
-        if (logObj.isDebugEnabled()) {
-            logObj.debug("Created expression: " + newExp);
-            logObj.debug("  Parameters: " + parameters);
-        }
+        // create transformer for named parameters
+        Transformer transformer = new Transformer() {
+            public Object transform(Object object) {
+                if (!(object instanceof ExpressionParameter)) {
+                    return object;
+                }
 
-        return newExp;
+                String name = ((ExpressionParameter) object).getName();
+                if (!parameters.containsKey(name)) {
+                    if (pruneMissing) {
+                        return null;
+                    }
+                    else {
+                        throw new ExpressionException(
+                            "Missing required parameter: $" + name);
+                    }
+                }
+                else {
+                    return parameters.get(name);
+                }
+            }
+        };
+
+        return transform(transformer);
     }
 
     /** 
@@ -474,26 +487,19 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Creates a transformed copy of this expression applying 
-     * transformation provided by Transformer to all its nodes.
-     * Null transformer will result in an identical deep copy of
-     * this expression.
-     *
-     * @since 1.1
-     */
-    public Expression transform(Transformer transformer) {
-        ExpressionDeepCopy transformEngine = new ExpressionDeepCopy(transformer);
-        traverse(transformEngine);
-
-        return transformEngine.getTransformed();
-    }
-
-    /**
      * Creates a copy of this expression node, without copying children.
      * 
      * @since 1.1
      */
     public abstract Expression shallowCopy();
+
+    /**
+     * Returns true if this node should be pruned from expression tree
+     * in the event a child is removed.
+     * 
+     * @since 1.1
+     */
+    protected abstract boolean pruneNodeForPrunedChild(Object prunedChild);
 
     /**
      * Traverses itself and child expressions, notifying visitor via callback
@@ -528,52 +534,60 @@ public abstract class Expression implements Serializable, XMLSerializable {
         }
 
         Expression exp = (Expression) expressionObj;
+
+        visitor.startNode(exp, parentExp);
+
+        // recursively traverse each child
         int count = exp.getOperandCount();
-
-        // announce start node
-        if (exp instanceof ListExpression) {
-            visitor.startListNode(exp, parentExp);
-        }
-        else {
-            switch (count) {
-                case 2 :
-                    visitor.startBinaryNode(exp, parentExp);
-                    break;
-                case 1 :
-                    visitor.startUnaryNode(exp, parentExp);
-                    break;
-                case 3 :
-                    visitor.startTernaryNode(exp, parentExp);
-                    break;
-            }
-        }
-
-        // traverse each child
-        int count_1 = count - 1;
-        for (int i = 0; i <= count_1; i++) {
+        for (int i = 0; i < count; i++) {
             traverse(exp.getOperand(i), exp, visitor);
-
-            // announce finished child
-            visitor.finishedChild(exp, i, i < count_1);
+            visitor.finishedChild(exp, i, i < count - 1);
         }
 
-        // announce the end of traversal
-        if (exp instanceof ListExpression) {
-            visitor.endListNode(exp, parentExp);
-        }
-        else {
-            switch (count) {
-                case 2 :
-                    visitor.endBinaryNode(exp, parentExp);
-                    break;
-                case 1 :
-                    visitor.endUnaryNode(exp, parentExp);
-                    break;
-                case 3 :
-                    visitor.endTernaryNode(exp, parentExp);
-                    break;
+        visitor.endNode(exp, parentExp);
+    }
+
+    /**
+     * Creates a transformed copy of this expression, applying 
+     * transformation provided by Transformer to all its nodes.
+     * Null transformer will result in an identical deep copy of
+     * this expression.
+     * 
+     * <p>There is one limitation on what Transformer is expected to do: 
+     * if a node is an Expression it must be transformed to null
+     * or another Expression. Returned Null Expression indicates that the 
+     * whole subtree must be pruned from resulting expression.
+     * 
+     *
+     * @since 1.1
+     */
+    public Expression transform(Transformer transformer) {
+
+        Expression copy = shallowCopy();
+        int count = getOperandCount();
+        for (int i = 0, j = 0; i < count; i++) {
+            Object operand = getOperand(i);
+            Object transformedChild = operand;
+
+            if (operand instanceof Expression) {
+                transformedChild = ((Expression) operand).transform(transformer);
+            }
+            else if (transformer != null) {
+                transformedChild = transformer.transform(operand);
+            }
+
+            if (transformedChild != null) {
+                copy.setOperand(j, transformedChild);
+                j++;
+            }
+            else if (pruneNodeForPrunedChild(operand)) {
+                // bail out early...
+                return null;
             }
         }
+
+        // all the children are processed, only now transform this copy 
+        return (transformer != null) ? (Expression) transformer.transform(copy) : copy;
     }
 
     /**
@@ -634,301 +648,5 @@ public abstract class Expression implements Serializable, XMLSerializable {
         pw.close();
         buffer.flush();
         return buffer.toString();
-    }
-
-    // ====================================================
-    // Deep copy traversal handler
-    // ====================================================
-    final class ExpressionDeepCopy implements TraversalHandler {
-        Transformer transformer;
-        LinkedList stack;
-
-        ExpressionDeepCopy(Transformer transformer) {
-            this.transformer = transformer;
-            this.stack = new LinkedList();
-        }
-
-        public Expression getTransformed() {
-            return (Expression) stack.getLast();
-        }
-
-        public void objectNode(Object leaf, Expression parentNode) {
-            stack.addLast(leaf);
-        }
-
-        public void finishedChild(
-            Expression node,
-            int childIndex,
-            boolean hasMoreChildren) {
-
-            Object childCopy = stack.removeLast();
-
-            // there is always be a parent clone on the stack, 
-            // so the line below is safe
-
-            Expression parentCopy = (Expression) stack.getLast();
-            parentCopy.setOperand(childIndex, childCopy);
-        }
-
-        void startNode(Expression node, Expression parentNode) {
-            stack.addLast(node.shallowCopy());
-        }
-
-        void endNode() {
-            // now that the clone's children are fully assembled,
-            // apply trasformer... First pick and see if transformer
-            // changes an objects, and if so, re-insert it to the 
-            // top of the stack
-
-            if (transformer != null) {
-                Object object = stack.getLast();
-                Object transformed = transformer.transform(object);
-
-                if (object != transformed) {
-                    stack.removeLast();
-                    stack.addLast(transformed);
-                }
-            }
-        }
-
-        public void startUnaryNode(Expression node, Expression parentNode) {
-            startNode(node, parentNode);
-        }
-
-        public void startBinaryNode(Expression node, Expression parentNode) {
-            startNode(node, parentNode);
-        }
-
-        public void startTernaryNode(Expression node, Expression parentNode) {
-            startNode(node, parentNode);
-        }
-
-        public void startListNode(Expression node, Expression parentNode) {
-            startNode(node, parentNode);
-        }
-
-        public void endUnaryNode(Expression node, Expression parentNode) {
-            endNode();
-        }
-
-        public void endBinaryNode(Expression node, Expression parentNode) {
-            endNode();
-        }
-
-        public void endTernaryNode(Expression node, Expression parentNode) {
-            endNode();
-        }
-
-        public void endListNode(Expression node, Expression parentNode) {
-            endNode();
-        }
-    }
-
-    // ====================================================
-    // Helper class to process parameterized expressions.
-    // ====================================================
-    final class ParametrizedExpressionBuilder extends TraversalHelper {
-        protected final Expression fakeTopLevelParent = new UnaryExpression();
-        protected Expression proto;
-
-        /**
-         * Stores pruned children of an expression node. Key is the node itself,
-         * value is a list of pruned children.
-         */
-        protected Map pruned = new HashMap();
-
-        /**
-         * Stores a mapping of the nodes of newly created expression back to
-         * the nodes of the prototype expression.
-         */
-        protected Map nodeMap = new HashMap();
-
-        protected Map params;
-        protected boolean pruneMissing;
-
-        /**
-         * Constructor ParametrizedExpressionBuilder.
-         * @param expression
-         */
-        public ParametrizedExpressionBuilder(
-            Expression proto,
-            Map params,
-            boolean pruneMissing) {
-            this.proto = proto;
-            this.params = params;
-            this.pruneMissing = pruneMissing;
-        }
-
-        /**
-         * Creates a new expression node for the prototype expression node.
-         * Stores mapping from the original expression node to the new one.
-         */
-        protected Expression makeExp(Expression proto) {
-            Expression e = ExpressionFactory.expressionOfType(proto.getType());
-            nodeMap.put(proto, e);
-            return e;
-        }
-
-        /**
-         * Finds an expression node corresponding to the prototype node. Throws
-         * IllegalStateException if no such mapping exists.
-         */
-        protected Expression findExp(Expression proto) {
-            Expression e = (Expression) nodeMap.get(proto);
-            if (e == null) {
-                throw new IllegalStateException(
-                    "Can't find expression for prototype: " + proto);
-            }
-            return e;
-        }
-
-        protected void pruneChild(Object child, Expression parent) {
-            List prunedChildren = prunedChildren(parent);
-            if (prunedChildren == null) {
-                prunedChildren = new ArrayList();
-                pruned.put(parent, prunedChildren);
-            }
-            prunedChildren.add(child);
-        }
-
-        protected List prunedChildren(Expression parent) {
-            return (List) pruned.get(parent);
-        }
-
-        protected void endNonListNode(Expression node, Expression parentNode) {
-            // we need to prune the expression if it has pruned children
-            Expression exp = findExp(node);
-            if (prunedChildren(exp) != null) {
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug("---- Prune node, since there are pruned children ----");
-                    logObj.debug("  exp: " + exp);
-                    logObj.debug("  children: " + prunedChildren(exp));
-                }
-
-                Expression parent =
-                    (parentNode != null) ? findExp(parentNode) : fakeTopLevelParent;
-
-                pruneChild(exp, parent);
-            }
-        }
-
-        /**
-         * Method getExpression.
-         * @return Expression
-         */
-        public Expression getExpression() {
-            return (prunedChildren(fakeTopLevelParent) == null) ? findExp(proto) : null;
-        }
-
-        public void startBinaryNode(Expression node, Expression parentNode) {
-            makeExp(node);
-        }
-
-        public void startListNode(Expression node, Expression parentNode) {
-            makeExp(node);
-        }
-
-        public void startTernaryNode(Expression node, Expression parentNode) {
-            makeExp(node);
-        }
-
-        public void startUnaryNode(Expression node, Expression parentNode) {
-            makeExp(node);
-        }
-
-        public void endBinaryNode(Expression node, Expression parentNode) {
-            endNonListNode(node, parentNode);
-        }
-
-        public void endListNode(Expression node, Expression parentNode) {
-            // see if we need to prune the expression
-            ListExpression exp = (ListExpression) findExp(node);
-
-            // prune empty list
-            if (exp.getOperandCount() == 0) {
-                logObj.debug("---- Prune empty list. ----");
-                pruneChild(exp, findExp(parentNode));
-                return;
-            }
-
-            List prunedChildren = prunedChildren(exp);
-
-            // no children pruned
-            if (prunedChildren == null || prunedChildren.size() == 0) {
-                return;
-            }
-
-            // all children pruned, prune self
-            if (prunedChildren.size() == exp.getOperandCount()) {
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug(
-                        "List node got all "
-                            + prunedChildren.size()
-                            + " children pruned.");
-                }
-                pruneChild(exp, findExp(parentNode));
-            }
-
-            // remove pruned children, see what remained
-            Iterator it = prunedChildren.iterator();
-            while (it.hasNext()) {
-                exp.removeOperand(it.next());
-            }
-
-            // if only one child remained, unwrap and replace self with it
-            if (exp.getOperandCount() == 1) {
-                logObj.debug("List node has only one remaining child.");
-                Object operand = exp.getOperand(0);
-                nodeMap.put(node, operand);
-            }
-        }
-
-        public void endTernaryNode(Expression node, Expression parentNode) {
-            endNonListNode(node, parentNode);
-        }
-
-        public void endUnaryNode(Expression node, Expression parentNode) {
-            endNonListNode(node, parentNode);
-        }
-
-        public void finishedChild(
-            Expression node,
-            int childIndex,
-            boolean hasMoreChildren) {
-
-            Expression parent = findExp(node);
-            Object child = node.getOperand(childIndex);
-
-            // link child to parent in the expression being built
-            if (child instanceof Expression) {
-                parent.setOperand(childIndex, findExp((Expression) child));
-            }
-            else {
-                // check for parameter substitution
-                if (child instanceof ExpressionParameter) {
-                    ExpressionParameter param = (ExpressionParameter) child;
-
-                    // explicitly check if key exists, since null value
-                    // may simply indicate NULL
-                    if (params.containsKey(param.getName())) {
-                        child = params.get(param.getName());
-                    }
-                    else {
-                        if (pruneMissing) {
-                            if (logObj.isDebugEnabled()) {
-                                logObj.debug("---- Prune parameter: " + param);
-                            }
-                            pruneChild(param, parent);
-                        }
-                        else {
-                            throw new ExpressionException(
-                                "Missing required parameter for key: " + param.getName());
-                        }
-                    }
-                }
-
-                parent.setOperand(childIndex, child);
-            }
-        }
     }
 }

@@ -66,14 +66,8 @@ import junit.framework.Assert;
 public class TstTraversalHandler implements TraversalHandler {
     protected List treeFlatView = new ArrayList();
     protected int children;
-    protected int unaryNodes;
-    protected int binaryNodes;
-    protected int ternaryNodes;
-    protected int listNodes;
-    protected int listNodesStarted;
-    protected int unaryNodesStarted;
-    protected int binaryNodesStarted;
-    protected int ternaryNodesStarted;
+    protected int nodes;
+    protected int nodesStarted;
     protected int leafs;
 
     /**
@@ -88,10 +82,7 @@ public class TstTraversalHandler implements TraversalHandler {
         TstTraversalHandler handler2 = new TstTraversalHandler();
         handler2.traverseExpression(exp2);
 
-        Assert.assertEquals(handler1.unaryNodes, handler2.unaryNodes);
-        Assert.assertEquals(handler1.binaryNodes, handler2.binaryNodes);
-        Assert.assertEquals(handler1.ternaryNodes, handler2.ternaryNodes);
-        Assert.assertEquals(handler1.listNodes, handler2.listNodes);
+        Assert.assertEquals(handler1.nodes, handler2.nodes);
     }
 
     public TstTraversalHandler() {
@@ -99,10 +90,7 @@ public class TstTraversalHandler implements TraversalHandler {
     }
 
     public void assertConsistency() throws Exception {
-        Assert.assertEquals(unaryNodesStarted, unaryNodes);
-        Assert.assertEquals(binaryNodesStarted, binaryNodes);
-        Assert.assertEquals(ternaryNodesStarted, ternaryNodes);
-        Assert.assertEquals(listNodesStarted, listNodes);
+        Assert.assertEquals(nodesStarted, nodes);
     }
 
     public List getTreeFlatView() {
@@ -116,55 +104,25 @@ public class TstTraversalHandler implements TraversalHandler {
 
     public void reset() {
         children = 0;
-        unaryNodes = 0;
-        binaryNodes = 0;
-        ternaryNodes = 0;
-        unaryNodesStarted = 0;
-        binaryNodesStarted = 0;
-        ternaryNodesStarted = 0;
-        listNodes = 0;
-        listNodesStarted = 0;
+        nodes = 0;
+        nodesStarted = 0;
         leafs = 0;
     }
 
     public int getNodeCount() {
-        return unaryNodes + binaryNodes + ternaryNodes + listNodes;
+        return nodes;
     }
 
     public int getChildren() {
         return children;
     }
 
-    public int getUnaryNodes() {
-        return unaryNodes;
+    public int getNodes() {
+        return nodes;
     }
 
-    public int getListNodes() {
-        return listNodes;
-    }
-
-    public int getListNodesStarted() {
-        return listNodesStarted;
-    }
-
-    public int getBinaryNodes() {
-        return binaryNodes;
-    }
-
-    public int getTernaryNodes() {
-        return ternaryNodes;
-    }
-
-    public int getUnaryNodesStarted() {
-        return unaryNodesStarted;
-    }
-
-    public int getBinaryNodesStarted() {
-        return binaryNodesStarted;
-    }
-
-    public int getTernaryNodesStarted() {
-        return ternaryNodesStarted;
+    public int getNodesStarted() {
+        return nodesStarted;
     }
 
     public int getLeafs() {
@@ -175,49 +133,73 @@ public class TstTraversalHandler implements TraversalHandler {
         children++;
     }
 
-    public void startUnaryNode(Expression node, Expression parentNode) {
+    public void startNode(Expression node, Expression parentNode) {
         treeFlatView.add(node);
-        unaryNodesStarted++;
+        nodesStarted++;
     }
 
-    public void startBinaryNode(Expression node, Expression parentNode) {
-        treeFlatView.add(node);
-        binaryNodesStarted++;
-    }
-
-    public void startTernaryNode(Expression node, Expression parentNode) {
-        treeFlatView.add(node);
-        ternaryNodesStarted++;
-    }
-
-    public void endUnaryNode(Expression node, Expression parentNode) {
-        unaryNodes++;
-    }
-
-    public void endBinaryNode(Expression node, Expression parentNode) {
-        binaryNodes++;
-    }
-
-    public void endTernaryNode(Expression node, Expression parentNode) {
-        ternaryNodes++;
+    public void endNode(Expression node, Expression parentNode) {
+        nodes++;
     }
 
     public void objectNode(Object leaf, Expression parentNode) {
         treeFlatView.add(leaf);
         leafs++;
     }
+
     /**
-     * @see org.objectstyle.cayenne.exp.TraversalHandler#endListNode(org.objectstyle.cayenne.exp.Expression, org.objectstyle.cayenne.exp.Expression)
+     * @deprecated Since 1.1 this method is not used.
      */
-    public void endListNode(Expression node, Expression parentNode) {
-        listNodes++;
+    public void startUnaryNode(Expression node, Expression parentNode) {
+
     }
 
     /**
-     * @see org.objectstyle.cayenne.exp.TraversalHandler#startListNode(org.objectstyle.cayenne.exp.Expression, org.objectstyle.cayenne.exp.Expression)
+     * @deprecated Since 1.1 this method is not used.
+     */
+    public void startBinaryNode(Expression node, Expression parentNode) {
+
+    }
+
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
+    public void startTernaryNode(Expression node, Expression parentNode) {
+
+    }
+
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
+    public void endUnaryNode(Expression node, Expression parentNode) {
+
+    }
+
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
+    public void endBinaryNode(Expression node, Expression parentNode) {
+
+    }
+
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
+    public void endTernaryNode(Expression node, Expression parentNode) {
+
+    }
+
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
+    public void endListNode(Expression node, Expression parentNode) {
+
+    }
+
+    /**
+     * @deprecated Since 1.1 this method is not used.
      */
     public void startListNode(Expression node, Expression parentNode) {
-        treeFlatView.add(node);
-        listNodesStarted++;
+
     }
 }

@@ -61,6 +61,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.collections.Transformer;
+
 /**
  * An expression with a varying number of operands. Usually this is
  * used for the list expressions when the list size may vary.
@@ -76,7 +78,30 @@ public class ListExpression extends Expression {
     public ListExpression(int type) {
         this.type = type;
     }
-    
+
+    protected boolean pruneNodeForPrunedChild(Object prunedChild) {
+        return false;
+    }
+
+    public Expression transform(Transformer transformer) {
+        Expression copy = super.transform(transformer);
+
+        if (!(copy instanceof ListExpression)) {
+            return copy;
+        }
+
+        // prune itself if the transformation resulted in 
+        // no children or a single child
+        switch (copy.getOperandCount()) {
+            case 1 :
+                return (Expression) copy.getOperand(0);
+            case 0 :
+                return null;
+            default :
+                return copy;
+        }
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      * 
@@ -114,9 +139,11 @@ public class ListExpression extends Expression {
     public void setOperand(int index, Object value) {
         if (operands.size() == index) {
             appendOperand(value);
-        } else if (operands.size() > index) {
+        }
+        else if (operands.size() > index) {
             operands.set(index, value);
-        } else {
+        }
+        else {
             throw new IllegalArgumentException(
                 "Attempt to set operand "
                     + index
@@ -132,7 +159,7 @@ public class ListExpression extends Expression {
     public void appendOperands(Collection operands) {
         this.operands.addAll(operands);
     }
-    
+
     public void removeOperand(Object value) {
         operands.remove(value);
     }
@@ -156,7 +183,7 @@ public class ListExpression extends Expression {
 
         return copy;
     }
-    
+
     /**
      * @since 1.1
      */

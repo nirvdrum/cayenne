@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.exp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +152,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
     public void testNoParams1() throws Exception {
         Expression e1 = ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
 
-        Expression e2 = e1.expWithParameters(new HashMap(), true);
+        Expression e2 = e1.expWithParameters(Collections.EMPTY_MAP, true);
 
         // all expression nodes must be pruned
         assertNull(e2);

@@ -56,46 +56,81 @@
 package org.objectstyle.cayenne.exp;
 
 /**
- * Defines callback methods invoked by ExpressionTraversal during Cayenne
- * Expression walk-through.
- * 
- * <p>This interface can be implemented by SQL processors to generate SQL
- * statements out of Cayenne Expressions.
+ * Expression visitor interface. Defines callback methods invoked when 
+ * walking the expression using {@link Expression.traverse(TraversalHandler)}.
  * 
  * @author Andrei Adamchik
  */
 public interface TraversalHandler {
 
-    /** Opportunity to insert an operation. */
+    /** 
+     * Called during traversal after a child of expression
+     * has been visited. 
+     */
     public void finishedChild(
         Expression node,
         int childIndex,
         boolean hasMoreChildren);
 
-    /** Opportunity to open a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void startListNode(Expression node, Expression parentNode);
 
-    /** Opportunity to open a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void startUnaryNode(Expression node, Expression parentNode);
 
-    /** Opportunity to open a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void startBinaryNode(Expression node, Expression parentNode);
 
-    /** Opportunity to open a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void startTernaryNode(Expression node, Expression parentNode);
 
-    /** Opportunity to close a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void endUnaryNode(Expression node, Expression parentNode);
 
-    /** Opportunity to close a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void endListNode(Expression node, Expression parentNode);
 
-    /** Opportunity to close a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void endBinaryNode(Expression node, Expression parentNode);
 
-    /** Opportunity to close a bracket. */
+    /**
+     * @deprecated Since 1.1 this method is not used.
+     */
     public void endTernaryNode(Expression node, Expression parentNode);
 
-    /** Opportunity to insert leaf node operand. */
+    /** 
+     * Called during the traversal before an expression node children
+     * processing is started.
+     * 
+     * @since 1.1
+     */
+    public void startNode(Expression node, Expression parentNode);
+    
+    /** 
+     * Called during the traversal after an expression node children
+     * processing is finished.
+     * 
+     * @since 1.1
+     */
+    public void endNode(Expression node, Expression parentNode);
+    
+    /** 
+     * Called during the traversal when a leaf non-expression node 
+     * is encountered.
+     */
     public void objectNode(Object leaf, Expression parentNode);
 }

@@ -75,6 +75,10 @@ public class UnaryExpression extends Expression {
         this.type = type;
     }
     
+    protected boolean pruneNodeForPrunedChild(Object prunedChild) {
+        return true;
+    }
+    
     /**
      * Creates a copy of this expression node, without copying children.
      * 

@@ -258,7 +258,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
             this.rootEntity = rootEntity;
         }
 
-        public void startUnaryNode(Expression node, Expression parentNode) {
+        public void startNode(Expression node, Expression parentNode) {
             // check if path nodes are compatibe with root entity
             if (node.getType() == Expression.OBJ_PATH
                 || node.getType() == Expression.DB_PATH) {

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
+import org.apache.commons.collections.Transformer;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 
 /**
@@ -68,6 +70,29 @@ import org.objectstyle.cayenne.exp.ExpressionException;
 public abstract class AggregateConditionNode extends SimpleNode {
     AggregateConditionNode(int i) {
         super(i);
+    }
+
+    protected boolean pruneNodeForPrunedChild(Object prunedChild) {
+        return false;
+    }
+
+    public Expression transform(Transformer transformer) {
+        Expression copy = super.transform(transformer);
+
+        if (!(copy instanceof AggregateConditionNode)) {
+            return copy;
+        }
+
+        // prune itself if the transformation resulted in 
+        // no children or a single child
+        switch (copy.getOperandCount()) {
+            case 1 :
+                return (Expression) copy.getOperand(0);
+            case 0 :
+                return null;
+            default :
+                return copy;
+        }
     }
 
     public void jjtSetParent(Node n) {

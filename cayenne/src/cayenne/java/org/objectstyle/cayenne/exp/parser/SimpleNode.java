@@ -83,6 +83,10 @@ public abstract class SimpleNode extends Expression implements Node {
 
     protected abstract String getExpressionOperator(int index);
 
+    protected boolean pruneNodeForPrunedChild(Object prunedChild) {
+        return true;
+    }
+
     /**
      * Implemented for backwards compatibility with exp package.
      * @return

@@ -94,23 +94,7 @@ class ASTCompiler {
             return startNode;
         }
 
-        public void startBinaryNode(Expression node, Expression parentNode) {
-            startedExpression(node, parentNode);
-        }
-
-        public void startListNode(Expression node, Expression parentNode) {
-            startedExpression(node, parentNode);
-        }
-
-        public void startTernaryNode(Expression node, Expression parentNode) {
-            startedExpression(node, parentNode);
-        }
-
-        public void startUnaryNode(Expression node, Expression parentNode) {
-            startedExpression(node, parentNode);
-        }
-
-        void startedExpression(Expression node, Expression parentNode) {
+        public void startNode(Expression node, Expression parentNode) {
             // create an ASTNode and store it so that children could link 
             // to it.
             ASTNode parentAST = (ASTNode) astMap.get(parentNode);

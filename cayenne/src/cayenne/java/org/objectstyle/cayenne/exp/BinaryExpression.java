@@ -74,6 +74,10 @@ public class BinaryExpression extends Expression {
         this.type = type;
     }
     
+    protected boolean pruneNodeForPrunedChild(Object prunedChild) {
+        return true;
+    }
+    
     public final int getOperandCount() {
         return 2;
     }

@@ -80,18 +80,44 @@ public class OpenBaseQualifierTranslator extends QualifierTranslator {
         super(queryAssembler);
     }
 
-    public void startBinaryNode(Expression node, Expression parentNode) {
-        // binary nodes are the only ones that currently require this
-        detectObjectMatch(node);
+    public void startNode(Expression node, Expression parentNode) {
 
-        if (parenthesisNeeded(node, parentNode)) {
-            qualBuf.append('(');
+        if (node.getOperandCount() == 2) {
+            // binary nodes are the only ones that currently require this
+            detectObjectMatch(node);
+
+            if (parenthesisNeeded(node, parentNode)) {
+                qualBuf.append('(');
+            }
+
+            // super implementation has special handling 
+            // of LIKE_IGNORE_CASE and NOT_LIKE_IGNORE_CASE
+            // OpenBase is case-insensitive by default
+            // ...
         }
+        else {
+            super.startNode(node, parentNode);
+        }
+    }
 
-        // super implementation has special handling 
-        // of LIKE_IGNORE_CASE and NOT_LIKE_IGNORE_CASE
-        // OpenBase is case-insensitive by default
-        // ...
+    public void endNode(Expression node, Expression parentNode) {
+        if (node.getOperandCount() == 2) {
+            // check if we need to use objectMatchTranslator to finish building the expression
+            if (matchingObject) {
+                appendObjectMatch();
+            }
+
+            if (parenthesisNeeded(node, parentNode))
+                qualBuf.append(')');
+
+            // super implementation has special handling 
+            // of LIKE_IGNORE_CASE and NOT_LIKE_IGNORE_CASE
+            // OpenBase is case-insensitive by default
+            // ...
+        }
+        else {
+            super.endNode(node, parentNode);
+        }
     }
 
     protected void appendLiteralDirect(
@@ -127,21 +153,6 @@ public class OpenBaseQualifierTranslator extends QualifierTranslator {
         }
 
         return buffer.toString();
-    }
-
-    public void endBinaryNode(Expression node, Expression parentNode) {
-        // check if we need to use objectMatchTranslator to finish building the expression
-        if (matchingObject) {
-            appendObjectMatch();
-        }
-
-        if (parenthesisNeeded(node, parentNode))
-            qualBuf.append(')');
-
-        // super implementation has special handling 
-        // of LIKE_IGNORE_CASE and NOT_LIKE_IGNORE_CASE
-        // OpenBase is case-insensitive by default
-        // ...
     }
 
     public void finishedChild(Expression node, int childIndex, boolean hasMoreChildren) {
