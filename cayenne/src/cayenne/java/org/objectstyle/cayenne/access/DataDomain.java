@@ -139,6 +139,7 @@ public class DataDomain implements QueryEngine {
     public void removeMap(String name) {
         DataMap map = (DataMap) maps.remove(name);
         if (map == null) {
+        	logObj.debug("attempt to remove non-existing map: " + name);
             return;
         }
 
