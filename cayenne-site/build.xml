@@ -69,6 +69,7 @@
 		<ant antfile="build-site.xml" target="site"/>
 		
 		<!-- assemble -->
+		<loadfile property="license.text" srcFile="${cayenne.latest}/doc/licenses/LICENSE"/>
 		<copy todir="${dist}">
 			<fileset dir="${build}/cayenne-site/out"  includes="**/*.html"/>
 			<fileset dir="${build}/cayenne-latest/out"  includes="**/*.html"/>
@@ -79,6 +80,9 @@
 			</filterset>
 			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
 				<filter token="JNLOGO" value="${java.net.logo}"/>
+			</filterset>
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="LICENSE" value="${license.text}"/>
 			</filterset>
 		</copy>
     </target>

@@ -7,8 +7,6 @@
         <section name="Cayenne API's - version 1.1">
         <p><ul>
         <li><a href="cayenne/index.html">Core Framework</a></li>
-        <li><a href="modeler/index.html">CayenneModeler GUI</a></li>
-        <li><a href="dvmodeler/index.html">DVModeler GUI</a></li>
         </ul>
         </p>
         </section>

@@ -6,7 +6,6 @@
 <project default="site">
 
 	<property name="dtd" value="${cayenne.latest}/src/cayenne/dtd"/>
-	<property name="license" value="${cayenne.latest}/doc/licenses"/>
 	<property name="grammar" value="${cayenne.latest}/dist/cayenne-${cayenne.latest.version}/doc/grammar"/>
     
     <!-- ============================================= -->
@@ -17,9 +16,6 @@
     <target name="other-resources" depends="check-latest,subproject">
     	<copy todir="${dist}/dtd">
     		<fileset dir="${dtd}" includes="**/*.dtd"/>
-    	</copy>
-    	<copy todir="${dist}/licenses">
-    		<fileset dir="${license}" includes="**/**"/>
     	</copy>
     	<copy todir="${dist}/grammar">
     		<fileset dir="${grammar}" includes="**/*.html"/>
@@ -34,7 +30,7 @@
     		<property name="cayenne.location" value="${cayenne.latest}"/>
     		<property name="subproject.dist" value="${cayenne.latest}/dist/cayenne-${cayenne.latest.version}"/>
     		<property name="subproject.name" value="cayenne-latest"/>
-    		<property name="doc.include" value="userguide/**,modelerguide/**,examples/**,developerguide/**"/>
+    		<property name="doc.include" value="userguide/**,modelerguide/**,examples/**,developerguide/**,license.xml"/>
     		<property name="doc.root" value="${dist}"/>
     	</ant>
     </target>
