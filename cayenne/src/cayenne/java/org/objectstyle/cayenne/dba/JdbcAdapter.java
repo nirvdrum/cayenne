@@ -60,10 +60,11 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
 import org
     .objectstyle
@@ -77,13 +78,16 @@ import org
     .access
     .trans
     .FlattenedRelationshipInsertTranslator;
+import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
+import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
 import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
+import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
-import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -142,6 +146,7 @@ public class JdbcAdapter implements DbAdapter {
         pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
         extendedTypes = new ExtendedTypeMap();
+        extendedTypes.registerType(new CharType(false));
         qualifierFactory = new QualifierTranslatorFactory();
     }
 

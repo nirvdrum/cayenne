@@ -73,7 +73,7 @@ public class PostgresAdapter extends JdbcAdapter
 	public PostgresAdapter() {
 		super();
 		// register CharType so that all CHAR types will be trimmed
-		this.getExtendedTypes().registerType(new CharType());
+		this.getExtendedTypes().registerType(new CharType(true));
 	}
 
 	/**

@@ -76,6 +76,12 @@ public class CharType extends AbstractType {
 
     private static final int BUF_SIZE = 8 * 1024;
 
+    protected boolean trimingChars;
+
+    public CharType(boolean trimingChars) {
+        this.trimingChars = trimingChars;
+    }
+
     public String getClassName() {
         return String.class.getName();
     }
@@ -97,7 +103,7 @@ public class CharType extends AbstractType {
             val = rs.getString(index);
 
             // trim CHAR type
-            if (val != null && type == Types.CHAR) {
+            if (val != null && type == Types.CHAR && isTrimingChars()) {
                 val = val.trim();
             }
         }
@@ -146,5 +152,19 @@ public class CharType extends AbstractType {
         } finally {
             in.close();
         }
+    }
+    
+    /**
+     * Returns <code>true</code> if 'materializeObject' method should trim
+     * trailing spaces from the CHAR columns. This addresses an issue with some
+     * JDBC drivers (e.g. Oracle), that return Strings for CHAR columsn  padded
+     * with spaces.
+     */
+    public boolean isTrimingChars() {
+        return trimingChars;
+    }
+
+    public void setTrimingChars(boolean trimingChars) {
+        this.trimingChars = trimingChars;
     }
 }
