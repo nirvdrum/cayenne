@@ -73,12 +73,12 @@ public class ValidationInfo {
     protected int severity;
 
     /**
-     * Constructor for ProjectValidationError.
+     * Constructor for ValidationInfo. 
      */
-    public ValidationInfo(int severity, String message, ProjectPath treeNodePath) {
+    public ValidationInfo(int severity, String message, ProjectPath path) {
         this.severity = severity;
         this.message = message;
-        this.path = treeNodePath;
+        this.path = path;
     }
 
     public Object getValidatedObject() {
