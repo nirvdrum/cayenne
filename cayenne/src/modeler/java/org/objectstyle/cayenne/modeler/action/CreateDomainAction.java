@@ -70,14 +70,17 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateDomainAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create DataDomain";
+
+	public static String getActionName() {
+		return "Create DataDomain";
+	}
 
     /**
      * Constructor for CreateDomainAction.
      * @param name
      */
     public CreateDomainAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

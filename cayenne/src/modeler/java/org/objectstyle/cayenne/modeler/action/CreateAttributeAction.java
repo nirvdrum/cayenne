@@ -79,14 +79,17 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateAttributeAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create Attribute";
+
+    public static String getActionName() {
+    	return "Create Attribute";
+    }
 
     /**
      * Constructor for CreateAttributeAction.
      * @param name
      */
     public CreateAttributeAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

@@ -70,14 +70,16 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class PackageMenuAction extends CayenneAction {
-    public static final String ACTION_NAME =
-        "Set Package Name for Obj Entities";
+
+	public static String getActionName() {
+		return "Set Package Name for Obj Entities";
+	}
 
     /**
      * Constructor for PackageMenuAction.
      */
     public PackageMenuAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     /**

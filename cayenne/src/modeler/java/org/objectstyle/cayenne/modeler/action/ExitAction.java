@@ -64,13 +64,16 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class ExitAction extends ProjectAction {
-    public static final String ACTION_NAME = "Exit";
+
+    public static String getActionName() {
+    	return "Exit";
+    }
 
     /**
      * Constructor for ExitAction.
      */
     public ExitAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public void performAction(ActionEvent e) {

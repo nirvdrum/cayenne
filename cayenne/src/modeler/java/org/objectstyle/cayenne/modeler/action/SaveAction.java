@@ -78,12 +78,15 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Misha Shengaout
  */
 public class SaveAction extends CayenneAction {
-    public static final String ACTION_NAME = "Save";
+
+	public static String getActionName() {
+		return "Save";
+	}
 
     protected ProjectOpener fileChooser = new ProjectOpener();
 
     public SaveAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public KeyStroke getAcceleratorKey() {

@@ -76,13 +76,17 @@ import org.scopemvc.core.Control;
  */
 public class OpenProjectAction extends ProjectAction {
     private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
-    public static final String ACTION_NAME = "Open Project";
     protected ProjectOpener fileChooser = new ProjectOpener();
+
+	public static String getActionName() {
+		return "Open Project";
+	}
+
     /**
      * Constructor for OpenProjectAction.
      */
     public OpenProjectAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
     public String getIconName() {
         return "icon-open.gif";

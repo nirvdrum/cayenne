@@ -71,14 +71,17 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateNodeAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create DataNode";
+
+	public static String getActionName() {
+		return "Create DataNode";
+	}
 
     /**
      * Constructor for CreateNodeAction.
      * @param name
      */
     public CreateNodeAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

@@ -101,10 +101,12 @@ import org.objectstyle.cayenne.project.ProjectPath;
 public class RemoveAction extends CayenneAction {
     private static Logger logObj = Logger.getLogger(RemoveAction.class);
 
-    public static final String ACTION_NAME = "Remove";
+	public static String getActionName() {
+		return "Remove";
+	}
 
     public RemoveAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

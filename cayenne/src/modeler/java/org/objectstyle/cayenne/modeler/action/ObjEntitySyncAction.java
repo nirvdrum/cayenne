@@ -71,10 +71,13 @@ import org.objectstyle.cayenne.util.EntityMergeSupport;
  * @author Andrei Adamchik
  */
 public class ObjEntitySyncAction extends CayenneAction {
-	public static final String ACTION_NAME = "Sync ObjEntity with DbEntity";
+
+	public static String getActionName() {
+		return "Sync ObjEntity with DbEntity";
+	}
 
 	public ObjEntitySyncAction() {
-		super(ACTION_NAME);
+		super(getActionName());
 	}
 
 	/**

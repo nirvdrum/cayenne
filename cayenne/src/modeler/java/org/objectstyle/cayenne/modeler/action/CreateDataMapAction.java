@@ -70,10 +70,13 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create DataMap";
+
+	public static String getActionName() {
+		return "Create DataMap";
+	}
 
     public CreateDataMapAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

@@ -72,10 +72,13 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateStoredProcedureAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create Stored Procedure";
+
+	public static String getActionName() {
+		return "Create Stored Procedure";
+	}
 
     public CreateStoredProcedureAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public void performAction(ActionEvent e) {

@@ -217,7 +217,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
         JButton revalidateBtn =
             new JButton(
-                Editor.getFrame().getAction(ValidateAction.ACTION_NAME));
+                Editor.getFrame().getAction(ValidateAction.getActionName()));
         revalidateBtn.setText("Refresh");
         closeBtn = new JButton("Close");
         JPanel panel =

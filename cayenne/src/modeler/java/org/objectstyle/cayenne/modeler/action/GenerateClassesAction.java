@@ -66,13 +66,16 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class GenerateClassesAction extends CayenneAction {
-    public static final String ACTION_NAME = "Generate Classes";
+
+	public static String getActionName() {
+		return "Generate Classes";
+	}
 
     /**
      * Constructor for GenerateClassesAction.
      */
     public GenerateClassesAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     /**

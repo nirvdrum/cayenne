@@ -65,10 +65,13 @@ import org.objectstyle.cayenne.modeler.control.ProjectTypeSelectControl;
  * @author Andrei Adamchik
  */
 public class NewProjectAction extends ProjectAction {
-    public static final String ACTION_NAME = "New Project";
+
+	public static String getActionName() {
+		return "New Project";
+	}
 
     public NewProjectAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

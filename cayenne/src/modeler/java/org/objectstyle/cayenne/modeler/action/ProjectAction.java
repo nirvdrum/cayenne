@@ -71,10 +71,12 @@ import org.scopemvc.core.Control;
 public class ProjectAction extends CayenneAction {
 	private static Logger logObj = Logger.getLogger(ProjectAction.class);
 	
-    public static final String ACTION_NAME = "Close Project";
+	public static String getActionName() {
+		return "Close Project";
+	}
 
     public ProjectAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     /**
@@ -121,7 +123,7 @@ public class ProjectAction extends CayenneAction {
                 // save changes and close
                 ActionEvent e =
                     new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SaveAll");
-                Editor.getFrame().getAction(SaveAction.ACTION_NAME).actionPerformed(e);
+                Editor.getFrame().getAction(SaveAction.getActionName()).actionPerformed(e);
 				if(mediator.isDirty()) {
 					// save was canceled... do not close
 					return false;

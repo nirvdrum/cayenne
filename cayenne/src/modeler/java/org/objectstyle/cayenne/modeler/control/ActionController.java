@@ -114,10 +114,10 @@ public class ActionController extends ModelerController {
 
     protected void projectClosed() {
         disableAllActions();
-		getAction(ValidateAction.ACTION_NAME).setEnabled(false);
-		getAction(ProjectAction.ACTION_NAME).setEnabled(false);
-        getAction(SaveAction.ACTION_NAME).setEnabled(false);
-        getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
+		getAction(ValidateAction.getActionName()).setEnabled(false);
+		getAction(ProjectAction.getActionName()).setEnabled(false);
+        getAction(SaveAction.getActionName()).setEnabled(false);
+        getAction(CreateDomainAction.getActionName()).setEnabled(false);
 
         updateRemoveAction(null);
     }
@@ -150,7 +150,7 @@ public class ActionController extends ModelerController {
             name = "Remove";
         }
 
-        getAction(RemoveAction.ACTION_NAME).setName(name);
+        getAction(RemoveAction.getActionName()).setName(name);
     }
 
     /**
@@ -170,7 +170,7 @@ public class ActionController extends ModelerController {
         for (int i = 0; i < len; i++) {
 
             // "save" button has its own rules
-            if (keys[i].equals(SaveAction.ACTION_NAME)) {
+            if (keys[i].equals(SaveAction.getActionName())) {
                 continue;
             }
 
@@ -183,9 +183,9 @@ public class ActionController extends ModelerController {
      */
     protected void enableProjectActions() {
         disableAllActions();
-        getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
-		getAction(ProjectAction.ACTION_NAME).setEnabled(true);
-		getAction(ValidateAction.ACTION_NAME).setEnabled(true);
+        getAction(CreateDomainAction.getActionName()).setEnabled(true);
+		getAction(ProjectAction.getActionName()).setEnabled(true);
+		getAction(ValidateAction.getActionName()).setEnabled(true);
     }
 
     /**
@@ -209,11 +209,11 @@ public class ActionController extends ModelerController {
         enableProjectActions();
 
         if (domain != null) {
-            getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
-            getAction(RemoveAction.ACTION_NAME).setEnabled(true);
-            getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
-            getAction(ImportDbAction.ACTION_NAME).setEnabled(true);
-            getAction(ImportEOModelAction.ACTION_NAME).setEnabled(true);
+            getAction(CreateDataMapAction.getActionName()).setEnabled(true);
+            getAction(RemoveAction.getActionName()).setEnabled(true);
+            getAction(CreateNodeAction.getActionName()).setEnabled(true);
+            getAction(ImportDbAction.getActionName()).setEnabled(true);
+            getAction(ImportEOModelAction.getActionName()).setEnabled(true);
         }
     }
 }

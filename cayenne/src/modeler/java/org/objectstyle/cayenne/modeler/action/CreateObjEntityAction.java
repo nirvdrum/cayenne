@@ -69,13 +69,16 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateObjEntityAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create ObjEntity";
+
+	public static String getActionName() {
+		return "Create ObjEntity";
+	}
 
     /**
      * Constructor for CreateObjEntityAction.
      */
     public CreateObjEntityAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

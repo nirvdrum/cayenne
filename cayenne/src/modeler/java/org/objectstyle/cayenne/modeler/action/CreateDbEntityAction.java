@@ -69,13 +69,16 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateDbEntityAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create DbEntity";
+
+	public static String getActionName() {
+		return "Create DbEntity";
+	}
 
     /**
      * Constructor for CreateDbEntityAction.
      */
     public CreateDbEntityAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public String getIconName() {

@@ -95,10 +95,13 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class ImportDbAction extends CayenneAction {
     private static Logger logObj = Logger.getLogger(ImportDbAction.class);
-    public static final String ACTION_NAME = "Reengineer Database Schema";
+
+	public static String getActionName() {
+		return "Reengineer Database Schema";
+	}
 
     public ImportDbAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     public void importDb() {

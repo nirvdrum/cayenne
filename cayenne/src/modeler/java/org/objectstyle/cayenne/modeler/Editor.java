@@ -188,7 +188,7 @@ public class Editor
 
         // set L&F
         try {
-            String laf = (String) prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
+            String laf = prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
 
             if (laf != null) {
                 LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
@@ -250,7 +250,7 @@ public class Editor
 
             if (f.isFile() && Configuration.DEFAULT_DOMAIN_FILE.equals(f.getName())) {
                 OpenProjectAction openAction =
-                    (OpenProjectAction) frame.getAction(OpenProjectAction.ACTION_NAME);
+                    (OpenProjectAction) frame.getAction(OpenProjectAction.getActionName());
                 openAction.openProject(f);
             }
         }
@@ -352,7 +352,7 @@ public class Editor
 
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                ((ExitAction) getAction(ExitAction.ACTION_NAME)).exit();
+                ((ExitAction) getAction(ExitAction.getActionName())).exit();
             }
         });
 
@@ -412,7 +412,7 @@ public class Editor
      * Returns an action object associated with the key.
      */
     public CayenneAction getAction(String key) {
-        return (CayenneAction) controller.getTopModel().getAction(key);
+        return controller.getTopModel().getAction(key);
     }
 
     protected void initMenus() {
@@ -432,44 +432,44 @@ public class Editor
         menuBar.add(toolMenu);
         menuBar.add(helpMenu);
 
-        fileMenu.add(getAction(NewProjectAction.ACTION_NAME).buildMenu());
-        fileMenu.add(getAction(OpenProjectAction.ACTION_NAME).buildMenu());
-        fileMenu.add(getAction(ProjectAction.ACTION_NAME).buildMenu());
+        fileMenu.add(getAction(NewProjectAction.getActionName()).buildMenu());
+        fileMenu.add(getAction(OpenProjectAction.getActionName()).buildMenu());
+        fileMenu.add(getAction(ProjectAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
-        fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
+        fileMenu.add(getAction(SaveAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();
         fileMenu.add(recentFileMenu);
 
         fileMenu.addSeparator();
-        fileMenu.add(getAction(ExitAction.ACTION_NAME).buildMenu());
+        fileMenu.add(getAction(ExitAction.getActionName()).buildMenu());
 
-		projectMenu.add(getAction(ValidateAction.ACTION_NAME).buildMenu());
+		projectMenu.add(getAction(ValidateAction.getActionName()).buildMenu());
 		projectMenu.addSeparator();
-        projectMenu.add(getAction(CreateDomainAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(CreateDomainAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateNodeAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateDataMapAction.getActionName()).buildMenu());
 
-        projectMenu.add(getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateStoredProcedureAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(CreateObjEntityAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateDbEntityAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateDerivedDbEntityAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateStoredProcedureAction.getActionName()).buildMenu());
         projectMenu.addSeparator();
-        projectMenu.add(getAction(ObjEntitySyncAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(ObjEntitySyncAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(DerivedEntitySyncAction.getActionName()).buildMenu());
         projectMenu.addSeparator();
-        projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
+        projectMenu.add(getAction(RemoveAction.getActionName()).buildMenu());
 
-        toolMenu.add(getAction(ImportDbAction.ACTION_NAME).buildMenu());
-        toolMenu.add(getAction(ImportEOModelAction.ACTION_NAME).buildMenu());
+        toolMenu.add(getAction(ImportDbAction.getActionName()).buildMenu());
+        toolMenu.add(getAction(ImportEOModelAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
-        toolMenu.add(getAction(GenerateClassesAction.ACTION_NAME).buildMenu());
-        toolMenu.add(getAction(GenerateDbAction.ACTION_NAME).buildMenu());
+        toolMenu.add(getAction(GenerateClassesAction.getActionName()).buildMenu());
+        toolMenu.add(getAction(GenerateDbAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
-        toolMenu.add(getAction(PackageMenuAction.ACTION_NAME).buildMenu());
+        toolMenu.add(getAction(PackageMenuAction.getActionName()).buildMenu());
 
-        helpMenu.add(getAction(AboutAction.ACTION_NAME).buildMenu());
+        helpMenu.add(getAction(AboutAction.getActionName()).buildMenu());
     }
 
     protected void initStatusBar() {
@@ -481,22 +481,22 @@ public class Editor
     /** Initializes main toolbar. */
     protected void initToolbar() {
         JToolBar toolBar = new JToolBar();
-        toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
+        toolBar.add(getAction(NewProjectAction.getActionName()).buildButton());
+        toolBar.add(getAction(OpenProjectAction.getActionName()).buildButton());
+        toolBar.add(getAction(SaveAction.getActionName()).buildButton());
+        toolBar.add(getAction(RemoveAction.getActionName()).buildButton());
 
         toolBar.addSeparator();
 
-        toolBar.add(getAction(CreateDomainAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateDbEntityAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateStoredProcedureAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateObjEntityAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateAttributeAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateRelationshipAction.ACTION_NAME).buildButton());
+        toolBar.add(getAction(CreateDomainAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateNodeAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateDataMapAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateDbEntityAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateDerivedDbEntityAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateStoredProcedureAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateObjEntityAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateAttributeAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateRelationshipAction.getActionName()).buildButton());
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }
@@ -530,13 +530,13 @@ public class Editor
     public void setDirty(boolean flag) {
         String title = getTitle();
         if (flag) {
-            getAction(SaveAction.ACTION_NAME).setEnabled(true);
+            getAction(SaveAction.getActionName()).setEnabled(true);
             if (title == null || !title.startsWith(DIRTY_STRING)) {
                 setTitle(DIRTY_STRING + title);
             }
         }
         else {
-            getAction(SaveAction.ACTION_NAME).setEnabled(false);
+            getAction(SaveAction.getActionName()).setEnabled(false);
             if (title != null && title.startsWith(DIRTY_STRING)) {
                 setTitle(title.substring(DIRTY_STRING.length(), title.length()));
             }
@@ -545,77 +545,77 @@ public class Editor
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         enableDataNodeMenu();
-        getAction(RemoveAction.ACTION_NAME).setName("Remove DataNode");
+        getAction(RemoveAction.getActionName()).setName("Remove DataNode");
     }
 
     public void currentDataMapChanged(DataMapDisplayEvent e) {
         enableDataMapMenu();
-        getAction(RemoveAction.ACTION_NAME).setName("Remove DataMap");
+        getAction(RemoveAction.getActionName()).setName("Remove DataMap");
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
         enableObjEntityMenu();
-        getAction(RemoveAction.ACTION_NAME).setName("Remove ObjEntity");
+        getAction(RemoveAction.getActionName()).setName("Remove ObjEntity");
     }
 
     public void currentDbEntityChanged(EntityDisplayEvent e) {
         enableDbEntityMenu();
-        getAction(RemoveAction.ACTION_NAME).setName("Remove DbEntity");
+        getAction(RemoveAction.getActionName()).setName("Remove DbEntity");
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         enableProcedureMenu();
 
         if (e.getProcedure() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove Stored Procedure");
-            getAction(CreateAttributeAction.ACTION_NAME).setName(
+            getAction(RemoveAction.getActionName()).setName("Remove Stored Procedure");
+            getAction(CreateAttributeAction.getActionName()).setName(
                 "Create Procedure Parameter");
         }
         else {
-			getAction(CreateAttributeAction.ACTION_NAME).setName("Create Attribute");	
+			getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");	
         }
     }
 
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {
         enableDbEntityMenu();
         if (e.getAttribute() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove DbAttribute");
+            getAction(RemoveAction.getActionName()).setName("Remove DbAttribute");
         }
     }
 
     public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
         enableProcedureMenu();
         if (e.getProcedureParameter() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove Procedure Parameter");
+            getAction(RemoveAction.getActionName()).setName("Remove Procedure Parameter");
         }
 
         if (e.getProcedure() != null) {
-            getAction(CreateAttributeAction.ACTION_NAME).setName(
+            getAction(CreateAttributeAction.getActionName()).setName(
                 "Create Procedure Parameter");
         }
         else {
-            getAction(CreateAttributeAction.ACTION_NAME).setName("Create Attribute");
+            getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
         }
     }
 
     public void currentObjAttributeChanged(AttributeDisplayEvent e) {
         enableObjEntityMenu();
         if (e.getAttribute() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove ObjAttribute");
+            getAction(RemoveAction.getActionName()).setName("Remove ObjAttribute");
         }
     }
 
     public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
         enableDbEntityMenu();
         if (e.getRelationship() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove DbRelationship");
+            getAction(RemoveAction.getActionName()).setName("Remove DbRelationship");
         }
     }
 
     public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
         enableObjEntityMenu();
         if (e.getRelationship() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove ObjRelationship");
+            getAction(RemoveAction.getActionName()).setName("Remove ObjRelationship");
         }
     }
 
@@ -630,39 +630,39 @@ public class Editor
                     controller.getEventController().getCurrentDataDomain()));
         }
 
-        getAction(PackageMenuAction.ACTION_NAME).setEnabled(true);
-        getAction(GenerateClassesAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateDbEntityAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateDerivedDbEntityAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateStoredProcedureAction.ACTION_NAME).setEnabled(true);
-        getAction(GenerateDbAction.ACTION_NAME).setEnabled(true);
+        getAction(PackageMenuAction.getActionName()).setEnabled(true);
+        getAction(GenerateClassesAction.getActionName()).setEnabled(true);
+        getAction(CreateObjEntityAction.getActionName()).setEnabled(true);
+        getAction(CreateDbEntityAction.getActionName()).setEnabled(true);
+        getAction(CreateDerivedDbEntityAction.getActionName()).setEnabled(true);
+        getAction(CreateStoredProcedureAction.getActionName()).setEnabled(true);
+        getAction(GenerateDbAction.getActionName()).setEnabled(true);
         
         // reset
-		getAction(CreateAttributeAction.ACTION_NAME).setName("Create Attribute");
+		getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
     }
 
     private void enableObjEntityMenu() {
         enableDataMapMenu();
-        getAction(ObjEntitySyncAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
+        getAction(ObjEntitySyncAction.getActionName()).setEnabled(true);
+        getAction(CreateAttributeAction.getActionName()).setEnabled(true);
+        getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
     }
 
     private void enableDbEntityMenu() {
         enableDataMapMenu();
-        getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
+        getAction(CreateAttributeAction.getActionName()).setEnabled(true);
+        getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
 
         if (controller.getEventController().getCurrentDbEntity()
             instanceof DerivedDbEntity) {
-            getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
+            getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
         }
     }
 
     private void enableProcedureMenu() {
         enableDataMapMenu();
-        getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
+        getAction(CreateAttributeAction.getActionName()).setEnabled(true);
     }
 
     private void enableDataNodeMenu() {

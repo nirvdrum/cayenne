@@ -66,14 +66,17 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class DerivedEntitySyncAction extends CayenneAction {
-    public static final String ACTION_NAME = "Reset Derived Entity";
+
+	public static String getActionName() {
+		return "Reset Derived Entity";
+	}
 
     /**
      * Constructor for DerivedEntitySyncAction.
      * @param name
      */
     public DerivedEntitySyncAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     /**

@@ -87,12 +87,14 @@ import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 public class ImportEOModelAction extends CayenneAction {
     private static Logger logObj = Logger.getLogger(ImportEOModelAction.class);
 
-    public static final String ACTION_NAME = "Import EOModel";
+	public static String getActionName() {
+		return "Import EOModel";
+	}
 
     protected JFileChooser eoModelChooser;
 
     public ImportEOModelAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     /**

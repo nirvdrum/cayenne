@@ -66,14 +66,17 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
  * @author Andrei Adamchik
  */
 public class CreateDerivedDbEntityAction extends CreateDbEntityAction {
-    public static final String ACTION_NAME = "Create Derived DbEntity";
+
+	public static String getActionName() {
+		return "Create Derived DbEntity";
+	}
     
 	/**
 	 * Constructor for CreateDerivedDbEntityAction.
 	 */
 	public CreateDerivedDbEntityAction() {
-		setName(ACTION_NAME);
-		super.putValue(Action.DEFAULT, ACTION_NAME);
+		super.setName(getActionName());
+		super.putValue(Action.DEFAULT, getActionName());
 	}
 	
 	public String getIconName() {
@@ -90,5 +93,6 @@ public class CreateDerivedDbEntityAction extends CreateDbEntityAction {
 		map.addDbEntity(entity);
 		return entity;
 	}
+
 }
 

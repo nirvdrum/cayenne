@@ -65,14 +65,17 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class AboutAction extends CayenneAction {
-    public static final String ACTION_NAME = "About CayenneModeler";
+
+	public static final String getActionName() {
+		return "About CayenneModeler";
+	}
 
     /**
      * Constructor for AboutMenuAction.
      * @param name
      */
     public AboutAction() {
-        super(ACTION_NAME);
+        super(getActionName());
     }
 
     /**

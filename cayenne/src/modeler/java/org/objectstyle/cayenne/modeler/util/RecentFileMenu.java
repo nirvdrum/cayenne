@@ -114,7 +114,7 @@ public class RecentFileMenu extends JMenu {
 				// add a new one
 				RecentFileMenuItem item = new RecentFileMenuItem(name);
 				item.setAction(
-					Editor.getFrame().getAction(OpenProjectAction.ACTION_NAME));
+					Editor.getFrame().getAction(OpenProjectAction.getActionName()));
 				add(item);
 			}
 		}

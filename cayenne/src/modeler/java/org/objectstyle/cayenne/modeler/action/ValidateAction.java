@@ -72,10 +72,13 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Craig Miskell
  */
 public class ValidateAction extends CayenneAction {
-	public static final String ACTION_NAME = "Validate Project";
+
+	public static String getActionName() {
+		return "Validate Project";
+	}
 
 	public ValidateAction() {
-		super(ACTION_NAME);
+		super(getActionName());
 	}
 
 	/**
