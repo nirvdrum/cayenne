@@ -115,16 +115,11 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
 
     /**
      * Generates new (unique and non-repeating) primary key for specified
-     * DbEntity.
+     * DbEntity. Executed SQL looks like this:
+     * 
+     * <pre>NEWID FOR Table Column</pre>
      *
-     * Executed SQL looks like this:
-     * <pre>
-     * NEWID FOR Table Column
-     * </pre>
-     *
-     * COLUMN must be marked as UNIQUE in order for this to work properly
-     *
-     *  @param ent DbEntity for which automatic PK is generated.
+     * COLUMN must be marked as UNIQUE in order for this to work properly.
      */
     protected int pkFromDatabase(DataNode node, DbEntity entity) throws Exception {
         String sql = generatePkForDbEntityString(entity);

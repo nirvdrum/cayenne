@@ -713,15 +713,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Creates and returns a DataObject from a data row (snapshot).
-     * Newly created object is registered with this DataContext.
-     *
-     * <p>Internally this method calls {@link 
-     * #objectsFromDataRows(org.objectstyle.cayenne.map.ObjEntity,java.util.List,boolean)
-     * objectsFromDataRows(ObjEntity, List, boolean)}
-     * with <code>false</code> "refersh" parameter.</p>
+     * Converts a list of DataRows to a List of DataObject registered with this
+     * DataContext. Interbnally calls {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}.
      * 
      * @since 1.1
+     * @see DataRow
+     * @see DataObject
      */
     public List objectsFromDataRows(
         Class objectClass,
@@ -737,32 +734,28 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * A convenience shortcut to {@link 
-     * #objectsFromDataRows(Class,java.util.List,boolean)
-     * objectsFromDataRows(Class, List, boolean)}, that allows to easily create an object
-     * from a map of values.</p>
+     * Creates a DataObject from DataRow. This is a convenience
+     * shortcut to {@link #objectsFromDataRows(Class,java.util.List,boolean,boolean)}.
+     * 
+     * @see DataRow
+     * @see DataObject
      */
     public DataObject objectFromDataRow(
         Class objectClass,
         DataRow dataRow,
         boolean refresh) {
-        // TODO: this method must resolve inheritance if asked!!!
         List list =
             objectsFromDataRows(
                 objectClass,
                 Collections.singletonList(dataRow),
                 refresh,
-                false);
+                true);
         return (DataObject) list.get(0);
     }
 
     /**
-      * Use {@link 
-      * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
-      * objectFromDataRow(Class, DataRow, boolean)}.
-      * 
-      * @deprecated Since 1.1
-      */
+     * @deprecated Since 1.1 use {@link #objectFromDataRow(Class,DataRow,boolean)}.
+     */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
         // backwards compatibility... wrap this in a DataRow
         if (!(dataRow instanceof DataRow)) {
@@ -802,13 +795,10 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Creates and returns a read-only DataObject from a data row (snapshot).
-     * Newly created object is registered with this DataContext. This method is not
-     * used in Cayenne anymore. Use
-     * {@link #objectsFromDataRows(org.objectstyle.cayenne.map.ObjEntity,java.util.List,boolean)
-     * objectsFromDataRows(ObjEntity, List, boolean)} instead.
+     * Creates and returns a read-only DataObject from a DataRow.
+     * Newly created object is registered with this DataContext. 
      * 
-     * @deprecated Since 1.1 
+     * @deprecated Since 1.1 use {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)} instead.
      */
     protected DataObject readOnlyObjectFromDataRow(
         ObjEntity objEntity,

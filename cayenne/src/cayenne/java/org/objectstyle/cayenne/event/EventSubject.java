@@ -121,7 +121,7 @@ public class EventSubject extends Object {
     /**
      * Protected constructor for new subjects.
      * 
-     * @param subject the name of the new subject to be created
+     * @param fullSubjectName the name of the new subject to be created
      */
     protected EventSubject(String fullSubjectName) {
         super();

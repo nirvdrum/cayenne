@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  * <code>PoolManager</code> that has been configured based on the
  * <code>RefAddr</code> values of the specified <code>Reference</code>.</p>
  *
- * <p>Here is a sample Tomcat 4.0.x configuration that sets this class
+ * <p>Here is a sample Tomcat 4.x configuration that sets this class
  * as a default factory for javax.sql.DataSource objects:</p>
 <code><pre>
 &lt;ResourceParams name="jdbc/mydb"&gt;
@@ -137,7 +137,7 @@ public class ContainerPoolFactory implements ObjectFactory {
      * @param obj The possibly null object containing location or
      *  reference information that can be used in creating an object
      * @param name The name of this object relative to <code>nameCtx</code>
-     * @param nameCts The context relative to which the <code>name</code>
+     * @param nameCtx The context relative to which the <code>name</code>
      *  parameter is specified, or <code>null</code> if <code>name</code>
      *  is relative to the default initial context
      * @param environment The possibly null environment that is used in

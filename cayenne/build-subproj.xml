@@ -65,7 +65,6 @@
 		<mkdir dir="${dist}/src/${subproj}"/>
 		<mkdir dir="${dist}/lib"/>
 		<mkdir dir="${dist}/bin"/>
-		<mkdir dir="${dist}/doc/api/${subproj}"/>
 	</target>
 	
 	
@@ -141,6 +140,7 @@
     <target name="api" depends="nosubproj,check-api,build-api"/>
     
     <target name="build-api" depends="prepare" unless="api.up2date">
+		<mkdir dir="${dist}/doc/api/${subproj}"/>
         <javadoc    packagenames="org.objectstyle.*"
                     sourcepath="src/${subproj}/java"
                     defaultexcludes="yes"

@@ -122,11 +122,6 @@ public class AbstractHandler extends DefaultHandler {
      * Handles the start of an element. This base implementation just
      * throws an exception.
      * 
-     * @param tag The name of the element being started. 
-     *            Will not be <code>null</code>.
-     * @param attrs Attributes of the element being started.
-     *              Will not be <code>null</code>.
-     * 
      * @exception SAXException if this method is not overridden, or in
      *                              case of error in an overridden version
      */

@@ -80,10 +80,14 @@ import org.objectstyle.cayenne.util.XMLSerializable;
 public class Ordering implements Comparator, Serializable, XMLSerializable {
     private static Logger logObj = Logger.getLogger(Ordering.class);
 
-    /** Symbolic representation of ascending ordering criterion. */
+    /** 
+     * Symbolic representation of ascending ordering criterion. 
+     */
     public static final boolean ASC = true;
 
-    /** Symbolic representation of descending ordering criterion. */
+    /** 
+     * Symbolic representation of descending ordering criterion. 
+     */
     public static final boolean DESC = false;
 
     protected Expression sortSpec;
@@ -91,11 +95,8 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
     protected boolean caseInsensitive;
 
     /**
-     * Orders the given list of objects according to the list of orderings specified
-     * Requires that the objects in objects are all subclasses of CayenneDataObject.
-     * Throws an IllegalArgumentException if any aren't
-     * Modifies theList in place
-     * @param theList a List of objects to be sorted
+     * Orders the given list of objects according to the list of orderings.
+     * The list is modified in place.
      */
     public static void orderList(List objects, List orderings) {
         Collections.sort(objects, new DataObjectPropertyComparator(orderings));
@@ -178,27 +179,24 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
     }
 
     /**
-     * Returns the sortSpec.
-     * @return Expression
+     * Returns the expression defining a ordering Java Bean property.
      */
     public Expression getSortSpec() {
         return sortSpec;
     }
 
     /**
-     * Sets the sortSpec.
-     * @param sortSpec The sortSpec to set
+     * Sets the expression defining a ordering Java Bean property.
      */
     public void setSortSpec(Expression sortSpec) {
         this.sortSpec = sortSpec;
     }
 
     /**
-     * Orders the given list of objects according to the ordering that this object specifies
-     * Requires that the objects in object are all subclasses of CayenneDataObject.
-     * Throws an IllegalArgumentException if any aren't
-     * Modifies theList in place
-     * @param theList a List of objects to be sorted
+     * Orders the given list of objects according to the ordering that this 
+     * object specifies. List is modified in-place.
+     * 
+     * @param objects a List of objects to be sorted
      */
     public void orderList(List objects) {
         Collections.sort(objects, this);

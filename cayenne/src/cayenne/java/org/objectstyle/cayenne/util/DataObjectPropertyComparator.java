@@ -82,10 +82,6 @@ public class DataObjectPropertyComparator implements Comparator {
         orderings[0] = new Ordering(propertyName, ascending);
     }
 
-    /**
-     * Constructor ListSorter.
-     * @param orderings
-     */
     public DataObjectPropertyComparator(List orderingsList) {
         super();
         orderings = new Ordering[orderingsList.size()];

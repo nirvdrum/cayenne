@@ -76,8 +76,6 @@ public class DataNodeFile extends ProjectFile {
 
     /**
      * Constructor for DataNodeFile.
-     * @param name
-     * @param extension
      */
     public DataNodeFile(Project project, DataNode node) {
         super(project, node.getDataSourceLocation());
@@ -85,14 +83,14 @@ public class DataNodeFile extends ProjectFile {
     }
 
     /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+     * @see ProjectFile#getObject()
      */
     public Object getObject() {
         return nodeObj;
     }
 
     /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
+     * @see ProjectFile#getObjectName()
      */
     public String getObjectName() {
         return nodeObj.getName();

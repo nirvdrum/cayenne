@@ -62,7 +62,7 @@ import java.io.Serializable;
  * store any extra information to help callers to identify the source and reasons 
  * for the failure.
  *
- * @see BeansValidationFailure
+ * @see BeanValidationFailure
  * @author Fabricio Voznika
  * @since 1.1
  */

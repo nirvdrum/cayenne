@@ -173,10 +173,6 @@ public class CayenneMap extends FastTreeMap {
         return parent;
     }
 
-    /**
-     * Sets the parent.
-     * @param parent The parent to set
-     */
     public void setParent(Object mapParent) {
         this.parent = mapParent;
     }

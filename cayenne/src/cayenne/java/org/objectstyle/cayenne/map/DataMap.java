@@ -156,8 +156,8 @@ public class DataMap implements XMLSerializable {
     }
 
     /**
-     * Prints itself as a well-formed complete XML document. In comparison
-     * {@link #encodeAsXML(PrintWriter, String)} stores DataMap assuming it is 
+     * Prints itself as a well-formed complete XML document. In comparison,
+     * {@link #encodeAsXML(XMLEncoder)} stores DataMap assuming it is 
      * a part of a bigger document.
      * 
      * @since 1.1

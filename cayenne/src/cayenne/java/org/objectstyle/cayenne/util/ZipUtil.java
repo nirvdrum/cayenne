@@ -144,10 +144,11 @@ public class ZipUtil {
       * Recursively zips a set of root entries into a zipfile, compressing the
       * contents.
       *
-      * @param zipFile
-      * @param srcDir
-      * @param parentDir a directory used as a root for the file name resolution.
-      * If null, current directory is assumed.
+      * @param zipFile target zip file.
+      * @param parentDir a directory containing source files to zip.
+      * @param sources an array of files and/or directories to zip.
+      * @param pathSeparator path separator for zip entries.
+      * 
       * @throws IOException
       */
     public static void zip(
@@ -156,6 +157,7 @@ public class ZipUtil {
         File[] sources,
         char pathSeparator)
         throws IOException {
+            
         String stripPath = (parentDir != null) ? parentDir.getPath() : "";
         if (stripPath.length() > 0 && !stripPath.endsWith(File.separator)) {
             stripPath += File.separator;

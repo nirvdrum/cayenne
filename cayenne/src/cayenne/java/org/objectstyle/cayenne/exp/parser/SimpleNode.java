@@ -89,7 +89,6 @@ public abstract class SimpleNode extends Expression implements Node {
 
     /**
      * Implemented for backwards compatibility with exp package.
-     * @return
      */
     public String expName() {
         return ExpressionParserTreeConstants.jjtNodeName[id];

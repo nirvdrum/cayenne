@@ -74,7 +74,9 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     protected int fetchLimit;
     protected int pageSize;
 
-    /** Creates empty SqlSelectQuery. */
+    /** 
+     * Creates empty SqlSelectQuery. 
+     */
     public SqlSelectQuery() {
     }
 
@@ -84,61 +86,57 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     }
 
     /**
-     * Creates a SqlSelectQuery with no initial sqlString, for the specifed ObjEntity
-     * @param root the ObjEntity to use as root
-    */
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(ObjEntity root) {
         this(root, null);
     }
 
     /**
-    * Creates a SqlSelectQuery using the given ObjEntity as a root, with the given sql string 
-    * @param root the ObjEntity to use as root
-    * @param sqlString the sql to execute
-    */
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(ObjEntity root, String sqlString) {
         init(root, sqlString);
     }
 
     /**
-     * Creates a SqlSelectQuery with no initial sqlString, for the specifed DbEntity
-     * @param root the DbEntity to use as root
-    */
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(DbEntity root) {
         this(root, null);
     }
 
     /**
-    * Creates a SqlSelectQuery using the given DbEntity as a root, with the given sql string 
-    * @param root the DbEntity to use as root
-    * @param sqlString the sql to execute
-    */
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(DbEntity root, String sqlString) {
         init(root, sqlString);
     }
 
     /**
-    * Creates a SqlSelectQuery with null qualifier, for the entity which uses the given class
-    * @param root the Class of objects this SqlSelectQuery is for.
-    */
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(Class rootClass) {
         this(rootClass, null);
     }
 
     /**
-     * Creates a SqlSelectQuery for the entity which uses the given class,  with the given qualifier
-     * @param root the Class of objects this SqlSelectQuery is for.
-     * @param sqlString the sql to execute
+     * Creates a SqlSelectQuery.
      */
     public SqlSelectQuery(Class rootClass, String sqlString) {
         init(rootClass, sqlString);
     }
-    /** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
+    
+    /**
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(String objEntityName) {
         this(objEntityName, null);
     }
 
-    /** Creates SqlSelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+    /**
+     * Creates a SqlSelectQuery.
+     */
     public SqlSelectQuery(String objEntityName, String sqlString) {
         init(objEntityName, sqlString);
     }

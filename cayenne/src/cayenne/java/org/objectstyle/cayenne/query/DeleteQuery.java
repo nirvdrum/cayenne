@@ -90,7 +90,7 @@ public class DeleteQuery extends QualifiedQuery {
     
      /**
      * Creates a DeleteQuery with null qualifier, for the entity which uses the given class
-     * @param root the Class of objects this DeleteQuery is for.
+     * @param rootClass the Class of objects this DeleteQuery is for.
      */
    public DeleteQuery(Class rootClass) {
     	this(rootClass, null);
@@ -98,7 +98,7 @@ public class DeleteQuery extends QualifiedQuery {
     
 	/**
 	 * Creates a DeleteQuery for the entity which uses the given class,  with the given qualifier
-	 * @param root the Class of objects this DeleteQuery is for.
+	 * @param rootClass the Class of objects this DeleteQuery is for.
      * @param qualifier an Expression indicating which objects should be deleted
      */
    public DeleteQuery(Class rootClass, Expression qualifier) {

@@ -103,17 +103,17 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public static final int POSITIVE = 21;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int ALL = 22;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int SOME = 23;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int ANY = 24;
 
@@ -169,32 +169,32 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public static final int LIST = 28;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int SUBQUERY = 29;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int COUNT = 30;
-
+    
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int AVG = 31;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int SUM = 32;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int MAX = 33;
 
     /**
-     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     * Currently not supported in Cayenne.
      */
     public static final int MIN = 34;
 

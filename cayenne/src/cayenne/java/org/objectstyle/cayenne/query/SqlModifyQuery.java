@@ -112,28 +112,29 @@ public class SqlModifyQuery extends AbstractQuery {
     }
 
     /**
-    * Creates a SqlModifyQuery with null qualifier, for the entity which uses the given class
-    * @param root the Class of objects this SqlModifyQuery is for.
-    */
+     * Creates a SqlModifyQuery.
+     */
     public SqlModifyQuery(Class rootClass) {
         this(rootClass, null);
     }
 
     /**
-     * Creates a SqlModifyQuery for the entity which uses the given class,  with the given qualifier
-     * @param root the Class of objects this SqlModifyQuery is for.
-     * @param sqlString the sql to execute
+     * Creates a SqlModifyQuery.
      */
     public SqlModifyQuery(Class rootClass, String sqlString) {
         init(rootClass, sqlString);
     }
 
-    /** Creates SqlModifyQuery with <code>objEntityName</code> parameter. */
+    /** 
+     * Creates SqlModifyQuery. 
+     */
     public SqlModifyQuery(String objEntityName) {
         this(objEntityName, null);
     }
 
-    /** Creates SqlModifyQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+    /** 
+     * Creates SqlModifyQuery. 
+     */
     public SqlModifyQuery(String objEntityName, String sqlString) {
         init(objEntityName, sqlString);
     }

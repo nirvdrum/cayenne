@@ -124,17 +124,19 @@ public class SelectQuery
     }
 
     /**
-    * Creates a SelectQuery with null qualifier, for the entity which uses the given class
-    * @param root the Class of objects this SelectQuery is for.
-    */
+     * Creates a SelectQuery that selects all objects of a given persistent class.
+     * 
+     * @param rootClass the Class of objects fetched by this query.
+     */
     public SelectQuery(Class rootClass) {
         this(rootClass, null);
     }
 
     /**
-     * Creates a SelectQuery for the entity which uses the given class,  with the given qualifier
-     * @param root the Class of objects this SelectQuery is for.
-     * @param qualifier an Expression indicating which objects should be fetched
+     * Creates a SelectQuery that selects objects of a given persistent class
+     * that match supplied qualifier.
+     * 
+     * @param rootClass the Class of objects fetched by this query.
      */
     public SelectQuery(Class rootClass, Expression qualifier) {
         init(rootClass, qualifier);

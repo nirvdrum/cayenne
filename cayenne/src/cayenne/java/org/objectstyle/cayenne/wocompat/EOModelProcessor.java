@@ -91,15 +91,14 @@ public class EOModelProcessor {
 
     /** Performs EOModel loading.
      *
-     *  @param path A path to ".eomodeld" directory.
-     *  If path doesn't end with ".eomodeld", ".eomodeld"
-     *  suffix is automatically assumed.
-     *  @param generateClientClass. If true then loading of EOModel
+     * @param path A path to ".eomodeld" directory. If path doesn't end with ".eomodeld", 
+     * ".eomodeld" suffix is automatically assumed.
+     * @param generateClientClass if true then loading of EOModel
      * is java client classes aware and the following processing will work with
      * Java client class settings of the EOModel.
      */
-    public DataMap loadEOModel(String path, boolean genereateClientClass) throws Exception {
-        EOModelHelper helper = makeHelper(path, genereateClientClass);
+    public DataMap loadEOModel(String path, boolean generateClientClass) throws Exception {
+        EOModelHelper helper = makeHelper(path, generateClientClass);
 
         // create empty map
         DataMap dataMap = helper.getDataMap();
@@ -109,7 +108,7 @@ public class EOModelProcessor {
         while (it.hasNext()) {
             String name = (String) it.next();
             // create and register entity
-            EOObjEntity e = makeEntity(helper, name, genereateClientClass);
+            EOObjEntity e = makeEntity(helper, name, generateClientClass);
             // process entity attributes
             makeAttributes(helper, e);
         }

@@ -240,15 +240,13 @@ public class DerivedDbAttribute extends DbAttribute {
 
     /**
      * Returns the expressionSpec.
-     * @return String
      */
     public String getExpressionSpec() {
         return expressionSpec;
     }
 
     /**
-     * Sets the params.
-     * @param params The expParams to set
+     * Adds parameter.
      */
     public void addParam(DbAttribute param) {
         params.add(param);
@@ -264,7 +262,6 @@ public class DerivedDbAttribute extends DbAttribute {
 
     /**
      * Sets the expressionSpec.
-     * @param expressionSpec The expressionSpec to set
      */
     public void setExpressionSpec(String expressionSpec) {
         this.expressionSpec = expressionSpec;

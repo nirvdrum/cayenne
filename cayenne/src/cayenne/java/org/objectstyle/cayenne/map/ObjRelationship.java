@@ -453,13 +453,11 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Sets the deleteRule.
+     * Sets the delete rule of the relationship.
      * 
-     * @param deleteRule
-     *            The deleteRule to set
-     * @see #getDeleteRule
-     * @throws IllegalArgumentException
-     *             if the value is not a known value.
+     * @param value New delete rule. Must be one of the constants defined in DeleteRule class.
+     * @see DeleteRule
+     * @throws IllegalArgumentException if the value is not a valid delete rule.
      */
     public void setDeleteRule(int value) {
         if ((value != DeleteRule.CASCADE)

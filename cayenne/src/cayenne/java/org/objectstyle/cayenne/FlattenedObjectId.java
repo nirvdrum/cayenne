@@ -77,12 +77,7 @@ public class FlattenedObjectId extends ObjectId {
 	protected DataObject sourceObject;
 
 	/**
-	 * Constructs a FlattenedObjectId
-	 * @param objClass the class of the DataObject this id represents
-	 * @param aSourceIdSnapshot the idsnapshot of the source object of the 
-	 * flattened relationship
-	 * @param aRelationshipName the name of the relationship on the source 
-	 * object.
+	 * Constructs a FlattenedObjectId.
 	 */
 	public FlattenedObjectId(
 		Class objClass,

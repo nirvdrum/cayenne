@@ -93,16 +93,18 @@ public class UpdateQuery extends QualifiedQuery {
     }
     
      /**
-     * Creates a UpdateQuery with null qualifier, for the entity which uses the given class
-     * @param root the Class of objects this UpdateQuery is for.
+     * Creates a UpdateQuery with null qualifier, for the entity which uses the given class.
+     * 
+     * @param rootClass the Class of objects this UpdateQuery is for.
      */
    public UpdateQuery(Class rootClass) {
     	this(rootClass, null);
     }
     
 	/**
-	 * Creates a UpdateQuery for the entity which uses the given class,  with the given qualifier
-	 * @param root the Class of objects this UpdateQuery is for.
+	 * Creates a UpdateQuery for the entity which uses the given class, with the given qualifier.
+     * 
+	 * @param rootClass the Class of objects this UpdateQuery is for.
      * @param qualifier an Expression indicating which objects will be updated
      */
    public UpdateQuery(Class rootClass, Expression qualifier) {
