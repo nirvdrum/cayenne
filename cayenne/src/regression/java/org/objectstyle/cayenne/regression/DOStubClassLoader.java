@@ -1,9 +1,8 @@
 package org.objectstyle.cayenne.regression;
 
-import org.apache.bcel.*;
-import org.apache.bcel.classfile.*;
-import org.apache.bcel.generic.*;
-import org.objectstyle.cayenne.*;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.generic.ClassGen;
 
 class DOStubClassLoader extends ClassLoader {
   private String superClassName = "org.objectstyle.cayenne.CayenneDataObject";

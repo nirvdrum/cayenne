@@ -1,12 +1,16 @@
 package org.objectstyle.cayenne.regression;
 
-import java.util.*;
-import java.io.*;
-import org.apache.log4j.*;
-import org.objectstyle.ashwood.dbutil.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Random;
+
+import org.objectstyle.ashwood.dbutil.RandomSchema;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DefaultConfiguration;
 
 public class Main {
   public static void main(String[] args) {

@@ -1,13 +1,25 @@
 package org.objectstyle.cayenne.regression;
 
-import java.util.*;
-import org.apache.commons.collections.*;
-import org.objectstyle.ashwood.random.*;
-import org.objectstyle.ashwood.dbutil.*;
-import org.objectstyle.ashwood.graph.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.apache.commons.collections.SequencedHashMap;
+import org.objectstyle.ashwood.graph.ArcIterator;
+import org.objectstyle.ashwood.graph.Digraph;
+import org.objectstyle.ashwood.graph.GraphUtils;
+import org.objectstyle.ashwood.graph.MapDigraph;
+import org.objectstyle.ashwood.random.Roulette;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 public class DataModificationRobot {
   private DataContext context;
@@ -107,7 +119,10 @@ public class DataModificationRobot {
       for (ArcIterator j = graph.incomingIterator(vertex); j.hasNext();) {
         j.next();
         String relName = (String)relIt.next();
-        Object origin = j.getOrigin();
+        
+        // Andrus: this line performs an assignment to the variable that
+        // is never used. Commented out for this reason
+        // Object origin = j.getOrigin();
         int referencedObjectIndex = ((Number)vertex).intValue();
         DataObject referencedObject = (DataObject)objects.get(referencedObjectIndex);
         referencingObject.setToOneTarget(relName, referencedObject, true);

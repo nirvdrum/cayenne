@@ -64,26 +64,28 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 public class InsertBatchQueryBuilder extends BatchQueryBuilder {
-  public InsertBatchQueryBuilder(DbAdapter adapter) {
-    super.setAdapter(adapter);
-  }
+    public InsertBatchQueryBuilder(DbAdapter adapter) {
+        super.setAdapter(adapter);
+    }
 
-  public String query(BatchQuery batch) {
-    String table = batch.getMetadata().getFullyQualifiedName();
-    List dbAttributes = batch.getDbAttributes();
-    StringBuffer query = new StringBuffer("INSERT INTO ");
-    query.append(table).append(" (");
-    for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
-      DbAttribute attribute = (DbAttribute)i.next();
-      query.append(attribute.getName());
-      if (i.hasNext()) query.append(", ");
+    public String query(BatchQuery batch) {
+        String table = batch.getMetadata().getFullyQualifiedName();
+        List dbAttributes = batch.getDbAttributes();
+        StringBuffer query = new StringBuffer("INSERT INTO ");
+        query.append(table).append(" (");
+        for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
+            DbAttribute attribute = (DbAttribute) i.next();
+            query.append(attribute.getName());
+            if (i.hasNext())
+                query.append(", ");
+        }
+        query.append(") VALUES (");
+        for (int i = 0; i < dbAttributes.size(); i++) {
+            if (i > 0)
+                query.append(", ");
+            query.append('?');
+        }
+        query.append(')');
+        return query.toString();
     }
-    query.append(") VALUES (");
-    for (int i = 0; i < dbAttributes.size(); i++) {
-      if (i > 0) query.append(", ");
-      query.append('?');
-    }
-    query.append(')');
-    return query.toString();
-  }
 }
