@@ -121,18 +121,25 @@ sub get_source() {
 		mkpath($cayenne_src, 1, 0711) or die_with_email("Can't create build directory: $!\n");
 		chdir $cayenne_src or die_with_email("Can't change to $cayenne_src: $!\n");
 
-		# checkout via anonymous CVS
-		# assume anonymous password is already in ~/.cvspass
-		my $status = run_command(
-		"cvs" . 
-		" -z3" .
-		" -q" .
-		" -d$opt_d" .
-		" export" .
-		" -D" .
-		" \"1 minute ago\"" .
-		" cayenne");
-		die_with_email("CVS checkout failed, return status: $status\n") if $status;
+		my $status = 0;
+                my $i = 0;
+                 
+                # cvs checkouts are unreliable...give it a few tries
+		for($i = 0; $i < 5; $i++) {
+                	$status = run_command(
+			"cvs" . 
+			" -z3" .
+			" -q" .
+			" -d$opt_d" .
+			" export" .
+			" -D" .
+			" \"1 minute ago\"" .
+			" cayenne");
+                    last unless $status;
+                    print_line("CVS checkout failed: $status\n");
+                    sleep 5;
+                }
+		die_with_email("CVS checkout failed, return status: $status, attempts: $i\n") if $status;
 	}
 }
 
