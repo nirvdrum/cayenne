@@ -98,6 +98,40 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(10, objects.size());
     }
 
+    /** Test how "like ignore case" works when using uppercase parameter. */
+    public void testSelectLikeIgnoreCaseObjects1() throws Exception {
+        query.setObjEntityName("Artist");
+        Expression qual =
+            ExpressionFactory.binaryPathExp(
+                Expression.LIKE_IGNORE_CASE,
+                "artistName",
+                "ARTIST%");
+        query.setQualifier(qual);
+        performQuery();
+
+        // check query results
+        ArrayList objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(_artistCount, objects.size());
+    }
+
+    /** Test how "like ignore case" works when using lowercase parameter. */
+    public void testSelectLikeIgnoreCaseObjects2() throws Exception {
+        query.setObjEntityName("Artist");
+        Expression qual =
+            ExpressionFactory.binaryPathExp(
+                Expression.LIKE_IGNORE_CASE,
+                "artistName",
+                "artist%");
+        query.setQualifier(qual);
+        performQuery();
+
+        // check query results
+        ArrayList objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(_artistCount, objects.size());
+    }
+
     protected void populateTables() throws java.lang.Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
@@ -105,7 +139,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
         try {
             conn.setAutoCommit(false);
-            
+
             PreparedStatement stmt = conn.prepareStatement(insertArtist);
             long dateBase = System.currentTimeMillis();
 

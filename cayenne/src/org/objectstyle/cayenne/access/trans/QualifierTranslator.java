@@ -134,7 +134,7 @@ public class QualifierTranslator
                 qualBuf.append(" LIKE ");
                 break;
             case Expression.LIKE_IGNORE_CASE :
-                qualBuf.append(") LIKE ");
+                qualBuf.append(") LIKE UPPER(");
                 break;
             case Expression.ADD :
                 qualBuf.append(" + ");
@@ -202,6 +202,8 @@ public class QualifierTranslator
     /** Opportunity to close a bracket */
     public void endBinaryNode(Expression node, Expression parentNode) {
         if (parenthesisNeeded(node, parentNode))
+            qualBuf.append(')');
+        if (node.getType() == Expression.LIKE_IGNORE_CASE)
             qualBuf.append(')');
     }
 

@@ -109,7 +109,7 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
         e1.setOperand(0, e10);
         e1.setOperand(1, "a%");
         return new TstExpressionCase("Exhibit",
-        e1, "UPPER(<ta.>GALLERY_NAME) LIKE ?",
+        e1, "UPPER(<ta.>GALLERY_NAME) LIKE UPPER(?)",
         2, 2);
     }
     
