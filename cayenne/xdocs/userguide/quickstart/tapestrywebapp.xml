@@ -27,7 +27,6 @@
     		<li><a href="#2">Prepare Tutorial Database.</a></li>
     		<li><a href="#3">Setup Cayenne Configuration Files.</a></li>
     		<li><a href="#4">Create Database Primary Key Support.</a></li>
-    		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
     		<li><a href="#6">Compile and Deploy the Application.</a></li>
     	</ul>
     	
@@ -100,7 +99,7 @@
     	</subsection>
     	
     	
-    	<subsection name="3.44.4 Create Database Primary Key Support." anchor="4">
+    	<subsection name="3.4.4 Create Database Primary Key Support." anchor="4">
     	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
     	objects for primary key support by following these  
     	<a href="../../modelerguide/pksupport.html">instructions</a>. Skip this step if it was already 
