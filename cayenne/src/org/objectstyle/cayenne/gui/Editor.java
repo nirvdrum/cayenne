@@ -169,6 +169,7 @@ implements ActionListener
 
         importDbMenu.addActionListener(this);
         generateMenu.addActionListener(this);
+        aboutMenu.addActionListener(this);
 
 		createDomainBtn.addActionListener(this);
 		createDataMapBtn.addActionListener(this);
@@ -383,6 +384,8 @@ implements ActionListener
             generateClasses();
         } else if (src == exitMenu) {
         	exitEditor();
+        } else if (src == aboutMenu) {
+        	AboutDialog win = new AboutDialog(this);
         } else if (lastOpenProjMenus.contains(src)) {
         	openProject(((JMenuItem)src).getText());
         }
