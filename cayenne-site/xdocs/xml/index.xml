@@ -6,16 +6,11 @@
         <!-- News section -->
         <section name="Cayenne News">
         
-         <p><u><i>[March 4, 2004]</i></u> <strong>M4 - New Cayenne 1.1 Milestone  Release</strong></p>
-         <p>This release fixes serious bugs found in M3, adds suppport for to-one relationships with an FK column
-         target and implements performance enhancements for to-many relationships.
-         For details see <a href="RELEASE-NOTES.txt">release notes</a> and <a href="UPGRADE.txt">upgrade instructions</a>.
-         </p>
-         
-        <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
-         <p>Cayenne 1.0.6 is released. It contains extended implementation of in-memory Expressions
-         evaluation and numerous bug fixes. For details see <a href="RELEASE-NOTES-1.0.6.txt">Release notes</a>. 
-         Release can be downloaded from <a href="download.html">here</a>.
+         <p><u><i>[April 14, 2004]</i></u> <strong>M5 - Cayenne 1.1 Milestone  Release</strong></p>
+         <p>This release includes two major new features - optimistic locking and entity inheritance, and also
+         a number of bug fixes and other enhancements. For details see <a href=
+         "release-notes/RELEASE-NOTES-1.1M5.txt">release notes</a> and 
+         <a href="upgrade/UPGRADE-1.1M5.txt">upgrade instructions</a>.
          </p>
          
          <p><u><i>[November 1, 2003]</i></u> <strong>Cayenne in "The Best Freeware And Shareware" of DB Magazine, Japan</strong></p>

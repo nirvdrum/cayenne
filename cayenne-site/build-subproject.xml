@@ -3,14 +3,14 @@
 <!-- ================================================= -->
 <!-- Common documentation tasks. -->
 <!-- ================================================= -->
-<project default="userguide">
+<project default="site">
 
     <target name="site" depends="doc,resources,api,tutorials,release-notes"/>
     
     <!-- ============================================= -->
     <!-- Builds a set of project documentation -->
     <!-- ============================================= -->
-    <target name="doc" depends="check-properties,assemble-project-xml">
+    <target name="doc" depends="check-properties,assemble-project-xml" if="doc.include">
     	<!-- Anakia is dumb as far as path resolution... so copy all XML files first -->
     	<copy todir="${build}/${subproject.name}/in">
 			<fileset dir="${cayenne.location}/xdocs" includes="${doc.include}"/>
@@ -113,11 +113,6 @@
     	<fail unless="subproject.name">
     	
 **** FATAL: No "subproject.name" property specified.
-    	</fail>
-    	
-		<fail unless="doc.include">
-    	
-**** FATAL: No "doc.include" property specified.
     	</fail>
     	
 	<fail unless="doc.root">

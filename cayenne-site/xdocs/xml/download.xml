@@ -17,14 +17,14 @@
         	
         	<subsection name="Stable Release -  1.0">
         	    <ul>
-                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-src-1.0.6.tar.gz">Cayenne</a></li>
+                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-src-1.0.7.tar.gz">Cayenne</a></li>
 					<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-src-1.0.3.tar.gz">Examples</a></li>
 				</ul>
         	</subsection>
         	
         	 <subsection name="Latest Development Release -  1.1">
         	    <ul>
-                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-src-1.1M4.tar.gz">Cayenne</a></li>
+                	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1M5.tar.gz">Cayenne</a></li>
 					<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-src-1.1a-pre2.tar.gz">Examples</a></li>
 					<li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
 				</ul>
@@ -37,8 +37,8 @@
             </p>
             
             <panel name="Cayenne Examples Note:">
-            Cayenne Examples documentation is bundled with Cayenne and is available on the website.
-            Examples code is downloadable separately, following the link above.
+            Cayenne Examples documentation is included in the main Cayenne download and is also available 
+            from the website. Examples code is downloadable separately, following the link above.
             </panel>
         </section>
     </body>

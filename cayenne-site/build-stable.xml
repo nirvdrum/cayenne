@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!-- Stable release buildfile. Called from build.xml. -->
+<!-- ================================================= -->
+<project default="site">
+    
+    <!-- ============================================= -->
+    <!-- Deploys Cayenne web site locally -->
+    <!-- ============================================= -->
+    <target name="site" depends="subproject"/>
+    
+	<!-- ============================================= -->
+    <!-- Assembles all documents related to the latest Cayenne. -->
+    <!-- ============================================= -->
+	<target name="subproject" depends="check-stable">
+		<!-- Only build API. -->
+    	<ant antfile="build-subproject.xml" target="api">
+    		<property name="cayenne.location" value="${cayenne.stable}"/>
+    		<property name="subproject.dist" value="${cayenne.stable}/dist/cayenne-${cayenne.stable.version}"/>
+    		<property name="subproject.name" value="cayenne-stable"/>
+    		<property name="doc.root" value="${dist}/${cayenne.stable.subdir}"/>
+    	</ant>
+    </target>
+    
+    <target name="check-stable">
+    	<available file="${cayenne.stable}" property="cayenne.stable.present"/>
+    	<fail unless="cayenne.stable.present">
+    	
+**** FATAL: No valid Stable Cayenne checkout. "cayenne.stable" property: "${cayenne.stable}"
+    	</fail>
+    	
+    	<fail unless="cayenne.stable.subdir">
+    	
+**** FATAL: "cayenne.stable.subdir" is undefined.
+    	</fail>
+    </target>
+</project>

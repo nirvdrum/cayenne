@@ -4,6 +4,12 @@
 
     <body>        
         <section name="Cayenne News Archive">
+        
+		<p><u><i>[March 4, 2004]</i></u> <strong>M4 - New Cayenne 1.1 Milestone  Release</strong></p>
+         <p>This release fixes serious bugs found in M3, adds suppport for to-one relationships with an FK column
+         target and implements performance enhancements for to-many relationships.
+         </p>
+         
          <p><u><strong><i>February 29, 2004</i></strong></u> <strong>M3 - New Cayenne 1.1 Milestone  Release</strong></p>
          <p>This release features major enhancement of Expressions API and allows to build SelectQueries using CayenneModeler.
          </p>
@@ -18,6 +24,11 @@
          <li>MS SQL Server Adapter</li>
          <li>various bug fixes</li>
          </ul>
+         </p>
+        
+        <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
+         <p>Cayenne 1.0.6 is released. It contains extended implementation of in-memory Expressions
+         evaluation and numerous bug fixes.
          </p>
          
         <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne 1.0.3 Release</strong></u></p>
