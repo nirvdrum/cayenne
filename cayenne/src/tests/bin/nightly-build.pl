@@ -92,6 +92,16 @@ if($opt_u) {
         my $upload_dir = "www.objectstyle.org:$rel_path/$year-$mon-$mday";
 	run_command("chmod -R 755 $test_reports");
 	run_command("rsync -rltp -e ssh --delete --exclude='*.xml' $test_reports/ $upload_dir/reports");
+
+	# Upload status information
+	my $footer;
+	if($test_failure) {
+		$footer = "Nightly build failed some tests, see <a href=\"reports\">test reports</a> for details.";
+	}
+	else {
+		$footer = "Nightly build passed all tests.";
+	}
+	run_command("ssh www.objectstyle.org echo \"$footer\" > $rel_path/$label/FOOTER.html");
 	
 
 	# Upload build even if it failed... 
@@ -102,6 +112,8 @@ if($opt_u) {
 	$status = 
 	run_command("scp $gz_files[0] $upload_dir/");
 	die_with_email("Can't upload release, return status: $status\n") if $status;
+
+	# 
 }
 
 die_with_email("Unit tests failed, return status: $status\n") if $test_failure;
