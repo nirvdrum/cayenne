@@ -1,5 +1,3 @@
-
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -56,6 +54,8 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
+package org.objectstyle.cayenne.access;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,9 +63,12 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.query.Query;
 
 
-/** Simple implementation of OperationObserver interface. 
- *  Useful as a superclass of other implementations of OperationObserver.
- *  This class would collect useful ststistics about the operation process. 
+/** 
+ * Simple implementation of OperationObserver interface. 
+ * Useful as a superclass of other implementations of OperationObserver.
+ * This class would collect useful ststistics about the operation process. 
+ * 
+ * @author Andrei Adamchik
  */
 public class DefaultOperationObserver implements OperationObserver {
     static Logger logObj = Logger.getLogger(DefaultOperationObserver.class.getName());
