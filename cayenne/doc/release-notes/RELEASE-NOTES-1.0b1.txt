@@ -15,3 +15,8 @@ to make API friendlier.
 2. Added convenience constructors to ObjectId
 
 3. Added file logging to CayenneModeler
+
+4. Implemented (limited) in-memory expression evaluation
+and array filtering
+
+5. Added "fetch limit" to select queries.

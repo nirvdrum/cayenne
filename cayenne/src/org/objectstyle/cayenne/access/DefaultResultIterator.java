@@ -95,14 +95,14 @@ public class DefaultResultIterator implements ResultIterator {
 	public DefaultResultIterator(
 		PreparedStatement prepStmt,
 		DbAdapter adapter,
-		SelectQueryAssembler queryAssembler)
+		SelectQueryAssembler assembler)
 		throws SQLException, CayenneException {
 
 		this.prepStmt = prepStmt;
-		this.connection = queryAssembler.getCon();
+		this.connection = assembler.getCon();
 		this.resultSet = prepStmt.executeQuery();
-		this.rowDescriptor = queryAssembler.getSnapshotDesc(resultSet);
-		String[] rowTypes = queryAssembler.getResultTypes(resultSet);
+		this.rowDescriptor = assembler.getSnapshotDesc(resultSet);
+		String[] rowTypes = assembler.getResultTypes(resultSet);
 
 		resultSize = rowDescriptor.length;
 		converters = new ExtendedType[resultSize];
@@ -111,6 +111,13 @@ public class DefaultResultIterator implements ResultIterator {
 			converters[i] = typeMap.getRegisteredType(rowTypes[i]);
 		}
 
+		init(assembler);
+	}
+	
+	/**
+	 * Reads the first row of data.
+	 */
+	protected void init(SelectQueryAssembler assembler) throws SQLException, CayenneException {
 		checkNextRow();
 	}
 

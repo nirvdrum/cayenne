@@ -65,6 +65,11 @@ public class SqlSelectQueryTst extends TestCase {
         super(name);
     }
 
+	public void testFetchLimit1() throws Exception {
+		SqlSelectQuery q = new SqlSelectQuery();
+		q.setFetchLimit(10);
+		assertEquals(10, q.getFetchLimit());
+	}
 
     public void testSqlString() throws Exception {
         SqlSelectQuery q1 = new SqlSelectQuery();

@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 public class SqlSelectQuery extends Query {
     protected String sqlString;
     protected ObjAttribute[] resultDesc;
+    protected int fetchLimit;
         
     /** Creates empty SqlSelectQuery. */
     public SqlSelectQuery() {}
@@ -105,4 +106,23 @@ public class SqlSelectQuery extends Query {
     public ObjAttribute[] getResultDesc() {
         return resultDesc;
     }
+    
+	/**
+	 * Returns the fetchLimit.
+	 * @return int
+	 */
+	public int getFetchLimit() {
+		return fetchLimit;
+	}
+
+
+	/**
+	 * Sets the fetchLimit.
+	 * @param fetchLimit The fetchLimit to set
+	 */
+	public void setFetchLimit(int fetchLimit) {
+		this.fetchLimit = fetchLimit;
+	}
+
+
 }

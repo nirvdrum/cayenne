@@ -69,6 +69,11 @@ public class SelectQueryBasicsTst extends TestCase {
 		q = new SelectQuery();
 	}
 
+	public void testFetchLimit1() throws Exception {
+		q.setFetchLimit(5);
+		assertEquals(5, q.getFetchLimit());
+	}
+	
 	public void testAddOrdering1() throws Exception {
 		Ordering ord = new Ordering();
 		q.addOrdering(ord);

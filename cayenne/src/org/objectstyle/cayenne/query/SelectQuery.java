@@ -69,6 +69,7 @@ public class SelectQuery extends QualifiedQuery {
 	protected ArrayList prefetches = new ArrayList();
 	protected boolean distinct;
 	protected boolean fetchingDataRows;
+	protected int fetchLimit;
 
 	/** Creates empty SelectQuery. */
 	public SelectQuery() {
@@ -188,4 +189,24 @@ public class SelectQuery extends QualifiedQuery {
 	public void setFetchingDataRows(boolean flag) {
 		this.fetchingDataRows = flag;
 	}
+	
+	
+	/**
+	 * Returns the fetchLimit.
+	 * @return int
+	 */
+	public int getFetchLimit() {
+		return fetchLimit;
+	}
+
+
+	/**
+	 * Sets the fetchLimit.
+	 * @param fetchLimit The fetchLimit to set
+	 */
+	public void setFetchLimit(int fetchLimit) {
+		this.fetchLimit = fetchLimit;
+	}
+
+
 }

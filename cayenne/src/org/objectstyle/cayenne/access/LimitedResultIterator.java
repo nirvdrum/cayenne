@@ -52,40 +52,60 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
-package org.objectstyle.cayenne.access.trans;
+ */
+package org.objectstyle.cayenne.access;
 
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
-
-/** 
- * Abstract superclass of Query translators.
- * Defines callback methods for helper classes 
- * that are delegated tasks of building query parts. 
+/**
+ * ResultIterator that supports fetch limit.
  * 
  * @author Andrei Adamchik
  */
-public abstract class SelectQueryAssembler extends QueryAssembler {
+public class LimitedResultIterator extends DefaultResultIterator {
+	static Logger logObj = Logger.getLogger(LimitedResultIterator.class.getName());
+	
+	protected int fetchedSoFar;
+	protected int fetchLimit;
 
-    /** 
-     * Returns an ordered array of DbAttributes that describe the
-     * result columns in the in the ResultSet.
-     */
-    public abstract DbAttribute[] getSnapshotDesc(ResultSet rs);
+	/**
+	 * Constructor for LimitedResultIterator.
+	 * 
+	 * @param prepStmt
+	 * @param adapter
+	 * @param queryAssembler
+	 * @throws SQLException
+	 * @throws CayenneException
+	 */
+	public LimitedResultIterator(
+		PreparedStatement prepStmt,
+		DbAdapter adapter,
+		SelectQueryAssembler assembler)
+		throws SQLException, CayenneException {
+			
+		super(prepStmt, adapter, assembler);
+	}
 
-    /** 
-     * Returns ordered array of Java class names that should be used
-     * for values in the ResultSet.
-     */
-    public abstract String[] getResultTypes(ResultSet rs);
-    
-    /** 
-     * Returns a maximum number of rows that the underlying
-     * query should fetch. If the value is less than or equal to
-     * zero, all rows will be returned.
-     */
-    public abstract int getFetchLimit();
+	/**
+	 * Reads the first row of data.
+	 */
+	protected void init(SelectQueryAssembler assembler) throws SQLException, CayenneException {
+		this.fetchLimit = assembler.getFetchLimit();
+		super.init(assembler);
+	}
+	
+	
+	protected void checkNextRow() throws SQLException, CayenneException {
+		dataRow = null;		
+		if (fetchedSoFar < fetchLimit && resultSet.next()) {
+			readDataRow();
+			fetchedSoFar++;
+		}
+	}
 }

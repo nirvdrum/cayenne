@@ -95,6 +95,10 @@ public class SelectTranslator extends SelectQueryAssembler {
 		return columnList;
 	}
 
+	public int getFetchLimit() {
+        return getSelectQuery().getFetchLimit();
+	}
+	
 	/** 
 	 * Returns an ordered list of DbAttributes that describe the
 	 * result columns in the in the ResultSet. ResultSet column names are ignored, 

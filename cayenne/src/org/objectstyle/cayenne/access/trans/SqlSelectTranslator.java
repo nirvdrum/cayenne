@@ -72,123 +72,126 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
   * @author Andrei Adamchik
   */
 public class SqlSelectTranslator extends SelectQueryAssembler {
-    static Logger logObj = Logger.getLogger(SqlSelectTranslator.class.getName());
+	static Logger logObj =
+		Logger.getLogger(SqlSelectTranslator.class.getName());
 
-    public String createSqlString() throws java.lang.Exception {
-        return getRawQuery().getSqlString();
-    }
+	public String createSqlString() throws java.lang.Exception {
+		return getRawQuery().getSqlString();
+	}
 
-    private final SqlSelectQuery getRawQuery() {
-        return (SqlSelectQuery) query;
-    }
+	public int getFetchLimit() {
+        return getRawQuery().getFetchLimit();
+	}
+	
+	private final SqlSelectQuery getRawQuery() {
+		return (SqlSelectQuery) query;
+	}
 
-    /**     
-     * Returns an ordered array of DbAttributes that describe the
-     * result columns in the in the ResultSet. Uses ResultSet info. 
-     */
-    public DbAttribute[] getSnapshotDesc(ResultSet rs) {
-        ObjAttribute[] attrs = getRawQuery().getResultDesc();
-        if (attrs == null || attrs.length == 0) {
-            return getSnapshotLabelsFromMetadata(rs);
-        }
+	/**     
+	 * Returns an ordered array of DbAttributes that describe the
+	 * result columns in the in the ResultSet. Uses ResultSet info. 
+	 */
+	public DbAttribute[] getSnapshotDesc(ResultSet rs) {
+		ObjAttribute[] attrs = getRawQuery().getResultDesc();
+		if (attrs == null || attrs.length == 0) {
+			return getSnapshotLabelsFromMetadata(rs);
+		}
 
-        int len = attrs.length;
-        DbAttribute[] desc = new DbAttribute[len];
-        for (int i = 0; i < len; i++) {
-            desc[i] = attrs[i].getDbAttribute();
-        }
-        return desc;
-    }
+		int len = attrs.length;
+		DbAttribute[] desc = new DbAttribute[len];
+		for (int i = 0; i < len; i++) {
+			desc[i] = attrs[i].getDbAttribute();
+		}
+		return desc;
+	}
 
-    /** 
-     * Returns ordered array of DbAttributes for the result set.
-     * This is a failover method to obtain result description when 
-     * query has no description data. It is called internally from 
-     * "getSnapshotDesc".
-     * 
-     * <p><i>Note that DbAttributes created by this method do not belong to
-     * any entity and only have their name and type initialized.</i></p>
-     */
-    public DbAttribute[] getSnapshotLabelsFromMetadata(ResultSet rs) {
-        try {
-            ResultSetMetaData md = rs.getMetaData();
-            int len = md.getColumnCount();
-            if (len == 0) {
-                throw new CayenneRuntimeException("No columns in ResultSet.");
-            }
+	/** 
+	 * Returns ordered array of DbAttributes for the result set.
+	 * This is a failover method to obtain result description when 
+	 * query has no description data. It is called internally from 
+	 * "getSnapshotDesc".
+	 * 
+	 * <p><i>Note that DbAttributes created by this method do not belong to
+	 * any entity and only have their name and type initialized.</i></p>
+	 */
+	public DbAttribute[] getSnapshotLabelsFromMetadata(ResultSet rs) {
+		try {
+			ResultSetMetaData md = rs.getMetaData();
+			int len = md.getColumnCount();
+			if (len == 0) {
+				throw new CayenneRuntimeException("No columns in ResultSet.");
+			}
 
-            DbAttribute[] desc = new DbAttribute[len];
-            for (int i = 0; i < len; i++) {
+			DbAttribute[] desc = new DbAttribute[len];
+			for (int i = 0; i < len; i++) {
 
-                // figure out column name
-                String name = md.getColumnLabel(i + 1);
-                if (name == null || name.length() == 0) {
-                    name = md.getColumnName(i + 1);
+				// figure out column name
+				String name = md.getColumnLabel(i + 1);
+				if (name == null || name.length() == 0) {
+					name = md.getColumnName(i + 1);
 
-                    if (name == null || name.length() == 0) {
-                        name = "column_" + (i + 1);
-                    }
-                }
+					if (name == null || name.length() == 0) {
+						name = "column_" + (i + 1);
+					}
+				}
 
-                desc[i] = new DbAttribute();
-                desc[i].setName(name);
-                desc[i].setType(md.getColumnType(i + 1));
-            }
-            return desc;
-        }
-        catch (SQLException sqex) {
-            throw new CayenneRuntimeException("Error reading metadata.", sqex);
-        }
-    }
+				desc[i] = new DbAttribute();
+				desc[i].setName(name);
+				desc[i].setType(md.getColumnType(i + 1));
+			}
+			return desc;
+		} catch (SQLException sqex) {
+			throw new CayenneRuntimeException("Error reading metadata.", sqex);
+		}
+	}
 
-    /** Returns ordered list of Java class names that
-      *  should be used for fetched values. */
-    public String[] getResultTypes(ResultSet rs) {
-        ObjAttribute[] attrs = getRawQuery().getResultDesc();
-        if (attrs == null || attrs.length == 0)
-            return getResultTypesFromMetadata(rs);
+	/** Returns ordered list of Java class names that
+	  *  should be used for fetched values. */
+	public String[] getResultTypes(ResultSet rs) {
+		ObjAttribute[] attrs = getRawQuery().getResultDesc();
+		if (attrs == null || attrs.length == 0)
+			return getResultTypesFromMetadata(rs);
 
-        int len = attrs.length;
-        String[] types = new String[len];
-        for (int i = 0; i < len; i++) {
-            types[i] = attrs[i].getType();
-        }
-        return types;
-    }
+		int len = attrs.length;
+		String[] types = new String[len];
+		for (int i = 0; i < len; i++) {
+			types[i] = attrs[i].getType();
+		}
+		return types;
+	}
 
-    /** Returns ordered list of Java class names that
-      * should be used for fetched values according to default Java
-      * class to JDBC type mapping. This is a failover method to
-      * obtain Java types used when query has no such data. */
-    public String[] getResultTypesFromMetadata(ResultSet rs) {
-        try {
-            ResultSetMetaData md = rs.getMetaData();
-            int len = md.getColumnCount();
-            if (len == 0)
-                throw new CayenneRuntimeException("No columns in ResultSet.");
+	/** Returns ordered list of Java class names that
+	  * should be used for fetched values according to default Java
+	  * class to JDBC type mapping. This is a failover method to
+	  * obtain Java types used when query has no such data. */
+	public String[] getResultTypesFromMetadata(ResultSet rs) {
+		try {
+			ResultSetMetaData md = rs.getMetaData();
+			int len = md.getColumnCount();
+			if (len == 0)
+				throw new CayenneRuntimeException("No columns in ResultSet.");
 
-            String[] types = new String[len];
-            for (int i = 0; i < len; i++) {
-                int sqlType = md.getColumnType(i + 1);
-                types[i] = TypesMapping.getJavaBySqlType(sqlType);
-            }
-            return types;
-        }
-        catch (SQLException sqex) {
-            logObj.log(Level.SEVERE, "Error", sqex);
-            throw new CayenneRuntimeException("Error reading metadata.", sqex);
-        }
-    }
+			String[] types = new String[len];
+			for (int i = 0; i < len; i++) {
+				int sqlType = md.getColumnType(i + 1);
+				types[i] = TypesMapping.getJavaBySqlType(sqlType);
+			}
+			return types;
+		} catch (SQLException sqex) {
+			logObj.log(Level.SEVERE, "Error", sqex);
+			throw new CayenneRuntimeException("Error reading metadata.", sqex);
+		}
+	}
 
-    public String aliasForTable(DbEntity dbEnt) {
-        throw new RuntimeException("aliases not supported");
-    }
+	public String aliasForTable(DbEntity dbEnt) {
+		throw new RuntimeException("aliases not supported");
+	}
 
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        throw new RuntimeException("db relationships not supported");
-    }
+	public void dbRelationshipAdded(DbRelationship dbRel) {
+		throw new RuntimeException("db relationships not supported");
+	}
 
-    public boolean supportsTableAliases() {
-        return false;
-    }
+	public boolean supportsTableAliases() {
+		return false;
+	}
 }

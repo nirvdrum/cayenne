@@ -70,6 +70,17 @@ public class SelectQueryTst extends SelectQueryBase {
         super(name);
     }
 
+   public void testFetchLimit() throws java.lang.Exception {
+        query.setObjEntityName("Artist");
+        query.setFetchLimit(7);
+        performQuery();
+
+        // check query results
+        ArrayList objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(7, objects.size());
+    }
+    
     public void testSelectAllObjects() throws java.lang.Exception {
         query.setObjEntityName("Artist");
         performQuery();

@@ -333,7 +333,15 @@ public class DataNode implements QueryEngine {
 
 		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
 		DefaultResultIterator it =
-			new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+			(assembler.getFetchLimit() > 0)
+				? new LimitedResultIterator(
+					prepStmt,
+					this.getAdapter(),
+					assembler)
+				: new DefaultResultIterator(
+					prepStmt,
+					this.getAdapter(),
+					assembler);
 
 		// note that we don't need to close ResultIterator
 		// since "dataRows" will do it internally

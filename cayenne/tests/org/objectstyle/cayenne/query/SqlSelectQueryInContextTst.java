@@ -61,61 +61,76 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class SqlSelectQueryInContextTst extends SelectQueryBase {
-    private static final int _artistCount = 10;
+	private static final int _artistCount = 10;
 
-    protected SqlSelectQuery q;
+	protected SqlSelectQuery q;
 
-    public SqlSelectQueryInContextTst(String name) {
-        super(name);
-    }
+	public SqlSelectQueryInContextTst(String name) {
+		super(name);
+	}
 
-    public void setUp() throws java.lang.Exception {
-        super.setUp();
-        q = new SqlSelectQuery();
-    }
+	public void setUp() throws java.lang.Exception {
+		super.setUp();
+		q = new SqlSelectQuery();
+	}
 
-    protected Query getQuery() {
-        return q;
-    }
+	protected Query getQuery() {
+		return q;
+	}
 
-    public void testSelect1() throws java.lang.Exception {
+	public void testSelect1() throws java.lang.Exception {
 
-        q.setObjEntityName("Artist");
-        q.setSqlString("select count(*)  from ARTIST");
-        performQuery();
+		q.setObjEntityName("Artist");
+		q.setSqlString("select count(*)  from ARTIST");
+		performQuery();
 
-        // check query results
-        ArrayList objects = opObserver.objectsForQuery(q);
-        assertNotNull(objects);
-        assertEquals(1, objects.size());
-        Map countMap = (Map) objects.get(0);
-        Object count = countMap.values().iterator().next();
-        assertEquals(_artistCount, ((Number) count).intValue());
-    }
+		// check query results
+		ArrayList objects = opObserver.objectsForQuery(q);
+		assertNotNull(objects);
+		assertEquals(1, objects.size());
+		Map countMap = (Map) objects.get(0);
+		Object count = countMap.values().iterator().next();
+		assertEquals(_artistCount, ((Number) count).intValue());
+	}
 
-    protected void populateTables() throws java.lang.Exception {
-        String insertArtist =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+	public void testSelect2() throws java.lang.Exception {
+		// use fetch limit
+		q.setObjEntityName("Artist");
+		q.setSqlString("select ARTIST_NAME from ARTIST");
+		q.setFetchLimit(5);
+		performQuery();
 
-        try {
-            conn.setAutoCommit(false);
-            
-            PreparedStatement stmt = conn.prepareStatement(insertArtist);
-            long dateBase = System.currentTimeMillis();
+		// check query results
+		ArrayList objects = opObserver.objectsForQuery(q);
+		assertNotNull(objects);
+		assertEquals(5, objects.size());
+	}
+	
 
-            for (int i = 1; i <= _artistCount; i++) {
-                stmt.setInt(1, i);
-                stmt.setString(2, "artist" + i);
-                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
-                stmt.executeUpdate();
-            }
+	protected void populateTables() throws java.lang.Exception {
+		String insertArtist =
+			"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+		Connection conn = org.objectstyle.TestMain.getSharedConnection();
 
-            stmt.close();
-            conn.commit();
-        }
-        finally {
-            conn.close();
-        }
-    }
+		try {
+			conn.setAutoCommit(false);
+
+			PreparedStatement stmt = conn.prepareStatement(insertArtist);
+			long dateBase = System.currentTimeMillis();
+
+			for (int i = 1; i <= _artistCount; i++) {
+				stmt.setInt(1, i);
+				stmt.setString(2, "artist" + i);
+				stmt.setDate(
+					3,
+					new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+				stmt.executeUpdate();
+			}
+
+			stmt.close();
+			conn.commit();
+		} finally {
+			conn.close();
+		}
+	}
 }
