@@ -107,7 +107,7 @@ public class DbGenerator {
 	protected void resetToDefaults() {
 		this.shouldDropTables = false;
 		this.shouldDropPKSupport = false;
-		this.shouldCreatePKSupport = false;
+		this.shouldCreatePKSupport = true;
 		this.shouldCreateTables = true;
 		this.shouldCreateFKConstraints = true;
 	}
