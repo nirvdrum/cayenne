@@ -330,12 +330,13 @@ public class ResourceLocator {
 			Iterator pi = this.additionalFilesystemPaths.iterator();
 			while (pi.hasNext()) {
 				File f = new File((File)pi.next(), name);
-				if (f.isAbsolute() && f.exists()) {
+				logObj.debug("searching for: " + f.getAbsolutePath());
+				if (f.exists()) {
 					try {
 						return f.toURL();
 					} catch (MalformedURLException ex) {
 						// ignoring
-						logObj.debug("Malformed url, ignoring.", ex);
+						logObj.debug("Malformed URL, ignoring.", ex);
 					}
 				}
 			}
@@ -352,6 +353,7 @@ public class ResourceLocator {
 				Iterator cpi = this.additionalClassPaths.iterator();
 				while (cpi.hasNext()) {
 					String fullName = cpi.next() + "/" + name;
+					logObj.debug("searching for: " + fullName);
 					url = findURLInClassLoader(fullName, classLoader);
 					if (url != null) {
 						return url;
