@@ -62,7 +62,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -113,10 +112,11 @@ public class DataContext implements QueryEngine, Serializable {
 
     //Will not be directly serialized - see read/writeObject for details
     protected transient QueryEngine parent;
+    protected transient ObjectStore objectStore = new ObjectStore();
 
     //Must be deserialized slightly differently - see read/writeObject
-    protected transient Map registeredMap = Collections.synchronizedMap(new HashMap());
-    protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
+    // protected transient Map registeredMap = Collections.synchronizedMap(new HashMap());
+    // protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
     protected RelationshipDataSource relDataSource = new RelationshipDataSource(this);
 
     public DataContext() {
@@ -145,6 +145,10 @@ public class DataContext implements QueryEngine, Serializable {
     public void setParent(QueryEngine parent) {
         this.parent = parent;
     }
+    
+    public ObjectStore getObjectStore() {
+    	return objectStore;
+    }
 
     /** 
      * Returns a collection of objects that are registered
@@ -152,11 +156,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Collection is returned by copy and can be modified by caller.
      */
     public Collection registeredObjects() {
-        ArrayList registeredObjects = null;
-        synchronized (registeredMap) {
-            registeredObjects = new ArrayList(registeredMap.values());
-        }
-        return registeredObjects;
+        return objectStore.getObjects();
     }
 
     /**
@@ -170,20 +170,7 @@ public class DataContext implements QueryEngine, Serializable {
      * may be needed.</i></p>
      */
     public boolean hasChanges() {
-        synchronized (registeredMap) {
-            Iterator it = registeredMap.values().iterator();
-            while (it.hasNext()) {
-                DataObject dobj = (DataObject) it.next();
-                int state = dobj.getPersistenceState();
-                if (state == PersistenceState.NEW
-                    || state == PersistenceState.DELETED
-                    || state == PersistenceState.MODIFIED) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return objectStore.hasChanges();
     }
 
     /** 
@@ -192,19 +179,7 @@ public class DataContext implements QueryEngine, Serializable {
      * copy.
      */
     public Collection objectsInState(int state) {
-        ArrayList filteredObjects = new ArrayList();
-
-        synchronized (registeredMap) {
-            Iterator it = registeredMap.values().iterator();
-
-            while (it.hasNext()) {
-                DataObject nextObj = (DataObject) it.next();
-                if (nextObj.getPersistenceState() == state)
-                    filteredObjects.add(nextObj);
-            }
-        }
-
-        return filteredObjects;
+        return objectStore.objectsInState(state);
     }
 
     /** Returns a list of objects that are registered
@@ -235,7 +210,7 @@ public class DataContext implements QueryEngine, Serializable {
      * a <code>CayenneRuntimeException</code> is thrown. 
      */
     public DataObject registeredExistingObject(ObjectId oid) {
-        DataObject obj = (DataObject) registeredMap.get(oid);
+        DataObject obj = objectStore.getObject(oid);
         if (obj == null) {
             obj = refetchObject(oid);
         }
@@ -249,24 +224,28 @@ public class DataContext implements QueryEngine, Serializable {
      * a "hollow" object fault is created, registered and returned to the caller. 
      */
     public DataObject registeredObject(ObjectId oid) {
-        DataObject obj = (DataObject) registeredMap.get(oid);
-        if (obj == null) {
-            try {
-                obj = newDataObject(lookupEntity(oid.getObjEntityName()).getClassName());
-            } catch (Exception ex) {
-                String entity = (oid != null) ? oid.getObjEntityName() : null;
-                throw new CayenneRuntimeException(
-                    "Error creating object for entity '" + entity + "'.",
-                    ex);
+        // must synchronize on ObjectStore since we must read and write atomically
+        synchronized (objectStore) {
+            DataObject obj = objectStore.getObject(oid);
+            if (obj == null) {
+                try {
+                    obj =
+                        newDataObject(
+                            lookupEntity(oid.getObjEntityName()).getClassName());
+                } catch (Exception ex) {
+                    String entity = (oid != null) ? oid.getObjEntityName() : null;
+                    throw new CayenneRuntimeException(
+                        "Error creating object for entity '" + entity + "'.",
+                        ex);
+                }
+
+                obj.setObjectId(oid);
+                obj.setPersistenceState(PersistenceState.HOLLOW);
+                obj.setDataContext(this);
+                objectStore.addObject(obj);
             }
-
-            obj.setObjectId(oid);
-            obj.setPersistenceState(PersistenceState.HOLLOW);
-            obj.setDataContext(this);
-            registeredMap.put(oid, obj);
+            return obj;
         }
-
-        return obj;
     }
 
     private final DataObject newDataObject(String className) throws Exception {
@@ -360,15 +339,14 @@ public class DataContext implements QueryEngine, Serializable {
             ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
             String dbAttrName = attr.getDbAttribute().getName();
 
-          
-        
             Object curVal = anObject.readPropertyDirectly(attrName);
             Object oldVal = oldSnap.get(dbAttrName);
-            Object newVal = snapshot.get(dbAttrName);        
-        
+            Object newVal = snapshot.get(dbAttrName);
+
             // if value not modified, update it from snapshot, 
             // otherwise leave it alone
-            if (Util.nullSafeEquals(curVal, oldVal) && !Util.nullSafeEquals(newVal, curVal)) {
+            if (Util.nullSafeEquals(curVal, oldVal)
+                && !Util.nullSafeEquals(newVal, curVal)) {
                 anObject.writePropertyDirectly(attrName, newVal);
             }
         }
@@ -461,19 +439,23 @@ public class DataContext implements QueryEngine, Serializable {
         boolean refresh) {
         ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
 
-        // this will create a HOLLOW object if it is not registered yet
-        DataObject obj = registeredObject(anId);
+        // synchronized on objectstore, since read/write
+        // must be performed atomically
+        synchronized (objectStore) {
+            // this will create a HOLLOW object if it is not registered yet
+            DataObject obj = registeredObject(anId);
 
-        if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-            // we are asked to refresh an existing object with new values
-            mergeObjectWithSnapshot(objEntity, obj, dataRow);
-            committedSnapshots.put(anId, dataRow);
+            if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
+                // we are asked to refresh an existing object with new values
+                mergeObjectWithSnapshot(objEntity, obj, dataRow);
+                objectStore.addSnapshot(anId, dataRow);
 
-            // notify object that it was fetched
-            obj.fetchFinished();
+                // notify object that it was fetched
+                obj.fetchFinished();
+            }
+
+            return obj;
         }
-
-        return obj;
     }
 
     /** 
@@ -506,7 +488,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @return a map of object values with DbAttribute names as keys 
      * corresponding to the latest value read from or committed to the database. */
     public Map getCommittedSnapshot(DataObject dataObject) {
-        return (Map) committedSnapshots.get(dataObject.getObjectId());
+        return objectStore.getSnapshot(dataObject.getObjectId());
     }
 
     /** 
@@ -549,7 +531,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         dataObject.setPersistenceState(PersistenceState.NEW);
-        registeredMap.put(tempId, dataObject);
+        objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
     }
 
@@ -566,8 +548,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         ObjectId oid = dataObj.getObjectId();
-        registeredMap.remove(oid);
-        committedSnapshots.remove(oid);
+        objectStore.removeObject(oid);
 
         dataObj.setDataContext(null);
         dataObj.setObjectId(null);
@@ -587,7 +568,7 @@ public class DataContext implements QueryEngine, Serializable {
             || dataObj.getPersistenceState() == PersistenceState.NEW) {
             return;
         }
-        committedSnapshots.remove(dataObj.getObjectId());
+        objectStore.removeSnapshot(dataObj.getObjectId());
         dataObj.setPersistenceState(PersistenceState.HOLLOW);
     }
 
@@ -652,8 +633,8 @@ public class DataContext implements QueryEngine, Serializable {
         ArrayList insObjects = new ArrayList();
         HashMap updatedIds = new HashMap();
 
-        synchronized (registeredMap) {
-            Iterator it = registeredMap.values().iterator();
+        synchronized (objectStore) {
+            Iterator it = objectStore.getObjectIterator();
             while (it.hasNext()) {
                 DataObject nextObject = (DataObject) it.next();
                 int objectState = nextObject.getPersistenceState();
@@ -729,14 +710,11 @@ public class DataContext implements QueryEngine, Serializable {
             while (idIt.hasNext()) {
                 ObjectId oldId = (ObjectId) idIt.next();
                 ObjectId newId = (ObjectId) updatedIds.get(oldId);
-                DataObject obj = (DataObject) registeredMap.remove(oldId);
-                Object snapshot = committedSnapshots.remove(obj.getObjectId());
 
-                obj.setObjectId(newId);
-
-                committedSnapshots.put(newId, snapshot);
-                registeredMap.put(newId, obj);
-
+                DataObject obj = objectStore.changeObjectKey(oldId, newId);
+                if (obj != null) {
+                    obj.setObjectId(newId);
+                }
             }
         }
     }
@@ -915,7 +893,9 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         if (queries.size() > 0) {
-            this.performQueries(queries, new ContextSelectObserver(this, query.getLoggingLevel()));
+            this.performQueries(
+                queries,
+                new ContextSelectObserver(this, query.getLoggingLevel()));
         }
     }
 
@@ -1117,27 +1097,30 @@ public class DataContext implements QueryEngine, Serializable {
             super.transactionCommitted();
 
             Iterator insIt = insObjects.iterator();
-            while (insIt.hasNext()) {
-                // replace temp id's w/perm.
-                DataObject nextObject = (DataObject) insIt.next();
-                TempObjectId tempId = (TempObjectId) nextObject.getObjectId();
-                ObjectId permId = tempId.getPermId();
-                registeredMap.remove(tempId);
-                nextObject.setObjectId(permId);
 
-                Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
-                committedSnapshots.put(permId, snapshot);
-                registeredMap.put(permId, nextObject);
+            synchronized (objectStore) {
+                while (insIt.hasNext()) {
 
-                nextObject.setPersistenceState(PersistenceState.COMMITTED);
+                    // replace temp id's w/perm.
+                    DataObject nextObject = (DataObject) insIt.next();
+                    TempObjectId tempId = (TempObjectId) nextObject.getObjectId();
+                    ObjectId permId = tempId.getPermId();
+
+                    objectStore.changeObjectKey(tempId, permId);
+                    nextObject.setObjectId(permId);
+                    Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
+                    objectStore.addSnapshot(permId, snapshot);
+
+                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
+                }
             }
 
             Iterator delIt = delObjects.iterator();
             while (delIt.hasNext()) {
                 DataObject nextObject = (DataObject) delIt.next();
                 ObjectId anId = nextObject.getObjectId();
-                registeredMap.remove(anId);
-                committedSnapshots.remove(anId);
+
+                objectStore.removeObject(anId);
                 nextObject.setPersistenceState(PersistenceState.TRANSIENT);
                 nextObject.setDataContext(null);
             }
@@ -1148,7 +1131,7 @@ public class DataContext implements QueryEngine, Serializable {
                 // refresh this object's snapshot, check if id data has changed
                 Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
 
-                DataContext.this.committedSnapshots.put(
+                DataContext.this.objectStore.addSnapshot(
                     nextObject.getObjectId(),
                     snapshot);
                 nextObject.setPersistenceState(PersistenceState.COMMITTED);
@@ -1175,7 +1158,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        //If the "parent" of this datacontext is a DataDomain, then just write the
+        // If the "parent" of this datacontext is a DataDomain, then just write the
         // name of it.  Then when deser happens, we can get back the DataDomain by name, 
         // from the shared configuration (which will either load it if need be, or return 
         // an existing one.
@@ -1190,7 +1173,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         //For writing, just write the objects.  They will be serialized possibly
         // as just objectIds... it's up to the object itself.  Reading will do magic
-        out.writeObject(registeredMap);
+        out.writeObject(objectStore);
     }
 
     private void readObject(ObjectInputStream in)
@@ -1225,11 +1208,14 @@ public class DataContext implements QueryEngine, Serializable {
         // serialized, it will then set the objects datacontext to the correctone
         // If deser'd "otherwise", it will not have a datacontext (good)
 
-        this.registeredMap = (Map) in.readObject();
-        Iterator it = registeredMap.values().iterator();
-        while (it.hasNext()) {
-            DataObject obj = (DataObject) it.next();
-            obj.setDataContext(this);
+        objectStore = (ObjectStore) in.readObject();
+
+        synchronized (objectStore) {
+            Iterator it = objectStore.getObjectIterator();
+            while (it.hasNext()) {
+                DataObject obj = (DataObject) it.next();
+                obj.setDataContext(this);
+            }
         }
     }
 }

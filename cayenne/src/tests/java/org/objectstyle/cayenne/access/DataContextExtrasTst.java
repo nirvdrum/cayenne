@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
@@ -120,7 +121,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 	    assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
 		assertNull(obj.getDataContext());
 		assertNull(obj.getObjectId());
-		assertNull(ctxt.registeredMap.get(oid));
+		assertNull(ctxt.getObjectStore().getObject(oid));
     }
     
     public void testInvalidateObject() throws Exception {
@@ -140,7 +141,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 	    assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
 		assertSame(ctxt, obj.getDataContext());
 		assertSame(oid, obj.getObjectId());
-		assertNull(ctxt.committedSnapshots.get(oid));
+		assertNull(ctxt.getObjectStore().getSnapshot(oid));
     }
     
 	public void testIdObjectFromDataRow() throws Exception {
@@ -235,7 +236,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 	/** Helper class to get access to DataContext inner classes. */
 	class DataContextExtended extends DataContext {
 		public OperationObserver getSelectObserver() {
-			return new SelectProcessor(Level.DEBUG);
+			return new ContextSelectObserver(this, Level.DEBUG);
 		}
 	}
 }
