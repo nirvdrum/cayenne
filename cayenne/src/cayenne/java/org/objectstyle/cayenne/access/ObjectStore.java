@@ -276,7 +276,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      *            controls whether existing cached snapshots should be replaced
      *            with the new ones.
      */
-    public synchronized void snapshotsUpdatedForObjects(
+    public void snapshotsUpdatedForObjects(
         List objects,
         List snapshots,
         boolean refresh) {
@@ -293,32 +293,34 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         Map modified = null;
 
-        int size = objects.size();
-        for (int i = 0; i < size; i++) {
-            DataObject object = (DataObject) objects.get(i);
-            ObjectId oid = object.getObjectId();
+        synchronized (this) {
+            int size = objects.size();
+            for (int i = 0; i < size; i++) {
+                DataObject object = (DataObject) objects.get(i);
+                ObjectId oid = object.getObjectId();
 
-            // add snapshots if refresh is forced, or if a snapshot is missing
-            DataRow cachedSnapshot = getCachedSnapshot(oid);
-            if (refresh || cachedSnapshot == null) {
-                if (modified == null) {
-                    modified = new HashMap();
+                // add snapshots if refresh is forced, or if a snapshot is missing
+                DataRow cachedSnapshot = getCachedSnapshot(oid);
+                if (refresh || cachedSnapshot == null) {
+                    if (modified == null) {
+                        modified = new HashMap();
+                    }
+
+                    DataRow newSnapshot = (DataRow) snapshots.get(i);
+                    if (cachedSnapshot != null) {
+                        newSnapshot.setReplacesVersion(cachedSnapshot.getVersion());
+                    }
+
+                    modified.put(oid, newSnapshot);
                 }
-
-                DataRow newSnapshot = (DataRow) snapshots.get(i);
-                if (cachedSnapshot != null) {
-                    newSnapshot.setReplacesVersion(cachedSnapshot.getVersion());
-                }
-
-                modified.put(oid, newSnapshot);
             }
-        }
 
-        if (modified != null) {
-            getDataRowCache().processSnapshotChanges(
-                this,
-                modified,
-                Collections.EMPTY_LIST);
+            if (modified != null) {
+                getDataRowCache().processSnapshotChanges(
+                    this,
+                    modified,
+                    Collections.EMPTY_LIST);
+            }
         }
     }
 

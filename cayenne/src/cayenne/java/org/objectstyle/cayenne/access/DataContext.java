@@ -185,7 +185,7 @@ public class DataContext implements QueryEngine, Serializable {
      * before Cayenne stack is fully initialized.
      */
     protected transient String lazyInitParentDomainName;
-    
+
     protected transient ToManyListDataSource relationshipDataSource;
 
     /**
@@ -198,7 +198,7 @@ public class DataContext implements QueryEngine, Serializable {
             .loadClass(className)
             .newInstance();
     }
-    
+
     /**
      * Factory method that creates and returns a new instance of DataContext based on default domain. If more
      * than one domain exists in the current configuration, {@link #createDataContext(String)
@@ -248,7 +248,7 @@ public class DataContext implements QueryEngine, Serializable {
         this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
     }
-    
+
     /**
      * @since 1.1
      * @param parent
@@ -274,7 +274,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataDomain domain =
                 Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName);
-                    
+
             this.parent = domain;
 
             if (isUsingSharedSnapshotCache() && domain != null) {
@@ -291,7 +291,7 @@ public class DataContext implements QueryEngine, Serializable {
         awakeFromDeserialization();
         return parent;
     }
-    
+
     /**
      * <i>
      * Note: currently nested DataContexts are not supported,
@@ -305,7 +305,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      */
     public DataDomain getParentDataDomain() {
-        return (DataDomain)getParent();
+        return (DataDomain) getParent();
     }
 
     /**
@@ -484,7 +484,7 @@ public class DataContext implements QueryEngine, Serializable {
             if (rel.isToDependentEntity()) {
                 continue;
             }
-            
+
             Object targetObject = anObject.readPropertyDirectly(relName);
             if (targetObject == null || (targetObject instanceof RelationshipFault)) {
                 continue;
@@ -529,7 +529,7 @@ public class DataContext implements QueryEngine, Serializable {
     public Map takeObjectSnapshot(DataObject anObject) {
         return currentSnapshot(anObject);
     }
-    
+
     /**
      * Creates a list of DataObjects local to this DataContext from a list 
      * of DataObjects coming from a different DataContext. Note that all objects
@@ -596,48 +596,56 @@ public class DataContext implements QueryEngine, Serializable {
 
         List results = new ArrayList(dataRows.size());
         Iterator it = dataRows.iterator();
-        while (it.hasNext()) {
-            DataRow dataRow = (DataRow) it.next();
-            ObjectId anId = dataRow.createObjectId(entity);
 
-            // this will create a HOLLOW object if it is not registered yet
-            DataObject object = registeredObject(anId);
+        // must do double sync...
+        synchronized (getObjectStore()) {
+            synchronized (getObjectStore().getDataRowCache()) {
+                while (it.hasNext()) {
+                    DataRow dataRow = (DataRow) it.next();
+                    ObjectId anId = dataRow.createObjectId(entity);
 
-            // deal with object state
-            if (refresh) {
-                // make all COMMITTED objects HOLLOW
-                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
-                    // TODO: temporary hack - should do lazy conversion - make an object HOLLOW
-                    // and resolve on first read... unfortunately lots of other things break...
+                    // this will create a HOLLOW object if it is not registered yet
+                    DataObject object = registeredObject(anId);
 
-                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
-                    // object.setPersistenceState(PersistenceState.HOLLOW);
+                    // deal with object state
+                    if (refresh) {
+                        // make all COMMITTED objects HOLLOW
+                        if (object.getPersistenceState() == PersistenceState.COMMITTED) {
+                            // TODO: temporary hack - should do lazy conversion - make an object HOLLOW
+                            // and resolve on first read... unfortunately lots of other things break...
+
+                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                            // object.setPersistenceState(PersistenceState.HOLLOW);
+                        }
+                        // merge all MODIFIED objects immediately 
+                        else if (
+                            object.getPersistenceState() == PersistenceState.MODIFIED) {
+                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                        }
+                        // TODO: temporary hack - should do lazy conversion - keep an object HOLLOW
+                        // and resolve on first read...unfortunately lots of other things break...
+                        else if (
+                            object.getPersistenceState() == PersistenceState.HOLLOW) {
+                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                        }
+                    }
+                    // TODO: temporary hack - this else clause must go... unfortunately lots of other things break
+                    // at the moment...
+                    else {
+                        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                        }
+                    }
+
+                    object.setSnapshotVersion(dataRow.getVersion());
+                    object.fetchFinished();
+                    results.add(object);
                 }
-                // merge all MODIFIED objects immediately 
-                else if (object.getPersistenceState() == PersistenceState.MODIFIED) {
-                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
-                }
-                // TODO: temporary hack - should do lazy conversion - keep an object HOLLOW
-                // and resolve on first read...unfortunately lots of other things break...
-                else if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
-                }
+
+                // now deal with snapshots 
+                getObjectStore().snapshotsUpdatedForObjects(results, dataRows, refresh);
             }
-            // TODO: temporary hack - this else clause must go... unfortunately lots of other things break
-            // at the moment...
-            else {
-                if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
-                }
-            }
-
-            object.setSnapshotVersion(dataRow.getVersion());
-            object.fetchFinished();
-            results.add(object);
         }
-
-        // now deal with snapshots 
-        getObjectStore().snapshotsUpdatedForObjects(results, dataRows, refresh);
 
         return results;
     }
@@ -763,7 +771,8 @@ public class DataContext implements QueryEngine, Serializable {
     public void registerNewObject(DataObject dataObject, String objEntityName) {
         ObjEntity entity = getEntityResolver().lookupObjEntity(objEntityName);
         if (entity == null) {
-            throw new IllegalArgumentException("Invalid ObjEntity name: " + objEntityName);
+            throw new IllegalArgumentException(
+                "Invalid ObjEntity name: " + objEntityName);
         }
 
         registerNewObjectWithEntity(dataObject, entity);
@@ -861,7 +870,7 @@ public class DataContext implements QueryEngine, Serializable {
     public void deleteObject(DataObject anObject) {
         if (anObject.getPersistenceState() == PersistenceState.DELETED
             || anObject.getPersistenceState() == PersistenceState.TRANSIENT) {
-                
+
             // Drop out... especially in case of DELETED we might be about to get 
             // into a horrible
             // recursive loop due to CASCADE delete rules.
@@ -869,14 +878,11 @@ public class DataContext implements QueryEngine, Serializable {
             // and *don't* do it again
             return;
         }
-        
-        
-        
+
         // must resolve HOLLOW objects before delete... Right now this is needed
         // to process relationships, but when we add optimistic locking, this will
         // be a requirement...
         anObject.resolveFault();
-       
 
         // Save the current state in case of a deny, in which case it should be reset.
         // We cannot delay setting it to deleted, as Cascade deletes might cause
@@ -904,7 +910,7 @@ public class DataContext implements QueryEngine, Serializable {
 
                 List toMany =
                     (List) anObject.readPropertyDirectly(relationship.getName());
-                
+
                 if (toMany.size() > 0) {
                     // Get a copy of the list so that deleting objects doesn't 
                     // result in concurrent modification exceptions
@@ -1470,14 +1476,12 @@ public class DataContext implements QueryEngine, Serializable {
                     + "the name of a valid DataDomain:"
                     + value);
         }
-        
+
         // 3. Deserialize local snapshots cache
-        if(!isUsingSharedSnapshotCache()) {
+        if (!isUsingSharedSnapshotCache()) {
             DataRowStore cache = (DataRowStore) in.readObject();
             objectStore.setDataRowCache(cache);
         }
-        
-        
 
         // initialized new relationship datasource
         this.relationshipDataSource = new RelationshipDataSource(this);
@@ -1596,11 +1600,10 @@ public class DataContext implements QueryEngine, Serializable {
         this.transactionEventsEnabled = flag;
     }
 
-  
     public boolean isTransactionEventsEnabled() {
         return this.transactionEventsEnabled;
     }
-    
+
     /**
      * Returns <code>true</code> if the ObjectStore uses
      * shared cache of a parent DataDomain.

@@ -129,6 +129,15 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.setFetchingDataRows(false);
         assertTrue(q.isFetchingDataRows());
     }
+    
+    public void testRefreshingObjects() {
+        
+        // default
+        assertTrue(q.isRefreshingObjects());
+        
+        q.setRefreshingObjects(false);
+        assertFalse(q.isRefreshingObjects());
+    }
 
     public void testQueryAttributes() throws Exception {
         assertEquals(0, q.getCustomDbAttributes().size());

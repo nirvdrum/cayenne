@@ -86,10 +86,12 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     protected Set prefetches = new HashSet();
     protected boolean distinct;
     protected boolean fetchingDataRows;
+    protected boolean refreshingObjects = true;
     protected int fetchLimit;
     protected Expression parentQualifier;
     protected String parentObjEntityName;
     protected int pageSize;
+
 
     /** Creates empty SelectQuery. */
     public SelectQuery() {
@@ -160,13 +162,12 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * @see org.objectstyle.cayenne.exp.Expression#expWithParameters(java.util.Map,
      * boolean) Explanation on parameter substitution.
      */
-    public SelectQuery queryWithParameters(
-        Map parameters,
-        boolean pruneMissing) {
+    public SelectQuery queryWithParameters(Map parameters, boolean pruneMissing) {
         // create a query replica
         SelectQuery query = new SelectQuery();
         query.setDistinct(distinct);
         query.setFetchingDataRows(fetchingDataRows);
+        query.setRefreshingObjects(refreshingObjects);
         query.setFetchLimit(fetchLimit);
         query.setLoggingLevel(logLevel);
         query.setPageSize(pageSize);
@@ -180,8 +181,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 
         // substitute qualifier parameters
         if (qualifier != null) {
-            query.setQualifier(
-                qualifier.expWithParameters(parameters, pruneMissing));
+            query.setQualifier(qualifier.expWithParameters(parameters, pruneMissing));
         }
 
         return query;
@@ -245,21 +245,21 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * in the results of this query.
      */
     public List getCustomDbAttributes() {
-    	// if query root is DbEntity, and no custom attributes
-    	// are defined, return DbEntity attributes.
-    	if(customDbAttributes.size() == 0 && (getRoot() instanceof DbEntity)) {
-    		Collection attributes = ((DbEntity)getRoot()).getAttributes();
-    		List attributeNames = new ArrayList(attributes.size());
-    		Iterator it = attributes.iterator();
-    		while(it.hasNext()) {
-    			DbAttribute attribute = (DbAttribute)it.next();
-			    attributeNames.add(attribute.getName());
-    		}
-    		return attributeNames;
-    	}
-    	else {
-		  return customDbAttributes;
-    	}
+        // if query root is DbEntity, and no custom attributes
+        // are defined, return DbEntity attributes.
+        if (customDbAttributes.size() == 0 && (getRoot() instanceof DbEntity)) {
+            Collection attributes = ((DbEntity) getRoot()).getAttributes();
+            List attributeNames = new ArrayList(attributes.size());
+            Iterator it = attributes.iterator();
+            while (it.hasNext()) {
+                DbAttribute attribute = (DbAttribute) it.next();
+                attributeNames.add(attribute.getName());
+            }
+            return attributeNames;
+        }
+        else {
+            return customDbAttributes;
+        }
     }
 
     /**
@@ -338,6 +338,22 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     }
 
     /**
+     * Returns refresh policy of this query. Default is <code>true</code>.
+     * 
+     * @since 1.1
+     */
+    public boolean isRefreshingObjects() {
+        return refreshingObjects;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setRefreshingObjects(boolean flag) {
+        this.refreshingObjects = flag;
+    }
+
+    /**
      * Returns the fetchLimit.
      * @return int
      */
@@ -369,8 +385,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * existing parent entity qualifier joining it using "AND".
      */
     public void andParentQualifier(Expression e) {
-        parentQualifier =
-            (parentQualifier != null) ? parentQualifier.andExp(e) : e;
+        parentQualifier = (parentQualifier != null) ? parentQualifier.andExp(e) : e;
     }
 
     /**
@@ -378,8 +393,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     * qualifier joining it using "OR".
     */
     public void orParentQualifier(Expression e) {
-        parentQualifier =
-            (parentQualifier != null) ? parentQualifier.orExp(e) : e;
+        parentQualifier = (parentQualifier != null) ? parentQualifier.orExp(e) : e;
     }
 
     /**

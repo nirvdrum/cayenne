@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -182,7 +183,11 @@ public class SelectObserver extends DefaultOperationObserver {
         }
 
         ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
-        List objects = dataContext.objectsFromDataRows(entity, dataRows, true);
+        boolean refresh =
+            (rootQuery instanceof GenericSelectQuery)
+                ? ((GenericSelectQuery) rootQuery).isRefreshingObjects()
+                : true;
+        List objects = dataContext.objectsFromDataRows(entity, dataRows, refresh);
 
         // handle prefetches for this query results
         Iterator queries = results.keySet().iterator();
@@ -202,8 +207,10 @@ public class SelectObserver extends DefaultOperationObserver {
             ObjEntity nextEntity =
                 dataContext.getEntityResolver().lookupObjEntity(nextQuery);
 
+            // TODO: how should we handle refreshing of prefetched objects???
+            // should we propagate the setting from parent query?
             List nextObjects =
-                dataContext.objectsFromDataRows(nextEntity, nextDataRows, true);
+                dataContext.objectsFromDataRows(nextEntity, nextDataRows, refresh);
 
             // now deal with to-many prefetching
             if (!(nextQuery instanceof PrefetchSelectQuery)) {

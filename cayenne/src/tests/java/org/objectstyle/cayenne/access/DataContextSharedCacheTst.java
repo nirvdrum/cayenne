@@ -404,4 +404,103 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertNull(altArtist.getDataContext());
         assertFalse(altContext.hasChanges());
     }
+
+    /**
+     * Checks that cache is not refreshed when a query "refreshingObjects"
+     * property is set to false.
+     * 
+     * @throws Exception
+     */
+    public void testCacheNonRefreshingOnSelect() throws Exception {
+        String originalName = artist.getArtistName();
+        final String newName = "version2";
+
+        DataContext context = artist.getDataContext();
+
+        DataRow oldSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotNull(oldSnapshot);
+        assertEquals(originalName, oldSnapshot.get("ARTIST_NAME"));
+
+        // update artist using raw SQL
+        SqlModifyQuery update =
+            new SqlModifyQuery(
+                Artist.class,
+                "UPDATE ARTIST SET ARTIST_NAME = '"
+                    + newName
+                    + "' WHERE ARTIST_NAME = '"
+                    + originalName
+                    + "'");
+        context.performQueries(
+            Collections.singletonList(update),
+            new DefaultOperationObserver());
+
+        // fetch updated artist without refreshing
+        Expression qual = ExpressionFactory.matchExp("artistName", newName);
+        SelectQuery query = new SelectQuery(Artist.class, qual);
+        query.setRefreshingObjects(false);
+        List artists = context.performQuery(query);
+        assertEquals(1, artists.size());
+        artist = (Artist) artists.get(0);
+
+        // check underlying cache
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertSame(oldSnapshot, freshSnapshot);
+
+        // check an artist
+        assertEquals(originalName, artist.getArtistName());
+    }
+
+    /**
+     * Checks that cache is refreshed when a query "refreshingObjects"
+     * property is set to true.
+     * 
+     * @throws Exception
+     */
+    public void testCacheRefreshingOnSelect() throws Exception {
+        String originalName = artist.getArtistName();
+        final String newName = "version2";
+
+        DataContext context = artist.getDataContext();
+
+        DataRow oldSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotNull(oldSnapshot);
+        assertEquals(originalName, oldSnapshot.get("ARTIST_NAME"));
+
+        // update artist using raw SQL
+        SqlModifyQuery update =
+            new SqlModifyQuery(
+                Artist.class,
+                "UPDATE ARTIST SET ARTIST_NAME = '"
+                    + newName
+                    + "' WHERE ARTIST_NAME = '"
+                    + originalName
+                    + "'");
+        context.performQueries(
+            Collections.singletonList(update),
+            new DefaultOperationObserver());
+
+        // fetch updated artist without refreshing
+        Expression qual = ExpressionFactory.matchExp("artistName", newName);
+        SelectQuery query = new SelectQuery(Artist.class, qual);
+        query.setRefreshingObjects(true);
+        List artists = context.performQuery(query);
+        assertEquals(1, artists.size());
+        artist = (Artist) artists.get(0);
+
+        // check underlying cache
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                artist.getObjectId());
+        assertNotSame(oldSnapshot, freshSnapshot);
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+
+        // check an artist
+        assertEquals(newName, artist.getArtistName());
+    }
 }

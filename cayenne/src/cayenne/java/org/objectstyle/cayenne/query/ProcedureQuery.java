@@ -128,4 +128,14 @@ public class ProcedureQuery
     public boolean isFetchingDataRows() {
         return true;
     }
+    
+    
+    /**
+     * Currently always returns <code>true</code>.
+     * 
+     * @since 1.1
+     */
+    public boolean isRefreshingObjects() {
+        return true;
+    }
 }

@@ -64,10 +64,11 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 
+
 public class SelectQueryTst extends SelectQueryBase {
     private static final int _artistCount = 20;
 
-    public void testFetchLimit() throws java.lang.Exception {
+    public void testFetchLimit() throws Exception {
         query.setRoot(Artist.class);
         query.setFetchLimit(7);
         performQuery();
@@ -78,7 +79,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(7, objects.size());
     }
 
-    public void testSelectAllObjectsRootEntityName() throws java.lang.Exception {
+    public void testSelectAllObjectsRootEntityName() throws Exception {
         query.setRoot(Artist.class);
         performQuery();
 
@@ -88,7 +89,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
-    public void testSelectAllObjectsRootClass() throws java.lang.Exception {
+    public void testSelectAllObjectsRootClass() throws Exception {
         query.setRoot(Artist.class);
         performQuery();
 
@@ -98,8 +99,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
-    public void testSelectAllObjectsRootObjEntity() throws java.lang.Exception {
-        //Crude technique to obtain the Artist ObjEntity, but it works
+    public void testSelectAllObjectsRootObjEntity() throws Exception {
         query.setRoot(this.getDomain().getEntityResolver().lookupObjEntity(Artist.class));
         performQuery();
 
@@ -183,7 +183,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
-    public void testSelectCustAttributes() throws java.lang.Exception {
+    public void testSelectCustAttributes() throws Exception {
         query.setRoot(Artist.class);
         query.addCustomDbAttribute("ARTIST_NAME");
 

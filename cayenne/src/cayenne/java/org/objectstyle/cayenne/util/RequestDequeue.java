@@ -60,6 +60,9 @@ package org.objectstyle.cayenne.util;
  * RequestQueue.
  * 
  * @author Andrei Adamchik
+ * @deprecated Since 1.1 RequestQueue is not used and won't be supported. See 
+ * http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/ for a good
+ * set of threading utilities.
  */
 public class RequestDequeue {
     public static final int DEQUEUE_SUCCESS = 1;

@@ -72,6 +72,16 @@ public interface GenericSelectQuery extends Query {
 	 * This is a hint to QueryEngine executing this query.
 	 */
 	public boolean isFetchingDataRows();
+    
+    /**
+     * Returns <code>true</code> if the query results should replace
+     * any currently cached values, returns <code>false</code> otherwise.
+     * If {@link #isFetchingDataRows()} returns <code>true</code>, this
+     * setting is not applicable and has no effect.
+     * 
+     * @since 1.1
+     */
+    public boolean isRefreshingObjects();
 	
 	/**
 	 * Returns query page size. Page size is a hint
