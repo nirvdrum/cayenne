@@ -2,14 +2,14 @@ package webtest;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.WebappCayenneListener;
 
 /** 
  * Special subclass of ServletConfiguration that enables 
  * logging of Cayenne queries and can also perform some 
  * custom tasks on servlet container startup.
  */
-public class CustomConfiguration extends ServletConfiguration {
+public class CustomConfiguration extends WebappCayenneListener {
 
     public CustomConfiguration() {
         super();
