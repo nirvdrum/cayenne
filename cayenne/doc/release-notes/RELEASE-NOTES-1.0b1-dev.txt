@@ -31,4 +31,10 @@ to appropriate entities.
 7. Deprecated QueryEngine.lookupEntity in favor of 
 QueryEngine.getEntityResolver().lookup...()
 
- 
+8. Added support for flattened relationships.  Modeller now suggests all available
+paths from the source entity to the destination entity for selection.  For simple flattened 
+relationships that span a many-many link table consisting solely of fk's to the linked rows, 
+cayenne will automatically add/remove the link records.   In that case, there is no need to 
+have an ObjEntity for the link record, and this is in fact discouraged.  All other flattened
+relationships are set "readOnly" and cannot be modified.
+
