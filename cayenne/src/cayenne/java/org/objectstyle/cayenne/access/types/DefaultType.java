@@ -92,7 +92,7 @@ public class DefaultType implements ExtendedType {
 
             readObjectMethod = rsClass.getMethod("getObject", paramTypes);
         } catch(Exception ex) {
-            throw new RuntimeException("Error initializing read methods.", ex);
+            throw new CayenneRuntimeException("Error initializing read methods.", ex);
         }
     }
 
