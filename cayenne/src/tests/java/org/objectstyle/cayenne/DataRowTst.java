@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataRowTst extends CayenneTestCase {
+
     public void testVersion() throws Exception {
         DataRow s1 = new DataRow(10);
         DataRow s2 = new DataRow(10);
@@ -74,7 +75,7 @@ public class DataRowTst extends CayenneTestCase {
         assertFalse(s3.getVersion() == s1.getVersion());
     }
 
-    public void testObjectIdFromSnapshot() throws Exception {
+    public void testCreateObjectId() throws Exception {
         // must provide a map container for the entities
         DataMap entityContainer = new DataMap();
 
@@ -103,5 +104,27 @@ public class DataRowTst extends CayenneTestCase {
         ObjectId oid = map2.createObjectId(objEntity);
 
         assertEquals(ref, oid);
+    }
+
+    public void testCreateObjectIdNulls() throws Exception {
+        // must provide a map container for the entities
+        DataMap entityContainer = new DataMap();
+
+        DbEntity dbe = new DbEntity("123");
+        entityContainer.addDbEntity(dbe);
+
+        DbAttribute at = new DbAttribute("xyz");
+        at.setPrimaryKey(true);
+        dbe.addAttribute(at);
+
+        // assert that data row is smart enough to throw on null ids...
+        DataRow map = new DataRow(10);
+        try {
+            map.createObjectId(Number.class, dbe);
+            throw new Exception("Must have failed... Null pk");
+        }
+        catch (CayenneRuntimeException ex) {
+            // expected...
+        }
     }
 }

@@ -180,6 +180,11 @@ public class DataRow extends HashMap {
         if (pk.size() == 1) {
             DbAttribute attr = (DbAttribute) pk.get(0);
             Object val = this.get(attr.getName());
+            if (val == null) {
+                throw new CayenneRuntimeException(
+                    "Null value for '" + attr.getName() + "'. Snapshot: " + this);
+            }
+            
             return new ObjectId(objectClass, attr.getName(), val);
         }
 
