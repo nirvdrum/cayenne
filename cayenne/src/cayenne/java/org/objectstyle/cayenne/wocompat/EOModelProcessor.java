@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -292,12 +293,17 @@ public class EOModelProcessor {
                 }
             }
 
-            boolean toMany = firstRel.isToMany();
-            flatRel.setSourceEntity(e);
-            flatRel.setTargetEntity(lastRel.getTargetEntity());
-            flatRel.setToMany(toMany);
-
-            e.addRelationship(flatRel);
+			if ((firstRel != null) && (lastRel != null)) {
+	            boolean toMany = firstRel.isToMany();
+	            flatRel.setSourceEntity(e);
+	            flatRel.setTargetEntity(lastRel.getTargetEntity());
+	            flatRel.setToMany(toMany);
+	
+	            e.addRelationship(flatRel);
+			}
+			else {
+				throw new CayenneRuntimeException("relationship in path was null!");
+			}
         }
     }
 
