@@ -89,7 +89,8 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
  * @author Andrei Adamchik
  */
 public class JdbcPkGenerator implements PkGenerator {
-
+    public static final int DEFAULT_PK_CACHE_SIZE = 20;
+    
 	protected static final String NEXT_ID = "NEXT_ID";
 	protected static final ObjAttribute[] objDesc =
 		new ObjAttribute[] {
@@ -98,7 +99,7 @@ public class JdbcPkGenerator implements PkGenerator {
 		new DbAttribute[] { new DbAttribute(NEXT_ID, Types.INTEGER, null)};
 
 	protected Map pkCache = new HashMap();
-	protected int pkCacheSize = 20;
+	protected int pkCacheSize = DEFAULT_PK_CACHE_SIZE;
 
 	static {
 		objDesc[0].setDbAttributePath(NEXT_ID);
