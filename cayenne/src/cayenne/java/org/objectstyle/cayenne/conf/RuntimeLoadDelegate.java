@@ -83,18 +83,26 @@ import org.xml.sax.InputSource;
  * @author Andrei Adamchik
  */
 public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
-    private static Logger logObj =
-        Logger.getLogger(RuntimeLoadDelegate.class);
+    private static Logger logObj = Logger.getLogger(RuntimeLoadDelegate.class);
 
     protected Map domains = new HashMap();
-    protected ConfigStatus status = new ConfigStatus();
+    protected ConfigStatus status;
     protected Configuration config;
     protected Level logLevel = Level.DEBUG;
     protected long startTime;
 
-    public RuntimeLoadDelegate(Configuration config, Level logLevel) {
+    public RuntimeLoadDelegate(
+        Configuration config,
+        ConfigStatus status,
+        Level logLevel) {
         this.config = config;
         this.logLevel = logLevel;
+
+        if (status == null) {
+            status = new ConfigStatus();
+        }
+
+        this.status = status;
     }
 
     protected DataDomain findDomain(String name) throws FindException {

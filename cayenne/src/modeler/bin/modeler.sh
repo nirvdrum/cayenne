@@ -5,11 +5,20 @@
 # Certain parts are modeled after Tomcat startup scrips, 
 # Copyright Apache Software Foundation
 
+MAIN_CLASS=org.objectstyle.cayenne.modeler.Editor
+
+
 # OS specific support.
 cygwin=false
 case "`uname`" in
 CYGWIN*) cygwin=true;;
 esac
+
+PATH_SEPARATOR=:
+if [ "$cygwin" = "true" ] ; then 
+	PATH_SEPARATOR=";"
+fi
+
 
 if [ "$JAVA_HOME" = "" ] ; then 
     echo "Please define JAVA_HOME to point to your JSDK installation."
@@ -46,6 +55,11 @@ if [ ! -f $JAVACMD ] ; then
 	JAVACMD=$JAVA_HOME/jre/bin/java
 fi
 
-$JAVACMD -jar $CAYENNE_HOME/lib/modeler/cayenne-modeler.jar $1 $2 $3 & 
+OPTIONS="-classpath $CAYENNE_HOME/lib/modeler/cayenne-modeler.jar"
+if [ "$CLASSPATH" != "" ] ; then
+	OPTIONS="$OPTIONS$PATH_SEPARATOR$CLASSPATH"
+fi
+
+$JAVACMD $OPTIONS $MAIN_CLASS $1 $2 $3 & 
 
 

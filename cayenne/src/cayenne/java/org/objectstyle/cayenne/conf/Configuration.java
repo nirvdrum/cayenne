@@ -110,7 +110,7 @@ public abstract class Configuration {
     protected CayenneMap dataDomains = new CayenneMap(this);
     protected DataSourceFactory overrideFactory;
     protected boolean ignoringLoadFailures;
-    protected ConfigStatus loadStatus;
+    protected ConfigStatus loadStatus = new ConfigStatus();
 
     /** 
      * Sets <code>cl</code> class's ClassLoader to serve
@@ -219,7 +219,7 @@ public abstract class Configuration {
     }
     
     public ConfigLoaderDelegate getLoaderDelegate() {
-    	return new RuntimeLoadDelegate(this, Configuration.getLoggingLevel());
+    	return new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
     }
 
     /** Returns domain configuration as a stream or null if it
@@ -251,7 +251,7 @@ public abstract class Configuration {
 
         ConfigLoaderDelegate delegate = getLoaderDelegate();
         if(delegate == null) {
-        	delegate = new RuntimeLoadDelegate(this, Configuration.getLoggingLevel());
+        	delegate = new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
         }
         
         ConfigLoader loader = new ConfigLoader(delegate);
