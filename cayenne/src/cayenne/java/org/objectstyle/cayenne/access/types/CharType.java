@@ -77,9 +77,11 @@ public class CharType extends AbstractType {
     private static final int BUF_SIZE = 8 * 1024;
 
     protected boolean trimingChars;
+    protected boolean usingClobs;
 
-    public CharType(boolean trimingChars) {
+    public CharType(boolean trimingChars, boolean usingClobs) {
         this.trimingChars = trimingChars;
+        this.usingClobs = usingClobs;
     }
 
     public String getClassName() {
@@ -94,10 +96,10 @@ public class CharType extends AbstractType {
 
         // CLOB handling
         if (type == Types.CLOB) {
-            Clob clob = rs.getClob(index);
-            if (clob != null) {
-                val = readClob(clob);
-            }
+            val =
+                (isUsingClobs())
+                    ? readClob(rs, index)
+                    : readCharStream(rs, index);
         } else {
 
             val = rs.getString(index);
@@ -128,7 +130,11 @@ public class CharType extends AbstractType {
         super.setJdbcObject(st, val, pos, type, precision);
     }
 
-    protected String readClob(Clob clob) throws IOException, SQLException {
+    protected String readClob(ResultSet rs, int index)
+        throws IOException, SQLException {
+
+        Clob clob = rs.getClob(index);
+
         // sanity check on size
         if (clob.length() > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(
@@ -140,9 +146,23 @@ public class CharType extends AbstractType {
         int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
 
         Reader in = new BufferedReader(clob.getCharacterStream(), bufSize);
+
+        return readValueStream(in, size, bufSize);
+    }
+
+    protected String readCharStream(ResultSet rs, int index)
+        throws IOException, SQLException {
+        return readValueStream(rs.getCharacterStream(index), -1, BUF_SIZE);
+    }
+
+    protected String readValueStream(Reader in, int streamSize, int bufSize)
+        throws IOException {
         char[] buf = new char[bufSize];
         int read;
-        StringWriter out = new StringWriter(size);
+        StringWriter out =
+            (streamSize > 0)
+                ? new StringWriter(streamSize)
+                : new StringWriter();
 
         try {
             while ((read = in.read(buf, 0, bufSize)) >= 0) {
@@ -153,7 +173,7 @@ public class CharType extends AbstractType {
             in.close();
         }
     }
-    
+
     /**
      * Returns <code>true</code> if 'materializeObject' method should trim
      * trailing spaces from the CHAR columns. This addresses an issue with some
@@ -166,5 +186,13 @@ public class CharType extends AbstractType {
 
     public void setTrimingChars(boolean trimingChars) {
         this.trimingChars = trimingChars;
+    }
+
+    public boolean isUsingClobs() {
+        return usingClobs;
+    }
+
+    public void setUsingClobs(boolean usingClobs) {
+        this.usingClobs = usingClobs;
     }
 }

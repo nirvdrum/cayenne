@@ -111,6 +111,5 @@ public class DataContextClobTst extends CayenneTestCase {
 
         ClobTest clobObj3 = (ClobTest) objects3.get(0);
         assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
-
     }
 }

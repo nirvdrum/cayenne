@@ -86,4 +86,8 @@ public class SybaseDelegate extends DatabaseSetupDelegate {
         executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
         executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
     }
+
+    public boolean supportsLobs() {
+        return true;
+    }
 }

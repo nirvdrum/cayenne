@@ -146,7 +146,12 @@ public class JdbcAdapter implements DbAdapter {
         pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
         extendedTypes = new ExtendedTypeMap();
-        extendedTypes.registerType(new CharType(false));
+        
+        // Create a default CHAR handler with some generic settings. 
+        // Subclasses may need to install their own CharType or reconfigure 
+        // this one to work better with the target database. 
+        extendedTypes.registerType(new CharType(false, true));
+        
         qualifierFactory = new QualifierTranslatorFactory();
     }
 

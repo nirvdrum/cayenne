@@ -100,7 +100,7 @@ public class OracleAdapter extends JdbcAdapter {
 
     public OracleAdapter() {
         super();
-        extendedTypes.registerType(new CharType(true));
+        extendedTypes.registerType(new CharType(true, true));
         qualifierFactory.setTranslatorClass(
             org
                 .objectstyle
