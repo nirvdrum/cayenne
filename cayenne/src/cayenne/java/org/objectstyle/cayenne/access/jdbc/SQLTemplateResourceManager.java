@@ -53,82 +53,87 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
+package org.objectstyle.cayenne.access.jdbc;
 
-import java.io.PrintWriter;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Map;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.Entity;
+import org.apache.commons.collections.ExtendedProperties;
+import org.apache.commons.collections.map.LRUMap;
+import org.apache.velocity.Template;
+import org.apache.velocity.exception.ParseErrorException;
+import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.runtime.RuntimeServices;
+import org.apache.velocity.runtime.resource.Resource;
+import org.apache.velocity.runtime.resource.ResourceManager;
+import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 
 /**
- * Path expression traversing DB relationships and attributes.
+ * An implementation of the Velocity ResourceManager and ResourceLoader that
+ * creates templates from in-memory Strings.
  * 
- * @since 1.1
  * @author Andrei Adamchik
+ * @since 1.1
  */
-public class ASTDbPath extends ASTPath {
-    ASTDbPath(int id) {
-        super(id);
+// class must be public since it is instantiated by Velocity via reflection.
+public class SQLTemplateResourceManager
+    extends ResourceLoader
+    implements ResourceManager {
+
+    protected Map templateCache;
+
+    public void initialize(RuntimeServices rs) throws Exception {
+        super.rsvc = rs;
+        this.templateCache = new LRUMap(100);
     }
 
-    public ASTDbPath() {
-        super(ExpressionParserTreeConstants.JJTDBPATH);
-    }
-
-    public ASTDbPath(Object value) {
-        super(ExpressionParserTreeConstants.JJTDBPATH);
-        setPath(value);
-    }
-
-    protected Object evaluateNode(Object o) throws Exception {
-        // TODO: implement resolving DB_PATH for DataObjects
-
-        if (o instanceof Entity) {
-            return evaluateEntityNode((Entity) o);
-        }
-
-        Map map = toMap(o);
-        return (map != null) ? map.get(path) : null;
-    }
-
-    protected Map toMap(Object o) {
-        if (o instanceof Map) {
-            return (Map) o;
-        }
-        else if (o instanceof ObjectId) {
-            return ((ObjectId) o).getIdSnapshot();
-        }
-        else if (o instanceof DataObject) {
-            DataObject dataObject = (DataObject) o;
-
-            // TODO: returns ObjectId snapshot for now.. should probably
-            // retrieve full snapshot...
-            ObjectId oid = dataObject.getObjectId();
-            return (oid != null) ? oid.getIdSnapshot() : null;
-        }
-        else {
-            return null;
-        }
+    public void clearCache() {
+        templateCache.clear();
     }
 
     /**
-     * Creates a copy of this expression node, without copying children.
+     * Returns a Velocity Resource which is a Template for the given SQL.
      */
-    public Expression shallowCopy() {
-        ASTDbPath copy = new ASTDbPath(id);
-        copy.path = path;
-        return copy;
+    public Resource getResource(String resourceName, int resourceType, String encoding)
+        throws ResourceNotFoundException, ParseErrorException, Exception {
+
+        synchronized (templateCache) {
+            Template resource = (Template) templateCache.get(resourceName);
+
+            if (resource == null) {
+                resource = new Template();
+                resource.setRuntimeServices(rsvc);
+                resource.setResourceLoader(this);
+                resource.setName(resourceName);
+                resource.setEncoding(encoding);
+                resource.process();
+
+                templateCache.put(resourceName, resource);
+            }
+
+            return resource;
+        }
     }
 
-    public void encodeAsString(PrintWriter pw) {
-        pw.print("db:");
-        pw.print(path);
+    public String getLoaderNameForResource(String resourceName) {
+        return getClass().getName();
     }
 
-    public int getType() {
-        return Expression.DB_PATH;
+    public long getLastModified(Resource resource) {
+        return -1;
+    }
+
+    public InputStream getResourceStream(String source)
+        throws ResourceNotFoundException {
+        return new ByteArrayInputStream(source.getBytes());
+    }
+
+    public void init(ExtendedProperties configuration) {
+
+    }
+
+    public boolean isSourceModified(Resource resource) {
+        return false;
     }
 }

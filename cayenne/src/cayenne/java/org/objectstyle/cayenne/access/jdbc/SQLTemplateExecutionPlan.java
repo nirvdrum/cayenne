@@ -53,82 +53,92 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
 
-import java.io.PrintWriter;
+package org.objectstyle.cayenne.access.jdbc;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * Path expression traversing DB relationships and attributes.
+ * Implements a stateless strategy for execution of updating {@link SQLTemplate} query.
  * 
- * @since 1.1
  * @author Andrei Adamchik
+ * @since 1.1
  */
-public class ASTDbPath extends ASTPath {
-    ASTDbPath(int id) {
-        super(id);
+// TODO: it is very likely that there will be an ExecutionPlan interface 
+// soon, and all query types will be run by an execution plan instead of
+// a DataNode. Then ExecutionPlan will become a true Strategy pattern...
+public class SQLTemplateExecutionPlan {
+    protected DbAdapter adapter;
+
+    public SQLTemplateExecutionPlan(DbAdapter adapter) {
+        this.adapter = adapter;
     }
 
-    public ASTDbPath() {
-        super(ExpressionParserTreeConstants.JJTDBPATH);
+    /**
+     * Returns DbAdapter associated with this execution plan object.
+     */
+    public DbAdapter getAdapter() {
+        return adapter;
     }
 
-    public ASTDbPath(Object value) {
-        super(ExpressionParserTreeConstants.JJTDBPATH);
-        setPath(value);
-    }
+    /**
+     * Runs a SQLTemplate query as an update.
+     */
+    public void execute(
+        Connection connection,
+        SQLTemplate query,
+        OperationObserver observer)
+        throws SQLException, Exception {
 
-    protected Object evaluateNode(Object o) throws Exception {
-        // TODO: implement resolving DB_PATH for DataObjects
+        // template maybe customized by adapter
+        List bindings = new ArrayList();
+        SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
+        String template = query.getTemplate(adapter.getClass().getName());
+        Iterator it = query.parametersIterator();
 
-        if (o instanceof Entity) {
-            return evaluateEntityNode((Entity) o);
-        }
+        while (it.hasNext()) {
+            Map nextParameters = (Map) it.next();
 
-        Map map = toMap(o);
-        return (map != null) ? map.get(path) : null;
-    }
+            // reset bindings
+            bindings.clear();
 
-    protected Map toMap(Object o) {
-        if (o instanceof Map) {
-            return (Map) o;
-        }
-        else if (o instanceof ObjectId) {
-            return ((ObjectId) o).getIdSnapshot();
-        }
-        else if (o instanceof DataObject) {
-            DataObject dataObject = (DataObject) o;
+            String sqlString =
+                templateProcessor.processTemplate(template, nextParameters, bindings);
 
-            // TODO: returns ObjectId snapshot for now.. should probably
-            // retrieve full snapshot...
-            ObjectId oid = dataObject.getObjectId();
-            return (oid != null) ? oid.getIdSnapshot() : null;
-        }
-        else {
-            return null;
+            // TODO: we may cache prep stataments for this loop, using merged string as a key
+            // since it is very likely that it will be the same for multiple parameter sets...
+            PreparedStatement statement = connection.prepareStatement(sqlString);
+            try {
+                execute(statement, observer, query);
+            }
+            finally {
+                statement.close();
+            }
         }
     }
 
     /**
-     * Creates a copy of this expression node, without copying children.
+     * Executes update notifying OperationObserver of the outcome.
      */
-    public Expression shallowCopy() {
-        ASTDbPath copy = new ASTDbPath(id);
-        copy.path = path;
-        return copy;
-    }
+    protected void execute(
+        PreparedStatement preparedStatement,
+        OperationObserver observer,
+        SQLTemplate query)
+        throws SQLException {
 
-    public void encodeAsString(PrintWriter pw) {
-        pw.print("db:");
-        pw.print(path);
-    }
-
-    public int getType() {
-        return Expression.DB_PATH;
+        int count = preparedStatement.executeUpdate();
+        QueryLogger.logUpdateCount(query.getLoggingLevel(), count);
+        observer.nextCount(query, count);
     }
 }

@@ -212,6 +212,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * 
      * @since 1.1
      */
+    // TODO: cache expression strings, since this operation is pretty slow
     public static Expression fromString(String expressionString) {
         if (expressionString == null) {
             throw new NullPointerException("Null expression string.");
