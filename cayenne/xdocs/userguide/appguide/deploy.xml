@@ -7,7 +7,7 @@
     
 <body>
      <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
-        <subsection name="4.5 Deployment" anchor="deploy">
+        <subsection name="4.6 Deployment" anchor="deploy">
            <p>As described in <a href="project.html">Cayenne Project</a>
            chapter, a Cayenne application would need access to <code>cayenne.xml</code>
            file, data map file(s) and (optionally) datasource file(s). These files are
@@ -18,7 +18,7 @@
            may subclass Configuration to define other loading strategies.
            </p>
            
-           <subsection name="4.5.1 Standalone Applications" anchor="standalone">
+           <subsection name="4.6.1 Standalone Applications" anchor="standalone">
                <p>In a standalone Java application, normally a <a href=
                "../../api/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a> 
                 will be used to locate and load configuration files. This approach
@@ -70,7 +70,7 @@ Configuration conf = Configuration.getSharedConfig();
 
            </subsection>
            
-           <subsection name="4.5.1 Web Applications" anchor="standalone">
+           <subsection name="4.6.2 Web Applications" anchor="standalone">
                <p>Though it is possible to use the procedure described for the standalone applications
                when deploying an application in a web container, Cayenne provides a better way
                to do that. Suggested way is to use <a href=
