@@ -394,16 +394,21 @@ public class Editor
 		return fileChooser;
 	}
 
-	/** Adds asterisk to the title of the window to indicate it is dirty. */
-	public void setDirty(boolean dirty_flag) {
+	/** 
+	 * Adds asterisk to the title of the window to indicate 
+	 * it is dirty. 
+	 */
+	public void setDirty(boolean flag) {
 		String title = getTitle();
-		if (dirty_flag) {
-			if (!title.startsWith(DIRTY_STRING))
+		if (flag) {
+			if (!title.startsWith(DIRTY_STRING)) {
 				setTitle(DIRTY_STRING + title);
+			}
 		} else {
-			if (title.startsWith(DIRTY_STRING))
+			if (title.startsWith(DIRTY_STRING)) {
 				setTitle(
 					title.substring(DIRTY_STRING.length(), title.length()));
+			}
 		}
 	}
 

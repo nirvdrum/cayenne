@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.event;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.event;
 
 import java.util.*;
 import java.awt.Component;
@@ -67,19 +67,22 @@ import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.util.*;
 
 
-/** Interface for mediator of all views of DataMapEditor. 
-  * DataMapEditor is implemented using Mediator pattern.
-  * Views (Pane-s) responsible for the display of the 
-  * group of teh properties of the DataMap elements,
-  * such as Entities, attributes and relationships,
-  * are going to listen to the different types of 
-  * events and act as controllers. 
-  * Do not make listeners out of models!
-  * Models (table models, combo box models)
-  * may create events, but they will assign the
-  * view (pane) they belong to as the source of the event.
-  * This is done to prevent eternal loops.
-  * @author Michael Misha Shengaout */
+/** 
+ * Interface for mediator of all views of DataMapEditor. 
+ * DataMapEditor is implemented using Mediator pattern.
+ * Views (Pane-s) responsible for the display of the 
+ * group of teh properties of the DataMap elements,
+ * such as Entities, attributes and relationships,
+ * are going to listen to the different types of 
+ * events and act as controllers. 
+ * Do not make listeners out of models!
+ * Models (table models, combo box models)
+ * may create events, but they will assign the
+ * view (pane) they belong to as the source of the event.
+ * This is done to prevent eternal loops.
+ * 
+ * @author Michael Misha Shengaout 
+ */
 public class Mediator
 {
 	//DataMapEditor parent;
@@ -365,12 +368,10 @@ public class Mediator
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
-		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener");
+		EventListener[] list = getListeners("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			DataNodeDisplayListener temp = (DataNodeDisplayListener)list[i];
-			temp.currentDataNodeChanged(e);
-		}// End for()
+            ((DataNodeDisplayListener)list[i]).currentDataNodeChanged(e);
+		}
 	}
 	
 
@@ -398,9 +399,8 @@ public class Mediator
 				default:
 					throw new IllegalArgumentException(
 								"Invalid DataNodeEvent type: " + e.getId());
-			}// End switch
-		}// End for()
-		
+			}
+		}		
 	}
 
 
@@ -828,6 +828,7 @@ public class Mediator
 		currentDomain.removeDataNode(node.getName());
 		fireDataNodeEvent(new DataNodeEvent(src, node, DataNodeEvent.REMOVE));
 		fireDataNodeDisplayEvent(new DataNodeDisplayEvent(src, currentDomain, null));
+		setDirty(true);
 	}
 	
 	public void addDomain(Object src, DataDomain domain) {
@@ -863,11 +864,11 @@ public class Mediator
 		return list;
 	}
 	
-	public void setDirty(boolean temp_dirty) {
-		if (dirty == temp_dirty)
-			return;
-		dirty = temp_dirty;
-		Editor.getFrame().setDirty(dirty);
+	public void setDirty(boolean dirty) {
+		if (this.dirty != dirty) {	
+		     this.dirty = dirty;
+		     Editor.getFrame().setDirty(dirty);
+		}
 	}
 	
 	public void setDirty(DataMap map) {
@@ -878,15 +879,17 @@ public class Mediator
 	}
 
 	public void setDirty(DataNode node) {
-		if (dirtyNodes.contains(node))
+		if (dirtyNodes.contains(node)) {
 			return;
+		}
 		dirtyNodes.add(node);
 		setDirty(true);
 	}
 
 	public void setDirty(DataDomain domain) {
-		if (dirtyDomains.contains(domain))
+		if (dirtyDomains.contains(domain)) {
 			return;
+		}
 		dirtyDomains.add(domain);
 		setDirty(true);
 	}

@@ -57,21 +57,12 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
-import java.util.List;
-import java.io.File;
 import java.util.logging.Logger;
-import java.util.Arrays;
-import java.util.List;
-import javax.swing.JFileChooser;
-import javax.swing.AbstractAction;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.AddDataMapDialog;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.map.*;
 
 
 /** 
@@ -80,8 +71,7 @@ import org.objectstyle.cayenne.gui.util.*;
  * 
  * @author Misha Shengaout
  */
-public class RemoveAction extends CayenneAction
-{
+public class RemoveAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(RemoveAction.class.getName());
 
 	public RemoveAction(Mediator mediator) {
@@ -196,16 +186,14 @@ public class RemoveAction extends CayenneAction
 		for (int i = 0; i < maps.length; i++) {
 			DataMap temp = (DataMap)maps[i];
 			if (temp == map) {
-				logObj.fine("Skipping map " + map.getName());
 				continue;
 			}
 			arr[j] = temp;
 			j++;
 		}
 		node.setDataMaps(arr);
+		
 		// Force reloading of the data node in the browse view
-		DataNodeEvent ev;
-		ev = new DataNodeEvent(Editor.getFrame(), node);
-		mediator.fireDataNodeEvent(ev);
+		mediator.fireDataNodeEvent(new DataNodeEvent(Editor.getFrame(), node));
 	}
 }
