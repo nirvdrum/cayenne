@@ -1,45 +1,57 @@
-/*
- * ====================================================================
+/* ====================================================================
  * 
- * The ObjectStyle Group Software License, Version 1.0
- * 
- * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
- * software. All rights reserved.
- * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002-2003 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 1.
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer. 2. Redistributions in
- * binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other
- * materials provided with the distribution. 3. The end-user documentation
- * included with the redistribution, if any, must include the following
- * acknowlegement: "This product includes software developed by the ObjectStyle
- * Group (http://objectstyle.org/)." Alternately, this acknowlegement may
- * appear in the software itself, if and wherever such third-party
- * acknowlegements normally appear. 4. The names "ObjectStyle Group" and
- * "Cayenne" must not be used to endorse or promote products derived from this
- * software without prior written permission. For written permission, please
- * contact andrus@objectstyle.org. 5. Products derived from this software may
- * not be called "ObjectStyle" nor may "ObjectStyle" appear in their names
- * without prior written permission of the ObjectStyle Group.
- * 
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  * ====================================================================
- * 
- * This software consists of voluntary contributions made by many individuals
- * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
- * Group, please see <http://objectstyle.org/> .
- *  
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
  */
 package org.objectstyle.cayenne.access;
 
@@ -66,6 +78,12 @@ import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
+ * 
+ * <p><strong>Synchronization Note:</strong> Since there is often a need 
+ * to synchronize on both, ObjectStore and underlying DataRowCache, there 
+ * must be a consistent synchronization policy to avoid deadlocks. Whenever
+ * ObjectStore needs to obtain a lock on DataRowStore, it must obtain a lock
+ * on self.</p>
  * 
  * @author Andrei Adamchik
  */
@@ -102,7 +120,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * Synchronizes the state of registered DataObjects with the current state
-     * of SnapshotCache.
+     * of parent DataRowStore.
+     * 
+     * @since 1.1
      */
     public synchronized void synchronizeWithCache(boolean refetchMissingSnapshots) {
         Iterator objects = this.getObjectIterator();
@@ -124,7 +144,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 nextObject.getDataContext().getEntityResolver().lookupObjEntity(
                     nextObject);
             DataRowUtils.mergeObjectWithSnapshot(entity, nextObject, snapshot);
-			nextObject.setSnapshotVersion(snapshot.getVersion());
+            nextObject.setSnapshotVersion(snapshot.getVersion());
         }
     }
 
@@ -317,12 +337,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * Changes object persistence state and handles snapshot updates.
      */
     public synchronized void objectsCommitted() {
-        Iterator objects = this.getObjectIterator();
-        List modifiedIds = null;
-
         // these will store snapshot changes
         List deletedIds = null;
         Map modifiedSnapshots = null;
+
+        Iterator objects = this.getObjectIterator();
+        List modifiedIds = null;
 
         while (objects.hasNext()) {
             DataObject object = (DataObject) objects.next();
@@ -509,7 +529,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @deprecated Since 1.1 all methods for snapshot manipulation via
      *             ObjectStore are deprecated due to architecture changes.
      */
-    public synchronized void addSnapshot(ObjectId id, Map snapshot) {
+    public void addSnapshot(ObjectId id, Map snapshot) {
         getDataRowCache().processSnapshotChanges(
             this,
             Collections.singletonMap(id, snapshot),
@@ -520,11 +540,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @deprecated Since 1.1 getCachedSnapshot(ObjectId) or
      *             getSnapshot(ObjectId,QueryEngine) must be used.
      */
-    public synchronized Map getSnapshot(ObjectId id) {
+    public Map getSnapshot(ObjectId id) {
         return getCachedSnapshot(id);
     }
 
-    public DataRow getRetainedSnapshot(ObjectId oid) {
+    public synchronized DataRow getRetainedSnapshot(ObjectId oid) {
         return (DataRow) retainedSnapshotMap.get(oid);
     }
 
@@ -547,7 +567,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * 
      * @since 1.1
      */
-    public DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
+    public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
         DataRow retained = getRetainedSnapshot(oid);
         return (retained != null) ? retained : getDataRowCache().getSnapshot(oid, engine);
     }
@@ -567,7 +587,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @deprecated Since 1.1 all methods for snapshot manipulation via
      *             ObjectStore are deprecated due to architecture changes.
      */
-    public synchronized void removeSnapshot(ObjectId id) {
+    public void removeSnapshot(ObjectId id) {
         dataRowCache.forgetSnapshot(id);
     }
 
@@ -644,18 +664,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
-        // must wrap in try/catch, since any exception in the event dispatch
-        // would result in removing this object from the regsitered listeners
-        try {
-            // merge objects with changes in event...
-            logObj.debug("new SnapshotEvent: " + event);
+        // merge objects with changes in event...
+        logObj.debug("new SnapshotEvent: " + event);
 
+        synchronized (this) {
             DataRowUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
 
             // TODO: what should we do with deleted objects?
             // I suggest to turn them into TRANSIENT and notify a delegate...
-        } catch (Throwable th) {
-            logObj.info("SnapshotEvent processing exception.", th);
         }
     }
 }

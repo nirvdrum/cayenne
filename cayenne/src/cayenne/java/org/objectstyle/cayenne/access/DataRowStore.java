@@ -83,6 +83,9 @@ import org.shiftone.cache.lru.LruCacheFactory;
 /**
  * Represents a fixed size cache of DataRows keyed by ObjectId. 
  * 
+ * <p><strong>Synchronization Note:</strong> DataRowStore synchronizes 
+ * most operations on its own instance.</p>
+ * 
  * @author Andrei Adamchik
  * @since 1.1
  */
@@ -120,8 +123,6 @@ public class DataRowStore implements Serializable {
     protected boolean notifyingRemoteListeners;
     protected EventBridge remoteNotificationsHandler;
 
-    protected Object lock;
-
     /**
      * Creates new named DataRowStore with default configuration.
      */
@@ -142,7 +143,6 @@ public class DataRowStore implements Serializable {
         }
 
         this.name = name;
-        this.lock = new Object();
         initFromProperties(properties);
     }
 
@@ -232,15 +232,6 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Returns a lock object to synchronize upon during commit operation.
-     * If this DataRowStore does not notify child object stores, a null
-     * lock is returned.
-     */
-    public Object getLock() {
-        return (notifyingObjectStores) ? lock : null;
-    }
-
-    /**
      * Shuts down any remote notification connections, and clears internal cache.
      */
     public void shutdown() {
@@ -274,7 +265,7 @@ public class DataRowStore implements Serializable {
      * Returns cached snapshot or null if no snapshot is currently cached for
      * the given ObjectId.
      */
-    public DataRow getCachedSnapshot(ObjectId oid) {
+    public synchronized DataRow getCachedSnapshot(ObjectId oid) {
         return (DataRow) snapshots.getObject(oid);
     }
 
@@ -283,7 +274,7 @@ public class DataRowStore implements Serializable {
      * returned. If not, a provided QueryEngine is used to fetch it from the
      * database. If there is no database row for a given id, null is returned.
      */
-    public DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
+    public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
 
         // try cache
         DataRow cachedSnapshot = getCachedSnapshot(oid);
@@ -353,14 +344,14 @@ public class DataRowStore implements Serializable {
      * Expires and removes all stored snapshots without sending any
      * notification events.
      */
-    public void clear() {
+    public synchronized void clear() {
         snapshots.clear();
     }
 
     /**
      * Evicts a snapshot from cache without generating any SnapshotEvents.
      */
-    public void forgetSnapshot(ObjectId id) {
+    public synchronized void forgetSnapshot(ObjectId id) {
         snapshots.remove(id);
     }
 
@@ -381,7 +372,7 @@ public class DataRowStore implements Serializable {
             return;
         }
 
-        synchronized (lock) {
+        synchronized (this) {
 
             // DELETED: evict deleted snapshots
             if (!deletedSnapshotIds.isEmpty()) {
@@ -440,6 +431,7 @@ public class DataRowStore implements Serializable {
                     snapshots.addObject(key, newSnapshot);
                 }
             }
+
         }
 
         // do not send bogus events... e.g. inserted objects are not counted
@@ -451,8 +443,17 @@ public class DataRowStore implements Serializable {
                 logObj.debug("postSnapshotsChangeEvent: " + event);
             }
 
-            // notify listeners;
-            EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
+            // notify listeners
+
+            // IMPORTANT: do this asynchronously, since there is a
+            // good chance of deadlocking when notifying object stores
+            // that are themselves waiting to obtain the lock on this DataRowStore,
+            // and are already being locked by calling threads
+
+            // downside of asynchronous post is ambiguity on the receiving end...
+            EventManager.getDefaultManager().postNonBlockingEvent(
+                event,
+                getSnapshotEventSubject());
         }
     }
 
