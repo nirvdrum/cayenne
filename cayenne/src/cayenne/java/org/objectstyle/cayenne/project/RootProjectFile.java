@@ -109,23 +109,14 @@ public class RootProjectFile extends ProjectFile {
         return "cayenne";
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
-     */
     public void save(PrintWriter out) throws Exception {
         DomainHelper.storeDomains(out, getProject().getDomains());
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#createFileWrapper(Object)
-     */
     public ProjectFile createProjectFile(Project project, Object obj) {
         return new RootProjectFile(project, (Configuration) obj);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#isObjectSupported(Object)
-     */
     public boolean canHandle(Object obj) {
         return obj instanceof Configuration;
     }

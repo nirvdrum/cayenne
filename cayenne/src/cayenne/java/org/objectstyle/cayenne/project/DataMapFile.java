@@ -97,9 +97,6 @@ public class DataMapFile extends ProjectFile {
         return map.getName();
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
-     */
     public void save(PrintWriter out) throws Exception {
         MapLoader saver = new MapLoader();
         saver.storeDataMap(out, map);
@@ -112,9 +109,6 @@ public class DataMapFile extends ProjectFile {
         return obj instanceof DataMap;
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
-     */
     public ProjectFile createProjectFile(Project project, Object obj) {
         return new DataMapFile(project, (DataMap) obj);
     }

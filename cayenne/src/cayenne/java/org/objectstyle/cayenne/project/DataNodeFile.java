@@ -98,9 +98,6 @@ public class DataNodeFile extends ProjectFile {
         return node.getName();
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
-     */
     public void save(PrintWriter out) throws Exception {
         ProjectDataSource src = (ProjectDataSource) node.getDataSource();
         DomainHelper.storeDataNode(out, src.getDataSourceInfo());
@@ -125,9 +122,6 @@ public class DataNodeFile extends ProjectFile {
         return false;
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
-     */
     public ProjectFile createProjectFile(Project project, Object obj) {
         return new DataNodeFile(project, (DataNode) obj);
     }

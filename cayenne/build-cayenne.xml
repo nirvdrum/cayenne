@@ -47,7 +47,7 @@
 
 	<target name="dist-bin" depends="jar-nodeps,jar">
 	    <copy todir="${dist}/bin">
-            <fileset dir="${core.bin}" includes="*.bat,*.sh"/>
+            <fileset dir="${core.bin}" includes="*.bat,*.sh,*.ico"/>
         </copy>
 
         <chmod perm="gu+x">

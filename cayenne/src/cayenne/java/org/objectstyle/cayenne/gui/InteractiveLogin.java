@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.gui;
 
 
 import java.io.IOException;
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.gui.util.CmdPasswordField;
 import org.objectstyle.cayenne.gui.util.CmdTextField;
