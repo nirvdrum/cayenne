@@ -9,6 +9,8 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-1. Synchronized internal DataContext cache access.
+1. Removed all methods that were deprecated prior to Aplpha 3.
 
-2. Added "unregisterObject" method to DataContext 
+2. Synchronized internal DataContext cache access.
+
+3. Added "unregisterObject" method to DataContext 
