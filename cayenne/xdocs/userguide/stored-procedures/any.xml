@@ -16,7 +16,7 @@
 		
 		<p>
 		QueryResult  implements OperationObserver, so it can be used as a second parameter to
-		<code>DataContext.performQuery()</code> method. After the query execution is done, QueryResult 
+		<code>DataContext.performQueries()</code> method. After the query execution is done, QueryResult 
 		instance will contain all the output of the query:
 		</p>
 		
@@ -34,7 +34,7 @@ query.addParam("parameter2", new Integer(3000));
 QueryResult resultsCollection = new QueryResult();
 
 // run query
-ctxt.performQuery(query, resultsCollection);
+ctxt.performQueries(Collections.singleton(query), resultsCollection);
 
 // check the results
 
@@ -80,7 +80,7 @@ query.addParam("parameter2", new Integer(3000));
 QueryResult resultsCollection = new QueryResult();
 
 // run query
-ctxt.performQuery(query, resultsCollection);
+ctxt.performQueries(Collections.singleton(query), resultsCollection);
 
 // read OUT parameters
 List outList = resultsCollection.getFirstRows(query);
