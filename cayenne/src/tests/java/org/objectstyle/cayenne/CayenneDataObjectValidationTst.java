@@ -53,39 +53,74 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.access.types;
+package org.objectstyle.cayenne;
 
-import java.sql.PreparedStatement;
+import java.util.List;
+
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.validation.ValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * Superclass of concrete ExtendedType implementations.
- * 
  * @author Andrei Adamchik
  */
-public abstract class AbstractType implements ExtendedType {
-    
-    public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
-        if (precision != -1) {
-			st.setObject(pos, val, type, precision);
-        }
-        else {
-			st.setObject(pos, val, type);
-        }
+public class CayenneDataObjectValidationTst extends CayenneTestCase {
+
+    public void testValidateForSaveMandatoryAttributeMissing() throws Exception {
+        DataContext context = createDataContext();
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+
+        ValidationResult result = new ValidationResult();
+        artist.validateForSave(result);
+
+        assertTrue("Validation of 'artistName' should've failed.", result.hasFailures());
+        assertTrue(result.hasFailures(artist));
+
+        List failures = result.getFailures();
+        assertEquals(1, failures.size());
+
+        ValidationFailure failure = (ValidationFailure) failures.get(0);
+        assertEquals(Artist.ARTIST_NAME_PROPERTY, failure.getProperty());
+
+        // fix the problem and see if it goes away
+        artist.setArtistName("aa");
+        result = new ValidationResult();
+        artist.validateForSave(result);
+        assertFalse(result.hasFailures());
     }
 
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("ExtendedType [")
-            .append(getClass().getName())
-            .append("], handling ")
-            .append(getClassName());
-        return buf.toString();
+    public void testValidateForSaveAttributeTooLong() throws Exception {
+        DataContext context = createDataContext();
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+
+        DbEntity entity = context.getEntityResolver().lookupDbEntity(artist);
+        int len = ((DbAttribute) entity.getAttribute("ARTIST_NAME")).getMaxLength();
+        StringBuffer buf = new StringBuffer(len);
+        for (int i = 0; i < len + 1; i++) {
+            buf.append("c");
+        }
+        artist.setArtistName(buf.toString());
+
+        ValidationResult result = new ValidationResult();
+        artist.validateForSave(result);
+
+        assertTrue(result.hasFailures());
+        assertTrue(result.hasFailures(artist));
+
+        List failures = result.getFailures();
+        assertEquals(1, failures.size());
+
+        ValidationFailure failure = (ValidationFailure) failures.get(0);
+        assertEquals(Artist.ARTIST_NAME_PROPERTY, failure.getProperty());
+
+        // fix the problem and see if it goes away
+        artist.setArtistName("aa");
+        result = new ValidationResult();
+        artist.validateForSave(result);
+        assertFalse(result.hasFailures());
     }
 }

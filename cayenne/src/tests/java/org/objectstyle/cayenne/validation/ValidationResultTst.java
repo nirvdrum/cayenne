@@ -112,16 +112,16 @@ public class ValidationResultTst extends TestCase {
     public void testHasFailure() {
         this.addFailures();
 
-        assertTrue(res.hasFailure());
+        assertTrue(res.hasFailures());
 
-        assertTrue(res.hasFailure(obj1));
+        assertTrue(res.hasFailures(obj1));
         assertTrue(res.hasFailure(obj1, "obj1 1"));
         assertTrue(res.hasFailure(obj1, "obj1 2"));
         assertTrue(res.hasFailure(obj1, "obj1 3"));
         assertFalse(res.hasFailure(obj1, "Foobar"));
         assertFalse(res.hasFailure(obj1, null));
 
-        assertTrue(res.hasFailure(obj2));
+        assertTrue(res.hasFailures(obj2));
         assertTrue(res.hasFailure(obj2, "obj2 1"));
         assertTrue(res.hasFailure(obj2, "obj2 2"));
         assertFalse(res.hasFailure(obj2, "Foobar"));
@@ -215,10 +215,10 @@ public class ValidationResultTst extends TestCase {
 
     public void testEmpty() {
         res = new ValidationResult();
-        assertFalse(res.hasFailure());
+        assertFalse(res.hasFailures());
 
-        assertFalse(res.hasFailure(obj1));
-        assertFalse(res.hasFailure(null));
+        assertFalse(res.hasFailures(obj1));
+        assertFalse(res.hasFailures(null));
 
         assertFalse(res.hasFailure(obj1, "property"));
         assertFalse(res.hasFailure(obj1, null));

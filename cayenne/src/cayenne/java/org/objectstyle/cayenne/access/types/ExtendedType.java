@@ -59,6 +59,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.ValidationResult;
+
 /** 
  * Defines methods to read Java objects from JDBC ResultSets 
  * and write as parameters of PreparedStatements.
@@ -70,13 +73,28 @@ public interface ExtendedType {
      * Returns a full name of Java class that this ExtendedType supports.
      */
     public String getClassName();
+    
+    /**
+     * Performs validation of an object property. Property is considered
+     * valid if this it satsifies the database constraints known to this
+     * ExtendedType. In case of validation failure, failures are appended
+     * to the ValidationResult object and <code>false</code> is returned.
+     * 
+     * @since 1.1
+     */
+    public boolean validateProperty(
+        Object source,
+        String property,
+        Object value,
+        DbAttribute dbAttribute,
+        ValidationResult validationResult);
 
     /**
      * Initializes a single parameter of a PreparedStatement with object value. 
      */
     public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
+        PreparedStatement statement,
+        Object value,
         int pos,
         int type,
         int precision)

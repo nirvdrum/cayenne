@@ -69,6 +69,9 @@ import java.sql.Types;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.validation.Validator;
 
 /**
  * @author Andrei Adamchik
@@ -112,6 +115,43 @@ public class ByteArrayType extends AbstractType {
 	public String getClassName() {
 		return "byte[]";
 	}
+    
+    /**
+     * Validates byte[] property.
+     * 
+     * @since 1.1
+     */
+    public boolean validateProperty(
+        Object source,
+        String property,
+        Object value,
+        DbAttribute dbAttribute,
+        ValidationResult validationResult) {
+
+        if (!(value instanceof byte[])) {
+            return true;
+        }
+
+        if (dbAttribute.getMaxLength() <= 0) {
+            return true;
+        }
+
+        byte[] bytes = (byte[]) value;
+        if (bytes.length > dbAttribute.getMaxLength()) {
+            validationResult.addFailure(
+                source,
+                property,
+                Validator.createMessage(
+                    property,
+                    " exceeds maximum allowed length ("
+                        + dbAttribute.getMaxLength()
+                        + " bytes): "
+                        + bytes.length));
+            return false;
+        }
+
+        return true;
+    }
 
 	public Object materializeObject(ResultSet rs, int index, int type)
 		throws Exception {

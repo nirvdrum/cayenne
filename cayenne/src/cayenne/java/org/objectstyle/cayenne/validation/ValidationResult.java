@@ -147,20 +147,24 @@ public class ValidationResult {
      */
     public List getFailures() {
         Collection values = this.errors.values();
-        ArrayList ret = new ArrayList(values.size() * 2);
-        //Guess 2 errors each on average.
-        for (Iterator it = values.iterator(); it.hasNext();) {
+
+        // Guess 2 errors each on average.
+        ArrayList failures = new ArrayList(values.size() * 2);
+
+        Iterator it = values.iterator();
+        while (it.hasNext()) {
             Object obj = it.next();
             if (obj instanceof List) {
                 List res = (List) obj;
-                ret.addAll(res);
+                failures.addAll(res);
 
             }
             else {
-                ret.add(obj);
+                failures.add(obj);
             }
         }
-        return ret;
+
+        return failures;
     }
 
     /**
@@ -212,7 +216,7 @@ public class ValidationResult {
     /**
      * @return true if at least one failure has been added to this result. False otherwise.
      */
-    public boolean hasFailure() {
+    public boolean hasFailures() {
         return !this.errors.isEmpty();
     }
 
@@ -220,11 +224,13 @@ public class ValidationResult {
      * @param source it may be null.
      * @return true if there is at least one failure for <code>source</code>. False otherwise.
      */
-    public boolean hasFailure(Object source) {
+    public boolean hasFailures(Object source) {
         if (source == null) {
             return this.hasFailure(null, null);
         }
-        for (Iterator it = this.errors.entrySet().iterator(); it.hasNext();) {
+
+        Iterator it = this.errors.entrySet().iterator();
+        while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             Tuple tuple = (Tuple) entry.getKey();
             if (source.equals(tuple.one)) {

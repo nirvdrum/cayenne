@@ -172,17 +172,23 @@ public class DbAttribute extends Attribute {
 		this.mandatory = mandatory;
 	}
 
-	/** Returns the length of database column described by this attribute. */
+	/** 
+     * Returns the length of database column described by this attribute. 
+     */
 	public int getMaxLength() {
 		return maxLength;
 	}
 
-	/** Sets the length of character or binary type or max num of digits for DECIMAL.*/
+	/** 
+     * Sets the length of character or binary type or max num of digits for DECIMAL.
+     */
 	public void setMaxLength(int maxLength) {
 		this.maxLength = maxLength;
 	}
 
-	/** Returns the number of digits after period for DECIMAL.*/
+	/** 
+     * Returns the number of digits after period for DECIMAL.
+     */
 	public int getPrecision() {
 		return precision;
 	}

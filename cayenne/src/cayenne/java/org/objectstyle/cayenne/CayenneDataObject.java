@@ -56,10 +56,14 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.validation.Validator;
 
 /**
  * A default implementation of DataObject interface. It is normally used as a
@@ -567,7 +571,44 @@ public class CayenneDataObject implements DataObject {
      * @since 1.1
      */
     public void validateForSave(ValidationResult validationResult) {
-        
+
+        ObjEntity objEntity = getDataContext().getEntityResolver().lookupObjEntity(this);
+        ExtendedTypeMap types =
+            getDataContext()
+                .dataNodeForObjEntity(objEntity)
+                .getAdapter()
+                .getExtendedTypes();
+
+        Iterator it = objEntity.getAttributes().iterator();
+
+        while (it.hasNext()) {
+            ObjAttribute objAttribute = (ObjAttribute) it.next();
+            DbAttribute dbAttribute = objAttribute.getDbAttribute();
+
+            Object value = this.readPropertyDirectly(objAttribute.getName());
+            if (dbAttribute.isMandatory()
+                && !Validator.checkMandatory(
+                    this,
+                    value,
+                    objAttribute.getName(),
+                    validationResult)) {
+
+                continue;
+            }
+
+            if (value != null) {
+                
+                // TODO: should we pass null values for validation as well?
+                // if so, class can be obtained from ObjAttribute...
+
+                types.getRegisteredType(value.getClass()).validateProperty(
+                    this,
+                    objAttribute.getName(),
+                    value,
+                    dbAttribute,
+                    validationResult);
+            }
+        }
     }
 
     /**

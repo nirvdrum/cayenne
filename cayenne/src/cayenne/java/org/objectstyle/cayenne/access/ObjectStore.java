@@ -756,7 +756,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
 
-        if (validationResult.hasFailure()) {
+        if (validationResult.hasFailures()) {
             throw new ValidationException(validationResult);
         }
     }

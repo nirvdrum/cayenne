@@ -62,6 +62,9 @@ package org.objectstyle.cayenne.validation;
  * @since 1.1
  */
 public class StringValidationFailure implements ValidationFailure {
+    private Object source;
+    private String property;
+    private String error;
 
     public StringValidationFailure(Object source, String property, String error) {
         if (source == null && property != null) {
@@ -91,11 +94,4 @@ public class StringValidationFailure implements ValidationFailure {
     public Object getError() {
         return error;
     }
-
-    private Object source;
-
-    private String property;
-
-    private String error;
-
 }

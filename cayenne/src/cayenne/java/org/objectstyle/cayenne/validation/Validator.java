@@ -138,8 +138,6 @@ public class Validator {
         return Validator.checkNotNull(bean, value, attribute, result);
     }
 
-    // Utility methods
-    // TODO: please, move them to an utilities class
 
     public static String createMessage(String attribute, String mes) {
         StringBuffer message = new StringBuffer(mes.length() + attribute.length() + 5);

@@ -59,7 +59,9 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 public class ExtendedTypeMapTst extends CayenneTestCase {
 
@@ -117,6 +119,15 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
     class TestExtType implements ExtendedType {
         public String getClassName() {
             return "test.test.Test";
+        }
+        
+        public boolean validateProperty(
+            Object source,
+            String property,
+            Object value,
+            DbAttribute dbAttribute,
+            ValidationResult validationResult) {
+            return true;
         }
 
         public Object materializeObject(ResultSet rs, int index, int type)

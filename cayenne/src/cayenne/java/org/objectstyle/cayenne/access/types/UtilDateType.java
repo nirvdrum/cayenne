@@ -60,6 +60,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.ValidationResult;
+
 /**
  * ExtendedType that allows Java application to use java.util.Date
  * transparently for all three database date/time types: TIME, DATE, TIMESTAMP.
@@ -70,6 +73,21 @@ public class UtilDateType extends AbstractType {
 
     public String getClassName() {
         return java.util.Date.class.getName();
+    }
+    
+    /**
+     * Always returns true indicating no validation failures. There is no date-specific
+     * validations at the moment.
+     * 
+     * @since 1.1
+     */
+    public boolean validateProperty(
+        Object source,
+        String property,
+        Object value,
+        DbAttribute dbAttribute,
+        ValidationResult validationResult) {
+        return true;
     }
 
     protected Object convertToJdbcObject(Object val, int type)

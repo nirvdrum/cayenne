@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * DbAdapter implementation for the <a href="http://www.ibm.com/db2/"> DB2 RDBMS</a>.
@@ -229,6 +230,18 @@ public class DB2Adapter extends JdbcAdapter {
         
         public String getClassName() {
             return Boolean.class.getName();
+        }
+        
+        /**
+         * @since 1.1
+         */
+        public boolean validateProperty(
+            Object source,
+            String property,
+            Object value,
+            DbAttribute dbAttribute,
+            ValidationResult validationResult) {
+            return true;
         }
 
         public Object materializeObject(ResultSet rs, int index, int type)

@@ -64,6 +64,8 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /** 
  * Default implementation of ExtendedType that works exactly per JDBC
@@ -218,7 +220,24 @@ public class DefaultType extends AbstractType {
     public String getClassName() {
         return className;
     }
-
+    
+    /**
+     * Always returns true indicating no validation failures. DefaultType doesn't
+     * support meaningful validation. Since it is generic and works with any types
+     * of Java values, it is not known how a given value will be converted to the
+     * database representation.
+     * 
+     * @since 1.1
+     */
+    public boolean validateProperty(
+        Object source,
+        String property,
+        Object value,
+        DbAttribute dbAttribute,
+        ValidationResult validationResult) {
+        return true;
+    }
+    
     public Object materializeObject(ResultSet rs, int index, int type)
         throws Exception {
         Object val = readMethod.invoke(rs, new Object[] { new Integer(index)});

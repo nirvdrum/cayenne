@@ -66,33 +66,34 @@ package org.objectstyle.cayenne.validation;
 public interface ValidationFailure {
 
     /**
-     * It is the object that has generated this failure.<br>
-     * For example, if a <code>Person</code> must have a name and a <code>ValidationFailure</code> is created when the
+     * Returns the object that has generated the failure. For example, if a <code>Person</code>
+     * must have a name and a <code>ValidationFailure</code> is created when the
      * user attempts to save it, the <code>Person</code> object would be the failure source.
      *
      * @return the failure's source or null in case a source cannot be defined.
      */
-    Object getSource();
+    public Object getSource();
 
     /**
-     * It is the name of the property that has generated this failure. It must be formatted according to the Java
-     * Beans standard (getFullName() -> fullName).<br>
+     * Returns the name of the property that has generated this failure. 
+     * It must be formatted according to the JavaBeans standard (getFullName() -> fullName).<br>
      * For example, if a <code>Person</code> must have a name and a <code>ValidationFailure</code> is created when the
      * user attempts to save it, the <code>String</code> "name" would be the failure property.
      *
      * @return the failure's property name or null in case a source cannot be defined. It MUST be null if
      * <code>source</code> is null.
      */
-    String getProperty();
+    public String getProperty();
 
     /**
-     * It is an user defined error object.
+     * Returns an user defined error object.
      */
-    Object getError();
+    public Object getError();
 
     /**
-     * @return a string representation of the error object. This is used in log messages and exceptions.
+     * Returns a String representation of the error object.
+     * This is used in log messages and exceptions.
      */
-    String getDescription();
+    public String getDescription();
 
 }
