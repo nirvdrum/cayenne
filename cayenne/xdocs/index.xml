@@ -5,13 +5,6 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><i>[December 12, 2003]</i></u> <strong>ObjectStyle LLC. Launches a Website to Support Cayenne </strong></p>
-        <p><img align="left" hspace="3" src="images/other/objectstyle-llc-logo.gif"/>
-        ObjectStyle LLC., a company founded by two original Cayenne authors and current developers, launched its public website
-         dedicated to commercial support of Cayenne. Visit <a href="http://objectstyle.com">http://objectstyle.com</a> for 
-         details.<br/><br/>
-         </p>
-         
          <p><u><i>[December 1, 2003]</i></u> <strong><font color="red">ObjectStyle.org Server has Become Collateral Damage In SPAM War</font></strong></p>
          <p>ObjectStyle.org server appeared on the <a href="http://www.spamhaus.org/sbl/sbl.lasso?query=SBL12419">SpamHous.org block list</a>
          as a result of another server on the same network being used by spammers. Until this is resolved, some users may not receive email from the mailing lists
