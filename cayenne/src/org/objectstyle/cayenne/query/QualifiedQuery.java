@@ -71,7 +71,7 @@ public abstract class QualifiedQuery extends AbstractQuery {
 	}
 
 	/**
-	 * Adds specificed qualifier to the existing qualifier
+	 * Adds specified qualifier to the existing qualifier
 	 * joining it using "AND".
 	 */
 	public void andQualifier(Expression e) {
@@ -79,7 +79,7 @@ public abstract class QualifiedQuery extends AbstractQuery {
 	}
 
 	/**
-	* Adds specificed qualifier to the existing qualifier
+	* Adds specified qualifier to the existing qualifier
 	* joining it using "OR".
 	*/
 	public void orQualifier(Expression e) {

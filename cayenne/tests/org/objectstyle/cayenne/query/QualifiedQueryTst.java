@@ -53,31 +53,53 @@ package org.objectstyle.cayenne.query;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 
-
 public class QualifiedQueryTst extends CayenneTestCase {
-    protected QualifiedQuery query;    
-    
-    public QualifiedQueryTst(String name) {
-        super(name);
-    }
-    
-    
-    public void setUp() throws java.lang.Exception {
-        query = new TstQualifiedQuery();
-    }
-    
-    public void testSetQualifier() throws Exception {
-        assertNull(query.getQualifier());
-        
-        org.objectstyle.cayenne.exp.Expression qual = ExpressionFactory.expressionOfType(org.objectstyle.cayenne.exp.Expression.AND);
-        query.setQualifier(qual);
-        assertNotNull(query.getQualifier());
-        assertSame(qual, query.getQualifier());
-    }
-    
+	protected QualifiedQuery query;
+
+	public QualifiedQueryTst(String name) {
+		super(name);
+	}
+
+	public void setUp() throws java.lang.Exception {
+		query = new TstQualifiedQuery();
+	}
+
+	public void testSetQualifier() throws Exception {
+		assertNull(query.getQualifier());
+
+		Expression qual = ExpressionFactory.expressionOfType(Expression.AND);
+		query.setQualifier(qual);
+		assertNotNull(query.getQualifier());
+		assertSame(qual, query.getQualifier());
+	}
+
+	public void testAndQualifier() throws Exception {
+		assertNull(query.getQualifier());
+
+		Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+		query.andQualifier(e1);
+		assertSame(e1, query.getQualifier());
+		
+		Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+		query.andQualifier(e2);
+		assertEquals(Expression.AND, query.getQualifier().getType()); 
+	}
+	
+	public void testOrQualifier() throws Exception {
+		assertNull(query.getQualifier());
+
+		Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+		query.orQualifier(e1);
+		assertSame(e1, query.getQualifier());
+		
+		Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+		query.orQualifier(e2);
+		assertEquals(Expression.OR, query.getQualifier().getType()); 
+	}
 }

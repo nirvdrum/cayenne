@@ -57,6 +57,8 @@
 package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 
 public class SelectQueryBasicsTst extends CayenneTestCase {
 	protected SelectQuery q;
@@ -73,7 +75,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 		q.setFetchLimit(5);
 		assertEquals(5, q.getFetchLimit());
 	}
-	
+
 	public void testAddOrdering1() throws Exception {
 		Ordering ord = new Ordering();
 		q.addOrdering(ord);
@@ -115,7 +117,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 		q.addCustDbAttribute("ARTIST_ID");
 		assertTrue(q.isFetchingDataRows());
 
-        // this shouldn't have any effect, since custom attributes are fetched
+		// this shouldn't have any effect, since custom attributes are fetched
 		q.setFetchingDataRows(false);
 		assertTrue(q.isFetchingDataRows());
 	}
@@ -133,5 +135,47 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
 
 		q.addCustDbAttribute("ARTIST_ID");
 		assertTrue(q.isFetchingCustAttributes());
+	}
+
+	public void testSetParentQualifier() throws Exception {
+		assertNull(q.getParentQualifier());
+
+		Expression qual = ExpressionFactory.expressionOfType(Expression.AND);
+		q.setParentQualifier(qual);
+		assertNotNull(q.getParentQualifier());
+		assertSame(qual, q.getParentQualifier());
+	}
+
+	public void testAndParentQualifier() throws Exception {
+		assertNull(q.getParentQualifier());
+
+		Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+		q.andParentQualifier(e1);
+		assertSame(e1, q.getParentQualifier());
+
+		Expression e2 =
+			ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+		q.andParentQualifier(e2);
+		assertEquals(Expression.AND, q.getParentQualifier().getType());
+	}
+
+	public void testOrParentQualifier() throws Exception {
+		assertNull(q.getParentQualifier());
+
+		Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+		q.orParentQualifier(e1);
+		assertSame(e1, q.getParentQualifier());
+
+		Expression e2 =
+			ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+		q.orParentQualifier(e2);
+		assertEquals(Expression.OR, q.getParentQualifier().getType());
+	}
+
+	public void testParentObjEntityName() throws Exception {
+		assertNull(q.getParentObjEntityName());
+
+		q.setParentObjEntityName("SomeEntity");
+		assertSame("SomeEntity", q.getParentObjEntityName());
 	}
 }

@@ -61,6 +61,17 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.exp.Expression;
 
+/**
+ * Describes a database SELECT statement in object terms.
+ * In other words, <code>SelectQuery</code> is a specification
+ * that tells Cayenne how to generate SQL that will be eventually
+ * sent to the database.
+ * 
+ * <p>SelectQuery defines ObjEntity that should be fetched and a set of conditions. 
+ * It allows lots of fine tuning of the fetch process.</p>
+ * 
+ * @author Andrei Adamchik
+ */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
 
@@ -70,6 +81,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	protected boolean distinct;
 	protected boolean fetchingDataRows;
 	protected int fetchLimit;
+	protected Expression parentQualifier;
+	protected String parentObjEntityName;
 
 	/** Creates empty SelectQuery. */
 	public SelectQuery() {
@@ -135,7 +148,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public void addCustDbAttribute(String attributePath) {
 		custDbAttributes.add(attributePath);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if there is at least one custom query 
 	 * attribute specified, otherwise returns <code>false</code>
@@ -177,7 +190,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 		return isFetchingCustAttributes() || fetchingDataRows;
 	}
 
-
 	/**	
 	 * Sets query result type. If <code>flag</code> parameter is
 	 * <code>true</code>, then results will be in the form of data rows.
@@ -189,8 +201,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public void setFetchingDataRows(boolean flag) {
 		this.fetchingDataRows = flag;
 	}
-	
-	
+
 	/**
 	 * Returns the fetchLimit.
 	 * @return int
@@ -199,14 +210,68 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 		return fetchLimit;
 	}
 
-
 	/**
 	 * Sets the fetchLimit.
+	 * 
 	 * @param fetchLimit The fetchLimit to set
 	 */
 	public void setFetchLimit(int fetchLimit) {
 		this.fetchLimit = fetchLimit;
 	}
 
+	/** Setter for query's parent entity qualifier. */
+	public void setParentQualifier(Expression parentQualifier) {
+		this.parentQualifier = parentQualifier;
+	}
 
+	/** Getter for query parent entity qualifier. */
+	public Expression getParentQualifier() {
+		return parentQualifier;
+	}
+
+	/**
+	 * Adds specified parent entity qualifier to the 
+	 * existing parent entity qualifier joining it using "AND".
+	 */
+	public void andParentQualifier(Expression e) {
+		parentQualifier =
+			(parentQualifier != null) ? parentQualifier.andExp(e) : e;
+	}
+
+	/**
+	* Adds specified parent entity qualifier to the existing 
+	* qualifier joining it using "OR".
+	*/
+	public void orParentQualifier(Expression e) {
+		parentQualifier =
+			(parentQualifier != null) ? parentQualifier.orExp(e) : e;
+	}
+
+	/**
+	 * Returns the name of parent ObjEntity.
+	 * 
+	 * @return String
+	 */
+	public String getParentObjEntityName() {
+		return parentObjEntityName;
+	}
+
+	/**
+	 * Sets the name of parent ObjEntity. If query's root 
+	 * ObjEntity maps to a derived entity in the DataMap,
+	 * this query qualifier will resolve to a HAVING clause
+	 * of an SQL statement. To allow fine tuning the query 
+	 * before applying GROUP BY and HAVING, callers can setup
+	 * the name of parent ObjEntity and parent qualifier that
+	 * will be used to create WHERE clause preceeding GROUP BY.
+	 * 
+	 * <p>For instance this is helpful to qualify the fetch 
+	 * on a related entity attributes, since HAVING does not 
+	 * allow joins.</p>
+	 * 
+	 * @param parentObjEntityName The parentObjEntityName to set
+	 */
+	public void setParentObjEntityName(String parentObjEntityName) {
+		this.parentObjEntityName = parentObjEntityName;
+	}
 }
