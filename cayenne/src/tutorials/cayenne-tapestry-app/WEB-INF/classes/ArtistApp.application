@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!DOCTYPE application PUBLIC 
+	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
+	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+
+<application name="Artist Web App" engine-class="net.sf.tapestry.engine.SimpleEngine">
+
+  <property name="net.sf.tapestry.visit-class">cayenne.tutorial.tapestry.Visit</property>
+
+  <page name="Home" specification-path="/cayenne/tutorial/tapestry/pages/Home.page"/>
+  <page name="Main" specification-path="/cayenne/tutorial/tapestry/pages/Main.page"/>
+  <page name="BrowseArtistsPage" specification-path="/cayenne/tutorial/tapestry/pages/BrowseArtistsPage.page"/>
+  <page name="BrowseGalleriesPage" specification-path="/cayenne/tutorial/tapestry/pages/BrowseGalleriesPage.page"/>
+  <page name="AddArtistPage" specification-path="/cayenne/tutorial/tapestry/pages/AddArtistPage.page"/>
+  <page name="AddGalleryPage" specification-path="/cayenne/tutorial/tapestry/pages/AddGalleryPage.page"/>
+  <page name="AddPaintingPage" specification-path="/cayenne/tutorial/tapestry/pages/AddPaintingPage.page"/>
+  <page name="ChooseGalleryPage" specification-path="/cayenne/tutorial/tapestry/pages/ChooseGalleryPage.page"/>
+  
+  <component-alias type="PageWrapper" specification-path="/cayenne/tutorial/tapestry/components/PageWrapper.jwc"/>
+</application>

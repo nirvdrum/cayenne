@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE page-specification PUBLIC 
+	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
+	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+
+<page-specification class="cayenne.tutorial.tapestry.pages.AddGalleryPage">
+
+  	<component id="pageWrapper" type="PageWrapper" />
+	
+	<component id="hasErrors" type="Conditional">
+   		<binding name="condition" expression="hasErrorMessage"/>
+	</component>
+	
+	<component id="errorMessage" type="Insert">
+    	<binding name="value" expression="errorMessage"/>
+		<binding name="raw" expression="true"/>
+	</component>
+	
+	<component id="addGalleryForm" type="Form" />
+	
+	<component id="galleryName" type="TextField">
+		<binding name="value" expression="gallery.galleryName" />
+	</component>
+
+	<component id="saveGalleryButton" type="Submit">
+		<binding name="listener" expression="listeners.saveGalleryAction"/>
+	</component>
+
+</page-specification>

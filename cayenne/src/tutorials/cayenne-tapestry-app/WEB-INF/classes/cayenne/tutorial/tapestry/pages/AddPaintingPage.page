@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE page-specification PUBLIC 
+	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
+	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+
+<page-specification class="cayenne.tutorial.tapestry.pages.AddPaintingPage">
+
+  	<component id="pageWrapper" type="PageWrapper" />
+	
+	<component id="hasErrors" type="Conditional">
+   		<binding name="condition" expression="hasErrorMessage"/>
+	</component>
+	
+	<component id="errorMessage" type="Insert">
+    	<binding name="value" expression="errorMessage"/>
+		<binding name="raw" expression="true"/>
+	</component>
+	
+	<component id="addPaintingForm" type="Form" />
+	
+	<component id="paintingTitle" type="TextField">
+		<binding name="value" expression="painting.paintingTitle" />
+	</component>
+	
+	<component id="estimatedPrice" type="TextField">
+		<binding name="value" expression="painting.estimatedPrice" />
+	</component>
+
+	<component id="savePaintingButton" type="Submit">
+		<binding name="listener" expression="listeners.savePaintingAction"/>
+	</component>
+
+</page-specification>

@@ -11,17 +11,19 @@
 	<target name="compile">
 		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="compile"/>
 		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="compile"/>
+		<ant antfile="src/tutorials/cayenne-tapestry-app/build.xml" target="compile"/>
 	</target>
 	
 	<target name="dist-src">
 		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="dist-src"/>
 		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="dist-src"/>
+		<ant antfile="src/tutorials/cayenne-tapestry-app/build.xml" target="dist-src"/>
 		
-		 <mkdir dir="${dist}/doc/tutorials"/>
+		<mkdir dir="${dist}/doc/tutorials"/>
 	     
-         <copy todir="${dist}/doc/tutorials">
+        <copy todir="${dist}/doc/tutorials">
              <fileset dir="${dist}/src/tutorials"/> 
-         </copy>
+        </copy>
 	</target>
 	
 	<target name="release-site" depends="nositedir,dist-src">

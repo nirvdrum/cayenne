@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE page-specification PUBLIC 
+	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
+	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+
+<page-specification class="cayenne.tutorial.tapestry.pages.BrowseArtistsPage">
+
+  	<component id="pageWrapper" type="PageWrapper" />
+  
+	<component id="artists" type="Foreach">
+  		<binding name="source" expression="artistList"/>
+  		<binding name="value" expression="artist"/>
+	</component>
+
+ 	<component id="artistName" type="Insert">
+    	<binding name="value" expression="artist.artistName"/>
+	</component>
+	
+	<component id="dateOfBirth" type="Insert">
+    	<binding name="value" expression="artist.dateOfBirth"/>
+	</component>
+	
+	<component id="paintings" type="Foreach">
+  		<binding name="source" expression="artist.paintingArray"/>
+  		<binding name="value" expression="painting"/>
+	</component>	
+	
+	<component id="paintingTitle" type="Insert">
+    	<binding name="value" expression="painting.paintingTitle"/>
+	</component>
+	
+	<component id="isOnDisplay" type="Conditional">
+   		<binding name="condition" expression="isOnDisplay"/>
+	</component>
+	
+	<component id="galleryName" type="Insert">
+    	<binding name="value" expression="painting.toGallery.galleryName"/>
+	</component>
+	
+	<component id="isNotOnDisplay" type="Conditional">
+   		<binding name="condition" expression="! isOnDisplay"/>
+	</component>
+	
+	<component id="addPaintingLink" type="ActionLink">
+    	<binding name="listener" expression="listeners.addPaintingAction"/>
+	</component>
+	
+	<component id="submitPaintingLink" type="ActionLink">
+    	<binding name="listener" expression="listeners.submitPaintingToGalleryAction"/>
+	</component>
+	
+	<component id="addArtistLink" type="PageLink">
+		<static-binding name="page">AddArtistPage</static-binding>
+		<field-binding name="stateful" field-name="Boolean.FALSE"/>
+    </component>
+
+
+</page-specification>

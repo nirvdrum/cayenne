@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE page-specification PUBLIC 
+	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
+	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+
+<page-specification class="cayenne.tutorial.tapestry.pages.AddArtistPage">
+
+  	<component id="pageWrapper" type="PageWrapper" />
+	
+	<component id="hasErrors" type="Conditional">
+   		<binding name="condition" expression="hasErrorMessage"/>
+	</component>
+	
+	<component id="errorMessage" type="Insert">
+    	<binding name="value" expression="errorMessage"/>
+		<binding name="raw" expression="true"/>
+	</component>
+	
+	<component id="addArtistForm" type="Form" />
+	
+	<component id="artistName" type="TextField">
+		<binding name="value" expression="artist.artistName"/>
+	</component>
+	
+	<component id="dateOfBirth" type="DatePicker">
+		<binding name="value" expression="artist.dateOfBirth"/>
+	</component>
+
+	<component id="saveArtistButton" type="Submit">
+		<binding name="listener" expression="listeners.saveArtistAction"/>
+	</component>
+	 
+</page-specification>

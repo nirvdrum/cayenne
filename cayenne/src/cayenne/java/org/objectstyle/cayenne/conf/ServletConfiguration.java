@@ -62,9 +62,8 @@ import javax.servlet.http.*;
 
 import org.objectstyle.cayenne.access.DataContext;
 
-
 /**
-  * Subclass of Configuration that uses ServletContext to locate resources. 
+  * ServletConfiguration is a Configuration that uses ServletContext to locate resources. 
   * This class can only be used in a context of a servlet/jsp container.
   * It resolves configuration file paths relative to the web application
   * "WEB-INF" directory.
@@ -90,36 +89,19 @@ import org.objectstyle.cayenne.access.DataContext;
   *
   * @author Andrei Adamchik
   */
-public class ServletConfiguration extends Configuration
+public class ServletConfiguration
+    extends BasicServletConfiguration
     implements HttpSessionListener, ServletContextListener {
 
     public static final String DATA_CONTEXT_KEY = "cayenne.datacontext";
 
-    protected ServletContext servletContext;
+    public ServletConfiguration() {}
 
+    public ServletConfiguration(ServletContext context) {}
 
     /** Returns default Cayenne DataContext associated with session <code>s</code>. */
     public static DataContext getDefaultContext(HttpSession s) {
-        return (DataContext)s.getAttribute(DATA_CONTEXT_KEY);
-    }
-
-    /** Locates domain configuration file in a web application
-      * looking for "cayenne.xml" in application "WEB-INF" directory. */
-    public InputStream getDomainConfig() {
-        return servletContext.getResourceAsStream("/WEB-INF/" + DOMAIN_FILE);
-    }
-
-    /** Locates data map configuration file via ServletContext
-      * associated with this Configuration treating 
-      * <code>location</code> as relative to application "WEB-INF" directory.. */
-    public InputStream getMapConfig(String location) {
-        return servletContext.getResourceAsStream("/WEB-INF/" + location);
-    }
-
-
-    /** Returns current application context object. */
-    public ServletContext getServletContext() {
-        return servletContext;
+        return (DataContext) s.getAttribute(DATA_CONTEXT_KEY);
     }
 
     /** Sets itself as a Cayenne shared Configuration object that can later
@@ -132,13 +114,11 @@ public class ServletConfiguration extends Configuration
         Configuration.initSharedConfig(this);
     }
 
-
     /** Currently does nothing. <i>In the future it should close down
       * any database connections if they wheren't obtained via JNDI.</i>
       * This method is a part of ServletContextListener interface and is called
       * on application shutdown. */
     public void contextDestroyed(ServletContextEvent sce) {}
-
 
     /** Creates and assigns a new data context based on default domain
       * to the session object  associated with this event. This method
@@ -149,10 +129,8 @@ public class ServletConfiguration extends Configuration
         se.getSession().setAttribute(DATA_CONTEXT_KEY, getDomain().createDataContext());
     }
 
-
     /** Does nothing. This method
       * is a part of HttpSessionListener interface and is called every time
       * when a session is destroyed. */
     public void sessionDestroyed(HttpSessionEvent se) {}
 }
-

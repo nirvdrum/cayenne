@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE page-specification PUBLIC 
+	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
+	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+
+<page-specification class="cayenne.tutorial.tapestry.pages.BrowseGalleriesPage">
+
+  	<component id="pageWrapper" type="PageWrapper" />
+  
+  	<component id="galleries" type="Foreach">
+  		<binding name="source" expression="galleryList"/>
+  		<binding name="value" expression="gallery"/>
+	</component>
+
+ 	<component id="galleryName" type="Insert">
+    	<binding name="value" expression="gallery.galleryName"/>
+	</component>
+	
+	<component id="paintings" type="Foreach">
+  		<binding name="source" expression="gallery.paintingArray"/>
+  		<binding name="value" expression="painting"/>
+	</component>	
+	
+	<component id="paintingTitle" type="Insert">
+    	<binding name="value" expression="painting.paintingTitle"/>
+	</component>
+	
+	<component id="estimatedPrice" type="Insert">
+    	<binding name="value" expression="painting.estimatedPrice"/>
+	</component>
+	
+	<component id="artistName" type="Insert">
+    	<binding name="value" expression="painting.toArtist.artistName"/>
+	</component>
+	
+	<component id="removePaintingLink" type="ActionLink">
+    	<binding name="listener" expression="listeners.removePaintingAction"/>
+	</component>
+	
+	<component id="addGalleryLink" type="PageLink">
+		<static-binding name="page">AddGalleryPage</static-binding>
+		<field-binding name="stateful" field-name="Boolean.FALSE"/>
+    </component>
+	
+</page-specification>
