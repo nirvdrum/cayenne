@@ -102,7 +102,7 @@ public class SQLTemplateSelectAction extends SQLTemplateAction {
         SQLTemplate sqlTemplate = (SQLTemplate) query;
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
-        String template = sqlTemplate.getTemplate(adapter.getClass().getName());
+        String template = extractTemplateString(sqlTemplate);
         boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
 
         int size = sqlTemplate.parametersSize();

@@ -427,6 +427,39 @@ public class Util {
         // we are dealing with a hidden file rather than an extension
         return (dotInd > 0) ? fileName.substring(0, dotInd) : fileName;
     }
+    
+    /**
+     * Strips "\n", "\r\n", "\r" from the argument string.
+     * 
+     * @since 1.2
+     */
+    public static String stripLineBreaks(String string, String replaceWith) {
+        if (isEmptyString(string)) {
+            return string;
+        }
+
+        int len = string.length();
+        StringBuffer buffer = new StringBuffer(len);
+        for (int i = 0; i < len; i++) {
+            char c = string.charAt(i);
+            
+            // skip \n, \r, \r\n
+            switch (c) {
+                case '\n':
+                case '\r': // do lookahead
+                    if (i + 1 < len && string.charAt(i + 1) == '\n') {
+                        i++;
+                    }
+
+                    buffer.append(replaceWith);
+                    break;
+                default:
+                    buffer.append(c);
+            }
+        }
+
+        return buffer.toString();
+    }
 
     /** 
      * Encodes a string so that it can be used as an attribute value in an XML document.

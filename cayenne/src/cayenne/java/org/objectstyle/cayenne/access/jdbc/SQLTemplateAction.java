@@ -71,10 +71,10 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Implements a stateless strategy for execution of updating {@link SQLTemplate} 
- * queries.
+ * Implements a stateless strategy for execution of updating {@link SQLTemplate}queries.
  * 
  * @author Andrei Adamchik
  * @since 1.2 replaces SQLTemplateExecutionPlan
@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.query.SQLTemplate;
 public class SQLTemplateAction implements SQLAction {
 
     protected DbAdapter adapter;
+    protected boolean removingLineBreaks;
 
     public SQLTemplateAction(DbAdapter adapter) {
         this.adapter = adapter;
@@ -93,51 +94,50 @@ public class SQLTemplateAction implements SQLAction {
     public DbAdapter getAdapter() {
         return adapter;
     }
-    
+
     /**
      * Runs a SQLTemplate query as an update.
      */
     public void performAction(
-        Connection connection,
-        Query query,
-        OperationObserver observer)
-        throws SQLException, Exception {
-        
+            Connection connection,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
+
         if (!(query instanceof SQLTemplate)) {
             throw new CayenneException("Query unsupported by the execution plan: "
                     + query);
         }
-        
+
         SQLTemplate sqlTemplate = (SQLTemplate) query;
 
-        SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
-        String template = sqlTemplate.getTemplate(adapter.getClass().getName());
+        String template = extractTemplateString(sqlTemplate);
 
         boolean loggable = QueryLogger.isLoggable(sqlTemplate.getLoggingLevel());
         int size = sqlTemplate.parametersSize();
 
+        SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
+
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
         int[] counts = new int[size > 0 ? size : 1];
-        Iterator it =
-            (size > 0)
-                ? sqlTemplate.parametersIterator()
-                : IteratorUtils.singletonIterator(Collections.EMPTY_MAP);
+        Iterator it = (size > 0) ? sqlTemplate.parametersIterator() : IteratorUtils
+                .singletonIterator(Collections.EMPTY_MAP);
         for (int i = 0; i < counts.length; i++) {
             Map nextParameters = (Map) it.next();
 
-            SQLStatement compiled =
-                templateProcessor.processTemplate(template, nextParameters);
+            SQLStatement compiled = templateProcessor.processTemplate(template,
+                    nextParameters);
 
             if (loggable) {
-                QueryLogger.logQuery(
-                        sqlTemplate.getLoggingLevel(),
+                QueryLogger.logQuery(sqlTemplate.getLoggingLevel(),
                         compiled.getSql(),
                         Arrays.asList(compiled.getBindings()));
             }
 
-            // TODO: we may cache prep statements for this loop, using merged string as a key
-            // since it is very likely that it will be the same for multiple parameter sets...
+            // TODO: we may cache prep statements for this loop, using merged string as a
+            // key
+            // since it is very likely that it will be the same for multiple parameter
+            // sets...
             PreparedStatement statement = connection.prepareStatement(compiled.getSql());
             try {
                 bind(statement, compiled.getBindings());
@@ -153,21 +153,43 @@ public class SQLTemplateAction implements SQLAction {
     }
 
     /**
+     * Extracts a template string from a SQLTemplate query. Exists mainly for the benefit
+     * of subclasses that can customize returned template.
+     * 
+     * @since 1.2
+     */
+    protected String extractTemplateString(SQLTemplate template) {
+        String sql = template.getTemplate(getAdapter().getClass().getName());
+        return isRemovingLineBreaks() ? Util.stripLineBreaks(sql, " ") : sql;
+    }
+
+    /**
      * Binds parameters to the PreparedStatement.
      */
     protected void bind(PreparedStatement preparedStatement, ParameterBinding[] bindings)
-        throws SQLException, Exception {
+            throws SQLException, Exception {
         // bind parameters
         if (bindings.length > 0) {
             int len = bindings.length;
             for (int i = 0; i < len; i++) {
-                adapter.bindParameter(
-                    preparedStatement,
-                    bindings[i].getValue(),
-                    i + 1,
-                    bindings[i].getJdbcType(),
-                    bindings[i].getPrecision());
+                adapter.bindParameter(preparedStatement,
+                        bindings[i].getValue(),
+                        i + 1,
+                        bindings[i].getJdbcType(),
+                        bindings[i].getPrecision());
             }
         }
+    }
+
+    /**
+     * Returns whether line breaks are removed when the query is executed. Some databases
+     * (like DB2) can't handle multiline queries.
+     */
+    public boolean isRemovingLineBreaks() {
+        return removingLineBreaks;
+    }
+
+    public void setRemovingLineBreaks(boolean removingLineBreaks) {
+        this.removingLineBreaks = removingLineBreaks;
     }
 }

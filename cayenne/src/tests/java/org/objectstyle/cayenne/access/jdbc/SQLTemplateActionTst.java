@@ -201,4 +201,17 @@ public class SQLTemplateActionTst extends CayenneTestCase {
         // to compare dates we need to create the binding correctly
         // assertEquals(bindings2.get("dob"), row2.get("DATE_OF_BIRTH"));
     }
+
+    public void testExtractTemplateString() throws Exception {
+        SQLTemplateAction action = new SQLTemplateAction(getAccessStackAdapter()
+                .getAdapter());
+
+        SQLTemplate template = new SQLTemplate(Artist.class, "A\nBC", false);
+
+        action.setRemovingLineBreaks(false);
+        assertEquals("A\nBC", action.extractTemplateString(template));
+
+        action.setRemovingLineBreaks(true);
+        assertEquals("A BC", action.extractTemplateString(template));
+    }
 }

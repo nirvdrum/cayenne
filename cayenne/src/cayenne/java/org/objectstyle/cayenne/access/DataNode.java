@@ -296,17 +296,16 @@ public class DataNode implements QueryEngine {
         Iterator it = queries.iterator();
         while (it.hasNext()) {
             Query nextQuery = (Query) it.next();
-
+            
             // catch exceptions for each individual query
             try {
 
+                // TODO: need to externalize this big switch into maybe a config file
+                // to allow easy plugging of alt. actions for nodes
+
                 // figure out query type and call appropriate worker method
                 if (nextQuery instanceof SQLTemplate) {
-                    SQLTemplate sqlTemplate = (SQLTemplate) nextQuery;
-                    SQLAction executionPlan = (sqlTemplate.isSelecting())
-                            ? new SQLTemplateSelectAction(getAdapter())
-                            : new SQLTemplateAction(getAdapter());
-                    executionPlan.performAction(connection, sqlTemplate, resultConsumer);
+                    runSQLTemplate(connection, (SQLTemplate) nextQuery, resultConsumer);
                 }
                 else if (nextQuery instanceof ProcedureQuery) {
                     runStoredProcedure(connection, nextQuery, resultConsumer);
@@ -336,9 +335,26 @@ public class DataNode implements QueryEngine {
             }
         }
     }
+    
+    /**
+     * Executes a SQLTemplate query.
+     * 
+     * @since 1.2
+     */
+    protected void runSQLTemplate(
+            Connection connection,
+            SQLTemplate sqlTemplate,
+            OperationObserver resultConsumer) throws SQLException, Exception {
+
+        SQLAction executionPlan = (sqlTemplate.isSelecting())
+                ? new SQLTemplateSelectAction(getAdapter())
+                : new SQLTemplateAction(getAdapter());
+        executionPlan.performAction(connection, sqlTemplate, resultConsumer);
+    }
+    
 
     /**
-     * Executes select query.
+     * Executes a generic select query.
      */
     protected void runSelect(
             Connection connection,
@@ -385,7 +401,7 @@ public class DataNode implements QueryEngine {
     /**
      * Executes batch query using JDBC Statement batching features.
      * 
-     * @deprecated since 1.2 execution plans are used.
+     * @deprecated since 1.2 SQLActions are used.
      */
     protected void runBatchUpdateAsBatch(
             Connection con,

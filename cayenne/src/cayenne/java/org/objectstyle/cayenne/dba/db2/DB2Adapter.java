@@ -62,6 +62,7 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.AbstractType;
@@ -83,11 +84,13 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * 
  * <pre>
  * 
- *  test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
- *  test-db2.jdbc.username = test
- *  test-db2.jdbc.password = secret
- *  test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
- *  test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
+ *  
+ *   test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
+ *   test-db2.jdbc.username = test
+ *   test-db2.jdbc.password = secret
+ *   test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
+ *   test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
+ *   
  *  
  * </pre>
  * 
@@ -96,6 +99,17 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 public class DB2Adapter extends JdbcAdapter {
 
     public DB2Adapter() {
+    }
+
+    /**
+     * Returns an instance of DB2DataNode.
+     * 
+     * @since 1.2
+     */
+    public DataNode createDataNode(String name) {
+        DataNode node = new DB2DataNode(name);
+        node.setAdapter(this);
+        return node;
     }
 
     /**

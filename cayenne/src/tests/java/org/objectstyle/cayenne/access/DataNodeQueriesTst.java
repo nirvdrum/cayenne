@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,12 +71,13 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
-/** 
+/**
  * DataNode test cases.
  * 
  * @author Andrei Adamchik
  */
 public class DataNodeQueriesTst extends CayenneTestCase {
+
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
@@ -87,17 +89,16 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         DataNode node = getNode();
 
         DbEntity artistEnt = node.getEntityResolver().lookupDbEntity(Artist.class);
-        assertNotNull(
-            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
+        assertNotNull(node.getAdapter().getPkGenerator().generatePkForDbEntity(node,
+                artistEnt));
 
         DbEntity exhibitEnt = node.getEntityResolver().lookupDbEntity(Exhibit.class);
-        assertNotNull(
-            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
+        assertNotNull(node.getAdapter().getPkGenerator().generatePkForDbEntity(node,
+                exhibitEnt));
     }
 
     public void testPerfomQueriesSQLTemplate() throws Exception {
-        String template =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
+        String template = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
         SQLTemplate query = new SQLTemplate(Object.class, template, false);
 
@@ -128,8 +129,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     public void testPerfomQueriesSelectingSQLTemplate1() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        String template =
-            "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID";
+        String template = "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template, true);
 
         MockOperationObserver observer = new MockOperationObserver();
@@ -156,17 +156,14 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         assertEquals(DataContextTestBase.artistCount, data.size());
         Map row = (Map) data.get(2);
         assertEquals(3, row.size());
-        assertEquals(
-            "Can't find ARTIST_ID: " + row,
-            new Integer(33003),
-            row.get("ARTIST_ID"));
+        assertEquals("Can't find ARTIST_ID: " + row, new Integer(33003), row
+                .get("ARTIST_ID"));
     }
 
     public void testPerfomQueriesSelectingSQLTemplateAlias() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        String template =
-            "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID";
+        String template = "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template, true);
 
         MockOperationObserver observer = new MockOperationObserver();
@@ -177,6 +174,43 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         Map row = (Map) data.get(2);
         assertEquals(1, row.size());
         assertEquals(new Integer(33003), row.get("A"));
+    }
+
+    public void testRunMultiLineSQLTemplateUNIX() throws Exception {
+        String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME)"
+                + "\n"
+                + "VALUES (1, 'A')";
+        runMultiLineSQLTemplateLine(templateString);
+    }
+
+    public void testRunMultiLineSQLTemplateWindows() throws Exception {
+        String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME)"
+                + "\r\n"
+                + "VALUES (1, 'A')";
+        runMultiLineSQLTemplateLine(templateString);
+    }
+
+    public void testRunMultiLineSQLTemplateMac() throws Exception {
+        String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME)"
+                + "\r"
+                + "VALUES (1, 'A')";
+        runMultiLineSQLTemplateLine(templateString);
+    }
+
+    /**
+     * Testing that SQLTemplate that is entered on multiple lines can be executed. CAY-269
+     * shows that some databases are very picky about it.
+     */
+    private void runMultiLineSQLTemplateLine(String templateString) throws Exception {
+        SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
+
+        Connection c = getConnection();
+        try {
+            getNode().runSQLTemplate(c, template, new MockOperationObserver());
+        }
+        finally {
+            c.close();
+        }
     }
 
 }
