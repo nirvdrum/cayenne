@@ -117,6 +117,39 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         */
     }
 
+   public void testRevertModification() throws Exception {
+        // prepare and save a gallery
+        Painting p11 = newPainting("p11");
+        Painting p12 = newPainting("p12");
+        ctxt.commitChanges();
+
+        Artist a1 = newArtist();
+        a1.addToPaintingArray(p11);
+ 
+        // test before save
+        assertEquals(1, a1.getPaintingArray().size());
+        ctxt.commitChanges();
+		
+       	a1.addToPaintingArray(p12);
+		assertEquals(2, a1.getPaintingArray().size());
+      	ctxt.rollbackChanges();
+ 
+		/* TODO - these all fail until the one-way relationship code works correctly
+        assertEquals(1, a1.getPaintingArray().size()); //Should only be one..
+        assertEquals(p11, a1.getPaintingArray().get(0)); //..and it should be the original one
+    	
+    	ctxt.commitChanges(); //Save so we can be sure the rollback really worked
+    	
+        ctxt = getDomain().createDataContext();
+
+        Artist a2 = fetchArtist();
+        assertNotNull(a2);
+        assertEquals(1, a2.getPaintingArray().size()); //Should only be one..
+        Painting p21 = (Painting)a1.getPaintingArray().get(0);
+        assertEquals(p11.getPaintingTitle(), p21.getPaintingTitle()); //..and it should be the same as the original one
+        */
+     }
+
     protected Painting newPainting(String name) {
         Painting p1 = (Painting) ctxt.createAndRegisterNewObject("Painting");
         p1.setPaintingTitle(name);

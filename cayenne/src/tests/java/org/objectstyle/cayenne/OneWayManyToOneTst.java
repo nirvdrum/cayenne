@@ -137,6 +137,36 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         assertEquals(g12.getGalleryName(), g21.getGalleryName());
     }
 
+	public void testRevertModification() {
+       // prepare and save a gallery
+        Gallery g11 = newGallery("g1");
+        Gallery g12 = newGallery("g1");
+        ctxt.commitChanges();
+
+        Painting p1 = newPainting();
+        p1.setToGallery(g11);
+
+        // test before save
+        assertSame(g11, p1.getToGallery());
+        ctxt.commitChanges();
+
+        p1.setToGallery(g12);
+		ctxt.rollbackChanges();
+		
+		assertEquals(g11, p1.getToGallery()); //Expecting the original gallery to be the one
+		
+		//And save so we can be sure that the save did the right thing
+		ctxt.commitChanges();
+        ctxt = getDomain().createDataContext();
+
+        Painting p2 = fetchPainting();
+        Gallery g21 = p2.getToGallery();
+        assertNotNull(g21);
+		//IT should still be the first one we set
+        assertEquals(g11.getGalleryName(), g21.getGalleryName());
+	}
+
+
     protected Painting newPainting() {
         Painting p1 = (Painting) ctxt.createAndRegisterNewObject("Painting");
         p1.setPaintingTitle(CayenneDOTestBase.paintingName);

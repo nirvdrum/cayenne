@@ -253,6 +253,9 @@ public class CayenneDataObject implements DataObject {
 		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.remove(val);
+        if (persistenceState == PersistenceState.COMMITTED) {
+            persistenceState = PersistenceState.MODIFIED;
+        }
 
         if (val != null && setReverse) {
             unsetReverseRelationship(relName, val);
@@ -274,6 +277,9 @@ public class CayenneDataObject implements DataObject {
 		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.add(val);
+        if (persistenceState == PersistenceState.COMMITTED) {
+            persistenceState = PersistenceState.MODIFIED;
+        }
 
         if (val != null && setReverse)
             setReverseRelationship(relName, val);

@@ -621,5 +621,105 @@ public class DataContextTst extends CayenneTestCase {
 		PoolManager manager = (PoolManager) node.getDataSource();
 		manager.setMaxConnections(manager.getMaxConnections() + delta);
 	}
+	
+	public void testRollbackNewObject() {
+		String artistName="revertTestArtist";
+		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName(artistName);
+		
+		ctxt.rollbackChanges();
+
+		assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+		ctxt.commitChanges(); 
+		//The commit should have made no changes, so 
+		//perform a fetch to ensure that this artist hasn't been persisted to the db
+		
+		DataContext freshContext=getDomain().createDataContext();
+		SelectQuery query=new SelectQuery(Artist.class);
+		query.setQualifier(ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName));
+		List queryResults=freshContext.performQuery(query);
+		
+		assertEquals(0, queryResults.size());
+	}
+	
+	public void testRollbackDeletedObject() {
+		String artistName="deleteTestArtist";
+		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName(artistName);
+		ctxt.commitChanges(); //Save... cayenne doesn't yet handle deleting objects that are uncommitted
+		ctxt.deleteObject(artist); 
+		ctxt.rollbackChanges();
+		
+		//Now check everything is as it should be
+		assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+		
+		ctxt.commitChanges();
+		//The commit should have made no changes, so 
+		//perform a fetch to ensure that this artist hasn't been deleted from the db
+		
+		DataContext freshContext=getDomain().createDataContext();
+		SelectQuery query=new SelectQuery(Artist.class);
+		query.setQualifier(ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName));
+		List queryResults=freshContext.performQuery(query);
+		
+		assertEquals(1, queryResults.size());
+	}
+	
+	public void testRollbackModifiedObject() {
+		String artistName="initialTestArtist";
+		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName(artistName);
+		ctxt.commitChanges();
+		
+		artist.setArtistName("a new value");
+
+		ctxt.rollbackChanges();
+		
+		//Make sure the inmemory changes have been rolled back
+		assertEquals(artistName, artist.getArtistName());
+		
+		//Commit what's in memory...
+		ctxt.commitChanges();
+		
+		//.. and ensure that the correct data is in the db
+		DataContext freshContext=getDomain().createDataContext();
+		SelectQuery query=new SelectQuery(Artist.class);
+		query.setQualifier(ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName));
+		List queryResults=freshContext.performQuery(query);
+		
+		assertEquals(1, queryResults.size());
+		
+	}
+	
+	public void testRollbackRelationshipModification() {
+		String artistName="relationshipModArtist";
+		String paintingTitle="relationshipTestPainting";
+		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName(artistName);
+		Painting painting=(Painting)ctxt.createAndRegisterNewObject("Painting");
+		painting.setPaintingTitle(paintingTitle);
+		painting.setToArtist(artist);
+		ctxt.commitChanges();
+		
+		painting.setToArtist(null);
+		ctxt.rollbackChanges();
+		
+		assertEquals(artist, painting.getToArtist());
+		
+		//Check that the reverse relationship was handled
+		assertEquals(1,  artist.getPaintingArray().size()); 
+		ctxt.commitChanges();
+		
+		DataContext freshContext=getDomain().createDataContext();
+		SelectQuery query=new SelectQuery(Painting.class);
+		query.setQualifier(ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingTitle", paintingTitle));
+		List queryResults=freshContext.performQuery(query);
+		
+		assertEquals(1, queryResults.size());
+		Painting queriedPainting=(Painting)queryResults.get(0);
+		
+		 //NB:  This is an easier comparison than manually fetching artist
+		assertEquals(artistName, queriedPainting.getToArtist().getArtistName());
+	}
 
 }

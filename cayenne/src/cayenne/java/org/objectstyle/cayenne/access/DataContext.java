@@ -461,6 +461,36 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /** 
+     * Rollsback any changes that have occurred to objects
+     * registered with this data context.
+     */
+	public void rollbackChanges() {
+        synchronized (objectStore) {
+            Iterator it = objectStore.getObjectIterator();
+            while (it.hasNext()) {
+                DataObject thisObject = (DataObject) it.next();
+                int objectState = thisObject.getPersistenceState();
+				switch(objectState) {
+					case PersistenceState.NEW:
+						this.unregisterObject(thisObject);
+						break;
+					case PersistenceState.DELETED:
+						//Do the same as for modified... deleted is only a persistence state, so 
+						// rolling the object back will set the state to committed
+					case PersistenceState.MODIFIED:
+						ObjEntity oe=getEntityResolver().lookupObjEntity(thisObject);
+						snapshotManager.refreshObjectWithSnapshot(oe, thisObject, thisObject.getCommittedSnapshot());
+						break;
+					default:
+						//Transient, committed and hollow need no handling
+						break;
+				}
+            }
+        }
+		
+	}
+
+    /** 
      * Synchronizes object graph with the database. Executes needed
      * insert, update and delete queries (generated internally).
      */
