@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.*;
 import java.util.*;
 import java.awt.event.*;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
@@ -71,13 +72,16 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Detail view of the ObjEntity attributes. 
  * @author Michael Misha Shengaout */
 public class ObjAttributePane extends JPanel
-implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
+implements ActionListener, ObjEntityDisplayListener
+, ObjEntityListener, ObjAttributeListener
+, ExistingSelectionProcessor, ListSelectionListener
 {
+	static Logger logObj = Logger.getLogger(ObjAttributePane.class.getName());
+
 	Mediator mediator;
 
 	JTable		table;
 	JButton		add;
-	JButton		remove;
 	
 	public ObjAttributePane(Mediator temp_mediator)
 	{
@@ -85,11 +89,11 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		mediator = temp_mediator;		
 		mediator.addObjEntityDisplayListener(this);
 		mediator.addObjEntityListener(this);
+		mediator.addObjAttributeListener(this);
 		// Create and laout components
 		init();		
 		// Add listeners
 		add.addActionListener(this);
-		remove.addActionListener(this);
 	}
 	
 	private void init()
@@ -98,9 +102,8 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		// Create table with two columns and no rows.
 		table = new CayenneTable();
 		add		= new JButton("Add");
-		remove 	= new JButton("Remove");
 		JPanel panel = PanelFactory.createTablePanel(table
-												, new JButton[]{add, remove});
+												, new JButton[]{add});
 		add(panel, BorderLayout.CENTER);
 	}
 	
@@ -109,14 +112,37 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		ObjAttributeTableModel model = (ObjAttributeTableModel)table.getModel();
 		if (src == add) {
 			model.addRow();
-		} else if (src == remove) {
-			stopEditing();
-			// Remove the row.
-			int row = table.getSelectedRow();
-			if (row >= 0)
-				model.removeRow(row);
 		}
 	}
+
+	public void processExistingSelection()
+	{
+		ObjAttribute rel = null;
+		if (table.getSelectedRow() >= 0) {
+			ObjAttributeTableModel model;
+			model = (ObjAttributeTableModel)table.getModel();
+			rel = model.getAttribute(table.getSelectedRow());
+		}
+		AttributeDisplayEvent ev;
+		ev = new AttributeDisplayEvent(this, rel
+				, mediator.getCurrentObjEntity(), mediator.getCurrentDataMap()
+				, mediator.getCurrentDataDomain());
+		mediator.fireObjAttributeDisplayEvent(ev);
+	}
+
+	public void valueChanged(ListSelectionEvent e) {
+		processExistingSelection();
+	}
+
+
+	public void objAttributeChanged(AttributeEvent e){}
+	public void objAttributeAdded(AttributeEvent e){}
+	public void objAttributeRemoved(AttributeEvent e){
+		ObjAttributeTableModel model;
+		model = (ObjAttributeTableModel)table.getModel();
+		model.removeAttribute(e.getAttribute());
+	}
+
 
 	private void stopEditing() {
 		// Stop whatever editing may be taking place
@@ -133,7 +159,7 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		if (e.getSource() == this)
 			return;
 		ObjEntity entity = (ObjEntity)e.getEntity();
-		if (null == entity)
+		if (null == entity || e.isEntityChanged() == false)
 			return;
 		ObjAttributeTableModel model;
 		// Show db attribute columns only if db entity is not null
@@ -143,6 +169,7 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		table.setRowHeight(25);
 		table.setRowMargin(3);
 		setUpTableStructure(model, entity);
+		table.getSelectionModel().addListSelectionListener(this);
 	}
 	
 	private void setUpTableStructure(ObjAttributeTableModel model

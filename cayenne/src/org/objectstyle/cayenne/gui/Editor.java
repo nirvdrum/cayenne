@@ -94,6 +94,8 @@ public class Editor extends JFrame
 implements ActionListener
 , DomainDisplayListener, DataNodeDisplayListener, DataMapDisplayListener
 , ObjEntityDisplayListener, DbEntityDisplayListener
+, ObjAttributeDisplayListener, DbAttributeDisplayListener
+, ObjRelationshipDisplayListener, DbRelationshipDisplayListener
 {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 
@@ -103,8 +105,6 @@ implements ActionListener
 
     EditorView view;
     Mediator mediator;
-    /** The object last selected in BrowseView. */
-    Object context;
     ActionMap actionMap = new ActionMap();
 
     JMenuBar  menuBar    	= new JMenuBar();
@@ -250,7 +250,7 @@ implements ActionListener
 		actionMap.put("CreateDataMap", new CreateDataMapAction(mediator));
 		actionMap.put("SaveAll", new SaveAction(mediator));
 		actionMap.put("ImportDb", new ImportDbAction(mediator));
-		actionMap.put("GenerateDb", new GenerateDbAction(mediator));
+		actionMap.put("Remove", new RemoveAction(mediator));
 	}
 
     private void reloadLastProjList() {
@@ -402,7 +402,7 @@ implements ActionListener
         } else if (src == createDbEntityMenu || src == createDbEntityBtn) {
         	createDbEntity();
         } else if (src == removeMenu || src == removeBtn) {
-        	remove();
+        	actionMap.get("Remove").actionPerformed(e);
         } else if (src == saveMenu) {
         	actionMap.get("SaveAll").actionPerformed(e);
         } else if (src == importDbMenu) {
@@ -457,77 +457,6 @@ implements ActionListener
 		mediator.fireDataMapEvent(new DataMapEvent(this, map));
 	}
 
-	private void remove()
-	{
-		int ret;
-		if (context instanceof DataDomain) {
-			ret = JOptionPane.showConfirmDialog(this,
-				"Are you sure you want to remove "
-				+ ((DataDomain)context).getName() + " data domain?"
-				, "Cayenne", JOptionPane.YES_NO_OPTION);
-			if (ret == JOptionPane.YES_OPTION)
-				mediator.removeDomain(this, (DataDomain)context);
-		} else if (context instanceof DataNode) {
-			ret = JOptionPane.showConfirmDialog(this,
-				"Are you sure you want to remove "
-				+ ((DataNode)context).getName() + " data node?"
-				, "Cayenne", JOptionPane.YES_NO_OPTION);
-			if (ret == JOptionPane.YES_OPTION)
-				mediator.removeDataNode(this, (DataNode)context);
-		} else if (context instanceof DataMap) {
-			ret = JOptionPane.showConfirmDialog(this,
-				"Are you sure you want to remove "
-				+ ((DataMap)context).getName() + " data map?"
-				, "Cayenne", JOptionPane.YES_NO_OPTION);
-			if (ret == JOptionPane.YES_OPTION)
-				removeDataMap();
-		} else if (context instanceof DbEntity) {
-			ret = JOptionPane.showConfirmDialog(this,
-				"Are you sure you want to remove "
-				+ ((DbEntity)context).getName() + " db entity?"
-				, "Cayenne", JOptionPane.YES_NO_OPTION);
-			if (ret == JOptionPane.YES_OPTION)
-				mediator.removeDbEntity(this, (DbEntity)context);
-		} else if (context instanceof ObjEntity) {
-			ret = JOptionPane.showConfirmDialog(this,
-				"Are you sure you want to remove "
-				+ ((ObjEntity)context).getName() + " obj entity?"
-				, "Cayenne", JOptionPane.YES_NO_OPTION);
-			if (ret == JOptionPane.YES_OPTION)
-				mediator.removeObjEntity(this, (ObjEntity)context);
-		}
-
-	}
-	
-	/** Removing data map either from node or from everywhere based on context.*/
-	private void removeDataMap() {
-		DataNode node = mediator.getCurrentDataNode();
-		DataMap map = mediator.getCurrentDataMap();
-		if (null == node)
-			mediator.removeDataMap(this, (DataMap)context);
-		else {
-			DataMap[] maps = node.getDataMaps();
-			boolean found = false;
-			for (int i = 0; i < maps.length; i++) {
-				if (map == maps[i]) {
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-				return;
-			DataMap[] new_maps = new DataMap[maps.length-1];
-			int new_map_idx = 0;
-			for (int i = 0; i < maps.length; i++) {
-				if (map == maps[i])
-					continue;
-				new_maps[new_map_idx] = maps[i];
-			}
-			node.setDataMaps(new_maps);
-			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-		}
-	}
-
 	private void generateClasses() {
 		GenerateClassDialog dialog;
 		dialog = new GenerateClassDialog(this, mediator);
@@ -567,8 +496,8 @@ implements ActionListener
 		mediator.fireObjEntityDisplayEvent(
 				new EntityDisplayEvent(this, entity
 									, mediator.getCurrentDataMap()
-									, mediator.getCurrentDataDomain()
-									, mediator.getCurrentDataNode()));
+									, mediator.getCurrentDataNode()
+									, mediator.getCurrentDataDomain()));
 	}
 
 	private void createDbEntity() {
@@ -578,8 +507,8 @@ implements ActionListener
 		mediator.fireDbEntityDisplayEvent(
 				new EntityDisplayEvent(this, entity
 									, mediator.getCurrentDataMap()
-									, mediator.getCurrentDataDomain()
-									, mediator.getCurrentDataNode()));
+									, mediator.getCurrentDataNode()
+									, mediator.getCurrentDataDomain()));
 	}
 
     private void createProject() {
@@ -718,6 +647,10 @@ implements ActionListener
         mediator.addDataMapDisplayListener(this);
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityDisplayListener(this);
+        mediator.addObjAttributeDisplayListener(this);
+        mediator.addDbAttributeDisplayListener(this);
+        mediator.addObjRelationshipDisplayListener(this);
+        mediator.addDbRelationshipDisplayListener(this);
 
         createDomainMenu.setEnabled(true);
         createDomainBtn.setEnabled(true);
@@ -760,7 +693,6 @@ implements ActionListener
 		createDataMapBtn.setToolTipText("Create data map");
 		removeMenu.setText("Remove Domain");
 		removeBtn.setToolTipText("Remove current domain");
-		context = e.getDomain();
 	}
 
 	public void currentDataNodeChanged(DataNodeDisplayEvent e){
@@ -769,14 +701,12 @@ implements ActionListener
 		createDataMapBtn.setToolTipText("Add data map");
 		removeMenu.setText("Remove Data Node");
 		removeBtn.setToolTipText("Remove curent data node");
-		context = e.getDataNode();
 	}
 
 	public void currentDataMapChanged(DataMapDisplayEvent e){
 		enableDataMapMenu();
 		removeMenu.setText("Remove Data Map");
 		removeBtn.setToolTipText("Remove current data map");
-		context = e.getDataMap();
 	}
 
    	public void currentObjEntityChanged(EntityDisplayEvent e)
@@ -791,7 +721,6 @@ implements ActionListener
 		}
 		removeMenu.setText("Remove Obj Entity");
 		removeBtn.setToolTipText("Remove current obj entity");
-		context = e.getEntity();
    	}
 
 
@@ -806,9 +735,45 @@ implements ActionListener
 			createDataMapBtn.setToolTipText("Add data map");
 		}
 		removeMenu.setText("Remove Db Entity");
-		removeBtn.setToolTipText("Remove current db entity");
-		context = e.getEntity();
+		removeBtn.setToolTipText("Remove Db Entity");
    	}
+
+
+	public void currentDbAttributeChanged(AttributeDisplayEvent e){
+		enableDataMapMenu();
+		if (e.getAttribute() != null) {
+			removeMenu.setText("Remove Db Attribute");
+			removeBtn.setToolTipText("Remove Db Attribute");
+		}
+	}
+
+	public void currentObjAttributeChanged(AttributeDisplayEvent e){
+		logObj.fine("Changing remove text for ObjAttribute");
+		enableDataMapMenu();
+		if (e.getAttribute() != null) {
+			removeMenu.setText("Remove Obj Attribute");
+			removeBtn.setToolTipText("Remove Obj Attribute");
+			logObj.fine("Changed remove text for ObjAttribute");
+		}
+	}
+
+	public void currentDbRelationshipChanged(RelationshipDisplayEvent e){
+		enableDataMapMenu();
+		if (e.getRelationship() != null) {
+			removeMenu.setText("Remove Db Relationship");
+			removeBtn.setToolTipText("Remove Db Relationship");
+		}
+	}
+
+
+	public void currentObjRelationshipChanged(RelationshipDisplayEvent e){
+		enableDataMapMenu();
+		if (e.getRelationship() != null) {
+			removeMenu.setText("Remove Obj Relationship");
+			removeBtn.setToolTipText("Remove Obj Relationship");
+		}
+	}
+
 
 
     /** Disables all menu  for the case when no project is open.

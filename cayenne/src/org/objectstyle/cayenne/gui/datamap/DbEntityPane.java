@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.gui.util.*;
  * @author Michael Misha Shengaout */
 public class DbEntityPane extends JPanel
 implements DocumentListener, DbEntityDisplayListener
+, ExistingSelectionProcessor
 {
 	Mediator mediator;
 	
@@ -150,10 +151,19 @@ implements DocumentListener, DbEntityDisplayListener
 			current_entity.setSchema(schema.getText());
 		}
 	}
+
+
+	public void processExistingSelection()
+	{
+		EntityDisplayEvent e;
+		e = new EntityDisplayEvent(this, mediator.getCurrentDbEntity()
+			, mediator.getCurrentDataMap(), mediator.getCurrentDataDomain());
+		mediator.fireDbEntityDisplayEvent(e);
+	}
 	
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
 		DbEntity entity = (DbEntity)e.getEntity();
-		if (null == entity) 
+		if (null == entity || e.isEntityChanged() == false) 
 			return;
 		ignoreChange = true;
 		name.setText(entity.getName());

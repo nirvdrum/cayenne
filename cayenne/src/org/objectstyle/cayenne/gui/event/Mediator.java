@@ -90,6 +90,10 @@ public class Mediator
 	DataMap currentMap 			= null;	
 	ObjEntity currentObjEntity 	= null;
 	DbEntity  currentDbEntity  	= null;
+	ObjAttribute currentObjAttr = null;
+	DbAttribute currentDbAttr 	= null;
+	ObjRelationship currentObjRel=null;
+	DbRelationship currentDbRel = null;
 	
 	/** The list of changed data domains.*/
 	ArrayList dirtyDomains = new ArrayList();
@@ -158,6 +162,30 @@ public class Mediator
 		currentDbEntity = null;
 	}
 	
+	/** Makes Db Attribute current. Clears Db Relationship.*/
+	public void setCurrentDbAttribute(DbAttribute temp_attribute) {
+		this.currentDbAttr = temp_attribute;
+		this.currentDbRel = null;
+	}
+	
+	/** Makes Obj Attribute current. Clears nothing.*/
+	public void setCurrentObjAttribute(ObjAttribute temp_attribute) {
+		this.currentObjAttr = temp_attribute;
+	}
+	
+	/** Makes Db Relationship current. Clears Db Attribute.*/
+	public void setCurrentDbRelationship(DbRelationship temp_rel) {
+		this.currentDbRel = temp_rel;
+		this.currentDbAttr = null;
+	}
+	
+	/** Makes Obj Relationship current. Clears Obj Attribute.*/
+	public void setCurrentObjRelationship(ObjRelationship temp_rel) {
+		this.currentObjRel = temp_rel;
+		this.currentObjAttr = null;
+	}
+	
+
 	
 	/** Resets all current models to null. */
 	private void clearState() {
@@ -166,6 +194,10 @@ public class Mediator
 		currentMap 		= null;	
 		currentObjEntity= null;
 		currentDbEntity = null;
+		currentObjAttr 	= null;
+		currentDbAttr	= null;
+		currentObjRel	= null;
+		currentDbRel	= null;
 	}
 	
 	/** Makes data map current. This means also clearing the current
@@ -205,6 +237,10 @@ public class Mediator
 	public DataMap getCurrentDataMap() {return currentMap;}
 	public ObjEntity getCurrentObjEntity() {return currentObjEntity;}
 	public DbEntity getCurrentDbEntity() {return currentDbEntity;}
+	public ObjAttribute getCurrentObjAttribute() {return currentObjAttr;}
+	public DbAttribute getCurrentDbAttribute() {return currentDbAttr;}
+	public ObjRelationship getCurrentObjRelationship() {return currentObjRel;}
+	public DbRelationship getCurrentDbRelationship() {return currentDbRel;}
 
 
 	public void addDomainDisplayListener(DomainDisplayListener listener) {
@@ -214,7 +250,6 @@ public class Mediator
 	public void addDomainListener(DomainListener listener) {
 		addListener("org.objectstyle.cayenne.gui.event.DomainListener", listener);
 	}
-
 
 	public void addDataNodeDisplayListener(DataNodeDisplayListener listener) {
 		addListener("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener", listener);
@@ -283,6 +318,8 @@ public class Mediator
 
 	public void fireDomainDisplayEvent(DomainDisplayEvent e)
 	{
+		if (e.getDomain() == currentDomain)
+			e.setDomainChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		EventListener[] list;
@@ -323,6 +360,8 @@ public class Mediator
 
 	public void fireDataNodeDisplayEvent(DataNodeDisplayEvent e)
 	{
+		if (e.getDataNode() == this.getCurrentDataNode())
+			e.setDataNodeChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
@@ -369,6 +408,8 @@ public class Mediator
 
 	public void fireDataMapDisplayEvent(DataMapDisplayEvent e)
 	{
+		if (e.getDataMap() == this.getCurrentDataMap())
+			e.setDataMapChanged(false);
 		clearState();
 		currentMap = e.getDataMap();
 		currentDomain = e.getDomain();
@@ -464,11 +505,14 @@ public class Mediator
 	
 	public void fireObjEntityDisplayEvent(EntityDisplayEvent e)
 	{
+		if (currentObjEntity == e.getEntity())
+			e.setEntityChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
 		currentMap = e.getDataMap();
-		currentObjEntity = (ObjEntity)e.getEntity();
+			
+		currentObjEntity = (ObjEntity)e.getEntity();		
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener");
 		for (int i = 0; i < list.length; i++) {
@@ -478,6 +522,8 @@ public class Mediator
 	}
 	
 	public void fireDbEntityDisplayEvent(EntityDisplayEvent e){
+		if (currentDbEntity == e.getEntity())
+			e.setEntityChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
@@ -518,13 +564,23 @@ public class Mediator
 
 	public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e)
 	{
+		if (e.getAttribute() == this.getCurrentDbAttribute())
+			e.setAttributeChanged(false);
 		this.fireDbEntityDisplayEvent(e);
+		clearState();
+		// Must follow DbEntityDisplayEvent, 
+		// as it resets curr Attr and Rel values to null.
+		currentDbAttr = (DbAttribute)e.getAttribute();
+		this.currentDbEntity = (DbEntity)e.getEntity();
+		this.currentMap = e.getDataMap();
+		this.currentDomain = e.getDomain();
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener");
 		for (int i = 0; i < list.length; i++) {
 			DbAttributeDisplayListener temp = (DbAttributeDisplayListener)list[i];
 			temp.currentDbAttributeChanged(e);
 		}// End for()
+		currentDbAttr = (DbAttribute)e.getAttribute();
 	}
 	
 
@@ -555,7 +611,15 @@ public class Mediator
 
 	public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e)
 	{
+		if (e.getAttribute() == this.getCurrentObjAttribute())
+			e.setAttributeChanged(false);
 		this.fireObjEntityDisplayEvent(e);
+		// Must follow ObjEntityDisplayEvent, 
+		// as it resets curr Attr and Rel values to null.
+		currentObjAttr = (ObjAttribute)e.getAttribute();
+		this.currentObjEntity = (ObjEntity)e.getEntity();
+		this.currentMap = e.getDataMap();
+		this.currentDomain = e.getDomain();
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener");
 		for (int i = 0; i < list.length; i++) {
@@ -591,7 +655,15 @@ public class Mediator
 
 	public void fireDbRelationshipDisplayEvent(RelationshipDisplayEvent e)
 	{
+		if (e.getRelationship() == this.getCurrentDbRelationship())
+			e.setRelationshipChanged(false);
 		this.fireDbEntityDisplayEvent(e);
+		this.currentDbEntity = (DbEntity)e.getEntity();
+		this.currentMap = e.getDataMap();
+		this.currentDomain = e.getDomain();
+		// Must follow DbEntityDisplayEvent, 
+		// as it resets curr Attr and Rel values to null.
+		currentDbRel = (DbRelationship)e.getRelationship();
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener");
 		for (int i = 0; i < list.length; i++) {
@@ -629,13 +701,22 @@ public class Mediator
 
 	public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e)
 	{
+		if (e.getRelationship() == this.getCurrentObjRelationship())
+			e.setRelationshipChanged(false);
 		this.fireObjEntityDisplayEvent(e);
+		// Must follow DbEntityDisplayEvent, 
+		// as it resets curr Attr and Rel values to null.
+		currentObjRel = (ObjRelationship)e.getRelationship();
+		this.currentObjEntity = (ObjEntity)e.getEntity();
+		this.currentMap = e.getDataMap();
+		this.currentDomain = e.getDomain();
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener");
 		for (int i = 0; i < list.length; i++) {
 			ObjRelationshipDisplayListener temp = (ObjRelationshipDisplayListener)list[i];
 			temp.currentObjRelationshipChanged(e);
 		}// End for()
+		
 	}
 	
 
@@ -657,8 +738,8 @@ public class Mediator
 			fireObjEntityDisplayEvent(new EntityDisplayEvent(this
 													, null
 													, currentMap
-													, currentDomain
-													, currentNode));
+													, currentNode
+													, currentDomain));
 		else {
 			ObjEntity temp = (ObjEntity)list.get(index < list.size() - 1 
 												? index 
@@ -666,8 +747,8 @@ public class Mediator
 			fireObjEntityDisplayEvent(new EntityDisplayEvent(this
 													, temp
 													, currentMap
-													, currentDomain
-													, currentNode));
+													, currentNode
+													, currentDomain));
 		}
 		fireObjEntityEvent(new EntityEvent(src, entity, EntityEvent.REMOVE));
 	}
@@ -689,8 +770,8 @@ public class Mediator
 			fireDbEntityDisplayEvent(new EntityDisplayEvent(src
 													, null
 													, currentMap
-													, currentDomain
-													, currentNode));
+													, currentNode
+													, currentDomain));
 		else {
 			DbEntity temp = (DbEntity)list.get(index < list.size() - 1 
 												? index 
@@ -698,8 +779,8 @@ public class Mediator
 			fireDbEntityDisplayEvent(new EntityDisplayEvent(src
 													, temp
 													, currentMap
-													, currentDomain
-													, currentNode));
+													, currentNode
+													, currentDomain));
 		}
 		fireDbEntityEvent(new EntityEvent(src, entity, EntityEvent.REMOVE));
 	}	

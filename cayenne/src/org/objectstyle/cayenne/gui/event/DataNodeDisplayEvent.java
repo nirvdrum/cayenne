@@ -68,7 +68,8 @@ public class DataNodeDisplayEvent extends EventObject
 {
 	private DataDomain domain;
 	private DataNode node = null;
-	
+	/** True if data node is different from the current data node. */
+	private boolean dataNodeChanged = true;
 	
 	/** Current DataNode changed. */
 	public DataNodeDisplayEvent(Object src, DataDomain temp_domain
@@ -84,4 +85,11 @@ public class DataNodeDisplayEvent extends EventObject
 
 	/** Get data node (data source) associated with this data map. */
 	public DataNode getDataNode() {return node;}
+
+	/** Returns true if data node is different from the current data node. */
+	public boolean isDataNodeChanged() {return dataNodeChanged;}
+	public void setDataNodeChanged(boolean temp){
+		dataNodeChanged = temp;
+	}
+
 }

@@ -93,12 +93,16 @@ implements ChangeListener, ObjEntityDisplayListener
 		tab.addTab("Attributes", attributes);
 		rel = new ObjRelationshipPane(mediator);
 		tab.addTab("Relationships", rel);
+		
+		tab.addChangeListener(this);
 	}
 	
-	/** Handle focus when tab changes. */
+	/** AMong other things reset "Remove" button when tab changes. */
 	public void stateChanged(ChangeEvent e)	
 	{
-		// FIXME!! Handle focus changes
+		ExistingSelectionProcessor proc;
+		proc = (ExistingSelectionProcessor)tab.getSelectedComponent();
+		proc.processExistingSelection();
 	}
 	
 	/** If entity is null hides it's contents, otherwise makes it visible. */

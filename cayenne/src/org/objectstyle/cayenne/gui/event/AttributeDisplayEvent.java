@@ -65,6 +65,8 @@ import org.objectstyle.cayenne.map.*;
 public class AttributeDisplayEvent extends EntityDisplayEvent
 {
 	Attribute attribute;
+	/** True if different from current attribute */
+	boolean attributeChanged = true;
 
 	public AttributeDisplayEvent (Object src, Attribute temp_attribute
 	, Entity temp_entity, DataMap data_map, DataDomain temp_domain) 
@@ -75,5 +77,10 @@ public class AttributeDisplayEvent extends EntityDisplayEvent
 
 	public Attribute getAttribute() {
 		return attribute;
-	}	
+	}
+	
+	public boolean isAttributeChanged() {return attributeChanged;}
+	public void setAttributeChanged(boolean temp) {
+		attributeChanged = temp;
+	}
 }

@@ -107,6 +107,14 @@ class DbAttributeTableModel extends AbstractTableModel
 		dataMap = temp_mediator.getCurrentDataMap();
 	}
 	
+	public DbAttribute getAttribute(int row) {
+		if (row < 0 || row >= attributeList.size())
+			return null;
+		DbAttribute attribute = (DbAttribute)attributeList.get(row);
+		return attribute;
+	}
+	
+
 
 	public int getRowCount() {
 		return attributeList.size();
@@ -283,6 +291,14 @@ class DbAttributeTableModel extends AbstractTableModel
 		mediator.fireDbAttributeEvent(e);
 		fireTableDataChanged();
 	}	
+
+	/** Attribute just needs to be removed from the model. 
+	 *  It is already removed from the DataMap. */
+	void removeAttribute(Attribute attrib) {
+		attributeList.remove(attrib);
+		fireTableDataChanged();
+	}
+
 
 	public boolean isCellEditable(int row, int col) {
 		DbAttribute attrib = (DbAttribute)attributeList.get(row);

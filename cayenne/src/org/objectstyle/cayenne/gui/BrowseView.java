@@ -215,7 +215,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		
 	}
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this || e.isDataNodeChanged() == false)
 			return;
 		DefaultMutableTreeNode temp;
 		temp = getDataSourceNode(e.getDomain(), e.getDataNode());
@@ -224,7 +224,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		showNode(temp);
 	}
 	public void currentDataMapChanged(DataMapDisplayEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this || e.isDataMapChanged() == false)
 			return;
 		DefaultMutableTreeNode temp;
 		temp = getMapNode(e.getDomain(), e.getDataMap());
@@ -242,7 +242,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	}
 
 	private void currentEntityChanged(EntityDisplayEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this || e.isEntityChanged() == false)
 			return;
 		DefaultMutableTreeNode temp;
 		temp = getEntityNode(e.getDomain(), e.getDataMap(), e.getEntity());
@@ -650,8 +650,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	    								new EntityDisplayEvent(this
 	    								    , (Entity)obj
 	    								    , (DataMap)data[data.length-2]
-	    								    , (DataDomain)data[data.length-4]
-	    								    , (DataNode)data[data.length-3]));
+	    								    , (DataNode)data[data.length-3]
+	    								    , (DataDomain)data[data.length-4]));
 	    	} else if (data.length == 3){
 	    		mediator.fireObjEntityDisplayEvent(
 	    								new EntityDisplayEvent(this
@@ -665,8 +665,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	    								new EntityDisplayEvent(this
 	    								    , (Entity)obj
 	    								    , (DataMap)data[data.length-2]
-	    								    , (DataDomain)data[data.length-4]
-	    								    , (DataNode)data[data.length-3]));
+	    								    , (DataNode)data[data.length-3]
+	    								    , (DataDomain)data[data.length-4]));
 	    	} else if (data.length == 3){
 	    		mediator.fireDbEntityDisplayEvent(
 	    								new EntityDisplayEvent(this

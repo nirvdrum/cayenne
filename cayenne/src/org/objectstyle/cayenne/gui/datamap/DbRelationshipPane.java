@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.*;
 import java.util.*;
 import java.awt.event.*;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
@@ -71,13 +72,16 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Displays DbRelationship-s for the current obj entity. 
   * @author Michael Misha Shengaout*/
 public class DbRelationshipPane extends JPanel
-implements ActionListener, DbEntityDisplayListener, DbEntityListener
+implements ActionListener, DbEntityDisplayListener
+, DbEntityListener, DbRelationshipListener
+, ExistingSelectionProcessor, ListSelectionListener
 {
+	static Logger logObj = Logger.getLogger(DbRelationshipPane.class.getName());
+
 	Mediator mediator;
 
 	JTable 		table;
 	JButton 	add;
-	JButton 	remove;
 	JButton 	resolve;
 	
 	public DbRelationshipPane(Mediator temp_mediator) {
@@ -85,11 +89,11 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 		mediator = temp_mediator;		
 		mediator.addDbEntityDisplayListener(this);
 		mediator.addDbEntityListener(this);
+		mediator.addDbRelationshipListener(this);
 		// Set up graphical components
 		init();
 		// Add listeners		
 		add.addActionListener(this);
-		remove.addActionListener(this);
 		resolve.addActionListener(this);
 	}
 	
@@ -98,10 +102,9 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 		// Create table
 		table = new CayenneTable();
 		add = new JButton("Add");
-		remove = new JButton("Remove");
 		resolve	= new JButton("Database Mapping");
 		JPanel panel = PanelFactory.createTablePanel(table
-									, new JButton[] {add, remove, resolve});
+									, new JButton[] {add, resolve});
 		add(panel, BorderLayout.CENTER);
 	}
 	
@@ -111,15 +114,29 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 		model = (DbRelationshipTableModel)table.getModel();
 		if (src == add) {
 			model.addRow();
-		} else if (src == remove) {
-			stopEditing();
-			// Remove row
-			int row = table.getSelectedRow();
-			if (row >= 0)
-				model.removeRow(row);
 		} else if (src == resolve) {
 			resolveRelationship();
 		}
+	}
+	
+	public void valueChanged(ListSelectionEvent e) {
+		processExistingSelection();
+	}
+
+	public void processExistingSelection()
+	{
+		DbRelationship rel = null;
+		if (table.getSelectedRow() >= 0) {
+			DbRelationshipTableModel model;
+			model = (DbRelationshipTableModel)table.getModel();
+			rel = model.getRelationship(table.getSelectedRow());
+		}
+		RelationshipDisplayEvent ev;
+		ev = new RelationshipDisplayEvent(this, rel
+				, mediator.getCurrentDbEntity()
+				, mediator.getCurrentDataMap()
+				, mediator.getCurrentDataDomain());
+		mediator.fireDbRelationshipDisplayEvent(ev);
 	}
 
 	private void stopEditing() {
@@ -130,7 +147,6 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 			col.getCellEditor().stopCellEditing();
 		}
 	}
-	
 
 
 	private void resolveRelationship() {
@@ -159,7 +175,7 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 	/** Loads obj relationships into table. */
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
 		DbEntity entity = (DbEntity)e.getEntity();
-		if (null == entity)
+		if (null == entity || e.isEntityChanged() == false)
 			return;
 		DbRelationshipTableModel model;
 		model = new DbRelationshipTableModel(entity, mediator, this);
@@ -173,6 +189,7 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 		JComboBox combo = new JComboBox(createComboModel());
 		combo.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(combo));
+		table.getSelectionModel().addListSelectionListener(this);
 	}
 	
 	/** Create DefaultComboBoxModel with all obj entity names. */
@@ -197,6 +214,16 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 	public void dbEntityRemoved(EntityEvent e)
 	{ reloadEntityList(e); }
 
+	public void dbRelationshipChanged(RelationshipEvent e){}
+	public void dbRelationshipAdded(RelationshipEvent e){}
+	public void dbRelationshipRemoved(RelationshipEvent e){
+		DbRelationshipTableModel model;
+		model = (DbRelationshipTableModel)table.getModel();
+		model.removeRelationship(e.getRelationship());
+	}
+
+
+
 	/** Refresh the list of db entities (targets). 
 	  * Also refresh the table in case some db relationships were deleted.*/
 	private void reloadEntityList(EntityEvent e) {
@@ -216,5 +243,6 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 		DbRelationshipTableModel model;
 		model = (DbRelationshipTableModel)table.getModel();
 		model.fireTableDataChanged();
+		table.getSelectionModel().addListSelectionListener(this);
 	}	
 }

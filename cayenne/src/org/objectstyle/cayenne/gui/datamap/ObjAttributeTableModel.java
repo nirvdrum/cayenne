@@ -109,6 +109,15 @@ class ObjAttributeTableModel extends AbstractTableModel
 	public DbEntity getDbEntity(){ 
 		return dbEntity;
 	}
+
+	public ObjAttribute getAttribute(int row) {
+		if (row < 0 || row >= attributeList.size())
+			return null;
+		ObjAttribute attribute = (ObjAttribute)attributeList.get(row);
+		return attribute;
+	}
+	
+
 	
 	/** Refreshes DbEntity to current db entity within ObjEntity.*/
 	public void resetDbEntity() {
@@ -246,7 +255,14 @@ class ObjAttributeTableModel extends AbstractTableModel
 		entity.removeAttribute(attrib.getName());
 		mediator.fireObjAttributeEvent(e);
 		fireTableDataChanged();
-	}	
+	}
+	
+	/** Attribute just needs to be removed from the model. 
+	 *  It is already removed from the DataMap. */
+	void removeAttribute(Attribute attrib) {
+		attributeList.remove(attrib);
+		fireTableDataChanged();
+	}
 
 	public boolean isCellEditable(int row, int col) {
 		// Check if allow obj editing

@@ -248,6 +248,14 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		fireTableRowsDeleted(row, row);
 	}	
 
+	/** Relationship just needs to be removed from the model. 
+	 *  It is already removed from the DataMap. */
+	void removeRelationship(Relationship rel) {
+		relList.remove(rel);
+		fireTableDataChanged();
+	}
+
+
 	public boolean isCellEditable(int row, int col) {
 		return true;
 	}// End isCellEditable()

@@ -90,11 +90,15 @@ implements ChangeListener, DbEntityDisplayListener
 		tab.addTab("Attributes", attributes);
 		rel = new DbRelationshipPane(mediator);
 		tab.addTab("Relationships", rel);
+		
+		tab.addChangeListener(this);
 	}
-	
+
 	/** Handle focus when tab changes. */
 	public void stateChanged(ChangeEvent e)	{
-		// FIXME!! Handle focus changes
+		ExistingSelectionProcessor proc;
+		proc = (ExistingSelectionProcessor)tab.getSelectedComponent();
+		proc.processExistingSelection();
 	}
 	
 	/** If entity is null hides it's contents, otherwise makes it visible. */
@@ -121,5 +125,5 @@ implements ChangeListener, DbEntityDisplayListener
 			return;
 		// Display relationship tab
 		tab.setSelectedIndex(1);
-	}
+	}	
 }

@@ -70,7 +70,8 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Detail view of the ObjEntity properties. 
  * @author Michael Misha Shengaout */
 public class ObjEntityPane extends JPanel
-implements DocumentListener, ActionListener, ObjEntityDisplayListener
+implements DocumentListener, ActionListener
+, ObjEntityDisplayListener, ExistingSelectionProcessor
 {
 	Mediator mediator;
 	
@@ -154,6 +155,15 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		dbGenerate.setVisible(false);
 	}
 
+	public void processExistingSelection()
+	{
+		EntityDisplayEvent e;
+		e = new EntityDisplayEvent(this, mediator.getCurrentObjEntity()
+			, mediator.getCurrentDataMap(), mediator.getCurrentDataDomain());
+		mediator.fireObjEntityDisplayEvent(e);
+	}
+	
+
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (src == dbNew) {
@@ -216,7 +226,7 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 	
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		ObjEntity entity = (ObjEntity)e.getEntity();
-		if (null == entity) 
+		if (null == entity  || e.isEntityChanged() == false) 
 			return;
 		ignoreChange = true;
 		name.setText(entity.getName());

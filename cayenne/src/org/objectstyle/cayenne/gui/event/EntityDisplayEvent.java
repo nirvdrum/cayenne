@@ -72,6 +72,8 @@ public class EntityDisplayEvent extends EventObject
 	private DataNode node;
 	/** Reset the tab display to tab 0 */
 	private boolean tabReset = false;
+	/** True if different from current entity */
+	boolean entityChanged = true;
 	
 	/**  */
 	private EntityDisplayEvent(Object src, Entity temp_entity)
@@ -103,7 +105,7 @@ public class EntityDisplayEvent extends EventObject
 
 	
 	public EntityDisplayEvent (Object src, Entity temp_entity
-	, DataMap data_map, DataDomain temp_domain, DataNode temp_node)
+	, DataMap data_map, DataNode temp_node, DataDomain temp_domain)
 	{
 		this(src, temp_entity, data_map, temp_domain);
 		node = temp_node;
@@ -122,5 +124,9 @@ public class EntityDisplayEvent extends EventObject
 	public DataNode getDataNode() {return node;}
 	
 	public boolean isTabReset() { return tabReset;}
+	
+	/** True if entity different from current entity. */
+	public boolean isEntityChanged() {return entityChanged;}
+	public void setEntityChanged(boolean temp) {entityChanged = temp;}
 
 }

@@ -66,6 +66,9 @@ import org.objectstyle.cayenne.map.*;
 public class DomainDisplayEvent extends EventObject
 {
 	private DataDomain domain;
+	/** Returns true if domain is different from the current domain. */
+	private boolean domainChanged = true;
+
 	
 	public DomainDisplayEvent(Object src, DataDomain temp_domain)
 	{
@@ -75,4 +78,11 @@ public class DomainDisplayEvent extends EventObject
 	
 	/** Get domain for this data map. */
 	public DataDomain getDomain() {return domain;}
+
+	/** Returns true if domain is different from the current domain. */
+	public boolean isDomainChanged() {return domainChanged;}
+	public void setDomainChanged(boolean temp){
+		domainChanged = temp;
+	}
+	
 }

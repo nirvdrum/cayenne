@@ -69,6 +69,8 @@ public class DataMapDisplayEvent extends EventObject
 	private DataMap dataMap;
 	private DataDomain domain;
 	private DataNode node = null;
+	/** True if different from current data map. */
+	private boolean dataMapChanged = true;
 	
 	
 	/** 
@@ -106,4 +108,10 @@ public class DataMapDisplayEvent extends EventObject
 
 	/** Get data node (data source) associated with this data map. */
 	public DataNode getDataNode() {return node;}
+	
+	/** Returns true if data map is different from the current data map. */
+	public boolean isDataMapChanged() {return dataMapChanged;}
+	public void setDataMapChanged(boolean temp){
+		dataMapChanged = temp;
+	}
 }

@@ -71,13 +71,14 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Displays ObjRelationship-s for the current obj entity. 
   * @author Michael Misha Shengaout*/
 public class ObjRelationshipPane extends JPanel
-implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
+implements ActionListener, ObjEntityDisplayListener
+, ObjEntityListener, ObjRelationshipListener
+, ExistingSelectionProcessor, ListSelectionListener
 {
 	Mediator mediator;
 
 	JTable 		table;
 	JButton 	add;
-	JButton 	remove;
 	JButton 	resolve;
 	
 	public ObjRelationshipPane(Mediator temp_mediator) {
@@ -85,11 +86,11 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		mediator = temp_mediator;		
 		mediator.addObjEntityDisplayListener(this);
 		mediator.addObjEntityListener(this);
+		mediator.addObjRelationshipListener(this);
 		// Set up graphical components
 		init();
 		// Add listeners		
 		add.addActionListener(this);
-		remove.addActionListener(this);
 		resolve.addActionListener(this);
 	}
 
@@ -98,10 +99,9 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		this.setLayout(new BorderLayout());
 		table = new CayenneTable();
 		add = new JButton("Add");
-		remove = new JButton("Remove");
 		resolve	= new JButton("Database Mapping");
 		JPanel panel = PanelFactory.createTablePanel(table
-							, new JButton[]{add, remove, resolve});
+							, new JButton[]{add, resolve});
 		add(panel, BorderLayout.CENTER);
 	}
 
@@ -111,16 +111,31 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		model = (ObjRelationshipTableModel)table.getModel();
 		if (src == add) {
 			model.addRow();
-		} else if (src == remove) {
-			stopEditing();
-			// Remove row
-			int row = table.getSelectedRow();
-			if (row >= 0)
-				model.removeRow(row);
 		} else if (src == resolve) {
 			resolveRelationship();
 		}
 	}
+
+	public void processExistingSelection()
+	{
+		ObjRelationship rel = null;
+		if (table.getSelectedRow() >= 0) {
+			ObjRelationshipTableModel model;
+			model = (ObjRelationshipTableModel)table.getModel();
+			rel = model.getRelationship(table.getSelectedRow());
+		}
+		RelationshipDisplayEvent ev;
+		ev = new RelationshipDisplayEvent(this, rel
+				, mediator.getCurrentObjEntity(), mediator.getCurrentDataMap()
+				, mediator.getCurrentDataDomain());
+		mediator.fireObjRelationshipDisplayEvent(ev);
+	}
+
+	public void valueChanged(ListSelectionEvent e) {
+		processExistingSelection();
+	}
+
+
 
 	private void stopEditing() {
 		// Stop whatever editing may be taking place
@@ -195,7 +210,7 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		if (e.getSource() == this)
 			return;
 		ObjEntity entity = (ObjEntity)e.getEntity();
-		if (null == entity)
+		if (null == entity || e.isEntityChanged() == false)
 			return;
 		ObjRelationshipTableModel model;
 		model = new ObjRelationshipTableModel(entity,mediator, this);
@@ -214,6 +229,7 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		col.setCellEditor(editor);
 		col = table.getColumnModel().getColumn(model.REL_CARDINALITY);
 		col.setMinWidth(150);
+		table.getSelectionModel().addListSelectionListener(this);
 	}
 	
 	/** Create DefaultComboBoxModel with all obj entity names. */
@@ -237,6 +253,16 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 	{ reloadEntityList(e); }
 	public void objEntityRemoved(EntityEvent e)
 	{ reloadEntityList(e); }
+
+	public void objRelationshipChanged(RelationshipEvent e){}
+	public void objRelationshipAdded(RelationshipEvent e){}
+	public void objRelationshipRemoved(RelationshipEvent e){
+		ObjRelationshipTableModel model;
+		model = (ObjRelationshipTableModel)table.getModel();
+		model.removeRelationship(e.getRelationship());
+	}
+
+
 
 	/** Refresh the list of obj entities (targets). 
 	  * Also refresh the table in case some obj relationships were deleted.*/
