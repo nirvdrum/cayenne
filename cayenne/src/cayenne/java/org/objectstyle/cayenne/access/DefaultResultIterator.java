@@ -228,7 +228,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readDataRow() throws SQLException, CayenneException {
         try {
-            Map dataRow = new Snapshot(mapCapacity);
+            Map dataRow = new DataRow(mapCapacity);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();
@@ -261,7 +261,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readIdRow() throws SQLException, CayenneException {
         try {
-            Map idRow = new Snapshot(idMapCapacity);
+            Map idRow = new DataRow(idMapCapacity);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();

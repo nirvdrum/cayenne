@@ -210,7 +210,7 @@ public class SelectObserver extends DefaultOperationObserver {
                 continue;
             }
 
-            SnapshotUtils.mergePrefetchResultsRelationships(
+            DataRowUtils.mergePrefetchResultsRelationships(
                 objects,
                 relationship,
                 nextObjects);

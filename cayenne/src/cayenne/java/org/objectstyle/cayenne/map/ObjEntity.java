@@ -64,7 +64,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.util.SnapshotUtils;
+import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -228,7 +228,7 @@ public class ObjEntity extends Entity {
      * the access layer implementation.
      */
     public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-        return SnapshotUtils.objectIdFromSnapshot(this, objectSnapshot);
+        return DataRowUtils.objectIdFromSnapshot(this, objectSnapshot);
     }
 
     /** Clears all the mapping between this obj entity and its current db entity.

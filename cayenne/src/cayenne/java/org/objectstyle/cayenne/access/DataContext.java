@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
-import org.objectstyle.cayenne.access.util.SnapshotUtils;
+import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.event.EventManager;
@@ -197,7 +197,7 @@ public class DataContext implements QueryEngine, Serializable {
     public DataContext(QueryEngine parent) {
         setParent(parent);
 
-        SnapshotCache snapshotCache = null;
+        DataRowCache snapshotCache = null;
         if (parent != null) {
             snapshotCache = ((DataDomain) parent).getSnapshotCache();
         }
@@ -218,7 +218,7 @@ public class DataContext implements QueryEngine, Serializable {
                     lazyInitParentDomainName);
 
             if (parent instanceof DataDomain) {
-                this.objectStore.setSnapshotCache(
+                this.objectStore.setDataRowCache(
                     ((DataDomain) parent).getSnapshotCache());
             }
         }
@@ -325,7 +325,7 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    obj = SnapshotUtils.newDataObject(oid.getObjClass().getName());
+                    obj = DataRowUtils.newDataObject(oid.getObjClass().getName());
                 }
                 catch (Exception ex) {
                     String entity =
@@ -351,7 +351,7 @@ public class DataContext implements QueryEngine, Serializable {
     /** Takes a snapshot of current object state. */
     public Map takeObjectSnapshot(DataObject anObject) {
         ObjEntity ent = getEntityResolver().lookupObjEntity(anObject);
-        return SnapshotUtils.takeObjectSnapshot(ent, anObject);
+        return DataRowUtils.takeObjectSnapshot(ent, anObject);
     }
 
     /**
@@ -360,7 +360,6 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      */
     public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
-        // TODO: (Andrus) maybe move this to SnapshotManager?
 
         if (dataRows == null && dataRows.size() == 0) {
             return new ArrayList(1);
@@ -387,7 +386,7 @@ public class DataContext implements QueryEngine, Serializable {
         Iterator it = dataRows.iterator();
         while (it.hasNext()) {
             Map dataRow = (Map) it.next();
-            ObjectId anId = SnapshotUtils.objectIdFromSnapshot(entity, dataRow);
+            ObjectId anId = DataRowUtils.objectIdFromSnapshot(entity, dataRow);
 
             // synchronized on objectstore, since read/write
             // must be performed atomically
@@ -402,24 +401,24 @@ public class DataContext implements QueryEngine, Serializable {
                     // TODO: temporary hack - should do lazy conversion - make an object HOLLOW
                     // and resolve on first read... unfortunately lots of other things break...
 
-                    SnapshotUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
                     // object.setPersistenceState(PersistenceState.HOLLOW);
                 }
                 // merge all MODIFIED objects immediately 
                 else if (object.getPersistenceState() == PersistenceState.MODIFIED) {
-                    SnapshotUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
                 // TODO: temporary hack - should do lazy conversion - keep an object HOLLOW
                 // and resolve on first read...unfortunately lots of other things break...
                 else if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                    SnapshotUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
             }
             // TODO: temporary hack - this else clause must go... unfortunately lots of other things break
             // at the moment...
             else {
                 if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                    SnapshotUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                    DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
             }
 
@@ -519,7 +518,7 @@ public class DataContext implements QueryEngine, Serializable {
         String objClassName = entity.getClassName();
         DataObject dobj = null;
         try {
-            dobj = SnapshotUtils.newDataObject(objClassName);
+            dobj = DataRowUtils.newDataObject(objClassName);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);

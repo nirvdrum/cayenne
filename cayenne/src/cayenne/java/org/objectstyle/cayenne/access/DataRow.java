@@ -55,18 +55,40 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * Snapshot is a map that holds values retrieved from the database for a 
+ * given query row. Snapshots are used to cache database data, and as a reference
+ * point for tracking DataObject changes.
+ * 
  * @author Andrei Adamchik
+ * @since 1.1
  */
-public class SnapshotTst extends CayenneTestCase {
-    public void testVersion() throws Exception {
-        Snapshot s1 = new Snapshot(10);
-        Snapshot s2 = new Snapshot(10);
-        Snapshot s3 = new Snapshot(10);
-        assertFalse(s1.getVersion() == s2.getVersion());
-		assertFalse(s2.getVersion() == s3.getVersion());
-		assertFalse(s3.getVersion() == s1.getVersion());
+
+// TODO: Maybe implement "locking" of snapshot after it has been created,
+// since snapshots are expected to be immutable 
+public class DataRow extends HashMap {
+	
+	// "volatile" is supposed to ensure consistency in read and increment operations;
+	// is this universally true?
+	
+	// start with Long.MIN_VALUE + 1, since Long.MIN_VALUE is used as a default
+	// by DataObjects that have no snapshot version info.
+	private static volatile long currentVersion = Long.MIN_VALUE + 1;
+	
+    protected long version = currentVersion++;
+
+    public DataRow(Map map) {
+    	super(map);
+    }
+    
+    public DataRow(int initialCapacity) {
+        super(initialCapacity);
+    }
+
+    public long getVersion() {
+        return version;
     }
 }

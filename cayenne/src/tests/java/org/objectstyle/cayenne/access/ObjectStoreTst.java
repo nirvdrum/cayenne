@@ -75,13 +75,13 @@ public class ObjectStoreTst extends CayenneTestCase {
         this.context = createDataContext();
 
         // create ObjectStore outside of this DataContext
-        SnapshotCache cache = new SnapshotCache("test");
+        DataRowCache cache = new DataRowCache("test");
         this.objectStore = new ObjectStore(cache);
 
     }
 
     public void testObjectsInvalidated() throws Exception {
-        Snapshot row = new Snapshot(10);
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
@@ -90,7 +90,7 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getSnapshotCache().processSnapshotChanges(
+        objectStore.getDataRowCache().processSnapshotChanges(
             this,
             Collections.singletonMap(object.getObjectId(), row),
             Collections.EMPTY_LIST);
@@ -106,7 +106,7 @@ public class ObjectStoreTst extends CayenneTestCase {
     }
 
     public void testObjectsUnregistered() throws Exception {
-        Snapshot row = new Snapshot(10);
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
@@ -115,7 +115,7 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getSnapshotCache().processSnapshotChanges(
+        objectStore.getDataRowCache().processSnapshotChanges(
             this,
             Collections.singletonMap(object.getObjectId(), row),
             Collections.EMPTY_LIST);

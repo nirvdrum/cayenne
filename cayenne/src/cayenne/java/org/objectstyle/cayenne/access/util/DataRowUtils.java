@@ -64,13 +64,14 @@ import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
+import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ObjectStore;
-import org.objectstyle.cayenne.access.Snapshot;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.ToManyListDataSource;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -83,18 +84,19 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * SnapshotUtils contains a number of static methods to work with Snapshots.
+ * DataRowUtils contains a number of static methods to work with DataRows.
  * This is a helper class that works in conjunction with DataContext.
  *
  * @author Andrei Adamchik
  */
-public class SnapshotUtils {
+public class DataRowUtils {
     /**
      * A factory method of DataObjects. Uses Configuration ClassLoader to
      * instantiate a new instance of DataObject of a given class.
      */
-    public static final DataObject newDataObject(String className) throws Exception {
-        return (DataObject) Configuration
+    public static final CayenneDataObject newDataObject(String className)
+        throws Exception {
+        return (CayenneDataObject) Configuration
             .getResourceLoader()
             .loadClass(className)
             .newInstance();
@@ -467,7 +469,7 @@ public class SnapshotUtils {
             return context.getObjectStore().getSnapshot(id, context);
         }
 
-        Snapshot snapshot = new Snapshot(10);
+        DataRow snapshot = new DataRow(10);
 
         Map attrMap = ent.getAttributeMap();
         Iterator it = attrMap.keySet().iterator();
@@ -608,7 +610,7 @@ public class SnapshotUtils {
     /**
      * Instantiation is not allowed.
      */
-    private SnapshotUtils() {
+    private DataRowUtils() {
         super();
     }
 

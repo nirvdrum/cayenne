@@ -80,8 +80,8 @@ import org.shiftone.cache.CacheManager;
  * @author Andrei Adamchik
  * @since 1.1
  */
-public class SnapshotCache implements Serializable {
-    private static Logger logObj = Logger.getLogger(SnapshotCache.class);
+public class DataRowCache implements Serializable {
+    private static Logger logObj = Logger.getLogger(DataRowCache.class);
 
     protected String name;
     protected Cache snapshots;
@@ -90,7 +90,7 @@ public class SnapshotCache implements Serializable {
     /**
      * Creates new SnapshotCache, assigning it a specified name.
      */
-    public SnapshotCache(String name) {
+    public DataRowCache(String name) {
         if (name == null) {
             throw new IllegalArgumentException("SnapshotCache name can't be null.");
         }
@@ -118,8 +118,8 @@ public class SnapshotCache implements Serializable {
      * Returns cached snapshot or null if no snapshot is currently
      * cached for the given ObjectId.
      */
-    public Snapshot getCachedSnapshot(ObjectId oid) {
-        return (Snapshot) snapshots.getObject(oid);
+    public DataRow getCachedSnapshot(ObjectId oid) {
+        return (DataRow) snapshots.getObject(oid);
     }
 
     /**
@@ -128,10 +128,10 @@ public class SnapshotCache implements Serializable {
      * to fetch it from the database. If there is no database row
      * for a given id, an exception is thrown.
      */
-    public Snapshot getSnapshot(ObjectId oid, QueryEngine engine) {
+    public DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
 
         // try cache
-        Snapshot cachedSnapshot = getCachedSnapshot(oid);
+        DataRow cachedSnapshot = getCachedSnapshot(oid);
         if (cachedSnapshot != null) {
             return cachedSnapshot;
         }
@@ -156,7 +156,7 @@ public class SnapshotCache implements Serializable {
                 "No matching objects found for ObjectId " + oid);
         }
         else {
-        	Snapshot snapshot = (Snapshot) results.get(0);
+        	DataRow snapshot = (DataRow) results.get(0);
 			snapshots.addObject(oid, snapshot);
             return snapshot;
         }

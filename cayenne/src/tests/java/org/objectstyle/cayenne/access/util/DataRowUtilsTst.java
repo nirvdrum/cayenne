@@ -62,7 +62,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.access.Snapshot;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 /**
  * @author Andrei Adamchik
  */
-public class SnapshotUtilsTst extends DataContextTestBase {
+public class DataRowUtilsTst extends DataContextTestBase {
     public void testMerge() throws Exception {
         String n1 = "changed";
         String n2 = "changed again";
@@ -83,7 +83,7 @@ public class SnapshotUtilsTst extends DataContextTestBase {
         s2.put("ARTIST_NAME", n2);
         s2.put("DATE_OF_BIRTH", new java.util.Date());
         ObjEntity e = context.getEntityResolver().lookupObjEntity(a1);
-		SnapshotUtils.mergeObjectWithSnapshot(e, a1, s2);
+		DataRowUtils.mergeObjectWithSnapshot(e, a1, s2);
 
         // name was modified, so it should not change during merge
         assertEquals(n1, a1.getArtistName());
@@ -107,11 +107,11 @@ public class SnapshotUtilsTst extends DataContextTestBase {
             "ARTIST_ID",
             painting.getToArtist().getObjectId().getValueForAttribute("ARTIST_ID"));
 
-        assertFalse(SnapshotUtils.isToOneTargetModified(toArtist, painting, map));
+        assertFalse(DataRowUtils.isToOneTargetModified(toArtist, painting, map));
 
         painting.setToArtist(artist);
 
-        assertTrue(SnapshotUtils.isToOneTargetModified(toArtist, painting, map));
+        assertTrue(DataRowUtils.isToOneTargetModified(toArtist, painting, map));
     }
 
     public void testIsJoinAttributesModified() throws Exception {
@@ -132,9 +132,9 @@ public class SnapshotUtilsTst extends DataContextTestBase {
         Map same = new HashMap();
         same.put("ARTIST_ID", new Integer(1));
 
-        assertFalse(SnapshotUtils.isJoinAttributesModified(toArtist, stored, same));
-        assertTrue(SnapshotUtils.isJoinAttributesModified(toArtist, stored, nullified));
-        assertTrue(SnapshotUtils.isJoinAttributesModified(toArtist, stored, updated));
+        assertFalse(DataRowUtils.isJoinAttributesModified(toArtist, stored, same));
+        assertTrue(DataRowUtils.isJoinAttributesModified(toArtist, stored, nullified));
+        assertTrue(DataRowUtils.isJoinAttributesModified(toArtist, stored, updated));
     }
     
 	public void testObjectIdFromSnapshot() throws Exception {
@@ -151,14 +151,14 @@ public class SnapshotUtilsTst extends DataContextTestBase {
 		 ent.setClassName(entityClass.getName());
 
 		 // test same id created by different methods
-		 Snapshot map = new Snapshot(10);
+		 DataRow map = new DataRow(10);
 		 map.put(at.getName(), "123");
 
-		 Snapshot map2 = new Snapshot(10);
+		 DataRow map2 = new DataRow(10);
 		 map2.put(at.getName(), "123");
 
 		 ObjectId ref = new ObjectId(entityClass, map);
-		 ObjectId oid = SnapshotUtils.objectIdFromSnapshot(ent, map2);
+		 ObjectId oid = DataRowUtils.objectIdFromSnapshot(ent, map2);
 
 		 assertEquals(ref, oid);
 	 }

@@ -342,7 +342,7 @@ public class DefaultSorter implements DependencySorter {
             snapshot = obj.getCurrentSnapshot();
         }
 
-        ObjectId id = SnapshotUtils.targetObjectId(targetClass, finalRel, snapshot);
+        ObjectId id = DataRowUtils.targetObjectId(targetClass, finalRel, snapshot);
         return (id != null) ? obj.getDataContext().registeredObject(id) : null;
     }
 

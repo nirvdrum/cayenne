@@ -69,7 +69,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.util.RelationshipFault;
-import org.objectstyle.cayenne.access.util.SnapshotUtils;
+import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
@@ -83,10 +83,13 @@ import org.objectstyle.cayenne.util.PropertyComparator;
 public class CayenneDataObject implements DataObject {
     private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
 
+	protected long snapshotVersion = Long.MIN_VALUE;
+	
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
     protected transient DataContext dataContext;
     protected Map values = new HashMap();
+    
 
     /** Returns a data context this object is registered with, or null
      * if this object has no associated DataContext */
@@ -213,7 +216,7 @@ public class CayenneDataObject implements DataObject {
                 dataContext.getObjectStore().getSnapshot(objectId, dataContext);
 
             ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
-            SnapshotUtils.refreshObjectWithSnapshot(entity, this, snapshot, true);
+            DataRowUtils.refreshObjectWithSnapshot(entity, this, snapshot, true);
         }
         catch (Exception ex) {
             // TODO: add some sort of delegate method here. Quietly
@@ -534,5 +537,17 @@ public class CayenneDataObject implements DataObject {
 
         // DataContext will be set *IF* the DataContext it came from is also
         // deserialized.  Setting of DataContext is handled by the DataContext itself
+    }
+    
+    /**
+     * Returns a version of a DataRow snapshot that was used to 
+     * create this object.
+     */
+    public long getSnapshotVersion() {
+        return snapshotVersion;
+    }
+
+    public void setSnapshotVersion(long snapshotVersion) {
+        this.snapshotVersion = snapshotVersion;
     }
 }

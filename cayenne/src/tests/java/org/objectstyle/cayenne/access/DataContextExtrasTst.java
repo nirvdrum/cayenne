@@ -109,7 +109,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testIdObjectFromDataRow() throws Exception {
-		Snapshot row = new Snapshot(10);
+		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100000));
         DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
@@ -119,7 +119,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
-		Snapshot row = new Snapshot(10);
+		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100001));
         row.put("ARTIST_NAME", "ArtistXYZ");
         DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
@@ -130,7 +130,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testFullObjectFromDataRow() throws Exception {
-		Snapshot row = new Snapshot(10);
+		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(123456));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
