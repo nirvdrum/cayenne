@@ -88,7 +88,6 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.util.FileSystemViewDecorator;
 
 /** 
  * Wizard for generating the database from the data map.
@@ -252,13 +251,14 @@ public class GenerateDbDialog
     }
 
     protected void storeSQL() {
-        File projDir = CayenneModelerFrame.getProject().getProjectDirectory();
-        FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
-        JFileChooser fc = new JFileChooser(fileView);
+        JFileChooser fc = new JFileChooser();
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setDialogTitle("Save SQL Script");
-        if (null != projDir) {
-            fc.setCurrentDirectory(projDir);
+
+        File projectDir = CayenneModelerFrame.getProject().getProjectDirectory();
+
+        if (projectDir != null) {
+            fc.setCurrentDirectory(projectDir);
         }
 
         if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
