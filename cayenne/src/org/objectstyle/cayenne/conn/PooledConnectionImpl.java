@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.conn;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,59 +70,68 @@ import javax.sql.*;
  */
 public class PooledConnectionImpl implements PooledConnection {
     static Logger logObj = Logger.getLogger(PooledConnectionImpl.class.getName());
-    
+
     private Connection connectionObj;
     private ArrayList connectionEventListeners;
     private boolean hadErrors;
-    
+
     /** Creates new PooledConnection */
     public PooledConnectionImpl(Connection connectionObj) {
         this.connectionObj = connectionObj;
         connectionEventListeners = new ArrayList(10);
     }
-    
+
     public void addConnectionEventListener(ConnectionEventListener listener) {
-        synchronized(connectionEventListeners) {
-            if(!connectionEventListeners.contains(listener))
+        synchronized (connectionEventListeners) {
+            if (!connectionEventListeners.contains(listener))
                 connectionEventListeners.add(listener);
         }
     }
-    
+
     public void removeConnectionEventListener(ConnectionEventListener listener) {
-        synchronized(connectionEventListeners) {
+        synchronized (connectionEventListeners) {
             connectionEventListeners.remove(listener);
         }
     }
-    
+
     public void close() throws java.sql.SQLException {
         connectionObj.close();
         connectionObj = null;
-        
+
         // remove all listeners
-        synchronized(connectionEventListeners) {
+        synchronized (connectionEventListeners) {
             connectionEventListeners.clear();
         }
     }
-    
+
     public Connection getConnection() throws java.sql.SQLException {
         // set autocommit to false to return connection
         // always in consistent state
-        if(!connectionObj.getAutoCommit()) {
-            connectionObj.setAutoCommit(true);
+        if (!connectionObj.getAutoCommit()) {
+
+            try {
+                connectionObj.setAutoCommit(true);
+            }
+            catch (SQLException sqlEx) {
+                // try applying Sybase patch
+                ConnectionWrapper.sybaseAutoCommitPatch(connectionObj, sqlEx, true);
+            }
         }
-        
+
+        connectionObj.clearWarnings();
+
         return new ConnectionWrapper(connectionObj, this);
     }
-    
-    protected void returnConnectionToThePool() throws java.sql.SQLException  {
+
+    protected void returnConnectionToThePool() throws java.sql.SQLException {
         // do not return to pool bad connections
-        if(hadErrors)
+        if (hadErrors)
             close();
-        else   
+        else
             // notify the listeners that connection is no longer used by application...
             this.connectionClosedNotification();
     }
-    
+
     /** This method creates and sents an event to listeners when an error occurs in the
      *  underlying connection. Listeners can have special logic to
      *  analyze the error and do things like closing this PooledConnection
@@ -131,33 +140,35 @@ public class PooledConnectionImpl implements PooledConnection {
     protected void connectionErrorNotification(SQLException exception) {
         // hint for later to avoid returning bad connections to the pool
         hadErrors = true;
-        
-        synchronized(connectionEventListeners) {
-            if(connectionEventListeners.size() == 0)
+
+        synchronized (connectionEventListeners) {
+            if (connectionEventListeners.size() == 0)
                 return;
-            
+
             ConnectionEvent closedEvent = new ConnectionEvent(this, exception);
             Iterator listeners = connectionEventListeners.iterator();
-            while(listeners.hasNext()) {
-                ConnectionEventListener nextListener = (ConnectionEventListener)listeners.next();
+            while (listeners.hasNext()) {
+                ConnectionEventListener nextListener =
+                    (ConnectionEventListener) listeners.next();
                 nextListener.connectionErrorOccurred(closedEvent);
             }
         }
     }
-    
+
     /** Creates and sends an event to listeners when a user closes
      *  java.sql.Connection object belonging to this PooledConnection.
      */
     protected void connectionClosedNotification() {
-        synchronized(connectionEventListeners) {
-            if(connectionEventListeners.size() == 0)
+        synchronized (connectionEventListeners) {
+            if (connectionEventListeners.size() == 0)
                 return;
-            
+
             ConnectionEvent closedEvent = new ConnectionEvent(this);
             Iterator listeners = connectionEventListeners.iterator();
             int i = 0;
-            while(listeners.hasNext()) {
-                ConnectionEventListener nextListener = (ConnectionEventListener)listeners.next();
+            while (listeners.hasNext()) {
+                ConnectionEventListener nextListener =
+                    (ConnectionEventListener) listeners.next();
                 nextListener.connectionClosed(closedEvent);
             }
         }

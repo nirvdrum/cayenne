@@ -98,8 +98,7 @@ public class PkGenerator {
         }
         finally {
             // return connection to the pool
-            if (con != null)
-                con.close();
+            con.close();
         }
 
         if (shouldCreate) {
@@ -117,24 +116,26 @@ public class PkGenerator {
 
         // check if a table exists
         Connection con = node.getDataSource().getConnection();
+        ResultSet tables = null;
         boolean shouldDrop = false;
         try {
             DatabaseMetaData md = con.getMetaData();
-            ResultSet tables = md.getTables(null, null, "AUTO_PK_SUPPORT", null);
+            tables = md.getTables(null, null, "AUTO_PK_SUPPORT", null);
             shouldDrop = tables.next();
-            tables.close();
         }
         finally {
+            if(tables != null) {
+                tables.close();
+            }
+            
             // return connection to the pool
-            if (con != null)
-                con.close();
+            con.close();
         }
 
         if (shouldDrop) {
             runSchemaUpdate(node, "DROP TABLE AUTO_PK_SUPPORT");
         }
     }
-
 
     /** Performs necessary database operations to do primary key generation
      *  for a particular DbEntity. This may require a prior call 
@@ -163,13 +164,13 @@ public class PkGenerator {
             .append('\'');
 
         List rows = runSelect(node, buf.toString());
-        if(rows.size() > 0) {
+        if (rows.size() > 0) {
             shouldInsert = false;
         }
 
         // create new one if needed
         if (shouldInsert) {
-            
+
             buf.setLength(0);
             buf
                 .append("INSERT INTO AUTO_PK_SUPPORT (TABLE_NAME, NEXT_ID) ")
@@ -192,7 +193,6 @@ public class PkGenerator {
         PkSchemaProcessor pr = new PkSchemaProcessor();
         node.performQuery(q, pr);
     }
-
 
     /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
      * to track the results of the execution.

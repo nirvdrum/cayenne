@@ -94,6 +94,7 @@ public class DatabaseSetup {
                 int rowsDeleted = stmt.executeUpdate(deleteSql);
             }
             conn.commit();
+            stmt.close();
         }
         finally {
             conn.close();
