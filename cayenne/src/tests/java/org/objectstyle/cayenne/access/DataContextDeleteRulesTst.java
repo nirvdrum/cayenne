@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
@@ -74,6 +75,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
  * @author Craig Miskell
  */
 public class DataContextDeleteRulesTst extends CayenneTestCase {
+    private static Logger logObj = Logger.getLogger(DataContextDeleteRulesTst.class);
 
     private DataContext context;
 
@@ -117,31 +119,61 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
         context.commitChanges();
     }
 
-    public void testNullifyToManyFlattened() {
-        //ArtGroup artistArray
-        ArtGroup aGroup = (ArtGroup) context.createAndRegisterNewObject("ArtGroup");
+    /**
+     * Tests that deleting a source of a flattened relationship with
+     * CASCADE rule results in deleting a join and a target.
+     */    
+    public void testCascadeToManyFlattened() {
+        // testing Artist.groupArray relationship
+        ArtGroup aGroup = (ArtGroup) context.createAndRegisterNewObject(ArtGroup.class);
         aGroup.setName("Group Name");
-        Artist anArtist = (Artist) context.createAndRegisterNewObject("Artist");
+        Artist anArtist = (Artist) context.createAndRegisterNewObject(Artist.class);
+        anArtist.setArtistName("A Name");
+        anArtist.addToGroupArray(aGroup);
+        assertTrue(anArtist.getGroupArray().contains(aGroup));
+
+        context.commitChanges();
+        
+        assertEquals(0, context.getObjectStore().flattenedDeletes.size());
+        
+        context.deleteObject(anArtist);
+
+        assertEquals(PersistenceState.DELETED, aGroup.getPersistenceState());
+        assertFalse(anArtist.getGroupArray().contains(aGroup));
+        assertEquals(1, context.getObjectStore().flattenedDeletes.size());
+        context.commitChanges();
+    }
+
+    /**
+     * Tests that deleting a source of a flattened relationship with
+     * NULLIFY rule results in deleting a join together with the object
+     * deleted. 
+     */
+    public void testNullifyToManyFlattened() {
+        // testing ArtGroup.artistArray relationship
+        ArtGroup aGroup = (ArtGroup) context.createAndRegisterNewObject(ArtGroup.class);
+        aGroup.setName("Group Name");
+        Artist anArtist = (Artist) context.createAndRegisterNewObject(Artist.class);
         anArtist.setArtistName("A Name");
         aGroup.addToArtistArray(anArtist);
 
-        //Preconditions - good to check to be sure
+        context.commitChanges();
+
+        // Preconditions 
         assertTrue(aGroup.getArtistArray().contains(anArtist));
         assertTrue(anArtist.getGroupArray().contains(aGroup));
-        context.commitChanges();
+        assertEquals(0, context.getObjectStore().flattenedDeletes.size());
 
         context.deleteObject(aGroup);
 
         //The things to test
         assertFalse(anArtist.getGroupArray().contains(aGroup));
-        //Although the group is deleted, the array should still be 
-        //cleaned up correctly
-        //assertFalse(aGroup.getArtistArray().contains(anArtist));
-        context.commitChanges();
+        assertEquals(1, context.getObjectStore().flattenedDeletes.size());
 
+        context.commitChanges();
     }
 
-    public void testNullifyToManyNonFlattened() {
+    public void testNullifyToMany() {
         //ArtGroup childGroupsArray
         ArtGroup parentGroup = (ArtGroup) context.createAndRegisterNewObject("ArtGroup");
         parentGroup.setName("Parent");
@@ -155,6 +187,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
         assertTrue(parentGroup.getChildGroupsArray().contains(childGroup));
 
         context.commitChanges();
+
         context.deleteObject(parentGroup);
 
         //The things we are testing.
@@ -283,13 +316,13 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
         context.commitChanges();
 
         try {
-			context.deleteObject(test2);
+            context.deleteObject(test2);
         }
         catch (Exception e) {
             e.printStackTrace();
             fail("Shouldn't have thrown an exception");
         }
-        
+
         // don't commit, since this will cause a constraint exception
     }
 
