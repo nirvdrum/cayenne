@@ -79,6 +79,8 @@ import org.objectstyle.cayenne.query.Query;
  * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
  */
+// TODO: need a name that better reflects the functionality, 
+// e.g. OperationContext.
 public interface OperationObserver extends OperationHints {
 
     /**
