@@ -80,7 +80,7 @@ public class GuiConfiguration extends DefaultConfiguration {
 
 
     public static void initSharedConfig(File proj_file) throws Exception {
-    	initSharedConfig(proj_file, false);
+    	initSharedConfig(proj_file, true);
     }
 
 	/** Create configuration obj and initialize its state.
