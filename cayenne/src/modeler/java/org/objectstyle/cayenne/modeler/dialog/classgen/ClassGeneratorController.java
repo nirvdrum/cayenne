@@ -65,9 +65,10 @@ import javax.swing.JOptionPane;
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
+import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -227,21 +228,20 @@ public class ClassGeneratorController extends BasicController {
         ClassGeneratorModel model = (ClassGeneratorModel) getModel();
         File startDir = model.getOutputDirectory();
 
-        // guess start directory
-        if (startDir == null) {
-            String lastUsed = (String) ModelerPreferences.getPreferences().getProperty(
-                    ModelerPreferences.LAST_DIR);
-            if (lastUsed != null) {
-                startDir = new File(lastUsed);
-            }
-        }
-
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
 
+        // guess start directory
         if (startDir != null) {
             chooser.setCurrentDirectory(startDir);
+        }
+        else {
+            FSPath lastDir = Application
+                    .getInstance()
+                    .getFrameController()
+                    .getLastDirectory();
+            lastDir.updateChooser(chooser);
         }
 
         int result = chooser.showOpenDialog((Component) this.getView());
@@ -258,7 +258,10 @@ public class ClassGeneratorController extends BasicController {
         String template = chooseTemplate(
                 model.getCustomSuperclassTemplate(),
                 "Select Custom Superclass Template");
-        model.setCustomSuperclassTemplate(template);
+
+        if (template != null) {
+            model.setCustomSuperclassTemplate(template);
+        }
     }
 
     protected void chooseClassTemplate() {
@@ -266,25 +269,16 @@ public class ClassGeneratorController extends BasicController {
         String template = chooseTemplate(
                 model.getCustomClassTemplate(),
                 "Select Custom Class Template");
-        model.setCustomClassTemplate(template);
+
+        if (template != null) {
+            model.setCustomClassTemplate(template);
+        }
     }
 
     /**
      * Picks and returns class generation velocity template.
      */
     private String chooseTemplate(String oldTemplate, String title) {
-        File startDir = (oldTemplate != null)
-                ? new File(oldTemplate).getParentFile()
-                : null;
-
-        // guess start directory
-        if (startDir == null) {
-            String lastUsed = (String) ModelerPreferences.getPreferences().getProperty(
-                    ModelerPreferences.LAST_DIR);
-            if (lastUsed != null) {
-                startDir = new File(lastUsed);
-            }
-        }
 
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -294,8 +288,18 @@ public class ClassGeneratorController extends BasicController {
 
         chooser.setDialogTitle(title);
 
+        File startDir = (oldTemplate != null)
+                ? new File(oldTemplate).getParentFile()
+                : null;
         if (startDir != null) {
             chooser.setCurrentDirectory(startDir);
+        }
+        else {
+            FSPath lastDir = Application
+                    .getInstance()
+                    .getFrameController()
+                    .getLastDirectory();
+            lastDir.updateChooser(chooser);
         }
 
         File selected = null;
@@ -303,10 +307,12 @@ public class ClassGeneratorController extends BasicController {
         if (result == JFileChooser.APPROVE_OPTION) {
             selected = chooser.getSelectedFile();
 
-            // Set preferences
-            ModelerPreferences.getPreferences().setProperty(
-                    ModelerPreferences.LAST_DIR,
-                    selected.getAbsolutePath());
+            FSPath lastDir = Application
+                    .getInstance()
+                    .getFrameController()
+                    .getLastDirectory();
+            lastDir.updateFromChooser(chooser);
+
         }
 
         return (selected != null) ? selected.getAbsolutePath() : null;

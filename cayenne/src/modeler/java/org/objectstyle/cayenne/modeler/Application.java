@@ -118,16 +118,17 @@ import org.scopemvc.view.swing.SwingView;
  * <ul>
  * <li>cayenne.modeler.application.name - name of the application, 'CayenneModeler' is
  * default. Used to locate prerferences domain among other things.</li>
- * <li>cayenne.modeler.pref.db - a full path to the preferences database *directory*.
- * Default is "$HOME/.cayennne/pref".</li>
+ * <li>cayenne.modeler.pref.version - a version of the preferences DB schema. Default is
+ * "1.1".</li>
  * </ul>
  * 
  * @author Andrei Adamchik
  */
 public class Application {
 
+    public static final String PREFERENCES_VERSION = "1.1";
     public static final String APPLICATION_NAME_PROPERTY = "cayenne.modeler.application.name";
-    public static final String PREFERENCE_DB_PROPERTY = "cayenne.modeler.pref.db";
+    public static final String PREFERENCES_VERSION_PROPERTY = "cayenne.modeler.pref.version";
 
     public static final String DEFAULT_APPLICATION_NAME = "CayenneModeler";
 
@@ -164,10 +165,13 @@ public class Application {
         String configuredName = System.getProperty(APPLICATION_NAME_PROPERTY);
         this.name = (configuredName != null) ? configuredName : DEFAULT_APPLICATION_NAME;
 
-        String configuredPrefsDB = System.getProperty(PREFERENCE_DB_PROPERTY);
-        File dbDir = (configuredPrefsDB != null)
-                ? new File(configuredPrefsDB)
-                : CayenneUserDir.getInstance().resolveFile("prefs");
+        String subdir = System.getProperty(PREFERENCES_VERSION_PROPERTY);
+
+        if (subdir == null) {
+            subdir = PREFERENCES_VERSION;
+        }
+
+        File dbDir = new File(CayenneUserDir.getInstance().resolveFile("prefs"), subdir);
         dbDir.mkdirs();
         this.preferencesDB = new File(dbDir, "db").getAbsolutePath();
     }

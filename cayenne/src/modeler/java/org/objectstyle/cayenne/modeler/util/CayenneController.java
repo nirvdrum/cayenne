@@ -71,6 +71,8 @@ import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.pref.FSPath;
+import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -103,6 +105,33 @@ public abstract class CayenneController {
     }
 
     public abstract Component getView();
+
+    /**
+     * Returns last file system directory visited by user for this component. If there is
+     * no such directory set up in the preferences, creates a new object, setting its path
+     * to the parent last directory or to the user HOME directory.
+     */
+    public FSPath getLastDirectory() {
+        // find start directory in preferences
+        FSPath path = (FSPath) getViewDomain().getDetail("lastDir", FSPath.class, true);
+
+        if (path.getPath() == null) {
+
+            String pathString = (getParent() != null) ? getParent()
+                    .getLastDirectory()
+                    .getPath() : System.getProperty("user.home");
+            path.setPath(pathString);
+        }
+
+        return path;
+    }
+
+    /**
+     * Returns preference domaing for this component view.
+     */
+    protected Domain getViewDomain() {
+        return getApplication().getPreferenceDomain().getSubdomain(getView().getClass());
+    }
 
     /**
      * Utility method to provide a visual indication an execution error. This

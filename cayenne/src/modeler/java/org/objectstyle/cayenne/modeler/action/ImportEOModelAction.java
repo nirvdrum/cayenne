@@ -77,9 +77,9 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -119,15 +119,17 @@ public class ImportEOModelAction extends CayenneAction {
         int status = fileChooser.showOpenDialog(Application.getFrame());
 
         if (status == JFileChooser.APPROVE_OPTION) {
+
             // save preferences
+            FSPath lastDir = getApplication()
+                    .getFrameController()
+                    .getLastEOModelDirectory();
+            lastDir.updateFromChooser(fileChooser);
+
             File file = fileChooser.getSelectedFile();
             if (file.isFile()) {
                 file = file.getParentFile();
             }
-
-            ModelerPreferences.getPreferences().setProperty(
-                    ModelerPreferences.LAST_EOM_DIR,
-                    file.getParent());
 
             try {
                 String path = file.getCanonicalPath();
@@ -174,9 +176,7 @@ public class ImportEOModelAction extends CayenneAction {
             Collection newOE = new ArrayList(currentMap.getObjEntities());
             Collection newDE = new ArrayList(currentMap.getDbEntities());
 
-            EntityEvent entityEvent = new EntityEvent(
-                    Application.getFrame(),
-                    null);
+            EntityEvent entityEvent = new EntityEvent(Application.getFrame(), null);
 
             Collection addedOE = CollectionUtils.subtract(newOE, originalOE);
             Iterator it = addedOE.iterator();
@@ -232,20 +232,8 @@ public class ImportEOModelAction extends CayenneAction {
             eoModelChooser = new EOModelChooser("Select EOModel");
         }
 
-        String startDir = ModelerPreferences.getPreferences().getString(
-                ModelerPreferences.LAST_EOM_DIR);
-
-        if (startDir == null) {
-            startDir = ModelerPreferences.getPreferences().getString(
-                    ModelerPreferences.LAST_DIR);
-        }
-
-        if (startDir != null) {
-            File startDirFile = new File(startDir);
-            if (startDirFile.exists()) {
-                eoModelChooser.setCurrentDirectory(startDirFile);
-            }
-        }
+        FSPath lastDir = getApplication().getFrameController().getLastEOModelDirectory();
+        lastDir.updateChooser(eoModelChooser);
 
         return eoModelChooser;
     }

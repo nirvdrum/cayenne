@@ -63,7 +63,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -73,40 +72,22 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-
 /**
- * Utility class to create standard Swing widgets following
- * default look-and-feel of CayenneModeler.
- *  
+ * Utility class to create standard Swing widgets following default look-and-feel of
+ * CayenneModeler.
+ * 
  * @author Andrei Adamchik
  */
 
-// TODO: (Andrus) investigate performance impact of substituting 
+// TODO: (Andrus) investigate performance impact of substituting
 // constructors for all new widgets with cloning the prototype
 public class CayenneWidgetFactory {
+
     /**
      * Not intended for instantiation.
      */
     protected CayenneWidgetFactory() {
         super();
-    }
-
-    public static PreferenceField createPreferenceField(String preferencesKey) {
-        return createPreferenceField(preferencesKey, Collections.EMPTY_LIST);
-    }
-
-    /**
-     * Creates a new PreferenceField.
-     */
-    public static PreferenceField createPreferenceField(
-        String preferencesKey,
-        Collection initialValues) {
-
-        PreferenceField preferenceField =
-            new PreferenceField(preferencesKey, initialValues);
-        initFormWidget(preferenceField);
-        preferenceField.setBackground(Color.WHITE);
-        return preferenceField;
     }
 
     /**
@@ -164,6 +145,7 @@ public class CayenneWidgetFactory {
     protected static void initTextField(final JTextField textField) {
         // config focus
         textField.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 // transfer focus
                 textField.transferFocus();
@@ -177,19 +159,15 @@ public class CayenneWidgetFactory {
     protected static void initFormWidget(JComponent component) {
         component.setFont(component.getFont().deriveFont(Font.PLAIN, 12));
 
-   /*     Dimension size = component.getPreferredSize();
-        if (size == null) {
-            size = new Dimension();
-        }
-
-        size.setSize(size.getWidth(), 20);
-        component.setPreferredSize(size); */
+        /*
+         * Dimension size = component.getPreferredSize(); if (size == null) { size = new
+         * Dimension(); } size.setSize(size.getWidth(), 20);
+         * component.setPreferredSize(size);
+         */
     }
 
-
-    /** 
-     * Creates a borderless button that can be used
-     * as a clickable label.
+    /**
+     * Creates a borderless button that can be used as a clickable label.
      */
     public static JButton createLabelButton(String text) {
         JButton but = createButton(text);
@@ -201,9 +179,9 @@ public class CayenneWidgetFactory {
         return but;
     }
 
-    /** 
-      * Creates a normal button.
-      */
+    /**
+     * Creates a normal button.
+     */
     public static JButton createButton(String text) {
         return new JButton(text);
     }

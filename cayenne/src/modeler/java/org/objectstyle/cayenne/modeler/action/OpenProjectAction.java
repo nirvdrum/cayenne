@@ -66,9 +66,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
-import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
@@ -80,7 +78,7 @@ public class OpenProjectAction extends ProjectAction {
 
     private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
 
-    protected ProjectOpener fileChooser = new ProjectOpener();
+    protected ProjectOpener fileChooser;
 
     public static String getActionName() {
         return "Open Project";
@@ -91,6 +89,7 @@ public class OpenProjectAction extends ProjectAction {
      */
     public OpenProjectAction(Application application) {
         super(getActionName(), application);
+        this.fileChooser = new ProjectOpener();
     }
 
     public String getIconName() {
@@ -143,11 +142,9 @@ public class OpenProjectAction extends ProjectAction {
                 .getClassLoadingService()
                 .getClassLoader());
 
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
         try {
-            // Save dir path to the preferences
-            pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
-            getApplication().getFrameController().addToLastProjListAction(file.getAbsolutePath());
+            getApplication().getFrameController().addToLastProjListAction(
+                    file.getAbsolutePath());
 
             Project project = Project.createProject(file);
             getProjectController().setProject(project);

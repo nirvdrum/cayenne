@@ -67,9 +67,9 @@ import org.objectstyle.cayenne.project.CayenneUserDir;
 /**
  * ModelerPreferences class supports persistent user preferences. Preferences are saved in
  * the user home directory in "<code>$HOME/.cayenne/modeler.preferences</code>" file.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
+ * <p>
+ * <i>This class is obsolete; its users will be migrated to use preference service. </i>
+ * </p>
  */
 public class ModelerPreferences extends ExtendedProperties {
 
@@ -83,27 +83,8 @@ public class ModelerPreferences extends ExtendedProperties {
 
     // Keys for the preference file.
 
-    /** The directory of the cayenne project edited last. */
-    public static final String LAST_DIR = "Editor.lastProject";
-
-    /** The directory where the last EOModel was imported. */
-    public static final String LAST_EOM_DIR = "Editor.lastEOModel";
-
     /** List of the last 4 opened project files. */
     public static final String LAST_PROJ_FILES = "Editor.lastSeveralProjectFiles";
-
-
-    /** User name */
-    public static final String USER_NAME = "DbLoginPanel.unInput";
-
-    /** JDBC Driver Class */
-    public static final String JDBC_DRIVER = "DbLoginPanel.drInput";
-
-    /** Database URL */
-    public static final String DB_URL = "DbLoginPanel.urlInput";
-
-    /** RDBMS Adapter */
-    public static final String RDBMS_ADAPTER = "DbLoginPanel.adapterInput";
 
     /** GUI layout */
     public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";

@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.dialog;
+package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.Frame;
 import java.io.File;
@@ -64,7 +64,8 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.dialog.OverwriteDialog;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.DataMapProject;
@@ -76,21 +77,14 @@ import org.objectstyle.cayenne.project.ProjectFile;
  * 
  * @author Andrei Adamchik
  */
-public class ProjectOpener extends JFileChooser {
+class ProjectOpener extends JFileChooser {
 
-    private static Logger logObj = Logger.getLogger(ProjectOpener.class);
-
-    /**
-     * Constructor for ProjectOpener.
-     */
-    public ProjectOpener() {
-        super();
-    }
+    private static final Logger logObj = Logger.getLogger(ProjectOpener.class);
 
     /**
      * Selects a directory to store the project.
      */
-    public File newProjectDir(Frame f, Project p) {
+    File newProjectDir(Frame f, Project p) {
         if (p instanceof ApplicationProject) {
             // configure for application project
             return newProjectDir(f, Configuration.DEFAULT_DOMAIN_FILE, FileFilters
@@ -110,7 +104,7 @@ public class ProjectOpener extends JFileChooser {
         }
     }
 
-    protected File newProjectDir(Frame f, String location, FileFilter filter) {
+    File newProjectDir(Frame f, String location, FileFilter filter) {
         // configure dialog
         setDialogTitle("Select Project Directory");
         setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -170,7 +164,7 @@ public class ProjectOpener extends JFileChooser {
     /**
      * Runs a dialog to open Cayenne project.
      */
-    public File openProjectFile(Frame f) {
+    File openProjectFile(Frame f) {
 
         // configure dialog
         setDialogTitle("Select Project File");
@@ -197,21 +191,12 @@ public class ProjectOpener extends JFileChooser {
      * Returns directory where file search should start. This is either coming from saved
      * preferences, or a current directory is used.
      */
-    public File getDefaultStartDir() {
-        File startDir = null;
-
+    File getDefaultStartDir() {
         // find start directory in preferences
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        String startDirStr = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
-        if (startDirStr != null) {
-            startDir = new File(startDirStr);
-        }
-
-        // not found or invalid, use current dir
-        if (startDir == null || !startDir.isDirectory()) {
-            startDir = new File(System.getProperty("user.dir"));
-        }
-
-        return startDir;
+        return Application
+                .getInstance()
+                .getFrameController()
+                .getLastDirectory()
+                .getExistingDirectory(true);
     }
 }

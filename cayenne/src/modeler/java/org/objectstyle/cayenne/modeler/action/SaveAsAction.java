@@ -61,7 +61,6 @@ import java.io.File;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
@@ -77,7 +76,7 @@ import org.objectstyle.cayenne.project.validator.Validator;
  */
 public class SaveAsAction extends CayenneAction {
 
-    protected ProjectOpener fileChooser = new ProjectOpener();
+    protected ProjectOpener fileChooser;
 
     public static String getActionName() {
         return "Save As...";
@@ -85,6 +84,7 @@ public class SaveAsAction extends CayenneAction {
 
     public SaveAsAction(Application application) {
         super(getActionName(), application);
+        this.fileChooser = new ProjectOpener();
     }
 
     protected SaveAsAction(String name, Application application) {

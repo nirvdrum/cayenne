@@ -66,7 +66,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
 import org.objectstyle.cayenne.modeler.FileClassLoadingService;
-import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.pref.Domain;
@@ -96,11 +95,6 @@ public class ClasspathPreferences extends CayenneController {
 
     public Component getView() {
         return view;
-    }
-
-    protected Domain getViewDomain() {
-        return getApplication().getPreferenceDomain().getSubdomain(
-                ClasspathPreferencesView.class);
     }
 
     protected Domain getClassLoaderDomain() {
@@ -165,12 +159,7 @@ public class ClasspathPreferences extends CayenneController {
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setAcceptAllFileFilterUsed(true);
 
-        FSPath lastDir = FSPath.getPreference(getViewDomain());
-        File startDir = lastDir.getExistingDirectory(false);
-
-        if (startDir != null) {
-            chooser.setCurrentDirectory(startDir);
-        }
+        getLastDirectory().updateChooser(chooser);
 
         if (filter != null) {
             chooser.addChoosableFileFilter(filter);
@@ -186,7 +175,7 @@ public class ClasspathPreferences extends CayenneController {
 
         if (selected != null) {
             // store last dir in preferences
-            lastDir.setDirectoryPath(selected);
+            getLastDirectory().updateFromChooser(chooser);
 
             int len = classPathEntries.size();
             String key = selected.getAbsolutePath();

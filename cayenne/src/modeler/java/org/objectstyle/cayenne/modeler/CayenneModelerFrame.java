@@ -255,7 +255,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }
 
-
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         enableDataNodeMenu();
         getAction(RemoveAction.getActionName()).setName("Remove DataNode");
@@ -412,11 +411,25 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     }
 
     /**
-     * Sets the view.
-     * 
-     * @param view The view to set
+     * Adds editor view to the frame.
      */
     public void setView(EditorView view) {
+        boolean change = false;
+
+        if (this.view != null) {
+            getContentPane().remove(this.view);
+            change = true;
+        }
+
         this.view = view;
+
+        if (view != null) {
+            getContentPane().add(view, BorderLayout.CENTER);
+            change = true;
+        }
+
+        if (change) {
+            validate();
+        }
     }
 }

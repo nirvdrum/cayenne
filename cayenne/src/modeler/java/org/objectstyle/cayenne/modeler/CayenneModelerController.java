@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
 import org.objectstyle.cayenne.modeler.pref.ComponentGeometry;
+import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.pref.Domain;
@@ -106,6 +106,21 @@ public class CayenneModelerController extends CayenneController {
 
     public ProjectController getProjectController() {
         return projectController;
+    }
+
+
+
+    public FSPath getLastEOModelDirectory() {
+        // find start directory in preferences
+
+        FSPath path = (FSPath) getViewDomain()
+                .getDetail("lastEOMDir", FSPath.class, true);
+
+        if (path.getPath() == null) {
+            path.setPath(getLastDirectory().getPath());
+        }
+
+        return path;
     }
 
     protected void initBindings() {
@@ -166,10 +181,7 @@ public class CayenneModelerController extends CayenneController {
         recentFileMenu.rebuildFromPreferences();
         recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
 
-        if (frame.getView() != null) {
-            frame.getContentPane().remove(frame.getView());
-            frame.setView(null);
-        }
+        frame.setView(null);
 
         // repaint is needed, since sometimes there is a
         // trace from menu left on the screen
@@ -193,8 +205,6 @@ public class CayenneModelerController extends CayenneController {
         projectController.setProject(project);
 
         frame.setView(new EditorView(projectController));
-        frame.getContentPane().add(frame.getView(), BorderLayout.CENTER);
-        frame.validate();
 
         projectController.projectOpened();
         actionController.projectOpened();
@@ -211,6 +221,11 @@ public class CayenneModelerController extends CayenneController {
                     + project.getMainFile().getAbsolutePath());
         }
 
+        // update preferences
+        if (!project.isLocationUndefined()) {
+            getLastDirectory().setDirectory(project.getProjectDirectory());
+        }
+
         // --- check for load errors
         if (project.getLoadStatus().hasFailures()) {
             // mark project as unsaved
@@ -222,6 +237,7 @@ public class CayenneModelerController extends CayenneController {
                     project,
                     project.getLoadStatus()));
         }
+
     }
 
     /** Adds path to the list of last opened projects in preferences. */
