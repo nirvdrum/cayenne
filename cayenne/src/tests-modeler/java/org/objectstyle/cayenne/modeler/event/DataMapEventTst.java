@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.map.event.DataMapEvent;
  */
 public class DataMapEventTst extends TestCase {
 
-	/**
-	 * Constructor for DataMapEventTst.
-	 * @param arg0
-	 */
-	public DataMapEventTst(String arg0) {
-		super(arg0);
-	}
-
    public void testConstructor1() throws Exception {
     	Object src = new Object();
     	DataMap d = new DataMap("abc");

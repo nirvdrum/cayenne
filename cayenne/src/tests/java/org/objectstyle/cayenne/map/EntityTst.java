@@ -66,10 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class EntityTst extends CayenneTestCase {
     protected Entity ent;
 
-    public EntityTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws Exception {
         // create an anonymous inner Entity subclass, since Entity is abstract
         ent = new Entity() {
@@ -190,7 +186,7 @@ public class EntityTst extends CayenneTestCase {
         assertTrue(it.hasNext());
         ObjAttribute next = (ObjAttribute) it.next();
         assertNotNull(next);
-        assertTrue(!it.hasNext());
+        assertFalse(it.hasNext());
         assertSame(galleryEnt.getAttribute("galleryName"), next);
     }
 }

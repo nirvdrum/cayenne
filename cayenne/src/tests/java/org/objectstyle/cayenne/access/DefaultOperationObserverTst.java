@@ -67,13 +67,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DefaultOperationObserverTst extends CayenneTestCase {
 	protected DefaultOperationObserver observer;
 
-	/**
-	 * Constructor for DefaultOperationObserverTst.
-	 */
-	public DefaultOperationObserverTst(String name) {
-		super(name);
-	}
-
 	public void setUp() throws Exception {
 		observer = new DefaultOperationObserver();
 	}
@@ -84,7 +77,7 @@ public class DefaultOperationObserverTst extends CayenneTestCase {
         observerLogger.setLevel(Level.ERROR);
 
 		try {
-			assertTrue(!observer.hasExceptions());
+			assertFalse(observer.hasExceptions());
 			observer.nextGlobalException(new Exception());
 			assertTrue(observer.hasExceptions());
 		} finally {
@@ -98,7 +91,7 @@ public class DefaultOperationObserverTst extends CayenneTestCase {
         observerLogger.setLevel(Level.ERROR);
 
 		try {
-			assertTrue(!observer.hasExceptions());
+			assertFalse(observer.hasExceptions());
 			observer.nextQueryException(new SelectQuery(), new Exception());
 			assertTrue(observer.hasExceptions());
 		} finally {

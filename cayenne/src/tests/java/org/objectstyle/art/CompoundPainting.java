@@ -56,7 +56,7 @@
 
 package org.objectstyle.art;
 
-import java.math.*;
+import java.math.BigDecimal;
 
 public class CompoundPainting extends Painting {
     public String getArtistName() {

@@ -74,14 +74,6 @@ import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 public class OneWayManyToOneTst extends OneWayMappingTestCase {
     protected DataContext ctxt;
 
-    /**
-     * Constructor for OneWayOneToManyTst.
-     * @param name
-     */
-    public OneWayManyToOneTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();

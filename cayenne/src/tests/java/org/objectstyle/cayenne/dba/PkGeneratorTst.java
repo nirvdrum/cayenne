@@ -67,13 +67,8 @@ public class PkGeneratorTst extends CayenneTestCase {
     protected DataNode node;
     protected DbEntity paintEnt;
 
-    public PkGeneratorTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws java.lang.Exception {
         getDatabaseSetup().cleanTableData();
-
         node = (DataNode)getDomain().getDataNodesAsList().get(0);
         pkGen = node.getAdapter().getPkGenerator();
         paintEnt = node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
@@ -88,7 +83,7 @@ public class PkGeneratorTst extends CayenneTestCase {
         for (int i = 0; i < 6; i++) {
             Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
             assertNotNull(pk);
-            assertTrue(!pkList.contains(pk));
+            assertFalse(pkList.contains(pk));
             pkList.add(pk);
         }
     }

@@ -61,7 +61,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
 import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
@@ -72,7 +71,6 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 
 public class CayenneGeneratorTst extends CayenneTestCase {
-	private static Logger logObj = Logger.getLogger(CayenneGeneratorTst.class);
 
 	private static final Perl5Util regexUtil = new Perl5Util();
     private static final Project project = new Project();
@@ -106,10 +104,6 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 		Util.copy(url2, template);
 	}
 
-	public CayenneGeneratorTst(String name) {
-		super(name);
-	}
-
 	public void setUp() throws java.lang.Exception {
 		task = new CayenneGenerator();
 		task.setProject(project);
@@ -141,7 +135,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 
 		File _a =
 			new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
-		assertTrue(!_a.exists());
+		assertFalse(_a.exists());
 	}
 
 	/** Test single classes generation including full package path. */
@@ -167,7 +161,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 
 		File _a =
 			new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
-		assertTrue(!_a.exists());
+		assertFalse(_a.exists());
 	}
 
 	/** Test single classes generation ignoring package path. */
@@ -191,11 +185,11 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 		assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
 
 		File _a = new File(mapDir, convertPath("_Artist.java"));
-		assertTrue(!_a.exists());
+		assertFalse(_a.exists());
 
 		File pkga =
 			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-		assertTrue(!pkga.exists());
+		assertFalse(pkga.exists());
 	}
 
 	/** Test pairs generation including full package path. */
@@ -259,7 +253,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 
 		File pkga =
 			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-		assertTrue(!pkga.exists());
+		assertFalse(pkga.exists());
 	}
 
 	/** 

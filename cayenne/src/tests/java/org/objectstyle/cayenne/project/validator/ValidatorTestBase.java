@@ -77,15 +77,7 @@ public class ValidatorTestBase extends CayenneTestCase {
     protected Validator validator;
     protected ApplicationProject project;
 
-    /**
-     * Constructor for ValidatorTestBase.
-     * @param arg0
-     */
-    public ValidatorTestBase(String arg0) {
-        super(arg0);
-    }
-
-    /**
+   /**
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {

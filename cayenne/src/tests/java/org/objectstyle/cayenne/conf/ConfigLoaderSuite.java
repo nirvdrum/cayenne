@@ -58,11 +58,8 @@ package org.objectstyle.cayenne.conf;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 /** Runs multiple domain config cases. */
 public abstract class ConfigLoaderSuite {
-    private static Logger logObj = Logger.getLogger(ConfigLoaderSuite.class);
 
     protected List cases = new ArrayList();
 

@@ -64,11 +64,6 @@ public class TernaryExpressionTst extends CayenneTestCase {
     private static final int defaultType = -37;
     protected TernaryExpression expr;
     
-    public TernaryExpressionTst(String name) {
-        super(name);
-    }
-    
-    
     protected void setUp() throws java.lang.Exception {
         expr = new TernaryExpression(defaultType);
     }

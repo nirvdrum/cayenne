@@ -60,10 +60,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class NameConverterTst extends CayenneTestCase {
 
-    public NameConverterTst(String name) {
-        super(name);
-    }
-
     public void testUndescoredToJava1() throws java.lang.Exception {
         String expected = "ClassNameIdentifier";
         assertEquals(expected, NameConverter.undescoredToJava("_CLASS_name_IdeNTIFIER_", true));

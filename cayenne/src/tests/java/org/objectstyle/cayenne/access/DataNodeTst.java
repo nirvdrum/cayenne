@@ -74,10 +74,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class DataNodeTst extends IteratorTestBase {
 	protected DataNode sharedNode;
 
-	public DataNodeTst(String name) {
-		super(name);
-	}
-
 	public void testRunSelect() throws Exception {
 		SelectObserver observer = new SelectObserver();
 

@@ -66,10 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class JdbcAdapterTst extends CayenneTestCase {
 	protected JdbcAdapter adapter;
 
-	public JdbcAdapterTst(String name) {
-		super(name);
-	}
-
 	protected void setUp() throws java.lang.Exception {
 		adapter = new JdbcAdapter();
 	}

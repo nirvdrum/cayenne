@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.exp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,10 +63,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ExpressionFactoryTst extends CayenneTestCase {
     // non-existent type
     private static final int badType = -50;
-
-    public ExpressionFactoryTst(String name) {
-        super(name);
-    }
 
     public void testUnaryExp() throws Exception {
         Object o1 = new Object();

@@ -60,14 +60,8 @@ import org.objectstyle.cayenne.util.Util;
 
 
 public class DataSourceInfoTst extends CayenneTestCase {
-    
     private DataSourceInfo dsi;
-    
-    public DataSourceInfoTst(String name) {
-        super(name);
-    }
-    
-    
+
     public void setUp() throws java.lang.Exception {
         dsi = new DataSourceInfo();
         dsi.setUserName("a");
@@ -78,26 +72,23 @@ public class DataSourceInfoTst extends CayenneTestCase {
         dsi.setDataSourceUrl("c");
         dsi.setAdapterClass("d");
     }
-    
-    
+
     public void testDefaultValues() throws java.lang.Exception {
         DataSourceInfo localDsi = new DataSourceInfo();
         assertEquals(1, localDsi.getMinConnections());
         assertTrue(localDsi.getMinConnections() <= localDsi.getMaxConnections());
     }
-    
-    
+
     public void testClone() throws java.lang.Exception {
         DataSourceInfo dsiClone = dsi.cloneInfo();
         assertEquals(dsi, dsiClone);
         assertTrue(dsi != dsiClone);
     }
-    
-    
+
     public void testSerialize() throws java.lang.Exception {
         DataSourceInfo dsiUnserialized = (DataSourceInfo)Util.cloneViaSerialization(dsi);
         assertEquals(dsi, dsiUnserialized);
         assertTrue(dsi != dsiUnserialized);
     }
-    
+
 }

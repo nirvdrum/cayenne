@@ -66,14 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class FlatProjectViewTst extends CayenneTestCase {
 
-    /**
-     * Constructor for FlatProjectView.
-     * @param name
-     */
-    public FlatProjectViewTst(String name) {
-        super(name);
-    }
-
     public void testFlattenProjectView() throws Exception {
         DataMap map = new DataMap("m1");
         List view = new FlatProjectView().flattenProjectTree(map);

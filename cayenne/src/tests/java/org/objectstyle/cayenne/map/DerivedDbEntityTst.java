@@ -64,12 +64,6 @@ public class DerivedDbEntityTst extends CayenneTestCase {
     protected DerivedDbEntity ent;
     protected DataMap map;
 
-
-    public DerivedDbEntityTst(String name) {
-        super(name);
-    }
-
-
     public void setUp() throws Exception {
         ent = new DerivedDbEntity("abc");
         map = new DataMap();

@@ -63,14 +63,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DbAttributePairTst extends CayenneTestCase {
 	protected DbAttributePair join;
 
-	/**
-	 * Constructor for DbAttributePairTst.
-	 * @param arg0
-	 */
-	public DbAttributePairTst(String arg0) {
-		super(arg0);
-	}
-	
 	protected void setUp() throws Exception {
 		super.setUp();
 		join = new DbAttributePair();
@@ -99,9 +91,9 @@ public class DbAttributePairTst extends CayenneTestCase {
     }
     
     public void testEquals1() throws Exception {
-    	assertTrue(!join.equals(new Object()));
+    	assertFalse(join.equals(new Object()));
     	assertTrue(join.equals(join));
-    	assertTrue(!join.equals(null));
+    	assertFalse(join.equals(null));
     }
     
     public void testEquals2() throws Exception {
@@ -110,7 +102,7 @@ public class DbAttributePairTst extends CayenneTestCase {
     	join = new DbAttributePair(a1, a2);
     	
     	DbAttributePair join1 = new DbAttributePair();
-    	assertTrue(!join.equals(join1));
+    	assertFalse(join.equals(join1));
     }
     
     public void testEquals3() throws Exception {

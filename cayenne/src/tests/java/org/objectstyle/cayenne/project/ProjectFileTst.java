@@ -66,14 +66,6 @@ public class ProjectFileTst extends CayenneTestCase {
     protected ProjectFile pf;
 
     /**
-     * Constructor for ProjectFileTst.
-     * @param arg0
-     */
-    public ProjectFileTst(String arg0) {
-        super(arg0);
-    }
-
-    /**
     * @see junit.framework.TestCase#setUp()
     */
     protected void setUp() throws Exception {
@@ -90,7 +82,7 @@ public class ProjectFileTst extends CayenneTestCase {
     public void testRenamed() throws Exception {
     	assertTrue(pf.isRenamed());
     	pf.synchronizeLocation();
-    	assertTrue(!pf.isRenamed());
+    	assertFalse(pf.isRenamed());
     }
 
     public void testLocation() throws Exception {

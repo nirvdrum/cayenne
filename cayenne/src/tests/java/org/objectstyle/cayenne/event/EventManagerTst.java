@@ -59,10 +59,10 @@ package org.objectstyle.cayenne.event;
 import java.util.EventListener;
 import java.util.EventObject;
 
+import junit.framework.Assert;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
-import junit.framework.Assert;
 
 public class EventManagerTst
 	extends CayenneTestCase
@@ -78,10 +78,6 @@ public class EventManagerTst
 
 	// the event manager used for testing
 	private EventManager _eventManager;
-
-	public EventManagerTst(String arg0) {
-		super(arg0);
-	}
 
 	public void setUp() throws Exception {
 		_eventManager = new EventManager();
@@ -161,7 +157,7 @@ public class EventManagerTst
 
 	public void testNonretainedListener() throws NoSuchMethodException {
 		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
-		_eventManager.addListener(new EventManagerTst(""), "seeNotification", CayenneEvent.class, subject);
+		_eventManager.addListener(new EventManagerTst(), "seeNotification", CayenneEvent.class, subject);
 
 		// (hopefully) make the listener go away
 		System.gc();
@@ -193,7 +189,7 @@ public class EventManagerTst
 
 	public void testSuccessfulNotificationDefaultSender() throws Exception {
 		EventManagerTst listener1 = this;
-		EventManagerTst listener2 = new EventManagerTst("#2");
+		EventManagerTst listener2 = new EventManagerTst();
 
 		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
 		_eventManager.addListener(listener1, "seeNotification", CayenneEvent.class, subject);
@@ -227,7 +223,7 @@ public class EventManagerTst
 
 	public void testSuccessfulNotificationBothDefaultAndIndividualSender() throws Exception {
 		EventManagerTst listener1 = this;
-		EventManagerTst listener2 = new EventManagerTst("#2");
+		EventManagerTst listener2 = new EventManagerTst();
 
 		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
 		_eventManager.addListener(listener1, "seeNotification", CayenneEvent.class, subject, listener1);

@@ -65,11 +65,6 @@ public class MapLoaderLoadTst extends CayenneTestCase {
     private String testDataMap;
 
 
-    public MapLoaderLoadTst(String name) {
-        super(name);
-    }
-
-
     public void setUp() throws Exception {
         mapLoader = new MapLoader();
         testDataMap = ClassLoader.getSystemResource(CayenneTestResources.TEST_MAP_PATH).toExternalForm();

@@ -69,14 +69,8 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextDatesTst extends CayenneTestCase {
+
     protected DataContext ctxt;
-    /**
-     * Constructor for DataContextDatesTst.
-     * @param name
-     */
-    public DataContextDatesTst(String name) {
-        super(name);
-    }
 
     public void testDate() throws Exception {
         DateTest test = (DateTest) ctxt.createAndRegisterNewObject("DateTest");

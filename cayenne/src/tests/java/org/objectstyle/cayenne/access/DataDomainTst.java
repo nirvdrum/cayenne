@@ -66,10 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class DataDomainTst extends CayenneTestCase {
 
-	public DataDomainTst(String name) {
-		super(name);
-	}
-
 	public void testName() throws Exception {
 		String tstName = "tst_name";
 		DataDomain domain = new DataDomain();

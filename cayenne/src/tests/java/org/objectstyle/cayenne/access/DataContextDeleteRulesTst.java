@@ -73,15 +73,8 @@ import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
  * @author Craig Miskell
  */
 public class DataContextDeleteRulesTst extends CayenneTestCase {
-	private DataContext context;
 
-	/**
-	 * Constructor for DataContextDeleteRulesTst.
-	 * @param name
-	 */
-	public DataContextDeleteRulesTst(String name) {
-		super(name);
-	}
+	private DataContext context;
 
 	public void setUp() throws java.lang.Exception {
 		CayenneTestDatabaseSetup setup = getDatabaseSetup();
@@ -116,7 +109,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		context.deleteObject(childGroup);
 
 		//The things we are testing.
-		assertTrue(!parentGroup.getChildGroupsArray().contains(childGroup));
+		assertFalse(parentGroup.getChildGroupsArray().contains(childGroup));
 		//Although deleted, the property should be null (good cleanup policy)
 		//assertNull(childGroup.getToParentGroup());
 
@@ -141,10 +134,10 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		context.deleteObject(aGroup);
 
 		//The things to test
-		assertTrue(!anArtist.getGroupArray().contains(aGroup));
+		assertFalse(anArtist.getGroupArray().contains(aGroup));
 		//Although the group is deleted, the array should still be 
 		//cleaned up correctly
-		//assertTrue(!aGroup.getArtistArray().contains(anArtist));
+		//assertFalse(aGroup.getArtistArray().contains(anArtist));
 		context.commitChanges();
 
 	}
@@ -171,7 +164,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		assertNull(childGroup.getToParentGroup());
 
 		//Although deleted, the property should be null (good cleanup policy)
-		//assertTrue(!parentGroup.getChildGroupsArray().contains(childGroup));
+		//assertFalse(parentGroup.getChildGroupsArray().contains(childGroup));
 		context.commitChanges();
 	}
 
@@ -227,7 +220,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		assertEquals(
 			PersistenceState.DELETED,
 			artistExhibit.getPersistenceState());
-		assertTrue(!anArtist.getArtistExhibitArray().contains(artistExhibit));
+		assertFalse(anArtist.getArtistExhibitArray().contains(artistExhibit));
 		context.commitChanges();
 	}
 

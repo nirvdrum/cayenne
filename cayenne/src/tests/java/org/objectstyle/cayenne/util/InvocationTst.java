@@ -59,16 +59,12 @@ package org.objectstyle.cayenne.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
 import junit.framework.Assert;
+
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class InvocationTst extends CayenneTestCase {
 	private String _methodName = "myListenerMethod";
-
-	public InvocationTst(String arg0) {
-		super(arg0);
-	}
 
 	public void testEqualsReflexive() throws NoSuchMethodException {
 		Invocation inv0 = new Invocation(this, _methodName);		

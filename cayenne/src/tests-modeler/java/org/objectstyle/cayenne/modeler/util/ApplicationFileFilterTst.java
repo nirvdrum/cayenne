@@ -64,13 +64,6 @@ import junit.framework.TestCase;
  */
 public class ApplicationFileFilterTst extends TestCase {
 	protected ApplicationFileFilter filter;
-
-	/**
-	 * Constructor for ApplicationFileFilter.
-	 */
-	public ApplicationFileFilterTst(String name) {
-		super(name);
-	}
 	
 	public void setUp() throws Exception {
 		filter = new ApplicationFileFilter();
@@ -85,11 +78,11 @@ public class ApplicationFileFilterTst extends TestCase {
 	}
 	
 	public void testRejectOther() throws Exception {
-		assertTrue(!filter.accept(new File("somefile.txt")));
+		assertFalse(filter.accept(new File("somefile.txt")));
 	}
 	
 	public void testRejectBadCayenneXml() throws Exception {
-		assertTrue(!filter.accept(new File("bad_cayenne.xml")));
+		assertFalse(filter.accept(new File("bad_cayenne.xml")));
 	}
 }
 

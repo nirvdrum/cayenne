@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import org.objectstyle.cayenne.map.ObjEntity;
-
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.ObjEntity;
 
 
 /**
@@ -65,13 +65,6 @@ import junit.framework.TestCase;
 */
 public class EntityWrapperTst extends TestCase {
 
-	/**
-	 * Constructor for EntityWrapperTst.
-	 */
-	public EntityWrapperTst(String name) {
-		super(name);
-	}
-	
 	public void testEntity() throws Exception {
 		ObjEntity ent = new ObjEntity("abc");
 		EntityWrapper wrap = new EntityWrapper(ent);

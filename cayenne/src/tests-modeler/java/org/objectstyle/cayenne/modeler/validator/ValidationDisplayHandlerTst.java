@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.modeler.validator;
 
 import javax.swing.JFrame;
+
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -69,13 +70,6 @@ import org.objectstyle.cayenne.project.validator.ValidationInfo;
  * @author Andrei Adamchik
  */
 public class ValidationDisplayHandlerTst extends TestCase {
-
-    /**
-     * Constructor for ErrorMsgTst.
-     */
-    public ValidationDisplayHandlerTst(String name) {
-        super(name);
-    }
 
     public void testValidationInfo() throws Exception {
         ValidationInfo info = new ValidationInfo(-1, "123", null);

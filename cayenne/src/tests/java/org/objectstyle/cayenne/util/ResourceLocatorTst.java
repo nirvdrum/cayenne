@@ -65,10 +65,6 @@ public class ResourceLocatorTst extends CayenneTestCase {
     private File fTmpFileInCurrentDir;
     private String fTmpFileName;
 
-    public ResourceLocatorTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws java.lang.Exception {
         fTmpFileName = System.currentTimeMillis() + ".tmp";
         fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);

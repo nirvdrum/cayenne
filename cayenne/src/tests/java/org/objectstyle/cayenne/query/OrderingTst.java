@@ -60,11 +60,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class OrderingTst extends CayenneTestCase {
     
-    public OrderingTst(String name) {
-        super(name);
-    }
-    
-    
     public void testPathSpec1() throws Exception {
         String pathSpec = "a.b.c";
         Ordering ord = new Ordering();

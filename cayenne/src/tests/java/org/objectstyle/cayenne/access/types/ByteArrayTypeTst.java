@@ -62,10 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ByteArrayTypeTst extends CayenneTestCase {
 
-    public ByteArrayTypeTst(String name) {
-        super(name);
-    }
-
     public void testTrimBytes1() throws Exception {
         byte[] b1 = new byte[] { 1, 2, 3 };
         byte[] b2 = ByteArrayType.trimBytes(b1);

@@ -58,7 +58,6 @@ package org.objectstyle.cayenne;
 import java.util.List;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Exhibit;
@@ -69,11 +68,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class CDOOne2ManyTst extends CayenneDOTestBase {
-    private static Logger logObj = Logger.getLogger(CDOOne2ManyTst.class);
-
-    public CDOOne2ManyTst(String name) {
-        super(name);
-    }
 
     public void testSelectWithToManyDBQualifier() throws Exception {
          // setup test, intentionally add more than 1 painting to artist

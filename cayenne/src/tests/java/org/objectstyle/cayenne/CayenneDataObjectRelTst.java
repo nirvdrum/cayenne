@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,10 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
@@ -70,12 +69,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
 public class CayenneDataObjectRelTst extends CayenneDOTestBase {
-    private static Logger logObj =
-        Logger.getLogger(CayenneDataObjectRelTst.class);
-
-    public CayenneDataObjectRelTst(String name) {
-        super(name);
-    }
 
     private void prepareNestedProperties() throws Exception {
         Artist a1 = super.newArtist();
@@ -504,13 +497,6 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
         ctxt.deleteObject(artist);
         ctxt.commitChanges();
-    }
-
-    private Artist newSavedArtist() {
-        Artist o1 = newArtist();
-        o1.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
-        ctxt.commitChanges();
-        return o1;
     }
 
     private PaintingInfo fetchPaintingInfo(String name) {

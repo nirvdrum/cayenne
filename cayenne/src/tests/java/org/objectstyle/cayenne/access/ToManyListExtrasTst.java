@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ToManyListExtrasTst extends CayenneTestCase {
 	protected ToManyList list;
 
-	/**
-	 * Constructor for ToManyListExtrasTst.
-	 * @param arg0
-	 */
-	public ToManyListExtrasTst(String arg0) {
-		super(arg0);
-	}
-
 	public void setUp() throws Exception {
 		ToManyListDataSource lds = new ToManyListDataSource() {
 			public void updateListData(ToManyList l) {

@@ -60,7 +60,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.project.validator.Validator;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -68,18 +67,9 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ProjectTst extends CayenneTestCase {
-	private static Logger logObj = Logger.getLogger(ProjectTst.class);
-	
+
     protected Project p;
     protected File f;
-
-    /**
-     * Constructor for ProjectTst.
-     * @param arg0
-     */
-    public ProjectTst(String arg0) {
-        super(arg0);
-    }
 
     /**
       * @see junit.framework.TestCase#setUp()
@@ -91,7 +81,7 @@ public class ProjectTst extends CayenneTestCase {
     }
 
     public void testModified() throws Exception {
-    	assertTrue(!p.isModified());
+    	assertFalse(p.isModified());
     	p.setModified(true);
     	assertTrue(p.isModified());    	
     }

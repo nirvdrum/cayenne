@@ -72,20 +72,12 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     protected GenericSelectQuery query;
 
     /**
-     * Constructor for IncrementalFaultListTst.
-     * @param name
-     */
-    public IncrementalFaultListTst(String name) {
-        super(name);
-    }
-
-    /**
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
         super.setUp();
         getDatabaseSetup().cleanTableData();
-        new DataContextTst("Helper").populateTables();
+        new DataContextTst().populateTables();
 
         SelectQuery q = new SelectQuery("Artist");
         

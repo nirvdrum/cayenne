@@ -59,13 +59,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class PooledConnectionImplTst extends CayenneTestCase {
     
-    public PooledConnectionImplTst(String name) {
-        super(name);
-    }
-    
     public void testConnectionErrorNotificationConcurrency() throws java.lang.Exception {
-        // test for bugfix...
-        
         // test a case when error notification is sent to connection
         // that has been removed from the pool, but when pool is still a 
         // listener for its events.
@@ -76,8 +70,6 @@ public class PooledConnectionImplTst extends CayenneTestCase {
     }
     
     public void testConnectionClosedNotificationConcurrency() throws java.lang.Exception {
-        // test for bugfix...
-        
         // test a case when closed notification is sent to connection
         // that has been removed from the pool, but when pool is still a 
         // listener for its events.

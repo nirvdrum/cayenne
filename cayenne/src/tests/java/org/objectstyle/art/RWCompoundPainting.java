@@ -56,8 +56,6 @@
 
 package org.objectstyle.art;
 
-import java.math.*;
-
 public class RWCompoundPainting extends Painting {
 
     public String getTextReview() {

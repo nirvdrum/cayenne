@@ -11,14 +11,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ConfigLoaderTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(ConfigLoaderTst.class);
 
-    /**
-     * Constructor for ConfigLoaderTst.
-     * @param name
-     */
-    public ConfigLoaderTst(String name) {
-        super(name);
-    }
-
     public void testLoadDomains() throws Exception {
         Iterator it = new ConfigLoaderSimpleSuite().getCases().iterator();
         while (it.hasNext()) {

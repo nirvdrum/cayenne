@@ -59,9 +59,6 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SqlSelectQueryTst extends CayenneTestCase {
-    public SqlSelectQueryTst(String name) {
-        super(name);
-    }
 
 	public void testFetchLimit1() throws Exception {
 		SqlSelectQuery q = new SqlSelectQuery();

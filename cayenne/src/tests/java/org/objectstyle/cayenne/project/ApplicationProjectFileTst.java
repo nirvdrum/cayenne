@@ -66,15 +66,6 @@ public class ApplicationProjectFileTst extends CayenneTestCase {
     protected ApplicationProjectFile rpf;
     protected ProjectConfiguration conf;
     protected Project pr;
-    
-    
-    /**
-     * Constructor for RootProjectFileTst.
-     * @param arg0
-     */
-    public ApplicationProjectFileTst(String arg0) {
-        super(arg0);
-    }
 
     /**
      * @see junit.framework.TestCase#setUp()

@@ -68,21 +68,13 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class PropertyListSerializationTst extends CayenneTestCase {
 
-	/**
-	 * Constructor for PropertyListSerializationTst.
-	 * @param arg0
-	 */
-	public PropertyListSerializationTst(String arg0) {
-		super(arg0);
-	}
-	
 	public void testListPlist() throws Exception {
 		File plistFile = new File(super.getTestDir(), "test-array.plist");
 		List list = new ArrayList();
 		list.add("str");
 		list.add(new Integer(5));
 		
-		assertTrue(!plistFile.exists());
+		assertFalse(plistFile.exists());
 		PropertyListSerialization.propertyListToFile(plistFile, list);
 		assertTrue(plistFile.exists());
 		
@@ -97,7 +89,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 		map.put("key1", "val");
 		map.put("key2", new Integer(5));
 		
-		assertTrue(!plistFile.exists());
+		assertFalse(plistFile.exists());
 		PropertyListSerialization.propertyListToFile(plistFile, map);
 		assertTrue(plistFile.exists());
 		
@@ -112,7 +104,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 		list.add("s\"tr");
 		list.add(new Integer(5));
 		
-		assertTrue(!plistFile.exists());
+		assertFalse(plistFile.exists());
 		PropertyListSerialization.propertyListToFile(plistFile, list);
 		assertTrue(plistFile.exists());
 		
@@ -132,7 +124,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 		list.add(new Integer(5));
 		map.put("key3", list);
 		
-		assertTrue(!plistFile.exists());
+		assertFalse(plistFile.exists());
 		PropertyListSerialization.propertyListToFile(plistFile, map);
 		assertTrue(plistFile.exists());
 		
@@ -147,7 +139,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 		list.add("s tr");
 		list.add(new Integer(5));
 		
-		assertTrue(!plistFile.exists());
+		assertFalse(plistFile.exists());
 		PropertyListSerialization.propertyListToFile(plistFile, list);
 		assertTrue(plistFile.exists());
 		
@@ -162,7 +154,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 		list.add("s{t)r");
 		list.add(new Integer(5));
 		
-		assertTrue(!plistFile.exists());
+		assertFalse(plistFile.exists());
 		PropertyListSerialization.propertyListToFile(plistFile, list);
 		assertTrue(plistFile.exists());
 		
@@ -177,7 +169,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
         list.add("s/t\\r");
         list.add(new Integer(5));
 
-        assertTrue(!plistFile.exists());
+        assertFalse(plistFile.exists());
         PropertyListSerialization.propertyListToFile(plistFile, list);
         assertTrue(plistFile.exists());
 

@@ -66,10 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DataMapTst extends CayenneTestCase {
 	protected DataMap map;
 
-	public DataMapTst(String name) {
-		super(name);
-	}
-
 	protected void setUp() throws Exception {
 		super.setUp();
 		map = new DataMap();
@@ -149,7 +145,7 @@ public class DataMapTst extends CayenneTestCase {
 	public void testAddDependency1() throws Exception {
 		map.setName("m1");
 		DataMap map2 = new DataMap("m2");
-		assertTrue(!map.isDependentOn(map2));
+		assertFalse(map.isDependentOn(map2));
 		map.addDependency(map2);
 		assertTrue(map.isDependentOn(map2));
 	}

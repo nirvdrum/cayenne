@@ -9,14 +9,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ZipUtilTst extends CayenneTestCase {
 
-    /**
-     * Constructor for ZipUtilTest.
-     * @param name
-     */
-    public ZipUtilTst(String name) {
-        super(name);
-    }
-
     public void testUnzip() throws Exception {
         File jar = new File(getTestResourceDir(), "jar-test.jar");
         File unjarDir = getTestDir();
@@ -25,8 +17,8 @@ public class ZipUtilTst extends CayenneTestCase {
             new File(
                 unjarRootDir.getParentFile(),
                 "META-INF" + File.separator + "MANIFEST.MF");
-        assertTrue(!unjarRootDir.exists());
-        assertTrue(!manifest.exists());
+        assertFalse(unjarRootDir.exists());
+        assertFalse(manifest.exists());
 
         try {
             // try unzipping the JAR
@@ -50,7 +42,7 @@ public class ZipUtilTst extends CayenneTestCase {
 
         try {
             // unzip existing jar and recreate
-            assertTrue(!unjarRootDir.exists());
+            assertFalse(unjarRootDir.exists());
             ZipUtil.unzip(jar, unjarDir);
 
             ZipUtil.zip(

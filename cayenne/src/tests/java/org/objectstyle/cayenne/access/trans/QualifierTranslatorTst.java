@@ -72,10 +72,6 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 
     protected TstQueryAssembler qa;
 
-    public QualifierTranslatorTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws java.lang.Exception {
         qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
     }

@@ -70,21 +70,13 @@ public class IteratorTestBase extends CayenneTestCase {
 	protected PreparedStatement st;
 	protected QueryTranslator transl;
 
-	/**
-	 * Constructor for IteratorTestBase.
-	 * @param name TestCase name
-	 */
-	public IteratorTestBase(String name) {
-		super(name);
-	}
-
 	public void setUp() throws Exception {
 		conn = null;
 		st = null;
 		transl = null;
 
 		getDatabaseSetup().cleanTableData();
-		new DataContextTst("Helper").populateTables();
+		new DataContextTst().populateTables();
 	}
 
 

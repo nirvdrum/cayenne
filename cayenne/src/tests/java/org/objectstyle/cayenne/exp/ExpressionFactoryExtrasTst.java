@@ -65,17 +65,13 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ExpressionFactoryExtrasTst extends CayenneTestCase {
     protected TstTraversalHandler handler;    
-    
-    public ExpressionFactoryExtrasTst(String name) {
-        super(name);
-    }
-    
+
     
     protected void setUp() throws java.lang.Exception {                
         handler = new TstTraversalHandler();
     }
-    
-    
+
+
     public void testBinaryPathExp() throws Exception {
         String path = "path1.path2";
         Object o2 = new Object();

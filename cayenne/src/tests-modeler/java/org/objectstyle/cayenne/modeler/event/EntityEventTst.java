@@ -66,14 +66,6 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
  */
 public class EntityEventTst extends TestCase {
 
-	/**
-	 * Constructor for EntityEventTst.
-	 * @param arg0
-	 */
-	public EntityEventTst(String arg0) {
-		super(arg0);
-	}
-
    public void testConstructor1() throws Exception {
     	Object src = new Object();
     	Entity d = new DbEntity("abc");

@@ -11,14 +11,6 @@ public class DataNodeConfigInfoTst extends CayenneTestCase {
 	protected DataNodeConfigInfo test; 
 
     /**
-     * Constructor for DataNodeConfigInfoTst.
-     * @param name
-     */
-    public DataNodeConfigInfoTst(String name) {
-        super(name);
-    }
-
-    /**
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {

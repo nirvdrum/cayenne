@@ -61,15 +61,7 @@ import junit.framework.TestCase;
  * @author Andrei Adamchik
  */
 public class ModelerUtilTst extends TestCase {
-
-    /**
-     * Constructor for ModelerUtilTst.
-     * @param arg0
-     */
-    public ModelerUtilTst(String arg0) {
-        super(arg0);
-    }
-    
+   
     public void testBuildTitle() throws Exception {
     	String str = "abc";
     	assertEquals("CayenneModeler - abc", ModelerUtil.buildTitle(str));

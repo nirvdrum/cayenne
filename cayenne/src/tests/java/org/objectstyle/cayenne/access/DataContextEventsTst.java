@@ -72,14 +72,6 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     protected DataContext context;
     protected Artist artist;
 
-    /**
-     * Constructor for DataContextEventsTst.
-     * @param name
-     */
-    public DataContextEventsTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws Exception {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();
@@ -96,9 +88,9 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     }
 
     public void testDataContext() throws Exception {
-        assertTrue(!context.hasChanges());
-        assertTrue(!artist.receivedWillCommit());
-        assertTrue(!artist.receivedDidCommit());
+        assertFalse(context.hasChanges());
+        assertFalse(artist.receivedWillCommit());
+        assertFalse(artist.receivedDidCommit());
 
         // modify artist
         artist.setDateOfBirth(new Date(System.currentTimeMillis()));
@@ -117,9 +109,9 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     		return;
     	}
     	
-        assertTrue(!context.hasChanges());
-        assertTrue(!artist.receivedWillCommit());
-        assertTrue(!artist.receivedDidCommit());
+        assertFalse(context.hasChanges());
+        assertFalse(artist.receivedWillCommit());
+        assertFalse(artist.receivedDidCommit());
 
         // modify artist
         artist.setArtistName(null); // name is mandatory
@@ -133,19 +125,19 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         }
 
         assertTrue(artist.receivedWillCommit());
-        assertTrue(!artist.receivedDidCommit());
+        assertFalse(artist.receivedDidCommit());
     }
 
     // tests that no notifications are sent to objects that won't be updated/inserted into database
     public void testDataContextNoModifications() {
-        assertTrue(!context.hasChanges());
-        assertTrue(!artist.receivedWillCommit());
-        assertTrue(!artist.receivedDidCommit());
+        assertFalse(context.hasChanges());
+        assertFalse(artist.receivedWillCommit());
+        assertFalse(artist.receivedDidCommit());
         
         // commit without any pending changes
         context.commitChanges(Level.WARN);
 
-        assertTrue(!artist.receivedDidCommit());
-        assertTrue(!artist.receivedWillCommit());
+        assertFalse(artist.receivedDidCommit());
+        assertFalse(artist.receivedWillCommit());
     }
 }

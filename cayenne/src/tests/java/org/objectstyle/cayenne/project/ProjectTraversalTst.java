@@ -66,14 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ProjectTraversalTst extends CayenneTestCase {
 
-    /**
-     * Constructor for ProjectTraversalTst.
-     * @param arg0
-     */
-    public ProjectTraversalTst(String arg0) {
-        super(arg0);
-    }
-
     public void testTraverse1() throws Exception {
         TstProjectTraversalHelper helper = new TstProjectTraversalHelper();
         DataMap map = new DataMap("m1");

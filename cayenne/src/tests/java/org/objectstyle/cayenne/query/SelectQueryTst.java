@@ -67,10 +67,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 public class SelectQueryTst extends SelectQueryBase {
     private static final int _artistCount = 20;
 
-    public SelectQueryTst(String name) {
-        super(name);
-    }
-
     public void testFetchLimit() throws java.lang.Exception {
         query.setRoot(Artist.class);
         query.setFetchLimit(7);

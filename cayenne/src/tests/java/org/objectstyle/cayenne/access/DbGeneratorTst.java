@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -64,13 +63,8 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
   * @author Andrei Adamchik
   */
 public class DbGeneratorTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(DbLoaderTst.class);
 
     protected DbGenerator gen;
-
-    public DbGeneratorTst(String name) {
-        super(name);
-    }
 
     public void setUp() throws Exception {
         gen =
@@ -86,25 +80,25 @@ public class DbGeneratorTst extends CayenneTestCase {
     public void testCreatePkSupport() throws Exception {
         assertTrue(gen.shouldCreatePKSupport());
         gen.setShouldCreatePKSupport(false);
-        assertTrue(!gen.shouldCreatePKSupport());
+        assertFalse(gen.shouldCreatePKSupport());
 
     }
 
     public void testShouldCreateTables() throws Exception {
         assertTrue(gen.shouldCreateTables());
         gen.setShouldCreateTables(false);
-        assertTrue(!gen.shouldCreateTables());
+        assertFalse(gen.shouldCreateTables());
     }
 
     public void testDropPkSupport() throws Exception {
 
-        assertTrue(!gen.shouldDropPKSupport());
+        assertFalse(gen.shouldDropPKSupport());
         gen.setShouldDropPKSupport(true);
         assertTrue(gen.shouldDropPKSupport());
     }
 
     public void testShouldDropTables() throws Exception {
-        assertTrue(!gen.shouldDropTables());
+        assertFalse(gen.shouldDropTables());
         gen.setShouldDropTables(true);
         assertTrue(gen.shouldDropTables());
     }

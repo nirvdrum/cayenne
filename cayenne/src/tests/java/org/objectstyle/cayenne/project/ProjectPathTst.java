@@ -62,14 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ProjectPathTst extends CayenneTestCase {
 
-    /**
-     * Constructor for ProjectPathTst.
-     * @param name
-     */
-    public ProjectPathTst(String name) {
-        super(name);
-    }
-
     public void testConstructor() throws Exception {
         Object[] path = new Object[0];
         ProjectPath pp = new ProjectPath(path);

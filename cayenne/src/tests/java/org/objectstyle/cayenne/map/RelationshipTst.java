@@ -61,10 +61,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class RelationshipTst extends CayenneTestCase {
     protected Relationship rel;
 
-    public RelationshipTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws Exception {
         // create an anonymous inner Relationship subclass, since Relationship is abstract
         rel = new Relationship() {
@@ -108,6 +104,6 @@ public class RelationshipTst extends CayenneTestCase {
         rel.setToMany(true);
         assertTrue(rel.isToMany());
         rel.setToMany(false);
-        assertTrue(!rel.isToMany());
+        assertFalse(rel.isToMany());
     }
 }

@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
@@ -91,17 +90,12 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 public class DataContextTst extends CayenneTestCase {
-	private static Logger logObj = Logger.getLogger(DataContextTst.class);
 
 	public static final int artistCount = 25;
 	public static final int galleryCount = 10;
 
 	protected DataContext ctxt;
 	protected TestOperationObserver opObserver;
-
-	public DataContextTst(String name) {
-		super(name);
-	}
 
 	protected void setUp() throws java.lang.Exception {
 		super.setUp();
@@ -331,7 +325,7 @@ public class DataContextTst extends CayenneTestCase {
 			(ToManyList) a1.readPropertyDirectly("paintingArray");
 		assertNotNull(toMany);
 
-		assertTrue(!toMany.needsFetch());
+		assertFalse(toMany.needsFetch());
 	}
 
 	/**
@@ -357,7 +351,7 @@ public class DataContextTst extends CayenneTestCase {
 				(ToManyList) a1.readPropertyDirectly("paintingArray");
 			assertNotNull(toMany);
 
-			assertTrue(!toMany.needsFetch());
+			assertFalse(toMany.needsFetch());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Should not have failed " + e.getMessage());
@@ -396,7 +390,7 @@ public class DataContextTst extends CayenneTestCase {
 				(ToManyList) a1.readPropertyDirectly("paintingArray");
 			assertNotNull(toMany);
 
-			assertTrue(!toMany.needsFetch());
+			assertFalse(toMany.needsFetch());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Should not have failed " + e.getMessage());
@@ -1107,7 +1101,7 @@ public class DataContextTst extends CayenneTestCase {
 		ctxt.commitChanges();
 		
 		artist.setArtistName(artistName); //Set again to *exactly* the same value
-		assertTrue(!ctxt.hasChanges());
+		assertFalse(ctxt.hasChanges());
 	}
 	
 	/**

@@ -67,13 +67,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ValidatorTst extends CayenneTestCase {
-
-	/**
-	 * Constructor for ValidatorTst.
-	 */
-	public ValidatorTst(String name) {
-		super(name);
-	}
     
 	public void testProject() throws Exception {
 		Project project = new TstProject(new File(System.getProperty("user.dir")));

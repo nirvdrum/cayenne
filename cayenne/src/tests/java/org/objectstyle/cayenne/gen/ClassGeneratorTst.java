@@ -57,22 +57,16 @@ package org.objectstyle.cayenne.gen;
 
 import java.io.StringWriter;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ClassGeneratorTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(ClassGeneratorTst.class);
 
 	private static final String SUPER_CLASS_PACKAGE="org.objectstyle.art";
 	private static final String SUPER_CLASS_NAME="ArtDataObject";
 	private static final String FQ_SUPER_CLASS_NAME=SUPER_CLASS_PACKAGE+"."+SUPER_CLASS_NAME;
 	
     protected ClassGenerator cgen;
-
-    public ClassGeneratorTst(String name) {
-        super(name);
-    }
 
     public void setUp() throws Exception {
         cgen = new ClassGenerator(MapClassGenerator.SUPERCLASS_TEMPLATE);
@@ -132,7 +126,7 @@ public class ClassGeneratorTst extends CayenneTestCase {
 
 
     public void doPackageName() throws Exception {
-        assertTrue(!cgen.isUsingPackage());
+        assertFalse(cgen.isUsingPackage());
         String pkgName = "aaa.org";
         cgen.setPackageName(pkgName);
         assertEquals(pkgName, cgen.getPackageName());

@@ -65,11 +65,9 @@ public class OneWayMappingTestCase extends CayenneTestCase {
 
     /**
      * Constructor for OneWayMappingTestCase.
-     * 
-     * @param name
      */
-    public OneWayMappingTestCase(String name) {
-        super(name);
+    public OneWayMappingTestCase() {
+        super();
         OneWayMappingProject.init();
     }
 

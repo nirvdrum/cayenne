@@ -67,14 +67,6 @@ public class DataMapFileTst extends CayenneTestCase {
     protected DataMapFile dmf;
     protected DataMap map;
     protected Project pr;
-    
-    /**
-     * Constructor for MapFileTst.
-     * @param arg0
-     */
-    public DataMapFileTst(String arg0) {
-        super(arg0);
-    }
 
     /**
      * @see junit.framework.TestCase#setUp()

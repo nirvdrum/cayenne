@@ -64,14 +64,6 @@ import org.objectstyle.cayenne.access.DataDomain;
  */
 public class DomainDisplayEventTst extends TestCase {
 
-	/**
-	 * Constructor for ModelerDisplayEventTst.
-	 * @param arg0
-	 */
-	public DomainDisplayEventTst(String arg0) {
-		super(arg0);
-	}
-	
 	public void testDomain() throws Exception {
 		DataDomain d = new DataDomain("abc");
 		DomainDisplayEvent e = new DomainDisplayEvent(new Object(), d);

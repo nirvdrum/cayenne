@@ -72,14 +72,6 @@ public class ApplicationProjectTst extends CayenneTestCase {
     protected ApplicationProject p;
     protected File f;
 
-    /**
-     * Constructor for ApplicationProjectTst.
-     * @param name
-     */
-    public ApplicationProjectTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         super.setUp();
         f = new File("cayenne.xml");

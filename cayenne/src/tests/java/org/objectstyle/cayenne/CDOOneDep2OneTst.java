@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,8 +53,8 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Exhibit;
@@ -64,11 +63,6 @@ import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
 
 public class CDOOneDep2OneTst extends CayenneDOTestBase {
-    private static Logger logObj = Logger.getLogger(CDOOneDep2OneTst.class);
-
-    public CDOOneDep2OneTst(String name) {
-        super(name);
-    }
 
     public void testNewAdd1() throws Exception {
         Artist a1 = newArtist();

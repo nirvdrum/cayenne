@@ -69,10 +69,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DataContextBlobTst extends CayenneTestCase {
     protected DataContext ctxt;
 
-    public DataContextBlobTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
         ctxt = getDomain().createDataContext();

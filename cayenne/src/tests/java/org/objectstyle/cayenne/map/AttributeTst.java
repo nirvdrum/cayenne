@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,16 +53,13 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class AttributeTst extends CayenneTestCase {
     protected Attribute attr;
-
-    public AttributeTst(String name) {
-        super(name);
-    }
 
     public void setUp() throws Exception {
         // create an anonymous inner Attribute subclass, since Attribute is abstract

@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class CayenneMapTst extends CayenneTestCase {
 
-	/**
-	 * Constructor for CayenneMapTst.
-	 * @param arg0
-	 */
-	public CayenneMapTst(String arg0) {
-		super(arg0);
-	}
-
 	protected CayenneMapEntry makeEntry() {
 		return new CayenneMapEntry() {
 			protected Object parent;

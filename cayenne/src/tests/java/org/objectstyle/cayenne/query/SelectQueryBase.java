@@ -55,21 +55,13 @@
  */ 
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.TestOperationObserver;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public abstract class SelectQueryBase extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(SelectQueryBase.class);
 
     protected SelectQuery query;
     protected TestOperationObserver opObserver;
-
-    
-    public SelectQueryBase(String name) {
-        super(name);
-    }
-    
     
     public void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();

@@ -65,13 +65,6 @@ import junit.framework.TestCase;
 public class DataMapFileFilterTst extends TestCase {
     protected DataMapFileFilter filter;
 
-    /**
-     * Constructor for DataMapFileFilterTst.
-     */
-    public DataMapFileFilterTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws Exception {
         filter = new DataMapFileFilter();
     }
@@ -81,15 +74,15 @@ public class DataMapFileFilterTst extends TestCase {
     }
 
     public void testRejectCayenneXml() throws Exception {
-        assertTrue(!filter.accept(new File("cayenne.xml")));
+        assertFalse(filter.accept(new File("cayenne.xml")));
     }
 
     public void testRejectOther() throws Exception {
-        assertTrue(!filter.accept(new File("somefile.txt")));
+        assertFalse(filter.accept(new File("somefile.txt")));
     }
 
     public void testRejectHiddenMapXml() throws Exception {
-        assertTrue(!filter.accept(new File(".map.xml")));
+        assertFalse(filter.accept(new File(".map.xml")));
     }
     
     public void testAcceptMapXml() throws Exception {
@@ -97,6 +90,6 @@ public class DataMapFileFilterTst extends TestCase {
     }
     
     public void testRejectMixedCase() throws Exception {
-        assertTrue(!filter.accept(new File("xyz.MAP.xml")));
+        assertFalse(filter.accept(new File("xyz.MAP.xml")));
     }
 }

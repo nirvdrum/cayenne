@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.map.event.DomainEvent;
  */
 public class DomainEventTst extends TestCase {
 
-	/**
-	 * Constructor for DomainEventTst.
-	 * @param arg0
-	 */
-	public DomainEventTst(String arg0) {
-		super(arg0);
-	}
-
     public void testConstructor1() throws Exception {
     	Object src = new Object();
     	DataDomain d = new DataDomain("abc");

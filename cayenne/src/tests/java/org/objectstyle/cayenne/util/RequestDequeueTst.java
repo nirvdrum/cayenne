@@ -62,15 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class RequestDequeueTst extends CayenneTestCase {
 
-    /**
-     * Constructor for RequestDequeueTst.
-     * 
-     * @param arg0
-     */
-    public RequestDequeueTst(String arg0) {
-        super(arg0);
-    }
-
     public void testDequeueEventCode() throws Exception {
         RequestDequeue dequeue = new RequestDequeue();
         dequeue.setDequeueEventCode(RequestDequeue.QUEUE_FULL);

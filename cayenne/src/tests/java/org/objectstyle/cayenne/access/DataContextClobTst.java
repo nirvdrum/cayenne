@@ -68,10 +68,6 @@ public class DataContextClobTst extends CayenneTestCase {
 
     protected DataContext ctxt;
 
-    public DataContextClobTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
         ctxt = getDomain().createDataContext();

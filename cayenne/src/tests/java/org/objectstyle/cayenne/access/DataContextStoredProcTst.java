@@ -80,14 +80,6 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
     protected DataContext ctxt;
 
-    /**
-     * Constructor for DataContextStoredProcTst.
-     * @param name
-     */
-    public DataContextStoredProcTst(String name) {
-        super(name);
-    }
-
     public void testUpdate() throws Exception {
         // Don't run this on MySQL
         if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,16 +53,15 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
-
-import org.objectstyle.cayenne.TranslationTestCase;
+package org.objectstyle.cayenne.exp;
 
 import junit.framework.Assert;
 
+import org.objectstyle.cayenne.TranslationTestCase;
 
 public class TstExpressionCase extends TranslationTestCase {    
     protected int totalNodes;
     protected int totalLeaves;
-    
     
     public TstExpressionCase(String rootEntity, Expression cayenneExp, String sqlExp, int totalNodes, int totalLeaves) {
         super(rootEntity, cayenneExp, sqlExp);

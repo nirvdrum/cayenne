@@ -80,11 +80,8 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextExtrasTst extends CayenneTestCase {
-    protected DataContext ctxt;
 
-    public DataContextExtrasTst(String name) {
-        super(name);
-    }
+    protected DataContext ctxt;
 
     protected void setUp() throws java.lang.Exception {
         ctxt = getDomain().createDataContext();

@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class CayenneRuntimeExceptionTst extends CayenneTestCase {
 
-	/**
-	 * Constructor for CayenneRuntimeExceptionTst.
-	 * @param arg0
-	 */
-	public CayenneRuntimeExceptionTst(String arg0) {
-		super(arg0);
-	}
-
 	public void testConstructor1() throws Exception {
 		CayenneRuntimeException ex = new CayenneRuntimeException();
 		assertNull(ex.getCause());

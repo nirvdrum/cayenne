@@ -58,13 +58,12 @@ package org.objectstyle.cayenne.unittest;
 import java.io.File;
 import java.sql.Connection;
 
-import org.apache.log4j.Logger;
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-
-import junit.framework.TestCase;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared
@@ -73,7 +72,6 @@ import junit.framework.TestCase;
  * @author Andrei Adamchik
  */
 public class CayenneTestCase extends TestCase {
-    private static Logger logObj = Logger.getLogger(CayenneTestCase.class);
 
     static {
         // init resources if needed
@@ -84,14 +82,6 @@ public class CayenneTestCase extends TestCase {
         return new File(
             new File(new File(new File("build"), "tests"), "deps"),
             "test-resources");
-    }
-
-    /**
-     * Constructor for CayenneTestCase.
-     * @param arg0
-     */
-    public CayenneTestCase(String name) {
-        super(name);
     }
 
     /**

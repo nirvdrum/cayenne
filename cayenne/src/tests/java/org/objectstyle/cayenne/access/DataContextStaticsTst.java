@@ -66,14 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DataContextStaticsTst extends CayenneTestCase {
     protected Configuration savedConfig;
 
-    /**
-     * Constructor for DataContextStaticsTst.
-     * @param name
-     */
-    public DataContextStaticsTst(String name) {
-        super(name);
-    }
-
     public void testCreateDataContext1() throws Exception {
         TestConfig conf = new TestConfig(getDomain());
         try {

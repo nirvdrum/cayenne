@@ -67,10 +67,6 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 
 	protected SqlSelectQuery q;
 
-	public SqlSelectQueryInContextTst(String name) {
-		super(name);
-	}
-
 	public void setUp() throws java.lang.Exception {
 		super.setUp();
 		q = new SqlSelectQuery();

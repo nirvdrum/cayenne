@@ -63,14 +63,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ValidationInfoTst extends CayenneTestCase {
 
-    /**
-     * Constructor for ValidationInfoTst.
-     * @param name
-     */
-    public ValidationInfoTst(String name) {
-        super(name);
-    }
-
     public void testSeverity() throws Exception {
         int severity = ValidationInfo.WARNING;
         ValidationInfo info = new ValidationInfo(severity, null, null);

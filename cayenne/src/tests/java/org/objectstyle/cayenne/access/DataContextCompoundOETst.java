@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.art.CompoundPainting;
-import org.objectstyle.art.RWCompoundPainting;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -77,10 +76,6 @@ public class DataContextCompoundOETst extends CayenneTestCase {
     final int paintCount = 8;
 
     protected DataContext ctxt;
-
-    public DataContextCompoundOETst(String name) {
-        super(name);
-    }
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();

@@ -68,13 +68,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
 public class ObjEntityValidatorTst extends ValidatorTestBase {
 	protected DataDomain domain;
 	protected DataMap map;
-    /**
-     * Constructor for ObjEntityValidatorTst.
-     * @param name
-     */
-    public ObjEntityValidatorTst(String name) {
-        super(name);
-    }
     
 	protected void setUp() throws Exception {
 		super.setUp();

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,16 +53,17 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
-
-import junit.framework.Assert;
 
 /** Helper class to process test queries results. */
 public class TestOperationObserver extends DefaultOperationObserver {

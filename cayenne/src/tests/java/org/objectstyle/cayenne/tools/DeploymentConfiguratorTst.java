@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.tools;
 import java.io.File;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -73,8 +72,6 @@ import org.objectstyle.cayenne.util.ZipUtil;
  * @author Andrei Adamchik
  */
 public class DeploymentConfiguratorTst extends CayenneTestCase {
-    private static Logger logObj =
-        Logger.getLogger(DeploymentConfiguratorTst.class);
 
     private static final File baseDir =
         new File(CayenneTestResources.getResources().getTestDir(), "cdeploy");
@@ -117,14 +114,6 @@ public class DeploymentConfiguratorTst extends CayenneTestCase {
         Util.copy(url3, altNodeFile);
     }
 
-    /**
-     * Constructor for DeploymentConfiguratorTst.
-     * @param name
-     */
-    public DeploymentConfiguratorTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws Exception {
         // create test dir
         File testDir = null;
@@ -151,7 +140,7 @@ public class DeploymentConfiguratorTst extends CayenneTestCase {
 
         // assert setup success
         assertTrue(testDir.isDirectory());
-        assertTrue(!dest.exists());
+        assertFalse(dest.exists());
         assertSame(dest, task.getInfo().getDestJar());
         assertSame(src, task.getInfo().getSourceJar());
     }

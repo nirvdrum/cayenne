@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,16 +53,12 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
-
 public class ObjAttributeTst extends CayenneTestCase {
     protected ObjAttribute attr;
-    
-    public ObjAttributeTst(String name) {
-        super(name);
-    }
     
     public void setUp() throws Exception {
         attr = new ObjAttribute();

@@ -57,7 +57,6 @@ package org.objectstyle.cayenne;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting1;
 import org.objectstyle.cayenne.exp.Expression;
@@ -70,15 +69,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
-	private static Logger logObj = Logger.getLogger(CDOMany2OneNoRevTst.class);
-	
-    /**
-     * Constructor for CDOMany2OneNoRevTst.
-     * @param name
-     */
-    public CDOMany2OneNoRevTst(String name) {
-        super(name);
-    }
 
     /**
      * @see org.objectstyle.cayenne.CayenneDOTestBase#newPainting()

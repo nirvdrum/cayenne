@@ -64,10 +64,6 @@ import java.util.List;
 
 public class TypesMappingTst extends TypesMappingBase {
 
-    public TypesMappingTst(String name) {
-        super(name);
-    }
-
     public void testFuzzyDataType() throws java.lang.Exception {
         assertNotNull(createTypesMapping().getFuzzyDataType(Types.INTEGER));
     }

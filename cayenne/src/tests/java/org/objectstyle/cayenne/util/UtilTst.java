@@ -61,20 +61,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class UtilTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(UtilTst.class);
-
     private File fTmpFileInCurrentDir;
     private String fTmpFileName;
     private File fTmpFileCopy;
-
-    public UtilTst(String name) {
-        super(name);
-    }
 
     protected void setUp() throws java.lang.Exception {
         fTmpFileName =
@@ -84,7 +77,7 @@ public class UtilTst extends CayenneTestCase {
 
         // right some garbage to the temp file, so that it is not empty
         FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
-        fout.write("This is total grabage..");
+        fout.write("This is total garbage..");
         fout.close();
 
         fTmpFileCopy = new File(fTmpFileName + ".copy");
@@ -102,10 +95,10 @@ public class UtilTst extends CayenneTestCase {
 
     }
 
-    
-    public void testCopyFile() throws java.lang.Exception {
-        assertTrue("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.", !fTmpFileCopy.exists());
 
+    public void testCopyFile() throws java.lang.Exception {
+        assertFalse("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.",
+        			fTmpFileCopy.exists());
         assertTrue(Util.copy(fTmpFileInCurrentDir, fTmpFileCopy));
         assertTrue(fTmpFileCopy.exists());
         assertEquals(fTmpFileCopy.length(), fTmpFileInCurrentDir.length());
@@ -113,8 +106,8 @@ public class UtilTst extends CayenneTestCase {
 
 
     public void testCopyFileUrl() throws java.lang.Exception {
-        assertTrue("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.", !fTmpFileCopy.exists());
-
+        assertFalse("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.",
+        				fTmpFileCopy.exists());
         assertTrue(Util.copy(fTmpFileInCurrentDir.toURL(), fTmpFileCopy));
         assertTrue(fTmpFileCopy.exists());
         assertEquals(fTmpFileCopy.length(), fTmpFileInCurrentDir.length());
@@ -154,7 +147,8 @@ public class UtilTst extends CayenneTestCase {
 
     public void testDeleteFile() throws java.lang.Exception {
         // delete file
-        assertTrue("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.", !fTmpFileCopy.exists());
+        assertFalse("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.",
+        			fTmpFileCopy.exists());
         Util.copy(fTmpFileInCurrentDir, fTmpFileCopy);
         assertTrue(Util.delete(fTmpFileCopy.getPath(), false));
 
@@ -163,21 +157,21 @@ public class UtilTst extends CayenneTestCase {
         File tmpDir = new File(tmpDirName);
         assertTrue(tmpDir.mkdir());
         assertTrue(Util.delete(tmpDirName, false));
-        assertTrue(!tmpDir.exists());
+        assertFalse(tmpDir.exists());
 
         // delete dir with files with recurions
         assertTrue(tmpDir.mkdir());
         assertTrue(new File(tmpDir, "aaa").createNewFile());
         assertTrue(Util.delete(tmpDirName, true));
-        assertTrue(!tmpDir.exists());
+        assertFalse(tmpDir.exists());
 
         // fail delete dir with files with no recurions
         assertTrue(tmpDir.mkdir());
         assertTrue(new File(tmpDir, "aaa").createNewFile());
-        assertTrue(!Util.delete(tmpDirName, false));
+        assertFalse(Util.delete(tmpDirName, false));
         assertTrue(tmpDir.exists());
         assertTrue(Util.delete(tmpDirName, true));
-        assertTrue(!tmpDir.exists());
+        assertFalse(tmpDir.exists());
     }
 
 

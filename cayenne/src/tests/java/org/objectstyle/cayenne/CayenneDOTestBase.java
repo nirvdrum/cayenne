@@ -86,10 +86,6 @@ public class CayenneDOTestBase extends CayenneTestCase {
     
     protected DataContext ctxt;
     
-    public CayenneDOTestBase(String name) {
-        super(name);
-    }
-    
     protected void setUp() throws Exception {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();        

@@ -90,7 +90,6 @@ public class Preferences {
     private File outFile;
     private int schemaCount = 1;
     private int commitsPerSchema = 1;
-    private String connectionLabel;
 
     public Preferences(String[] args) throws Exception {
         if (args.length > 0 && read(args[0]))

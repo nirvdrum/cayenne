@@ -65,10 +65,6 @@ public class SqlModifyQueryInContextTst extends SelectQueryBase {
 
     protected SqlModifyQuery q;
 
-    public SqlModifyQueryInContextTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws java.lang.Exception {
         super.setUp();
         q = new SqlModifyQuery();

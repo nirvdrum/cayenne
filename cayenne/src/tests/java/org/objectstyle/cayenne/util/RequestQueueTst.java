@@ -64,14 +64,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class RequestQueueTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(RequestQueueTst.class);
 
-    /**
-     * Constructor for RequestQueueTst.
-     * @param arg0
-     */
-    public RequestQueueTst(String arg0) {
-        super(arg0);
-    }
-
     public void testDequeueSuccess() throws Exception {
         // create non-expiring queue
         QueueTestThread testCase1 =

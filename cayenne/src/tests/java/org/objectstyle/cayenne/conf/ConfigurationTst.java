@@ -61,12 +61,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.project.ProjectDataSourceFactory;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
-
 public class ConfigurationTst extends CayenneTestCase {
-
-    public ConfigurationTst(String name) {
-        super(name);
-    }
 
     public void testDomain() throws java.lang.Exception {
         Configuration cfg = new Config();

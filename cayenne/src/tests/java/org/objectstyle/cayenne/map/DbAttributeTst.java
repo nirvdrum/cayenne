@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class DbAttributeTst extends CayenneTestCase {
 
-	/**
-	 * Constructor for DbAttributeTst.
-	 * @param arg0
-	 */
-	public DbAttributeTst(String arg0) {
-		super(arg0);
-	}
-
     public void testConstructor1() throws Exception {
     	DbAttribute a = new DbAttribute("abc");
     	assertEquals("abc", a.getName());

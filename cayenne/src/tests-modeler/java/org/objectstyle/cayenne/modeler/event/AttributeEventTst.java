@@ -66,14 +66,6 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
  */
 public class AttributeEventTst extends TestCase {
 
-	/**
-	 * Constructor for AttributeEventTst.
-	 * @param arg0
-	 */
-	public AttributeEventTst(String arg0) {
-		super(arg0);
-	}
-
 	public void testAttribute() throws Exception {
 		Object src = new Object();
 		Attribute a = new DbAttribute();

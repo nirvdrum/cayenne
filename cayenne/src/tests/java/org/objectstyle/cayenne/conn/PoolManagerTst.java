@@ -62,10 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class PoolManagerTst extends CayenneTestCase {
 
-    public PoolManagerTst(String name) {
-        super(name);
-    }    
-    
     public void testDataSourceUrl() throws Exception {
         String driverName = getFreshConnInfo().getJdbcDriver();
         String url = getFreshConnInfo().getDataSourceUrl();

@@ -57,10 +57,10 @@ package org.objectstyle.cayenne.conf;
 
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.collections.ExtendedProperties;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-
-import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik

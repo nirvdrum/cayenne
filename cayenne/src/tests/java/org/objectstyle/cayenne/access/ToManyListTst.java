@@ -63,10 +63,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ToManyListTst extends CayenneTestCase {
     private boolean flag;
     
-    public ToManyListTst(String name) {
-        super(name);
-    }
-    
     public void testListDataSource() throws java.lang.Exception {
         ToManyListDataSource lds = new ToManyListDataSource() {
             public void updateListData(ToManyList l) {};

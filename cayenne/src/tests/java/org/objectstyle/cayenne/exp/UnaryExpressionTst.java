@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,18 +53,14 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.exp;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
 
 public class UnaryExpressionTst extends CayenneTestCase {
     // non-existent type
     private static final int defaultType = -34;
     protected UnaryExpression expr;
-    
-    public UnaryExpressionTst(String name) {
-        super(name);
-    }
     
     
     protected void setUp() throws java.lang.Exception {

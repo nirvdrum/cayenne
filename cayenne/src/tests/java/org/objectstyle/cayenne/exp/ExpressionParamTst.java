@@ -63,16 +63,9 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ExpressionParamTst extends CayenneTestCase {
 
-    /**
-     * Constructor for ExpressionParamTst.
-     * @param name
-     */
-    public ExpressionParamTst(String name) {
-        super(name);
-    }
-    
-    public void testConstructor() throws Exception {
+	public void testConstructor() throws Exception {
     	ExpressionParam p = new ExpressionParam("abc");
     	assertEquals("abc", p.getName());
     }
+
 }

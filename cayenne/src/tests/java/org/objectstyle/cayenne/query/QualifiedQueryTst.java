@@ -62,10 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class QualifiedQueryTst extends CayenneTestCase {
 	protected QualifiedQuery query;
 
-	public QualifiedQueryTst(String name) {
-		super(name);
-	}
-
 	public void setUp() throws java.lang.Exception {
 		query = new TstQualifiedQuery();
 	}

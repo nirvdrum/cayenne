@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,10 +65,6 @@ public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;
     protected DbEntity paintingEnt;
     protected DbEntity galleryEnt;
-    
-    public DbRelationshipTst(String name) {
-        super(name);
-    }
     
     public void setUp() throws Exception {
         DataDomain dom = getDomain();

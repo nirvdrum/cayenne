@@ -66,10 +66,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class QueryUtilsTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(QueryUtilsTst.class);
     
-    public QueryUtilsTst(String name) {
-        super(name);
-    }
-
     public void testSelectPrefetchPath1() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
         q.setQualifier(

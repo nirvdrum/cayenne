@@ -62,14 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class ConfigExceptionTst extends CayenneTestCase {
 
-	/**
-	 * Constructor for CayenneConfigExceptionTst.
-	 * @param arg0
-	 */
-	public ConfigExceptionTst(String arg0) {
-		super(arg0);
-	}
-
 	public void testConstructor1() throws Exception {
 		ConfigException ex = new ConfigException();
 		assertNull(ex.getCause());

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,11 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
-import org.objectstyle.art.Painting;
-import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -71,13 +68,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(CayenneDataObjectInCtxtTst.class);
-
     protected DataContext ctxt;
-
-    public CayenneDataObjectInCtxtTst(String name) {
-        super(name);
-    }
 
     public void setUp() throws java.lang.Exception {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
@@ -154,7 +145,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
         ctxt.commitChanges();
         assertEquals(PersistenceState.TRANSIENT, o1.getPersistenceState());
-        assertTrue(!ctxt.getObjectStore().getObjects().contains(o1));
+        assertFalse(ctxt.getObjectStore().getObjects().contains(o1));
         assertNull(o1.getDataContext());
     }
 
@@ -219,24 +210,4 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }
 
-    private Painting fetchPainting(String name) {
-        SelectQuery q =
-            new SelectQuery(
-                "Painting",
-                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingTitle", name));
-        List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (Painting) pts.get(0) : null;
-    }
-
-    private PaintingInfo fetchPaintingInfo(String name) {
-        SelectQuery q =
-            new SelectQuery(
-                "PaintingInfo",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "painting.paintingTitle",
-                    name));
-        List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
-    }
 }

@@ -62,12 +62,6 @@ public class ExpressionTraversalTst extends CayenneTestCase {
     protected TstTraversalHandler handler;
     protected ExpressionTraversal walker;
     
-    
-    public ExpressionTraversalTst(String name) {
-        super(name);
-    }
-    
-    
     protected void setUp() throws Exception {                
         handler = new TstTraversalHandler();
         walker = new ExpressionTraversal(); 

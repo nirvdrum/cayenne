@@ -10,14 +10,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ProjectConfigInfoTst extends CayenneTestCase {
     protected ProjectConfigInfo config;
 
-    /**
-     * Constructor for ProjectConfigInfoTst.
-     * @param name
-     */
-    public ProjectConfigInfoTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         super.setUp();
         config = new ProjectConfigInfo();

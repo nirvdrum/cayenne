@@ -68,14 +68,6 @@ public class PartialProjectTst extends CayenneTestCase {
     protected File testProjectFile;
     protected PartialProject project;
 
-    /**
-     * Constructor for PartialProjectTst.
-     * @param name
-     */
-    public PartialProjectTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         // create new test directory, copy cayenne.xml in there
         File baseDir = super.getTestDir();

@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class DataNodeValidatorTst extends ValidatorTestBase {
 
-    /**
-     * Constructor for DataNodeValidatorTst.
-     * @param arg0
-     */
-    public DataNodeValidatorTst(String arg0) {
-        super(arg0);
-    }
-
     public void testValidateDataNodes() throws Exception {
         // should succeed
         DataDomain d1 = new DataDomain("abc");

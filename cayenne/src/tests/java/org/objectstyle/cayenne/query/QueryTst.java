@@ -64,9 +64,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class QueryTst extends CayenneTestCase {
 	protected Query query;    
-    public QueryTst(String name) {
-        super(name);
-    }
     
     public void setUp() throws java.lang.Exception {
         query = new TstUnqualifiedQuery();

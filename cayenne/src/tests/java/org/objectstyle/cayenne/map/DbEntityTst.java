@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
 import java.util.List;
 
@@ -61,10 +61,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class DbEntityTst extends CayenneTestCase {
     protected DbEntity ent;
-
-    public DbEntityTst(String name) {
-        super(name);
-    }
 
     public void setUp() throws Exception {
         ent = new DbEntity();

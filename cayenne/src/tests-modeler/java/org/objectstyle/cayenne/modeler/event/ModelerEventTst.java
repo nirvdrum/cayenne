@@ -55,22 +55,14 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.map.event.MapEvent;
-
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.event.MapEvent;
 
 /**
  * @author Andrei Adamchik
  */
 public class ModelerEventTst extends TestCase {
-
-	/**
-	 * Constructor for ModelerEventTst.
-	 * @param arg0
-	 */
-	public ModelerEventTst(String arg0) {
-		super(arg0);
-	}
 
     public void testConstructor1() throws Exception {
     	Object src = new Object();

@@ -10,14 +10,6 @@ public class ListExpressionTst extends CayenneTestCase {
     private static final int defaultType = -33;
     protected ListExpression expr;
 
-    /**
-     * Constructor for ListExpressionTst.
-     * @param name
-     */
-    public ListExpressionTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         expr = new ListExpression(defaultType);
     }

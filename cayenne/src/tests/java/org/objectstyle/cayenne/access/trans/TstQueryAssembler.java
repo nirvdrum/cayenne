@@ -60,7 +60,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -72,7 +71,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestResources;
 
 public class TstQueryAssembler extends QueryAssembler {
-    private static Logger logObj = Logger.getLogger(TstQueryAssembler.class);
 
     protected List dbRels = new ArrayList();
 

@@ -62,10 +62,6 @@ import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 public class DefaultResultIteratorTst extends IteratorTestBase {
     protected DefaultResultIterator it;
 
-    public DefaultResultIteratorTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws Exception {
         super.setUp();
         it = null;
@@ -73,11 +69,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
     protected void init() throws Exception {
         super.init();
-        it =
-            new DefaultResultIterator(
-                st,
-                getNode().getAdapter(),
-                (SelectQueryAssembler) transl);
+        it = new DefaultResultIterator(st, getNode().getAdapter(), (SelectQueryAssembler) transl);
     }
 
     protected void cleanup() throws Exception {
@@ -92,13 +84,13 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
     public void testClose1() throws Exception {
         try {
             init();
-            assertTrue(!conn.isClosed());
+            assertFalse(conn.isClosed());
 
             it.setClosingConnection(false);
             it.close();
 
             // caller must close the connection
-            assertTrue(!conn.isClosed());
+            assertFalse(conn.isClosed());
         } finally {
             conn.close();
         }
@@ -106,7 +98,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
     public void testClose2() throws Exception {
         init();
-        assertTrue(!conn.isClosed());
+        assertFalse(conn.isClosed());
 
         it.setClosingConnection(true);
         it.close();
@@ -149,7 +141,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
             }
 
             // rows must end here
-            assertTrue(!it.hasNextRow());
+            assertFalse(it.hasNextRow());
 
         } finally {
             cleanup();
@@ -168,7 +160,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
             }
 
             // rows must end here
-            assertTrue(!it.hasNextRow());
+            assertFalse(it.hasNextRow());
 
         } finally {
             cleanup();
@@ -178,7 +170,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
     public void testIsClosingConnection() throws java.lang.Exception {
         try {
             init();
-            assertTrue(!it.isClosingConnection());
+            assertFalse(it.isClosingConnection());
             it.setClosingConnection(true);
             assertTrue(it.isClosingConnection());
         } finally {
@@ -201,7 +193,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
             assertEquals(
                 "Failed row: " + dataRow,
-                new DataContextTst("noop").artistName(9),
+                new DataContextTst().artistName(9),
                 dataRow.get("ARTIST_NAME"));
 
         } finally {

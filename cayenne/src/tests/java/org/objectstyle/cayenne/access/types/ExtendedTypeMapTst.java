@@ -62,9 +62,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class ExtendedTypeMapTst extends CayenneTestCase {
-    public ExtendedTypeMapTst(String name) {
-        super(name);
-    }
 
     public void testRegisterType() throws Exception {
         ExtendedTypeMap map = new ExtendedTypeMap();

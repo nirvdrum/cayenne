@@ -61,14 +61,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.ArtistPaintingCounts;
+import org.objectstyle.art.CompoundPainting;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.SubPainting;
-import org.objectstyle.art.CompoundPainting;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -78,14 +77,9 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SelectTranslatorTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);
 
     protected SelectQuery q;
     protected DbEntity artistEnt;
-
-    public SelectTranslatorTst(String name) {
-        super(name);
-    }
 
     protected void setUp() throws Exception {
         q = new SelectQuery();

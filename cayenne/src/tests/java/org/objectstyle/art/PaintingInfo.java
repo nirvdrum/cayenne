@@ -56,21 +56,18 @@
 
 package org.objectstyle.art;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneDataObject;
 
-
 public class PaintingInfo extends CayenneDataObject {
-    private static Logger logObj = Logger.getLogger(PaintingInfo.class);
 
     public void setImageBlob(byte[] imageBlob) {
         writeProperty("imageBlob", imageBlob);
     }
+
     public byte[] getImageBlob() {
         return (byte[])readProperty("imageBlob");
     }
-    
-    
+
     public void setTextReview(String textReview) {
         writeProperty("textReview", textReview);
     }
@@ -78,21 +75,10 @@ public class PaintingInfo extends CayenneDataObject {
         return (String)readProperty("textReview");
     }
     
-    
     public void setPainting(Painting painting) {
-   /*     Painting oldP = (Painting)readProperty("painting");
-        logObj.warning("**************************");
-        logObj.warning("old snapshot before: " + (oldP != null ? oldP.getCurrentSnapshot() : null));   
-        logObj.warning("new snapshot before: " + (painting != null ? painting.getCurrentSnapshot() : null));
-        logObj.warning("**************************");
-*/
-        setToOneTarget("painting", painting, true);
-    /*    
-        logObj.warning("===========================");
-        logObj.warning("old snapshot after: " + (oldP != null ? oldP.getCurrentSnapshot() : null));   
-        logObj.warning("new snapshot after: " + (painting != null ? painting.getCurrentSnapshot() : null));
-        logObj.warning("==========================="); */
+    	this.setToOneTarget("painting", painting, true);
     }
+
     public Painting getPainting() {
         return (Painting)readProperty("painting");
     }

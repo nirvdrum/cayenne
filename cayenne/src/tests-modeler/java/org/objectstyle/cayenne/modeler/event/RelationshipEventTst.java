@@ -66,14 +66,6 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
  */
 public class RelationshipEventTst extends TestCase {
 
-	/**
-	 * Constructor for RelationshipEventTst.
-	 * @param arg0
-	 */
-	public RelationshipEventTst(String arg0) {
-		super(arg0);
-	}
-
 	public void testRelationship() throws Exception {
 		Object src = new Object();
 		Relationship r = new DbRelationship();

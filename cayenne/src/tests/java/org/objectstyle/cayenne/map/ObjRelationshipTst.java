@@ -66,15 +66,11 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ObjRelationshipTst extends CayenneTestCase {
     protected ObjRelationship rel;
     protected DbEntity artistDBEntity = getDomain().getEntityResolver().lookupDbEntity(Artist.class);
-	//There may not be an ObjEntity for Artist_exhibit... jump straight to the dbentity
+	// there may not be an ObjEntity for Artist_exhibit... jump straight to the dbentity
     protected DbEntity artistExhibitDBEntity = getDomain().getMapForDbEntity("ARTIST_EXHIBIT").getDbEntity("ARTIST_EXHIBIT");
 	protected DbEntity exhibitDBEntity = getDomain().getEntityResolver().lookupDbEntity(Exhibit.class);
 	protected DbEntity paintingDbEntity = getDomain().getEntityResolver().lookupDbEntity(Painting.class);
 	protected DbEntity galleryDBEntity = getDomain().getEntityResolver().lookupDbEntity(Gallery.class);
-   
-    public ObjRelationshipTst(String name) {
-        super(name);
-	}
     
     public void setUp() throws Exception {
         rel = new ObjRelationship();
@@ -131,8 +127,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
     	rel.addDbRelationship(r1);
         assertEquals(1, rel.getDbRelationshipList().size());
         assertEquals(r1, rel.getDbRelationshipList().get(0));
-        assertTrue(!rel.isFlattened());
-        assertTrue(!rel.isReadOnly());
+        assertFalse(rel.isFlattened());
+        assertFalse(rel.isReadOnly());
 
         rel.removeDbRelationship(r1);
         assertEquals(0, rel.getDbRelationshipList().size());
@@ -157,13 +153,13 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertEquals(r2, rel.getDbRelationshipList().get(1));
         
         assertTrue(rel.isFlattened());
-        assertTrue(!rel.isReadOnly());
+        assertFalse(rel.isReadOnly());
         
         rel.removeDbRelationship(r1);
         assertEquals(1, rel.getDbRelationshipList().size());
         assertEquals(r2, rel.getDbRelationshipList().get(0));
-        assertTrue(!rel.isFlattened());
-        assertTrue(!rel.isReadOnly());
+        assertFalse(rel.isFlattened());
+        assertFalse(rel.isReadOnly());
     }
     
     public void testReadOnlyMoreThan3DbRelsRelationship() {
@@ -216,7 +212,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
      	ObjRelationship theRel=(ObjRelationship)artistEnt.getRelationship("groupArray");
      	assertNotNull(theRel);
      	assertTrue(theRel.isFlattened());
-     	assertTrue(!theRel.isReadOnly());
+     	assertFalse(theRel.isReadOnly());
     }
     
     public void testBadDeleteRuleValue() {

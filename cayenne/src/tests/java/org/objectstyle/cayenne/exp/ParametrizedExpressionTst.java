@@ -11,13 +11,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ParametrizedExpressionTst extends CayenneTestCase {
-    /**
-     * Constructor for ParametrizedExpressionTst.
-     * @param name
-     */
-    public ParametrizedExpressionTst(String name) {
-        super(name);
-    }
 
     /**
      * Tests how parameter substitution algorithm works on an expression

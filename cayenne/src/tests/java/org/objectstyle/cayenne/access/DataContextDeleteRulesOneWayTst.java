@@ -67,14 +67,6 @@ import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
 	private DataContext context;
 
-	/**
-	 * Constructor for DataContextDeleteRulesOneWayTst.
-	 * @param name
-	 */
-	public DataContextDeleteRulesOneWayTst(String name) {
-		super(name);
-	}
-
 	public void setUp() throws java.lang.Exception {
 		CayenneTestDatabaseSetup setup = getDatabaseSetup();
 		setup.cleanTableData();

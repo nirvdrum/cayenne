@@ -63,14 +63,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class DomainValidatorTst extends ValidatorTestBase {
 
-    /**
-     * Constructor for DomainValidatorTst.
-     * @param arg0
-     */
-    public DomainValidatorTst(String arg0) {
-        super(arg0);
-    }
-
     public void testValidateDomains() throws Exception {
         // should succeed
         validator.reset();

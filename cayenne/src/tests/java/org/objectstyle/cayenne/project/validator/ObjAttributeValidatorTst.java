@@ -65,14 +65,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class ObjAttributeValidatorTst extends ValidatorTestBase {
 
-    /**
-     * Constructor for ObAttributeValidatorTst.
-     * @param arg0
-     */
-    public ObjAttributeValidatorTst(String arg0) {
-        super(arg0);
-    }
-
     public void testValidateObjAttributes() throws Exception {
         DataDomain d1 = new DataDomain("d1");
 

@@ -72,10 +72,6 @@ public class EOModelProcessorTst extends CayenneTestCase {
 
     protected EOModelProcessor processor;
 
-    public EOModelProcessorTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws java.lang.Exception {
         processor = new EOModelProcessor();
     }

@@ -71,14 +71,6 @@ public class DataMapProjectTst extends CayenneTestCase {
     protected DataMapProject p;
     protected File f;
 
-    /**
-     * Constructor for DataMapProjectTst.
-     * @param name
-     */
-    public DataMapProjectTst(String name) {
-        super(name);
-    }
-
     protected void setUp() throws Exception {
         super.setUp();
 

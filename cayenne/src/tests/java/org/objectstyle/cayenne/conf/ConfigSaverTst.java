@@ -70,10 +70,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ConfigSaverTst extends CayenneTestCase {
 	protected ConfigSaver saver;
 
-	public ConfigSaverTst(String name) {
-		super(name);
-	}
-
 	public void testStoreFullDataNode() throws Exception {
 		DataSourceInfo info = new DataSourceInfo();
 		info.setDataSourceUrl("s1");

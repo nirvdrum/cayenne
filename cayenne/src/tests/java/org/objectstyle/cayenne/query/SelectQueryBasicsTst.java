@@ -70,10 +70,6 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class SelectQueryBasicsTst extends CayenneTestCase {
     protected SelectQuery q;
 
-    public SelectQueryBasicsTst(String name) {
-        super(name);
-    }
-
     public void setUp() throws java.lang.Exception {
         q = new SelectQuery();
     }
@@ -113,19 +109,19 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
     }
 
     public void testDistinct() throws Exception {
-        assertTrue(!q.isDistinct());
+        assertFalse(q.isDistinct());
         q.setDistinct(true);
         assertTrue(q.isDistinct());
     }
 
     public void testFetchingDataRows1() {
-        assertTrue(!q.isFetchingDataRows());
+        assertFalse(q.isFetchingDataRows());
         q.setFetchingDataRows(true);
         assertTrue(q.isFetchingDataRows());
     }
 
     public void testFetchingDataRows2() {
-        assertTrue(!q.isFetchingDataRows());
+        assertFalse(q.isFetchingDataRows());
         q.addCustDbAttribute("ARTIST_ID");
         assertTrue(q.isFetchingDataRows());
 
@@ -143,7 +139,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
     }
 
     public void testUsingRootEntityAttributes() throws Exception {
-        assertTrue(!q.isFetchingCustAttributes());
+        assertFalse(q.isFetchingCustAttributes());
 
         q.addCustDbAttribute("ARTIST_ID");
         assertTrue(q.isFetchingCustAttributes());

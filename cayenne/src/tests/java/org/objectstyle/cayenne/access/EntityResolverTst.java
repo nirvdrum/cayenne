@@ -12,15 +12,9 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver sharedResolver;
-    private List allMaps = new ArrayList();
-
-    public EntityResolverTst(String name) {
-        super(name);
-        allMaps.addAll(getDomain().getDataMapsAsList());
-    }
 
     protected void setUp() throws Exception {
-        sharedResolver = new EntityResolver(allMaps);
+        sharedResolver = new EntityResolver(getDomain().getDataMapsAsList());
     }
 
     ////Private conveniences

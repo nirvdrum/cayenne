@@ -69,14 +69,6 @@ public class DataNodeFileTst extends CayenneTestCase {
     protected Project pr;
 
     /**
-     * Constructor for DataNodeFileTst.
-     * @param arg0
-     */
-    public DataNodeFileTst(String arg0) {
-        super(arg0);
-    }
-
-    /**
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {

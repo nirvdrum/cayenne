@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
+
 import org.objectstyle.art.ArtGroup;
 
 public class CDOReflexiveRelDeleteTst extends CayenneDOTestBase {
@@ -61,13 +62,6 @@ public class CDOReflexiveRelDeleteTst extends CayenneDOTestBase {
 	private ArtGroup childGroup1;
 	private ArtGroup childGroup2;
 	private ArtGroup childGroup3;
-	/**
-	 * Constructor for CayenneDataObjectReflexiveRelDeleteTst.
-	 * @param name
-	 */
-	public CDOReflexiveRelDeleteTst(String name) {
-		super(name);
-	}
 
 	public void setUp() throws Exception {
 		super.setUp();

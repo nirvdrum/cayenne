@@ -61,9 +61,6 @@ import java.sql.DatabaseMetaData;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class TypesMappingBase extends CayenneTestCase {
-    public TypesMappingBase(String name) {
-        super(name);
-    }
 
     protected TypesMapping createTypesMapping() throws Exception {
         Connection conn = getConnection();

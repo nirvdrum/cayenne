@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,9 +53,7 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
-
-
-
+package org.objectstyle.cayenne.exp;
 
 public class TstUnaryExpSuite extends TstExpressionSuite {
     
