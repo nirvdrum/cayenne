@@ -278,6 +278,7 @@ public class ResourceLocator {
 	 * user home directory, current directory and CLASSPATH.
 	 */
 	public ResourceLocator() {
+		super();
 		this.setClassLoader(this.getClass().getClassLoader());
 		this.additionalClassPaths = new ArrayList();
 		this.additionalFilesystemPaths = new ArrayList();
@@ -470,11 +471,14 @@ public class ResourceLocator {
 	 * passed, the ClassLoader of the ResourceLocator class will be used.
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
-		if (classLoader != null) {
-			this.classLoader = classLoader;
-		} else {
-			this.classLoader = this.getClass().getClassLoader();
+		if (classLoader == null) {
+			classLoader = this.getClass().getClassLoader();
+			if (classLoader == null) {
+				classLoader = ClassLoader.getSystemClassLoader();
+			}
 		}
+
+		this.classLoader = classLoader;
 	}
 
 	/**
