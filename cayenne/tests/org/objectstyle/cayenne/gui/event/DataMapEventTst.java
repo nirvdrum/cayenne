@@ -55,46 +55,50 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import java.util.EventObject;
+import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
 
-/** 
- * Represents events resulted from DataDomain changes 
- * in CayenneModeler.
+/**
+ * @author Andrei Adamchik
  */
-public class DomainEvent extends ModelerEvent {
-	protected DataDomain domain;
-
-	/** Creates a domain change event. */
-	public DomainEvent(Object src, DataDomain domain) {
-		super(src);
-		this.domain = domain;
-	}
-
-	/** Creates a domain event of a specified type. */
-	public DomainEvent(Object src, DataDomain domain, int id) {
-		this(src, domain);
-		setId(id);
-	}
-
-	/** Creates a domain name change event.*/
-	public DomainEvent(Object src, DataDomain domain, String oldName) {
-		this(src, domain);	
-		setOldName(oldName);
-	}
-
-	/** Returns domain object associated with this event. */
-	public DataDomain getDomain() {
-		return domain;
-	}
+public class DataMapEventTst extends TestCase {
 
 	/**
-	 * Sets domain object associated with this event.
-	 * 
-	 * @param domain The domain to set
+	 * Constructor for DataMapEventTst.
+	 * @param arg0
 	 */
-	public void setDomain(DataDomain domain) {
-		this.domain = domain;
+	public DataMapEventTst(String arg0) {
+		super(arg0);
 	}
+
+   public void testConstructor1() throws Exception {
+    	Object src = new Object();
+    	DataMap d = new DataMap("abc");
+    	DataMapEvent e = new DataMapEvent(src, d);
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getDataMap());
+    }
+    
+    public void testConstructor2() throws Exception  {
+    	Object src = new Object();
+    	DataMap d = new DataMap("abc");
+    	DataMapEvent e = new DataMapEvent(src, d, "oldname");
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getDataMap());
+    	assertEquals("oldname", e.getOldName());
+    }
+    
+    public void testDataMap() throws Exception  {
+    	Object src = new Object();
+   	    DataMap d = new DataMap("abc");
+    	DataMapEvent e = new DataMapEvent(src, null);
+    	
+    	e.setDataMap(d);
+    	assertSame(d, e.getDataMap());
+    }
 }
+

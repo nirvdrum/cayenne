@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.gui.event;
 
 import java.util.EventObject;
 
+import org.objectstyle.cayenne.util.Util;
+
 /**
  * Superclass of CayenneModeler events.
  * 
@@ -95,6 +97,10 @@ public class ModelerEvent extends EventObject {
 		super(source);
 		setOldName(oldName);
 		setNewName(newName);
+	}
+	
+	public boolean isNameChange() {
+		return Util.nullSafeEquals(getOldName(), getNewName());
 	}
 	
 	/**
@@ -149,6 +155,4 @@ public class ModelerEvent extends EventObject {
 	public void setOldName(String oldName) {
 		this.oldName = oldName;
 	}
-
-
 }

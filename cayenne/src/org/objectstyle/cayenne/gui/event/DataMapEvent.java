@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,60 +52,51 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.event;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.EventObject;
 
+import org.objectstyle.cayenne.map.DataMap;
 
-/** Events pertaining to DataMap status change. 
-  * We don't need to store Domain information in this type of
-    event as it is always currentDomain. */
-public class DataMapEvent extends EventObject
-{
-	/** DataMap changed. Display or re-display it.*/
-	public static final int CHANGE 	= 1;
-	/** New dataMap created. Display it or add to the list, if applicable.*/
-	public static final int ADD		= 2;
-	/** DataMap removed. Display another one and/or remove this one from lists.*/
-	public static final int REMOVE	= 3;
-	
-	private int	id = CHANGE;
-	private DataMap dataMap;
-	private String  oldName;
-	private String  newName;
-	
-	/** DataMap property(-ies) changed. */
-	public DataMapEvent(Object src, DataMap temp_data_map)
-	{
+/** 
+ * Represents events resulted from DataMap changes 
+ * in CayenneModeler.
+ */
+public class DataMapEvent extends ModelerEvent {
+	protected DataMap dataMap;
+
+	/** Creates a DataMap change event. */
+	public DataMapEvent(Object src, DataMap dataMap) {
 		super(src);
-		dataMap = temp_data_map;
-		oldName = newName = temp_data_map.getName();
+		this.dataMap = dataMap;
 	}
 
-	/** DataMap added or removed. */
-	public DataMapEvent(Object src, DataMap temp_data_map, int temp_id)
-	{
-		this(src, temp_data_map);
-		id = temp_id;
+	/** Creates a DataMap event of a specified type. */
+	public DataMapEvent(Object src, DataMap dataMap, int id) {
+		this(src, dataMap);
+		setId(id);
 	}
 
-	/** DataMap name changed.*/
-	public DataMapEvent(Object src, DataMap temp_data_map, String old_name)
-	{
-		this(src, temp_data_map, CHANGE);
-		oldName = old_name;
+	/** Creates a DataMap name change event.*/
+	public DataMapEvent(Object src, DataMap dataMap, String oldName) {
+		this(src, dataMap);
+		setOldName(oldName);
+	}
+
+	/** 
+	 * Returns DataMap associated with this event. 
+	 */
+	public DataMap getDataMap() {
+		return dataMap;
 	}
 	
-	/** Get dataMap (obj or db). */
-	public DataMap getDataMap() {return dataMap;}
-	/** Get the type of the event.
-	 *  @return CHANGE, ADD or REMOVE.*/
-	public int getId() {return id;}
-	
-	/** Returns the old dataMap name. Used only in CHANGE event. */
-	public String getOldName() {return oldName;}
-	
-	/** Returns the new dataMap name. Used only in CHANGE event.*/
-	public String getNewName() {return newName;}
+	/**
+	 * Sets DataMap associated with this event.
+	 * 
+	 * @param dataMap The dataMap to set
+	 */
+	public void setDataMap(DataMap dataMap) {
+		this.dataMap = dataMap;
+	}
 }
