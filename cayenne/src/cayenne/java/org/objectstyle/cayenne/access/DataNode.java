@@ -100,7 +100,7 @@ public class DataNode implements QueryEngine {
 
     /** Creates unnamed DataNode. */
     public DataNode() {
-    	this(null);
+        this(null);
     }
 
     /** Creates DataNode and assigns <code>name</code> to it. */
@@ -137,20 +137,20 @@ public class DataNode implements QueryEngine {
         this.dataSourceFactory = dataSourceFactory;
     }
 
-	/**
-	 * Returns a list of DataMaps handled by this DataNode.
-	 * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
-	 */
-	public List getDataMapsAsList() {
-		return entityResolver.getDataMapsList();
-	}
+    /**
+     * Returns a list of DataMaps handled by this DataNode.
+     * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
+     */
+    public List getDataMapsAsList() {
+        return entityResolver.getDataMapsList();
+    }
 
-	/**
-	 * Returns an unmodifiable collection of DataMaps handled by this DataNode.
-	 */
-	public Collection getDataMaps() {
-		return entityResolver.getDataMaps();
-	}
+    /**
+     * Returns an unmodifiable collection of DataMaps handled by this DataNode.
+     */
+    public Collection getDataMaps() {
+        return entityResolver.getDataMaps();
+    }
 
     public void setDataMaps(Collection dataMaps) {
         entityResolver.setDataMaps(dataMaps);
@@ -191,17 +191,16 @@ public class DataNode implements QueryEngine {
 
     public void setAdapter(DbAdapter adapter) {
         this.adapter = adapter;
-        
+
         // update sorter
-        
+
         // TODO: since sorting may be disabled even for databases
         // that enforce constraints, in cases when constraints are
         // defined as deferrable, this may need more fine grained 
         // control from the user, maybe via ContextCommitObserver?  
-        if(adapter != null && adapter.supportsFkConstraints()) {
+        if (adapter != null && adapter.supportsFkConstraints()) {
             this.dependencySorter = new DefaultSorter(this);
-        }
-        else {
+        } else {
             this.dependencySorter = NullSorter.NULL_SORTER;
         }
     }
@@ -218,6 +217,10 @@ public class DataNode implements QueryEngine {
                 != null)
             ? this
             : null;
+    }
+
+    public void performQuery(Query query, OperationObserver opObserver) {
+        this.performQueries(Collections.singletonList(query), opObserver);
     }
 
     /** Run multiple queries using one of the pooled connections. */
@@ -272,34 +275,30 @@ public class DataNode implements QueryEngine {
                         interpreter.execute((BatchQuery) nextQuery, con);
                         continue;
                     }
-                    // translate query
-                    QueryTranslator transl =
-                        getAdapter().getQueryTranslator(nextQuery);
-                    transl.setEngine(this);
-                    transl.setCon(con);
 
-                    PreparedStatement prepStmt =
-                        transl.createStatement(logLevel);
-
-                    // if ResultIterator is returned to the user,
-                    // DataNode is not responsible for closing the connections
-                    // exception handling, and other housekeeping
-                    if (opObserver.isIteratedResult()) {
-                        // trick "finally" to avoid closing connection here
-                        // it will be closed by the ResultIterator
-                        con = null;
-                        runIteratedSelect(opObserver, prepStmt, transl);
-                        return;
-                    }
-
+                    // figure out query type and call appropriate worker method
                     if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-                        runSelect(opObserver, prepStmt, transl);
+
+                        // if ResultIterator is returned to the user,
+                        // DataNode is not responsible for closing the connections
+                        // exception handling, and other housekeeping
+                        if (opObserver.isIteratedResult()) {
+                            // trick "finally" to avoid closing connection here
+                            // it will be closed by the ResultIterator
+                            Connection localCon = con;
+                            con = null;
+                            runIteratedSelect(localCon, nextQuery, opObserver);
+                            return;
+                        } else {
+                            runSelect(con, nextQuery, opObserver);
+                        }
+
                     } else if (
                         nextQuery.getQueryType()
                             != Query.STORED_PROCEDURE_QUERY) {
-                        runUpdate(opObserver, prepStmt, transl);
+                        runUpdate(con, nextQuery, opObserver);
                     } else {
-                        runProcedure(opObserver, prepStmt, transl);
+                        runStoredProcedureUpdate(con, nextQuery, opObserver);
                     }
 
                 } catch (Exception queryEx) {
@@ -366,16 +365,20 @@ public class DataNode implements QueryEngine {
         }
     }
 
-    /**
-     * Executes prebuilt SELECT PreparedStatement.
-     */
     protected void runSelect(
-        OperationObserver observer,
-        PreparedStatement prepStmt,
-        QueryTranslator transl)
-        throws Exception {
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
+
+        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(con);
+
+        PreparedStatement prepStmt =
+            transl.createStatement(query.getLoggingLevel());
 
         SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
         DefaultResultIterator it =
@@ -385,21 +388,25 @@ public class DataNode implements QueryEngine {
         // since "dataRows" will do it internally
         List resultRows = it.dataRows();
         QueryLogger.logSelectCount(
-            observer.getLoggingLevel(),
+            query.getLoggingLevel(),
             resultRows.size(),
             System.currentTimeMillis() - t1);
-        observer.nextDataRows(transl.getQuery(), resultRows);
+
+        delegate.nextDataRows(query, resultRows);
     }
 
-    /**
-     * Executes prebuilt SELECT PreparedStatement and returns
-     * result to an observer as a ResultIterator.
-     */
     protected void runIteratedSelect(
-        OperationObserver observer,
-        PreparedStatement prepStmt,
-        QueryTranslator transl)
-        throws Exception {
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(con);
+
+        PreparedStatement prepStmt =
+            transl.createStatement(query.getLoggingLevel());
 
         DefaultResultIterator it = null;
 
@@ -412,7 +419,7 @@ public class DataNode implements QueryEngine {
                     assembler);
 
             it.setClosingConnection(true);
-            observer.nextDataRows(transl.getQuery(), it);
+            delegate.nextDataRows(transl.getQuery(), it);
         } catch (Exception ex) {
             if (it != null) {
                 it.close();
@@ -422,35 +429,54 @@ public class DataNode implements QueryEngine {
         }
     }
 
-    /**
-     * Executes prebuilt UPDATE, DELETE or INSERT PreparedStatement.
-     */
     protected void runUpdate(
-        OperationObserver observer,
-        PreparedStatement prepStmt,
-        QueryTranslator transl)
-        throws Exception {
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(con);
+
+        PreparedStatement prepStmt =
+            transl.createStatement(query.getLoggingLevel());
+
+        DefaultResultIterator it = null;
 
         try {
             // execute update
             int count = prepStmt.executeUpdate();
-            QueryLogger.logUpdateCount(observer.getLoggingLevel(), count);
+            QueryLogger.logUpdateCount(query.getLoggingLevel(), count);
 
             // send results back to consumer
-            observer.nextCount(transl.getQuery(), count);
+            delegate.nextCount(transl.getQuery(), count);
         } finally {
             prepStmt.close();
         }
     }
 
-    /**
-        * Executes StoredProcedure.
-        */
-    protected void runProcedure(
-        OperationObserver observer,
-        PreparedStatement prepStmt,
-        QueryTranslator transl)
-        throws Exception {
+    protected void runBatchUpdate(
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+    }
+
+    protected void runStoredProcedureUpdate(
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(con);
+
+        PreparedStatement prepStmt =
+            transl.createStatement(query.getLoggingLevel());
+
+        DefaultResultIterator it = null;
 
         try {
 
@@ -462,8 +488,18 @@ public class DataNode implements QueryEngine {
         }
     }
 
-    public void performQuery(Query query, OperationObserver opObserver) {
-        this.performQueries(Collections.singletonList(query), opObserver);
+    protected void runStoredProcedureSelect(
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+    }
+
+    protected void runStoredProcedureIteratedSelect(
+        Connection con,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
     }
 
     /**

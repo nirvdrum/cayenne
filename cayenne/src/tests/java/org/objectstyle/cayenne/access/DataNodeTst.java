@@ -79,13 +79,11 @@ public class DataNodeTst extends IteratorTestBase {
 
 		try {
 			init();
-			sharedNode.runSelect(observer, st, transl);
+			sharedNode.runSelect(conn, query, observer);
 			assertEquals(
 				DataContextTst.artistCount,
 				observer.getResults(transl.getQuery()).size());
 		} finally {
-			// avoid double closing of the statement
-			st = null;
 			cleanup();
 		}
 	}
@@ -94,7 +92,11 @@ public class DataNodeTst extends IteratorTestBase {
 		IteratedObserver observer = new IteratedObserver();
 
 		init();
-		sharedNode.runIteratedSelect(observer, st, transl);
+		
+		// first assert that created node is valid
+		assertNotNull(sharedNode.getEntityResolver().lookupObjEntity(query));
+		
+		sharedNode.runIteratedSelect(conn, query, observer);
 		assertEquals(DataContextTst.artistCount, observer.getResultCount());
 
 		// no cleanup is needed, since observer will close the iterator
@@ -125,8 +127,8 @@ public class DataNodeTst extends IteratorTestBase {
 	}
 
 	protected DataNode newDataNode() {
-		DataNode node = new DataNode("dummy");
-		node.setAdapter(getNode().getAdapter());
+		DataNode node = getNode().getAdapter().createDataNode("dummy");
+		node.setDataMaps(getNode().getDataMaps());
 		return node;
 	}
 
