@@ -88,7 +88,10 @@ public class OracleQualifierTranslator extends QualifierTranslator {
      */
     protected void processColumn(StringBuffer buf, DbAttribute dbAttr) {
         if (dbAttr.getType() == Types.CHAR) {
-            buf.append("TRIM(TRAILING FROM ");
+        	//CTM 7/11/2002 
+        	//TRIM(TRAILING FROM is only available in Oracle 8i and above.  RTRIM is available in older versions as well
+            //buf.append("TRIM(TRAILING FROM ");
+            buf.append("RTRIM(");
             super.processColumn(buf, dbAttr);
             buf.append(')');
         } else {
@@ -106,7 +109,10 @@ public class OracleQualifierTranslator extends QualifierTranslator {
         DbAttribute dbAttr,
         DbRelationship rel) {
         if (dbAttr.getType() == Types.CHAR) {
-            buf.append("TRIM(TRAILING FROM ");
+       		//CTM 7/11/2002 
+        	//TRIM(TRAILING FROM is only available in Oracle 8i and above.  RTRIM is available in older versions as well
+            //buf.append("TRIM(TRAILING FROM ");
+            buf.append("RTRIM(");
             super.processColumn(buf, dbAttr, rel);
             buf.append(')');
         } else {
