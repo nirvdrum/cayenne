@@ -143,16 +143,10 @@ public class AddDataMapDialog extends JDialog implements ActionListener
 	{
 		if (e.getSource() == add) {
 			Object[] sel = list.getSelectedValues();
-			DataMap [] old_maps = node.getDataMaps();
-			DataMap[] new_maps = new DataMap[old_maps.length + sel.length];
-			for (int i = 0; i < old_maps.length; i++) {
-				new_maps[i] = old_maps[i];
-			}
 			for (int i = 0; i < sel.length; i++) {
-				new_maps[i + old_maps.length] = ((DataMapWrapper)sel[i]).getDataMap();
+				node.addDataMap(((DataMapWrapper)sel[i]).getDataMap());
 			}
-			node.setDataMaps(new_maps);
-		}// End add
+		}
 		setVisible(false);
 		dispose();
 	}

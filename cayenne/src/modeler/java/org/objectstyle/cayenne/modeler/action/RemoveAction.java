@@ -257,19 +257,7 @@ public class RemoveAction extends CayenneAction {
 		Mediator mediator = getMediator();
 		DataNode node = mediator.getCurrentDataNode();
 		DataMap map = mediator.getCurrentDataMap();
-		// Get existing data maps
-		Object[] maps = node.getDataMaps();
-		DataMap[] arr = new DataMap[maps.length - 1];
-		int j = 0;
-		for (int i = 0; i < maps.length; i++) {
-			DataMap temp = (DataMap) maps[i];
-			if (temp == map) {
-				continue;
-			}
-			arr[j] = temp;
-			j++;
-		}
-		node.setDataMaps(arr);
+		node.removeDataMap(map.getName());
 
 		// Force reloading of the data node in the browse view
 		mediator.fireDataNodeEvent(new DataNodeEvent(Editor.getFrame(), node));

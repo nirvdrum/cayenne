@@ -84,379 +84,351 @@ import org.objectstyle.cayenne.query.Query;
   * @author Andrei Adamchik
   */
 public class DataNode implements QueryEngine {
-	static Logger logObj = Logger.getLogger(DataNode.class.getName());
+    static Logger logObj = Logger.getLogger(DataNode.class);
 
-	public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
+    public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
 
-	private static final DataMap[] noDataMaps = new DataMap[0];
+    protected String name;
+    protected DataSource dataSource;
+    protected DbAdapter adapter;
+    protected String dataSourceLocation;
+    protected String dataSourceFactory;
+    protected EntityResolver entityResolver = new EntityResolver();
 
-	protected String name;
-	protected DataSource dataSource;
-	protected DataMap[] dataMaps;
-	protected DbAdapter adapter;
-	protected String dataSourceLocation;
-	protected String dataSourceFactory;
+    /** Creates unnamed DataNode */
+    public DataNode() {}
 
-	private EntityResolver entityResolver;
+    /** Creates DataNode and assigns <code>name</code> to it. */
+    public DataNode(String name) {
+        this.name = name;
+    }
 
-	/** Creates unnamed DataNode */
-	public DataNode() {}
+    // setters/getters
 
-	/** Creates DataNode and assigns <code>name</code> to it. */
-	public DataNode(String name) {
-		this.name = name;
+    /** Returns node "name" property. */
+    public String getName() {
+        return name;
+    }
 
-		// make sure it is not null - set to static immutable object
-		this.dataMaps = noDataMaps;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	// setters/getters
+    /** Returns a location of DataSource of this node. */
+    public String getDataSourceLocation() {
+        return dataSourceLocation;
+    }
 
-	/** Returns node "name" property. */
-	public String getName() {
-		return name;
-	}
+    public void setDataSourceLocation(String dataSourceLocation) {
+        this.dataSourceLocation = dataSourceLocation;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /** Returns a name of DataSourceFactory class for this node. */
+    public String getDataSourceFactory() {
+        return dataSourceFactory;
+    }
 
-	/** Returns a location of DataSource of this node. */
-	public String getDataSourceLocation() {
-		return dataSourceLocation;
-	}
-
-	public void setDataSourceLocation(String dataSourceLocation) {
-		this.dataSourceLocation = dataSourceLocation;
-	}
-
-	/** Returns a name of DataSourceFactory class for this node. */
-	public String getDataSourceFactory() {
-		return dataSourceFactory;
-	}
-
-	public void setDataSourceFactory(String dataSourceFactory) {
-		this.dataSourceFactory = dataSourceFactory;
-	}
+    public void setDataSourceFactory(String dataSourceFactory) {
+        this.dataSourceFactory = dataSourceFactory;
+    }
 
     /**
-     * Returns a list of linked DataMaps.
+     * Returns a list of DataMaps handled by this DataNode.
      */
     public List getMapList() {
-    	ArrayList list = new ArrayList();
-    	
-    	if(dataMaps != null && dataMaps.length > 0) {
-    	   for(int i = 0; i < dataMaps.length; i++) {
-    	   	   list.add(dataMaps[i]);
-    	   }
-    	}
-    	return list;
+        return entityResolver.getDataMapsList();
     }
-    
-	public DataMap[] getDataMaps() {
-		return dataMaps;
-	}
 
-	public void setDataMaps(DataMap[] dataMaps) {
-		this.dataMaps = dataMaps;
-	}
+    /**
+     * Returns an array of DataMaps handled by this DataNode.
+     */
+    public DataMap[] getDataMaps() {
+        // Andrus: this should probably be deprecated eventually,
+        // since it is redundant with "getMapList"	
+        List maps = entityResolver.getDataMapsList();
+        DataMap[] mapsArray = new DataMap[maps.size()];
+        return (DataMap[]) maps.toArray(mapsArray);
+    }
 
-	public void addDataMap(DataMap map) {
-		// note to self - implement it as a List
-		// to avoid this ugly resizing in the future
-		if (dataMaps == null)
-			dataMaps = new DataMap[] { map };
-		else {
-			DataMap[] newMaps = new DataMap[dataMaps.length + 1];
-			System.arraycopy(dataMaps, 0, newMaps, 0, dataMaps.length);
-			newMaps[dataMaps.length] = map;
-			dataMaps = newMaps;
-		}
-	}
+    /**
+     * @deprecated Use setDataMaps(List) instead.
+     */
+    public void setDataMaps(DataMap[] dataMaps) {
+        ArrayList mapsList = new ArrayList();
 
-	public void removeDataMap(String name) {
-		// note to self - implement it as a List
-		// to avoid this ugly resizing in the future
-		if (dataMaps == null || name == null) {
-			return;
-		} else {
-			int mapInd = -1;
-			for (int i = 0; i < dataMaps.length; i++) {
-				if (name.equals(dataMaps[i].getName())) {
-					mapInd = i;
-					break;
-				}
-			}
+        if (dataMaps != null) {
+            for (int i = 0; i < dataMaps.length; i++) {
+                mapsList.add(dataMaps[i]);
+            }
+        }
 
-			if (mapInd < 0) {
-				return;
-			}
+        setDataMaps(dataMaps);
+    }
 
-			DataMap[] newMaps = new DataMap[dataMaps.length - 1];
-			int newInd = 0;
-			for (int i = 0; i < dataMaps.length; i++) {
-				if (i != mapInd) {
-					newMaps[newInd] = dataMaps[i];
-					newInd++;
-				}
-			}
-			dataMaps = newMaps;
-		}
-	}
+    public void setDataMaps(List dataMaps) {
+        entityResolver.setDataMaps(dataMaps);
+    }
 
-	public DataSource getDataSource() {
-		return dataSource;
-	}
+    /**
+     * Adds a DataMap to be handled by this node.
+     */
+    public void addDataMap(DataMap map) {
+        entityResolver.addDataMap(map);
+    }
 
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
+    public void removeDataMap(String name) {
+        DataMap map = entityResolver.getDataMap(name);
+        if (map != null) {
+            entityResolver.removeDataMap(map);
+        }
+    }
 
-	/** Returns DbAdapter object. This is a plugin for
-	  * that handles RDBMS vendor-specific features. */
-	public DbAdapter getAdapter() {
-		return adapter;
-	}
+    public DataSource getDataSource() {
+        return dataSource;
+    }
 
-	public void setAdapter(DbAdapter adapter) {
-		this.adapter = adapter;
-	}
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
-	// other methods
+    /** Returns DbAdapter object. This is a plugin for
+      * that handles RDBMS vendor-specific features. */
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
 
-	/** 
-	 * Returns this object if it can hanle queries for
-	 * <code>objEntity</code>, returns null otherwise.
-	 */
-	public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-		return (lookupEntity(objEntity.getName()) != null) ? this : null;
-	}
+    public void setAdapter(DbAdapter adapter) {
+        this.adapter = adapter;
+    }
 
-	/** Lookup an entity by name across all node maps.
+    // other methods
+
+    /** 
+     * Returns this object if it can hanle queries for
+     * <code>objEntity</code>, returns null otherwise.
+     */
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+        return (lookupEntity(objEntity.getName()) != null) ? this : null;
+    }
+
+    /** Lookup an entity by name across all node maps.
      * @deprecated use getEntityResolver.lookupObjEntity()*/
-	public ObjEntity lookupEntity(String objEntityName) {
-		return this.getEntityResolver().lookupObjEntity(objEntityName);
-	}
+    public ObjEntity lookupEntity(String objEntityName) {
+        return this.getEntityResolver().lookupObjEntity(objEntityName);
+    }
 
-	/** Run multiple queries using one of the pooled connections. */
-	public void performQueries(List queries, OperationObserver opObserver) {
-		Level logLevel = opObserver.getLoggingLevel();
+    /** Run multiple queries using one of the pooled connections. */
+    public void performQueries(List queries, OperationObserver opObserver) {
+        Level logLevel = opObserver.getLoggingLevel();
 
-		int listSize = queries.size();
-		QueryLogger.logQueryStart(logLevel, listSize);
-		if (listSize == 0) {
-			return;
-		}
+        int listSize = queries.size();
+        QueryLogger.logQueryStart(logLevel, listSize);
+        if (listSize == 0) {
+            return;
+        }
 
-		Connection con = null;
-		boolean usesAutoCommit = opObserver.useAutoCommit();
-		boolean rolledBackFlag = false;
+        Connection con = null;
+        boolean usesAutoCommit = opObserver.useAutoCommit();
+        boolean rolledBackFlag = false;
 
-		try {
+        try {
 
-			// check for invalid iterated query
-			if (opObserver.isIteratedResult() && listSize > 1) {
-				throw new CayenneException(
-					"Iterated queries are not allowed in a batch. Batch size: "
-						+ listSize);
-			}
+            // check for invalid iterated query
+            if (opObserver.isIteratedResult() && listSize > 1) {
+                throw new CayenneException(
+                    "Iterated queries are not allowed in a batch. Batch size: "
+                        + listSize);
+            }
 
-			// check out connection, create statement
-			con = this.getDataSource().getConnection();
-			if (con.getAutoCommit() != usesAutoCommit) {
-				con.setAutoCommit(usesAutoCommit);
-			}
+            // check out connection, create statement
+            con = this.getDataSource().getConnection();
+            if (con.getAutoCommit() != usesAutoCommit) {
+                con.setAutoCommit(usesAutoCommit);
+            }
 
-			// give a chance to order queries
-			queries = opObserver.orderQueries(this, queries);
+            // give a chance to order queries
+            queries = opObserver.orderQueries(this, queries);
 
-			// just in case, recheck list size....
-			listSize = queries.size();
+            // just in case, recheck list size....
+            listSize = queries.size();
 
-			for (int i = 0; i < listSize; i++) {
-				Query nextQuery = (Query) queries.get(i);
+            for (int i = 0; i < listSize; i++) {
+                Query nextQuery = (Query) queries.get(i);
 
-				// catch exceptions for each individual query
-				try {
-					// translate query
-					QueryTranslator transl = getAdapter().getQueryTranslator(nextQuery);
-					transl.setEngine(this);
-					transl.setCon(con);
+                // catch exceptions for each individual query
+                try {
+                    // translate query
+                    QueryTranslator transl = getAdapter().getQueryTranslator(nextQuery);
+                    transl.setEngine(this);
+                    transl.setCon(con);
 
-					PreparedStatement prepStmt = transl.createStatement(logLevel);
+                    PreparedStatement prepStmt = transl.createStatement(logLevel);
 
-					// if ResultIterator is returned to the user,
-					// DataNode is not responsible for closing the connections
-					// exception handling, and other housekeeping
-					if (opObserver.isIteratedResult()) {
-						// trick "finally" to avoid closing connection here
-						// it will be closed by the ResultIterator
-						con = null;
-						runIteratedSelect(opObserver, prepStmt, transl);
-						return;
-					}
+                    // if ResultIterator is returned to the user,
+                    // DataNode is not responsible for closing the connections
+                    // exception handling, and other housekeeping
+                    if (opObserver.isIteratedResult()) {
+                        // trick "finally" to avoid closing connection here
+                        // it will be closed by the ResultIterator
+                        con = null;
+                        runIteratedSelect(opObserver, prepStmt, transl);
+                        return;
+                    }
 
-					if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-						runSelect(opObserver, prepStmt, transl);
-					} else {
-						runUpdate(opObserver, prepStmt, transl);
-					}
+                    if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                        runSelect(opObserver, prepStmt, transl);
+                    } else {
+                        runUpdate(opObserver, prepStmt, transl);
+                    }
 
-				} catch (Exception queryEx) {
-					QueryLogger.logQueryError(logLevel, queryEx);
+                } catch (Exception queryEx) {
+                    QueryLogger.logQueryError(logLevel, queryEx);
 
-					// notify consumer of the exception,
-					// stop running further queries
-					opObserver.nextQueryException(nextQuery, queryEx);
+                    // notify consumer of the exception,
+                    // stop running further queries
+                    opObserver.nextQueryException(nextQuery, queryEx);
 
-					if (!usesAutoCommit) {
-						// rollback transaction
-						try {
-							rolledBackFlag = true;
-							con.rollback();
-							QueryLogger.logRollbackTransaction(logLevel);
-							opObserver.transactionRolledback();
-						} catch (SQLException sqlEx) {
-							opObserver.nextQueryException(nextQuery, sqlEx);
-						}
-					}
+                    if (!usesAutoCommit) {
+                        // rollback transaction
+                        try {
+                            rolledBackFlag = true;
+                            con.rollback();
+                            QueryLogger.logRollbackTransaction(logLevel);
+                            opObserver.transactionRolledback();
+                        } catch (SQLException sqlEx) {
+                            opObserver.nextQueryException(nextQuery, sqlEx);
+                        }
+                    }
 
-					break;
-				}
-			}
+                    break;
+                }
+            }
 
-			// commit transaction if needed
-			if (!rolledBackFlag && !usesAutoCommit) {
-				con.commit();
-				QueryLogger.logCommitTransaction(logLevel);
-				opObserver.transactionCommitted();
-			}
+            // commit transaction if needed
+            if (!rolledBackFlag && !usesAutoCommit) {
+                con.commit();
+                QueryLogger.logCommitTransaction(logLevel);
+                opObserver.transactionCommitted();
+            }
 
-		}
-		// catch stuff like connection allocation errors, etc...
-		catch (Exception globalEx) {
-			QueryLogger.logQueryError(logLevel, globalEx);
+        }
+        // catch stuff like connection allocation errors, etc...
+        catch (Exception globalEx) {
+            QueryLogger.logQueryError(logLevel, globalEx);
 
-			if (!usesAutoCommit) {
-				// rollback failed transaction
-				rolledBackFlag = true;
+            if (!usesAutoCommit) {
+                // rollback failed transaction
+                rolledBackFlag = true;
 
-				try {
-					con.rollback();
-					QueryLogger.logRollbackTransaction(logLevel);
-					opObserver.transactionRolledback();
-				} catch (SQLException ex) {
-					// do nothing....
-				}
-			}
+                try {
+                    con.rollback();
+                    QueryLogger.logRollbackTransaction(logLevel);
+                    opObserver.transactionRolledback();
+                } catch (SQLException ex) {
+                    // do nothing....
+                }
+            }
 
-			opObserver.nextGlobalException(globalEx);
-		} finally {
-			try {
-				// return connection to the pool if it was checked out
-				if (con != null) {
-					con.close();
-				}
-			}
-			// finally catch connection closing exceptions...
-			catch (Exception finalEx) {
-				opObserver.nextGlobalException(finalEx);
-			}
-		}
-	}
+            opObserver.nextGlobalException(globalEx);
+        } finally {
+            try {
+                // return connection to the pool if it was checked out
+                if (con != null) {
+                    con.close();
+                }
+            }
+            // finally catch connection closing exceptions...
+            catch (Exception finalEx) {
+                opObserver.nextGlobalException(finalEx);
+            }
+        }
+    }
 
-	/** 
-	 * Executes prebuilt SELECT PreparedStatement.
-	 */
-	protected void runSelect(
-		OperationObserver observer,
-		PreparedStatement prepStmt,
-		QueryTranslator transl)
-		throws Exception {
+    /** 
+     * Executes prebuilt SELECT PreparedStatement.
+     */
+    protected void runSelect(
+        OperationObserver observer,
+        PreparedStatement prepStmt,
+        QueryTranslator transl)
+        throws Exception {
 
-		long t1 = System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
 
-		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-		DefaultResultIterator it =
-			(assembler.getFetchLimit() > 0)
-				? new LimitedResultIterator(prepStmt, this.getAdapter(), assembler)
-				: new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+        SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
+        DefaultResultIterator it =
+            (assembler.getFetchLimit() > 0)
+                ? new LimitedResultIterator(prepStmt, this.getAdapter(), assembler)
+                : new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
-		// note that we don't need to close ResultIterator
-		// since "dataRows" will do it internally
-		List resultRows = it.dataRows();
-		QueryLogger.logSelectCount(
-			observer.getLoggingLevel(),
-			resultRows.size(),
-			System.currentTimeMillis() - t1);
-		observer.nextDataRows(transl.getQuery(), resultRows);
-	}
+        // note that we don't need to close ResultIterator
+        // since "dataRows" will do it internally
+        List resultRows = it.dataRows();
+        QueryLogger.logSelectCount(
+            observer.getLoggingLevel(),
+            resultRows.size(),
+            System.currentTimeMillis() - t1);
+        observer.nextDataRows(transl.getQuery(), resultRows);
+    }
 
-	/** 
-	 * Executes prebuilt SELECT PreparedStatement and returns 
-	 * result to an observer as a ResultIterator.
-	 */
-	protected void runIteratedSelect(
-		OperationObserver observer,
-		PreparedStatement prepStmt,
-		QueryTranslator transl)
-		throws Exception {
+    /** 
+     * Executes prebuilt SELECT PreparedStatement and returns 
+     * result to an observer as a ResultIterator.
+     */
+    protected void runIteratedSelect(
+        OperationObserver observer,
+        PreparedStatement prepStmt,
+        QueryTranslator transl)
+        throws Exception {
 
-		DefaultResultIterator it = null;
+        DefaultResultIterator it = null;
 
-		try {
-			SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-			it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+        try {
+            SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
+            it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
-			it.setClosingConnection(true);
-			observer.nextDataRows(transl.getQuery(), it);
-		} catch (Exception ex) {
-			if (it != null) {
-				it.close();
-			}
+            it.setClosingConnection(true);
+            observer.nextDataRows(transl.getQuery(), it);
+        } catch (Exception ex) {
+            if (it != null) {
+                it.close();
+            }
 
-			throw ex;
-		}
-	}
+            throw ex;
+        }
+    }
 
-	/** 
-	 * Executes prebuilt UPDATE, DELETE or INSERT PreparedStatement.
-	 */
-	protected void runUpdate(
-		OperationObserver observer,
-		PreparedStatement prepStmt,
-		QueryTranslator transl)
-		throws Exception {
+    /** 
+     * Executes prebuilt UPDATE, DELETE or INSERT PreparedStatement.
+     */
+    protected void runUpdate(
+        OperationObserver observer,
+        PreparedStatement prepStmt,
+        QueryTranslator transl)
+        throws Exception {
 
-		try {
-			// execute update
-			int count = prepStmt.executeUpdate();
-			QueryLogger.logUpdateCount(observer.getLoggingLevel(), count);
+        try {
+            // execute update
+            int count = prepStmt.executeUpdate();
+            QueryLogger.logUpdateCount(observer.getLoggingLevel(), count);
 
-			// send results back to consumer
-			observer.nextCount(transl.getQuery(), count);
-		} finally {
-			prepStmt.close();
-		}
-	}
+            // send results back to consumer
+            observer.nextCount(transl.getQuery(), count);
+        } finally {
+            prepStmt.close();
+        }
+    }
 
-	public void performQuery(Query query, OperationObserver opObserver) {
-		ArrayList qWrapper = new ArrayList(1);
-		qWrapper.add(query);
-		this.performQueries(qWrapper, opObserver);
-	}
-	
-	public EntityResolver getEntityResolver() {
-		if(entityResolver==null) {
-			List maps;
-			if(dataMaps!=null && dataMaps.length!=0) {
-				maps=Arrays.asList(dataMaps);
-			} else {
-				maps=new ArrayList();
-			}
-			entityResolver=new EntityResolver(maps);
-		}
-		return entityResolver;
-	}
+    public void performQuery(Query query, OperationObserver opObserver) {
+        ArrayList qWrapper = new ArrayList(1);
+        qWrapper.add(query);
+        this.performQueries(qWrapper, opObserver);
+    }
 
+    /**
+     * Returns EntityResolver that handles DataMaps of this node.
+     */
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
+    }
 }

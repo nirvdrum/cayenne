@@ -95,6 +95,9 @@ public class EntityResolver {
         this.constructCache();
     }
 
+    /**
+     * Adds a DataMap to the list handled by resolver.
+     */
     public synchronized void addDataMap(DataMap map) {
         if (!maps.contains(map)) {
             maps.add(map);
@@ -106,6 +109,31 @@ public class EntityResolver {
         if (maps.remove(map)) {
             clearCache();
         }
+    }
+
+    /**
+     * Returns a DataMap matching the name.
+     */
+    public synchronized DataMap getDataMap(String mapName) {
+        if (mapName == null) {
+            return null;
+        }
+
+        Iterator it = maps.iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            if (mapName.equals(map.getName())) {
+                return map;
+            }
+        }
+
+        return null;
+    }
+
+    public synchronized void setDataMaps(List maps) {
+        this.maps.clear();
+        this.maps.addAll(maps);
+        clearCache();
     }
 
     /**
