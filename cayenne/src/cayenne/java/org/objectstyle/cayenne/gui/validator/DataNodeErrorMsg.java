@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DataNodeErrorMsg extends ErrorMsg {
+public class DataNodeErrorMsg extends ValidationDisplayHandler {
 	protected DataNode node;
 
     /**
@@ -81,28 +81,6 @@ public class DataNodeErrorMsg extends ErrorMsg {
         super(result);
         this.node = (DataNode)result.getTreeNodePath()[1];
     }
-
-
-    /**
-     * Constructor for DataNodeErrorMsg.
-     * @param message
-     * @param severity
-     * @param domain
-     */
-    public DataNodeErrorMsg(String message, int severity, DataDomain domain) {
-        super(message, severity, domain);
-    }
-
-
-	public DataNodeErrorMsg(
-		String message,
-		int severity,
-		DataDomain domain,
-		DataNode node) {
-			
-		super(message, severity, domain);
-		this.node = node;
-	}
 
 	public void displayField(Mediator mediator, JFrame frame) {
 		DataNodeDisplayEvent event;

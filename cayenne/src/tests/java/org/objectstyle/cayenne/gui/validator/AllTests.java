@@ -69,7 +69,7 @@ public class AllTests {
 		}
 
 		// continue with noGUI tests
-		suite.addTestSuite(ErrorMsgTst.class);
+		suite.addTestSuite(ValidationDisplayHandlerTst.class);
 		return suite;
 	}
 }

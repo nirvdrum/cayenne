@@ -57,27 +57,9 @@
 package org.objectstyle.cayenne.project.validator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.gui.validator.AttributeErrorMsg;
-import org.objectstyle.cayenne.gui.validator.DataMapErrorMsg;
-import org.objectstyle.cayenne.gui.validator.EntityErrorMsg;
-import org.objectstyle.cayenne.gui.validator.ErrorMsg;
-import org.objectstyle.cayenne.gui.validator.RelationshipErrorMsg;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.DerivedDbAttribute;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 
@@ -149,7 +131,7 @@ public class Validator {
         registerValidated(ValidationResult.WARNING, message, treeNodePath);
     }
 
-    /** Return collection of ErrorMsg objects from last validation. */
+    /** Return collection of ValidationDisplayHandler objects from last validation. */
     public List validationResults() {
         return validationResults;
     }

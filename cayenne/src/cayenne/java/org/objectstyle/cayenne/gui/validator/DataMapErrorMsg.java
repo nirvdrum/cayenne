@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DataMapErrorMsg extends ErrorMsg {
+public class DataMapErrorMsg extends ValidationDisplayHandler {
 	protected DataMap map;
 
     /**
@@ -81,28 +81,6 @@ public class DataMapErrorMsg extends ErrorMsg {
         super(result);
         this.map = (DataMap)result.getTreeNodePath()[1];
     }
-
-
-    /**
-     * Constructor for DataMapErrorMsg.
-     * @param message
-     * @param severity
-     * @param domain
-     */
-    public DataMapErrorMsg(String message, int severity, DataDomain domain) {
-        super(message, severity, domain);
-    }
-
-
-	public DataMapErrorMsg(
-		String message,
-		int severity,
-		DataDomain domain,
-		DataMap map) {
-
-		super(message, severity, domain);
-		this.map = map;
-	}
 
 	public void displayField(Mediator mediator, JFrame frame) {
 		DataMapDisplayEvent event;

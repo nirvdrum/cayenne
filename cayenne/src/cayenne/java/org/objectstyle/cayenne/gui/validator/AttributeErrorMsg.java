@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class AttributeErrorMsg extends ErrorMsg {
+public class AttributeErrorMsg extends ValidationDisplayHandler {
 	protected DataMap map;
 	protected Entity entity;
 	protected Attribute attribute;
@@ -87,21 +87,6 @@ public class AttributeErrorMsg extends ErrorMsg {
         this.entity = (Entity)result.getTreeNodePath()[2];
         this.attribute = (Attribute)result.getTreeNodePath()[3];
     }
-
-
-	public AttributeErrorMsg(
-		String message,
-		int severity,
-		DataDomain domain,
-		DataMap map,
-		Attribute attribute) {
-
-		super(message, severity, domain);
-
-		this.map = map;
-		this.attribute = attribute;
-		this.entity = attribute.getEntity();
-	}
 
 	public void displayField(Mediator mediator, JFrame frame) {
 		AttributeDisplayEvent event;

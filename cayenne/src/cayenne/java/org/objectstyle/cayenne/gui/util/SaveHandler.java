@@ -60,7 +60,7 @@ import javax.swing.JOptionPane;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.action.SaveAction;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ValidationDisplayHandler;
 
 /**
  * A <b>SaveHandler</b> is a utility class that pops up a dialog
@@ -126,7 +126,7 @@ public class SaveHandler {
 			(SaveAction) Editor.getFrame().getAction(SaveAction.ACTION_NAME);
 		
 		// save quietly
-		action.performAction(ErrorMsg.ERROR);
+		action.performAction(ValidationDisplayHandler.ERROR);
 
 		// check if save succeeded
 		return !mediator.isDirty();

@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class EntityErrorMsg extends ErrorMsg {
+public class EntityErrorMsg extends ValidationDisplayHandler {
     protected DataMap map;
     protected Entity entity;
 
@@ -85,28 +85,6 @@ public class EntityErrorMsg extends ErrorMsg {
         super(result);
         this.map = (DataMap) result.getTreeNodePath()[1];
         this.entity = (Entity) result.getTreeNodePath()[2];
-    }
-
-    /**
-     * Constructor for EntityErrorMsg.
-     * @param message
-     * @param severity
-     * @param domain
-     */
-    public EntityErrorMsg(String message, int severity, DataDomain domain) {
-        super(message, severity, domain);
-    }
-
-    public EntityErrorMsg(
-        String message,
-        int severity,
-        DataDomain domain,
-        DataMap map,
-        Entity entity) {
-
-        super(message, severity, domain);
-        this.map = map;
-        this.entity = entity;
     }
 
     public void displayField(Mediator mediator, JFrame frame) {

@@ -85,118 +85,112 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Andrei Adamchik
  */
 public class ValidatorDialog
-	extends CayenneDialog
-	implements ListSelectionListener, ActionListener {
+    extends CayenneDialog
+    implements ListSelectionListener, ActionListener {
 
-	protected Mediator mediator;
-	protected List errMsg;
-	protected JTable messages;
-	protected JButton closeBtn;
+    protected Mediator mediator;
+    protected List errMsg;
+    protected JTable messages;
+    protected JButton closeBtn;
 
+    public ValidatorDialog(Editor editor, Mediator mediator, List errMsg, int severity) {
 
-	public ValidatorDialog(
-		Editor editor,
-		Mediator mediator,
-		List errMsg,
-		int severity) {
-			
-		super(editor, "Validation Errors", false);
-		this.mediator = mediator;
-		this.errMsg = errMsg;
+        super(editor, "Validation Errors", false);
+        this.mediator = mediator;
+        this.errMsg = errMsg;
 
-		init();
+        init();
 
-		messages.getSelectionModel().addListSelectionListener(this);
-		closeBtn.addActionListener(this);
+        messages.getSelectionModel().addListSelectionListener(this);
+        closeBtn.addActionListener(this);
 
         this.pack();
-        this.centerWindow();	
-		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.setVisible(true);
-	}
+        this.centerWindow();
+        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        this.setVisible(true);
+    }
 
-	protected void init() {
-		getContentPane().setLayout(new BorderLayout());
+    protected void init() {
+        getContentPane().setLayout(new BorderLayout());
 
-		ValidatorTableModel model = new ValidatorTableModel(errMsg);
-		messages = new JTable(model);
-		messages.setRowHeight(25);
-		messages.setRowMargin(3);
-		messages.setBackground(new Color(255, 200, 200));
-		messages.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		messages.setCellSelectionEnabled(false);
-		messages.setRowSelectionAllowed(true);
-		TableColumn col = messages.getColumnModel().getColumn(0);
-		col.setPreferredWidth(50);
-		col = messages.getColumnModel().getColumn(1);
-		col.setPreferredWidth(220);
+        ValidatorTableModel model = new ValidatorTableModel(errMsg);
+        messages = new JTable(model);
+        messages.setRowHeight(25);
+        messages.setRowMargin(3);
+        messages.setBackground(new Color(255, 200, 200));
+        messages.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        messages.setCellSelectionEnabled(false);
+        messages.setRowSelectionAllowed(true);
+        TableColumn col = messages.getColumnModel().getColumn(0);
+        col.setPreferredWidth(50);
+        col = messages.getColumnModel().getColumn(1);
+        col.setPreferredWidth(220);
 
-		//Create the scroll pane and add the table to it. 
-		JScrollPane scrollPane = new JScrollPane(messages);
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
+        //Create the scroll pane and add the table to it. 
+        JScrollPane scrollPane = new JScrollPane(messages);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         closeBtn = new JButton("Close");
-		JPanel panel = PanelFactory.createButtonPanel(new JButton[] {closeBtn});
-		getContentPane().add(panel, BorderLayout.SOUTH);
-	}
+        JPanel panel = PanelFactory.createButtonPanel(new JButton[] { closeBtn });
+        getContentPane().add(panel, BorderLayout.SOUTH);
+    }
 
-	public void valueChanged(ListSelectionEvent e) {
-		if (messages.getSelectedRow() >= 0) {
-			ValidatorTableModel model =
-				(ValidatorTableModel) messages.getModel();
-			ValidationResult obj = model.getValue(messages.getSelectedRow());
-			ErrorMsg.getErrorMsg(obj).displayField(mediator, super.getParentEditor());
-		}
-	}
+    public void valueChanged(ListSelectionEvent e) {
+        if (messages.getSelectedRow() >= 0) {
+            ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
+            ValidationResult obj = model.getValue(messages.getSelectedRow());
+            ValidationDisplayHandler.getErrorMsg(obj).displayField(mediator, super.getParentEditor());
+        }
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		this.setVisible(false);
-		this.dispose();
-	}
-}
+    public void actionPerformed(ActionEvent e) {
+        this.setVisible(false);
+        this.dispose();
+    }
 
-class ValidatorTableModel extends AbstractTableModel {
-	List errMsg;
+    static class ValidatorTableModel extends AbstractTableModel {
+        List validationObjects;
 
-	public ValidatorTableModel(List err_msg) {
-		errMsg = err_msg;
-	}
+        public ValidatorTableModel(List validationObjects) {
+            this.validationObjects = validationObjects;
+        }
 
-	public String getColumnName(int col) {
-		if (col == 0)
-			return "Severity";
-		else if (col == 1)
-			return "Error Message";
-		else
-			return "";
-	}
+        public String getColumnName(int col) {
+            if (col == 0)
+                return "Severity";
+            else if (col == 1)
+                return "Error Message";
+            else
+                return "";
+        }
 
-	public int getRowCount() {
-		return errMsg.size();
-	}
+        public int getRowCount() {
+            return validationObjects.size();
+        }
 
-	public int getColumnCount() {
-		return 2;
-	}
+        public int getColumnCount() {
+            return 2;
+        }
 
-	public Object getValueAt(int row, int col) {
-		ValidationResult msg = (ValidationResult) errMsg.get(row);
-		if (col == 0) {
-			if (msg.getSeverity() == ErrorMsg.ERROR)
-				return "ERROR";
-			else
-				return "WARNING";
-		} else if (col == 1) {
-			return msg.getMessage();
-		} else
-			return "";
-	}
+        public Object getValueAt(int row, int col) {
+            ValidationResult msg = (ValidationResult) validationObjects.get(row);
+            if (col == 0) {
+                if (msg.getSeverity() == ValidationDisplayHandler.ERROR)
+                    return "ERROR";
+                else
+                    return "WARNING";
+            } else if (col == 1) {
+                return msg.getMessage();
+            } else
+                return "";
+        }
 
-	public boolean isCellEditable(int row, int col) {
-		return false;
-	}
+        public boolean isCellEditable(int row, int col) {
+            return false;
+        }
 
-	public ValidationResult getValue(int row) {
-		return (ValidationResult) errMsg.get(row);
-	}
+        public ValidationResult getValue(int row) {
+            return (ValidationResult) validationObjects.get(row);
+        }
+    }
 }

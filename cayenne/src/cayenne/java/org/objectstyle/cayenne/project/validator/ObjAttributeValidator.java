@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.objectstyle.cayenne.gui.validator.AttributeErrorMsg;
-import org.objectstyle.cayenne.gui.validator.ErrorMsg;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.util.Util;

@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.conf.DomainHelper;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.gui.validator.ValidatorDialog;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
@@ -239,7 +239,7 @@ public class SaveAction extends CayenneAction {
 	 * This method is synchronized to prevent problems on double-clicking "save".
 	 */
 	public synchronized void performAction(ActionEvent e) {
-		performAction(ErrorMsg.WARNING);
+		performAction(ValidationDisplayHandler.WARNING);
 	}
 
 	public synchronized void performAction(int warningLevel) {
@@ -248,7 +248,7 @@ public class SaveAction extends CayenneAction {
 		int validationCode = val.validate();
 
 		// If no serious errors, perform save.
-		if (validationCode < ErrorMsg.ERROR) {
+		if (validationCode < ValidationDisplayHandler.ERROR) {
 			try {
 				saveAll();
 			} catch (Exception ex) {

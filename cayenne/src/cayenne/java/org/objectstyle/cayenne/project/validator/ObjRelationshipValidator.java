@@ -57,8 +57,6 @@ package org.objectstyle.cayenne.project.validator;
 
 import java.util.List;
 
-import org.objectstyle.cayenne.gui.validator.ErrorMsg;
-import org.objectstyle.cayenne.gui.validator.RelationshipErrorMsg;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;

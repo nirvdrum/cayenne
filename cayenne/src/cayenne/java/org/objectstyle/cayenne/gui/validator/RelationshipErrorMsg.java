@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class RelationshipErrorMsg extends ErrorMsg {
+public class RelationshipErrorMsg extends ValidationDisplayHandler {
 	protected DataMap map;
 	protected Entity entity;
 	protected Relationship rel;
@@ -86,30 +86,6 @@ public class RelationshipErrorMsg extends ErrorMsg {
         this.rel = (Relationship)result.getTreeNodePath()[3];
     }
 
-
-    /**
-     * Constructor for RelationshipErrorMsg.
-     * @param message
-     * @param severity
-     * @param domain
-     */
-    public RelationshipErrorMsg(String message, int severity, DataDomain domain) {
-        super(message, severity, domain);
-    }
-
-
-	public RelationshipErrorMsg(
-		String message,
-		int severity,
-		DataDomain domain,
-		DataMap map,
-		Relationship rel) {
-
-		super(message, severity, domain);
-		this.map = map;
-		this.rel = rel;
-		this.entity = rel.getSourceEntity();
-	}
 
 	public void displayField(Mediator mediator, JFrame frame) {
 		RelationshipDisplayEvent event;

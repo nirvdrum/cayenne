@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DomainErrorMsg extends ErrorMsg {
+public class DomainErrorMsg extends ValidationDisplayHandler {
 
     /**
      * Constructor for DomainErrorMsg.
@@ -78,11 +78,6 @@ public class DomainErrorMsg extends ErrorMsg {
     public DomainErrorMsg(ValidationResult result) {
         super(result);
     }
-
-
-	public DomainErrorMsg(String message, int severity, DataDomain domain) {
-		super(message, severity, domain);
-	}
 
 	public void displayField(Mediator mediator, JFrame frame) {
 		DomainDisplayEvent event;

@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public abstract class ErrorMsg {
+public abstract class ValidationDisplayHandler {
     public static final int NO_ERROR = ValidationResult.VALID;
     public static final int WARNING = ValidationResult.WARNING;
     public static final int ERROR = ValidationResult.ERROR;
@@ -85,10 +85,10 @@ public abstract class ErrorMsg {
     protected int severity;
     protected DataDomain domain;
 
-    public static ErrorMsg getErrorMsg(ValidationResult result) {
+    public static ValidationDisplayHandler getErrorMsg(ValidationResult result) {
         Object validatedObj = result.getValidatedObject();
         
-        ErrorMsg msg = null;
+        ValidationDisplayHandler msg = null;
         if (validatedObj instanceof Attribute) {
             msg = new AttributeErrorMsg(result);
         } else if (validatedObj instanceof Relationship) {
@@ -108,16 +108,10 @@ public abstract class ErrorMsg {
         return msg;
     }
 
-    public ErrorMsg(ValidationResult result) {
+    public ValidationDisplayHandler(ValidationResult result) {
         this.message = result.getMessage();
         this.severity = result.getSeverity();
         this.domain = (DataDomain) result.getTreeNodePath()[0];
-    }
-
-    public ErrorMsg(String message, int severity, DataDomain domain) {
-        this.message = message;
-        this.severity = severity;
-        this.domain = domain;
     }
 
     /** 
