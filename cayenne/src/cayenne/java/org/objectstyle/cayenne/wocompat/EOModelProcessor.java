@@ -168,6 +168,7 @@ public class EOModelProcessor {
         List pks = (List) entityMap.get("primaryKeyAttributes");
         List classProps = (List) entityMap.get("classProperties");
         List attributes = (List) entityMap.get("attributes");
+        DbEntity dbEntity = e.getDbEntity();
 
         if (pks == null) {
             pks = Collections.EMPTY_LIST;
@@ -196,14 +197,23 @@ public class EOModelProcessor {
             String javaType = helper.javaTypeForEOModelerType(attrType);
             EODbAttribute dbAttr = null;
 
-            if (dbAttrName != null && e.getDbEntity() != null) {
+            if (dbAttrName != null && dbEntity != null) {
+
+                // create DbAttribute...since EOF allows the same column name for 
+                // more than one Java attribute, we need to check for name duplicates
+                int i = 0;
+                String dbAttributeBaseName = dbAttrName;
+                while (dbEntity.getAttribute(dbAttrName) != null) {
+                    dbAttrName = dbAttributeBaseName + i++;
+                }
+
                 dbAttr =
                     new EODbAttribute(
                         dbAttrName,
                         TypesMapping.getSqlTypeByJava(javaType),
-                        e.getDbEntity());
+                        dbEntity);
                 dbAttr.setEoAttributeName(attrName);
-                e.getDbEntity().addAttribute(dbAttr);
+                dbEntity.addAttribute(dbAttr);
 
                 Integer width = (Integer) attrMap.get("width");
                 if (width != null)
