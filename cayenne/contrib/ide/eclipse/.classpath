@@ -25,6 +25,7 @@
     <classpathentry exported="true" kind="lib" path="otherlib/ognl-2.5.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/scope-bin-1.0.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/servlet-2.3.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/ejb-2.0.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/struts-1.0.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/velocity-dep-1.3.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/javagroups-2.1.1.jar"/>
