@@ -155,9 +155,9 @@ public class EditorView
         addPanelToDetailView(new JScrollPane(nodeView), NODE_VIEW);
         dataMapView = new DataMapDetailView(eventController);
         addPanelToDetailView(new JScrollPane(dataMapView), DATA_MAP_VIEW);
+        
         procedureView = new ProcedureDetailView(eventController);
-        addPanelToDetailView(new JScrollPane(procedureView), PROCEDURE_VIEW);
-
+        addPanelToDetailView(procedureView, PROCEDURE_VIEW);
         objDetailView = new ObjDetailView(eventController);
         addPanelToDetailView(objDetailView, OBJ_VIEW);
         dbDetailView = new DbDetailView(eventController);

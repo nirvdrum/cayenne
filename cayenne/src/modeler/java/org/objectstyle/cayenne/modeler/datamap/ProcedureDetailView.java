@@ -56,132 +56,67 @@
 
 package org.objectstyle.cayenne.modeler.datamap;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 
-import javax.swing.InputVerifier;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.event.ProcedureEvent;
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
-import org.objectstyle.cayenne.util.Util;
 
 /**
+ * Tabbed panel for stored procedure editing.
+ * 
  * @author Andrei Adamchik
  */
-public class ProcedureDetailView extends JPanel implements ProcedureDisplayListener {
+public class ProcedureDetailView
+    extends JTabbedPane
+    implements ProcedureDisplayListener {
+
     protected EventController eventController;
-    protected JTextField name;
-    protected JTextField schema;
+    protected ProcedurePane procedurePanel;
+    protected ProcedureParameterPane procedureParameterPanel;
 
     public ProcedureDetailView(EventController eventController) {
-
         this.eventController = eventController;
 
-        init();
+        // init view
+        setTabPlacement(JTabbedPane.TOP);
+        procedurePanel = new ProcedurePane(eventController);
+        addTab("Procedure", new JScrollPane(procedurePanel));
+		procedureParameterPanel = new ProcedureParameterPane(eventController);
+        addTab("Parameters", procedureParameterPanel);
 
+        // init listeners
         eventController.addProcedureDisplayListener(this);
-        InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
-        schema.setInputVerifier(inputCheck);
-    }
 
-    protected void init() {
-        this.setLayout(new BorderLayout());
-        this.name = CayenneWidgetFactory.createTextField();
-        this.schema = CayenneWidgetFactory.createTextField();
+        this.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                // find source view
+                Component selected = ProcedureDetailView.this.getSelectedComponent();
+                while (selected instanceof JScrollPane) {
+                    selected = ((JScrollPane) selected).getViewport().getView();
+                }
 
-        this.add(
-            PanelFactory.createForm(
-                new Component[] {
-                    CayenneWidgetFactory.createLabel("Procedure name: "),
-                    CayenneWidgetFactory.createLabel("Schema: ")},
-                new Component[] { name, schema },
-                5,
-                5,
-                5,
-                5));
+                ((ExistingSelectionProcessor) selected).processExistingSelection();
+            }
+        });
     }
 
     /**
      * Invoked when currently selected Procedure object is changed.
      */
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
-        Procedure procedure = e.getProcedure();
-        if (procedure == null || !e.isProcedureChanged()) {
-            return;
+        if (e.getProcedure() == null)
+            setVisible(false);
+        else {
+            if (e.isTabReset()) {
+                setSelectedIndex(0);
+            }
+            setVisible(true);
         }
-
-        name.setText(procedure.getName());
-        schema.setText(procedure.getSchema());
-    }
-
-    class FieldVerifier extends InputVerifier {
-        public boolean verify(JComponent input) {
-            if (input == name) {
-                return verifyName();
-            }
-            else if (input == schema) {
-                return verifySchema();
-            }
-            else {
-                return true;
-            }
-        }
-
-        protected boolean verifyName() {
-            String text = name.getText();
-            if (text != null && text.trim().length() == 0) {
-                text = null;
-            }
-
-            DataMap map = eventController.getCurrentDataMap();
-            Procedure procedure = eventController.getCurrentProcedure();
-
-            Procedure matchingProcedure = map.getProcedure(text);
-
-            if (matchingProcedure == null) {
-                // completely new name, set new name for entity
-                ProcedureEvent e =
-                    new ProcedureEvent(this, procedure, procedure.getName());
-                MapUtil.setProcedureName(map, procedure, text);
-                eventController.fireProcedureEvent(e);
-                return true;
-            }
-            else if (matchingProcedure == procedure) {
-                // no name changes, just return
-                return true;
-            }
-            else {
-                // there is an entity with the same name
-                return false;
-            }
-        }
-
-        protected boolean verifySchema() {
-            String text = schema.getText();
-            if (text != null && text.trim().length() == 0) {
-                text = null;
-            }
-
-            Procedure procedure = eventController.getCurrentProcedure();
-
-            if (!Util.nullSafeEquals(procedure.getSchema(), text)) {
-                procedure.setSchema(text);
-                eventController.fireProcedureEvent(new ProcedureEvent(this, procedure));
-            }
-
-            return true;
-        }
-
     }
 }

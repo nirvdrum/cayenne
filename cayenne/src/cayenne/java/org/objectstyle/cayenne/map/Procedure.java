@@ -71,12 +71,15 @@ public class Procedure extends MapObject {
     protected List callParameters = new ArrayList();
 
     /**
-     * Default constructor for StoredProcedure.
+     * Creates an unnamed procedure object.
      */
     public Procedure() {
         super();
     }
 
+	/**
+	 * Creates a named Procedure object.
+	 */
     public Procedure(String name) {
         super(name);
     }
@@ -175,17 +178,16 @@ public class Procedure extends MapObject {
     }
 
     /**
-     * Returns the returningValue.
+     * Returns <code>true</code> if a stored procedure returns a value.
+     * The first parameter in a list of parameters will be assumed to be 
+     * a descriptor of return value.
+     * 
      * @return boolean
      */
     public boolean isReturningValue() {
         return returningValue;
     }
 
-    /**
-     * Sets the returningValue.
-     * @param returningValue The returningValue to set
-     */
     public void setReturningValue(boolean returningValue) {
         this.returningValue = returningValue;
     }
@@ -198,12 +200,17 @@ public class Procedure extends MapObject {
         return schema;
     }
 
+    /**
+     * Sets stored procedure's catalog.
+     */
     public void setCatalog(String string) {
         catalog = string;
     }
 
+    /**
+     * Sets stored procedure's database schema.
+     */
     public void setSchema(String string) {
         schema = string;
     }
-
 }

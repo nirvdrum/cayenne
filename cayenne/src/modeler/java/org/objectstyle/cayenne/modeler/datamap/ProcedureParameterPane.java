@@ -53,52 +53,68 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
+package org.objectstyle.cayenne.modeler.datamap;
+
+import java.awt.BorderLayout;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /**
- * Display event for Stored Procedures.
- * 
  * @author Andrei Adamchik
  */
-public class ProcedureDisplayEvent extends DataMapDisplayEvent {
-	protected Procedure procedure;
-	protected boolean procedureChanged = true;
-	protected boolean tabReset;
+public class ProcedureParameterPane
+    extends JPanel
+    implements ProcedureDisplayListener, ExistingSelectionProcessor {
+    protected EventController eventController;
+
+    protected JTable table;
+
+    public ProcedureParameterPane(EventController eventController) {
+        this.eventController = eventController;
+
+        init();
+
+        eventController.addProcedureDisplayListener(this);
+    }
+
+    protected void init() {
+        setLayout(new BorderLayout());
+
+        // Create table with two columns and no rows.
+        table = new CayenneTable();
+        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] {
+        });
+        add(panel, BorderLayout.CENTER);
+    }
+
+    public void processExistingSelection() {
+        ProcedureDisplayEvent e =
+            new ProcedureDisplayEvent(
+                this,
+                eventController.getCurrentProcedure(),
+                eventController.getCurrentDataMap(),
+                eventController.getCurrentDataDomain());
+        eventController.fireProcedureDisplayEvent(e);
+    }
 
     /**
-     * Creates a new ProcedureDisplayEvent
-     */
-    public ProcedureDisplayEvent(Object src, Procedure procedure, DataMap map, DataDomain domain) {
-        super(src, map, domain);
-        this.procedure = procedure;
+      * Invoked when currently selected Procedure object is changed.
+      */
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        Procedure procedure = e.getProcedure();
+        if (procedure == null || !e.isProcedureChanged()) {
+            return;
+        }
     }
 
-
-    public Procedure getProcedure() {
-        return procedure;
-    }
-
-    public void setProcedure(Procedure procedure) {
-        this.procedure = procedure;
-    }
-    
-    public boolean isProcedureChanged() {
-        return procedureChanged;
-    }
-
-    public void setProcedureChanged(boolean b) {
-        procedureChanged = b;
-    }
-    
-    public boolean isTabReset() {
-        return tabReset;
-    }
-
-    public void setTabReset(boolean b) {
-        tabReset = b;
-    }
 }
