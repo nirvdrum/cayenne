@@ -62,114 +62,136 @@ import org.objectstyle.cayenne.unittest.CayenneTestResources;
 
 public class TestCaseDataFactory {
 
-	private static void createArtist(Connection conn, String artistName) throws Exception {
-		String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-		PreparedStatement stmt = conn.prepareStatement(insertArtist);
-		long dateBase = System.currentTimeMillis();
+    private static void createArtist(Connection conn, String artistName)
+        throws Exception {
+        String insertArtist =
+            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+        PreparedStatement stmt = conn.prepareStatement(insertArtist);
+        long dateBase = System.currentTimeMillis();
 
-		stmt.setInt(1, 1);
-		stmt.setString(2, artistName);
-		stmt.setDate(3, new java.sql.Date(dateBase - 1000 * 60 * 60 * 24 * 365 * 30));
-		stmt.executeUpdate();
+        stmt.setInt(1, 1);
+        stmt.setString(2, artistName);
+        stmt.setDate(3, new java.sql.Date(dateBase - 1000 * 60 * 60 * 24 * 365 * 30));
+        stmt.executeUpdate();
 
-		stmt.close();
-		conn.commit();
+        stmt.close();
+        conn.commit();
+    }
 
-	}
+    public static void createArtist(String artistName) throws Exception {
 
-	public static void createArtistWithPainting(String artistName, String[] paintingNames, boolean paintingInfo)
-		throws Exception {
+        Connection conn = CayenneTestResources.getResources().getSharedConnection();
 
-		Connection conn = CayenneTestResources.getResources().getSharedConnection();
+        try {
+            conn.setAutoCommit(false);
+            createArtist(conn, artistName);
+        }
+        finally {
+            conn.close();
+        }
+    }
 
-		try {
-			conn.setAutoCommit(false);
-			createArtist(conn, artistName);
-			
-			String insertPt =
-				"INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?,?,?,?)";
-			PreparedStatement stmt = conn.prepareStatement(insertPt);
+    public static void createArtistWithPainting(
+        String artistName,
+        String[] paintingNames,
+        boolean paintingInfo)
+        throws Exception {
 
-			int len = paintingNames.length;
-			if (len > 0) {
-				for (int i = 0; i < len; i++) {
-					stmt.setInt(1, i + 1);
-					stmt.setInt(2, 1);
-					stmt.setFloat(3, 1000 * i);
-					stmt.setString(4, paintingNames[i]);
-					stmt.executeUpdate();
-				}
-				stmt.close();
-				conn.commit();
+        Connection conn = CayenneTestResources.getResources().getSharedConnection();
 
-				if (paintingInfo) {
-					String insertPtI = "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?,?)";
-					stmt = conn.prepareStatement(insertPtI);
-					for (int i = 0; i < len; i++) {
-						stmt.setInt(1, i + 1);
-						stmt.setString(2, "text: " + paintingNames[i]);
-						stmt.executeUpdate();
-					}
+        try {
+            conn.setAutoCommit(false);
+            createArtist(conn, artistName);
 
-					stmt.close();
-					conn.commit();
-				}
+            String insertPt =
+                "INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?,?,?,?)";
+            PreparedStatement stmt = conn.prepareStatement(insertPt);
 
-			}
-		} finally {
-			conn.close();
-		}
-	}
+            int len = paintingNames.length;
+            if (len > 0) {
+                for (int i = 0; i < len; i++) {
+                    stmt.setInt(1, i + 1);
+                    stmt.setInt(2, 1);
+                    stmt.setFloat(3, 1000 * i);
+                    stmt.setString(4, paintingNames[i]);
+                    stmt.executeUpdate();
+                }
+                stmt.close();
+                conn.commit();
 
-	public static void createArtistBelongingToGroups(String artistName, String[] groupNames) throws Exception {
-		Connection conn = CayenneTestResources.getResources().getSharedConnection();
+                if (paintingInfo) {
+                    String insertPtI =
+                        "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?,?)";
+                    stmt = conn.prepareStatement(insertPtI);
+                    for (int i = 0; i < len; i++) {
+                        stmt.setInt(1, i + 1);
+                        stmt.setString(2, "text: " + paintingNames[i]);
+                        stmt.executeUpdate();
+                    }
 
-		try {
-			conn.setAutoCommit(false);
-			createArtist(conn, artistName);
-			String insertGroup =
-				"INSERT INTO ARTGROUP (GROUP_ID, NAME) VALUES (?,?)";
-			String insertLink =
-				"INSERT INTO ARTIST_GROUP (GROUP_ID, ARTIST_ID) VALUES (?,?)";
-			PreparedStatement groupStmt = conn.prepareStatement(insertGroup);
-			PreparedStatement linkStmt = conn.prepareStatement(insertLink);
+                    stmt.close();
+                    conn.commit();
+                }
 
-			int len = groupNames.length;
-			if (len > 0) {
-				for (int i = 0; i < len; i++) {
-					groupStmt.setInt(1, i + 1);
-					groupStmt.setString(2, groupNames[i]);
-					groupStmt.executeUpdate();
-					
-					linkStmt.setInt(1, i+1); //group id
-					linkStmt.setInt(2,1); //artist id
-					linkStmt.executeUpdate();
-				}
-				groupStmt.close();
-				linkStmt.close();
-				conn.commit();
-			}
-		} finally {
-			conn.close();
-		}
-	}
+            }
+        }
+        finally {
+            conn.close();
+        }
+    }
 
-	public static void createUnconnectedGroup(String groupName) throws Exception {
-		Connection conn = CayenneTestResources.getResources().getSharedConnection();
+    public static void createArtistBelongingToGroups(
+        String artistName,
+        String[] groupNames)
+        throws Exception {
+        Connection conn = CayenneTestResources.getResources().getSharedConnection();
 
-		try {
-			conn.setAutoCommit(false);
-			String insertGroup =
-				"INSERT INTO ARTGROUP (GROUP_ID, NAME) VALUES (?,?)";
-			PreparedStatement groupStmt = conn.prepareStatement(insertGroup);
-			groupStmt.setInt(1, 1);
-			groupStmt.setString(2, groupName);
-			groupStmt.executeUpdate();
-			groupStmt.close();
-			conn.commit();
-		} finally {
-			conn.close();
-		}
-	}
+        try {
+            conn.setAutoCommit(false);
+            createArtist(conn, artistName);
+            String insertGroup = "INSERT INTO ARTGROUP (GROUP_ID, NAME) VALUES (?,?)";
+            String insertLink =
+                "INSERT INTO ARTIST_GROUP (GROUP_ID, ARTIST_ID) VALUES (?,?)";
+            PreparedStatement groupStmt = conn.prepareStatement(insertGroup);
+            PreparedStatement linkStmt = conn.prepareStatement(insertLink);
+
+            int len = groupNames.length;
+            if (len > 0) {
+                for (int i = 0; i < len; i++) {
+                    groupStmt.setInt(1, i + 1);
+                    groupStmt.setString(2, groupNames[i]);
+                    groupStmt.executeUpdate();
+
+                    linkStmt.setInt(1, i + 1); //group id
+                    linkStmt.setInt(2, 1); //artist id
+                    linkStmt.executeUpdate();
+                }
+                groupStmt.close();
+                linkStmt.close();
+                conn.commit();
+            }
+        }
+        finally {
+            conn.close();
+        }
+    }
+
+    public static void createUnconnectedGroup(String groupName) throws Exception {
+        Connection conn = CayenneTestResources.getResources().getSharedConnection();
+
+        try {
+            conn.setAutoCommit(false);
+            String insertGroup = "INSERT INTO ARTGROUP (GROUP_ID, NAME) VALUES (?,?)";
+            PreparedStatement groupStmt = conn.prepareStatement(insertGroup);
+            groupStmt.setInt(1, 1);
+            groupStmt.setString(2, groupName);
+            groupStmt.executeUpdate();
+            groupStmt.close();
+            conn.commit();
+        }
+        finally {
+            conn.close();
+        }
+    }
 
 }

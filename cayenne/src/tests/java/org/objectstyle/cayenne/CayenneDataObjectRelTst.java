@@ -97,9 +97,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         prepareNestedProperties();
 
         Painting p1 = fetchPainting();
-        assertTrue(
-            p1.getToArtist().readNestedProperty("paintingArray")
-                instanceof List);
+        assertTrue(p1.getToArtist().readNestedProperty("paintingArray") instanceof List);
     }
 
     public void testReciprocalRel1() throws Exception {
@@ -181,9 +179,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         assertEquals(
             PersistenceState.COMMITTED,
             ((Painting) plist.get(0)).getPersistenceState());
-        assertEquals(
-            paintingName,
-            ((Painting) plist.get(0)).getPaintingTitle());
+        assertEquals(paintingName, ((Painting) plist.get(0)).getPaintingTitle());
     }
 
     public void testReadToManyRel2() throws Exception {
@@ -200,8 +196,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
     public void testReadFlattenedRelationship() throws Exception {
         //Test no groups
-        TestCaseDataFactory
-            .createArtistBelongingToGroups(artistName, new String[] {
+        TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {
         });
 
         Artist a1 = fetchArtist();
@@ -227,25 +222,24 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
     }
 
     public void testAddToFlattenedRelationship() throws Exception {
-        TestCaseDataFactory
-            .createArtistBelongingToGroups(artistName, new String[] {
-        });
+        TestCaseDataFactory.createArtist(artistName);
         TestCaseDataFactory.createUnconnectedGroup(groupName);
+
         Artist a1 = fetchArtist();
+        assertEquals(0, a1.getGroupArray().size());
 
         SelectQuery q =
             new SelectQuery(
                 ArtGroup.class,
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "name",
-                    groupName));
+                ExpressionFactory.matchExp("name", groupName));
         List results = ctxt.performQuery(q);
         assertEquals(1, results.size());
 
+        assertFalse(ctxt.hasChanges());
         ArtGroup group = (ArtGroup) results.get(0);
         a1.addToGroupArray(group);
-
+		assertTrue(ctxt.hasChanges());
+		
         List groupList = a1.getGroupArray();
         assertEquals(1, groupList.size());
         assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
@@ -254,6 +248,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         a1.getDataContext().commitChanges();
 
         //and check again
+		assertFalse(ctxt.hasChanges());
         groupList = a1.getGroupArray();
         assertEquals(1, groupList.size());
         assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
@@ -261,8 +256,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
     //Test case to show up a bug in committing more than once
     public void testDoubleCommitAddToFlattenedRelationship() throws Exception {
-        TestCaseDataFactory
-            .createArtistBelongingToGroups(artistName, new String[] {
+        TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {
         });
         TestCaseDataFactory.createUnconnectedGroup(groupName);
         Artist a1 = fetchArtist();
@@ -270,10 +264,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         SelectQuery q =
             new SelectQuery(
                 ArtGroup.class,
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "name",
-                    groupName));
+                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "name", groupName));
         List results = ctxt.performQuery(q);
         assertEquals(1, results.size());
 
@@ -291,7 +282,8 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
             //The bug caused the second commit to fail (the link record
             // was inserted again)
             a1.getDataContext().commitChanges();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             fail("Should not have thrown an exception");
         }
@@ -320,8 +312,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
     //Shows up a possible bug in ordering of deletes, when a flattened relationships link record is deleted
     // at the same time (same transaction) as one of the record to which it links.
-    public void testRemoveFlattenedRelationshipAndRootRecord()
-        throws Exception {
+    public void testRemoveFlattenedRelationshipAndRootRecord() throws Exception {
         TestCaseDataFactory.createArtistBelongingToGroups(
             artistName,
             new String[] { groupName });
@@ -335,7 +326,8 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
         try {
             dc.commitChanges();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             fail("Should not have thrown the exception :" + e.getMessage());
         }
@@ -345,8 +337,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
      * even if unneccessary */
     public void testAddRemoveAddFlattenedRelationship() throws Exception {
         String specialGroupName = "Special Group2";
-        TestCaseDataFactory
-            .createArtistBelongingToGroups(artistName, new String[] {
+        TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {
         });
         TestCaseDataFactory.createUnconnectedGroup(specialGroupName);
         Artist a1 = fetchArtist();
@@ -368,7 +359,8 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 
         try {
             ctxt.commitChanges();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Util.unwindException(e).printStackTrace();
             fail("Should not have thrown the exception " + e.getMessage());
         }
@@ -382,43 +374,41 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         //a1 = fetchArtist();
         //assertTrue(group.getArtistArray().contains(a1));
     }
-    
-	public void testToOneSeriesFlattenedRel() {
-		FlattenedTest1 ft1 =
-			(FlattenedTest1) ctxt.createAndRegisterNewObject("FlattenedTest1");
-		ft1.setName("FT1Name");
-		FlattenedTest2 ft2 =
-			(FlattenedTest2) ctxt.createAndRegisterNewObject("FlattenedTest2");
-		ft2.setName("FT2Name");
-		FlattenedTest3 ft3 =
-			(FlattenedTest3) ctxt.createAndRegisterNewObject("FlattenedTest3");
-		ft3.setName("FT3Name");
-		
-		ft2.setToFT1(ft1);
-		ft2.addToFt3Array(ft3);
-		ctxt.commitChanges();
-		
-		this.resetContext(); //We need a new context
-		SelectQuery q=new SelectQuery(FlattenedTest3.class);
-		q.setQualifier(ExpressionFactory.matchExp("name", "FT3Name"));
-		List results=ctxt.performQuery(q);
-		
-		assertEquals(1, results.size());
-		
-		FlattenedTest3 fetchedFT3=(FlattenedTest3)results.get(0);
-		FlattenedTest1 fetchedFT1=fetchedFT3.getToFT1();
-		assertEquals("FT1Name", fetchedFT1.getName());
-		
-	}
+
+    public void testToOneSeriesFlattenedRel() {
+        FlattenedTest1 ft1 =
+            (FlattenedTest1) ctxt.createAndRegisterNewObject("FlattenedTest1");
+        ft1.setName("FT1Name");
+        FlattenedTest2 ft2 =
+            (FlattenedTest2) ctxt.createAndRegisterNewObject("FlattenedTest2");
+        ft2.setName("FT2Name");
+        FlattenedTest3 ft3 =
+            (FlattenedTest3) ctxt.createAndRegisterNewObject("FlattenedTest3");
+        ft3.setName("FT3Name");
+
+        ft2.setToFT1(ft1);
+        ft2.addToFt3Array(ft3);
+        ctxt.commitChanges();
+
+        this.resetContext(); //We need a new context
+        SelectQuery q = new SelectQuery(FlattenedTest3.class);
+        q.setQualifier(ExpressionFactory.matchExp("name", "FT3Name"));
+        List results = ctxt.performQuery(q);
+
+        assertEquals(1, results.size());
+
+        FlattenedTest3 fetchedFT3 = (FlattenedTest3) results.get(0);
+        FlattenedTest1 fetchedFT1 = fetchedFT3.getToFT1();
+        assertEquals("FT1Name", fetchedFT1.getName());
+
+    }
 
     public void testReflexiveRelationshipInsertOrder1() {
         DataContext dc = this.createDataContext();
-        ArtGroup parentGroup =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup parentGroup = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         parentGroup.setName("parent");
 
-        ArtGroup childGroup1 =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup childGroup1 = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         childGroup1.setName("child1");
         childGroup1.setToParentGroup(parentGroup);
         dc.commitChanges();
@@ -427,12 +417,10 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
     public void testReflexiveRelationshipInsertOrder2() {
         //Create in a different order and see what happens
         DataContext dc = this.createDataContext();
-        ArtGroup childGroup1 =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup childGroup1 = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         childGroup1.setName("child1");
 
-        ArtGroup parentGroup =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup parentGroup = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         parentGroup.setName("parent");
 
         childGroup1.setToParentGroup(parentGroup);
@@ -443,18 +431,15 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
     public void testReflexiveRelationshipInsertOrder3() {
         //Tey multiple children, one created before parent, one after
         DataContext dc = this.createDataContext();
-        ArtGroup childGroup1 =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup childGroup1 = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         childGroup1.setName("child1");
 
-        ArtGroup parentGroup =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup parentGroup = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         parentGroup.setName("parent");
 
         childGroup1.setToParentGroup(parentGroup);
 
-        ArtGroup childGroup2 =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup childGroup2 = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         childGroup2.setName("child2");
         childGroup2.setToParentGroup(parentGroup);
 
@@ -464,18 +449,15 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
     public void testReflexiveRelationshipInsertOrder4() {
         //Tey multiple children, one created before parent, one after
         DataContext dc = this.createDataContext();
-        ArtGroup childGroup1 =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup childGroup1 = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         childGroup1.setName("child1");
 
-        ArtGroup parentGroup =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup parentGroup = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         parentGroup.setName("parent");
 
         childGroup1.setToParentGroup(parentGroup);
 
-        ArtGroup childGroup2 =
-            (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
+        ArtGroup childGroup2 = (ArtGroup) dc.createAndRegisterNewObject("ArtGroup");
         childGroup2.setName("subchild");
         childGroup2.setToParentGroup(childGroup1);
 
@@ -494,7 +476,8 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         try {
             painting.setToArtist(artist);
             fail("Should have failed to set a cross-context relationship");
-        } catch (CayenneRuntimeException e) {
+        }
+        catch (CayenneRuntimeException e) {
             //Fine.. it should  throw an exception
         }
 
@@ -504,7 +487,8 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         try {
             artist.addToPaintingArray(painting);
             fail("Should have failed to add a cross-context relationship");
-        } catch (CayenneRuntimeException e) {
+        }
+        catch (CayenneRuntimeException e) {
             //Fine.. it should  throw an exception
         }
 
@@ -519,8 +503,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         ctxt.commitChanges();
 
         //Cause an update and an insert that need correct ordering
-        Painting painting =
-            (Painting) ctxt.createAndRegisterNewObject("Painting");
+        Painting painting = (Painting) ctxt.createAndRegisterNewObject("Painting");
         painting.setPaintingTitle("a painting");
         artist.addToPaintingArray(painting);
 
