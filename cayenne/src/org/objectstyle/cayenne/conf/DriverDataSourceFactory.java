@@ -55,25 +55,20 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.Attributes;
-import org.xml.sax.XMLReader;
-import org.xml.sax.SAXException;
-import org.xml.sax.ContentHandler;
+import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
-import org.objectstyle.util.Util;
-import org.objectstyle.util.AbstractHandler;
-import org.objectstyle.util.ResourceLocator;
-import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.ConfigException;
-import org.objectstyle.cayenne.conn.PoolDataSource;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conf.DomainHelper.RootHandler;
 import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.util.*;
 
 
 

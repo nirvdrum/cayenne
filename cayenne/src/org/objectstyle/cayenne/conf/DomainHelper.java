@@ -56,20 +56,23 @@ package org.objectstyle.cayenne.conf;
  */
 
 
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.*;
-import java.io.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.xml.sax.helpers.DefaultHandler;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.util.AbstractHandler;
+import org.objectstyle.util.Util;
 
 
 /**

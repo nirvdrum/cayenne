@@ -55,13 +55,14 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.io.InputStream;
 import java.util.*;
-import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.access.DataDomain;
 
 /**
  * This class is an entry point to Cayenne. It loads all 

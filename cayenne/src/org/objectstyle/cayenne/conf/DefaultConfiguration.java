@@ -55,9 +55,10 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import org.objectstyle.util.ResourceLocator;
-import java.util.logging.Logger;
 import java.io.InputStream;
+import java.util.logging.Logger;
+
+import org.objectstyle.util.ResourceLocator;
 
 /**
  * Subclass of Configuration that uses System CLASSPATH to locate resources.

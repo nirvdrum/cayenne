@@ -57,17 +57,9 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpSessionListener;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSession;
-import javax.servlet.ServletException;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
-
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataContext;
 
 
