@@ -95,8 +95,25 @@ public class CreateAttributeAction extends CayenneAction {
 	}
 
 	public void createObjAttribute(ObjEntity objEnt) {
+		Mediator mediator = getMediator();
+
+		ObjAttribute attr =
+			(ObjAttribute) NamedObjectFactory.createObject(
+				ObjAttribute.class,
+				objEnt);
+		objEnt.addAttribute(attr);
+		mediator.fireObjAttributeEvent(
+			new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
+
+		mediator.fireObjAttributeDisplayEvent(
+			new AttributeDisplayEvent(
+				this,
+				attr,
+				objEnt,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain()));
 	}
-	
+
 	public void createDbAttribute(DbEntity dbEnt) {
 		Mediator mediator = getMediator();
 		DbAttribute attr =
@@ -106,7 +123,8 @@ public class CreateAttributeAction extends CayenneAction {
 		dbEnt.addAttribute(attr);
 		mediator.fireDbAttributeEvent(
 			new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
-		mediator.fireDbAttributeDisplayEvent(new AttributeDisplayEvent(
+		mediator.fireDbAttributeDisplayEvent(
+			new AttributeDisplayEvent(
 				this,
 				attr,
 				dbEnt,

@@ -223,20 +223,6 @@ class ObjAttributeTableModel extends CayenneTableModel {
 		mediator.fireObjAttributeEvent(ev);
 	}
 
-	/** Add new attribute to the model and the table. 
-	 *  Broadcast AttributeEvent.*/
-	public void addRow() {
-		ObjAttribute attr =
-			(ObjAttribute) NamedObjectFactory.createObject(
-				ObjAttribute.class,
-				entity);
-		objectList.add(attr);
-		entity.addAttribute(attr);
-		mediator.fireObjAttributeEvent(
-			new AttributeEvent(eventSource, attr, entity, AttributeEvent.ADD));
-		fireTableDataChanged();
-	}
-
 	public void removeRow(int row) {
 		if (row < 0)
 			return;
