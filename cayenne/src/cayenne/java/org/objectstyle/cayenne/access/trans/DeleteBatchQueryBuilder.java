@@ -64,26 +64,36 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- *
- * @author Andriy Shapochka
+ * Translator for delete BatchQueries. Creates parametrized DELETE SQL statements.
+ * 
+ * @author Andriy Shapochka, Andrei Adamchik
  */
 
 public class DeleteBatchQueryBuilder extends BatchQueryBuilder {
-    public DeleteBatchQueryBuilder(DbAdapter adapter) {
-        super.setAdapter(adapter);
-    }
+	public DeleteBatchQueryBuilder(DbAdapter adapter) {
+		this(adapter, null);
+	}
+	
+	public DeleteBatchQueryBuilder(DbAdapter adapter, String trimFunction) {
+		super(adapter, trimFunction);
+	}
 
-    public String query(BatchQuery batch) {
-        String table = batch.getDbEntity().getFullyQualifiedName();
-        List dbAttributes = batch.getDbAttributes();
-        StringBuffer query = new StringBuffer("DELETE FROM ");
-        query.append(table).append(" WHERE ");
-        for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
-            DbAttribute attribute = (DbAttribute) i.next();
-            query.append(attribute.getName()).append(" = ?");
-            if (i.hasNext())
-                query.append(" AND ");
-        }
-        return query.toString();
-    }
+	public String query(BatchQuery batch) {
+		String table = batch.getDbEntity().getFullyQualifiedName();
+		List dbAttributes = batch.getDbAttributes();
+		StringBuffer query = new StringBuffer("DELETE FROM ");
+		query.append(table).append(" WHERE ");
+
+		Iterator i = dbAttributes.iterator();
+		while (i.hasNext()) {
+			DbAttribute attribute = (DbAttribute) i.next();
+			appendDbAttribute(query, attribute);
+			query.append(" = ?");
+			
+			if (i.hasNext()) {
+				query.append(" AND ");
+			}
+		}
+		return query.toString();
+	}
 }

@@ -53,58 +53,24 @@
  * <http://objectstyle.org/>.
  *
  */
-
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.UpdateBatchQuery;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
- * A translator for UpdateBatchQueries that produces parameterized SQL.
- *  
- * @author Andriy Shapochka, Andrei Adamchik
+ * @author Andrei Adamchik
  */
+public class DeleteBatchQueryBuilderTst extends CayenneTestCase {
+	public void testConstructor() throws Exception {
+		DbAdapter adapter = new JdbcAdapter();
+		String trimFunction = "testTrim";
 
-public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
-	public UpdateBatchQueryBuilder(DbAdapter adapter) {
-		this(adapter, null);
-	}
+		DeleteBatchQueryBuilder builder =
+			new DeleteBatchQueryBuilder(adapter, trimFunction);
 
-	public UpdateBatchQueryBuilder(DbAdapter adapter, String trimFunction) {
-		super(adapter, trimFunction);
-	}
-
-	public String query(BatchQuery batch) {
-		UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
-		String table = batch.getDbEntity().getFullyQualifiedName();
-		List idDbAttributes = updateBatch.getIdDbAttributes();
-		List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
-		StringBuffer query = new StringBuffer("UPDATE ");
-		query.append(table).append(" SET ");
-
-		Iterator i = updatedDbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			query.append(attribute.getName()).append(" = ?");
-			if (i.hasNext())
-				query.append(", ");
-		}
-
-		query.append(" WHERE ");
-		i = idDbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			appendDbAttribute(query, attribute);
-			query.append(" = ?");
-			if (i.hasNext()) {
-				query.append(" AND ");
-			}
-		}
-		return query.toString();
+		assertSame(adapter, builder.getAdapter());
+		assertEquals(trimFunction, builder.getTrimFunction());
 	}
 }

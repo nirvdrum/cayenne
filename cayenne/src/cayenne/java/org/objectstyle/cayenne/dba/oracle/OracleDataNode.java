@@ -88,161 +88,166 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class OracleDataNode extends DataNode {
 
-    public OracleDataNode() {
-        super();
-    }
+	public OracleDataNode() {
+		super();
+	}
 
-    public OracleDataNode(String name) {
-        super(name);
-    }
+	public OracleDataNode(String name) {
+		super(name);
+	}
 
-    protected void runBatchUpdate(
-        Connection con,
-        BatchQuery query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+	protected void runBatchUpdate(
+		Connection con,
+		BatchQuery query,
+		OperationObserver delegate)
+		throws SQLException, Exception {
 
-        // TODO: refactoring super implementation  shoild make this method smaller
-        // the only difference with super is using "addBatch" instead of "executeUpdate"
+		// TODO: refactoring super implementation  shoild make this method smaller
+		// the only difference with super is using "addBatch" instead of "executeUpdate"
 
-        BatchQueryBuilder queryBuilder;
-        switch (query.getQueryType()) {
-            case Query.INSERT_QUERY :
-                queryBuilder = new InsertBatchQueryBuilder(getAdapter());
-                break;
-            case Query.UPDATE_QUERY :
-                queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
-                break;
-            case Query.DELETE_QUERY :
-                queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
-                ;
-                break;
-            default :
-                throw new CayenneException(
-                    "Unsupported batch type: " + query.getQueryType());
-        }
+		BatchQueryBuilder queryBuilder;
+		switch (query.getQueryType()) {
+			case Query.INSERT_QUERY :
+				queryBuilder = new InsertBatchQueryBuilder(getAdapter());
+				break;
+			case Query.UPDATE_QUERY :
+				queryBuilder =
+					new UpdateBatchQueryBuilder(
+						getAdapter(),
+						OracleAdapter.TRIM_FUNCTION);
+				break;
+			case Query.DELETE_QUERY :
+				queryBuilder =
+					new DeleteBatchQueryBuilder(
+						getAdapter(),
+						OracleAdapter.TRIM_FUNCTION);
+				break;
+			default :
+				throw new CayenneException(
+					"Unsupported batch type: " + query.getQueryType());
+		}
 
-        // translate batch
-        List dbAttributes = query.getDbAttributes();
-        int attributeCount = dbAttributes.size();
-        int[] attributeTypes = new int[attributeCount];
-        int[] attributeScales = new int[attributeCount];
-        for (int i = 0; i < attributeCount; i++) {
-            DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
-            attributeTypes[i] = attribute.getType();
-            attributeScales[i] = attribute.getPrecision();
-        }
-        String queryStr = queryBuilder.query(query);
-        ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
+		// translate batch
+		List dbAttributes = query.getDbAttributes();
+		int attributeCount = dbAttributes.size();
+		int[] attributeTypes = new int[attributeCount];
+		int[] attributeScales = new int[attributeCount];
+		for (int i = 0; i < attributeCount; i++) {
+			DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
+			attributeTypes[i] = attribute.getType();
+			attributeScales[i] = attribute.getPrecision();
+		}
+		String queryStr = queryBuilder.query(query);
+		ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
 
-        // log batch execution
-        QueryLogger.logQuery(
-            query.getLoggingLevel(),
-            queryStr,
-            Collections.EMPTY_LIST);
+		// log batch execution
+		QueryLogger.logQuery(
+			query.getLoggingLevel(),
+			queryStr,
+			Collections.EMPTY_LIST);
 
-        PreparedStatement st = con.prepareStatement(queryStr);
-        try {
+		PreparedStatement st = con.prepareStatement(queryStr);
+		try {
 
-            query.reset();
-            while (query.next()) {
-                // log next batch parameters
-                QueryLogger.logBatchQueryParameters(
-                    query.getLoggingLevel(),
-                    query);
+			query.reset();
+			while (query.next()) {
+				// log next batch parameters
+				QueryLogger.logBatchQueryParameters(
+					query.getLoggingLevel(),
+					query);
 
-                for (int i = 0; i < attributeCount; i++) {
-                    Object value = query.getObject(i);
-                    int type = attributeTypes[i];
-                    if (value == null)
-                        st.setNull(i + 1, type);
-                    else {
-                        ExtendedType typeProcessor =
-                            typeConverter.getRegisteredType(value.getClass());
-                        typeProcessor.setJdbcObject(
-                            st,
-                            value,
-                            i + 1,
-                            type,
-                            attributeScales[i]);
-                    }
-                }
+				for (int i = 0; i < attributeCount; i++) {
+					Object value = query.getObject(i);
+					int type = attributeTypes[i];
+					if (value == null)
+						st.setNull(i + 1, type);
+					else {
+						ExtendedType typeProcessor =
+							typeConverter.getRegisteredType(value.getClass());
+						typeProcessor.setJdbcObject(
+							st,
+							value,
+							i + 1,
+							type,
+							attributeScales[i]);
+					}
+				}
 
-                // this line differs from super
-                st.addBatch();
-            }
+				// this line differs from super
+				st.addBatch();
+			}
 
-            // this differs from super
-            int[] results = st.executeBatch();
-            delegate.nextBatchCount(query, results);
+			// this differs from super
+			int[] results = st.executeBatch();
+			delegate.nextBatchCount(query, results);
 
-            // TODO: Create QUeryLogger method to log batch counts
-        } finally {
-            try {
-                st.close();
-            } catch (Exception e) {
-            }
-        }
-    }
+			// TODO: Create QUeryLogger method to log batch counts
+		} finally {
+			try {
+				st.close();
+			} catch (Exception e) {
+			}
+		}
+	}
 
-    /**
-     * Implements Oracle-specific handling of StoredProcedure OUT parameters reading.
-     */
-    protected void readStoredProcedureOutParameters(
-        CallableStatement statement,
-        ResultDescriptor descriptor,
-        Query query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+	/**
+	 * Implements Oracle-specific handling of StoredProcedure OUT parameters reading.
+	 */
+	protected void readStoredProcedureOutParameters(
+		CallableStatement statement,
+		ResultDescriptor descriptor,
+		Query query,
+		OperationObserver delegate)
+		throws SQLException, Exception {
 
-        long t1 = System.currentTimeMillis();
+		long t1 = System.currentTimeMillis();
 
-        int resultSetType = OracleAdapter.getOracleCursorType();
-        int resultWidth = descriptor.getResultWidth();
-        if (resultWidth > 0) {
-            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
-            ExtendedType[] converters = descriptor.getConverters();
-            int[] jdbcTypes = descriptor.getJdbcTypes();
-            String[] names = descriptor.getNames();
-            int[] outParamIndexes = descriptor.getOutParamIndexes();
+		int resultSetType = OracleAdapter.getOracleCursorType();
+		int resultWidth = descriptor.getResultWidth();
+		if (resultWidth > 0) {
+			Map dataRow = new HashMap(resultWidth * 2, 0.75f);
+			ExtendedType[] converters = descriptor.getConverters();
+			int[] jdbcTypes = descriptor.getJdbcTypes();
+			String[] names = descriptor.getNames();
+			int[] outParamIndexes = descriptor.getOutParamIndexes();
 
-            // process result row columns,
-            for (int i = 0; i < outParamIndexes.length; i++) {
-                int index = outParamIndexes[i];
+			// process result row columns,
+			for (int i = 0; i < outParamIndexes.length; i++) {
+				int index = outParamIndexes[i];
 
-                if (jdbcTypes[index] == resultSetType) {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere else
-                    ResultSet rs = (ResultSet) statement.getObject(index + 1);
-                    ResultDescriptor nextDesc =
-                        ResultDescriptor.createDescriptor(
-                            rs,
-                            getAdapter().getExtendedTypes());
+				if (jdbcTypes[index] == resultSetType) {
+					// note: jdbc column indexes start from 1, not 0 unlike everywhere else
+					ResultSet rs = (ResultSet) statement.getObject(index + 1);
+					ResultDescriptor nextDesc =
+						ResultDescriptor.createDescriptor(
+							rs,
+							getAdapter().getExtendedTypes());
 
-                    readResultSet(
-                        rs,
-                        nextDesc,
-                        (GenericSelectQuery) query,
-                        delegate);
-                } else {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere else
-                    Object val =
-                        converters[index].materializeObject(
-                            statement,
-                            index + 1,
-                            jdbcTypes[index]);
-                    dataRow.put(names[index], val);
-                }
-            }
+					readResultSet(
+						rs,
+						nextDesc,
+						(GenericSelectQuery) query,
+						delegate);
+				} else {
+					// note: jdbc column indexes start from 1, not 0 unlike everywhere else
+					Object val =
+						converters[index].materializeObject(
+							statement,
+							index + 1,
+							jdbcTypes[index]);
+					dataRow.put(names[index], val);
+				}
+			}
 
-            if (!dataRow.isEmpty()) {
-                QueryLogger.logSelectCount(
-                    query.getLoggingLevel(),
-                    1,
-                    System.currentTimeMillis() - t1);
-                delegate.nextDataRows(
-                    query,
-                    Collections.singletonList(dataRow));
-            }
-        }
-    }
+			if (!dataRow.isEmpty()) {
+				QueryLogger.logSelectCount(
+					query.getLoggingLevel(),
+					1,
+					System.currentTimeMillis() - t1);
+				delegate.nextDataRows(
+					query,
+					Collections.singletonList(dataRow));
+			}
+		}
+	}
 }

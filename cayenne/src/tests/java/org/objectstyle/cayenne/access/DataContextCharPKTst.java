@@ -102,16 +102,16 @@ public class DataContextCharPKTst extends CayenneTestCase {
 		assertEquals("PK1", val);
 	}
 
-/*	public void testDelete() throws Exception {
+	public void testDelete() throws Exception {
 		CharPkTest object =
 			(CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
 		object.setOtherCol("object-XYZ");
 		object.setPkCol("PK1");
 		ctxt.commitChanges();
 
-        ctxt.deleteObject(object);
+		ctxt.deleteObject(object);
 		ctxt.commitChanges();
-		
+
 		List rows =
 			ctxt.performQuery(
 				new SqlSelectQuery(
@@ -119,5 +119,30 @@ public class DataContextCharPKTst extends CayenneTestCase {
 					"SELECT * FROM CHAR_PK_TEST"));
 		assertNotNull(rows);
 		assertEquals(0, rows.size());
-	} */
+	}
+
+	public void testUpdate() throws Exception {
+		CharPkTest object =
+			(CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
+		object.setOtherCol("object-XYZ");
+		object.setPkCol("PK1");
+		ctxt.commitChanges();
+
+		object.setOtherCol("UPDATED");
+		ctxt.commitChanges();
+
+		List rows =
+			ctxt.performQuery(
+				new SqlSelectQuery(
+					CharPkTest.class,
+					"SELECT * FROM CHAR_PK_TEST"));
+		assertNotNull(rows);
+		assertEquals(1, rows.size());
+		Map row = (Map) rows.get(0);
+		Object val = row.get("OTHER_COL");
+		if (val == null) {
+			val = row.get("other_col");
+		}
+		assertEquals("UPDATED", val);
+	}
 }

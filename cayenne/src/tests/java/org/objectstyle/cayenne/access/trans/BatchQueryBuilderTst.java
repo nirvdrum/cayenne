@@ -56,55 +56,74 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.Iterator;
-import java.util.List;
+import java.sql.Types;
+
+import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
- * A translator for UpdateBatchQueries that produces parameterized SQL.
- *  
- * @author Andriy Shapochka, Andrei Adamchik
+ * @author Andrei Adamchik
  */
+public class BatchQueryBuilderTst extends TestCase {
 
-public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
-	public UpdateBatchQueryBuilder(DbAdapter adapter) {
-		this(adapter, null);
-	}
+	public void testConstructor() throws Exception {
+		DbAdapter adapter = new JdbcAdapter();
+		String trimFunction = "testTrim";
 
-	public UpdateBatchQueryBuilder(DbAdapter adapter, String trimFunction) {
-		super(adapter, trimFunction);
-	}
-
-	public String query(BatchQuery batch) {
-		UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
-		String table = batch.getDbEntity().getFullyQualifiedName();
-		List idDbAttributes = updateBatch.getIdDbAttributes();
-		List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
-		StringBuffer query = new StringBuffer("UPDATE ");
-		query.append(table).append(" SET ");
-
-		Iterator i = updatedDbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			query.append(attribute.getName()).append(" = ?");
-			if (i.hasNext())
-				query.append(", ");
-		}
-
-		query.append(" WHERE ");
-		i = idDbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			appendDbAttribute(query, attribute);
-			query.append(" = ?");
-			if (i.hasNext()) {
-				query.append(" AND ");
+		BatchQueryBuilder builder =
+			new BatchQueryBuilder(adapter, trimFunction) {
+			public String query(BatchQuery batch) {
+				return null;
 			}
-		}
-		return query.toString();
+		};
+
+		assertSame(adapter, builder.getAdapter());
+		assertEquals(trimFunction, builder.getTrimFunction());
+	}
+
+	public void testAppendDbAttribute1() throws Exception {
+		DbAdapter adapter = new JdbcAdapter();
+		String trimFunction = "testTrim";
+
+		BatchQueryBuilder builder =
+			new BatchQueryBuilder(adapter, trimFunction) {
+			public String query(BatchQuery batch) {
+				return null;
+			}
+		};
+
+		StringBuffer buf = new StringBuffer();
+		DbAttribute attr = new DbAttribute("testAttr", Types.CHAR, null);
+		builder.appendDbAttribute(buf, attr);
+		assertEquals("testTrim(testAttr)", buf.toString());
+
+		buf = new StringBuffer();
+		attr = new DbAttribute("testAttr", Types.VARCHAR, null);
+		builder.appendDbAttribute(buf, attr);
+		assertEquals("testAttr", buf.toString());
+	}
+
+	public void testAppendDbAttribute2() throws Exception {
+		DbAdapter adapter = new JdbcAdapter();
+
+		BatchQueryBuilder builder = new BatchQueryBuilder(adapter, null) {
+			public String query(BatchQuery batch) {
+				return null;
+			}
+		};
+
+		StringBuffer buf = new StringBuffer();
+		DbAttribute attr = new DbAttribute("testAttr", Types.CHAR, null);
+		builder.appendDbAttribute(buf, attr);
+		assertEquals("testAttr", buf.toString());
+
+		buf = new StringBuffer();
+		attr = new DbAttribute("testAttr", Types.VARCHAR, null);
+		builder.appendDbAttribute(buf, attr);
+		assertEquals("testAttr", buf.toString());
 	}
 }

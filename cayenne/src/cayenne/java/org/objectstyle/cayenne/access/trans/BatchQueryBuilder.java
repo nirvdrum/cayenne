@@ -56,23 +56,68 @@
 
 package org.objectstyle.cayenne.access.trans;
 
+import java.sql.Types;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- *
- * @author Andriy Shapochka
+ * Superclass of batch query translators.
+ * 
+ * @author Andriy Shapochka, Andrei Adamchik
  */
 
 public abstract class BatchQueryBuilder {
-  protected DbAdapter adapter;
+	protected DbAdapter adapter;
+	protected String trimFunction;
 
-  public void setAdapter(DbAdapter adapter) {
-    this.adapter = adapter;
-  }
-  public DbAdapter getAdapter() {
-    return adapter;
-  }
+	public BatchQueryBuilder() {
+	}
 
-  public abstract String query(BatchQuery batch);
+	public BatchQueryBuilder(DbAdapter adapter, String trimFunction) {
+		this.adapter = adapter;
+		this.trimFunction = trimFunction;
+	}
+
+	/**
+	 * Translates BatchQuery to parameterized SQL string.
+	 */
+	public abstract String query(BatchQuery batch);
+
+	/**
+	 * Utility method used to append the name of the column to the query buffer.
+	 */
+	protected void appendDbAttribute(
+		StringBuffer buf,
+		DbAttribute dbAttribute) {
+
+		// TODO: (Andrus) is there a need for trimming binary types?
+		boolean trim =
+			dbAttribute.getType() == Types.CHAR && trimFunction != null;
+		if (trim) {
+			buf.append(trimFunction).append('(');
+		}
+
+		buf.append(dbAttribute.getName());
+
+		if (trim) {
+			buf.append(')');
+		}
+	}
+
+	public void setAdapter(DbAdapter adapter) {
+		this.adapter = adapter;
+	}
+	public DbAdapter getAdapter() {
+		return adapter;
+	}
+
+	public String getTrimFunction() {
+		return trimFunction;
+	}
+
+	public void setTrimFunction(String string) {
+		trimFunction = string;
+	}
 }

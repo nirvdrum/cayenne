@@ -95,6 +95,8 @@ public class OracleAdapter extends JdbcAdapter {
     public static final String ORACLE_FLOAT = "FLOAT";
     public static final String ORACLE_BLOB = "BLOB";
     public static final String ORACLE_CLOB = "CLOB";
+    
+    public static final String TRIM_FUNCTION = "RTRIM";
 
     protected static boolean initDone;
     protected static int oracleCursorType = Integer.MAX_VALUE;
@@ -227,7 +229,7 @@ public class OracleAdapter extends JdbcAdapter {
      * Returns a trimming translator.
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
+        return new TrimmingQualifierTranslator(queryAssembler, OracleAdapter.TRIM_FUNCTION);
     }
 
     /**
