@@ -103,6 +103,7 @@ public class CreateDomainAction extends CayenneAction {
             (DataDomain) NamedObjectFactory.createObject(
                 DataDomain.class,
                 project.getConfiguration());
+        domain.getEntityResolver().setIndexedByClass(false);
         project.getConfiguration().addDomain(domain);
         mediator.fireDomainEvent(new DomainEvent(this, domain, DomainEvent.ADD));
         mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
