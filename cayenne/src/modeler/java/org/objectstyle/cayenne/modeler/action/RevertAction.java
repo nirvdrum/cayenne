@@ -107,8 +107,5 @@ public class RevertAction extends CayenneAction {
             new ProjectTypeSelectControl().handleControl(new Control(
                     ProjectTypeSelectControl.CREATE_APP_PROJECT_CONTROL));
         }
-
-        controller.getStatusController().handleControl(
-                new Control(ModelerController.PROJECT_REVERTED_ID));
     }
 }

@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -66,9 +68,12 @@ import java.awt.event.WindowEvent;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.swing.Box;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 import org.objectstyle.cayenne.map.DerivedDbEntity;
@@ -82,9 +87,9 @@ import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -127,32 +132,22 @@ import org.objectstyle.cayenne.project.Project;
 import org.scopemvc.core.Control;
 import org.scopemvc.util.UIStrings;
 
-/** 
- * Main frame of CayenneModeler. Responsibilities include 
- * coordination of enabling/disabling of menu and toolbar.
+/**
+ * Main frame of CayenneModeler. Responsibilities include coordination of
+ * enabling/disabling of menu and toolbar.
  * 
- * @author Michael Misha Shengaout 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  * @since 1.1
  */
-public class CayenneModelerFrame
-    extends JFrame
-    implements
-        DataNodeDisplayListener,
-        DataMapDisplayListener,
-        ObjEntityDisplayListener,
-        DbEntityDisplayListener,
-        ObjAttributeDisplayListener,
-        DbAttributeDisplayListener,
-        ObjRelationshipDisplayListener,
-        DbRelationshipDisplayListener,
-        QueryDisplayListener,
-        ProcedureDisplayListener,
-        ProcedureParameterDisplayListener {
+public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListener,
+        DataMapDisplayListener, ObjEntityDisplayListener, DbEntityDisplayListener,
+        ObjAttributeDisplayListener, DbAttributeDisplayListener,
+        ObjRelationshipDisplayListener, DbRelationshipDisplayListener,
+        QueryDisplayListener, ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
-    /** 
-     * Label that indicates as a part of the title that
-     * the project has unsaved changes. 
+    /**
+     * Label that indicates as a part of the title that the project has unsaved changes.
      */
     public static final String DIRTY_STRING = "* - ";
 
@@ -161,6 +156,7 @@ public class CayenneModelerFrame
     protected EditorView view;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
     protected TopController controller;
+    protected JLabel status;
 
     private ModelerPreferences prefs;
 
@@ -170,9 +166,9 @@ public class CayenneModelerFrame
     }
 
     /**
-     * Returns a project that is currently a current project of an 
-     * Editor singleton instance. This will be changed if CayenneModeler
-     * ever starts supporting multiple open projects.
+     * Returns a project that is currently a current project of an Editor singleton
+     * instance. This will be changed if CayenneModeler ever starts supporting multiple
+     * open projects.
      */
     public static Project getProject() {
         return getFrame().controller.getTopModel().getCurrentProject();
@@ -196,31 +192,29 @@ public class CayenneModelerFrame
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         this.addWindowListener(new WindowAdapter() {
+
             public void windowClosing(WindowEvent e) {
                 ((ExitAction) getAction(ExitAction.getActionName())).exit();
             }
         });
 
         this.addComponentListener(new ComponentAdapter() {
+
             public void componentResized(ComponentEvent e) {
                 if (e.getComponent() == CayenneModelerFrame.this) {
-                    prefs.setProperty(
-                        ModelerPreferences.EDITOR_FRAME_WIDTH,
-                        String.valueOf(CayenneModelerFrame.this.getWidth()));
-                    prefs.setProperty(
-                        ModelerPreferences.EDITOR_FRAME_HEIGHT,
-                        String.valueOf(CayenneModelerFrame.this.getHeight()));
+                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_WIDTH, String
+                            .valueOf(CayenneModelerFrame.this.getWidth()));
+                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_HEIGHT, String
+                            .valueOf(CayenneModelerFrame.this.getHeight()));
                 }
             }
 
             public void componentMoved(ComponentEvent e) {
                 if (e.getComponent() == CayenneModelerFrame.this) {
-                    prefs.setProperty(
-                        ModelerPreferences.EDITOR_FRAME_X,
-                        String.valueOf(CayenneModelerFrame.this.getX()));
-                    prefs.setProperty(
-                        ModelerPreferences.EDITOR_FRAME_Y,
-                        String.valueOf(CayenneModelerFrame.this.getY()));
+                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_X, String
+                            .valueOf(CayenneModelerFrame.this.getX()));
+                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_Y, String
+                            .valueOf(CayenneModelerFrame.this.getY()));
                 }
             }
         });
@@ -302,12 +296,10 @@ public class CayenneModelerFrame
 
         projectMenu.add(getAction(CreateObjEntityAction.getActionName()).buildMenu());
         projectMenu.add(getAction(CreateDbEntityAction.getActionName()).buildMenu());
-        projectMenu.add(
-            getAction(CreateDerivedDbEntityAction.getActionName()).buildMenu());
-        projectMenu.add(
-            getAction(CreateProcedureAction.getActionName()).buildMenu());
-        projectMenu.add(
-                   getAction(CreateQueryAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateDerivedDbEntityAction.getActionName())
+                .buildMenu());
+        projectMenu.add(getAction(CreateProcedureAction.getActionName()).buildMenu());
+        projectMenu.add(getAction(CreateQueryAction.getActionName()).buildMenu());
         projectMenu.addSeparator();
         projectMenu.add(getAction(ObjEntitySyncAction.getActionName()).buildMenu());
         projectMenu.add(getAction(DerivedEntitySyncAction.getActionName()).buildMenu());
@@ -326,9 +318,15 @@ public class CayenneModelerFrame
     }
 
     protected void initStatusBar() {
-        StatusBarView statusBar = new StatusBarView();
+        status = new JLabel();
+        status.setFont(status.getFont().deriveFont(Font.PLAIN, 10));
+
+        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 1));
+        // add placeholder
+        statusBar.add(Box.createVerticalStrut(16));
+        statusBar.add(status);
+
         getContentPane().add(statusBar, BorderLayout.SOUTH);
-        controller.setStatusBarView(statusBar);
     }
 
     /** Initializes main toolbar. */
@@ -344,9 +342,9 @@ public class CayenneModelerFrame
         toolBar.add(getAction(CreateDomainAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateNodeAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateDataMapAction.getActionName()).buildButton());
-        
+
         toolBar.addSeparator();
-        
+
         toolBar.add(getAction(CreateDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateDerivedDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateProcedureAction.getActionName()).buildButton());
@@ -380,9 +378,8 @@ public class CayenneModelerFrame
         }
     }
 
-    /** 
-     * Adds asterisk to the title of the window to indicate 
-     * it is dirty. 
+    /**
+     * Adds asterisk to the title of the window to indicate it is dirty.
      */
     public void setDirty(boolean flag) {
         String title = getTitle();
@@ -392,7 +389,8 @@ public class CayenneModelerFrame
             if (title == null || !title.startsWith(DIRTY_STRING)) {
                 setTitle(DIRTY_STRING + title);
             }
-        } else {
+        }
+        else {
             getAction(SaveAction.getActionName()).setEnabled(false);
             getAction(RevertAction.getActionName()).setEnabled(false);
             if (title != null && title.startsWith(DIRTY_STRING)) {
@@ -428,15 +426,16 @@ public class CayenneModelerFrame
             getAction(RemoveAction.getActionName()).setName("Remove Query");
         }
     }
-    
+
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         enableProcedureMenu();
 
         if (e.getProcedure() != null) {
             getAction(RemoveAction.getActionName()).setName("Remove Stored Procedure");
             getAction(CreateAttributeAction.getActionName()).setName(
-                "Create Procedure Parameter");
-        } else {
+                    "Create Procedure Parameter");
+        }
+        else {
             getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
         }
     }
@@ -456,8 +455,9 @@ public class CayenneModelerFrame
 
         if (e.getProcedure() != null) {
             getAction(CreateAttributeAction.getActionName()).setName(
-                "Create Procedure Parameter");
-        } else {
+                    "Create Procedure Parameter");
+        }
+        else {
             getAction(CreateAttributeAction.getActionName()).setName("Create Attribute");
         }
     }
@@ -489,9 +489,9 @@ public class CayenneModelerFrame
         else {
             // Andrus: Temp hack till moved to controller
             controller.getActionController().handleControl(
-                new Control(
-                    ModelerController.DATA_DOMAIN_SELECTED_ID,
-                    controller.getEventController().getCurrentDataDomain()));
+                    new Control(ModelerController.DATA_DOMAIN_SELECTED_ID, controller
+                            .getEventController()
+                            .getCurrentDataDomain()));
         }
 
         getAction(GenerateClassesAction.getActionName()).setEnabled(true);
@@ -518,8 +518,7 @@ public class CayenneModelerFrame
         getAction(CreateAttributeAction.getActionName()).setEnabled(true);
         getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
 
-        if (controller.getEventController().getCurrentDbEntity()
-            instanceof DerivedDbEntity) {
+        if (controller.getEventController().getCurrentDbEntity() instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
         }
     }
@@ -532,9 +531,9 @@ public class CayenneModelerFrame
     private void enableDataNodeMenu() {
         // Andrus: Temp hack till moved to controller
         controller.getActionController().handleControl(
-            new Control(
-                ModelerController.DATA_DOMAIN_SELECTED_ID,
-                controller.getEventController().getCurrentDataDomain()));
+                new Control(ModelerController.DATA_DOMAIN_SELECTED_ID, controller
+                        .getEventController()
+                        .getCurrentDataDomain()));
     }
 
     public void updateTitle() {
@@ -544,7 +543,8 @@ public class CayenneModelerFrame
         if (project != null) {
             if (project.isLocationUndefined()) {
                 title = "[New]";
-            } else {
+            }
+            else {
                 title = project.getMainFile().getAbsolutePath();
             }
         }
@@ -561,6 +561,10 @@ public class CayenneModelerFrame
         return view;
     }
 
+    public JLabel getStatus() {
+        return status;
+    }
+
     /**
      * Returns the controller.
      * 
@@ -572,6 +576,7 @@ public class CayenneModelerFrame
 
     /**
      * Returns the recentFileMenu.
+     * 
      * @return RecentFileMenu
      */
     public RecentFileMenu getRecentFileMenu() {
@@ -580,6 +585,7 @@ public class CayenneModelerFrame
 
     /**
      * Sets the view.
+     * 
      * @param view The view to set
      */
     public void setView(EditorView view) {

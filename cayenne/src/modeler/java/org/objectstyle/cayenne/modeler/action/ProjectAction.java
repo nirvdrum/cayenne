@@ -105,9 +105,6 @@ public class ProjectAction extends CayenneAction {
         TopController controller = CayenneModelerFrame.getFrame().getController();
         controller.handleControl(control);
 
-        control.markUnmatched();
-        controller.getStatusController().handleControl(control);
-
         return true;
     }
 

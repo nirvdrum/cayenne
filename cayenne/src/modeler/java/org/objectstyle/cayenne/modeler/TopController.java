@@ -72,21 +72,18 @@ import org.scopemvc.core.ControlException;
  */
 public class TopController extends ModelerController {
 
-    protected StatusBarController statusController;
     protected EventController eventController;
     protected ActionController actionController;
 
-    // should refactor to SPanel
-    protected CayenneModelerFrame mainFrame;
+    protected CayenneModelerFrame view;
 
     /**
      * Constructor for TopController.
      */
     public TopController(CayenneModelerFrame view) {
-        this.mainFrame = view;
+        this.view = view;
         setModel(new TopModel());
 
-        statusController = new StatusBarController(this);
         eventController = new EventController(this);
         actionController = new ActionController(this);
     }
@@ -96,19 +93,19 @@ public class TopController extends ModelerController {
      */
     protected void projectClosed(Control control) {
         // --- update view
-        RecentFileMenu recentFileMenu = mainFrame.getRecentFileMenu();
+        RecentFileMenu recentFileMenu = view.getRecentFileMenu();
         recentFileMenu.rebuildFromPreferences();
         recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
 
-        if (mainFrame.getView() != null) {
-            mainFrame.getContentPane().remove(mainFrame.getView());
-            mainFrame.setView(null);
+        if (view.getView() != null) {
+            view.getContentPane().remove(view.getView());
+            view.setView(null);
         }
 
         // repaint is needed, since sometimes there is a
         // trace from menu left on the screen
-        mainFrame.repaint();
-        mainFrame.updateTitle();
+        view.repaint();
+        view.updateTitle();
 
         // --- update model
         getTopModel().setCurrentProject(null);
@@ -119,6 +116,8 @@ public class TopController extends ModelerController {
 
         control.markUnmatched();
         actionController.handleControl(control);
+
+        doUpdate("Project Closed...");
     }
 
     /**
@@ -137,10 +136,17 @@ public class TopController extends ModelerController {
         getTopModel().setCurrentProject(project);
 
         // update main view
-        mainFrame.setView(new EditorView(eventController));
-        mainFrame.getContentPane().add(mainFrame.getView(), BorderLayout.CENTER);
-        mainFrame.validate();
-        mainFrame.updateTitle();
+        view.setView(new EditorView(eventController));
+        view.getContentPane().add(view.getView(), BorderLayout.CENTER);
+        view.validate();
+        view.updateTitle();
+
+        if (project.isLocationUndefined()) {
+            doUpdate("New project created...");
+        }
+        else {
+            doUpdate("Project opened...");
+        }
 
         // --- propagate control to child controllers
         control.markUnmatched();
@@ -156,14 +162,10 @@ public class TopController extends ModelerController {
             eventController.setDirty(true);
 
             // show warning dialog
-            ValidatorDialog.showDialog(mainFrame, eventController, new Validator(
+            ValidatorDialog.showDialog(view, eventController, new Validator(
                     project,
                     project.getLoadStatus()));
         }
-    }
-
-    public void setStatusBarView(StatusBarView view) {
-        statusController.setView(view);
     }
 
     protected void doHandleControl(Control control) throws ControlException {
@@ -190,7 +192,40 @@ public class TopController extends ModelerController {
         return actionController;
     }
 
-    public StatusBarController getStatusController() {
-        return statusController;
+    /**
+     * Performs status bar update with a message. Message will dissappear in 6 seconds.
+     */
+    protected void doUpdate(String message) {
+        view.getStatus().setText(message);
+
+        // start message cleanup thread that would remove the message after X seconds
+        if (message != null && message.trim().length() > 0) {
+            Thread cleanup = new ExpireThread(message, 6);
+            cleanup.start();
+        }
+    }
+
+    class ExpireThread extends Thread {
+
+        protected int seconds;
+        protected String message;
+
+        public ExpireThread(String message, int seconds) {
+            this.seconds = seconds;
+            this.message = message;
+        }
+
+        public void run() {
+            try {
+                sleep(seconds * 1000);
+            }
+            catch (InterruptedException e) {
+                // ignore exception
+            }
+
+            if (message.equals(view.getStatus().getText())) {
+                doUpdate(null);
+            }
+        }
     }
 }

@@ -113,9 +113,6 @@ public class ProjectTypeSelectControl extends BasicController {
         TopController controller = CayenneModelerFrame.getFrame().getController();
         controller.handleControl(control);
 
-        control.markUnmatched();
-        controller.getStatusController().handleControl(control);
-
         if (getView() != null) {
             shutdown();
         }
@@ -129,9 +126,6 @@ public class ProjectTypeSelectControl extends BasicController {
 
         TopController controller = CayenneModelerFrame.getFrame().getController();
         controller.handleControl(control);
-
-        control.markUnmatched();
-        controller.getStatusController().handleControl(control);
 
         if (getView() != null) {
             shutdown();

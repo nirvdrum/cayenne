@@ -95,10 +95,7 @@ import org.objectstyle.cayenne.project.Project;
  */
 public class TopModel {
 
-    public static final String STATUS_MESSAGE_KEY = "statusMessage";
-
     protected Project currentProject;
-    protected String statusMessage;
     protected ActionMap actionMap;
 
     /**
@@ -132,7 +129,7 @@ public class TopModel {
 
         CayenneAction saveAsAction = new SaveAsAction();
         actionMap.put(saveAsAction.getKey(), saveAsAction);
-        
+
         CayenneAction revertAction = new RevertAction();
         actionMap.put(revertAction.getKey(), revertAction);
 
@@ -224,15 +221,6 @@ public class TopModel {
     }
 
     /**
-     * Returns the statusMessage.
-     * 
-     * @return String
-     */
-    public String getStatusMessage() {
-        return statusMessage;
-    }
-
-    /**
      * Sets the currentProject.
      * 
      * @param currentProject The currentProject to set
@@ -241,12 +229,4 @@ public class TopModel {
         this.currentProject = currentProject;
     }
 
-    /**
-     * Sets the statusMessage.
-     * 
-     * @param statusMessage The statusMessage to set
-     */
-    public void setStatusMessage(String statusMessage) {
-        this.statusMessage = statusMessage;
-    }
 }

@@ -170,9 +170,6 @@ public class OpenProjectAction extends ProjectAction {
 
                 TopController controller = CayenneModelerFrame.getFrame().getController();
                 controller.handleControl(control);
-
-                control.markUnmatched();
-                controller.getStatusController().handleControl(control);
             }
         }
         catch (Exception ex) {
