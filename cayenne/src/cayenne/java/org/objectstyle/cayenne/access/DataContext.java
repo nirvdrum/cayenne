@@ -805,8 +805,8 @@ public class DataContext implements QueryEngine, Serializable {
 				Object q = it.next();
 				if (q instanceof SelectQuery) {
 					SelectQuery sel = (SelectQuery) q;
-					List prefetchRels = sel.getPrefetches();
-					if (prefetchRels != null && prefetchRels.size() > 0) {
+					Collection prefetchRels = sel.getPrefetches();
+					if (prefetchRels.size() > 0) {
 						Iterator prIt = prefetchRels.iterator();
 						while (prIt.hasNext()) {
 							prefetch.add(
@@ -840,20 +840,18 @@ public class DataContext implements QueryEngine, Serializable {
 	 * arbitrary limitation and will be removed eventually.</i></p>
 	 */
 	public void prefetchRelationships(SelectQuery query, List objects) {
-		List prefetches = query.getPrefetches();
+		Collection prefetches = query.getPrefetches();
 
 		if (objects == null
-			|| prefetches == null
 			|| objects.size() == 0
 			|| prefetches.size() == 0) {
 			return;
 		}
 
-		int prefetchSize = prefetches.size();
 		ObjEntity entity = getEntityResolver().lookupObjEntity(query);
-
-		for (int i = 0; i < prefetchSize; i++) {
-			String prefetchKey = (String) prefetches.get(i);
+        Iterator prefetchesIt = prefetches.iterator();
+		while (prefetchesIt.hasNext()) {
+			String prefetchKey = (String) prefetchesIt.next();
 			if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
 				throw new CayenneRuntimeException(
 					"Only one-step relationships are "

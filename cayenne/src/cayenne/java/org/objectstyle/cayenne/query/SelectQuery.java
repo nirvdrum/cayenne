@@ -56,8 +56,11 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collection;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -77,7 +80,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 
     protected List customDbAttributes = new ArrayList();
     protected List orderings = new ArrayList();
-    protected List prefetches = new ArrayList();
+    protected Set prefetches = new HashSet();
     protected boolean distinct;
     protected boolean fetchingDataRows;
     protected int fetchLimit;
@@ -274,7 +277,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * Returns a list of relationships that must be prefetched 
      * as a part of this query.
      */
-    public List getPrefetches() {
+    public Collection getPrefetches() {
         return prefetches;
     }
 
@@ -287,7 +290,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
         prefetches.add(relPath);
     }
 
-    public void addPrefetches(List relPaths) {
+    public void addPrefetches(Collection relPaths) {
         prefetches.addAll(relPaths);
     }
 

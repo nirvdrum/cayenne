@@ -17,3 +17,5 @@ Bug report number 760819:
    
 3. Added User Guide chapter on prefetching.
 
+4. Changed SelectQuery.prefetches property to be a Collection instead of List (with internal
+implementation being a Set to ensure that no duplicates are used).

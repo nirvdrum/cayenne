@@ -95,7 +95,7 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         String path = "a.b.c";
         q.addPrefetch(path);
         assertEquals(1, q.getPrefetches().size());
-        assertSame(path, q.getPrefetches().get(0));
+        assertSame(path, q.getPrefetches().iterator().next());
     }
 
     public void testAddOrdering2() throws Exception {
