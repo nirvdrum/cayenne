@@ -116,7 +116,6 @@ import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
-import org.objectstyle.cayenne.modeler.util.XmlFilter;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
@@ -154,8 +153,6 @@ public class Editor
 
     protected EditorView view;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
-
-    protected XmlFilter xmlFilter = new XmlFilter();
     protected TopController controller;
 
     /** Returns an editor singleton object. */
