@@ -59,7 +59,6 @@ import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-
 /**
  * DataDomain unit tests.
  * 
@@ -67,82 +66,96 @@ import org.objectstyle.cayenne.map.ObjEntity;
  */
 public class DataDomainTst extends CayenneTestCase {
 
-    public DataDomainTst(String name) {
-        super(name);
-    }
+	public DataDomainTst(String name) {
+		super(name);
+	}
 
-    public void testName() throws Exception {
-        String tstName = "tst_name";
-        DataDomain domain = new DataDomain();
-        assertNull(domain.getName());
-        domain.setName(tstName);
-        assertEquals(tstName, domain.getName());
-    }
+	public void testName() throws Exception {
+		String tstName = "tst_name";
+		DataDomain domain = new DataDomain();
+		assertNull(domain.getName());
+		domain.setName(tstName);
+		assertEquals(tstName, domain.getName());
+	}
 
+	public void testNodes() throws java.lang.Exception {
+		DataDomain domain = new DataDomain("dom1");
+		assertEquals(0, domain.getDataNodes().length);
+		domain.addNode(new DataNode("1"));
+		assertEquals(1, domain.getDataNodes().length);
+		domain.addNode(new DataNode("2"));
+		assertEquals(2, domain.getDataNodes().length);
+	}
 
+	public void testNodeMaps() throws java.lang.Exception {
+		DataDomain domain = new DataDomain("dom1");
+		assertNull(domain.getMap("map"));
 
-    public void testNodes() throws java.lang.Exception {
-        DataDomain domain = new DataDomain("dom1");
-        assertEquals(0, domain.getDataNodes().length);
-        domain.addNode(new DataNode("1"));
-        assertEquals(1, domain.getDataNodes().length);
-        domain.addNode(new DataNode("2"));
-        assertEquals(2, domain.getDataNodes().length);
-    }
+		DataNode node = new DataNode("1");
+		node.addDataMap(new DataMap("map"));
 
+		domain.addNode(node);
+		assertNotNull(domain.getMap("map"));
+	}
 
-    public void testNodeMaps() throws java.lang.Exception {
-        DataDomain domain = new DataDomain("dom1");
-        assertNull(domain.getMap("map"));
+	public void testMaps() throws java.lang.Exception {
+		DataDomain d1 = new DataDomain("dom1");
 
-        DataNode node = new DataNode("1");
-        node.addDataMap(new DataMap("map"));
+		DataMap m1 = new DataMap("m1");
+		d1.addMap(m1);
+		assertSame(m1, d1.getMap(m1.getName()));
 
-        domain.addNode(node);
-        assertNotNull(domain.getMap("map"));
-    }
+		d1.removeMap(m1.getName());
+		assertNull(d1.getMap(m1.getName()));
+	}
 
+	public void testDataNodeForObjEntity() throws Exception {
+		DataDomain domain = new DataDomain("dom1");
+		assertNull(domain.getMap("map"));
 
-    public void testMaps() throws java.lang.Exception {
-        DataDomain d1 = new DataDomain("dom1");
+		DataMap map = new DataMap("map");
+		ObjEntity oe = new ObjEntity("a");
+		map.addObjEntity(oe);
+		DataNode node = new DataNode("1");
+		node.addDataMap(map);
 
-        DataMap m1 = new DataMap("m1");
-        d1.addMap(m1);
-        assertSame(m1, d1.getMap(m1.getName()));
+		domain.addNode(node);
+		assertNotNull(domain.dataNodeForObjEntity(oe));
+		assertSame(node, domain.dataNodeForObjEntity(oe));
+	}
 
-        d1.removeMap(m1.getName());
-        assertNull(d1.getMap(m1.getName()));
-    }
-    
-    
-    public void testDataNodeForObjEntity() throws java.lang.Exception {
-        DataDomain domain = new DataDomain("dom1");
-        assertNull(domain.getMap("map"));
+	public void testDataNodeForObjEntityName() throws Exception {
+		DataDomain domain = new DataDomain("dom1");
+		assertNull(domain.getMap("map"));
 
-        DataMap map = new DataMap("map");
-        ObjEntity oe = new ObjEntity("a");
-        map.addObjEntity(oe);
-        DataNode node = new DataNode("1");
-        node.addDataMap(map);
+		DataMap map = new DataMap("map");
+		ObjEntity oe = new ObjEntity("a");
+		map.addObjEntity(oe);
+		DataNode node = new DataNode("1");
+		node.addDataMap(map);
 
-        domain.addNode(node);
-        assertNotNull(domain.dataNodeForObjEntity(oe));
-        assertSame(node, domain.dataNodeForObjEntity(oe));
-    }
+		domain.addNode(node);
+		assertNotNull(domain.dataNodeForObjEntityName(oe.getName()));
+		assertSame(node, domain.dataNodeForObjEntityName(oe.getName()));
+	}
 
-    public void testDataNodeForObjEntityName() throws java.lang.Exception {
-        DataDomain domain = new DataDomain("dom1");
-        assertNull(domain.getMap("map"));
+	public void testReindexNodes() throws Exception {
+		DataDomain domain = new DataDomain("dom1");
+		DataMap map = new DataMap("map");
+		DataNode node = new DataNode("1");
+		node.addDataMap(map);
+		domain.addNode(node);
 
-        DataMap map = new DataMap("map");
-        ObjEntity oe = new ObjEntity("a");
-        map.addObjEntity(oe);
-        DataNode node = new DataNode("1");
-        node.addDataMap(map);
+		
 
-        domain.addNode(node);
-        assertNotNull(domain.dataNodeForObjEntityName(oe.getName()));
-        assertSame(node, domain.dataNodeForObjEntityName(oe.getName()));
-    }
-
+		// add new entity dynamically
+		ObjEntity oe1 = new ObjEntity("e1");
+		map.addObjEntity(oe1);
+		assertNull(domain.nodesByEntityName.get("e1"));
+		
+		// testing this
+		domain.reindexNodes();
+		
+		assertSame(node, domain.nodesByEntityName.get("e1"));
+	}
 }
