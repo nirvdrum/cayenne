@@ -59,6 +59,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -95,6 +96,7 @@ public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
         String template = query.getTemplate(adapter.getClass().getName());
+        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
 
         int size = query.parametersSize();
 
@@ -110,10 +112,13 @@ public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
             SQLSelectStatement compiled =
                 templateProcessor.processSelectTemplate(template, nextParameters);
 
-            QueryLogger.logQuery(
-                query.getLoggingLevel(),
-                compiled.getSql(),
-                Collections.EMPTY_LIST);
+            if (loggable) {
+                QueryLogger.logQuery(
+                    query.getLoggingLevel(),
+                    compiled.getSql(),
+                    Arrays.asList(compiled.getBindings()));
+            }
+
             long t1 = System.currentTimeMillis();
 
             // TODO: we may cache prep statements for this loop, using merged string as a key

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access.jdbc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -108,6 +109,7 @@ public class SQLTemplateExecutionPlan {
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
         String template = query.getTemplate(adapter.getClass().getName());
 
+        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
         int size = query.parametersSize();
 
         // zero size indicates a one-shot query with no parameters
@@ -123,10 +125,12 @@ public class SQLTemplateExecutionPlan {
             SQLStatement compiled =
                 templateProcessor.processTemplate(template, nextParameters);
 
-            QueryLogger.logQuery(
-                query.getLoggingLevel(),
-                compiled.getSql(),
-                Collections.EMPTY_LIST);
+            if (loggable) {
+                QueryLogger.logQuery(
+                    query.getLoggingLevel(),
+                    compiled.getSql(),
+                    Arrays.asList(compiled.getBindings()));
+            }
 
             // TODO: we may cache prep statements for this loop, using merged string as a key
             // since it is very likely that it will be the same for multiple parameter sets...
