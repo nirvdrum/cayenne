@@ -72,6 +72,11 @@
 		<tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar.gz" compression="gzip">
 			<tarfileset dir="${dist.base}">
 				<include name="${project.name}-${project.version}/**"/>
+				<exclude name="${project.name}-${project.version}/**/*.sh"/>
+			</tarfileset>
+			<!-- Set correct permissions -->
+			<tarfileset dir="${dist.base}" mode="755">
+				<include name="${project.name}-${project.version}/**/*.sh"/>
 			</tarfileset>
 		</tar>
     </target>
