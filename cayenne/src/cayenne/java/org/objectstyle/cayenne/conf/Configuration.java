@@ -133,6 +133,7 @@ public abstract class Configuration {
     protected ConfigLoaderDelegate loaderDelegate;
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
     protected Map dataViewLocations = new HashMap();
+    protected String projectVersion;
 
 	/**
 	 * Sets <code>cl</code> class's ClassLoader to serve
@@ -391,6 +392,20 @@ public abstract class Configuration {
 	protected void setDomainConfigurationName(String domainConfigurationName) {
 		this.domainConfigurationName = domainConfigurationName;
 	}
+
+    /**
+     * @since 1.1
+     */
+    public String getProjectVersion() {
+        return projectVersion;
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public void setProjectVersion(String projectVersion) {
+        this.projectVersion = projectVersion;
+    }
 
     /**
      * Returns an internal property for the DataSource factory that
