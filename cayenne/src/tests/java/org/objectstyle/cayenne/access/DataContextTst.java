@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -195,7 +195,7 @@ public class DataContextTst extends CayenneTestCase {
         assertNull(ctxt.getEntityResolver().lookupObjEntity("NonExistent"));
     }
 
-    /** 
+    /**
      * Tests how CHAR field is handled during fetch.
      * Some databases (Oracle...) would pad a CHAR column
      * with extra spaces, returned to the client. Cayenne
@@ -208,7 +208,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(a.getArtistName().trim(), a.getArtistName());
     }
 
-    /** 
+    /**
      * Tests how CHAR field is handled during fetch in the WHERE clause.
      * Some databases (Oracle...) would pad a CHAR column
      * with extra spaces, returned to the client. Cayenne
@@ -225,9 +225,9 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(1, artists.size());
     }
 
-    /** 
+    /**
      * Test that all queries specified in prefetch are executed
-     * with a single prefetch path. 
+     * with a single prefetch path.
      */
     public void testPrefetch1() throws Exception {
         Expression e =
@@ -244,9 +244,9 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(2, o.getSelectCount());
     }
 
-    /** 
+    /**
      * Test that all queries specified in prefetch are executed
-     * in a more complex prefetch scenario. 
+     * in a more complex prefetch scenario.
      */
     public void testPrefetch2() throws Exception {
         Expression e =
@@ -265,7 +265,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(4, o.getSelectCount());
     }
 
-    /** 
+    /**
      * Test that a to-many relationship is initialized.
      */
     public void testPrefetch3() throws Exception {
@@ -283,7 +283,7 @@ public class DataContextTst extends CayenneTestCase {
         // assertTrue(!toMany.needsFetch());
     }
 
-    /** 
+    /**
      * Test that a to-one relationship is initialized.
      */
     public void testPrefetch4() throws Exception {
@@ -299,7 +299,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
     }
 
-    /** 
+    /**
      * Test prefetching with queries using DB_PATH.
      */
     public void testPrefetch5() throws Exception {
@@ -317,7 +317,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(1, results.size());
     }
 
-    /** 
+    /**
      * Test prefetching with queries using OBJ_PATH.
      */
     public void testPrefetch6() throws Exception {
@@ -333,7 +333,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(1, results.size());
     }
 
-    /** 
+    /**
      * Test fetching query with multiple relationship
      * paths between the same 2 entities used in qualifier.
      */
@@ -350,7 +350,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(2, results.size());
     }
 
-    /** 
+    /**
      * Test fetching query with multiple relationship
      * paths between the same 2 entities used in qualifier.
      */
@@ -371,7 +371,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(2, results.size());
     }
 
-    /** 
+    /**
      * Test fetching a derived entity.
      */
     public void testDerivedEntityFetch1() throws Exception {
@@ -392,7 +392,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(1, a1.getPaintingsCount().intValue());
     }
 
-    /** 
+    /**
      * Test fetching a derived entity with complex qualifier including relationships.
      */
     public void testDerivedEntityFetch2() throws Exception {
@@ -443,7 +443,7 @@ public class DataContextTst extends CayenneTestCase {
 
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
-        
+
         Artist a1 = (Artist)objects.get(0);
         assertEquals(java.util.Date.class, a1.getDateOfBirth().getClass());
     }
@@ -522,7 +522,7 @@ public class DataContextTst extends CayenneTestCase {
             ctxt.commitChanges();
             fail("Inserting a 'read-only' object must fail.");
         } catch (Exception ex) {
-            // exception is expected, 
+            // exception is expected,
             // must blow on saving new "read-only" object.
         }
     }
@@ -535,7 +535,7 @@ public class DataContextTst extends CayenneTestCase {
             ctxt.commitChanges();
             fail("Updating a 'read-only' object must fail.");
         } catch (Exception ex) {
-            // exception is expected, 
+            // exception is expected,
             // must blow on saving new "read-only" object.
         }
     }
@@ -548,7 +548,7 @@ public class DataContextTst extends CayenneTestCase {
             ctxt.commitChanges();
             fail("Deleting a 'read-only' object must fail.");
         } catch (Exception ex) {
-            // exception is expected, 
+            // exception is expected,
             // must blow on saving new "read-only" object.
         }
     }
@@ -706,7 +706,7 @@ public class DataContextTst extends CayenneTestCase {
 
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
         ctxt.commitChanges();
-        //The commit should have made no changes, so 
+        //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been persisted to the db
 
         DataContext freshContext = getDomain().createDataContext();
@@ -721,7 +721,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(0, queryResults.size());
     }
 
-    //Catches a bug where new objects were unregistered within an object iterator, thus modifying the 
+    //Catches a bug where new objects were unregistered within an object iterator, thus modifying the
     // collection the iterator was iterating over (ConcurrentModificationException)
     public void testRollbackWithMultipleNewObjects() {
         String artistName = "rollbackTestArtist";
@@ -745,7 +745,7 @@ public class DataContextTst extends CayenneTestCase {
 
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
         ctxt.commitChanges();
-        //The commit should have made no changes, so 
+        //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been persisted to the db
 
         DataContext freshContext = getDomain().createDataContext();
@@ -773,7 +773,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
 
         ctxt.commitChanges();
-        //The commit should have made no changes, so 
+        //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been deleted from the db
 
         DataContext freshContext = getDomain().createDataContext();
