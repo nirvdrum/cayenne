@@ -24,16 +24,15 @@
                 
             <p><strong>- Access to a relational database and JDBC driver for 
             this database :</strong> Out of the box, Cayenne would 
-            support Oracle, Sybase, MySQL and PostgreSQL databases. 
+            support Oracle, Sybase and MySQL databases. 
             Certain level of support exists for any other database that has a 
             JDBC driver available but this is untested and not guaranteed. List of
             available JDBC drivers can be found at 
             <a href="http://industry.java.sun.com/products/jdbc/drivers">
             http://industry.java.sun.com/products/jdbc/drivers</a>.
-            <i>Note that to run Cayenne unit tests you will need "CREATE TABLE" and 
-            "DROP TABLE" database privileges since tests supplied with 
-            Cayenne will create all the tables on the fly.</i>
-            </p>
+            
+            <i>Note that to run Cayenne unit tests you will need database privileges
+            to create and drop tables.</i></p>
             
             <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary 
             distribution WILL NOT need Ant. Only if you plan to <a href="#compile">build it yourself</a>
@@ -117,9 +116,25 @@
         
         <subsection name="2.4 Unit Tests" anchor="tests">        
             <p>[Optional] Run tests. To do that, you will need to set CAYENNE_HOME and 
-            JAVA_HOME environment variables as described <a href="#inst">above</a>. When 
-            this is 
-            done, you can run test start script. On Windows, from the command line run:</p>
+            JAVA_HOME environment variables as described <a href="#inst">above</a>. Then 
+            make sure that an account used to connect to the database has enough
+            privileges to create and drop tables. For instance a SQL command like the one
+            below would create a user "AUSER" with just enough privileges on Oracle:
+            </p>
+<source>
+CREATE USER "AUSER"  
+PROFILE "DEFAULT" IDENTIFIED BY "PASSWD"
+DEFAULT TABLESPACE "USERS" 
+TEMPORARY TABLESPACE "TEMP" 
+QUOTA UNLIMITED ON USERS ACCOUNT UNLOCK
+
+GRANT CREATE SEQUENCE TO "AUSER"
+GRANT CREATE SESSION TO "AUSER"
+GRANT CREATE TABLE TO "AUSER"
+GRANT CREATE VIEW TO "AUSER"
+</source>
+
+			<p>When this is done, you can run test start script. On Windows, from the command line run:</p>
             
             <source>%CAYENNE_HOME%\bin\runtests.bat</source>
                 

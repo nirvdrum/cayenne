@@ -25,8 +25,8 @@
             lines of code:</p>
             
 <source>
-import org.objectstyle.conf.Configuration;
-import org.objectstyle.access.DataContext;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.access.DataContext;
 ...
 
 DataContext ctxt = Configuration.getSharedConfig().getDomain().createDataContext();
@@ -57,10 +57,10 @@ DataContext ctxt = ServletConfiguration.getDefaultContext(session);
             
 <source>
 import java.util.List;
-import org.objectstyle.access.DataContext;
-import org.objectstyle.query.SelectQuery;
-import org.objectstyle.exp.Expression;
-import org.objectstyle.exp.ExpressionFactory;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 ...
 
 // assume this exists and initialized
@@ -83,10 +83,10 @@ List realArt = ctxt.performQuery(q);
 <source>
 import java.math.BigDecimal;
 import java.util.List;
-import org.objectstyle.access.DataContext;
-import org.objectstyle.query.SelectQuery;
-import org.objectstyle.exp.Expression;
-import org.objectstyle.exp.ExpressionFactory;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.Artist;
 ...
