@@ -82,11 +82,12 @@ public class EventManager extends Object {
 
     private static final EventManager defaultManager = new EventManager();
 
-    public static final int DEFAULT_DISPATCH_THREAD_COUNT = 3;
+    public static final int DEFAULT_DISPATCH_THREAD_COUNT = 5;
 
     // keeps weak references to subjects
     protected Map subjects;
     protected List eventQueue;
+    protected boolean singleThread;
 
     /**
      * This method will return the shared 'default' EventManager.
@@ -108,10 +109,7 @@ public class EventManager extends Object {
         super();
         this.subjects = Collections.synchronizedMap(new WeakHashMap());
         this.eventQueue = Collections.synchronizedList(new LinkedList());
-
-        if (dispatchThreadCount <= 0) {
-            dispatchThreadCount = DEFAULT_DISPATCH_THREAD_COUNT;
-        }
+        this.singleThread = dispatchThreadCount <= 0;
 
         // start dispatch threads
         for (int i = 0; i < dispatchThreadCount; i++) {
@@ -138,6 +136,11 @@ public class EventManager extends Object {
         String methodName,
         Class eventParameterClass,
         EventSubject subject) {
+
+        if (singleThread) {
+            throw new IllegalStateException("EventManager is configured to be single-threaded.");
+        }
+
         this.addListener(listener, methodName, eventParameterClass, subject, null, false);
     }
 
@@ -169,6 +172,11 @@ public class EventManager extends Object {
         Class eventParameterClass,
         EventSubject subject,
         Object sender) {
+
+        if (singleThread) {
+            throw new IllegalStateException("EventManager is configured to be single-threaded.");
+        }
+
         addListener(listener, methodName, eventParameterClass, subject, sender, false);
     }
 
@@ -312,6 +320,9 @@ public class EventManager extends Object {
      * @since 1.1
      */
     public void postNonBlockingEvent(EventObject event, EventSubject subject) {
+        if (singleThread) {
+            throw new IllegalStateException("EventManager is configured to be single-threaded.");
+        }
 
         // add dispatch to the queue and return
         synchronized (eventQueue) {
@@ -339,6 +350,7 @@ public class EventManager extends Object {
         }
     }
 
+    // represents a posted event
     class Dispatch {
         EventObject[] eventArgument;
         EventSubject subject;
@@ -383,6 +395,7 @@ public class EventManager extends Object {
         }
     }
 
+    // represents a posted event that should be sent to a single known listener
     class InvocationDispatch extends Dispatch {
         Invocation target;
 
