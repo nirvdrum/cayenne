@@ -99,7 +99,9 @@ public class FileConfiguration extends DefaultConfiguration {
 	 * l.addFilesystemPath(new File("/an/absolute/search/path"));
 	 * Configuration.initializeSharedConfiguration(conf);
 	 * </pre>
-	 * The added file search paths must exist.
+	 * The added file search paths must exist when given as
+	 * <code>File</code>; for adding possibly nonexisting paths, use
+	 * {@link ResourceLocator#addFilesystemPath(String)}.
 	 *
 	 * @throws ConfigurationException when projectFile is <code>null</code>.
 	 * @see DefaultConfiguration#DefaultConfiguration(String)
@@ -117,10 +119,10 @@ public class FileConfiguration extends DefaultConfiguration {
 		l.setSkipCurrentDirectory(false);
 		l.setSkipHomeDirectory(true);
 
-		// normalize the file location & add it to the file search path
+		// add the file's location to the search path, if it exists
 		File projectDirectory = this.getProjectDirectory();
 		if (projectDirectory != null) {
-			l.addFilesystemPath(projectDirectory);
+			l.addFilesystemPath(projectDirectory.getPath());
 		}
 	}
 
@@ -146,7 +148,7 @@ public class FileConfiguration extends DefaultConfiguration {
 		l.setSkipCurrentDirectory(false);
 		l.setSkipHomeDirectory(true);
 
-		// normalize the file location & add it to the file search path
+		// add the file's location to the search path, if it exists
 		File projectDirectory = this.getProjectDirectory();
 		if (projectDirectory != null) {
 			l.addFilesystemPath(projectDirectory);
