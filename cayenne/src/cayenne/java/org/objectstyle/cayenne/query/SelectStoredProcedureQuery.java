@@ -56,6 +56,9 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectstyle.cayenne.map.StoredProcedure;
 
 /**
@@ -69,6 +72,7 @@ public class SelectStoredProcedureQuery
 
     protected int pageSize;
     protected boolean fetchingDataRows;
+    protected Map resultParams = new HashMap();
 
     /**
      * Constructor for SelectStoredProcedureQuery.
@@ -123,5 +127,28 @@ public class SelectStoredProcedureQuery
                     + "must return a ResultSet.");
         }
         super.setStoredProcedure(storedProcedure);
+    }
+
+    /**
+     * Creates a mapping of stored procedure result column to a DbAttribute name
+     * associated with the root DbEntity for this query.
+     * 
+     * @param storedProcParam
+     * @param dbAttrName
+     */
+    public void addResultParam(String storedProcParam, String dbAttrName) {
+        resultParams.put(storedProcParam, dbAttrName);
+    }
+
+    public Map getResultParams() {
+        return resultParams;
+    }
+
+    public void removeResultParam(String storedProcParam) {
+        resultParams.remove(storedProcParam);
+    }
+
+    public void clearResultParams() {
+        resultParams.clear();
     }
 }
