@@ -71,6 +71,7 @@ import org.apache.commons.collections.SequencedHashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -112,7 +113,6 @@ class ContextCommit {
 	private Map objectsToDeleteByObjEntity;
 	private Map objectsToUpdateByObjEntity;
 	private Set writableObjEntities;
-	private Set readOnlyObjEntities;
 	private List objEntitiesToInsert;
 	private List objEntitiesToDelete;
 	private List objEntitiesToUpdate;
@@ -529,7 +529,6 @@ class ContextCommit {
 		objectsToDeleteByObjEntity = new HashMap();
 		objectsToUpdateByObjEntity = new HashMap();
 		writableObjEntities = new HashSet();
-		readOnlyObjEntities = new HashSet();
 		objEntitiesToInsert = new ArrayList();
 		objEntitiesToDelete = new ArrayList();
 		objEntitiesToUpdate = new ArrayList();
@@ -552,42 +551,70 @@ class ContextCommit {
 	}
 
 	private void objectToInsert(DataObject o) throws CayenneException {
-		if (!classifyByEntityAndNode(o,
+		classifyByEntityAndNode(o,
 			newObjectsByObjEntity,
 			objEntitiesToInsert,
-			DataNodeCommitHelper.INSERT))
-			throw new CayenneException("Classification failed");
+			DataNodeCommitHelper.INSERT);
 	}
 
 	private void objectToDelete(DataObject o) throws CayenneException {
-		if (!classifyByEntityAndNode(o,
+		classifyByEntityAndNode(o,
 			objectsToDeleteByObjEntity,
 			objEntitiesToDelete,
-			DataNodeCommitHelper.DELETE))
-			throw new CayenneException("Classification failed");
+			DataNodeCommitHelper.DELETE);
 	}
 
 	private void objectToUpdate(DataObject o) throws CayenneException {
-		if (!classifyByEntityAndNode(o,
+		classifyByEntityAndNode(o,
 			objectsToUpdateByObjEntity,
 			objEntitiesToUpdate,
-			DataNodeCommitHelper.UPDATE))
-			throw new CayenneException("Classification failed");
+			DataNodeCommitHelper.UPDATE);
 	}
 
 	private ObjEntity classifyAsWritable(Class objEntityClass) {
 		ObjEntity entity =
 			context.getEntityResolver().lookupObjEntity(objEntityClass);
-		if (entity == null || entity.isReadOnly()) {
-			readOnlyObjEntities.add(objEntityClass);
-			return null;
+		if (entity == null) {
+			throw attemptToCommitUnmappedClass(objEntityClass);
+		}
+		else if(entity.isReadOnly()) {
+			throw attemptToCommitReadOnlyEntity(objEntityClass, context.getEntityResolver().lookupObjEntity(objEntityClass));
 		} else {
 			writableObjEntities.add(objEntityClass);
 			return entity;
 		}
 	}
+	
+	private RuntimeException attemptToCommitReadOnlyEntity(Class objectClass, ObjEntity entity) {
+		String className = (objectClass != null) ? objectClass.getName() : "<null>";
+		StringBuffer message = new StringBuffer();
+		message.append("Class '")
+		  .append(className)
+		  .append("' maps to a read-only entity");
+		  
+		if(entity != null) {
+		  message.append(" '").append(entity.getName()).append("'");
+		}
+		   
+		message.append(". Can't commit changes.");
+		return new CayenneRuntimeException(message.toString());
+	}
+	
+	private RuntimeException attemptToCommitUnmappedClass(Class objectClass) {
+		String className = (objectClass != null) ? objectClass.getName() : "<null>";
+		StringBuffer message = new StringBuffer();
+		message.append("Class '")
+			.append(className)
+			.append("' does not map to an ObjEntity and is therefore not persistent. Can't commit changes.");
+		  
+		return new CayenneRuntimeException(message.toString());
+	}
 
-	private boolean classifyByEntityAndNode(
+    /**
+     * Performs classification of a DataObject for the DML operation.
+     * Throws CayenneRuntimeException if an object can't be classified. 
+     */
+	private void classifyByEntityAndNode(
 		DataObject o,
 		Map objectsByObjEntity,
 		List objEntities,
@@ -596,15 +623,8 @@ class ContextCommit {
 		Class objEntityClass = o.getObjectId().getObjClass();
 		ObjEntity entity = null;
 
-		if (readOnlyObjEntities.contains(objEntityClass)) {
-			return false;
-		}
-
 		if (!writableObjEntities.contains(objEntityClass)) {
 			entity = classifyAsWritable(objEntityClass);
-			if (entity == null) {
-				return false;
-			}
 		} else {
 			entity =
 				context.getEntityResolver().lookupObjEntity(objEntityClass);
@@ -628,7 +648,6 @@ class ContextCommit {
 				objectsForObjEntity);
 		}
 		objectsForObjEntity.add(o);
-		return true;
 	}
 
 	private void categorizeFlattenedInsertsAndCreateBatches() {
