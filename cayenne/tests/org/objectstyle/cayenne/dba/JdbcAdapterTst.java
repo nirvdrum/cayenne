@@ -86,4 +86,30 @@ public class JdbcAdapterTst extends TestCase {
         assertEquals(1, types.length);
         assertEquals(TypesMapping.getSqlNameByType(type), types[0]);
     }
+    
+    
+    /*// check for Oracle open cursors - used for debugging. 
+    public static void testOpenCursors() {
+        try {
+            Statement st = c.createStatement();
+            ResultSet rs =
+                st.executeQuery(
+                    "select user_name, status, osuser, machine, a.sql_text "
+                        + "from v$session b, v$open_cursor a where user_name = 'GOYA'");
+            System.out.println("results..");
+            System.out.println("==================");
+            while (rs.next()) {
+                System.out.print(rs.getString(1));
+                System.out.print(":" + rs.getString(2));
+                System.out.print(":" + rs.getString(3));
+                System.out.print(":" + rs.getString(4));
+                System.out.println(":" + rs.getString(5));
+            }
+            rs.close();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+    } */
 }
