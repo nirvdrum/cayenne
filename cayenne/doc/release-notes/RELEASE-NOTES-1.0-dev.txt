@@ -8,3 +8,8 @@ http://objectstyle.org/cayenne/
 
 
 Changes in this release:
+
+1. Fixed regression bug with MySQL PK Generator to correctly generate PK ranges.
+
+2. Removed many deprecated classes and methods, as announced.
+
