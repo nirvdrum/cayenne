@@ -77,6 +77,7 @@ import org.apache.commons.collections.ExtendedProperties;
 import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.conf.*;
 import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
@@ -129,6 +130,7 @@ implements ActionListener
     JMenu  toolMenu   		= new JMenu("Tools");
     JMenuItem importDbMenu  = new JMenuItem("Reverse engineer database");
     JMenuItem generateMenu  = new JMenuItem("Generate Classes");
+    JMenuItem generateDbMenu  = new JMenuItem("Generate Database");
     JMenuItem setPackageMenu= new JMenuItem("Set Package Name For Obj Entities");
 
     JMenu helpMenu				= new JMenu("Help");
@@ -179,6 +181,7 @@ implements ActionListener
 
         importDbMenu.addActionListener(this);
         generateMenu.addActionListener(this);
+        generateDbMenu.addActionListener(this);
         setPackageMenu.addActionListener(this);
         aboutMenu.addActionListener(this);
 
@@ -230,6 +233,7 @@ implements ActionListener
 
         toolMenu.add(importDbMenu);
         toolMenu.add(generateMenu);
+        toolMenu.add(generateDbMenu);
         toolMenu.addSeparator();
         toolMenu.add(setPackageMenu);
 
@@ -395,6 +399,8 @@ implements ActionListener
             setPackageName();
         } else if (src == generateMenu) {
             generateClasses();
+        } else if (src == generateDbMenu) {
+            generateDb();
         } else if (src == exitMenu) {
         	exitEditor();
         } else if (src == aboutMenu) {
@@ -413,6 +419,8 @@ implements ActionListener
 		String package_name;
 		package_name = JOptionPane.showInputDialog(this
 												, "Enter the new package name");
+		if (null == package_name || package_name.trim().length() == 0)
+			return;
 		// Append period to the end of package name, if it is not there.
 		if (package_name.charAt(package_name.length() - 1) != '.')
 			package_name = package_name + ".";
@@ -535,6 +543,74 @@ implements ActionListener
 		this.setTitle(TITLE);
 		return true;
 	}
+
+	private void generateDb() {
+        DataSourceInfo dsi = new DataSourceInfo();
+        Connection conn = null;
+        DbAdapter adapter = null;
+        // Get connection
+        while (conn == null) {
+	        InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
+	        loginObj.collectLoginInfo();
+	        // connect
+	        dsi = loginObj.getDataSrcInfo();
+	        if (null == dsi) {
+	        	return;
+	        }
+	        if (dsi.getAdapterClass() == null 
+	        	|| dsi.getAdapterClass().trim().length() == 0) {
+	        	JOptionPane.showMessageDialog(this, "Must specify DB Adapter");
+	        	continue;
+	        }
+	        try {
+		        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
+		        conn = DriverManager.getConnection(
+		              					dsi.getDataSourceUrl(),
+		                   				dsi.getUserName(),
+		                   				dsi.getPassword());
+		        adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this
+							, e.getMessage(), "Error Connecting to the Database"
+							, JOptionPane.ERROR_MESSAGE);
+				continue;
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this
+							, e.getMessage(), "Error creating DbAdapter"
+							, JOptionPane.ERROR_MESSAGE);
+				continue;
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this
+							, e.getMessage(), "Error creating DbAdapter"
+							, JOptionPane.ERROR_MESSAGE);
+				continue;
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this
+							, e.getMessage(), "Error creating DbAdapter"
+							, JOptionPane.ERROR_MESSAGE);
+				continue;
+			}
+		}// End while()
+
+		DataMap map = mediator.getCurrentDataMap();
+		try {
+			GenerateDbDialog dialog;
+			dialog = new GenerateDbDialog(mediator, conn, adapter);
+		} 
+		finally {
+			try {
+				conn.close();
+			} catch (Exception e) {e.printStackTrace();}
+		}
+	}// End generateDb()
+
+
+
 
 	private void importDb() {
         DataSourceInfo dsi = new DataSourceInfo();
@@ -1218,6 +1294,7 @@ implements ActionListener
 
         importDbMenu.setEnabled(false);
         generateMenu.setEnabled(false);
+        generateDbMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);
 
         createDomainBtn.setEnabled(false);
@@ -1250,6 +1327,7 @@ implements ActionListener
         createObjEntityMenu.setEnabled(true);
         createDbEntityMenu.setEnabled(true);
         generateMenu.setEnabled(true);
+        generateDbMenu.setEnabled(true);
 
         createObjEntityBtn.setEnabled(true);
         createDbEntityBtn.setEnabled(true);
