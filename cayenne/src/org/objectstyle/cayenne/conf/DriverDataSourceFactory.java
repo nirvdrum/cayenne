@@ -98,14 +98,12 @@ public class DriverDataSourceFactory implements DataSourceFactory {
       * directory or a user home directory. */
     public DataSource getDataSource(String location) throws Exception {
         load(location);
-        PoolDataSource poolDS = new PoolDataSource(driverInfo.getJdbcDriver(), driverInfo.getDataSourceUrl());
-
-        return new PoolManager(
-                   poolDS,
-                   driverInfo.getMinConnections(),
-                   driverInfo.getMaxConnections(),
-                   driverInfo.getUserName(),
-                   driverInfo.getPassword());
+        return new PoolManager(driverInfo.getJdbcDriver(),
+                               driverInfo.getDataSourceUrl(),
+                               driverInfo.getMinConnections(),
+                               driverInfo.getMaxConnections(),
+                               driverInfo.getUserName(),
+                               driverInfo.getPassword());
     }
 
     /** Returns DataSourceInfo property. */
@@ -210,7 +208,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 throw new SAXException("'<url value=' attribute is required.");
         }
     }
-    
+
     private class LoginHandler extends AbstractHandler {
         /**
          * Constructor which just delegates to the superconstructor.
@@ -228,7 +226,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
             driverInfo.setPassword(atts.getValue("password"));
         }
     }
-    
+
     private class ConnectionHandler extends AbstractHandler {
         /**
          * Constructor which just delegates to the superconstructor.
@@ -242,7 +240,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         }
 
         public void init(String name, Attributes atts, DataSourceInfo driverInfo) throws SAXException {
-           try {
+            try {
                 String min = atts.getValue("min");
                 if(min != null)
                     driverInfo.setMinConnections(Integer.parseInt(min));
