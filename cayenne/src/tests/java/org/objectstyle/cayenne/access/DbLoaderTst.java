@@ -167,30 +167,36 @@ public class DbLoaderTst extends CayenneTestCase {
 
         DbAttribute blobAttr = getDbAttribute(blobEnt, "BLOB_COL");
         assertNotNull(blobAttr);
-        assertEquals(msgForTypeMismatch(Types.BLOB, blobAttr), Types.BLOB, blobAttr.getType());
+        assertEquals(
+            msgForTypeMismatch(Types.BLOB, blobAttr),
+            Types.BLOB,
+            blobAttr.getType());
 
         DbEntity clobEnt = getDbEntity(map, "CLOB_TEST");
         assertNotNull(clobEnt);
 
         DbAttribute clobAttr = getDbAttribute(clobEnt, "CLOB_COL");
         assertNotNull(clobAttr);
-        assertEquals(msgForTypeMismatch(Types.CLOB, clobAttr), Types.CLOB, clobAttr.getType());
+        assertEquals(
+            msgForTypeMismatch(Types.CLOB, clobAttr),
+            Types.CLOB,
+            clobAttr.getType());
     }
-    
+
     private void assertLobObjEntities(DataMap map) {
         ObjEntity blobEnt = map.getObjEntity("BlobTest");
         assertNotNull(blobEnt);
 
         // BLOBs should be mapped as byte[]
-        ObjAttribute blobAttr = (ObjAttribute)blobEnt.getAttribute("blobCol");
+        ObjAttribute blobAttr = (ObjAttribute) blobEnt.getAttribute("blobCol");
         assertNotNull(blobAttr);
         assertEquals("byte[]", blobAttr.getType());
-        
+
         ObjEntity clobEnt = map.getObjEntity("ClobTest");
         assertNotNull(clobEnt);
 
         // CLOBs should be mapped as Strings by default
-        ObjAttribute clobAttr = (ObjAttribute)clobEnt.getAttribute("clobCol");
+        ObjAttribute clobAttr = (ObjAttribute) clobEnt.getAttribute("clobCol");
         assertNotNull(clobAttr);
         assertEquals(String.class.getName(), clobAttr.getType());
     }
@@ -223,37 +229,13 @@ public class DbLoaderTst extends CayenneTestCase {
 
     /** Selectively check how different types were processed. */
     public void checkTypes(DataMap map) {
-        DbEntity dbe = map.getDbEntity("PAINTING");
-        DbEntity floatTest = map.getDbEntity("FLOAT_TEST");
+        DbEntity dbe = getDbEntity(map, "PAINTING");
+        DbEntity floatTest = getDbEntity(map, "FLOAT_TEST");
 
-        // take into account a possibility of lowercase names
-        if (dbe == null) {
-            dbe = map.getDbEntity("painting");
-        }
-        if (floatTest == null) {
-            floatTest = map.getDbEntity("float_test");
-        }
-
-        DbAttribute integerAttr = (DbAttribute) dbe.getAttribute("PAINTING_ID");
-        if (integerAttr == null) {
-            // consider lowercase attribute names
-            integerAttr = (DbAttribute) dbe.getAttribute("painting_id");
-        }
-        DbAttribute decimalAttr =
-            (DbAttribute) dbe.getAttribute("ESTIMATED_PRICE");
-        if (decimalAttr == null) {
-            decimalAttr = (DbAttribute) dbe.getAttribute("estimated_price");
-        }
-        DbAttribute varcharAttr =
-            (DbAttribute) dbe.getAttribute("PAINTING_TITLE");
-        if (varcharAttr == null) {
-            varcharAttr = (DbAttribute) dbe.getAttribute("painting_title");
-        }
-        DbAttribute floatAttr =
-            (DbAttribute) floatTest.getAttribute("FLOAT_COL");
-        if (floatAttr == null) {
-            floatAttr = (DbAttribute) floatTest.getAttribute("float_col");
-        }
+        DbAttribute integerAttr = getDbAttribute(dbe, "PAINTING_ID");
+        DbAttribute decimalAttr = getDbAttribute(dbe, "ESTIMATED_PRICE");
+        DbAttribute varcharAttr = getDbAttribute(dbe, "PAINTING_TITLE");
+        DbAttribute floatAttr = getDbAttribute(floatTest, "FLOAT_COL");
 
         // check decimal
         // postgresql does not have a decimal type, instead columns that
@@ -289,14 +271,10 @@ public class DbLoaderTst extends CayenneTestCase {
             integerAttr.getType());
 
         // check float
-        // floats are not very well reingeneered by Oracle driver,
-        // so account for that here
-
         assertTrue(
             msgForTypeMismatch(Types.FLOAT, floatAttr),
             Types.FLOAT == floatAttr.getType()
-                || Types.DOUBLE == floatAttr.getType()
-                || Types.OTHER == floatAttr.getType());
+                || Types.DOUBLE == floatAttr.getType());
     }
 
     public void checkAllDBEntities(DataMap map) {
