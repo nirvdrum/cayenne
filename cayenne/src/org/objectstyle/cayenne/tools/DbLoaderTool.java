@@ -55,13 +55,12 @@ package org.objectstyle.cayenne.tools;
  *
  */
 
-import java.sql.*;
-import java.util.*;
 import java.io.PrintWriter;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.gui.*;
+import java.sql.*;
+
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.gui.InteractiveLogin;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
 
 
 /** Utility class for loading schema information from the specified

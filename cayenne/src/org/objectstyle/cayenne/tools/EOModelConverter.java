@@ -55,10 +55,13 @@ package org.objectstyle.cayenne.tools;
  *
  */ 
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.wocompat.*;
-import java.io.*;
-import java.util.logging.*;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 /**
  *  Command-line tool that converts WebObjects EOModels to Cayenne DataMaps
  */

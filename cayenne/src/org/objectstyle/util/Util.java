@@ -55,13 +55,16 @@ package org.objectstyle.util;
  *
  */ 
 
-import java.util.*;
-import java.util.regex.*;
-import java.util.logging.*;
-import java.net.*;
 import java.io.*;
-import org.xml.sax.*;
+import java.net.URL;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.parsers.*;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  *  Utility methods sink.

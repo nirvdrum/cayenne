@@ -55,10 +55,12 @@ package org.objectstyle.util;
  *
  */ 
 
-import java.util.*;
-import java.util.logging.*;
-import java.util.regex.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /** ObjectStyle log formatter for more readable logs. */

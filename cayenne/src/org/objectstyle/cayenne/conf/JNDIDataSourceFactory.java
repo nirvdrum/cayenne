@@ -55,10 +55,9 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import javax.sql.DataSource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 /** Looks up DataSource objects via JNDI.
   *

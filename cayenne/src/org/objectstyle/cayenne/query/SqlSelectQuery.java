@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.ObjAttribute;
 
 
 /** Allows to send "raw" SQL select statements to the database using 

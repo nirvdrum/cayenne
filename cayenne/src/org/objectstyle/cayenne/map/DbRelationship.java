@@ -57,7 +57,8 @@ package org.objectstyle.cayenne.map;
 
 
 import java.util.*;
-import org.objectstyle.cayenne.*;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 public class DbRelationship extends Relationship {
     // The columns through which the join is implemented.

@@ -55,7 +55,7 @@ package org.objectstyle.util;
  *
  */ 
 
-import java.util.*;
+import java.util.StringTokenizer;
 
 /** Utility class to convert from different naming styles to Java convention.
  *  For example names like "ABCD_EFG" can be converted to "abcdEfg" */

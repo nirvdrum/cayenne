@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+
 
 
 /** Superclass of classes that describe possible database operations. */

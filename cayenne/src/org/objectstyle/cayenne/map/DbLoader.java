@@ -57,10 +57,10 @@ package org.objectstyle.cayenne.map;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.*;
-import java.io.PrintWriter;
-import org.objectstyle.util.*;
+import java.util.logging.Logger;
+
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.util.NameConverter;
 
 
 /** Utility class that does reverse engineering of the database. 

@@ -56,7 +56,9 @@ package org.objectstyle.cayenne.map;
  */ 
 
 import java.util.*;
-import org.objectstyle.cayenne.exp.*;
+
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
 
 
 /** Superclass of metadata classes. */

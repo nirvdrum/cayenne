@@ -56,14 +56,15 @@ package org.objectstyle.cayenne.map;
  */
 
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.*;
-import org.apache.velocity.*;
-import org.apache.velocity.app.*;
-import org.apache.velocity.context.*;
+import java.io.Writer;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.context.Context;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 
 /** Generates Java class source code using VTL (Velocity template engine) based on

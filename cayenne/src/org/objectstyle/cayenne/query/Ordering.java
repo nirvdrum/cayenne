@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+
 
 /** Defines ordering policy. Queries can have multiple Ordering's. */
 public class Ordering {

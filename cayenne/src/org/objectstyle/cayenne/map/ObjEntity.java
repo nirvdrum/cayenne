@@ -57,8 +57,9 @@ package org.objectstyle.cayenne.map;
 
 
 import java.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.exp.*;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectId;
 
 
 /** Metadata for the data object class. Each data object class is tied

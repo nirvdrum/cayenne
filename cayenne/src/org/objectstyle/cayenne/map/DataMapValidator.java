@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.map;
 import java.util.*;
 
 /**
- * validates an object of DataMap and
+ * Validates an object of DataMap and
  * generates objects of DataMapValidator.Message to describe
  * warnings. It is intended for use in GUI modelers or in
  * developer's code.

@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.*;
+import java.util.Iterator;
 
 /** Provides utility methods to access DataMap, Entities, etc.
  *  For example, setName() in Attribute requires changing

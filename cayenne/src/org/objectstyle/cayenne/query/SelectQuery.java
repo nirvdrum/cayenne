@@ -56,9 +56,9 @@ package org.objectstyle.cayenne.query;
  */ 
 
 import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.exp.*;
-import java.util.logging.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.exp.Expression;
 
 public class SelectQuery extends QualifiedQuery {
     static Logger logObj = Logger.getLogger(SelectQuery.class.getName());

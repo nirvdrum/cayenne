@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.exp.Expression;
 
 public abstract class QualifiedQuery extends Query {
     protected Expression qualifier;

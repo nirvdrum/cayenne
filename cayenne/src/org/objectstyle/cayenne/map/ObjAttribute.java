@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.map;
  */ 
 
 
-import java.util.*;
+
 
 /** Metadata for the data object property.
  *  Also used to map properties to the database table columns. */

@@ -57,8 +57,7 @@ package org.objectstyle.cayenne.map;
 
 
 import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.*;
+import java.util.logging.Logger;
 
 /** Metadata for the navigational association between the data objects.
  *  For example, if class "Employee" you may need to get to the department

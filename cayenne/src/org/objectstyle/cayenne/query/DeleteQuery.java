@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.exp.Expression;
 
 public class DeleteQuery extends QualifiedQuery {
     /** Creates empty DeleteQuery. */

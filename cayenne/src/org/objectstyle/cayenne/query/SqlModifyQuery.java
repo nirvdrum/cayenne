@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+
 
 
 /** Allows to send "raw" SQL INSERT, UPDATE, DELETE statements or stored procedure calls 

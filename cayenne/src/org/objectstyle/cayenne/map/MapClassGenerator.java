@@ -56,11 +56,11 @@ package org.objectstyle.cayenne.map;
  */
 
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.*;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 
 /** Generates Java classes source code using VTL (Velocity template engine) for

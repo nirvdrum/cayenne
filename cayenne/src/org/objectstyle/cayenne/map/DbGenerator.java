@@ -56,18 +56,13 @@ package org.objectstyle.cayenne.map;
  */
 
 
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Level;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.SQLException;
 
-
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 
 /** Utility class that does forward engineering of the database.

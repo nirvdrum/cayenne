@@ -56,10 +56,10 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.exp.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.objectstyle.cayenne.exp.Expression;
 
 /** Object encapsulating an UPDATE statement. Note that updated attributes
  *  are expressed in terms of DbAttribute names.  */

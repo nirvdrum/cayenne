@@ -55,13 +55,9 @@ package org.objectstyle.util;
  *
  */
 
-import java.util.*;
-import java.util.logging.Logger;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.File;
+import java.io.*;
 import java.net.URL;
+import java.util.logging.Logger;
 
 
 /** Utility class to find resources (usually files) using most common Java approaches.

@@ -55,14 +55,16 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
+
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import java.util.logging.*;
-import org.objectstyle.util.*;
-import java.net.*;
-import org.objectstyle.cayenne.dba.*;
+import org.xml.sax.helpers.DefaultHandler;
+
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.util.ResourceLocator;
+import org.objectstyle.util.Util;
 
 public class MapLoaderImpl extends DefaultHandler implements MapLoader {
     static Logger logObj = Logger.getLogger(MapLoaderImpl.class.getName());
