@@ -60,6 +60,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -145,6 +146,15 @@ public class UtilDateType extends AbstractType {
                 break;
             default :
                 val = cs.getObject(index);
+                // check if value was properly converted by the driver
+                if (val != null && !(val instanceof java.util.Date)) {
+                    String typeName = TypesMapping.getSqlNameByType(type);
+                    throw new ClassCastException(
+                        "Expected a java.util.Date or subclass, instead fetched '"
+                            + val.getClass().getName()
+                            + "' for JDBC type "
+                            + typeName);
+                }
                 break;
         }
 
