@@ -63,7 +63,7 @@ import javax.swing.JOptionPane;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.event.DataMapEvent;
+import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**

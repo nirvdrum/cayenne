@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -57,15 +57,15 @@ package org.objectstyle.cayenne.modeler.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the DataNode */
-public interface DataNodeListener extends EventListener
+/** For managing the changes in the DbAttribute. */
+public interface DbAttributeListener extends EventListener
 {
-	/** DataNode property (usually - name) changed. */
-	public void dataNodeChanged(DataNodeEvent e);
-	/** New data map has been created/added.*/
-	public void dataNodeAdded(DataNodeEvent e);
-	/** DataNode has been removed.*/
-	public void dataNodeRemoved(DataNodeEvent e);
+	/** Attribute property changed. */
+	public void dbAttributeChanged(AttributeEvent e);
+	/** New attribute has been created/added.*/
+	public void dbAttributeAdded(AttributeEvent e);
+	/** Attribute has been removed.*/
+	public void dbAttributeRemoved(AttributeEvent e);
 	
 }
 

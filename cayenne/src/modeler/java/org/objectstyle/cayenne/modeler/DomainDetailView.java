@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DomainEvent;
+import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.Util;

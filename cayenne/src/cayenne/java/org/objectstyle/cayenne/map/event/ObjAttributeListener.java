@@ -1,3 +1,4 @@
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -52,50 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */
-package org.objectstyle.cayenne.modeler.event;
+ */ 
 
-import org.objectstyle.cayenne.access.DataNode;
+import java.util.EventListener;
 
-/** 
- * Represents events resulted from DataNode changes 
- * in CayenneModeler.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
- */
-public class DataNodeEvent extends ModelerEvent {
-	protected DataNode dataNode;
-
-	/** Creates a node change event. */
-	public DataNodeEvent(Object src, DataNode node) {
-		super(src);
-		setDataNode(node);
-	}
-
-	/** Creates a node event of a specified type. */
-	public DataNodeEvent(Object src, DataNode node, int id) {
-		this(src, node);
-		setId(id);
-	}
-
-	/** Creates a node name change event.*/
-	public DataNodeEvent(Object src, DataNode node, String oldName) {
-		this(src, node);
-		setOldName(oldName);
-	}
-
-	/** Returns node object associated with this event. */
-	public DataNode getDataNode() {
-		return dataNode;
-	}
-
-	/**
-	 * Sets the dataNode.
-	 * 
-	 * @param dataNode The dataNode to set
-	 */
-	public void setDataNode(DataNode dataNode) {
-		this.dataNode = dataNode;
-	}
+/** For managing the changes in the ObjAttribute. */
+public interface ObjAttributeListener extends EventListener
+{ 
+	/** Attribute property changed. */
+	public void objAttributeChanged(AttributeEvent e);
+	/** New attribute has been created/added.*/
+	public void objAttributeAdded(AttributeEvent e);
+	/** Attribute has been removed.*/
+	public void objAttributeRemoved(AttributeEvent e);
+	
 }
+

@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DataMapEvent;
+import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.modeler.util.EOModelFileFilter;
 import org.objectstyle.cayenne.modeler.util.EOModelSelectFilter;
 import org.objectstyle.cayenne.project.ProjectPath;

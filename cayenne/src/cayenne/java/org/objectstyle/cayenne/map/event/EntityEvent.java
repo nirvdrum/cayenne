@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.map.event;
 
 import org.objectstyle.cayenne.map.Entity;
 
@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.map.Entity;
  * in CayenneModeler. This event is used for both ObjEntities
  * and DbEntities.
  */
-public class EntityEvent extends ModelerEvent {
+public class EntityEvent extends MapEvent {
 	protected Entity entity;
 
 	/** Creates a Entity change event. */

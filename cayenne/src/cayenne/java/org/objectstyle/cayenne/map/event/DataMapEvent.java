@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,22 +52,49 @@ package org.objectstyle.cayenne.modeler.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map.event;
 
-import java.util.EventListener;
+import org.objectstyle.cayenne.map.DataMap;
 
-/** For managing the changes in the DbEntity */
-public interface DbEntityListener extends EventListener
-{
-	/** Entity property changed. 
-	  * May be name, attribute or relationship added or removed, etc. 
-	  * Attribute and relationship property changes are handled in
-	  * respective listeners. */
-	public void dbEntityChanged(EntityEvent e);
-	/** New entity has been created/added.*/
-	public void dbEntityAdded(EntityEvent e);
-	/** Entity has been removed.*/
-	public void dbEntityRemoved(EntityEvent e);
+/** 
+ * Represents events resulted from DataMap changes 
+ * in CayenneModeler.
+ */
+public class DataMapEvent extends MapEvent {
+	protected DataMap dataMap;
+
+	/** Creates a DataMap change event. */
+	public DataMapEvent(Object src, DataMap dataMap) {
+		super(src);
+		this.dataMap = dataMap;
+	}
+
+	/** Creates a DataMap event of a specified type. */
+	public DataMapEvent(Object src, DataMap dataMap, int id) {
+		this(src, dataMap);
+		setId(id);
+	}
+
+	/** Creates a DataMap name change event.*/
+	public DataMapEvent(Object src, DataMap dataMap, String oldName) {
+		this(src, dataMap);
+		setOldName(oldName);
+	}
+
+	/** 
+	 * Returns DataMap associated with this event. 
+	 */
+	public DataMap getDataMap() {
+		return dataMap;
+	}
 	
+	/**
+	 * Sets DataMap associated with this event.
+	 * 
+	 * @param dataMap The dataMap to set
+	 */
+	public void setDataMap(DataMap dataMap) {
+		this.dataMap = dataMap;
+	}
 }
-

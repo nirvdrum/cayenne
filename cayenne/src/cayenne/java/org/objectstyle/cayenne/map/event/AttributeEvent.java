@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,22 +52,57 @@ package org.objectstyle.cayenne.modeler.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map.event;
 
-import java.util.EventListener;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.Entity;
 
-/** For managing the changes in the ObjEntity */
-public interface ObjEntityListener extends EventListener
-{
-	/** Entity property changed. 
-	  * May be name, attribute or relationship added or removed, etc. 
-	  * Attribute and relationship property changes are handled in
-	  * respective listeners. */
-	public void objEntityChanged(EntityEvent e);
-	/** New entity has been created/added.*/
-	public void objEntityAdded(EntityEvent e);
-	/** Entity has been removed.*/
-	public void objEntityRemoved(EntityEvent e);
-	
+/** 
+ * Represents events resulted from Attribute changes 
+ * in CayenneModeler. This event is used for both ObjAttributes
+ * and DbAttributes.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class AttributeEvent extends EntityEvent {
+	protected Attribute attribute;
+
+	/** Creates a Attribute change event. */
+	public AttributeEvent(Object src, Attribute attr, Entity entity) {
+		super(src, entity);
+		setAttribute(attr);
+	}
+
+	/** Creates a Attribute event of a specified type. */
+	public AttributeEvent(Object src, Attribute attr, Entity entity, int id) {
+		this(src, attr, entity);
+		setId(id);
+	}
+
+	/** Creates a Attribute name change event.*/
+	public AttributeEvent(
+		Object src,
+		Attribute attr,
+		Entity entity,
+		String oldName) {
+			
+		this(src, attr, entity);
+		setOldName(oldName);
+	}
+
+	/** Get attribute (obj or db). */
+	public Attribute getAttribute() {
+		return attribute;
+	}
+
+
+	/**
+	 * Sets the attribute.
+	 * @param attribute The attribute to set
+	 */
+	public void setAttribute(Attribute attribute) {
+		this.attribute = attribute;
+	}
 }
-

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,19 +52,107 @@ package org.objectstyle.cayenne.modeler.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map.event;
 
-import java.util.EventListener;
+import java.util.EventObject;
 
-/** For managing the changes in the DbAttribute. */
-public interface DbAttributeListener extends EventListener
-{
-	/** Attribute property changed. */
-	public void dbAttributeChanged(AttributeEvent e);
-	/** New attribute has been created/added.*/
-	public void dbAttributeAdded(AttributeEvent e);
-	/** Attribute has been removed.*/
-	public void dbAttributeRemoved(AttributeEvent e);
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * Superclass of CayenneModeler events.
+ * 
+ * @author Andrei Adamchik
+ */
+public class MapEvent extends EventObject {
+
+	/** Signifies a changed object. */
+	public static final int CHANGE = 1;
+
+	/** Signifies a new object. */
+	public static final int ADD = 2;
+
+	/** Signifies a removed object. */
+	public static final int REMOVE = 3;
+
+	protected int id = CHANGE;
+	protected String oldName;
+	protected String newName;
+
+	/**
+	 * Constructor for MapEvent.
+	 * 
+	 * @param source event source
+	 */
+	public MapEvent(Object source) {
+		super(source);
+	}
 	
-}
+	/**
+	 * Constructor for MapEvent.
+	 * 
+	 * @param source event source
+	 */
+	public MapEvent(Object source, String oldName, String newName) {
+		super(source);
+		setOldName(oldName);
+		setNewName(newName);
+	}
+	
+	public boolean isNameChange() {
+		return Util.nullSafeEquals(getOldName(), getNewName());
+	}
+	
+	/**
+	 * Returns the id.
+	 * @return int
+	 */
+	public int getId() {
+		return id;
+	}
 
+
+	/**
+	 * Returns the newName.
+	 * @return String
+	 */
+	public String getNewName() {
+		return newName;
+	}
+
+
+	/**
+	 * Returns the oldName.
+	 * @return String
+	 */
+	public String getOldName() {
+		return oldName;
+	}
+
+
+	/**
+	 * Sets the id.
+	 * @param id The id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+
+	/**
+	 * Sets the newName.
+	 * @param newName The newName to set
+	 */
+	public void setNewName(String newName) {
+		this.newName = newName;
+	}
+
+
+	/**
+	 * Sets the oldName.
+	 * @param oldName The oldName to set
+	 */
+	public void setOldName(String oldName) {
+		this.oldName = oldName;
+	}
+}

@@ -1,3 +1,4 @@
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -52,50 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */
-package org.objectstyle.cayenne.modeler.event;
+ */ 
 
-import org.objectstyle.cayenne.access.DataDomain;
+import java.util.EventListener;
 
-/** 
- * Represents events resulted from DataDomain changes 
- * in CayenneModeler.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
- */
-public class DomainEvent extends ModelerEvent {
-	protected DataDomain domain;
-
-	/** Creates a domain change event. */
-	public DomainEvent(Object src, DataDomain domain) {
-		super(src);
-		this.domain = domain;
-	}
-
-	/** Creates a domain event of a specified type. */
-	public DomainEvent(Object src, DataDomain domain, int id) {
-		this(src, domain);
-		setId(id);
-	}
-
-	/** Creates a domain name change event.*/
-	public DomainEvent(Object src, DataDomain domain, String oldName) {
-		this(src, domain);	
-		setOldName(oldName);
-	}
-
-	/** Returns domain object associated with this event. */
-	public DataDomain getDomain() {
-		return domain;
-	}
-
-	/**
-	 * Sets domain object associated with this event.
-	 * 
-	 * @param domain The domain to set
-	 */
-	public void setDomain(DataDomain domain) {
-		this.domain = domain;
-	}
+/** For managing the changes in the DataNode */
+public interface DataNodeListener extends EventListener
+{
+	/** DataNode property (usually - name) changed. */
+	public void dataNodeChanged(DataNodeEvent e);
+	/** New data map has been created/added.*/
+	public void dataNodeAdded(DataNodeEvent e);
+	/** DataNode has been removed.*/
+	public void dataNodeRemoved(DataNodeEvent e);
+	
 }
+

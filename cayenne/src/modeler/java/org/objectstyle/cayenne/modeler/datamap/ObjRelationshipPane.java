@@ -83,12 +83,12 @@ import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
-import org.objectstyle.cayenne.modeler.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.ObjEntityListener;
+import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 

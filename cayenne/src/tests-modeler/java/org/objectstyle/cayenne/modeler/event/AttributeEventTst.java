@@ -55,10 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
-
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
 
 /**
  * @author Andrei Adamchik

@@ -55,9 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.map.DataMap;
-
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.event.DataMapEvent;
 
 /**
  * @author Andrei Adamchik

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -57,15 +57,15 @@ package org.objectstyle.cayenne.modeler.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the Domain */
-public interface DomainListener extends EventListener
+/** For managing the changes in the ObjRelationship. */
+public interface ObjRelationshipListener extends EventListener
 {
-	/** Domain property (usually - name) changed. */
-	public void domainChanged(DomainEvent e);
-	/** New data map has been created/added.*/
-	public void domainAdded(DomainEvent e);
-	/** Domain has been removed.*/
-	public void domainRemoved(DomainEvent e);
+	/** Relationship property changed. */
+	public void objRelationshipChanged(RelationshipEvent e);
+	/** Relationship has been created/added.*/
+	public void objRelationshipAdded(RelationshipEvent e);
+	/** Relationship has been removed.*/
+	public void objRelationshipRemoved(RelationshipEvent e);
 	
 }
 

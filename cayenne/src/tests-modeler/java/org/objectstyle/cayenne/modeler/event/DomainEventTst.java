@@ -55,9 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.access.DataDomain;
-
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.event.DomainEvent;
 
 /**
  * @author Andrei Adamchik

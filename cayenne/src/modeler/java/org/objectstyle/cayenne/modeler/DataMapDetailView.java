@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DataMapEvent;
+import org.objectstyle.cayenne.map.event.DataMapEvent;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo

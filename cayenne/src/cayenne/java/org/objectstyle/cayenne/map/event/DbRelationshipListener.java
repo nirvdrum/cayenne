@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -57,14 +57,15 @@ package org.objectstyle.cayenne.modeler.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the DataMap */
-public interface DataMapListener extends EventListener
+/** For managing the changes in the DbRelationship. */
+public interface DbRelationshipListener extends EventListener
 {
-	/** DataMap property (usually - name) changed. */
-	public void dataMapChanged(DataMapEvent e);
-	/** New data map has been created/added.*/
-	public void dataMapAdded(DataMapEvent e);
-	/** DataMap has been removed.*/
-	public void dataMapRemoved(DataMapEvent e);
+	/** Relationship property changed. */
+	public void dbRelationshipChanged(RelationshipEvent e);
+	/** Relationship has been created/added.*/
+	public void dbRelationshipAdded(RelationshipEvent e);
+	/** Relationship has been removed.*/
+	public void dbRelationshipRemoved(RelationshipEvent e);
 	
 }
+

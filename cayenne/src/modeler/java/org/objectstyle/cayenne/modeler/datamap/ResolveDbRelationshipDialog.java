@@ -85,7 +85,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;

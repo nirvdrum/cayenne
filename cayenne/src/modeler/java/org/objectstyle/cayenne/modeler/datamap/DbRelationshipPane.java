@@ -80,12 +80,12 @@ import org.objectstyle.cayenne.modeler.CayenneActionPanel;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbEntityListener;
-import org.objectstyle.cayenne.modeler.event.DbRelationshipListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
+import org.objectstyle.cayenne.map.event.DbEntityListener;
+import org.objectstyle.cayenne.map.event.DbRelationshipListener;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 

@@ -53,48 +53,62 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.map.event;
 
-import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
 
 /** 
- * Represents events resulted from DataMap changes 
- * in CayenneModeler.
+ * Represents events resulted from Relationship changes 
+ * in CayenneModeler. This event is used for both ObjRelationships
+ * and DbRelationships.
+ * 
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
-public class DataMapEvent extends ModelerEvent {
-	protected DataMap dataMap;
+public class RelationshipEvent extends EntityEvent {
+	protected Relationship relationship;
 
-	/** Creates a DataMap change event. */
-	public DataMapEvent(Object src, DataMap dataMap) {
-		super(src);
-		this.dataMap = dataMap;
+	/** Creates a Relationship change event. */
+	public RelationshipEvent(Object src, Relationship rel, Entity entity) {
+		super(src, entity);
+		setRelationship(rel);
 	}
 
-	/** Creates a DataMap event of a specified type. */
-	public DataMapEvent(Object src, DataMap dataMap, int id) {
-		this(src, dataMap);
+	/** Creates a Relationship event of a specified type. */
+	public RelationshipEvent(
+		Object src,
+		Relationship rel,
+		Entity entity,
+		int id) {
+
+		this(src, rel, entity);
 		setId(id);
 	}
 
-	/** Creates a DataMap name change event.*/
-	public DataMapEvent(Object src, DataMap dataMap, String oldName) {
-		this(src, dataMap);
-		setOldName(oldName);
+	/** Creates a Relationship name change event. */
+	public RelationshipEvent(
+		Object src,
+		Relationship rel,
+		Entity entity,
+		String oldName) {
+			
+		this(src, rel, entity);
+        setOldName(oldName);
 	}
 
-	/** 
-	 * Returns DataMap associated with this event. 
-	 */
-	public DataMap getDataMap() {
-		return dataMap;
+	/** Returns relationship associated with this event. */
+	public Relationship getRelationship() {
+		return relationship;
 	}
-	
+
 	/**
-	 * Sets DataMap associated with this event.
+	 * Sets relationship associated with this event.
 	 * 
-	 * @param dataMap The dataMap to set
+	 * @param relationship The relationship to set
 	 */
-	public void setDataMap(DataMap dataMap) {
-		this.dataMap = dataMap;
+	public void setRelationship(Relationship relationship) {
+		this.relationship = relationship;
 	}
 }

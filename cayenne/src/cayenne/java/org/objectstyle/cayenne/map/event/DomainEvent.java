@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,19 +52,50 @@ package org.objectstyle.cayenne.modeler.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map.event;
 
-import java.util.EventListener;
+import org.objectstyle.cayenne.access.DataDomain;
 
-/** For managing the changes in the ObjAttribute. */
-public interface ObjAttributeListener extends EventListener
-{ 
-	/** Attribute property changed. */
-	public void objAttributeChanged(AttributeEvent e);
-	/** New attribute has been created/added.*/
-	public void objAttributeAdded(AttributeEvent e);
-	/** Attribute has been removed.*/
-	public void objAttributeRemoved(AttributeEvent e);
-	
+/** 
+ * Represents events resulted from DataDomain changes 
+ * in CayenneModeler.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class DomainEvent extends MapEvent {
+	protected DataDomain domain;
+
+	/** Creates a domain change event. */
+	public DomainEvent(Object src, DataDomain domain) {
+		super(src);
+		this.domain = domain;
+	}
+
+	/** Creates a domain event of a specified type. */
+	public DomainEvent(Object src, DataDomain domain, int id) {
+		this(src, domain);
+		setId(id);
+	}
+
+	/** Creates a domain name change event.*/
+	public DomainEvent(Object src, DataDomain domain, String oldName) {
+		this(src, domain);	
+		setOldName(oldName);
+	}
+
+	/** Returns domain object associated with this event. */
+	public DataDomain getDomain() {
+		return domain;
+	}
+
+	/**
+	 * Sets domain object associated with this event.
+	 * 
+	 * @param domain The domain to set
+	 */
+	public void setDomain(DataDomain domain) {
+		this.domain = domain;
+	}
 }
-

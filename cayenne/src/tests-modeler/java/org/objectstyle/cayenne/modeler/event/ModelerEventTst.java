@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
+import org.objectstyle.cayenne.map.event.MapEvent;
+
 import junit.framework.TestCase;
 
 /**
@@ -72,24 +74,24 @@ public class ModelerEventTst extends TestCase {
 
     public void testConstructor1() throws Exception {
     	Object src = new Object();
-    	ModelerEvent e = new ModelerEvent(src);
+    	MapEvent e = new MapEvent(src);
     	assertSame(src, e.getSource());
     }
     
     public void testConstructor2() throws Exception  {
     	Object src = new Object();
-    	ModelerEvent e = new ModelerEvent(src, "oldname", "newname");
+    	MapEvent e = new MapEvent(src, "oldname", "newname");
     	assertSame(src, e.getSource());
     	assertEquals("oldname", e.getOldName());
     	assertEquals("newname", e.getNewName());
     }
     
     public void testId() throws Exception  {
-    	ModelerEvent e = new ModelerEvent(new Object());
-    	assertEquals(ModelerEvent.CHANGE, e.getId());
+    	MapEvent e = new MapEvent(new Object());
+    	assertEquals(MapEvent.CHANGE, e.getId());
     	
-    	e.setId(ModelerEvent.ADD);
-    	assertEquals(ModelerEvent.ADD, e.getId());
+    	e.setId(MapEvent.ADD);
+    	assertEquals(MapEvent.ADD, e.getId());
     }
 }
 

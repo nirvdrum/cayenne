@@ -78,9 +78,9 @@ import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.ChooseSchemaDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DataMapEvent;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.ModelerEvent;
+import org.objectstyle.cayenne.map.event.DataMapEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.util.YesNoToAllDialog;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -241,7 +241,7 @@ public class ImportDbAction extends CayenneAction {
 
         if (mediator.getCurrentDataMap() != null) {
             mediator.fireDataMapEvent(
-                new DataMapEvent(Editor.getFrame(), map, ModelerEvent.CHANGE));
+                new DataMapEvent(Editor.getFrame(), map, MapEvent.CHANGE));
             mediator.fireDataMapDisplayEvent(
                 new DataMapDisplayEvent(
                     Editor.getFrame(),

@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTextField;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 

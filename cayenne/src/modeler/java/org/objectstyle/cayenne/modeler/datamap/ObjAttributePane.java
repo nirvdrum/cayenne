@@ -70,12 +70,12 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.ObjAttributeListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.ObjAttributeListener;
+import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 

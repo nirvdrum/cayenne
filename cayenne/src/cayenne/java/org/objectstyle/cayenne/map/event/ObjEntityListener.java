@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -57,15 +57,18 @@ package org.objectstyle.cayenne.modeler.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the ObjRelationship. */
-public interface ObjRelationshipListener extends EventListener
+/** For managing the changes in the ObjEntity */
+public interface ObjEntityListener extends EventListener
 {
-	/** Relationship property changed. */
-	public void objRelationshipChanged(RelationshipEvent e);
-	/** Relationship has been created/added.*/
-	public void objRelationshipAdded(RelationshipEvent e);
-	/** Relationship has been removed.*/
-	public void objRelationshipRemoved(RelationshipEvent e);
+	/** Entity property changed. 
+	  * May be name, attribute or relationship added or removed, etc. 
+	  * Attribute and relationship property changes are handled in
+	  * respective listeners. */
+	public void objEntityChanged(EntityEvent e);
+	/** New entity has been created/added.*/
+	public void objEntityAdded(EntityEvent e);
+	/** Entity has been removed.*/
+	public void objEntityRemoved(EntityEvent e);
 	
 }
 

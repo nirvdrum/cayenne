@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 

@@ -55,10 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
-
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 
 /**
  * @author Andrei Adamchik

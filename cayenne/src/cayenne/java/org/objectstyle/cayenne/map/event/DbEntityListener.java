@@ -1,3 +1,4 @@
+package org.objectstyle.cayenne.map.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -52,63 +53,22 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */
-package org.objectstyle.cayenne.modeler.event;
+ */ 
 
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Relationship;
+import java.util.EventListener;
 
-/** 
- * Represents events resulted from Relationship changes 
- * in CayenneModeler. This event is used for both ObjRelationships
- * and DbRelationships.
- * 
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
- */
-public class RelationshipEvent extends EntityEvent {
-	protected Relationship relationship;
-
-	/** Creates a Relationship change event. */
-	public RelationshipEvent(Object src, Relationship rel, Entity entity) {
-		super(src, entity);
-		setRelationship(rel);
-	}
-
-	/** Creates a Relationship event of a specified type. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		int id) {
-
-		this(src, rel, entity);
-		setId(id);
-	}
-
-	/** Creates a Relationship name change event. */
-	public RelationshipEvent(
-		Object src,
-		Relationship rel,
-		Entity entity,
-		String oldName) {
-			
-		this(src, rel, entity);
-        setOldName(oldName);
-	}
-
-	/** Returns relationship associated with this event. */
-	public Relationship getRelationship() {
-		return relationship;
-	}
-
-	/**
-	 * Sets relationship associated with this event.
-	 * 
-	 * @param relationship The relationship to set
-	 */
-	public void setRelationship(Relationship relationship) {
-		this.relationship = relationship;
-	}
+/** For managing the changes in the DbEntity */
+public interface DbEntityListener extends EventListener
+{
+	/** Entity property changed. 
+	  * May be name, attribute or relationship added or removed, etc. 
+	  * Attribute and relationship property changes are handled in
+	  * respective listeners. */
+	public void dbEntityChanged(EntityEvent e);
+	/** New entity has been created/added.*/
+	public void dbEntityAdded(EntityEvent e);
+	/** Entity has been removed.*/
+	public void dbEntityRemoved(EntityEvent e);
+	
 }
+

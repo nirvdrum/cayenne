@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
