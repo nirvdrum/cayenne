@@ -26,7 +26,12 @@
                 <li><a href="install/faq.html">2.5 Installation FAQ</a></li>
             </ul></li>
             
-            <li><a href="quickstart/index.html">3. Quick Start</a></li>
+            <li><a href="quickstart/index.html">3. Quick Start</a>
+            <ul>
+                <li><a href="quickstart/modeler.html">3.1 "Using CayenneModeler" Tutorial</a></li>
+                <li><a href="quickstart/comline.html">3.2 "Command-line Application" Tutorial</a></li>
+                <li><a href="quickstart/webapp.html">3.3 "Web Application" Tutorial</a></li>
+            </ul></li>
             
             <li><a href="design/index.html">4. Design</a>
             <ul>

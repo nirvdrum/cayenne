@@ -6,94 +6,21 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/install/faq.html</prev>
-	<next>/userguide/design/index.html</next>
+	<next>/userguide/quickstart/modeler.html</next>
 </navigator> 
 <body>
     <section name="3. Quick Start">
-    	<p>This section shows how to write a simple command-line application
-    	using Cayenne. For a more detailed discussion read <a href="../appguide/index.html">"Writing 
-    	Cayenne Applications"</a> section. The tutorial follows these steps:
+    	<p>Before getting any deeper into details of Cayenne design, it may be helpful to go through
+    	a few simple examples. This may be all the information needed to start writing
+    	Cayenne applications. This section contains a few simple tutorials 
+    	that explain how to use Cayenne:
     	
     	<ul>
-    		<li><a href="#1">Tutorial Setup.</a></li>
-    		<li><a href="#2">Prepare Tutorial Database.</a></li>
-    		<li><a href="#3">Create Cayenne Configuration Files.</a></li>
-    		<li><a href="#4">Generate Java Code for DataObjects.</a></li>
-    		<li><a href="#5">Write Application Code.</a></li>
-    		<li><a href="#6">Compile and Run the Application.</a></li>
+    		<li><a href="modeler.html">"Using CayenneModeler" Tutorial</a></li>
+    		<li><a href="comline.html">"Command-line Application" Tutorial</a></li>
+    		<li><a href="webapp.html">"Web Application" Tutorial</a></li>
     	</ul>
     	</p>
-    	
-       	<subsection name="3.1 Tutorial Setup" anchor="1">
-       		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
-       		installation instructions</a>. In particular, JSDK 1.4 must be installed.
-       		</p>
-       		
-    		<p>- Copy cayenne.jar file that is a part of Cayenne distribution to
-    		the JRE extensions directory (normally a directory like $JAVA_HOME/jre/lib/ext) 
-    		or make it otherwise accessible in the CLASSPATH of the application.</p>
-    		
-    		<p>- Create tutorial project directory (further referred to as "project directory") 
-    		anywhere on the filesystem. For example:</p>
-    		
-<source>
-# cd somedir
-# mkdir cayenne-tutorial
-</source>
-
-    	</subsection>
-    	
-    	<subsection name="3.2 Prepare Tutorial Database" anchor="2">
-    		<p>To run this tutorial user must have access to a relational database with 
-    		privileges sufficient to perform tables creation, select, insert and update queries. 
-    		Run the following script to create test tables (script is tested on MySQL, 
-    		but it should be easy to port to any other RDBMS): 
-    		<a href="../../tutorial/0/tutorialdb.sql">tutorialdb.sql</a>.</p>
-    	</subsection>
-    	
-    	<subsection name="3.3 Create Cayenne Configuration Files" anchor="3">
-    		<p>Use CayenneModler tool to create Cayenne configuration files including "cayenne.xml",
-    		data map file and data source file.
-    		Sample files used for this tutorial can be downloaded from here:
-    		
-    		<ul>
-    			<li><a href="../../tutorial/0/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorial/0/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorial/0/driverinfo.xml">driverinfo.xml</a></li>
-    		</ul>
-    		
-    		These XML files should be copied to the project directory. DataSource connection info
-    		should be changed to reflect the information specific to the user database. This can be 
-    		done either manually or by using CayenneModeler (recommended).
-    		</p>
-    	</subsection>
-    	
-    	<subsection name="3.4 Generate Java Code for DataObjects" anchor="4">
-    		<p>Use CayenneModeler to generate Java classes for DataObjects. Sample generated
-    		files that can be used with this tutorial can be found here:
-    		
-    		<ul>
-    			<li><a href="../../tutorial/0/test/_Artist.java">_Artist.java</a></li>
-    			<li><a href="../../tutorial/0/test/Artist.java">Artist.java</a></li>
-    			<li><a href="../../tutorial/0/test/_Painting.java">_Painting.java</a></li>
-    			<li><a href="../../tutorial/0/test/Painting.java">Painting.java</a></li>
-    			<li><a href="../../tutorial/0/test/_Gallery.java">_Gallery.java</a></li>
-    			<li><a href="../../tutorial/0/test/Gallery.java">Gallery.java</a></li>
-    		</ul>
-    		
-    		Create a subdirectory called "test" under the project directory. Save the source code under
-    		this new directory. 
-    		</p>    	
-    	</subsection>
-    	
-    	<subsection name="3.5 Write Application Code" anchor="5">
-    		<p>Create a simple application that uses Cayenne. Here is a sample Java class source code:
-    		<a href="../../tutorial/0/test/Main.java">Main.java</a>. Download it and save under "test" directory in project directory.</p>    	
-    	</subsection>
-    	
-    	<subsection name="3.6 Compile and Run the Application" anchor="6">
-    		<p>...</p>
-    	</subsection>
     </section>
 </body>
 </document>
