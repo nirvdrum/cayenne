@@ -72,7 +72,7 @@ class ASTCompiler {
      */
     static ASTNode compile(Expression expression) throws ExpressionException {
         ExpressionParser handler = new ExpressionParser();
-        new ExpressionTraversal(handler).traverseExpression(expression);
+        expression.traverse(handler);
         return handler.finishParsing(expression);
     }
 

@@ -60,6 +60,9 @@ package org.objectstyle.cayenne.exp;
  * Delegates any actions that need to be performed at certain points
  * during traversal to a TraversalHandler instance. 
  * 
+ * @deprecated Since 1.1 expressions implement a visitor-pattern-like
+ * method traverse that do the traversal.
+ * 
  * @author Andrei Adamchik
  */
 public class ExpressionTraversal {

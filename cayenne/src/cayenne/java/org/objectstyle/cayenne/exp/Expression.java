@@ -289,9 +289,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public Expression expWithParameters(Map parameters, boolean pruneMissing) {
         ParametrizedExpressionBuilder builder =
             new ParametrizedExpressionBuilder(this, parameters, pruneMissing);
-        ExpressionTraversal traversal = new ExpressionTraversal();
-        traversal.setHandler(builder);
-        traversal.traverseExpression(this);
+        this.traverse(builder);
         Expression newExp = builder.getExpression();
 
         if (logObj.isDebugEnabled()) {

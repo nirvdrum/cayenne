@@ -60,11 +60,10 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-/** Class that collects statistics of expression traversal. It is both traversal 
- *  engine and traversal handler. */
-public class TstTraversalHandler
-    extends ExpressionTraversal
-    implements TraversalHandler {
+/** 
+ * Class that collects statistics of expression traversal. 
+ */
+public class TstTraversalHandler implements TraversalHandler {
     protected List treeFlatView = new ArrayList();
     protected int children;
     protected int unaryNodes;
@@ -96,7 +95,7 @@ public class TstTraversalHandler
     }
 
     public TstTraversalHandler() {
-        setHandler(this);
+
     }
 
     public void assertConsistency() throws Exception {
@@ -112,7 +111,7 @@ public class TstTraversalHandler
 
     public void traverseExpression(Expression exp) {
         reset();
-        super.traverseExpression(exp);
+        exp.traverse(this);
     }
 
     public void reset() {
@@ -172,10 +171,7 @@ public class TstTraversalHandler
         return leafs;
     }
 
-    public void finishedChild(
-        Expression node,
-        int childIndex,
-        boolean hasMoreChildren) {
+    public void finishedChild(Expression node, int childIndex, boolean hasMoreChildren) {
         children++;
     }
 

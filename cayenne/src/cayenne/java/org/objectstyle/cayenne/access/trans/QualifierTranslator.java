@@ -61,7 +61,6 @@ import java.util.List;
 import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionTraversal;
 import org.objectstyle.cayenne.exp.TraversalHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -79,7 +78,6 @@ public class QualifierTranslator
     extends QueryAssemblerHelper
     implements TraversalHandler {
 
-    private ExpressionTraversal treeWalker = new ExpressionTraversal();
     protected StringBuffer qualBuf = new StringBuffer();
 
     protected boolean translateParentQual;
@@ -92,7 +90,6 @@ public class QualifierTranslator
 
     public QualifierTranslator(QueryAssembler queryAssembler) {
         super(queryAssembler);
-        treeWalker.setHandler(this);
     }
 
     /** Translates query qualifier to SQL WHERE clause. 
@@ -108,7 +105,7 @@ public class QualifierTranslator
 
         // build SQL where clause string based on expression
         // (using '?' for object values)
-        treeWalker.traverseExpression(rootNode);
+        rootNode.traverse(this);
         return qualBuf.length() > 0 ? qualBuf.toString() : null;
     }
 

@@ -60,12 +60,9 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ExpressionTraversalTst extends CayenneTestCase {
     protected TstTraversalHandler handler;
-    protected ExpressionTraversal walker;
-    
+ 
     protected void setUp() throws Exception {                
         handler = new TstTraversalHandler();
-        walker = new ExpressionTraversal(); 
-        walker.setHandler(handler);
     }
     
     
@@ -90,7 +87,7 @@ public class ExpressionTraversalTst extends CayenneTestCase {
         int len = cases.length;
         for(int i = 0;  i < len; i++) {
             handler.reset();
-            walker.traverseExpression(cases[i].getCayenneExp());
+            cases[i].getCayenneExp().traverse(handler);
             
             // assert statistics
             handler.assertConsistency();

@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.exp.ExpressionTraversal;
 import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
@@ -335,9 +334,7 @@ public class QueryUtils {
         }
 
         ExpressionTranslator trans = new ExpressionTranslator(ent, relPath);
-        ExpressionTraversal parser = new ExpressionTraversal();
-        parser.setHandler(trans);
-        parser.traverseExpression(qual);
+        qual.traverse(trans);
 
         return trans.getPeer(qual);
     }
