@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.modeler.util;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -66,9 +67,12 @@ import java.util.Collection;
 import java.util.Collections;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
  * Utility class to create standard Swing widgets following
@@ -100,7 +104,7 @@ public class CayenneWidgetFactory {
 
         PreferenceField preferenceField =
             new PreferenceField(preferencesKey, initialValues);
-        initComponent(preferenceField);
+        initFormWidget(preferenceField);
         preferenceField.setBackground(Color.WHITE);
         return preferenceField;
     }
@@ -131,7 +135,7 @@ public class CayenneWidgetFactory {
      */
     public static JComboBox createComboBox() {
         JComboBox comboBox = new JComboBox();
-        initComponent(comboBox);
+        initFormWidget(comboBox);
         comboBox.setBackground(Color.WHITE);
         return comboBox;
     }
@@ -148,9 +152,15 @@ public class CayenneWidgetFactory {
      */
     public static JTextField createTextField(int columns) {
         final JTextField textField = new JTextField(columns);
-        initComponent(textField);
+        initFormWidget(textField);
         initTextField(textField);
         return textField;
+    }
+
+    public static JLabel createLabel(String text) {
+        JLabel label = new JLabel(text);
+        initLabel(label);
+        return label;
     }
 
     protected static void initTextField(final JTextField textField) {
@@ -163,7 +173,10 @@ public class CayenneWidgetFactory {
         });
     }
 
-    protected static void initComponent(JComponent component) {
+    /**
+     * Initializes a "form" element with a standard font and height.
+     */
+    protected static void initFormWidget(JComponent component) {
         component.setFont(component.getFont().deriveFont(Font.PLAIN, 12));
 
         Dimension size = component.getPreferredSize();
@@ -173,5 +186,36 @@ public class CayenneWidgetFactory {
 
         size.setSize(size.getWidth(), 20);
         component.setPreferredSize(size);
+    }
+
+    /**
+     * Initializes a label or button with a standard font.
+     */
+    protected static void initLabel(JComponent label) {
+        label.setFont(label.getFont().deriveFont(Font.BOLD, 12));
+    }
+
+    /** 
+     * Creates a borderless button that can be used
+     * as a clickable label.
+     */
+    public static JButton createLabelButton(String text) {
+        JButton but = createButton(text);
+        but.setBorderPainted(false);
+        but.setHorizontalAlignment(SwingConstants.LEFT);
+        but.setFocusPainted(false);
+        but.setMargin(new Insets(0, 0, 0, 0));
+        but.setBorder(null);
+        return but;
+    }
+
+    /** 
+      * Creates a borderless button that can be used
+      * as a clickable label.
+      */
+    public static JButton createButton(String text) {
+        JButton but = new JButton(text);
+        initLabel(but);
+        return but;
     }
 }

@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.modeler.util;
 
+import org.scopemvc.view.swing.SLabel;
 import org.scopemvc.view.swing.STextField;
 
 /**
@@ -86,8 +87,14 @@ public class ScopeWidgetFactory {
      */
     public static STextField createTextField(int columns) {
         final STextField textField = new STextField(columns);
-        CayenneWidgetFactory.initComponent(textField);
+        CayenneWidgetFactory.initFormWidget(textField);
         CayenneWidgetFactory.initTextField(textField);
         return textField;
+    }
+
+    public static SLabel createLabel(String text) {
+		SLabel label = new SLabel(text);
+		CayenneWidgetFactory.initLabel(label);
+        return label;
     }
 }

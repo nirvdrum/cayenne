@@ -60,7 +60,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -71,7 +70,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
-import javax.swing.SwingConstants;
 
 /** 
  * Utility methods for laying out components on the panels.
@@ -80,20 +78,6 @@ import javax.swing.SwingConstants;
  * @author Andrei Adamchik
  */
 public class PanelFactory {
-
-	/** 
-	 * Creates a borderless button that can be used
-	 * as a clickable label.
-	 */
-	public static JButton createLabelButton(String text) {
-		JButton but = new JButton(text);
-		but.setBorderPainted(false);
-		but.setHorizontalAlignment(SwingConstants.LEFT);
-		but.setFocusPainted(false);
-		but.setMargin(new Insets(0, 0, 0, 0));
-		but.setBorder(null);
-		return but;
-	}
 
 	/** 
 	 * Creates and returns a panel with right-centered buttons.

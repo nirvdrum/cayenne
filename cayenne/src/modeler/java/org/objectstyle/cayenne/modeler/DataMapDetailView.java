@@ -131,14 +131,14 @@ public class DataMapDetailView
         this.setLayout(new BorderLayout());
 
         name = CayenneWidgetFactory.createTextField();
-        location = new JLabel();
+        location = CayenneWidgetFactory.createLabel("");
 
         nodeSelector = CayenneWidgetFactory.createComboBox();
 
         Component[] leftComp = new Component[3];
-        leftComp[0] = new JLabel("DataMap name: ");
-        leftComp[1] = new JLabel("File: ");
-        leftComp[2] = new JLabel("Linked to DataNode: ");
+        leftComp[0] = CayenneWidgetFactory.createLabel("DataMap name: ");
+        leftComp[1] = CayenneWidgetFactory.createLabel("File: ");
+        leftComp[2] = CayenneWidgetFactory.createLabel("Linked to DataNode: ");
 
         Component[] rightComp = new Component[3];
         rightComp[0] = name;
@@ -277,7 +277,7 @@ public class DataMapDetailView
             DataMap nextMap = (DataMap) it.next();
             if (nextMap != map) {
                 JCheckBox check = new JCheckBox();
-                JLabel label = new JLabel(nextMap.getName());
+                JLabel label = CayenneWidgetFactory.createLabel(nextMap.getName());
 
                 check.addItemListener(this);
                 if (nextMap.isDependentOn(map)) {

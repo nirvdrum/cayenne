@@ -144,14 +144,14 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
 
             left =
                 new Component[] {
-                    new JLabel("Table Name Pattern: "),
-                    new JLabel("Schemas: "),
+					CayenneWidgetFactory.createLabel("Table Name Pattern: "),
+					CayenneWidgetFactory.createLabel("Schemas: "),
                     new JLabel()};
 
             right = new Component[] { tabeNamePatternField, schemaSelect, buttons };
         }
         else {
-            left = new Component[] { new JLabel("Table Name Pattern: "), new JLabel()};
+            left = new Component[] { CayenneWidgetFactory.createLabel("Table Name Pattern: "), new JLabel()};
 
             right = new Component[] { tabeNamePatternField, buttons };
         }

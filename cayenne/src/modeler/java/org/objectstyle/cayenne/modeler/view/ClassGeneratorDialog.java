@@ -71,6 +71,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.ClassGeneratorController;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.scopemvc.core.PropertyManager;
@@ -92,180 +93,177 @@ import org.scopemvc.view.swing.SwingView;
  */
 public class ClassGeneratorDialog extends SPanel {
 
-	public ClassGeneratorDialog() {
-		init();
-	}
+    public ClassGeneratorDialog() {
+        init();
+    }
 
-	private void init() {
-		setDisplayMode(SwingView.MODAL_DIALOG);
-		setTitle("Generate Java Classes");
-		setLayout(new BorderLayout());
+    private void init() {
+        setDisplayMode(SwingView.MODAL_DIALOG);
+        setTitle("Generate Java Classes");
+        setLayout(new BorderLayout());
 
-		// build entity table
-		STable table = new ClassGeneratorTable();
-		ClassGeneratorModel model = new ClassGeneratorModel(table);
-		model.setSelector("entities");
-		model.setColumnNames(
-			new String[] { "Entity", "Class", "Generate", "Problems" });
-		model.setColumnSelectors(
-			new String[] {
-				"entity.name",
-				"entity.className",
-				"selected",
-				"validationMessage" });
+        // build entity table
+        STable table = new ClassGeneratorTable();
+        ClassGeneratorModel model = new ClassGeneratorModel(table);
+        model.setSelector("entities");
+        model.setColumnNames(new String[] { "Entity", "Class", "Generate", "Problems" });
+        model.setColumnSelectors(
+            new String[] {
+                "entity.name",
+                "entity.className",
+                "selected",
+                "validationMessage" });
 
-		table.setModel(model);
+        table.setModel(model);
 
-		// make sure that long columns are not squeezed
-		table.getColumnModel().getColumn(1).setMinWidth(100);
-		table.getColumnModel().getColumn(3).setMinWidth(150);
+        // make sure that long columns are not squeezed
+        table.getColumnModel().getColumn(1).setMinWidth(100);
+        table.getColumnModel().getColumn(3).setMinWidth(150);
 
-		// build superclass package
-		JLabel superClassPackageLabel = new JLabel("Superclass Package:");
-		final STextField superClassPackage = ScopeWidgetFactory.createTextField();
-		superClassPackage.setSelector("superClassPackage");
+        // build superclass package
+        JLabel superClassPackageLabel =
+            CayenneWidgetFactory.createLabel("Superclass Package:");
+        final STextField superClassPackage = ScopeWidgetFactory.createTextField();
+        superClassPackage.setSelector("superClassPackage");
 
-		// build pair checkbox
-		JLabel generatePairLabel =
-			new JLabel("Generate parent/child class pairs:");
-		SCheckBox generatePair = new SCheckBox() {
-			// (de)activate the text field
-			public void itemStateChanged(ItemEvent inEvent) {
-				superClassPackage.setEnabled(
-					inEvent.getStateChange() == ItemEvent.SELECTED);
-				super.itemStateChanged(inEvent);
-			}
-		};
-		generatePair.setSelector("pairs");
+        // build pair checkbox
+        JLabel generatePairLabel =
+            CayenneWidgetFactory.createLabel("Generate parent/child class pairs:");
+        SCheckBox generatePair = new SCheckBox() {
+                // (de)activate the text field
+    public void itemStateChanged(ItemEvent inEvent) {
+                superClassPackage.setEnabled(
+                    inEvent.getStateChange() == ItemEvent.SELECTED);
+                super.itemStateChanged(inEvent);
+            }
+        };
+        generatePair.setSelector("pairs");
 
-		// build folder selector
-		JLabel folderLabel = new JLabel("Output directory:");
-		JPanel folderPanel = new JPanel();
-		folderPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
-		STextField folder = ScopeWidgetFactory.createTextField();
-		folder.setSelector("outputDir");
-		SAction chooseAction =
-			new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL);
-		SButton chooseButton = new SButton(chooseAction);
-		chooseButton.setEnabled(true);
-		folderPanel.add(folder);
-		folderPanel.add(Box.createHorizontalStrut(5));
-		folderPanel.add(chooseButton);
+        // build folder selector
+        JLabel folderLabel = CayenneWidgetFactory.createLabel("Output directory:");
+        JPanel folderPanel = new JPanel();
+        folderPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
+        STextField folder = ScopeWidgetFactory.createTextField();
+        folder.setSelector("outputDir");
+        SAction chooseAction =
+            new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL);
+        SButton chooseButton = new SButton(chooseAction);
+        chooseButton.setEnabled(true);
+        folderPanel.add(folder);
+        folderPanel.add(Box.createHorizontalStrut(5));
+        folderPanel.add(chooseButton);
 
-		// build action buttons
-		SAction generateAction =
-			new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL);
-		SButton generateButton = new SButton(generateAction);
-		generateButton.setEnabled(true);
+        // build action buttons
+        SAction generateAction =
+            new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL);
+        SButton generateButton = new SButton(generateAction);
+        generateButton.setEnabled(true);
 
-		SAction cancelAction =
-			new SAction(ClassGeneratorController.CANCEL_CONTROL);
-		SButton cancelButton = new SButton(cancelAction);
-		cancelButton.setEnabled(true);
+        SAction cancelAction = new SAction(ClassGeneratorController.CANCEL_CONTROL);
+        SButton cancelButton = new SButton(cancelAction);
+        cancelButton.setEnabled(true);
 
-		// assemble
-		JPanel formPanel =
-			PanelFactory.createForm(
-				new Component[] {
-					generatePairLabel,
-					superClassPackageLabel,
-					folderLabel },
-				new Component[] {
-					generatePair,
-					superClassPackage,
-					folderPanel },
-				5,
-				5,
-				5,
-				5);
+        // assemble
+        JPanel formPanel =
+            PanelFactory.createForm(
+                new Component[] {
+                    generatePairLabel,
+                    superClassPackageLabel,
+                    folderLabel },
+                new Component[] { generatePair, superClassPackage, folderPanel },
+                5,
+                5,
+                5,
+                5);
 
-		JPanel panel =
-			PanelFactory.createTablePanel(
-				table,
-				new JComponent[] { formPanel },
-				new JButton[] { generateButton, cancelButton });
-		add(panel, BorderLayout.CENTER);
-	}
+        JPanel panel =
+            PanelFactory.createTablePanel(
+                table,
+                new JComponent[] { formPanel },
+                new JButton[] { generateButton, cancelButton });
+        add(panel, BorderLayout.CENTER);
+    }
 
-	class ClassGeneratorModel extends STableModel {
-		protected Selector enabledSelector = Selector.fromString("enabled");
+    class ClassGeneratorModel extends STableModel {
+        protected Selector enabledSelector = Selector.fromString("enabled");
 
-		/**
-		 * Constructor for TableModel.
-		 * @param table
-		 */
-		public ClassGeneratorModel(JTable table) {
-			super(table);
-		}
+        /**
+         * Constructor for TableModel.
+         * @param table
+         */
+        public ClassGeneratorModel(JTable table) {
+            super(table);
+        }
 
-		public boolean isEnabledRow(int rowIndex) {
-			// check if this is a failed row
-			Object row = getElementAt(rowIndex);
-			PropertyManager manager = getItemsManager();
-			if (manager == null || row == null) {
-				return false;
-			}
+        public boolean isEnabledRow(int rowIndex) {
+            // check if this is a failed row
+            Object row = getElementAt(rowIndex);
+            PropertyManager manager = getItemsManager();
+            if (manager == null || row == null) {
+                return false;
+            }
 
-			try {
-				Boolean enabled = (Boolean) manager.get(row, enabledSelector);
-				return enabled != null && enabled.booleanValue();
-			} catch (Exception e) {
-				return false;
-			}
-		}
+            try {
+                Boolean enabled = (Boolean) manager.get(row, enabledSelector);
+                return enabled != null && enabled.booleanValue();
+            }
+            catch (Exception e) {
+                return false;
+            }
+        }
 
-		/**
-		 * @see javax.swing.table.TableModel#isCellEditable(int, int)
-		 */
-		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			// only checkbox is editable
-			if (columnIndex != 2) {
-				return false;
-			}
+        /**
+         * @see javax.swing.table.TableModel#isCellEditable(int, int)
+         */
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            // only checkbox is editable
+            if (columnIndex != 2) {
+                return false;
+            }
 
-			return isEnabledRow(rowIndex);
-		}
-	}
+            return isEnabledRow(rowIndex);
+        }
+    }
 
-	class ClassGeneratorTable extends STable {
-		protected DefaultTableCellRenderer problemRenderer;
+    class ClassGeneratorTable extends STable {
+        protected DefaultTableCellRenderer problemRenderer;
 
-		public ClassGeneratorTable() {
-			problemRenderer = new ClassGeneratorProblemRenderer();
-			problemRenderer.setBackground(ValidatorDialog.WARNING_COLOR);
-		}
+        public ClassGeneratorTable() {
+            problemRenderer = new ClassGeneratorProblemRenderer();
+            problemRenderer.setBackground(ValidatorDialog.WARNING_COLOR);
+        }
 
-		public TableCellRenderer getCellRenderer(int row, int column) {
-			ClassGeneratorModel model = (ClassGeneratorModel) getModel();
+        public TableCellRenderer getCellRenderer(int row, int column) {
+            ClassGeneratorModel model = (ClassGeneratorModel) getModel();
 
-			return (model.isEnabledRow(row))
-				? super.getCellRenderer(row, column)
-				: problemRenderer;
-		}
-	}
+            return (model.isEnabledRow(row))
+                ? super.getCellRenderer(row, column)
+                : problemRenderer;
+        }
+    }
 
-	class ClassGeneratorProblemRenderer extends DefaultTableCellRenderer {
+    class ClassGeneratorProblemRenderer extends DefaultTableCellRenderer {
 
-		public Component getTableCellRendererComponent(
-			JTable table,
-			Object value,
-			boolean isSelected,
-			boolean hasFocus,
-			int row,
-			int column) {
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
 
-			if (value instanceof Boolean) {
-				value = "";
-			}
+            if (value instanceof Boolean) {
+                value = "";
+            }
 
-			return super.getTableCellRendererComponent(
-				table,
-				value,
-				isSelected,
-				hasFocus,
-				row,
-				column);
-		}
+            return super.getTableCellRendererComponent(
+                table,
+                value,
+                isSelected,
+                hasFocus,
+                row,
+                column);
+        }
 
-	}
+    }
 }

@@ -169,11 +169,11 @@ public class DataNodeDetailView
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.anchor = GridBagConstraints.NORTHWEST;
 
-        nameLabel = new JLabel("Data node name: ");
+        nameLabel = CayenneWidgetFactory.createLabel("Data node name: ");
         name = CayenneWidgetFactory.createTextField();
-        locationLabel = new JLabel("Location: ");
+        locationLabel = CayenneWidgetFactory.createLabel("Location: ");
         location = CayenneWidgetFactory.createTextField();
-        factoryLabel = new JLabel("Data source factory:");
+        factoryLabel = CayenneWidgetFactory.createLabel("Data source factory:");
         factory = CayenneWidgetFactory.createComboBox();
         factory.setEditable(true);
         DefaultComboBoxModel model =
@@ -184,7 +184,7 @@ public class DataNodeDetailView
         factory.setModel(model);
         factory.setSelectedIndex(-1);
 
-        adapterLabel = new JLabel("DB adapter:");
+        adapterLabel = CayenneWidgetFactory.createLabel("DB adapter:");
         adapter =
             CayenneWidgetFactory.createComboBox(
                 DbAdapter.availableAdapterClassNames,
@@ -208,22 +208,22 @@ public class DataNodeDetailView
         add(temp, constraints);
         location.setEditable(false);
 
-        userNameLabel = new JLabel("User name: ");
+        userNameLabel = CayenneWidgetFactory.createLabel("User name: ");
         userName =
             CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
         userName.addActionListener(this);
-        passwordLabel = new JLabel("Password: ");
+        passwordLabel = CayenneWidgetFactory.createLabel("Password: ");
         password = new JPasswordField(20);
-        driverLabel = new JLabel("Driver class: ");
+        driverLabel = CayenneWidgetFactory.createLabel("Driver class: ");
         driver =
             CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         driver.addActionListener(this);
-        urlLabel = new JLabel("Database URL: ");
+        urlLabel = CayenneWidgetFactory.createLabel("Database URL: ");
         url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         url.addActionListener(this);
-        minConnectionsLabel = new JLabel("Min connections: ");
+        minConnectionsLabel = CayenneWidgetFactory.createLabel("Min connections: ");
         minConnections = CayenneWidgetFactory.createTextField();
-        maxConnectionsLabel = new JLabel("Max connections: ");
+        maxConnectionsLabel = CayenneWidgetFactory.createLabel("Max connections: ");
         maxConnections = CayenneWidgetFactory.createTextField();
 
         left_comp = new Component[6];

@@ -71,7 +71,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -140,15 +139,15 @@ public class ObjEntityPane
         readOnly = new JCheckBox();
         readOnly.addItemListener(this);
 
-        tableLabel = PanelFactory.createLabelButton("Table name:");
+        tableLabel = CayenneWidgetFactory.createLabelButton("Table name:");
 
         Component[] leftCol =
             new Component[] {
-                new JLabel("ObjEntity name: "),
-                new JLabel("Java class: "),
-                new JLabel("Super class name: "),
+				CayenneWidgetFactory.createLabel("ObjEntity name: "),
+				CayenneWidgetFactory.createLabel("Java class: "),
+				CayenneWidgetFactory.createLabel("Super class name: "),
                 tableLabel,
-                new JLabel("Read-only: ")};
+				CayenneWidgetFactory.createLabel("Read-only: ")};
 
         Component[] rightCol =
             new Component[] { name, className, superClassName, dbName, readOnly };

@@ -216,8 +216,7 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 
 		ClassLoader cl = AboutDialog.class.getClassLoader();
 		URL url = cl.getResource(CayenneAction.RESOURCE_PATH + "logo.jpg");
-		ImageIcon logo_icon = new ImageIcon(url);
-		image = new JLabel(logo_icon);
+		image = new JLabel(new ImageIcon(url));
 		image.setBorder(border);
 		image_pane.add(image, BorderLayout.CENTER);
 		layout.setConstraints(image_pane, c);

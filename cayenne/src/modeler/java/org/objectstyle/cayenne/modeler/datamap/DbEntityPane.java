@@ -143,13 +143,13 @@ public class DbEntityPane
     private void init() {
         setLayout(new BorderLayout());
 
-        JLabel nameLabel = new JLabel("DbEntity name: ");
+        JLabel nameLabel = CayenneWidgetFactory.createLabel("DbEntity name: ");
         name = CayenneWidgetFactory.createTextField();
 
-        schemaLabel = new JLabel("Schema: ");
+        schemaLabel = CayenneWidgetFactory.createLabel("Schema: ");
         schema = CayenneWidgetFactory.createTextField();
 
-        parentLabel = PanelFactory.createLabelButton("Parent DbEntity: ");
+        parentLabel = CayenneWidgetFactory.createLabelButton("Parent DbEntity: ");
         parentLabel.setEnabled(false);
         parentEntities = CayenneWidgetFactory.createComboBox();
         parentEntities.setEditable(false);
@@ -161,9 +161,11 @@ public class DbEntityPane
 
         JPanel pkGeneratorPanel = new JPanel(new BorderLayout());
 
-        customPKGeneratorLabel = new JLabel("Customize primary key generation");
+        customPKGeneratorLabel =
+            CayenneWidgetFactory.createLabel("Customize primary key generation");
         customPKGeneratorNote =
-            new JLabel("(currently ignored by all adapters except Oracle)");
+            CayenneWidgetFactory.createLabel(
+                "(currently ignored by all adapters except Oracle)");
         customPKGeneratorNote.setFont(customPKGeneratorNote.getFont().deriveFont(10));
 
         customPKGenerator = new JCheckBox();
@@ -174,8 +176,8 @@ public class DbEntityPane
             PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
             BorderLayout.NORTH);
 
-        customPKGeneratorNameLabel = new JLabel("Database object name: ");
-        customPKSizeLabel = new JLabel("Cached PK Size: ");
+        customPKGeneratorNameLabel = CayenneWidgetFactory.createLabel("Database object name: ");
+        customPKSizeLabel = CayenneWidgetFactory.createLabel("Cached PK Size: ");
 
         customPKName = CayenneWidgetFactory.createTextField();
         customPKSize = CayenneWidgetFactory.createTextField();

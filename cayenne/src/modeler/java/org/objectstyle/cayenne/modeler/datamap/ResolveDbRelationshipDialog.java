@@ -115,8 +115,8 @@ public class ResolveDbRelationshipDialog
     private DbRelationship reverseDbRel;
     private boolean isReverseDbRelNew;
 
-    JLabel reverseNameLabel = new JLabel("Reverse Relationship:");
-    JLabel reverseCheckLabel = new JLabel("Create Reverse:");
+    JLabel reverseNameLabel = CayenneWidgetFactory.createLabel("Reverse Relationship:");
+    JLabel reverseCheckLabel = CayenneWidgetFactory.createLabel("Create Reverse:");
     JTextField name = CayenneWidgetFactory.createTextField();
     JTextField reverseName = CayenneWidgetFactory.createTextField();
     JCheckBox hasReverseDbRel = new JCheckBox("", false);
@@ -210,7 +210,7 @@ public class ResolveDbRelationshipDialog
 
         Component[] left =
             new Component[] {
-                new JLabel("Relationship: "),
+				CayenneWidgetFactory.createLabel("Relationship: "),
                 reverseNameLabel,
                 reverseCheckLabel };
 

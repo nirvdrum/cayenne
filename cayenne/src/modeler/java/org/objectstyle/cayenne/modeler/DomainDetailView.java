@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -106,7 +105,7 @@ public class DomainDetailView
         this.name = CayenneWidgetFactory.createTextField();
         this.add(
             PanelFactory.createForm(
-                new Component[] { new JLabel("Domain name: ")},
+                new Component[] { CayenneWidgetFactory.createLabel("Domain name: ")},
                 new Component[] { name },
                 5,
                 5,

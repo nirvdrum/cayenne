@@ -83,6 +83,7 @@ import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 import org.objectstyle.cayenne.project.validator.Validator;
 
@@ -148,7 +149,7 @@ public class ValidatorDialog
             (validator.getMaxSeverity() < ValidationInfo.ERROR)
                 ? "Saved project with validation warnings."
                 : "Validation errors. Project can not be saved.";
-        JLabel label = new JLabel(msg);
+        JLabel label = CayenneWidgetFactory.createLabel(msg);
 
         messagePanel.add(label);
         getContentPane().add(messagePanel, BorderLayout.NORTH);

@@ -166,29 +166,24 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
     protected JPanel initInputArea() {
         // user name line
-        JLabel unLabel = new JLabel("User Name:");
         unInput =
             CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
         disableVKEvents(unInput);
 
         // password line
-        JLabel pwdLabel = new JLabel("Password:");
         pwdInput = new JPasswordField(25);
         disableVKEvents(pwdInput);
 
         // JDBC driver line
-        JLabel drLabel = new JLabel("JDBC Driver Class:");
         drInput =
             CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         disableVKEvents(drInput);
 
         // Database URL line
-        JLabel urlLabel = new JLabel("Database URL:");
         urlInput = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         disableVKEvents(urlInput);
 
         // Adapter class line
-        JLabel adapterLabel = new JLabel("RDBMS Adapter:");
         adapterInput =
             CayenneWidgetFactory.createPreferenceField(
                 ModelerPreferences.RDBMS_ADAPTER,
@@ -196,7 +191,12 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
         disableVKEvents(adapterInput);
 
         Component[] left =
-            new Component[] { unLabel, pwdLabel, drLabel, urlLabel, adapterLabel };
+            new Component[] {
+                CayenneWidgetFactory.createLabel("User Name:"),
+                CayenneWidgetFactory.createLabel("Password:"),
+                CayenneWidgetFactory.createLabel("JDBC Driver Class:"),
+                CayenneWidgetFactory.createLabel("Database URL:"),
+                CayenneWidgetFactory.createLabel("RDBMS Adapter:")};
 
         Component[] right =
             new Component[] { unInput, pwdInput, drInput, urlInput, adapterInput };
@@ -221,7 +221,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
     protected JPanel initMessagePanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
-        JLabel lbl = new JLabel("Enter JDBC Information");
+        JLabel lbl = CayenneWidgetFactory.createLabel("Enter JDBC Information");
         lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN, 18));
         lbl.setForeground(Color.red);
         panel.add(lbl);
