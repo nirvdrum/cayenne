@@ -68,19 +68,19 @@ public class DbAttribute extends Attribute {
 	/** 
 	 * The type of the column. 
 	 */
-	private int type = TypesMapping.NOT_DEFINED;
+	protected int type = TypesMapping.NOT_DEFINED;
 
 	// Does this attribute allow null
-	private boolean mandatory;
+	protected boolean mandatory;
 
 	// Is this attribute a part of primary key
-	private boolean primaryKey;
+	protected boolean primaryKey;
 
 	// The length of CHAR or VARCHAr or max num of digits for DECIMAL.
-	private int maxLength = -1;
+	protected int maxLength = -1;
 
 	// The number of digits after period for DECIMAL.
-	private int precision = -1;
+	protected int precision = -1;
 
 	public DbAttribute() {
 	}
@@ -89,18 +89,6 @@ public class DbAttribute extends Attribute {
 		setName(name);
 		setType(type);
 		setEntity(entity);
-	}
-
-	/**
-	 * Creates new DbAttribute using another attribute as a prototype.
-	 */
-	public DbAttribute(DbAttribute proto) {
-		this.name = proto.name;
-		this.type = proto.type;
-		this.mandatory = proto.mandatory;
-		this.maxLength = proto.maxLength;
-		this.precision = proto.precision;
-		this.primaryKey = proto.primaryKey;
 	}
 
 	public String getAliasedName(String alias) {

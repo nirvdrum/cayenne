@@ -95,16 +95,26 @@ public class DerivedDbAttribute extends DbAttribute {
 		int type,
 		DbEntity entity,
 		String spec) {
+
 		super(name, type, entity);
 		setExpressionSpec(spec);
 	}
 
 	/**
-	 * Constructor for DerivedDbAttribute.
-	 * @param proto
+	 * Creates and initializes a derived attribute with 
+	 * an attribute of a parent entity.
 	 */
-	public DerivedDbAttribute(DbAttribute proto) {
-		super(proto);
+	public DerivedDbAttribute(DbEntity entity, DbAttribute parentProto) {
+		setName(parentProto.getName());
+		setType(parentProto.getType());
+		setMandatory(parentProto.isMandatory());
+		setMaxLength(parentProto.getMaxLength());
+		setPrecision(parentProto.getPrecision());
+		setPrimaryKey(parentProto.isPrimaryKey());
+		
+		setExpressionSpec(ATTRIBUTE_TOKEN);
+		addParam(parentProto);
+		setEntity(entity);
 	}
 
 	public String getAliasedName(String alias) {
@@ -181,11 +191,11 @@ public class DerivedDbAttribute extends DbAttribute {
 	public void addParam(DbAttribute param) {
 		params.add(param);
 	}
-	
+
 	public void removeParam(DbAttribute param) {
 		params.remove(param);
 	}
-	
+
 	public void clearParams() {
 		params.clear();
 	}

@@ -88,7 +88,7 @@ public class ObjEntitySyncAction extends CayenneAction {
 			EntityMergeSupport merger = new EntityMergeSupport(map);
 			merger.synchronizeWithDbEntity(ent);
 
-			// fire a chain of "remove/add" vents for entity
+			// fire a chain of "remove/add" events for entity
 			// this seems to be the only way to refresh the view
 			mediator.fireObjEntityEvent(
 				new EntityEvent(this, ent, EntityEvent.REMOVE));

@@ -70,8 +70,7 @@ import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.RecentFileMenu;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.objectstyle.cayenne.util.Preferences;
 
@@ -178,7 +177,7 @@ public class Editor
 
 		CayenneAction removeAction = new RemoveAction();
 		actionMap.put(removeAction.getKey(), removeAction);
-		
+
 		CayenneAction infoAction = new InfoAction();
 		actionMap.put(infoAction.getKey(), infoAction);
 
@@ -196,7 +195,7 @@ public class Editor
 
 		CayenneAction createDEAction = new CreateDbEntityAction();
 		actionMap.put(createDEAction.getKey(), createDEAction);
-		
+
 		CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
 		actionMap.put(createDDEAction.getKey(), createDDEAction);
 
@@ -211,7 +210,7 @@ public class Editor
 
 		CayenneAction entSyncAction = new ObjEntitySyncAction();
 		actionMap.put(entSyncAction.getKey(), entSyncAction);
-		
+
 		CayenneAction derivedResetAction = new DerivedEntitySyncAction();
 		actionMap.put(derivedResetAction.getKey(), derivedResetAction);
 
@@ -268,7 +267,8 @@ public class Editor
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
 		projectMenu.add(getAction(ObjEntitySyncAction.ACTION_NAME).buildMenu());
-		projectMenu.add(getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
+		projectMenu.add(
+			getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
@@ -320,14 +320,15 @@ public class Editor
 		toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
-		
+
 		toolBar.addSeparator();
 
 		toolBar.add(getAction(CreateDomainAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateDbEntityAction.ACTION_NAME).buildButton());
-		toolBar.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
+		toolBar.add(
+			getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateObjEntityAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateAttributeAction.ACTION_NAME).buildButton());
 		toolBar.add(
@@ -550,7 +551,12 @@ public class Editor
 	}
 
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
-		enableDbEntityMenu();
+		if (e.getEntity() instanceof DerivedDbEntity) {
+			enableDerivedDbEntityMenu();
+		} else {
+			enableDbEntityMenu();
+		}
+
 		getAction(RemoveAction.ACTION_NAME).setName("Remove DbEntity");
 	}
 
@@ -654,7 +660,7 @@ public class Editor
 		getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
 	}
-	
+
 	private void enableDerivedDbEntityMenu() {
 		enableDbEntityMenu();
 		getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
@@ -701,8 +707,7 @@ public class Editor
 			}
 			p1.addHandler(
 				new CayenneFileHandler(log, 2 * 1024 * 1024, 4, true));
-		}
-		catch(IOException ioex) {
+		} catch (IOException ioex) {
 			logObj.log(Level.WARNING, "Error setting logging.", ioex);
 		}
 	}

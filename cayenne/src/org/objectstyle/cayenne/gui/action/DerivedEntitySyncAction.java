@@ -57,6 +57,9 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.gui.event.EntityEvent;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
+
 /**
  * @author Andrei Adamchik
  */
@@ -75,6 +78,19 @@ public class DerivedEntitySyncAction extends CayenneAction {
 	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
 	 */
 	public void performAction(ActionEvent e) {
+		DerivedDbEntity ent =
+			(DerivedDbEntity) getMediator().getCurrentDbEntity();
+			
+		if (ent != null && ent.getParentEntity() != null) {
+			ent.resetToParentView();
+
+			// fire a chain of "remove/add" events for entity
+			// this seems to be the only way to refresh the view
+			getMediator().fireObjEntityEvent(
+				new EntityEvent(this, ent, EntityEvent.REMOVE));
+			getMediator().fireObjEntityEvent(
+				new EntityEvent(this, ent, EntityEvent.ADD));
+		}
 	}
 
 }

@@ -81,9 +81,11 @@ public class DbRelationship extends Relationship {
         addJoin(pr);
     }
 
-    /** Returns DbRelationship that is the opposite of this DbRelationship.
+    /** 
+     * Returns DbRelationship that is the opposite of this DbRelationship.
      * This means a relationship from this target entity to this source entity with the same
-     * join semantics. Returns null if no such relationship exists. */
+     * join semantics. Returns null if no such relationship exists. 
+     */
     public DbRelationship getReverseRelationship() {
         Entity target = getTargetEntity();
         Entity src = getSourceEntity();

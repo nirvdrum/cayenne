@@ -108,6 +108,42 @@ public class DerivedDbEntityTst extends TestCase {
     	assertEquals(ent.getParentEntity().getFullyQualifiedName(), ent.getFullyQualifiedName());
     }
     
+    public void testResetToParentView1() throws Exception {
+    	assignParent();
+    	
+    	DerivedDbAttribute at = new DerivedDbAttribute();
+    	at.setName("abc");
+    	
+    	DbRelationship rel = new DbRelationship();
+    	rel.setName("abc");
+    	
+    	ent.addAttribute(at);
+    	ent.addRelationship(rel);
+    	
+    	ent.resetToParentView();
+    	
+    	assertEquals(0, ent.getAttributeList().size());
+    	assertEquals(0, ent.getRelationshipList().size());
+    }
+    
+    public void testResetToParentView2() throws Exception {
+    	assignParent();
+    	
+    	DbAttribute at = new DbAttribute();
+    	at.setName("abc");
+    	
+    	DbRelationship rel = new DbRelationship();
+    	rel.setName("abc");
+    	
+    	ent.getParentEntity().addAttribute(at);
+    	ent.getParentEntity().addRelationship(rel);
+    	
+    	ent.resetToParentView();
+    	
+    	assertEquals(1, ent.getAttributeList().size());
+    	assertEquals(1, ent.getRelationshipList().size());
+    }
+    
     protected void assignParent() {
     	ent.setParentEntity(new DbEntity());
     }

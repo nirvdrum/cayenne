@@ -98,17 +98,38 @@ public class DerivedDbEntity extends DbEntity {
 
 	/**
 	 * Removes all attributes and relationships, 
-	 * and replaces them with the data of 
-	 * the parent entity.
+	 * and replaces them with the data of the parent entity.
 	 */
 	public void resetToParentView() {
 		clearAttributes();
 		clearRelationships();
 
+		// copy attributes
 		Iterator it = getParentEntity().getAttributeList().iterator();
 		while (it.hasNext()) {
 			DbAttribute at = (DbAttribute) it.next();
-			addAttribute(new DbAttribute(at));
+			addAttribute(new DerivedDbAttribute(this, at));
+		}
+
+		// copy relationships
+		Iterator rit = getParentEntity().getRelationshipList().iterator();
+		while (rit.hasNext()) {
+			DbRelationship protoRel = (DbRelationship) rit.next();
+            DbRelationship rel = new DbRelationship();
+            rel.setName(protoRel.getName());
+            rel.setSourceEntity(this);
+            rel.setTargetEntity(protoRel.getTargetEntity());
+            
+            Iterator joins = protoRel.getJoins().iterator(); 
+            while(joins.hasNext()) {
+            	DbAttributePair protoJoin = (DbAttributePair)joins.next();
+            	
+            	DbAttribute src = (DbAttribute)getAttribute(protoJoin.getSource().getName());
+            	DbAttributePair join = new DbAttributePair(src, protoJoin.getTarget());
+            	rel.addJoin(join);
+            }   
+            
+            addRelationship(rel);       
 		}
 	}
 
