@@ -81,6 +81,11 @@ public class QueryResult
     // the same functionality, but we have to stay 1.3 comatible)
     protected SequencedHashMap queries = new SequencedHashMap();
 
+    /** Clears any previously collected information. */
+	public void clear() {
+		queries.clear();
+	}
+			
     /**
      * Returns an iterator over all executed queries in the order they were executed.
      */
