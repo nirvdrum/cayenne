@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.validator;
 
 import javax.swing.JFrame;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
@@ -67,7 +68,6 @@ import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.ProjectException;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
@@ -78,6 +78,8 @@ import org.objectstyle.cayenne.project.validator.ValidationInfo;
  * @author Andrei Adamchik
  */
 public abstract class ValidationDisplayHandler {
+    private static Logger logObj = Logger.getLogger(ValidationDisplayHandler.class);
+
     public static final int NO_ERROR = ValidationInfo.VALID;
     public static final int WARNING = ValidationInfo.WARNING;
     public static final int ERROR = ValidationInfo.ERROR;
@@ -114,7 +116,9 @@ public abstract class ValidationDisplayHandler {
             msg = new ProcedureParameterErrorMsg(result);
         }
         else {
-            throw new ProjectException("Unsupported project node: " + validatedObj);
+            // do nothing ... this maybe a project node that is not displayed
+            logObj.info("unknown project node: " + validatedObj);
+            msg = new NullHanlder(result);
         }
 
         return msg;
@@ -157,5 +161,15 @@ public abstract class ValidationDisplayHandler {
 
     public ValidationInfo getValidationInfo() {
         return validationInfo;
+    }
+
+    private static final class NullHanlder extends ValidationDisplayHandler {
+        NullHanlder(ValidationInfo info) {
+            super(info);
+        }
+
+        public void displayField(EventController mediator, JFrame frame) {
+            // noop
+        }
     }
 }

@@ -208,7 +208,8 @@ public class SelectQuery
         pw.print(linePadding);
         pw.print("<query name=\"");
         pw.print(getName());
-        pw.print("\" factory=\"org.objectstyle.cayenne.map.SelectQueryBuilder\"");
+        pw.print("\" factory=\"");
+        pw.print(SelectQueryBuilder.class.getName());
 
         String rootString = null;
         String rootType = null;
@@ -239,10 +240,9 @@ public class SelectQuery
             pw.print(rootType);
             pw.print("\" root-name=\"");
             pw.print(rootString);
-            pw.print("\"");
         }
 
-        pw.println('>');
+        pw.println("\">");
 
         // print properties
         if (distinct != DISTINCT_DEFAULT) {

@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
@@ -131,14 +132,15 @@ public abstract class AbstractQuery implements Query {
             || (value instanceof ObjEntity)
             || (value instanceof DbEntity)
             || (value instanceof Class)
-            || (value instanceof Procedure))) {
-            String rootClass =
-                (value != null) ? value.getClass().getName() : "null";
+            || (value instanceof Procedure)
+            || (value instanceof DataMap))) {
+
+            String rootClass = (value != null) ? value.getClass().getName() : "null";
 
             throw new IllegalArgumentException(
                 getClass().getName()
-                    + ".setRoot takes a String, ObjEntity, DbEntity, Procedure, "
-                    + "or Class only. It was passed a "
+                    + ": \"setRoot(..)\" takes a DataMap, String, ObjEntity, DbEntity, Procedure, "
+                    + "or Class. It was passed a "
                     + rootClass);
         }
         
