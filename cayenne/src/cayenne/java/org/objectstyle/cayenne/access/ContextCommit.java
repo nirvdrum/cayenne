@@ -57,13 +57,15 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.Set;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.log4j.Level;
@@ -71,7 +73,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.ObjectStore.FlattenedRelationshipInfo;
@@ -366,88 +367,6 @@ class ContextCommit {
         }
     }
 
-    private List createOptimisticLockingIdSnapshotKeys(ObjEntity objEntity) {
-        List newLockingAttributeList = new ArrayList();
-
-        Iterator dbAttributeIterator = objEntity.getDbEntity().getAttributes().iterator();
-        while (dbAttributeIterator.hasNext()) {
-            DbAttribute dbAttr = (DbAttribute) dbAttributeIterator.next();
-
-            // always lock on primary key(s)
-            if (dbAttr.isPrimaryKey()) {
-                newLockingAttributeList.add(dbAttr);
-                continue;
-            }
-
-            ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(dbAttr);
-
-            if (objAttr == null)
-                continue;
-
-            // Per-objAtttribute optimistic locking conditional
-            if (!objAttr.isUsedForLocking())
-                continue;
-
-            newLockingAttributeList.add(dbAttr);
-        }
-
-        Iterator dbRelationshipIterator =
-            objEntity.getDbEntity().getRelationships().iterator();
-        while (dbRelationshipIterator.hasNext()) {
-            DbRelationship dbRel = (DbRelationship) dbRelationshipIterator.next();
-
-            ObjRelationship objRel = objEntity.getRelationshipForDbRelationship(dbRel);
-
-            if (objRel == null)
-                continue;
-
-            // Per-objAtttribute optimistic locking conditional
-            if (!objRel.isUsedForLocking())
-                continue;
-
-            Iterator joinsIterator = dbRel.getJoins().iterator();
-            while (joinsIterator.hasNext()) {
-                DbAttributePair dbAttrPair = (DbAttributePair) joinsIterator.next();
-                DbAttribute dbAttr = dbAttrPair.getSource();
-                newLockingAttributeList.add(dbAttr);
-            }
-        }
-
-        return newLockingAttributeList;
-    }
-
-    private Map createOptimisticLockingIdSnapshot(
-        ObjEntity objEntity,
-        DataObject dataObject,
-        List dbAttrList,
-        Map srcIdSnapshotMap)
-        throws CayenneException {
-            
-        // Unclear to me if srcIdSnapshotMap is necessary as a starting point, but it seems safest to leave it
-        Map newLockingAttributeMap = new HashMap(srcIdSnapshotMap);
-
-        // Use this to insure we're not fetching it from the db.
-        DataRow commitedSnapshot =
-            dataObject.getDataContext().getObjectStore().getRetainedSnapshot(
-                dataObject.getObjectId());
-
-        if (null == commitedSnapshot) {
-            throw new CayenneException(
-                "getRetainedSnapshot() is null for " + dataObject.getObjectId());
-        }
-
-        Iterator dbAttributeIterator = dbAttrList.iterator();
-        while (dbAttributeIterator.hasNext()) {
-            DbAttribute dbAttr = (DbAttribute) dbAttributeIterator.next();
-
-            newLockingAttributeMap.put(
-                dbAttr.getName(),
-                commitedSnapshot.get(dbAttr.getName()));
-        }
-
-        return newLockingAttributeMap;
-    }
-
     private void prepareUpdateQueries(DataNodeCommitHelper commitHelper)
         throws CayenneException {
         List entities = commitHelper.getObjEntitiesForUpdate();
@@ -458,6 +377,7 @@ class ContextCommit {
         List dbEntities = new ArrayList(entities.size());
         Map objEntitiesByDbEntity = new HashMap(entities.size());
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
+
         for (Iterator i = dbEntities.iterator(); i.hasNext();) {
             DbEntity dbEntity = (DbEntity) i.next();
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
@@ -467,12 +387,10 @@ class ContextCommit {
                 ObjEntity entity = (ObjEntity) j.next();
 
                 // Per-objEntity optimistic locking conditional
-                boolean shouldUseOptimisticLocking =
+                boolean optimisticLocking =
                     (ObjEntity.LOCK_TYPE_OPTIMISTIC == entity.getLockType());
-                List lockingIdSnapshotKeys = null;
-                if (shouldUseOptimisticLocking) {
-                    lockingIdSnapshotKeys = createOptimisticLockingIdSnapshotKeys(entity);
-                }
+
+                List qualifierAttributes = qualifierAttributes(entity, optimisticLocking);
 
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
 
@@ -487,10 +405,6 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-
-                    // check if object was modified from underneath and consult the delegate
-                    // if this is the case...
-                    // checkConcurrentModifications(o);
 
                     Map snapshot =
                         BatchQueryUtils.buildSnapshotForUpdate(
@@ -511,41 +425,54 @@ class ContextCommit {
                         throw attemptToCommitReadOnlyEntity(o.getClass(), entity);
                     }
 
-                    // Need to wrap snapshot keys to a TreeSet to ensure
-                    // automatic ordering so that we can build a valid hashcode
-                    TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
-                    Integer hashCode = new Integer(Util.hashCode(updatedAttributeNames));
+                    // build qualifier snapshot
+                    Map idSnapshot = o.getObjectId().getIdSnapshot();
 
-                    UpdateBatchQuery batch = (UpdateBatchQuery) batches.get(hashCode);
+                    if (!isMasterDbEntity && masterDependentDbRel != null) {
+                        idSnapshot =
+                            masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(
+                                idSnapshot);
+                    }
+
+                    Map qualifierSnapshot = idSnapshot;
+                    if (optimisticLocking) {
+                        // clone snapshot and add extra keys...
+                        qualifierSnapshot = new HashMap(qualifierSnapshot);
+                        appendOptimisticLockingAttributes(
+                            qualifierSnapshot,
+                            o,
+                            qualifierAttributes);
+                    }
+
+                    // organize batches by the updated columns + nulls in qualifier
+                    Set snapshotSet = snapshot.keySet();
+                    Set nullQualifierNames = new HashSet();
+                    Iterator it = qualifierSnapshot.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry entry = (Map.Entry) it.next();
+                        if (entry.getValue() == null) {
+                            nullQualifierNames.add(entry.getKey());
+                        }
+                    }
+
+                    List batchKey =
+                        Arrays.asList(new Object[] { snapshotSet, nullQualifierNames });
+
+                    UpdateBatchQuery batch = (UpdateBatchQuery) batches.get(batchKey);
                     if (batch == null) {
                         batch =
                             new UpdateBatchQuery(
                                 dbEntity,
-                                new ArrayList(snapshot.keySet()),
+                                qualifierAttributes,
+                                updatedAttributes(dbEntity, snapshot),
+                                nullQualifierNames,
                                 10);
                         batch.setLoggingLevel(logLevel);
-                        batches.put(hashCode, batch);
+                        batch.setUsingOptimisticLocking(optimisticLocking);
+                        batches.put(batchKey, batch);
                     }
-                    Map idSnapshot = o.getObjectId().getIdSnapshot();
-                    if (!isMasterDbEntity && masterDependentDbRel != null)
-                        idSnapshot =
-                            masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(
-                                idSnapshot);
 
-                    if (shouldUseOptimisticLocking) {
-                        Map lockingIdSnapshot =
-                            createOptimisticLockingIdSnapshot(
-                                entity,
-                                o,
-                                lockingIdSnapshotKeys,
-                                idSnapshot);
-                        batch.setIdDbAttributes(lockingIdSnapshotKeys);
-                        batch.setUsingOptimisticLocking(true);
-                        batch.add(lockingIdSnapshot, snapshot);
-                    }
-                    else {
-                        batch.add(idSnapshot, snapshot);
-                    }
+                    batch.add(qualifierSnapshot, snapshot);
 
                     if (isMasterDbEntity) {
                         ObjectId updId =
@@ -562,6 +489,95 @@ class ContextCommit {
                 }
             }
             commitHelper.getQueries().addAll(batches.values());
+        }
+    }
+
+    /** 
+     * Creates a list of DbAttributes that should be used in update WHERE clause.
+     */
+    private List qualifierAttributes(ObjEntity entity, boolean optimisticLocking) {
+        if (!optimisticLocking) {
+            return entity.getDbEntity().getPrimaryKey();
+        }
+
+        List attributes = new ArrayList(entity.getDbEntity().getPrimaryKey());
+
+        Iterator attributeIt = entity.getAttributes().iterator();
+        while (attributeIt.hasNext()) {
+            ObjAttribute attribute = (ObjAttribute) attributeIt.next();
+
+            if (attribute.isUsedForLocking()) {
+                // only care about first step in a flattened attribute
+                DbAttribute dbAttribute =
+                    (DbAttribute) attribute.getDbPathIterator().next();
+
+                if (!attributes.contains(dbAttribute)) {
+                    attributes.add(dbAttribute);
+                }
+            }
+        }
+
+        Iterator relationshipIt = entity.getRelationships().iterator();
+        while (relationshipIt.hasNext()) {
+            ObjRelationship relationship = (ObjRelationship) relationshipIt.next();
+
+            if (relationship.isUsedForLocking()) {
+                // only care about the first DbRelationship
+                DbRelationship dbRelationship =
+                    (DbRelationship) relationship.getDbRelationships().get(0);
+
+                Iterator joinsIterator = dbRelationship.getJoins().iterator();
+                while (joinsIterator.hasNext()) {
+                    DbAttributePair dbAttrPair = (DbAttributePair) joinsIterator.next();
+                    DbAttribute dbAttribute = dbAttrPair.getSource();
+                    if (!attributes.contains(dbAttribute)) {
+                        attributes.add(dbAttribute);
+                    }
+                }
+            }
+        }
+
+        return attributes;
+    }
+
+    /**
+     * Creates a list of DbAttributes that are updated in a snapshot
+     * @param entity
+     * @return
+     */
+    private List updatedAttributes(DbEntity entity, Map updatedSnapshot) {
+        List attributes = new ArrayList(updatedSnapshot.size());
+        Map entityAttributes = entity.getAttributeMap();
+
+        Iterator it = updatedSnapshot.keySet().iterator();
+        while (it.hasNext()) {
+            Object name = it.next();
+            attributes.add(entityAttributes.get(name));
+        }
+
+        return attributes;
+    }
+
+    /**
+     * Appends values used for optimistic locking to a given snapshot.
+     */
+    private void appendOptimisticLockingAttributes(
+        Map qualifierSnapshot,
+        DataObject dataObject,
+        List qualifierAttributes)
+        throws CayenneException {
+
+        Map snapshot =
+            dataObject.getDataContext().getObjectStore().getRetainedSnapshot(
+                dataObject.getObjectId());
+
+        Iterator it = qualifierAttributes.iterator();
+        while (it.hasNext()) {
+            DbAttribute attribute = (DbAttribute) it.next();
+            String name = attribute.getName();
+            if (!qualifierSnapshot.containsKey(name)) {
+                qualifierSnapshot.put(name, snapshot.get(name));
+            }
         }
     }
 

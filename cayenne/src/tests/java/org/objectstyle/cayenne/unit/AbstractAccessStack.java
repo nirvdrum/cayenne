@@ -62,18 +62,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -162,10 +159,6 @@ public abstract class AbstractAccessStack {
 
         node.getDependencySorter().sortDbEntities(entities, false);
         return entities;
-    }
-
-    protected void createTestData(DataDomain domain, Collection queries) throws Exception {
-        domain.performQueries(queries, new DefaultOperationObserver());
     }
 
     protected void deleteTestData(DataNode node, DataMap map) throws Exception {

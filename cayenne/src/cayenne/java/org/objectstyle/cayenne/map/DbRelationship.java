@@ -316,12 +316,14 @@ public class DbRelationship extends Relationship {
         }
     }
 
-    /** Creates a snapshot of primary key attributes of a target
-      * object of this relationship based on a snapshot of a source.
-      * Only "to-one" relationships are supported.
-      * Returns null if relationship does not point to an object.
-      * Throws CayenneRuntimeException if relationship is "to many" or
-      * if snapshot is missing id components. */
+    /** 
+     * Creates a snapshot of primary key attributes of a target
+     * object of this relationship based on a snapshot of a source.
+     * Only "to-one" relationships are supported.
+     * Returns null if relationship does not point to an object.
+     * Throws CayenneRuntimeException if relationship is "to many" or
+     * if snapshot is missing id components. 
+     */
     public Map targetPkSnapshotWithSrcSnapshot(Map srcSnapshot) {
 
         if (isToMany()) {

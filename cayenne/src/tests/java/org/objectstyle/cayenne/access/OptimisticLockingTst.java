@@ -55,14 +55,93 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.List;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.testdo.locking.SimpleLockingTest;
 import org.objectstyle.cayenne.unit.LockingTestCase;
 
 /**
  * @author Andrei Adamchik
  */
 public class OptimisticLockingTst extends LockingTestCase {
+    protected DataContext context;
+
+    protected void setUp() throws Exception {
+        context = createDataContext();
+    }
+
     public void testSimpleLocking() throws Exception {
         createTestData("testSimpleLocking");
 
+        List allObjects = context.performQuery(new SelectQuery(SimpleLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        SimpleLockingTest object = (SimpleLockingTest) allObjects.get(0);
+
+        // change description and save... no optimistic lock failure expected
+        object.setDescription("first update");
+        context.commitChanges();
+
+        // change row underneath, change description and save...  optimistic lock failure expected
+        createTestData("SimpleLockUpdate");
+        object.setDescription("second update");
+
+        try {
+            context.commitChanges();
+            fail("Optimistic lock failure expected.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // optimistic lock failure expected...
+        }
+    }
+
+    public void testLockingOnNull() throws Exception {
+        createTestData("testLockingOnNull");
+
+        List allObjects = context.performQuery(new SelectQuery(SimpleLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        SimpleLockingTest object = (SimpleLockingTest) allObjects.get(0);
+
+        // change description and save... no optimistic lock failure expected... 
+        object.setDescription("first update");
+        context.commitChanges();
+
+        // change row underneath, change description and save...  optimistic lock failure expected
+        createTestData("SimpleLockUpdate");
+        object.setDescription("second update");
+
+        try {
+            context.commitChanges();
+            fail("Optimistic lock failure expected.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // optimistic lock failure expected...
+        }
+    }
+
+    public void testLockingOnMixed() throws Exception {
+        createTestData("testLockingOnMixed");
+        SelectQuery query = new SelectQuery(SimpleLockingTest.class);
+        query.addOrdering(new Ordering("db:LOCKING_TEST_ID", Ordering.ASC));
+
+        List allObjects = context.performQuery(query);
+        assertEquals(3, allObjects.size());
+
+        SimpleLockingTest object1 = (SimpleLockingTest) allObjects.get(0);
+        SimpleLockingTest object2 = (SimpleLockingTest) allObjects.get(0);
+        SimpleLockingTest object3 = (SimpleLockingTest) allObjects.get(0);
+
+        // change description and save... no optimistic lock failure expected... 
+        object1.setDescription("first update for object1");
+        object2.setDescription("first update for object2");
+        object3.setName("object3 - new name");
+        context.commitChanges();
+
+        // TODO: it would be nice to pick inside DataContext to see that 3 batches where generated...
+        // this requires refactoring of ContextCommit.
     }
 }

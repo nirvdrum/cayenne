@@ -79,8 +79,8 @@ public class LOBUpdateBatchQueryBuilder extends LOBBatchQueryBuilder {
         UpdateBatchQuery updateBatch = (UpdateBatchQuery) query;
 
         List values = new ArrayList(len);
-        List qualifierAttributes = updateBatch.getIdDbAttributes();
-        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+        List qualifierAttributes = updateBatch.getQualifierAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedAttributes();
 
         int updatedLen = updatedDbAttributes.size();
         int qualifierLen = qualifierAttributes.size();
@@ -102,8 +102,8 @@ public class LOBUpdateBatchQueryBuilder extends LOBBatchQueryBuilder {
     public String createSqlString(BatchQuery batch) {
         UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
         String table = batch.getDbEntity().getFullyQualifiedName();
-        List idDbAttributes = updateBatch.getIdDbAttributes();
-        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+        List idDbAttributes = updateBatch.getQualifierAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedAttributes();
         StringBuffer query = new StringBuffer("UPDATE ");
         query.append(table).append(" SET ");
 

@@ -91,7 +91,7 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         node = new NodeSwitchingMockup();
     }
 
@@ -117,7 +117,12 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
 
     public void testBatchUpdateQuery() throws Exception {
         assertQuery(
-            new UpdateBatchQuery(new DbEntity(), Collections.EMPTY_LIST, 1),
+            new UpdateBatchQuery(
+                new DbEntity(),
+                Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST,
+                null,
+                1),
             "runBatchUpdate");
     }
 
@@ -130,16 +135,11 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
     }
 
     public void testProcedureQuery() throws Exception {
-        assertQuery(
-            new ProcedureQuery(new Procedure()),
-            "runStoredProcedure");
+        assertQuery(new ProcedureQuery(new Procedure()), "runStoredProcedure");
     }
 
-    protected void assertQuery(Query q, String expectedMethod)
-        throws Exception {
-        node.performQueries(
-            Collections.singletonList(q),
-            new DefaultOperationObserver());
+    protected void assertQuery(Query q, String expectedMethod) throws Exception {
+        node.performQueries(Collections.singletonList(q), new DefaultOperationObserver());
         List calls = node.getMethodsCalled();
         assertEquals(expectedMethod, 1, calls.size());
         assertEquals(expectedMethod, calls.get(0));
@@ -156,10 +156,7 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
             methodsCalled.add("runBatchUpdate");
         }
 
-        protected void runSelect(
-            Connection con,
-            Query query,
-            OperationObserver delegate)
+        protected void runSelect(Connection con, Query query, OperationObserver delegate)
             throws SQLException, Exception {
             methodsCalled.add("runSelect");
         }
@@ -172,10 +169,7 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
             methodsCalled.add("runStoredProcedure");
         }
 
-        protected void runUpdate(
-            Connection con,
-            Query query,
-            OperationObserver delegate)
+        protected void runUpdate(Connection con, Query query, OperationObserver delegate)
             throws SQLException, Exception {
             methodsCalled.add("runUpdate");
         }

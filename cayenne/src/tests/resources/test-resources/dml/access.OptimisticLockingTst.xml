@@ -5,10 +5,38 @@
 	<!-- ======================================= -->
 	<!-- Named Queries -->
 	<!-- ======================================= -->
-	<bean id="SimpleLockingInsert1" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+	<bean id="SimpleLockDelete" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.locking.SimpleLockingTest</value></constructor-arg>
+		<constructor-arg><value>delete from SIMPLE_LOCKING_TEST</value></constructor-arg>
+	</bean>
+	<bean id="SimpleLockInsert" class="org.objectstyle.cayenne.query.SqlModifyQuery">
 		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.locking.SimpleLockingTest</value></constructor-arg>
 		<constructor-arg><value>
 		insert into SIMPLE_LOCKING_TEST (LOCKING_TEST_ID, NAME, DESCRIPTION) values (1, 'LockTest1', null)
+		</value></constructor-arg>
+	</bean>
+	<bean id="SimpleLockInsertNull" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.locking.SimpleLockingTest</value></constructor-arg>
+		<constructor-arg><value>
+		insert into SIMPLE_LOCKING_TEST (LOCKING_TEST_ID, NAME, DESCRIPTION) values (1, null, null)
+		</value></constructor-arg>
+	</bean>
+	<bean id="SimpleLockInsert2" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.locking.SimpleLockingTest</value></constructor-arg>
+		<constructor-arg><value>
+		insert into SIMPLE_LOCKING_TEST (LOCKING_TEST_ID, NAME, DESCRIPTION) values (2, 'LockTest2', null)
+		</value></constructor-arg>
+	</bean>
+	<bean id="SimpleLockInsert3" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.locking.SimpleLockingTest</value></constructor-arg>
+		<constructor-arg><value>
+		insert into SIMPLE_LOCKING_TEST (LOCKING_TEST_ID, NAME, DESCRIPTION) values (3, 'LockTest3', 'Another Lock Test')
+		</value></constructor-arg>
+	</bean>
+	<bean id="SimpleLockUpdate" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.cayenne.testdo.locking.SimpleLockingTest</value></constructor-arg>
+		<constructor-arg><value>
+		update SIMPLE_LOCKING_TEST set NAME = 'LockTest1Updated' where LOCKING_TEST_ID = 1
 		</value></constructor-arg>
 	</bean>
 
@@ -17,7 +45,23 @@
 	<!-- ======================================= -->	
 	<bean id="testSimpleLocking" class="java.util.ArrayList">
 		<constructor-arg>
-			<list><ref bean="SimpleLockingInsert1"/></list>
+			<list><ref bean="SimpleLockDelete"/><ref bean="SimpleLockInsert"/></list>
 		</constructor-arg>
 	</bean>	
+	
+	<bean id="testLockingOnNull" class="java.util.ArrayList">
+		<constructor-arg>
+			<list><ref bean="SimpleLockDelete"/><ref bean="SimpleLockInsertNull"/></list>
+		</constructor-arg>
+	</bean>
+	<bean id="testLockingOnMixed" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="SimpleLockDelete"/>
+				<ref bean="SimpleLockInsertNull"/>
+				<ref bean="SimpleLockInsert2"/>
+				<ref bean="SimpleLockInsert3"/>
+			</list>
+		</constructor-arg>
+	</bean>
 </beans>

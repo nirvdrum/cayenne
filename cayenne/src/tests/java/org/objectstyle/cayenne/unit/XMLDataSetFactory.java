@@ -60,10 +60,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.query.Query;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 
@@ -85,43 +87,59 @@ public class XMLDataSetFactory implements DataSetFactory {
     /**
      * Returns a Collection of Cayenne queries for a given test.
      */
-    public Collection dataSetQueries(Class testCase, String testName) {
+    public Collection getDataSet(Class testCase, String testName) {
         // use test case class name as a key to locate BeanFactory
         // use test name to locate DataSet
+        BeanFactory factory = getFactory(testCase);
 
-        BeanFactory factory = (BeanFactory) dataSets.get(testCase);
         if (factory == null) {
-            // if the key exists, however the value is null, return null
-            if (dataSets.containsKey(testCase)) {
-                return null;
-            }
+            return null;
+        }
+
+        // name is either a Collection or an individual query
+        Object object = factory.getBean(testName);
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof Collection) {
+            return (Collection) object;
+        }
+        else if (object instanceof Query) {
+            return Collections.singleton(object);
+        }
+        else {
+            throw new RuntimeException(
+                "Invalid object type for name '"
+                    + testName
+                    + "': "
+                    + object.getClass().getName());
+        }
+    }
+
+    protected BeanFactory getFactory(Class testCase) {
+        BeanFactory factory = (BeanFactory) dataSets.get(testCase);
+
+        if (factory == null && !dataSets.containsKey(testCase)) {
 
             // load XML file
             File file = dataSetXML(testCase);
-            if (!file.isFile()) {
-                logObj.info(
-                    "No test data for "
-                        + testCase.getName()
-                        + ", file used: "
-                        + file.getAbsolutePath());
-                dataSets.put(testCase, null);
-                return null;
+            if (file.isFile()) {
+                InputStream in = null;
+                try {
+                    in = new FileInputStream(file);
+                }
+                catch (IOException ioex) {
+                    logObj.error("Can't open test resources...", ioex);
+                    throw new RuntimeException("Error loading");
+                }
+
+                factory = new XmlBeanFactory(in);
             }
 
-            InputStream in = null;
-            try {
-                in = new FileInputStream(file);
-            }
-            catch (IOException ioex) {
-                logObj.error("Can't open test resources...", ioex);
-                throw new RuntimeException("Error loading");
-            }
-
-            factory = new XmlBeanFactory(in);
             dataSets.put(testCase, factory);
         }
 
-        return (Collection) factory.getBean(testName, Collection.class);
+        return factory;
     }
 
     protected File dataSetXML(Class testCase) {

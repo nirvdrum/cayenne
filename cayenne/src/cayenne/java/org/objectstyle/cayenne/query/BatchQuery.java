@@ -62,38 +62,30 @@ import org.objectstyle.cayenne.map.DbEntity;
 
 /**
  * BatchQuery and its descendants allow to group similar data for the
- * following massive database modifications. Mainly the data are grouped
- * by modification type (INSERT/DELETE/UPDATE) and DbEntity. Additional
- * conditions may be used too. Generally batches are utilized in ContextCommit
- * and performed by DataNodes.
+ * batch database modifications, including inserts, updates and deletes. 
+ * Single BatchQuery corresponds to a parameterized PreparedStatement 
+ * and a matrix of values.
  *
  * @author Andriy Shapochka
  */
-
 public abstract class BatchQuery extends AbstractQuery {
 
     public BatchQuery(DbEntity dbEntity) {
         setRoot(dbEntity);
     }
 
+    /**
+     * Returns a DbEntity associated with this batch.
+     */
     public DbEntity getDbEntity() {
         return (DbEntity) getRoot();
     }
 
-    public abstract List getDbAttributes();
-
-    public abstract void reset();
-
     /**
-     * Repositions batch to the next object, so that subsequent calls to
-     * getObject(int) would return the values of the next batch object. Returns
-     * <code>true</code> if batch has more objects to iterate over,
-     * <code>false</code> otherwise.
+     * Returns a List of values for the current batch iteration, 
+     * in the order they are bound to the query. Used mainly for 
+     * logging.
      */
-    public abstract boolean next();
-
-    public abstract Object getObject(int valueIndex);
-
     public List getValuesForUpdateParameters() {
         int len = getDbAttributes().size();
         List values = new ArrayList(len);
@@ -104,14 +96,37 @@ public abstract class BatchQuery extends AbstractQuery {
     }
 
     /**
-     * Returns the number of objects grouped in the batch query.
-     */
-    public abstract int size();
-
-    /**
-     * Returns <code>true</code> if this batch query has no associated objects.
+     * Returns <code>true</code> if this batch query has no parameter rows.
      */
     public boolean isEmpty() {
         return size() == 0;
     }
+
+    /**
+     * Returns a list of DbAttributes describing batch parameters.
+     */
+    public abstract List getDbAttributes();
+
+    /**
+     * Rewinds batch to the first parameter row.
+     */
+    public abstract void reset();
+
+    /**
+     * Repositions batch to the next object, so that subsequent calls to
+     * getObject(int) would return the values of the next batch object. Returns
+     * <code>true</code> if batch has more objects to iterate over,
+     * <code>false</code> otherwise.
+     */
+    public abstract boolean next();
+
+    /**
+     * Returns a value at a given index for the current batch iteration.
+     */
+    public abstract Object getObject(int valueIndex);
+
+    /**
+     * Returns the number of parameter rows in this batch.
+     */
+    public abstract int size();
 }

@@ -61,9 +61,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -85,8 +83,9 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
     public String createSqlString(BatchQuery batch) {
         UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
         String table = batch.getDbEntity().getFullyQualifiedName();
-        List idDbAttributes = updateBatch.getIdDbAttributes();
-        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+        List qualifierAttributes = updateBatch.getQualifierAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedAttributes();
+
         StringBuffer query = new StringBuffer("UPDATE ");
         query.append(table).append(" SET ");
 
@@ -101,24 +100,18 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
         }
 
         query.append(" WHERE ");
-        int parameterIndex = len;
-        Iterator i = idDbAttributes.iterator();
+
+        Iterator i = qualifierAttributes.iterator();
         while (i.hasNext()) {
             DbAttribute attribute = (DbAttribute) i.next();
             appendDbAttribute(query, attribute);
-            if (updateBatch.isUsingOptimisticLocking()) {
-                Object value = batch.getObject(parameterIndex++);
-                if (null == value)
-                    query.append(" IS NULL");
-                else
-                    query.append(" = ?");
-            }
-            else
-                query.append(" = ?");
+            query.append(updateBatch.isNull(attribute) ? " IS NULL" : " = ?");
+
             if (i.hasNext()) {
                 query.append(" AND ");
             }
         }
+
         return query.toString();
     }
 
@@ -132,11 +125,11 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
         throws SQLException, Exception {
 
         UpdateBatchQuery updateBatch = (UpdateBatchQuery) query;
-        List idDbAttributes = updateBatch.getIdDbAttributes();
-        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+        List qualifierAttributes = updateBatch.getQualifierAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedAttributes();
 
         int len = updatedDbAttributes.size();
-        int parameterIndex = 0;
+        int parameterIndex = 1;
         for (int i = 0; i < len; i++) {
             Object value = query.getObject(i);
 
@@ -144,75 +137,25 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
             adapter.bindParameter(
                 statement,
                 value,
-                parameterIndex + 1,
+                parameterIndex++,
                 attribute.getType(),
                 attribute.getPrecision());
-
-            logQueryParameterInDetail(
-                Level.DEBUG,
-                "binding set",
-                parameterIndex + 1,
-                attribute.getType(),
-                attribute.getName(),
-                value);
-
-            ++parameterIndex;
         }
 
-        for (int i = 0; i < idDbAttributes.size(); i++) {
+        for (int i = 0; i < qualifierAttributes.size(); i++) {
             Object value = query.getObject(len + i);
+            
+            // skip null values... they are translated as "IS NULL"
             if (null == value)
                 continue;
 
-            DbAttribute attribute = (DbAttribute) idDbAttributes.get(i);
+            DbAttribute attribute = (DbAttribute) qualifierAttributes.get(i);
             adapter.bindParameter(
                 statement,
                 value,
-                parameterIndex + 1,
+                parameterIndex++,
                 attribute.getType(),
                 attribute.getPrecision());
-
-            logQueryParameterInDetail(
-                Level.DEBUG,
-                "binding id/lock",
-                parameterIndex + 1,
-                attribute.getType(),
-                attribute.getName(),
-                value);
-
-            ++parameterIndex;
         }
     }
-
-    // utility method to log batch bindings
-    static void logQueryParameterInDetail(
-        Level logLevel,
-        String label,
-        int parameterIndex,
-        int attributeSqlType,
-        String attributeName,
-        Object value) {
-
-        if (logObj.isEnabledFor(logLevel)) {
-            StringBuffer buf = new StringBuffer("[");
-            buf.append(label).append(": ");
-
-            buf.append("parameter=");
-            buf.append(parameterIndex);
-
-            buf.append(", type=");
-            buf.append(attributeSqlType);
-
-            buf.append(", name=");
-            buf.append(attributeName);
-
-            buf.append(", value=");
-            QueryLogger.sqlLiteralForObject(buf, value);
-
-            buf.append(']');
-
-            logObj.log(logLevel, buf.toString());
-        }
-    }
-
 }

@@ -60,6 +60,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 
@@ -113,10 +114,10 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
      * Creates test data for a given test case and test name.
      */
     public void createTestData(Class testCase, String testName) throws Exception {
-        Collection queries = dataSetFactory.dataSetQueries(testCase, testName);
+        Collection queries = dataSetFactory.getDataSet(testCase, testName);
 
         if (queries != null && !queries.isEmpty()) {
-            createTestData(getDataDomain(), queries);
+            getDataDomain().performQueries(queries, new DefaultOperationObserver());
         }
     }
 

@@ -574,7 +574,7 @@ public class DataNode implements QueryEngine {
                         "Optimistic lock failure on sql '"
                             + queryStr
                             + "' for query bindings="
-                            + buf.toString());
+                            + buf);
                 }
 
                 delegate.nextCount(query, updated);

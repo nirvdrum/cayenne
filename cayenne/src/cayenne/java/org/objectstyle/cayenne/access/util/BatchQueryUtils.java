@@ -105,7 +105,7 @@ public class BatchQueryUtils {
         List updatedAttributes =
             (isInsert)
                 ? query.getDbAttributes()
-                : ((UpdateBatchQuery) query).getUpdatedDbAttributes();
+                : ((UpdateBatchQuery) query).getUpdatedAttributes();
 
         Iterator it = updatedAttributes.iterator();
         while (it.hasNext()) {
@@ -119,8 +119,9 @@ public class BatchQueryUtils {
     }
 
     public static Map buildSnapshotForUpdate(DataObject o) {
-    	DataContext context = o.getDataContext();
-        Map committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId(), context);
+        DataContext context = o.getDataContext();
+        Map committedSnapshot =
+            context.getObjectStore().getSnapshot(o.getObjectId(), context);
         Map currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = null;
 
@@ -223,7 +224,7 @@ public class BatchQueryUtils {
             while (itr.hasNext()) {
                 String relName = (String) itr.next();
                 ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-                
+
                 if (rel.isSourceIndependentFromTargetChange())
                     continue;
 
@@ -246,7 +247,7 @@ public class BatchQueryUtils {
                 String relName = (String) itr.next();
                 ObjRelationship rel = (ObjRelationship) relMap.get(relName);
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(1);
-                
+
                 if (rel.isSourceIndependentFromTargetChange())
                     continue;
 
@@ -296,14 +297,18 @@ public class BatchQueryUtils {
         return null;
     }
 
+    /**
+     * Creates a snapshot of updated columns for a given object.
+     */
     public static Map buildSnapshotForUpdate(
         ObjEntity entity,
         DataObject o,
         DbRelationship masterDependentRel) {
-        	
+
         boolean isMasterDbEntity = (masterDependentRel == null);
         DataContext context = o.getDataContext();
-        DataRow committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId(), context);
+        DataRow committedSnapshot =
+            context.getObjectStore().getSnapshot(o.getObjectId(), context);
         DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 

@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.conf.Configuration;
  * @author Andrei Adamchik
  */
 public class BasicTestCase extends TestCase {
+
     static {
         Configuration.configureCommonLogging();
     }
