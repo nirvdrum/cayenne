@@ -1,10 +1,13 @@
-<!-- ========================================== -->
-<!-- DataMap DTD file                           -->
-<!-- Author: Michael Shengaout                  -->
-<!-- Author: Andrei Adamchik                    -->
-<!-- Author: Andriy Shapochka                   -->
-<!-- Version 1.1  -->
-<!-- ========================================== -->
+<!-- =================================================== -->
+<!-- Cayenne DataMap DTD, v 1.1                          -->
+<!--                                                     -->
+<!-- Copyright (c) 2002-2004 Andrei Adamchik and         -->
+<!-- individual authors. All rights reserved             -->
+<!--                                                     -->
+<!-- Author: Michael Shengaout                           -->
+<!-- Author: Andrei Adamchik                             -->
+<!-- Author: Andriy Shapochka                            -->
+<!-- =================================================== -->
 
 <!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*, procedure*)>
 <!ATTLIST data-map
