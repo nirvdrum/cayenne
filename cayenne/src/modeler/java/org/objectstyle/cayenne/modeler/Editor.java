@@ -186,6 +186,19 @@ public class Editor
         frame.setVisible(true);
         
         logObj.info("Started CayenneModeler.");
+        
+        // load project if filename is supplied as an argument
+        if(args.length == 1) {
+            File f = new File(args[0]);
+            if(f.isDirectory()) {
+               f = new File(f, Configuration.DOMAIN_FILE);              
+            }
+            
+            if(f.isFile() && Configuration.DOMAIN_FILE.equals(f.getName())) {
+                OpenProjectAction openAction = (OpenProjectAction)frame.getAction(OpenProjectAction.ACTION_NAME);
+                openAction.openProject(f);        
+            }
+        }
     }
 
     /** 

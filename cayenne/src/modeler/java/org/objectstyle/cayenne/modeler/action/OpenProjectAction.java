@@ -110,7 +110,7 @@ public class OpenProjectAction extends ProjectAction {
         }
     }
     /** Opens cayenne.xml file using file chooser. */
-    protected void openProject() {
+    public void openProject() {
         try {
             // Get the project file name (always cayenne.xml)
             File file = fileChooser.openProjectFile(Editor.getFrame());
@@ -122,7 +122,7 @@ public class OpenProjectAction extends ProjectAction {
         }
     }
     /** Opens specified project file. File must already exist. */
-    protected void openProject(File file) {
+    public void openProject(File file) {
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         try {
             // Save dir path to the preferences
