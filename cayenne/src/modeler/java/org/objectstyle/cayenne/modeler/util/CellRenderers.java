@@ -115,7 +115,7 @@ public final class CellRenderers {
         return new ImageIcon(url);
     }
 
-    static ImageIcon iconForObject(Object object) {
+    public static ImageIcon iconForObject(Object object) {
         if (object == null) {
             return null;
         }

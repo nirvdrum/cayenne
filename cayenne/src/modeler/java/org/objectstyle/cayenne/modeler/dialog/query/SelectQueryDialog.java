@@ -57,7 +57,19 @@ package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.awt.BorderLayout;
 
+import javax.swing.Icon;
+import javax.swing.JButton;
+
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
+import org.scopemvc.view.swing.SAction;
+import org.scopemvc.view.swing.SButton;
+import org.scopemvc.view.swing.SCheckBox;
+import org.scopemvc.view.swing.SLabel;
 import org.scopemvc.view.swing.SPanel;
+import org.scopemvc.view.swing.STextField;
+import org.scopemvc.view.swing.SwingView;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -68,21 +80,83 @@ import com.jgoodies.forms.layout.FormLayout;
  * @since 1.1 
  * @author Andrei Adamchik
  */
-public class SelectQueryInfoDialog extends SPanel {
+public class SelectQueryDialog extends SPanel {
 
-    public SelectQueryInfoDialog() {
+    protected SLabel rootLabel;
+
+    public SelectQueryDialog() {
         initView();
     }
 
     protected void initView() {
+        // create widgets
+        SButton saveButton = new SButton(new SAction(SelectQueryController.SAVE_CONTROL));
+        saveButton.setEnabled(true);
+
+        SButton cancelButton =
+            new SButton(new SAction(SelectQueryController.CANCEL_CONTROL));
+        cancelButton.setEnabled(true);
+
+        STextField name = ScopeWidgetFactory.createTextField(40);
+        name.setSelector(QueryModel.NAME_SELECTOR);
+
+        STextField qualifier = ScopeWidgetFactory.createTextField(40);
+        qualifier.setSelector(SelectQueryModel.QUALIFIER_SELECTOR);
+
+        SCheckBox distinct = new SCheckBox();
+        distinct.setSelector(SelectQueryModel.DISTINCT_SELECTOR);
+
+        SCheckBox dataRows = new SCheckBox();
+        dataRows.setSelector(SelectQueryModel.FETCHING_DATA_ROWS_SELECTOR);
+
+        SCheckBox refreshesResults = new SCheckBox();
+        refreshesResults.setSelector(SelectQueryModel.REFRESHING_OBJECTS_SELECTOR);
+
+        STextField fetchLimit = ScopeWidgetFactory.createTextField(7);
+        fetchLimit.setSelector(SelectQueryModel.FETCH_LIMIT_SELECTOR);
+
+        STextField pageSize = ScopeWidgetFactory.createTextField(7);
+        pageSize.setSelector(SelectQueryModel.PAGE_SIZE_SELECTOR);
+
+        rootLabel = new SLabel();
+        rootLabel.setSelector(QueryModel.ROOT_NAME_SELECTOR);
+
+        // assemble
         setLayout(new BorderLayout());
 
-        // type form
-        FormLayout layout = new FormLayout("right:150, 3dlu, left:200", "");
+        FormLayout layout =
+            new FormLayout("right:max(50dlu;pref), 3dlu, left:max(200dlu;pref)", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
-        builder.appendSeparator("JMS Settings");
+        builder.appendSeparator("SelectQuery Settings");
+        builder.append("Query Root:", rootLabel);
+        builder.append("Query Name:", name);
+        builder.append("Qualifier:", qualifier);
+        builder.appendSeparator();
+        builder.append("Distinct:", distinct);
+        builder.append("Fetch Data Rows:", dataRows);
+        builder.append("Refresh Objects:", refreshesResults);
+        builder.append("Fetch Limit, Rows:", fetchLimit);
+        builder.append("Page Size:", pageSize);
 
-        add(builder.getPanel(), BorderLayout.NORTH);
+        add(builder.getPanel(), BorderLayout.CENTER);
+        add(
+            PanelFactory.createButtonPanel(new JButton[] { saveButton, cancelButton }),
+            BorderLayout.SOUTH);
+
+        // decorate
+        setDisplayMode(SwingView.MODAL_DIALOG);
+        setTitle("Configure Select Query");
+    }
+
+    public void setBoundModel(Object model) {
+        super.setBoundModel(model);
+
+        // init root icon
+        if (model instanceof QueryModel) {
+            Object root = ((QueryModel) model).getRoot();
+            Icon icon = CellRenderers.iconForObject(root);
+            rootLabel.setIcon(icon);
+        }
     }
 }

@@ -53,61 +53,42 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.modeler.util;
 
-package org.objectstyle.cayenne.modeler.dialog.query;
-
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.Util;
-import org.scopemvc.core.Selector;
-import org.scopemvc.model.basic.BasicModel;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.scopemvc.util.convertor.StringConvertor;
 
 /**
- * Swing model for a Cayenne Query object.
+ * A Scope convertor that allows to display expressions in text fields.
  * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-public abstract class QueryModel extends BasicModel {
-    public static final Selector NAME_SELECTOR = Selector.fromString("name");
-    public static final Selector ROOT_SELECTOR = Selector.fromString("root");
-    public static final Selector ROOT_NAME_SELECTOR = Selector.fromString("root.name");
+public class ExpressionConvertor implements StringConvertor {
 
-    protected Query query;
-    protected String name;
+    public String valueAsString(Object value) throws IllegalArgumentException {
+        if (value == null) {
+            return null;
+        }
 
-    /**
-     * Creates a QueryModel for the existing query.
-     */
-    public QueryModel(Query query) {
-        this.query = query;
-        initWithQuery(query);
+        if (!(value instanceof Expression)) {
+            throw new IllegalArgumentException(
+                "Unsupported value class: " + value.getClass().getName());
+        }
+
+        return value.toString();
     }
 
-    protected void initWithQuery(Query query) {
-        this.name = query.getName();
-    }
-
-    public Object getRoot() {
-        return query.getRoot();
-    }
-
-    public Query getQuery() {
-        return query;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        if (!Util.nullSafeEquals(name, this.name)) {
-            this.name = name;
-            fireModelChange(VALUE_CHANGED, NAME_SELECTOR);
+    public Object stringAsValue(String string) throws IllegalArgumentException {
+        try {
+            return ExpressionFactory.expressionFromString(string);
+        }
+        catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid expression: " + string);
         }
     }
 
-    /**
-     * Updates the underlying query with the values of this model.
-     */
-    public abstract void updateQuery();
+    public boolean supportsStringAsValue() {
+        return true;
+    }
 }

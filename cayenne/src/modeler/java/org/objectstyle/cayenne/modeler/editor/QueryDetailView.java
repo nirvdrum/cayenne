@@ -56,12 +56,14 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -70,6 +72,7 @@ import javax.swing.JTextField;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.dialog.query.SelectQueryController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -91,6 +94,7 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
     protected EventController eventController;
     protected JTextField name;
     protected JComboBox queryRoot;
+    protected JButton editButton;
 
     public QueryDetailView(EventController eventController) {
         this.eventController = eventController;
@@ -104,6 +108,7 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
         name = CayenneWidgetFactory.createTextField();
         queryRoot = CayenneWidgetFactory.createComboBox();
         queryRoot.setRenderer(CellRenderers.listRendererWithIcons());
+        editButton = CayenneWidgetFactory.createButton("Edit Query");
 
         // assemble
         this.setLayout(new BorderLayout());
@@ -119,7 +124,12 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
         // in the future this will be expanded...
         builder.append("Query Root:", queryRoot);
 
-        this.add(builder.getPanel());
+        JPanel buttons = new JPanel();
+        buttons.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(editButton);
+
+        this.add(builder.getPanel(), BorderLayout.CENTER);
+        this.add(buttons, BorderLayout.SOUTH);
     }
 
     private void initController() {
@@ -160,6 +170,15 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
                 Query query = eventController.getCurrentQuery();
                 if (query != null) {
                     query.setRoot(queryRoot.getModel().getSelectedItem());
+                }
+            }
+        });
+
+        editButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                Query query = eventController.getCurrentQuery();
+                if (query != null) {
+                    new SelectQueryController(eventController, query).startup();
                 }
             }
         });
