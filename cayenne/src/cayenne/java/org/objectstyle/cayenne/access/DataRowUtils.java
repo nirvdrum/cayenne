@@ -137,28 +137,6 @@ class DataRowUtils {
 
             // set a shared fault to indicate any kind of unresolved to-one
             object.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
-            /*
-             * ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
-             * Class targetClass = targetEntity.getJavaClass(); // handle toOne
-             * flattened relationship if (rel.isFlattened()) { // A flattened
-             * toOne relationship must be a series of // toOne dbRelationships.
-             * Initialize fault for it, since // creating a hollow object won't
-             * be right...
-             * 
-             * continue; }
-             * 
-             * DbRelationship dbRel = (DbRelationship)
-             * rel.getDbRelationships().get(0); // dependent to one
-             * relationship is optional // use fault, since we do not know
-             * whether it is null or not... if (dbRel.isToDependentPK()) {
-             * object.writePropertyDirectly(rel.getName(),
-             * RelationshipFault.getInstance()); continue; }
-             * 
-             * ObjectId id = snapshot.createTargetObjectId(targetClass, dbRel);
-             * DataObject targetObject = (id != null) ?
-             * context.registeredObject(id) : null;
-             *  
-             */
         }
 
         if (isPartialSnapshot) {
