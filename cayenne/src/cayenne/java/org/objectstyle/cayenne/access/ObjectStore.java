@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.access.util.QueryUtils;
  */
 public class ObjectStore implements Serializable {
     protected transient Map objectMap = new HashMap();
+    protected transient Map newObjectMap = null;
     protected Map snapshotMap = new HashMap();
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -110,6 +111,53 @@ public class ObjectStore implements Serializable {
 
     public synchronized void addObject(DataObject obj) {
         objectMap.put(obj.getObjectId(), obj);
+
+        if ( newObjectMap != null ) {
+            newObjectMap.put(obj.getObjectId(), obj);
+        }
+    }
+
+    /**
+     * Start tracking the registration of new objects.
+     * from this objectStore. Used in conjunction
+     * with unregisterNewObjects() to control garbage
+     * collection when an instance of ObjectStore
+     * is used over a longer time for batch processing.
+     * (TODO: this won't work with changeObjectKey()?)
+     *
+     * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
+     */
+    public synchronized void startTrackingNewObjects() {
+        newObjectMap = new HashMap();
+    }
+
+    /**
+     * Unregisters the newly registered DataObjects
+     * from this objectStore. Used in conjunction
+     * with startTrackingNewObjects() to control garbage
+     * collection when an instance of ObjectStore
+     * is used over a longer time for batch processing.
+     * (TODO: this won't work with changeObjectKey()?)
+     * 
+     * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
+     */
+    public synchronized void unregisterNewObjects() {
+
+        Iterator it = newObjectMap.values().iterator();
+
+        while (it.hasNext()) {
+            DataObject dataObj = (DataObject) it.next();
+
+            ObjectId oid = dataObj.getObjectId();
+            removeObject(oid);
+            removeSnapshot(oid);
+
+            dataObj.setDataContext(null);
+            dataObj.setObjectId(null);
+            dataObj.setPersistenceState(PersistenceState.TRANSIENT);
+        }
+        newObjectMap.clear();
+        newObjectMap = null;
     }
 
     public synchronized DataObject getObject(ObjectId id) {
