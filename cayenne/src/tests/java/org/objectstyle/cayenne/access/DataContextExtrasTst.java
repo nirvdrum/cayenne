@@ -173,7 +173,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
         finally {
             observerLogger.setLevel(oldLevel);
-            gen.createAutoPk(getNode(), new ArrayList(map.getDbEntities()));
+            getDatabaseSetup().createPkSupportForMapEntities(getNode());
         }
     }
 
