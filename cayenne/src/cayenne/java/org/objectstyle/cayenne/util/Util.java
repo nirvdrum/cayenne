@@ -247,7 +247,7 @@ public class Util {
 	
 	
 	/**
-     * Utility method to extract extension out of file name.
+     * Utility method to extract extension from of file name.
      */
     public static String extractFileExtension(String fileName) {
      	int dotInd = fileName.lastIndexOf('.');
@@ -259,7 +259,7 @@ public class Util {
 
 
     /**
-     * Utility method to remove extension out of a file name.
+     * Utility method to remove extension from a file name.
      */
     public static String stripFileExtension(String fileName) {
     	int dotInd = fileName.lastIndexOf('.');

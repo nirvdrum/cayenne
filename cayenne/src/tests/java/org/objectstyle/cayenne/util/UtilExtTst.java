@@ -63,10 +63,6 @@ import org.objectstyle.cayenne.CayenneTestCase;
 public class UtilExtTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(UtilTst.class.getName());
 
-    private File fTmpFileInCurrentDir;
-    private String fTmpFileName;
-    private File fTmpFileCopy;
-
     public UtilExtTst(String name) {
         super(name);
     }
@@ -134,5 +130,35 @@ public class UtilExtTst extends CayenneTestCase {
         assertTrue(!Util.nullSafeEquals(o1, null));
         assertTrue(!Util.nullSafeEquals(null, o1));
         assertTrue(Util.nullSafeEquals(null, null));
+    }
+    
+    public void testExtractFileExtension1() throws Exception {
+    	String fullName = "n.ext";
+    	assertEquals("ext", Util.extractFileExtension(fullName));
+    }
+    
+    public void testExtractFileExtension2() throws Exception {
+    	String fullName = "n";
+    	assertNull(Util.extractFileExtension(fullName));
+    }
+    
+    public void testExtractFileExtension3() throws Exception {
+    	String fullName = ".ext";
+    	assertNull(Util.extractFileExtension(fullName));
+    }
+    
+    public void testStripFileExtension1() throws Exception {
+    	String fullName = "n.ext";
+    	assertEquals("n", Util.stripFileExtension(fullName));
+    }
+    
+    public void testStripFileExtension2() throws Exception {
+    	String fullName = "n";
+    	assertEquals("n", Util.stripFileExtension(fullName));
+    }
+    
+    public void testStripFileExtension3() throws Exception {
+    	String fullName = ".ext";
+    	assertEquals(".ext", Util.stripFileExtension(fullName));
     }
 }
