@@ -93,16 +93,20 @@ public class TestMain implements TestConstants {
     public static void main(String[] args) {
         // check for "-nogui" flag
         boolean noGui = false;
+        boolean xmlDataSource = false;
         if(args != null && args.length > 0) {
             if("-nogui".equals(args[0]))
                 noGui = true;
+            else 
+                xmlDataSource = true;
         }
 
         // configure properties
         configureProps();
 
         // initialize shared resources
-        resources.setSharedConnInfo(new ConnectionSetup().buildConnectionInfo(!noGui));
+        DataSourceInfo dsi = new ConnectionSetup().buildConnectionInfo(!noGui);
+        resources.setSharedConnInfo(dsi);
         resources.setSharedConnection(openConnection());
         resources.setSharedDomain(createSharedDomain());
 
@@ -209,18 +213,9 @@ public class TestMain implements TestConstants {
         }
     }
 
-    private static void configureProps() {
-        // first set default System properties (that can be overwriten later by user-specific)
-        try {
-            String url = new File(".").getCanonicalFile().toURL().toExternalForm();
-            System.setProperty(Context.PROVIDER_URL, url);
-            System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.fscontext.RefFSContextFactory");
-        } catch(IOException ioex) {
-            logObj.log(Level.SEVERE, "Error seting properties.", ioex);
-            System.exit(1);
-        }
 
-        // now load user overrides
+    private static void configureProps() {
+        // load user property overrides
         File propsFile = new File(System.getProperty("user.home") + File.separator + USER_PROPS);
         if(propsFile.exists()) {
             Properties props = new Properties();
