@@ -56,17 +56,19 @@
 package org.objectstyle.cayenne.gui.util;
 
 import java.awt.Component;
+import java.util.EventObject;
 import java.util.logging.Logger;
 
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
+import javax.swing.event.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 
 /**  
- * Common superclass of tables used in Cayenne. COntains some common configuration
+ * Common superclass of tables used in Cayenne. Contains some common configuration
  * settings and utility methods.
  * 
  * @author Michael Misha Shengaout
@@ -116,28 +118,25 @@ public class CayenneTable extends JTable {
 	public void editingStopped(ChangeEvent e) {
 		super.editingStopped(e);
 
-        // only go down one row if we are editing text
-		if (getSelectedRow() >= 0 && getSelectedTextComponent() != null) {
-			select(getSelectedRow() + 1);
-		}
+		// only go down one row if we are editing text
+		int row = getSelectedRow();
+		if (row >= 0
+			&& this.getRowCount() > 0
+			&& getSelectedTextComponent() != null) {
+			row++;
 
-		// select a row below current row, if this was a text component
-		/*	int row = getSelectedRow();
-			if (getSelectedTextComponent() != null) {
-				
-		
-				if (row != getSelectedRow()) {
-					editCellAt(getSelectedRow(), getSelectedColumn());
-					JTextComponent newText = getSelectedTextComponent();
-					if(newText != null) {
-						newText.selectAll();
-						newText.setCaretPosition(newText.getDocument().getLength());
-					}
-				}
-			} */
+			if (row >= this.getRowCount()) {
+				row = 0;
+			}
+			select(row);
+		}
 	}
 
 	public JTextComponent getSelectedTextComponent() {
+		if (getSelectedRow() < 0 && getSelectedColumn() < 0) {
+			return null;
+		}
+
 		TableCellEditor editor =
 			this.getCellEditor(getSelectedRow(), getSelectedColumn());
 		if (editor instanceof DefaultCellEditor) {
@@ -147,5 +146,29 @@ public class CayenneTable extends JTable {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @see javax.swing.JTable#editCellAt(int, int, EventObject)
+	 */
+	public boolean editCellAt(int row, int column, EventObject e) {
+		boolean edit = super.editCellAt(row, column, e);
+
+		if (edit) {
+			JTextComponent t = getSelectedTextComponent();
+			if (t != null) {
+				if (!t.isFocusOwner()) {
+					t.requestFocus();
+				}
+				t.setCaretPosition(t.getDocument().getLength());
+			}
+		}
+		return edit;
+	}
+	/**
+	 * @see javax.swing.event.ListSelectionListener#valueChanged(ListSelectionEvent)
+	 */
+	public void valueChanged(ListSelectionEvent e) {
+		super.valueChanged(e);
 	}
 }
