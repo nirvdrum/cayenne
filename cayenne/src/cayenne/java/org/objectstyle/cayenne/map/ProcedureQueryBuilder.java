@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,63 +55,42 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
+ * A QueryBuilder for stored procedure-based queries.
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class QueryBuilderTst extends BasicTestCase {
+class ProcedureQueryBuilder extends QueryBuilder {
 
-    protected QueryBuilder builder;
+    /**
+     * Returns a ProcedureQuery.
+     */
+    public Query getQuery() {
+        ProcedureQuery query;
 
-    protected void setUp() throws Exception {
-        builder = new QueryBuilder() {
-
-            public Query getQuery() {
-                return null;
-            }
-        };
-    }
-
-    public void testSetName() throws Exception {
-        builder.setName("aaa");
-        assertEquals("aaa", builder.name);
-    }
-    
-    public void testSetSelecting() throws Exception {
-        builder.setSelecting(null);
-        assertTrue(builder.selecting);
+        Object root = getRoot();
+        if (root instanceof String) {
+            query = new ProcedureQuery(root.toString());
+        }
+        else if (root instanceof Procedure) {
+            query = new ProcedureQuery((Procedure) root);
+        }
+        else {
+            throw new CayenneRuntimeException("Invalid ProcedureQuery root - "
+                    + rootType
+                    + ", "
+                    + rootName);
+        }
         
-        builder.setSelecting("false");
-        assertFalse(builder.selecting);
-        
-        builder.setSelecting("true");
-        assertTrue(builder.selecting);
+        // TODO: procedure queries are too primitive yet ... 
+        // in the future we must support all GenericSelectQuery properties...
+
+        return query;
     }
 
-    public void testSetRootInfoDbEntity() throws Exception {
-        DataMap map = new DataMap("map");
-        DbEntity entity = new DbEntity("DB1");
-        map.addDbEntity(entity);
-
-        builder.setRoot(map, QueryBuilder.DB_ENTITY_ROOT, "DB1");
-        assertSame(entity, builder.getRoot());
-    }
-
-    public void testSetRootObjEntity() throws Exception {
-        DataMap map = new DataMap("map");
-        ObjEntity entity = new ObjEntity("OBJ1");
-        map.addObjEntity(entity);
-
-        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "OBJ1");
-        assertSame(entity, builder.getRoot());
-    }
-
-    public void testSetRootDataMap() throws Exception {
-        DataMap map = new DataMap("map");
-
-        builder.setRoot(map, QueryBuilder.DATA_MAP_ROOT, null);
-        assertSame(map, builder.getRoot());
-    }
 }

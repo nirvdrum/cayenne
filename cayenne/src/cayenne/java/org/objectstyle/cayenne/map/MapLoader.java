@@ -825,7 +825,7 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processEndQuerySQL() throws SAXException {
-        queryBuilder.setSql(charactersBuffer.toString());
+        queryBuilder.addSql(charactersBuffer.toString(), null);
     }
 
     private void processEndQualifier() throws SAXException {

@@ -55,63 +55,45 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.BasicTestCase;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
+ * QueryBuilder for the SQLTemplates.
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class QueryBuilderTst extends BasicTestCase {
+class SQLTemplateBuilder extends QueryBuilder {
 
-    protected QueryBuilder builder;
+    /**
+     * Builds a SQLTemplate query.
+     */
+    public Query getQuery() {
 
-    protected void setUp() throws Exception {
-        builder = new QueryBuilder() {
+        SQLTemplate template = new SQLTemplate(selecting);
+        template.setRoot(getRoot());
+        template.setName(name);
 
-            public Query getQuery() {
-                return null;
+        template.initWithProperties(properties);
+
+        // init SQL
+        template.setDefaultTemplate(sql);
+        if (adapterSql != null) {
+            Iterator it = adapterSql.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                if (key != null && value != null) {
+                    template.setTemplate(key.toString(), value.toString());
+                }
             }
-        };
-    }
+        }
 
-    public void testSetName() throws Exception {
-        builder.setName("aaa");
-        assertEquals("aaa", builder.name);
-    }
-    
-    public void testSetSelecting() throws Exception {
-        builder.setSelecting(null);
-        assertTrue(builder.selecting);
-        
-        builder.setSelecting("false");
-        assertFalse(builder.selecting);
-        
-        builder.setSelecting("true");
-        assertTrue(builder.selecting);
-    }
-
-    public void testSetRootInfoDbEntity() throws Exception {
-        DataMap map = new DataMap("map");
-        DbEntity entity = new DbEntity("DB1");
-        map.addDbEntity(entity);
-
-        builder.setRoot(map, QueryBuilder.DB_ENTITY_ROOT, "DB1");
-        assertSame(entity, builder.getRoot());
-    }
-
-    public void testSetRootObjEntity() throws Exception {
-        DataMap map = new DataMap("map");
-        ObjEntity entity = new ObjEntity("OBJ1");
-        map.addObjEntity(entity);
-
-        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "OBJ1");
-        assertSame(entity, builder.getRoot());
-    }
-
-    public void testSetRootDataMap() throws Exception {
-        DataMap map = new DataMap("map");
-
-        builder.setRoot(map, QueryBuilder.DATA_MAP_ROOT, null);
-        assertSame(map, builder.getRoot());
+        return template;
     }
 }

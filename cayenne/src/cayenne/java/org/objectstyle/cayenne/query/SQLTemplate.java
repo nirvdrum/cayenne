@@ -139,6 +139,21 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
         setRoot(objEntityName);
         setDefaultTemplate(defaultTemplate);
     }
+    
+    /**
+     * Initializes query parameters using a set of properties.
+     * 
+     * @since 1.1
+     */
+    public void initWithProperties(Map properties) {
+
+        // must init defaults even if properties are empty
+        if (properties == null) {
+            properties = Collections.EMPTY_MAP;
+        }
+
+        selectProperties.initWithProperties(properties);
+    }
 
     /**
      * Returns an iterator over parameter sets. Each element returned
@@ -272,6 +287,11 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
         return (template != null) ? template : defaultTemplate;
     }
 
+    /**
+     * Adds a SQL template string for a given key.
+     * 
+     * @see #setDefaultTemplate(String)
+     */
     public synchronized void setTemplate(String key, String template) {
         if (templates == null) {
             templates = new HashMap();

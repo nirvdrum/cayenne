@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-
 /**
  * QueryBuilder for SelectQueries.
  * 
@@ -83,11 +82,9 @@ class SelectQueryBuilder extends QueryBuilder {
         if (prefetches != null && !prefetches.isEmpty()) {
             query.addPrefetches(prefetches);
         }
-        
+
         // init properties
-        if (properties != null && !properties.isEmpty()) {
-            query.initWithProperties(properties);
-        }
+        query.initWithProperties(properties);
 
         return query;
     }

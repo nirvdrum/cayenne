@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,63 +55,82 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.BasicTestCase;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
  * @author Andrei Adamchik
  */
-public class QueryBuilderTst extends BasicTestCase {
+public class SQLTemplateBuilderTst extends TestCase {
 
-    protected QueryBuilder builder;
-
-    protected void setUp() throws Exception {
-        builder = new QueryBuilder() {
-
-            public Query getQuery() {
-                return null;
-            }
-        };
+    public void testGetQueryType() throws Exception {
+        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
+        assertTrue(builder.getQuery() instanceof SQLTemplate);
     }
 
-    public void testSetName() throws Exception {
-        builder.setName("aaa");
-        assertEquals("aaa", builder.name);
-    }
-    
-    public void testSetSelecting() throws Exception {
-        builder.setSelecting(null);
-        assertTrue(builder.selecting);
-        
-        builder.setSelecting("false");
-        assertFalse(builder.selecting);
-        
-        builder.setSelecting("true");
-        assertTrue(builder.selecting);
+    public void testGetQueryName() throws Exception {
+        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
+        builder.setName("xyz");
+
+        assertEquals("xyz", builder.getQuery().getName());
     }
 
-    public void testSetRootInfoDbEntity() throws Exception {
-        DataMap map = new DataMap("map");
-        DbEntity entity = new DbEntity("DB1");
-        map.addDbEntity(entity);
-
-        builder.setRoot(map, QueryBuilder.DB_ENTITY_ROOT, "DB1");
-        assertSame(entity, builder.getRoot());
-    }
-
-    public void testSetRootObjEntity() throws Exception {
-        DataMap map = new DataMap("map");
-        ObjEntity entity = new ObjEntity("OBJ1");
+    public void testGetQueryRoot() throws Exception {
+        DataMap map = new DataMap();
+        ObjEntity entity = new ObjEntity("A");
         map.addObjEntity(entity);
 
-        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "OBJ1");
-        assertSame(entity, builder.getRoot());
+        SQLTemplateBuilder builder = new SQLTemplateBuilder();
+        builder.setRoot(map, QueryBuilder.OBJ_ENTITY_ROOT, "A");
+
+        assertSame(entity, builder.getQuery().getRoot());
     }
 
-    public void testSetRootDataMap() throws Exception {
-        DataMap map = new DataMap("map");
+    public void testGetQueryProperties() throws Exception {
+        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
+        builder.addProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, "5");
 
-        builder.setRoot(map, QueryBuilder.DATA_MAP_ROOT, null);
-        assertSame(map, builder.getRoot());
+        GenericSelectQuery query = (GenericSelectQuery) builder.getQuery();
+        assertEquals(5, query.getFetchLimit());
+
+        // TODO: test other properties...
+    }
+    
+    public void testGetQuerySelecting() throws Exception {
+        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
+        builder.setSelecting("true");
+
+        SQLTemplate selecting = (SQLTemplate) builder.getQuery();
+        assertTrue(selecting.isSelecting());
+        
+        builder.setSelecting("false");
+        SQLTemplate nonselecting = (SQLTemplate) builder.getQuery();
+        assertFalse(nonselecting.isSelecting());
+    }
+
+    public void testGetQuerySql() throws Exception {
+        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
+        builder.addSql("abc", null);
+
+        SQLTemplate query = (SQLTemplate) builder.getQuery();
+        assertEquals("abc", query.getDefaultTemplate());
+    }
+    
+    public void testGetQueryAdapterSql() throws Exception {
+        SQLTemplateBuilder builder = new MockupRootQueryBuilder();
+        builder.addSql("abc", "adapter");
+
+        SQLTemplate query = (SQLTemplate) builder.getQuery();
+        assertNull(query.getDefaultTemplate());
+        assertEquals("abc", query.getTemplate("adapter"));
+    }
+
+    class MockupRootQueryBuilder extends SQLTemplateBuilder {
+
+        public Object getRoot() {
+            return "FakeRoot";
+        }
     }
 }

@@ -85,13 +85,14 @@ public abstract class QueryBuilder {
     protected Map properties;
     protected List resultColumns;
     protected String sql;
-    protected String sqlAdapterClass;
+    protected Map adapterSql;
     protected Expression qualifier;
     protected List orderings;
     protected List prefetches;
     protected DataMap dataMap;
     protected String rootType;
     protected String rootName;
+    protected boolean selecting = true;
 
     /**
      * Builds a Query object based on internal configuration information.
@@ -104,6 +105,8 @@ public abstract class QueryBuilder {
 
     /**
      * Determines query root based on configuration info.
+     * 
+     * @throws CayenneRuntimeException if a valid root can't be established.
      */
     protected Object getRoot() {
         Object root = null;
@@ -136,8 +139,13 @@ public abstract class QueryBuilder {
         return root;
     }
 
+    public void setSelecting(String selecting) {
+        // "true" is a default per DTD
+        this.selecting = ("false".equalsIgnoreCase(selecting)) ? false : true;
+    }
+
     /**
-     * Determines the root object of the query.
+     * Sets the information pertaining to the root of the query.
      */
     public void setRoot(DataMap dataMap, String rootType, String rootName) {
         this.dataMap = dataMap;
@@ -145,12 +153,21 @@ public abstract class QueryBuilder {
         this.rootName = rootName;
     }
 
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
+    /**
+     * Adds raw sql. If adapterClass parameter is not null, sets the SQL string to be
+     * adapter-specific. Otherwise it is used as a default SQL string.
+     */
+    public void addSql(String sql, String adapterClass) {
+        if (adapterClass == null) {
+            this.sql = sql;
+        }
+        else {
+            if (adapterSql == null) {
+                adapterSql = new HashMap();
+            }
 
-    public void setSqlAdapterClass(String sqlAdapterClass) {
-        this.sqlAdapterClass = sqlAdapterClass;
+            adapterSql.put(adapterClass, sql);
+        }
     }
 
     public void setQualifier(String qualifier) {

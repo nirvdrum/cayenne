@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.map;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -95,6 +96,16 @@ public class SelectQueryBuilderTst extends TestCase {
         SelectQuery query = (SelectQuery) builder.getQuery();
 
         assertEquals(Expression.fromString("abc = 5"), query.getQualifier());
+    }
+    
+    public void testGetQueryProperties() throws Exception {
+        SelectQueryBuilder builder = new MockupRootQueryBuilder();
+        builder.addProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, "5");
+
+        GenericSelectQuery query = (GenericSelectQuery) builder.getQuery();
+        assertEquals(5, query.getFetchLimit());
+        
+        // TODO: test other properties...
     }
     
     class MockupRootQueryBuilder extends SelectQueryBuilder {
