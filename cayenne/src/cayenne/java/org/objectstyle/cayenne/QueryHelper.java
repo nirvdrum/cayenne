@@ -55,13 +55,24 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.ExpressionTraversal;
+import org.objectstyle.cayenne.exp.TraversalHelper;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -77,21 +88,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  */
 public final class QueryHelper {
 	static Logger logObj = Logger.getLogger(QueryHelper.class.getName());
-
-	/** Returns a qualifier that matches an all values in the
-	 *  map as defined in ObjectId. Keys are DbAttribute names, values - database values. */
-	private static Expression qualifierForDbMap(Map map) {
-		ArrayList list = new ArrayList();
-
-		Iterator it = map.keySet().iterator();
-		while (it.hasNext()) {
-			String attr = (String) it.next();
-			Object value = map.get(attr);
-			Expression dbPathExp = ExpressionFactory.unaryExp(Expression.DB_PATH, attr);
-			list.add(ExpressionFactory.binaryExp(Expression.EQUAL_TO, dbPathExp, value));
-		}
-		return ExpressionFactory.joinExp(Expression.AND, list);
-	}
 
 	/** Returns an update query for the DataObject that can be used to commit
 	 *  object state changes to the database. If no changes are found, null is returned.
@@ -144,7 +140,7 @@ public final class QueryHelper {
 
 		if (upd.getUpdAttributes().size() > 0) {
 			// set qualifier
-			upd.setQualifier(qualifierForDbMap(id.getIdSnapshot()));
+			upd.setQualifier(ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
 			return upd;
 		}
 
@@ -156,7 +152,7 @@ public final class QueryHelper {
 		DeleteQuery del = new DeleteQuery();
 		ObjectId id = dataObject.getObjectId();
 		del.setObjEntityName(id.getObjEntityName());
-		del.setQualifier(qualifierForDbMap(id.getIdSnapshot()));
+		del.setQualifier(ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
 		return del;
 	}
 
@@ -174,11 +170,42 @@ public final class QueryHelper {
 		return ins;
 	}
 
-	/** Generates a select query that can be used to fetch an object for object id. */
+	/** 
+	 * Creates and returns a select query that can be used to 
+	 * fetch an object given an ObjectId.
+	 */
 	public static SelectQuery selectObjectForId(ObjectId oid) {
 		SelectQuery sel = new SelectQuery();
 		sel.setObjEntityName(oid.getObjEntityName());
-		sel.setQualifier(qualifierForDbMap(oid.getIdSnapshot()));
+		sel.setQualifier(ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
+		return sel;
+	}
+	
+	
+	/** 
+	 * Creates and returns a select query that can be used to 
+	 * fetch a list of objects given a list of ObjectIds.
+	 * All ObjectIds must belong to the same entity.
+	 */
+	public static SelectQuery selectQueryForIds(List oids) {
+		if(oids == null || oids.size() == 0) {
+			throw new IllegalArgumentException("List must contain at least one ObjectId");
+		}
+		
+		SelectQuery sel = new SelectQuery();
+		sel.setObjEntityName(((ObjectId)oids.get(1)).getObjEntityName());
+		
+		Iterator it = oids.iterator();
+		
+		ObjectId firstId = (ObjectId)it.next();
+		Expression exp = ExpressionFactory.matchAllDbExp(firstId.getIdSnapshot(), Expression.EQUAL_TO);
+		
+		while(it.hasNext()) {
+			ObjectId anId = (ObjectId)it.next();
+			exp = exp.orExp(ExpressionFactory.matchAllDbExp(anId.getIdSnapshot(), Expression.EQUAL_TO));
+		}
+		
+		sel.setQualifier(exp);
 		return sel;
 	}
 
@@ -253,7 +280,7 @@ public final class QueryHelper {
 		Map fkAttrs =
 			dbRel.getReverseRelationship().srcFkSnapshotWithTargetSnapshot(
 				oid.getIdSnapshot());
-		sel.setQualifier(qualifierForDbMap(fkAttrs));
+		sel.setQualifier(ExpressionFactory.matchAllDbExp(fkAttrs, Expression.EQUAL_TO));
 		return sel;
 	}
 
