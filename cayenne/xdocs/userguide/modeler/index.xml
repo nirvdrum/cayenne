@@ -45,9 +45,10 @@
 
         	<source>$CAYENNE_HOME/bin/modeler.sh</source>
         </subsection>
-	<subsection name="6.3. Concepts and terminology" anchor="concepts">
+        
+	<subsection name="6.3. Concepts and Terminology" anchor="concepts">
 		<p>
-			Cayenne modeler is a GUI tool for creating the data access classes
+			CayenneModeler is a GUI tool for creating the data access classes
 			and associated data model.
 			This section describes the techniques of its use as well as the
 			deployment
@@ -121,7 +122,7 @@
 		<tr valign="top">
 			<td>Domain</td>
 			<td>Virtual data source.
-				Cayenne’s way to treat multiple databases as if they are one
+				Cayenne's way to treat multiple databases as if they are one
 				data source.
 				Each domain contains data maps and data nodes
 			</td>
@@ -139,12 +140,12 @@
 		Here are the types of files it may have:
 		</p>
 
-		<table width="100%" border="1">
+		<table>
 		<tr valign="top">
-			<th width="28%">Type of file</th>
-			<th width="78%">Description</th>
+			<th>Type of file</th>
+			<th>Description</th>
 		</tr>
-		<tr valign="top">
+		<tr>
 			<td>Project file</td>
 			<td>One per project.
 				Contains all the domains for the project.
@@ -155,7 +156,7 @@
 				project directory.
 			</td>
 		</tr>
-		<tr valign="top">
+		<tr>
 			<td>Data node file</td>
 			<td>One per DIRECT data node
 				(see earlier in the section definitions of DIRECT and JNDI data
@@ -165,14 +166,14 @@
 				is stored directly in the project file.
 			</td>
 		</tr>
-		<tr valign="top">
+		<tr>
 			<td>Data map file</td>
 			<td>One per data map. </td>
 		</tr>
 		</table>
 
 		<p>
-		Cayenne Modeler supports three scenarios of use:
+		CayenneModeler supports three scenarios of use:
 		<ol>
 		<li>	Creating the Data Map and generating database schema from it</li
 		>
@@ -184,12 +185,12 @@
 
 	</subsection>
 
-	<subsection name="6.4. Creating Data Map first and database schema last"
+	<subsection name="6.4. Creating Data Map First and Database Schema After That"
 	anchor="map_first">
 
 		Here are the steps to create a new Cayenne project.
 		<ol>
-		<li>Start Cayenne Modeler</li>
+		<li>Start CayenneModeler</li>
 		<li>Click File->New Project.
 			System will prompt you to choose the project location -
 			folder which will be the root for all other project files.
@@ -246,8 +247,8 @@
 		<li>Go back to ObjEntity1. Click Attributes tab. Now it has
 		more columns for showing the mapping of the object attributes to the db
 		attributes.</li>
-		<li>Select attribute in the Db Attribute column. Cayenne
-		Modeler DOES NOT enforce at this time compatibility between obj
+		<li>Select attribute in the Db Attribute column. CayenneModeler 
+		DOES NOT enforce at this time compatibility between obj
 		attribute and db attribute types, so make sure you don't match up
 		java.util.Date type with VARCHAR.</li>
 		<li>Select DataMap1 and click Project->Create DB Entity.
@@ -289,7 +290,7 @@
 		</ol>
 	 </subsection>
 
-	 <subsection name="6.5 Using existing database schema to create data map" anchor="map_from_db" >
+	 <subsection name="6.5 Using Existing Database Schema to Create Data Map" anchor="map_from_db" >
 
 		<ol>
 		<li>Do steps 1 through 6 of the previous section to create project and a domain.</li>

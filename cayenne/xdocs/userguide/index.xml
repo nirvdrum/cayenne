@@ -56,6 +56,9 @@
             <ul>
                 <li><a href="modeler/index.html#intro">6.1 Introduction</a></li>
                 <li><a href="modeler/index.html#run">6.2 Running CayenneModeler</a></li>
+                <li><a href="modeler/index.html#concepts">6.3. Concepts and Terminology</a></li>
+                <li><a href="modeler/index.html#map_first">6.4. Creating Data Map First and Database Schema After That</a></li>
+                <li><a href="modeler/index.html#map_from_db">6.5 Using Existing Database Schema to Create Data Map</a></li>
             </ul></li>
             
             <li><a href="webobjects.html">7. Cayenne and WebObjects</a>
