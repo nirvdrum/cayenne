@@ -205,7 +205,9 @@ public class DataNode implements QueryEngine {
         try {
             // check out connection, create statement
             con = this.getDataSource().getConnection();
-            con.setAutoCommit(usesAutoCommit);
+            if (con.getAutoCommit() != usesAutoCommit) {
+                con.setAutoCommit(usesAutoCommit);
+            }
 
             // give a chance to order queries
             queries = opObserver.orderQueries(this, queries);

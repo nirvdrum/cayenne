@@ -82,6 +82,7 @@ public class SimpleTest implements TestConstants {
     protected DataDomain domain;
     protected final int objCount = 2000;
     protected long insertCayenne;
+    protected long insertCayenne1;
     protected long selectCayenne1;
     protected long selectCayenne2;
     protected long selectCayenne3;
@@ -93,10 +94,21 @@ public class SimpleTest implements TestConstants {
     }
 
     public void testCayenne() throws Exception {
-        cleanData();
-
-        long t1 = System.currentTimeMillis();
         DataContext ctxt = domain.createDataContext();
+
+        cleanData();
+        testCayenneBigInsert(ctxt);
+
+        cleanData();
+        // use fresh data context
+        ctxt = domain.createDataContext();
+        testCayenneSmallInserts(ctxt);
+
+        testCayenneSelect(ctxt);
+    }
+
+    private void testCayenneBigInsert(DataContext ctxt) throws Exception {
+        long t1 = System.currentTimeMillis();
         for (int i = 0; i < objCount; i++) {
             Artist a = (Artist) ctxt.createAndRegisterNewObject("Artist");
             a.setArtistName("name_" + i);
@@ -104,6 +116,29 @@ public class SimpleTest implements TestConstants {
 
         // save all at once
         ctxt.commitChanges();
+        long t2 = System.currentTimeMillis();
+        insertCayenne = t2 - t1;
+    }
+
+    private void testCayenneSmallInserts(DataContext ctxt) throws Exception {
+        long t1 = System.currentTimeMillis();
+
+        final int batchCount = objCount / 20;
+        for (int j = 0; j < batchCount; j++) {
+            int startInd = j * 20;
+            for (int i = 0; i < 20; i++) {
+                Artist a = (Artist) ctxt.createAndRegisterNewObject("Artist");
+                a.setArtistName("name_" + (startInd + i));
+            }
+            // save batch
+            ctxt.commitChanges();
+        }
+
+        long t2 = System.currentTimeMillis();
+        insertCayenne1 = t2 - t1;
+    }
+
+    private void testCayenneSelect(DataContext ctxt) throws Exception {
         long t2 = System.currentTimeMillis();
 
         // fetch to the same context
@@ -118,13 +153,11 @@ public class SimpleTest implements TestConstants {
         // fetch into data domain 
         domain.performQuery(q, new SelectOperationObserver());
         long t5 = System.currentTimeMillis();
-        
-        insertCayenne = t2 - t1;
+
         selectCayenne1 = t3 - t2;
         selectCayenne2 = t4 - t3;
         selectCayenne3 = t5 - t4;
     }
-    
 
     public void testJDBC() throws Exception {
         cleanData();
@@ -133,7 +166,8 @@ public class SimpleTest implements TestConstants {
         Connection con = getConnection();
         con.setAutoCommit(false);
         PreparedStatement st =
-            con.prepareStatement("INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
+            con.prepareStatement(
+                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
         for (int i = 1; i <= objCount; i++) {
             st.setInt(1, i);
             st.setString(2, "name_" + i);
@@ -151,9 +185,9 @@ public class SimpleTest implements TestConstants {
 
         Statement sel = con.createStatement();
         ResultSet rs = sel.executeQuery("SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST");
-        while(rs.next()) {
+        while (rs.next()) {
             Artist a = new Artist();
-            a.setArtistName(rs.getString(2));            
+            a.setArtistName(rs.getString(2));
         }
         con.close();
         long t3 = System.currentTimeMillis();
@@ -161,12 +195,14 @@ public class SimpleTest implements TestConstants {
         insertJDBC = t2 - t1;
         selectJDBC = t3 - t2;
     }
-    
 
     public void printResults(Level level) throws Exception {
         logObj.log(level, "Finished.");
         logObj.log(level, "=====================================");
         logObj.log(level, "Insert via Cayenne: " + insertCayenne + " ms.");
+        logObj.log(
+            level,
+            "Insert via Cayenne (small batches): " + insertCayenne1 + " ms.");
         logObj.log(
             level,
             "Select via Cayenne (objects in cache): " + selectCayenne1 + " ms.");

@@ -653,8 +653,9 @@ public class DataContext implements QueryEngine {
             DbAttribute attr = (DbAttribute) it.next();
 
             // see if it is there already
-            if (idMap.get(attr.getName()) != null)
+            if (idMap.get(attr.getName()) != null) {
                 continue;
+            }
 
             // try object value as PK
             ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(attr);
@@ -664,9 +665,10 @@ public class DataContext implements QueryEngine {
             }
 
             // run PK autogeneration
-            if (autoPkDone)
+            if (autoPkDone) {
                 throw new CayenneRuntimeException("Primary Key autogeneration only works for a single attribute.");
-
+            }
+            
             try {
                 DbAdapter dba = aNode.getAdapter();
                 Object pk = dba.generatePkForDbEntity(aNode, objEntity.getDbEntity());
