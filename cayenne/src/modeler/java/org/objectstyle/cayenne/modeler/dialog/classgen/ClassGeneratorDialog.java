@@ -58,16 +58,16 @@ package org.objectstyle.cayenne.modeler.dialog.classgen;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
+import javax.swing.Box;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.scopemvc.core.PropertyManager;
 import org.scopemvc.core.Selector;
@@ -80,7 +80,8 @@ import org.scopemvc.view.swing.STableModel;
 import org.scopemvc.view.swing.STextField;
 import org.scopemvc.view.swing.SwingView;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
@@ -91,12 +92,14 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class ClassGeneratorDialog extends SPanel {
 
+    protected STable table;
+
     public ClassGeneratorDialog() {
         init();
     }
 
     private void init() {
-        // **** build widgets
+        // create widgets
         final STextField superClassPackage = new STextField(30);
         superClassPackage.setSelector("superClassPackage");
 
@@ -121,6 +124,10 @@ public class ClassGeneratorDialog extends SPanel {
                 ClassGeneratorController.CHOOSE_SUPERTEMPLATE_CONTROL));
         chooseSuperTemplateButton.setEnabled(true);
 
+        SButton selectAllButton = new SButton(new SAction(
+                ClassGeneratorController.SELECT_ALL_CONTROL));
+        selectAllButton.setEnabled(true);
+
         SButton generateButton = new SButton(new SAction(
                 ClassGeneratorController.GENERATE_CLASSES_CONTROL));
         generateButton.setEnabled(true);
@@ -143,27 +150,8 @@ public class ClassGeneratorDialog extends SPanel {
         };
         generateSuperclass.setSelector("pairs");
 
-        // **** build entry form
-        setDisplayMode(SwingView.MODAL_DIALOG);
-        setTitle("Generate Java Classes");
-        setLayout(new BorderLayout());
-
-        FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, left:max(180dlu;pref), 3dlu, left:70",
-                "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.append("Output Directory:", folder, chooseButton);
-        builder.append("Custom Template:", classTemplate, chooseTemplateButton);
-
-        builder.appendSeparator("Superclass Settings");
-        builder.append("Generate Superclass:", generateSuperclass, 3);
-        builder.append("Superclass Package:", superClassPackage, 3);
-        builder.append("Custom Template:", superClassTemplate, chooseSuperTemplateButton);
-
         // **** build entity table
-        STable table = new ClassGeneratorTable();
+        table = new ClassGeneratorTable();
         table.setRowHeight(25);
         table.setRowMargin(3);
         ClassGeneratorModel model = new ClassGeneratorModel(table);
@@ -176,20 +164,55 @@ public class ClassGeneratorDialog extends SPanel {
         });
 
         table.setModel(model);
+        table.getColumnModel().getColumn(2).setPreferredWidth(30);
 
-        // make sure that long columns are not squeezed
-        table.getColumnModel().getColumn(1).setMinWidth(100);
-        table.getColumnModel().getColumn(3).setMinWidth(250);
+        // assemble..
 
-        // **** assemble
-        add(builder.getPanel(), BorderLayout.NORTH);
-        JPanel panel = PanelFactory.createTablePanel(
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(
+                new FormLayout(
+                        "right:max(50dlu;pref), 3dlu, fill:pref:grow, 3dlu, left:70",
+                        "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, fill:100dlu:grow"));
+        builder.setDefaultDialogBorder();
+
+        builder.addSeparator("Generated Class Settings", cc.xywh(1, 1, 5, 1));
+        builder.addLabel("Output Directory:", cc.xy(1, 3));
+        builder.add(folder, cc.xy(3, 3));
+        builder.add(chooseButton, cc.xy(5, 3));
+        builder.addLabel("Custom Template:", cc.xy(1, 5));
+        builder.add(classTemplate, cc.xy(3, 5));
+        builder.add(chooseTemplateButton, cc.xy(5, 5));
+        builder.addSeparator("Generated Superclass Settings", cc.xywh(1, 7, 5, 1));
+        builder.addLabel("Generate Superclass:", cc.xy(1, 9));
+        builder.add(generateSuperclass, cc.xywh(3, 9, 3, 1));
+        builder.addLabel("Superclass Package:", cc.xy(1, 11));
+        builder.add(superClassPackage, cc.xy(3, 11));
+        builder.addLabel("Custom Template:", cc.xy(1, 13));
+        builder.add(superClassTemplate, cc.xy(3, 13));
+        builder.add(chooseSuperTemplateButton, cc.xy(5, 13));
+
+        builder.add(new JScrollPane(
                 table,
-                new JComponent[] {},
-                new JButton[] {
-                        generateButton, cancelButton
-                });
-        add(panel, BorderLayout.CENTER);
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), cc.xywh(1, 15, 5, 1));
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(selectAllButton);
+        buttons.add(Box.createHorizontalStrut(20));
+        buttons.add(generateButton);
+        buttons.add(cancelButton);
+          
+
+        setDisplayMode(SwingView.MODAL_DIALOG);
+        setTitle("Generate Java Classes");
+        setLayout(new BorderLayout());
+
+        add(builder.getPanel(), BorderLayout.CENTER);
+        add(buttons, BorderLayout.SOUTH);
+    }
+
+    public STable getTable() {
+        return table;
     }
 
     class ClassGeneratorModel extends STableModel {
@@ -283,4 +306,5 @@ public class ClassGeneratorDialog extends SPanel {
         }
 
     }
+
 }

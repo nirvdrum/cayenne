@@ -18,6 +18,7 @@ import org.scopemvc.model.basic.BasicModel;
  * @author Andrei Adamchik
  */
 public class ClassGeneratorModel extends BasicModel {
+
     protected DataMap map;
     protected String outputDir;
     protected boolean pairs;
@@ -26,23 +27,19 @@ public class ClassGeneratorModel extends BasicModel {
     protected String customSuperclassTemplate;
     protected String customClassTemplate;
 
-    public ClassGeneratorModel(
-        DataMap map,
-        ObjEntity selectedEntity,
-        List validationInfo) {
+    public ClassGeneratorModel(DataMap map, ObjEntity selectedEntity, List validationInfo) {
         this.map = map;
         prepareEntities(selectedEntity, validationInfo);
     }
 
     /**
-     * Initializes superClassPackage to a default reasonable 
-     * superclass package value.
+     * Initializes superClassPackage to a default reasonable superclass package value.
      */
     public void updateDefaultSuperClassPackage() {
         Iterator it = entities.iterator();
         while (it.hasNext()) {
-            ClassGeneratorEntityWrapper entityWrapper =
-                (ClassGeneratorEntityWrapper) it.next();
+            ClassGeneratorEntityWrapper entityWrapper = (ClassGeneratorEntityWrapper) it
+                    .next();
             String className = entityWrapper.getEntity().getClassName();
             if (className == null) {
                 continue;
@@ -67,8 +64,8 @@ public class ClassGeneratorModel extends BasicModel {
             Iterator vit = validationInfo.iterator();
             while (vit.hasNext()) {
                 ValidationInfo info = (ValidationInfo) vit.next();
-                ObjEntity ent =
-                    (ObjEntity) info.getPath().firstInstanceOf(ObjEntity.class);
+                ObjEntity ent = (ObjEntity) info.getPath().firstInstanceOf(
+                        ObjEntity.class);
                 if (ent != null) {
                     failedEntities.put(ent.getName(), info.getMessage());
                 }
@@ -78,17 +75,19 @@ public class ClassGeneratorModel extends BasicModel {
         List tmp = new ArrayList();
         Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
-            ObjEntity ent = (ObjEntity) it.next();
+            ObjEntity entity = (ObjEntity) it.next();
 
             // check if entity didn't pass the validation
             ClassGeneratorEntityWrapper wrapper = null;
-            String errorMessage = (String) failedEntities.get(ent.getName());
+            String errorMessage = (String) failedEntities.get(entity.getName());
             if (errorMessage != null) {
-                wrapper = new ClassGeneratorEntityWrapper(ent, false, errorMessage);
+                wrapper = new ClassGeneratorEntityWrapper(entity, false, errorMessage);
             }
             else {
-                boolean enabled = (selectedEntity != null) ? selectedEntity == ent : true;
-                wrapper = new ClassGeneratorEntityWrapper(ent, enabled);
+                boolean enabled = (selectedEntity != null)
+                        ? selectedEntity == entity
+                        : true;
+                wrapper = new ClassGeneratorEntityWrapper(entity, enabled);
             }
 
             tmp.add(wrapper);
@@ -109,8 +108,24 @@ public class ClassGeneratorModel extends BasicModel {
         return selected;
     }
 
+    public boolean selectAllEnabled() {
+        boolean changed = false;
+
+        Iterator it = entities.iterator();
+        while (it.hasNext()) {
+            ClassGeneratorEntityWrapper wrapper = (ClassGeneratorEntityWrapper) it.next();
+            if (wrapper.isEnabled() && !wrapper.isSelected()) {
+                wrapper.setSelected(true);
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
     /**
      * Returns the map.
+     * 
      * @return DataMap
      */
     public DataMap getMap() {
@@ -119,6 +134,7 @@ public class ClassGeneratorModel extends BasicModel {
 
     /**
      * Returns the outputDir.
+     * 
      * @return File
      */
     public File getOutputDirectory() {
@@ -127,6 +143,7 @@ public class ClassGeneratorModel extends BasicModel {
 
     /**
      * Returns the pairs.
+     * 
      * @return boolean
      */
     public boolean isPairs() {
@@ -135,6 +152,7 @@ public class ClassGeneratorModel extends BasicModel {
 
     /**
      * Sets the pairs.
+     * 
      * @param pairs The pairs to set
      */
     public void setPairs(boolean pairs) {
@@ -160,24 +178,25 @@ public class ClassGeneratorModel extends BasicModel {
     }
 
     public void setCustomSuperclassTemplate(String customSuperclassTemplate) {
-        if (!Util
-            .nullSafeEquals(this.customSuperclassTemplate, customSuperclassTemplate)) {
+        if (!Util.nullSafeEquals(this.customSuperclassTemplate, customSuperclassTemplate)) {
             this.customSuperclassTemplate = customSuperclassTemplate;
-            fireModelChange(
-                VALUE_CHANGED,
-                Selector.fromString("customSuperclassTemplate"));
+            fireModelChange(VALUE_CHANGED, Selector
+                    .fromString("customSuperclassTemplate"));
         }
     }
 
     /**
      * Returns the entities.
+     * 
      * @return List
      */
     public List getEntities() {
         return entities;
     }
+
     /**
      * Returns the outputDir.
+     * 
      * @return String
      */
     public String getOutputDir() {
@@ -186,6 +205,7 @@ public class ClassGeneratorModel extends BasicModel {
 
     /**
      * Sets the outputDir.
+     * 
      * @param outputDir The outputDir to set
      */
     public void setOutputDir(String outputDir) {
