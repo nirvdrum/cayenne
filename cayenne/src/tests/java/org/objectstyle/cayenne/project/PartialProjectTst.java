@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class PartialProjectTst extends CayenneTestCase {
     protected File testProjectFile;
-    protected PartialProject handler;
+    protected PartialProject project;
 
     /**
      * Constructor for PartialProjectTst.
@@ -98,17 +98,17 @@ public class PartialProjectTst extends CayenneTestCase {
             throw new Exception("Can't copy from " + src);
         }
 
-        handler = new PartialProject(testProjectFile);
+        project = new PartialProject(testProjectFile);
     }
 
     public void testParentFile() throws Exception {
         assertEquals(
             testProjectFile.getParentFile().getCanonicalFile(),
-            handler.getProjectDir().getCanonicalFile());
+            project.getProjectDir().getCanonicalFile());
     }
 
     public void testProjectFile() throws Exception {
-        ProjectFile f = handler.findFile(handler);
+        ProjectFile f = project.findFile(project);
         assertNotNull(f);
         assertTrue(
             "Wrong main file type: " + f.getClass().getName(),
@@ -120,18 +120,33 @@ public class PartialProjectTst extends CayenneTestCase {
 
     public void testMainFile() throws Exception {
         assertEquals(
-            handler.findFile(handler).resolveFile(),
-            handler.getMainFile());
+            project.findFile(project).resolveFile(),
+            project.getMainFile());
     }
 
     public void testDomains() throws Exception {
-        assertEquals(2, handler.getChildren().size());
+        assertEquals(2, project.getChildren().size());
     }
 
     public void testNodes() throws Exception {
         PartialProject.DomainMetaData d2 =
-            (PartialProject.DomainMetaData) handler.domains.get("d2");
+            (PartialProject.DomainMetaData) project.domains.get("d2");
         assertNotNull(d2);
         assertEquals(2, d2.nodes.size());
+    }
+    
+    public void testSave() throws Exception {
+    	if(!testProjectFile.delete()) {
+    		throw new Exception("Can't delete project file: " + testProjectFile);
+    	}
+    	
+    	PartialProject old = project;
+    	old.save();
+    	
+    	assertTrue(testProjectFile.exists());
+    	
+    	// reinit shared project and run one of the other tests
+        project = new PartialProject(testProjectFile);
+        testNodes();
     }
 }

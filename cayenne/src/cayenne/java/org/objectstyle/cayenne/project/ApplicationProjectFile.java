@@ -108,15 +108,10 @@ public class ApplicationProjectFile extends ProjectFile {
     }
 
     public void save(PrintWriter out) throws Exception {
-        List children = getProject().getChildren();
-        DataDomain[] domains = new DataDomain[children.size()];
-        children.toArray(domains);
-
-        ApplicationProject project = (ApplicationProject) projectObj;
         ConfigSaverDelegate localDelegate =
             (saveDelegate != null)
                 ? saveDelegate
-                : new RuntimeSaveDelegate(project.getConfig());
+                : new RuntimeSaveDelegate(((ApplicationProject) projectObj).getConfig());
         new ConfigSaver(localDelegate).storeDomains(out);
     }
 

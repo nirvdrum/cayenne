@@ -99,7 +99,8 @@ public abstract class Project {
         } else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
             return new DataMapProject(projectFile);
         } else {
-            throw new ProjectException("Unsupported project file: " + projectFile);
+            throw new ProjectException(
+                "Unsupported project file: " + projectFile);
         }
     }
 
@@ -118,7 +119,8 @@ public abstract class Project {
 
             if (!parent.isDirectory()) {
                 throw new ProjectException(
-                    "Project directory does not exist or is not a directory: " + parent);
+                    "Project directory does not exist or is not a directory: "
+                        + parent);
             }
 
             try {
@@ -321,9 +323,9 @@ public abstract class Project {
      * @return An object describing failures in the loaded project.
      */
     public abstract ConfigStatus getLoadStatus();
-    
+
     public abstract ProjectFile projectFileForObject(Object obj);
-    
+
     /**
      * Returns a list of first-level children of the project.
      */
@@ -340,9 +342,12 @@ public abstract class Project {
      * Returns an Iterator over project tree of objects.
      */
     public Iterator treeNodes() {
-        return FlatProjectView.getInstance().flattenProjectTree(this).iterator();
+        return FlatProjectView
+            .getInstance()
+            .flattenProjectTree(this)
+            .iterator();
     }
-    
+
     /** 
      * Saves project. All currently existing files are updated,
      * without checking for modifications. New files are created
@@ -358,25 +363,7 @@ public abstract class Project {
         // 1. Traverse project tree to find file wrappers that require update.
         List filesToSave = new ArrayList();
         List wrappedObjects = new ArrayList();
-
-        Iterator nodes = treeNodes();
-        while (nodes.hasNext()) {
-            ProjectPath nodePath = (ProjectPath) nodes.next();
-            Object obj = nodePath.getObject();
-
-            ProjectFile existingFile = findFile(obj);
-
-            if (existingFile == null) {
-                // check if project node can have a file
-                ProjectFile newFile = projectFileForObject(obj);
-                if (newFile != null) {
-                    filesToSave.add(newFile);
-                }
-            } else if (existingFile.canHandleObject()) {
-                wrappedObjects.add(existingFile.getObject());
-                filesToSave.add(existingFile);
-            }
-        }
+        prepareSave(filesToSave, wrappedObjects);
 
         // 2. Try saving individual file wrappers
         processSave(filesToSave);
@@ -404,9 +391,32 @@ public abstract class Project {
         synchronized (upgradeMessages) {
             upgradeMessages.clear();
         }
-        
+
         // update state 
         setModified(false);
+    }
+
+    protected void prepareSave(List filesToSave, List wrappedObjects)
+        throws ProjectException {
+        Iterator nodes = treeNodes();
+        while (nodes.hasNext()) {
+            ProjectPath nodePath = (ProjectPath) nodes.next();
+            Object obj = nodePath.getObject();
+
+            ProjectFile existingFile = findFile(obj);
+
+            if (existingFile == null) {
+                // check if project node can have a file
+                ProjectFile newFile = projectFileForObject(obj);
+                if (newFile != null) {
+                    filesToSave.add(newFile);
+                }
+            } else if (existingFile.canHandleObject()) {
+                wrappedObjects.add(existingFile.getObject());
+                filesToSave.add(existingFile);
+            }
+        }
+
     }
 
     /**
@@ -441,7 +451,9 @@ public abstract class Project {
                 f.saveUndo();
             }
 
-            throw new ProjectException("Project save failed and was canceled.", ex);
+            throw new ProjectException(
+                "Project save failed and was canceled.",
+                ex);
         }
     }
 
@@ -471,12 +483,14 @@ public abstract class Project {
                 } else if (!existingObjects.contains(f.getObject())) {
                     delete = true;
                     logObj.info(
-                        "Object deleted from the project, deleting file: " + file);
+                        "Object deleted from the project, deleting file: "
+                            + file);
                 } else if (!f.canHandleObject()) {
                     // this happens too - node can start using JNDI for instance
                     delete = true;
                     logObj.info(
-                        "Can no longer handle the object, deleting file: " + file);
+                        "Can no longer handle the object, deleting file: "
+                            + file);
                 }
 
                 if (delete) {
@@ -491,14 +505,13 @@ public abstract class Project {
     protected boolean deleteFile(File f) {
         return (f.exists()) ? f.delete() : true;
     }
-    
+
     /**
      * Returns <code>true</code> if the project is modified.
      */
     public boolean isModified() {
         return modified;
     }
-
 
     /**
      * Updates "modified" state of the project.

@@ -97,6 +97,11 @@ public class PartialProject extends Project {
 
     }
 
+    protected void prepareSave(List filesToSave, List wrappedObjects)
+        throws ProjectException {
+        filesToSave.addAll(files);
+    }
+
     protected void postInit(File projectFile) {
         loadDelegate = new LoadDelegate();
         domains = new HashMap();
@@ -155,8 +160,8 @@ public class PartialProject extends Project {
 
     protected class DomainMetaData {
         protected String name;
-        protected List nodes = new ArrayList();
-        protected List maps = new ArrayList();
+        protected Map nodes = new HashMap();
+        protected Map maps = new HashMap();
         protected Map mapDependencies = new HashMap();
 
         public DomainMetaData(String name) {
@@ -176,13 +181,52 @@ public class PartialProject extends Project {
         }
     }
 
+    protected class MapMetaData {
+        protected String name;
+        protected String location;
+        protected List maps = new ArrayList();
+
+        public MapMetaData(String name) {
+            this.name = name;
+        }
+    }
+
     class LoadDelegate implements ConfigLoaderDelegate {
         protected ConfigStatus status = new ConfigStatus();
 
-        public void startedLoading() {
-        	domains.clear();
+        protected DomainMetaData findDomain(String name) {
+            DomainMetaData domain = (DomainMetaData) domains.get(name);
+            if (domain == null) {
+                throw new ProjectException("Can't find domain: " + name);
+            }
+
+            return domain;
         }
-        
+
+        protected MapMetaData findMap(String domainName, String mapName) {
+            DomainMetaData domain = findDomain(domainName);
+            MapMetaData map = (MapMetaData) domain.maps.get(mapName);
+            if (map == null) {
+                throw new ProjectException("Can't find map: " + mapName);
+            }
+
+            return map;
+        }
+
+        protected NodeMetaData findNode(String domainName, String nodeName) {
+            DomainMetaData domain = findDomain(domainName);
+            NodeMetaData node = (NodeMetaData) domain.nodes.get(nodeName);
+            if (node == null) {
+                throw new ProjectException("Can't find node: " + nodeName);
+            }
+
+            return node;
+        }
+
+        public void startedLoading() {
+            domains.clear();
+        }
+
         public void finishedLoading() {
         }
 
@@ -199,6 +243,7 @@ public class PartialProject extends Project {
             String domainName,
             String nodeName,
             String mapName) {
+            findNode(domainName, nodeName).maps.add(mapName);
         }
 
         public void shouldLoadDataDomain(String name) {
@@ -210,6 +255,11 @@ public class PartialProject extends Project {
             String mapName,
             String location,
             List depMapNames) {
+
+            MapMetaData map = new MapMetaData(mapName);
+            map.location = location;
+            map.maps = depMapNames;
+            findDomain(domainName).maps.put(mapName, map);
         }
 
         public void shouldLoadDataNode(
@@ -223,46 +273,61 @@ public class PartialProject extends Project {
             node.adapter = adapter;
             node.factory = factory;
             node.dataSource = dataSource;
-            DomainMetaData domain = (DomainMetaData) domains.get(domainName);
-            domain.nodes.add(node);
+            findDomain(domainName).nodes.put(nodeName, node);
         }
     }
 
     class SaveDelegate implements ConfigSaverDelegate {
+        protected DomainMetaData findDomain(String domainName) {
+            DomainMetaData domain = (DomainMetaData) domains.get(domainName);
+            if (domain == null) {
+                throw new IllegalArgumentException(
+                    "Can't find domain: " + domainName);
+            }
+
+            return domain;
+        }
+
         public Iterator dependentMapNames(String domainName, String mapName) {
-            return null;
+            return ((MapMetaData) findDomain(domainName).maps.get(mapName))
+                .maps
+                .iterator();
         }
 
         public Iterator domainNames() {
-            return null;
+            return domains.keySet().iterator();
         }
 
         public Iterator linkedMapNames(String domainName, String nodeName) {
-            return null;
+            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName))
+                .maps
+                .iterator();
         }
 
         public String mapLocation(String domainName, String mapName) {
-            return null;
+            return (
+                (MapMetaData) findDomain(domainName).maps.get(
+                    mapName)).location;
         }
 
         public Iterator mapNames(String domainName) {
-            return null;
+            return findDomain(domainName).maps.keySet().iterator();
         }
 
         public String nodeAdapterName(String domainName, String nodeName) {
-            return null;
+            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName)).adapter;
         }
 
         public String nodeDataSourceName(String domainName, String nodeName) {
-            return null;
+            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName)).dataSource;
         }
 
         public String nodeFactoryName(String domainName, String nodeName) {
-            return null;
+            return ((NodeMetaData) findDomain(domainName).nodes.get(nodeName)).factory;
         }
 
         public Iterator nodeNames(String domainName) {
-            return null;
+            return findDomain(domainName).nodes.keySet().iterator();
         }
     }
 }
