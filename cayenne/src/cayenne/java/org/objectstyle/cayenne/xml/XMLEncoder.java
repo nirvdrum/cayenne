@@ -93,7 +93,10 @@ public class XMLEncoder {
         XMLOutputter serializer = new XMLOutputter();
         serializer.setFormat(Format.getPrettyFormat());
 
-        return serializer.outputString(doc);
+        String ret = serializer.outputString(doc);
+        doc.detachRootElement();
+        
+        return ret;
     }
 
     public void setRoot(String xmlTag, String type) {
