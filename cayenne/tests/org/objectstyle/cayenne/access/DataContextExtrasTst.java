@@ -110,7 +110,7 @@ public class DataContextExtrasTst extends TestCase {
         Level oldLevel = DefaultOperationObserver.logObj.getLevel();
         DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
         try {
-            ctxt.commitChanges();
+            ctxt.commitChanges(Level.FINE);
             fail("Exception expected but not thrown due to missing PK generation routine.");
         }
         catch (CayenneRuntimeException ex) {
