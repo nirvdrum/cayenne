@@ -300,8 +300,7 @@ public class EventManager extends Object {
 
         if (dispatchImmediately) {
             dispatchEvent(dispatch);
-        }
-        else {
+        } else {
 
             // add dispatch to the queue and return
             synchronized (eventQueue) {

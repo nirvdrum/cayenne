@@ -74,7 +74,6 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * Implementation of EventBridge that passes and receives events via JMS 
@@ -85,8 +84,6 @@ import org.objectstyle.cayenne.util.IDUtil;
  */
 public class JMSBridge extends EventBridge implements MessageListener {
     private static Logger logObj = Logger.getLogger(JMSBridge.class);
-    public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
-    public static final String VM_ID_PROPERRTY = "VM_ID";
 
     protected String topicConnectionFactoryName;
 
@@ -96,20 +93,9 @@ public class JMSBridge extends EventBridge implements MessageListener {
     protected TopicPublisher publisher;
     protected TopicSubscriber subscriber;
 
-    protected static String convertToExternalSubject(EventSubject localSubject) {
-        // substitute all chars that can be incorrectly interpreted by JNDI
-        char[] chars = localSubject.getSubjectName().toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (chars[i] == '/' || chars[i] == '.') {
-                chars[i] = '_';
-            }
-        }
-
-        return new String(chars);
-    }
 
     public JMSBridge(EventSubject localSubject, String topicConnectionFactoryName) {
-        super(localSubject, convertToExternalSubject(localSubject));
+        super(localSubject);
         this.topicConnectionFactoryName = topicConnectionFactoryName;
     }
 
@@ -128,16 +114,15 @@ public class JMSBridge extends EventBridge implements MessageListener {
     public void onMessage(Message message) {
 
         try {
-            if (VM_ID.equals(message.getObjectProperty(VM_ID_PROPERRTY))) {
+            Object vmID = message.getObjectProperty(VM_ID_PROPERRTY);
+            if (VM_ID.equals(vmID)) {
                 logObj.debug("Message from same VM ignoring.");
                 return;
             }
 
             if (!(message instanceof ObjectMessage)) {
                 if (logObj.isDebugEnabled()) {
-                    logObj.debug(
-                        "Unsupported message, ignoring: "
-                            + message.getJMSCorrelationID());
+                    logObj.debug("Unsupported message, ignoring: " + vmID);
                 }
 
                 return;
@@ -151,7 +136,7 @@ public class JMSBridge extends EventBridge implements MessageListener {
                         "Received CayenneEvent: "
                             + event.getClass().getName()
                             + ", id: "
-                            + message.getJMSCorrelationID());
+                            + vmID);
                 }
 
                 onExternalEvent(event);

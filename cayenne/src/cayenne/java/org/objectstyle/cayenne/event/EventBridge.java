@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.event;
 import java.util.EventListener;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * A bridge between Cayenne EventManager and other possible event sources.
@@ -78,6 +79,9 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @since 1.1
  */
 public abstract class EventBridge implements EventListener {
+    public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
+    public static final String VM_ID_PROPERRTY = "VM_ID";
+    
     public static final int RECEIVE_LOCAL = 1;
     public static final int RECEIVE_EXTERNAL = 2;
     public static final int RECEIVE_LOCAL_EXTERNAL = 3;
@@ -87,6 +91,23 @@ public abstract class EventBridge implements EventListener {
     protected EventManager eventManager;
     protected int mode;
 
+    protected static String convertToExternalSubject(EventSubject localSubject) {
+        // substitute all chars that can be incorrectly interpreted by whoever (JNDI, ...?)
+        // provides a consistent translator from local event subjects to strings
+        char[] chars = localSubject.getSubjectName().toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '/' || chars[i] == '.') {
+                chars[i] = '_';
+            }
+        }
+
+        return new String(chars);
+    }
+    
+    public EventBridge(EventSubject localSubject) {
+        this(localSubject, convertToExternalSubject(localSubject));
+    }
+    
     public EventBridge(EventSubject localSubject, String externalSubject) {
         this.localSubject = localSubject;
         this.externalSubject = externalSubject;
