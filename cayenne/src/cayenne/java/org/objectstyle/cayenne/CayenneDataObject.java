@@ -174,9 +174,10 @@ public class CayenneDataObject implements DataObject {
                 dataContext.refetchObject(objectId);
             }
         } catch (Exception ex) {
+        	ex.printStackTrace();
+        	System.out.println("Exception "+ex.getMessage());
             setPersistenceState(PersistenceState.TRANSIENT);
         }
-
         return readPropertyDirectly(propName);
     }
 
