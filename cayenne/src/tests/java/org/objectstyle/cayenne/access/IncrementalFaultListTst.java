@@ -118,37 +118,35 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     }
 
     public void testPagesRead1() throws Exception {
-        assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Map);
+        assertTrue(list.elements.get(0) instanceof Artist);
+        assertTrue(list.elements.get(8) instanceof Map);
 
         list.resolveInterval(5, 10);
-        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
+        assertTrue(list.elements.get(7) instanceof Artist);
 
         list.resolveAll();
-        assertTrue(
-            ((IncrementalFaultList) list).elements.get(list.size() - 1)
-                instanceof Artist);
+        assertTrue((list.elements.get(list.size() - 1)) instanceof Artist);
     }
 
     public void testGet1() throws Exception {
-        assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Map);
+        assertTrue(list.elements.get(0) instanceof Artist);
+        assertTrue(list.elements.get(8) instanceof Map);
 
         Object a = list.get(8);
 
         assertNotNull(a);
         assertTrue(a instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Artist);
+        assertTrue(list.elements.get(8) instanceof Artist);
     }
 
     public void testGet2() throws Exception {
         ((SelectQuery) query).setFetchingDataRows(true);
-        assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Map);
+        assertTrue(list.elements.get(0) instanceof Artist);
+        assertTrue(list.elements.get(8) instanceof Map);
 
         Object a = list.get(8);
 
         assertNotNull(a);
-        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Artist);
+        assertTrue(list.elements.get(8) instanceof Artist);
     }
 }

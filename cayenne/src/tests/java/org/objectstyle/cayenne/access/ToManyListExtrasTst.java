@@ -69,7 +69,7 @@ public class ToManyListExtrasTst extends CayenneTestCase {
 		ToManyListDataSource lds = new ToManyListDataSource() {
 			public void updateListData(ToManyList l) {
 				l.setObjectList(new ArrayList());
-			};
+			}
 		};
 
 		list = new ToManyList(lds, null, null);

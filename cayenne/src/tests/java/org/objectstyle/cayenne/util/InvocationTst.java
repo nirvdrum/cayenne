@@ -218,7 +218,7 @@ public class InvocationTst extends CayenneTestCase {
 		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
 
 		try {
-			inv1.fire((Object[])null);
+			inv1.fire(null);
 			Assert.fail();
 		}
 

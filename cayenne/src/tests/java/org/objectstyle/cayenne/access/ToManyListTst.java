@@ -65,7 +65,7 @@ public class ToManyListTst extends CayenneTestCase {
     
     public void testListDataSource() throws java.lang.Exception {
         ToManyListDataSource lds = new ToManyListDataSource() {
-            public void updateListData(ToManyList l) {};
+            public void updateListData(ToManyList l) {}
         };
         
         ToManyList list = new ToManyList(lds, null, null);
@@ -80,7 +80,7 @@ public class ToManyListTst extends CayenneTestCase {
             public void updateListData(ToManyList l) {
                 flag = true;
                 l.setObjectList(new ArrayList());
-            };
+            }
         };
         
         ToManyList list = new ToManyList(lds, null, null);

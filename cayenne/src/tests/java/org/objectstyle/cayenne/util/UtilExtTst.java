@@ -70,7 +70,7 @@ public class UtilExtTst extends CayenneTestCase {
 	public void testPackagePath2() throws java.lang.Exception {
 		// inner class
 		class TmpTest extends Object {
-		};
+		}
 
 		String expectedPath = "org/objectstyle/cayenne/util";
 		assertEquals(

@@ -105,7 +105,6 @@ public static void main(String args[]) {
       case 10:
       case STRING:
       case QUOTED_STRING:
-        ;
         break;
       default:
         jj_la1[2] = jj_gen;
@@ -140,7 +139,6 @@ public static void main(String args[]) {
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case 12:
-          ;
           break;
         default:
           jj_la1[3] = jj_gen;
@@ -153,7 +151,6 @@ public static void main(String args[]) {
       break;
     default:
       jj_la1[4] = jj_gen;
-      ;
     }
     jj_consume_token(9);
         {if (true) return v;}

@@ -129,7 +129,7 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
             
             // populate map
             for(int i = 1; i <= n; i++) {
-                list.add(ExpressionFactory.binaryExp(Expression.EQUAL_TO, (Object)("k" + i), "v" + i));
+                list.add(ExpressionFactory.binaryExp(Expression.EQUAL_TO, ("k" + i), "v" + i));
             }
             
             Expression exp = ExpressionFactory.joinExp(Expression.AND, list);

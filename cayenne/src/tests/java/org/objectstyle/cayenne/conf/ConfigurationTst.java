@@ -88,7 +88,7 @@ public class ConfigurationTst extends CayenneTestCase {
 
 	public void testDefaultConfigurationConstructorWithNullName() {
 		try {
-			new DefaultConfiguration((String)null);
+			new DefaultConfiguration(null);
 			fail("expected ConfigurationException!");
 		}
 		catch (ConfigurationException ex) {

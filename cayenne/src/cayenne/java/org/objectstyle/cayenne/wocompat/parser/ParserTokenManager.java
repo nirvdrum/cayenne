@@ -684,9 +684,9 @@ final void MoreLexicalActions()
          jjimageLen = 0;
         int oct;
         len = image.length();
-        oct = ((int)(image.charAt(len-1)-'0')) +
-              8 * ((int)(image.charAt(len-2)-'0')) +
-              64 * ((int)(image.charAt(len-3)-'0'));
+        oct = (image.charAt(len-1)-'0') +
+              8 * (image.charAt(len-2)-'0') +
+              64 * (image.charAt(len-3)-'0');
         image.setCharAt(len-4, (char)oct);
         image.setLength(len-3);
          break;
@@ -699,7 +699,7 @@ final void MoreLexicalActions()
         int c, base=1,hex=0;
         len = image.length();
         for(int i=0; i<4; ++i) {
-          c=(int)image.charAt(len-(i+1));
+          c=image.charAt(len-(i+1));
           if (c<='9') c-='0';
             else if (c<='F') c = (c -'A') + 10;
               else c =(c -'a') + 10;
