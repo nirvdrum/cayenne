@@ -91,6 +91,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -1638,7 +1639,7 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Returns EntityResolver object used to resolve and route queries.
      */
-    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
+    public EntityResolver getEntityResolver() {
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
