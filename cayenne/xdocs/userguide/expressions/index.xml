@@ -4,8 +4,8 @@
 <body>
     <section name="10. Using Expressions">
     	<p>Cayenne defines a simple yet powerful object-based expression language. Cayenne expressions are database 
-    	independent "filters" that can be used in query qualifiers and orderings and to perform in-memory evaluation with DataObjects
-    	(and generally java beans). BNF of Cayenne expression language is described 
+    	independent and are used as query qualifiers and orderings and also to perform in-memory evaluation with 
+    	DataObjects (and generally any kind of Java Beans). BNF of Cayenne expression language is described 
     	<a href="../../grammar/ExpressionParser.html">here</a>.</p> 
     	
     	<p>Expressions are broadly divided into the following categories: object property expressions (also called "path expressions"), 

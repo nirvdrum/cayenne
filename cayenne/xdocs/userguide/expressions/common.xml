@@ -6,17 +6,17 @@
 		<subsection name="10.2 Building Expressions">
 		<p>Static method <code>Expression.fromString(String)</code> provides an easy way
 		to create expressions of arbitrary complexity.  Structure of expressions is fairly intuitive,
-		with the formal grammar provided <a href="../../grammar/ExpressionParser.html">here</a>. 
-		A simple example of creating an expression that matches Paintings with names that start with "A" 
-		and a price less than $1000.00:
+		with the formal grammar provided <a href="../../grammar/ExpressionParser.html">here</a>.
+		Among other things grammar link above can tell what operators are currently supported. 
+		A simple example of creating an expression that matches Paintings with names that start 
+		with "A" and a price less than $1000.00:
 		</p>
 		
 <source>
 Expression e = Expression.fromString("paintingTitle like 'A%' and estimatedPrice &lt; 1000");
 </source>
 
-<p>A few expression tips:</p>
-
+	<subsection name="10.2.1 String Expression Tips">
 <p>Character constants should be enclosed in single or double quotes:</p>
 <source>
 // e1 and e2 are equivalent
@@ -37,7 +37,8 @@ Expression e2 = Expression.fromString("obj:artistName");
 Expression e3 = Expression.fromString("db:ARTIST_NAME");
 </source>
 
-<p>Operators are case sensitive, mostly lowercase or mixed case using the "Java" style:</p>
+<p>Predefined expression operators are all case sensitive, and are usually lowercase. Complex
+words mostly follow the "Java nameing style":</p>
 <source>
 // correct
 Expression e1 = Expression.fromString("artistName likeIgnoreCase 'A%'");
@@ -64,7 +65,7 @@ params.put("name", "Monet");
 Expression e2 = template.expWithParameters(params);
 </source>
 
-<p>Expressions used in query qualifiers must be boolean conditions:</p>
+<p>Expressions used as query qualifiers must be boolean conditions:</p>
 <source>
 // valid qualifier
 Expression e1 = Expression.fromString("artistName likeIgnoreCase 'A%'");
@@ -73,6 +74,7 @@ Expression e1 = Expression.fromString("artistName likeIgnoreCase 'A%'");
 // Though this is still a valid Cayenne expression
 Expression e2 = Expression.fromString("artistName");
 </source>
+		</subsection>
 		</subsection>
     </section>
 </body>
