@@ -56,92 +56,52 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
-import org.objectstyle.cayenne.conf.DefaultConfiguration;
+import org.objectstyle.cayenne.conf.FileConfiguration;
 
 /**
- * Subclass of Configuration used in the project model.
+ * Subclass of FileConfiguration used in the project model.
  *
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ProjectConfiguration extends DefaultConfiguration {
-    private static Logger logObj = Logger.getLogger(ProjectConfiguration.class);
+public class ProjectConfiguration extends FileConfiguration {
 
-    /** Main project file. */
-    protected File projectFile;
-
+	/**
+	 * @HH todo
+	 */
     public ProjectConfiguration(File projectFile) {
-        this.projectFile = projectFile;
-        this.ignoringLoadFailures = true;
+    	super(projectFile);
+	}
 
-        if (projectFile != null && projectFile.isFile()) {
-            try {
-                init();
-            } catch (Exception e) {
-                throw new ProjectException("Error initializing configuration.", e);
-            }
-        }
-    }
+	/**
+	 * Override parent implementation to ignore loading failures and
+	 * prevent loading of nonexisting files.
+	 * @see FileConfiguration#shouldInitialize()
+	 */
+	public boolean shouldInitialize() {
+		this.setIgnoringLoadFailures(true);
+		return (super.shouldInitialize() && this.getProjectFile().isFile());
+	}
 
-    /** Returns project directory. */
-    public File getProjectDir() {
-        String parent = (projectFile != null) ? projectFile.getParent() : null;
-        return (parent != null) ? new File(parent) : null;
-    }
-
-    /** 
-     * Returns domain configuration as a stream or null if it
-     * can not be found. 
-     */
-    public InputStream getDomainConfig() {
-        try {
-            if (projectFile != null && projectFile.exists() && projectFile.isFile()) {
-                return new FileInputStream(projectFile);
-            }
-        } catch (Exception ex) {
-            logObj.warn("Error reading domain configuration", ex);
-        }
-
-        return null;
-    }
-
-    /** Returns DataMap configuration from a specified location or null if it
-      * can not be found. */
-    public InputStream getMapConfig(String location) {
-        try {
-            if (projectFile != null) {
-                File mapFile = new File(projectFile.getParent(), location);
-                if (mapFile.exists()) {
-                    return new FileInputStream(mapFile);
-                }
-            }
-        } catch (Exception ex) {
-            logObj.warn("Error reading data map", ex);
-        }
-        return null;
-    }
+	/**
+	 * Override parent implementation to not check for existing files.
+	 * @see FileConfiguration#setProjectFile(File)
+	 */
+	protected void setProjectFile(File projectFile) {
+		super.projectFile = projectFile;
+	}
 
     /**
      * @see org.objectstyle.cayenne.conf.Configuration#getOverrideFactory()
      */
     public DataSourceFactory getOverrideFactory() {
         try {
-            return new ProjectDataSourceFactory(getProjectDir());
+            return new ProjectDataSourceFactory(this.getProjectDirectory());
         } catch (Exception e) {
             throw new ProjectException("Error creating DataSourceFactory.", e);
         }
     }
 
-    /**
-     * Returns the projectFile.
-     * @return File
-     */
-    public File getProjectFile() {
-        return projectFile;
-    }
 }

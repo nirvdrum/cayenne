@@ -59,6 +59,7 @@ import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.conf.ConfigSaver;
 import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
 
 /**
@@ -79,7 +80,7 @@ public class ApplicationProjectFile extends ProjectFile {
      * Constructor for ApplicationProjectFile.
      */
     public ApplicationProjectFile(Project project) {
-        super(project, "cayenne.xml");
+        super(project, Configuration.DEFAULT_DOMAIN_FILE);
     }
 
     /**
@@ -109,7 +110,7 @@ public class ApplicationProjectFile extends ProjectFile {
         ConfigSaverDelegate localDelegate =
             (saveDelegate != null)
                 ? saveDelegate
-                : new RuntimeSaveDelegate(((ApplicationProject) projectObj).getConfig());
+                : new RuntimeSaveDelegate(((ApplicationProject) projectObj).getConfiguration());
         new ConfigSaver(localDelegate).storeDomains(out);
     }
 

@@ -92,9 +92,10 @@ public abstract class Project {
      * Factory method to create the right project type given project file.
      */
     public static Project createProject(File projectFile) {
+		logObj.debug("createProject: " + projectFile);
         String fileName = projectFile.getName();
 
-        if (Configuration.DEFAULT_DOMAIN_FILE.equals(fileName)) {
+        if (fileName.endsWith(Configuration.DEFAULT_DOMAIN_FILE)) {
             return new ApplicationProject(projectFile);
         } else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
             return new DataMapProject(projectFile);
@@ -139,6 +140,7 @@ public abstract class Project {
      * and checks for upgrades.
      */
     protected void postInit(File projectFile) {
+		logObj.debug("postInit: " + projectFile);
         // take a snapshot of files used by the project
         files = Collections.synchronizedList(buildFileList());
 
@@ -299,11 +301,11 @@ public abstract class Project {
      * Returns project directory. This is a directory where
      * project file is located.
      */
-    public File getProjectDir() {
+    public File getProjectDirectory() {
         return projectDir;
     }
 
-    public void setProjectDir(File dir) {
+    public void setProjectDirectory(File dir) {
         this.projectDir = dir;
     }
 

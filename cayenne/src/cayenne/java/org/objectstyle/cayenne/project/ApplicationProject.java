@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -70,7 +71,9 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class ApplicationProject extends Project {
-    protected ProjectConfiguration config;
+	private static Logger logObj = Logger.getLogger(ApplicationProject.class);
+
+    protected ProjectConfiguration configuration;
 
     /**
      * Constructor for ApplicationProject.
@@ -82,12 +85,25 @@ public class ApplicationProject extends Project {
     }
 
     /**
-     * Initializes internal <code>config</code> object and then calls super.
+     * Initializes internal <code>Configuration</code> object and then calls super.
      */
     protected void postInit(File projectFile) {
+    	logObj.debug("postInit: " + projectFile);
         try {
-            File f = (projectFile != null) ? projectFile.getCanonicalFile() : null;
-            config = new ProjectConfiguration(f);
+        	// if the projectFile is real..
+            if (projectFile != null) {
+            	// see whether it's a directory
+            	if (projectFile.isDirectory()) {
+            		// if so, create a new default file with full path
+            		projectFile = new File(projectFile.getPath()
+            								+ File.separator
+            								+ Configuration.DEFAULT_DOMAIN_FILE);
+            	}
+
+            	projectFile = projectFile.getCanonicalFile();
+            }
+
+            this.configuration = new ProjectConfiguration(projectFile);
         } catch (IOException e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
@@ -97,20 +113,20 @@ public class ApplicationProject extends Project {
     /**
     * Returns Cayenne configuration object associated with this project. 
     */
-    public Configuration getConfig() {
-        return (Configuration) config;
+    public Configuration getConfiguration() {
+        return (Configuration) configuration;
     }
 
     /**
     * Sets Cayenne configuration object associated with this project. 
     */
-    public void setConfig(ProjectConfiguration config) {
-        this.config = config;
+    public void setConfiguration(ProjectConfiguration config) {
+        this.configuration = config;
     }
 
     public void checkForUpgrades() {
         if (hasRenamedFiles()) {
-            upgradeMessages.add("Some files require renaming");
+            upgradeMessages.add("Some files require renaming.");
         }
     }
 
@@ -118,7 +134,7 @@ public class ApplicationProject extends Project {
      * @see org.objectstyle.cayenne.project.Project#getChildren()
      */
     public List getChildren() {
-        return new ArrayList(this.getConfig().getDomains());
+        return new ArrayList(this.getConfiguration().getDomains());
     }
 
     /**
@@ -165,6 +181,6 @@ public class ApplicationProject extends Project {
     
 
     public ConfigStatus getLoadStatus() {
-        return (config != null) ? config.getLoadStatus() : new ConfigStatus();
+        return (configuration != null) ? configuration.getLoadStatus() : new ConfigStatus();
     }
 }

@@ -56,9 +56,6 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 import javax.sql.DataSource;
 
@@ -80,16 +77,18 @@ public class ProjectDataSourceFactory extends DriverDataSourceFactory {
     protected File projectDir;
 
     public ProjectDataSourceFactory(File projectDir) throws Exception {
+    	super();
         this.projectDir = projectDir;
     }
 
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         try {
-            load(location);
+            this.load(location);
         } catch (ConfigurationException e) {
             logObj.info("No data source at '" + location + "', ignoring.");
         }
-        return new ProjectDataSource(getDriverInfo());
+
+        return new ProjectDataSource(this.getDriverInfo());
     }
 
     protected DataSourceInfo getDriverInfo() {
@@ -97,25 +96,8 @@ public class ProjectDataSourceFactory extends DriverDataSourceFactory {
         if (null == temp) {
             temp = new DataSourceInfo();
         }
+
         return temp;
     }
 
-    protected InputStream getInputStream(String location) {
-        File absLocation =
-            (projectDir != null) ? new File(projectDir, location) : new File(location);
-
-        try {
-            return new FileInputStream(absLocation);
-        } catch (FileNotFoundException ex) {
-            return super.getInputStream(location);
-        }
-    }
-
-    /**
-     * Returns the projectDir.
-     * @return String
-     */
-    public File getProjectDir() {
-        return projectDir;
-    }
 }
