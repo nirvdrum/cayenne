@@ -92,11 +92,18 @@ public class JdbcPkGenerator implements PkGenerator {
     }
 
     public String dropAutoPkSupportString() {
-        return null;
+        return "DROP TABLE AUTO_PK_SUPPORT";
     }
 
     public String createAutoPkSupportForDbEntityString(DbEntity ent) {
-        return null;
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("INSERT INTO AUTO_PK_SUPPORT")
+            .append(" (TABLE_NAME, NEXT_ID)")
+            .append(" VALUES ('")
+            .append(ent.getName())
+            .append("', 1)");
+        return buf.toString();
     }
 
     public String generatePkForDbEntityString(DbEntity ent) {
@@ -107,11 +114,11 @@ public class JdbcPkGenerator implements PkGenerator {
      *  automatic primary key support. This implementation will create
      *  a lookup table called "AUTO_PK_SUPPORT" unless it already exists:
      * 
-     <pre>
-     *CREATE TABLE AUTO_PK_SUPPORT (
-     *TABLE_NAME           CHAR(100) NOT NULL,
-     *NEXT_ID              INTEGER NOT NULL
-     *)
+     *<pre>
+     *  CREATE TABLE AUTO_PK_SUPPORT (
+     *    TABLE_NAME CHAR(100) NOT NULL,
+     *    NEXT_ID INTEGER NOT NULL
+     *  )
      *</pre>
      *
      *  @param node node that provides access to a DataSource.
@@ -136,8 +143,10 @@ public class JdbcPkGenerator implements PkGenerator {
         }
     }
 
-    /** Will drop table named "AUTO_PK_SUPPORT" if it exists in the 
-      * database. */
+    /** 
+     * Drops table named "AUTO_PK_SUPPORT" if it exists in the 
+     * database. 
+     */
     public void dropAutoPkSupport(DataNode node) throws Exception {
 
         // check if a table exists
@@ -159,7 +168,7 @@ public class JdbcPkGenerator implements PkGenerator {
         }
 
         if (shouldDrop) {
-            runSchemaUpdate(node, "DROP TABLE AUTO_PK_SUPPORT");
+            runSchemaUpdate(node, dropAutoPkSupportString());
         }
     }
 
@@ -177,7 +186,7 @@ public class JdbcPkGenerator implements PkGenerator {
      *  @param node node that provides connection layer for PkGenerator.
      *  @param dbEntity DbEntity that needs an auto PK support
      */
-    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity dbEntity)
+    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity ent)
         throws Exception {
 
         // check for existing record
@@ -186,7 +195,7 @@ public class JdbcPkGenerator implements PkGenerator {
         buf
             .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT ")
             .append("WHERE TABLE_NAME = '")
-            .append(dbEntity.getName())
+            .append(ent.getName())
             .append('\'');
 
         List rows = runSelect(node, buf.toString());
@@ -196,15 +205,7 @@ public class JdbcPkGenerator implements PkGenerator {
 
         // create new one if needed
         if (shouldInsert) {
-
-            buf.setLength(0);
-            buf
-                .append("INSERT INTO AUTO_PK_SUPPORT (TABLE_NAME, NEXT_ID) ")
-                .append("VALUES ('")
-                .append(dbEntity.getName())
-                .append("', 1)");
-
-            runSchemaUpdate(node, buf.toString());
+            runSchemaUpdate(node, createAutoPkSupportForDbEntityString(ent));
         }
     }
 
