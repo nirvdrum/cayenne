@@ -865,6 +865,9 @@ public class DataContext implements QueryEngine, Serializable {
 			if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
 				eventMgr.postObserverEvent(DID_COMMIT, commitChangesEvent);
 			}
+
+			// this makes sure the ContextCommitObserver isn't GC'ed prematurely
+			result = null;
 		}
 	}
 
