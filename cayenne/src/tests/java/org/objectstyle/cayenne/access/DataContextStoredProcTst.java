@@ -91,7 +91,11 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         // create and run stored procedure
         Procedure proc = new Procedure(UPDATE_STORED_PROCEDURE);
-        ProcedureParam param = new ProcedureParam("paintingPrice", Types.INTEGER, ProcedureParam.IN_PARAM);
+        ProcedureParam param =
+            new ProcedureParam(
+                "paintingPrice",
+                Types.INTEGER,
+                ProcedureParam.IN_PARAM);
         proc.addCallParam(param);
 
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
@@ -119,12 +123,17 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         }
 
         // create an artist with painting in the database
-        createArtist(1000.0);
+     /*   createArtist(1000.0);
 
         // create and run stored procedure
         Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
-        ProcedureParam param1 = new ProcedureParam("aName", Types.VARCHAR, ProcedureParam.IN_PARAM);
-        ProcedureParam param2 = new ProcedureParam("paintingPrice", Types.INTEGER, ProcedureParam.IN_PARAM);
+        ProcedureParam param1 =
+            new ProcedureParam("aName", Types.VARCHAR, ProcedureParam.IN_PARAM);
+        ProcedureParam param2 =
+            new ProcedureParam(
+                "paintingPrice",
+                Types.INTEGER,
+                ProcedureParam.IN_PARAM);
         proc.addCallParam(param1);
         proc.addCallParam(param2);
 
@@ -132,14 +141,14 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
         q.setLoggingLevel(Level.WARN);
-         // List artists = ctxt.performQuery(q);
+        List artists = ctxt.performQuery(q);
 
         // check the results
-        /*assertNotNull("Null result from StoredProcedure.", artists);
+        assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         Artist a = (Artist) artists.get(0);
         Painting p = (Painting) a.getPaintingArray().get(0);
-        assertEquals(2000, p.getEstimatedPrice().intValue());*/
+        assertEquals(2000, p.getEstimatedPrice().intValue()); */
     }
 
     protected void createArtist(double paintingPrice) {

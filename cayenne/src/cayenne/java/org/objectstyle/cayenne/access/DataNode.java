@@ -442,8 +442,6 @@ public class DataNode implements QueryEngine {
         PreparedStatement prepStmt =
             transl.createStatement(query.getLoggingLevel());
 
-        DefaultResultIterator it = null;
-
         try {
             // execute update
             int count = prepStmt.executeUpdate();
@@ -455,11 +453,10 @@ public class DataNode implements QueryEngine {
             prepStmt.close();
         }
     }
-    
-    
-	/**
-	 * Executes a batched update query (including UPDATE, DELETE, INSERT, etc.).
-	 */
+
+    /**
+     * Executes a batched update query (including UPDATE, DELETE, INSERT, etc.).
+     */
     protected void runBatchUpdate(
         Connection con,
         BatchQuery query,
@@ -555,8 +552,6 @@ public class DataNode implements QueryEngine {
         PreparedStatement prepStmt =
             transl.createStatement(query.getLoggingLevel());
 
-        DefaultResultIterator it = null;
-
         try {
 
             // execute procedure
@@ -572,6 +567,26 @@ public class DataNode implements QueryEngine {
         Query query,
         OperationObserver delegate)
         throws SQLException, Exception {
+
+    /*    QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(con);
+
+        PreparedStatement prepStmt =
+            transl.createStatement(query.getLoggingLevel());
+
+        DefaultResultIterator it =
+            new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+
+        // note that we don't need to close ResultIterator
+        // since "dataRows" will do it internally
+        List resultRows = it.dataRows();
+        QueryLogger.logSelectCount(
+            query.getLoggingLevel(),
+            resultRows.size(),
+            System.currentTimeMillis() - t1);
+
+        delegate.nextDataRows(query, resultRows); */
     }
 
     protected void runStoredProcedureIteratedSelect(
