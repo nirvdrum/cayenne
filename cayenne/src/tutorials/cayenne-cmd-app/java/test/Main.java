@@ -2,7 +2,6 @@ package test;
 
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.exp.Expression;
@@ -57,9 +56,6 @@ public class Main {
         Expression qual = ExpressionFactory.likeIgnoreCaseExp("galleryName", likePattern);
 
         SelectQuery query = new SelectQuery(Gallery.class, qual);
-        // using log level of WARN to make sure that query 
-        // execution is logged to STDOUT
-        query.setLoggingLevel(Level.WARN);
 
         List galleries = ctxt.performQuery(query);
         if (galleries.size() == 1) {
@@ -94,7 +90,6 @@ public class Main {
         gallery.addToPaintingArray(painting);
 
         // commit to the database
-        // using log level of WARN to show the query execution
-        ctxt.commitChanges(Level.WARN);
+        ctxt.commitChanges();
     }
 }
