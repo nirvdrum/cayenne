@@ -115,6 +115,7 @@ public class JdbcAdapter implements DbAdapter {
         typesHandler = TypesHandler.getHandler(this.getClass());
         extendedTypes = new ExtendedTypeMap();
         this.configureExtendedTypes(extendedTypes);
+        this.setSupportsBatchUpdates(false);
     }
 
     /**
