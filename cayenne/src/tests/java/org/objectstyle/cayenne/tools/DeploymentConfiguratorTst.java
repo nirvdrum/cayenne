@@ -73,119 +73,133 @@ import org.objectstyle.cayenne.util.ZipUtil;
  */
 public class DeploymentConfiguratorTst extends CayenneTestCase {
 
-    private static final File baseDir =
-        new File(CayenneTestResources.getResources().getTestDir(), "cdeploy");
-    private static File src = new File(baseDir, "cdeploy-test.jar");
-    private static File altFile = new File(baseDir, "alt-cayenne.xml");
-    private static File altNodeFile = new File(baseDir, "alt-node1.xml");
+	private static final File baseDir =
+		new File(CayenneTestResources.getResources().getTestDir(), "cdeploy");
+	private static File src = new File(baseDir, "cdeploy-test.jar");
+	private static File altFile = new File(baseDir, "alt-cayenne.xml");
+	private static File altNodeFile = new File(baseDir, "alt-node1.xml");
 
-    protected DeploymentConfigurator task;
-    protected Project project;
-    protected File dest;
+	protected DeploymentConfigurator task;
+	protected Project project;
+	protected File dest;
 
-    static {
-        extractFiles();
-    }
+	static {
+		extractFiles();
+	}
 
-    private static void extractFiles() {
-        baseDir.mkdirs();
+	private static void extractFiles() {
+		baseDir.mkdirs();
 
-        ResourceLocator locator = new ResourceLocator();
-        locator.setSkipAbsPath(true);
-        locator.setSkipClasspath(false);
-        locator.setSkipCurDir(true);
-        locator.setSkipHomeDir(true);
+		ResourceLocator locator = new ResourceLocator();
+		locator.setSkipAbsPath(true);
+		locator.setSkipClasspath(false);
+		locator.setSkipCurDir(true);
+		locator.setSkipHomeDir(true);
 
-        // Configuration superclass statically defines what
-        // ClassLoader to use for resources. This
-        // allows applications to control where resources
-        // are loaded from.
-        locator.setClassLoader(Configuration.getResourceLoader());
+		// Configuration superclass statically defines what
+		// ClassLoader to use for resources. This
+		// allows applications to control where resources
+		// are loaded from.
+		locator.setClassLoader(Configuration.getResourceLoader());
 
-        URL url1 =
-            locator.findResource("test-resources/cdeploy/cdeploy-test.jar");
-        Util.copy(url1, src);
+		URL url1 =
+			locator.findResource("test-resources/cdeploy/cdeploy-test.jar");
+		Util.copy(url1, src);
 
-        URL url2 =
-            locator.findResource("test-resources/cdeploy/alt-cayenne.xml");
-        Util.copy(url2, altFile);
+		URL url2 =
+			locator.findResource("test-resources/cdeploy/alt-cayenne.xml");
+		Util.copy(url2, altFile);
 
-        URL url3 = locator.findResource("test-resources/cdeploy/alt-node1.xml");
-        Util.copy(url3, altNodeFile);
-    }
+		URL url3 = locator.findResource("test-resources/cdeploy/alt-node1.xml");
+		Util.copy(url3, altNodeFile);
+	}
 
-    public void setUp() throws Exception {
-        // create test dir
-        File testDir = null;
-        for (int i = 1; i < 50; i++) {
-            File tmp = new File(baseDir, "test" + i);
-            if (!tmp.exists()) {
-                tmp.mkdirs();
-                testDir = tmp;
-                break;
-            }
-        }
+	public void setUp() throws Exception {
+		// create test dir
+		File testDir = null;
+		for (int i = 1; i < 50; i++) {
+			File tmp = new File(baseDir, "test" + i);
+			if (!tmp.exists()) {
+				tmp.mkdirs();
+				testDir = tmp;
+				break;
+			}
+		}
 
-        project = new Project();
-        project.setBaseDir(testDir);
+		project = new Project();
+		project.setBaseDir(testDir);
 
-        dest = new File(project.getBaseDir(), "test-out.jar");
+		dest = new File(project.getBaseDir(), "test-out.jar");
 
-        task = new DeploymentConfigurator();
-        task.setProject(project);
-        task.setTaskName("Test");
-        task.setLocation(Location.UNKNOWN_LOCATION);
-        task.setSrc(src);
-        task.setDest(dest);
+		task = new DeploymentConfigurator();
+		task.setProject(project);
+		task.setTaskName("Test");
+		task.setLocation(Location.UNKNOWN_LOCATION);
+		task.setSrc(src);
+		task.setDest(dest);
 
-        // assert setup success
-        assertTrue(testDir.isDirectory());
-        assertFalse(dest.exists());
-        assertSame(dest, task.getInfo().getDestJar());
-        assertSame(src, task.getInfo().getSourceJar());
-    }
+		// assert setup success
+		assertTrue(testDir.isDirectory());
+		assertFalse(dest.exists());
+		assertSame(dest, task.getInfo().getDestJar());
+		assertSame(src, task.getInfo().getSourceJar());
+	}
 
-    public void testPassThrough() throws Exception {
-        // run task
-        task.execute();
+	public void testPassThrough() throws Exception {
+		// run task
+		task.execute();
 
-        // check results
-        assertTrue(dest.isFile());
-    }
+		// check results
+		assertTrue(dest.isFile());
+	}
 
-    public void testAltFile() throws Exception {
-        task.setAltProjectFile(altFile);
+	public void testAltFile() throws Exception {
+		task.setAltProjectFile(altFile);
 
-        // run task
-        task.execute();
+		// run task
+		task.execute();
 
-        // check results
-        assertTrue(dest.isFile());
+		// check results
+		assertTrue(dest.isFile());
 
-        ZipUtil.unzip(dest, project.getBaseDir());
-        File newRoot = new File(project.getBaseDir(), "cayenne.xml");
-        assertTrue(newRoot.isFile());
-        assertEquals(altFile.length(), newRoot.length());
-    }
+		ZipUtil.unzip(dest, project.getBaseDir());
+		File newRoot = new File(project.getBaseDir(), "cayenne.xml");
+		assertTrue(newRoot.isFile());
+		assertEquals(altFile.length(), newRoot.length());
+	}
 
-    public void testAltNode() throws Exception {
-        DataNodeConfigInfo node = new DataNodeConfigInfo();
-        node.setName("node1");
-        node.setAdapter("non-existent-adapter");
-        
-        task.addNode(node);
+	public void testAltNode() throws Exception {
+		DataNodeConfigInfo node = new DataNodeConfigInfo();
+		node.setName("node1");
+		node.setAdapter("non-existent-adapter");
 
-        // run task
-        task.execute();
+		task.addNode(node);
 
-        // check results
-        assertTrue(dest.isFile());
+		// run task
+		task.execute();
 
-        ZipUtil.unzip(dest, project.getBaseDir());
-        File newRoot = new File(project.getBaseDir(), "cayenne.xml");
-        
-        String fileContents = Util.stringFromFile(newRoot);
-        assertTrue(fileContents.indexOf(node.getName()) >= 0);
-        assertTrue(fileContents.indexOf(node.getAdapter()) >= 0);
-    }
+		// check results
+		assertTrue(dest.isFile());
+
+		ZipUtil.unzip(dest, project.getBaseDir());
+		File newRoot = new File(project.getBaseDir(), "cayenne.xml");
+
+		String fileContents = Util.stringFromFile(newRoot);
+		assertTrue(fileContents.indexOf(node.getName()) >= 0);
+		assertTrue(fileContents.indexOf(node.getAdapter()) >= 0);
+	}
+
+	public void testSameJar() throws Exception {
+		Util.copy(src, dest);
+		long size = dest.length();
+		task.setSrc(dest);
+		task.setAltProjectFile(altFile);
+		
+
+		// run task
+		task.execute();
+
+		// check results
+		assertFalse(size == dest.length());
+	}
 }
