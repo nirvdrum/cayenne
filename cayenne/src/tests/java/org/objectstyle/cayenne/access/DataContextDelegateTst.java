@@ -47,11 +47,9 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.MultiContextTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * Tests various DataContextDelegate methods invocation and consequences on
@@ -59,7 +57,7 @@ import org.objectstyle.cayenne.unittest.MultiContextTestCase;
  * 
  * @author Andrei Adamchik
  */
-public class DataContextDelegateTst extends MultiContextTestCase {
+public class DataContextDelegateTst extends CayenneTestCase {
 
     protected Gallery gallery;
     protected Artist artist;
@@ -68,92 +66,31 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         super.setUp();
 
         DataContext context = createDataContextWithSharedCache();
-        
+
         // prepare a single gallery record
         gallery = (Gallery) context.createAndRegisterNewObject("Gallery");
         gallery.setGalleryName("version1");
-        context.commitChanges();
 
         // prepare a single artist record
         artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("version1");
+
         context.commitChanges();
     }
 
-    public DataContext createDataContext() {
-        // create datacontext with local cache
-        return getDomain().createDataContext(false);
-    }
-
-    /**
-     * Test that "snapshotChangedInDataRow" method is called when expected.
-     */
-    public void testSnapshotChangedInDataRow1() throws Exception {
+    public void testWillPerformSelect() throws Exception {
         DataContext context = gallery.getDataContext();
-        DataContext altContext = mirrorDataContext(context);
 
-        // prepare delegates
-        TestDelegate delegate = new TestDelegate();
-        context.setDelegate(delegate);
-        TestDelegate altDelegate = new TestDelegate();
-        altContext.setDelegate(altDelegate);
-
-        Gallery altGallery =
-            (Gallery) altContext.getObjectStore().getObject(gallery.getObjectId());
-        assertNotNull(altGallery);
-
-        // update
-        gallery.setGalleryName("version2");
-        context.commitChanges();
-        assertNull(
-            "Delegate shouldn't have been notified, since we are using the same snapshot.",
-            delegate.getChangedSnapshot());
-
-        // test behavior on commit when snapshot has changed underneath
-        altGallery.setGalleryName("version3");
-        altContext.commitChanges();
-        assertNotNull(
-            "Delegate should have been notified, since we are using a different snapshot.",
-            altDelegate.getChangedSnapshot());
-    }
-
-    /**
-     * Test that "snapshotChangedInDataRow" method has a power to abort the
-     * operations.
-     */
-    public void testSnapshotChangedInDataRow2() throws Exception {
-        DataContext context = gallery.getDataContext();
-        
-        // prepare a second context
-        DataContext altContext = mirrorDataContext(context);
-        TestDelegate altDelegate = new TestDelegate();
-        altContext.setDelegate(altDelegate);
-
-        Gallery altGallery =
-            (Gallery) altContext.getObjectStore().getObject(gallery.getObjectId());
-        assertNotNull(altGallery);
-
-        // update
-        gallery.setGalleryName("version2");
-        context.commitChanges();
-
-        // test behavior on commit when snapshot has changed underneath
-        altDelegate.setAbortCommit(true);
-        altGallery.setGalleryName("version3");
-
-        try {
-            altContext.commitChanges();
-            fail("Delegate failed to abort operation.");
-        }
-        catch (RuntimeException rex) {
-            // commit aborted, exception expected
-        }
-    }
-
-    public void testWillPerformSelect1() throws Exception {
-        DataContext context = gallery.getDataContext();
-        
-        TestDelegate delegate = new TestDelegate();
+        final List queriesPerformed = new ArrayList(1);
+        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+            public GenericSelectQuery willPerformSelect(
+                DataContext context,
+                GenericSelectQuery query) {
+                    // save query, and allow its execution
+    queriesPerformed.add(query);
+                return query;
+            }
+        };
         context.setDelegate(delegate);
 
         // test that delegate is consulted before select
@@ -162,26 +99,34 @@ public class DataContextDelegateTst extends MultiContextTestCase {
 
         assertTrue(
             "Delegate is not notified of a query being run.",
-            delegate.containsQuery(query));
+            queriesPerformed.contains(query));
+        assertEquals(1, queriesPerformed.size());
         assertNotNull(results);
         assertEquals(1, results.size());
     }
 
-    public void testWillPerformSelect2() throws Exception {
+    public void testWillPerformSelectQueryBlocked() throws Exception {
         DataContext context = gallery.getDataContext();
-        
-        TestDelegate delegate = new TestDelegate();
+
+        final List queriesPerformed = new ArrayList(1);
+        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+            public GenericSelectQuery willPerformSelect(
+                DataContext context,
+                GenericSelectQuery query) {
+                    // save query, and block its execution
+    queriesPerformed.add(query);
+                return null;
+            }
+        };
+
         context.setDelegate(delegate);
-
-        // test that delegate can block a query
-        delegate.setBlockQueries(true);
-
         SelectQuery query = new SelectQuery(Gallery.class);
         List results = context.performQuery(query);
 
         assertTrue(
             "Delegate is not notified of a query being run.",
-            delegate.containsQuery(query));
+            queriesPerformed.contains(query));
+        assertEquals(1, queriesPerformed.size());
 
         assertNotNull(results);
 
@@ -189,62 +134,30 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         assertEquals("Delegate couldn't block the query.", 0, results.size());
     }
 
-    class TestDelegate implements DataContextDelegate {
-        protected DataRow changedSnapshot;
-        protected List queries = new ArrayList();
-        protected boolean blockQueries;
-        protected boolean abortCommit;
-        protected boolean overridesConcurrentModifictions;
+    public void testWillPerformSelectWithPrefetch() throws Exception {
+        DataContext context = gallery.getDataContext();
 
-        public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
-            this.changedSnapshot = snapshotInStore;
-
-            if (abortCommit) {
-                throw new RuntimeException("No commit for you.");
+        final List queriesPerformed = new ArrayList();
+        DataContextDelegate delegate = new DefaultDataContextDelegate() {
+            public GenericSelectQuery willPerformSelect(
+                DataContext context,
+                GenericSelectQuery query) {
+                    // save query, and allow its execution
+    queriesPerformed.add(query);
+                return query;
             }
+        };
+        context.setDelegate(delegate);
 
-            if (overridesConcurrentModifictions) {
-                // demonstrates how to implement a policy of overriding concurrent modifications
-                // instead of merging (which may have dubious practical value though).
-                object.getDataContext().getObjectStore().retainSnapshot(
-                    object,
-                    snapshotInStore);
+        // test that delegate is consulted before select
+        SelectQuery query = new SelectQuery(Gallery.class);
+        query.addPrefetch("exhibitArray");
+        List results = context.performQuery(query);
 
-            }
-
-            return false;
-        }
-
-        public boolean shouldProcessDelete(DataObject object) {
-            return true;
-        }
-
-        public GenericSelectQuery willPerformSelect(
-            DataContext context,
-            GenericSelectQuery query) {
-
-            queries.add(query);
-            return (blockQueries) ? null : query;
-        }
-
-        public DataRow getChangedSnapshot() {
-            return changedSnapshot;
-        }
-
-        public void setBlockQueries(boolean flag) {
-            this.blockQueries = flag;
-        }
-
-        public void setAbortCommit(boolean flag) {
-            this.abortCommit = flag;
-        }
-
-        public void setOverridesConcurrentModifictions(boolean flag) {
-            this.overridesConcurrentModifictions = flag;
-        }
-
-        public boolean containsQuery(GenericSelectQuery query) {
-            return queries.contains(query);
-        }
+        assertTrue(
+            "Delegate is not notified of a query being run.",
+            queriesPerformed.contains(query));
+        assertEquals(2, queriesPerformed.size());
+        assertNotNull(results);
     }
 }
