@@ -80,10 +80,10 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 public class XMLMappingUtil {
 
     /** The root of the mapping file (the "model" tag). */
-    protected Element root = null;
+    protected Element root;
 
     /** Cached copies of entity items. */
-    protected Map entities = null;
+    protected Map entities;
 
     /**
      * Creates a MappingUtils instance using a URL that points to the mapping file.
@@ -122,7 +122,8 @@ public class XMLMappingUtil {
      * @param root The root node of the mapping document.
      */
     protected void setRoot(Element root) {
-        if (!root.getName().equals("model")) {
+        
+        if (!"model".equals(root.getName())) {
             throw new CayenneRuntimeException(
                     "Root of the mapping model must be \"model\"");
         }
