@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
- * Action class to create stored procedures mapping.
+ * Action class to create a new stored procedure mapping.
  * 
  * @author Andrei Adamchik
  */

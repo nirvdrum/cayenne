@@ -76,6 +76,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
  * Factory class that generates various Cayenne objects with 
@@ -94,6 +96,7 @@ import org.objectstyle.cayenne.map.Relationship;
  *    <li>DbRelationship</li>
  *    <li>DataNode</li>
  *    <li>DataDomain</li>
+ *    <li>Query</li>
  * 	  <li>Procedure</li>
  *    <li>ProcedureParameter</li>
  * </ul>
@@ -119,6 +122,7 @@ public abstract class NamedObjectFactory {
         factories.put(ObjRelationship.class, new ObjRelationshipFactory(null, false));
         factories.put(DataDomain.class, new DataDomainFactory());
         factories.put(Procedure.class, new ProcedureFactory());
+        factories.put(Query.class, new SelectQueryFactory());
         factories.put(ProcedureParameter.class, new ProcedureParameterFactory());
     }
 
@@ -330,6 +334,23 @@ public abstract class NamedObjectFactory {
         protected boolean isNameInUse(String name, Object namingContext) {
             DataMap map = (DataMap) namingContext;
             return map.getProcedure(name) != null;
+        }
+    }
+    
+    static class SelectQueryFactory extends NamedObjectFactory {
+        protected String nameBase() {
+            return "UntitledQuery";
+        }
+
+        protected Object create(String name, Object namingContext) {
+            SelectQuery query = new SelectQuery();
+            query.setName(name);
+            return query;
+        }
+
+        protected boolean isNameInUse(String name, Object namingContext) {
+            DataMap map = (DataMap) namingContext;
+            return map.getQuery(name) != null;
         }
     }
 

@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -54,39 +54,14 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.event;
 
-import java.io.File;
+import java.util.EventListener;
 
-/** 
- * Main frame of CayenneModeler. Responsibilities include 
- * coordination of enabling/disabling of menu and toolbar.
- * 
- * @deprecated Since 1.1 Main and CayenneModelerFrame supercede this class
+/**
+ * @since 1.1
+ * @author Andrei Adamchik
  */
-public class Editor extends CayenneModelerFrame {
-
-    /**
-     * Main method that starts the CayenneModeler.
-     */
-    public static void main(String[] args) {
-        Main.main(args);
-    }
-
-    /** 
-     * Configures Log4J appenders to perform logging to 
-     * $HOME/.cayenne/modeler.log.
-     */
-    public static void configureLogging() {
-        new Main().configureLogging();
-    }
-
-    /** 
-     * Returns a file correspinding to $HOME/.cayenne/modeler.log
-     */
-    public static File getLogFile() {
-        return new Main().getLogFile();
-    }
-
-    public Editor() {}
+public interface QueryDisplayListener extends EventListener {
+    public void currentQueryChanged(QueryDisplayEvent e);
 }

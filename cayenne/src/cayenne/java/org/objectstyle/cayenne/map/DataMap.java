@@ -132,7 +132,12 @@ public class DataMap {
     protected CayenneMap queries = new CayenneMap(this);
     
     // read-through reference for public access
-     private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queries);
+    private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queries);
+    
+    // read-through reference for public access
+    private Collection queriesValuesRef =
+        Collections.unmodifiableCollection(queries.values());
+
     
     /** 
      * Creates an new unnamed DataMap. 
@@ -333,6 +338,13 @@ public class DataMap {
      */
     public SortedMap getQueryMap() {
         return queryMapRef;
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public Collection getQueries() {
+        return queriesValuesRef;
     }
 
     /** 

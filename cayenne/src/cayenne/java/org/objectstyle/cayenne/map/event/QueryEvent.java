@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,40 +53,44 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.map.event;
 
-package org.objectstyle.cayenne.modeler;
+import org.objectstyle.cayenne.query.Query;
 
-import java.io.File;
-
-/** 
- * Main frame of CayenneModeler. Responsibilities include 
- * coordination of enabling/disabling of menu and toolbar.
+/**
+ * An event generated when a Query object is added to a DataMap, 
+ * removed from a DataMap, or changed within a DataMap.
  * 
- * @deprecated Since 1.1 Main and CayenneModelerFrame supercede this class
+ * @since 1.1
+ * @author Andrei Adamchik
  */
-public class Editor extends CayenneModelerFrame {
+public class QueryEvent extends MapEvent {
+    protected Query query;
 
-    /**
-     * Main method that starts the CayenneModeler.
-     */
-    public static void main(String[] args) {
-        Main.main(args);
+    public QueryEvent(Object source, Query query) {
+        super(source);
+        setQuery(query);
     }
 
-    /** 
-     * Configures Log4J appenders to perform logging to 
-     * $HOME/.cayenne/modeler.log.
-     */
-    public static void configureLogging() {
-        new Main().configureLogging();
+    public QueryEvent(Object source, Query query, String oldName) {
+        this(source, query);
+        setOldName(oldName);
     }
 
-    /** 
-     * Returns a file correspinding to $HOME/.cayenne/modeler.log
-     */
-    public static File getLogFile() {
-        return new Main().getLogFile();
+    public QueryEvent(Object source, Query query, int type) {
+        this(source, query);
+        setId(type);
     }
 
-    public Editor() {}
+    public String getNewName() {
+        return (query != null) ? query.getName() : null;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
 }

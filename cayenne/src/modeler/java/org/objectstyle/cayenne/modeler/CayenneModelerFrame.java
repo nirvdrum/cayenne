@@ -118,6 +118,8 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
@@ -146,6 +148,7 @@ public class CayenneModelerFrame
         DbAttributeDisplayListener,
         ObjRelationshipDisplayListener,
         DbRelationshipDisplayListener,
+        QueryDisplayListener,
         ProcedureDisplayListener,
         ProcedureParameterDisplayListener {
 
@@ -417,6 +420,14 @@ public class CayenneModelerFrame
         getAction(RemoveAction.getActionName()).setName("Remove DbEntity");
     }
 
+    public void currentQueryChanged(QueryDisplayEvent e) {
+        enableDataMapMenu();
+
+        if (e.getQuery() != null) {
+            getAction(RemoveAction.getActionName()).setName("Remove Query");
+        }
+    }
+    
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         enableProcedureMenu();
 

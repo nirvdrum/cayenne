@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -85,6 +86,7 @@ public class ProjectTraversal {
     protected static final Comparator dataMapComparator = new DataMapComparator();
     protected static final Comparator dataDomainComparator = new DataDomainComparator();
     protected static final Comparator dataNodeComparator = new DataNodeComparator();
+    protected static final Comparator queryComparator = new QueryComparator();
 
     protected ProjectTraversalHandler handler;
     protected boolean sort;
@@ -209,10 +211,27 @@ public class ProjectTraversal {
                 this.traverseEntities(map.getObjEntities().iterator(), mapPath);
                 this.traverseEntities(map.getDbEntities().iterator(), mapPath);
                 this.traverseProcedures(map.getProcedures().iterator(), mapPath);
+                this.traverseQueries(map.getQueries().iterator(), mapPath);
             }
         }
     }
 
+    /**
+     * Performs recusrive traversal of an Iterator of Cayenne Query objects.
+     */
+    public void traverseQueries(Iterator queries, ProjectPath path) {
+        if (sort) {
+            queries =
+                Util.sortedIterator(queries, ProjectTraversal.queryComparator);
+        }
+
+        while (queries.hasNext()) {
+            Query query = (Query) queries.next();
+            ProjectPath queryPath = path.appendToPath(query);
+            handler.projectNode(queryPath);
+        }
+    }
+    
     /**
      * Performs recusrive traversal of an Iterator of Cayenne Procedure objects.
      */
@@ -283,6 +302,23 @@ public class ProjectTraversal {
         }
     }
 
+    static class QueryComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            String name1 = ((Query) o1).getName();
+            String name2 = ((Query) o2).getName();
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
+        }
+    }
+    
     static class MapObjectComparator implements Comparator {
         public int compare(Object o1, Object o2) {
             String name1 = ((MapObject) o1).getName();
@@ -298,7 +334,6 @@ public class ProjectTraversal {
                 return name1.compareTo(name2);
             }
         }
-
     }
 
     static class DataMapComparator implements Comparator {

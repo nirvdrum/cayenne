@@ -57,6 +57,14 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.map.event.MapEvent;
+import org.objectstyle.cayenne.map.event.QueryEvent;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
+
 /**
  * @since 1.1
  * @author Andrei Adamchik
@@ -78,6 +86,27 @@ public class CreateQueryAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-
+        createQuery();
     }
+
+    protected void createQuery() {
+        EventController mediator = getMediator();
+
+        // for now support only SelectQueries
+        String queryName =
+            NamedObjectFactory.createName(Query.class, mediator.getCurrentDataMap());
+        SelectQuery query = new SelectQuery();
+        query.setName(queryName);
+
+        mediator.getCurrentDataMap().addQuery(query);
+
+        mediator.fireQueryEvent(new QueryEvent(this, query, MapEvent.ADD));
+        mediator.fireQueryDisplayEvent(
+            new QueryDisplayEvent(
+                this,
+                query,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain()));
+    }
+
 }

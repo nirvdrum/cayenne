@@ -74,14 +74,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
@@ -95,6 +96,8 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureListener;
+import org.objectstyle.cayenne.map.event.QueryEvent;
+import org.objectstyle.cayenne.map.event.QueryListener;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -108,16 +111,15 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
- * Tree of domains, data maps, data nodes (sources) and entities. 
- * When item of the tree is selected, detailed view for that 
- * item comes up. 
- * 
- *  @author Michael Misha Shengaout. 
+ * Panel displaying Cayenne project as a tree.
  */
-public class BrowseView
+public class ProjectTreeView
     extends JScrollPane
     implements
         DomainDisplayListener,
@@ -130,10 +132,12 @@ public class BrowseView
         ObjEntityDisplayListener,
         DbEntityListener,
         DbEntityDisplayListener,
+        QueryListener,
+        QueryDisplayListener,
         ProcedureListener,
         ProcedureDisplayListener {
 
-    private static Logger logObj = Logger.getLogger(BrowseView.class);
+    private static Logger logObj = Logger.getLogger(ProjectTreeView.class);
 
     protected EventController mediator;
     protected ProjectTree browseTree;
@@ -141,7 +145,7 @@ public class BrowseView
 
     protected boolean reorderOnFocus;
 
-    public BrowseView(EventController mediator) {
+    public ProjectTreeView(EventController mediator) {
         super();
         this.mediator = mediator;
 
@@ -193,6 +197,8 @@ public class BrowseView
         mediator.addDbEntityDisplayListener(this);
         mediator.addProcedureListener(this);
         mediator.addProcedureDisplayListener(this);
+        mediator.addQueryListener(this);
+        mediator.addQueryDisplayListener(this);
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
@@ -284,6 +290,60 @@ public class BrowseView
                 mediator.getCurrentDataDomain(),
                 mediator.getCurrentDataMap(),
                 e.getProcedure()});
+    }
+
+    public void queryAdded(QueryEvent e) {
+        if (e.getSource() == this) {
+            return;
+        }
+
+        DefaultMutableTreeNode node =
+            browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] {
+                    mediator.getCurrentDataDomain(),
+                    mediator.getCurrentDataMap()});
+
+        if (node == null) {
+            return;
+        }
+
+        Query query = e.getQuery();
+        currentNode = new DefaultMutableTreeNode(query, false);
+        fixEntityPosition(node, currentNode);
+        showNode(currentNode);
+    }
+
+    public void queryChanged(QueryEvent e) {
+        Object[] path =
+            new Object[] {
+                mediator.getCurrentDataDomain(),
+                mediator.getCurrentDataMap(),
+                e.getQuery()};
+
+        updateNode(path);
+
+        if (e.isNameChange()) {
+            reorderOnFocus = true;
+        }
+    }
+
+    public void queryRemoved(QueryEvent e) {
+        if (e.getSource() == this) {
+            return;
+        }
+
+        removeNode(
+            new Object[] {
+                mediator.getCurrentDataDomain(),
+                mediator.getCurrentDataMap(),
+                e.getQuery()});
+    }
+
+    public void currentQueryChanged(QueryDisplayEvent e) {
+        if (e.getSource() == this || !e.isQueryChanged())
+            return;
+
+        showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getQuery()});
     }
 
     public void domainChanged(DomainEvent e) {
@@ -713,6 +773,15 @@ public class BrowseView
                     (DataDomain) data[data.length - 3]);
             mediator.fireProcedureDisplayEvent(e);
         }
+        else if (obj instanceof Query) {
+            QueryDisplayEvent e =
+                new QueryDisplayEvent(
+                    this,
+                    (Query) obj,
+                    (DataMap) data[data.length - 2],
+                    (DataDomain) data[data.length - 3]);
+            mediator.fireQueryDisplayEvent(e);
+        }
     }
 
     /** Gets array of the user objects ending with this and starting with one under root. 
@@ -748,7 +817,7 @@ public class BrowseView
             return;
         }
 
-        MapObject mapObject = (MapObject) entityNode.getUserObject();
+        Object object = entityNode.getUserObject();
 
         int len = parent.getChildCount();
         int ins = -1;
@@ -768,10 +837,8 @@ public class BrowseView
                 continue;
             }
 
-            MapObject e = (MapObject) node.getUserObject();
-
             // ObjEntities go before DbEntities
-            if (MapObjectsComparator.compare(mapObject, e) <= 0) {
+            if (MapObjectsComparator.compare(object, node.getUserObject()) <= 0) {
                 ins = i;
             }
         }
@@ -794,29 +861,32 @@ public class BrowseView
 
     static class MapObjectsComparator {
 
-        public static int compare(MapObject o1, MapObject o2) {
+        public static int compare(Object o1, Object o2) {
             int delta = getClassWeight(o1) - getClassWeight(o2);
             if (delta != 0) {
                 return delta;
             }
 
-            // assume that o2 is a MapObject too, and is NOT NULL;
-            // this is proven as a result of earlier delta calculation
-            String name1 = o1.getName();
-            String name2 = o2.getName();
+            try {
+                String name1 = (String) PropertyUtils.getSimpleProperty(o1, "name");
+                String name2 = (String) PropertyUtils.getSimpleProperty(o2, "name");
 
-            if (name1 == null) {
-                return (name2 != null) ? -1 : 0;
+                if (name1 == null) {
+                    return (name2 != null) ? -1 : 0;
+                }
+                else if (name2 == null) {
+                    return 1;
+                }
+                else {
+                    return name1.compareTo(name2);
+                }
             }
-            else if (name2 == null) {
-                return 1;
-            }
-            else {
-                return name1.compareTo(name2);
+            catch (Exception ex) {
+                throw new CayenneRuntimeException("Comparator error.", ex);
             }
         }
 
-        protected static int getClassWeight(MapObject o) {
+        protected static int getClassWeight(Object o) {
 
             if (o instanceof ObjEntity) {
                 return 1;
@@ -826,6 +896,9 @@ public class BrowseView
             }
             else if (o instanceof Procedure) {
                 return 3;
+            }
+            else if (o instanceof Query) {
+                return 4;
             }
             else {
                 // this should trap nulls among other things
@@ -842,31 +915,23 @@ public class BrowseView
         ImageIcon objEntityIcon;
         ImageIcon derivedDbEntityIcon;
         ImageIcon procedureIcon;
+        ImageIcon queryIcon;
 
         public BrowseViewRenderer() {
+            domainIcon = buildIcon("icon-dom.gif");
+            nodeIcon = buildIcon("icon-node.gif");
+            mapIcon = buildIcon("icon-datamap.gif");
+            dbEntityIcon = buildIcon("icon-dbentity.gif");
+            objEntityIcon = buildIcon("icon-objentity.gif");
+            derivedDbEntityIcon = buildIcon("icon-derived-dbentity.gif");
+            procedureIcon = buildIcon("icon-stored-procedure.gif");
+            queryIcon = buildIcon("icon-query.gif");
+        }
+
+        private ImageIcon buildIcon(String path) {
             ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
-            URL url = cl.getResource(CayenneAction.RESOURCE_PATH + "icon-dom.gif");
-            domainIcon = new ImageIcon(url);
-
-            url = cl.getResource(CayenneAction.RESOURCE_PATH + "icon-node.gif");
-            nodeIcon = new ImageIcon(url);
-
-            url = cl.getResource(CayenneAction.RESOURCE_PATH + "icon-datamap.gif");
-            mapIcon = new ImageIcon(url);
-
-            url = cl.getResource(CayenneAction.RESOURCE_PATH + "icon-dbentity.gif");
-            dbEntityIcon = new ImageIcon(url);
-
-            url =
-                cl.getResource(CayenneAction.RESOURCE_PATH + "icon-derived-dbentity.gif");
-            derivedDbEntityIcon = new ImageIcon(url);
-
-            url = cl.getResource(CayenneAction.RESOURCE_PATH + "icon-objentity.gif");
-            objEntityIcon = new ImageIcon(url);
-
-            url =
-                cl.getResource(CayenneAction.RESOURCE_PATH + "icon-stored-procedure.gif");
-            procedureIcon = new ImageIcon(url);
+            URL url = cl.getResource(CayenneAction.RESOURCE_PATH + path);
+            return new ImageIcon(url);
         }
 
         public Component getTreeCellRendererComponent(
@@ -911,6 +976,9 @@ public class BrowseView
             }
             else if (obj instanceof Procedure) {
                 setIcon(procedureIcon);
+            }
+            else if (obj instanceof Query) {
+                setIcon(queryIcon);
             }
 
             return this;

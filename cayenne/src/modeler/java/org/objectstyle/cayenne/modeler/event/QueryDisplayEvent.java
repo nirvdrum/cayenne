@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -54,39 +54,38 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.event;
 
-import java.io.File;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.query.Query;
 
-/** 
- * Main frame of CayenneModeler. Responsibilities include 
- * coordination of enabling/disabling of menu and toolbar.
- * 
- * @deprecated Since 1.1 Main and CayenneModelerFrame supercede this class
+/**
+ * @since 1.1
+ * @author Andrei Adamchik
  */
-public class Editor extends CayenneModelerFrame {
+public class QueryDisplayEvent extends DataMapDisplayEvent {
+    protected Query query;
+    protected boolean queryChanged = true;
 
-    /**
-     * Main method that starts the CayenneModeler.
-     */
-    public static void main(String[] args) {
-        Main.main(args);
+    public QueryDisplayEvent(Object src, Query query, DataMap map, DataDomain domain) {
+        super(src, map, domain);
+        this.query = query;
     }
 
-    /** 
-     * Configures Log4J appenders to perform logging to 
-     * $HOME/.cayenne/modeler.log.
-     */
-    public static void configureLogging() {
-        new Main().configureLogging();
+    public Query getQuery() {
+        return query;
     }
 
-    /** 
-     * Returns a file correspinding to $HOME/.cayenne/modeler.log
-     */
-    public static File getLogFile() {
-        return new Main().getLogFile();
+    public void setQuery(Query query) {
+        this.query = query;
     }
 
-    public Editor() {}
+    public boolean isQueryChanged() {
+        return queryChanged;
+    }
+
+    public void setQueryChanged(boolean queryChanged) {
+        this.queryChanged = queryChanged;
+    }
 }

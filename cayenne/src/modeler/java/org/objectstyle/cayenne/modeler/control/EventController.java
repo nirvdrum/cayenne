@@ -91,6 +91,8 @@ import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureListener;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
+import org.objectstyle.cayenne.map.event.QueryEvent;
+import org.objectstyle.cayenne.map.event.QueryListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -111,8 +113,11 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.Query;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
@@ -142,6 +147,7 @@ public class EventController extends ModelerController {
     protected DbAttribute currentDbAttr;
     protected ObjRelationship currentObjRel;
     protected DbRelationship currentDbRel;
+    protected Query currentQuery;
     protected Procedure currentProcedure;
     protected ProcedureParameter currentProcedureParameter;
 
@@ -169,6 +175,7 @@ public class EventController extends ModelerController {
             addDbAttributeDisplayListener(CayenneModelerFrame.getFrame());
             addObjRelationshipDisplayListener(CayenneModelerFrame.getFrame());
             addDbRelationshipDisplayListener(CayenneModelerFrame.getFrame());
+            addQueryDisplayListener(CayenneModelerFrame.getFrame());
             addProcedureDisplayListener(CayenneModelerFrame.getFrame());
             addProcedureParameterDisplayListener(CayenneModelerFrame.getFrame());
         }
@@ -245,6 +252,10 @@ public class EventController extends ModelerController {
         return currentDbRel;
     }
 
+    public Query getCurrentQuery() {
+        return currentQuery;
+    }
+    
     public Procedure getCurrentProcedure() {
         return currentProcedure;
     }
@@ -323,6 +334,14 @@ public class EventController extends ModelerController {
 
     public void addObjRelationshipDisplayListener(ObjRelationshipDisplayListener listener) {
         addListener(ObjRelationshipDisplayListener.class, listener);
+    }
+
+    public void addQueryDisplayListener(QueryDisplayListener listener) {
+        addListener(QueryDisplayListener.class, listener);
+    }
+
+    public void addQueryListener(QueryListener listener) {
+        addListener(QueryListener.class, listener);
     }
 
     public void addProcedureDisplayListener(ProcedureDisplayListener listener) {
@@ -531,6 +550,33 @@ public class EventController extends ModelerController {
      * Informs all listeners of the ProcedureEvent. 
      * Does not send the event to its originator. 
      */
+    public void fireQueryEvent(QueryEvent e) {
+        setDirty(true);
+        EventListener[] list = getListeners(QueryListener.class);
+        debugEvent(e, list);
+        for (int i = 0; i < list.length; i++) {
+            QueryListener listener = (QueryListener) list[i];
+            switch (e.getId()) {
+                case EntityEvent.ADD :
+                    listener.queryAdded(e);
+                    break;
+                case EntityEvent.CHANGE :
+                    listener.queryChanged(e);
+                    break;
+                case EntityEvent.REMOVE :
+                    listener.queryRemoved(e);
+                    break;
+                default :
+                    throw new IllegalArgumentException(
+                        "Invalid ProcedureEvent type: " + e.getId());
+            }
+        }
+    }
+    
+    /** 
+     * Informs all listeners of the ProcedureEvent. 
+     * Does not send the event to its originator. 
+     */
     public void fireProcedureEvent(ProcedureEvent e) {
         setDirty(true);
         EventListener[] list = getListeners(ProcedureListener.class);
@@ -597,6 +643,25 @@ public class EventController extends ModelerController {
         }
     }
 
+    public void fireQueryDisplayEvent(QueryDisplayEvent e) {
+        if (currentQuery == e.getQuery()) {
+            e.setQueryChanged(false);
+        }
+
+        clearState();
+
+        currentDomain = e.getDomain();
+        currentMap = e.getDataMap();
+        currentQuery = e.getQuery();
+
+        EventListener[] list = getListeners(QueryDisplayListener.class);
+        debugEvent(e, list);
+        for (int i = 0; i < list.length; i++) {
+            QueryDisplayListener listener = (QueryDisplayListener) list[i];
+            listener.currentQueryChanged(e);
+        }
+    }
+    
     public void fireProcedureDisplayEvent(ProcedureDisplayEvent e) {
         if (currentProcedure == e.getProcedure())
             e.setProcedureChanged(false);

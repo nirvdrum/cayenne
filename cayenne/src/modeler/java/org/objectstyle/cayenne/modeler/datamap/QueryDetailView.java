@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,40 +53,76 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.modeler.datamap;
 
-package org.objectstyle.cayenne.modeler;
+import java.awt.BorderLayout;
 
-import java.io.File;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-/** 
- * Main frame of CayenneModeler. Responsibilities include 
- * coordination of enabling/disabling of menu and toolbar.
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
+import org.objectstyle.cayenne.modeler.model.QueryModel;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.query.Query;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
+
+/**
+ * Query editor panel.
  * 
- * @deprecated Since 1.1 Main and CayenneModelerFrame supercede this class
+ * @since 1.1
+ * @author Andrei Adamchik
  */
-public class Editor extends CayenneModelerFrame {
+public class QueryDetailView extends JPanel implements QueryDisplayListener {
+    protected EventController eventController;
+
+    protected QueryModel model;
+    protected JTextField name;
+
+    public QueryDetailView(EventController eventController) {
+        this.eventController = eventController;
+
+        initView();
+        initController();
+    }
+
+    private void initView() {
+        // create widgets
+        name = CayenneWidgetFactory.createTextField();
+
+        // assemble
+        this.setLayout(new BorderLayout());
+        FormLayout layout =
+            new FormLayout(
+                "right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150",
+                "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.append("Query Name:", name, 3);
+
+        this.add(builder.getPanel());
+    }
+
+    protected void initController() {
+        eventController.addQueryDisplayListener(this);
+    }
 
     /**
-     * Main method that starts the CayenneModeler.
+     * Displays newly selected query.
      */
-    public static void main(String[] args) {
-        Main.main(args);
-    }
+    public void currentQueryChanged(QueryDisplayEvent e) {
+        Query query = e.getQuery();
+        if (query == null || (model != null && model.getQuery() == query)) {
+            return;
+        }
 
-    /** 
-     * Configures Log4J appenders to perform logging to 
-     * $HOME/.cayenne/modeler.log.
-     */
-    public static void configureLogging() {
-        new Main().configureLogging();
-    }
+        model = new QueryModel(query);
 
-    /** 
-     * Returns a file correspinding to $HOME/.cayenne/modeler.log
-     */
-    public static File getLogFile() {
-        return new Main().getLogFile();
+        // extract values from the new query object
+        name.setText(model.getName());
     }
-
-    public Editor() {}
 }

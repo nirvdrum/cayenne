@@ -83,12 +83,14 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
+import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
  * Removes currently selected object from the project. This can be 
@@ -142,6 +144,9 @@ public class RemoveAction extends CayenneAction {
         }
         else if (mediator.getCurrentDbEntity() != null) {
             removeDbEntity();
+        }
+        else if (mediator.getCurrentQuery() != null) {
+            removeQuery();
         }
         else if (mediator.getCurrentProcedure() != null) {
             removeProcedure();
@@ -203,6 +208,22 @@ public class RemoveAction extends CayenneAction {
         map.removeDbEntity(ent.getName(), true);
         mediator.fireDbEntityEvent(
             new EntityEvent(CayenneModelerFrame.getFrame(), ent, MapEvent.REMOVE));
+    }
+    
+    /** 
+       * Removes current Query from its DataMap and fires 
+       * "remove" QueryEvent.
+       */
+    protected void removeQuery() {
+        EventController mediator = getMediator();
+        Query query = mediator.getCurrentQuery();
+        DataMap map = mediator.getCurrentDataMap();
+        map.removeQuery(query.getName());
+        mediator.fireQueryEvent(
+            new QueryEvent(
+                CayenneModelerFrame.getFrame(),
+                query,
+                MapEvent.REMOVE));
     }
 
     /** 
