@@ -162,7 +162,6 @@ public class Editor
     protected static Editor frame;
 
     protected EditorView view;
-    protected ActionMap actionMap;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
     // these all must be put in actions
@@ -174,7 +173,7 @@ public class Editor
     protected JMenuItem aboutMenu = new JMenuItem("About");
 
     protected XmlFilter xmlFilter = new XmlFilter();
-    protected TopController controller = new TopController(this);
+    protected TopController controller;
 
     /** Returns an editor singleton object. */
     public static Editor getFrame() {
@@ -248,14 +247,14 @@ public class Editor
     public Editor() {
         super(ModelerConstants.TITLE);
 
+        controller = new TopController(this);
         frame = this;
-        
+
         // force Scope to use CayenneModeler properties
         UIStrings.setPropertiesName(ModelerStrings.DEFAULT_MESSAGE_BUNDLE);
 
         ModelerContext.setupContext();
-        initEmptyActions();
-
+        
         initMenus();
         initToolbar();
         initStatusBar();
@@ -270,71 +269,7 @@ public class Editor
      * Returns an action object associated with the key.
      */
     public CayenneAction getAction(String key) {
-        return (CayenneAction) actionMap.get(key);
-    }
-
-    protected void initEmptyActions() {
-        // build action map
-        actionMap = new ActionMap();
-
-        CayenneAction newProjectAction = new NewProjectAction();
-        newProjectAction.setEnabled(true);
-        actionMap.put(newProjectAction.getKey(), newProjectAction);
-
-        CayenneAction openProjectAction = new OpenProjectAction();
-        openProjectAction.setEnabled(true);
-        actionMap.put(openProjectAction.getKey(), openProjectAction);
-
-        CayenneAction saveAction = new SaveAction();
-        actionMap.put(saveAction.getKey(), saveAction);
-
-        CayenneAction removeAction = new RemoveAction();
-        actionMap.put(removeAction.getKey(), removeAction);
-
-        CayenneAction infoAction = new InfoAction();
-        actionMap.put(infoAction.getKey(), infoAction);
-
-        CayenneAction createDomainAction = new CreateDomainAction();
-        actionMap.put(createDomainAction.getKey(), createDomainAction);
-
-        CayenneAction createNodeAction = new CreateNodeAction();
-        actionMap.put(createNodeAction.getKey(), createNodeAction);
-
-        CayenneAction createMapAction = new CreateDataMapAction();
-        actionMap.put(createMapAction.getKey(), createMapAction);
-
-        CayenneAction createOEAction = new CreateObjEntityAction();
-        actionMap.put(createOEAction.getKey(), createOEAction);
-
-        CayenneAction createDEAction = new CreateDbEntityAction();
-        actionMap.put(createDEAction.getKey(), createDEAction);
-
-        CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
-        actionMap.put(createDDEAction.getKey(), createDDEAction);
-
-        CayenneAction createAttrAction = new CreateAttributeAction();
-        actionMap.put(createAttrAction.getKey(), createAttrAction);
-
-        CayenneAction createRelAction = new CreateRelationshipAction();
-        actionMap.put(createRelAction.getKey(), createRelAction);
-
-        CayenneAction addMapToNodeAction = new AddDataMapAction();
-        actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
-
-        CayenneAction entSyncAction = new ObjEntitySyncAction();
-        actionMap.put(entSyncAction.getKey(), entSyncAction);
-
-        CayenneAction derivedResetAction = new DerivedEntitySyncAction();
-        actionMap.put(derivedResetAction.getKey(), derivedResetAction);
-
-        CayenneAction importDbAction = new ImportDbAction();
-        actionMap.put(importDbAction.getKey(), importDbAction);
-
-        CayenneAction importEOModelAction = new ImportEOModelAction();
-        actionMap.put(importEOModelAction.getKey(), importEOModelAction);
-
-        CayenneAction genDbAction = new GenerateDbAction();
-        actionMap.put(genDbAction.getKey(), genDbAction);
+        return (CayenneAction) controller.getTopModel().getAction(key);
     }
 
     protected void initMenus() {
@@ -485,7 +420,7 @@ public class Editor
     }
 
     public void projectOpened() {
-    	EventController evController = controller.getEventController(); 	
+        EventController evController = controller.getEventController();
         view = new EditorView(evController);
         getContentPane().add(view, BorderLayout.CENTER);
 
@@ -549,7 +484,7 @@ public class Editor
             } else if (src == exitMenu) {
                 exitEditor();
             } else if (src == aboutMenu) {
-				new AboutDialog(this);
+                new AboutDialog(this);
             }
         } catch (Exception ex) {
             ErrorDebugDialog.guiException(ex);
@@ -663,7 +598,7 @@ public class Editor
      */
     private void disableMenu() {
         // disable everything we can
-        Object[] keys = actionMap.allKeys();
+        Object[] keys = controller.getTopModel().getActionMap().allKeys();
         int len = keys.length;
         for (int i = 0; i < len; i++) {
             // "save" button has its own rules
@@ -671,7 +606,7 @@ public class Editor
                 continue;
             }
 
-            actionMap.get(keys[i]).setEnabled(false);
+            controller.getTopModel().getActionMap().get(keys[i]).setEnabled(false);
         }
 
         // explicitly disable "legacy" menus
@@ -727,7 +662,8 @@ public class Editor
         getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
         getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
 
-        if (controller.getEventController().getCurrentDbEntity() instanceof DerivedDbEntity) {
+        if (controller.getEventController().getCurrentDbEntity()
+            instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
         }
     }

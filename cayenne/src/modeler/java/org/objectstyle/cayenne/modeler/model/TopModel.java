@@ -55,6 +55,28 @@
  */
 package org.objectstyle.cayenne.modeler.model;
 
+import javax.swing.ActionMap;
+
+import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
+import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
+import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
+import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
+import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
+import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
+import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
+import org.objectstyle.cayenne.modeler.action.InfoAction;
+import org.objectstyle.cayenne.modeler.action.NewProjectAction;
+import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
+import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
+import org.objectstyle.cayenne.modeler.action.RemoveAction;
+import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 
@@ -69,6 +91,90 @@ public class TopModel {
     protected Project currentProject;
     protected String statusMessage;
     protected Object[] selectedPath;
+    protected ActionMap actionMap;
+
+    /**
+     * Constructor for TopModel.
+     */
+    public TopModel() {
+        super();
+        initEmptyActions();
+    }
+
+    protected void initEmptyActions() {
+        // build action map
+        actionMap = new ActionMap();
+
+        CayenneAction newProjectAction = new NewProjectAction();
+        newProjectAction.setEnabled(true);
+        actionMap.put(newProjectAction.getKey(), newProjectAction);
+
+        CayenneAction openProjectAction = new OpenProjectAction();
+        openProjectAction.setEnabled(true);
+        actionMap.put(openProjectAction.getKey(), openProjectAction);
+
+        CayenneAction saveAction = new SaveAction();
+        actionMap.put(saveAction.getKey(), saveAction);
+
+        CayenneAction removeAction = new RemoveAction();
+        actionMap.put(removeAction.getKey(), removeAction);
+
+        CayenneAction infoAction = new InfoAction();
+        actionMap.put(infoAction.getKey(), infoAction);
+
+        CayenneAction createDomainAction = new CreateDomainAction();
+        actionMap.put(createDomainAction.getKey(), createDomainAction);
+
+        CayenneAction createNodeAction = new CreateNodeAction();
+        actionMap.put(createNodeAction.getKey(), createNodeAction);
+
+        CayenneAction createMapAction = new CreateDataMapAction();
+        actionMap.put(createMapAction.getKey(), createMapAction);
+
+        CayenneAction createOEAction = new CreateObjEntityAction();
+        actionMap.put(createOEAction.getKey(), createOEAction);
+
+        CayenneAction createDEAction = new CreateDbEntityAction();
+        actionMap.put(createDEAction.getKey(), createDEAction);
+
+        CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
+        actionMap.put(createDDEAction.getKey(), createDDEAction);
+
+        CayenneAction createAttrAction = new CreateAttributeAction();
+        actionMap.put(createAttrAction.getKey(), createAttrAction);
+
+        CayenneAction createRelAction = new CreateRelationshipAction();
+        actionMap.put(createRelAction.getKey(), createRelAction);
+
+        CayenneAction addMapToNodeAction = new AddDataMapAction();
+        actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
+
+        CayenneAction entSyncAction = new ObjEntitySyncAction();
+        actionMap.put(entSyncAction.getKey(), entSyncAction);
+
+        CayenneAction derivedResetAction = new DerivedEntitySyncAction();
+        actionMap.put(derivedResetAction.getKey(), derivedResetAction);
+
+        CayenneAction importDbAction = new ImportDbAction();
+        actionMap.put(importDbAction.getKey(), importDbAction);
+
+        CayenneAction importEOModelAction = new ImportEOModelAction();
+        actionMap.put(importEOModelAction.getKey(), importEOModelAction);
+
+        CayenneAction genDbAction = new GenerateDbAction();
+        actionMap.put(genDbAction.getKey(), genDbAction);
+    }
+
+    /**
+     * Returns an action for key.
+     */
+    public CayenneAction getAction(String key) {
+        return (CayenneAction) actionMap.get(key);
+    }
+    
+    public ActionMap getActionMap() {
+    	return actionMap;
+    }
 
     /**
      * Returns the currentProject.

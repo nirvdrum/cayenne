@@ -61,7 +61,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -259,8 +258,7 @@ public class BrowseView
                 for (int i = 0; i < maps.length; i++) {
                     boolean found = false;
                     for (int j = 0; j < node.getChildCount(); j++) {
-                        DefaultMutableTreeNode child;
-                        child = (DefaultMutableTreeNode) node.getChildAt(j);
+                        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(j);
                         if (maps[i] == child.getUserObject()) {
                             found = true;
                             break;
@@ -287,7 +285,7 @@ public class BrowseView
                         removeNode(child);
                         break;
                     }
-                } // End for(j)
+                }
             }
 
         }
