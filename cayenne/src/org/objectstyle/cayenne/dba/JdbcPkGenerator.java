@@ -62,8 +62,7 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
 
 /** 
@@ -75,12 +74,17 @@ import org.objectstyle.cayenne.query.*;
 public class JdbcPkGenerator implements PkGenerator {
     static Logger logObj = Logger.getLogger(JdbcPkGenerator.class.getName());
 
+    private static final String NEXT_ID = "NEXT_ID";
     private static final ObjAttribute[] resultDesc =
         new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
 
     protected HashMap pkCache = new HashMap();
     protected int pkCacheSize = 20;
 
+    static {
+        resultDesc[0].setDbAttribute(new DbAttribute(NEXT_ID, Types.INTEGER, null));
+    }
+    
     public String createAutoPkSupportString() {
         StringBuffer buf = new StringBuffer();
         buf
@@ -388,7 +392,7 @@ public class JdbcPkGenerator implements PkGenerator {
             }
 
             Map lastPk = (Map) resultObjects.get(0);
-            nextId = (Integer) lastPk.get("nextId");
+            nextId = (Integer) lastPk.get(NEXT_ID);
             if (nextId == null) {
                 throw new CayenneRuntimeException("Error generating PK : null nextId.");
             }

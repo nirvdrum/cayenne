@@ -94,19 +94,19 @@ public class SelectTranslator extends SelectQueryAssembler {
         return columnList;
     }
     
-    /** Returns ordered list of names that should be assigned as keys
-     * for values fetched from the database. ResultSet column names are ignored, 
+    /** 
+     * Returns an ordered list of DbAttributes that describe the
+     * result columns in the in the ResultSet. ResultSet column names are ignored, 
      * names specified in the query are used instead. */
-    public String[] getSnapshotLabels(ResultSet rs) {
+    public DbAttribute[] getSnapshotDesc(ResultSet rs) {
         int len = columnList.size();
-        if (len == 0)
+        if (len == 0) {
             throw new CayenneRuntimeException("Call 'createStatement' first");
-
-        String[] labels = new String[len];
-        for (int i = 0; i < len; i++) {
-            labels[i] = ((DbAttribute) columnList.get(i)).getName();
         }
-        return labels;
+        
+        DbAttribute[] desc = new DbAttribute[len];
+        columnList.toArray(desc);
+        return desc;
     }
 
     /** Returns ordered list of Java class names that should be used for fetched values.

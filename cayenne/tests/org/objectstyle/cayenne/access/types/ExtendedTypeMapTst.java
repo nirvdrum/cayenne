@@ -108,7 +108,7 @@ public class ExtendedTypeMapTst extends TestCase {
             return new Object();
         }
 
-        public Object materializeObject(ResultSet rs, int index) throws Exception {
+        public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
             Object val = rs.getObject(index);
             return (rs.wasNull()) ? null : val;
         }

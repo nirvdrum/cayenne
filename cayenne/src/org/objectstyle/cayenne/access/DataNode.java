@@ -232,11 +232,12 @@ public class DataNode implements QueryEngine {
                         if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                             // 2.a execute query
                             ResultSet rs = prepStmt.executeQuery();
-                            String[] snapshotLabels =
-                                ((SelectQueryAssembler) queryTranslator).getSnapshotLabels(rs);
+                            DbAttribute[] snapshotDesc =
+                                ((SelectQueryAssembler) queryTranslator).getSnapshotDesc(rs);
                             String[] resultTypes =
                                 ((SelectQueryAssembler) queryTranslator).getResultTypes(rs);
-                            List resultSnapshots = snapshotsFromResultSet(rs, snapshotLabels, resultTypes);
+                            
+                            List resultSnapshots = snapshotsFromResultSet(rs, snapshotDesc, resultTypes);
                             QueryLogger.logSelectCount(logLevel, resultSnapshots.size());
                             rs.close();
 
@@ -361,12 +362,12 @@ public class DataNode implements QueryEngine {
     /** Will process a result set instantiating a list of maps with data. */
     public List snapshotsFromResultSet(
         ResultSet rs,
-        String[] snapshotLabels,
+        DbAttribute[] snapshotDesc,
         String[] resultTypes)
         throws Exception {
 
         ArrayList snapshots = new ArrayList();
-        int len = snapshotLabels.length;
+        int len = snapshotDesc.length;
         ExtendedType[] converters = new ExtendedType[len];
         ExtendedTypeMap typeMap = adapter.getTypeConverter();
         for (int i = 0; i < len; i++) {
@@ -383,8 +384,8 @@ public class DataNode implements QueryEngine {
             Object fetchedValue = null;
             for (int i = 0; i < len; i++) {
                 // note: jdbc column indexes start from 1 , not 0 as in arrays
-                Object val = converters[i].materializeObject(rs, i + 1);
-                map.put(snapshotLabels[i], val);
+                Object val = converters[i].materializeObject(rs, i + 1, snapshotDesc[i].getType());
+                map.put(snapshotDesc[i].getName(), val);
             }
         }
 

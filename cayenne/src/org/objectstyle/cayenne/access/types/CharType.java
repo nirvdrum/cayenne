@@ -57,9 +57,8 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.logging.Logger;
-
-import org.objectstyle.cayenne.access.types.ExtendedType;
 
 /** Handles CHAR type for JDBC drivers that don't trim trailing spaces. */
 public class CharType implements ExtendedType {
@@ -74,8 +73,11 @@ public class CharType implements ExtendedType {
     }
 
     /** Return trimmed string. */
-    public Object materializeObject(ResultSet rs, int index) throws Exception {
+    public Object materializeObject(ResultSet rs, int index, int type)
+        throws Exception {
         String val = rs.getString(index);
-        return (val != null) ? val.trim() : null;
+
+        // trim CHAR type
+        return (val != null) ? ((type == Types.CHAR) ? val.trim() : val) : null;
     }
 }

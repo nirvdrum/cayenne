@@ -75,7 +75,7 @@ public class UtilDateType implements ExtendedType {
                 "Only date/time types can be used for '" + getClassName() + "'.");
     }
 
-    public Object materializeObject(ResultSet rs, int index) throws Exception {
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
         Object val = rs.getObject(index);
 
         // all sql time/date classes are subclasses of java.util.Date,

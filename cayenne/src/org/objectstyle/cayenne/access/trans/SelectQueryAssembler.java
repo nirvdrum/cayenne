@@ -56,25 +56,29 @@ package org.objectstyle.cayenne.access.trans;
  */ 
 
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.map.DbAttribute;
 
 
-/** Abstract superclass of Query translators.
- *  Defines callback methods for helper classes 
- *  that are delegated tasks of building query parts. */
+/** 
+ * Abstract superclass of Query translators.
+ * Defines callback methods for helper classes 
+ * that are delegated tasks of building query parts. 
+ * 
+ * @author Andrei Adamchik
+ */
 public abstract class SelectQueryAssembler extends QueryAssembler {
 
+    /** 
+     * Returns an ordered array of DbAttributes that describe the
+     * result columns in the in the ResultSet.
+     */
+    public abstract DbAttribute[] getSnapshotDesc(ResultSet rs);
 
-    /** Returns ordered list of names that should be assigned as keys
-    * for values in the ResultSet */
-    public abstract String[] getSnapshotLabels(ResultSet rs);
-
-    /** Returns ordered list of Java class names that should be used
-    * for values in the ResultSet. */
+    /** 
+     * Returns ordered array of Java class names that should be used
+     * for values in the ResultSet.
+     */
     public abstract String[] getResultTypes(ResultSet rs);
 }

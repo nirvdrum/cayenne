@@ -133,7 +133,7 @@ public class DefaultType implements ExtendedType {
     }
 
 
-    public Object materializeObject(ResultSet rs, int index) throws Exception {
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
         args[0] = new Integer(index);
         Object val = readMethod.invoke(rs, args);
         return (rs.wasNull()) ? null : val;

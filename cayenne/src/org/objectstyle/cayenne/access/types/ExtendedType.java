@@ -80,5 +80,5 @@ public interface ExtendedType {
       *
       * @throws Exception if read error ocurred, or an object can't be converted
       * to a target Java class. */
-    public Object materializeObject(ResultSet rs, int index) throws Exception;
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception;
 }
