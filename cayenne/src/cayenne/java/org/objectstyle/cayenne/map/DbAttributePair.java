@@ -82,7 +82,7 @@ public class DbAttributePair implements XMLSerializable {
     }
 
     /**
-     * Used as DbJoi  converter in deprecated methods.
+     * Used as DbJoin converter in deprecated methods.
      * 
      * @since 1.1
      */

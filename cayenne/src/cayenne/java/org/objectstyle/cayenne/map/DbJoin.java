@@ -55,10 +55,8 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -149,42 +147,6 @@ public class DbJoin implements XMLSerializable {
         }
 
         encoder.println("/>");
-    }
-
-    public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
-
-        if (o == this) {
-            return true;
-        }
-
-        if (!(o instanceof DbJoin)) {
-            return false;
-        }
-
-        DbJoin j = (DbJoin) o;
-        return j.relationship == this.relationship
-                && Util.nullSafeEquals(j.sourceName, this.sourceName)
-                && Util.nullSafeEquals(j.targetName, this.targetName);
-    }
-
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder(7, 11);
-
-        if (relationship != null) {
-            builder.append(relationship);
-        }
-
-        if (sourceName != null) {
-            builder.append(sourceName);
-        }
-
-        if (targetName != null) {
-            builder.append(targetName);
-        }
-        return builder.toHashCode();
     }
 
     public DbRelationship getRelationship() {

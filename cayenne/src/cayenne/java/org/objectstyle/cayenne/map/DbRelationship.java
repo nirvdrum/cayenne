@@ -225,7 +225,7 @@ public class DbRelationship extends Relationship {
             return null;
         }
         
-        DbJoin testJoin = new DbJoin(this);
+        TestJoin testJoin = new TestJoin(this);
         Iterator it = target.getRelationships().iterator();
         while (it.hasNext()) {
             DbRelationship rel = (DbRelationship) it.next();
@@ -536,5 +536,31 @@ public class DbRelationship extends Relationship {
                 return (input instanceof DbJoin) ? ((DbJoin) input).getSource() : input;
             }
         };
+    }
+    
+    // a join used for comparison
+    final static class TestJoin extends DbJoin {
+        TestJoin(DbRelationship relationship) {
+            super(relationship);
+        }
+        
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+
+            if (o == this) {
+                return true;
+            }
+
+            if (!(o instanceof DbJoin)) {
+                return false;
+            }
+
+            DbJoin j = (DbJoin) o;
+            return j.relationship == this.relationship
+                    && Util.nullSafeEquals(j.sourceName, this.sourceName)
+                    && Util.nullSafeEquals(j.targetName, this.targetName);
+        }
     }
 }
