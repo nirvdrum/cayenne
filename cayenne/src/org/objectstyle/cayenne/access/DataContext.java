@@ -800,7 +800,6 @@ public class DataContext implements QueryEngine {
 
         public void nextGlobalException(Exception ex) {
             super.nextGlobalException(ex);
-            ex.printStackTrace();
             throw new CayenneRuntimeException(
                 "Raising from underlyingQueryEngine exception.",
                 ex);

@@ -233,7 +233,6 @@ public class DataMap {
         DbEntity db_entity = getDbEntity(entity_name);
         // No db entity to remove? return.
         if (null == db_entity) {
-            System.out.println("Entity " + entity_name + " is not found");
             return;
         }
         dbEntityMap.remove(entity_name);

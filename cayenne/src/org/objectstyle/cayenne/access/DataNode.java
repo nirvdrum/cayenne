@@ -243,14 +243,6 @@ public class DataNode implements QueryEngine {
 
                             // 3.a send results back to consumer
                             opObserver.nextSnapshots(nextQuery, resultSnapshots);
-                            
-                            // 4. do prefetching if needed
-                            if(nextQuery instanceof SelectQuery) {
-                                List prefetches = ((SelectQuery)nextQuery).getPrefetchList();
-                                if(prefetches != null && prefetches.size() > 0) {
-                                    
-                                }
-                            }
                         }
                         else {
                             // 2.b execute update

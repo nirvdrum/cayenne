@@ -78,7 +78,7 @@ public class DefaultOperationObserver implements OperationObserver {
     protected boolean transactionRolledback;
     protected Level queryLogLevel = DEFAULT_LOG_LEVEL;
     
-
+    
     /** Returns a list of global exceptions that occured during data operation run. */
     public List getGlobalExceptions() {
         return globalExceptions;
@@ -111,8 +111,15 @@ public class DefaultOperationObserver implements OperationObserver {
         return queryLogLevel;
     }
     
+    /** 
+     * Sets log level that should be used for queries. 
+     * If <code>level</code> argument is null, level is set to
+     * DEFAULT_LOG_LEVEL. If <code>level</code> is equal or higher
+     * than log level configured for QueryLogger, query SQL statements
+     * will be logged.
+     */
     public void setQueryLogLevel(Level level) {
-        this.queryLogLevel = level;
+        this.queryLogLevel = (level == null) ? DEFAULT_LOG_LEVEL : level;
     }
     
     public void nextCount(Query query, int resultCount) {
