@@ -182,6 +182,8 @@ public class PrimaryKeyHelper {
                     continue;
                 }
 
+                // only a single key can be generated from DB... if this is done already
+                // in this loop, we must bail out.
                 if (autoPkDone) {
                     throw new CayenneException(
                             "Primary Key autogeneration only works for a single attribute.");

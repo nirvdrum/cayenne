@@ -243,7 +243,7 @@ public class BatchQueryUtils {
             }
 
             // support deferred propagated values...
-            // stick a Factory in the snapshot instead...
+            // stick a Factory in the snapshot if the value is not available yet.
             Iterator joins = dbRel.getJoins().iterator();
             while (joins.hasNext()) {
                 DbJoin join = (DbJoin) joins.next();
