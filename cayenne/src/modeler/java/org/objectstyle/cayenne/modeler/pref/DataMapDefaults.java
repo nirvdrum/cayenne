@@ -15,38 +15,36 @@ public class DataMapDefaults extends _DataMapDefaults {
         super.setPersistenceState(persistenceState);
     }
 
-    public String getSuperclassPackage(String classPackage) {
-        String suffix = getSuperclassPackageSuffix();
+    public String getSuperclassPackage() {
+        return getSuperclassPackageSuffix();
+    }
 
-        String dot = (classPackage != null && suffix != null) ? "." : "";
+    public void setSuperclassPackage(String superclassPackage) {
+        // TODO: rename "SuperclassPackageSuffix" to "SuperclassPackage"
+        setSuperclassPackageSuffix(superclassPackage);
+    }
 
-        if (classPackage == null) {
-            classPackage = "";
+    /**
+     * Sets superclass package, building it by "normalizing" and concatenating prefix and
+     * suffix.
+     */
+    public void setSuperclassPackage(String prefix, String suffix) {
+        if (prefix == null) {
+            prefix = "";
+        }
+        else if (prefix.endsWith(".")) {
+            prefix = prefix.substring(0, prefix.length() - 1);
         }
 
         if (suffix == null) {
             suffix = "";
         }
+        else if (suffix.startsWith(".")) {
+            suffix = suffix.substring(1);
+        }
 
-        String packageName = classPackage + dot + suffix;
-        return (packageName.length() > 0) ? packageName : null;
-    }
-
-    public void setSuperclassPackage(String superclassPackage, String classPackage) {
-        if (superclassPackage == null) {
-            setSuperclassPackageSuffix(null);
-        }
-        else if (classPackage == null) {
-            setSuperclassPackageSuffix(superclassPackage);
-        }
-        else if (superclassPackage.length() > classPackage.length() + 2
-                && superclassPackage.startsWith(classPackage + ".")) {
-            setSuperclassPackageSuffix(superclassPackage
-                    .substring(classPackage.length() + 2));
-        }
-        else {
-            setSuperclassPackageSuffix(null);
-        }
+        String dot = (suffix.length() > 0 && prefix.length() > 0) ? "." : "";
+        setSuperclassPackage(prefix + dot + suffix);
     }
 }
 
