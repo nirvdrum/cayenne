@@ -16,18 +16,38 @@
         
         <p>Also we developed a few web badges to enable you to endorse Cayenne technology.
         Help us to spread the word and promote Cayenne. If your site or project uses
-        Cayenne, you may put one of the following badges on the site: 
+        Cayenne, you may put one of the following badges on the site, linking to http://objectstyle.org/cayenne/
         </p>
         
-      	<p>
-			<img src="images/powered-by-cayenne-green1.gif" width="170" height="45"/>
+        <p><img src="images/powered-by-cayenne-green1.gif" width="170" height="45"/></p>
+        <p>
+		&lt;a href="http://objectstyle.org/cayenne/"&gt;&lt;img 
+			src="http://objectstyle.org/cayenne/images/powered-by-cayenne-green1.gif" 
+			width="170" 
+			height="45" 
+			border="0"&gt;&lt;/a&gt;
 		</p>
 		<p>
 			<img src="images/powered-by-cayenne-green2.gif" width="170" height="45"/>
 		</p>
+		  <p>
+		&lt;a href="http://objectstyle.org/cayenne/"&gt;&lt;img 
+			src="http://objectstyle.org/cayenne/images/powered-by-cayenne-green2.gif" 
+			width="170" 
+			height="45" 
+			border="0"&gt;&lt;/a&gt;
+		</p>
+		
 		<p>
 			<img src="images/powered-by-cayenne-white.gif" width="170" height="45"/>
         </p>
+          <p>
+		&lt;a href="http://objectstyle.org/cayenne/"&gt;&lt;img 
+			src="http://objectstyle.org/cayenne/images/powered-by-cayenne-white.gif" 
+			width="170" 
+			height="45" 
+			border="0"&gt;&lt;/a&gt;
+		</p>
         </section>
     </body>
 </document>
