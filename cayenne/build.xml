@@ -19,6 +19,7 @@
 
 
     <path id="classpath">
+    	<pathelement path="${ant.home}/lib/ant.jar"/>
         <fileset dir="otherlib">
             <include name="**.jar"/>
         </fileset>
@@ -56,6 +57,7 @@
      * ENVIRONMENT:
      *  java.home = ${java.home}
      *  user.home = ${user.home}
+     *  ant.home = ${ant.home}
      *  build.compiler = ${build.compiler}
      *  java.class.path = ${java.class.path}
      ******************************************************
