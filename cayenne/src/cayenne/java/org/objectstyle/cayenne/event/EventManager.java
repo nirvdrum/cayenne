@@ -121,7 +121,7 @@ public class EventManager extends Object {
      * Register	an <code>EventListener</code> for events sent by any sender.
      * 
      * @throws RuntimeException if <code>methodName</code> is not found
-     * @see #addListener(EventListener, String, Class, EventSubject, Object)
+     * @see #addListener(Object, String, Class, EventSubject, Object)
      */
     public void addListener(
         Object listener,

@@ -74,8 +74,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
 
 /**
- * A CayenneDataObject is a default implementation of DataObject interface.
- * It is normally used as a superclass of Cayenne persistent objects.
+ * A default implementation of DataObject interface. It is normally used as 
+ * a superclass of Cayenne persistent objects.
  *
  * @author Andrei Adamchik
  */
@@ -89,8 +89,12 @@ public class CayenneDataObject implements DataObject {
     protected transient DataContext dataContext;
     protected Map values = new HashMap();
 
-    /** Returns a data context this object is registered with, or null
-     * if this object has no associated DataContext */
+    /** 
+     * Returns a DataContext that holds this object. Object becomes
+     * assocaiated with a DataContext either when the object is fetched
+     * using a query, or when a new object is registered explicitly with
+     * a DataContext.
+     */
     public DataContext getDataContext() {
         return dataContext;
     }
@@ -203,9 +207,6 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Attempts to initialize object with data from cache or from the database,
-     * if this object is a "fault", i.e. not fully resolved.
-     * 
      * @since 1.1
      */
     public void resolveFault() {

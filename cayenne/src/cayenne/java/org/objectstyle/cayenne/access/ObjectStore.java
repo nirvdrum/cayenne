@@ -471,7 +471,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Start tracking the registration of new objects. from this objectStore.
+     * Starts tracking the registration of new objects from this ObjectStore.
      * Used in conjunction with unregisterNewObjects() to control garbage
      * collection when an instance of ObjectStore is used over a longer time
      * for batch processing. (TODO: this won't work with changeObjectKey()?)
@@ -672,8 +672,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Attempts to initialize object with data from cache or from the database,
-     * if the object is a "fault", i.e. not fully resolved.
+     * Initializes object with data from cache or from the database,
+     * if this object is not fully resolved.
      * 
      * @since 1.1
      */

@@ -157,8 +157,8 @@ public interface DataObject extends java.io.Serializable {
     public void setSnapshotVersion(long snapshotVersion);
 
     /**
-     * Attempts to initialize object with data from cache or from the database,
-     * if this object is a "fault", i.e. not fully resolved.
+     * Initializes object with data from cache or from the database,
+     * if this object is not fully resolved.
      * 
      * @since 1.1
      */

@@ -406,7 +406,7 @@ public class DataDomain implements QueryEngine {
      * 
      * @param useSharedCache determines whether resulting DataContext should use
      * shared vs. local cache. This setting overrides default behavior configured
-     * for this DataDomain via {@link SHARED_CACHE_ENABLED_PROPERTY}. 
+     * for this DataDomain via {@link #SHARED_CACHE_ENABLED_PROPERTY}. 
      * 
      * @since 1.1
      */

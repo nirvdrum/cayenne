@@ -223,9 +223,8 @@ public class ObjEntity extends Entity {
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
      * 
-     * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.access.DataRow.createObjectId(ObjEntity)
-     * DataRow.createObjectId(ObjEntity)}. This method is deprecated to decouple mapping layer from
-     * the access layer implementation.
+     * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.DataRow#createObjectId(ObjEntity)}. 
+     * This method is deprecated to remove the dependency of mapping layer from the access layer.
      */
     public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
         DataRow dataRow =
@@ -235,8 +234,10 @@ public class ObjEntity extends Entity {
         return dataRow.createObjectId(this);
     }
 
-    /** Clears all the mapping between this obj entity and its current db entity.
-     *  Clears mapping between entities, attributes and relationships. */
+    /** 
+     * Clears all the mapping between this obj entity and its current db entity.
+     *  Clears mapping between entities, attributes and relationships. 
+     */
     public void clearDbMapping() {
         if (dbEntity == null)
             return;
