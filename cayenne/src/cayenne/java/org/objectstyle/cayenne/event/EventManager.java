@@ -78,10 +78,10 @@ import org.objectstyle.cayenne.util.Invocation;
  * @author Holger Hoffstaette
  */
 public class EventManager extends Object {
-	private static final EventManager _defaultManager = new EventManager();
+	private static final EventManager defaultManager = new EventManager();
 
 	// keeps weak references to subjects
-	private Map _subjects;
+	private Map subjects;
 
 	/**
 	 * This method will return the shared 'default' EventManager.
@@ -89,7 +89,7 @@ public class EventManager extends Object {
 	 * @return EventManager the shared EventManager instance
 	 */
 	public static EventManager getDefaultManager() {
-		return _defaultManager;
+		return defaultManager;
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class EventManager extends Object {
 	 */
 	public EventManager() {
 		super();
-		_subjects = new WeakHashMap();
+		this.subjects = new WeakHashMap();
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class EventManager extends Object {
 		if (subjectQueues == null) {
 			// make sure the subject can be associated with invocation queues
 			subjectQueues = new WeakHashMap();
-			_subjects.put(subject, subjectQueues);
+			subjects.put(subject, subjectQueues);
 		}
 
 		Set queueForSender = this.invocationQueueForSubjectAndSender(subject, sender);
@@ -175,8 +175,8 @@ public class EventManager extends Object {
 	synchronized public boolean removeListener(EventListener listener) {
 		boolean didRemove = false;
 
-		if ((_subjects.isEmpty() == false) && (listener != null)) {
-			Iterator subjectIter = _subjects.keySet().iterator();
+		if ((subjects.isEmpty() == false) && (listener != null)) {
+			Iterator subjectIter = subjects.keySet().iterator();
 			while (subjectIter.hasNext()) {
 				didRemove |= this.removeListener(listener, (EventSubject)subjectIter.next());
 			}
@@ -290,7 +290,7 @@ public class EventManager extends Object {
 						&& (invParamTypes[0].isAssignableFrom(event.getClass()))) {
 						// fire invocation, detect if anything went wrong
 						// (e.g. GC'ed invocation targets)
-						if (inv.fire(eventArgument) == false) {
+						if (!inv.fire(eventArgument)) {
 							if (invalidInvocations == null) {
 								invalidInvocations = new ArrayList();
 							}
@@ -310,7 +310,7 @@ public class EventManager extends Object {
 
 	// returns a subject's mapping from senders to registered listener invocations
 	private Map invocationQueuesForSubject(EventSubject subject) {
-		return (Map)_subjects.get(subject);
+		return (Map)subjects.get(subject);
 	}
 
 	// returns the registered listener invocations for a particular sender;

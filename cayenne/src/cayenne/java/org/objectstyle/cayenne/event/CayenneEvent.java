@@ -70,7 +70,7 @@ import java.util.Map;
 
 public class CayenneEvent extends EventObject {
 
-	private Map _info;
+	private Map info;
 
 	public CayenneEvent(Object src) {
 		this(src, null);
@@ -78,11 +78,11 @@ public class CayenneEvent extends EventObject {
 
 	public CayenneEvent(Object src, Map info) {
 		super(src);
-		_info = (info != null ? info : Collections.EMPTY_MAP);
+		this.info = (info != null ? info : Collections.EMPTY_MAP);
 	}
 
 	public Map getInfo() {
-		return _info;
+		return info;
 	}
 }
 
