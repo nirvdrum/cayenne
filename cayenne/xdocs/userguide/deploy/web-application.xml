@@ -1,0 +1,110 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/deploy/standalone-application.html</prev>
+	<next>/userguide/deploy/custom.html</next>
+</navigator>    
+<body>
+     <section name="13. Deployment">
+           
+           <subsection name="13.2 Web Applications" anchor="web">
+               <p>When deploying an application in a web container, it is still possible 
+               to use the procedure described for the standalone applications above.
+               But Cayenne provides a better way to do that. Suggested way is to use <a href=
+               "../../api/cayenne/org/objectstyle/cayenne/conf/BasicServletConfiguration.html"
+               >BasicServletConfiguration</a> subclass of Configuration. It does <code>cayenne.xml</code>
+               and datamap files lookup relative to the WEB-INF directory of a deployed application.
+               Since WEB-INF is a standard place to put configuration files, this approach makes
+               configuration cleaner and more maintainable.
+               <i>Note that it will NOT search the CLASSPATH for configuration files.</i>              
+               </p>
+               
+               <p>
+               To get access to the resources under WEB-INF directory, Cayenne configuration object
+               must get a hold of javax.servlet.ServletContext instance of the current application.
+               There are a few different ways to achieve that:
+               </p>
+               
+               <p><strong>Initialization Servlet.</strong> This is the most common approach
+               - use <code>init</code> method of the very first servlet loaded
+               in the application. Some people would even create a specialized initialization servlet for 
+               this purpose. Here is the steps involved.</p>
+
+<p>Startup servlet initialization code:</p>
+<source>
+package com.somepackage;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+
+public class MyServlet extends HttpServlet {
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+  
+        BasicServletConfiguration.setSharedConfiguration(config.getServletContext());
+        
+        // do other initialization...
+    }
+...
+</source>
+            
+<p>Configuring startup servlet in <code>web.xml</code>: </p>      
+<source>...
+
+&amp;lt;servlet&amp;gt;
+    &amp;lt;servlet-name&amp;gt;myservl&amp;lt;/servlet-name&amp;gt;
+    &amp;lt;servlet-class&amp;gt;com.somepackage.MyServlet&amp;lt;/servlet-class&amp;gt;
+    &amp;lt;load-on-startup&amp;gt;0&amp;lt;/load-on-startup&amp;gt;
+&amp;lt;/servlet&amp;gt; 
+
+...
+</source>
+               <p><strong>Using Context and Session Listeners</strong>.  Servlet Specification 2.3
+               introduces a set of container events that can be sent to the interested
+               listeners. Cayenne contains a subclass of BasicServletConfiguration called
+               <a href=
+               "../../api/cayenne/org/objectstyle/cayenne/conf/ServletConfiguration.html"
+               >ServletConfiguration</a> that implements container listener interfaces
+               and can be registered as a listener to initialize Cayenne on context 
+               startup and to assign a new DataContext object to every new session
+               created.</p>
+               
+               <panel name="Note:">
+               Check if your container supports Servlet Specification 2.3. For instance Tomcat >= 4.0
+               does, while Tomcat 3.3 only supports 2.2
+               </panel> 
+
+<p>Registering listener in <code>web.xml</code>: </p>      
+<source>...
+
+&amp;lt;listener&amp;gt;
+   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.ServletConfiguration&amp;lt;/listener-class&amp;gt;
+&amp;lt;/listener&amp;gt; 
+
+...
+</source>
+
+<p>Obtaining session DataContext:</p>      
+              
+<source>
+import org.objectstyle.cayenne.conf.ServletConfiguration;
+import javax.servlet.http.HttpServletRequest;
+...
+
+// assume this exists
+HttpServletRequest r;
+
+// get session DataContext to perform database queries
+DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
+</source>
+</subsection>    
+    </section>
+</body>
+</document>

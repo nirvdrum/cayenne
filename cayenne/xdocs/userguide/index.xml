@@ -96,13 +96,12 @@
             
             <li><a href="deploy/index.html"><strong>13. Deployment</strong></a>
             <ul>
-                <li><a href="deploy/index.html#config">13.1 Configuration</a></li>
-                <li><a href="deploy/index.html#standalone">13.2 Standalone Applications</a></li>
-                <li><a href="deploy/index.html#web">13.3 Web Applications</a></li>
-                <li><a href="deploy/index.html#custom">13.4 Customizing Configuration</a></li>
-                <li><a href="deploy/index.html#jndi">13.5 Using JNDI</a></li>
-                <li><a href="deploy/cdeploy.html">13.6 Deployment Configuration With Ant</a></li>
-                <li><a href="deploy/logging.html">13.7 Configuring Logging</a></li>
+                <li><a href="deploy/standalone-application.html">13.1 Standalone Applications</a></li>
+                <li><a href="deploy/web-application.html">13.2 Web Applications</a></li>
+                <li><a href="deploy/custom.html">13.3 Customizing Configuration</a></li>
+                <li><a href="deploy/jndi.html">13.4 Using JNDI</a></li>
+                <li><a href="deploy/cdeploy.html">13.5 Deployment Configuration With Ant</a></li>
+                <li><a href="deploy/logging.html">13.6 Configuring Logging</a></li>
             </ul><br/></li>
             
             <li><a href="misc.html"><strong>14. Miscellaneous Information</strong></a>

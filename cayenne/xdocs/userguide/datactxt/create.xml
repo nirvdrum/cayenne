@@ -38,13 +38,13 @@ DataContext ctxt = DataContext.createDataContext();
         	If this is done, the following code is used to obtain HttpSession's DataContext :</p>
 
 		<source>
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import org.objectstyle.cayenne.access.DataContext;
 ...
 
 // assume this exists
 HttpSession session;
-DataContext ctxt = ServletConfiguration.getDefaultContext(session);
+DataContext ctxt = BasicServletConfiguration.getDefaultContext(session);
 ...
 </source>
 		</subsection>
