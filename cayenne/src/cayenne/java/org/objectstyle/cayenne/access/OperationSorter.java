@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.util.*;
 import org.apache.log4j.Logger;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
@@ -76,8 +77,9 @@ public class OperationSorter {
 	static Logger logObj = Logger.getLogger(OperationSorter.class.getName());
 
 	private QueryComparator queryComparator;
-
-	/** Creates new OperationSorter based on all entities in DataMap array */
+	private List sortedEntities;
+	
+	/** Creates new OperationSorter based on all entities in DataMap array*/
 	public OperationSorter(QueryEngine queryEngine, DataMap[] maps) {
 		ArrayList entities = new ArrayList();
 		int len = (maps == null) ? 0 : maps.length;
@@ -86,19 +88,14 @@ public class OperationSorter {
 		for (int i = 0; i < len; i++) {
 			entities.addAll(maps[i].getDbEntitiesAsList());
 		}
-
-		// order the list
-		Collections.sort(entities, new EntityComparator());
-
-		// convert the list of DbEntities to the list of names
-		ArrayList entNames = new ArrayList();
-		int entLen = entities.size();
-		for (int i = 0; i < entLen; i++) {
-			entNames.add(((DbEntity) entities.get(i)).getName());
-		}
-		queryComparator = new QueryComparator(queryEngine, entNames);
+		List sortedEntityNames=InsertOrderSorter.sortedDbEntityNames(entities);
+		queryComparator = new QueryComparator(queryEngine, sortedEntityNames);
 	}
 
+	/**
+	 * Creates a new OperationSorted which will sort entities for insert in the order
+	 * specified by the insOrderOfEntNames list
+	 */
 	public OperationSorter(QueryEngine queryEngine, List insOrderOfEntNames) {
 		queryComparator = new QueryComparator(queryEngine, insOrderOfEntNames);
 	}
@@ -106,11 +103,17 @@ public class OperationSorter {
 	/** 
 	  *  Sorts an unsorted array of DbEntities in the right 
 	  *  insert order. 
+	  * @deprecated use OperationSorter.sortedEntitiesInInsertOrder instead.  This method is now rather inefficient
 	  */
 	public static void sortEntitiesInInsertOrder(List entities) {
-		Collections.sort(entities, new EntityComparator());
+		List newList=InsertOrderSorter.sortedDbEntities(entities);
+		Collections.sort(entities, new PreSortedEntityComparator(newList));
 	}
 
+	public static List sortedEntitiesInInsertOrder(List entities) {
+		return InsertOrderSorter.sortedDbEntities(entities);
+	}
+	
 	/** 
 	 * Sorts an array of DataMaps in the right save order 
 	 * to satisfy inter-map dependencies. 
@@ -118,13 +121,23 @@ public class OperationSorter {
 	public static void sortMaps(List maps) {
 		Collections.sort(maps, new MapComparator());
 	}
-
+	
 	/** 
 	 *  Sorts an unsorted array of DataObjects in the right 
 	 *  insert order. 
 	 */
 	public static void sortObjectsInInsertOrder(List objects) {
-		Collections.sort(objects, new ObjectComparator());
+		List dbEntities=new ArrayList();
+		Iterator objIterator=objects.iterator();
+		while(objIterator.hasNext()) {
+			DataObject thisObj = (DataObject)objIterator.next();
+			DbEntity thisEntity=thisObj.getDataContext().getEntityResolver().lookupDbEntity(thisObj.getClass());
+			//entity might be null in some odd cases, mainly testing,  Do not try and sort them
+			if(thisEntity!=null && !dbEntities.contains(thisEntity)) {
+				dbEntities.add(thisEntity);
+			}
+		}
+		Collections.sort(objects, new PreSortedObjectComparator(InsertOrderSorter.sortedDbEntities(dbEntities)));
 	}
 
 	/** Sorts queries to make sure that database constraints will not be
@@ -141,7 +154,7 @@ public class OperationSorter {
 	 *  in the right sorting order from an unsorted array. 
 	 */
 	public List sortedQueries(List unsortedQueries) {
-		Object[] qs = unsortedQueries.toArray();
+		Object[] qs = unsortedQueries.toArray();;
 		Arrays.sort(qs, queryComparator);
 		return Arrays.asList(qs);
 	}
@@ -190,110 +203,54 @@ public class OperationSorter {
 		}
 	}
 
-	/** Used as a comparator to derive entity ordering */
-	static final class EntityComparator implements Comparator {
-
+	/** Used as a comparator to sort in place a list of entities into insert Order (based on a 
+	 * sorted list that had to be created from scratch) */
+	static final class PreSortedEntityComparator implements Comparator {
+		private List sortedList;
+		
+		public PreSortedEntityComparator(List sortedList) {
+			super();
+			this.sortedList=sortedList;
+		}
+		
 		public final int compare(Object o1, Object o2) {
-			DbEntity e1 = (DbEntity) o1;
-			DbEntity e2 = (DbEntity) o2;
-			int result = compareEntities(e1, e2);
-
-			// resort to very bad and dumb alphabetic ordering
-			if (result == 0) {
-				result = e1.getName().compareTo(e2.getName());
-			}
-
-			return result;
-		}
-
-		/** @return
-		 *  <li> -1 when target depends on source
-		 *  <li> 1 when source depends on target
-		 *  <li> 0 when dependency is undefined..
-		 *
-		 */
-		private final int checkSrcTargetDependancy(DbRelationship rel) {
-			Iterator joinIt = rel.getJoins().iterator();
-			while (joinIt.hasNext()) {
-				DbAttributePair join = (DbAttributePair) joinIt.next();
-				boolean srcPkFlag = join.getSource().isPrimaryKey();
-				boolean targetPkFlag = join.getTarget().isPrimaryKey();
-
-				if (srcPkFlag && !targetPkFlag)
-					// src goes first
-					return -1;
-				else if (!srcPkFlag && targetPkFlag)
-					// dest goes first
-					return 1;
-				else if (srcPkFlag && targetPkFlag && rel.isToDependentPK())
-					// src goes first even though target has its PK attribute in a join
-					return -1;
-			}
-
-			return 0;
-		}
-
-		/** Check if these 2 entities have a relationship with each other....
-		 * if so, entity with PK in this relationship goes first..
-		 * if they are both PK, "toDependentPK" attribute of relationship defines who goes first,
-		 * otherwise try to see if one of the entities does not have dependent entities at all,
-		 * then it should go second....
-		 *
-		 * @return
-		 *  <li> -1 when e2 depends on e1
-		 *  <li> 1 when e1 depends on e2
-		 *  <li> 0 when dependency is undefined..
-		 */
-		private final int compareEntities(DbEntity e1, DbEntity e2) {
-
-			boolean hasDependent1 = false;
-			boolean hasDependent2 = false;
-
-			Iterator it1 = e1.getRelationshipList().iterator();
-			while (it1.hasNext()) {
-				DbRelationship rel = (DbRelationship) it1.next();
-
-				// non zero value would indicate that
-				// there is a dependancy discovered
-				int dep = checkSrcTargetDependancy(rel);
-				if (dep != 0) {
-					if (rel.getTargetEntity() == e2)
-						return dep;
-					else if (dep < 0)
-						hasDependent1 = true;
-					else
-						hasDependent2 = true;
-				}
-			}
-
-			// check if the opposite relationships have more information
-			Iterator it2 = e2.getRelationshipList().iterator();
-			while (it2.hasNext()) {
-				DbRelationship rel = (DbRelationship) it2.next();
-
-				// non zero value would indicate that
-				// there is a dependancy discovered
-				int dep = checkSrcTargetDependancy(rel);
-				if (dep != 0) {
-					if (rel.getTargetEntity() == e1)
-						return -dep;
-					else if (dep > 0)
-						hasDependent1 = true;
-					else
-						hasDependent2 = true;
-				}
-			}
-
-			// ok if 1 entity has a dependency and another does not, 
-			// the first one goes first
-			if (hasDependent1 && !hasDependent2)
+			int index1=sortedList.indexOf(o1);
+			int index2=sortedList.indexOf(o2);
+			if(index1<index2) {
 				return -1;
-
-			if (!hasDependent1 && hasDependent2)
+			} else if (index1 > index2) {
 				return 1;
+			} else {
+				return 0; 
+			}
+		}
 
-			// do not know what to do...
-			return 0;
+	}
+	/** Used as a comparator to sort in place a list of objects into insert Order (based on a 
+	 * sorted list pf dbEntities) */
+	static final class PreSortedObjectComparator implements Comparator {
+		private List sortedDbEntities;
+		
+		public PreSortedObjectComparator(List sortedDbEntities) {
+			super();
+			this.sortedDbEntities=sortedDbEntities;
+		}
+		
+		public final int compare(Object o1, Object o2) {
+			DataObject do1=(DataObject)o1;
+			DataObject do2=(DataObject)o2;
+			EntityResolver er=do1.getDataContext().getEntityResolver();
+
+			int index1=sortedDbEntities.indexOf(er.lookupDbEntity(do1));
+			int index2=sortedDbEntities.indexOf(er.lookupDbEntity(do2));
+			
+			if(index1<index2) {
+				return -1;
+			} else if (index1 > index2) {
+				return 1;
+			} else {
+				return 0; 
+			}
 		}
 
 	}
@@ -382,22 +339,276 @@ public class OperationSorter {
 		}
 	}
 
-	/** 
-	 * Used as a comparator to derive DataObject insert ordering. 
-	 * Delegates its functions to internal EntityComparator.
+	/**
+	 * Sorts a list of DBEntities into an appropriate insert order (sortedDbEntities returns a list of sorted names)
 	 */
-	static final class ObjectComparator implements Comparator {
-		private EntityComparator ecomp = new EntityComparator();
-
-		public final int compare(Object o1, Object o2) {
-			DbEntity e1 = lookupEntity((DataObject) o1);
-			DbEntity e2 = lookupEntity((DataObject) o2);
-			return ecomp.compare(e1, e2);
+	static final class InsertOrderSorter {
+		public static List sortedDbEntityNames(List dbEntities) {
+			List names=new ArrayList();
+			Iterator entityIt=sortedDbEntities(dbEntities).iterator();
+			while(entityIt.hasNext()) {
+				names.add(((DbEntity)entityIt.next()).getName());
+			}
+			return names;
 		}
 
-		private DbEntity lookupEntity(DataObject o) {
-			Class aClass = o.getObjectId().getObjClass();
-			return o.getDataContext().getEntityResolver().lookupDbEntity(aClass);
+
+		/* The algorithm
+		 *  Partition the entities into sets of connected entities.  All entities in a given set must have a relationship path to 
+		 * 	all other entities in the set.
+		 * 		While there are unassigned entities:
+		 * 			Create a new set and put the first unassigned entity in it.
+		 * 			Follow relationships of entities in the set and add entities that aren't already in the set, 
+		 * 				until all relationships have been checked.
+		 * 		   end while
+		 *   For each set:
+		 *   		Pick an entity, create a Structure entityDeps {entity, afterEntities, beforeEntities, dontCareEntities} 
+		 * 			and populate for that entity.
+		 * 		Put this structure into a "main" list (one object only to start with)
+		 * 		While there exists a structure in the main list that has after/before/dontcare entities do
+		 * 			Pick one such "current" structure
+		 * 			From its beforeEntities list, pick one of the entities and create its structure, only using other entities from 
+		 * 				the current before list in the new before/after/dontcare lists.  
+		 * 				Insert this new structure into the main list directly before the current structure
+		 * 			Do the same for the afterEntities, but insert the resulting structure directly after the current structure in the main list
+		 * 			Do the same for the dontCareEntities list, and place the result directly after the current structure (before or
+		 * 				after is an arbitrary choice and doesn't matter.  However, it must be between the current and the newly inserted
+		 * 				after or before structure (the previous two steps) for consistency.
+		 * 		End while
+		 * 
+		 * 	Finally, take the lists from each set and concatenate the top level entities into one big list.  
+		 * 		The order of sets doesn't matter as by creation they are disjoint
+		 */
+		public static List sortedDbEntities(List dbEntities) {
+			List finalResult=new ArrayList();
+			
+			List entitySets=new ArrayList();
+			List unassignedEntities=new ArrayList(dbEntities);
+			//Create "sets" of entities
+			while(unassignedEntities.size()!=0) {
+				//Create and add the set
+				List thisSet=new ArrayList();
+				entitySets.add(thisSet);
+				
+				//seed the set
+				thisSet.add(unassignedEntities.get(0));
+				unassignedEntities.remove(0);
+				int i;
+				
+				//As thisSet is modified, the size will keep on growing.  Because entities are
+				// only added to the end, all will be processed eventually
+				for(i=0; i<thisSet.size(); i++) {
+					DbEntity thisEntity=(DbEntity)thisSet.get(i);
+					Iterator relIterator=thisEntity.getRelationshipList().iterator();
+					while(relIterator.hasNext()) {
+						DbRelationship thisRel=(DbRelationship) relIterator.next();
+						DbEntity target=(DbEntity)thisRel.getTargetEntity();
+						//Add it to thisSet, if it's not already there
+						if(dbEntities.contains(target) && !thisSet.contains(target)) {
+							thisSet.add(target);
+							unassignedEntities.remove(target);
+						}
+					}
+					
+					//And check unassigned entities to see if any have a direct relationship to thisEntity (maybe one way)
+					for(int j=unassignedEntities.size()-1; j>=0; j--) {
+						DbEntity unassignedEntity=(DbEntity)unassignedEntities.get(j);
+						Iterator reverseRelIterator=unassignedEntity.getRelationshipList().iterator();
+						while(reverseRelIterator.hasNext()) {
+							DbRelationship thisRel=(DbRelationship) reverseRelIterator.next();
+							DbEntity target=(DbEntity)thisRel.getTargetEntity();
+							//Target is the entity we are looking at.
+							if(target==thisEntity) {
+								thisSet.add(unassignedEntity);
+								unassignedEntities.remove(unassignedEntity);
+							}
+						}
+					}
+
+				}
+			}
+			
+			//Sets have been created - now process them one by one
+			Iterator setIterator=entitySets.iterator();
+			while(setIterator.hasNext()) {
+				List thisSet=(List)setIterator.next();
+				List mainList=new ArrayList();
+				
+				//Seed the mainList with the first entity in thisSet
+				EntityDep firstDep=new EntityDep((DbEntity)thisSet.get(0), thisSet);
+				mainList.add(firstDep);
+				int i;
+				int entryIndex=0;
+				while(entryIndex!=-1) {
+					EntityDep thisDep=(EntityDep) mainList.get(entryIndex);
+					List befores=thisDep.getBeforeEntities();
+					List afters=thisDep.getAfterEntities();
+					List dontCares=thisDep.getDontCareEntities();
+					
+					//Insert the afters first (while entryIndex+1 is still the correct place)
+					if(afters!=null && afters.size()!=0) {
+						EntityDep newDep=new EntityDep((DbEntity)afters.get(0), afters);
+						mainList.add(entryIndex+1, newDep );
+						thisDep.clearAfterEntities(); //Remove them
+					}
+					
+					//Same for the dontcares, which will put them between the current and the recently inserted "afters"
+					if(dontCares!=null && dontCares.size()!=0) {
+						EntityDep newDep=new EntityDep((DbEntity)dontCares.get(0), dontCares);
+						mainList.add(entryIndex+1, newDep);
+						thisDep.clearDontCareEntities(); //Remove them
+					}
+					
+					//Now insert the befores, at the entry index, shifting the "current" structure to entryIndex+1
+					if(befores !=null && befores.size()!=0) {
+						EntityDep newDep=new EntityDep((DbEntity)befores.get(0), befores);
+						mainList.add(entryIndex, newDep);
+						thisDep.clearBeforeEntities();
+					}
+					//Check to see if there's another structure to process
+					entryIndex=-1; //Reset to "stop" flag
+					for(i=0; i<mainList.size(); i++) {
+						if(((EntityDep)mainList.get(i)).hasDependencies()) {
+							entryIndex=i; //found one - use it next
+							break; // out of the for loop
+						}
+					}
+				}
+		
+				//Processed this set - shove the results into finalResult		
+				Iterator mainListIterator=mainList.iterator();
+				while(mainListIterator.hasNext()) {
+					//Add the root entity to the final result
+					finalResult.add(((EntityDep)mainListIterator.next()).getRootEntity());
+				}
+				
+			}
+			return finalResult;
+		}
+		
+		/**Contains an entity and it's known dependencies.  Constructor can create the dependencies **/
+		static final class EntityDep {
+			private DbEntity rootEntity;
+			private List beforeEntities;
+			private List afterEntities;
+			private List dontCareEntities;
+			
+			private EntityDep() {
+				super();
+			}
+			
+			public EntityDep(DbEntity rootEntity, List otherEntities) {
+				super();
+				this.rootEntity=rootEntity;
+				this.beforeEntities=this.findBeforeEntities(this.rootEntity, otherEntities, null);
+				this.afterEntities=this.findAfterEntities(this.rootEntity, otherEntities, null);
+				this.dontCareEntities=new ArrayList();
+				Iterator othersIterator=otherEntities.iterator();
+				while(othersIterator.hasNext()) {
+					DbEntity thisEntity=(DbEntity)othersIterator.next();
+					boolean inBefore=beforeEntities.contains(thisEntity);
+					boolean inAfter=afterEntities.contains(thisEntity);
+					if(inBefore && inAfter) {
+						throw new CayenneRuntimeException("Cannot handle circular db dependencies properly yet.  DbEntity "+
+							thisEntity.getName()+" needs to be inserted both before and after "+rootEntity.getName());
+					}
+					if(!inBefore && !inAfter && (thisEntity!=rootEntity)) {
+						dontCareEntities.add(thisEntity);
+					}
+				}
+			}
+			
+			private List findAfterEntities(DbEntity start, List relevantEntities, Set foundEntities) {
+				return this.findRelatedEntities(start, relevantEntities, foundEntities, true);
+			}
+			
+			private List findBeforeEntities(DbEntity start, List relevantEntities, Set foundEntities) {
+				return this.findRelatedEntities(start, relevantEntities, foundEntities, false);
+			}
+			
+			private List findRelatedEntities(DbEntity start, List relevantEntities, Set foundEntities, boolean findAfterEntities) {
+				List result=new ArrayList();
+				if(foundEntities==null) {
+					foundEntities=new HashSet();
+				}
+				foundEntities.add(start);
+				Iterator relIterator=start.getRelationshipList().iterator();
+				while(relIterator.hasNext()) {
+					DbRelationship thisRel=(DbRelationship) relIterator.next();
+					//When looking for entities to do after 'start', then if the rel is toMany *OR* it's dependent, 
+					//  then it's one we want
+					//When looking for entities to do before 'start', then if it's toOne and it's NOT dependent then 
+					// it's one we want.  If it's toOne and dependent, then the it's not a "before" situation
+					if((findAfterEntities && (thisRel.isToMany() || thisRel.isToDependentPK())) ||
+						(!findAfterEntities && !thisRel.isToMany() && !thisRel.isToDependentPK())) {
+						DbEntity target=(DbEntity)thisRel.getTargetEntity();
+						//Only add this target if it's in the list of relevant entities, and it's not already found
+						if(relevantEntities.contains(target) && (!foundEntities.contains(target))) {
+							//Add the target..
+							result.add(target); 
+							//.. and any further "beforeEntities" from that entity
+							result.addAll(this.findRelatedEntities(target, relevantEntities, foundEntities, findAfterEntities)); 
+						}
+					}
+				}
+				
+				return result;
+			}
+
+			public List getAfterEntities() {
+				return afterEntities;
+			}
+			
+			public void clearAfterEntities() {
+				afterEntities=null;
+			}
+
+			public List getBeforeEntities() {
+				return beforeEntities;
+			}
+			
+			public void clearBeforeEntities() {
+				beforeEntities=null;
+			}
+			
+			public List getDontCareEntities() {
+				return dontCareEntities;
+			}
+
+			public void clearDontCareEntities() {
+				dontCareEntities=null;
+			}
+
+			public DbEntity getRootEntity() {
+				return rootEntity;
+			}
+			
+			public boolean hasDependencies() {
+				boolean hasAfter=((afterEntities!=null) && (afterEntities.size()!=0));
+				boolean hasBefore=((beforeEntities!=null) && (beforeEntities.size()!=0));
+				boolean hasDontCare=((dontCareEntities!=null) && (dontCareEntities.size()!=0));
+				return hasAfter || hasBefore || hasDontCare;
+			}
+
+			//Convenience for the toString method
+			private String entityNames(List dbEntities) {
+				if(dbEntities!=null && dbEntities.size()>0) {
+					StringBuffer result=new StringBuffer("*"+((DbEntity)dbEntities.get(0)).getName());
+					for(int i=1; i<dbEntities.size(); i++) {
+						result.append(", ");
+						result.append(((DbEntity)dbEntities.get(i)).getName());
+					}
+					result.append("*");
+					return result.toString();
+				}
+				return "none";			
+			}
+			
+			public String toString() {
+				return "root:"+rootEntity.getName()+" befores :"+entityNames(beforeEntities)+
+					" afters:"+entityNames(afterEntities)+" dontCares:"+entityNames(dontCareEntities);
+			}
 		}
 	}
 }
+

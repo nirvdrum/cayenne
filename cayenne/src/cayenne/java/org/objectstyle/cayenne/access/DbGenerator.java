@@ -411,7 +411,7 @@ public class DbGenerator {
 
 		OperationSorter sorter = getAdapter().getOpSorter(node);
 		if (sorter != null) {
-			sorter.sortEntitiesInInsertOrder(list);
+			list=sorter.sortedEntitiesInInsertOrder(list);
 		}
 		return list;
 	}

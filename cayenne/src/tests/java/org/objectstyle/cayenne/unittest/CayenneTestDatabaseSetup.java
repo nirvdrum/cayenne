@@ -278,7 +278,7 @@ public class CayenneTestDatabaseSetup {
 		DataNode node = resources.getSharedNode();
 		OperationSorter sorter = node.getAdapter().getOpSorter(node);
 		if (sorter != null) {
-			sorter.sortEntitiesInInsertOrder(list);
+			list=sorter.sortedEntitiesInInsertOrder(list);
 		}
 		return list;
 	}
