@@ -286,10 +286,9 @@ public class JdbcAdapter implements DbAdapter {
                 }
             }
 
-            if (at.isMandatory())
-                buf.append(" NOT");
-
-            buf.append(" NULL");
+            if (at.isMandatory()) {
+                buf.append(" NOT NULL");
+			}
         }
 
         // primary key clause
