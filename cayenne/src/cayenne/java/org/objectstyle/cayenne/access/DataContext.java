@@ -245,13 +245,20 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Factory method that creates and returns a new instance of DataContext based on
      * default domain. If more than one domain exists in the current configuration,
-     * {@link DataContext#createDataContext(String)}must be used instead.
+     * {@link DataContext#createDataContext(String)} must be used instead. ObjectStore associated
+     * with created DataContext will have a cache stack configured using parent domain settings.
      */
     public static DataContext createDataContext() {
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
     }
 
     /**
+     * Factory method that creates and returns a new instance of DataContext based on
+     * default domain. If more than one domain exists in the current configuration,
+     * {@link DataContext#createDataContext(String, boolean)} must be used instead.
+     * ObjectStore associated with newly created DataContext will have a cache 
+     * stack configured according to the specified policy, overriding a parent domain setting.
+     * 
      * @since 1.1
      */
     public static DataContext createDataContext(boolean useSharedCache) {
@@ -273,6 +280,11 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * Creates and returns new DataContext that will use a named DataDomain as its parent.
+     * ObjectStore associated with newly created DataContext will have a cache 
+     * stack configured according to the specified policy, overriding a parent domain 
+     * setting.
+     * 
      * @since 1.1
      */
     public static DataContext createDataContext(String domainName, boolean useSharedCache) {
