@@ -61,11 +61,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
 
@@ -179,7 +181,7 @@ public class DB2PkGenerator extends JdbcPkGenerator {
 		  	String pkQueryString = "SELECT NEXTVAL FOR "
 		  							+ seq_name
 		  							+ " FROM SYSIBM.SYSDUMMY1";
-
+			QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, pkQueryString, Collections.EMPTY_LIST);
 			ResultSet rs = st.executeQuery(pkQueryString);
 			try {
 			  if (!rs.next()) {
