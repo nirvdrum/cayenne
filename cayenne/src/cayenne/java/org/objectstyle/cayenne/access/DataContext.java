@@ -209,6 +209,14 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * @since 1.1
+     */
+    public static DataContext createDataContext(boolean useSharedCache) {
+        return Configuration.getSharedConfiguration().getDomain().createDataContext(
+            useSharedCache);
+    }
+
+    /**
      * Factory method that creates and returns a new instance of DataContext using named 
      * domain as its parent. If there is no domain matching the name argument, an exception 
      * is thrown.
@@ -219,6 +227,20 @@ public class DataContext implements QueryEngine, Serializable {
             throw new IllegalArgumentException("Non-existent domain: " + domainName);
         }
         return domain.createDataContext();
+    }
+
+    /**
+     * @since 1.1
+     */
+    public static DataContext createDataContext(
+        String domainName,
+        boolean useSharedCache) {
+
+        DataDomain domain = Configuration.getSharedConfiguration().getDomain(domainName);
+        if (domain == null) {
+            throw new IllegalArgumentException("Non-existent domain: " + domainName);
+        }
+        return domain.createDataContext(useSharedCache);
     }
 
     /**
