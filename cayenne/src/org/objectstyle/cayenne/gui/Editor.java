@@ -325,12 +325,12 @@ implements ActionListener
     	createDbEntityBtn.setToolTipText("Create new db entity");
         toolBar.add(createDbEntityBtn);
 
-    	url = cl.getResource(path + "images/remove24_grey.gif");
+    	url = cl.getResource(path + "images/remove24.gif");
     	ImageIcon removeIcon = new ImageIcon(url);
     	removeBtn = new JButton(removeIcon);
     	removeBtn.setToolTipText("Remove current");
         toolBar.add(removeBtn);
-
+        
     	getContentPane().add(toolBar, BorderLayout.NORTH);
     }
 
