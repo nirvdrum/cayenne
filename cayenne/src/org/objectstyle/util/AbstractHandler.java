@@ -132,7 +132,7 @@ public class AbstractHandler extends DefaultHandler {
      */
     public void startElement(String namespaceURI, String localName, String qName, Attributes atts)
     throws SAXException {
-        throw new SAXException("Unexpected element \"" + localName + "\"");
+        throw new SAXException(this.getClass().getName() + ": unexpected element \"" + localName + "\"");
     }
 
     /**
@@ -151,7 +151,7 @@ public class AbstractHandler extends DefaultHandler {
         String s = new String(buf, start, count).trim();
 
         if (s.length() > 0) {
-            throw new SAXException("Unexpected text \"" + s + "\"");
+            throw new SAXException(this.getClass().getName() + ": unexpected text \"" + s + "\"");
         }
     }
 
