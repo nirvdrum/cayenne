@@ -1,0 +1,19 @@
+Cayenne Release Notes 1.2 Milesone (M3)
+Date: 
+============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+To browse individual bug reports, see 
+http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
+
+Changes:
+
+- support for "joint" prefetches in SelectQuery and SQLTemplate
+- SQLTemplate support for explicit DataRow columns naming that is different from SQL
+  (via forth parameter in the #result directive)
+
+Bugs Fixed:
+
+

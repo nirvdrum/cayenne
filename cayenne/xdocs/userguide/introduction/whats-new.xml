@@ -46,6 +46,18 @@
 						Cayenne and supports a dozen or so runtime 
 						parameters.</p>
 				</subsection>
+				<subsection name="1.1.5 Ant DbGenerator">
+					<p>Ant task to generate a database from Cayenne DataMap: <a href="../ant/cdbgen.html">cdbgen</a>.</p>
+				</subsection>
+				<subsection name="1.1.6 Joint Prefetches">
+					<p>SQLTemplate and SelectQuery support a new type of 
+						prefetches - "joint" prefetches that are retrieved as a 
+						part of the main query. Joint prefetches have public 
+						API similar to the "regular" ones (e.g.: 
+						query.addJointPrefetch("toArtist")). Joint prefetches 
+						support all types of relationships including 
+						flattened.</p>
+				</subsection>
 			</subsection>
 		</section>
 	</body>
