@@ -74,90 +74,98 @@ import org.objectstyle.cayenne.util.Preferences;
  * @author Andrei Adamchik
  */
 public class NewProjectAction extends ProjectAction {
-	static Logger logObj =
-		Logger.getLogger(NewProjectAction.class.getName());
-		
-	public static final String ACTION_NAME = "New Project";
+    static Logger logObj = Logger.getLogger(NewProjectAction.class.getName());
 
-	public NewProjectAction() {
-		super(ACTION_NAME);
-	}
+    public static final String ACTION_NAME = "New Project";
 
-	public String getIconName() {
-		return "icon-new.gif";
-	}
+    public NewProjectAction() {
+        super(ACTION_NAME);
+    }
 
-	public KeyStroke getAcceleratorKey() {
-		return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
-	}
+    public String getIconName() {
+        return "icon-new.gif";
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		newProject();
-	}
+    public KeyStroke getAcceleratorKey() {
+        return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
+    }
 
-	protected void newProject() {
-		Preferences pref = Preferences.getPreferences();
-		String startDir = (String) pref.getProperty(Preferences.LAST_DIR);
-		try {
-			boolean finished = false;
-			File file = null;
-			File projectFile = null;
+    /**
+     * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        newProject();
+    }
 
-			while (!finished) {
-				fileChooser.setAcceptAllFileFilterUsed(false);
-				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				fileChooser.setDialogTitle("Choose project location");
-				if (startDir != null) {
-					File init_dir_file = new File(startDir);
-					if (init_dir_file.exists())
-						fileChooser.setCurrentDirectory(init_dir_file);
-				}
-				int ret_code = fileChooser.showSaveDialog(Editor.getFrame());
-				if (ret_code != JFileChooser.APPROVE_OPTION)
-					return;
-				file = fileChooser.getSelectedFile();
-				if (!file.exists())
-					file.createNewFile();
-				projectFile = new File(file, ProjectFileFilter.PROJ_FILE_NAME);
-				if (projectFile.exists()) {
-					int ret =
-						JOptionPane.showConfirmDialog(
-							Editor.getFrame(),
-							"There is already "
-								+ "project in this folder. Overwrite?");
-					if (ret == JOptionPane.YES_OPTION) {
-						finished = true;
-					} else if (ret == JOptionPane.CANCEL_OPTION) {
-						return;
-					}
-				} else {
-					finished = true;
-				}
-			}
+    protected void newProject() {
+        Preferences pref = Preferences.getPreferences();
+        String startDir = (String) pref.getProperty(Preferences.LAST_DIR);
+        try {
+            boolean finished = false;
+            File file = null;
+            File projectFile = null;
 
-			// Save and close (if needed) currently open project.
-			if (getMediator() != null && !closeProject()) {
-				return;
-			}
+            while (!finished) {
+                fileChooser.setAcceptAllFileFilterUsed(false);
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setDialogTitle("Choose project location");
+                if (startDir != null) {
+                    File startDirFile = new File(startDir);
+                    if (startDirFile.exists()) {
+                        fileChooser.setCurrentDirectory(startDirFile);
+                    }
+                }
 
-			// Save dir path to the preferences
-			pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
-			try {
-				GuiConfiguration.initSharedConfig(projectFile, false);
-			} catch (ConfigException e) {
-				logObj.warn(e);
-			}
-			
-			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
-			Editor.getFrame().projectOpened();
-			
-			// Set title to contain proj file path
-			Editor.getFrame().setProjectTitle(projectFile.getAbsolutePath());
-		} catch (Exception e) {
-			logObj.warn("Error loading project file.", e);
-		}
-	}
+                int retCode = fileChooser.showSaveDialog(Editor.getFrame());
+                if(retCode == JFileChooser.CANCEL_OPTION) {
+                	return;
+                }
+
+                file = fileChooser.getSelectedFile();
+                if (!file.exists()) {
+                    file.mkdirs();
+                } else if (!file.isDirectory()) {
+                    JOptionPane.showMessageDialog(
+                        Editor.getFrame(),
+                        "Can't create directory " + file);
+                    return;
+                }
+                projectFile = new File(file, ProjectFileFilter.PROJ_FILE_NAME);
+                if (projectFile.exists()) {
+                    int ret =
+                        JOptionPane.showConfirmDialog(
+                            Editor.getFrame(),
+                            "There is already " + "project in this folder. Overwrite?");
+                    if (ret == JOptionPane.YES_OPTION) {
+                        finished = true;
+                    } else if (ret == JOptionPane.CANCEL_OPTION) {
+                        return;
+                    }
+                } else {
+                    finished = true;
+                }
+            }
+
+            // Save and close (if needed) currently open project.
+            if (getMediator() != null && !closeProject()) {
+                return;
+            }
+
+            // Save dir path to the preferences
+            pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
+            try {
+                GuiConfiguration.initSharedConfig(projectFile, false);
+            } catch (ConfigException e) {
+                logObj.warn(e);
+            }
+
+            setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
+            Editor.getFrame().projectOpened();
+
+            // Set title to contain proj file path
+            Editor.getFrame().setProjectTitle(projectFile.getAbsolutePath());
+        } catch (Exception e) {
+            logObj.warn("Error loading project file.", e);
+        }
+    }
 }
