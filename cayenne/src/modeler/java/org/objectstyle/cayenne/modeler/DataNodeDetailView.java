@@ -204,7 +204,7 @@ public class DataNodeDetailView
         right_comp[2] = location;
         right_comp[3] = adapter;
 
-        JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
+        JPanel temp = PanelFactory.createForm(left_comp, right_comp);
         add(temp, constraints);
         location.setEditable(false);
 
@@ -242,7 +242,7 @@ public class DataNodeDetailView
         right_comp[4] = minConnections;
         right_comp[5] = maxConnections;
 
-        driverPanel = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
+        driverPanel = PanelFactory.createForm(left_comp, right_comp);
         driverPanel.setBorder(BorderFactory.createTitledBorder("Data Source Info"));
         constraints.gridheight = 2;
         constraints.gridy = 1;

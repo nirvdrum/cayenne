@@ -170,11 +170,7 @@ public class GenerateDbDialog
         JPanel optionsPane =
             PanelFactory.createForm(
                 new Component[] { dropTables, new JLabel(), dropPK },
-                new Component[] { createTables, createFK, createPK },
-                5,
-                5,
-                5,
-                5);
+                new Component[] { createTables, createFK, createPK });
         optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
         contentPane.add(optionsPane, BorderLayout.NORTH);
 

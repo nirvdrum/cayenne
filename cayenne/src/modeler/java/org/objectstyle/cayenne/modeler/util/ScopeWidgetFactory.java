@@ -94,7 +94,6 @@ public class ScopeWidgetFactory {
 
     public static SLabel createLabel(String text) {
 		SLabel label = new SLabel(text);
-		CayenneWidgetFactory.initLabel(label);
         return label;
     }
 }

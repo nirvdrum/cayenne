@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -158,9 +157,7 @@ public class CayenneWidgetFactory {
     }
 
     public static JLabel createLabel(String text) {
-        JLabel label = new JLabel(text);
-        initLabel(label);
-        return label;
+        return new JLabel(text);
     }
 
     protected static void initTextField(final JTextField textField) {
@@ -179,21 +176,15 @@ public class CayenneWidgetFactory {
     protected static void initFormWidget(JComponent component) {
         component.setFont(component.getFont().deriveFont(Font.PLAIN, 12));
 
-        Dimension size = component.getPreferredSize();
+   /*     Dimension size = component.getPreferredSize();
         if (size == null) {
             size = new Dimension();
         }
 
         size.setSize(size.getWidth(), 20);
-        component.setPreferredSize(size);
+        component.setPreferredSize(size); */
     }
 
-    /**
-     * Initializes a label or button with a standard font.
-     */
-    protected static void initLabel(JComponent label) {
-        label.setFont(label.getFont().deriveFont(Font.PLAIN, 12));
-    }
 
     /** 
      * Creates a borderless button that can be used
@@ -210,12 +201,9 @@ public class CayenneWidgetFactory {
     }
 
     /** 
-      * Creates a borderless button that can be used
-      * as a clickable label.
+      * Creates a normal button.
       */
     public static JButton createButton(String text) {
-        JButton but = new JButton(text);
-        initLabel(but);
-        return but;
+        return new JButton(text);
     }
 }

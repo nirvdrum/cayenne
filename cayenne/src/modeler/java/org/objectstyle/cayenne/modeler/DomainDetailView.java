@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
@@ -73,6 +72,9 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
+
+import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
  * Panel for editing DataDomain.
@@ -98,14 +100,14 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
     private void init() {
         this.setLayout(new BorderLayout());
         this.name = CayenneWidgetFactory.createTextField();
-        this.add(
-            PanelFactory.createForm(
-                new Component[] { CayenneWidgetFactory.createLabel("Domain name: ")},
-                new Component[] { name },
-                5,
-                5,
-                5,
-                5));
+
+        FormLayout layout = new FormLayout("right:100, 3dlu, left:300", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+        builder.appendSeparator("DataDomain Info");
+        builder.append("DataDomain Name:", name);
+        
+        this.add(builder.getPanel());
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
@@ -121,8 +123,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         public boolean verify(JComponent input) {
             if (input == name) {
                 return verifyName();
-            }
-            else {
+            } else {
                 return true;
             }
         }
@@ -134,7 +135,8 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
             }
 
             Configuration configuration =
-                ((ApplicationProject) CayenneModelerFrame.getProject()).getConfiguration();
+                ((ApplicationProject) CayenneModelerFrame.getProject())
+                    .getConfiguration();
             DataDomain domain = eventController.getCurrentDataDomain();
 
             DataDomain matchingDomain = configuration.getDomain(text);
@@ -145,12 +147,10 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
                 MapUtil.setDataDomainName(configuration, domain, text);
                 eventController.fireDomainEvent(e);
                 return true;
-            }
-            else if (matchingDomain == domain) {
+            } else if (matchingDomain == domain) {
                 // no name changes, just return
                 return true;
-            }
-            else {
+            } else {
                 // there is an entity with the same name
                 return false;
             }

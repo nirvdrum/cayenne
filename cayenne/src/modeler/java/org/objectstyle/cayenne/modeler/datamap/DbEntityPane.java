@@ -157,7 +157,7 @@ public class DbEntityPane
 
         Component[] leftCol = new Component[] { nameLabel, schemaLabel, parentLabel };
         Component[] rightCol = new Component[] { name, schema, parentEntities };
-        add(PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5), BorderLayout.NORTH);
+        add(PanelFactory.createForm(leftCol, rightCol), BorderLayout.NORTH);
 
         JPanel pkGeneratorPanel = new JPanel(new BorderLayout());
 
@@ -173,7 +173,7 @@ public class DbEntityPane
         leftCol = new Component[] { customPKGenerator, new JLabel()};
         rightCol = new Component[] { customPKGeneratorLabel, customPKGeneratorNote };
         pkGeneratorPanel.add(
-            PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
+            PanelFactory.createForm(leftCol, rightCol),
             BorderLayout.NORTH);
 
         customPKGeneratorNameLabel = CayenneWidgetFactory.createLabel("Database object name: ");
@@ -185,7 +185,7 @@ public class DbEntityPane
         leftCol = new Component[] { customPKGeneratorNameLabel, customPKSizeLabel };
         rightCol = new Component[] { customPKName, customPKSize };
         pkGeneratorPanel.add(
-            PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
+            PanelFactory.createForm(leftCol, rightCol),
             BorderLayout.CENTER);
 
         add(pkGeneratorPanel, BorderLayout.CENTER);

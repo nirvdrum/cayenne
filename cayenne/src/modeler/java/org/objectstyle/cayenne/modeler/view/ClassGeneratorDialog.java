@@ -173,11 +173,7 @@ public class ClassGeneratorDialog extends SPanel {
                     generatePairLabel,
                     superClassPackageLabel,
                     folderLabel },
-                new Component[] { generatePair, superClassPackage, folderPanel },
-                5,
-                5,
-                5,
-                5);
+                new Component[] { generatePair, superClassPackage, folderPanel });
 
         JPanel panel =
             PanelFactory.createTablePanel(

@@ -201,7 +201,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
         Component[] right =
             new Component[] { unInput, pwdInput, drInput, urlInput, adapterInput };
 
-        return PanelFactory.createForm(left, right, 5, 5, 5, 5);
+        return PanelFactory.createForm(left, right);
     }
 
     private JPanel initButtons() {

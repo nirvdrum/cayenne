@@ -131,11 +131,7 @@ public class ProcedurePane
                     CayenneWidgetFactory.createLabel("Schema: "),
                     CayenneWidgetFactory.createLabel("Returns Value: "),
                     new JLabel()},
-                new Component[] { name, schema, returnsValue, returnValueHelp },
-                5,
-                5,
-                5,
-                5));
+                new Component[] { name, schema, returnsValue, returnValueHelp }));
     }
 
     public void processExistingSelection() {

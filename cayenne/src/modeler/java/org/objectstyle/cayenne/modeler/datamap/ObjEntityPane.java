@@ -152,7 +152,7 @@ public class ObjEntityPane
         Component[] rightCol =
             new Component[] { name, className, superClassName, dbName, readOnly };
 
-        add(PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5), BorderLayout.NORTH);
+        add(PanelFactory.createForm(leftCol, rightCol), BorderLayout.NORTH);
     }
 
     public void processExistingSelection() {

@@ -156,7 +156,7 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
             right = new Component[] { tabeNamePatternField, buttons };
         }
 
-        JPanel panel = PanelFactory.createForm(left, right, 5, 5, 5, 5);
+        JPanel panel = PanelFactory.createForm(left, right);
         getContentPane().add(panel, BorderLayout.CENTER);
     }
 

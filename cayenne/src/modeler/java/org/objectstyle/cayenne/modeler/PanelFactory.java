@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
@@ -68,16 +67,34 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.Spring;
-import javax.swing.SpringLayout;
+
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+
+import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
- * Utility methods for laying out components on the panels.
+ * Implements a set of utility methods for laying out components on the panels.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class PanelFactory {
+    
+    /**
+     * @deprecated since 1.1
+     */
+    public static JPanel createForm(
+        String title,
+        Component[] leftComponents,
+        Component[] rightComponents,
+        int initialX,
+        int initialY,
+        int xPad,
+        int yPad) {
+
+        return createForm(leftComponents, rightComponents);
+    }
 
     /** 
      * Creates and returns a panel with right-centered buttons.
@@ -94,118 +111,62 @@ public class PanelFactory {
         return panel;
     }
 
-    /** 
-     * Create panel with aligned labels on the right and fields on the left.
-     * Panel uses SpringLayout.
-     */
+    public static JPanel createForm(String[] labels, Component[] components) {
+        return createForm(null, labels, components);
+    }
+
+    public static JPanel createForm(
+        String title,
+        String[] labels,
+        Component[] components) {
+        Component[] jlabels = new Component[labels.length];
+        for (int i = 0; i < labels.length; i++) {
+            jlabels[i] = CayenneWidgetFactory.createLabel(labels[i]);
+        }
+        return createForm(title, jlabels, components);
+    }
+
     public static JPanel createForm(
         Component[] leftComponents,
-        Component[] rightComponents,
-        int initialX,
-        int initialY,
-        int xPad,
-        int yPad) {
-        SpringLayout layout = new SpringLayout();
-        int numRows = Math.max(leftComponents.length, rightComponents.length);
+        Component[] rightComponents) {
+        return createForm(null, leftComponents, rightComponents);
+    }
 
-        // The constant springs we'll use to enforce spacing.
-        Spring xSpring = Spring.constant(initialX);
-        Spring ySpring = Spring.constant(initialY);
-        Spring xPadSpring = Spring.constant(xPad);
-        Spring yPadSpring = Spring.constant(yPad);
-        Spring negXPadSpring = Spring.constant(-xPad);
+    /** 
+     * Create panel with aligned labels on the right and fields on the left.
+     */
+    public static JPanel createForm(
+        String title,
+        Component[] leftComponents,
+        Component[] rightComponents) {
 
-        // Create the container and add the components to it.
-        JPanel parent = new JPanel(layout);
+        if (leftComponents.length != rightComponents.length) {
+            throw new IllegalArgumentException(
+                "Arrays must be the same size, instead got "
+                    + leftComponents.length
+                    + "and "
+                    + rightComponents.length);
+        }
+
+        int numRows = leftComponents.length;
+        if (numRows == 0) {
+            throw new IllegalArgumentException("Zero components.");
+        }
+
+        FormLayout layout = new FormLayout("right:100, 3dlu, left:300", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        if (title != null) {
+            builder.appendSeparator(title);
+        }
+
         for (int i = 0; i < numRows; i++) {
-            parent.add(leftComponents[i]);
-            parent.add(rightComponents[i]);
+            builder.append(leftComponents[i], rightComponents[i]);
+            builder.nextLine();
         }
 
-        // maxEastSpring will contain the highest min/pref/max values
-        // for the right edges of the components in the first column
-        // (i.e. the largest X coordinate in a first-column component).
-        // We use layout.getConstraint instead of layout.getConstraints
-        // (layout.getConstraints(comp).getConstraint("East"))
-        // because we need a proxy -- not the current Spring.
-        // Otherwise, it won't take the revised X position into account
-        // for the initial layout.
-        Spring maxEastSpring = layout.getConstraint("East", leftComponents[0]);
-        for (int row = 1; row < numRows; row++) {
-            maxEastSpring =
-                Spring.max(
-                    maxEastSpring,
-                    layout.getConstraint("East", leftComponents[row]));
-        }
-
-        // Lay out each pair. The left column's x is constrained based on
-        // the passed x location. The y for each component in the left column
-        // is the max of the previous pair's height. In the right column, x is
-        // constrained by the max width of the left column (maxEastSpring),
-        // y is constrained as in the left column, and the width is
-        // constrained to be the x location minus the width of the
-        // parent container. This last constraint makes the right column fill
-        // all extra horizontal space.
-        SpringLayout.Constraints lastConsL = null;
-        SpringLayout.Constraints lastConsR = null;
-        Spring parentWidth = layout.getConstraint("East", parent);
-        Spring rWidth = null;
-        Spring maxHeightSpring = null;
-        Spring rX = Spring.sum(maxEastSpring, xPadSpring); //right col location
-        Spring negRX = Spring.minus(rX); //negative of rX
-
-        for (int row = 0; row < numRows; row++) {
-            SpringLayout.Constraints consL = layout.getConstraints(leftComponents[row]);
-            SpringLayout.Constraints consR = layout.getConstraints(rightComponents[row]);
-
-            consL.setX(xSpring);
-            consR.setX(rX);
-
-            if (row == 0)
-                rWidth = consR.getWidth();
-            else
-                rWidth = Spring.max(rWidth, consR.getWidth());
-            consR.setWidth(Spring.sum(Spring.sum(parentWidth, negRX), negXPadSpring));
-            Spring height = Spring.max(consL.getHeight(), consR.getHeight());
-            if (row == 0) {
-                consL.setY(ySpring);
-                consR.setY(ySpring);
-                maxHeightSpring = Spring.sum(ySpring, height);
-            }
-            else { // row > 0
-                Spring y =
-                    Spring.sum(
-                        Spring.max(
-                            lastConsL.getConstraint("South"),
-                            lastConsR.getConstraint("South")),
-                        yPadSpring);
-
-                consL.setY(y);
-                consR.setY(y);
-                maxHeightSpring =
-                    Spring.sum(yPadSpring, Spring.sum(maxHeightSpring, height));
-            }
-            Dimension dimL = leftComponents[row].getPreferredSize();
-            Dimension dimR = rightComponents[row].getPreferredSize();
-            int dim_height = Math.max(dimL.height, dimR.height);
-            consL.setHeight(Spring.constant(dim_height));
-            consR.setHeight(Spring.constant(dim_height));
-            lastConsL = consL;
-            lastConsR = consR;
-        } // end of for loop
-
-        // Wire up the east/south of the container so that the its preferred
-        // size is valid.  The east spring is the distance to the right
-        // column (rX) + the right component's width (rWidth) + the final
-        // padding (xPadSpring).
-        // The south side is maxHeightSpring + the final padding (yPadSpring).
-
-        SpringLayout.Constraints consParent = layout.getConstraints(parent);
-
-        consParent.setConstraint("East", Spring.sum(rX, Spring.sum(rWidth, xPadSpring)));
-        consParent.setConstraint("South", Spring.sum(maxHeightSpring, yPadSpring));
-
-        return parent;
+        return builder.getPanel();
     }
 
     /** 

@@ -285,7 +285,7 @@ public class ChooseDbRelationshipDialog extends CayenneDialog implements ActionL
 
         Component[] right = new Component[] { relSelect, buttons };
 
-        JPanel panel = PanelFactory.createForm(left, right, 5, 5, 5, 5);
+        JPanel panel = PanelFactory.createForm(left, right);
         getContentPane().add(panel, BorderLayout.CENTER);
     }
 

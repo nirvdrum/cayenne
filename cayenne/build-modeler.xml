@@ -47,6 +47,8 @@
         <copy todir="${dist}/lib/modeler">
             <fileset dir="${otherlib.dir}">
                 <include name="${scope.jar}"/>
+                <include name="${jgoodies.forms.jar}"/>
+                <include name="${jgoodies.forms-extras.jar}"/>
                 <include name="${jgoodies.looks.jar}"/>
             </fileset>
         </copy>
@@ -78,7 +80,8 @@
                <attribute name="Implementation-Version" value="${project.version}"/>
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.modeler.Main"/>
-               <attribute name="Class-Path" value="../cayenne.jar scope-bin-1.0.1.jar plastic-1.1.2.jar"/>
+               <attribute name="Class-Path" 
+               		value="../cayenne.jar forms-1.0.2.jar forms-extras-1.0.2.jar scope-bin-1.0.1.jar plastic-1.1.2.jar"/>
             </manifest>
         </jar>
     </target>  

@@ -220,7 +220,7 @@ public class ResolveDbRelationshipDialog
 
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        panel.add(PanelFactory.createForm(left, right, 5, 5, 5, 5));
+        panel.add(PanelFactory.createForm(left, right));
         getContentPane().add(panel);
 
         // Attribute pane
