@@ -55,6 +55,9 @@ import javax.ejb.SessionContext;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.examples.ejbfacade.model.Auction;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -97,7 +100,14 @@ public class AuctionSessionEJB implements SessionBean {
      */
     public Collection getActiveAuctions() throws RemoteException {
         System.out.println("AuctionSessionEJB.getActiveAuctions()");
-        return cayenneContext.performQuery(new SelectQuery(Auction.class));
+
+        Date now = new Date();
+        Expression qualifier = ExpressionFactory.lessExp("startTime", now);
+        qualifier = qualifier.andExp(ExpressionFactory.greaterExp("closingTime", now));
+        SelectQuery query = new SelectQuery(Auction.class, qualifier);
+        query.addOrdering("name", Ordering.ASC);
+
+        return cayenneContext.performQuery(query);
     }
 
     /**

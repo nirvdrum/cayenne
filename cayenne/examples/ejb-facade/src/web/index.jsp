@@ -1,9 +1,19 @@
-<%@ page
-   session="false"
-   isThreadSafe="true"
-   isErrorPage="false"
-   import="javax.naming.*,
-           test.interfaces.*"
+<%@ page 
+	language="java" 
+	contentType="text/html"
+	import="javax.naming.InitialContext,
+		org.objectstyle.cayenne.examples.ejbfacade.interfaces.*,
+		org.objectstyle.cayenne.examples.ejbfacade.model.*,
+		java.util.*"
+%>
+
+<%
+InitialContext context = new InitialContext();
+AuctionSessionHome auctionHome = (AuctionSessionHome) context.lookup(
+                    "ejb/cayenne/examples/AuctionSession");
+AuctionSession auctionBean = auctionHome.create();
+Collection auctions = auctionBean.getActiveAuctions();
+auctionBean.remove();
 %>
 <html>
 <head>
@@ -12,48 +22,25 @@
 </head>
 
 <body>
-<img src="images/cayenne_logo.gif" width=183 height=70 alt="return home" border="0">
-<h2>Auction Manager</h2>
-<table width="600" border="0" cellpadding="3" cellspacing="3">
+<h2><img src="images/cayenne_logo.gif" width=183 height=70 alt="return home" border="0" hspace="1" vspace="1"> Auction Manager</h2>
+<table width="700" border="0" cellpadding="3" cellspacing="3">
 <tr>
-<td width="300" valign="top">
+<td width="400" valign="top">
 	<table width="100%" border="0">
 	<tr>
-		<td>Running Auctions</td>
-		<td>Closing Date</td>
+		<td>Currently Active Auctions</td>
+		<td>Close at</td>
 	</tr>
+<% 
+Iterator it = auctions.iterator();
+while(it.hasNext()) {
+  Auction next = (Auction)it.next();
+%>
 	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
+		<td><%= next.getName() %></td>
+		<td><%= next.getClosingTime() %></td>
 	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
-	<tr>
-		<td>Auction 1</td>
-		<td>02/02/2004</td>
-	</tr>
+<% } %>
 	</table>
 </td>
 <td width="300" valign="top">
