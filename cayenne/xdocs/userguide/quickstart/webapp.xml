@@ -42,10 +42,9 @@
        		All references to Tomcat below should apply in some form to other web containers
        		as well.</p>
     		
-    		<p>- Create a new folder named <code>cayenne-web-app</code> 
-    		anywhere in the filesystem. This directory is referred to as 
-    		"project directory" further in this chapter. For a sample project
-    		layout look at the tutorial source distributed with Cayenne.</p>
+    		<p>- Use tutorial source directory distributed with Cayenne at
+    		<code>$CAYENNE_HOME/src/tutorials/cayenne-web-app</code> 
+    		as a project directory.</p>
     		
     		<p>- Copy <code>cayenne.jar</code> to the <code>WEB-INF/lib</code> subdirectory of 
     		the tutorial project directory.</p>
@@ -115,7 +114,7 @@
     			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
-    		Open <code>cayenne.xml</code> 
+    		Save these files under WEB-INF subdirectory of the tutorial project folder. Open <code>cayenne.xml</code> 
     		file in CayenneModeler and make the following changes:
     		<ul>
     			<li>if the database used is NOT MySQL, <code>cayenne.xml</code>
@@ -160,11 +159,12 @@
     		</p>    	
     	</subsection>
     	   	<subsection name="3.2.6 Compile and Deploy the Application" anchor="6">
-    		<p>Compile the source code lime ypou would normally compile a webapplications.
+    		<p>Compile the source code like you would normally compile a webapplication.
     		The example is given for javac from the command line (assuming that JAVA_HOME variable 
-    		points to the JSDK 1.4 installation). 
-    		On Windows (substitute <code>[servlet.jar]</code> with the path to the actiual JAR file,
-    		for instance tomcat/common/lib/servlet.jar):</p>
+    		points to the JDK 1.3 or 1.4 installation). Substitute <code>[servlet.jar]</code> 
+    		with the path to the actiual JAR file,
+    		for instance tomcat/common/lib/servlet.jar
+    		On Windows:</p>
 <source>
 cayenne-web-app> cd WEB-INF\classes
 cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;[servlet.jar] 

@@ -143,33 +143,21 @@ projectdir> %JAVA_HOME%\bin\java test.Main metro
 			would match the word "metro"), the following output will be printed:
 			</p>
 <source>
---- will run 1 query.
-SELECT t0.GALLERY_NAME, t0.GALLERY_ID FROM GALLERY t0 WHERE UPPER(t0.GALLERY_NAME) LIKE UPPER(?) 
-[params: '%metro%'] - prepared in 20 ms.
-=== returned 1 row. - took 10 ms.
+WARN  QueryLogger: --- will run 1 query.
+WARN  QueryLogger: SELECT t0.GALLERY_NAME, t0.GALLERY_ID FROM GALLERY t0 WHERE UPPER(t0.GALLERY_NAME
+) LIKE UPPER(?) [params: '%metro%'] - prepared in 20 ms.
+WARN  QueryLogger: === returned 1 row. - took 0 ms.
 
 Found gallery 'The Metropolitan Museum of Art'.
 
---- will run 2 queries.
-SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = 'ARTIST'
-=== returned 1 row. - took 0 ms.
-UPDATE AUTO_PK_SUPPORT SET NEXT_ID = NEXT_ID + 20 WHERE TABLE_NAME = 'ARTIST'
-=== updated 1 row.
-+++ transaction committed.
---- will run 2 queries.
-SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = 'PAINTING'
-=== returned 1 row. - took 0 ms.
-UPDATE AUTO_PK_SUPPORT SET NEXT_ID = NEXT_ID + 20 WHERE TABLE_NAME = 'PAINTING'
-=== updated 1 row.
-+++ transaction committed.
---- will run 2 queries.
-INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) VALUES (?, ?, ?) 
-[params: 280, NULL, 'Salvador Dali']
-=== updated 1 row.
-INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?, ?, ?, ?) 
-[params: 280, 280, NULL, 'Sleep']
-=== updated 1 row.
-+++ transaction committed.
+WARN  QueryLogger: --- will run 2 queries.
+WARN  QueryLogger: INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) VALUES (?, ?, ?) 
+[params: 320, NULL, 'Salvador Dali']
+WARN  QueryLogger: === updated 1 row.
+WARN  QueryLogger: INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) 
+VALUES (?, ?, ?, ?) [params: 320, 320, NULL, 'Sleep']
+WARN  QueryLogger: === updated 1 row.
+WARN  QueryLogger: +++ transaction committed.
 </source>
     	</subsection>
     	</subsection>
