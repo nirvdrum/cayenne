@@ -55,36 +55,45 @@
  */
 package org.objectstyle.cayenne.dba.postgres;
 
-import org.objectstyle.cayenne.access.types.CharType;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-/** DbAdapter implementation for <a href="http://postgresql.org">PostgreSQL RDBMS</a>. */
-public class PostgresAdapter extends JdbcAdapter
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.JdbcPkGenerator;
+
+public class PostgresPkGenerator extends JdbcPkGenerator
 {
-	public PostgresAdapter() {
+	public PostgresPkGenerator() {
 		super();
-		// register CharType so that all CHAR types will be trimmed
-		this.getTypeConverter().registerType(new CharType());
 	}
 
 	/**
-	* Returns a SQL string to drop a table corresponding
-	* to <code>ent</code> DbEntity.
-	*/
-	public String dropTable(DbEntity ent) {
-		return super.dropTable(ent) + " CASCADE";
-	}
+	 * Checks if AUTO_PK_TABLE already exists in the database.
+	 */
+	protected boolean autoPkTableExists(DataNode node) throws SQLException {
+		if (super.autoPkTableExists(node) == false) {
+			Connection con = node.getDataSource().getConnection();
+			boolean exists = false;
 
-	protected PkGenerator createPkGenerator() {
-		return new PostgresPkGenerator();
-	}
+			try {
+				DatabaseMetaData md = con.getMetaData();
+				ResultSet tables = md.getTables(null, null, "auto_pk_support", null);
 
-	public String createFkConstraint(DbRelationship rel) {
-		String fkConstraint = super.createFkConstraint(rel);
-		return fkConstraint + " DEFERRABLE INITIALLY DEFERRED";
+				try {
+					exists = tables.next();
+				}
+				finally {
+					tables.close();
+				}
+			}
+			finally {
+				// return connection to the pool
+				con.close();
+			}
+			return exists;
+		}
+		return true;
 	}
-
 }

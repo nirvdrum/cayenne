@@ -172,13 +172,12 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
 		// Adapter class line
 		JLabel adapterLabel = new JLabel("RDBMS Adapter:");
-		String[] adapter_arr =
-			{
-				DbAdapter.JDBC,
-				DbAdapter.SYBASE,
-				DbAdapter.MYSQL,
-				DbAdapter.ORACLE
-			/* [DISABLE POSTGRES DATA] ,DbAdapter.POSTGRES */
+		String[] adapter_arr = {
+			DbAdapter.JDBC,
+			DbAdapter.SYBASE,
+			DbAdapter.MYSQL,
+			DbAdapter.ORACLE,
+			DbAdapter.POSTGRES
 		};
 		adapterInput =
 			new PreferenceField(

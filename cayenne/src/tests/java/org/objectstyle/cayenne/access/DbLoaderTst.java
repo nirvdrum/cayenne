@@ -110,8 +110,14 @@ public class DbLoaderTst extends CayenneTestCase {
 			assertNotNull(dae);
 			assertEquals("ARTIST", dae.getName().toUpperCase());
 
-			assertTrue(
-				((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
+			DbAttribute a = (DbAttribute)dae.getAttribute("ARTIST_ID");
+			if (a == null)
+			{
+				// try lowercase version (e.g. when testing against postgres)
+				a = (DbAttribute)dae.getAttribute("artist_id");
+			}
+			assertNotNull(a);
+			assertTrue(a.isPrimaryKey());
 
 			if (supportsFK) {
 				// *** TESTING THIS ***
@@ -167,12 +173,25 @@ public class DbLoaderTst extends CayenneTestCase {
 		}
 
 		DbAttribute integerAttr = (DbAttribute) dbe.getAttribute("PAINTING_ID");
+		if (integerAttr == null) {
+			// consider lowercase attribute names
+			integerAttr = (DbAttribute)dbe.getAttribute("painting_id");
+		}
 		DbAttribute decimalAttr =
 			(DbAttribute) dbe.getAttribute("ESTIMATED_PRICE");
+		if (decimalAttr == null) {
+			decimalAttr = (DbAttribute) dbe.getAttribute("estimated_price");
+		}
 		DbAttribute varcharAttr =
 			(DbAttribute) dbe.getAttribute("PAINTING_TITLE");
+		if (varcharAttr == null) {
+			varcharAttr = (DbAttribute) dbe.getAttribute("painting_title");
+		}
 		DbAttribute floatAttr =
 			(DbAttribute) floatTest.getAttribute("FLOAT_COL");
+		if (floatAttr == null) {
+			floatAttr = (DbAttribute) floatTest.getAttribute("float_col");
+		}			
 
 		// check decimal
 		assertEquals(

@@ -188,9 +188,12 @@ public class DataNodeDetailView
         adapterLabel = new JLabel("DB adapter:");
         adapter = new JComboBox();
         adapter.setEditable(true);
-        String[] arr1 =
-            { DbAdapter.JDBC, DbAdapter.SYBASE, DbAdapter.MYSQL, DbAdapter.ORACLE
-            /* [DISABLE POSTGRES DATA] ,DbAdapter.POSTGRES */
+        String[] arr1 = {
+        	DbAdapter.JDBC,
+        	DbAdapter.SYBASE,
+        	DbAdapter.MYSQL,
+        	DbAdapter.ORACLE,
+        	DbAdapter.POSTGRES
         };
         model = new DefaultComboBoxModel(arr1);
         adapter.setModel(model);

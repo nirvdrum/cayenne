@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.unittest;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -70,6 +71,8 @@ import org.objectstyle.cayenne.conf.ConnectionProperties;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.Util;
@@ -225,6 +228,14 @@ public class CayenneTestResources {
 
             node.setAdapter((DbAdapter) adapterClass.newInstance());
             node.addDataMap(map);
+            
+            // dirk: Postgres hack to make BLOBs work
+            if ((adapterClass == PostgresAdapter.class) && (mapPath.indexOf("testmap") != -1)) {
+            	logObj.info("changing attribute IMAGE_BLOB of DbEntity PAINTING_INFO to VARBINARY for PostgreSQL");
+	            DbEntity pi = map.getDbEntity("PAINTING_INFO");
+	            DbAttribute att = (DbAttribute)pi.getAttribute("IMAGE_BLOB");
+	            att.setType(Types.VARBINARY);
+            }
 
             // domain
             DataDomain domain = new DataDomain("domain");
