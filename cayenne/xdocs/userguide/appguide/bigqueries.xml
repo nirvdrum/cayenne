@@ -75,7 +75,27 @@ Artist artist = (Artist)ctxt.objectFromDataRow("Artist", row);
 </source>
 			</subsection>
             
-			<subsection name="5.8.2 ResultIterator: Incremental Data Processing" anchor="iterator">
+            <subsection name="5.8.2 Read-Only Entities" anchor="ro">
+            <p>There are some cases when objects are used for display only. For instance when
+            Cayenne is used for statistical report generation, etc. 
+            For such cases Cayenne allows marking ObjEntities as "read-only", so that
+            DataContext could make an assumption that user will not modify its managed objects. 
+            This allows to implement more straightforward and faster algorithms for objects creation.
+            </p>
+            
+            <p>Benefits of <code>Read-Only</code> Entities:</p>
+            <ul>
+            	<li>Fetch speed increase. Our tests show 2x performance increase, that is comparable
+            	to data rows.</li>
+            	<li>Relationships and other benefits of having an object as opposed to a generic 
+            	collection.</li>
+            </ul>
+            
+            <p>An obvious drawback of "read-only" entities is of course the inability to make any 
+            direct modifications to persistent objects.</p>            
+            </subsection>
+            
+			<subsection name="5.8.3 ResultIterator: Incremental Data Processing" anchor="iterator">
 			<p>There are cases when the result sets are so large that even when fetching data rows, 
 			application can run out of memory. For instance, a user may be creating a report
 			that requires in-memory processing of hundreds of thousands of database rows. 
@@ -153,7 +173,7 @@ finally {
 </source>
 			</subsection>
             
-			<subsection name="5.8.3 Paged Results" anchor="paged">
+			<subsection name="5.8.4 Paged Results" anchor="paged">
             <p>This feature is pending implementation in Cayenne.</p>
 			</subsection>
         </subsection>

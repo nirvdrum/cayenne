@@ -61,6 +61,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -89,7 +91,11 @@ import org.objectstyle.cayenne.util.NamedObjectFactory;
  */
 public class ObjEntityPane
 	extends JPanel
-	implements ActionListener, ObjEntityDisplayListener, ExistingSelectionProcessor {
+	implements
+		ActionListener,
+		ObjEntityDisplayListener,
+		ExistingSelectionProcessor,
+		ItemListener {
 
 	static Logger logObj = Logger.getLogger(ObjEntityPane.class.getName());
 
@@ -99,6 +105,7 @@ public class ObjEntityPane
 	protected JPanel dbPane;
 	protected JComboBox dbName;
 	protected JButton tableLabel;
+	protected JCheckBox readOnly;
 
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
@@ -133,10 +140,15 @@ public class ObjEntityPane
 		dbName = new JComboBox();
 		dbName.setBackground(Color.WHITE);
 
-		Component[] leftCol =
-			new Component[] { nameLbl, classNameLbl, tableLabel };
+		JLabel checkLabel = new JLabel("Read-only");
+		readOnly = new JCheckBox();
+		readOnly.addItemListener(this);
 
-		Component[] rightCol = new Component[] { name, className, dbName };
+		Component[] leftCol =
+			new Component[] { nameLbl, classNameLbl, tableLabel, checkLabel };
+
+		Component[] rightCol =
+			new Component[] { name, className, dbName, readOnly };
 
 		add(
 			PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
@@ -208,6 +220,7 @@ public class ObjEntityPane
 		name.setText(entity.getName());
 		className.setText(
 			entity.getClassName() != null ? entity.getClassName() : "");
+		readOnly.setSelected(entity.isReadOnly());
 
 		// Display DbEntity name in select box
 		dbName.setModel(createComboBoxModel(entity.getDbEntity()));
@@ -245,6 +258,24 @@ public class ObjEntityPane
 		model.setSelectedItem(selected_entry);
 		return model;
 	}
+	
+	/**
+	 * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e) {	
+		if(ignoreChange) {
+			return;
+		}
+			
+		if (e.getSource() == readOnly) {
+			ObjEntity ent = mediator.getCurrentObjEntity();
+			if(ent != null) {
+				ent.setReadOnly(readOnly.isSelected());
+				mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+			}
+		}
+	}
+	
 
 	class FieldVerifier extends InputVerifier {
 		public boolean verify(JComponent input) {

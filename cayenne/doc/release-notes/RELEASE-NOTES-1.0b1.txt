@@ -53,4 +53,6 @@ exception cause properly.
 15. Ordering now supports DB_NAME expressions. As a result,
 setSortPathSpec and getSortPathSpec are deprecated.
 
+16. Added "read-only" object entities
+
 
