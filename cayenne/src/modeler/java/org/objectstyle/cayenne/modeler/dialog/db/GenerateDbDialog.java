@@ -88,7 +88,7 @@ import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
@@ -123,7 +123,7 @@ public class GenerateDbDialog extends CayenneDialog {
     protected JCheckBox dropPK;
 
     public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter, DbGenerator gen) {
-        super(CayenneModelerFrame.getFrame(), "Generate Database Schema", true);
+        super(Application.getFrame(), "Generate Database Schema", true);
 
         this.dsi = dsi;
         this.adapter = adapter;
@@ -328,7 +328,7 @@ public class GenerateDbDialog extends CayenneDialog {
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
         fc.setDialogTitle("Save SQL Script");
 
-        File projectDir = CayenneModelerFrame.getProject().getProjectDirectory();
+        File projectDir = Application.getProject().getProjectDirectory();
 
         if (projectDir != null) {
             fc.setCurrentDirectory(projectDir);

@@ -130,7 +130,7 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
 
         initView();
         initController();
-        initFromModel(CayenneModelerFrame.getProject());
+        initFromModel(Application.getProject());
     }
 
     private void initView() {

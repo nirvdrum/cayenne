@@ -58,9 +58,8 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.ModelerController;
-import org.objectstyle.cayenne.modeler.TopController;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
@@ -80,8 +79,10 @@ public class RevertAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-        TopController controller = CayenneModelerFrame.getFrame().getController();
-        Project project = controller.getTopModel().getCurrentProject();
+        CayenneModelerController controller = Application
+                .getInstance()
+                .getFrameController();
+        Project project = controller.getCurrentProject();
         if (project == null) {
             return;
         }
@@ -90,12 +91,12 @@ public class RevertAction extends CayenneAction {
 
         // close ... don't use OpenProjectAction close method as it will ask for save, we
         // don't want that here
-        controller.handleControl(new Control(ModelerController.PROJECT_CLOSED_ID));
+        controller.projectClosedAction();
 
         // reopen existing
         if (!isNew && project.getMainFile().isFile()) {
             OpenProjectAction openAction = (OpenProjectAction) controller
-                    .getTopModel()
+                    .getApplication()
                     .getAction(OpenProjectAction.getActionName());
             openAction.openProject(project.getMainFile());
         }

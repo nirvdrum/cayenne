@@ -54,11 +54,13 @@
  * <http://objectstyle.org/>.
  */
 package org.objectstyle.cayenne.modeler.action;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
 
 /**
@@ -66,9 +68,9 @@ import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
  */
 public class NewProjectAction extends ProjectAction {
 
-	public static String getActionName() {
-		return "New Project";
-	}
+    public static String getActionName() {
+        return "New Project";
+    }
 
     public NewProjectAction() {
         super(getActionName());
@@ -81,13 +83,14 @@ public class NewProjectAction extends ProjectAction {
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
     }
-    
+
     /**
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         // Save and close (if needed) currently open project.
-        if (getTopModel().getCurrentProject() != null && !closeProject()) {
+        if (Application.getInstance().getFrameController().getCurrentProject() != null
+                && !closeProject()) {
             return;
         }
 

@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.editor.DerivedAttributeParamsTableModel;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
@@ -103,7 +103,7 @@ public class EditDerivedParamsDialog extends CayenneDialog implements ActionList
      * Constructor for EditDerivedParamsDialog.
      */
     public EditDerivedParamsDialog(DerivedDbAttribute attr) {
-        super(CayenneModelerFrame.getFrame(), "Edit Derived Attribute Parameters", true);
+        super(Application.getFrame(), "Edit Derived Attribute Parameters", true);
 
         this.attr = attr;
 

@@ -80,6 +80,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -132,7 +133,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
         Validator val) {
         closeValidationDialog();
         JOptionPane.showMessageDialog(
-            CayenneModelerFrame.getFrame(),
+            Application.getFrame(),
             "Project passed validation successfully.");
     }
 
@@ -214,7 +215,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
         JButton revalidateBtn =
             new JButton(
-                CayenneModelerFrame.getFrame().getAction(ValidateAction.getActionName()));
+                Application.getFrame().getAction(ValidateAction.getActionName()));
         revalidateBtn.setText("Refresh");
         closeBtn = new JButton("Close");
         JPanel panel =

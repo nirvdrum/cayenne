@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
@@ -115,7 +115,7 @@ public class ImportEOModelAction extends CayenneAction {
      */
     protected void importEOModel() {
         JFileChooser fileChooser = getEOModelChooser();
-        int status = fileChooser.showOpenDialog(CayenneModelerFrame.getFrame());
+        int status = fileChooser.showOpenDialog(Application.getFrame());
 
         if (status == JFileChooser.APPROVE_OPTION) {
             // save preferences
@@ -174,7 +174,7 @@ public class ImportEOModelAction extends CayenneAction {
             Collection newDE = new ArrayList(currentMap.getDbEntities());
 
             EntityEvent entityEvent = new EntityEvent(
-                    CayenneModelerFrame.getFrame(),
+                    Application.getFrame(),
                     null);
 
             Collection addedOE = CollectionUtils.subtract(newOE, originalOE);
@@ -213,12 +213,12 @@ public class ImportEOModelAction extends CayenneAction {
                 mediator.fireDbEntityEvent(entityEvent);
             }
 
-            mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(CayenneModelerFrame
+            mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(Application
                     .getFrame(), map, mediator.getCurrentDataDomain(), mediator
                     .getCurrentDataNode()));
         }
         else {
-            mediator.addDataMap(CayenneModelerFrame.getFrame(), map);
+            mediator.addDataMap(Application.getFrame(), map);
         }
     }
 

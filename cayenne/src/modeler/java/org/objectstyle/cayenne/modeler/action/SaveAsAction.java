@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
@@ -94,21 +94,21 @@ public class SaveAsAction extends CayenneAction {
      * successful save, master files are replaced with new versions.
      */
     protected boolean saveAll() throws Exception {
-        Project p = CayenneModelerFrame.getProject();
+        Project p = Application.getProject();
 
         if(!chooseDestination(p)) {
             return false;
         }
       
         p.save();
-        CayenneModelerFrame.getFrame().updateTitle();
-        CayenneModelerFrame.getFrame().addToLastProjList(
+        Application.getFrame().updateTitle();
+        Application.getFrame().addToLastProjList(
                 p.getMainFile().getAbsolutePath());
         return true;
     }
 
     protected boolean chooseDestination(Project p) {
-        File projectDir = fileChooser.newProjectDir(CayenneModelerFrame.getFrame(), p);
+        File projectDir = fileChooser.newProjectDir(Application.getFrame(), p);
         if (projectDir == null) {
             return false;
         }
@@ -126,7 +126,7 @@ public class SaveAsAction extends CayenneAction {
 
     public synchronized void performAction(int warningLevel) {
         EventController mediator = getMediator();
-        Validator val = CayenneModelerFrame.getProject().getValidator();
+        Validator val = Application.getProject().getValidator();
         int validationCode = val.validate();
 
         // If no serious errors, perform save.
@@ -145,7 +145,7 @@ public class SaveAsAction extends CayenneAction {
 
         // If there were errors or warnings at validation, display them
         if (validationCode >= warningLevel) {
-            ValidatorDialog.showDialog(CayenneModelerFrame.getFrame(), mediator, val);
+            ValidatorDialog.showDialog(Application.getFrame(), mediator, val);
         }
     }
 

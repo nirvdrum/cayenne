@@ -65,17 +65,16 @@ import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.TopModel;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
- * Superclass of CayenneModeler actions that implements support 
- * for some common functionality, exception handling, etc.
+ * Superclass of CayenneModeler actions that implements support for some common
+ * functionality, exception handling, etc.
  * 
  * @author Andrei Adamchik
  */
@@ -103,37 +102,35 @@ public abstract class CayenneAction extends AbstractAction {
         setEnabled(false);
     }
 
-    /** 
-     * Changes the name of this action, propagating the change
-     * to all widgets using this action.
+    /**
+     * Changes the name of this action, propagating the change to all widgets using this
+     * action.
      */
     public void setName(String newName) {
         super.putValue(Action.NAME, newName);
     }
 
     /**
-     * Returns keyboard shortcut for this action. Default
-     * implementation returns <code>null</code>.
+     * Returns keyboard shortcut for this action. Default implementation returns
+     * <code>null</code>.
      */
     public KeyStroke getAcceleratorKey() {
         return null;
     }
 
     /**
-     * Returns the name of the icon that should be used
-     * for buttons. Name will be reolved relative to
-     * <code>RESOURCE_PATH</code>. Default implementation
-     * returns <code>null</code>.
+     * Returns the name of the icon that should be used for buttons. Name will be reolved
+     * relative to <code>RESOURCE_PATH</code>. Default implementation returns
+     * <code>null</code>.
      */
     public String getIconName() {
         return null;
     }
 
     /**
-     * Creates and returns an ImageIcon that can be used 
-     * for buttons that rely on this action.
-     * Returns <code>null</code> if <code>getIconName</code>
-     * returns <code>null</code>.
+     * Creates and returns an ImageIcon that can be used for buttons that rely on this
+     * action. Returns <code>null</code> if <code>getIconName</code> returns
+     * <code>null</code>.
      */
     public Icon createIcon() {
         String name = getIconName();
@@ -141,43 +138,37 @@ public abstract class CayenneAction extends AbstractAction {
     }
 
     /**
-     * Returns the key under which this action should be stored in the
-     * ActionMap.
+     * Returns the key under which this action should be stored in the ActionMap.
      */
     public String getKey() {
         return (String) super.getValue(Action.DEFAULT);
     }
 
     /**
-     * Subclasses must implement this method instead of <code>actionPerformed</code>
-     * to allow for exception handling.
+     * Subclasses must implement this method instead of <code>actionPerformed</code> to
+     * allow for exception handling.
      */
     public abstract void performAction(ActionEvent e);
 
     /**
-     * Returns <code>true</code> if the action is enabled for the 
-     * specified "project path" - a path on the project tree to a 
-     * currently selected object. Default implementation simply 
-     * returns <code>false</code>.
+     * Returns <code>true</code> if the action is enabled for the specified "project
+     * path" - a path on the project tree to a currently selected object. Default
+     * implementation simply returns <code>false</code>.
      */
     public boolean enableForPath(ProjectPath obj) {
         return false;
     }
 
-    /** 
+    /**
      * Returns shared CayenneModeler mediator.
      */
     public EventController getMediator() {
-        return CayenneModelerFrame.getFrame().getController().getEventController();
-    }
-
-    public TopModel getTopModel() {
-        return CayenneModelerFrame.getFrame().getController().getTopModel();
+        return Application.getInstance().getFrameController().getEventController();
     }
 
     /**
-     * Internally calls <code>performAction</code>.
-     * Traps exceptions that ocurred during action processing.
+     * Internally calls <code>performAction</code>. Traps exceptions that ocurred
+     * during action processing.
      */
     public void actionPerformed(ActionEvent e) {
         try {
@@ -189,16 +180,14 @@ public abstract class CayenneAction extends AbstractAction {
     }
 
     /**
-     * Factory method that creates a menu item hooked up
-     * to this action.
+     * Factory method that creates a menu item hooked up to this action.
      */
     public JMenuItem buildMenu() {
         return new JMenuItem(this);
     }
 
     /**
-     * Factory method that creates a button hooked up
-     * to this action.
+     * Factory method that creates a button hooked up to this action.
      */
     public JButton buildButton() {
         return new CayenneToolbarButton(this);
@@ -206,6 +195,7 @@ public abstract class CayenneAction extends AbstractAction {
 
     /**
      * Returns true if this action is always enabled.
+     * 
      * @return boolean
      */
     public boolean isAlwaysOn() {
@@ -214,6 +204,7 @@ public abstract class CayenneAction extends AbstractAction {
 
     /**
      * Sets the alwaysOn.
+     * 
      * @param alwaysOn The alwaysOn to set
      */
     public void setAlwaysOn(boolean alwaysOn) {

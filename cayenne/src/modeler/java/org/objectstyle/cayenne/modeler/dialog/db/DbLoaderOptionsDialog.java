@@ -72,7 +72,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.access.DbLoader;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -103,7 +103,7 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
      */
     public DbLoaderOptionsDialog(Collection schemas, String dbUserName,
             boolean loadProcedures) {
-        super(CayenneModelerFrame.getFrame(), "DB Reengineering Options", true);
+        super(Application.getFrame(), "DB Reengineering Options", true);
 
         init();
         initController();

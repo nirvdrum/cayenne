@@ -56,66 +56,115 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
 
+import javax.swing.JFrame;
+
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.modeler.action.ExitAction;
+import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
 
 /**
- * TopController is the main controller object of the CayenneModeler.
+ * Controller of the main application frame.
  * 
  * @author Andrei Adamchik
  */
-public class TopController extends ModelerController {
+public class CayenneModelerController {
 
     protected EventController eventController;
     protected ActionController actionController;
 
-    protected CayenneModelerFrame view;
+    protected CayenneModelerFrame frame;
+    protected Application application;
+    protected Project currentProject;
+    protected File initialProject;
 
-    /**
-     * Constructor for TopController.
-     */
-    public TopController(CayenneModelerFrame view) {
-        this.view = view;
-        setModel(new TopModel());
+    public CayenneModelerController(Application application, File initialProject) {
+        this.application = application;
+        this.initialProject = initialProject;
+        this.frame = new CayenneModelerFrame(this);
 
         eventController = new EventController(this);
-        actionController = new ActionController(this);
+        actionController = new ActionController(application);
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public CayenneModelerFrame getFrame() {
+        return frame;
+    }
+
+    public Project getCurrentProject() {
+        return currentProject;
+    }
+
+    public void setCurrentProject(Project currentProject) {
+        this.currentProject = currentProject;
+    }
+
+    public EventController getEventController() {
+        return eventController;
+    }
+
+    protected void initBindings() {
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+
+            public void windowClosing(WindowEvent e) {
+                ((ExitAction) getApplication().getAction(ExitAction.getActionName()))
+                        .exit();
+            }
+        });
+    }
+
+    public void dataDomainSelectedAction(DataDomain domain) {
+        actionController.domainSelected(domain);
+    }
+
+    public void startupAction() {
+        initBindings();
+        frame.show();
+
+        // open project
+        if (initialProject != null) {
+            OpenProjectAction openAction = (OpenProjectAction) getApplication()
+                    .getAction(OpenProjectAction.getActionName());
+            openAction.openProject(initialProject);
+        }
     }
 
     /**
      * Action method invoked on project closing.
      */
-    protected void projectClosed(Control control) {
+    public void projectClosedAction() {
         // --- update view
-        RecentFileMenu recentFileMenu = view.getRecentFileMenu();
+        RecentFileMenu recentFileMenu = frame.getRecentFileMenu();
         recentFileMenu.rebuildFromPreferences();
         recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
 
-        if (view.getView() != null) {
-            view.getContentPane().remove(view.getView());
-            view.setView(null);
+        if (frame.getView() != null) {
+            frame.getContentPane().remove(frame.getView());
+            frame.setView(null);
         }
 
         // repaint is needed, since sometimes there is a
         // trace from menu left on the screen
-        view.repaint();
-        view.updateTitle();
+        frame.repaint();
+        frame.updateTitle();
 
-        // --- update model
-        getTopModel().setCurrentProject(null);
+        setCurrentProject(null);
 
-        // --- propagate control to child controllers
-        control.markUnmatched();
-        eventController.handleControl(control);
-
-        control.markUnmatched();
-        actionController.handleControl(control);
+        eventController.reset();
+        actionController.projectClosed();
 
         doUpdate("Project Closed...");
     }
@@ -124,22 +173,15 @@ public class TopController extends ModelerController {
      * Handles project opening control. Updates main frame, then delegates control to
      * child controllers.
      */
-    protected void projectOpened(Control control) {
-        // sanity check
-        if (!(control.getParameter() instanceof Project)) {
-            return;
-        }
+    public void projectOpenedAction(Project project) {
 
-        Project project = (Project) control.getParameter();
-
-        // update model
-        getTopModel().setCurrentProject(project);
+        setCurrentProject(project);
 
         // update main view
-        view.setView(new EditorView(eventController));
-        view.getContentPane().add(view.getView(), BorderLayout.CENTER);
-        view.validate();
-        view.updateTitle();
+        frame.setView(new EditorView(eventController));
+        frame.getContentPane().add(frame.getView(), BorderLayout.CENTER);
+        frame.validate();
+        frame.updateTitle();
 
         if (project.isLocationUndefined()) {
             doUpdate("New project created...");
@@ -149,11 +191,9 @@ public class TopController extends ModelerController {
         }
 
         // --- propagate control to child controllers
-        control.markUnmatched();
-        eventController.handleControl(control);
+        eventController.projectOpened(getFrame());
 
-        control.markUnmatched();
-        actionController.handleControl(control);
+        actionController.projectOpened();
 
         // --- check for load errors
         if (project.getLoadStatus().hasFailures()) {
@@ -162,27 +202,10 @@ public class TopController extends ModelerController {
             eventController.setDirty(true);
 
             // show warning dialog
-            ValidatorDialog.showDialog(view, eventController, new Validator(
+            ValidatorDialog.showDialog(frame, eventController, new Validator(
                     project,
                     project.getLoadStatus()));
         }
-    }
-
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(PROJECT_OPENED_ID)) {
-            projectOpened(control);
-        }
-        else if (control.matchesID(PROJECT_CLOSED_ID)) {
-            projectClosed(control);
-        }
-        else if (control.matchesID(DATA_DOMAIN_SELECTED_ID)) {
-            control.markUnmatched();
-            actionController.handleControl(control);
-        }
-    }
-
-    public EventController getEventController() {
-        return eventController;
     }
 
     /**
@@ -196,7 +219,7 @@ public class TopController extends ModelerController {
      * Performs status bar update with a message. Message will dissappear in 6 seconds.
      */
     protected void doUpdate(String message) {
-        view.getStatus().setText(message);
+        frame.getStatus().setText(message);
 
         // start message cleanup thread that would remove the message after X seconds
         if (message != null && message.trim().length() > 0) {
@@ -223,7 +246,7 @@ public class TopController extends ModelerController {
                 // ignore exception
             }
 
-            if (message.equals(view.getStatus().getText())) {
+            if (message.equals(frame.getStatus().getText())) {
                 doUpdate(null);
             }
         }

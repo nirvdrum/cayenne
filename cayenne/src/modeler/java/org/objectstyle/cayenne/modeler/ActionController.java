@@ -77,48 +77,32 @@ import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
 
 /**
  * @author Andrei Adamchik
  */
-public class ActionController extends ModelerController {
+public class ActionController {
 
-    /**
-     * Constructor for ActionController.
-     */
-    public ActionController(ModelerController parent) {
-        super(parent);
+    protected Application application;
+
+    public ActionController(Application application) {
+        this.application = application;
     }
 
-    /**
-     * Performs control handling, invoking appropriate action method.
-     */
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(PROJECT_OPENED_ID)) {
-            projectOpened();
-        } else if (control.matchesID(PROJECT_CLOSED_ID)) {
-            projectClosed();
-        } else if (control.matchesID(DATA_DOMAIN_SELECTED_ID)) {
-            domainSelected((DataDomain) control.getParameter());
-        }
-    }
-
-    protected void domainSelected(DataDomain domain) {
+    public void domainSelected(DataDomain domain) {
         enableDataDomainActions(domain);
         updateRemoveAction(domain);
     }
 
-    protected void projectOpened() {
+    public void projectOpened() {
         enableProjectActions();
         updateRemoveAction(null);
     }
 
-    protected void projectClosed() {
+    public void projectClosed() {
         disableAllActions();
-		getAction(ValidateAction.getActionName()).setEnabled(false);
-		getAction(ProjectAction.getActionName()).setEnabled(false);
+        getAction(ValidateAction.getActionName()).setEnabled(false);
+        getAction(ProjectAction.getActionName()).setEnabled(false);
         getAction(SaveAction.getActionName()).setEnabled(false);
         getAction(SaveAsAction.getActionName()).setEnabled(false);
         getAction(RevertAction.getActionName()).setEnabled(false);
@@ -135,23 +119,32 @@ public class ActionController extends ModelerController {
 
         if (selected == null) {
             name = "Remove";
-        } else if (selected instanceof DataDomain) {
+        }
+        else if (selected instanceof DataDomain) {
             name = "Remove DataDomain";
-        } else if (selected instanceof DataMap) {
+        }
+        else if (selected instanceof DataMap) {
             name = "Remove DataMap";
-        } else if (selected instanceof DbEntity) {
+        }
+        else if (selected instanceof DbEntity) {
             name = "Remove DbEntity";
-        } else if (selected instanceof ObjEntity) {
+        }
+        else if (selected instanceof ObjEntity) {
             name = "Remove ObjEntity";
-        } else if (selected instanceof DbAttribute) {
+        }
+        else if (selected instanceof DbAttribute) {
             name = "Remove DbAttribute";
-        } else if (selected instanceof ObjAttribute) {
+        }
+        else if (selected instanceof ObjAttribute) {
             name = "Remove ObjAttribute";
-        } else if (selected instanceof DbRelationship) {
+        }
+        else if (selected instanceof DbRelationship) {
             name = "Remove DbRelationship";
-        } else if (selected instanceof ObjRelationship) {
+        }
+        else if (selected instanceof ObjRelationship) {
             name = "Remove ObjRelationship";
-        } else {
+        }
+        else {
             name = "Remove";
         }
 
@@ -161,16 +154,16 @@ public class ActionController extends ModelerController {
     /**
      * Returns an action object for the specified key.
      */
-    protected CayenneAction getAction(String key) {
-        return (CayenneAction) getTopModel().getActionMap().get(key);
+    private CayenneAction getAction(String key) {
+        return application.getAction(key);
     }
 
-    /** 
+    /**
      * Disables all controlled actions.
      */
     protected void disableAllActions() {
         // disable everything we can
-        Object[] keys = getTopModel().getActionMap().allKeys();
+        Object[] keys = application.getActionMap().allKeys();
         int len = keys.length;
         for (int i = 0; i < len; i++) {
 
@@ -180,7 +173,7 @@ public class ActionController extends ModelerController {
                 continue;
             }
 
-            getTopModel().getActionMap().get(keys[i]).setEnabled(false);
+            application.getActionMap().get(keys[i]).setEnabled(false);
         }
     }
 
@@ -190,8 +183,8 @@ public class ActionController extends ModelerController {
     protected void enableProjectActions() {
         disableAllActions();
         getAction(CreateDomainAction.getActionName()).setEnabled(true);
-		getAction(ProjectAction.getActionName()).setEnabled(true);
-		getAction(ValidateAction.getActionName()).setEnabled(true);
+        getAction(ProjectAction.getActionName()).setEnabled(true);
+        getAction(ValidateAction.getActionName()).setEnabled(true);
         getAction(SaveAsAction.getActionName()).setEnabled(true);
     }
 
@@ -199,12 +192,10 @@ public class ActionController extends ModelerController {
      * Updates actions "on/off" state for the selected project path.
      */
     protected void updateActions(ProjectPath objectPath) {
-        Object[] keys = getTopModel().getActionMap().allKeys();
+        Object[] keys = application.getActionMap().allKeys();
         int len = keys.length;
         for (int i = 0; i < len; i++) {
-            CayenneAction action =
-                (CayenneAction) getTopModel().getActionMap().get(keys[i]);
-
+            CayenneAction action = getAction((String) keys[i]);
             action.setEnabled(action.enableForPath(objectPath));
         }
     }

@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
@@ -447,7 +447,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                         });
 
                 pane
-                        .createDialog(CayenneModelerFrame.getFrame(), "Update Class Name")
+                        .createDialog(Application.getFrame(), "Update Class Name")
                         .show();
                 if ("Change".equals(pane.getValue())) {
                     className.setText(suggestedClassName);

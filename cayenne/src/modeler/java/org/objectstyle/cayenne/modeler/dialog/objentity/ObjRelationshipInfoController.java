@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.dialog.ResolveDbRelationshipDialog;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
@@ -123,7 +123,7 @@ public class ObjRelationshipInfoController extends BasicController {
         ObjRelationshipInfoModel model = (ObjRelationshipInfoModel) getModel();
 
         if (model.savePath()) {
-            mediator.fireObjRelationshipEvent(new RelationshipEvent(CayenneModelerFrame
+            mediator.fireObjRelationshipEvent(new RelationshipEvent(Application
                     .getFrame(), model.getRelationship(), model
                     .getRelationship()
                     .getSourceEntity()));

@@ -65,17 +65,15 @@ import javax.swing.KeyStroke;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
-import org.objectstyle.cayenne.modeler.ModelerController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
-import org.objectstyle.cayenne.modeler.TopController;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
-import org.scopemvc.core.Control;
 
 /**
  * @author Andrei Adamchik
@@ -130,7 +128,7 @@ public class OpenProjectAction extends ProjectAction {
     public void openProject() {
         try {
             // Get the project file name (always cayenne.xml)
-            File file = fileChooser.openProjectFile(CayenneModelerFrame.getFrame());
+            File file = fileChooser.openProjectFile(Application.getFrame());
             if (file != null) {
                 openProject(file);
             }
@@ -151,25 +149,21 @@ public class OpenProjectAction extends ProjectAction {
         try {
             // Save dir path to the preferences
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
-            CayenneModelerFrame.getFrame().addToLastProjList(file.getAbsolutePath());
+            Application.getFrame().addToLastProjList(file.getAbsolutePath());
 
             Project project = Project.createProject(file);
-            CayenneModelerFrame
-                    .getFrame()
-                    .getController()
-                    .getTopModel()
-                    .setCurrentProject(project);
+            CayenneModelerController controller = Application
+                    .getInstance()
+                    .getFrameController();
+
+            controller.setCurrentProject(project);
+
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             }
             else {
-                Control control = new Control(
-                        ModelerController.PROJECT_OPENED_ID,
-                        project);
-
-                TopController controller = CayenneModelerFrame.getFrame().getController();
-                controller.handleControl(control);
+                controller.projectOpenedAction(project);
             }
         }
         catch (Exception ex) {
@@ -183,7 +177,7 @@ public class OpenProjectAction extends ProjectAction {
         String msg = (String) project.getUpgradeMessages().get(0);
         // need an upgrade
         int returnCode = JOptionPane.showConfirmDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                 "Project needs an upgrade to a newer version. " + msg + ". Upgrade?",
                 "Upgrade Needed",
                 JOptionPane.YES_NO_OPTION);

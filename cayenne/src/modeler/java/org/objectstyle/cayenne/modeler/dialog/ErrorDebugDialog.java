@@ -72,6 +72,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
@@ -97,7 +98,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
         }
 
         ErrorDebugDialog dialog =
-            new ErrorDebugDialog(CayenneModelerFrame.getFrame(), "CayenneModeler Error", th, true);
+            new ErrorDebugDialog(Application.getFrame(), "CayenneModeler Error", th, true);
         dialog.show();
     }
 
@@ -106,7 +107,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
             th.printStackTrace();
         }
 
-        WarningDialog dialog = new WarningDialog(CayenneModelerFrame.getFrame(), message, th, false);
+        WarningDialog dialog = new WarningDialog(Application.getFrame(), message, th, false);
         dialog.show();
     }
 

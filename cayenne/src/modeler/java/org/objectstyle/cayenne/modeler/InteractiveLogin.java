@@ -78,7 +78,7 @@ public class InteractiveLogin {
     }
 
     public void collectLoginInfo() {
-        CayenneModelerFrame frame = CayenneModelerFrame.getFrame();
+        CayenneModelerFrame frame = Application.getFrame();
         DbLoginPanel loginPanel = new DbLoginPanel(frame);
         loginPanel.setDataSrcInfo(dataSrcInfo);
 

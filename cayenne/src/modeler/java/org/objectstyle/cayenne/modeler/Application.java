@@ -55,7 +55,14 @@
  */
 package org.objectstyle.cayenne.modeler;
 
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Window;
+import java.io.File;
+
 import javax.swing.ActionMap;
+import javax.swing.JFrame;
+import javax.swing.JRootPane;
 
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
@@ -86,27 +93,86 @@ import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.project.Project;
+import org.scopemvc.controller.basic.ViewContext;
+import org.scopemvc.controller.swing.SwingContext;
+import org.scopemvc.core.View;
+import org.scopemvc.util.UIStrings;
+import org.scopemvc.view.swing.SwingView;
 
 /**
- * A top level MVC model object in CayenneModeler.
+ * A main modeler application class that provides a number of services to the Modeler
+ * components.
  * 
  * @author Andrei Adamchik
  */
-public class TopModel {
+public class Application {
 
-    protected Project currentProject;
+    // TODO: implement cleaner IoC approach to avoid using this singleton...
+    protected static Application instance;
+
+    protected CayenneModelerController frameController;
     protected ActionMap actionMap;
+    protected File initialProject;
 
-    /**
-     * Constructor for TopModel.
-     */
-    public TopModel() {
-        super();
-        initEmptyActions();
+    public static CayenneModelerFrame getFrame() {
+        return getInstance().getFrameController().getFrame();
     }
 
-    protected void initEmptyActions() {
+    public static Project getProject() {
+        return getInstance().getFrameController().getCurrentProject();
+    }
+
+    public static Application getInstance() {
+        return instance;
+    }
+
+    public Application() {
+        this(null);
+    }
+
+    public Application(File projectFile) {
+        this.initialProject = projectFile;
+    }
+
+    /**
+     * Returns an action for key.
+     */
+    public CayenneAction getAction(String key) {
+        return (CayenneAction) actionMap.get(key);
+    }
+
+    public ActionMap getActionMap() {
+        return actionMap;
+    }
+
+    public CayenneModelerController getFrameController() {
+        return frameController;
+    }
+
+    public void startup() {
+        // init subsystems
+
+        // actions
+        initActions();
+
+        // scope settings
+        // setup Scope..
+        // force Scope to use CayenneModeler properties
+        UIStrings.setPropertiesName(ModelerConstants.DEFAULT_MESSAGE_BUNDLE);
+        ViewContext.clearThreadContext();
+
+        // start main frame
+        this.frameController = new CayenneModelerController(this, initialProject);
+
+        // update scope to work nicely with main frame
+        ViewContext.setGlobalContext(new ModelerContext(frameController.getFrame()));
+
+        frameController.startupAction();
+    }
+
+    protected void initActions() {
         // build action map
         actionMap = new ActionMap();
 
@@ -200,33 +266,73 @@ public class TopModel {
         actionMap.put(exitAction.getKey(), exitAction);
     }
 
-    /**
-     * Returns an action for key.
-     */
-    public CayenneAction getAction(String key) {
-        return (CayenneAction) actionMap.get(key);
-    }
+    class ModelerContext extends SwingContext {
 
-    public ActionMap getActionMap() {
-        return actionMap;
-    }
+        JFrame frame;
 
-    /**
-     * Returns the currentProject.
-     * 
-     * @return Project
-     */
-    public Project getCurrentProject() {
-        return currentProject;
-    }
+        public ModelerContext(JFrame frame) {
+            this.frame = frame;
+        }
 
-    /**
-     * Sets the currentProject.
-     * 
-     * @param currentProject The currentProject to set
-     */
-    public void setCurrentProject(Project currentProject) {
-        this.currentProject = currentProject;
-    }
+        protected void showViewInPrimaryWindow(SwingView view) {
+        }
 
+        /**
+         * Creates closeable dialogs.
+         */
+        protected void showViewInDialog(SwingView inView) {
+            // NOTE:
+            // copied from superclass, except that JDialog is substituted for
+            // CayenneDialog
+            // Keep in mind when upgrading Scope to the newer versions.
+
+            // Make a JDialog to contain the view.
+            Window parentWindow = getDefaultParentWindow();
+
+            final CayenneDialog dialog;
+            if (parentWindow instanceof Dialog) {
+                dialog = new CayenneDialog((Dialog) parentWindow);
+            }
+            else {
+                dialog = new CayenneDialog((Frame) parentWindow);
+            }
+
+            // Set title, modality, resizability
+            if (inView.getTitle() != null) {
+                dialog.setTitle(inView.getTitle());
+            }
+            if (inView.getDisplayMode() == SwingView.MODAL_DIALOG) {
+                dialog.setModal(true);
+            }
+            else {
+                dialog.setModal(false);
+            }
+            dialog.setResizable(inView.isResizable());
+
+            setupWindow(dialog.getRootPane(), inView, true);
+            dialog.toFront();
+        }
+
+        /**
+         * Overrides super implementation to allow using Scope together with normal Swing
+         * code that CayenneModeler already has.
+         */
+        public JRootPane findRootPaneFor(View view) {
+            JRootPane pane = super.findRootPaneFor(view);
+
+            if (pane != null) {
+                return pane;
+            }
+
+            if (((SwingView) view).getDisplayMode() != SwingView.PRIMARY_WINDOW) {
+                return pane;
+            }
+
+            return frame.getRootPane();
+        }
+
+        protected Window getDefaultParentWindow() {
+            return frame;
+        }
+    }
 }

@@ -70,7 +70,6 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 
 import com.jgoodies.plaf.plastic.PlasticLookAndFeel;
@@ -122,25 +121,19 @@ public class Main {
         return null;
     }
 
-    protected void runModeler(final File projectFile) {
+    protected void runModeler(File projectFile) {
         logObj.info("Starting CayenneModeler.");
 
         // set up UI
         configureLookAndFeel();
 
+        Application.instance = new Application(projectFile);
+
         // start frame and load project from EventDispatchThread...
         Runnable runnable = new Runnable() {
 
             public void run() {
-
-                CayenneModelerFrame frame = new CayenneModelerFrame();
-
-                // load project
-                if (projectFile != null) {
-                    OpenProjectAction openAction = (OpenProjectAction) frame
-                            .getAction(OpenProjectAction.getActionName());
-                    openAction.openProject(projectFile);
-                }
+                Application.instance.startup();
             }
         };
 

@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.event.DomainEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.project.ApplicationProject;
@@ -96,7 +96,7 @@ public class CreateDomainAction extends CayenneAction {
 
     protected void createDomain() {
         // only ApplicationProjects can have domains, so this cast is reasonable
-        ApplicationProject project = (ApplicationProject) CayenneModelerFrame.getProject();
+        ApplicationProject project = (ApplicationProject) Application.getProject();
 
         EventController mediator = getMediator();
         DataDomain domain =

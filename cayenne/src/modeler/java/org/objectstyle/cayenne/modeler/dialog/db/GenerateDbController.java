@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
@@ -171,7 +171,7 @@ public class GenerateDbController extends BasicController {
         catch (Exception ex) {
             logObj.info("problem generating schema (missing map info?)", ex);
             JOptionPane.showMessageDialog(
-            CayenneModelerFrame.getFrame(),
+            Application.getFrame(),
                 "Error generating schema: " + ex.getMessage());
             return;
         }
@@ -179,7 +179,7 @@ public class GenerateDbController extends BasicController {
         // check if there are any tables to generate
         if (generator.isEmpty(false)) {
             logObj.info("Nothing to generate");
-            JOptionPane.showMessageDialog(CayenneModelerFrame.getFrame(), "Nothing to generate.");
+            JOptionPane.showMessageDialog(Application.getFrame(), "Nothing to generate.");
             return;
         }
 
@@ -230,7 +230,7 @@ public class GenerateDbController extends BasicController {
             if (dataSourceInfo.getAdapterClassName() == null
                 || dataSourceInfo.getAdapterClassName().trim().length() == 0) {
                 JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                     "Must specify DB Adapter");
                 continue;
             }
@@ -244,7 +244,7 @@ public class GenerateDbController extends BasicController {
             catch (InstantiationException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                     e.getMessage(),
                     "Error creating DbAdapter",
                     JOptionPane.ERROR_MESSAGE);
@@ -253,7 +253,7 @@ public class GenerateDbController extends BasicController {
             catch (IllegalAccessException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                     e.getMessage(),
                     "Error creating DbAdapter",
                     JOptionPane.ERROR_MESSAGE);
@@ -262,7 +262,7 @@ public class GenerateDbController extends BasicController {
             catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                     e.getMessage(),
                     "Error creating DbAdapter",
                     JOptionPane.ERROR_MESSAGE);
@@ -277,7 +277,7 @@ public class GenerateDbController extends BasicController {
       * problems.
       */
     protected Collection validateDbEntities() {
-        Validator validator = CayenneModelerFrame.getProject().getValidator();
+        Validator validator = Application.getProject().getValidator();
         int validationCode = validator.validate();
 
         // if there were errors, filter out those related to

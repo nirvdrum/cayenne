@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.PackageUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SchemaUpdateController;
@@ -372,7 +372,7 @@ public class DataMapView extends JPanel {
 
         // search for matching map name across domains, as currently they have to be
         // unique globally
-        Configuration config = ((ApplicationProject) CayenneModelerFrame.getProject())
+        Configuration config = ((ApplicationProject) Application.getProject())
                 .getConfiguration();
 
         DataMap matchingMap = null;

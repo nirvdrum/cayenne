@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.AboutDialog;
 
 /**
@@ -85,6 +85,6 @@ public class AboutAction extends CayenneAction {
     }
 
     public void showAboutDialog() {
-        new AboutDialog(CayenneModelerFrame.getFrame());
+        new AboutDialog(Application.getFrame());
     }
 }

@@ -12,7 +12,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
@@ -41,7 +41,7 @@ public class ImportDataMapAction extends CayenneAction {
     }
 
     protected void importDataMap() {
-        File dataMapFile = selectDataMap(CayenneModelerFrame.getFrame());
+        File dataMapFile = selectDataMap(Application.getFrame());
         if (dataMapFile == null) {
             return;
         }
@@ -78,7 +78,7 @@ public class ImportDataMapAction extends CayenneAction {
         catch (DataMapException ex) {
             logObj.info("Error importing DataMap.", ex);
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                 "Error reading DataMap: " + ex.getMessage(),
                 "Can't Open DataMap",
                 JOptionPane.OK_OPTION);

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
@@ -177,7 +177,7 @@ public class ImportDbAction extends CayenneAction {
         catch (Throwable th) {
             th.printStackTrace();
             JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
+                    Application.getFrame(),
                     th.getMessage(),
                     "Error loading adapter",
                     JOptionPane.ERROR_MESSAGE);
@@ -208,7 +208,7 @@ public class ImportDbAction extends CayenneAction {
                 logObj.warn("Nested Exception: ", ex);
             }
             JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
+                    Application.getFrame(),
                     e.getMessage(),
                     "Error Connecting to the Database",
                     JOptionPane.ERROR_MESSAGE);
@@ -218,7 +218,7 @@ public class ImportDbAction extends CayenneAction {
             logObj.warn("Error loading driver. Classpath: "
                     + System.getProperty("java.class.path"), e);
             JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
+                    Application.getFrame(),
                     "Class not found: " + e.getLocalizedMessage(),
                     "Error Loading Driver",
                     JOptionPane.ERROR_MESSAGE);
@@ -228,7 +228,7 @@ public class ImportDbAction extends CayenneAction {
             logObj.warn("Error loading driver. Classpath: "
                     + System.getProperty("java.class.path"), e);
             JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
+                    Application.getFrame(),
                     "Error Loading Driver: " + e.getLocalizedMessage(),
                     "Error Loading Driver",
                     JOptionPane.ERROR_MESSAGE);
@@ -237,7 +237,7 @@ public class ImportDbAction extends CayenneAction {
         catch (Throwable e) {
             logObj.warn("Error Connecting to the Database", e);
             JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
+                    Application.getFrame(),
                     e.getMessage(),
                     "Error Connecting to the Database",
                     JOptionPane.ERROR_MESSAGE);

@@ -60,8 +60,9 @@ import java.util.Vector;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 
@@ -126,8 +127,6 @@ public class RecentFileMenu extends JMenu {
     }
 
     protected Action findAction() {
-        return CayenneModelerFrame
-                .getFrame()
-                .getAction(OpenProjectAction.getActionName());
+        return Application.getInstance().getAction(OpenProjectAction.getActionName());
     }
 }

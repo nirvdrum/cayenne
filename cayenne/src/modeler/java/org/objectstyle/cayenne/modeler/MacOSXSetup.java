@@ -4,7 +4,6 @@ import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 
-import com.apple.eawt.Application;
 import com.apple.eawt.ApplicationAdapter;
 import com.apple.eawt.ApplicationEvent;
 
@@ -19,7 +18,7 @@ class MacOSXSetup {
 
     static void configureMacOSX() {
         // Application.getApplication().setEnabledPreferencesMenu(true);
-        Application.getApplication().addApplicationListener(new MacEventsAdapter());
+        com.apple.eawt.Application.getApplication().addApplicationListener(new MacEventsAdapter());
     }
 
     static class MacEventsAdapter extends ApplicationAdapter {
@@ -39,7 +38,7 @@ class MacOSXSetup {
         }
 
         CayenneAction getAction(String name) {
-            return CayenneModelerFrame.getFrame().getAction(name);
+            return Application.getInstance().getAction(name);
         }
     }
 }

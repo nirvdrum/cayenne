@@ -57,13 +57,11 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.ModelerController;
-import org.objectstyle.cayenne.modeler.TopController;
 import org.objectstyle.cayenne.modeler.dialog.UnsavedChangesDialog;
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.scopemvc.core.Control;
 
 /**
  * @author Andrei Adamchik
@@ -100,10 +98,10 @@ public class ProjectAction extends CayenneAction {
             return false;
         }
 
-        Control control = new Control(ModelerController.PROJECT_CLOSED_ID);
-
-        TopController controller = CayenneModelerFrame.getFrame().getController();
-        controller.handleControl(control);
+        CayenneModelerController controller = Application
+                .getInstance()
+                .getFrameController();
+        controller.projectClosedAction();
 
         return true;
     }
@@ -114,8 +112,7 @@ public class ProjectAction extends CayenneAction {
     public boolean checkSaveOnClose() {
         EventController mediator = getMediator();
         if (mediator != null && mediator.isDirty()) {
-            UnsavedChangesDialog dialog = new UnsavedChangesDialog(CayenneModelerFrame
-                    .getFrame());
+            UnsavedChangesDialog dialog = new UnsavedChangesDialog(Application.getFrame());
             dialog.show();
 
             if (dialog.shouldCancel()) {
@@ -128,7 +125,7 @@ public class ProjectAction extends CayenneAction {
                         this,
                         ActionEvent.ACTION_PERFORMED,
                         "SaveAll");
-                CayenneModelerFrame
+                Application
                         .getFrame()
                         .getAction(SaveAction.getActionName())
                         .actionPerformed(e);

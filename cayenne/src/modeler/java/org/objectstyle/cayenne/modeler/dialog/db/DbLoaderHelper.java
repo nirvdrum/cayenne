@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.LongRunningTask;
@@ -120,7 +120,7 @@ public class DbLoaderHelper {
 
     static synchronized DbLoaderMergeDialog getMergeDialogInstance() {
         if (mergeDialog == null) {
-            mergeDialog = new DbLoaderMergeDialog(CayenneModelerFrame.getFrame());
+            mergeDialog = new DbLoaderMergeDialog(Application.getFrame());
         }
 
         return mergeDialog;
@@ -165,7 +165,7 @@ public class DbLoaderHelper {
         stoppingReverseEngineering = false;
 
         // load schemas...
-        LongRunningTask loadSchemasTask = new LoadSchemasTask(CayenneModelerFrame
+        LongRunningTask loadSchemasTask = new LoadSchemasTask(Application
                 .getFrame(), "Loading Schemas");
 
         loadSchemasTask.startAndWait();
@@ -205,7 +205,7 @@ public class DbLoaderHelper {
         this.procedureNamePattern = dialog.getProcedureNamePattern();
 
         // load DataMap...
-        LongRunningTask loadDataMapTask = new LoadDataMapTask(CayenneModelerFrame
+        LongRunningTask loadDataMapTask = new LoadDataMapTask(Application
                 .getFrame(), "Reengineering DB");
         loadDataMapTask.startAndWait();
     }
@@ -216,7 +216,7 @@ public class DbLoaderHelper {
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                JOptionPane.showMessageDialog(CayenneModelerFrame.getFrame(), th
+                JOptionPane.showMessageDialog(Application.getFrame(), th
                         .getMessage(), message, JOptionPane.ERROR_MESSAGE);
             }
         });
@@ -286,7 +286,7 @@ public class DbLoaderHelper {
 
             if (existingMap) {
                 mediator.fireDbEntityEvent(new EntityEvent(
-                        CayenneModelerFrame.getFrame(),
+                        Application.getFrame(),
                         entity,
                         EntityEvent.REMOVE));
             }
@@ -296,7 +296,7 @@ public class DbLoaderHelper {
             checkCanceled();
 
             if (existingMap) {
-                mediator.fireObjEntityEvent(new EntityEvent(CayenneModelerFrame
+                mediator.fireObjEntityEvent(new EntityEvent(Application
                         .getFrame(), entity, EntityEvent.REMOVE));
             }
         }
@@ -420,17 +420,17 @@ public class DbLoaderHelper {
             loadStatusNote = "Updating view...";
             if (mediator.getCurrentDataMap() != null) {
                 mediator.fireDataMapEvent(new DataMapEvent(
-                        CayenneModelerFrame.getFrame(),
+                        Application.getFrame(),
                         dataMap,
                         MapEvent.CHANGE));
                 mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(
-                        CayenneModelerFrame.getFrame(),
+                        Application.getFrame(),
                         dataMap,
                         mediator.getCurrentDataDomain(),
                         mediator.getCurrentDataNode()));
             }
             else {
-                mediator.addDataMap(CayenneModelerFrame.getFrame(), dataMap);
+                mediator.addDataMap(Application.getFrame(), dataMap);
             }
         }
     }

@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
@@ -327,7 +327,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
                                 + " \"To Dep PK\" relationships using this attribute?";
 
                     int answer =
-                        JOptionPane.showConfirmDialog(CayenneModelerFrame.getFrame(), message);
+                        JOptionPane.showConfirmDialog(Application.getFrame(), message);
                     if (answer != JOptionPane.YES_OPTION) {
                         // no action needed
                         return false;

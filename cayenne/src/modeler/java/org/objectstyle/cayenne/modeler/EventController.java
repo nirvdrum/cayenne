@@ -116,21 +116,19 @@ import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.query.Query;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
 
-/** 
- * Implementation of event dispatching in CayenneModeler using <i>mediator</i>
- * design pattern. 
- * 
- * <p>TODO: Refactor the event model, so that events are generic and contain "path"
- * to a project node in question. After this is done, EventController should no longer
- * maintain the selection model (currentXYZ ivars), rather it should update internal model.  
+/**
+ * Implementation of event dispatching in CayenneModeler using <i>mediator </i> design
+ * pattern.
+ * <p>
+ * TODO: Refactor the event model, so that events are generic and contain "path" to a
+ * project node in question. After this is done, EventController should no longer maintain
+ * the selection model (currentXYZ ivars), rather it should update internal model.
  * </p>
  * 
  * @author Andrei Adamchik
  */
-public class EventController extends ModelerController {
+public class EventController {
 
     private static Logger logObj = Logger.getLogger(EventController.class);
 
@@ -152,40 +150,25 @@ public class EventController extends ModelerController {
     /** Changes have been made, need to be saved. */
     protected boolean dirty;
 
-    public EventController(ModelerController parent) {
-        super(parent);
+    protected CayenneModelerController parent;
+
+    public EventController(CayenneModelerController parent) {
+        this.parent = parent;
         this.listenerList = new EventListenerList();
     }
 
-    /**
-      * Performs control handling.
-      */
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(PROJECT_CLOSED_ID)) {
-            reset();
-        }
-        else if (control.matchesID(PROJECT_OPENED_ID)) {
-            addDataNodeDisplayListener(CayenneModelerFrame.getFrame());
-            addDataMapDisplayListener(CayenneModelerFrame.getFrame());
-            addObjEntityDisplayListener(CayenneModelerFrame.getFrame());
-            addDbEntityDisplayListener(CayenneModelerFrame.getFrame());
-            addObjAttributeDisplayListener(CayenneModelerFrame.getFrame());
-            addDbAttributeDisplayListener(CayenneModelerFrame.getFrame());
-            addObjRelationshipDisplayListener(CayenneModelerFrame.getFrame());
-            addDbRelationshipDisplayListener(CayenneModelerFrame.getFrame());
-            addQueryDisplayListener(CayenneModelerFrame.getFrame());
-            addProcedureDisplayListener(CayenneModelerFrame.getFrame());
-            addProcedureParameterDisplayListener(CayenneModelerFrame.getFrame());
-        }
-    }
-
-    /**
-     * Sends control to parent controller.
-     */
-    protected void sendControlToParent(String id, Object parameter) {
-        if (getParent() != null) {
-            getParent().handleControl(new Control(id, parameter));
-        }
+    public void projectOpened(CayenneModelerFrame frame) {
+        addDataNodeDisplayListener(frame);
+        addDataMapDisplayListener(frame);
+        addObjEntityDisplayListener(frame);
+        addDbEntityDisplayListener(frame);
+        addObjAttributeDisplayListener(frame);
+        addDbAttributeDisplayListener(frame);
+        addObjRelationshipDisplayListener(frame);
+        addDbRelationshipDisplayListener(frame);
+        addQueryDisplayListener(frame);
+        addProcedureDisplayListener(frame);
+        addProcedureParameterDisplayListener(frame);
     }
 
     public void reset() {
@@ -361,7 +344,8 @@ public class EventController extends ModelerController {
         addListener(ProcedureParameterListener.class, listener);
     }
 
-    public void addProcedureParameterDisplayListener(ProcedureParameterDisplayListener listener) {
+    public void addProcedureParameterDisplayListener(
+            ProcedureParameterDisplayListener listener) {
         addListener(ProcedureParameterDisplayListener.class, listener);
     }
 
@@ -381,12 +365,13 @@ public class EventController extends ModelerController {
             temp.currentDomainChanged(e);
         }
 
-        // also send control to parent
-        sendControlToParent(DATA_DOMAIN_SELECTED_ID, currentDomain);
+        parent.dataDomainSelectedAction(currentDomain);
     }
 
-    /** Informs all listeners of the DomainEvent. 
-      * Does not send the event to its originator. */
+    /**
+     * Informs all listeners of the DomainEvent. Does not send the event to its
+     * originator.
+     */
     public void fireDomainEvent(DomainEvent e) {
         setDirty(true);
 
@@ -395,18 +380,18 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             DomainListener temp = (DomainListener) list[i];
             switch (e.getId()) {
-                case DomainEvent.ADD :
+                case DomainEvent.ADD:
                     temp.domainAdded(e);
                     break;
-                case DomainEvent.CHANGE :
+                case DomainEvent.CHANGE:
                     temp.domainChanged(e);
                     break;
-                case DomainEvent.REMOVE :
+                case DomainEvent.REMOVE:
                     temp.domainRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid DomainEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid DomainEvent type: "
+                            + e.getId());
             }
         }
     }
@@ -424,33 +409,35 @@ public class EventController extends ModelerController {
         }
     }
 
-    /** Informs all listeners of the DataNodeEvent. 
-      * Does not send the event to its originator. */
+    /**
+     * Informs all listeners of the DataNodeEvent. Does not send the event to its
+     * originator.
+     */
     public void fireDataNodeEvent(DataNodeEvent e) {
         EventListener[] list = getListeners(DataNodeListener.class);
         debugEvent(e, list);
 
         // FIXME: "dirty" flag and other procesisng is
-        // done in the loop. Loop should only care about 
+        // done in the loop. Loop should only care about
         // notifications...
         for (int i = 0; i < list.length; i++) {
             DataNodeListener temp = (DataNodeListener) list[i];
             switch (e.getId()) {
-                case DataNodeEvent.ADD :
+                case DataNodeEvent.ADD:
                     temp.dataNodeAdded(e);
                     setDirty(true);
                     break;
-                case DataNodeEvent.CHANGE :
+                case DataNodeEvent.CHANGE:
                     temp.dataNodeChanged(e);
                     setDirty(true);
                     break;
-                case DataNodeEvent.REMOVE :
+                case DataNodeEvent.REMOVE:
                     temp.dataNodeRemoved(e);
                     setDirty(true);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid DataNodeEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid DataNodeEvent type: "
+                            + e.getId());
             }
         }
 
@@ -472,9 +459,9 @@ public class EventController extends ModelerController {
 
     }
 
-    /** 
-     * Informs all listeners of the DataMapEvent. 
-     * Does not send the event to its originator. 
+    /**
+     * Informs all listeners of the DataMapEvent. Does not send the event to its
+     * originator.
      */
     public void fireDataMapEvent(DataMapEvent e) {
         EventListener[] list = getListeners(DataMapListener.class);
@@ -488,24 +475,26 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             DataMapListener listener = (DataMapListener) list[i];
             switch (e.getId()) {
-                case DataMapEvent.ADD :
+                case DataMapEvent.ADD:
                     listener.dataMapAdded(e);
                     break;
-                case DataMapEvent.CHANGE :
+                case DataMapEvent.CHANGE:
                     listener.dataMapChanged(e);
                     break;
-                case DataMapEvent.REMOVE :
+                case DataMapEvent.REMOVE:
                     listener.dataMapRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid DataMapEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid DataMapEvent type: "
+                            + e.getId());
             }
         }
     }
 
-    /** Informs all listeners of the EntityEvent. 
-      * Does not send the event to its originator. */
+    /**
+     * Informs all listeners of the EntityEvent. Does not send the event to its
+     * originator.
+     */
     public void fireObjEntityEvent(EntityEvent e) {
         EventListener[] list = getListeners(ObjEntityListener.class);
         debugEvent(e, list);
@@ -518,24 +507,26 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             ObjEntityListener temp = (ObjEntityListener) list[i];
             switch (e.getId()) {
-                case EntityEvent.ADD :
+                case EntityEvent.ADD:
                     temp.objEntityAdded(e);
                     break;
-                case EntityEvent.CHANGE :
+                case EntityEvent.CHANGE:
                     temp.objEntityChanged(e);
                     break;
-                case EntityEvent.REMOVE :
+                case EntityEvent.REMOVE:
                     temp.objEntityRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid EntityEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid EntityEvent type: "
+                            + e.getId());
             }
         }
     }
 
-    /** Informs all listeners of the EntityEvent. 
-      * Does not send the event to its originator. */
+    /**
+     * Informs all listeners of the EntityEvent. Does not send the event to its
+     * originator.
+     */
     public void fireDbEntityEvent(EntityEvent e) {
         EventListener[] list = getListeners(DbEntityListener.class);
         debugEvent(e, list);
@@ -548,25 +539,25 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             DbEntityListener temp = (DbEntityListener) list[i];
             switch (e.getId()) {
-                case EntityEvent.ADD :
+                case EntityEvent.ADD:
                     temp.dbEntityAdded(e);
                     break;
-                case EntityEvent.CHANGE :
+                case EntityEvent.CHANGE:
                     temp.dbEntityChanged(e);
                     break;
-                case EntityEvent.REMOVE :
+                case EntityEvent.REMOVE:
                     temp.dbEntityRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid EntityEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid EntityEvent type: "
+                            + e.getId());
             }
         }
     }
 
-    /** 
-     * Informs all listeners of the ProcedureEvent. 
-     * Does not send the event to its originator. 
+    /**
+     * Informs all listeners of the ProcedureEvent. Does not send the event to its
+     * originator.
      */
     public void fireQueryEvent(QueryEvent e) {
         EventListener[] list = getListeners(QueryListener.class);
@@ -580,25 +571,25 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             QueryListener listener = (QueryListener) list[i];
             switch (e.getId()) {
-                case EntityEvent.ADD :
+                case EntityEvent.ADD:
                     listener.queryAdded(e);
                     break;
-                case EntityEvent.CHANGE :
+                case EntityEvent.CHANGE:
                     listener.queryChanged(e);
                     break;
-                case EntityEvent.REMOVE :
+                case EntityEvent.REMOVE:
                     listener.queryRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid ProcedureEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid ProcedureEvent type: "
+                            + e.getId());
             }
         }
     }
 
-    /** 
-     * Informs all listeners of the ProcedureEvent. 
-     * Does not send the event to its originator. 
+    /**
+     * Informs all listeners of the ProcedureEvent. Does not send the event to its
+     * originator.
      */
     public void fireProcedureEvent(ProcedureEvent e) {
         EventListener[] list = getListeners(ProcedureListener.class);
@@ -612,44 +603,44 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             ProcedureListener listener = (ProcedureListener) list[i];
             switch (e.getId()) {
-                case EntityEvent.ADD :
+                case EntityEvent.ADD:
                     listener.procedureAdded(e);
                     break;
-                case EntityEvent.CHANGE :
+                case EntityEvent.CHANGE:
                     listener.procedureChanged(e);
                     break;
-                case EntityEvent.REMOVE :
+                case EntityEvent.REMOVE:
                     listener.procedureRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid ProcedureEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid ProcedureEvent type: "
+                            + e.getId());
             }
         }
     }
 
-    /** 
-       * Informs all listeners of the ProcedureEvent. 
-       * Does not send the event to its originator. 
-       */
+    /**
+     * Informs all listeners of the ProcedureEvent. Does not send the event to its
+     * originator.
+     */
     public void fireProcedureParameterEvent(ProcedureParameterEvent e) {
         setDirty(true);
         EventListener[] list = getListeners(ProcedureParameterListener.class);
         for (int i = 0; i < list.length; i++) {
             ProcedureParameterListener listener = (ProcedureParameterListener) list[i];
             switch (e.getId()) {
-                case EntityEvent.ADD :
+                case EntityEvent.ADD:
                     listener.procedureParameterAdded(e);
                     break;
-                case EntityEvent.CHANGE :
+                case EntityEvent.CHANGE:
                     listener.procedureParameterChanged(e);
                     break;
-                case EntityEvent.REMOVE :
+                case EntityEvent.REMOVE:
                     listener.procedureParameterRemoved(e);
                     break;
-                default :
+                default:
                     throw new IllegalArgumentException(
-                        "Invalid ProcedureParameterEvent type: " + e.getId());
+                            "Invalid ProcedureParameterEvent type: " + e.getId());
             }
         }
     }
@@ -722,8 +713,7 @@ public class EventController extends ModelerController {
         EventListener[] list = getListeners(ProcedureParameterDisplayListener.class);
         debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
-            ProcedureParameterDisplayListener listener =
-                (ProcedureParameterDisplayListener) list[i];
+            ProcedureParameterDisplayListener listener = (ProcedureParameterDisplayListener) list[i];
             listener.currentProcedureParameterChanged(e);
         }
 
@@ -745,7 +735,7 @@ public class EventController extends ModelerController {
         }
     }
 
-    /** Notifies all listeners of the change(add, remove) and does the change.*/
+    /** Notifies all listeners of the change(add, remove) and does the change. */
     public void fireDbAttributeEvent(AttributeEvent e) {
         setDirty(true);
         EventListener[] list = getListeners(DbAttributeListener.class);
@@ -753,18 +743,18 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             DbAttributeListener temp = (DbAttributeListener) list[i];
             switch (e.getId()) {
-                case AttributeEvent.ADD :
+                case AttributeEvent.ADD:
                     temp.dbAttributeAdded(e);
                     break;
-                case AttributeEvent.CHANGE :
+                case AttributeEvent.CHANGE:
                     temp.dbAttributeChanged(e);
                     break;
-                case AttributeEvent.REMOVE :
+                case AttributeEvent.REMOVE:
                     temp.dbAttributeRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid AttributeEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid AttributeEvent type: "
+                            + e.getId());
             }
         }
     }
@@ -772,7 +762,7 @@ public class EventController extends ModelerController {
     public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e) {
         this.fireDbEntityDisplayEvent(e);
         clearState();
-        // Must follow DbEntityDisplayEvent, 
+        // Must follow DbEntityDisplayEvent,
         // as it resets curr Attr and Rel values to null.
         this.currentDbAttr = (DbAttribute) e.getAttribute();
         this.currentDbEntity = (DbEntity) e.getEntity();
@@ -787,7 +777,7 @@ public class EventController extends ModelerController {
         }
     }
 
-    /** Notifies all listeners of the change (add, remove) and does the change.*/
+    /** Notifies all listeners of the change (add, remove) and does the change. */
     public void fireObjAttributeEvent(AttributeEvent e) {
         setDirty(true);
         EventListener[] list = getListeners(ObjAttributeListener.class);
@@ -795,25 +785,25 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             ObjAttributeListener temp = (ObjAttributeListener) list[i];
             switch (e.getId()) {
-                case AttributeEvent.ADD :
+                case AttributeEvent.ADD:
                     temp.objAttributeAdded(e);
                     break;
-                case AttributeEvent.CHANGE :
+                case AttributeEvent.CHANGE:
                     temp.objAttributeChanged(e);
                     break;
-                case AttributeEvent.REMOVE :
+                case AttributeEvent.REMOVE:
                     temp.objAttributeRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid AttributeEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid AttributeEvent type: "
+                            + e.getId());
             }
         }
     }
 
     public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e) {
         this.fireObjEntityDisplayEvent(e);
-        // Must follow ObjEntityDisplayEvent, 
+        // Must follow ObjEntityDisplayEvent,
         // as it resets curr Attr and Rel values to null.
         this.currentObjAttr = (ObjAttribute) e.getAttribute();
         this.currentObjEntity = (ObjEntity) e.getEntity();
@@ -827,7 +817,7 @@ public class EventController extends ModelerController {
         }
     }
 
-    /** Notifies all listeners of the change(add, remove) and does the change.*/
+    /** Notifies all listeners of the change(add, remove) and does the change. */
     public void fireDbRelationshipEvent(RelationshipEvent e) {
         setDirty(true);
         EventListener[] list = getListeners(DbRelationshipListener.class);
@@ -835,18 +825,18 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             DbRelationshipListener temp = (DbRelationshipListener) list[i];
             switch (e.getId()) {
-                case RelationshipEvent.ADD :
+                case RelationshipEvent.ADD:
                     temp.dbRelationshipAdded(e);
                     break;
-                case RelationshipEvent.CHANGE :
+                case RelationshipEvent.CHANGE:
                     temp.dbRelationshipChanged(e);
                     break;
-                case RelationshipEvent.REMOVE :
+                case RelationshipEvent.REMOVE:
                     temp.dbRelationshipRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid RelationshipEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid RelationshipEvent type: "
+                            + e.getId());
             }
         }
     }
@@ -858,7 +848,7 @@ public class EventController extends ModelerController {
         this.currentDbEntity = (DbEntity) e.getEntity();
         this.currentMap = e.getDataMap();
         this.currentDomain = e.getDomain();
-        // Must follow DbEntityDisplayEvent, 
+        // Must follow DbEntityDisplayEvent,
         // as it resets curr Attr and Rel values to null.
         currentDbRel = (DbRelationship) e.getRelationship();
         EventListener[] list = getListeners(DbRelationshipDisplayListener.class);
@@ -869,7 +859,7 @@ public class EventController extends ModelerController {
         }
     }
 
-    /** Notifies all listeners of the change(add, remove) and does the change.*/
+    /** Notifies all listeners of the change(add, remove) and does the change. */
     public void fireObjRelationshipEvent(RelationshipEvent e) {
         setDirty(true);
         EventListener[] list = getListeners(ObjRelationshipListener.class);
@@ -878,18 +868,18 @@ public class EventController extends ModelerController {
         for (int i = 0; i < list.length; i++) {
             ObjRelationshipListener temp = (ObjRelationshipListener) list[i];
             switch (e.getId()) {
-                case RelationshipEvent.ADD :
+                case RelationshipEvent.ADD:
                     temp.objRelationshipAdded(e);
                     break;
-                case RelationshipEvent.CHANGE :
+                case RelationshipEvent.CHANGE:
                     temp.objRelationshipChanged(e);
                     break;
-                case RelationshipEvent.REMOVE :
+                case RelationshipEvent.REMOVE:
                     temp.objRelationshipRemoved(e);
                     break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Invalid RelationshipEvent type: " + e.getId());
+                default:
+                    throw new IllegalArgumentException("Invalid RelationshipEvent type: "
+                            + e.getId());
             }
         }
     }
@@ -898,7 +888,7 @@ public class EventController extends ModelerController {
         if (e.getRelationship() == this.getCurrentObjRelationship())
             e.setRelationshipChanged(false);
         this.fireObjEntityDisplayEvent(e);
-        // Must follow DbEntityDisplayEvent, 
+        // Must follow DbEntityDisplayEvent,
         // as it resets curr Attr and Rel values to null.
         currentObjRel = (ObjRelationship) e.getRelationship();
         this.currentObjEntity = (ObjEntity) e.getEntity();
@@ -908,8 +898,7 @@ public class EventController extends ModelerController {
         debugEvent(e, list);
 
         for (int i = 0; i < list.length; i++) {
-            ObjRelationshipDisplayListener temp =
-                (ObjRelationshipDisplayListener) list[i];
+            ObjRelationshipDisplayListener temp = (ObjRelationshipDisplayListener) list[i];
             temp.currentObjRelationshipChanged(e);
         }
     }
@@ -931,13 +920,16 @@ public class EventController extends ModelerController {
 
         fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.ADD));
         if (makeCurrent) {
-            fireDataMapDisplayEvent(
-                new DataMapDisplayEvent(src, map, currentDomain, currentNode));
+            fireDataMapDisplayEvent(new DataMapDisplayEvent(
+                    src,
+                    map,
+                    currentDomain,
+                    currentNode));
         }
     }
 
     private void addListener(Class aClass, EventListener listener) {
-        // make sure we do 
+        // make sure we do
         listenerList.add(aClass, listener);
     }
 
@@ -948,7 +940,7 @@ public class EventController extends ModelerController {
     public void setDirty(boolean dirty) {
         if (this.dirty != dirty) {
             this.dirty = dirty;
-            CayenneModelerFrame.getFrame().setDirty(dirty);
+            Application.getFrame().setDirty(dirty);
         }
     }
 
@@ -963,29 +955,28 @@ public class EventController extends ModelerController {
 
             String source = event.getSource().getClass().getName();
 
-            String listenerString =
-                (listenerCount == 1) ? "1 listener" : listenerCount + " listeners";
+            String listenerString = (listenerCount == 1) ? "1 listener" : listenerCount
+                    + " listeners";
 
             String eventLabel;
 
             if (event instanceof MapEvent) {
                 MapEvent mapEvent = (MapEvent) event;
                 switch (mapEvent.getId()) {
-                    case MapEvent.ADD :
+                    case MapEvent.ADD:
                         eventLabel = "ADD";
                         break;
-                    case MapEvent.REMOVE :
+                    case MapEvent.REMOVE:
                         eventLabel = "REMOVE";
                         break;
-                    default :
+                    default:
                         eventLabel = "CHANGE";
                 }
             }
             else {
                 eventLabel = "DISPLAY";
             }
-            logObj.debug(
-                "--- ["
+            logObj.debug("--- ["
                     + eventLabel
                     + ": "
                     + className
@@ -996,15 +987,13 @@ public class EventController extends ModelerController {
                     + "]");
 
             // listener debugging is commented out to reduce the number of generated logs
-            /*     for (int i = 0; i < listenerCount; i++) {
-                     String listenerName = listeners[i].getClass().getName();
-                     int listenerDot = listenerName.lastIndexOf('.');
-                     if (listenerDot >= 0) {
-                         listenerName = listenerName.substring(listenerDot);
-                     }
-                     logObj.debug(" {listener: " + listenerName + "}");
-                 }
-                 */
+            /*
+             * for (int i = 0; i < listenerCount; i++) { String listenerName =
+             * listeners[i].getClass().getName(); int listenerDot =
+             * listenerName.lastIndexOf('.'); if (listenerDot >= 0) { listenerName =
+             * listenerName.substring(listenerDot); } logObj.debug(" {listener: " +
+             * listenerName + "}"); }
+             */
         }
     }
 }

@@ -63,8 +63,6 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -129,8 +127,6 @@ import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.project.Project;
-import org.scopemvc.core.Control;
-import org.scopemvc.util.UIStrings;
 
 /**
  * Main frame of CayenneModeler. Responsibilities include coordination of
@@ -151,52 +147,21 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
      */
     public static final String DIRTY_STRING = "* - ";
 
-    protected static CayenneModelerFrame frame;
-
     protected EditorView view;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
-    protected TopController controller;
+    protected CayenneModelerController controller;
     protected JLabel status;
 
     private ModelerPreferences prefs;
 
-    /** Returns an editor singleton object. */
-    public static CayenneModelerFrame getFrame() {
-        return frame;
-    }
-
-    /**
-     * Returns a project that is currently a current project of an Editor singleton
-     * instance. This will be changed if CayenneModeler ever starts supporting multiple
-     * open projects.
-     */
-    public static Project getProject() {
-        return getFrame().controller.getTopModel().getCurrentProject();
-    }
-
-    public CayenneModelerFrame() {
+    public CayenneModelerFrame(CayenneModelerController controller) {
         super(ModelerConstants.TITLE);
 
-        controller = new TopController(this);
-        frame = this;
-
-        // force Scope to use CayenneModeler properties
-        UIStrings.setPropertiesName(ModelerConstants.DEFAULT_MESSAGE_BUNDLE);
-
-        ModelerContext.setupContext();
+        this.controller = controller;
 
         initMenus();
         initToolbar();
         initStatusBar();
-
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-        this.addWindowListener(new WindowAdapter() {
-
-            public void windowClosing(WindowEvent e) {
-                ((ExitAction) getAction(ExitAction.getActionName())).exit();
-            }
-        });
 
         this.addComponentListener(new ComponentAdapter() {
 
@@ -241,17 +206,14 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         int defaultY = (screenSize.height - newHeight) / 2;
         int newY = prefs.getInt(ModelerPreferences.EDITOR_FRAME_Y, defaultY);
 
-        frame.setLocation(newX, newY);
-        frame.setVisible(true);
-
-        this.controller.startup();
+        setLocation(newX, newY);
     }
 
     /**
      * Returns an action object associated with the key.
      */
     public CayenneAction getAction(String key) {
-        return controller.getTopModel().getAction(key);
+        return controller.getApplication().getAction(key);
     }
 
     protected void initMenus() {
@@ -488,10 +450,8 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
             enableDataNodeMenu();
         else {
             // Andrus: Temp hack till moved to controller
-            controller.getActionController().handleControl(
-                    new Control(ModelerController.DATA_DOMAIN_SELECTED_ID, controller
-                            .getEventController()
-                            .getCurrentDataDomain()));
+            controller.getActionController().domainSelected(
+                    controller.getEventController().getCurrentDataDomain());
         }
 
         getAction(GenerateClassesAction.getActionName()).setEnabled(true);
@@ -530,15 +490,13 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
     private void enableDataNodeMenu() {
         // Andrus: Temp hack till moved to controller
-        controller.getActionController().handleControl(
-                new Control(ModelerController.DATA_DOMAIN_SELECTED_ID, controller
-                        .getEventController()
-                        .getCurrentDataDomain()));
+        controller.getActionController().domainSelected(
+                controller.getEventController().getCurrentDataDomain());
     }
 
     public void updateTitle() {
         String title = null;
-        Project project = getProject();
+        Project project = Application.getProject();
 
         if (project != null) {
             if (project.isLocationUndefined()) {
@@ -570,7 +528,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
      * 
      * @return TopController
      */
-    public TopController getController() {
+    public CayenneModelerController getController1() {
         return controller;
     }
 
@@ -591,5 +549,4 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     public void setView(EditorView view) {
         this.view = view;
     }
-
 }

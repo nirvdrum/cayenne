@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
@@ -393,7 +393,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
 
         // search for matching node name across domains, as currently they have to be
         // unique globally
-        Configuration config = ((ApplicationProject) CayenneModelerFrame.getProject())
+        Configuration config = ((ApplicationProject) Application.getProject())
                 .getConfiguration();
 
         DataNode matchingNode = null;
@@ -465,7 +465,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
                 ex.printStackTrace();
                 JOptionPane
                         .showMessageDialog(
-                                CayenneModelerFrame.getFrame(),
+                                Application.getFrame(),
                                 ex.getMessage(),
                                 "Error loading adapter",
                                 JOptionPane.ERROR_MESSAGE);

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.event.DomainEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.dialog.datadomain.CacheSyncConfigController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
@@ -319,7 +319,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
             throw new ValidationException("Enter name for DataDomain");
         }
 
-        Configuration configuration = ((ApplicationProject) CayenneModelerFrame
+        Configuration configuration = ((ApplicationProject) Application
                 .getProject()).getConfiguration();
         DataDomain domain = eventController.getCurrentDataDomain();
 

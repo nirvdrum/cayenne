@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.classgen.ClassGeneratorController;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -86,7 +87,7 @@ public class GenerateClassesAction extends CayenneAction {
     }
 
     protected void generateClasses() {
-        Project project = super.getTopModel().getCurrentProject();
+        Project project = Application.getProject();
         new ClassGeneratorController(
             project,
             getMediator().getCurrentDataMap(),

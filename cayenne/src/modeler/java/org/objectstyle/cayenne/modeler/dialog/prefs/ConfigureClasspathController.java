@@ -65,7 +65,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
@@ -131,7 +131,7 @@ public class ConfigureClasspathController extends BasicController {
         catch (MalformedURLException urlEx) {
             logObj.info("Error saving ClassPath", urlEx);
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                 urlEx.getMessage(),
                 "Error saving ClassPath",
                 JOptionPane.ERROR_MESSAGE);
@@ -139,7 +139,7 @@ public class ConfigureClasspathController extends BasicController {
         catch (IOException ioEx) {
             logObj.info("Error saving ClassPath", ioEx);
             JOptionPane.showMessageDialog(
-                CayenneModelerFrame.getFrame(),
+                Application.getFrame(),
                 ioEx.getMessage(),
                 "Error saving ClassPath",
                 JOptionPane.ERROR_MESSAGE);
