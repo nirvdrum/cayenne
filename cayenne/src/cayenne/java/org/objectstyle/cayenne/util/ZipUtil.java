@@ -91,46 +91,52 @@ public class ZipUtil {
       */
     public static void unzip(File zipFile, File destDir) throws IOException {
         ZipFile zip = new ZipFile(zipFile);
-        Enumeration en = zip.entries();
-        int bufSize = 8 * 1024;
 
-        while (en.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry) en.nextElement();
-            File file =
-                (destDir != null)
-                    ? new File(destDir, entry.getName())
-                    : new File(entry.getName());
+        try {
+            Enumeration en = zip.entries();
+            int bufSize = 8 * 1024;
 
-            if (entry.isDirectory()) {
-                if (!file.mkdirs()) {
-                    throw new IOException("Error creating directory: " + file);
-                }
-            } else {
-                File parent = file.getParentFile();
-                if (parent != null && !parent.exists()) {
-                    if (!parent.mkdirs()) {
+            while (en.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) en.nextElement();
+                File file =
+                    (destDir != null)
+                        ? new File(destDir, entry.getName())
+                        : new File(entry.getName());
+
+                if (entry.isDirectory()) {
+                    if (!file.mkdirs()) {
                         throw new IOException(
-                            "Error creating directory: " + parent);
+                            "Error creating directory: " + file);
                     }
-                }
+                } else {
+                    File parent = file.getParentFile();
+                    if (parent != null && !parent.exists()) {
+                        if (!parent.mkdirs()) {
+                            throw new IOException(
+                                "Error creating directory: " + parent);
+                        }
+                    }
 
-                InputStream in = zip.getInputStream(entry);
-                try {
-                    OutputStream out =
-                        new BufferedOutputStream(
-                            new FileOutputStream(file),
-                            bufSize);
-
+                    InputStream in = zip.getInputStream(entry);
                     try {
-                        Util.copyPipe(in, out, bufSize);
-                    } finally {
-                        out.close();
-                    }
+                        OutputStream out =
+                            new BufferedOutputStream(
+                                new FileOutputStream(file),
+                                bufSize);
 
-                } finally {
-                    in.close();
+                        try {
+                            Util.copyPipe(in, out, bufSize);
+                        } finally {
+                            out.close();
+                        }
+
+                    } finally {
+                        in.close();
+                    }
                 }
             }
+        } finally {
+            zip.close();
         }
     }
 
