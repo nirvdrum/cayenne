@@ -468,8 +468,6 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             List columns = transl.getColumnList();
 
-            ObjEntity subPainting = getDomain().getEntityResolver().lookupObjEntity("SubPainting");
-
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2 
             assertEquals(2, columns.size());
@@ -489,8 +487,6 @@ public class SelectTranslatorTst extends CayenneTestCase {
             transl.createSqlString();
 
             List columns = transl.getColumnList();
-
-            ObjEntity countsEnt = getDomain().getEntityResolver().lookupObjEntity("ArtistPaintingCounts");
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2 

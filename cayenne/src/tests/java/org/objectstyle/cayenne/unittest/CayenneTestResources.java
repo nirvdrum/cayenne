@@ -117,7 +117,7 @@ public class CayenneTestResources {
 
     protected static void probeJDKVersion() {
         try {
-            Class c = Class.forName("java.sql.Savepoint");
+            Class.forName("java.sql.Savepoint");
             hasJSDK14 = true;
         } catch (Exception ex) {
             hasJSDK14 = false;

@@ -88,6 +88,6 @@ public class DOPrefetchTst extends CayenneDOTestBase {
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
         Artist a2 = (Artist)artists.get(0);
-        
+        assertNotNull(a2);        
     }
 }

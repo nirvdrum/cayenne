@@ -235,8 +235,6 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 		if (col == OBJ_ATTRIBUTE || col == OBJ_ATTRIBUTE_TYPE)
 			return true;
 		else {
-			ObjAttribute attrib = getAttribute(row);
-			DbAttribute db_attrib = attrib.getDbAttribute();
 			// Allow choosing different db attributes
 			if (col == DB_ATTRIBUTE)
 				return true;

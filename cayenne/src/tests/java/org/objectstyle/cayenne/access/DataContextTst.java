@@ -248,6 +248,9 @@ public class DataContextTst extends CayenneTestCase {
 
 		CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
 		ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
+		assertNotNull(toMany);
+
+		// TODO
 		// assertTrue(!toMany.needsFetch());
 	}
 

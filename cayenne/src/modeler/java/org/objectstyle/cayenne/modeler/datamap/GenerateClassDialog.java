@@ -211,7 +211,6 @@ public class GenerateClassDialog
 	}
 
 	private void generateCode() {
-		String file_name = folder.getText();
 		if (outputFolder == null) {
 			JOptionPane.showMessageDialog(
 				this,

@@ -77,7 +77,7 @@ public class SelectIteratedTest extends SelectTest {
 	public void runTest() throws Exception {
 		SelectQuery q = new SelectQuery("Artist");
 		q.setPageSize(50);
-		List artists = ctxt.performQuery(q);
+		ctxt.performQuery(q);
 	}
 
 }

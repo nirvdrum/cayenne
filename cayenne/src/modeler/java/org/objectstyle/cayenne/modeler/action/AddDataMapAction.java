@@ -93,7 +93,7 @@ public class AddDataMapAction extends CayenneAction {
 		Mediator mediator = getMediator();
 		DataNode node = mediator.getCurrentDataNode();
 		List map_list = mediator.getCurrentDataDomain().getMapList();
-		AddDataMapDialog dialog = new AddDataMapDialog(node, map_list);
+		new AddDataMapDialog(node, map_list);
 		mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 	}
 }

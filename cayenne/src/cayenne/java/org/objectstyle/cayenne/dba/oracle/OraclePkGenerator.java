@@ -178,7 +178,6 @@ public class OraclePkGenerator extends JdbcPkGenerator {
 							+ sequenceName(ent.getName())
 							+ ".nextval FROM DUAL");
 				try {
-					Object pk = null;
 					if (!rs.next()) {
 						throw new CayenneRuntimeException(
 							"Error generating pk for DbEntity "

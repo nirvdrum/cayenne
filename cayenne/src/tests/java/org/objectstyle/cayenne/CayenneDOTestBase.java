@@ -110,7 +110,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
         return e1;
     }
     
-    protected ArtistExhibit newAritistExhibit() {
+    protected ArtistExhibit newArtistExhibit() {
         return (ArtistExhibit)ctxt.createAndRegisterNewObject("ArtistExhibit");
     }
     

@@ -200,7 +200,6 @@ public class DbRelationshipPane
 		java.util.List dbRelList = new ArrayList();
 		dbRelList.add(rel);
 
-		DataMap map = mediator.getCurrentDataMap();
 		ResolveDbRelationshipDialog dialog =
 			new ResolveDbRelationshipDialog(
 				dbRelList,

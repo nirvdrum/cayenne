@@ -116,7 +116,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         assertNotNull(rop1.getToArtist());
         
         // trigger fetch
-        String name = rop1.getToArtist().getArtistName();
+        rop1.getToArtist().getArtistName();
         assertEquals(PersistenceState.COMMITTED, rop1.getToArtist().getPersistenceState());
     }
     
@@ -261,6 +261,8 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
     public void testSavedAdd() throws Exception {
         Painting p1 = newPainting();
+		assertEquals(p1.getObjectId(), ctxt.registeredObject(p1.getObjectId()).getObjectId());
+		assertTrue(ctxt.hasChanges());
 
         // do save
         ctxt.commitChanges();

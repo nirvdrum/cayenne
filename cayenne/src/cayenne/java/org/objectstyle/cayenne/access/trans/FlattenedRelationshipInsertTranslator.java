@@ -93,7 +93,6 @@ public class FlattenedRelationshipInsertTranslator extends InsertTranslator {
 
 	/** Creates 2 matching lists: columns names and values */
 	protected void prepareLists() throws Exception {
-		DbEntity dbE = this.getDbEntity();
 		ObjRelationship relationship = this.getRelationship();
 		DbRelationship dbRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
 

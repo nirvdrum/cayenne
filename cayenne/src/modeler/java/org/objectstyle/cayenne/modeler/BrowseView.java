@@ -756,7 +756,6 @@ public class BrowseView
       * That is the array of actual objects rather than wrappers.*/
     private Object[] getUserObjects(DefaultMutableTreeNode node) {
         ArrayList list = new ArrayList();
-        Object[] arr;
         while (!node.isRoot()) {
             list.add(0, node.getUserObject());
             node = (DefaultMutableTreeNode) node.getParent();

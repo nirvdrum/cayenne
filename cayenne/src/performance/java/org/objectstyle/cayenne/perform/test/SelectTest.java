@@ -88,6 +88,6 @@ public class SelectTest extends CayennePerformanceTest {
 	 */
 	public void runTest() throws Exception {
 		SelectQuery q = new SelectQuery("Artist");
-		List artists = ctxt.performQuery(q);
+		ctxt.performQuery(q);
 	}
 }

@@ -213,7 +213,6 @@ public class CayenneTestDatabaseSetup {
 		DataMap[] dataMaps = node.getDataMaps();
 		int len = dataMaps.length;
 		for (int i = 0; i < len; i++) {
-			DbEntity[] ents = dataMaps[i].getDbEntities();
 			node.getAdapter().getPkGenerator().createAutoPk(
 				node,
 				dataMaps[i].getDbEntitiesAsList());

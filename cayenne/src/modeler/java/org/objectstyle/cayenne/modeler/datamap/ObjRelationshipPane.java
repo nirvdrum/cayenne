@@ -113,10 +113,7 @@ public class ObjRelationshipPane
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		ObjRelationshipTableModel model;
-		model = (ObjRelationshipTableModel) table.getModel();
-		if (src == resolve) {
+		if (e.getSource() == resolve) {
 			resolveRelationship();
 		}
 	}
@@ -184,7 +181,6 @@ public class ObjRelationshipPane
 		DbEntity start = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
 		DbEntity end = ((ObjEntity) rel.getTargetEntity()).getDbEntity();
 		java.util.List db_rel_list = rel.getDbRelationshipList();
-		DataMap map = mediator.getCurrentDataMap();
 
 		// Choose the relationship to resolve this obj relationship
 		ChooseDbRelationshipDialog dg;

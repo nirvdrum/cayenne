@@ -213,9 +213,6 @@ public class OperationSorter {
 		 *
 		 */
 		private final int checkSrcTargetDependancy(DbRelationship rel) {
-			DbEntity src = (DbEntity) rel.getSourceEntity();
-			DbEntity target = (DbEntity) rel.getTargetEntity();
-
 			Iterator joinIt = rel.getJoins().iterator();
 			while (joinIt.hasNext()) {
 				DbAttributePair join = (DbAttributePair) joinIt.next();

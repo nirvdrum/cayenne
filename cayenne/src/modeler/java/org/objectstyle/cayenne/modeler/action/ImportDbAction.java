@@ -184,7 +184,7 @@ public class ImportDbAction extends CayenneAction {
 
     public Connection openConnection(DataSourceInfo dsi) {
         try {
-            Driver driver = (Driver) Class.forName(dsi.getJdbcDriver()).newInstance();
+            Class.forName(dsi.getJdbcDriver()).newInstance();
             return DriverManager.getConnection(
                 dsi.getDataSourceUrl(),
                 dsi.getUserName(),

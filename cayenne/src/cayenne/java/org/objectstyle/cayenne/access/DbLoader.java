@@ -231,7 +231,7 @@ public class DbLoader {
             String schema = rs.getString("TABLE_SCHEM");
             String type = rs.getString("TABLE_TYPE");
             String name = rs.getString("TABLE_NAME");
-            TableInfo info = new TableInfo(name, type, schema, catalog);
+            TableInfo info = new TableInfo(name, type, schema, cat);
             tables.add(info);
         }
         rs.close();

@@ -221,7 +221,6 @@ public class DefaultResultIterator implements ResultIterator {
             Map dataRow = new HashMap();
 
             // process result row columns,
-            Object fetchedValue = null;
             for (int i = 0; i < resultSize; i++) {
                 // note: jdbc column indexes start from 1, not 0 as in arrays
                 Object val =
@@ -252,7 +251,6 @@ public class DefaultResultIterator implements ResultIterator {
             
             int len = idIndex.length;
 
-            Object fetchedValue = null;
             for (int i = 0; i < len; i++) {
             	
             	// dereference column index

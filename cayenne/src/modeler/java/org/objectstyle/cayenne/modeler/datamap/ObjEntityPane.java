@@ -210,8 +210,6 @@ public class ObjEntityPane
         EntityEvent event = new EntityEvent(this, mediator.getCurrentObjEntity());
         mediator.fireObjEntityEvent(event);
 
-        EntityWrapper wrapper = new EntityWrapper(entity);
-
         // Add DbEntity to dropdown in alphabetical order
         DefaultComboBoxModel model = (DefaultComboBoxModel) dbName.getModel();
         EntityWrapper wrap = new EntityWrapper(entity);

@@ -171,7 +171,7 @@ public class PooledConnectionImpl implements PooledConnection {
 
             ConnectionEvent closedEvent = new ConnectionEvent(this);
             Iterator listeners = connectionEventListeners.iterator();
-            int i = 0;
+
             while (listeners.hasNext()) {
                 ConnectionEventListener nextListener =
                     (ConnectionEventListener) listeners.next();

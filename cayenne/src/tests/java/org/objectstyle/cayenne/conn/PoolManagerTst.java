@@ -113,18 +113,26 @@ public class PoolManagerTst extends CayenneTestCase {
             Connection c1 = pm.getConnection();
             assertEquals(1, pm.getCurrentlyInUse());
             assertEquals(1, pm.getCurrentlyUnused());
-            
+
             Connection c2 = pm.getConnection();
             assertEquals(2, pm.getCurrentlyInUse());
             assertEquals(0, pm.getCurrentlyUnused());
-            
+
             Connection c3 = pm.getConnection();
             assertEquals(3, pm.getCurrentlyInUse());
             assertEquals(0, pm.getCurrentlyUnused());
-            
+
             c3.close();
             assertEquals(2, pm.getCurrentlyInUse());
-            assertEquals(1, pm.getCurrentlyUnused());            
+            assertEquals(1, pm.getCurrentlyUnused());
+
+            c1.close();
+            assertEquals(1, pm.getCurrentlyInUse());
+            assertEquals(2, pm.getCurrentlyUnused());
+
+            c2.close();
+            assertEquals(0, pm.getCurrentlyInUse());
+            assertEquals(3, pm.getCurrentlyUnused());            
         }
         finally {
             // get rid of local pool

@@ -80,7 +80,7 @@ public class SelectDataRowsTest extends SelectTest {
 	public void runTest() throws Exception {
 		SelectQuery q = new SelectQuery("Artist");
 		q.setFetchingDataRows(true);
-		List artists = ctxt.performQuery(q);
+		ctxt.performQuery(q);
 	}
 
 }

@@ -269,7 +269,6 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
 	public void setAttributeName(String newVal, DbAttribute attr) {
 		String newName = newVal.trim();
-		String oldName = attr.getName();
 		MapUtil.setAttributeName(attr, newName);
 	}
 

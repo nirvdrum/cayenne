@@ -112,7 +112,6 @@ public class RemoveAction extends CayenneAction {
 	private void remove() {
 		Mediator mediator = getMediator();
 
-		Object src = Editor.getFrame();
 		if (mediator.getCurrentObjAttribute() != null) {
 			removeObjAttribute();
 		} else if (mediator.getCurrentDbAttribute() != null) {
@@ -196,15 +195,8 @@ public class RemoveAction extends CayenneAction {
 		ObjEntity entity = mediator.getCurrentObjEntity();
 		ObjAttribute attrib = mediator.getCurrentObjAttribute();
 		entity.removeAttribute(attrib.getName());
-		AttributeEvent e;
-		e =
-			new AttributeEvent(
-				Editor.getFrame(),
-				attrib,
-				entity,
-				AttributeEvent.REMOVE);
+		AttributeEvent e = new AttributeEvent(Editor.getFrame(), attrib, entity, AttributeEvent.REMOVE);
 		mediator.fireObjAttributeEvent(e);
-		AttributeDisplayEvent ev;
 	}
 
 	protected void removeDbAttribute() {

@@ -87,8 +87,7 @@ public class BrowserControl {
 	 * file, you must include the absolute path name.
 	 *
 	 * @param url the file's url (the url must start with either "http://"
-	or
-	 * "file://").
+	 * or "file://").
 	 */
 	public static void displayURL(String url) {
 		boolean windows = isWindowsPlatform();
@@ -97,7 +96,7 @@ public class BrowserControl {
 			if (windows) {
 				// cmd = 'rundll32 url.dll,FileProtocolHandler http://...'
 				cmd = WIN_PATH + " " + WIN_FLAG + " " + url;
-				Process p = Runtime.getRuntime().exec(cmd);
+				Runtime.getRuntime().exec(cmd);
 			} else {
 				// Under Unix, Netscape has to be running for the "-remote"
 				// command to work.  So, we try sending the command and

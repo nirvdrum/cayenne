@@ -114,7 +114,6 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 	private void createQualifier() {
 		List pkExpressions = new ArrayList();
 
-		DbEntity dbE = (DbEntity)this.getRoot();
 		ObjRelationship relationship = this.getRelationship();
 		DbRelationship dbRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
 

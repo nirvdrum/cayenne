@@ -96,7 +96,7 @@ public class PreparedSmallSelectTest extends SmallSelectTest {
 							artists.add(artist);
 
 							// read artist_id to provide closer comparison
-							Integer id = new Integer(rs.getInt(1));
+							rs.getInt(1);
 						}
 					} finally {
 						rs.close();

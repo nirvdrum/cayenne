@@ -231,7 +231,6 @@ public class DbGenerator {
 		List orderedEnts = dbEntitiesInInsertOrder();
 
 		try {
-			DatabaseMetaData meta = con.getMetaData();
 			List nonExistent = filterNonExistentTables(con);
 			Statement stmt = con.createStatement();
 

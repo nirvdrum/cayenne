@@ -147,11 +147,12 @@ public class DataContextExtrasTst extends CayenneTestCase {
         Map row = new HashMap();
         row.put("ARTIST_ID", new Integer(1));
         DataObject obj = ctxt.objectFromDataRow("Artist", row);
+		assertNotNull(obj);
 
-        /*  assertTrue(ctxt.registeredObjects().contains(obj));
-          assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-          assertNull(ctxt.getCommittedSnapshot(obj));
-          */
+        // TODO
+        // assertTrue(ctxt.registeredObjects().contains(obj));
+        // assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        // assertNull(ctxt.getCommittedSnapshot(obj));
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
@@ -159,11 +160,12 @@ public class DataContextExtrasTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         DataObject obj = ctxt.objectFromDataRow("Artist", row);
+		assertNotNull(obj);
 
-        /*   assertTrue(ctxt.registeredObjects().contains(obj));
-           assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-           assertNull(ctxt.getCommittedSnapshot(obj));
-           */
+        // TODO
+		// assertTrue(ctxt.registeredObjects().contains(obj));
+        // assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        // assertNull(ctxt.getCommittedSnapshot(obj));
     }
 
     public void testFullObjectFromDataRow() throws Exception {

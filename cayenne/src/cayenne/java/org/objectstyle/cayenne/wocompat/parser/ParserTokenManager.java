@@ -90,12 +90,11 @@ static final long[] jjbitVec0 = {
 };
 private final int jjMoveNfa_0(int startState, int curPos)
 {
-   int[] nextStates;
    int startsAt = 0;
    jjnewStateCnt = 10;
    int i = 1;
    jjstateSet[0] = startState;
-   int j, kind = 0x7fffffff;
+   int kind = 0x7fffffff;
    for (;;)
    {
       if (++jjround == 0x7fffffff)
@@ -316,12 +315,11 @@ private final int jjMoveStringLiteralDfa1_1(long active0)
 }
 private final int jjMoveNfa_1(int startState, int curPos)
 {
-   int[] nextStates;
    int startsAt = 0;
    jjnewStateCnt = 11;
    int i = 1;
    jjstateSet[0] = startState;
-   int j, kind = 0x7fffffff;
+   int kind = 0x7fffffff;
    for (;;)
    {
       if (++jjround == 0x7fffffff)
@@ -551,8 +549,6 @@ int jjmatchedKind;
 
 public final Token getNextToken() 
 {
-  int kind;
-  Token specialToken = null;
   Token matchedToken;
   int curPos = 0;
 
@@ -734,7 +730,7 @@ final void MoreLexicalActions()
          else
             image.append(new String(input_stream.GetSuffix(jjimageLen)));
          jjimageLen = 0;
-        int dig,c, base=1,hex=0;
+        int c, base=1,hex=0;
         len = image.length();
         for(int i=0; i<4; ++i) {
           c=(int)image.charAt(len-(i+1));

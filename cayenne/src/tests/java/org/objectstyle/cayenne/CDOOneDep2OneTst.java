@@ -102,7 +102,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         Gallery g1 = this.newGallery();
         Exhibit e1 = this.newExhibit(g1);
 
-        ArtistExhibit ae1 = this.newAritistExhibit();
+        ArtistExhibit ae1 = this.newArtistExhibit();
         ae1.setToArtist(a1);
         ae1.setToExhibit(e1);
 
@@ -114,12 +114,17 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
     public void testReplace() throws Exception {
         String altPaintingName = "alt painting";
+
         Artist a1 = newArtist();
+		assertEquals(a1.getObjectId(), ctxt.registeredObject(a1.getObjectId()).getObjectId());
+
         PaintingInfo pi1 = newPaintingInfo();
         Painting p1 = newPainting();
         p1.setPaintingTitle(altPaintingName);
 
         pi1.setPainting(p1);
+
+        assertTrue(ctxt.hasChanges());
 
         // do save
         ctxt.commitChanges();

@@ -353,8 +353,6 @@ public class DataNodeDetailView
         }
 
         Object src = e.getSource();
-        DataSourceInfo info = ((ProjectDataSource) node.getDataSource()).getDataSourceInfo();
-
         DataNode aNode = mediator.getCurrentDataNode();
 
         // node factory changed
@@ -383,12 +381,8 @@ public class DataNodeDetailView
         } else if (src == adapter) {
             // DBAdapter changed
             String adapterName = (String) adapter.getModel().getSelectedItem();
-            String currentName =
-                (node.getAdapter() != null)
-                    ? node.getAdapter().getClass().getName()
-                    : null;
 
-         //   if (!Util.nullSafeEquals(currentName, adapterName)) {
+         	// if (!Util.nullSafeEquals(currentName, adapterName)) {
             	// instantiate new adapter if needed
                 DbAdapter newAdapter = null;
                 if (adapterName != null && adapterName.trim().length() > 0) {

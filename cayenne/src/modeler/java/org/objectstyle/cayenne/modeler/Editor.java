@@ -425,8 +425,6 @@ public class Editor
 
     /** Initializes main toolbar. */
     protected void initToolbar() {
-        ClassLoader cl = Editor.class.getClassLoader();
-
         JToolBar toolBar = new JToolBar();
         toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
@@ -569,7 +567,7 @@ public class Editor
             } else if (src == exitMenu) {
                 exitEditor();
             } else if (src == aboutMenu) {
-                AboutDialog win = new AboutDialog(this);
+				new AboutDialog(this);
             }
         } catch (Exception ex) {
             ErrorDebugDialog.guiException(ex);

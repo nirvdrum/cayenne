@@ -519,7 +519,6 @@ public class MapLoader extends DefaultHandler {
             Collection objRels = temp.getRelationshipMap().values();
             objRelationships.addAll(objRels);
 
-            ArrayList dbRels = new ArrayList();
             Iterator relIt = objRels.iterator();
             while (relIt.hasNext()) {
                 ObjRelationship objRel = (ObjRelationship) relIt.next();

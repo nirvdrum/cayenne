@@ -403,7 +403,6 @@ public class SelectTranslator extends SelectQueryAssembler {
                 andFlag = true;
 
             DbAttributePair join = (DbAttributePair) joins.get(i);
-            DbAttribute src = join.getSource();
             queryBuf
                 .append(srcAlias)
                 .append('.')
