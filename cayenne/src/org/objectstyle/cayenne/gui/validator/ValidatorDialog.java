@@ -110,7 +110,6 @@ implements ListSelectionListener, ActionListener
 		closeBtn.addActionListener(this);
 		
 		setSize(WIDTH, HEIGHT);
-		this.setVisible(true);		
 		JFrame frame = Editor.getFrame();
 		Point point = frame.getLocationOnScreen();
 		int width = frame.getWidth();
@@ -121,6 +120,7 @@ implements ListSelectionListener, ActionListener
 		point.setLocation(point.x + x, point.y + y);
 		this.setLocation(point);
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		this.setVisible(true);		
 	}
 	
 	private void init()
