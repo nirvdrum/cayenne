@@ -72,7 +72,7 @@ public class MapLoaderLoadTst extends TestCase {
 
 
     public void setUp() throws Exception {
-        mapLoader = new MapLoaderImpl();
+        mapLoader = new MapLoader();
         testDataMap = ClassLoader.getSystemResource(TestConstants.TEST_MAP_PATH).toExternalForm();
     }
 

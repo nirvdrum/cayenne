@@ -97,7 +97,7 @@ public class DbLoaderTool {
 
 
         // Write out the map to the xml file
-        MapLoader impl = new MapLoaderImpl();
+        MapLoader impl = new MapLoader();
         PrintWriter out = new PrintWriter(System.out);
 
         try {

@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.objectstyle.cayenne.map.MapLoader;
 import org.xml.sax.InputSource;
 
 
@@ -83,7 +83,7 @@ public class DbGeneratorTool {
         }
             
         try {
-            DataMap map = new MapLoaderImpl().loadDataMap(new InputSource(args[0]));
+            DataMap map = new MapLoader().loadDataMap(new InputSource(args[0]));
             DataSourceInfo dsi = DbLoaderTool.getConnectionInfo(!noGui);            
             DbAdapter adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
             DbGenerator gen = new DbGenerator(adapter, map);

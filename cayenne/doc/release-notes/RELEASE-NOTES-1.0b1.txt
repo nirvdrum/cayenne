@@ -25,4 +25,4 @@ and array filtering
 
 7. Added DerivedDbAttribute with aggregate function support.
 
-8. Simplified MapLoader API
+8. Simplified MapLoader API, got rid of interface-implementation pair.

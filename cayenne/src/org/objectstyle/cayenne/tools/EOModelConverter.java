@@ -60,7 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 /**
  *  Command-line tool that converts WebObjects EOModels to Cayenne DataMaps
@@ -80,7 +80,7 @@ public class EOModelConverter extends Object {
             
             // save it in Cayenne format to STDOUT
             PrintWriter out = new PrintWriter(System.out);
-            new MapLoaderImpl().storeDataMap(out, map);
+            new MapLoader().storeDataMap(out, map);
             out.flush();
         }
         catch(Exception ex) {

@@ -118,7 +118,7 @@ public class CayenneGenerator extends Task {
     /** Loads and returns DataMap based on <code>map</code> attribute. */
     protected DataMap loadDataMap() throws Exception {
         InputSource in = new InputSource(map.getCanonicalPath());
-        return new MapLoaderImpl().loadDataMap(in);
+        return new MapLoader().loadDataMap(in);
     }
 
     /** 

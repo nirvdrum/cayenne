@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.objectstyle.cayenne.map.MapLoader;
 
 /**
  *  Root class of all test cases. When "main" is invoked, 
@@ -202,7 +202,7 @@ public class TestMain implements TestConstants {
 
 			// map
 			String[] maps = new String[] { TEST_MAP_PATH };
-			DataMap map = new MapLoaderImpl().loadDataMap(TEST_MAP_PATH);
+			DataMap map = new MapLoader().loadDataMap(TEST_MAP_PATH);
 
 			// node
 			DataNode node = new DataNode("node");

@@ -90,7 +90,7 @@ public class DomainHelper {
 
 	private Level logLevel = Level.FINER;
 	private Configuration config;
-	private MapLoaderImpl loader;
+	private MapLoader loader;
 	private XMLReader parser;
 	private Locator locator;
 	private ArrayList domains;
@@ -99,8 +99,10 @@ public class DomainHelper {
 	private HashMap failedDataSources;
 	private ArrayList failedMapRefs;
 
-	/** If set, <code>factory</code> will override
-	  * factory settings in domain configuration file. */
+	/** 
+	 * If set, <code>factory</code> will override
+	 * factory settings in domain configuration file. 
+	 */
 	private DataSourceFactory factory;
 
 	/** Creates new DomainHelper. */
@@ -114,7 +116,7 @@ public class DomainHelper {
 		this.logLevel = logLevel;
 		this.config = config;
 		parser = Util.createXmlReader();
-		loader = new MapLoaderImpl();
+		loader = new MapLoader();
 	}
 
 	/** Returns domains loaded during the last call to "loadDomains". */
@@ -134,8 +136,10 @@ public class DomainHelper {
 		return failedMaps;
 	}
 
-	/** Returns a map of DataSource locations for node names that
-	  * failed to load during the last call to "loadDomains". */
+	/** 
+	 * Returns a map of DataSource locations for node names that
+	 * failed to load during the last call to "loadDomains". 
+	 */
 	public Map getFailedDataSources() {
 		return failedDataSources;
 	}
@@ -236,20 +240,36 @@ public class DomainHelper {
 
 	private static void storeDomain(PrintWriter pw, DataDomain domain) {
 		pw.println("<domain name=\"" + domain.getName().trim() + "\">");
-		
+
 		DataNode[] nodes = domain.getDataNodes();
 		List maps = domain.getMapList();
-		
+
 		// sort to satisfy dependecies
 		OperationSorter.sortMaps(maps);
-		
+
 		Iterator iter = maps.iterator();
 		while (iter.hasNext()) {
 			StringBuffer buf = new StringBuffer();
 			DataMap map = (DataMap) iter.next();
+			List depMaps = map.getDependencies();
+
 			buf.append("\t<map name=\"").append(map.getName().trim());
 			buf.append("\" location=\"").append(map.getLocation().trim());
-			buf.append("\"/> ");
+
+			if (depMaps.size() == 0) {
+				buf.append("\"/>");
+			} else {
+				buf.append("\">");
+				Iterator dit = depMaps.iterator();
+				while (dit.hasNext()) {
+					DataMap dep = (DataMap) dit.next();
+					buf.append("\t\t<dep-map-ref name=\"").append(
+						dep.getName().trim()).append(
+						"\"/>");
+				}
+
+				buf.append("</map>");
+			}
 			pw.println(buf.toString());
 		}
 
@@ -459,13 +479,19 @@ public class DomainHelper {
 	}
 
 	private class MapHandler extends AbstractHandler {
+		protected DataDomain domain;
+		protected ArrayList depMaps = new ArrayList();
+		protected String mapName;
+		protected String location;
+		
 		public MapHandler(XMLReader parser, ContentHandler parentHandler) {
 			super(parser, parentHandler);
 		}
 
 		public void init(String name, Attributes attrs, DataDomain domain)
 			throws SAXException {
-			String mapName = attrs.getValue("", "name");
+				this.domain = domain;
+			mapName = attrs.getValue("", "name");
 			if (mapName == null) {
 				logObj.log(logLevel, "error: <map> without 'name'.");
 				throw new SAXParseException(
@@ -473,7 +499,7 @@ public class DomainHelper {
 					locator);
 			}
 
-			String location = attrs.getValue("", "location");
+			location = attrs.getValue("", "location");
 			if (location == null) {
 				logObj.log(logLevel, "error: <map> without 'location'.");
 				throw new SAXParseException(
@@ -488,7 +514,34 @@ public class DomainHelper {
 					+ "' location='"
 					+ location
 					+ "'>.");
-
+		}
+		
+		public void startElement(
+			String namespaceURI,
+			String localName,
+			String qName,
+			Attributes attrs)
+			throws SAXException {
+			if (localName.equals("dep-map-ref")) {
+				new DepMapRefHandler(getParser(), this).init(
+					localName,
+					attrs,
+					domain,
+					depMaps);
+			} else {
+				logObj.log(
+					logLevel,
+					"<dep-map-ref> should be the only node child. <"
+						+ localName
+						+ "> is unexpected.");
+				throw new SAXParseException(
+					"Unexpected element \"" + localName + "\"",
+					locator);
+			}
+		}
+		
+	    protected void finished() {
+		    // do actual loading after all references are initialized
 			InputStream mapIn = config.getMapConfig(location);
 			if (mapIn == null) {
 				logObj.log(logLevel, "warning: map location not found.");
@@ -498,7 +551,7 @@ public class DomainHelper {
 
 			DataMap map = null;
 			try {
-				map = loader.loadDataMap(new InputSource(mapIn));
+				map = loader.loadDataMap(new InputSource(mapIn), depMaps);
 			} catch (DataMapException dmex) {
 				logObj.log(logLevel, "warning: map loading failed.", dmex);
 				failedMaps.put(mapName, location);
@@ -595,7 +648,7 @@ public class DomainHelper {
 							.forName(factoryName)
 							.newInstance();
 
-                localFactory.setParentConfig(DomainHelper.this.config);
+				localFactory.setParentConfig(DomainHelper.this.config);
 				DataSource ds =
 					localFactory.getDataSource(dataSrcLocation, logLevel);
 				if (ds != null) {
@@ -635,7 +688,7 @@ public class DomainHelper {
 			} else {
 				logObj.log(
 					logLevel,
-					"<domap-ref> should be the only node child. <"
+					"<map-ref> should be the only node child. <"
 						+ localName
 						+ "> is unexpected.");
 				throw new SAXParseException(
@@ -686,6 +739,40 @@ public class DomainHelper {
 			} else {
 				logObj.log(logLevel, "loaded map-ref: " + mapName + ".");
 				node.addDataMap(map);
+			}
+		}
+	}
+	
+	
+	private class DepMapRefHandler extends AbstractHandler {
+
+		public DepMapRefHandler(XMLReader parser, ContentHandler parentHandler) {
+			super(parser, parentHandler);
+		}
+
+		public void init(
+			String name,
+			Attributes attrs,
+			DataDomain domain,
+			List depMaps)
+			throws SAXException {
+			String mapName = attrs.getValue("", "name");
+			if (mapName == null) {
+				logObj.log(logLevel, "<map-ref> has no 'name'.");
+				throw new SAXParseException(
+					"'<map-ref name=' attribute must be present.",
+					locator);
+			}
+
+			DataMap depMap = domain.getMap(mapName);
+			if (depMap == null) {
+				logObj.log(
+					logLevel,
+					"warning: unknown map-ref: " + mapName + ".");
+				failedMapRefs.add(mapName);
+			} else {
+				logObj.log(logLevel, "loaded dep-map-ref: " + mapName + ".");
+				depMaps.add(depMap);
 			}
 		}
 	}

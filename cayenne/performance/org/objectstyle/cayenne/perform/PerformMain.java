@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.perform.*;
 
 /** Runs performance tests. */
@@ -156,7 +156,7 @@ public class PerformMain implements TestConstants {
 
 			// map
 			String[] maps = new String[] { TEST_MAP_PATH };
-			DataMap map = new MapLoaderImpl().loadDataMaps(maps)[0];
+			DataMap map = new MapLoader().loadDataMaps(maps)[0];
 
 			// node
 			DataNode node = new DataNode("node");

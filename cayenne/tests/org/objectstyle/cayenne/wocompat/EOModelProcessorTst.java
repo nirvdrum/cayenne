@@ -122,7 +122,7 @@ public class EOModelProcessorTst extends TestCase {
         
         
         // storing data map may uncover some inconsistencies
-        MapLoaderImpl loader = new MapLoaderImpl();
+        MapLoader loader = new MapLoader();
         loader.storeDataMap(out, map);
     }
 

@@ -268,7 +268,7 @@ public class SaveAction extends CayenneAction {
 				saveMapAs(map);
 				return;
 			}
-			MapLoader saver = new MapLoaderImpl();
+			MapLoader saver = new MapLoader();
 			FileWriter fw = new FileWriter(file);
 			PrintWriter pw = new PrintWriter(fw);
 			saver.storeDataMap(pw, map);
@@ -308,7 +308,7 @@ public class SaveAction extends CayenneAction {
 			// Create new file
 			if (!file.exists())
 				file.createNewFile();
-			MapLoader saver = new MapLoaderImpl();
+			MapLoader saver = new MapLoader();
 			FileWriter fw = new FileWriter(file);
 			PrintWriter pw = new PrintWriter(fw);
 			saver.storeDataMap(pw, map);
