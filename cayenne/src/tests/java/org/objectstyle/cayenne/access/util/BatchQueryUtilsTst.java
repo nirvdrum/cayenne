@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.dba.oracle;
+package org.objectstyle.cayenne.access.util;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
@@ -62,17 +62,17 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 /**
  * @author Andrei Adamchik
  */
-public class OracleDataNodeTst extends CayenneTestCase {
+public class BatchQueryUtilsTst extends CayenneTestCase {
 	public void testContainsLOBColumns() throws Exception {
 		DataMap map = getDomain().getMap("testmap");
 		assertTrue(
-			OracleDataNode.containsLOBColumns(
+			BatchQueryUtils.containsLOBColumns(
 				new InsertBatchQuery(map.getDbEntity("BLOB_TEST"), 1)));
 		assertTrue(
-			OracleDataNode.containsLOBColumns(
+			BatchQueryUtils.containsLOBColumns(
 				new InsertBatchQuery(map.getDbEntity("CLOB_TEST"), 1)));
 		assertFalse(
-			OracleDataNode.containsLOBColumns(
+			BatchQueryUtils.containsLOBColumns(
 				new InsertBatchQuery(map.getDbEntity("ARTIST"), 1)));
 	}
 }

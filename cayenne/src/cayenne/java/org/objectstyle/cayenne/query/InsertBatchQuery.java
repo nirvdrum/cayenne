@@ -111,11 +111,11 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     public List getDbAttributes() {
-        return dbAttributes;
+        return Collections.unmodifiableList(dbAttributes);
     }
 
     private void prepareMetadata() {
-        dbAttributes = Collections.unmodifiableList(new ArrayList(this.getDbEntity().getAttributes()));
+        dbAttributes = new ArrayList(this.getDbEntity().getAttributes());
     }
 
     public int getQueryType() {

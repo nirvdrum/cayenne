@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access.util;
 
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,10 +69,11 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
  * Collection of utility methods to work with BatchQueries.
@@ -84,6 +86,21 @@ public class BatchQueryUtils {
     private BatchQueryUtils() {
     }
 
+	/**
+	 * Utility method that returns <code>true</code> if 
+	 * the query contains at least one BLOB or CLOB DbAttribute.
+	 */
+	public static boolean containsLOBColumns(BatchQuery query) {
+		Iterator it = query.getDbAttributes().iterator();
+		while (it.hasNext()) {
+			int type = ((DbAttribute) it.next()).getType();
+			if (type == Types.CLOB || type == Types.BLOB) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
     public static Map buildSnapshotForUpdate(DataObject o) {
         Map committedSnapshot = o.getCommittedSnapshot();
         Map currentSnapshot = o.getCurrentSnapshot();

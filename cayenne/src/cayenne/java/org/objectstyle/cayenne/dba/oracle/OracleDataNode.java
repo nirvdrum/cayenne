@@ -59,10 +59,8 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneException;
@@ -75,7 +73,6 @@ import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -86,20 +83,6 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class OracleDataNode extends DataNode {
-	/**
-	 * Utility method that returns <code>true</code> if 
-	 * the query contains at least one BLOB or CLOB DbAttribute.
-	 */
-	public static boolean containsLOBColumns(BatchQuery query) {
-		Iterator it = query.getDbAttributes().iterator();
-		while (it.hasNext()) {
-			int type = ((DbAttribute) it.next()).getType();
-			if (type == Types.CLOB || type == Types.BLOB) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	public OracleDataNode() {
 		super();
