@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
 
 /** 
@@ -91,6 +92,7 @@ import org.objectstyle.cayenne.map.Relationship;
  *    <li>DbRelationship</li>
  *    <li>DataNode</li>
  *    <li>DataDomain</li>
+ * 	   <li>Procedure</li>
  * </ul>
  * 
  * This is a helper class used mostly by GUI and database 
@@ -113,6 +115,7 @@ public abstract class NamedObjectFactory {
         factories.put(DbRelationship.class, new DbRelationshipFactory(null, false));
         factories.put(ObjRelationship.class, new ObjRelationshipFactory(null, false));
         factories.put(DataDomain.class, new DataDomainFactory());
+        factories.put(Procedure.class, new ProcedureFactory());
     }
 
     public static String createName(Class objectClass, Object namingContext) {
@@ -160,11 +163,12 @@ public abstract class NamedObjectFactory {
         String name = null;
         do {
             name = nameBase() + c++;
-        } while (isNameInUse(name, namingContext));
+        }
+        while (isNameInUse(name, namingContext));
 
         return name;
     }
-    
+
     /**
      * Creates a unique name for the new object and constructs
      * this object.
@@ -249,6 +253,21 @@ public abstract class NamedObjectFactory {
         protected boolean isNameInUse(String name, Object namingContext) {
             DataMap map = (DataMap) namingContext;
             return map.getDbEntity(name) != null;
+        }
+    }
+
+    static class ProcedureFactory extends NamedObjectFactory {
+        protected String nameBase() {
+            return "UntitledProcedure";
+        }
+
+        protected Object create(String name, Object namingContext) {
+            return new Procedure(name);
+        }
+
+        protected boolean isNameInUse(String name, Object namingContext) {
+            DataMap map = (DataMap) namingContext;
+            return map.getProcedure(name) != null;
         }
     }
 

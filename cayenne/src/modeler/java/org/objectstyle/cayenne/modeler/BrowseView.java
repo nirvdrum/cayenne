@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
@@ -92,6 +93,8 @@ import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.DomainListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
+import org.objectstyle.cayenne.map.event.ProcedureListener;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -127,6 +130,7 @@ public class BrowseView
         ObjEntityDisplayListener,
         DbEntityListener,
         DbEntityDisplayListener,
+        ProcedureListener,
         ProcedureDisplayListener {
 
     private static Logger logObj = Logger.getLogger(BrowseView.class);
@@ -182,6 +186,8 @@ public class BrowseView
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityListener(this);
         mediator.addDbEntityDisplayListener(this);
+        mediator.addProcedureListener(this);
+        mediator.addProcedureDisplayListener(this);
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
@@ -226,6 +232,37 @@ public class BrowseView
             return;
         }
         showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getEntity()});
+    }
+
+    public void procedureAdded(ProcedureEvent e) {
+        if (e.getSource() == this) {
+            return;
+        }
+
+        DefaultMutableTreeNode node =
+            browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] {
+                    mediator.getCurrentDataDomain(),
+                    mediator.getCurrentDataMap()});
+
+        if (node == null) {
+            return;
+        }
+
+        Procedure procedure = e.getProcedure();
+        currentNode = new DefaultMutableTreeNode(procedure, false);
+        fixEntityPosition(node, currentNode);
+        showNode(currentNode);
+    }
+
+    public void procedureChanged(ProcedureEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void procedureRemoved(ProcedureEvent e) {
+        // TODO Auto-generated method stub
+
     }
 
     public void domainChanged(DomainEvent e) {
@@ -388,23 +425,18 @@ public class BrowseView
      *      selected.</li>
      *  </ul>
      */
-    public void entityChanged(EntityEvent e) {
+    protected void entityChanged(EntityEvent e) {
         if (e.getSource() == this) {
             return;
         }
 
-        updateNode(
+        Object[] path =
             new Object[] {
                 mediator.getCurrentDataDomain(),
                 mediator.getCurrentDataMap(),
-                e.getEntity()});
+                e.getEntity()};
 
-        updateNode(
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataMap(),
-                e.getEntity()});
+        updateNode(path);
     }
 
     /** 
@@ -659,8 +691,12 @@ public class BrowseView
     private void fixEntityPosition(
         DefaultMutableTreeNode parent,
         DefaultMutableTreeNode entityNode) {
-        Entity curEnt = (Entity) entityNode.getUserObject();
-        boolean isObj = curEnt instanceof ObjEntity;
+
+        if (parent == null || entityNode == null) {
+            return;
+        }
+
+        MapObject mapObject = (MapObject) entityNode.getUserObject();
 
         int len = parent.getChildCount();
         int ins = -1;
@@ -669,7 +705,7 @@ public class BrowseView
         for (int i = 0; i < len; i++) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
 
-            // remeber to remove node
+            // remember to remove node
             if (node == entityNode) {
                 rm = i;
                 continue;
@@ -680,23 +716,10 @@ public class BrowseView
                 continue;
             }
 
-            Entity e = (Entity) node.getUserObject();
+            MapObject e = (MapObject) node.getUserObject();
 
             // ObjEntities go before DbEntities
-            if (isObj && (e instanceof DbEntity)) {
-                ins = i;
-            }
-            if (!isObj && (e instanceof ObjEntity)) {
-                continue;
-            }
-
-            // Ignore unnamed
-            if (e.getName() == null) {
-                continue;
-            }
-
-            // Do alphabetical comparison
-            if (e.getName().compareTo(curEnt.getName()) > 0) {
+            if (MapObjectsComparator.compare(mapObject, e) <= 0) {
                 ins = i;
             }
         }
@@ -715,6 +738,48 @@ public class BrowseView
 
         // insert
         model.insertNodeInto(entityNode, parent, ins);
+    }
+
+    static class MapObjectsComparator {
+
+        public static int compare(MapObject o1, MapObject o2) {
+            int delta = getClassWeight(o1) - getClassWeight(o2);
+            if (delta != 0) {
+                return delta;
+            }
+
+            // assume that o2 is a MapObject too, and is NOT NULL;
+            // this is proven as a result of earlier delta calculation
+            String name1 = ((MapObject) o1).getName();
+            String name2 = ((MapObject) o2).getName();
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
+        }
+
+        protected static int getClassWeight(MapObject o) {
+
+            if (o instanceof ObjEntity) {
+                return 1;
+            }
+            else if (o instanceof DbEntity) {
+                return 2;
+            }
+            else if (o instanceof Procedure) {
+                return 3;
+            }
+            else {
+                // this should trap nulls among other things
+                return Integer.MAX_VALUE;
+            }
+        }
     }
 
     static class BrowseViewRenderer extends DefaultTreeCellRenderer {

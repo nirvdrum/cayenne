@@ -121,6 +121,8 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
@@ -148,7 +150,8 @@ public class Editor
         ObjAttributeDisplayListener,
         DbAttributeDisplayListener,
         ObjRelationshipDisplayListener,
-        DbRelationshipDisplayListener {
+        DbRelationshipDisplayListener,
+        ProcedureDisplayListener {
     private static Logger logObj = Logger.getLogger(Editor.class);
 
     /** 
@@ -556,6 +559,11 @@ public class Editor
         getAction(RemoveAction.ACTION_NAME).setName("Remove DbEntity");
     }
 
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        enableProcedureMenu();
+        getAction(RemoveAction.ACTION_NAME).setName("Remove Stored Procedure");
+    }
+
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {
         enableDbEntityMenu();
         if (e.getAttribute() != null) {
@@ -620,6 +628,11 @@ public class Editor
             instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
         }
+    }
+
+    private void enableProcedureMenu() {
+        enableDataMapMenu();
+        getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
     }
 
     private void enableDataNodeMenu() {

@@ -58,6 +58,12 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.event.MapEvent;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -73,8 +79,24 @@ public class CreateStoredProcedureAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-        // TODO Auto-generated method stub
+        createStoredProcedure();
+    }
 
+    protected void createStoredProcedure() {
+        EventController mediator = getMediator();
+        Procedure procedure =
+            (Procedure) NamedObjectFactory.createObject(
+                Procedure.class,
+                mediator.getCurrentDataMap());
+        mediator.getCurrentDataMap().addProcedure(procedure);
+        
+		mediator.fireProcedureEvent(new ProcedureEvent(this, procedure, MapEvent.ADD));
+        mediator.fireProcedureDisplayEvent(
+            new ProcedureDisplayEvent(
+                this,
+                procedure,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain()));
     }
 
     /**

@@ -53,67 +53,39 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.map.event;
 
-import java.awt.event.ActionEvent;
+import org.objectstyle.cayenne.map.Procedure;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.project.ProjectPath;
-
-/**
+/** 
+ * An event generated when a Procedure object is added to a DataMap, 
+ * removed from a DataMap, or changed within a DataMap.
+ * 
  * @author Andrei Adamchik
  */
-public class CreateObjEntityAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create ObjEntity";
+public class ProcedureEvent extends MapEvent {
+    protected Procedure procedure;
 
-    /**
-     * Constructor for CreateObjEntityAction.
-     */
-    public CreateObjEntityAction() {
-        super(ACTION_NAME);
+    public ProcedureEvent(Object source, Procedure procedure) {
+        super(source);
+        setProcedure(procedure);
     }
 
-    public String getIconName() {
-        return "icon-objentity.gif";
+    public ProcedureEvent(Object source, Procedure procedure, String oldName) {
+        this(source, procedure);
+        setOldName(oldName);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
-    public void performAction(ActionEvent e) {
-        createObjEntity();
+    public ProcedureEvent(Object source, Procedure procedure, int type) {
+        this(source, procedure);
+        setId(type);
     }
 
-    protected void createObjEntity() {
-        EventController mediator = getMediator();
-        ObjEntity entity =
-            (ObjEntity) NamedObjectFactory.createObject(
-                ObjEntity.class,
-                mediator.getCurrentDataMap());
-        mediator.getCurrentDataMap().addObjEntity(entity);
-        mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-        mediator.fireObjEntityDisplayEvent(
-            new EntityDisplayEvent(
-                this,
-                entity,
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataDomain()));
+    public Procedure getProcedure() {
+        return procedure;
     }
 
-    /**
-    * Returns <code>true</code> if path contains a DataMap object.
-    */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
-        }
-
-        return path.firstInstanceOf(DataMap.class) != null;
+    public void setProcedure(Procedure procedure) {
+        this.procedure = procedure;
     }
 }

@@ -57,7 +57,12 @@ package org.objectstyle.cayenne.map.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the ObjAttribute. */
+/** 
+ * Listener for ObjAttribute events.
+ * 
+ * @author Andrei Adamchik
+ * @author Misha Shengaout
+ */
 public interface ObjAttributeListener extends EventListener
 { 
 	/** Attribute property changed. */

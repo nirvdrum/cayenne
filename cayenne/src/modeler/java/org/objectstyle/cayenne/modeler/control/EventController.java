@@ -84,6 +84,8 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjAttributeListener;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
+import org.objectstyle.cayenne.map.event.ProcedureListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -161,6 +163,7 @@ public class EventController extends ModelerController {
             addDbAttributeDisplayListener(Editor.getFrame());
             addObjRelationshipDisplayListener(Editor.getFrame());
             addDbRelationshipDisplayListener(Editor.getFrame());
+            addProcedureDisplayListener(Editor.getFrame());
         }
     }
 
@@ -313,6 +316,10 @@ public class EventController extends ModelerController {
     public void addProcedureDisplayListener(ProcedureDisplayListener listener) {
         addListener(ProcedureDisplayListener.class, listener);
     }
+    
+	public void addProcedureListener(ProcedureListener listener) {
+		addListener(ProcedureListener.class, listener);
+	}
 
     public void fireDomainDisplayEvent(DomainDisplayEvent e) {
         if (e.getDomain() == currentDomain) {
@@ -492,6 +499,33 @@ public class EventController extends ModelerController {
                 default :
                     throw new IllegalArgumentException(
                         "Invalid EntityEvent type: " + e.getId());
+            }
+        }
+    }
+
+    /** 
+     * Informs all listeners of the ProcedureEvent. 
+     * Does not send the event to its originator. 
+     */
+    public void fireProcedureEvent(ProcedureEvent e) {
+        setDirty(true);
+        EventListener[] list;
+        list = getListeners(ProcedureListener.class);
+        for (int i = 0; i < list.length; i++) {
+            ProcedureListener listener = (ProcedureListener) list[i];
+            switch (e.getId()) {
+                case EntityEvent.ADD :
+                    listener.procedureAdded(e);
+                    break;
+                case EntityEvent.CHANGE :
+                    listener.procedureChanged(e);
+                    break;
+                case EntityEvent.REMOVE :
+                    listener.procedureRemoved(e);
+                    break;
+                default :
+                    throw new IllegalArgumentException(
+                        "Invalid ProcedureEvent type: " + e.getId());
             }
         }
     }
