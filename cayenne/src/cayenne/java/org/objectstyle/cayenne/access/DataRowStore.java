@@ -549,17 +549,6 @@ public class DataRowStore implements Serializable {
         }
     }
 
-    /**
-     * @deprecated 
-     */
-    private void sendUpdateNotification(
-            Object source,
-            Map diffs,
-            Collection deletedSnapshotIDs,
-            Collection indirectlyModifiedIds) {
-        this.sendUpdateNotification(source, diffs, deletedSnapshotIDs, Collections.EMPTY_LIST, indirectlyModifiedIds);
-    }
-
     private void sendUpdateNotification(
             Object source,
             Map diffs,
