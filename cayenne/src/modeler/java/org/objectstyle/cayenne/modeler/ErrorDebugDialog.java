@@ -182,13 +182,17 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
     }
 
     protected String infoHTML() {
+        String bugreportURL = ModelerStrings.getString("cayenne.bugreport.url");
         return "<b><font face='Arial,Helvetica' size='+1' color='red'>"
             + getTitle()
             + "</font></b><br>"
             + "<font face='Arial,Helvetica' size='-1'>Please copy the message below and "
             + "report this error by going to <br>"
-            + "<a href='http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068'>"
-            + "http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068</a></font>";
+            + "<a href='"
+            + bugreportURL
+            + "'>"
+            + bugreportURL
+            + "</a></font>";
     }
 
     protected void setThrowable(Throwable throwable) {
