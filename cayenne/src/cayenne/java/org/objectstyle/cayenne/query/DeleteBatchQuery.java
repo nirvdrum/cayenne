@@ -110,7 +110,7 @@ public class DeleteBatchQuery extends BatchQuery {
     }
 
     public List getDbAttributes() {
-        return Collections.unmodifiableList(dbAttributes);
+        return dbAttributes;
     }
 
     private void prepareMetadata() {

@@ -81,14 +81,13 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
     public LOBBatchQueryBuilder(DbAdapter adapter) {
         super(adapter);
     }
-    
-    
+
     public abstract List getValuesForLOBUpdateParameters(BatchQuery query);
 
     public String createLOBSelectString(
-        BatchQuery updateQuery,
-        List selectedLOBAttributes,
-        List qualifierAttributes) {
+            BatchQuery updateQuery,
+            List selectedLOBAttributes,
+            List qualifierAttributes) {
 
         StringBuffer buf = new StringBuffer();
         buf.append("SELECT ");
@@ -102,9 +101,10 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
             }
         }
 
-        buf.append(" FROM ").append(
-            updateQuery.getDbEntity().getFullyQualifiedName()).append(
-            " WHERE ");
+        buf
+                .append(" FROM ")
+                .append(updateQuery.getDbEntity().getFullyQualifiedName())
+                .append(" WHERE ");
 
         it = qualifierAttributes.iterator();
         while (it.hasNext()) {
@@ -121,14 +121,13 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
     }
 
     /**
-      * Appends parameter placeholder for the value of the column
-      * being updated. If requested, performs special handling on LOB
-      * columns.
-      */
+     * Appends parameter placeholder for the value of the column being updated. If
+     * requested, performs special handling on LOB columns.
+     */
     protected void appendUpdatedParameter(
-        StringBuffer buf,
-        DbAttribute dbAttribute,
-        Object value) {
+            StringBuffer buf,
+            DbAttribute dbAttribute,
+            Object value) {
 
         int type = dbAttribute.getType();
 
@@ -143,8 +142,7 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
                 buf.append(newBlobFunction);
             }
             else {
-                throw new CayenneRuntimeException(
-                    "Unknown LOB column type: "
+                throw new CayenneRuntimeException("Unknown LOB column type: "
                         + type
                         + "("
                         + TypesMapping.getSqlNameByType(type)
@@ -154,16 +152,13 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
         }
     }
 
-
     /**
-     * Binds BatchQuery parameters to the PreparedStatement. 
+     * Binds BatchQuery parameters to the PreparedStatement.
      */
-    public void bindParameters(
-        PreparedStatement statement,
-        BatchQuery query,
-        List dbAttributes)
-        throws SQLException, Exception {
+    public void bindParameters(PreparedStatement statement, BatchQuery query)
+            throws SQLException, Exception {
 
+        List dbAttributes = query.getDbAttributes();
         int attributeCount = dbAttributes.size();
 
         // i - attribute position in the query
@@ -175,12 +170,9 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
 
             // TODO: (Andrus) This works as long as there is no LOBs in qualifier
             if (isUpdateableColumn(value, type)) {
-                adapter.bindParameter(
-                    statement,
-                    value,
-                    j,
-                    type,
-                    attribute.getPrecision());
+                adapter
+                        .bindParameter(statement, value, j, type, attribute
+                                .getPrecision());
 
                 j++;
             }

@@ -136,7 +136,6 @@ class OracleLOBBatchAction implements SQLAction {
         // for each batch set, since prepared statements
         // may be different depending on whether LOBs are NULL or not..
 
-        List dbAttributes = batch.getDbAttributes();
         LOBBatchQueryWrapper selectQuery = new LOBBatchQueryWrapper(batch);
         List qualifierAttributes = selectQuery.getDbAttributesForLOBSelectQualifier();
 
@@ -158,7 +157,7 @@ class OracleLOBBatchAction implements SQLAction {
                     QueryLogger.logQueryParameters(logLevel, "bind", bindings);
                 }
 
-                queryBuilder.bindParameters(statement, batch, dbAttributes);
+                queryBuilder.bindParameters(statement, batch);
                 updated = statement.executeUpdate();
                 QueryLogger.logUpdateCount(logLevel, updated);
             }

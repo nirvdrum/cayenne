@@ -388,7 +388,6 @@ public class DataNode implements QueryEngine {
         boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
         BatchAction action = new BatchAction(getAdapter(), getEntityResolver());
         action.setBatch(runningAsBatch);
-        action.setGeneratedKeys(getAdapter().supportsGeneratedKeys());
         action.performAction(connection, query, observer);
     }
 

@@ -115,7 +115,6 @@ public class OracleDataNode extends DataNode {
                     getAdapter(),
                     getEntityResolver());
             batchAction.setBatch(runningAsBatch);
-            batchAction.setGeneratedKeys(false);
             action = batchAction;
         }
 

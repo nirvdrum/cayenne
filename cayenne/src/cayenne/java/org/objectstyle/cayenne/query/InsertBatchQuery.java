@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -139,7 +138,7 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     public List getDbAttributes() {
-        return Collections.unmodifiableList(dbAttributes);
+        return dbAttributes;
     }
 
     /**

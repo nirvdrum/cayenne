@@ -62,7 +62,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
@@ -92,7 +91,6 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 public class BatchAction extends BaseSQLAction {
 
     protected boolean batch;
-    protected boolean generatedKeys;
 
     public BatchAction(DbAdapter adapter, EntityResolver entityResolver) {
         super(adapter, entityResolver);
@@ -104,14 +102,6 @@ public class BatchAction extends BaseSQLAction {
 
     public void setBatch(boolean runningAsBatch) {
         this.batch = runningAsBatch;
-    }
-
-    public boolean isGeneratedKeys() {
-        return generatedKeys;
-    }
-
-    public void setGeneratedKeys(boolean supportingGeneratedKeys) {
-        this.generatedKeys = supportingGeneratedKeys;
     }
 
     public void performAction(
@@ -171,7 +161,6 @@ public class BatchAction extends BaseSQLAction {
 
         // log batch SQL execution
         QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
-        List dbAttributes = query.getDbAttributes();
 
         // run batch
         query.reset();
@@ -181,11 +170,11 @@ public class BatchAction extends BaseSQLAction {
             while (query.next()) {
 
                 if (isLoggable) {
-                    QueryLogger.logQueryParameters(logLevel, "batch bind", query
-                            .getValuesForUpdateParameters());
+                    QueryLogger.logQueryParameters(logLevel, "batch bind", queryBuilder
+                            .getParameterValues(query));
                 }
 
-                queryBuilder.bindParameters(statement, query, dbAttributes);
+                queryBuilder.bindParameters(statement, query);
                 statement.addBatch();
             }
 
@@ -225,7 +214,6 @@ public class BatchAction extends BaseSQLAction {
 
         // log batch SQL execution
         QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
-        List dbAttributes = query.getDbAttributes();
 
         // run batch queries one by one
         query.reset();
@@ -234,11 +222,11 @@ public class BatchAction extends BaseSQLAction {
         try {
             while (query.next()) {
                 if (isLoggable) {
-                    QueryLogger.logQueryParameters(logLevel, "bind", query
-                            .getValuesForUpdateParameters());
+                    QueryLogger.logQueryParameters(logLevel, "bind", queryBuilder
+                            .getParameterValues(query));
                 }
 
-                queryBuilder.bindParameters(statement, query, dbAttributes);
+                queryBuilder.bindParameters(statement, query);
 
                 int updated = statement.executeUpdate();
                 if (useOptimisticLock && updated != 1) {
@@ -274,11 +262,11 @@ public class BatchAction extends BaseSQLAction {
     }
 
     /**
-     * Returns whether BatchQuery generates
+     * Returns whether BatchQuery generates any keys.
      */
     protected boolean hasGeneratedKeys(BatchQuery query) {
-        // see if we are configured to syupport generated keys
-        if (!generatedKeys) {
+        // see if we are configured to support generated keys
+        if (!adapter.supportsGeneratedKeys()) {
             return false;
         }
 

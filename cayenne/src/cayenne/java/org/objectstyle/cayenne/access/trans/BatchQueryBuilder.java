@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access.trans;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -72,6 +73,7 @@ import org.objectstyle.cayenne.query.BatchQuery;
  */
 
 public abstract class BatchQueryBuilder {
+
     protected DbAdapter adapter;
     protected String trimFunction;
 
@@ -83,23 +85,19 @@ public abstract class BatchQueryBuilder {
     }
 
     /**
-     * Translates BatchQuery into an SQL string formatted to use 
-     * in a PreparedStatement.
+     * Translates BatchQuery into an SQL string formatted to use in a PreparedStatement.
      */
     public abstract String createSqlString(BatchQuery batch);
 
     /**
-     * Appends the name of the column to the query buffer. Subclasses use
-     * this method to append column names in the WHERE clause, i.e. for the 
-     * columns that are not being updated.
+     * Appends the name of the column to the query buffer. Subclasses use this method to
+     * append column names in the WHERE clause, i.e. for the columns that are not being
+     * updated.
      */
-    protected void appendDbAttribute(
-        StringBuffer buf,
-        DbAttribute dbAttribute) {
+    protected void appendDbAttribute(StringBuffer buf, DbAttribute dbAttribute) {
 
         // TODO: (Andrus) is there a need for trimming binary types?
-        boolean trim =
-            dbAttribute.getType() == Types.CHAR && trimFunction != null;
+        boolean trim = dbAttribute.getType() == Types.CHAR && trimFunction != null;
         if (trim) {
             buf.append(trimFunction).append('(');
         }
@@ -114,6 +112,7 @@ public abstract class BatchQueryBuilder {
     public void setAdapter(DbAdapter adapter) {
         this.adapter = adapter;
     }
+
     public DbAdapter getAdapter() {
         return adapter;
     }
@@ -127,26 +126,50 @@ public abstract class BatchQueryBuilder {
     }
 
     /**
-     * Binds BatchQuery parameters to the PreparedStatement. 
+     * Binds parameters for the current batch iteration to the PreparedStatement.
+     * 
+     * @deprecated since 1.1 use 'bindParameters' without dbAttributes argument.
      */
     public void bindParameters(
-        PreparedStatement statement,
-        BatchQuery query,
-        List dbAttributes)
-        throws SQLException, Exception {
+            PreparedStatement statement,
+            BatchQuery query,
+            List dbAttributes) throws SQLException, Exception {
+        this.bindParameters(statement, query);
+    }
 
+    /**
+     * Binds parameters for the current batch iteration to the PreparedStatement.
+     * 
+     * @since 1.2
+     */
+    public void bindParameters(PreparedStatement statement, BatchQuery query)
+            throws SQLException, Exception {
+
+        List dbAttributes = query.getDbAttributes();
         int attributeCount = dbAttributes.size();
 
         for (int i = 0; i < attributeCount; i++) {
             Object value = query.getValue(i);
             DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
-            adapter.bindParameter(
-                statement,
-                value,
-                i + 1,
-                attribute.getType(),
-                attribute.getPrecision());
+            adapter.bindParameter(statement, value, i + 1, attribute.getType(), attribute
+                    .getPrecision());
 
         }
+    }
+
+    /**
+     * Returns a list of values for the current batch iteration. Used primarily for
+     * logging.
+     * 
+     * @since 1.2
+     */
+    public List getParameterValues(BatchQuery query) {
+        List attributes = query.getDbAttributes();
+        int len = attributes.size();
+        List values = new ArrayList(len);
+        for (int i = 0; i < len; i++) {
+            values.add(query.getValue(i));
+        }
+        return values;
     }
 }

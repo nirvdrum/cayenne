@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
  * A translator for UpdateBatchQueries that produces parameterized SQL.
- *  
+ * 
  * @author Andriy Shapochka, Andrei Adamchik, Mike Kienenberger
  */
 
@@ -114,13 +114,10 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
     }
 
     /**
-     * Binds BatchQuery parameters to the PreparedStatement. 
+     * Binds BatchQuery parameters to the PreparedStatement.
      */
-    public void bindParameters(
-        PreparedStatement statement,
-        BatchQuery query,
-        List dbAttributes)
-        throws SQLException, Exception {
+    public void bindParameters(PreparedStatement statement, BatchQuery query)
+            throws SQLException, Exception {
 
         UpdateBatchQuery updateBatch = (UpdateBatchQuery) query;
         List qualifierAttributes = updateBatch.getQualifierAttributes();
@@ -133,27 +130,27 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
 
             DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
             adapter.bindParameter(
-                statement,
-                value,
-                parameterIndex++,
-                attribute.getType(),
-                attribute.getPrecision());
+                    statement,
+                    value,
+                    parameterIndex++,
+                    attribute.getType(),
+                    attribute.getPrecision());
         }
 
         for (int i = 0; i < qualifierAttributes.size(); i++) {
             Object value = query.getValue(len + i);
-            
+
             // skip null values... they are translated as "IS NULL"
             if (null == value)
                 continue;
 
             DbAttribute attribute = (DbAttribute) qualifierAttributes.get(i);
             adapter.bindParameter(
-                statement,
-                value,
-                parameterIndex++,
-                attribute.getType(),
-                attribute.getPrecision());
+                    statement,
+                    value,
+                    parameterIndex++,
+                    attribute.getType(),
+                    attribute.getPrecision());
         }
     }
 }

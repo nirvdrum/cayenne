@@ -61,11 +61,10 @@ import java.util.List;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- * BatchQuery and its descendants allow to group similar data for the
- * batch database modifications, including inserts, updates and deletes. 
- * Single BatchQuery corresponds to a parameterized PreparedStatement 
- * and a matrix of values.
- *
+ * BatchQuery and its descendants allow to group similar data for the batch database
+ * modifications, including inserts, updates and deletes. Single BatchQuery corresponds to
+ * a parameterized PreparedStatement and a matrix of values.
+ * 
  * @author Andriy Shapochka
  */
 public abstract class BatchQuery extends AbstractQuery {
@@ -82,9 +81,11 @@ public abstract class BatchQuery extends AbstractQuery {
     }
 
     /**
-     * Returns a List of values for the current batch iteration, 
-     * in the order they are bound to the query. Used mainly for 
-     * logging.
+     * Returns a List of values for the current batch iteration, in the order they are
+     * bound to the query. Used mainly for logging.
+     * 
+     * @deprecated Since 1.2 use BatchQueryBuilder.getParameterValues(), as this allows
+     *             better control over which attributes are logged.
      */
     public List getValuesForUpdateParameters() {
         int len = getDbAttributes().size();
@@ -113,24 +114,23 @@ public abstract class BatchQuery extends AbstractQuery {
     public abstract void reset();
 
     /**
-     * Repositions batch to the next object, so that subsequent calls to
-     * getObject(int) would return the values of the next batch object. Returns
-     * <code>true</code> if batch has more objects to iterate over,
-     * <code>false</code> otherwise.
+     * Repositions batch to the next object, so that subsequent calls to getObject(int)
+     * would return the values of the next batch object. Returns <code>true</code> if
+     * batch has more objects to iterate over, <code>false</code> otherwise.
      */
     public abstract boolean next();
-    
+
     /**
      * @deprecated Since 1.2 renamed to "getValue()"
      */
     public Object getObject(int valueIndex) {
-       return getValue(valueIndex); 
+        return getValue(valueIndex);
     }
 
     /**
      * Returns a value at a given index for the current batch iteration.
      * 
-     * @since 1.2 
+     * @since 1.2
      */
     public abstract Object getValue(int valueIndex);
 

@@ -194,7 +194,7 @@ public class UpdateBatchQuery extends BatchQuery {
     }
 
     public List getDbAttributes() {
-        return Collections.unmodifiableList(dbAttributes);
+        return dbAttributes;
     }
 
     /**

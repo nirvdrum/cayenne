@@ -56,6 +56,9 @@
 
 package org.objectstyle.cayenne.access.trans;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -69,26 +72,86 @@ import org.objectstyle.cayenne.query.BatchQuery;
  * @author Andriy Shapochka
  * @author Andrei Adamchik
  */
-
 public class InsertBatchQueryBuilder extends BatchQueryBuilder {
+
     public InsertBatchQueryBuilder(DbAdapter adapter) {
         super.setAdapter(adapter);
+    }
+
+    /**
+     * Binds parameters for the current batch iteration to the PreparedStatement. Performs
+     * filtering of attributes based on column generation rules.
+     * 
+     * @since 1.2
+     */
+    public void bindParameters(PreparedStatement statement, BatchQuery query)
+            throws SQLException, Exception {
+
+        List dbAttributes = query.getDbAttributes();
+        int attributeCount = dbAttributes.size();
+
+        // must use an independent counter "j" for prepared statement index
+        for (int i = 0, j = 0; i < attributeCount; i++) {
+            DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
+            if (includeInBatch(attribute)) {
+                j++;
+                Object value = query.getValue(i);
+                adapter.bindParameter(statement, value, j, attribute.getType(), attribute
+                        .getPrecision());
+            }
+        }
+    }
+
+    /**
+     * Returns a list of values for the current batch iteration. Performs filtering of
+     * attributes based on column generation rules. Used primarily for logging.
+     * 
+     * @since 1.2
+     */
+    public List getParameterValues(BatchQuery query) {
+        List attributes = query.getDbAttributes();
+        int len = attributes.size();
+        List values = new ArrayList(len);
+        for (int i = 0; i < len; i++) {
+            DbAttribute attribute = (DbAttribute) attributes.get(i);
+            if (includeInBatch(attribute)) {
+                values.add(query.getValue(i));
+            }
+        }
+        return values;
     }
 
     public String createSqlString(BatchQuery batch) {
         String table = batch.getDbEntity().getFullyQualifiedName();
         List dbAttributes = batch.getDbAttributes();
+
         StringBuffer query = new StringBuffer("INSERT INTO ");
         query.append(table).append(" (");
-        for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
-            DbAttribute attribute = (DbAttribute) i.next();
-            query.append(attribute.getName());
-            if (i.hasNext()) {
-                query.append(", ");
+
+        int columnCount = 0;
+        Iterator it = dbAttributes.iterator();
+
+        while (it.hasNext()) {
+            DbAttribute attribute = (DbAttribute) it.next();
+
+            // attribute inclusion rule - one of the rules below must be true:
+            // (1) attribute not generated
+            // (2) attribute is generated and PK and adapter does not support generated
+            // keys
+
+            if (includeInBatch(attribute)) {
+
+                if (columnCount > 0) {
+                    query.append(", ");
+                }
+                query.append(attribute.getName());
+                columnCount++;
             }
         }
+
         query.append(") VALUES (");
-        for (int i = 0; i < dbAttributes.size(); i++) {
+
+        for (int i = 0; i < columnCount; i++) {
             if (i > 0) {
                 query.append(", ");
             }
@@ -97,5 +160,20 @@ public class InsertBatchQueryBuilder extends BatchQueryBuilder {
         }
         query.append(')');
         return query.toString();
+    }
+
+    /**
+     * Returns true if an attribute should be included in the batch.
+     * 
+     * @since 1.2
+     */
+    protected boolean includeInBatch(DbAttribute attribute) {
+        // attribute inclusion rule - one of the rules below must be true:
+        // (1) attribute not generated
+        // (2) attribute is generated and PK and adapter does not support generated
+        // keys
+
+        return !attribute.isGenerated()
+                || (attribute.isPrimaryKey() && !adapter.supportsGeneratedKeys());
     }
 }
