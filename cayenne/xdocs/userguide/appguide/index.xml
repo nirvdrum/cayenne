@@ -1,0 +1,46 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+    
+<body>
+    <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">
+        <subsection name="4.1 Introduction" anchor="intro">
+            <p>The following steps (discussed in detail below) are needed
+            to write a Cayenne application:</p>
+            
+            <p><strong>- Create DataMap : </strong> 
+            <a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            is stored in an XML file 
+            used to desribe your database schema and map it to the Java classes
+            in your application. DataMap can be created either manually or using
+            CayenneModeler GUI tool shipped with Cayenne.
+            </p>
+            
+            <p><strong>- Generate Java classes : </strong> In Cayenne
+            <a href="../api/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
+            map to Java classes that implement 
+            <a href="../api/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
+            CayenneModeler can be used to generate and maintain such Java classes.            
+            </p>
+            
+            <p><strong>- Access Cayenne classes from your Java code : </strong> 
+            Access to Cayenne functionality at the user (Java developer) level 
+            is done via  <a 
+            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
+            class.      
+            </p>
+            
+            <p><strong>- Configure deployment environment : </strong> 
+            Depending on how you deploy your application you may need different
+            approaches in configuring Cayenne. Possible deployment scenarious are: 
+            standalone application, web application, EJB application.
+            </p>
+            <p>Database schema used in examples in this chapter is shown below:</p>
+            <img src="/images/schema.jpg" width="500" height="309" border="0" align="middle" alt="Art Catalog Schema"/>
+        </subsection>
+    </section>
+</body>
+</document>

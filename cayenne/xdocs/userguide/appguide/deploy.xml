@@ -1,0 +1,15 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+    
+<body>
+     <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
+        <subsection name="4.5 Deployment" anchor="deploy">
+            <p>To Be Done</p>
+        </subsection>
+    </section>
+</body>
+</document>

@@ -30,13 +30,13 @@
                 <li><a href="design.html#config">3.4 Configuration</a></li>
             </ul></li>
             
-            <li><a href="appguide.html">4. Writing Cayenne Applications</a>
+            <li><a href="appguide/index.html">4. Writing Cayenne Applications</a>
             <ul>
-                <li><a href="appguide.html#intro">4.1 Introduction</a></li>
-                <li><a href="appguide.html#datamap">4.2 Create DataMap</a></li>
-                <li><a href="appguide.html#javagen">4.3 Generate Java Classes</a></li>
-                <li><a href="appguide.html#cayenne">4.4 Using Cayenne Classes</a></li>
-                <li><a href="appguide.html#deploy">4.5 Deployment</a></li>
+                <li><a href="appguide/index.html#intro">4.1 Introduction</a></li>
+                <li><a href="appguide/datamap.html#datamap">4.2 Create DataMap</a></li>
+                <li><a href="appguide/javagen.html#javagen">4.3 Generate Java Classes</a></li>
+                <li><a href="appguide/cayenne.html#cayenne">4.4 Using Cayenne Classes</a></li>
+                <li><a href="appguide/deploy.html#deploy">4.5 Deployment</a></li>
             </ul></li>
             
            <li><a href="webobjects.html">5. Cayenne and WebObjects</a>
