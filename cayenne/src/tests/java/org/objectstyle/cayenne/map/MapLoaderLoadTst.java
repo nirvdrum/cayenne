@@ -92,5 +92,11 @@ public class MapLoaderLoadTst extends CayenneTestCase {
         assertNotNull(a1.getExpressionSpec());
         assertNotNull(a1.getParams());
         assertEquals(1, a1.getParams().size());        
+        
+        //test super class name
+        //We expect the artist entity to have a super class name... test map should be set up in that way.
+        //No other assertions can be made (the actual super class may change)
+        ObjEntity ent=map.getObjEntity("Painting");
+        assertNotNull(ent.getSuperClassName());
     }
 }

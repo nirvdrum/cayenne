@@ -64,6 +64,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class ClassGeneratorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(ClassGeneratorTst.class.getName());
 
+	private static final String SUPER_CLASS_PACKAGE="org.objectstyle.art";
+	private static final String SUPER_CLASS_NAME="ArtDataObject";
+	private static final String FQ_SUPER_CLASS_NAME=SUPER_CLASS_PACKAGE+"."+SUPER_CLASS_NAME;
+	
     protected ClassGenerator cgen;
 
     public ClassGeneratorTst(String name) {
@@ -86,6 +90,9 @@ public class ClassGeneratorTst extends CayenneTestCase {
         // test 3
         doSuperPrefix();
 
+		//test 4
+		doSuperClassName();
+		
         // final template test
         StringWriter out = new StringWriter();
         ObjEntity pe = getSharedDomain().lookupEntity("Painting");
@@ -94,8 +101,21 @@ public class ClassGeneratorTst extends CayenneTestCase {
         out.close();
 
         String classCode = out.toString();
+
         assertNotNull(classCode);
         assertTrue(classCode.length() > 0);
+        //Must contain the clause "extends <classname>", where classname is either fully qualified or not 
+		//If the class name is not fully qualified, then both the package and the class name must appear, the package as
+		// either a package statement or an import.
+        int indexOfFQSuperClass=classCode.indexOf(FQ_SUPER_CLASS_NAME);
+        if(indexOfFQSuperClass==-1) {
+ 			int indexOfSuperClassName=classCode.indexOf(SUPER_CLASS_NAME);
+ 			int indexOfSuperPackageName=classCode.indexOf(SUPER_CLASS_PACKAGE);
+ 			//Both must be found
+       		assertTrue((indexOfSuperClassName!=-1) && (indexOfSuperPackageName!=-1));
+       		//Should probably also check for the extends clause, but there can be arbitrary whitespace between extends and
+       		// the class name - would need regex to do that easily and correctly... a task for another time.
+        }
     }
 
     private void doClassName() throws Exception {
@@ -117,5 +137,10 @@ public class ClassGeneratorTst extends CayenneTestCase {
         cgen.setPackageName(pkgName);
         assertEquals(pkgName, cgen.getPackageName());
         assertTrue(cgen.isUsingPackage());
+    }
+    
+    private void doSuperClassName() throws Exception {
+    	cgen.setSuperClassName(FQ_SUPER_CLASS_NAME);
+    	assertEquals(FQ_SUPER_CLASS_NAME, cgen.getSuperClassName());
     }
 }

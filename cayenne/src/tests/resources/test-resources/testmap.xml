@@ -77,7 +77,7 @@
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>
 	</obj-entity>
 	
-	<obj-entity name="Painting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
+	<obj-entity name="Painting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING" superClassName="org.objectstyle.art.ArtDataObject">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
 	</obj-entity>

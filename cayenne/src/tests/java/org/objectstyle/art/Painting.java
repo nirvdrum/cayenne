@@ -59,7 +59,7 @@ import org.objectstyle.cayenne.*;
 import java.util.*;
 import java.math.BigDecimal;
 
-public class Painting extends CayenneDataObject {
+public class Painting extends ArtDataObject {
     
     public void setEstimatedPrice(BigDecimal estimatedPrice) {
         writeProperty("estimatedPrice", estimatedPrice);
