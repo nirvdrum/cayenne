@@ -50,21 +50,7 @@
                 <th colspan="1">Nov</th>
                 <th colspan="1">Dec</th>
             </tr>
-            <tr>
-                <td colspan="1">2002</td>
-                <td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-				<td colspan="1">-</td>
-            </tr>
+            <list-arch name="cayenne-devel"/>
             </table>
         </subsection>
         </section>

@@ -107,6 +107,13 @@
 </table>
 #end
 
+## Creates mailing list archive placeholder
+#macro ( listarch $arch)
+<!-- Do not change comments below, it is a placeholder to create archive links -->
+<!-- ARCHIVE_START:$arch.getAttributeValue("name") -->
+<!-- ARCHIVE_END:$arch.getAttributeValue("name") -->
+#end
+
 #macro ( panel $panel)
 <div align="center">
 <p>
@@ -127,6 +134,8 @@
     #foreach ( $items in $table.getChildren() )
         #if ($items.getName().equals("tr"))
             #tr ($items)
+        #elseif ($items.getName().equals("list-arch"))
+        	#listarch ($items)
         #end
     #end
 </table>
