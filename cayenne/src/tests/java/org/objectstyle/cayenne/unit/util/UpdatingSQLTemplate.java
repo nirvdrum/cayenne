@@ -66,6 +66,6 @@ import org.objectstyle.cayenne.query.SQLTemplate;
 public class UpdatingSQLTemplate extends SQLTemplate {
 
     public UpdatingSQLTemplate(Class rootClass, String defaultTemplate) {
-        super(rootClass, defaultTemplate, false);
+        super(rootClass, defaultTemplate != null ? defaultTemplate.trim() : null, false);
     }
 }
