@@ -17,6 +17,13 @@
    	    <panel name="Note:">
     		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
     	</panel>
+    	
+    	<panel name="Note:">
+    		Configuration given in this tutorial assumes Servlet 2.3 compatible
+    		container. For older containers, move cayenne files from WEB-INF to WEB-INF/classes
+    		(e.g. "mv cayenne.xml datanode.driver.xml datamap.map.xml classes/") and remove listener
+    		section from the web.xml.
+    	</panel>
 
    	<p>Tutorial steps:</p>
     	
@@ -63,36 +70,17 @@
     		to any convenient directory.</li> 
     		
     		<li>Copy all JAR files distributed with Struts (located in <code>lib</code> subdirectory) to
-    		<code>WEB-INF/lib</code> subdirectory of the tutorial project. At the minimum these files
-    		are required:
-    			<ul>
-    		    	<li>commons-beanutils.jar</li>
-    		    	<li>commons-collections.jar</li>
-    		    	<li>commons-dbcp.jar</li>
-    		    	<li>commons-digester.jar</li>
-    		    	<li>commons-logging.jar</li>
-    		    	<li>commons-pool.jar</li>
-    		    	<li>commons-services.jar</li>
-    		    	<li>commons-validator.jar</li>
-    		    	<li>struts.jar</li>
-    			</ul>    		
-    		</li>
+    		<code>WEB-INF/lib</code> subdirectory of the tutorial project.</li>
     		
-    		<li>Copy the following Struts configuration files from Struts <code>lib</code> subdirectory 
-    		to <code>WEB-INF</code> subdirectory of the tutorial project:
-				<ul>
-    		    	<li>struts-bean.tld</li>
-    		    	<li>struts-html.tld</li>
-    		    	<li>struts-logic.tld</li>
-    		    	<li>struts-nested.tld</li>
-    		    	<li>struts-template.tld</li>
-    		    	<li>validator-rules.xml</li>
-    			</ul>    
+    		<li>Copy all the *.tld files and validator-rules.xml from Struts 
+    		<code>lib</code> subdirectory 
+    		to <code>WEB-INF</code> subdirectory of the tutorial project.
+			
     		</li>
     		</ul>
     		
-    		Tutorial was testsed with Struts 1.1b1, earlier versions of Struts will most 
-    		likely require a different setup.</p>
+    		Tutorial was testsed with Struts 1.1rc1, other versions of Struts may
+    		require a different setup.</p>
     	</subsection>
     	
        <subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
