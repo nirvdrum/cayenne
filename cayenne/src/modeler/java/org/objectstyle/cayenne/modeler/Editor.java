@@ -59,8 +59,6 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -71,7 +69,6 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
@@ -90,6 +87,7 @@ import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
+import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
@@ -102,7 +100,6 @@ import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.TopController;
-import org.objectstyle.cayenne.modeler.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
@@ -138,7 +135,6 @@ import org.scopemvc.util.UIStrings;
 public class Editor
     extends JFrame
     implements
-        ActionListener,
         DomainDisplayListener,
         DataNodeDisplayListener,
         DataMapDisplayListener,
@@ -160,8 +156,6 @@ public class Editor
 
     protected EditorView view;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
-
-    protected JMenuItem generateMenu = new JMenuItem("Generate Classes");
 
     protected XmlFilter xmlFilter = new XmlFilter();
     protected TopController controller;
@@ -250,8 +244,14 @@ public class Editor
         initToolbar();
         initStatusBar();
 
-        // these are legacy methods being refactored out
-        initOther();
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(650, 550);
+
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                ((ExitAction) getAction(ExitAction.ACTION_NAME)).exit();
+            }
+        });
 
         controller.startup();
     }
@@ -310,28 +310,12 @@ public class Editor
         toolMenu.add(getAction(ImportDbAction.ACTION_NAME).buildMenu());
         toolMenu.add(getAction(ImportEOModelAction.ACTION_NAME).buildMenu());
         toolMenu.addSeparator();
-        toolMenu.add(generateMenu);
+        toolMenu.add(getAction(GenerateClassesAction.ACTION_NAME).buildMenu());
         toolMenu.add(getAction(GenerateDbAction.ACTION_NAME).buildMenu());
         toolMenu.addSeparator();
         toolMenu.add(getAction(PackageMenuAction.ACTION_NAME).buildMenu());
 
         helpMenu.add(getAction(AboutAction.ACTION_NAME).buildMenu());
-    }
-
-    protected void initOther() {
-        // "legacy" code - need to hook up all menus and toolbars with actions 
-        disableMenu();
-
-        generateMenu.addActionListener(this);
-
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(650, 550);
-
-        this.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                ((ExitAction)getAction(ExitAction.ACTION_NAME)).exit();
-            }
-        });
     }
 
     protected void initStatusBar() {
@@ -444,25 +428,6 @@ public class Editor
         }
     }
 
-    public void actionPerformed(ActionEvent e) {
-        try {
-            Object src = e.getSource();
-
-            if (src == generateMenu) {
-                generateClasses();
-            } 
-        } catch (Exception ex) {
-            ErrorDebugDialog.guiException(ex);
-        }
-    }
-
-    private void generateClasses() {
-        GenerateClassDialog dialog;
-        dialog = new GenerateClassDialog(this, controller.getEventController());
-        dialog.show();
-        dialog.dispose();
-    }
-
     public void currentDomainChanged(DomainDisplayEvent e) {
         if (e.getDomain() == null) {
             enableProjectMenu();
@@ -541,9 +506,6 @@ public class Editor
 
             controller.getTopModel().getActionMap().get(keys[i]).setEnabled(false);
         }
-
-        // explicitly disable "legacy" menus
-        generateMenu.setEnabled(false);
     }
 
     private void enableProjectMenu() {
@@ -569,8 +531,7 @@ public class Editor
             enableDomainMenu();
 
         getAction(PackageMenuAction.ACTION_NAME).setEnabled(true);
-        generateMenu.setEnabled(true);
-
+        getAction(GenerateClassesAction.ACTION_NAME).setEnabled(true);
         getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);
         getAction(CreateDbEntityAction.ACTION_NAME).setEnabled(true);
         getAction(CreateDerivedDbEntityAction.ACTION_NAME).setEnabled(true);
