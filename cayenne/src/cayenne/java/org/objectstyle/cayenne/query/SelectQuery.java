@@ -548,6 +548,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
     
     /**
+     * Adds all joint prefetches from a provided collection.
+     * 
      * @since 1.2
      */
     public void addJointPrefetches(Collection relationshipPaths) {
@@ -555,10 +557,23 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
     
     /**
+     * Clears all joint prefetches.
+     * 
      * @since 1.2
      */
     public void clearJointPrefetches() {
         jointPrefetches = null;
+    }
+    
+    /**
+     * Removes joint prefetch.
+     * 
+     * @since 1.2
+     */
+    public void removeJointPrefetch(String relationshipPath) {
+        if (jointPrefetches != null) {
+            jointPrefetches.remove(relationshipPath);
+        }
     }
     
 

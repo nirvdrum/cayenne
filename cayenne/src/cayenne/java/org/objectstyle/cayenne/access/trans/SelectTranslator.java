@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access.trans;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +80,9 @@ import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Class that serves as a translator of SELECT queries to JDBC statements.
+ * A builder of JDBC PreparedStatements based on Cayenne SelectQueries. Translates
+ * SelectQuery to parameterized SQL string and wraps it in a PreparedStatement.
+ * SelectTranslator is stateful and thread-unsafe.
  * 
  * @author Andrei Adamchik
  */
@@ -100,11 +103,14 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     }
 
     private final Map aliasLookup = new HashMap();
-    private final List columnList = new ArrayList();
+    
     private final List tableList = new ArrayList();
     private final List aliasList = new ArrayList();
     private final List dbRelList = new ArrayList();
+    
+    private List columnList;
     private List groupByList;
+    
     private int aliasCounter;
 
     private boolean suppressingDistinct;
@@ -131,7 +137,8 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         forcingDistinct = false;
 
         // build column list
-        buildColumnList();
+        newAliasForTable(getRootDbEntity());
+        this.columnList = buildColumnList();
 
         QualifierTranslator tr = adapter.getQualifierTranslator(this);
 
@@ -150,7 +157,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         String qualifierStr = tr.doTranslation();
 
         // build GROUP BY
-        buildGroupByList();
+        this.groupByList = buildGroupByList();
 
         // build ORDER BY
         OrderingTranslator orderingTranslator = new OrderingTranslator(this);
@@ -191,9 +198,10 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         if (forcingDistinct || getSelectQuery().isDistinct()) {
             List orderByColumnList = orderingTranslator.getOrderByColumnList();
             for (int i = 0; i < orderByColumnList.size(); i++) {
-                String orderByColumnExp = (String) orderByColumnList.get(i);
-                if (selectColumnExpList.contains(orderByColumnExp) == false)
+                Object orderByColumnExp = orderByColumnList.get(i);
+                if (!selectColumnExpList.contains(orderByColumnExp)) {
                     selectColumnExpList.add(orderByColumnExp);
+                }
             }
         }
 
@@ -224,10 +232,10 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             hasWhere = true;
             queryBuf.append(" WHERE ");
 
-            appendDbRelJoins(queryBuf, 0);
+            appendJoins(queryBuf, 0);
             for (int i = 1; i < dbRelCount; i++) {
                 queryBuf.append(" AND ");
-                appendDbRelJoins(queryBuf, i);
+                appendJoins(queryBuf, i);
             }
         }
 
@@ -304,36 +312,28 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     }
 
     /**
-     * Creates a list of columns used in the query.
-     */
-    private void buildColumnList() {
-        newAliasForTable(getRootDbEntity());
-        appendAttributes();
-    }
-
-    /**
      * Creates a list of columns used in the query's GROUP BY clause.
      */
-    private void buildGroupByList() {
+    private List buildGroupByList() {
         DbEntity dbEntity = getRootDbEntity();
-        if (dbEntity instanceof DerivedDbEntity) {
-            groupByList = ((DerivedDbEntity) dbEntity).getGroupByAttributes();
-        }
+        return (dbEntity instanceof DerivedDbEntity) ? ((DerivedDbEntity) dbEntity)
+                .getGroupByAttributes() : Collections.EMPTY_LIST;
     }
 
     /**
-     * Returns a list of DbAttributes used in query.
+     * Creates a list of DbAttributes used in query.
      */
-    private void appendAttributes() {
-        DbEntity dbe = getRootDbEntity();
-        SelectQuery q = getSelectQuery();
+    private List buildColumnList() {
+        DbEntity table = getRootDbEntity();
+        SelectQuery query = getSelectQuery();
+        List columnList = new ArrayList();
 
         // extract custom attributes from the query
-        if (q.isFetchingCustomAttributes()) {
-            List custAttrNames = q.getCustomDbAttributes();
+        if (query.isFetchingCustomAttributes()) {
+            List custAttrNames = query.getCustomDbAttributes();
             int len = custAttrNames.size();
             for (int i = 0; i < len; i++) {
-                Attribute attr = dbe.getAttribute((String) custAttrNames.get(i));
+                Attribute attr = table.getAttribute((String) custAttrNames.get(i));
                 if (attr == null) {
                     throw new CayenneRuntimeException("Attribute does not exist: "
                             + custAttrNames.get(i));
@@ -342,13 +342,20 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
         }
         else {
-            // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP
-            // BY's
+            // fetched attributes include attributes that are either:
+            // 
+            //   * class properties
+            //   * PK
+            //   * FK used in relationships
+            //   * GROUP BY
+            //   * joined prefetch PK
 
             ObjEntity oe = getRootEntity();
+            
+            // null tree will indicate that we don't take inheritance into account
             EntityInheritanceTree tree = null;
 
-            if (q.isResolvingInherited()) {
+            if (query.isResolvingInherited()) {
                 tree = getRootInheritanceTree();
             }
 
@@ -388,9 +395,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
                 List joins = dbRel.getJoins();
-                int jLen = joins.size();
-                for (int j = 0; j < jLen; j++) {
-                    DbJoin join = (DbJoin) joins.get(j);
+                int len = joins.size();
+                for (int i = 0; i < len; i++) {
+                    DbJoin join = (DbJoin) joins.get(i);
                     DbAttribute src = join.getSource();
                     if (!columnList.contains(src)) {
                         columnList.add(src);
@@ -399,7 +406,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
 
             // add remaining needed attrs from DbEntity
-            Iterator dbattrs = dbe.getPrimaryKey().iterator();
+            Iterator dbattrs = table.getPrimaryKey().iterator();
             while (dbattrs.hasNext()) {
                 DbAttribute dba = (DbAttribute) dbattrs.next();
                 if (!columnList.contains(dba)) {
@@ -409,8 +416,8 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
 
             // May require some special handling for prefetch selects
             // if the prefetch is of a certain type
-            if (q instanceof PrefetchSelectQuery) {
-                PrefetchSelectQuery pq = (PrefetchSelectQuery) q;
+            if (query instanceof PrefetchSelectQuery) {
+                PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
                 ObjRelationship r = pq.getLastPrefetchHint();
                 if ((r != null) && (r.getReverseRelationship() == null)) {
                     // Prefetching a single step toMany relationship which
@@ -430,18 +437,20 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 }
             }
         }
+        
+        return columnList;
     }
 
     private String getColumn(int index) {
-        DbAttribute attr = (DbAttribute) columnList.get(index);
-        String alias = aliasForTable((DbEntity) attr.getEntity());
-        return attr.getAliasedName(alias);
+        DbAttribute column = (DbAttribute) columnList.get(index);
+        String alias = aliasForTable((DbEntity) column.getEntity());
+        return column.getAliasedName(alias);
     }
 
     private void appendGroupBy(StringBuffer queryBuf, int index) {
-        DbAttribute attr = (DbAttribute) groupByList.get(index);
-        DbEntity ent = (DbEntity) attr.getEntity();
-        queryBuf.append(attr.getAliasedName(aliasForTable(ent)));
+        DbAttribute column = (DbAttribute) groupByList.get(index);
+        String alias = aliasForTable((DbEntity) column.getEntity());
+        queryBuf.append(column.getAliasedName(alias));
     }
 
     private void appendTable(StringBuffer queryBuf, int index) {
@@ -452,7 +461,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         queryBuf.append(' ').append((String) aliasList.get(index));
     }
 
-    private void appendDbRelJoins(StringBuffer queryBuf, int index) {
+    private void appendJoins(StringBuffer queryBuf, int index) {
         DbRelationship rel = (DbRelationship) dbRelList.get(index);
         String srcAlias = aliasForTable((DbEntity) rel.getSourceEntity());
         String targetAlias = (String) aliasLookup.get(rel);
@@ -550,8 +559,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     }
 
     public ResultDescriptor getResultDescriptor(ResultSet rs) {
-        if (columnList.size() == 0) {
-            throw new CayenneRuntimeException("Call 'createStatement' first");
+        if (columnList.isEmpty()) {
+            throw new CayenneRuntimeException(
+                    "No columns in SELECT, call 'createStatement' first");
         }
 
         ResultDescriptor descriptor;
