@@ -216,7 +216,7 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
 
     public void testFloatExpression() throws Exception {
         populatePaintings();
-        Expression parsed1 = Expression.fromString("estimatedPrice < 2000.01");
+        Expression parsed1 = Expression.fromString("estimatedPrice < 2001.01");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 

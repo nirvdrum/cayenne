@@ -97,13 +97,18 @@ test-openbase.jdbc.driver = com.openbase.jdbc.ObDriver
 public class OpenBaseAdapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(OpenBaseAdapter.class);
 
+    public OpenBaseAdapter() {
+        // init defaults
+        this.setSupportsUniqueConstraints(false);
+    }
+
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         super.configureExtendedTypes(map);
 
         // Byte handling doesn't work on read... 
         // need special converter
         map.registerType(new OpenBaseByteType());
-        
+
         map.registerType(new OpenBaseCharType());
     }
 

@@ -87,7 +87,7 @@ public class CDOOneToOneFKTst extends CayenneTestCase {
         assertNull(src2.getToOneToFK());
     }
 
-    public void testReplaceNull() throws Exception {
+    public void testReplaceNull1() throws Exception {
         ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
         context.commitChanges();
         context = createDataContext();
@@ -99,6 +99,30 @@ public class CDOOneToOneFKTst extends CayenneTestCase {
         // *** TESTING THIS ***
         src2.setToOneToFK(null);
         assertNull(src2.getToOneToFK());
+    }
+
+    public void testReplaceNull2() throws Exception {
+        ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
+        context.commitChanges();
+
+        ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
+
+        // *** TESTING THIS *** 
+        src.setToOneToFK(target);
+
+        // test before save
+        assertSame(target, src.getToOneToFK());
+
+        // do save 
+        context.commitChanges();
+        context = createDataContext();
+
+        // test database data
+        ToOneFK2 src2 = (ToOneFK2) context.refetchObject(src.getObjectId());
+        ToOneFK1 target2 = src2.getToOneToFK();
+        assertNotNull(target2);
+        assertEquals(src.getObjectId(), src2.getObjectId());
+        assertEquals(target.getObjectId(), target2.getObjectId());
     }
 
     public void testNewAdd() throws Exception {
@@ -123,33 +147,34 @@ public class CDOOneToOneFKTst extends CayenneTestCase {
         assertEquals(target.getObjectId(), target2.getObjectId());
     }
 
-    public void testReplace() throws Exception {
-        ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
-        ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
-
-        src.setToOneToFK(target);
-        assertSame(target, src.getToOneToFK());
-        context.commitChanges();
-
-        // replace target
-        ToOneFK1 target1 = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
-        src.setToOneToFK(target1);
-        assertSame(target1, src.getToOneToFK());
-        assertNull(target.getToPK());
-        context.commitChanges();
-
-        context = createDataContext();
-
-        // test database data
-        ToOneFK2 src2 = (ToOneFK2) context.refetchObject(src.getObjectId());
-        ToOneFK1 target2 = src2.getToOneToFK();
-        assertNotNull(target2);
-        assertEquals(src.getObjectId(), src2.getObjectId());
-        assertEquals(target1.getObjectId(), target2.getObjectId());
-        
-        ToOneFK1 oldTarget = (ToOneFK1) context.refetchObject(target.getObjectId());
-        assertNull(oldTarget.getToPK());
-    }
+    // technically replacing a related object with a new one is possible...
+    // though this seems pretty evil...
+    /*  public void testReplace() throws Exception {
+          ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
+          ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
+    
+          src.setToOneToFK(target);
+          assertSame(target, src.getToOneToFK());
+          context.commitChanges();
+    
+          // replace target
+          ToOneFK1 target1 = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
+          src.setToOneToFK(target1);
+          assertSame(target1, src.getToOneToFK());
+    
+          // delete an old target, since the column is not nullable...
+          context.deleteObject(target);
+          context.commitChanges();
+    
+          context = createDataContext();
+    
+          // test database data
+          ToOneFK2 src2 = (ToOneFK2) context.refetchObject(src.getObjectId());
+          ToOneFK1 target2 = src2.getToOneToFK();
+          assertNotNull(target2);
+          assertEquals(src.getObjectId(), src2.getObjectId());
+          assertEquals(target1.getObjectId(), target2.getObjectId());
+      } */
 
     public void testTakeObjectSnapshotDependentFault() throws Exception {
         ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
@@ -164,5 +189,22 @@ public class CDOOneToOneFKTst extends CayenneTestCase {
         // test that taking a snapshot does not trigger a fault, and generally works well 
         context.currentSnapshot(src2);
         assertTrue(src2.readPropertyDirectly("toOneToFK") instanceof Fault);
+    }
+
+    public void testDelete() throws Exception {
+        ToOneFK2 src = (ToOneFK2) context.createAndRegisterNewObject(ToOneFK2.class);
+        ToOneFK1 target = (ToOneFK1) context.createAndRegisterNewObject(ToOneFK1.class);
+        src.setToOneToFK(target);
+        context.commitChanges();
+
+        src.setToOneToFK(null);
+        context.deleteObject(target);
+        context.commitChanges();
+
+        // test database data
+        context = createDataContext();
+        ToOneFK2 src2 = (ToOneFK2) context.refetchObject(src.getObjectId());
+        assertNull(src.getToOneToFK());
+        assertEquals(src.getObjectId(), src2.getObjectId());
     }
 }

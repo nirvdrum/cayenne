@@ -56,12 +56,15 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
@@ -116,6 +119,32 @@ public class DbRelationship extends Relationship {
         }
 
         return map.getDbEntity(getTargetEntityName(), true);
+    }
+
+    /**
+     * Returns a Collection of target attributes.
+     * 
+     * @since 1.1
+     */
+    public Collection getTargetAttributes() {
+        if (joins.size() == 0) {
+            return Collections.EMPTY_LIST;
+        }
+
+        return CollectionUtils.collect(joins, JoinTransformers.targetExtractor);
+    }
+
+    /**
+     * Returns a Collection of target attributes.
+     * 
+     * @since 1.1
+     */
+    public Collection getSourceAttributes() {
+        if (joins.size() == 0) {
+            return Collections.EMPTY_LIST;
+        }
+
+        return CollectionUtils.collect(joins, JoinTransformers.sourceExtractor);
     }
 
     /**
@@ -390,5 +419,25 @@ public class DbRelationship extends Relationship {
         RelationshipEvent event =
             new RelationshipEvent(this, this, this.getSourceEntity());
         EventManager.getDefaultManager().postEvent(event, PROPERTY_DID_CHANGE);
+    }
+
+    final static class JoinTransformers {
+        static final Transformer targetExtractor = new Transformer() {
+            public Object transform(Object input) {
+                return (input instanceof DbAttributePair)
+                    ? ((DbAttributePair) input).getTarget()
+                    : input;
+
+            }
+        };
+
+        static final Transformer sourceExtractor = new Transformer() {
+            public Object transform(Object input) {
+                return (input instanceof DbAttributePair)
+                    ? ((DbAttributePair) input).getSource()
+                    : input;
+
+            }
+        };
     }
 }

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.dba;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
@@ -136,8 +137,17 @@ public interface DbAdapter {
 	 */
 	public DataNode createDataNode(String name);
 
-	/** Returns true if a target database supports FK constraints. */
+	/** 
+     * Returns true if a target database supports FK constraints. 
+     */
 	public boolean supportsFkConstraints();
+    
+    /** 
+     * Returns true if a target database supports UNIQUE constraints. 
+     * 
+     * @since 1.1
+     */
+    public boolean supportsUniqueConstraints();
 
 	/**
 	 * Returns <code>true</code> if the target database supports
@@ -158,6 +168,14 @@ public interface DbAdapter {
 	 */
 	public String createTable(DbEntity ent);
 
+    /**
+     * Returns a DDL string to create a unique constraint over a set 
+     * of columns.
+     * 
+     * @since 1.1
+     */
+    public String createUniqueConstraint(DbEntity source, Collection columns);
+    
 	/**
 	 *  Returns a SQL string that can be used to create
 	 * a foreign key constraint for the relationship.

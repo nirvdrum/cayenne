@@ -65,7 +65,7 @@ import java.util.ListIterator;
 import org.objectstyle.cayenne.ObjectId;
 
 /**
- * Special List implementation to hold "to many" relationship data.
+ * A List that holds objects for to-many relationships.
  * 
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>

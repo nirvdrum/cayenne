@@ -52,13 +52,16 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 
 package org.objectstyle.cayenne.dba.hsqldb;
 
+import java.util.Collection;
 import java.util.Iterator;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -81,53 +84,91 @@ test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
  */
 public class HSQLDBAdapter extends JdbcAdapter {
 
-	/**
-	 * Adds an ADD CONSTRAINT clause to a relationship constraint.
-	 * @see JdbcAdapter#createFkConstraint(DbRelationship)
-	 */
-	public String createFkConstraint(DbRelationship rel) {
-		StringBuffer buf = new StringBuffer();
-		StringBuffer refBuf = new StringBuffer();
+    /**
+     * Returns a DDL string to create a unique constraint over a set 
+     * of columns.
+     * 
+     * @since 1.1
+     */
+    public String createUniqueConstraint(DbEntity source, Collection columns) {
+        if (columns == null || columns.isEmpty()) {
+            throw new CayenneRuntimeException("Can't create UNIQUE constraint - no columns specified.");
+        }
 
-		String srcName = ((DbEntity)rel.getSourceEntity()).getFullyQualifiedName();
-		String dstName = ((DbEntity)rel.getTargetEntity()).getFullyQualifiedName();
+        String srcName = source.getFullyQualifiedName();
 
-		buf.append("ALTER TABLE ");
-		buf.append(srcName);
+        StringBuffer buf = new StringBuffer();
 
-		// hsqldb requires the ADD CONSTRAINT statement
-		buf.append(" ADD CONSTRAINT ");
-		buf.append("C_");
-		buf.append(srcName);
-		buf.append("_");
-		buf.append((long)(System.currentTimeMillis()/(Math.random()*100000)));
+        buf.append("ALTER TABLE ").append(srcName);
+        buf.append(" ADD CONSTRAINT ");
+        buf.append("U_");
+        buf.append(srcName);
+        buf.append("_");
+        buf.append((long) (System.currentTimeMillis() / (Math.random() * 100000)));
+        buf.append(" UNIQUE (");
 
-		buf.append(" FOREIGN KEY (");
+        Iterator it = columns.iterator();
+        DbAttribute first = (DbAttribute) it.next();
+        buf.append(first.getName());
 
-		Iterator jit = rel.getJoins().iterator();
-		boolean first = true;
-		while (jit.hasNext()) {
-			DbAttributePair join = (DbAttributePair) jit.next();
-			if (!first) {
-				buf.append(", ");
-				refBuf.append(", ");
-			} else
-				first = false;
+        while (it.hasNext()) {
+            DbAttribute next = (DbAttribute) it.next();
+            buf.append(", ");
+            buf.append(next.getName());
+        }
 
-			buf.append(join.getSource().getName());
-			refBuf.append(join.getTarget().getName());
-		}
+        buf.append(")");
 
-		buf.append(") REFERENCES ");
-		buf.append(dstName);
-		buf.append(" (");
-		buf.append(refBuf.toString());
-		buf.append(')');
+        return buf.toString();
+    }
 
-		// also make sure we delete dependent FKs
-		buf.append(" ON DELETE CASCADE");
+    /**
+     * Adds an ADD CONSTRAINT clause to a relationship constraint.
+     * @see JdbcAdapter#createFkConstraint(DbRelationship)
+     */
+    public String createFkConstraint(DbRelationship rel) {
+        StringBuffer buf = new StringBuffer();
+        StringBuffer refBuf = new StringBuffer();
 
-		return buf.toString();
-	}
+        String srcName = ((DbEntity) rel.getSourceEntity()).getFullyQualifiedName();
+        String dstName = ((DbEntity) rel.getTargetEntity()).getFullyQualifiedName();
+
+        buf.append("ALTER TABLE ");
+        buf.append(srcName);
+
+        // hsqldb requires the ADD CONSTRAINT statement
+        buf.append(" ADD CONSTRAINT ");
+        buf.append("C_");
+        buf.append(srcName);
+        buf.append("_");
+        buf.append((long) (System.currentTimeMillis() / (Math.random() * 100000)));
+
+        buf.append(" FOREIGN KEY (");
+
+        Iterator jit = rel.getJoins().iterator();
+        boolean first = true;
+        while (jit.hasNext()) {
+            DbAttributePair join = (DbAttributePair) jit.next();
+            if (!first) {
+                buf.append(", ");
+                refBuf.append(", ");
+            }
+            else
+                first = false;
+
+            buf.append(join.getSource().getName());
+            refBuf.append(join.getTarget().getName());
+        }
+
+        buf.append(") REFERENCES ");
+        buf.append(dstName);
+        buf.append(" (");
+        buf.append(refBuf.toString());
+        buf.append(')');
+
+        // also make sure we delete dependent FKs
+        buf.append(" ON DELETE CASCADE");
+
+        return buf.toString();
+    }
 }
-

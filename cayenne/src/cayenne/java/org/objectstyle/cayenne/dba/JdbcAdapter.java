@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.dba;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -110,16 +111,24 @@ public class JdbcAdapter implements DbAdapter {
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
     protected boolean supportsBatchUpdates;
+    protected boolean supportsFkConstraints;
+    protected boolean supportsUniqueConstraints;
 
+    /**
+     * Creates new JdbcAdapter with a set of default parameters.
+     */
     public JdbcAdapter() {
-        // create Pk generator
+        // init defaults
+        this.setSupportsBatchUpdates(false);
+        this.setSupportsUniqueConstraints(true);
+        this.setSupportsFkConstraints(true);
+
         this.pkGenerator = this.createPkGenerator();
         this.typesHandler = TypesHandler.getHandler(this.getClass());
         this.extendedTypes = new ExtendedTypeMap();
         this.configureExtendedTypes(extendedTypes);
-        this.setSupportsBatchUpdates(false);
     }
-    
+
     /**
      * Returns default separator - a semicolon.
      * @since 1.0.4
@@ -217,9 +226,34 @@ public class JdbcAdapter implements DbAdapter {
         }
     }
 
-    /** Returns true. */
+    /** 
+     * Returns true. 
+     */
     public boolean supportsFkConstraints() {
-        return true;
+        return supportsFkConstraints;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setSupportsFkConstraints(boolean flag) {
+        this.supportsFkConstraints = flag;
+    }
+
+    /** 
+     * Returns true. 
+     * 
+     * @since 1.1
+     */
+    public boolean supportsUniqueConstraints() {
+        return supportsUniqueConstraints;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setSupportsUniqueConstraints(boolean flag) {
+        this.supportsUniqueConstraints = flag;
     }
 
     /**
@@ -307,7 +341,7 @@ public class JdbcAdapter implements DbAdapter {
                 buf.append(" NOT NULL");
             }
             else {
-				buf.append(" NULL");
+                buf.append(" NULL");
             }
         }
 
@@ -333,6 +367,37 @@ public class JdbcAdapter implements DbAdapter {
             buf.append(')');
         }
         buf.append(')');
+        return buf.toString();
+    }
+
+    /**
+     * Returns a DDL string to create a unique constraint over a set 
+     * of columns.
+     * 
+     * @since 1.1
+     */
+    public String createUniqueConstraint(DbEntity source, Collection columns) {
+        if (columns == null || columns.isEmpty()) {
+            throw new CayenneRuntimeException("Can't create UNIQUE constraint - no columns specified.");
+        }
+
+        StringBuffer buf = new StringBuffer();
+
+        buf.append("ALTER TABLE ").append(source.getFullyQualifiedName()).append(
+            " ADD UNIQUE (");
+
+        Iterator it = columns.iterator();
+        DbAttribute first = (DbAttribute) it.next();
+        buf.append(first.getName());
+
+        while (it.hasNext()) {
+            DbAttribute next = (DbAttribute) it.next();
+            buf.append(", ");
+            buf.append(next.getName());
+        }
+
+        buf.append(")");
+
         return buf.toString();
     }
 

@@ -415,10 +415,28 @@ public class DbGenerator {
         while (it.hasNext()) {
             DbRelationship rel = (DbRelationship) it.next();
 
-            // TODO: last condition ("isToPK") is a temp hack - to-one relationships 
-            // with a target that is not a PK should be skipped... Permanent solution 
-            // would be to generate UNIQUE constraint, and then - an FK
-            if (!rel.isToMany() && !rel.isToDependentPK() && rel.isToPK()) {
+            if (rel.isToMany()) {
+                continue;
+            }
+
+            // create an FK CONSTRAINT only if the relationship is to PK
+            // and if this is not a dependent PK
+
+            // create UNIQUE CONSTRAINT on FK if reverse relationship is to-one
+
+            if (rel.isToPK() && !rel.isToDependentPK()) {
+
+                if (getAdapter().supportsUniqueConstraints()) {
+
+                    DbRelationship reverse = rel.getReverseRelationship();
+                    if (reverse != null && !reverse.isToMany() && !reverse.isToPK()) {
+                        list.add(
+                            getAdapter().createUniqueConstraint(
+                                (DbEntity) rel.getSourceEntity(),
+                                rel.getSourceAttributes()));
+                    }
+                }
+
                 list.add(getAdapter().createFkConstraint(rel));
             }
         }

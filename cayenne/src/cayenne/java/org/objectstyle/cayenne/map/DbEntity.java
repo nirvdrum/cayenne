@@ -359,7 +359,6 @@ public class DbEntity extends Entity implements DbAttributeListener {
 
             String path = (String) expression.getOperand(0);
             String converted = translatePath(path);
-            logObj.warn("transforming: " + path + " to " + converted);
             Expression transformed =
                 ExpressionFactory.expressionOfType(Expression.DB_PATH);
             transformed.setOperand(0, converted);

@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.util.Util;
  * access to an element, the list would ensure that this element as well as all
  * its siblings on the same page are fully resolved.
  * 
- * <p>Note that this list would only allow addition of DataObjects. Attempts to
+ * <p>The list can hold DataRows or DataObjects. Attempts to
  * add any other object types will result in an exception.</p>
  * 
  * <p>Performance note: certain operations like <code>toArray</code> would

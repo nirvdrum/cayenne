@@ -93,6 +93,9 @@ test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
  */
 public class DB2Adapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(DB2Adapter.class);
+    
+    public DB2Adapter() {
+    }
 
     /**
      * Creates a DB2 specific PK Generator.

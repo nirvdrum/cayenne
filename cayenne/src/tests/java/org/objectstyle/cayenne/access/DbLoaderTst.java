@@ -87,6 +87,8 @@ public class DbLoaderTst extends CayenneTestCase {
         try {
             boolean supportsFK = getNode().getAdapter().supportsFkConstraints();
 
+            boolean supportsUnique = getNode().getAdapter().supportsUniqueConstraints();
+
             boolean supportsLobs = super.getDatabaseSetupDelegate().supportsLobs();
 
             DataMap map = new DataMap();
@@ -133,6 +135,10 @@ public class DbLoaderTst extends CayenneTestCase {
                     "Relationship to PAINTING_INFO must be to-one",
                     oneToOne.isToDependentPK());
 
+                // test UNIQUE only if FK is supported...
+                if (supportsUnique) {
+                    assertUniqueConstraintsInRelationships(map);
+                }
             }
 
             // *** TESTING THIS ***
@@ -158,6 +164,18 @@ public class DbLoaderTst extends CayenneTestCase {
         finally {
             loader.getCon().close();
         }
+    }
+
+    private void assertUniqueConstraintsInRelationships(DataMap map) {
+        // unfortunately JDBC metadata doesn't provide infor for UNIQUE constraints....
+        // cant reengineer them...
+
+        // find rel to TO_ONEFK1
+        /*  Iterator it = getDbEntity(map, "TO_ONEFK2").getRelationships().iterator();
+          DbRelationship rel = (DbRelationship) it.next();
+          assertEquals("TO_ONEFK1", rel.getTargetEntityName());
+          assertFalse("UNIQUE constraint was ignored...", rel.isToMany());
+          */
     }
 
     private void assertDbEntities(DataMap map) {
@@ -224,7 +242,11 @@ public class DbLoaderTst extends CayenneTestCase {
 
     private DataMap originalMap() {
         return (DataMap) getNode().getDataMaps().iterator().next();
-    } /** Selectively check how different types were processed. */
+    }
+
+    /** 
+     * Selectively check how different types were processed. 
+     */
     public void checkTypes(DataMap map) {
         DbEntity dbe = getDbEntity(map, "PAINTING");
         DbEntity floatTest = getDbEntity(map, "FLOAT_TEST");
@@ -241,7 +263,7 @@ public class DbLoaderTst extends CayenneTestCase {
             Types.DECIMAL == decimalAttr.getType()
                 || Types.NUMERIC == decimalAttr.getType());
         assertEquals(2, decimalAttr.getPrecision());
-        
+
         // check varchar
         assertEquals(
             msgForTypeMismatch(Types.VARCHAR, varcharAttr),

@@ -83,11 +83,13 @@ test-mysql.jdbc.driver = org.gjt.mm.mysql.Driver
  */
 public class MySQLAdapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(MySQLAdapter.class);
-    
-	public boolean supportsFkConstraints() {
-		return false;
-	}
-    
+
+    public MySQLAdapter() {
+        // init defaults
+        this.setSupportsFkConstraints(false);
+        this.setSupportsUniqueConstraints(true);
+    }
+
     /**
      * Installs appropriate ExtendedTypes used as converters for passing values
      * between JDBC and Java layers.
@@ -101,7 +103,7 @@ public class MySQLAdapter extends JdbcAdapter {
         //  for BLOBs (ConnectorJ v. 3.0.9)
         map.registerType(new CharType(false, false));
     }
-    
+
     public DbAttribute buildAttribute(
         String name,
         String typeName,
@@ -141,27 +143,26 @@ public class MySQLAdapter extends JdbcAdapter {
 
         return super.buildAttribute(name, typeName, type, size, precision, allowNulls);
     }
-    
 
-	/** Throws an exception, since FK constraints are not supported by MySQL. */
-	public String createFkConstraint(DbRelationship rel) {
-		throw new CayenneRuntimeException("FK constraints are not supported.");
-	}
+    /** Throws an exception, since FK constraints are not supported by MySQL. */
+    public String createFkConstraint(DbRelationship rel) {
+        throw new CayenneRuntimeException("FK constraints are not supported.");
+    }
 
-	/** 
-	 * Returns null, since views are not yet supported in MySQL. Views
-	 * support is promised in MySQL 4.1.
-	 */
-	public String tableTypeForView() {
-		return null;
-	}
+    /** 
+     * Returns null, since views are not yet supported in MySQL. Views
+     * support is promised in MySQL 4.1.
+     */
+    public String tableTypeForView() {
+        return null;
+    }
 
-	/**
-	  * Creates and returns a primary key generator. Overrides superclass 
-	  * implementation to return an
-	  * instance of MySQLPkGenerator that does the correct table locking.
-	  */
-	protected PkGenerator createPkGenerator() {
-		return new MySQLPkGenerator();
-	}
+    /**
+      * Creates and returns a primary key generator. Overrides superclass 
+      * implementation to return an
+      * instance of MySQLPkGenerator that does the correct table locking.
+      */
+    protected PkGenerator createPkGenerator() {
+        return new MySQLPkGenerator();
+    }
 }
