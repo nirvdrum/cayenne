@@ -130,7 +130,6 @@
     <!-- ========================================== -->
     <target name="dist" depends="prepare,compile_subprojects,jar,jar-other"
         description="Creates Cayenne development, distribution including all code dependencies.">
-        <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
         <copy file="doc/LICENSE" todir="${dist}"/>
 
         <copy todir="${dist}/bin" overwrite="true">
@@ -204,6 +203,9 @@
             <fileset dir="tests/${build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>
+        
+        <!-- JUnit JAR is required for the tests to run. -->
+        <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
     </target>
     
     
