@@ -20,8 +20,7 @@
                 <li><a href="install/index.html#inst">2.2 Installation</a></li>
                 <li><a href="install/index.html#db">2.3 Database Configuration</a></li>
                 <li><a href="install/index.html#jar">2.4 Cayenne JAR Files</a></li>
-                <li><a href="install/index.html#tests">2.5 Unit Tests</a></li>
-                <li><a href="install/index.html#compile">2.6 Compiling Cayenne from Source</a></li>
+                <li><a href="install/index.html#compile">2.5 Compiling Cayenne from Source</a></li>
             </ul></li>
             
             <li><a href="quickstart/index.html">3. Quick Start</a>

@@ -161,61 +161,7 @@
             
         </subsection>
         
-        <subsection name="2.5 Unit Tests" anchor="tests">        
-            <p>[Optional] Run tests. To do that, you will need to set CAYENNE_HOME and 
-            JAVA_HOME environment variables as described <a href="#inst">above</a>. Then 
-            make sure that an account used to connect to the database has enough
-            privileges to create and drop tables. For instance a SQL command like the one
-            below would create a user "AUSER" with just enough privileges on Oracle:
-            </p>
-<source>
-CREATE USER "AUSER"  
-PROFILE "DEFAULT" IDENTIFIED BY "PASSWD"
-DEFAULT TABLESPACE "USERS" 
-TEMPORARY TABLESPACE "TEMP" 
-QUOTA UNLIMITED ON USERS ACCOUNT UNLOCK
-
-GRANT CREATE SEQUENCE TO "AUSER"
-GRANT CREATE SESSION TO "AUSER"
-GRANT CREATE TABLE TO "AUSER"
-GRANT CREATE VIEW TO "AUSER"
-</source>
-
-			<p>When this is done, you can run test start script. On Windows, from the command line run:</p>
-            
-            <source>%CAYENNE_HOME%\bin\runtests.bat</source>
-                
-            <p>On UNIX, run:</p>
-			
-            <source>$CAYENNE_HOME/bin/runtests.sh</source>
-                
-			<p>Test runner will present a graphic login panel that has some canned settings for
-			supported databases (use dropdown in the upper right corner):</p>
-			<img src="/images/ulogin.gif" width="402" height="254" border="0" align="middle"
-			alt="Cayenne Login Panel"/>
-            
-            <panel name="Note:">
-            Use &quot;-nogui&quot; flag when calling runtests.sh if you need 
-            to run tests in command line mode with no GUI (for example, for remote installations). 
-            For things like automated unit tests "-xml [filename]" can be supplied on the command line
-            to allow test script to read database info from an XML file.
-            </panel>
-                
-            <p>Enter you
-			database login information, JDBC driver class and database URL.
-			JDBC driver class must be accessible by Java
-			Virtual Machine. For example you can put a database vendor JAR
-			file containing the driver in $JAVA_HOME/jre/lib/ext directory. 
-	        Note that there is a combo box in the top left corner of the login panel
-	        that allows user to select a canned driver and URL information. 
-	        You must overwrite any of the canned data to provide the information that matches your
-	        environment.
-			</p>
-			
-			<p>Test results will be printed in a terminal window.</p>
-        </subsection>
-        
-		<subsection name="2.6 Compiling Cayenne from Source" anchor="compile">
+		<subsection name="2.5 Compiling Cayenne from Source" anchor="compile">
 		    <p><strong>JSDK1.4 must be present to compile Cayenne.</strong></p>
 		    
 			<panel name="Note:">Normally users don't need to build Cayenne from source. 
