@@ -70,6 +70,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
+import org.objectstyle.art.ROArtist;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -104,7 +105,8 @@ public class DataContextTst extends CayenneTestCase {
         populateTables();
 
         DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
+        setup.createPkSupportForMapEntities(
+            (DataNode) dom.getDataNodesAsList().get(0));
 
         ctxt = dom.createDataContext();
         opObserver = new TestOperationObserver();
@@ -142,7 +144,7 @@ public class DataContextTst extends CayenneTestCase {
 
         Map s2 = new HashMap();
         s2.put("ARTIST_NAME", n2);
-        s2.put("DATE_OF_BIRTH", new java.util.Date());
+        s2.put("DATE_OF_BIRTH", new java.sql.Date(System.currentTimeMillis()));
         ObjEntity e = ctxt.getEntityResolver().lookupObjEntity(a1);
         ctxt.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
 
@@ -422,6 +424,17 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(galleryCount, o2.size());
     }
 
+    public void testSelectDate() throws Exception {
+        SelectQuery query = new SelectQuery("Artist");
+        List objects = ctxt.performQuery(query);
+
+        assertNotNull(objects);
+        assertEquals(artistCount, objects.size());
+        
+        Artist a1 = (Artist)objects.get(0);
+        assertEquals(java.sql.Date.class, a1.getDateOfBirth().getClass());
+    }
+
     public void testPerformSelectQuery1() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
         List objects = ctxt.performQuery(query);
@@ -439,7 +452,7 @@ public class DataContextTst extends CayenneTestCase {
         expressions.add(ExpressionFactory.matchExp("artistName", "artist3"));
         expressions.add(ExpressionFactory.matchExp("artistName", "artist5"));
         expressions.add(ExpressionFactory.matchExp("artistName", "artist15"));
-        
+
         SelectQuery query =
             new SelectQuery(
                 "Artist",
@@ -489,7 +502,7 @@ public class DataContextTst extends CayenneTestCase {
     }
 
     public void testCommitChangesRO1() throws Exception {
-        Artist a1 = (Artist) ctxt.createAndRegisterNewObject("ROArtist");
+        ROArtist a1 = (ROArtist) ctxt.createAndRegisterNewObject("ROArtist");
         a1.setArtistName("abc");
 
         try {
@@ -502,7 +515,7 @@ public class DataContextTst extends CayenneTestCase {
     }
 
     public void testCommitChangesRO2() throws Exception {
-        Artist a1 = fetchROArtist("artist1");
+        ROArtist a1 = fetchROArtist("artist1");
         a1.setArtistName("abc");
 
         try {
@@ -515,7 +528,7 @@ public class DataContextTst extends CayenneTestCase {
     }
 
     public void testCommitChangesRO3() throws Exception {
-        Artist a1 = fetchROArtist("artist1");
+        ROArtist a1 = fetchROArtist("artist1");
         ctxt.deleteObject(a1);
 
         try {
@@ -531,24 +544,18 @@ public class DataContextTst extends CayenneTestCase {
         SelectQuery q =
             new SelectQuery(
                 "Artist",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "artistName",
-                    name));
+                ExpressionFactory.matchExp("artistName", name));
         List ats = ctxt.performQuery(q);
         return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }
 
-    private Artist fetchROArtist(String name) {
+    private ROArtist fetchROArtist(String name) {
         SelectQuery q =
             new SelectQuery(
                 "ROArtist",
-                ExpressionFactory.binaryPathExp(
-                    Expression.EQUAL_TO,
-                    "artistName",
-                    name));
+                ExpressionFactory.matchExp("artistName", name));
         List ats = ctxt.performQuery(q);
-        return (ats.size() > 0) ? (Artist) ats.get(0) : null;
+        return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
     }
 
     public String artistName(int ind) {
@@ -668,7 +675,11 @@ public class DataContextTst extends CayenneTestCase {
     }
 
     public void changeMaxConnections(int delta) {
-        DataNode node = (DataNode)((DataDomain)ctxt.getParent()).getDataNodesAsList().get(0);
+        DataNode node =
+            (DataNode) ((DataDomain) ctxt.getParent())
+                .getDataNodesAsList()
+                .get(
+                0);
         PoolManager manager = (PoolManager) node.getDataSource();
         manager.setMaxConnections(manager.getMaxConnections() + delta);
     }
@@ -697,42 +708,44 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(0, queryResults.size());
     }
 
-	//Catches a bug where new objects were unregistered within an object iterator, thus modifying the 
-	// collection the iterator was iterating over (ConcurrentModificationException)
-	public void testRollbackWithMultipleNewObjects() {
-		String artistName = "rollbackTestArtist";
-		String paintingTitle = "rollbackTestPainting";
- 		Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
-		artist.setArtistName(artistName);
-		
-		Painting painting =
-			(Painting) ctxt.createAndRegisterNewObject("Painting");
-		painting.setPaintingTitle(paintingTitle);
-		painting.setToArtist(artist);
-	
-		try {
-			ctxt.rollbackChanges();
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("rollbackChanges should not have caused the exception "+e.getMessage());
-		}
+    //Catches a bug where new objects were unregistered within an object iterator, thus modifying the 
+    // collection the iterator was iterating over (ConcurrentModificationException)
+    public void testRollbackWithMultipleNewObjects() {
+        String artistName = "rollbackTestArtist";
+        String paintingTitle = "rollbackTestPainting";
+        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        artist.setArtistName(artistName);
 
-		assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
-		ctxt.commitChanges();
-		//The commit should have made no changes, so 
-		//perform a fetch to ensure that this artist hasn't been persisted to the db
+        Painting painting =
+            (Painting) ctxt.createAndRegisterNewObject("Painting");
+        painting.setPaintingTitle(paintingTitle);
+        painting.setToArtist(artist);
 
-		DataContext freshContext = getDomain().createDataContext();
-		SelectQuery query = new SelectQuery(Artist.class);
-		query.setQualifier(
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				artistName));
-		List queryResults = freshContext.performQuery(query);
+        try {
+            ctxt.rollbackChanges();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(
+                "rollbackChanges should not have caused the exception "
+                    + e.getMessage());
+        }
 
-		assertEquals(0, queryResults.size());
-	}
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+        ctxt.commitChanges();
+        //The commit should have made no changes, so 
+        //perform a fetch to ensure that this artist hasn't been persisted to the db
+
+        DataContext freshContext = getDomain().createDataContext();
+        SelectQuery query = new SelectQuery(Artist.class);
+        query.setQualifier(
+            ExpressionFactory.binaryPathExp(
+                Expression.EQUAL_TO,
+                "artistName",
+                artistName));
+        List queryResults = freshContext.performQuery(query);
+
+        assertEquals(0, queryResults.size());
+    }
 
     public void testRollbackDeletedObject() {
         String artistName = "deleteTestArtist";

@@ -17,11 +17,11 @@ public class _Artist extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void setDateOfBirth(java.sql.Time dateOfBirth) {
+    public void setDateOfBirth(java.sql.Date dateOfBirth) {
         writeProperty("dateOfBirth", dateOfBirth);
     }
-    public java.sql.Time getDateOfBirth() {
-        return (java.sql.Time)readProperty("dateOfBirth");
+    public java.sql.Date getDateOfBirth() {
+        return (java.sql.Date)readProperty("dateOfBirth");
     }
     
     

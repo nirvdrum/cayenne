@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.sql.Time;
+import java.sql.Date;
 
 import org.apache.log4j.Level;
 import org.objectstyle.art.oneway.Artist;
@@ -101,7 +101,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         assertTrue(!artist.receivedDidCommit());
 
         // modify artist
-        artist.setDateOfBirth(new Time(System.currentTimeMillis()));
+        artist.setDateOfBirth(new Date(System.currentTimeMillis()));
 
         // commit the pending changes
         context.commitChanges(Level.WARN);

@@ -3,7 +3,7 @@
 	<db-entity name="ARTIST">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="255"/>
-		<db-attribute name="DATE_OF_BIRTH" type="TIME"/>
+		<db-attribute name="DATE_OF_BIRTH" type="DATE"/>
 	</db-entity>
 	<db-entity name="GALLERY">
 		<db-attribute name="GALLERY_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -18,7 +18,7 @@
 	</db-entity>
 	<obj-entity name="Artist" className="org.objectstyle.art.oneway.Artist" dbEntityName="ARTIST">
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
-		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-name="DATE_OF_BIRTH"/>
 	</obj-entity>
 	<obj-entity name="Gallery" className="org.objectstyle.art.oneway.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>

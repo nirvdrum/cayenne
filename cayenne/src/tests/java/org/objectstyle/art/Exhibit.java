@@ -1,9 +1,8 @@
-package org.objectstyle.art;
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +10,7 @@ package org.objectstyle.art;
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -19,15 +18,15 @@ package org.objectstyle.art;
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,50 +52,51 @@ package org.objectstyle.art;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.Date;
+package org.objectstyle.art;
+
 import java.util.List;
 
-import org.objectstyle.cayenne.CayenneDataObject;
+public class Exhibit extends org.objectstyle.cayenne.CayenneDataObject {
 
-
-public class Exhibit extends CayenneDataObject {
-    
-    protected Date openingDate;
-    protected Date closingDate;
-    protected Gallery toGallery;
-    
-    public void setOpeningDate(Date openingDate) {
-        writeProperty("openingDate", openingDate);
-    }
-    public Date getOpeningDate() {
-        return (Date)readProperty("openingDate");
-    }
-    
-    
-    public void setClosingDate(Date closingDate) {
+    public void setClosingDate(java.sql.Timestamp closingDate) {
         writeProperty("closingDate", closingDate);
     }
-    public Date getClosingDate() {
-        return (Date)readProperty("closingDate");
+    public java.sql.Timestamp getClosingDate() {
+        return (java.sql.Timestamp)readProperty("closingDate");
+    }
+    
+    
+    public void setOpeningDate(java.sql.Timestamp openingDate) {
+        writeProperty("openingDate", openingDate);
+    }
+    public java.sql.Timestamp getOpeningDate() {
+        return (java.sql.Timestamp)readProperty("openingDate");
+    }
+    
+    
+    public void addToArtistExhibitArray(ArtistExhibit obj) {
+        addToManyTarget("artistExhibitArray", obj, true);
+    }
+    public void removeFromArtistExhibitArray(ArtistExhibit obj) {
+        removeToManyTarget("artistExhibitArray", obj, true);
+    }
+    public List getArtistExhibitArray() {
+        return (List)readProperty("artistExhibitArray");
     }
     
     
     public void setToGallery(Gallery toGallery) {
         setToOneTarget("toGallery", toGallery, true);
-    } 
-    public Gallery getToGallery() {
-        return (Gallery)readProperty("toGallery");
     }
     
-    public void addToArtistExhibitArray(ArtistExhibit artistExhibit) {
-        addToManyTarget("artistExhibitArray", artistExhibit, true);
-    }
-    public void removeFromArtistExhibitArray(ArtistExhibit artistExhibit) {
-        removeToManyTarget("artistExhibitArray", artistExhibit, true);
-    }
-    public List getArtistExhibitArray() {
-        return (List)readProperty("artistExhibitArray");
-    }
+    public Gallery getToGallery() {
+        return (Gallery)readProperty("toGallery");
+    } 
+    
+    
 }
+
+
+

@@ -204,7 +204,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     private Artist newSavedArtist() {
         Artist o1 = new Artist();
         o1.setArtistName("a");
-        o1.setDateOfBirth(new java.util.Date());
+        o1.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
         ctxt.registerNewObject(o1);
         ctxt.commitChanges();
         return o1;

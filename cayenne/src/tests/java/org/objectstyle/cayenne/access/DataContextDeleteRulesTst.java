@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Date;
-
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
@@ -206,8 +204,8 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		anArtist.setArtistName("A Name");
 		Exhibit anExhibit =
 			(Exhibit) context.createAndRegisterNewObject("Exhibit");
-		anExhibit.setClosingDate(new Date());
-		anExhibit.setOpeningDate(new Date());
+		anExhibit.setClosingDate(new java.sql.Timestamp(System.currentTimeMillis()));
+		anExhibit.setOpeningDate(new java.sql.Timestamp(System.currentTimeMillis()));
 		
 		//Needs a gallery... required for data integrity
 		Gallery gallery =

@@ -59,8 +59,9 @@ import java.sql.ResultSet;
 import java.sql.Types;
 
 public class UtilDateType implements ExtendedType {
+	
     public String getClassName() {
-        return "java.util.Date";
+        return java.util.Date.class.getName();
     }
 
     public Object toJdbcObject(Object val, int type) throws Exception {
@@ -80,7 +81,7 @@ public class UtilDateType implements ExtendedType {
 
         // all sql time/date classes are subclasses of java.util.Date,
         // so lets cast it to Date,
-        // if it is not date, ClasscastException will be thrown,
+        // if it is not date, ClassCastException will be thrown,
         // which is what we want
         return (rs.wasNull())
             ? null

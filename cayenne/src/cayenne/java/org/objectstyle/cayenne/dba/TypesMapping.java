@@ -215,7 +215,7 @@ public class TypesMapping {
         javaSqlEnum.put(JAVA_BOOLEAN, new Integer(Types.BIT));
         javaSqlEnum.put(JAVA_STRING, new Integer(Types.VARCHAR));
         javaSqlEnum.put(JAVA_SQLDATE, new Integer(Types.DATE));
-        javaSqlEnum.put(JAVA_UTILDATE, new Integer(Types.TIMESTAMP));
+        javaSqlEnum.put(JAVA_TIMESTAMP, new Integer(Types.TIMESTAMP));
         javaSqlEnum.put(JAVA_BIGDECIMAL, new Integer(Types.DECIMAL));
         javaSqlEnum.put(JAVA_DOUBLE, new Integer(Types.DOUBLE));
         javaSqlEnum.put(JAVA_FLOAT, new Integer(Types.FLOAT));

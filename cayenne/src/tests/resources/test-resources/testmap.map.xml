@@ -8,7 +8,7 @@
 	<db-entity name="ARTIST">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="255"/>
-		<db-attribute name="DATE_OF_BIRTH" type="TIME"/>
+		<db-attribute name="DATE_OF_BIRTH" type="DATE"/>
 	</db-entity>
 	<db-entity name="ARTIST_EXHIBIT">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -26,10 +26,10 @@
 		<db-attribute name="DEL_RULE_TEST2_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="EXHIBIT">
-		<db-attribute name="CLOSING_DATE" type="TIME" isMandatory="true"/>
+		<db-attribute name="CLOSING_DATE" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="EXHIBIT_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GALLERY_ID" type="INTEGER" isMandatory="true"/>
-		<db-attribute name="OPENING_DATE" type="TIME" isMandatory="true"/>
+		<db-attribute name="OPENING_DATE" type="TIMESTAMP" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="FLOAT_TEST">
 		<db-attribute name="FLOAT_COL" type="FLOAT"/>
@@ -74,7 +74,7 @@
 	</obj-entity>
 	<obj-entity name="Artist" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
-		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-name="DATE_OF_BIRTH"/>
 	</obj-entity>
 	<obj-entity name="ArtistAssets" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
@@ -90,8 +90,8 @@
 	<obj-entity name="DeleteRuleTest2" className="org.objectstyle.art.DeleteRuleTest2" dbEntityName="DELETE_RULE_TEST2">
 	</obj-entity>
 	<obj-entity name="Exhibit" className="org.objectstyle.art.Exhibit" dbEntityName="EXHIBIT">
-		<obj-attribute name="closingDate" type="java.sql.Time" db-attribute-name="CLOSING_DATE"/>
-		<obj-attribute name="openingDate" type="java.sql.Time" db-attribute-name="OPENING_DATE"/>
+		<obj-attribute name="closingDate" type="java.sql.Timestamp" db-attribute-name="CLOSING_DATE"/>
+		<obj-attribute name="openingDate" type="java.sql.Timestamp" db-attribute-name="OPENING_DATE"/>
 	</obj-entity>
 	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>
@@ -110,7 +110,7 @@
 	</obj-entity>
 	<obj-entity name="ROArtist" className="org.objectstyle.art.ROArtist" readOnly="true" dbEntityName="ARTIST">
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
-		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-name="DATE_OF_BIRTH"/>
 	</obj-entity>
 	<obj-entity name="ROPainting" className="org.objectstyle.art.ROPainting" readOnly="true" dbEntityName="PAINTING">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
@@ -201,7 +201,7 @@
 	<obj-relationship name="exhibitArray" source="Gallery" target="Exhibit" toMany="true" deleteRule="Nullify">
 		<db-relationship-ref source="GALLERY" target="EXHIBIT" name="exhibitArray"/>
 	</obj-relationship>
-	<obj-relationship name="groupArray" source="Artist" target="ArtGroup" toMany="true" deleteRule="Nullify">
+	<obj-relationship name="groupArray" source="Artist" target="ArtGroup" toMany="true" deleteRule="Cascade">
 		<db-relationship-ref source="ARTIST" target="ARTIST_GROUP" name="artistGroupArray"/>
 		<db-relationship-ref source="ARTIST_GROUP" target="ARTGROUP" name="toGroup"/>
 	</obj-relationship>

@@ -55,6 +55,7 @@ package org.objectstyle.cayenne;
  *
  */ 
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -106,8 +107,8 @@ public class CayenneDOTestBase extends CayenneTestCase {
     
     protected Exhibit newExhibit(Gallery gallery) {
         Exhibit e1 = (Exhibit)ctxt.createAndRegisterNewObject("Exhibit");
-        e1.setOpeningDate(new java.util.Date());
-        e1.setClosingDate(new java.util.Date());
+        e1.setOpeningDate(new Timestamp(System.currentTimeMillis()));
+        e1.setClosingDate(new Timestamp(System.currentTimeMillis()));
         e1.setToGallery(gallery);
         return e1;
     }

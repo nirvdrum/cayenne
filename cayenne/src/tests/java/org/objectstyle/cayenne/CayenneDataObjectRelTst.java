@@ -448,7 +448,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 	
 	private Artist newSavedArtist() {
 		Artist o1 = newArtist();
-		o1.setDateOfBirth(new java.util.Date());
+		o1.setDateOfBirth(new java.sql.Date(System.currentTimeMillis()));
 		ctxt.commitChanges();
 		return o1;
 	}

@@ -66,7 +66,7 @@ public class CharType implements ExtendedType {
     private static Logger logObj = Logger.getLogger(CharType.class);
 
     public String getClassName() {
-        return "java.lang.String";
+        return String.class.getName();
     }
 
     public Object toJdbcObject(Object val, int type) throws Exception {
