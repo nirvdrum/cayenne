@@ -27,14 +27,14 @@
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
 	</obj-entity>
-	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
 	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
-		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true">
+		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
 	</obj-relationship>
 	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false">
 		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>

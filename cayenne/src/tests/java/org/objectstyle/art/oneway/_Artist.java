@@ -26,4 +26,15 @@ public class _Artist extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
+    public void addToPaintingArray(Painting obj) {
+        addToManyTarget("paintingArray", obj, true);
+    }
+    public void removeFromPaintingArray(Painting obj) {
+        removeToManyTarget("paintingArray", obj, true);
+    }
+    public List getPaintingArray() {
+        return (List)readProperty("paintingArray");
+    }
+    
+    
 }

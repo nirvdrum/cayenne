@@ -26,15 +26,6 @@ public class _Painting extends org.objectstyle.art.ArtDataObject {
     }
     
     
-    public void setToArtist(Artist toArtist) {
-        setToOneTarget("toArtist", toArtist, true);
-    }
-    
-    public Artist getToArtist() {
-        return (Artist)readProperty("toArtist");
-    } 
-    
-    
     public void setToGallery(Gallery toGallery) {
         setToOneTarget("toGallery", toGallery, true);
     }
