@@ -9,8 +9,8 @@
 	<property name="test.src" value="src/tests/java"/>
 	<property name="test.bin" value="src/tests/bin"/>
 	<property name="test.resources" value="src/tests/resources"/>
-	<property name="test.output" value="${test.build}/out"/>
-	<property name="test.report" value="${test.build}/report"/>
+	<property name="test.output" value="${test.build}/out/${cayenne.test.connection}"/>
+	<property name="test.report" value="${test.build}/report/${cayenne.test.connection}"/>
 	<property name="test.filter" value="**/*Tst.class"/>
 	
     <path id="classpath">
