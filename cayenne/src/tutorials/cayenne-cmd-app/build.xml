@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+
+<!-- =============================================== -->
+<!-- cayenne-cmd-app tutorial buildfile.             -->
+<!-- =============================================== -->
+<project name="cayenne-cmd-app" default="compile">
+    <property name="tutorial.subpath" value="tutorials/cayenne-cmd-app"/>
+    <property name="tutorial.build" value="${build}/${tutorial.subpath}/classes"/>
+    <property name="tutorial.src" value="src/${tutorial.subpath}/java"/>
+    
+    
+    <path id="classpath">
+		<fileset dir="otherlib">
+			<include name="*.jar"/>
+		</fileset>
+		<pathelement path="${build}/cayenne/classes"/>
+    </path>
+    
+    
+    <target name="prepare">
+    	<mkdir dir="${tutorial.build}"/>
+    </target>
+    
+    
+	<target name="compile" depends="prepare">
+		<javac	srcdir="${tutorial.src}" 
+				destdir="${tutorial.build}" 
+				debug="on" 
+				deprecation="on">
+			<classpath refid="classpath"/>
+		</javac>
+	</target>
+	
+	<target name="dist-src">
+	
+	</target>
+
+	<target name="dist-bin" depends="compile">
+
+	</target>
+</project>

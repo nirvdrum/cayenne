@@ -92,6 +92,7 @@
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="dist-bin"/>
 		<ant antfile="build-performance.xml" target="dist-bin"/>
+		<ant antfile="build-tutorials.xml" target="dist-bin"/>
     </target>
     
     <!-- ========================================== -->
@@ -101,6 +102,7 @@
 		<ant antfile="build-cayenne.xml" target="compile"/>
 		<ant antfile="build-tests.xml" target="compile"/>
 		<ant antfile="build-performance.xml" target="compile"/>
+		<ant antfile="build-tutorials.xml" target="compile"/>
     </target>
 
 

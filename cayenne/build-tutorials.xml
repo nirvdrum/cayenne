@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+
+
+<!-- =============================================== -->
+<!-- Tutorials buildfile.                            -->
+<!-- Tutorials normally do not follow the "standard" -->
+<!-- Cayenne subproject layout, therefore they have  -->
+<!-- their own build.xml file called from here.      -->
+<!-- =============================================== -->
+<project name="cayenne-tutorials" default="compile">
+	<target name="compile">
+		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="compile"/>
+		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="compile"/>
+	</target>
+	
+	<target name="dist-src">
+		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="dist-src"/>
+		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="dist-src"/>
+	</target>
+
+	<target name="dist-bin">
+		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="dist-bin"/>
+		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="dist-bin"/>
+	</target>
+</project>
+

@@ -41,7 +41,7 @@
   
   
     <!-- ========================================== -->
-    <!-- Build "fat" JAR file with dependencies.    -->
+    <!-- Builds tests JAR file.                     -->
     <!-- ========================================== -->
     <target name="jar" depends="compile">
     	<jar jarfile="${dist}/lib/cayenne-tests.jar" manifest="src/tests/MANIFEST.MF">
