@@ -17,51 +17,61 @@
             on the mailing list.</p>
 
             <subsection name="Core Team">
+            <p></p> 
             <table>
             <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Web</th>
                 <th>Role</th>
             </tr>
             <tr>
                 <td>Andrei Adamchik</td>
                 <td>andrus at objectstyle dot org</td>
+                <td><a href="http://adamchik.org">adamchik.org</a></td>
                 <td>Original idea, most of the framework code</td>
             </tr>
             <tr>
                 <td>Michael Shengaout</td>
                 <td>mshenga at pobox dot org</td>
+                <td><a href="http://reusablesoftwarecomponents.com/">reusablesoftwarecomponents.com</a></td>
                 <td>Original idea, GUI tools, map package</td>
             </tr>
             </table>
             </subsection>
             
             
-            <subsection name="Contributors">   
+            <subsection name="Contributors">
+            <p></p>  
             <table>
             <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Web</th>
                 <th>Role</th>
             </tr>
             <tr>
                 <td>Andriy Shapochka</td>
                 <td>andriy at logical dash process dot com</td>
+                <td>-</td>
                 <td>Original design, early expressions and GUI code</td>
             </tr>
             <tr>
                 <td>David Cooper</td>
                 <td>snowbladin at yahoo dot com</td>
+                <td><a href="http://livingroad.com/">livingroad.com</a></td>
                 <td>Site and logos design</td>
             </tr>
            <tr>
                 <td>Anton Apolit</td>
                 <td>anton at logical dash process dot com</td>
+                <td>-</td>
                 <td>GUI code</td>
             </tr>
              <tr>
                 <td>Maria Vashkevich</td>
                 <td>m dot vashkevich at zaval dot org</td>
+                <td>-</td>
                 <td>Original Cayenne logo idea</td>
             </tr>
             </table>
