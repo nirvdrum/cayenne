@@ -187,11 +187,11 @@ public class DomainHelper {
     /** Returns true if any of the "failed.." collections
       * is non-empty. */
     private boolean hasFailures() {
-        return 
-        (failedMaps != null && failedMaps.size() > 0) ||
-        (failedDataSources != null && failedDataSources.size() > 0) ||
-        (failedAdapters != null && failedAdapters.size() > 0) ||
-        (failedMapRefs != null && failedMapRefs.size() > 0);        
+        return
+            (failedMaps != null && failedMaps.size() > 0) ||
+            (failedDataSources != null && failedDataSources.size() > 0) ||
+            (failedAdapters != null && failedAdapters.size() > 0) ||
+            (failedMapRefs != null && failedMapRefs.size() > 0);
     }
 
     /** Reads domain configuration from the InputStream, returns an array
@@ -437,7 +437,12 @@ public class DomainHelper {
                                                  ? factory
                                                  : (DataSourceFactory)Class.forName(factoryName).newInstance();
 
-                node.setDataSource(localFactory.getDataSource(dataSrcLocation));
+                DataSource ds = localFactory.getDataSource(dataSrcLocation);
+                if(ds != null) {
+                    node.setDataSource(ds);
+                } else {
+                    failedDataSources.put(nodeName, dataSrcLocation);
+                }
             } catch (Exception ex) {
                 logObj.log(Level.FINE, "Error loading DataSource", ex);
                 failedDataSources.put(nodeName, dataSrcLocation);
@@ -459,7 +464,7 @@ public class DomainHelper {
                 throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
-        
+
         protected void finished() {
             // it is important to add node to domain after all node maps
             // are initialized..
