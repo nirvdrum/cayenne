@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
@@ -144,6 +145,13 @@ public class DataMapProject extends Project {
     		return new DataMapFile(this, map);
     	}
     	
+        return null;
+    }
+    
+    /**
+     * Always returns null. Map projects do not support status tracking yet.
+     */
+    public ConfigStatus projectLoadStatus() {
         return null;
     }
 }

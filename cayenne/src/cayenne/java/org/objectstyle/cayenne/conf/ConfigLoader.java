@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.conf;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,7 +89,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * 
  * @author Andrei Adamchik
  */
-public class ConfigLoader {
+public class ConfigLoader implements ConfigStatus {
     private static Logger logObj = Logger.getLogger(ConfigLoader.class);
 
     protected Level logLevel = Level.DEBUG;
@@ -179,7 +180,7 @@ public class ConfigLoader {
        * @return true if no failures happened during domain loading,
        * false - if at least one non-fatal failure ocurred.
        */
-    public boolean loadDomains(InputStream in) throws Exception {
+    public boolean loadDomains(InputStream in) throws IOException, SAXException {
         logObj.log(logLevel, "start configuration loading.");
         if (factory != null) {
             logObj.log(
@@ -207,7 +208,7 @@ public class ConfigLoader {
     /** 
      * Returns true if any of the "failed.." collections is non-empty.
      */
-    protected boolean hasFailures() {
+    public boolean hasFailures() {
         return (failedMaps != null && failedMaps.size() > 0)
             || (failedDataSources != null && failedDataSources.size() > 0)
             || (failedAdapters != null && failedAdapters.size() > 0)

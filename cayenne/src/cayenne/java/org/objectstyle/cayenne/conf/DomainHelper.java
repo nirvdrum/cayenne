@@ -56,22 +56,14 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.util.Util;
 
 /**
- * @deprecated Use ConfigLoader/ConfigSaver were appropriate.
- *
+ * @deprecated Use ConfigLoader/ConfigSaver where appropriate.
  * @author Andrei Adamchik 
  */
 public class DomainHelper extends ConfigLoader {
@@ -90,7 +82,7 @@ public class DomainHelper extends ConfigLoader {
     /** Saves domains into the specified file.
       * Assumes that the maps have already been saved.*/
     public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
-        ConfigSaver.storeDomains(pw, domains);
+        new ConfigSaver().storeDomains(pw, domains);
     }
 
     /** 
@@ -98,6 +90,6 @@ public class DomainHelper extends ConfigLoader {
      * <code>info</code> object may contain full or partial information.
      */
     public static void storeDataNode(PrintWriter out, DataSourceInfo info) {
-        ConfigSaver.storeDataNode(out, info);
+        new ConfigSaver().storeDataNode(out, info);
     }
 }

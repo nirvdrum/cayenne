@@ -152,6 +152,9 @@ public class TopController extends ModelerController {
 
         control.markUnmatched();
         statusController.handleControl(control);
+        
+        // --- check for load errors
+        
     }
 
     public void setStatusBarView(StatusBarView view) {

@@ -100,7 +100,7 @@ public class DataNodeFile extends ProjectFile {
 
     public void save(PrintWriter out) throws Exception {
         ProjectDataSource src = (ProjectDataSource) nodeObj.getDataSource();
-        ConfigSaver.storeDataNode(out, src.getDataSourceInfo());
+        new ConfigSaver().storeDataNode(out, src.getDataSourceInfo());
     }
 
     /**

@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.validator.Validator;
 
@@ -316,6 +317,11 @@ public abstract class Project {
         return (f != null) ? resolveFile(f.getLocation()) : null;
     }
 
+    /**
+     * @return An object describing failures in the loaded project.
+     */
+    public abstract ConfigStatus projectLoadStatus();
+    
     public abstract ProjectFile projectFileForObject(Object obj);
     
     /**

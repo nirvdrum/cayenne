@@ -77,6 +77,7 @@ public class ProjectConfiguration extends DefaultConfiguration {
 
     public ProjectConfiguration(File projectFile) {
         this.projectFile = projectFile;
+        this.ignoringLoadFailures = true;
 
         if (projectFile != null && projectFile.isFile()) {
             try {

@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ConfigSaverTst extends CayenneTestCase {
+	protected ConfigSaver saver;
 
 	public ConfigSaverTst(String name) {
 		super(name);
@@ -112,7 +113,7 @@ public class ConfigSaverTst extends CayenneTestCase {
 		StringWriter str = new StringWriter();
 		PrintWriter out = new PrintWriter(str);
 
-		ConfigSaver.storeDataNode(out, info);
+	    saver.storeDataNode(out, info);
 
 		out.close();
 		str.close();
@@ -148,4 +149,11 @@ public class ConfigSaverTst extends CayenneTestCase {
 					>= 0);
 		}
 	}
+	
+    /**
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception {
+        saver = new ConfigSaver();
+    }
 }

@@ -61,6 +61,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.map.DataMap;
@@ -168,5 +169,10 @@ public class ApplicationProject extends Project {
         }
 
         return false;
+    }
+    
+
+    public ConfigStatus projectLoadStatus() {
+        return (config != null) ? config.getLoadStatus() : null;
     }
 }

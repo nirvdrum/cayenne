@@ -84,7 +84,7 @@ public class ConfigSaver {
 
     /** Saves domains into the specified file.
       * Assumes that the maps have already been saved.*/
-    public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
+    public void storeDomains(PrintWriter pw, DataDomain[] domains) {
         pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         pw.println(
             "<domains project-version=\""
@@ -96,13 +96,13 @@ public class ConfigSaver {
         pw.println("</domains>");
     }
 
-    private static void storeDomain(PrintWriter pw, DataDomain domain) {
+    protected void storeDomain(PrintWriter pw, DataDomain domain) {
         pw.println("<domain name=\"" + domain.getName().trim() + "\">");
 
         DataNode[] nodes = domain.getDataNodes();
         List maps = domain.getMapList();
 
-        // sort to satisfy dependecies
+        // sort to satisfy dependencies
         OperationSorter.sortMaps(maps);
 
         Iterator iter = maps.iterator();
@@ -168,7 +168,7 @@ public class ConfigSaver {
      * Stores DataSolurceInfo to the specified PrintWriter.
      * <code>info</code> object may contain full or partial information.
      */
-    public static void storeDataNode(PrintWriter out, DataSourceInfo info) {
+    public void storeDataNode(PrintWriter out, DataSourceInfo info) {
         out.print(
             "<driver project-version=\""
                 + Project.CURRENT_PROJECT_VERSION
