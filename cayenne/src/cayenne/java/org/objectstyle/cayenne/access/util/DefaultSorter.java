@@ -116,7 +116,7 @@ public class DefaultSorter implements DependencySorter {
 
     protected DefaultSorter() {
     }
-    
+
     public DefaultSorter(QueryEngine queryEngine) {
         setDataMaps(queryEngine.getDataMaps());
     }
@@ -203,6 +203,9 @@ public class DefaultSorter implements DependencySorter {
         List objects,
         boolean deleteOrder) {
 
+        // don't forget to index the sorter
+        _indexSorter();
+
         DbEntity dbEntity = objEntity.getDbEntity();
 
         // if no sorting is required
@@ -210,42 +213,43 @@ public class DefaultSorter implements DependencySorter {
             return;
         }
 
-        // don't forget to index the sorter
-        _indexSorter();
-
         int size = objects.size();
         List reflexiveRels = (List) reflexiveDbEntities.get(dbEntity);
-        String[] objRelNames = new String[reflexiveRels.size()];
-        for (int i = 0; i < objRelNames.length; i++) {
+        String[] reflexiveRelNames = new String[reflexiveRels.size()];
+        for (int i = 0; i < reflexiveRelNames.length; i++) {
             DbRelationship dbRel = (DbRelationship) reflexiveRels.get(i);
             ObjRelationship objRel =
                 (dbRel != null
                     ? objEntity.getRelationshipForDbRelationship(dbRel)
                     : null);
-            objRelNames[i] = (objRel != null ? objRel.getName() : null);
+            reflexiveRelNames[i] = (objRel != null ? objRel.getName() : null);
         }
 
         List sorted = new ArrayList(size);
 
         Digraph objectDependencyGraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
-        DataObject[] masters = new DataObject[objRelNames.length];
+        Object[] masters = new Object[reflexiveRelNames.length];
         for (int i = 0; i < size; i++) {
             DataObject current = (DataObject) objects.get(i);
             objectDependencyGraph.addVertex(current);
             int actualMasterCount = 0;
-            for (int k = 0; k < objRelNames.length; k++) {
-                String objRelName = objRelNames[k];
-                if (objRelName == null)
+            for (int k = 0; k < reflexiveRelNames.length; k++) {
+                String reflexiveRelName = reflexiveRelNames[k];
+
+                if (reflexiveRelName == null) {
                     continue;
+                }
+
                 masters[k] =
-                    (objRelName != null
-                        ? (DataObject) current.readPropertyDirectly(objRelName)
-                        : null);
+                    (reflexiveRelName != null)
+                        ? current.readProperty(reflexiveRelName)
+                        : null;
+
                 if (masters[k] == null) {
                     masters[k] =
                         findReflexiveMaster(
                             current,
-                            (ObjRelationship) objEntity.getRelationship(objRelName),
+                            (ObjRelationship) objEntity.getRelationship(reflexiveRelName),
                             current.getObjectId().getObjClass());
                 }
 

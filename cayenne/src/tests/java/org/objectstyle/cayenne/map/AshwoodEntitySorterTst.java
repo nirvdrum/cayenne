@@ -55,21 +55,41 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import java.util.Collections;
+import java.util.List;
+
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.testdo.relationship.ReflexiveAndToOne;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class AshwoodEntitySorterTst extends CayenneTestCase {
+public class AshwoodEntitySorterTst extends RelationshipTestCase {
     protected AshwoodEntitySorter sorter;
-    
+
     protected void setUp() throws Exception {
         super.setUp();
-        
-        
+
+        deleteTestData();
+        sorter = new AshwoodEntitySorter(getDomain().getDataMaps());
     }
 
-    public void testSortDeletedObjectsForEntity() throws Exception {
+    public void testSortObjectsForEntityReflexiveWithFaults() throws Exception {
+        createTestData("testSortObjectsForEntityDeletedWithFaults");
 
+        ObjEntity entity =
+            getDomain().getEntityResolver().lookupObjEntity(ReflexiveAndToOne.class);
+
+        List objects =
+            createDataContext().performQuery(new SelectQuery(ReflexiveAndToOne.class));
+        Collections.shuffle(objects);
+        assertEquals(3, objects.size());
+
+        sorter.sortObjectsForEntity(entity, objects, true);
+
+        assertEquals("r3", ((ReflexiveAndToOne) objects.get(0)).getName());
+        assertEquals("r2", ((ReflexiveAndToOne) objects.get(1)).getName());
+        assertEquals("r1", ((ReflexiveAndToOne) objects.get(2)).getName());
     }
 }
