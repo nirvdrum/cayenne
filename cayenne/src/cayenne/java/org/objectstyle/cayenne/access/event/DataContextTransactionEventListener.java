@@ -58,6 +58,10 @@ package org.objectstyle.cayenne.access.event;
 
 import java.util.EventListener;
 
+/**
+ * @HH: writeme!
+ */
+
 public interface DataContextTransactionEventListener extends EventListener {
 	public void dataContextWillCommit(DataContextEvent event);
 	public void dataContextDidCommit(DataContextEvent event);
