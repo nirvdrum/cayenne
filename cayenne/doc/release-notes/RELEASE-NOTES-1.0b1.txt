@@ -25,7 +25,11 @@ and array filtering
 
 7. Added DerivedDbAttribute with aggregate function support.
 
-8. Simplified MapLoader API, got rid of interface-implementation pair.
+8. Simplified MapLoader API, got rid of interface-implementation 
+pair.
 
 9. Added support for relationships accross DataMaps, 
-and other cross-map communications
+and other cross-map communications, both in the core and in the 
+modeler.
+
+10. Added "project" attribute to class generator

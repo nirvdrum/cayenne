@@ -81,6 +81,7 @@ public class CayenneGenerator extends Task {
 	protected File map;
 	protected File project;
 	protected DefaultClassGenerator generator;
+	protected DisconnectedConfiguration config;
 
 	public CayenneGenerator() {
 		bootstrapVelocity();
@@ -124,8 +125,8 @@ public class CayenneGenerator extends Task {
 		DataMap[] dataMaps = loadDataMaps();
 
 		for (int i = 0; i < dataMaps.length; i++) {
-			String location = dataMaps[i].getLocation();
-			generator.setTimestamp(new File(location).lastModified());
+			File mapFile = new File(config.projectDir(), dataMaps[i].getLocation());
+			generator.setTimestamp(mapFile.lastModified());
 			generator.setObjEntities(dataMaps[i].getObjEntitiesAsList());
 			generator.validateAttributes();
 			generator.execute();
@@ -143,11 +144,11 @@ public class CayenneGenerator extends Task {
 	/** Loads and returns DataMap based on <code>map</code> attribute. */
 	protected DataMap[] loadDataMaps() throws Exception {
 		// Configuration.setLogLevel(Level.SEVERE);
-		Configuration conf = new DisconnectedConfiguration(project);
-		conf.init();
+		config = new DisconnectedConfiguration(project);
+		config.init();
 		
 		ArrayList allMaps = new ArrayList();
-		Iterator domains = conf.getDomainList().iterator();
+		Iterator domains = config.getDomainList().iterator();
 		while(domains.hasNext()) {
 			DataDomain dom = (DataDomain)domains.next();
 			allMaps.addAll(dom.getMapList());
