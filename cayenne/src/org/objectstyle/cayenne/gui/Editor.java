@@ -40,8 +40,9 @@ implements ActionListener
     JMenuItem  openProjectMenu  = new JMenuItem("Open Project");
     JMenuItem  openDataMapMenu  = new JMenuItem("Open Data Map");
     JMenuItem  closeProjectMenu  = new JMenuItem("Close Project");
-    JMenuItem saveMenu    = new JMenuItem("Save");
-    JMenuItem saveAsMenu    = new JMenuItem("Save As");
+    JMenuItem saveMapMenu    = new JMenuItem("Save Current Map");
+    JMenuItem saveMapAsMenu    = new JMenuItem("Save Current Map As");
+    JMenuItem saveProjectMenu    = new JMenuItem("Save Project");
     JMenuItem saveAllMenu   = new JMenuItem("Save All");
     JMenuItem  exitMenu    = new JMenuItem("Exit");
     JMenu  toolMenu   = new JMenu("Tools");
@@ -69,8 +70,9 @@ implements ActionListener
         openProjectMenu.addActionListener(this);
         openDataMapMenu.addActionListener(this);
         closeProjectMenu.addActionListener(this);
-        saveMenu.addActionListener(this);
-        saveAsMenu.addActionListener(this);
+        saveMapMenu.addActionListener(this);
+        saveProjectMenu.addActionListener(this);
+        saveMapAsMenu.addActionListener(this);
         saveAllMenu.addActionListener(this);
         exitMenu.addActionListener(this);
 
@@ -107,8 +109,9 @@ implements ActionListener
         fileMenu.add(openDataMapMenu);
         fileMenu.addSeparator();
         fileMenu.add(closeProjectMenu);
-        fileMenu.add(saveMenu);
-        fileMenu.add(saveAsMenu);
+        fileMenu.add(saveMapMenu);
+        fileMenu.add(saveMapAsMenu);
+        fileMenu.add(saveProjectMenu);
         fileMenu.add(saveAllMenu);
         fileMenu.addSeparator();
         fileMenu.add(exitMenu);
@@ -129,8 +132,8 @@ implements ActionListener
             view = null;
             mediator = null;
             disableMenu();
-        } else if (src == saveAsMenu) {
-            saveAs();
+        } else if (src == saveMapAsMenu) {
+            saveMapAs(mediator.getCurrentDataMap());
         } else if (src == createProjectMenu) {
             createProject();
         } else if (src == createDomainMenu) {
@@ -141,8 +144,10 @@ implements ActionListener
         	createObjEntity();
         } else if (src == createDbEntityMenu) {
         	createDbEntity();
-        } else if (src == saveMenu) {
-            save();
+        } else if (src == saveMapMenu) {
+            saveDataMap(mediator.getCurrentDataMap());
+        } else if (src == saveProjectMenu) {
+            saveProject();
         } else if (src == importDbMenu) {
             importDb();
         } else if (src == generateMenu) {
@@ -336,20 +341,14 @@ implements ActionListener
         mediator.addDataMapDisplayListener(this);
         createDomainMenu.setEnabled(true);
         closeProjectMenu.setEnabled(true);
-		saveAsMenu.setEnabled(true);		
         this.validate();
     }
 
-	private void saveAs() {
-		// If there is current data map, save it
-		if (mediator.getCurrentDataMap() != null)
-			saveAsMap(mediator.getCurrentDataMap());
-	}
 
 	/** Save data map to a different location. 
 	  * If there already exists proj tree, saves it under that tree.
 	  * otherwise saves using absolute path. */
-	private void saveAsMap(DataMap map) {
+	private void saveMapAs(DataMap map) {
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
@@ -454,7 +453,7 @@ implements ActionListener
             String proj_dir_str = mediator.getConfig().getProjDir();
 			file = new File(proj_dir_str + File.separator + map.getLocation());			
 			if (!file.exists()) {
-				saveAsMap(map);
+				saveMapAs(map);
 				return;
 			}
 			MapLoader saver = new MapLoaderImpl();
@@ -463,8 +462,7 @@ implements ActionListener
 			saver.storeDataMap(pw, map);
 			pw.close();
 			fw.close();
-		} catch (Exception e) {
-		}
+		} catch (Exception e) {}
 	}
 	
 	private void createDomain() {
@@ -498,8 +496,9 @@ implements ActionListener
         createDbEntityMenu.setEnabled(false);
         openDataMapMenu.setEnabled(false);
         closeProjectMenu.setEnabled(false);
-        saveMenu.setEnabled(false);
-        saveAsMenu.setEnabled(false);
+        saveProjectMenu.setEnabled(false);
+        saveMapMenu.setEnabled(false);
+        saveMapAsMenu.setEnabled(false);
         saveAllMenu.setEnabled(false);
 
         importDbMenu.setEnabled(false);
@@ -513,14 +512,15 @@ implements ActionListener
 		createDataSourceMenu.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
         openDataMapMenu.setEnabled(true);
-        if (mediator.isDirty())
-	        saveMenu.setEnabled(true);
+	    saveProjectMenu.setEnabled(true);
         importDbMenu.setEnabled(true);
 	}
 	
 	private void enableDataMapMenu() {
-		saveAsMenu.setEnabled(true);		
+		saveMapAsMenu.setEnabled(true);		
 		enableDomainMenu();
+	    saveMapMenu.setEnabled(true);
+        saveMapAsMenu.setEnabled(true);
         createObjEntityMenu.setEnabled(true);
         createDbEntityMenu.setEnabled(true);
         generateMenu.setEnabled(true);
@@ -549,7 +549,7 @@ implements ActionListener
 
 class EditorView extends JPanel 
 implements ObjEntityDisplayListener, DbEntityDisplayListener
-, DomainDisplayListener {
+, DomainDisplayListener, DataMapDisplayListener, DataNodeDisplayListener {
     Mediator mediator;
 
     private static final int INIT_DIVIDER_LOCATION = 170;
@@ -586,7 +586,7 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
         detailLayout = new CardLayout();
         detailPanel.setLayout(detailLayout);
 
-		JPanel temp = new JPanel();
+		JPanel temp = new JPanel(new FlowLayout());
 		detailPanel.add(temp, EMPTY_VIEW);
 		domainView = new DomainDetailView(temp_mediator);
 		detailPanel.add(domainView, DOMAIN_VIEW);
@@ -597,6 +597,8 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
         detailPanel.add(dbDetailView, DB_VIEW);
         
         mediator.addDomainDisplayListener(this);
+        mediator.addDataNodeDisplayListener(this);
+        mediator.addDataMapDisplayListener(this);
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityDisplayListener(this);
     }
@@ -606,11 +608,23 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
    		detailLayout.show(detailPanel, DOMAIN_VIEW);
    	}
 
+   	public void currentDataNodeChanged(DataNodeDisplayEvent e)
+   	{
+   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   	}
+    
+
+
+   	public void currentDataMapChanged(DataMapDisplayEvent e)
+   	{
+   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   	}
     
    	public void currentObjEntityChanged(EntityDisplayEvent e)
    	{
    		detailLayout.show(detailPanel, OBJ_VIEW);
    	}
+
 
    	public void currentDbEntityChanged(EntityDisplayEvent e)
    	{
