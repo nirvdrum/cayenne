@@ -133,6 +133,7 @@
     <!-- Performs replacements in property files.   -->
     <!-- ========================================== -->
     <target name="prepare-properties">
+    	<tstamp/>
 		<copy todir="${core.build.properties}" overwrite="yes">
 			<fileset dir="${core.src}" >
 				<include name="**/*.properties"/>
