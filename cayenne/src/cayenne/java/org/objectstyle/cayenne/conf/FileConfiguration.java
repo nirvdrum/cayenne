@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.util.ResourceLocator;
  * FileConfiguration loads a Cayenne configuraton file from a given
  * location in the file system.
  *
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 public class FileConfiguration extends DefaultConfiguration {
 	private static Logger logObj = Logger.getLogger(FileConfiguration.class);

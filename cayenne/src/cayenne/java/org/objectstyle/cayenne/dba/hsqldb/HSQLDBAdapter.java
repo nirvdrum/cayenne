@@ -77,7 +77,7 @@ test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
 test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
 </pre>
  *
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 public class HSQLDBAdapter extends JdbcAdapter {
 

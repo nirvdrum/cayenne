@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
  * The target is kept with a WeakReference and can therefore be reclaimed by the
  * Garbage Collector.
  * 
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  * @author Dirk Olmes
  */
 public class Invocation extends Object {

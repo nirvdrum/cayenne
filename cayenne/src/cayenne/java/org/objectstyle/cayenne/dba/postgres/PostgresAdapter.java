@@ -78,7 +78,7 @@ test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
 test-postgresql.jdbc.driver = org.postgresql.Driver
 </pre>
  * 
- * @author Dirk Olmes, Holger Hoffstätte
+ * @author Dirk Olmes, Holger Hoffstaette
  */
 public class PostgresAdapter extends JdbcAdapter
 {

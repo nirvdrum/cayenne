@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.util.ResourceLocator;
  * </p>
  *
  * @author Andrei Adamchik
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 public abstract class Configuration {
     private static Logger logObj = Logger.getLogger(Configuration.class);

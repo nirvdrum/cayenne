@@ -69,7 +69,7 @@ package org.objectstyle.cayenne.event;
  * </ul>
  * 
  * @author Dirk Olmes
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 
 public class EventSubject extends Object {

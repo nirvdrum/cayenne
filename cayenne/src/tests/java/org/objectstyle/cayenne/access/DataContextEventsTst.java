@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 
 /**
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  * @author Andrei Adamchik
  */
 public class DataContextEventsTst extends OneWayMappingTestCase {

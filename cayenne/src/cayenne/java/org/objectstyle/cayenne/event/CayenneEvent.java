@@ -65,7 +65,7 @@ import java.util.Map;
  * encapsulates optional event information.
  * 
  * @author Dirk Olmes
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 
 public class CayenneEvent extends EventObject {

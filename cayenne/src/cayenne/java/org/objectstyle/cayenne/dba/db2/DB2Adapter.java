@@ -81,7 +81,7 @@ test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
 test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
 </pre>
  *
- * @author Holger Hoffst�tte
+ * @author Holger Hoffstaette
  */
 public class DB2Adapter extends JdbcAdapter {
 

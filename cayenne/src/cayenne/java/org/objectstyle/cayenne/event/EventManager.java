@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.util.Invocation;
  * interested in the Subject (Listeners).
  * 
  * @author Dirk Olmes
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 public class EventManager extends Object {
 	private static final EventManager _defaultManager = new EventManager();

@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 /**
  * PK Generator for IBM DB2 using sequences.
  * 
- * @author Mario Linke, Holger Hoffstätte
+ * @author Mario Linke, Holger Hoffstaette
  */
 public class DB2PkGenerator extends JdbcPkGenerator {
 

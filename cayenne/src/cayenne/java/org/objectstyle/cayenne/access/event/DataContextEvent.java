@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.event.CayenneEvent;
  * Represents events sent by DataContext.
  * 
  * @author Dirk Olmes
- * @author Holger Hoffstätte
+ * @author Holger Hoffstaette
  */
 
 public class DataContextEvent extends CayenneEvent {
