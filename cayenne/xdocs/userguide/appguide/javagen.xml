@@ -9,8 +9,93 @@
     <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
            <subsection name="4.3 Generating Java Classes" anchor="javagen">
             <p>Java classes can be generated from an existing DataMap using CayenneModeler
-            tool. See <a href="../modeler/index.html">CayenneModeler chapter</a>
-            for more information.</p>
+            tool or a special <a href="http://jakarat.apache.org/ant/">Ant</a> task, 
+            <code>CayenneGen</code>, implemented by <a href=
+            "../../api/org/objectstyle/cayenne/tools/CayenneGenerator.html">CayenneGenerator</a>
+            Java class. 
+            This chapter describes how to use <code>CayenneGen</code> task. For details on 
+            how class generation can be done using GUI see 
+            <a href="../modeler/index.html">CayenneModeler chapter</a>.</p>
+            
+            <subsection name="4.3.1 CayenneGen" anchor="cayennegen">
+			<h3>Description</h3>
+			
+			<p><code>CayenneGen</code> is an Ant task that generates and maintains DataObjects
+			source files based on Cayenne DataMap. If "makepairs" is set to "true" (default), this task
+			will generate a pair of classes (superclass/subclass) for each ObjEntity in the
+			DataMap. Superclasses should not be changed manually, since they are always 
+			overwritten. Subclasses are never overwritten and may be later customized by the user.
+			If "makepairs" is set to "false", a single class will be generated for each ObjEntity.
+			</p>
+
+			<h3>Parameters</h3>
+			
+			<table border="1" cellpadding="2" cellspacing="0">
+				<tr>
+					<th valign="top"><b>Attribute</b></th>
+					<th valign="top"><b>Description</b></th>
+					<th align="center" valign="top"><b>Required</b></th>
+				</tr>
+				<tr>
+					<td valign="top">map</td>
+					<td valign="top">DataMap XML file to use as a base for class generation.</td>
+					<td valign="top" align="center">Yes</td>
+				</tr>
+				<tr>
+					<td valign="top">destDir</td>
+					<td valign="top">Destination directory for Java classes
+					<i>(ignoring their package names)</i>.</td>
+					<td valign="top" align="center">Yes</td>
+				</tr>
+				<tr>
+					<td valign="top">superDestDir</td>
+					<td valign="top">Destination directory for Java superclasses
+					<i>(ignoring their package names)</i>. If ommitted, "destDir" is used.
+					Ignored unless "makepairs" set to "true".
+					</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">overwrite</td>
+					<td valign="top">If set to "true", will overwrite older versions of
+					generated classes. Ignored unless makepairs is set to "false".</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">makepairs</td>
+					<td valign="top">If set to "true", will generate subclass/superclass
+					pairs, with all generated code included in superclass
+					<i>(default is "true")</i>.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">template</td>
+					<td valign="top">Location of Velocity template file for Java class
+					generation. If ommitted, default template is used.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+				<tr>
+					<td valign="top">supertemplate</td>
+					<td valign="top">Location of Velocity template file for Java superclass 
+					generation. Ignored unless "makepairs" set to "true".
+					If ommitted, default template is used.</td>
+					<td valign="top" align="center">No</td>
+				</tr>
+			</table>
+			
+			<h3>Examples</h3>
+			<p>Here is an example of a using <code>CayenneGen</code> to generate DataObject
+			subclass/superclass pairs from DataMap located in "src/datamap.xml". All generated
+			subclasses and superclasses will be saved in the same directory "src/java/dobj" regardless
+			of their package names:</p>
+<source>
+&amp;lt;taskdef name="cayennegen" classname="org.objectstyle.cayenne.tools.CayenneGenerator"&amp;gt;
+     &amp;lt;classpath refid="classpath"/&amp;gt;
+&amp;lt;/taskdef&amp;gt;
+&amp;lt;cayennegen map="src/datamap.xml" destDir="src/java/dobj"/&amp;gt;
+</source>
+
+			</subsection>
         </subsection>
     </section>
 </body>
