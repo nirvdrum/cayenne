@@ -112,39 +112,36 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
     public void testIdObjectFromDataRow() throws Exception {
         Map row = new HashMap();
-        row.put("ARTIST_ID", new Integer(1));
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        row.put("ARTIST_ID", new Integer(100000));
+        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
-
-        // TODO
         assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertNull(obj.getCommittedSnapshot());
+        assertNotNull(obj.getCommittedSnapshot());
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
         Map row = new HashMap();
-        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_ID", new Integer(100001));
         row.put("ARTIST_NAME", "ArtistXYZ");
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
-
-        // TODO
         assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertNull(obj.getCommittedSnapshot());
+        assertNotNull(obj.getCommittedSnapshot());
     }
 
     public void testFullObjectFromDataRow() throws Exception {
         Map row = new HashMap();
-        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_ID", new Integer(123456));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+		Artist obj = (Artist)ctxt.objectFromDataRow(Artist.class, row, false);
 
         assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
         assertNotNull(ctxt.getObjectStore().getSnapshot(obj.getObjectId()));
+        assertEquals("ArtistXYZ", obj.getArtistName());
     }
 
     public void testCommitChangesError() throws Exception {

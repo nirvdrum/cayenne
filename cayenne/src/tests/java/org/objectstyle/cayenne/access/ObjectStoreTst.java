@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -84,7 +85,7 @@ public class ObjectStoreTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject object = context.objectFromDataRow("Artist", row);
+        DataObject object = context.objectFromDataRow(Artist.class, row, false);
         ObjectId oid = object.getObjectId();
 
         // insert object into the ObjectStore
@@ -105,7 +106,7 @@ public class ObjectStoreTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject object = context.objectFromDataRow("Artist", row);
+        DataObject object = context.objectFromDataRow(Artist.class, row, false);
         ObjectId oid = object.getObjectId();
 
         // insert object into the ObjectStore

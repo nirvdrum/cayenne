@@ -153,14 +153,14 @@ public class IncrementalFaultList implements List {
                 ResultIterator it = dataContext.performIteratedQuery(query);
                 try {
                     // read first page completely, the rest as ObjectIds
+                    List firstPage = new ArrayList(pageSize);
                     for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
-                        Map row = it.nextDataRow();
-                        elements.add(
-                            dataContext.objectFromDataRow(
-                                rootEntity,
-                                row,
-                                true));
+						firstPage.add(it.nextDataRow());
                     }
+					elements.addAll(dataContext.objectsFromDataRows(
+					      rootEntity,
+					      firstPage,
+				          true));
 
                     // continue reading ids
                     while (it.hasNextRow()) {

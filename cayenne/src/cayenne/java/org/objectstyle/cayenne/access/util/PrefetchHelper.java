@@ -193,11 +193,12 @@ public class PrefetchHelper {
         List results = context.performQuery(sel);
 
         // sort the resulting objects into individual lists for each source object
-        int nrows = results.size();
+        
+        List destObjects = context.objectsFromDataRows(destEnt, results, false);
+		int nrows = destObjects.size();
         for (int k = 0; k < nrows; k++) {
             Map row = (Map) results.get(k);
-            ((List) listMap.get(row.get(dbKey))).add(
-                context.objectFromDataRow(destEnt, row, false));
+            ((List) listMap.get(row.get(dbKey))).add(destObjects.get(k));
         }
 
         // and finally set these lists in the relation targets

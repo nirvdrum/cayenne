@@ -125,7 +125,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         Map artistRow = (Map) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow("Artist", artistRow);
+        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class, artistRow, false);
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
@@ -156,7 +156,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         Map artistRow = (Map) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow("Artist", artistRow);
+        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class, artistRow, false);
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
@@ -189,7 +189,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         Map artistRow = (Map) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow("Artist", artistRow);
+        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class, artistRow, false);
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc

@@ -435,7 +435,7 @@ public class DataContextTst extends DataContextTestBase {
                 Map row = it.nextDataRow();
 
                 // try instantiating an object and fetching its relationships
-                Artist obj = (Artist) context.objectFromDataRow("Artist", row);
+                Artist obj = (Artist) context.objectFromDataRow(Artist.class, row, false);
                 List paintings = obj.getPaintingArray();
                 assertNotNull(paintings);
                 assertEquals(1, paintings.size());

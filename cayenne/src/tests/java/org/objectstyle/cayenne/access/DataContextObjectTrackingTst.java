@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -83,7 +84,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
         ObjectId oid = obj.getObjectId();
 
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
@@ -104,7 +105,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
         ObjectId oid = obj.getObjectId();
 
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());

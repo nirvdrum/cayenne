@@ -298,7 +298,8 @@ public class DataContext implements QueryEngine, Serializable {
      * Converts a list of data rows to a list of DataObjects. 
      */
     public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
-
+        // TODO: (Andrus) maybe move this to SnapshotManager?
+        
         if (dataRows == null && dataRows.size() == 0) {
             return new ArrayList(1);
         }
@@ -352,6 +353,13 @@ public class DataContext implements QueryEngine, Serializable {
                     SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
             }
+            // TODO: temporary hack - this else clause must go... unfortunately lots of other things break
+            // at the moment...
+            else {
+                if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+                    SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);                  
+                }
+            }
 
             object.fetchFinished();
             results.add(object);
@@ -367,50 +375,52 @@ public class DataContext implements QueryEngine, Serializable {
      * Creates and returns a DataObject from a data row (snapshot).
      * Newly created object is registered with this DataContext.
      *
-     * <p>Internally this method calls
-     *  #objectFromDataRow(org.objectststyle.cayenne.map.ObjEntity,java.util.Map,boolean)
-     * objectFromDataRow(ObjEntity, Map, boolean)}
+     * <p>Internally this method calls {@link 
+     * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
+     * objectsFromDataRows(ObjEntity, List, boolean)}
      * with <code>false</code> "refersh" parameter.</p>
      */
-    public DataObject objectFromDataRow(String entityName, Map dataRow) {
-        ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
-        return objectFromDataRow(ent, dataRow, false);
+    public List objectsFromDataRows(Class objectClass, List dataRows, boolean refresh) {
+        ObjEntity entity = this.getEntityResolver().lookupObjEntity(objectClass);
+        return objectsFromDataRows(entity, dataRows, false);
     }
 
     /**
-     * Creates and returns a DataObject from a data row (snapshot).
-     * Newly created object is registered with this DataContext.
+     * A convenience shortcut to {@link 
+     * #objectsFromDataRows(Class,java.util.List,boolean)
+     * objectsFromDataRows(Class, List, boolean)}, that allows to easily create an object
+     * from a map of values.</p>
      */
+    public DataObject objectFromDataRow(Class objectClass, Map dataRow, boolean refresh) {
+        List list = objectsFromDataRows(objectClass, Collections.singletonList(dataRow), refresh);
+        return (DataObject) list.get(0);
+    }
+    
+	/**
+      * @deprecated Since 1.1 use {@link 
+      * #objectsFromDataRows(Class,java.util.List,boolean)
+      * objectFromDataRow(Class, List, boolean)}, using <code>false</code>
+      * boolean parameter.</p>
+	 */
+	public DataObject objectFromDataRow(String entityName, Map dataRow) {
+		ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
+		List list = objectsFromDataRows(ent, Collections.singletonList(dataRow), false);
+		return (DataObject) list.get(0);
+	}
+
+    /**
+      * @deprecated Since 1.1 use {@link 
+      * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
+      * objectFromDataRow(ObjEntity, Map, boolean)}.</p>
+      */
     public DataObject objectFromDataRow(
         ObjEntity objEntity,
         Map dataRow,
         boolean refresh) {
 
-        ObjectId anId = SnapshotManager.objectIdFromSnapshot(objEntity, dataRow);
-
-        // synchronized on objectstore, since read/write
-        // must be performed atomically
-        synchronized (objectStore) {
-            // this will create a HOLLOW object if it is not registered yet
-            DataObject obj = registeredObject(anId);
-
-            if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-                // we are asked to refresh an existing object with new values
-                SnapshotManager.mergeObjectWithSnapshot(objEntity, obj, dataRow);
-
-                //The merge might leave the object in hollow state if
-                // dataRow was only partial.  If so, do not add the snapshot
-                // to the objectstore.
-                if (obj.getPersistenceState() != PersistenceState.HOLLOW) {
-                    objectStore.addSnapshot(anId, dataRow);
-                }
-
-                // notify object that it was fetched
-                obj.fetchFinished();
-            }
-
-            return obj;
-        }
+        List list =
+            objectsFromDataRows(objEntity, Collections.singletonList(dataRow), refresh);
+        return (DataObject) list.get(0);
     }
 
     /**
@@ -418,8 +428,8 @@ public class DataContext implements QueryEngine, Serializable {
      * Newly created object is registered with this DataContext.
      * 
      * @deprecated Since 1.1 This method is not used in Cayenne anymore. Use
-     * #objectFromDataRow(org.objectststyle.cayenne.map.ObjEntity,java.util.Map,boolean)
-     * objectFromDataRow(ObjEntity, Map, boolean)} instead.
+     * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
+     * objectsFromDataRows(ObjEntity, List, boolean)} instead.
      */
     protected DataObject readOnlyObjectFromDataRow(
         ObjEntity objEntity,
