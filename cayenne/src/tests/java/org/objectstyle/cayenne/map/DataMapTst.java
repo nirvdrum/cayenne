@@ -248,64 +248,7 @@ public class DataMapTst extends TestCase {
         assertSame(q, queries.get("a"));
     }
 
-    /**
-     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
-     */
-    public void testAddDependency1() throws Exception {
-        map.setName("m1");
-        DataMap map2 = new DataMap("m2");
-        assertFalse(map.isDependentOn(map2));
-        map.addDependency(map2);
-        assertTrue(map.isDependentOn(map2));
-    }
 
-    /**
-     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
-     */
-    public void testAddDependency2() throws Exception {
-        map.setName("m1");
-        DataMap map2 = new DataMap("m2");
-        DataMap map3 = new DataMap("m3");
-        map.addDependency(map2);
-        map2.addDependency(map3);
-        assertTrue(map.isDependentOn(map3));
-    }
-
-    /**
-     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
-     */
-    public void testAddDependency3() throws Exception {
-        map.setName("m1");
-        DataMap map2 = new DataMap("m2");
-        map.addDependency(map2);
-
-        try {
-            map2.addDependency(map);
-            fail("Circular dependencies should throw exceptions.");
-        }
-        catch (RuntimeException ex) {
-            // exception expected
-        }
-    }
-
-    /**
-     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
-     */
-    public void testAddDependency4() throws Exception {
-        map.setName("m1");
-        DataMap map2 = new DataMap("m2");
-        map.addDependency(map2);
-        DataMap map3 = new DataMap("m3");
-        map2.addDependency(map3);
-
-        try {
-            map3.addDependency(map);
-            fail("Circular dependencies should throw exceptions.");
-        }
-        catch (RuntimeException ex) {
-            // exception expected
-        }
-    }
 
     // make sure deleting a DbEntity & other entity's relationships to it
     // works & does not cause a ConcurrentModificationException

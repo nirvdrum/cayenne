@@ -75,7 +75,6 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -142,7 +141,7 @@ public class PrimaryKeyHelper {
 
             DataObject object = (DataObject) i.next();
             ObjectId id = object.getObjectId();
-            if (!(id instanceof TempObjectId)) {
+            if (id == null || !id.isTemporary()) {
                 continue;
                 //If the id is not a temp, then it must be permanent.  Do nothing else
             }

@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -119,20 +118,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     protected String defaultPackage;
     protected String defaultSuperclass;
     protected int defaultLockType;
-
-    // ====================================================
-    // DataMaps that provide dependencies for this DataMap
-    // ====================================================
-    /**
-     * @deprecated since 1.1
-     */
-    private List dependencies = new ArrayList();
-
-    // read-through reference for public access
-    /**
-     * @deprecated since 1.1
-     */
-    private List dependenciesRef = Collections.unmodifiableList(dependencies);
 
     // ====================================================
     // ObjEntities
@@ -336,78 +321,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Adds a data map that has entities used by this map.
-     * 
-     * @throws IllegalArgumentException if a <code>map</code> argument already depends
-     *             on thsi map directly or indirectly.
-     * @deprecated since 1.1
-     */
-    public void addDependency(DataMap map) throws IllegalArgumentException {
-        if (map.isDependentOn(this)) {
-            StringBuffer buf = new StringBuffer(128);
-            buf
-                    .append("Attempt to create circular dependency. ")
-                    .append('\'')
-                    .append(map.getName())
-                    .append("' already depends on '")
-                    .append(this.getName())
-                    .append("'.");
-            throw new IllegalArgumentException(buf.toString());
-        }
-        dependencies.add(map);
-    }
-
-    /**
-     * @deprecated since 1.1
-     */
-    public void removeDependency(DataMap map) {
-        dependencies.remove(map);
-    }
-
-    /**
-     * @deprecated since 1.1
-     */
-    public List getDependencies() {
-        return dependenciesRef;
-    }
-
-    /**
-     * Returns <code>true</code> if this map depends on DataMap supplied as a
-     * <code>map</code> parameter. Checks for nested dependencies as well. For instance
-     * if the following dependency exists: map1 -> map2 -> map3, calling
-     * <code>map1.isDependentOn(map3)</code> will return <code>true</code>.
-     * 
-     * @deprecated since 1.1
-     */
-    public boolean isDependentOn(DataMap map) {
-        if (dependencies.size() == 0) {
-            return false;
-        }
-
-        if (dependencies.contains(map)) {
-            return true;
-        }
-
-        Iterator it = dependencies.iterator();
-        while (it.hasNext()) {
-            // check dependencies recursively
-            DataMap dep = (DataMap) it.next();
-            if (dep.isDependentOn(map)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated since 1.1
-     */
-    public void clearDependencies() {
-        dependencies.clear();
-    }
-
-    /**
      * Returns "name" property value.
      */
     public String getName() {
@@ -561,75 +474,24 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * Returns a list of ObjEntities stored in this DataMap.
      */
     public Collection getObjEntities() {
-        return this.getObjEntities(false);
+        return objEntityValuesRef;
     }
 
     /**
      * Returns all ObjEntities in this DataMap, including entities from dependent maps if
      * <code>includeDeps</code> is <code>true</code>.
+     * 
+     * @deprecated since 1.2 use getObjEntities().
      */
     public Collection getObjEntities(boolean includeDeps) {
-        if (!includeDeps || this.getDependencies().isEmpty()) {
-            return objEntityValuesRef;
-        }
-        else {
-            // create a copy until we can start to cache allObjEnts as well
-            List allObjEnts = new ArrayList(objEntityValuesRef);
-            Iterator dependentMaps = this.getDependencies().iterator();
-            while (dependentMaps.hasNext()) {
-                DataMap depMap = (DataMap) dependentMaps.next();
-                allObjEnts.addAll(depMap.getObjEntities());
-            }
-            return allObjEnts;
-        }
+        return getObjEntities();
     }
 
     /**
      * Returns all DbEntities in this DataMap.
      */
     public Collection getDbEntities() {
-        return this.getDbEntities(false);
-    }
-
-    /**
-     * Returns all DbEntities in this DataMap, including entities from dependent maps if
-     * <code>includeDeps</code> is <code>true</code>.
-     * 
-     * @deprecated since 1.1
-     */
-    public Collection getDbEntities(boolean includeDeps) {
-        if (!includeDeps || getDependencies().isEmpty()) {
-            return dbEntityValuesRef;
-        }
-        else {
-            // create a copy until we can start to cache allDbEnts as well
-            List allDbEnts = new ArrayList(dbEntityValuesRef);
-            Iterator dependentMaps = this.getDependencies().iterator();
-            while (dependentMaps.hasNext()) {
-                DataMap depMap = (DataMap) dependentMaps.next();
-                allDbEnts.addAll(depMap.getDbEntities());
-            }
-            return allDbEnts;
-        }
-    }
-
-    /**
-     * Returns a list of DbEntity names.
-     * 
-     * @deprecated since 1.1
-     */
-    public List getDbEntityNames(boolean includeDeps) {
-        List ents = new ArrayList(dbEntityMap.keySet());
-
-        if (includeDeps) {
-            Iterator it = this.getDependencies().iterator();
-            while (it.hasNext()) {
-                DataMap dep = (DataMap) it.next();
-                // using "false" to avoid problems with circular dependencies
-                ents.addAll(dep.getDbEntityNames(false));
-            }
-        }
-        return ents;
+        return dbEntityValuesRef;
     }
 
     /**
@@ -644,27 +506,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         }
 
         return namespace != null ? namespace.getDbEntity(dbEntityName) : null;
-    }
-
-    /**
-     * @deprecated since 1.1
-     */
-    public DbEntity getDbEntity(String dbEntityName, boolean searchDependencies) {
-        DbEntity ent = (DbEntity) dbEntityMap.get(dbEntityName);
-        if (ent != null || !searchDependencies) {
-            return ent;
-        }
-
-        Iterator it = this.getDependencies().iterator();
-        while (it.hasNext()) {
-            DataMap dep = (DataMap) it.next();
-            // using "false" to avoid problems with circular dependencies
-            DbEntity e = dep.getDbEntity(dbEntityName, false);
-            if (e != null) {
-                return e;
-            }
-        }
-        return null;
     }
 
     /**
@@ -703,27 +544,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * @deprecated since 1.1
-     */
-    public ObjEntity getObjEntity(String objEntityName, boolean searchDependencies) {
-        ObjEntity ent = (ObjEntity) objEntityMap.get(objEntityName);
-        if (ent != null || !searchDependencies) {
-            return ent;
-        }
-
-        Iterator it = this.getDependencies().iterator();
-        while (it.hasNext()) {
-            DataMap dep = (DataMap) it.next();
-            // using "false" to avoid problems with circular dependencies
-            ObjEntity e = dep.getObjEntity(objEntityName, false);
-            if (e != null) {
-                return e;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns a list of ObjEntities mapped to the given DbEntity.
      */
     public Collection getMappedEntities(DbEntity dbEntity) {
@@ -749,16 +569,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         }
 
         return result;
-    }
-
-    /**
-     * Removes DbEntity, also removing all DbRelationships and ObjRelationships that
-     * reference it. This method is a "clean" remove.
-     * 
-     * @deprecated Since 1.1 use {@link #removeDbEntity(String, boolean)}
-     */
-    public void deleteDbEntity(String dbEntityName) {
-        removeDbEntity(dbEntityName, true);
     }
 
     /**
@@ -818,16 +628,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Removes ObjEntity, also removing all ObjRelationships that reference it. This
-     * method is a "clean" remove.
-     * 
-     * @deprecated Since 1.1 use {@link #removeObjEntity(String, boolean)}
-     */
-    public void deleteObjEntity(String objEntityName) {
-        removeObjEntity(objEntityName, true);
-    }
-
-    /**
      * "Dirty" remove of the ObjEntity from the data map.
      */
     public void removeObjEntity(String objEntityName) {
@@ -864,29 +664,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * Returns stored procedures associated with this DataMap.
      */
     public Collection getProcedures() {
-        return getProcedures(false);
-    }
-
-    /**
-     * Returns stored procedures associated with this DataMap, including procedures from
-     * dependent maps if requested.
-     * 
-     * @deprecated since 1.1
-     */
-    public Collection getProcedures(boolean includeDeps) {
-        if (!includeDeps || this.getDependencies().isEmpty()) {
-            return procedureValuesRef;
-        }
-        else {
-            // create a copy until we can start to cache allDbEnts as well
-            List allProcedures = new ArrayList(procedureValuesRef);
-            Iterator dependentMaps = this.getDependencies().iterator();
-            while (dependentMaps.hasNext()) {
-                DataMap depMap = (DataMap) dependentMaps.next();
-                allProcedures.addAll(depMap.getProcedures());
-            }
-            return allProcedures;
-        }
+        return procedureValuesRef;
     }
 
     /**
@@ -916,30 +694,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
 
     public void removeProcedure(String name) {
         procedureMap.remove(name);
-    }
-
-    /**
-     * Returns a named stored procedure or null if no such procedure exists in the map,
-     * searching dependent maps if requested.
-     * 
-     * @deprecated since 1.1
-     */
-    public Procedure getProcedure(String name, boolean searchDependencies) {
-        Procedure procedure = (Procedure) procedureMap.get(name);
-        if (procedure != null || !searchDependencies) {
-            return procedure;
-        }
-
-        Iterator it = this.getDependencies().iterator();
-        while (it.hasNext()) {
-            DataMap dep = (DataMap) it.next();
-            // using "false" to avoid problems with circular dependencies
-            procedure = dep.getProcedure(name, false);
-            if (procedure != null) {
-                return procedure;
-            }
-        }
-        return null;
     }
 
     /**

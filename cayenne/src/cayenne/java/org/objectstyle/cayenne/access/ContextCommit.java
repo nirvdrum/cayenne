@@ -69,7 +69,6 @@ import java.util.Set;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -104,8 +103,6 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  */
 
 class ContextCommit {
-
-    private static Logger logObj = Logger.getLogger(ContextCommit.class);
 
     private DataContext context;
     private Level logLevel;
@@ -245,10 +242,7 @@ class ContextCommit {
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
             InsertBatchQuery batch = new InsertBatchQuery(dbEntity, 27);
             batch.setLoggingLevel(logLevel);
-            if (logObj.isDebugEnabled()) {
-                logObj.debug("Creating InsertBatchQuery for DbEntity "
-                        + dbEntity.getName());
-            }
+
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
@@ -305,10 +299,6 @@ class ContextCommit {
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
             DeleteBatchQuery batch = new DeleteBatchQuery(dbEntity, 27);
             batch.setLoggingLevel(logLevel);
-
-            if (logObj.isDebugEnabled())
-                logObj.debug("Creating DeleteBatchQuery for DbEntity "
-                        + dbEntity.getName());
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();

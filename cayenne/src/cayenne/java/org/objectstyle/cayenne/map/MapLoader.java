@@ -58,8 +58,6 @@ package org.objectstyle.cayenne.map;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -176,22 +174,6 @@ public class MapLoader extends DefaultHandler {
                 Util.unwindException(e));
         }
         return dataMap;
-    }
-
-    /**
-     * @deprecated since 1.1 explicit DataMap dependencies are not supported, and 
-     * {@link #loadDataMap(InputSource)} should be used.
-     */
-    public synchronized DataMap loadDataMap(InputSource src, List deps)
-        throws DataMapException {
-        DataMap map = loadDataMap(src);
-
-        Iterator it = deps.iterator();
-        while (it.hasNext()) {
-            map.addDependency((DataMap) it.next());
-        }
-
-        return map;
     }
 
     /**

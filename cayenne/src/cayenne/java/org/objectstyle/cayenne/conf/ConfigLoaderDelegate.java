@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.conf;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,22 +98,6 @@ public interface ConfigLoaderDelegate {
      */
     public void shouldRegisterDataView(String name, String location);
 
-    /**
-     * @deprecated Since 1.1 this method is no longer called during project loading.
-     * {@link #shouldLoadDataMaps(String,Map)} is used instead.
-     */
-    public void shouldLoadDataMap(
-        String domainName,
-        String mapName,
-        String location,
-        List depMapNames);
-    
-    /**
-     * @deprecated Since 1.1 this method is no longer called during project loading.
-     * {@link #shouldLoadDataMaps(String,Map)} is used instead.
-     */
-    public void shouldLoadDataMaps(String domainName, Map locations, Map dependencies);
-    
     /**
      * @since 1.1
      */

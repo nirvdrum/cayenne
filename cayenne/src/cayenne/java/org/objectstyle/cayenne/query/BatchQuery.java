@@ -126,7 +126,7 @@ public abstract class BatchQuery extends AbstractQuery {
     public abstract Object getObject(int valueIndex);
 
     /**
-     * Returns the number of parameter rows in this batch.
+     * Returns the number of parameter rows in a batch.
      */
     public abstract int size();
 }

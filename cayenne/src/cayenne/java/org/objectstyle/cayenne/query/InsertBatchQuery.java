@@ -78,8 +78,9 @@ public class InsertBatchQuery extends BatchQuery {
 
     public InsertBatchQuery(DbEntity objectEntity, int batchCapacity) {
         super(objectEntity);
+        
         dataObjectSnapshots = new ArrayList(batchCapacity);
-        prepareMetadata();
+        dbAttributes = new ArrayList(getDbEntity().getAttributes());
     }
 
     public void reset() {
@@ -88,11 +89,16 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     public boolean next() {
-        if (!snapshotIterator.hasNext())
+        if (!snapshotIterator.hasNext()) {
             return false;
+        }
+        
         currentSnapshot = (Map) snapshotIterator.next();
-        currentSnapshot =
-            (currentSnapshot != null ? currentSnapshot : Collections.EMPTY_MAP);
+
+        if (currentSnapshot == null) {
+            currentSnapshot = Collections.EMPTY_MAP;
+        }
+
         return true;
     }
 
@@ -111,9 +117,5 @@ public class InsertBatchQuery extends BatchQuery {
 
     public List getDbAttributes() {
         return Collections.unmodifiableList(dbAttributes);
-    }
-
-    private void prepareMetadata() {
-        dbAttributes = new ArrayList(this.getDbEntity().getAttributes());
     }
 }

@@ -843,8 +843,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     private void registerNewObjectWithEntity(DataObject dataObject, ObjEntity objEntity) {
-        TempObjectId tempId = new TempObjectId(dataObject.getClass());
-        dataObject.setObjectId(tempId);
+        dataObject.setObjectId(new TempObjectId(dataObject.getClass()));
 
         // initialize to-many relationships with a fault
         Iterator it = objEntity.getRelationships().iterator();

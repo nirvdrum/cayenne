@@ -56,10 +56,8 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -256,101 +254,6 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                 location,
                 "map loading failed - " + dmex.getMessage());
             return null;
-        }
-    }
-
-    /**
-     * @deprecated Since 1.1
-     */
-    public void shouldLoadDataMaps(String domainName, Map locations, Map dependencies) {
-        shouldLoadDataMaps(domainName, locations);
-    }
-
-
-    /**
-     * @deprecated Since 1.1
-     */
-    public void shouldLoadDataMap(
-        String domainName,
-        String mapName,
-        String location,
-        List depMapNames) {
-
-        if (mapName == null) {
-            throw new ConfigurationException("Error: <map> without 'name'.");
-        }
-
-        if (location == null) {
-            throw new ConfigurationException(
-                "Error: map '" + mapName + "' without 'location'.");
-        }
-
-        List depMaps = new ArrayList();
-        if (depMapNames != null && depMapNames.size() > 0) {
-            for (int i = 0; i < depMapNames.size(); i++) {
-                String depMapName = (String) depMapNames.get(i);
-                if (depMapName == null) {
-                    logObj.log(
-                        logLevel,
-                        "Error: missing dependent map name for map: " + mapName);
-                    getStatus().addFailedMap(
-                        mapName,
-                        location,
-                        "missing dependent map: " + domainName + "." + depMapName);
-                    return;
-                }
-
-                logObj.log(logLevel, "Info: linking map to dependent map: " + depMapName);
-
-                try {
-                    depMaps.add(findMap(domainName, depMapName));
-                }
-                catch (FindException ex) {
-                    logObj.log(logLevel, "Error: unknown dependent map: " + depMapName);
-                    getStatus().addFailedMap(
-                        mapName,
-                        location,
-                        "missing dependent map: " + domainName + "." + depMapName);
-                }
-            }
-        }
-
-        InputStream mapIn = config.getMapConfiguration(location);
-
-        if (mapIn == null) {
-            logObj.log(logLevel, "Warning: map location not found.");
-            getStatus().addFailedMap(mapName, location, "map location not found");
-            return;
-        }
-
-        try {
-            DataMap map = new MapLoader().loadDataMap(new InputSource(mapIn), depMaps);
-
-            logObj.log(
-                logLevel,
-                "loaded <map name='" + mapName + "' location='" + location + "'>.");
-
-            map.setName(mapName);
-            map.setLocation(location);
-
-            try {
-                findDomain(domainName).addMap(map);
-            }
-            catch (FindException ex) {
-                logObj.log(logLevel, "Error: unknown domain: " + domainName);
-                getStatus().addFailedMap(
-                    mapName,
-                    location,
-                    "unknown parent domain: " + domainName);
-            }
-
-        }
-        catch (DataMapException dmex) {
-            logObj.log(logLevel, "Warning: map loading failed.", dmex);
-            getStatus().addFailedMap(
-                mapName,
-                location,
-                "map loading failed - " + dmex.getMessage());
         }
     }
 
