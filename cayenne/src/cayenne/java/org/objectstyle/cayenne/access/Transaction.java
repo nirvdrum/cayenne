@@ -158,12 +158,12 @@ public abstract class Transaction {
     protected Transaction() {
         status = STATUS_NO_TRANSACTION;
     }
-    
+
     /**
      * Helper method that wraps a number of queries in this transaction,
      * runs them, and commits or rolls back depending on
      * the outcome. This method allows users to define their own custom 
-     * Transactions and easily wrap Cayenne queries in them.
+     * Transactions and easily wrap Cayenne queries in them. 
      */
     public void performQueries(
         QueryEngine engine,
@@ -175,7 +175,11 @@ public abstract class Transaction {
             // implicit begin..
             engine.performQueries(queries, observer, this);
 
-            if (getStatus() == Transaction.STATUS_ACTIVE) {
+            // don't commit iterated queries - leave it up to the caller
+            // at the same time rollbacks of iterated queries must be processed here, 
+            // since caller will no longer be processing stuff on exception
+            if (!observer.isIteratedResult()
+                && (getStatus() == Transaction.STATUS_ACTIVE)) {
                 commit();
             }
         }
@@ -200,7 +204,6 @@ public abstract class Transaction {
             }
         }
     }
-
 
     public Level getLogLevel() {
         return logLevel != null ? logLevel : QueryLogger.DEFAULT_LOG_LEVEL;

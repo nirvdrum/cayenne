@@ -56,7 +56,10 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -73,104 +76,209 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class DataNodeTst extends IteratorTestBase {
-	protected DataNode sharedNode;
+    protected DataNode sharedNode;
 
-	public void testRunSelect() throws Exception {
-		SelectObserver observer = new SelectObserver();
+    public void testRunSelect() throws Exception {
+        SelectObserver observer = new SelectObserver();
 
-		try {
-			init();
-			sharedNode.runSelect(conn, query, observer);
-			assertEquals(
-				DataContextTst.artistCount,
-				observer.getResults(transl.getQuery()).size());
-		} finally {
-			cleanup();
-		}
-	}
+        try {
+            init();
+            sharedNode.runSelect(conn, query, observer);
+            assertEquals(
+                DataContextTst.artistCount,
+                observer.getResults(transl.getQuery()).size());
+        }
+        finally {
+            cleanup();
+        }
+    }
 
-	public void testRunIteratedSelect() throws Exception {
-		IteratedObserver observer = new IteratedObserver();
+    public void testRunIteratedSelect() throws Exception {
+        IteratedObserver observer = new IteratedObserver();
 
-		init();
-		
-		// first assert that created node is valid
-		assertNotNull(sharedNode.getEntityResolver().lookupObjEntity(query));
-		
-		sharedNode.runSelect(conn, query, observer);
-		assertEquals(DataContextTst.artistCount, observer.getResultCount());
+        init();
 
-		// no cleanup is needed, since observer will close the iterator
-	}
+        // first assert that created node is valid
+        assertNotNull(sharedNode.getEntityResolver().lookupObjEntity(query));
 
-	public void testFailIterated() throws Exception {
-		// must fail multiple queries when one of them is iterated
-		IteratedObserver observer = new IteratedObserver();
+        sharedNode.runSelect(conn, query, observer);
+        assertEquals(DataContextTst.artistCount, observer.getResultCount());
 
-		List queries = new ArrayList();
-		queries.add(new SelectQuery("Artist"));
-		queries.add(new SelectQuery("Artist"));
+        // no cleanup is needed, since observer will close the iterator
+    }
 
-		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+    public void testFailIterated() throws Exception {
+        // must fail multiple queries when one of them is iterated
+        IteratedObserver observer = new IteratedObserver();
+
+        List queries = new ArrayList();
+        queries.add(new SelectQuery("Artist"));
+        queries.add(new SelectQuery("Artist"));
+
+        Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
 
-		try {
-			getNode().performQueries(queries, observer);
+        try {
+            getNode().performQueries(queries, observer);
 
-			assertEquals(0, observer.getResultCount());
-			assertTrue(
-				"Iterated queries are not allowed in batches.",
-				observer.hasExceptions());
-		} finally {
-			observerLogger.setLevel(oldLevel);
-		}
-	}
+            assertEquals(0, observer.getResultCount());
+            assertTrue(
+                "Iterated queries are not allowed in batches.",
+                observer.hasExceptions());
+        }
+        finally {
+            observerLogger.setLevel(oldLevel);
+        }
+    }
 
-	protected DataNode newDataNode() {
-		DataNode node = getNode().getAdapter().createDataNode("dummy");
-		node.setDataMaps(getNode().getDataMaps());
-		return node;
-	}
+    /**
+     * Checks that when an iterated query fails prior to returning
+     * to the caller, connection is being closed properly. 
+     */
+    public void testEarlyIteratedFailure() throws Exception {
+        IteratedFailingNode node = new IteratedFailingNode();
+        node.setDataMaps(getNode().getDataMaps());
+        node.setAdapter(getNode().getAdapter());
+        node.setDataSource(getNode().getDataSource());
 
-	protected void init() throws Exception {
-		super.init();
-		sharedNode = newDataNode();
-	}
+        SelectObserver observer = new SelectObserver() {
+            public boolean isIteratedResult() {
+                return true;
+            }
+        };
 
-	class IteratedObserver extends DefaultOperationObserver {
-		protected int count;
+        SelectQuery query = new SelectQuery("Artist");
 
-		public boolean isIteratedResult() {
-			return true;
-		}
+        try {
+            node.performQueries(Collections.singletonList(query), observer);
+            fail("SQLException expected.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // by now connection must be closed
+            assertNotNull("Node connection is null.", node.connection);
+            assertTrue("Node did not close connection.", node.connection.isClosed());
+        }
+        finally {
+            // To avoid total meltdown if connection is not closed,
+            // close it here again 
+            try {
+                if (node.connection != null) {
+                    node.connection.close();
+                }
+            }
+            catch (Throwable th) {
+                // ignore it...
+            }
+        }
+    }
 
-		public void nextDataRows(Query q, ResultIterator it) {
-			super.nextDataRows(q, it);
+    /**
+      * Checks that when an iterated query fails prior to returning
+      * to the caller, connection is being closed properly. This case
+      * is being run with a transaction to emulate usual DataContext behavior.
+      */
+    public void testEarlyIteratedFailure2() throws Exception {
+        IteratedFailingNode node = new IteratedFailingNode();
+        node.setDataMaps(getNode().getDataMaps());
+        node.setAdapter(getNode().getAdapter());
+        node.setDataSource(getNode().getDataSource());
 
-			try {
-				while (it.hasNextRow()) {
-					it.nextDataRow();
-					count++;
-				}
-			} catch (Exception ex) {
-				throw new CayenneRuntimeException(
-					"Error processing result iterator",
-					ex);
-			} finally {
+        SelectObserver observer = new SelectObserver() {
+            public boolean isIteratedResult() {
+                return true;
+            }
+        };
 
-				try {
-					it.close();
-				} catch (Exception ex) {
-					throw new CayenneRuntimeException(
-						"Error closing result iterator",
-						ex);
-				}
-			}
-		}
+        SelectQuery query = new SelectQuery("Artist");
+        Transaction transaction = Transaction.externalTransaction(null);
 
-		public int getResultCount() {
-			return count;
-		}
-	}
+        try {
+            transaction.performQueries(node, Collections.singletonList(query), observer);
+            fail("SQLException expected.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // by now connection must be closed
+            assertNotNull("Node connection is null.", node.connection);
+            assertTrue("Node did not close connection.", node.connection.isClosed());
+        }
+        finally {
+            // To avoid total meltdown if connection is not closed,
+            // close it here again 
+            try {
+                if (node.connection != null) {
+                    node.connection.close();
+                }
+            }
+            catch (Throwable th) {
+                // ignore it...
+            }
+        }
+    }
+
+    protected DataNode newDataNode() {
+        DataNode node = getNode().getAdapter().createDataNode("dummy");
+        node.setDataMaps(getNode().getDataMaps());
+        return node;
+    }
+
+    protected void init() throws Exception {
+        super.init();
+        sharedNode = newDataNode();
+    }
+
+    class IteratedFailingNode extends DataNode {
+        Connection connection;
+
+        IteratedFailingNode() {
+            super("test");
+        }
+
+        protected void runSelect(
+            Connection connection,
+            Query query,
+            OperationObserver delegate)
+            throws SQLException, Exception {
+
+            this.connection = connection;
+            throw new SQLException("Test Exception");
+        }
+    }
+
+    class IteratedObserver extends DefaultOperationObserver {
+        protected int count;
+
+        public boolean isIteratedResult() {
+            return true;
+        }
+
+        public void nextDataRows(Query q, ResultIterator it) {
+            super.nextDataRows(q, it);
+
+            try {
+                while (it.hasNextRow()) {
+                    it.nextDataRow();
+                    count++;
+                }
+            }
+            catch (Exception ex) {
+                throw new CayenneRuntimeException("Error processing result iterator", ex);
+            }
+            finally {
+
+                try {
+                    it.close();
+                }
+                catch (Exception ex) {
+                    throw new CayenneRuntimeException(
+                        "Error closing result iterator",
+                        ex);
+                }
+            }
+        }
+
+        public int getResultCount() {
+            return count;
+        }
+    }
 }

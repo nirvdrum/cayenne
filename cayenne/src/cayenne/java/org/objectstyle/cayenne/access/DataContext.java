@@ -1129,6 +1129,34 @@ public class DataContext implements QueryEngine, Serializable {
 
         return (DataObject) results.get(0);
     }
+    
+
+    /** 
+     * Delegates node lookup to parent QueryEngine.
+     * 
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
+     * queries are not necessarily based on an ObjEntity.
+     */
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+        if (this.getParent() == null) {
+            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+        }
+        return this.getParent().dataNodeForObjEntity(objEntity);
+    }
+    
+    /**
+     * Returns a DataNode that should hanlde queries for all
+     * DataMap components.
+     * 
+     * @since 1.1
+     */
+    public DataNode lookupDataNode(DataMap dataMap) {
+        if (this.getParent() == null) {
+            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+        }
+        return this.getParent().lookupDataNode(dataMap);
+    }
+
 
     /**
      * Reverts any changes that have occurred to objects registered with DataContext. 
@@ -1204,45 +1232,15 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Performs a single database select query returning result as a ResultIterator.
-     * Returned ResultIterator will provide access to "data rows"
-     * - maps with database data that can be used to create DataObjects.
+     * Returned ResultIterator will provide access to DataRows.
      */
     public ResultIterator performIteratedQuery(GenericSelectQuery query)
         throws CayenneException {
 
         IteratedSelectObserver observer = new IteratedSelectObserver();
         observer.setLoggingLevel(query.getLoggingLevel());
-        performQueries(
-            Collections.singletonList(query),
-            observer,
-            Transaction.noTransaction());
+        performQueries(Collections.singletonList(query), observer);
         return observer.getResultIterator();
-    }
-
-    /** 
-     * Delegates node lookup to parent QueryEngine.
-     * 
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
-     * queries are not necessarily based on an ObjEntity.
-     */
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
-        }
-        return this.getParent().dataNodeForObjEntity(objEntity);
-    }
-    
-    /**
-     * Returns a DataNode that should hanlde queries for all
-     * DataMap components.
-     * 
-     * @since 1.1
-     */
-    public DataNode lookupDataNode(DataMap dataMap) {
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
-        }
-        return this.getParent().lookupDataNode(dataMap);
     }
 
     /** 
@@ -1251,9 +1249,12 @@ public class DataContext implements QueryEngine, Serializable {
      * queries to perform necessary prefetching.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
+        // note - use external transaction for iterated queries;
+        // other types of transactions won't be safe in this case
         Transaction transaction =
             (observer.isIteratedResult())
-                ? Transaction.noTransaction()
+                ? Transaction.externalTransaction(
+                    getParentDataDomain().getTransactionDelegate())
                 : getParentDataDomain().createTransaction();
 
         transaction.performQueries(this, queries, observer);

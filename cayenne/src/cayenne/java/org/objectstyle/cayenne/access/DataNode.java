@@ -322,22 +322,15 @@ public class DataNode implements QueryEngine {
                     runSelect(connection, nextQuery, resultConsumer);
                 }
                 // 2. All kinds of MODIFY - INSERT, DELETE, UPDATE, UNKNOWN
-                else {
-
-                    if (nextQuery instanceof BatchQuery) {
-                        runBatchUpdate(
-                            connection,
-                            (BatchQuery) nextQuery,
-                            resultConsumer);
-                    }
-                    else if (nextQuery instanceof ProcedureQuery) {
-                        runStoredProcedure(connection, nextQuery, resultConsumer);
-                    }
-                    else {
-                        runUpdate(connection, nextQuery, resultConsumer);
-                    }
+                else if (nextQuery instanceof BatchQuery) {
+                    runBatchUpdate(connection, (BatchQuery) nextQuery, resultConsumer);
                 }
-
+                else if (nextQuery instanceof ProcedureQuery) {
+                    runStoredProcedure(connection, nextQuery, resultConsumer);
+                }
+                else {
+                    runUpdate(connection, nextQuery, resultConsumer);
+                }
             }
             catch (Exception queryEx) {
                 QueryLogger.logQueryError(logLevel, queryEx);
