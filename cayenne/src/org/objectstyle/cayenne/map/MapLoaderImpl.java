@@ -484,7 +484,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 
     private void processStartObjEntity(Attributes atts) {
         objEntity = new ObjEntity(atts.getValue("", "name"));
-        objEntity.setDataMap(dataMap);
         objEntity.setClassName(atts.getValue("", "className"));
         String temp = atts.getValue("", "dbEntityName");
         if (null != temp) {
@@ -662,7 +661,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 
     private void processEndObjEntity() {
         dataMap.addObjEntity(objEntity);
-        objEntity.setDataMap(dataMap);
         objEntity = null;
     }
 

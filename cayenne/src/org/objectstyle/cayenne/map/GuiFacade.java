@@ -120,7 +120,6 @@ public class GuiFacade {
 	public static void setObjRelationshipName(ObjEntity entity
 										, ObjRelationship rel, String new_name)
 	{
-		DataMap map = entity.getDataMap();
 		ObjRelationship temp_rel;
 		temp_rel = (ObjRelationship)entity.relationships.get(rel.getName());
 		// If rel is not in the entity - we have a problem

@@ -67,23 +67,11 @@ import org.objectstyle.cayenne.exp.*;
  public class ObjEntity extends Entity {
      private String className;
      private DbEntity dbEntity;
-     private DataMap dataMap;
 
      public ObjEntity() {}
 
      public ObjEntity(String name) {
          setName(name);
-     }
-
-
-     /** Returns DataMap object that contains this ObjEntity. */
-     public DataMap getDataMap() {
-         return dataMap;
-     }
-
-
-     public void setDataMap(DataMap dataMap) {
-         this.dataMap = dataMap;
      }
 
 

@@ -124,6 +124,9 @@ public class DataMap {
     }
 
 
+    /** Adds ObjEntity to the list of map entities.
+      * If there is another entity registered under the same name
+      * already, does nothing. */
     public void addObjEntity(ObjEntity objEntity) {
         String name = objEntity.getName();
         if (!objEntityMap.containsKey(name)) {
@@ -131,7 +134,10 @@ public class DataMap {
         }
     }
 
-
+    
+    /** Adds DbEntity to the list of map entities.
+      * If there is another entity registered under the same name
+      * already, does nothing. */
     public void addDbEntity(DbEntity dbEntity) {
         String name = dbEntity.getName();
         if (!dbEntityMap.containsKey(name))
@@ -167,6 +173,7 @@ public class DataMap {
 
 
 
+    /** Returns a list of ObjEntities stored in this DataMap. */
     public List getObjEntitiesAsList() {
         return new ArrayList(objEntityMap.values());
     }

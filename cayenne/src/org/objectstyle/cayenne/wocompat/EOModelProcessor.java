@@ -96,11 +96,6 @@ public class EOModelProcessor {
     }
     
     
-    public static void saveEOModel(DataMap map, String path) {
-        
-    }
-    
-    
     // plist parser
     private Parser plistParser = new Parser();
     
@@ -150,10 +145,9 @@ public class EOModelProcessor {
             ObjEntity objEntity = new ObjEntity(entName);
             objEntity.setClassName(javaClass);
             dataMap.addObjEntity(objEntity);
-            objEntity.setDataMap(dataMap);
             
             // load entity info
-            processObjEntity(objEntity, eomDir);
+            processObjEntity(dataMap, objEntity, eomDir);
         }
         
         // do relationships
@@ -162,7 +156,7 @@ public class EOModelProcessor {
             ObjEntity nextEnt = (ObjEntity)relIt.next();
             List rels = (List)relationshipMap.get(nextEnt);
             if(rels != null)
-                processEntityRelationships(nextEnt, rels);
+                processEntityRelationships(dataMap, nextEnt, rels);
         }
         
         return dataMap;
@@ -171,7 +165,7 @@ public class EOModelProcessor {
     
     /** Take an ObjEntity stub and initialize it with the data from EntName.plist file.
      */
-    private void processObjEntity(ObjEntity entity, File modelDir) throws Exception {
+    private void processObjEntity(DataMap map, ObjEntity entity, File modelDir) throws Exception {
         File entFile = new File(modelDir, entity.getName() + ".plist");
         
         if(!entFile.exists())
@@ -189,7 +183,7 @@ public class EOModelProcessor {
         String dbEntName = (String)entDetails.get("externalName");
         DbEntity dbEntity = new DbEntity(dbEntName);
         entity.setDbEntity(dbEntity);
-        entity.getDataMap().addDbEntity(dbEntity);
+        map.addDbEntity(dbEntity);
         
         // save relationship info for future use
         Object relInfo = entDetails.get("relationships");
@@ -229,9 +223,8 @@ public class EOModelProcessor {
         }
     }
     
-    private void processEntityRelationships(ObjEntity src, List entRels) {
+    private void processEntityRelationships(DataMap map, ObjEntity src, List entRels) {
         Iterator it = entRels.iterator();
-        DataMap dataMap = src.getDataMap();
         
         
         while(it.hasNext()) {
@@ -240,7 +233,7 @@ public class EOModelProcessor {
             String relName = (String)relMap.get("name");
             boolean toMany = "Y".equals(relMap.get("isToMany"));
             boolean toDependentPK = "Y".equals(relMap.get("propagatesPrimaryKey"));
-            ObjEntity target = dataMap.getObjEntity(targetName);
+            ObjEntity target = map.getObjEntity(targetName);
             DbEntity dbSrc = src.getDbEntity();
             DbEntity dbTarget = target.getDbEntity();
             

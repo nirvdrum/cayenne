@@ -94,10 +94,10 @@ public class DataDomain implements QueryEngine {
     /** Stores DataMaps by name. */
     protected HashMap maps = new HashMap();
 
-    /** Stores mapping of data nodes to DataMap keys.
-      * its goal is to speed up lookups for data operation 
+    /** Stores mapping of data nodes to ObjEntity names.
+      * Its goal is to speed up lookups for data operation 
       * switching. */
-    private HashMap nodesToDataMap = new HashMap();
+    private HashMap nodesByEntityName = new HashMap();
     
 
     /** Creates an unnamed DataDomain */
@@ -171,7 +171,7 @@ public class DataDomain implements QueryEngine {
     public void reset() {
         synchronized (dataNodes) {
             dataNodes.clear();
-            nodesToDataMap.clear();
+            nodesByEntityName.clear();
         }
     }
 
@@ -182,13 +182,17 @@ public class DataDomain implements QueryEngine {
             // add node to name->node map
             dataNodes.put(node.getName(), node);
 
-            // add node to datamap->node map
+            // add node to "ent name->node" map
             DataMap[] maps = node.getDataMaps();
             if (maps != null) {
                 int mapsCount = maps.length;
                 for (int i = 0; i < mapsCount; i++) {
-                    nodesToDataMap.put(maps[i], node);
                     addMap(maps[i]);
+                    Iterator it = maps[i].getObjEntitiesAsList().iterator();
+                    while(it.hasNext()) {
+                        ObjEntity e = (ObjEntity)it.next();
+                        nodesByEntityName.put(e.getName(), node);
+                    }
                 }
             }
         }
@@ -210,13 +214,13 @@ public class DataDomain implements QueryEngine {
     /** Returns DataNode that should handle database operations for
       * a specified <code>objEntityName</code>. */
     public DataNode dataNodeForObjEntityName(String objEntityName) {
-        return dataNodeForObjEntity(lookupEntity(objEntityName));
+        return (DataNode)nodesByEntityName.get(objEntityName);
     }
 
     /** Returns DataNode that should handle database operations for
       * a specified <code>objEntity</code>. */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return (DataNode)nodesToDataMap.get(objEntity.getDataMap());
+        return dataNodeForObjEntityName(objEntity.getName());
     }
 
 
