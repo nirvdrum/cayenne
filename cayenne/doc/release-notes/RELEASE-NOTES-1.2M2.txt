@@ -1,5 +1,5 @@
-Cayenne Release Notes 1.2 Milesone (M1)
-Date: November 22, 2004
+Cayenne Release Notes 1.2 Milesone (M2)
+Date: 
 ============================================
 
 For the latest information go to the project web site at 
@@ -8,9 +8,11 @@ http://objectstyle.org/cayenne/
 To browse individual bug reports, see 
 http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
+Changes:
+
+- Started removal of classes and methods deprecated in 1.1. This is still not complete.
+- Upgraded JDOM library to v. 1.0
+
 
 Bugs Fixed:
 
-CAY-236	gui application generates malformed xml
-CAY-243	Allow Cayenne PK generator to work over SQLServer identity columns
-CAY-222	Change CREATE statement for HSQLDB when Generating SQL
