@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * @author Andrei Adamchik
@@ -80,25 +81,31 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
 public class ProcedureDetailView extends JPanel implements ProcedureDisplayListener {
     protected EventController eventController;
     protected JTextField name;
+    protected JTextField schema;
 
     public ProcedureDetailView(EventController eventController) {
-    	
+
         this.eventController = eventController;
-        
+
         init();
-        
+
         eventController.addProcedureDisplayListener(this);
         InputVerifier inputCheck = new FieldVerifier();
         name.setInputVerifier(inputCheck);
+        schema.setInputVerifier(inputCheck);
     }
 
     protected void init() {
         this.setLayout(new BorderLayout());
         this.name = CayenneWidgetFactory.createTextField();
+        this.schema = CayenneWidgetFactory.createTextField();
+
         this.add(
             PanelFactory.createForm(
-                new Component[] { CayenneWidgetFactory.createLabel("Procedure name: ")},
-                new Component[] { name },
+                new Component[] {
+                    CayenneWidgetFactory.createLabel("Procedure name: "),
+                    CayenneWidgetFactory.createLabel("Schema: ")},
+                new Component[] { name, schema },
                 5,
                 5,
                 5,
@@ -115,12 +122,16 @@ public class ProcedureDetailView extends JPanel implements ProcedureDisplayListe
         }
 
         name.setText(procedure.getName());
+        schema.setText(procedure.getSchema());
     }
 
     class FieldVerifier extends InputVerifier {
         public boolean verify(JComponent input) {
             if (input == name) {
                 return verifyName();
+            }
+            else if (input == schema) {
+                return verifySchema();
             }
             else {
                 return true;
@@ -155,5 +166,22 @@ public class ProcedureDetailView extends JPanel implements ProcedureDisplayListe
                 return false;
             }
         }
+
+        protected boolean verifySchema() {
+            String text = schema.getText();
+            if (text != null && text.trim().length() == 0) {
+                text = null;
+            }
+
+            Procedure procedure = eventController.getCurrentProcedure();
+
+            if (!Util.nullSafeEquals(procedure.getSchema(), text)) {
+                procedure.setSchema(text);
+                eventController.fireProcedureEvent(new ProcedureEvent(this, procedure));
+            }
+
+            return true;
+        }
+
     }
 }

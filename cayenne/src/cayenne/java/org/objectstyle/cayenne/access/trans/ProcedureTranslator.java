@@ -105,21 +105,22 @@ public class ProcedureTranslator
      * Creates an SQL String for the stored procedure call.
      */
     protected String createSqlString() {
-        Procedure proc = getProcedure();
+        Procedure procedure = getProcedure();
 
         StringBuffer buf = new StringBuffer();
 
         int totalParams = callParams.size();
 
         // check if procedure returns values
-        if (proc.isReturningValue()) {
+        if (procedure.isReturningValue()) {
             totalParams--;
             buf.append("{? = call ");
-        } else {
+        }
+        else {
             buf.append("{call ");
         }
 
-        buf.append(proc.getName());
+        buf.append(procedure.getFullyQualifiedName());
 
         if (totalParams > 0) {
             // unroll the loop
@@ -145,26 +146,21 @@ public class ProcedureTranslator
         initValues();
         String sqlStr = createSqlString();
 
-        
-        if(QueryLogger.isLoggable(logLevel)) {
+        if (QueryLogger.isLoggable(logLevel)) {
             // need to convert OUT/VOID parameters to loggable strings
             long time = System.currentTimeMillis() - t1;
-            
+
             List loggableParameters = new ArrayList(values.size());
             Iterator it = values.iterator();
-            while(it.hasNext()) {
-              Object val = it.next();
-              if(val instanceof NotInParam) {
-              	 val = val.toString();
-              }
-              loggableParameters.add(val);
+            while (it.hasNext()) {
+                Object val = it.next();
+                if (val instanceof NotInParam) {
+                    val = val.toString();
+                }
+                loggableParameters.add(val);
             }
-            
-            QueryLogger.logQuery(
-            logLevel,
-            sqlStr,
-					loggableParameters,
-            time);
+
+            QueryLogger.logQuery(logLevel, sqlStr, loggableParameters, time);
         }
         CallableStatement stmt = con.prepareCall(sqlStr);
         initStatement(stmt);
@@ -229,9 +225,11 @@ public class ProcedureTranslator
 
             if (param.getDirection() == ProcedureParameter.OUT_PARAMETER) {
                 values.add(OUT_PARAM);
-            } else if (param.getDirection() == ProcedureParameter.VOID_PARAMETER) {
+            }
+            else if (param.getDirection() == ProcedureParameter.VOID_PARAMETER) {
                 values.add(VOID_PARAM);
-            } else {
+            }
+            else {
                 values.add(queryValues.get(param.getName()));
             }
         }
@@ -248,22 +246,20 @@ public class ProcedureTranslator
         throws Exception {
 
         int type = param.getType();
-		adapter.bindParameter(stmt, val, pos, type, param.getPrecision());
+        adapter.bindParameter(stmt, val, pos, type, param.getPrecision());
     }
 
     /**
      * Sets a single OUT parameter of the CallableStatement.
      */
-    protected void setOutParam(
-        CallableStatement stmt,
-        ProcedureParameter param,
-        int pos)
+    protected void setOutParam(CallableStatement stmt, ProcedureParameter param, int pos)
         throws Exception {
 
         int precision = param.getPrecision();
         if (precision >= 0) {
             stmt.registerOutParameter(pos, param.getType(), precision);
-        } else {
+        }
+        else {
             stmt.registerOutParameter(pos, param.getType());
         }
     }

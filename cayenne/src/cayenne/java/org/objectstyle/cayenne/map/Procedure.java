@@ -80,7 +80,14 @@ public class Procedure extends MapObject {
     public Procedure(String name) {
         super(name);
     }
-    
+
+    /**
+     * Returns procedure name including schema, if present.
+     */
+    public String getFullyQualifiedName() {
+        return (schema != null) ? schema + '.' + getName() : getName();
+    }
+
     /**
      * @return parent DataMap of this entity.
      */
@@ -112,7 +119,6 @@ public class Procedure extends MapObject {
         param.setProcedure(this);
         callParameters.add(param);
     }
-    
 
     /** Removes a named call parameter. */
     public void removeCallParameter(String name) {
@@ -137,7 +143,7 @@ public class Procedure extends MapObject {
     public List getCallParameters() {
         return callParameters;
     }
-    
+
     /**
      * Returns a list of OUT and INOUT call parameters. If procedure has a
      * return value, it will also be included as a call parameter.
@@ -145,13 +151,13 @@ public class Procedure extends MapObject {
     public List getCallOutParams() {
         List outParams = new ArrayList(callParameters.size());
         Iterator it = callParameters.iterator();
-        while(it.hasNext()) {
-            ProcedureParameter param = (ProcedureParameter)it.next();
-            if(param.isOutParam()) {
+        while (it.hasNext()) {
+            ProcedureParameter param = (ProcedureParameter) it.next();
+            if (param.isOutParam()) {
                 outParams.add(param);
             }
         }
-        
+
         return outParams;
     }
 
@@ -167,7 +173,7 @@ public class Procedure extends MapObject {
             ? (ProcedureParameter) callParameters.get(0)
             : null;
     }
-    
+
     /**
      * Returns the returningValue.
      * @return boolean
@@ -183,7 +189,7 @@ public class Procedure extends MapObject {
     public void setReturningValue(boolean returningValue) {
         this.returningValue = returningValue;
     }
-    
+
     public String getCatalog() {
         return catalog;
     }
