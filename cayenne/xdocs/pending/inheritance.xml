@@ -1,0 +1,25 @@
+<document>
+<title>CayenneModeler Guide</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/modelerguide/index.html</up>
+	<prev></prev>
+</navigator>
+<body>
+    <section name="7. Inheritance Mapping">
+        	<p>In Java development it is natural to think about classes and
+        	objects in terms of inheritance. Relational databases on the other hand
+        	do not have this concept. This is another area where Cayenne provides
+        	a bridge between the two worlds.
+        	tech</p>
+    </section>
+</body>
+</document>
+
+
+
+
+
