@@ -147,7 +147,7 @@ Normally, there should be no need for identifiers in the object model, so they c
     // Get the first Project you can find (Cayenne)
     qry             = new SelectQuery (Project.class);   
     List prjs       = mContext.performQuery(qry);       
-    Project prj     = (Project) prjs.get(1);
+    Project prj     = (Project) prjs.get(0);
 
     // Add Scott to the Cayenne project
     emp.addToProjects(prj);
