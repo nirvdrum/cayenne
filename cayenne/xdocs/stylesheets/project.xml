@@ -95,6 +95,7 @@
     	<item name="9. Using Stored Procedures"  href="/userguide/stored-procedures/index.html">
     		<item name="9.1 Selecting Objects"  href="/userguide/stored-procedures/select.html"/>
     		<item name="9.2 Executing a Stored Procedure"  href="/userguide/stored-procedures/any.html"/>
+    		<item name="9.3 Stored Procedures and Transactions"  href="/userguide/stored-procedures/procedure-transactions.html"/>
     	</item>
     	
     	<item name="10. Using Expressions"  href="/userguide/expressions/index.html">

@@ -52,10 +52,10 @@
             <p></p>
             </subsection>
             
-            <subsection name="1.1.8 Explicit Transaction API">
-            <p>Cayenne implements explicit transaction API that allows better external control over 
-            transaction processing, e.g. in a J2EE container. The following user guide chapter explains new Transaction
-            API in details:</p>
+            <subsection name="1.1.8 Explicit Transaction API and Container Managed Transactions">
+            <p>Cayenne now supports container-managed transactions. As a result it can be used inside EJBs
+            out of the box. It also allows a high degree of transactions customization. The following user guide 
+            chapter explains Transactions design and behavior in details:</p>
             
             <ul>
             <li><a href="../design/transactions.html">Understanding Transactions</a></li>
@@ -67,32 +67,36 @@
             </subsection>
             
             <subsection name="1.1.9 OpenBase Adapter">
+            <p>A dedicated adapter is implemented for OpenBase DB Engine.</p>
+            </subsection>
+            
+            <subsection name="1.1.10 SQL Server Adapter">
+            <p>A dedicated adapter is implemented for MS SQL Server Engine.</p>
+            </subsection>
+            
+            <subsection name="1.1.11 New Default CayenneModeler Look and Feel">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.9 New Default CayenneModeler Look and Feel">
+            <subsection name="1.1.12 Non-refreshing Select Queries">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.10 Non-refreshing Select Queries">
+            <subsection name="1.1.13 CayenneModeler Support for Custom Class Templates.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.11 CayenneModeler Support for Custom Class Templates.">
+            <subsection name="1.1.14 CayenneModeler Support for UI Customizable Classpath for Jars.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.12 CayenneModeler Support for UI Customizable Classpath for Jars.">
-            <p></p>
-            </subsection>
-            
-            <subsection name="1.1.13 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
+            <subsection name="1.1.15 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
             <p>A dialog used to select mapping of ObjRelationship to one DbRelationship (simple relationship)
             or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
             can be selected. This dialog has been completely redesigned to remove this limitation.</p>
             </subsection>
             
-            <subsection name="1.1.14 CayenneModeler Productivity Enhancements.">
+            <subsection name="1.1.16 CayenneModeler Productivity Enhancements.">
             <p>CayenneModeler now uses defaults where appropriate when working with mappings. This is
             to reduce manual operations. Some examples are:
             </p>
