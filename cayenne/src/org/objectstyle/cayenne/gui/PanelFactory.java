@@ -264,15 +264,18 @@ public class PanelFactory {
 		panel.add(temp_panel, BorderLayout.CENTER);
 
 		// Add Add and Remove buttons
-		JPanel button_panel = new JPanel();
-		button_panel.setLayout(new BoxLayout(button_panel, BoxLayout.X_AXIS));
-		button_panel.add(Box.createHorizontalGlue());
-		for (int i = 0; i < buttons.length; i++) {
-			button_panel.add(buttons[i]);
-			button_panel.add(Box.createHorizontalStrut(5));
+		if (buttons != null) {
+			JPanel button_panel = new JPanel();
+			button_panel.setLayout(
+				new BoxLayout(button_panel, BoxLayout.X_AXIS));
+			button_panel.add(Box.createHorizontalGlue());
+			for (int i = 0; i < buttons.length; i++) {
+				button_panel.add(buttons[i]);
+				button_panel.add(Box.createHorizontalStrut(5));
+			}
+			button_panel.add(Box.createHorizontalGlue());
+			panel.add(button_panel, BorderLayout.SOUTH);
 		}
-		button_panel.add(Box.createHorizontalGlue());
-		panel.add(button_panel, BorderLayout.SOUTH);
 		return panel;
 	}
 

@@ -30,7 +30,7 @@
     		<li><a href="#3">Setup Cayenne Configuration Files.</a></li>
     		<li><a href="#4">Create Database Primary Key Support.</a></li>
     		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
-    		<li><a href="#6">Write Application Code.</a></li>
+    		<li><a href="#6">Application Code.</a></li>
     		<li><a href="#7">Compile and Run the Application.</a></li>
     	</ul>
     	
@@ -41,23 +41,18 @@
        		
     		<p>- Add cayenne.jar to the CLASSPATH of the application. Do not
     		put it in JRE extendsions directory - eventually this will lead to 
-    		ClassNotFound exceptions.</p>
+    		ClassNotFoundException problems.</p>
     		
-    		<p>- Create tutorial project directory (further referred to as "project directory") 
-    		anywhere on the filesystem. For example:</p>
-    		
-<source>
-# cd somedir
-# mkdir cayenne-tutorial
-# cd cayenne-tutorial
-</source>
-         <p>Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>) in this directory.</p>
+    		<p>- Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>)
+    		anywhere in the filesystem. A new directory named <code>cayenne-cmd-app</code>
+    		will be created. This directory is referred to as "project directory" further in 
+    		this tutorial.</p>
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
     		<p>Run the <a href="../../tutorial/cayenne-cmd-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
-    		script to create test tables. This script is tested on MySQL, 
-    		but it should be easy to port to any other RDBMS.</p>
+    		script located in the project directory to create test tables. 
+    		This script is tested on MySQL, but it should be easy to port to any other RDBMS.</p>
     	</subsection>
     	
     	<subsection name="3.2.3 Setup Cayenne Configuration Files" anchor="3">
@@ -73,7 +68,7 @@
     		file in CayenneModeler and make the following changes:
     		<ul>
     			<li>if the database used is NOT MySQL, <code>cayenne.xml</code>
-    			must be modified to use <code>node adapter</code> for the appropriate database.</li>
+    			must be modified to use an adapter for the appropriate database.</li>
     			<li><code>driverinfo.xml</code> must be modified to reflect connection and
     			driver information of the test database.</li>
     		</ul>         	
@@ -89,8 +84,15 @@
     	</subsection>
     	
     	<subsection name="3.2.5 Generate Java Code for DataObjects" anchor="5">
-    		<p>Use CayenneModeler to generate Java classes for DataObjects. Sample generated
-    		files that can be used with this tutorial can be found here:
+    		<p>Use CayenneModeler to generate Java classes for DataObjects by going to 
+    		<strong>"Tools -> Generate Classes"</strong> and selecting the project directory
+    		in the opened popup:</p>
+    		<img src="/images/classgen.gif" width="546" height="489" border="0" align="middle"
+			alt="Generate Classes Dialog"/>
+			
+    		<p>After the generation 
+    		is done, the following files should appear in the <code>test</code> subdirectory of the 
+    		project directory:
     		
     		<ul>
     			<li><a href="../../tutorial/cayenne-cmd-app/test/_Artist.java">_Artist.java</a></li>
@@ -100,15 +102,13 @@
     			<li><a href="../../tutorial/cayenne-cmd-app/test/_Gallery.java">_Gallery.java</a></li>
     			<li><a href="../../tutorial/cayenne-cmd-app/test/Gallery.java">Gallery.java</a></li>
     		</ul>
-    		
-    		Create a subdirectory called "test" under the project directory. Save the source code under
-    		this new directory. 
     		</p>    	
     	</subsection>
     	
-    	<subsection name="3.2.6 Write Application Code" anchor="6">
-    		<p>Create a simple application that uses Cayenne. Here is a sample Java class source code:
-    		<a href="../../tutorial/cayenne-cmd-app/test/Main.java">Main.java</a>. Download it and save under "test" directory in project directory.</p>    	
+    	<subsection name="3.2.6 Application Code" anchor="6">
+    		<p>A simple application that uses Cayenne is located in 
+			   <a href="../../tutorial/cayenne-cmd-app/test/Main.java">Main.java</a>.
+            </p>    	
     	</subsection>
     	
     	<subsection name="3.2.7 Compile and Run the Application" anchor="7">

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,37 +52,41 @@ package org.objectstyle.cayenne.gui.datamap;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
-import org.objectstyle.cayenne.gui.PanelFactory;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Preferences;
 
-
-/** Wizard for generating the classes from the data map. 
-  * @author Michael Misha Shengaout */
-public class GenerateClassDialog extends JDialog
-implements ActionListener
-{
+/** 
+ * Dialog for generating Java classes from the DataMap.
+ *  
+ * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
+ */
+public class GenerateClassDialog
+	extends CayenneDialog
+	implements ActionListener {
 	Mediator mediator;
-	
+
 	File outputFolder = null;
-	
+
 	private JTable table;
 	private JLabel generatePairLabel;
 	private JCheckBox generatePair;
@@ -94,22 +97,19 @@ implements ActionListener
 	private JButton selectAll;
 	private JButton deselectAll;
 	private JButton cancel;
-	
+
 	private JFileChooser fileChooser = new JFileChooser();
-	
-	
-	public GenerateClassDialog(JFrame win, Mediator temp_mediator)
-	{
-		super(win, "Generate classes", true);
+
+	public GenerateClassDialog(Editor win, Mediator temp_mediator) {
+		super(win, "Generate Java Classes", true);
 		mediator = temp_mediator;
 
 		init();
 		setSize(400, 400);
-		Point point = win.getLocationOnScreen();
-		setLocation(point);
-		
+		centerWindow();
+
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);		
+		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 
 		chooseFolder.addActionListener(this);
 		generate.addActionListener(this);
@@ -126,7 +126,7 @@ implements ActionListener
 		table.setModel(new GenerateClassTableModel(map));
 		TableColumn col = table.getColumnModel().getColumn(0);
 		col.setMinWidth(280);
-		
+
 		Box generate_pair_box = Box.createHorizontalBox();
 		generatePairLabel = new JLabel("Generate parent/child class pairs");
 		generatePair = new JCheckBox();
@@ -136,10 +136,15 @@ implements ActionListener
 		generate_pair_box.add(Box.createHorizontalStrut(7));
 		generate_pair_box.add(generatePair);
 		generate_pair_box.add(Box.createHorizontalStrut(2));
-		
+
 		Box folder_box = Box.createHorizontalBox();
 		folderLabel = new JLabel("Output directory:");
 		folder = new JTextField();
+
+		Preferences pref = Preferences.getPreferences();
+		String startDir =
+			(String) pref.getProperty(Preferences.LAST_GENERATED_CLASSES_DIR);
+		folder.setText(startDir);
 		folder.setEditable(false);
 		chooseFolder = new JButton("Choose");
 		folder_box.add(Box.createHorizontalStrut(2));
@@ -149,114 +154,119 @@ implements ActionListener
 		folder_box.add(Box.createHorizontalStrut(3));
 		folder_box.add(chooseFolder);
 		folder_box.add(Box.createHorizontalStrut(2));
-				
-		
+
 		generate = new JButton("Generate");
 		selectAll = new JButton("Select All");
 		deselectAll = new JButton("Deselect All");
 		cancel = new JButton("Cancel");
-		
-		JPanel panel = PanelFactory.createTablePanel(table
-											, new JComponent[]{generate_pair_box
-															, folder_box}
-											, new JButton[]{generate
-															, selectAll
-															, deselectAll
-															, cancel});
+
+		JPanel panel =
+			PanelFactory.createTablePanel(
+				table,
+				new JComponent[] { generate_pair_box, folder_box },
+				new JButton[] { generate, selectAll, deselectAll, cancel });
 		getContentPane().add(panel, BorderLayout.CENTER);
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		
+
 		if (src == cancel) {
 			hide();
 		} else if (src == generate) {
 			generateCode();
 		} else if (src == chooseFolder) {
-	    	Preferences pref = Preferences.getPreferences();
-    	   	String init_dir = (String)pref.getProperty(Preferences.LAST_GENERATED_CLASSES_DIR);
-    	   	if (null == init_dir)
-    	   		init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
-            if (null != init_dir) {
-            	File init_dir_file = new File(init_dir);
-            	if (init_dir_file.exists())
-            		fileChooser.setCurrentDirectory(init_dir_file);
-            }
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			int ret_code = fileChooser.showOpenDialog(this);			
+			Preferences pref = Preferences.getPreferences();
+			String init_dir =
+				(String) pref.getProperty(
+					Preferences.LAST_GENERATED_CLASSES_DIR);
+			if (null == init_dir)
+				init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
+			if (null != init_dir) {
+				File init_dir_file = new File(init_dir);
+				if (init_dir_file.exists())
+					fileChooser.setCurrentDirectory(init_dir_file);
+			}
+			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int ret_code = fileChooser.showOpenDialog(this);
 			if (ret_code == JFileChooser.APPROVE_OPTION) {
 				outputFolder = fileChooser.getSelectedFile();
 				folder.setText(outputFolder.getAbsolutePath());
 				// Set preferences
-				pref.setProperty(Preferences.LAST_GENERATED_CLASSES_DIR, outputFolder.getAbsolutePath());
+				pref.setProperty(
+					Preferences.LAST_GENERATED_CLASSES_DIR,
+					outputFolder.getAbsolutePath());
 			}
 		} else if (src == selectAll) {
 			GenerateClassTableModel model;
-			model = (GenerateClassTableModel)table.getModel();
+			model = (GenerateClassTableModel) table.getModel();
 			model.selectAll(true);
 		} else if (src == deselectAll) {
 			GenerateClassTableModel model;
-			model = (GenerateClassTableModel)table.getModel();
+			model = (GenerateClassTableModel) table.getModel();
 			model.selectAll(false);
 		}
 	}
-	
+
 	private void generateCode() {
 		String file_name = folder.getText();
 		if (outputFolder == null) {
-			JOptionPane.showMessageDialog(this, "Enter directory for source files");
+			JOptionPane.showMessageDialog(
+				this,
+				"Enter directory for source files");
 			chooseFolder.requestFocus(true);
 			return;
 		}
 		if (!outputFolder.exists()) {
-			JOptionPane.showMessageDialog(this, "Directory " 
-								+ outputFolder.getName() + " does not exist");
+			JOptionPane.showMessageDialog(
+				this,
+				"Directory " + outputFolder.getName() + " does not exist");
 			chooseFolder.requestFocus(true);
 			return;
 		}
 		if (!outputFolder.isDirectory()) {
-			JOptionPane.showMessageDialog(this, "Choose directory rather than file");
+			JOptionPane.showMessageDialog(
+				this,
+				"Choose directory rather than file");
 			chooseFolder.requestFocus(true);
 			return;
 		}
-		
-		List selected = ((GenerateClassTableModel)table.getModel()).getSelected();
+
+		List selected =
+			((GenerateClassTableModel) table.getModel()).getSelected();
 		DefaultClassGenerator generator = new DefaultClassGenerator(selected);
 		generator.setDestDir(outputFolder);
-		generator.setMakePairs(generatePair.isSelected());		
-		
+		generator.setMakePairs(generatePair.isSelected());
+
 		try {
 			generator.execute();
 			JOptionPane.showMessageDialog(this, "Class generation finished");
 			hide();
 		} catch (Exception e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "Error generating classes - " 
-				+ e.getMessage());
+			JOptionPane.showMessageDialog(
+				this,
+				"Error generating classes - " + e.getMessage());
 		}
 	}
 }
 
-
-class GenerateClassTableModel extends AbstractTableModel 
-{
+class GenerateClassTableModel extends AbstractTableModel {
 	DataMap map;
-	
+
 	ObjEntity[] entities;
 	boolean[] selected;
-	
+
 	Boolean tempBoolean = new Boolean(false);
 	String tempString = new String();
-	
+
 	public GenerateClassTableModel(DataMap temp_map) {
 		map = temp_map;
 		entities = temp_map.getObjEntities();
 		selected = new boolean[entities.length];
 		// Deselect entities without class names.
-		for (int i = 0; i < selected.length; i++) 
-		{
-			if (entities[i].getClassName() != null 
+		for (int i = 0; i < selected.length; i++) {
+			if (entities[i].getClassName() != null
 				&& entities[i].getClassName().trim().length() > 0)
 				selected[i] = true;
 			else
@@ -266,44 +276,41 @@ class GenerateClassTableModel extends AbstractTableModel
 
 	public Class getColumnClass(int col) {
 		switch (col) {
-			case 0:
+			case 0 :
 				return tempString.getClass();
-			default:
+			default :
 				return tempBoolean.getClass();
 		}
 	}
-	
+
 	public int getRowCount() {
 		return entities.length;
 	}
-	
-	public int getColumnCount()
-	{
+
+	public int getColumnCount() {
 		return 2;
 	}
-	
+
 	public String getColumnName(int column) {
 		if (column == 0)
 			return "Entity";
-		else 
+		else
 			return "";
 	}
 
-	public Object getValueAt(int row, int column)
-	{
+	public Object getValueAt(int row, int column) {
 		if (column == 0) {
 			return entities[row].getName();
 		} else if (column == 1) {
 			return new Boolean(selected[row]);
-		} else return "";
-		
-		
-	}// End getValueAt()
-	
+		} else
+			return "";
+
+	} // End getValueAt()
+
 	public void selectAll(boolean sel_val) {
-		for (int i = 0; i < selected.length; i++) 
-		{
-			if (entities[i].getClassName() != null 
+		for (int i = 0; i < selected.length; i++) {
+			if (entities[i].getClassName() != null
 				&& entities[i].getClassName().trim().length() > 0)
 				selected[i] = sel_val;
 			else
@@ -311,27 +318,25 @@ class GenerateClassTableModel extends AbstractTableModel
 		}
 		fireTableDataChanged();
 	}
-    
-    public void setValueAt(Object aValue, int row, int column) {
-    	if (column == 1) {
-    		Boolean temp = (Boolean)aValue;
-    		selected[row] = temp.booleanValue();
-    	}
-    }// End setValueAt()
 
+	public void setValueAt(Object aValue, int row, int column) {
+		if (column == 1) {
+			Boolean temp = (Boolean) aValue;
+			selected[row] = temp.booleanValue();
+		}
+	} // End setValueAt()
 
 	public boolean isCellEditable(int row, int col) {
 		if (col == 1)
-			if (entities[row].getClassName() != null 
+			if (entities[row].getClassName() != null
 				&& entities[row].getClassName().trim().length() > 0)
 				return true;
-			else 
+			else
 				return false;
-		else 
+		else
 			return false;
-	}// End isCellEditable()
-	
-	
+	} // End isCellEditable()
+
 	/** 
 	 * Returns a list containing selected ObjEntities.
 	 */
