@@ -124,6 +124,9 @@ public class DatabaseSetup {
         tables.close();
 
         // drop all tables in the map
+        DataNode node = TestMain.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
+        
         Statement stmt = conn.createStatement();
         List list = dbEntitiesInInsertOrder();
         ListIterator it = list.listIterator(list.size());
@@ -134,9 +137,9 @@ public class DatabaseSetup {
             }
 
             try {
-                String dropSql = "DROP TABLE " + ent.getName();
+                String dropSql = adapter.dropTable(ent);
+                logObj.warning("Drop table: " + dropSql);
                 stmt.execute(dropSql);
-                logObj.fine("Dropped table " + ent.getName());
             }
             catch (SQLException sqe) {
                 logObj.log(
@@ -147,8 +150,6 @@ public class DatabaseSetup {
         }
 
         // drop primary key support
-        DataNode node = TestMain.getSharedNode();
-        DbAdapter adapter = node.getAdapter();
         adapter.dropAutoPkSupport(node);
     }
 

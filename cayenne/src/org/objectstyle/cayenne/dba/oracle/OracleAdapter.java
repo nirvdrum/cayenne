@@ -56,7 +56,16 @@ package org.objectstyle.cayenne.dba.oracle;
  */ 
 
 import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DbEntity;
 
 /** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
 public class OracleAdapter extends JdbcAdapter {
+    
+    /** Returns a query string to drop a table corresponding
+      * to <code>ent</code> DbEntity. Changes superclass behavior
+      * to drop all related foreign key constraints. */
+    public String dropTable(DbEntity ent) {
+        return "DROP TABLE " + ent.getName() + " CASCADE CONSTRAINTS";
+    }
 }
+
