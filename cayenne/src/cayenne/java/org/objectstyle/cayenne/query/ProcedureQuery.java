@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.query;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Procedure;
 
 /**
@@ -77,13 +76,6 @@ public class ProcedureQuery extends AbstractQuery {
         Class rootClass,
         Procedure procedure) {
         setRoot(rootClass);
-        setProcedure(procedure);
-    }
-
-    public ProcedureQuery(
-        DbEntity dbEntity,
-        Procedure procedure) {
-        setRoot(dbEntity);
         setProcedure(procedure);
     }
 

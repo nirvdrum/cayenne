@@ -278,7 +278,7 @@ public class RefIntegritySupport {
         Collection tables = new ArrayList();
         dbEntityToTableMap = new HashMap();
         reflexiveDbEntities = new HashMap();
-        for (Iterator i = supportedNode.dataMapIterator(); i.hasNext();) {
+        for (Iterator i = supportedNode.getDataMapsAsList().iterator(); i.hasNext();) {
             DataMap map = (DataMap) i.next();
             Iterator entitiesToConvert = map.getDbEntitiesAsList().iterator();
             while (entitiesToConvert.hasNext()) {

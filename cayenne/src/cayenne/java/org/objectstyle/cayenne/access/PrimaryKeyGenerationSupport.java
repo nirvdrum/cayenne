@@ -234,7 +234,7 @@ class PrimaryKeyGenerationSupport {
 
   private List collectAllDbEntities() {
     List entities = new ArrayList();
-    for (Iterator i = supportedQueryEngine.dataMapIterator(); i.hasNext();) {
+    for (Iterator i = supportedQueryEngine.getDataMapsAsList().iterator(); i.hasNext();) {
       entities.addAll(((DataMap)i.next()).getDbEntitiesAsList());
     }
     return entities;

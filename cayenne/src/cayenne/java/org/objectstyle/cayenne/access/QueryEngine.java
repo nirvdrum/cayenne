@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -97,8 +96,9 @@ public interface QueryEngine {
      */
     public EntityResolver getEntityResolver();
 
-    //Anyway, an instance of QueryEngine will normally operate on a collection of
-    //data maps. Let's have a way to find out about them.
-    public Iterator dataMapIterator();
+    /** 
+     * Returns a list of DataMap objects associated with this QueryEngine.
+     */
+    public List getDataMapsAsList();
 }
 

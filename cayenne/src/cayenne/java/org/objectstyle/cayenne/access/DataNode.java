@@ -60,7 +60,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -473,10 +472,6 @@ public class DataNode implements QueryEngine {
      */
     public EntityResolver getEntityResolver() {
         return entityResolver;
-    }
-
-    public Iterator dataMapIterator() {
-        return this.getDataMapsAsList().iterator();
     }
 
     public void resetReferentialIntegritySupport() throws CayenneException {
