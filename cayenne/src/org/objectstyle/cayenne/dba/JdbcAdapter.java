@@ -62,16 +62,17 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.map.*;
 
-/** A generic DbAdapter implementation. 
-  * Can be used as a default adapter or as
-  * a superclass of a concrete adapter implementation.  
-  *
-  * @author Andrei Adamchik
-  */
+/** 
+ * A generic DbAdapter implementation. 
+ * Can be used as a default adapter or as
+ * a superclass of a concrete adapter implementation.  
+ *
+ * @author Andrei Adamchik
+ */
 public class JdbcAdapter implements DbAdapter {
-    static Logger logObj = Logger.getLogger(DbAdapter.class.getName());
+    static Logger logObj = Logger.getLogger(JdbcAdapter.class.getName());
 
-    protected PkGenerator pkGen;
+    protected PKGenerator pkGen;
     protected TypesHandler typesHandler;
 
     public JdbcAdapter() {
@@ -80,8 +81,13 @@ public class JdbcAdapter implements DbAdapter {
         typesHandler = TypesHandler.getHandler(this.getClass());
     }
 
-    protected PkGenerator createPkGenerator() {
-        return new PkGenerator();
+    /** 
+     * Creates and returns primary key generator. This factory
+     * method should be overriden by JdbcAdapter subclasses to
+     * provide custom implementations of PKGenerator. 
+     */
+    protected PKGenerator createPkGenerator() {
+        return new DefaultPKGenerator();
     }
 
     /** Returns true. */
