@@ -1,16 +1,8 @@
 <document>
 <title>CayenneModeler Guide</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/object-relational-modeling/existing-database.html</prev>
-	<next>/modelerguide/object-relational-modeling/existing-java-framework.html</next>
-</navigator>
+<toc name="toc-modeler-guide" chapter="2. Object/Relational Modeling"/>
 <body>
-	<section name="2. Approach to Object/Relational Modeling">
+	<section name="2. Object/Relational Modeling">
  	<subsection name="2.2 Start from the O/R Model">
  		 	<p><b>To be rewritten...</b></p>
 

@@ -1,14 +1,6 @@
 <document>
 <title>CayenneModeler Guide - Introduction</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/index.html</prev>
-	<next>/modelerguide/modeler-intro/runmodeler.html</next>
-</navigator>
+<toc name="toc-modeler-guide" chapter="1. Introduction"/>
 <body>
    <section name="1. Introduction">
             <p>Cayenne stores mapping and deployment information using a set of XML files with a predefined

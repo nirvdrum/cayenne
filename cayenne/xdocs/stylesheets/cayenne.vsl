@@ -293,12 +293,12 @@ $tag
       <tbody>
        	<tr>
        		<td align="left" class="normal">
-       		<strong class="body-white">Table of Contents:</strong><br>
+       		<strong class="body-white">TABLE OF CONTENTS:</strong><br>
          #set ($toc = $project.getChild($root.getChild("toc").getAttributeValue("name")))
          #foreach ( $item in $toc.getChildren())
     		#set ($name = $item.getAttributeValue("name"))
     		<p>
-       		<strong>#menuprojectanchor($name $item.getAttributeValue("href"))</strong><br>
+       		#menuprojectanchor($name $item.getAttributeValue("href"))<br>
        		
        		#if($name == $root.getChild("toc").getAttributeValue("chapter"))
        		#foreach ( $subitem in $item.getChildren("item"))

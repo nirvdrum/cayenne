@@ -1,16 +1,8 @@
 <document>
 <title>CayenneModeler Guide</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/object-relational-modeling/existing-java-framework.html</prev>
-	<next>/modelerguide/modeling-tips.html</next>
-</navigator>
+<toc name="toc-modeler-guide" chapter="3. Generating Primary Key Support"/>
 <body>
-        <section name="3. Generating Primary Key Support in the Database" anchor="pk">
+        <section name="3. Generating Primary Key Support" anchor="pk">
         	<p>One of Cayenne core features is automatic generation of the database primary
         	keys for the new objects. This requires a set of special database objects to
         	be present in the database. (Those are adapter specific and can be special lookup tables,

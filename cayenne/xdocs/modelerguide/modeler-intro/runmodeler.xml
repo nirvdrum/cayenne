@@ -1,14 +1,6 @@
 <document>
 <title>CayenneModeler Guide - Running CayenneModeler</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/modeler-intro/index.html</prev>
-	<next>/modelerguide/modeler-intro/modelerconcepts.html</next>
-</navigator>
+<toc name="toc-modeler-guide" chapter="1. Introduction"/>
 <body>
  <section name="1. Introduction">
     <subsection name="1.1. Running CayenneModeler">

@@ -1,13 +1,6 @@
 <document>
 <title>CayenneModeler Guide</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/pksupport.html</prev>
-</navigator>
+<toc name="toc-modeler-guide" chapter="4. Modeling Tips"/>
 <body>
         <section name="4. Modeling Tips">
         	<p>This section contains a few unorganized tips on Object/Relational modeling in Cayenne. 

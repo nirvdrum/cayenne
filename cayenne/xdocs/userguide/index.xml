@@ -3,7 +3,7 @@
 <toc name="toc-user-guide"/>
 <body>
     <section name="Cayenne User Guide">
-    <p>This User Guide documents Cayenne behavior and most common patterns of Cayenne use. 
+    <p>User Guide documents Cayenne behavior and most common patterns of Cayenne use. 
     It includes a set of tutorials, discussion of Cayenne design and deployment.
     </p>
     </section>

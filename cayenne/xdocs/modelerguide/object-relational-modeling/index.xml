@@ -1,16 +1,8 @@
 <document>
 <title>CayenneModeler Guide</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/modeler-intro/modelerconcepts.html</prev>
-	<next>/modelerguide/object-relational-modeling/existing-database.html</next>
-</navigator>
+<toc name="toc-modeler-guide" chapter="2. Object/Relational Modeling"/>
 <body>
- 	 <section name="2. Approach to Object/Relational Modeling">
+ 	 <section name="2. Object/Relational Modeling">
 		<p>A few scenarios are shown below that describe the most common cases that a
 		development team may encounter on a typical O/R project. Lets assume an 
 		imaginary company called "Some Company" that sells services to consumers as its
