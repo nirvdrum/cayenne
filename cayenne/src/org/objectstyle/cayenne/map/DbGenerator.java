@@ -239,7 +239,7 @@ public class DbGenerator {
         ResultSet rs = md.getTables(null, null, "%", null);
         ArrayList tables = new ArrayList();
         while (rs.next()) {
-            tables.add(rs.getString("TABLE_NAME"));
+            tables.add(rs.getString("TABLE_NAME").toLowerCase());
         }
         rs.close();
 
@@ -248,7 +248,7 @@ public class DbGenerator {
         Iterator it = map.getDbEntitiesAsList().iterator();
         while (it.hasNext()) {
             DbEntity e = (DbEntity) it.next();
-            if (!tables.contains(e.getName())) {
+            if (!tables.contains(e.getName().toLowerCase())) {
                 missing.add(e);
             }
         }
