@@ -244,7 +244,7 @@ public class DataNode implements QueryEngine {
                         // no matter what, or it will result in 
                         // "leaks" of the database resources (in Oracle,
                         // for example, this will result in 
-                        // "ORA-01000 maximum open cursors exceeded" error
+                        // "ORA-01000 maximum open cursors exceeded" error)
                         prepStmt.close();
                     }
                 }
