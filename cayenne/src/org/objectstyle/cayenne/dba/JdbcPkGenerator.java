@@ -247,9 +247,10 @@ public class JdbcPkGenerator implements PkGenerator {
      * "pkCacheSize" bean property. 
      * 
      * <p>This method is called internally from "generatePkForDbEntity" 
-     * and then saved in cache for performance. Subclasses that 
-     * implement different primary key generation solutions should 
-     * override this method, not "generatePkForDbEntity".</p>
+     * and then generated range of key values is saved in cache for 
+     * performance. Subclasses that implement different primary key 
+     * generation solutions should override this method, 
+     * not "generatePkForDbEntity".</p>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
         ArrayList queries = new ArrayList(2);
