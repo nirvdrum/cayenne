@@ -119,8 +119,9 @@
     <target name="clean-java">
         <delete includeEmptyDirs="true">
             <!-- Eclipse-friendly - preserve "classes" -->
-        	<fileset dir="${build}">
-        		<exclude name="classes/**"/>
+        	<fileset dir="${basedir}">
+        		<include name="${build}/**"/>
+        		<exclude name="${build}/classes/**"/>
         	</fileset>
         </delete>
     </target>   
