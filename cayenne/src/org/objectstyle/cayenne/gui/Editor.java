@@ -67,7 +67,6 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
-import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.gui.action.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
@@ -111,20 +110,14 @@ public class Editor
 	protected ActionMap actionMap;
 
 	RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
+
+	// these all must be put in actions
 	JMenuItem closeProjectMenu = new JMenuItem("Close Project");
 	JMenuItem exitMenu = new JMenuItem("Exit");
-
-	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
-	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
 	JMenuItem generateMenu = new JMenuItem("Generate Classes");
-	JMenuItem generateDbMenu = new JMenuItem("Generate Database");
 	JMenuItem setPackageMenu =
 		new JMenuItem("Set Package Name for Obj Entities");
-
 	JMenuItem aboutMenu = new JMenuItem("About");
-
-	JButton createObjEntityBtn;
-	JButton createDbEntityBtn;
 
 	Properties props;
 
@@ -153,9 +146,11 @@ public class Editor
 
 		initEmptyActions();
 
+		initMenus();
+		initToolbar();
+
 		// these are legacy methods being refactored out
-		init();
-		initActions();
+		initOther();
 
 	}
 
@@ -193,22 +188,35 @@ public class Editor
 		CayenneAction createMapAction = new CreateDataMapAction();
 		actionMap.put(createMapAction.getKey(), createMapAction);
 
+		CayenneAction createOEAction = new CreateObjEntityAction();
+		actionMap.put(createOEAction.getKey(), createOEAction);
 
+		CayenneAction createDEAction = new CreateDbEntityAction();
+		actionMap.put(createDEAction.getKey(), createDEAction);
+
+		CayenneAction createAttrAction = new CreateAttributeAction();
+		actionMap.put(createAttrAction.getKey(), createAttrAction);
+
+		CayenneAction createRelAction = new CreateRelationshipAction();
+		actionMap.put(createRelAction.getKey(), createRelAction);
 
 		CayenneAction addMapToNodeAction = new AddDataMapAction();
 		actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
-		
+
 		CayenneAction entSynchAction = new EntitySynchAction();
 		actionMap.put(entSynchAction.getKey(), entSynchAction);
-		
+
 		CayenneAction importDbAction = new ImportDbAction();
 		actionMap.put(importDbAction.getKey(), importDbAction);
-		
+
 		CayenneAction importEOModelAction = new ImportEOModelAction();
 		actionMap.put(importEOModelAction.getKey(), importEOModelAction);
+
+		CayenneAction genDbAction = new GenerateDbAction();
+		actionMap.put(genDbAction.getKey(), genDbAction);
 	}
 
-	protected void init() {
+	protected void initMenus() {
 		getContentPane().setLayout(new BorderLayout());
 
 		// Setup menu bar
@@ -242,8 +250,10 @@ public class Editor
 		projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
 		projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
 
-		projectMenu.add(createObjEntityMenu);
-		projectMenu.add(createDbEntityMenu);
+		projectMenu.add(
+			getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
+		projectMenu.add(
+			getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
 		projectMenu.add(getAction(EntitySynchAction.ACTION_NAME).buildMenu());
@@ -254,7 +264,7 @@ public class Editor
 		toolMenu.add(getAction(ImportEOModelAction.ACTION_NAME).buildMenu());
 		toolMenu.addSeparator();
 		toolMenu.add(generateMenu);
-		toolMenu.add(generateDbMenu);
+		toolMenu.add(getAction(GenerateDbAction.ACTION_NAME).buildMenu());
 		toolMenu.addSeparator();
 		toolMenu.add(setPackageMenu);
 
@@ -265,25 +275,12 @@ public class Editor
 		Image icon = Toolkit.getDefaultToolkit().createImage(url);
 		this.setIconImage(icon);
 		*/
-
-		initToolBar();
 	}
 
-	protected void initActions() {
-		// create and assign actions
-
-
-		CayenneAction genDbAction = new GenerateDbAction();
-		actionMap.put(genDbAction.getKey(), genDbAction);
-		generateDbMenu.addActionListener(genDbAction);
-
-
+	protected void initOther() {
 		// "legacy" code - need to hook up all menus and toolbars with actions 
 		disableMenu();
 		closeProjectMenu.setEnabled(false);
-
-		createObjEntityMenu.addActionListener(this);
-		createDbEntityMenu.addActionListener(this);
 
 		closeProjectMenu.addActionListener(this);
 		exitMenu.addActionListener(this);
@@ -291,9 +288,6 @@ public class Editor
 		generateMenu.addActionListener(this);
 		setPackageMenu.addActionListener(this);
 		aboutMenu.addActionListener(this);
-
-		createObjEntityBtn.addActionListener(this);
-		createDbEntityBtn.addActionListener(this);
 
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setSize(650, 550);
@@ -303,6 +297,30 @@ public class Editor
 				exitEditor();
 			}
 		});
+	}
+
+    /** Initializes main toolbar. */
+	protected void initToolbar() {
+		ClassLoader cl = Editor.class.getClassLoader();
+
+		JToolBar toolBar = new JToolBar();
+		toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
+
+		toolBar.addSeparator();
+
+		toolBar.add(getAction(CreateDomainAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(CreateDbEntityAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(CreateObjEntityAction.ACTION_NAME).buildButton());
+		toolBar.add(getAction(CreateAttributeAction.ACTION_NAME).buildButton());
+		toolBar.add(
+			getAction(CreateRelationshipAction.ACTION_NAME).buildButton());
+
+		getContentPane().add(toolBar, BorderLayout.NORTH);
 	}
 
 	/** Adds path to the list of last opened projects in preferences. */
@@ -327,60 +345,9 @@ public class Editor
 		}
 	}
 
-	protected void initToolBar() {
-		ClassLoader cl = Editor.class.getClassLoader();
-
-		JToolBar toolBar = new JToolBar();
-		toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
-		toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
-		toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
-		toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
-
-		toolBar.addSeparator();
-
-		toolBar.add(getAction(CreateDomainAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
-		toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
-
-		URL url =
-			cl.getResource(
-				CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
-		ImageIcon dbEntityIcon = new ImageIcon(url);
-		createDbEntityBtn = new JButton(dbEntityIcon);
-		createDbEntityBtn.setToolTipText("create new db entity");
-		toolBar.add(createDbEntityBtn);
-
-		url =
-			cl.getResource(
-				CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
-		ImageIcon objEntityIcon = new ImageIcon(url);
-		createObjEntityBtn = new JButton(objEntityIcon);
-		createObjEntityBtn.setToolTipText("create new obj entity");
-		toolBar.add(createObjEntityBtn);
-
-		ImageIcon attrIcon =
-			new ImageIcon(
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-attribute.gif"));
-		JButton attrBtn = new JButton(attrIcon);
-		attrBtn.setToolTipText("create attribute");
-		toolBar.add(attrBtn);
-
-		ImageIcon relIcon =
-			new ImageIcon(
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH
-						+ "images/icon-relationship.gif"));
-		JButton relBtn = new JButton(relIcon);
-		relBtn.setToolTipText("create relationship");
-		toolBar.add(relBtn);
-
-		getContentPane().add(toolBar, BorderLayout.NORTH);
-	}
-
 	public void projectClosed() {
 		recentFileMenu.rebuildFromPreferences();
-		
+
 		getContentPane().remove(view);
 		view = null;
 		setMediator(null);
@@ -396,7 +363,6 @@ public class Editor
 		repaint();
 		setProjectTitle(null);
 	}
-	
 
 	public void projectOpened() {
 		view = new EditorView(mediator);
@@ -491,11 +457,6 @@ public class Editor
 			if (src == closeProjectMenu) {
 				((ProjectAction) getAction(NewProjectAction.ACTION_NAME))
 					.closeProject();
-			} else if (
-				src == createObjEntityMenu || src == createObjEntityBtn) {
-				createObjEntity();
-			} else if (src == createDbEntityMenu || src == createDbEntityBtn) {
-				createDbEntity();
 			} else if (src == setPackageMenu) {
 				// Set the same package name for all obj entities.
 				setPackageName();
@@ -549,41 +510,6 @@ public class Editor
 		dialog = new GenerateClassDialog(this, mediator);
 		dialog.show();
 		dialog.dispose();
-	}
-
-	private void createObjEntity() {
-		ObjEntity entity =
-			(ObjEntity) NamedObjectFactory.createObject(
-				ObjEntity.class,
-				mediator.getCurrentDataMap());
-		mediator.getCurrentDataMap().addObjEntity(entity);
-		mediator.fireObjEntityEvent(
-			new EntityEvent(this, entity, EntityEvent.ADD));
-		mediator.fireObjEntityDisplayEvent(
-			new EntityDisplayEvent(
-				this,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataNode(),
-				mediator.getCurrentDataDomain()));
-	}
-
-	private void createDbEntity() {
-		DbEntity entity =
-			(DbEntity) NamedObjectFactory.createObject(
-				DbEntity.class,
-				mediator.getCurrentDataMap());
-
-		mediator.getCurrentDataMap().addDbEntity(entity);
-		mediator.fireDbEntityEvent(
-			new EntityEvent(this, entity, EntityEvent.ADD));
-		mediator.fireDbEntityDisplayEvent(
-			new EntityDisplayEvent(
-				this,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataNode(),
-				mediator.getCurrentDataDomain()));
 	}
 
 	public void currentDomainChanged(DomainDisplayEvent e) {
@@ -655,24 +581,21 @@ public class Editor
 	 * </ul> 
 	 */
 	private void disableMenu() {
-		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(false);
-		getAction(RemoveAction.ACTION_NAME).setEnabled(false);
-		getAction(AddDataMapAction.ACTION_NAME).setEnabled(false);
-        getAction(CreateNodeAction.ACTION_NAME).setEnabled(false);
+		// disable everything we can
+		Object[] keys = actionMap.allKeys();
+		int len = keys.length;
+		for(int i = 0; i < len; i++) {
+			actionMap.get(keys[i]).setEnabled(false);
+		}
 		
-		createObjEntityMenu.setEnabled(false);
-		createDbEntityMenu.setEnabled(false);
-
-		getAction(EntitySynchAction.ACTION_NAME).setEnabled(false);
-		getAction(ImportDbAction.ACTION_NAME).setEnabled(false);
-		getAction(ImportEOModelAction.ACTION_NAME).setEnabled(false);
+		// explicitly disable "legacy" menus
 		generateMenu.setEnabled(false);
-		generateDbMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);
-
 		
-		createObjEntityBtn.setEnabled(false);
-		createDbEntityBtn.setEnabled(false);
+		// these are always on
+		exitMenu.setEnabled(true);
+		getAction(NewProjectAction.ACTION_NAME).setEnabled(true);
+		getAction(OpenProjectAction.ACTION_NAME).setEnabled(true);
 	}
 
 	private void enableDomainMenu() {
@@ -680,7 +603,7 @@ public class Editor
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
 		closeProjectMenu.setEnabled(true);
 		getAction(ImportDbAction.ACTION_NAME).setEnabled(true);
 		getAction(ImportEOModelAction.ACTION_NAME).setEnabled(true);
@@ -691,25 +614,28 @@ public class Editor
 			enableDataNodeMenu();
 		else
 			enableDomainMenu();
+			
+		// enable "legacy" menus
 		setPackageMenu.setEnabled(true);
-		createObjEntityMenu.setEnabled(true);
-		createDbEntityMenu.setEnabled(true);
 		generateMenu.setEnabled(true);
-		generateDbMenu.setEnabled(true);
-
-		createObjEntityBtn.setEnabled(true);
-		createDbEntityBtn.setEnabled(true);
+		
+		getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateDbEntityAction.ACTION_NAME).setEnabled(true);
+		getAction(GenerateDbAction.ACTION_NAME).setEnabled(true);
 	}
-	
+
 	private void enableObjEntityMenu() {
 		enableDataMapMenu();
 		getAction(EntitySynchAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
 	}
-	
+
 	private void enableDbEntityMenu() {
 		enableDataMapMenu();
+		getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
 	}
-	
 
 	private void enableDataNodeMenu() {
 		enableDomainMenu();

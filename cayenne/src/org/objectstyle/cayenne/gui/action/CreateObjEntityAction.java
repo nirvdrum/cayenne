@@ -53,32 +53,54 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.testui;
+package org.objectstyle.cayenne.gui.action;
 
-import java.io.IOException;
-import java.util.Properties;
+import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**
- * Subclass of CayenneModeler Editor frame with 
- * most of the functionality disabled. Used for testing only.
- * 
  * @author Andrei Adamchik
  */
-public class TestEditorFrame extends Editor {
-
+public class CreateObjEntityAction extends CayenneAction {
+    public static final String ACTION_NAME = "Create ObjEntity";
+    
 	/**
-	 * Constructor for TestEditorFrame.
+	 * Constructor for CreateObjEntityAction.
 	 */
-	public TestEditorFrame() {
-		super();
+	public CreateObjEntityAction() {
+		super(ACTION_NAME);
 	}
 	
-	protected void initMenus() { }
-    protected void initOther() { }
-    protected Properties loadProperties() throws IOException {
-    	return null;
-    }
+	public String getIconName() {
+		return "images/icon-objentity.gif";
+	}
+
+	/**
+	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
+	 */
+	public void performAction(ActionEvent e) {
+		createObjEntity();
+	}
+
+	private void createObjEntity() {
+		Mediator mediator = getMediator();
+		ObjEntity entity =
+			(ObjEntity) NamedObjectFactory.createObject(
+				ObjEntity.class,
+				mediator.getCurrentDataMap());
+		mediator.getCurrentDataMap().addObjEntity(entity);
+		mediator.fireObjEntityEvent(
+			new EntityEvent(this, entity, EntityEvent.ADD));
+		mediator.fireObjEntityDisplayEvent(
+			new EntityDisplayEvent(
+				this,
+				entity,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataNode(),
+				mediator.getCurrentDataDomain()));
+	}
 }
 

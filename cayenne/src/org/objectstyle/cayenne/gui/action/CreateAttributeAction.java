@@ -53,32 +53,33 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.testui;
+package org.objectstyle.cayenne.gui.action;
 
-import java.io.IOException;
-import java.util.Properties;
-
-import org.objectstyle.cayenne.gui.Editor;
+import java.awt.event.ActionEvent;
 
 /**
- * Subclass of CayenneModeler Editor frame with 
- * most of the functionality disabled. Used for testing only.
- * 
  * @author Andrei Adamchik
  */
-public class TestEditorFrame extends Editor {
-
+public class CreateAttributeAction extends CayenneAction {
+	public static final String ACTION_NAME = "Create Attribute";
+	
 	/**
-	 * Constructor for TestEditorFrame.
+	 * Constructor for CreateAttributeAction.
+	 * @param name
 	 */
-	public TestEditorFrame() {
-		super();
+	public CreateAttributeAction() {
+		super(ACTION_NAME);
+	}
+
+	public String getIconName() {
+		return "images/icon-attribute.gif";
 	}
 	
-	protected void initMenus() { }
-    protected void initOther() { }
-    protected Properties loadProperties() throws IOException {
-    	return null;
-    }
+	/**
+	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
+	 */
+	public void performAction(ActionEvent e) {
+	}
+
 }
 
