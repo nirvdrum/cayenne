@@ -19,7 +19,55 @@
            </p>
            
            <subsection name="4.5.1 Standalone Applications" anchor="standalone">
-               <p>To Be Done</p>
+               <p>In a standalone Java application, normally a <a href=
+               "../../api/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a> 
+                will be used to locate and load configuration files. This approach
+                does not require any special Java code. Shared configuration objects
+                can simply be obtained by calling <code>getSharedConfig</code>:</p>
+                
+<source>import org.objectstyle.cayenne.conf.Configuration;
+...           
+Configuration conf = Configuration.getSharedConfig();
+</source>
+              <p>DefaultConfiguration will expect <code>cayenne.xml</code> file to be located 
+              in the CLASSPATH. Same is true for datamaps referenced in <code>cayenne.xml</code>.
+              Their location is resolved relative to CLASSPATH as well. To make these files available to
+              Cayenne, you can simply include them in the root of your application jar file. 
+              </p>
+              
+              <p>Location of the datasource files referenced in <code>cayenne.xml</code>
+              depends on what factory was assigned to each datasource in <code>cayenne.xml</code>.
+              Normally this would be a <a href=
+               "../../api/org/objectstyle/cayenne/conf/DriverDataSourceFactory.html"
+               >org.objectstyle.cayenne.conf.DriverDataSourceFactory</a>. It would use
+               the following lookup order to resolve location:
+               
+               <ul>
+                  <li>Location is assumed to be a file relative to the user HOME 
+                  directory (as defined by <code>user.home</code> system property).</li>
+                  <li>Location is assumed to be a file relative to the current directory
+                  from which the application was started.</li>
+                  <li>Location is assumed to be a resource relative to CLASSPATH.</li>
+               </ul>
+               
+               This lookup order makes configuration very flexible in that it separates
+               datasource configuration files from the application distribution (jar file).
+               A compiled application can be deployed as a jar file containing <code>cayenne.xml</code>
+               and datamap files, without any datasource files.  This way a user wouldn't
+               need to rebuild a jar for each of target environments that has a different database server.
+               </p>
+               
+               <p>
+               Simple use case for this feature is when a Java project needs to be deployed
+               in development, test, and production environments. All a deployer would need to
+               do is to create datasource files in the home directory of each of the servers. After that
+               the same jar file can be deployed on any of them without any changes. 
+               Another benefit of a separate datasource file is that database user name 
+               and password information are not
+               stored with the application (possibly in a shared repository) 
+               and instead stored on each deployment machine. This provides better security.
+              </p>
+
            </subsection>
            
            <subsection name="4.5.1 Web Applications" anchor="standalone">
