@@ -155,27 +155,27 @@ public final class CellRenderers {
      * Returns a TreeCellRenderer to display Cayenne project tree nodes with icons.
      */
     public static TreeCellRenderer treeRenderer() {
-        return new ProjectTreeRenderer();
+        return new TreeRenderer();
     }
 
     /**
      * Returns a ListCellRenderer to display Cayenne project tree nodes without icons.
      */
     public static ListCellRenderer listRenderer() {
-        return new ProjectListRenderer(false);
+        return new ListRenderer(false);
     }
 
     /**
      * Returns a ListCellRenderer to display Cayenne project tree nodes with icons.
      */
     public static ListCellRenderer listRendererWithIcons() {
-        return new ProjectListRenderer(true);
+        return new ListRenderer(true);
     }
 
-    final static class ProjectListRenderer extends DefaultListCellRenderer {
+    final static class ListRenderer extends DefaultListCellRenderer {
         boolean showIcons;
 
-        ProjectListRenderer(boolean showIcons) {
+        ListRenderer(boolean showIcons) {
             this.showIcons = showIcons;
         }
 
@@ -213,7 +213,7 @@ public final class CellRenderers {
         }
     }
 
-    final static class ProjectTreeRenderer extends DefaultTreeCellRenderer {
+    final static class TreeRenderer extends DefaultTreeCellRenderer {
         public Component getTreeCellRendererComponent(
             JTree tree,
             Object value,

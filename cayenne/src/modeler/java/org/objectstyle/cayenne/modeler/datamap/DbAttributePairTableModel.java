@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
 
-import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -74,9 +73,7 @@ public class DbAttributePairTableModel extends CayenneTableModel {
 
     // Columns
     static final int SOURCE = 0;
-    static final int SOURCE_TYPE = 1;
-    static final int TARGET = 2;
-    static final int TARGET_TYPE = 3;
+    static final int TARGET = 1;
 
     protected DbRelationship relationship;
     protected DbEntity source;
@@ -114,27 +111,23 @@ public class DbAttributePairTableModel extends CayenneTableModel {
     public void commit() throws DataMapException {
         relationship.setJoins(getObjectList());
     }
-    
+
     /**
      * Returns null to disable ordering.
      */
-    public String getOrderingKey() { 
+    public String getOrderingKey() {
         return null;
     }
 
     public int getColumnCount() {
-        return 4;
+        return 2;
     }
 
     public String getColumnName(int column) {
         if (column == SOURCE)
             return "Source";
-        else if (column == SOURCE_TYPE)
-            return "Type";
         else if (column == TARGET)
             return "Target";
-        else if (column == TARGET_TYPE)
-            return "Type";
         else
             return "";
     }
@@ -152,23 +145,14 @@ public class DbAttributePairTableModel extends CayenneTableModel {
         }
 
         if (column == SOURCE) {
-            return (join.getSource() == null)
-                ? null
-                : join.getSource().getName();
-        } else if (column == SOURCE_TYPE) {
-            return (join.getSource() == null)
-                ? null
-                : TypesMapping.getSqlNameByType(join.getSource().getType());
-        } else if (column == TARGET) {
-            return (join.getTarget() == null)
-                ? null
-                : join.getTarget().getName();
-        } else if (column == TARGET_TYPE) {
-            return (join.getTarget() == null)
-                ? null
-                : TypesMapping.getSqlNameByType(join.getTarget().getType());
-        } else
+            return (join.getSource() == null) ? null : join.getSource().getName();
+        }
+        else if (column == TARGET) {
+            return (join.getTarget() == null) ? null : join.getTarget().getName();
+        }
+        else {
             return null;
+        }
 
     }
 
@@ -188,7 +172,8 @@ public class DbAttributePairTableModel extends CayenneTableModel {
                 return;
             }
             join.setSource(attrib);
-        } else if (column == TARGET) {
+        }
+        else if (column == TARGET) {
             if (null == target)
                 return;
             DbAttribute attrib = (DbAttribute) target.getAttribute(value);
@@ -203,10 +188,11 @@ public class DbAttributePairTableModel extends CayenneTableModel {
     public boolean isCellEditable(int row, int col) {
         if (col == SOURCE) {
             return relationship.getSourceEntity() != null && editable;
-        } else if (col == TARGET) {
+        }
+        else if (col == TARGET) {
             return relationship.getTargetEntity() != null && editable;
         }
-        
+
         return false;
     }
 }
