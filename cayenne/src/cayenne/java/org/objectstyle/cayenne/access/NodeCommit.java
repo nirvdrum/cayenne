@@ -58,12 +58,9 @@ package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
@@ -89,21 +86,6 @@ class NodeCommit {
 
     NodeCommit(DataNode node) {
         this.node = node;
-    }
-    
-    String firstGeneratedColumn(DbEntity entity) {
-        if (node.getAdapter().supportsGeneratedKeys()) {
-
-            Iterator it = entity.getAttributes().iterator();
-            while (it.hasNext()) {
-                DbAttribute attribute = (DbAttribute) it.next();
-                if (attribute.isGenerated()) {
-                    return attribute.getName();
-                }
-            }
-        }
-
-        return null;
     }
 
     void addToEntityList(ObjEntity ent, int listType) {

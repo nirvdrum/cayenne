@@ -199,7 +199,7 @@ public class DefaultOperationObserver implements OperationObserver {
      * 
      * @since 1.2
      */
-    public void nextKeyDataRows(Query query, ResultIterator keysIterator) {
+    public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
         if (keysIterator != null) {
             try {
                 keysIterator.close();

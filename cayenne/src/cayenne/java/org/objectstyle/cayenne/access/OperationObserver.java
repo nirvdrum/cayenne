@@ -106,11 +106,11 @@ public interface OperationObserver extends OperationHints {
     public void nextDataRows(Query q, ResultIterator it);
 
     /**
-     * Invoked after each batch of generated keys is read.
+     * Invoked after each batch of values generated on update is read.
      * 
      * @since 1.2
      */
-    public void nextKeyDataRows(Query query, ResultIterator keysIterator);
+    public void nextGeneratedDataRows(Query query, ResultIterator keysIterator);
 
     /** Invoked when an exception occurs during query execution. */
     public void nextQueryException(Query query, Exception ex);

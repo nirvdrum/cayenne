@@ -57,65 +57,97 @@ package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.IteratorUtils;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- * Batched INSERT query.
+ * Batched INSERT query. Allows inserting multiple object snapshots (DataRows) for a
+ * given DbEntity in a single query. InsertBatchQuery normally is not used directly.
+ * Rather DataContext creates one internally when committing DataObjects.
  * 
  * @author Andriy Shapochka
  */
 public class InsertBatchQuery extends BatchQuery {
-    private List dataObjectSnapshots;
-    private List dbAttributes;
-    private Iterator snapshotIterator = IteratorUtils.EMPTY_ITERATOR;
-    private Map currentSnapshot = Collections.EMPTY_MAP;
 
-    public InsertBatchQuery(DbEntity objectEntity, int batchCapacity) {
-        super(objectEntity);
-        
-        dataObjectSnapshots = new ArrayList(batchCapacity);
-        dbAttributes = new ArrayList(getDbEntity().getAttributes());
+    /**
+     * @since 1.2
+     */
+    protected List objectIds;
+
+    protected List objectSnapshots;
+    protected List dbAttributes;
+
+    /**
+     * @since 1.2
+     */
+    protected int batchIndex;
+
+    /**
+     * Creates new InsertBatchQuery for a given DbEntity and estimated capacity.
+     */
+    public InsertBatchQuery(DbEntity entity, int batchCapacity) {
+        super(entity);
+
+        this.objectSnapshots = new ArrayList(batchCapacity);
+        this.objectIds = new ArrayList(batchCapacity);
+        this.dbAttributes = new ArrayList(getDbEntity().getAttributes());
+        this.batchIndex = -1;
     }
 
+    /**
+     * Resets InsertBatchQuery so that a following call to "next" would start from the
+     * beginning of the batch.
+     */
     public void reset() {
-        snapshotIterator = dataObjectSnapshots.iterator();
-        currentSnapshot = Collections.EMPTY_MAP;
+        batchIndex = -1;
     }
 
     public boolean next() {
-        if (!snapshotIterator.hasNext()) {
-            return false;
-        }
-        
-        currentSnapshot = (Map) snapshotIterator.next();
-
-        if (currentSnapshot == null) {
-            currentSnapshot = Collections.EMPTY_MAP;
-        }
-
-        return true;
+        batchIndex++;
+        return size() > batchIndex;
     }
 
     public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
+        Map currentSnapshot = (Map) objectSnapshots.get(batchIndex);
         return currentSnapshot.get(attribute.getName());
     }
 
-    public void add(Map dataObjectSnapshot) {
-        dataObjectSnapshots.add(dataObjectSnapshot);
+    /**
+     * Adds a snapshot to batch. A shortcut for "add(snapshot, null)".
+     */
+    public void add(Map snapshot) {
+        add(snapshot, null);
+    }
+
+    /**
+     * Adds a snapshot to batch. Optionally stores the object id for the snapshot.
+     * 
+     * @since 1.2
+     */
+    public void add(Map snapshot, ObjectId id) {
+        objectSnapshots.add(snapshot);
+        objectIds.add(id);
     }
 
     public int size() {
-        return dataObjectSnapshots.size();
+        return objectSnapshots.size();
     }
 
     public List getDbAttributes() {
         return Collections.unmodifiableList(dbAttributes);
+    }
+
+    /**
+     * Returns an ObjectId associated with the current batch iteration.
+     * 
+     * @since 1.2
+     */
+    public ObjectId getObjectId() {
+        return (ObjectId) objectIds.get(batchIndex);
     }
 }

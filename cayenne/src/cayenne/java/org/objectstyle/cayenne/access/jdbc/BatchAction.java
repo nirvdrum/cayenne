@@ -313,6 +313,6 @@ public class BatchAction extends BaseSQLAction {
                         .createDescriptor(keysRS, getAdapter().getExtendedTypes()),
                 0);
 
-        observer.nextKeyDataRows(query, iterator);
+        observer.nextGeneratedDataRows(query, iterator);
     }
 }

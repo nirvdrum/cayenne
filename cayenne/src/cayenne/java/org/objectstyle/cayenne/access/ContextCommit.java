@@ -155,11 +155,12 @@ class ContextCommit {
                 }
 
                 CommitObserver observer = new CommitObserver(
-                        logLevel,
                         context,
                         insObjects,
                         updObjects,
                         delObjects);
+                
+                observer.setLoggingLevel(logLevel);
 
                 if (context.isTransactionEventsEnabled()) {
                     observer.registerForDataContextEvents();
@@ -235,11 +236,7 @@ class ContextCommit {
             DbEntity dbEntity = (DbEntity) i.next();
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
 
-            String generatedColumn = commitHelper.firstGeneratedColumn(dbEntity);
-            InsertBatchQuery batch = (generatedColumn != null)
-                    ? new CallbackInsertBatchQuery(dbEntity, generatedColumn, 27)
-                    : new InsertBatchQuery(dbEntity, 27);
-
+            InsertBatchQuery batch = new InsertBatchQuery(dbEntity, 27);
             batch.setLoggingLevel(logLevel);
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
@@ -258,8 +255,9 @@ class ContextCommit {
                     throw attemptToCommitReadOnlyEntity(objects.get(0).getClass(), entity);
                 }
 
-                if (isMasterDbEntity)
+                if (isMasterDbEntity) {
                     sorter.sortObjectsForEntity(entity, objects, false);
+                }
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
@@ -267,11 +265,12 @@ class ContextCommit {
                             entity,
                             o,
                             masterDependentDbRel);
-                    batch.add(snapshot);
+                    batch.add(snapshot, o.getObjectId());
                 }
 
-                if (isMasterDbEntity)
+                if (isMasterDbEntity) {
                     insObjects.addAll(objects);
+                }
             }
             commitHelper.getQueries().add(batch);
         }

@@ -211,8 +211,8 @@ class SQLServerProcedureAction extends ProcedureAction {
             observer.nextGlobalException(ex);
         }
 
-        public void nextKeyDataRows(Query query, ResultIterator keysIterator) {
-            observer.nextKeyDataRows(query, keysIterator);
+        public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
+            observer.nextGeneratedDataRows(query, keysIterator);
         }
 
         public void nextQueryException(Query query, Exception ex) {
