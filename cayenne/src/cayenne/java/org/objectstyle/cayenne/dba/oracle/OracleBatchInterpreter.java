@@ -59,11 +59,13 @@ package org.objectstyle.cayenne.dba.oracle;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.BatchInterpreter;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -91,12 +93,25 @@ public class OracleBatchInterpreter extends BatchInterpreter {
             attributeScales[i] = attribute.getPrecision();
         }
         String query = queryBuilder.query(batch);
+        
+        // log batch execution
+        QueryLogger.logQuery(
+            batch.getLoggingLevel(),
+            query,
+            Collections.EMPTY_LIST);
+            
+            
         PreparedStatement st = null;
         ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
         try {
             st = connection.prepareStatement(query);
             batch.reset();
             while (batch.next()) {
+                // log next batch parameters
+                QueryLogger.logBatchQueryParameters(
+                     batch.getLoggingLevel(),
+                     batch);
+                     
                 for (int i = 0; i < attributeCount; i++) {
                     Object value = batch.getObject(i);
                     int type = attributeTypes[i];
