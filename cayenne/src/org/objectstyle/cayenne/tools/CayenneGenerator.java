@@ -73,9 +73,11 @@ public class CayenneGenerator extends Task {
     protected File destDir;
     protected File superDestDir;
     protected boolean overwrite;
+    protected boolean usepkgpath = true;
     protected boolean makepairs = true;
     protected File template;
     protected File supertemplate;
+    protected String superpkg;
 
     /** Classes are generated only for files that are older 
      * than the map. <code>mapTimestamp</code> is used to track that. 
@@ -95,6 +97,12 @@ public class CayenneGenerator extends Task {
             if (makepairs) {
                 String t = getTemplateForPairs();
                 String st = getSupertemplateForPairs();
+
+                // overwrite superclass package
+                if (superpkg != null) {
+                    gen.setSuperPkg(superpkg);
+                }
+
                 gen.generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
             }
             else {
@@ -108,7 +116,6 @@ public class CayenneGenerator extends Task {
         }
     }
 
-
     /** 
      *  Returns template file path for Java class 
      *  when generating single classes. 
@@ -118,7 +125,6 @@ public class CayenneGenerator extends Task {
             ? template.getCanonicalPath()
             : MapClassGenerator.SINGLE_CLASS_TEMPLATE;
     }
-    
 
     /** 
      *  Returns template file path for Java subclass 
@@ -199,54 +205,62 @@ public class CayenneGenerator extends Task {
 
     /**
      * Sets the destDir.
-     * @param destDir The destDir to set
      */
     public void setDestDir(File destDir) {
         this.destDir = destDir;
     }
 
     /**
-     * Sets the superDestDir.
-     * @param superDestDir The superDestDir to set
+     * Sets the <code>superDestDir</code> property.
      */
     public void setSuperDestDir(File superDestDir) {
         this.superDestDir = superDestDir;
     }
 
     /**
-     * Sets the overwrite.
-     * @param overwrite The overwrite to set
+     * Sets <code>overwrite</code> property.
      */
     public void setOverwrite(boolean overwrite) {
         this.overwrite = overwrite;
     }
 
     /**
-     * Sets the makepairs.
-     * @param makepairs The makepairs to set
+     * Sets <code>makepairs</code> property.
      */
     public void setMakepairs(boolean makepairs) {
         this.makepairs = makepairs;
     }
 
     /**
-     * Sets the template.
-     * @param template The template to set
+     * Sets <code>template</code> property.
      */
     public void setTemplate(File template) {
         this.template = template;
     }
 
     /**
-     * Sets the supertemplate.
-     * @param supertemplate The supertemplate to set
+     * Sets <code>supertemplate</code> property.
      */
     public void setSupertemplate(File supertemplate) {
         this.supertemplate = supertemplate;
     }
 
+    /**
+     * Sets <code>usepkgpath</code> property.
+     */
+    public void setUsepkgpath(boolean usepkgpath) {
+        this.usepkgpath = usepkgpath;
+    }
+
+    /**
+     * Sets <code>superpkg</code> property.
+     */
+    public void setSuperpkg(String superpkg) {
+        this.superpkg = superpkg;
+    }
+
     /** Concrete subclass of MapClassGenerator that performs the actual
-     * class generation. */
+      * class generation. */
     class AntClassGenerator extends MapClassGenerator {
 
         public AntClassGenerator(DataMap map) {
@@ -257,18 +271,21 @@ public class CayenneGenerator extends Task {
             out.close();
         }
 
-        public Writer openWriter(ObjEntity entity, String className) throws Exception {
+        public Writer openWriter(ObjEntity entity, String pkgName, String className)
+            throws Exception {
             return (className.startsWith(SUPERCLASS_PREFIX))
-                ? writerForSuperclass(entity, className)
-                : writerForClass(entity, className);
+                ? writerForSuperclass(entity, pkgName, className)
+                : writerForClass(entity, pkgName, className);
         }
 
-        private Writer writerForSuperclass(ObjEntity entity, String className)
+        private Writer writerForSuperclass(
+            ObjEntity entity,
+            String pkgName,
+            String className)
             throws Exception {
+
             File destFile = (superDestDir != null) ? superDestDir : destDir;
-            File dest =
-                getProject().resolveFile(
-                    destFile.getPath() + File.separator + className + ".java");
+            File dest = new File(destFile.getPath(), className + ".java");
 
             // ignore newer files
             if (dest.exists()
@@ -280,12 +297,13 @@ public class CayenneGenerator extends Task {
             return new FileWriter(dest);
         }
 
-        private Writer writerForClass(ObjEntity entity, String className)
+        private Writer writerForClass(
+            ObjEntity entity,
+            String pkgName,
+            String className)
             throws Exception {
-            File dest =
-                getProject().resolveFile(
-                    destDir.getPath() + File.separator + className + ".java");
 
+            File dest = new File(destDir.getPath(), className + ".java");
             if (dest.exists()) {
 
                 // no overwrite of subclasses
@@ -306,6 +324,26 @@ public class CayenneGenerator extends Task {
 
             log("Generating class file :" + dest.getCanonicalPath());
             return new FileWriter(dest);
+        }
+
+        /** Returns a File object corresponding to a directory where files
+         *  that belong to <code>pkgName</code> package should reside. 
+         *  Creates any missing diectories below <code>destDir</code>.
+         */
+        private File mkpath(String basePath, String pkgName) throws Exception {
+            File dest = getProject().resolveFile(basePath);
+
+            if (pkgName == null) {
+                return dest;
+            }
+
+            String path = pkgName.replace('.', File.separatorChar);
+            File fullPath = new File(dest, path);
+            if (!fullPath.isDirectory() && !fullPath.mkdirs()) {
+                throw new Exception("Error making path: " + fullPath);
+            }
+
+            return fullPath;
         }
     }
 }

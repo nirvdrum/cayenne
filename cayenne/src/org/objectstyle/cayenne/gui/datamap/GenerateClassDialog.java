@@ -329,6 +329,7 @@ class GenerateClassTableModel extends AbstractTableModel
 	}
 } // End GenerateClassTableModel
 
+
 /** Class actually opening and closing streams for the files.*/
 class Generator extends MapClassGenerator
 {
@@ -347,7 +348,8 @@ class Generator extends MapClassGenerator
 									+ " does not exist or is not a directory");
 	}
 	
-    public Writer openWriter(ObjEntity entity, String className) throws Exception
+	/** FIXME: package name is ignored, need better handling of this. */
+    public Writer openWriter(ObjEntity entity, String pkgName, String className) throws Exception
     {
     	try {
 			if (!toGenerate.containsKey(entity))

@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-
 import java.io.Writer;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-
 
 /** Generates Java classes source code using VTL (Velocity template engine) for
   * the ObjEntities in the DataMap. */
@@ -72,23 +70,28 @@ public abstract class MapClassGenerator {
     public static final String SUPERCLASS_PREFIX = "_";
 
     protected DataMap map;
+    protected String superPkg;
 
     public MapClassGenerator(DataMap map) {
         this.map = map;
     }
 
-
     /** Provides child ClassGenerator with a Writer object
       * to store generated source code of the Java class corresponding 
       * to the <code>entity</code> parameter. 
+      * 
       * @return Writer to store generated class source code or
-      * null if this class generation should be skipped. */
-    public abstract Writer openWriter(ObjEntity entity, String className) throws Exception ;
-
+      * null if this class generation should be skipped. 
+      */
+    public abstract Writer openWriter(
+        ObjEntity entity,
+        String pkgName,
+        String className)
+        throws Exception;
+        
 
     /** Closes writer after class code has been successfully written by ClassGenerator. */
-    public abstract void closeWriter(Writer out) throws Exception ;
-
+    public abstract void closeWriter(Writer out) throws Exception;
 
     /** Runs class generation. Produces a pair of Java classes for
       * each ObjEntity in the map. Uses default Cayenne templates for classes. */
@@ -96,14 +99,20 @@ public abstract class MapClassGenerator {
         generateClassPairs(SUBCLASS_TEMPLATE, SUPERCLASS_TEMPLATE, SUPERCLASS_PREFIX);
     }
 
-
-    /** Runs class generation. Produces a pair of Java classes for
+    /** 
+      * Runs class generation. Produces a pair of Java classes for
       * each ObjEntity in the map. This allows developers to use generated 
       * <b>subclass</b> for their custom code, while generated <b>superclass</b>
       * will contain Cayenne code. Superclass will be generated in the same package, 
       * its class name will be derived from the class name by adding a 
-      * <code>superPrefix</code>. */
-    public void generateClassPairs(String classTemplate, String superTemplate, String superPrefix) throws Exception {
+      * <code>superPrefix</code>. 
+      */
+    public void generateClassPairs(
+        String classTemplate,
+        String superTemplate,
+        String superPrefix)
+        throws Exception {
+
         ClassGenerator mainGen = new ClassGenerator(classTemplate);
         ClassGenerator superGen = new ClassGenerator(superTemplate);
 
@@ -112,30 +121,33 @@ public abstract class MapClassGenerator {
         superGen.setSuperPrefix(superPrefix);
 
         Iterator it = map.getObjEntitiesAsList().iterator();
-        while(it.hasNext()) {
-            ObjEntity ent = (ObjEntity)it.next();
+        while (it.hasNext()) {
+            ObjEntity ent = (ObjEntity) it.next();
 
             // 1. do the superclass
-            initClassGenerator(superGen, ent);
+            initClassGenerator(superGen, ent, true);
 
+            Writer superOut =
+                openWriter(
+                    ent,
+                    superGen.getPackageName(),
+                    superPrefix + superGen.getClassName());
 
-            Writer superOut = openWriter(ent, superPrefix + superGen.getClassName());
-            if(superOut != null) {
+            if (superOut != null) {
                 superGen.generateClass(superOut, ent);
                 closeWriter(superOut);
             }
 
             // 2. do the main class
-            initClassGenerator(mainGen, ent);
-            Writer mainOut = openWriter(ent, mainGen.getClassName());
-            if(mainOut != null) {
+            initClassGenerator(mainGen, ent, false);
+            Writer mainOut =
+                openWriter(ent, mainGen.getPackageName(), mainGen.getClassName());
+            if (mainOut != null) {
                 mainGen.generateClass(mainOut, ent);
                 closeWriter(mainOut);
             }
         }
     }
-
-
 
     /** Runs class generation. Produces a single Java class for
       * each ObjEntity in the map. Uses default Cayenne templates for classes. */
@@ -143,40 +155,68 @@ public abstract class MapClassGenerator {
         generateSingleClasses(SINGLE_CLASS_TEMPLATE);
     }
 
-
     /** Runs class generation. Produces a single Java class for
       * each ObjEntity in the map. */
     public void generateSingleClasses(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate);
 
         Iterator it = map.getObjEntitiesAsList().iterator();
-        while(it.hasNext()) {
-            ObjEntity ent = (ObjEntity)it.next();
-            initClassGenerator(gen, ent);
-            Writer out = openWriter(ent, gen.getClassName());
-            if(out == null)
+        while (it.hasNext()) {
+            ObjEntity ent = (ObjEntity) it.next();
+            initClassGenerator(gen, ent, false);
+            Writer out = openWriter(ent, gen.getPackageName(), gen.getClassName());
+            if (out == null) {
                 continue;
+            }
 
             gen.generateClass(out, ent);
             closeWriter(out);
         }
     }
 
-
     /** Initializes ClassGenerator with class name and package of a generated class. */
-    protected void initClassGenerator(ClassGenerator gen, ObjEntity entity) {
+    protected void initClassGenerator(
+        ClassGenerator gen,
+        ObjEntity entity,
+        boolean superclass) {
+
         String fullClassName = entity.getClassName();
         int i = fullClassName.lastIndexOf(".");
 
+        String pkg = null;
+        String cname = null;
+
         // dot in first or last position is invalid
-        if(i == 0 || i + 1 == fullClassName.length())
+        if (i == 0 || i + 1 == fullClassName.length())
             throw new CayenneRuntimeException("Invalid class mapping: " + fullClassName);
-        else if(i < 0) {
-            gen.setPackageName(null);
-            gen.setClassName(fullClassName);
-        } else {
-            gen.setPackageName(fullClassName.substring(0, i));
-            gen.setClassName(fullClassName.substring(i + 1));
+        else if (i < 0) {
+            pkg = (superclass) ? superPkg : null;
+            cname = fullClassName;
         }
+        else {
+            cname = fullClassName.substring(i + 1);
+            pkg =
+                (superclass && superPkg != null) ? superPkg : fullClassName.substring(0, i);
+        }
+
+        gen.setPackageName(pkg);
+        gen.setClassName(cname);
     }
+
+    /**
+     * Returns "superPkg" property value -
+     * a name of a superclass package that should be used
+     * for all generated superclasses.
+     */
+    public String getSuperPkg() {
+        return superPkg;
+    }
+
+    /**
+     * Sets "superPkg" property value.
+     */
+    public void setSuperPkg(String superPkg) {
+        this.superPkg = superPkg;
+    }
+
 }
