@@ -15,11 +15,6 @@
 	<!-- ========================================== -->
     <!-- Build targets.                             -->
     <!-- ========================================== -->
-    <target name="api">
-		<ant antfile="build-subproj.xml" target="api">
-			<property name="subproj" value="dvmodeler"/>
-		</ant>
-	</target>
 	
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">
@@ -27,7 +22,7 @@
 		</ant>
 	</target>
 	
-	<target name="dist-src" depends="dist-bin,api">
+	<target name="dist-src" depends="dist-bin">
 		<copy todir="${dvmodeler.dist.src}">
  			<fileset dir="${dvmodeler.src}"/>
         </copy>

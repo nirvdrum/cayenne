@@ -15,19 +15,13 @@
 	<!-- ========================================== -->
     <!-- Build targets.                             -->
     <!-- ========================================== -->
-    <target name="api">
-		<ant antfile="build-subproj.xml" target="api">
-			<property name="subproj" value="modeler"/>
-		</ant>
-	</target>
-	
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">
 			<property name="subproj" value="modeler"/>
 		</ant>
 	</target>
 	
-	<target name="dist-src" depends="dist-bin,api">
+	<target name="dist-src" depends="dist-bin">
 		<copy todir="${modeler.dist.src}">
  			<fileset dir="${modeler.src}"/>
         </copy>

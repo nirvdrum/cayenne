@@ -192,8 +192,6 @@
     <!-- ========================================== -->
     <target name="api">
 		<ant antfile="build-cayenne.xml" target="api"/>
-		<ant antfile="build-modeler.xml" target="api"/>
-		<ant antfile="build-dvmodeler.xml" target="api"/>
     </target>  
 
      <!-- ========================================== -->
