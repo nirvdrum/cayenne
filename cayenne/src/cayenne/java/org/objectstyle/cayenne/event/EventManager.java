@@ -95,8 +95,6 @@ public class EventManager extends Object {
 
 	/**
 	 * Default constructor for new EventManager instances, in case you need one.
-	 * 
-	 * @return EventManager
 	 */
 	public EventManager() {
 		super();

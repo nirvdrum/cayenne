@@ -113,7 +113,8 @@ public class EventSubject extends Object {
 	}
 
 	/**
-	 * @return a String in the form <code><ClassName 0x123456> SomeName</code>
+	 * @return a String in the form <code>&lt;ClassName 0x123456&gt;
+	 * SomeName</code>
 	 * @see Object#toString()
 	 */
 	public String toString() {
