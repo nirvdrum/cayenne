@@ -120,8 +120,10 @@
 			
             <source>$CAYENNE_HOME/bin/runtests.sh</source>
                 
-            <p>Test runner will present a graphic login panel:</p>
-            <img src="/images/login.jpg" width="350" height="199" border="0" align="middle" alt="Cayenne Login Panel"/>
+            <p>Test runner will present a graphic login panel that has some canned settings for
+            supported databases (use dropdown in the upper right corner):</p>
+            <img src="/images/ulogin.gif" width="402" height="254" border="0" align="middle" 
+            alt="Cayenne Login Panel"/>
             
             <panel name="Note:">
             Use &quot;-nogui&quot; flag when calling runtests.sh if you need 
