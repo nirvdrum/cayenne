@@ -208,7 +208,7 @@ public class DataNode implements QueryEngine {
      * <code>objEntity</code>, returns null otherwise.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return (lookupEntity(objEntity.getName()) != null) ? this : null;
+        return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null) ? this : null;
     }
 
     /** Lookup an entity by name across all node maps.
