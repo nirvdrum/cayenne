@@ -7,9 +7,13 @@
 <!-- Author: Michael Shengaout                           -->
 <!-- Author: Andrei Adamchik                             -->
 <!-- Author: Andriy Shapochka                            -->
+<!--                                                     -->
+<!-- Defines format of Cayenne DataMaps (*.map.xml) that -->
+<!-- contain the mapping between DB schemas and Java     -->
+<!-- object structure.                                   -->
 <!-- =================================================== -->
 
-<!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*, procedure*)>
+<!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*, procedure*, query*)>
 <!ATTLIST data-map
 	project-version CDATA #REQUIRED
 >
@@ -112,10 +116,44 @@
 	precision CDATA #IMPLIED
 >
 
+<!-- =================================================== 
+Defines a Cayenne Query that can be either at the DataMap
+level, or linked to an entity or procedure.
+-->
+<!ELEMENT query (property*, (qualifier | sql)? )>
+<!ATTLIST query
+        name CDATA #REQUIRED
+        class CDATA #REQUIRED
+	root (db-entity | obj-entity | procedure | data-map) "data-map"
+        rootName CDATA #IMPLIED
+>
 
-<!--
-This optional tag is used to install the Automatic Sequence/Key
-Generation facility for db-entity.
+<!-- ===================================================
+Defines a property of an object.
+-->
+<!ELEMENT property>
+<!ATTLIST property
+	name CDATA #REQUIRED
+	value CDATA #REQUIRED
+>
+
+<!-- ===================================================
+Defines a query qualifier, normally an encoded expression
+wrapped in CDATA, like "abc.name != $param2 and salary > 
+$param2".
+-->
+<!ELEMENT qualifier (#PCDATA)>
+
+<!-- ===================================================
+Defines arbitrary SQL statement, normally wrapped in 
+CDATA section.
+-->
+<!ELEMENT sql (#PCDATA)>
+
+
+<!-- =================================================== 
+"db-key-generator"  optional tag is used to install the 
+Automatic Sequence/Key Generation facility for db-entity.
 
 Example:
   <db-key-generator>
@@ -133,7 +171,7 @@ Notes: This feature is intended for use with Simple (non-Compound)
     db-key-cache-size?
 )>
 
-<!--
+<!-- ===================================================
 Specifies the Key Generation Method that will be employed
   'ORACLE'               - use Oracle's SEQUENCE
   'NAMED_SEQUENCE_TABLE' - use USER designated SEQUENCE TABLE
@@ -144,8 +182,7 @@ Specifies the Key Generation Method that will be employed
 -->
 <!ELEMENT db-generator-type (#PCDATA)>
 
-
-<!--
+<!-- ===================================================
 If this is DBMS Key Generation,
 Then this may be used to specify the Name of the Generator,
   e.g. for <db-generator-type>ORACLE
@@ -159,8 +196,7 @@ Then this would be used to specify the name of the SEQUENCE TABLE to use.
 -->
 <!ELEMENT db-generator-name (#PCDATA)>
 
-
-<!--
+<!-- ===================================================
 Optional size of key cache.
 For <db-generator-type>ORACLE , this value MUST match the
   Oracle SEQUENCE  INCREMENT value.  If there is a mismatch

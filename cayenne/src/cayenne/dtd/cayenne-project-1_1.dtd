@@ -25,13 +25,13 @@
 <!ELEMENT property>
 <!ATTLIST property
 	name CDATA #REQUIRED
-    value CDATA #REQUIRED
+	value CDATA #REQUIRED
 >
 
 <!ELEMENT map (dep-map-ref*)>
 <!ATTLIST map
 	name CDATA #REQUIRED
-    location CDATA #REQUIRED
+	location CDATA #REQUIRED
 >
 
 <!ELEMENT dep-map-ref>
@@ -42,9 +42,9 @@
 <!ELEMENT node (map-ref*)>
 <!ATTLIST node
 	name CDATA #REQUIRED
-    factory CDATA #REQUIRED
-    datasource CDATA #REQUIRED
-    adapter CDATA #IMPLIED 
+	factory CDATA #REQUIRED
+	datasource CDATA #REQUIRED
+	adapter CDATA #IMPLIED 
 >
 
 <!ELEMENT map-ref>
