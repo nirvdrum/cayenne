@@ -173,7 +173,7 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
         Component dbDetailView = new DbEntityTabbedView(eventController);
         detailPanel.add(dbDetailView, DB_VIEW);
 
-        splitPane.setLeftComponent(treePanel);
+        splitPane.setLeftComponent(new JScrollPane(treePanel));
         splitPane.setRightComponent(detailPanel);
 
         setLayout(new BorderLayout());

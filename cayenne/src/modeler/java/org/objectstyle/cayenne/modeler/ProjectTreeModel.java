@@ -65,7 +65,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -80,8 +79,6 @@ import org.objectstyle.cayenne.project.ProjectTraversalHandler;
  * @author Andrei Adamchik
  */
 public class ProjectTreeModel extends DefaultTreeModel {
-
-    private static Logger logObj = Logger.getLogger(ProjectTreeModel.class);
 
     /**
      * Creates a tree of Swing TreeNodes wrapping Cayenne project. Returns the root node
@@ -275,9 +272,6 @@ public class ProjectTreeModel extends DefaultTreeModel {
         }
 
         public void projectNode(ProjectPath nodePath) {
-            if (ProjectTreeModel.logObj.isDebugEnabled()) {
-                logObj.debug("Read node: " + nodePath);
-            }
 
             Object parent = nodePath.getObjectParent();
             Object nodeObj = nodePath.getObject();
