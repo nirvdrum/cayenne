@@ -62,13 +62,10 @@ import java.util.List;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.validation.SimpleValidationFailure;
-import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * A DbEntity is a mapping descriptor that defines a structure of a database table.
@@ -79,24 +76,24 @@ import org.objectstyle.cayenne.validation.ValidationResult;
 public class DbEntity extends Entity implements DbAttributeListener {
     protected String catalog;
     protected String schema;
-	protected List primaryKey;
-	protected List primaryKeyRef;
-	protected DbKeyGenerator primaryKeyGenerator;
+    protected List primaryKey;
+    protected List primaryKeyRef;
+    protected DbKeyGenerator primaryKeyGenerator;
 
     /**
      * Creates an unnamed DbEntity.
      */
     public DbEntity() {
-    	super();
-    	this.primaryKey = new ArrayList(4);
-    	this.primaryKeyRef = Collections.unmodifiableList(primaryKey);
+        super();
+        this.primaryKey = new ArrayList(4);
+        this.primaryKeyRef = Collections.unmodifiableList(primaryKey);
     }
 
     /**
      * Creates a named DbEntity.
      */
     public DbEntity(String name) {
-    	this();
+        this();
         this.setName(name);
     }
 
@@ -144,9 +141,9 @@ public class DbEntity extends Entity implements DbAttributeListener {
      * Returns an unmodifiable list of DbAttributes representing the
      * primary key of the table described by this DbEntity.
      */
-	public List getPrimaryKey() {
-		return primaryKeyRef;
-	}
+    public List getPrimaryKey() {
+        return primaryKeyRef;
+    }
 
     public String toString() {
         StringBuffer sb = new StringBuffer("DbEntity:");
@@ -170,19 +167,17 @@ public class DbEntity extends Entity implements DbAttributeListener {
         Iterator relIt = this.getRelationships().iterator();
         while (relIt.hasNext()) {
             DbRelationship dbRel = (DbRelationship) relIt.next();
-            sb.append("\n   Rel. to: ").append(
-                dbRel.getTargetEntityName());
+            sb.append("\n   Rel. to: ").append(dbRel.getTargetEntityName());
             sb.append("\n------------------");
         }
 
         return sb.toString();
     }
 
-	public void addAttribute(Attribute attr)
-	{
-		super.addAttribute(attr);
-		this.dbAttributeAdded(new AttributeEvent(this, attr, this, MapEvent.ADD));
-	}
+    public void addAttribute(Attribute attr) {
+        super.addAttribute(attr);
+        this.dbAttributeAdded(new AttributeEvent(this, attr, this, MapEvent.ADD));
+    }
 
     /**
      * Removes attribute from the entity, removes any relationship
@@ -200,15 +195,14 @@ public class DbEntity extends Entity implements DbAttributeListener {
         if (map != null) {
             Iterator ents = map.getDbEntities().iterator();
             while (ents.hasNext()) {
-            	DbEntity ent = (DbEntity)ents.next();
+                DbEntity ent = (DbEntity) ents.next();
                 Iterator it = ent.getRelationships().iterator();
                 while (it.hasNext()) {
                     DbRelationship rel = (DbRelationship) it.next();
                     Iterator joins = rel.getJoins().iterator();
                     while (joins.hasNext()) {
                         DbAttributePair join = (DbAttributePair) joins.next();
-                        if (join.getSource() == attr
-                            || join.getTarget() == attr) {
+                        if (join.getSource() == attr || join.getTarget() == attr) {
                             joins.remove();
                         }
                     }
@@ -220,29 +214,20 @@ public class DbEntity extends Entity implements DbAttributeListener {
         this.dbAttributeRemoved(new AttributeEvent(this, attr, this, MapEvent.REMOVE));
     }
 
-	public void clearAttributes() {
-		super.clearAttributes();
-		// post dummy event for no specific attribute
-		this.dbAttributeRemoved(new AttributeEvent(this, null, this, MapEvent.REMOVE));
-	}
+    public void clearAttributes() {
+        super.clearAttributes();
+        // post dummy event for no specific attribute
+        this.dbAttributeRemoved(new AttributeEvent(this, null, this, MapEvent.REMOVE));
+    }
 
     /**
      * @deprecated Unused since 1.1
      */
     protected void validateQueryRoot(Query query) throws IllegalArgumentException {
         if (query.getRoot() != this) {
-            throw new IllegalArgumentException("Wrong query root for DbEntity: " + query.getRoot());
+            throw new IllegalArgumentException(
+                "Wrong query root for DbEntity: " + query.getRoot());
         }
-    }
-    
-    /**
-     * Checks if expression is compatible with this entity, i.e. all
-     * the path subexpressions can be resolved using this entity as a context.
-     * 
-     * @since 1.1
-     */
-    public void validateExpression(Expression e, ValidationResult validationBuilder) {
-        e.traverse(new ExpressionValidatingTraversal(validationBuilder));
     }
 
     public Iterator resolvePathComponents(Expression pathExp)
@@ -257,104 +242,72 @@ public class DbEntity extends Entity implements DbAttributeListener {
         return new PathIterator((String) pathExp.getOperand(0));
     }
 
-	public void setPrimaryKeyGenerator(DbKeyGenerator primaryKeyGenerator) {
-		this.primaryKeyGenerator = primaryKeyGenerator;
-      	if (primaryKeyGenerator != null) {
-      		primaryKeyGenerator.setDbEntity(this);
-	  	}
+    public void setPrimaryKeyGenerator(DbKeyGenerator primaryKeyGenerator) {
+        this.primaryKeyGenerator = primaryKeyGenerator;
+        if (primaryKeyGenerator != null) {
+            primaryKeyGenerator.setDbEntity(this);
+        }
     }
 
     public DbKeyGenerator getPrimaryKeyGenerator() {
-    	return primaryKeyGenerator;
+        return primaryKeyGenerator;
     }
 
-	public void dbAttributeAdded(AttributeEvent e) {
-		this.handlePrimaryKeyUpdate(e);
-	}
+    public void dbAttributeAdded(AttributeEvent e) {
+        this.handlePrimaryKeyUpdate(e);
+    }
 
-	public void dbAttributeChanged(AttributeEvent e) {
-		this.handlePrimaryKeyUpdate(e);
-	}
+    public void dbAttributeChanged(AttributeEvent e) {
+        this.handlePrimaryKeyUpdate(e);
+    }
 
-	public void dbAttributeRemoved(AttributeEvent e) {
-		this.handlePrimaryKeyUpdate(e);
-	}
+    public void dbAttributeRemoved(AttributeEvent e) {
+        this.handlePrimaryKeyUpdate(e);
+    }
 
-	private void handlePrimaryKeyUpdate(AttributeEvent e) {
-		if ((e == null) || (e.getEntity() != this)) {
-			// not our concern
-			return;
-		}
-
-		// catch clearing (event with null ('any') DbAttribute)
-		Attribute attr = e.getAttribute();
-		if ((attr == null) && (this.attributes.isEmpty())) {
-			this.primaryKey.clear();
-			return;
-		}
-
-		// make sure we handle a DbAttribute
-		if (!(attr instanceof DbAttribute)) {
-			return;
-		}
-
-		DbAttribute dbAttr = (DbAttribute)attr;
-		if (!(this.primaryKey.contains(dbAttr)) && !(dbAttr.isPrimaryKey())) {
-			// no reason to do anything
-			return;
-		}
-
-		switch (e.getId()) {
-			case MapEvent.ADD:
-				this.primaryKey.add(attr);
-				break;
-
-			case MapEvent.REMOVE:
-				this.primaryKey.remove(attr);
-				break;
-
-			default:
-				// generic update
-				this.primaryKey.clear();
-				Iterator it = this.getAttributes().iterator();
-				while (it.hasNext()) {
-					DbAttribute dba = (DbAttribute) it.next();
-					if (dba.isPrimaryKey()) {
-						this.primaryKey.add(dba);
-					}
-				}
-		}
-	}
-    
-    
-    final class ExpressionValidatingTraversal extends TraversalHelper {
-        ValidationResult validationBuilder;
-        
-        ExpressionValidatingTraversal(ValidationResult validationBuilder) {
-            this.validationBuilder = validationBuilder;
+    private void handlePrimaryKeyUpdate(AttributeEvent e) {
+        if ((e == null) || (e.getEntity() != this)) {
+            // not our concern
+            return;
         }
-        
-        public void startUnaryNode(Expression node, Expression parentNode) {
-            // if this is an DB_PATH, see if the path fully resolves
-            if (node.getType() == Expression.DB_PATH) {
-                StringBuffer pathBuffer = new StringBuffer();
-                try {
-                    Iterator pathIt = resolvePathComponents(node);
-                    while (pathIt.hasNext()) {
-                        Object next = pathIt.next();
-                        pathBuffer.append('.').append(next);
+
+        // catch clearing (event with null ('any') DbAttribute)
+        Attribute attr = e.getAttribute();
+        if ((attr == null) && (this.attributes.isEmpty())) {
+            this.primaryKey.clear();
+            return;
+        }
+
+        // make sure we handle a DbAttribute
+        if (!(attr instanceof DbAttribute)) {
+            return;
+        }
+
+        DbAttribute dbAttr = (DbAttribute) attr;
+        if (!(this.primaryKey.contains(dbAttr)) && !(dbAttr.isPrimaryKey())) {
+            // no reason to do anything
+            return;
+        }
+
+        switch (e.getId()) {
+            case MapEvent.ADD :
+                this.primaryKey.add(attr);
+                break;
+
+            case MapEvent.REMOVE :
+                this.primaryKey.remove(attr);
+                break;
+
+            default :
+                // generic update
+                this.primaryKey.clear();
+                Iterator it = this.getAttributes().iterator();
+                while (it.hasNext()) {
+                    DbAttribute dba = (DbAttribute) it.next();
+                    if (dba.isPrimaryKey()) {
+                        this.primaryKey.add(dba);
                     }
                 }
-                catch (ExpressionException ex) {
-                    String message =
-                        "Invalid DB expression path: '" + node.getOperand(0) + "'";
-                    if (pathBuffer.length() > 0) {
-                        message += ", last valid component: " + pathBuffer;
-                    }
-                    validationBuilder.addFailure(
-                        new SimpleValidationFailure(node, message));
-                }
-            }
         }
     }
 }

@@ -61,6 +61,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -94,7 +95,8 @@ abstract class ASTNode {
 
         switch (expression.getType()) {
             case Expression.OBJ_PATH :
-                node = new ObjectPropertyNode((String) expression.getOperand(0));
+            case Expression.DB_PATH :
+                node = new PropertyNode(expression);
                 break;
             case Expression.EQUAL_TO :
                 node = new EqualsNode();
@@ -295,11 +297,13 @@ abstract class ASTNode {
         }
     }
 
-    final static class ObjectPropertyNode extends ASTNode {
+    final static class PropertyNode extends ASTNode {
+        Expression pathExp;
         String propertyPath;
 
-        ObjectPropertyNode(String propertyPath) {
-            this.propertyPath = propertyPath;
+        PropertyNode(Expression pathExp) {
+            this.pathExp = pathExp;
+            this.propertyPath = (String) pathExp.getOperand(0);
         }
 
         ASTNode evaluateWithObject(ASTStack stack, Object bean) {
@@ -307,13 +311,19 @@ abstract class ASTNode {
             try {
                 // for DataObjects it should be faster to read property via 
                 // dataObject methods instead of reflection
+                // for entities the whole meaning is different - we should return 
+                // an iterator over attributes/relationships...
                 stack.push(
                     (bean instanceof DataObject)
                         ? ((DataObject) bean).readNestedProperty(propertyPath)
+                        : (bean instanceof Entity)
+                        ? ((Entity) bean).resolvePathComponents(pathExp)
                         : PropertyUtils.getProperty(bean, propertyPath));
             }
             catch (Exception ex) {
-                String msg = "Error reading property '" + propertyPath + "'.";
+                String beanClass = (bean != null) ? bean.getClass().getName() : "<null>";
+                String msg =
+                    "Error reading property '" + beanClass + "." + propertyPath + "'.";
                 logObj.warn(msg, ex);
                 throw new ExpressionException(msg, ex);
             }

@@ -67,11 +67,8 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
-import org.objectstyle.cayenne.validation.SimpleValidationFailure;
-import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * ObjEntity is a mapping descriptor for a DataObject Java class.
@@ -329,20 +326,6 @@ public class ObjEntity extends Entity {
     }
 
     /**
-     * Checks if expression is compatible with this entity, i.e. all
-     * the path subexpressions can be resolved using this entity as a context.
-     * 
-     * @since 1.1
-     */
-    public void validateExpression(Expression e, ValidationResult validationBuilder) {
-        e.traverse(new ExpressionValidatingTraversal(validationBuilder));
-
-        if (getDbEntity() != null) {
-            getDbEntity().validateExpression(e, validationBuilder);
-        }
-    }
-
-    /**
      * @deprecated Unused since 1.1
      */
     public void validate() throws CayenneException {
@@ -370,37 +353,6 @@ public class ObjEntity extends Entity {
                         + "ObjAttribute: "
                         + objAttr.getName()
                         + " compound, read only.");
-            }
-        }
-    }
-
-    final class ExpressionValidatingTraversal extends TraversalHelper {
-        ValidationResult validationBuilder;
-
-        ExpressionValidatingTraversal(ValidationResult validationBuilder) {
-            this.validationBuilder = validationBuilder;
-        }
-
-        public void startUnaryNode(Expression node, Expression parentNode) {
-            // if this is an OBJ_PATH, see if the path fully resolves
-            if (node.getType() == Expression.OBJ_PATH) {
-                StringBuffer pathBuffer = new StringBuffer();
-                try {
-                    Iterator pathIt = resolvePathComponents(node);
-                    while (pathIt.hasNext()) {
-                        Object next = pathIt.next();
-                        pathBuffer.append('.').append(next);
-                    }
-                }
-                catch (ExpressionException ex) {
-                    String message =
-                        "Invalid object expression path: '" + node.getOperand(0) + "'";
-                    if (pathBuffer.length() > 0) {
-                        message += ", last valid component: " + pathBuffer;
-                    }
-                    validationBuilder.addFailure(
-                        new SimpleValidationFailure(node, message));
-                }
             }
         }
     }

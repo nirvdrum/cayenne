@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
-import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * An Entity is an abstract descriptor for an entity mapping concept.
@@ -159,16 +158,6 @@ public abstract class Entity extends MapObject {
      */
     protected abstract void validateQueryRoot(Query query)
         throws IllegalArgumentException;
-
-    /**
-     * Checks if expression is compatible with this entity, i.e. all
-     * the path subexpressions can be resolved using this entity as a context.
-     * 
-     * @since 1.1
-     */
-    public abstract void validateExpression(
-        Expression e,
-        ValidationResult validationBuilder);
 
     /**
      * Returns attribute with name <code>attrName</code>.

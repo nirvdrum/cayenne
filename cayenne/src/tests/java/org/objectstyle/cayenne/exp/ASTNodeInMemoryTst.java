@@ -56,11 +56,18 @@
 package org.objectstyle.cayenne.exp;
 
 import java.math.BigDecimal;
+import java.util.Iterator;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.NonPersistentBean;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -72,7 +79,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ASTNodeInMemoryTst extends CayenneTestCase {
-    public void testEvaluateOBJ_PATHDataObject() throws Exception {
+    public void testEvaluateOBJ_PATH_DataObject() throws Exception {
         ASTNode node =
             ASTCompiler.compile(
                 ExpressionFactory.unaryExp(Expression.OBJ_PATH, "artistName"));
@@ -86,7 +93,7 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
         assertEquals("123", node.evaluateASTChain(a2));
     }
 
-    public void testEvaluateOBJ_PATHJavaBean() throws Exception {
+    public void testEvaluateOBJ_PATH_JavaBean() throws Exception {
         ASTNode node =
             ASTCompiler.compile(
                 ExpressionFactory.unaryExp(Expression.OBJ_PATH, "property2"));
@@ -98,6 +105,47 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
         NonPersistentBean b2 = new NonPersistentBean();
         b2.setProperty2(-3);
         assertEquals(new Integer(-3), node.evaluateASTChain(b2));
+    }
+
+    public void testEvaluateOBJ_PATH_ObjEntity() throws Exception {
+        ASTNode node =
+            ASTCompiler.compile(
+                ExpressionFactory.expFromString("paintingArray.paintingTitle"));
+
+        ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+
+        Object target = node.evaluateASTChain(ae);
+        assertTrue(target instanceof Iterator);
+
+        Iterator it = (Iterator) target;
+        assertTrue(it.next() instanceof ObjRelationship);
+        assertTrue(it.next() instanceof ObjAttribute);
+        assertFalse(it.hasNext());
+    }
+
+    public void testEvaluateDB_PATH_DbEntity() throws Exception {
+        ASTNode node =
+            ASTCompiler.compile(
+                ExpressionFactory.expFromString("db:paintingArray.PAINTING_TITLE"));
+
+        ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+        DbEntity ade = ae.getDbEntity();
+
+        Object objTarget = node.evaluateASTChain(ae);
+        assertTrue(objTarget instanceof Iterator);
+
+        Iterator it = (Iterator) objTarget;
+        assertTrue(it.next() instanceof DbRelationship);
+        assertTrue(it.next() instanceof DbAttribute);
+        assertFalse(it.hasNext());
+
+        Object dbTarget = node.evaluateASTChain(ade);
+        assertTrue(dbTarget instanceof Iterator);
+
+        it = (Iterator) dbTarget;
+        assertTrue(it.next() instanceof DbRelationship);
+        assertTrue(it.next() instanceof DbAttribute);
+        assertFalse(it.hasNext());
     }
 
     public void testEvaluateEQUAL_TO() throws Exception {
