@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!--            Cayenne master build file.             -->
+<!-- Serves as a facade to a set of private buildfiles.-->
+<!-- ================================================= -->
+<project name="cayenne" default="build" basedir=".">
+
+    <!-- ============================================= -->
+    <!-- Loads properties from default locations.      -->
+    <!-- ============================================= -->
+    <property file="build.properties" />
+    <property file="${user.home}/build.properties" />
+    <property file="default.properties" />
+    
+    
+    <!-- ============================================= -->
+    <!-- Derived Properties. These properties are      -->
+    <!-- derived from other properties. You probably   -->
+    <!-- don't want to redefine them.                  -->
+    <!-- ============================================= -->
+    <property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
+
+
+    <!-- ============================================= -->
+    <!-- Prints help message describing build.xml use. -->
+    <!-- ============================================= -->
+    <target name="help">
+        <echo>
+     ******************************************************
+     * Available targets (you can also use the "-projecthelp" ant flag 
+     * to see targets):
+     *
+     *  1. release      - creates a full Cayenne distribution.
+     *  2. build        - (default target) builds all subproject JAR files.
+     *  3. compile      - compiles all subprojects source files.
+     *  4. clean        - cleans temporary build and distribution directories
+     *  5. doc          - builds Cayenne documentation including Javadocs.
+     *  6. api          - builds Javdoc API documentation.
+     *  7. help         - prints this message
+     *
+     *
+     * ENVIRONMENT:
+     *  java.home = ${java.home}
+     *  user.home = ${user.home}
+     *  ant.home = ${ant.home}
+     *  build.compiler = ${build.compiler}
+     ******************************************************
+         </echo>
+    </target>
+
+
+    <!-- ============================================= -->
+    <!-- Creates a full release of Cayenne Examples.   -->
+    <!-- ============================================= -->
+    <target name="release">
+    
+    </target>
+
+    <!-- ========================================== -->
+    <!-- Builds all Example subproject JARS.        -->
+    <!-- ========================================== -->
+    <target name="build">
+		<ant antfile="build-data-port.xml" target="dist-bin"/>
+    </target>
+    
+    <!-- ========================================== -->
+    <!-- Compiles all Example subprojects.          -->
+    <!-- ========================================== -->
+    <target name="compile">
+		<ant antfile="build-data-port.xml" target="compile"/>
+    </target>
+
+
+    <!-- ========================================== -->
+    <!-- Cleans distribution files and subprojects. -->
+    <!-- ========================================== -->
+    <target name="clean" depends="clean-java">
+        <delete dir="${dist.base}"/>
+    </target>
+
+    <!-- ========================================== -->
+    <!-- Builds Cayenne documenatation.             -->
+    <!-- ========================================== -->
+    <target name="doc">
+        <ant antfile="build-doc.xml" target="doc"/>
+    </target>
+
+
+    <!-- ========================================== -->
+    <!-- Builds API documenatation.                 -->
+    <!-- Depends on "compile-subprojects", since    -->
+    <!-- some of the classes are generated on the   -->
+    <!-- fly.                                       -->
+    <!-- ========================================== -->
+    <target name="api">
+		<ant antfile="build-data-port.xml" target="api"/>
+    </target>  
+</project>
+
+

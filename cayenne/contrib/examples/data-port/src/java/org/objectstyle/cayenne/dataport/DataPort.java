@@ -1,0 +1,300 @@
+/* ====================================================================
+ *
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002-2003 The ObjectStyle Group
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne"
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */
+package org.objectstyle.cayenne.dataport;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.QueryResult;
+import org.objectstyle.cayenne.access.ResultIterator;
+import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.DeleteQuery;
+import org.objectstyle.cayenne.query.InsertBatchQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
+
+/**
+ * Engine to port data between two DataNodes.
+ */
+public class DataPort
+{
+  public static final int INSERT_BATCH_SIZE = 500;
+
+  protected DataNode sourceNode;
+  protected DataNode destinationNode;
+  protected List entities;
+  protected boolean cleaningDestination;
+  protected DataPortDelegate delegate;
+
+  public DataPort(DataPortDelegate delegate)
+  {
+    super();
+    this.delegate = delegate;
+  }
+
+  /**
+   * Runs DataPort.
+   */
+  public void execute() throws Exception
+  {
+    // sanity check
+    if (sourceNode == null)
+    {
+      throw new CayenneException("Can't port data, source node is null.");
+    }
+
+    if (destinationNode == null)
+    {
+      throw new CayenneException("Can't port data, destination node is null.");
+    }
+
+    // the simple equality check may actually detect problems with misconfigred nodes
+    // it is not as dumb as it may look at first
+    if (sourceNode == destinationNode)
+    {
+      throw new CayenneException("Can't port data, source and target nodes are the same.");
+    }
+
+    if (entities == null || entities.isEmpty())
+    {
+      return;
+    }
+
+    // create sorted copy of entities list
+    List sorted = new ArrayList(entities);
+    destinationNode.getDependencySorter().sortDbEntities(sorted, false);
+
+    if (cleaningDestination)
+    {
+      List entitiesInDeleteOrder = new ArrayList(sorted.size());
+      entitiesInDeleteOrder.addAll(sorted);
+      Collections.reverse(entitiesInDeleteOrder);
+      processDelete(entitiesInDeleteOrder);
+    }
+
+    processInsert(sorted);
+  }
+
+  /**
+   * Cleans up destination tables data.
+   */
+  protected void processDelete(List entities)
+  {
+    // allow delegate to interfere
+    if (delegate != null)
+    {
+      entities = delegate.willCleanData(this, entities);
+    }
+
+    if (entities == null || entities.isEmpty())
+    {
+      return;
+    }
+
+    QueryResult observer = new QueryResult();
+    Iterator it = entities.iterator();
+    while (it.hasNext())
+    {
+      DbEntity entity = (DbEntity) it.next();
+      DeleteQuery query = new DeleteQuery();
+      query.setRoot(entity);
+
+      // log execution
+      if (delegate != null)
+      {
+        delegate.willCleanData(this, entity);
+      }
+
+      destinationNode.performQuery(query, observer);
+
+      if (delegate != null)
+      {
+        List updates = observer.getUpdates(query);
+        int count = 0;
+        if (updates.size() > 0)
+        {
+          count = ((Number) updates.get(0)).intValue();
+        }
+        delegate.didCleanData(this, entity, count);
+      }
+    }
+  }
+
+  protected void processInsert(List entities) throws Exception
+  {
+    // allow delegate to interfere
+    if (delegate != null)
+    {
+      entities = delegate.willCleanData(this, entities);
+    }
+
+    if (entities == null || entities.isEmpty())
+    {
+      return;
+    }
+
+    // Create an observer for to get the iterated result
+    IteratedSelectObserver observer = new IteratedSelectObserver();
+    QueryResult insertObserver = new QueryResult();
+    Iterator it = entities.iterator();
+    while (it.hasNext())
+    {
+      DbEntity entity = (DbEntity) it.next();
+
+      SelectQuery select = new SelectQuery();
+      select.setRoot(entity);
+      select.setFetchingDataRows(true);
+
+      sourceNode.performQuery(select, observer);
+      ResultIterator result = observer.getResultIterator();
+      InsertBatchQuery insert = new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
+      // determine logging level
+      if (delegate != null)
+      {
+        delegate.willPortEntity(this, entity);
+      }
+
+      try
+      {
+        while (result.hasNextRow())
+        {
+          Map nextRow = result.nextDataRow();
+          insert.add(nextRow);
+        }
+
+        // maybe commit for every INSERT_BATCH_SIZE rows instead of the whole table?
+        destinationNode.performQuery(insert, insertObserver);
+
+        if (delegate != null)
+        {
+          List inserts = insertObserver.getUpdates(insert);
+          int count = 0;
+          if (inserts.size() > 0)
+          {
+            count = ((Number) inserts.get(0)).intValue();
+          }
+          delegate.didPortEntity(this, entity, count);
+        }
+      }
+      finally
+      {
+        try
+        {
+          result.close();
+        }
+        catch (CayenneException ex)
+        {
+        }
+      }
+    }
+  }
+
+  public List getEntities()
+  {
+    return entities;
+  }
+
+  public DataNode getSourceNode()
+  {
+    return sourceNode;
+  }
+
+  public DataNode getDestinationNode()
+  {
+    return destinationNode;
+  }
+
+  public void setEntities(List entities)
+  {
+    this.entities = entities;
+  }
+
+  public void setSourceNode(DataNode sourceNode)
+  {
+    this.sourceNode = sourceNode;
+  }
+
+  public void setDestinationNode(DataNode destinationNode)
+  {
+    this.destinationNode = destinationNode;
+  }
+
+  public DataPortDelegate getDelegate()
+  {
+    return delegate;
+  }
+
+  public void setDelegate(DataPortDelegate delegate)
+  {
+    this.delegate = delegate;
+  }
+
+  public boolean isCleaningDestination()
+  {
+    return cleaningDestination;
+  }
+
+  public void setCleaningDestination(boolean deletingDestinationFirst)
+  {
+    this.cleaningDestination = deletingDestinationFirst;
+  }
+
+}
