@@ -82,6 +82,9 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author Andrei Adamchik
  */
+// TODO: factory shouldn't contain any state specific to location ("driverInfo" ivar
+// should go, and probably "parser" too)... Otherwise the API doesn't make sense -
+// sequential invocations of getDataSource() will have side effects....
 public class DriverDataSourceFactory implements DataSourceFactory {
     private static Logger logObj =
         Logger.getLogger(DriverDataSourceFactory.class);
