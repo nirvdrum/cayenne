@@ -56,15 +56,19 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.io.Serializable;
+
 import org.objectstyle.cayenne.util.Util;
 
 /** 
- * Helper JavaBean class that holds datasource login information. 
+ * Helper JavaBean class that holds DataSource login information. 
  * 
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
+ * 
+ * @author Andrei Adamchik
  */
-public class DataSourceInfo implements Cloneable, java.io.Serializable {
+public class DataSourceInfo implements Cloneable, Serializable {	
 	protected String userName;
 	protected String password;
 	protected String jdbcDriver;
