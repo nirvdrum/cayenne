@@ -106,11 +106,12 @@ public class RelationshipErrorMsg extends ValidationDisplayHandler {
     }
 
     public void displayField(EventController mediator, JFrame frame) {
-        RelationshipDisplayEvent event;
-        event = new RelationshipDisplayEvent(frame, rel, entity, map, domain);
+        RelationshipDisplayEvent event =
+            new RelationshipDisplayEvent(frame, rel, entity, map, domain);
         if (entity instanceof ObjEntity) {
             mediator.fireObjRelationshipDisplayEvent(event);
-        } else if (entity instanceof DbEntity) {
+        }
+        else if (entity instanceof DbEntity) {
             mediator.fireDbRelationshipDisplayEvent(event);
         }
     }

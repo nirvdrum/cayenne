@@ -63,9 +63,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 
 /**
  * Tabbed panel for stored procedure editing.
@@ -74,7 +77,7 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
  */
 public class ProcedureDetailView
     extends JTabbedPane
-    implements ProcedureDisplayListener {
+    implements ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
     protected EventController eventController;
     protected ProcedurePane procedurePanel;
@@ -87,7 +90,7 @@ public class ProcedureDetailView
         setTabPlacement(JTabbedPane.TOP);
         procedurePanel = new ProcedurePane(eventController);
         addTab("Procedure", new JScrollPane(procedurePanel));
-		procedureParameterPanel = new ProcedureParameterPane(eventController);
+        procedureParameterPanel = new ProcedureParameterPane(eventController);
         addTab("Parameters", procedureParameterPanel);
 
         // init listeners
@@ -114,9 +117,21 @@ public class ProcedureDetailView
             setVisible(false);
         else {
             if (e.isTabReset()) {
-                setSelectedIndex(0);
+                this.setSelectedIndex(0);
             }
-            setVisible(true);
+            this.setVisible(true);
         }
+    }
+
+    public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
+        if (e.getProcedure() == null)
+            return;
+
+        // update relationship selection
+        ProcedureParameter parameter = e.getProcedureParameter();
+        procedureParameterPanel.selectParameter(parameter);
+
+        // Display attribute tab
+        this.setSelectedIndex(1);
     }
 }

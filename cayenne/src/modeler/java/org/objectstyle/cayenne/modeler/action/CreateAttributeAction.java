@@ -64,9 +64,14 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.MapEvent;
+import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -89,62 +94,86 @@ public class CreateAttributeAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     * Creates ObjAttribute, DbAttribute or ProcedureParameter depending on context.
      */
     public void performAction(ActionEvent e) {
-        ObjEntity objEnt = getMediator().getCurrentObjEntity();
-        if (objEnt != null) {
-            createObjAttribute(objEnt);
-        } else {
-            DbEntity dbEnt = getMediator().getCurrentDbEntity();
-            if (dbEnt != null) {
-                createDbAttribute(dbEnt);
-            }
+        if (getMediator().getCurrentProcedure() != null) {
+            createProcedureParameter();
+        }
+        else if (getMediator().getCurrentObjEntity() != null) {
+            createObjAttribute();
+        }
+        else if (getMediator().getCurrentDbEntity() != null) {
+            createDbAttribute();
         }
     }
 
-    public void createObjAttribute(ObjEntity objEnt) {
+    public void createProcedureParameter() {
+        Procedure procedure = getMediator().getCurrentProcedure();
+
+        ProcedureParameter parameter =
+            (ProcedureParameter) NamedObjectFactory.createObject(
+                ProcedureParameter.class,
+                procedure);
+        procedure.addCallParameter(parameter);
+
         EventController mediator = getMediator();
+        mediator.fireProcedureParameterEvent(
+            new ProcedureParameterEvent(this, parameter, MapEvent.ADD));
+        mediator.fireProcedureParameterDisplayEvent(
+            new ProcedureParameterDisplayEvent(
+                this,
+                parameter,
+                procedure,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain()));
+    }
+
+    public void createObjAttribute() {
+        EventController mediator = getMediator();
+        ObjEntity objEntity = mediator.getCurrentObjEntity();
 
         ObjAttribute attr =
-            (ObjAttribute) NamedObjectFactory.createObject(ObjAttribute.class, objEnt);
-        objEnt.addAttribute(attr);
+            (ObjAttribute) NamedObjectFactory.createObject(ObjAttribute.class, objEntity);
+        objEntity.addAttribute(attr);
         mediator.fireObjAttributeEvent(
-            new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
+            new AttributeEvent(this, attr, objEntity, AttributeEvent.ADD));
 
         mediator.fireObjAttributeDisplayEvent(
             new AttributeDisplayEvent(
                 this,
                 attr,
-                objEnt,
+                objEntity,
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain()));
     }
 
-    public void createDbAttribute(DbEntity dbEnt) {
+    public void createDbAttribute() {
         Class attrClass = null;
 
-        if (dbEnt instanceof DerivedDbEntity) {
-            if (((DerivedDbEntity) dbEnt).getParentEntity() == null) {
+        DbEntity dbEntity = getMediator().getCurrentDbEntity();
+        if (dbEntity instanceof DerivedDbEntity) {
+            if (((DerivedDbEntity) dbEntity).getParentEntity() == null) {
                 return;
             }
             attrClass = DerivedDbAttribute.class;
-        } else {
+        }
+        else {
             attrClass = DbAttribute.class;
         }
 
         DbAttribute attr =
-            (DbAttribute) NamedObjectFactory.createObject(attrClass, dbEnt);
-        dbEnt.addAttribute(attr);
+            (DbAttribute) NamedObjectFactory.createObject(attrClass, dbEntity);
+        dbEntity.addAttribute(attr);
 
         EventController mediator = getMediator();
         mediator.fireDbAttributeEvent(
-            new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
+            new AttributeEvent(this, attr, dbEntity, AttributeEvent.ADD));
         mediator.fireDbAttributeDisplayEvent(
             new AttributeDisplayEvent(
                 this,
                 attr,
-                dbEnt,
+                dbEntity,
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain()));
     }

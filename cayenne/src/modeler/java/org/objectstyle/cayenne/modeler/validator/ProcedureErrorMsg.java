@@ -53,109 +53,35 @@
  * <http://objectstyle.org/>.
  *
  */
-
 package org.objectstyle.cayenne.modeler.validator;
 
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.ProjectException;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
-/** 
- * Superclass of CayenneModeler validation messages.
- * 
- * @author Michael Misha Shengaout 
+/**
  * @author Andrei Adamchik
  */
-public abstract class ValidationDisplayHandler {
-    public static final int NO_ERROR = ValidationInfo.VALID;
-    public static final int WARNING = ValidationInfo.WARNING;
-    public static final int ERROR = ValidationInfo.ERROR;
-
-    protected ValidationInfo validationInfo;
-    protected DataDomain domain;
-
-    public static ValidationDisplayHandler getErrorMsg(ValidationInfo result) {
-        Object validatedObj = result.getValidatedObject();
-
-        ValidationDisplayHandler msg = null;
-        if (validatedObj instanceof Attribute) {
-            msg = new AttributeErrorMsg(result);
-        }
-        else if (validatedObj instanceof Relationship) {
-            msg = new RelationshipErrorMsg(result);
-        }
-        else if (validatedObj instanceof Entity) {
-            msg = new EntityErrorMsg(result);
-        }
-        else if (validatedObj instanceof DataNode) {
-            msg = new DataNodeErrorMsg(result);
-        }
-        else if (validatedObj instanceof DataMap) {
-            msg = new DataMapErrorMsg(result);
-        }
-        else if (validatedObj instanceof DataDomain) {
-            msg = new DomainErrorMsg(result);
-        }
-        else if (validatedObj instanceof Procedure) {
-            msg = new ProcedureErrorMsg(result);
-        }
-        else if (validatedObj instanceof ProcedureParameter) {
-            msg = new ProcedureParameterErrorMsg(result);
-        }
-        else {
-            throw new ProjectException("Unsupported project node: " + validatedObj);
-        }
-
-        return msg;
+public class ProcedureErrorMsg extends ValidationDisplayHandler {
+    public ProcedureErrorMsg(ValidationInfo validationInfo) {
+        super(validationInfo);
     }
 
-    public ValidationDisplayHandler(ValidationInfo validationInfo) {
-        this.validationInfo = validationInfo;
-    }
-
-    /** 
-     * Fires event to display the screen where error should be corrected. 
-     */
-    public abstract void displayField(EventController mediator, JFrame frame);
-
-    /** Returns the text of the error message. */
-    public String getMessage() {
-        return validationInfo.getMessage();
-    }
-
-    /** Returns the severity of the error message.*/
-    public int getSeverity() {
-        return validationInfo.getSeverity();
-    }
-
-    public DataDomain getDomain() {
-        return domain;
-    }
-
-    public void setDomain(DataDomain domain) {
-        this.domain = domain;
-    }
-
-    public String toString() {
-        return getMessage();
-    }
-
-    public ProjectPath getPath() {
-        return validationInfo.getPath();
-    }
-
-    public ValidationInfo getValidationInfo() {
-        return validationInfo;
+    public void displayField(EventController mediator, JFrame frame) {
+		ProjectPath path = super.validationInfo.getPath();
+		DataDomain domain = (DataDomain)path.firstInstanceOf(DataDomain.class);
+		DataMap map = (DataMap)path.firstInstanceOf(DataMap.class);
+		Procedure procedure = (Procedure)path.firstInstanceOf(Procedure.class);
+	
+        ProcedureDisplayEvent event =
+            new ProcedureDisplayEvent(frame, procedure, map, domain);
+        event.setTabReset(true);
+        mediator.fireProcedureDisplayEvent(event);
     }
 }

@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
@@ -82,6 +83,7 @@ import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
+import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -131,6 +133,9 @@ public class RemoveAction extends CayenneAction {
         }
         else if (mediator.getCurrentDbRelationship() != null) {
             removeDbRelationship();
+        }
+        if (mediator.getCurrentProcedureParameter() != null) {
+            removeProcedureParameter();
         }
         else if (mediator.getCurrentObjEntity() != null) {
             removeObjEntity();
@@ -222,6 +227,15 @@ public class RemoveAction extends CayenneAction {
         map.deleteObjEntity(ent.getName());
         mediator.fireObjEntityEvent(
             new EntityEvent(Editor.getFrame(), ent, MapEvent.REMOVE));
+    }
+
+    protected void removeProcedureParameter() {
+        EventController mediator = getMediator();
+        ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
+        mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
+        ProcedureParameterEvent e =
+            new ProcedureParameterEvent(Editor.getFrame(), parameter, MapEvent.REMOVE);
+        mediator.fireProcedureParameterEvent(e);
     }
 
     protected void removeObjAttribute() {

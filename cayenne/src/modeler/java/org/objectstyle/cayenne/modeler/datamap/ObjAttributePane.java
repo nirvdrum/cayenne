@@ -93,8 +93,9 @@ public class ObjAttributePane
         ObjAttributeListener,
         ExistingSelectionProcessor,
         ListSelectionListener {
-    EventController mediator;
-    CayenneTable table;
+        	
+    protected EventController mediator;
+    protected CayenneTable table;
 
     public ObjAttributePane(EventController mediator) {
         super();
@@ -230,7 +231,9 @@ public class ObjAttributePane
         }
     }
 
-    /** If DbEntity changed, refresh table.*/
+    /**
+     * Refreshes attributes view for the updated entity 
+     */
     public void objEntityChanged(EntityEvent e) {
         if (e.getSource() == this) {
             return;

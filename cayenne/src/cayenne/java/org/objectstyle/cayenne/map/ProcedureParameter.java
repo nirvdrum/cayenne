@@ -72,7 +72,7 @@ public class ProcedureParameter extends MapObject {
      */
     public static final int VOID_PARAMETER = 4;
 
-    protected int direction = VOID_PARAMETER;
+    protected int direction = -1;
 
     // The length of CHAR or VARCHAR or max num of digits for DECIMAL.
     protected int maxLength = -1;

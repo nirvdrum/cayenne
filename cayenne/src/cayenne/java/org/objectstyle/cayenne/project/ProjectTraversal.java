@@ -226,6 +226,12 @@ public class ProjectTraversal {
             Procedure procedure = (Procedure) procedures.next();
             ProjectPath procedurePath = path.appendToPath(procedure);
             handler.projectNode(procedurePath);
+
+            if (handler.shouldReadChildren(procedure, path)) {
+                this.traverseProcedureParameters(
+                    procedure.getCallParameters().iterator(),
+                    procedurePath);
+            }
         }
     }
 
@@ -266,6 +272,14 @@ public class ProjectTraversal {
 
         while (relationships.hasNext()) {
             handler.projectNode(path.appendToPath(relationships.next()));
+        }
+    }
+
+    public void traverseProcedureParameters(Iterator parameters, ProjectPath path) {
+        // Note: !! do not try to sort parameters - they are positional by definition
+
+        while (parameters.hasNext()) {
+            handler.projectNode(path.appendToPath(parameters.next()));
         }
     }
 

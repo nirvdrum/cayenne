@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -73,6 +74,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
 
 /** 
@@ -92,7 +94,8 @@ import org.objectstyle.cayenne.map.Relationship;
  *    <li>DbRelationship</li>
  *    <li>DataNode</li>
  *    <li>DataDomain</li>
- * 	   <li>Procedure</li>
+ * 	  <li>Procedure</li>
+ *    <li>ProcedureParameter</li>
  * </ul>
  * 
  * This is a helper class used mostly by GUI and database 
@@ -116,6 +119,7 @@ public abstract class NamedObjectFactory {
         factories.put(ObjRelationship.class, new ObjRelationshipFactory(null, false));
         factories.put(DataDomain.class, new DataDomainFactory());
         factories.put(Procedure.class, new ProcedureFactory());
+        factories.put(ProcedureParameter.class, new ProcedureParameterFactory());
     }
 
     public static String createName(Class objectClass, Object namingContext) {
@@ -253,6 +257,33 @@ public abstract class NamedObjectFactory {
         protected boolean isNameInUse(String name, Object namingContext) {
             DataMap map = (DataMap) namingContext;
             return map.getDbEntity(name) != null;
+        }
+    }
+
+    static class ProcedureParameterFactory extends NamedObjectFactory {
+        protected String nameBase() {
+            return "UntitledProcedureParameter";
+        }
+
+        protected Object create(String name, Object namingContext) {
+            return new ProcedureParameter(name);
+        }
+
+        protected boolean isNameInUse(String name, Object namingContext) {
+        	
+            // it doesn't matter if we create a parameter with 
+            // a duplicate name.. parameters are positional anyway..
+            // still try to use unique names for visual consistency
+            Procedure procedure = (Procedure) namingContext;
+            Iterator it = procedure.getCallOutParams().iterator();
+            while (it.hasNext()) {
+                ProcedureParameter parameter = (ProcedureParameter) it.next();
+                if (name.equals(parameter.getName())) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

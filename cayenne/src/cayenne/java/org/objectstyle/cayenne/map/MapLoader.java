@@ -1223,9 +1223,6 @@ public class MapLoader extends DefaultHandler {
         else if ("in_out".equals(direction)) {
             parameter.setDirection(ProcedureParameter.IN_OUT_PARAMETER);
         }
-        else {
-            parameter.setDirection(ProcedureParameter.VOID_PARAMETER);
-        }
 
         procedure.addCallParameter(parameter);
     }

@@ -62,15 +62,20 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
+import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
@@ -79,10 +84,10 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
  */
 public class ProcedureParameterPane
     extends JPanel
-    implements ProcedureDisplayListener, ExistingSelectionProcessor {
+    implements ProcedureParameterListener, ProcedureDisplayListener, ExistingSelectionProcessor {
     protected EventController eventController;
 
-    protected JTable table;
+    protected CayenneTable table;
 
     public ProcedureParameterPane(EventController eventController) {
         this.eventController = eventController;
@@ -90,6 +95,13 @@ public class ProcedureParameterPane
         init();
 
         eventController.addProcedureDisplayListener(this);
+        eventController.addProcedureParameterListener(this);
+
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                ProcedureParameterPane.this.processExistingSelection();
+            }
+        });
     }
 
     protected void init() {
@@ -103,13 +115,24 @@ public class ProcedureParameterPane
     }
 
     public void processExistingSelection() {
-        ProcedureDisplayEvent e =
-            new ProcedureDisplayEvent(
+        ProcedureParameter parameter = null;
+        if (table.getSelectedRow() >= 0) {
+            ProcedureParameterTableModel model =
+                (ProcedureParameterTableModel) table.getModel();
+            parameter = model.getParameter(table.getSelectedRow());
+
+            // scroll table
+            table.scroll(table.getSelectedRow(), 0);
+        }
+
+        ProcedureParameterDisplayEvent e =
+            new ProcedureParameterDisplayEvent(
                 this,
+                parameter,
                 eventController.getCurrentProcedure(),
                 eventController.getCurrentDataMap(),
                 eventController.getCurrentDataDomain());
-        eventController.fireProcedureDisplayEvent(e);
+        eventController.fireProcedureParameterDisplayEvent(e);
     }
 
     /**
@@ -119,6 +142,23 @@ public class ProcedureParameterPane
         Procedure procedure = e.getProcedure();
         if (procedure != null && e.isProcedureChanged()) {
             rebuildTable(procedure);
+        }
+    }
+
+    /**
+     * Selects a specified parameter.
+     */
+    public void selectParameter(ProcedureParameter parameter) {
+        if (parameter == null) {
+            return;
+        }
+
+        ProcedureParameterTableModel model =
+            (ProcedureParameterTableModel) table.getModel();
+        java.util.List parameters = model.getObjectList();
+        int pos = parameters.indexOf(parameter);
+        if (pos >= 0) {
+            table.select(pos);
         }
     }
 
@@ -159,4 +199,20 @@ public class ProcedureParameterPane
         directionColumn.setCellEditor(new DefaultCellEditor(directionEditor));
     }
 
+    public void procedureParameterAdded(ProcedureParameterEvent e) {
+        rebuildTable(e.getParameter().getProcedure());
+        table.select(e.getParameter());
+    }
+
+    public void procedureParameterChanged(ProcedureParameterEvent e) {
+        table.select(e.getParameter());
+    }
+
+    public void procedureParameterRemoved(ProcedureParameterEvent e) {
+        ProcedureParameterTableModel model =
+            (ProcedureParameterTableModel) table.getModel();
+        int ind = model.getObjectList().indexOf(e.getParameter());
+        model.removeRow(e.getParameter());
+        table.select(ind);
+    }
 }

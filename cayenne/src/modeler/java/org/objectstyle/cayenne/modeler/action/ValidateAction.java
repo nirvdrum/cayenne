@@ -90,18 +90,17 @@ public class ValidateAction extends CayenneAction {
 		}
 
 	}
+	
 	/**
 	* Returns <code>true</code> if path contains a Project object 
 	* and the project is modified.
 	*/
 	public boolean enableForPath(ProjectPath path) {
-		System.out.println("ValidateAction enabelForPath "+path);
 		if (path == null) {
 			return false;
 		}
 
 		Project project = (Project)path.firstInstanceOf(Project.class);
-		System.out.println("project is "+project);
 		return project != null;
 	}
 

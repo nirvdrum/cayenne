@@ -65,6 +65,8 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -74,8 +76,8 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public abstract class TreeNodeValidator {
-	private static Logger logObj = Logger.getLogger(TreeNodeValidator.class);
-    
+    private static Logger logObj = Logger.getLogger(TreeNodeValidator.class);
+
     // initialize singleton validators
     protected static final DomainValidator domainValidator = new DomainValidator();
     protected static final DataNodeValidator nodeValidator = new DataNodeValidator();
@@ -92,6 +94,12 @@ public abstract class TreeNodeValidator {
     protected static final DbRelationshipValidator dbRelValidator =
         new DbRelationshipValidator();
 
+    protected static final ProcedureValidator procedureValidator =
+        new ProcedureValidator();
+
+    protected static final ProcedureParameterValidator procedureParameterValidator =
+        new ProcedureParameterValidator();
+
     /**
      * Validates an object, appending any validation messages 
      * to the validator provided.
@@ -101,25 +109,43 @@ public abstract class TreeNodeValidator {
         TreeNodeValidator validatorObj = null;
         if (validatedObj instanceof ObjAttribute) {
             validatorObj = objAttrValidator;
-        } else if (validatedObj instanceof ObjRelationship) {
+        }
+        else if (validatedObj instanceof ObjRelationship) {
             validatorObj = objRelValidator;
-        } else if (validatedObj instanceof ObjEntity) {
+        }
+        else if (validatedObj instanceof ObjEntity) {
             validatorObj = objEntityValidator;
-        } else if (validatedObj instanceof DbAttribute) {
+        }
+        else if (validatedObj instanceof DbAttribute) {
             validatorObj = dbAttrValidator;
-        } else if (validatedObj instanceof DbRelationship) {
+        }
+        else if (validatedObj instanceof DbRelationship) {
             validatorObj = dbRelValidator;
-        } else if (validatedObj instanceof DbEntity) {
+        }
+        else if (validatedObj instanceof DbEntity) {
             validatorObj = dbEntityValidator;
-        } else if (validatedObj instanceof DataNode) {
+        }
+        else if (validatedObj instanceof DataNode) {
             validatorObj = nodeValidator;
-        } else if (validatedObj instanceof DataMap) {
+        }
+        else if (validatedObj instanceof DataMap) {
             validatorObj = mapValidator;
-        } else if (validatedObj instanceof DataDomain) {
+        }
+        else if (validatedObj instanceof DataDomain) {
             validatorObj = domainValidator;
-        } else {
+        }
+        else if (validatedObj instanceof Procedure) {
+            validatorObj = procedureValidator;
+        }
+        else if (validatedObj instanceof ProcedureParameter) {
+            validatorObj = procedureParameterValidator;
+        }
+        else {
             // ignore unknown nodes
-            String className = (validatedObj != null) ? validatedObj.getClass().getName() : "(null object)";
+            String className =
+                (validatedObj != null)
+                    ? validatedObj.getClass().getName()
+                    : "(null object)";
             logObj.info("Validation not supported for object of class: " + className);
             return;
         }
