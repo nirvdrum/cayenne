@@ -171,10 +171,8 @@ public class PreferenceDialog extends CayenneController {
         Domain prefDomain = application.getPreferenceDomain().getSubdomain(
                 view.getClass());
         ComponentGeometry geometry = ComponentGeometry.getPreference(prefDomain);
-        geometry.bind(view, 500, 350);
-        geometry.bindIntProperty(view.getSplit(), "dividerLocation", view
-                .getSplit()
-                .getDividerLocation());
+        geometry.bind(view, 650, 350);
+        geometry.bindIntProperty(view.getSplit(), "dividerLocation", 220);
 
         // show
         centerView();
