@@ -127,7 +127,6 @@ public class SelectQueryTst extends SelectQueryBase {
         query.setQualifier(qual);
 
         query.setLoggingLevel(Level.WARN);
-        getDomain().createDataContext().performQuery(query);
         performQuery();
 
         // check query results
