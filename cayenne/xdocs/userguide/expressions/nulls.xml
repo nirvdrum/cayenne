@@ -6,8 +6,8 @@
 	<next>/userguide/perform/index.html</next>
 </navigator>    
 <body>
-    <section name="9. Using Expressions">        
-		<subsection name="9.4 NULL handling.">
+    <section name="10. Using Expressions">        
+		<subsection name="10.4 NULL handling.">
 		<p>Handling of Java nulls as operands is no different from normal values. 
 		Instead of using special conditional operators, like SQL does, EQUAL_TO and NOT_EQUAL_TO 
         expressions can be used directly with null values. It is up to Cayenne to 

@@ -6,14 +6,14 @@
 	<next>/userguide/expressions/nulls.html</next>
 </navigator>    
 <body>
-    <section name="9. Using Expressions">        
-		<subsection name="9.3 Simplified Expression API">
+    <section name="10. Using Expressions">        
+		<subsection name="10.3 Simplified Expression API">
 		<p>Building expressions using previously described techniques is not intuitive,
 		requires lots of code, and is error-prone. For most real-life cases Cayenne provides
 		simpler and cleaner API discussed in this chapter.
 		</p>
 		
-		<subsection name="9.3.1 Path/Value Expressions">
+		<subsection name="10.3.1 Path/Value Expressions">
 		<p>The most simple expressions are the ones that match an object property
 		(or more commonly - object property path) with a value or a list of values. 
 		ExpressionFactory provides a set of methods to build such "path/value" expressions:</p>
@@ -69,7 +69,7 @@
         </ul>		
 		</subsection>
 		
-		<subsection name="9.3.2 Chanining Expressions">
+		<subsection name="10.3.2 Chanining Expressions">
 		<p>Expression class itself provides a set of convenience methods to chain expressions
 		as they are built from smaller parts. Note that each of these methods does not modify
 		the original expression, rather it builds and returns a new instance of the expression.</p>
@@ -117,7 +117,7 @@ SelectQuery select = new SelectQuery(Artist.class, qual);
 </source>
 			</subsection>
 			
-			<subsection name="9.3.3 Creating Complex Expressions">
+			<subsection name="10.3.3 Creating Complex Expressions">
 			<p>There is a way to create complex expressions either from the 
 			Lists of expressions or from the Maps containing values using "path" Strings
 			as keys. This approach significantly simplifies connecting Cayenne queries

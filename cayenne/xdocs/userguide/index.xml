@@ -74,39 +74,39 @@
             	<li><a href="stored-procedures/any.html">9.2 Executing an Arbitrary Stored Procedure</a></li>
             </ul><br/></li>
             
-            <li><a href="expressions/index.html"><strong>9. Using Expressions</strong></a>
+            <li><a href="expressions/index.html"><strong>10. Using Expressions</strong></a>
             <ul>
-            	<li><a href="expressions/common.html">9.1 General Approach to Building Expressions</a></li>
-            	<li><a href="expressions/path.html">9.2 Path Expressions</a></li>
-            	<li><a href="expressions/shortcut.html">9.3 Simplified Expression API</a></li>
-            	<li><a href="expressions/nulls.html">9.4 NULL handling</a></li>
+            	<li><a href="expressions/common.html">10.1 General Approach to Building Expressions</a></li>
+            	<li><a href="expressions/path.html">10.2 Path Expressions</a></li>
+            	<li><a href="expressions/shortcut.html">10.3 Simplified Expression API</a></li>
+            	<li><a href="expressions/nulls.html">10.4 NULL handling</a></li>
             </ul><br/></li>
             
-            <li><a href="perform/index.html"><strong>10. Performance Tuning</strong></a>
+            <li><a href="perform/index.html"><strong>11. Performance Tuning</strong></a>
             <ul>
-                <li><a href="perform/index.html#data_rows">10.1 Data Rows</a></li>
-                <li><a href="perform/index.html#iterator">10.2 ResultIterator: Incremental Data Processing</a></li>
-                <li><a href="perform/index.html#paged">10.3 Paged Queries</a></li>
+                <li><a href="perform/index.html#data_rows">11.1 Data Rows</a></li>
+                <li><a href="perform/index.html#iterator">11.2 ResultIterator: Incremental Data Processing</a></li>
+                <li><a href="perform/index.html#paged">11.3 Paged Queries</a></li>
             </ul><br/></li>
             
-            <li><a href="advmodel/index.html"><strong>11. Advanced modelling</strong></a>
+            <li><a href="advmodel/index.html"><strong>12. Advanced modelling</strong></a>
             <ul>
-            	<li><a href="advmodel/flattenedrel.html">11.1 Flattened relationships</a></li>
+            	<li><a href="advmodel/flattenedrel.html">12.1 Flattened relationships</a></li>
             </ul><br/></li>
             
-            <li><a href="deploy/index.html"><strong>12. Deployment</strong></a>
+            <li><a href="deploy/index.html"><strong>13. Deployment</strong></a>
             <ul>
-                <li><a href="deploy/index.html#config">12.1 Configuration</a></li>
-                <li><a href="deploy/index.html#standalone">12.2 Standalone Applications</a></li>
-                <li><a href="deploy/index.html#web">12.3 Web Applications</a></li>
-                <li><a href="deploy/index.html#custom">12.4 Customizing Configuration</a></li>
-                <li><a href="deploy/index.html#jndi">12.5 Using JNDI</a></li>
-                <li><a href="deploy/cdeploy.html">12.6 Deployment Configuration With Ant</a></li>
+                <li><a href="deploy/index.html#config">13.1 Configuration</a></li>
+                <li><a href="deploy/index.html#standalone">13.2 Standalone Applications</a></li>
+                <li><a href="deploy/index.html#web">13.3 Web Applications</a></li>
+                <li><a href="deploy/index.html#custom">13.4 Customizing Configuration</a></li>
+                <li><a href="deploy/index.html#jndi">13.5 Using JNDI</a></li>
+                <li><a href="deploy/cdeploy.html">13.6 Deployment Configuration With Ant</a></li>
             </ul><br/></li>
             
-            <li><a href="misc.html"><strong>13. Miscellaneous Information</strong></a>
+            <li><a href="misc.html"><strong>14. Miscellaneous Information</strong></a>
             <ul>
-                <li><a href="misc.html#webobjects">13.1 Cayenne and WebObjects</a></li>
+                <li><a href="misc.html#webobjects">14.1 Cayenne and WebObjects</a></li>
             </ul><br/></li>
         </ul>
     </section>

@@ -10,8 +10,8 @@
 	<next>/userguide/misc.html</next>
 </navigator>    
 <body>
-    <section name="11. Deployment">        
-           <subsection name="11.6 Deployment Configuration With Ant">
+    <section name="13. Deployment">        
+           <subsection name="13.6 Deployment Configuration With Ant">
             <p>There is a number of 
             cases when it is highly desirable to automate changing of Cayenne 
             configuration files, including <code>cayenne.xml</code> and driver information files:</p>
@@ -28,7 +28,7 @@
             <p>Cayenne provides an Ant task described below that takes care of such things.
 			</p>
             
-            <subsection name="11.6.1 Cdeploy (Cayenne Deployment Configurator)" anchor="cdeploy">
+            <subsection name="13.6.1 Cdeploy (Cayenne Deployment Configurator)" anchor="cdeploy">
 			<h3>Description</h3>
 			
 			<p><code>Cdeploy</code> is an Ant task that configures Cayenne connection information

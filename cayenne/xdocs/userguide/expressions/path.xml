@@ -6,8 +6,8 @@
 	<next>/userguide/expressions/shortcut.html</next>
 </navigator>    
 <body>
-    <section name="9. Using Expressions">        
-		<subsection name="9.2 Path Expressions">
+    <section name="10. Using Expressions">        
+		<subsection name="10.2 Path Expressions">
 		<p>There is an important group of expressions widely used in Cayenne: <i>path expressions</i>.
         There is no direct analogue in SQL, rather a path expression resolves to a table
         coolumn name and, optionally, set of joins. Path expressions have a single operand 

@@ -6,7 +6,7 @@
 	<next>/userguide/expressions/common.html</next>
 </navigator>    
 <body>
-    <section name="9. Using Expressions">
+    <section name="10. Using Expressions">
     	<p>Expressions in Cayenne are used to build query qualifiers and to perform
     	in-memory sorting of objects. Each expression consists of a type and a set of operands. 
         Expressions are organized by the number of operands as Unary, Binary and Ternary.

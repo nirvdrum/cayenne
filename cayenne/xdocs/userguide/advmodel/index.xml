@@ -7,7 +7,7 @@
 </navigator>    
 
 <body>
-    <section name="10. Advanced modelling">
+    <section name="12. Advanced modelling">
     	<p>Although you can do a lot of things very easily with basic modelling,
     	there often comes a point where higher level concepts can be very useful
     	to reduce the amount of code required, and generally make the life of

@@ -6,8 +6,8 @@
 	<next>/userguide/expressions/path.html</next>
 </navigator>    
 <body>
-    <section name="9. Using Expressions">        
-		<subsection name="9.1 General Approach to Building Expressions">
+    <section name="10. Using Expressions">        
+		<subsection name="10.1 General Approach to Building Expressions">
 		<p>There is a very generic way to build any semantically valid 
 		Cayenne expression.	Internally all expressions are categorized by the 
 		number of operands as unary, binary, and ternary. <a href=
