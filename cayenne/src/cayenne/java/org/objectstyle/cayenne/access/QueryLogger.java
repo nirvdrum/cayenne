@@ -142,8 +142,8 @@ public class QueryLogger {
         } else if (anObject instanceof Boolean) {
             buf.append('\'').append(anObject).append('\'');
         } else {
-            throw new org.objectstyle.cayenne.CayenneRuntimeException(
-                "Unsupported type : " + anObject.getClass().getName());
+        	// unknown
+            buf.append("[").append(anObject.getClass().getName()).append(": ").append(anObject).append("]");
         }
     }
 
