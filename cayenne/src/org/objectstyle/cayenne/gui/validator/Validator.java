@@ -10,13 +10,11 @@ import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.*;
 
 /** Used for validating dirty elements in the Mediator.
-  * If errors are found, displays them in the dialog window.*/
+  * If errors are found, displays them in the dialog window.
+  * @author Michael Misha Shengaout */
 public class Validator
 {
 	private Mediator mediator;
@@ -210,6 +208,11 @@ public class Validator
 		int temp_err_level = validateObjEntities(domain, map, entities);
 		if (temp_err_level > status) 
 			status = temp_err_level;
+
+		DbEntity[] db_entities = map.getDbEntities();
+		temp_err_level = validateDbEntities(domain, map, db_entities);
+		if (temp_err_level > status)
+			status = temp_err_level;
 		return status;
 	}
 
@@ -217,15 +220,70 @@ public class Validator
 									, ObjEntity[] entities)
 	{
 		int status = ErrorMsg.NO_ERROR;
+		if (null == entities)
+			return status;
+		EntityErrorMsg msg;
+		// Used to check for duplicate names
+		HashMap name_map = new HashMap();
 
 		for (int i = 0; i < entities.length; i++) {
-			List rel = entities[i].getRelationshipList();
-			int temp_err_level = validateObjRels(domain, map, entities[i]);
+			String name = entities[i].getName();
+			if (name == null)
+				name = "";
+			else name = name.trim();
+			if (name.length() == 0) {
+				msg = new EntityErrorMsg("Entity has no name", ErrorMsg.ERROR
+											, domain, map, entities[i]);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			} else if (name_map.containsKey(name)) {
+				msg = new EntityErrorMsg("Duplicate entity name \""
+										+name+"\".", ErrorMsg.ERROR
+										, domain, map, entities[i]);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+			name_map.put(name, map);
+
+			int temp_err_level = validateObjAttributes(domain, map, entities[i]);
 			if (temp_err_level > status) 
 				status = temp_err_level;
-		}
+			temp_err_level = validateObjRels(domain, map, entities[i]);
+			if (temp_err_level > status) 
+				status = temp_err_level;
+		}// End for()
 		return status;
 	}
+
+	private int validateObjAttributes(DataDomain domain, DataMap map
+									, ObjEntity entity)
+	{
+		int status = ErrorMsg.NO_ERROR;
+		AttributeErrorMsg msg;
+		
+		List attributes = entity.getAttributeList();
+		Iterator iter = attributes.iterator();
+		while (iter.hasNext()) {
+			ObjAttribute attribute = (ObjAttribute)iter.next();
+			if (attribute.getName() == null || attribute.getName().trim().length() == 0) {
+				msg = new AttributeErrorMsg("Attribute has no name"
+									, ErrorMsg.ERROR, domain, map, attribute);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+			if (attribute.getType() == null || attribute.getType().trim().length() == 0) {
+				msg = new AttributeErrorMsg("Must specify attribute type"
+									, ErrorMsg.WARNING, domain, map, attribute);
+				errMsg.add(msg);
+				if (status == ErrorMsg.NO_ERROR)
+					status = ErrorMsg.WARNING;
+			}
+		}// End while()
+		
+		return status;
+	}
+	
+
 	
 	private int validateObjRels(DataDomain domain, DataMap map
 									, ObjEntity entity)
@@ -247,7 +305,87 @@ public class Validator
 		
 		return status;
 	}
+	
+	
+	private int validateDbEntities(DataDomain domain, DataMap map
+									, DbEntity[] entities)
+	{
+		int status = ErrorMsg.NO_ERROR;
+		if (null == entities)
+			return status;
+		EntityErrorMsg msg;
+		// Used to check for duplicate names
+		HashMap name_map = new HashMap();
 
+		for (int i = 0; i < entities.length; i++) {
+			String name = entities[i].getName();
+			if (name == null)
+				name = "";
+			else name = name.trim();
+			if (name.length() == 0) {
+				msg = new EntityErrorMsg("Entity has no name", ErrorMsg.ERROR
+											, domain, map, entities[i]);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			} else if (name_map.containsKey(name)) {
+				msg = new EntityErrorMsg("Duplicate entity name \""
+										+name+"\".", ErrorMsg.ERROR
+										, domain, map, entities[i]);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+			name_map.put(name, map);
+
+			int temp_err_level = validateDbAttributes(domain, map, entities[i]);
+			if (temp_err_level > status) 
+				status = temp_err_level;
+			temp_err_level = validateDbRels(domain, map, entities[i]);
+			if (temp_err_level > status) 
+				status = temp_err_level;
+		}// End for()
+		return status;
+	}
+
+	private int validateDbAttributes(DataDomain domain, DataMap map
+									, DbEntity entity)
+	{
+		int status = ErrorMsg.NO_ERROR;
+		AttributeErrorMsg msg;
+		
+		List attributes = entity.getAttributeList();
+		Iterator iter = attributes.iterator();
+		while (iter.hasNext()) {
+			DbAttribute attribute = (DbAttribute)iter.next();
+			if (attribute.getName() == null || attribute.getName().trim().length() == 0) {
+				msg = new AttributeErrorMsg("Attribute has no name"
+									, ErrorMsg.ERROR, domain, map, attribute);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+		}// End while()
+		
+		return status;
+	}
+	
+
+	
+	private int validateDbRels(DataDomain domain, DataMap map
+									, DbEntity entity)
+	{
+		int status = ErrorMsg.NO_ERROR;
+		RelationshipErrorMsg msg;
+		
+		List rels = entity.getRelationshipList();
+		Iterator iter = rels.iterator();
+		while (iter.hasNext()) {
+			DbRelationship rel = (DbRelationship)iter.next();
+			if (rel.getTargetEntity() == null) {
+				msg = new RelationshipErrorMsg("Must specify target entity"
+									, ErrorMsg.ERROR, domain, map, rel);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+		}// End while()
+		return status;
+	}	
 }
-
-

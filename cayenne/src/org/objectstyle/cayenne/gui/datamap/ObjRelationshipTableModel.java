@@ -194,6 +194,8 @@ class ObjRelationshipTableModel extends AbstractTableModel
 		else if (column == REL_CARDINALITY) {
 			Boolean temp = (Boolean)aValue;
 			rel.setToMany(temp.booleanValue());
+			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			mediator.fireObjRelationshipEvent(e);
 		}
         fireTableRowsUpdated(row, row);
     }// End setValueAt()

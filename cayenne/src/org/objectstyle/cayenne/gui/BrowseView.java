@@ -75,7 +75,8 @@ import org.objectstyle.cayenne.map.*;
 
 /** Tree of domains, data maps, data nodes (sources) and entities. 
   * When item of the tree is selected, detailed view for that 
-  * item comes up. */
+  * item comes up. 
+  *  @author Michael Misha Shengaout. */
 public class BrowseView extends JScrollPane 
 implements TreeSelectionListener, DomainDisplayListener, DomainListener
 , DataMapDisplayListener, DataMapListener, DataNodeDisplayListener, DataNodeListener
@@ -137,6 +138,14 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		// Set selection policy (one at a time) and add listeners
 		browseTree.getSelectionModel().setSelectionMode(
 									TreeSelectionModel.SINGLE_TREE_SELECTION);
+		Enumeration level = rootNode.children();
+		if (null == level)
+			return;
+		while (level.hasMoreElements()) {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)level.nextElement();
+			TreePath path = new TreePath(node.getPath());
+			browseTree.expandPath(path);
+		}// End level
 	}
 	
 	private DefaultMutableTreeNode loadDomain(DataDomain temp_domain)  {

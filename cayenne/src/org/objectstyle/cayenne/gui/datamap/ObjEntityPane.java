@@ -79,11 +79,12 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 	String		oldName;
 	JLabel		classNameLbl;
 	JTextField	className;
-	JButton 	remove;
 	JPanel		dbPane;
 	JLabel		dbNameLbl;
 	JComboBox	dbName;
 	JButton		dbNew;
+	/** At some point it will generate DbEntity from ObjEntity.
+	  * For now it will be invisible. */
 	JButton		dbGenerate;
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
@@ -97,7 +98,6 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		// Add listeners
 		name.getDocument().addDocumentListener(this);
 		className.getDocument().addDocumentListener(this);
-		remove.addActionListener(this);
 		dbName.addActionListener(this);
 		dbNew.addActionListener(this);
 		dbGenerate.addActionListener(this);
@@ -151,23 +151,12 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		dbGenerate= new JButton("Generate");
 		temp.add(dbGenerate);
 		temp.add(Box.createGlue());
-
-		remove = new JButton("Remove");
-		JPanel temp_panel 	= new JPanel(new FlowLayout(FlowLayout.CENTER));
-		add(temp_panel);
-		ySpring = Spring.sum(Spring.sum(ySpring, pad), cons.getConstraint("South"));
-		cons = layout.getConstraints(temp_panel);
-		cons.setY(ySpring);
-		cons.setX(pad);
-		temp_panel.add(remove);
+		dbGenerate.setVisible(false);
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		if (src == remove) {
-			mediator.removeObjEntity(this, mediator.getCurrentObjEntity());
-		} 
-		else if (src == dbNew) {
+		if (src == dbNew) {
 			createDbEntity();			
 		} 
 		// Change db entity for current obj entity
@@ -177,9 +166,6 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 			EntityWrapper wrap;
 			wrap = (EntityWrapper)dbName.getSelectedItem();
 			db_entity = (DbEntity)wrap.getEntity();
-			System.out.println("ObjEntityPane::actionPerformed(), " 
-				+ "setting db entity to " 
-				+ (db_entity != null ? db_entity.getName() : "") );
 			entity.setDbEntity(db_entity);
 			mediator.fireObjEntityEvent(new EntityEvent(this, entity));
 		}
@@ -190,6 +176,9 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		DbEntity entity = EntityWrapper.createDbEntity();
 		mediator.getCurrentObjEntity().setDbEntity(entity);
 		mediator.getCurrentDataMap().addDbEntity(entity);
+		EntityEvent event = new EntityEvent(this, mediator.getCurrentObjEntity());
+		mediator.fireObjEntityEvent(event);
+
 		EntityWrapper wrapper = new EntityWrapper(entity);
 		// Add DbEntity to drop-down in alphabetical order
 		DefaultComboBoxModel model = (DefaultComboBoxModel)dbName.getModel();
@@ -197,6 +186,7 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		model.insertElementAt(wrap, model.getSize());
 		model.setSelectedItem(wrap);
 		mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
+		
 	}
 
 	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }
@@ -219,6 +209,8 @@ implements DocumentListener, ActionListener, ObjEntityDisplayListener
 		}
 		else if (doc == className.getDocument()) {
 			current_entity.setClassName(className.getText());
+			EntityEvent event = new EntityEvent(this, current_entity);
+			mediator.fireObjEntityEvent(event);
 		}
 	}
 	

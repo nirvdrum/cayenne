@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.gui.event;
+package org.objectstyle.cayenne.gui.validator;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,13 +55,45 @@ package org.objectstyle.cayenne.gui.event;
  *
  */ 
 
-import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
+import javax.swing.JFrame;
 
-/** Used to display ObjRelationship. 
-  * @author Michael Misha Shengaout */
-public interface ObjRelationshipDisplayListener extends EventListener
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
+
+public class EntityErrorMsg implements ErrorMsg
 {
-	/** Current obj entity used as a model has changed.*/
-	public void currentObjRelationshipChanged(RelationshipDisplayEvent e);
+	private String errMsg;
+	private int severity = ErrorMsg.ERROR;
+	private DataDomain domain;
+	private DataMap map;
+	private Entity entity;
+	
+	public EntityErrorMsg(String temp_msg, int temp_severity
+						  , DataDomain temp_domain, DataMap temp_map
+						  , Entity temp_entity)
+	{
+		domain = temp_domain;
+		map = temp_map;
+		entity = temp_entity;
+		errMsg = temp_msg;
+		severity = temp_severity;
+	}
+	
+	public String getMessage() { return errMsg; }
+	
+	public void displayField(Mediator mediator, JFrame frame){
+		EntityDisplayEvent event;
+		event = new EntityDisplayEvent(frame, entity, map, domain);
+		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
+			mediator.fireObjEntityDisplayEvent(event);
+		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
+			mediator.fireDbEntityDisplayEvent(event);
+	}
+	
+	public int getSeverity() {return severity;}
+	
+	public String toString() {return getMessage();}
 }

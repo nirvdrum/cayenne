@@ -63,6 +63,7 @@ import javax.swing.event.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.GuiConfiguration;
+import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.util.*;
 
 
@@ -78,7 +79,7 @@ import org.objectstyle.cayenne.gui.util.*;
   * may create events, but they will assign the
   * view (pane) they belong to as the source of the event.
   * This is done to prevent eternal loops.
-  * */
+  * @author Michael Misha Shengaout */
 public class Mediator
 {
 	//DataMapEditor parent;
@@ -251,12 +252,24 @@ public class Mediator
 		addListener("org.objectstyle.cayenne.gui.event.DbAttributeListener", listener);
 	}
 
+	public void addDbAttributeDisplayListener(DbAttributeDisplayListener listener) {
+		addListener("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener", listener);
+	}
+
 	public void addObjAttributeListener(ObjAttributeListener listener) {
 		addListener("org.objectstyle.cayenne.gui.event.ObjAttributeListener", listener);		
 	}
 
+	public void addObjAttributeDisplayListener(ObjAttributeDisplayListener listener) {
+		addListener("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener", listener);		
+	}
+
 	public void addDbRelationshipListener(DbRelationshipListener listener) {
 		addListener("org.objectstyle.cayenne.gui.event.DbRelationshipListener", listener);
+	}
+
+	public void addDbRelationshipDisplayListener(DbRelationshipDisplayListener listener) {
+		addListener("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener", listener);
 	}
 
 	public void addObjRelationshipListener(ObjRelationshipListener listener) {
@@ -503,6 +516,17 @@ public class Mediator
 		}// End for()
 	}
 
+	public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e)
+	{
+		this.fireDbEntityDisplayEvent(e);
+		EventListener[] list;
+		list = getListeners("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener");
+		for (int i = 0; i < list.length; i++) {
+			DbAttributeDisplayListener temp = (DbAttributeDisplayListener)list[i];
+			temp.currentDbAttributeChanged(e);
+		}// End for()
+	}
+	
 
 	/** Notifies all listeners of the change (add, remove) and does the change.*/
 	public void fireObjAttributeEvent(AttributeEvent e) 
@@ -529,6 +553,17 @@ public class Mediator
 		}// End for()
 	}
 
+	public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e)
+	{
+		this.fireObjEntityDisplayEvent(e);
+		EventListener[] list;
+		list = getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener");
+		for (int i = 0; i < list.length; i++) {
+			ObjAttributeDisplayListener temp = (ObjAttributeDisplayListener)list[i];
+			temp.currentObjAttributeChanged(e);
+		}// End for()
+	}
+	
 	/** Notifies all listeners of the change(add, remove) and does the change.*/
 	public void fireDbRelationshipEvent(RelationshipEvent e) 
 	{
@@ -553,6 +588,19 @@ public class Mediator
 			}// End switch
 		}// End for()
 	}
+
+	public void fireDbRelationshipDisplayEvent(RelationshipDisplayEvent e)
+	{
+		this.fireDbEntityDisplayEvent(e);
+		EventListener[] list;
+		list = getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener");
+		for (int i = 0; i < list.length; i++) {
+			DbRelationshipDisplayListener temp = (DbRelationshipDisplayListener)list[i];
+			temp.currentDbRelationshipChanged(e);
+		}// End for()
+	}
+	
+
 
 	/** Notifies all listeners of the change(add, remove) and does the change.*/
 	public void fireObjRelationshipEvent(RelationshipEvent e) 
@@ -735,7 +783,10 @@ public class Mediator
 	}
 	
 	public void setDirty(boolean temp_dirty) {
+		if (dirty == temp_dirty)
+			return;
 		dirty = temp_dirty;
+		Editor.getFrame().setDirty(dirty);
 	}
 	
 	public void setDirty(DataMap map) {

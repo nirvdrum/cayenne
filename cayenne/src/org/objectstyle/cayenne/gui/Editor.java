@@ -62,6 +62,7 @@ import java.io.*;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
@@ -80,12 +81,16 @@ import org.objectstyle.cayenne.gui.validator.*;
 
 /** Window for the Cayenne Modeler.
   * Responsibilities include coordination of enabling/disabling of
-  * menu and toolbar. */
+  * menu and toolbar. 
+  * @author Michael Misha Shengaout */
 public class Editor extends JFrame
 implements ActionListener
 , DomainDisplayListener, DataNodeDisplayListener, DataMapDisplayListener
 , ObjEntityDisplayListener, DbEntityDisplayListener
 {
+	static Logger logObj = Logger.getLogger(Editor.class.getName());
+	
+	private static final String TITLE = "Cayenne modeler";
 	
     EditorView view;
     Mediator mediator;
@@ -128,7 +133,7 @@ implements ActionListener
 	private static Editor frame;
 
     private Editor() {
-        super("Cayenne Modeler");
+        super(TITLE);
 
         init();
 		disableMenu();
@@ -183,6 +188,18 @@ implements ActionListener
 			frame = new Editor();
 		}
 		return frame;
+	}
+
+	/** Adds asterisk to the title of the window to indicate it is dirty. */
+	public void setDirty(boolean dirty_flag) {
+		String title = getTitle();
+		if (dirty_flag) {
+			if (!title.endsWith("*"))
+				setTitle(title + "*");
+		} else {
+			if (title.endsWith("*"))
+				setTitle(title.substring(0, title.length()-1));
+		}
 	}
 
 	/** Return false if cancel closing the window, true otherwise. */
@@ -361,7 +378,8 @@ implements ActionListener
         createDomainBtn.setEnabled(false);
         removeMenu.setText("Remove");
         removeBtn.setToolTipText("Remove");
-
+        // Take path of the proj away from the title
+		this.setTitle(TITLE);
 	}
 
 	private void importDb() {
@@ -487,9 +505,6 @@ implements ActionListener
             if (!proj_file.exists())
             	proj_file.createNewFile();
 			
-			System.out.println("proj file path is " 
-					+ proj_file.getAbsolutePath());
-			
 			FileWriter fw = new FileWriter(proj_file);
 			PrintWriter pw = new PrintWriter(fw, true);
 			pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
@@ -502,6 +517,8 @@ implements ActionListener
             GuiConfiguration config = GuiConfiguration.getGuiConfig();
             Mediator mediator = Mediator.getMediator(config);
             project(mediator);
+            // Set title to contain proj file path
+            this.setTitle(TITLE + " - " + proj_file.getAbsolutePath());
         } catch (Exception e) {
             System.out.println("Error loading project file, " + e.getMessage());
             e.printStackTrace();
@@ -534,6 +551,8 @@ implements ActionListener
             GuiConfiguration config = GuiConfiguration.getGuiConfig();
             Mediator mediator = Mediator.getMediator(config);
             project(mediator);
+            // Set title to contain proj file path
+            this.setTitle(TITLE + " - " + file.getAbsolutePath());
 
         } catch (Exception e) {
             System.out.println("Error loading project file, " + e.getMessage());
@@ -576,7 +595,6 @@ implements ActionListener
             FileSystemViewDecorator file_view;
             file_view = new FileSystemViewDecorator(proj_dir);
             fc = new JFileChooser(file_view);
-            fc.setFileFilter(xmlFilter);
             fc.setDialogType(JFileChooser.SAVE_DIALOG);
             fc.setDialogTitle("Save data map - " + map.getName());
             if (null != proj_dir)
@@ -728,12 +746,12 @@ implements ActionListener
 			iter = mediator.getDirtyDataNodes().iterator();
 			while (iter.hasNext()) {
 				DataNode node = (DataNode)iter.next();
-				System.out.println("Editor::saveAll(), node name " 
+				logObj.fine("Editor::saveAll(), node name " 
 									+ node.getName() + ", factory " 
 									+ node.getDataSourceFactory());
 				// If using direct connection, save into separate file
 				if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
-					System.out.println("Editor::saveAll(), saving node name " 
+					logObj.fine("Editor::saveAll(), saving node name " 
 									+ node.getName());
 					saveDataNode(node);
 				}
@@ -743,7 +761,6 @@ implements ActionListener
 			mediator.getDirtyDataNodes().clear();
 			
 			mediator.setDirty(false);
-			JOptionPane.showMessageDialog(this, "Data saved successfully");
 		}
 		// If there were errors or warnings at validation, display them
 		if (ret_code == ErrorMsg.ERROR || ret_code == ErrorMsg.WARNING) {

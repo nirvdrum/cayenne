@@ -183,7 +183,6 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
             FileSystemViewDecorator file_view;
             file_view = new FileSystemViewDecorator(proj_dir);
             fc = new JFileChooser(file_view);
-            fc.setFileFilter(new DirectoryFilter());
             fc.setDialogType(JFileChooser.SAVE_DIALOG);
             fc.setDialogTitle("Data Map location");
 			fc.setFileSelectionMode(JFileChooser.FILES_ONLY );

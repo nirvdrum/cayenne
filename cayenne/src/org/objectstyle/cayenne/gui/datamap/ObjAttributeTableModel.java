@@ -68,7 +68,8 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Model for the Object Entity attributes and for Obj to DB Attribute Mapping tables.
  *  Allows adding/removing attributes, modifying the types and the names.
  *  Add/remove changes are cached and saved into ObjEntity only when commit()
- *  is called.*/
+ *  is called.
+ *  @author Michael Misha Shengaout. */
 class ObjAttributeTableModel extends AbstractTableModel
 {
 	Mediator mediator;
@@ -210,6 +211,8 @@ class ObjAttributeTableModel extends AbstractTableModel
 			}
         	fireTableRowsUpdated(row, row);
 		}// End DbAttribute columns
+		AttributeEvent ev = new AttributeEvent(src, attrib, entity);
+		mediator.fireObjAttributeEvent(ev);
     }// End setValueAt()
 
 	

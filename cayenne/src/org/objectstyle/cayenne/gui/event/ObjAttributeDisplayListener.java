@@ -58,10 +58,9 @@ package org.objectstyle.cayenne.gui.event;
 import java.util.EventListener;
 import org.objectstyle.cayenne.map.*;
 
-/** Used to display ObjRelationship. 
-  * @author Michael Misha Shengaout */
-public interface ObjRelationshipDisplayListener extends EventListener
+/** Used to display ObjAttribute. */
+public interface ObjAttributeDisplayListener extends EventListener
 {
-	/** Current obj entity used as a model has changed.*/
-	public void currentObjRelationshipChanged(RelationshipDisplayEvent e);
+	/** Display specified ObjAttribute.*/
+	public void currentObjAttributeChanged(AttributeDisplayEvent e);
 }

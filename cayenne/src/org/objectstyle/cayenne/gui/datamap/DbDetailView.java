@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.gui.util.*;
 
 public class DbDetailView extends JPanel 
 implements ChangeListener, DbEntityDisplayListener
+, DbRelationshipDisplayListener, DbAttributeDisplayListener
 {
 	Mediator mediator;
 	
@@ -76,6 +77,8 @@ implements ChangeListener, DbEntityDisplayListener
 		super();
 		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);
+		mediator.addDbAttributeDisplayListener(this);
+		mediator.addDbRelationshipDisplayListener(this);
 		
 		setLayout(new BorderLayout());
 		tab = new JTabbedPane();
@@ -99,7 +102,23 @@ implements ChangeListener, DbEntityDisplayListener
 	{
 		if (e.getEntity() == null)
 			tab.setVisible(false);
-		else
+		else {
+			tab.setSelectedIndex(0);
 			tab.setVisible(true);
+		}
+	}
+	
+	public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
+		if (e.getEntity() == null)
+			return;
+		// Display relationship tab
+		tab.setSelectedIndex(2);
+	}
+
+	public void currentDbAttributeChanged(AttributeDisplayEvent e) {
+		if (e.getEntity() == null)
+			return;
+		// Display relationship tab
+		tab.setSelectedIndex(1);
 	}
 }

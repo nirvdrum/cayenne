@@ -65,7 +65,8 @@ import javax.swing.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.datamap.*;
 
-/** Panel for the Editor window. */
+/** Panel for the Editor window. 
+ *  @author Michael Misha Shengaout. */
 class EditorView extends JPanel 
 implements ObjEntityDisplayListener, DbEntityDisplayListener
 , DomainDisplayListener, DataMapDisplayListener, DataNodeDisplayListener {

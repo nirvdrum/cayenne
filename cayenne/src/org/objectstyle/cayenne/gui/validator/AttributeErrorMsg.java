@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.gui.event;
+package org.objectstyle.cayenne.gui.validator;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,13 +55,48 @@ package org.objectstyle.cayenne.gui.event;
  *
  */ 
 
-import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
+import javax.swing.JFrame;
 
-/** Used to display ObjRelationship. 
-  * @author Michael Misha Shengaout */
-public interface ObjRelationshipDisplayListener extends EventListener
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Attribute;
+
+public class AttributeErrorMsg implements ErrorMsg
 {
-	/** Current obj entity used as a model has changed.*/
-	public void currentObjRelationshipChanged(RelationshipDisplayEvent e);
+	private String errMsg;
+	private int severity = ErrorMsg.ERROR;
+	private DataDomain domain;
+	private DataMap map;
+	private Entity entity;
+	private Attribute attribute;
+	
+	public AttributeErrorMsg(String temp_msg, int temp_severity
+						  , DataDomain temp_domain, DataMap temp_map
+						  , Attribute temp_rel)
+	{ 
+		domain = temp_domain;
+		map = temp_map;
+		attribute = temp_rel;
+		entity = attribute.getEntity();
+		errMsg = temp_msg;
+		severity = temp_severity;
+	}
+	
+	public String getMessage() { return errMsg; }
+
+	public void displayField(Mediator mediator, JFrame frame){
+		AttributeDisplayEvent event;
+		event = new AttributeDisplayEvent(frame, attribute, entity, map, domain);
+		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
+			mediator.fireObjAttributeDisplayEvent(event);
+		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
+			mediator.fireDbAttributeDisplayEvent(event);
+	}
+	
+	public int getSeverity() {return severity;}
+	
+	public String toString() {return getMessage();}
 }

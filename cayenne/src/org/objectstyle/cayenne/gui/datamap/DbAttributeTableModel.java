@@ -122,7 +122,7 @@ class DbAttributeTableModel extends AbstractTableModel
 		else if (column == DB_ATTRIBUTE_TYPE)
 			return "Type";
 		else if (column == DB_ATTRIBUTE_PRIMARY_KEY) 
-			return "Key";
+			return "PK";
 		else if (column == DB_ATTRIBUTE_PRECISION) 
 			return "Precision";
 		else if (column == DB_ATTRIBUTE_MANDATORY) 
@@ -186,6 +186,7 @@ class DbAttributeTableModel extends AbstractTableModel
     
     public void setValueAt(Object aValue, int row, int column) {
 		DbAttribute attrib = (DbAttribute)attributeList.get(row);
+		AttributeEvent e = null;
 		if (null == attrib) {
 			JOptionPane.showMessageDialog(Editor.getFrame()
 					, "The last edited value is not saved"
@@ -196,7 +197,6 @@ class DbAttributeTableModel extends AbstractTableModel
 			String new_name = ((String)aValue).trim();
 			String old_name = attrib.getName();
 			GuiFacade.setDbAttributeName(dataMap, attrib, new_name);
-			AttributeEvent e;
 			e = new AttributeEvent(src, attrib, entity, old_name);
 			mediator.fireDbAttributeEvent(e);
 			fireTableCellUpdated(row, column);
@@ -209,6 +209,9 @@ class DbAttributeTableModel extends AbstractTableModel
 		else if (column == DB_ATTRIBUTE_PRIMARY_KEY) {
 			Boolean primary = (Boolean)aValue;
 			attrib.setPrimaryKey(primary.booleanValue());
+			if (primary.booleanValue())
+				attrib.setMandatory(true);
+			fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
 		}
 		else if (column == DB_ATTRIBUTE_PRECISION) {
 			String str = (String)aValue;
@@ -220,10 +223,11 @@ class DbAttributeTableModel extends AbstractTableModel
 				try  {
 					int precision = Integer.parseInt(str);
 					attrib.setPrecision(precision);
-				} catch (NumberFormatException e) {
+				} catch (NumberFormatException ex) {
 					JOptionPane.showMessageDialog(null, "Invalid precision value - " 
 							+ aValue + ", only numbers are allowed"
 							, "Invalid Precision value", JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 			}
 		}
@@ -241,13 +245,17 @@ class DbAttributeTableModel extends AbstractTableModel
 				try  {
 					int max_len = Integer.parseInt((String)aValue);
 					attrib.setMaxLength(max_len);
-				} catch (NumberFormatException e) {
+				} catch (NumberFormatException ex) {
 					JOptionPane.showMessageDialog(null, "Invalid Max Length value - " 
 							+ aValue + ", only numbers are allowed"
 							, "Invalid Maximum Length", JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 			}
 		}
+		if (null == e)
+			e = new AttributeEvent(src, attrib, entity);
+		mediator.fireDbAttributeEvent(e);
     }// End setValueAt()
 
 	
@@ -278,9 +286,13 @@ class DbAttributeTableModel extends AbstractTableModel
 
 	public boolean isCellEditable(int row, int col) {
 		DbAttribute attrib = (DbAttribute)attributeList.get(row);
-		if (null != attrib)
-			return true;
-		return false;
+		if (null == attrib)
+			return false;
+		else if (col == DB_ATTRIBUTE_MANDATORY) {
+			if (attrib.isPrimaryKey())
+				return false;
+		}
+		return true;
 	}// End isCellEditable()
 
 }// End DbAttributeTableModel

@@ -21,6 +21,7 @@ public class DataMapErrorMsg implements ErrorMsg
 		domain = temp_domain;
 		map = temp_map;
 		errMsg = temp_msg;
+		severity = temp_severity;
 	}
 	
 	public String getMessage() { return errMsg; }

@@ -62,8 +62,12 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
+/** 
+  * @author Michael Misha Shengaout
+  */
 public class ObjDetailView extends JPanel 
-implements ChangeListener, ObjEntityDisplayListener, ObjRelationshipDisplayListener
+implements ChangeListener, ObjEntityDisplayListener
+, ObjRelationshipDisplayListener, ObjAttributeDisplayListener
 {
 	Mediator mediator;
 	
@@ -76,6 +80,8 @@ implements ChangeListener, ObjEntityDisplayListener, ObjRelationshipDisplayListe
 		super();
 		mediator = temp_mediator;
 		mediator.addObjEntityDisplayListener(this);
+		mediator.addObjAttributeDisplayListener(this);
+		mediator.addObjRelationshipDisplayListener(this);
 		
 		setLayout(new BorderLayout());
 		tab = new JTabbedPane();
@@ -100,8 +106,10 @@ implements ChangeListener, ObjEntityDisplayListener, ObjRelationshipDisplayListe
 	{
 		if (e.getEntity() == null)
 			tab.setVisible(false);
-		else
+		else {
+			tab.setSelectedIndex(0);
 			tab.setVisible(true);
+		}
 	}
 	
 	public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
@@ -110,4 +118,12 @@ implements ChangeListener, ObjEntityDisplayListener, ObjRelationshipDisplayListe
 		// Display relationship tab
 		tab.setSelectedIndex(2);
 	}
+
+	public void currentObjAttributeChanged(AttributeDisplayEvent e) {
+		if (e.getEntity() == null)
+			return;
+		// Display attribute tab
+		tab.setSelectedIndex(1);
+	}
+
 }

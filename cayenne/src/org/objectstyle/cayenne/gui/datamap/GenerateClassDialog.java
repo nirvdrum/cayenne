@@ -63,6 +63,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 
+import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
@@ -167,10 +168,22 @@ implements ActionListener
 		} else if (src == generate) {
 			generateCode();
 		} else if (src == chooseFolder) {
-			int ret_code = fileChooser.showOpenDialog(this);
+	    	Preferences pref = Preferences.getPreferences();
+    	   	String init_dir = (String)pref.getProperty(Preferences.LAST_GENERATED_CLASSES_DIR);
+    	   	if (null == init_dir)
+    	   		init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
+            if (null != init_dir) {
+            	File init_dir_file = new File(init_dir);
+            	if (init_dir_file.exists())
+            		fileChooser.setCurrentDirectory(init_dir_file);
+            }
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int ret_code = fileChooser.showOpenDialog(this);			
 			if (ret_code == JFileChooser.APPROVE_OPTION) {
 				outputFolder = fileChooser.getSelectedFile();
 				folder.setText(outputFolder.getAbsolutePath());
+				// Set preferences
+				pref.setProperty(Preferences.LAST_GENERATED_CLASSES_DIR, outputFolder.getAbsolutePath());
 			}
 		} else if (src == selectAll) {
 			GenerateClassTableModel model;

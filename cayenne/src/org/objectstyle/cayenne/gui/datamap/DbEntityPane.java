@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Detail view of the ObjEntity properties. 
  * @author Michael Misha Shengaout */
 public class DbEntityPane extends JPanel
-implements DocumentListener, ActionListener, DbEntityDisplayListener
+implements DocumentListener, DbEntityDisplayListener
 {
 	Mediator mediator;
 	
@@ -82,7 +82,6 @@ implements DocumentListener, ActionListener, DbEntityDisplayListener
 	JTextField	catalog;
 	JLabel		schemaLabel;
 	JTextField	schema;
-	JButton 	remove;
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
 	
@@ -96,7 +95,6 @@ implements DocumentListener, ActionListener, DbEntityDisplayListener
 		name.getDocument().addDocumentListener(this);
 		catalog.getDocument().addDocumentListener(this);
 		schema.getDocument().addDocumentListener(this);
-		remove.addActionListener(this);
 	}
 
 	private void init(){
@@ -125,22 +123,6 @@ implements DocumentListener, ActionListener, DbEntityDisplayListener
 		SpringLayout.Constraints cons = layout.getConstraints(temp);
 		cons.setY(ySpring);
 		cons.setX(pad);
-
-		remove = new JButton("Remove");
-		JPanel button_panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		button_panel.add(remove);
-		add(button_panel);
-		ySpring = Spring.sum(Spring.sum(ySpring, pad), cons.getConstraint("South"));
-		cons = layout.getConstraints(button_panel);
-		cons.setY(ySpring);
-		cons.setX(pad);
-	}
-
-	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		if (src == remove) {
-			mediator.removeDbEntity(this, mediator.getCurrentDbEntity());
-		}
 	}
 
 	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }

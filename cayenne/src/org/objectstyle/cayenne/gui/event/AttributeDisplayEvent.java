@@ -55,13 +55,25 @@ package org.objectstyle.cayenne.gui.event;
  *
  */ 
 
-import java.util.EventListener;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.*;
 
-/** Used to display ObjRelationship. 
-  * @author Michael Misha Shengaout */
-public interface ObjRelationshipDisplayListener extends EventListener
+/** 
+  * @author Michael Misha Shengaout
+  */
+
+public class AttributeDisplayEvent extends EntityDisplayEvent
 {
-	/** Current obj entity used as a model has changed.*/
-	public void currentObjRelationshipChanged(RelationshipDisplayEvent e);
+	Attribute attribute;
+
+	public AttributeDisplayEvent (Object src, Attribute temp_attribute
+	, Entity temp_entity, DataMap data_map, DataDomain temp_domain) 
+	{
+		super(src, temp_entity, data_map, temp_domain);
+		attribute = temp_attribute;
+	}
+
+	public Attribute getAttribute() {
+		return attribute;
+	}	
 }

@@ -21,6 +21,7 @@ public class DataNodeErrorMsg implements ErrorMsg
 		domain = temp_domain;
 		node = temp_node;
 		errMsg = temp_msg;
+		severity = temp_severity;
 	}
 	
 	public String getMessage() { return errMsg; }

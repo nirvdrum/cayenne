@@ -74,7 +74,8 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
 
-/** Table model for DbRelationship table.*/
+/** Table model for DbRelationship table.
+ *  @author Michael Misha Shengaout. */
 class DbRelationshipTableModel extends AbstractTableModel {
 
 	Mediator mediator;
@@ -184,8 +185,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 			String text = (String)aValue;
 			String old_name = rel.getName();
 			GuiFacade.setDbRelationshipName(entity, rel, text);
-			RelationshipEvent e;
-			e = new RelationshipEvent(src, rel, entity, old_name);
+			RelationshipEvent e = new RelationshipEvent(src, rel, entity, old_name);
 			mediator.fireDbRelationshipEvent(e);
 			fireTableCellUpdated(row, column);
 		}
@@ -202,8 +202,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 			else
 			 	target = mediator.getCurrentDataMap().getDbEntity(target_name);
 			rel.setTargetEntity(target);
-			RelationshipEvent e;
-			e = new RelationshipEvent(src, rel, entity);
+			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
 			mediator.fireDbRelationshipEvent(e);
 		}
 		else if (column == FOREIGN_KEY) {
@@ -213,6 +212,8 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		else if (column == CARDINALITY) {
 			Boolean temp = (Boolean)aValue;
 			rel.setToMany(temp.booleanValue());
+			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			mediator.fireDbRelationshipEvent(e);
 		}
         fireTableRowsUpdated(row, row);
     }// End setValueAt()

@@ -70,17 +70,19 @@ public class Preferences extends ExtendedProperties {
     static final Logger logObj = Logger.getLogger(Preferences.class.getName());
     
 	/** Directory for preferences in User home. */
-	private static final String PREF_DIR = "cayenne";
+	private static final String PREF_DIR = ".cayenne";
 	/** Name of the preferences file in the CAYENNE_PREF_DIR.
 	  * General standard for keys in the preferences:
 	  * Use class name (optionally with the package name) and 
 	  * the name of the field which uses this preference. */
-	private static final String PREF = ".preferences";
+	private static final String PREF = "modeler.preferences";
 
 	/* Keys for the preference file. */
 
 	/** The directory of the cayenne project edited last. */
 	public static final String LAST_DIR = "Editor.lastProject";
+	/** The directory of the last generated classes. */
+	public static final String LAST_GENERATED_CLASSES_DIR = "gui.datamap.GenerateClassDialog.lastDir";
 	/** User name */
 	public static final String USER_NAME = "DbLoginPanel.unInput";
 	/** JDBC Driver Class */
