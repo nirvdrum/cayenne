@@ -108,12 +108,10 @@ public class DeleteBatchQuery extends BatchQuery {
 
     /**
      * Creates new DeleteBatchQuery.
-     * Don't use this!  Placeholder until I can figure out what ContextCommit.categorizeFlattenedDeletesAndCreateBatches needs.
+     * Used by ContextCommit.categorizeFlattenedDeletesAndCreateBatches for deleting flattenned relationships.
      * 
      * @param dbEntity Table or view to delete.
      * @param batchCapacity Estimated size of the batch.
-     * 
-     * @deprecated
      */
     public DeleteBatchQuery(DbEntity dbEntity, int batchCapacity) {
         this(dbEntity, dbEntity.getPrimaryKey(), Collections.EMPTY_SET, batchCapacity);
