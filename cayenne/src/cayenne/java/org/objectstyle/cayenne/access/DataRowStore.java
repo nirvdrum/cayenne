@@ -91,7 +91,7 @@ public class DataRowStore implements Serializable {
     // default property values
 
     // default expiration time is 2 hours
-    public static final long SNAPSHOT_EXPIRATION_DEFAULT = 2 * 60 * 60 * 1000;
+    public static final long SNAPSHOT_EXPIRATION_DEFAULT = 2 * 60 * 60;
     public static final int SNAPSHOT_CACHE_SIZE_DEFAULT = 10000;
     public static final boolean OBJECT_STORE_NOTIFICATION_DEFAULT = true;
     public static final boolean REMOTE_NOTIFICATION_DEFAULT = false;
@@ -191,7 +191,9 @@ public class DataRowStore implements Serializable {
         this.notifyingRemoteListeners = notifyRemote;
         this.notifyingObjectStores = notifyObjectStores;
         this.snapshots =
-            CacheManager.getInstance().newCache(snapshotsExpiration, snapshotsCacheSize);
+            CacheManager.getInstance().newCache(
+                snapshotsExpiration * 1000,
+                snapshotsCacheSize);
 
         // init event bridge only if we are notifying remote listeners
         if (notifyingRemoteListeners) {
@@ -203,7 +205,8 @@ public class DataRowStore implements Serializable {
                 remoteNotificationsHandler.startup(
                     EventManager.getDefaultManager(),
                     EventBridge.RECEIVE_LOCAL_EXTERNAL);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 throw new CayenneRuntimeException("Error initializing DataRowStore.", ex);
             }
         }
@@ -216,12 +219,13 @@ public class DataRowStore implements Serializable {
         if (remoteNotificationsHandler != null) {
             try {
                 remoteNotificationsHandler.shutdown();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 logObj.info("Exception shutting down EventBridge.", ex);
             }
             remoteNotificationsHandler = null;
         }
-        
+
         clear();
     }
 
@@ -273,11 +277,13 @@ public class DataRowStore implements Serializable {
                     + ". Fetch matched "
                     + results.size()
                     + " objects.");
-        } else if (results.size() == 0) {
+        }
+        else if (results.size() == 0) {
             // oops, object was deleted
             throw new CayenneRuntimeException(
                 "No matching objects found for ObjectId " + oid);
-        } else {
+        }
+        else {
             DataRow snapshot = (DataRow) results.get(0);
             snapshots.addObject(oid, snapshot);
             return snapshot;

@@ -120,7 +120,7 @@ public class ConfigSaver {
             }
      
             pw.print("\t<property name=\"" + Util.encodeXmlAttribute(name.trim()));
-            pw.print("\" value=\"" + Util.encodeXmlAttribute(value.trim()));
+            pw.println("\" value=\"" + Util.encodeXmlAttribute(value.trim()) + "\"/>");
         }
                
         // store maps

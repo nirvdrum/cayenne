@@ -288,7 +288,7 @@ public class ConfigLoader {
             throws SAXException {
                 
             String name = attrs.getValue("", "name");
-            String value = attrs.getValue("", "location");
+            String value = attrs.getValue("", "value");
             if(name != null && value != null) {
                 properties.put(name, value);
             }
