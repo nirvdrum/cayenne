@@ -62,8 +62,7 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -300,17 +299,19 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void storeDbEntities(PrintWriter out, DataMap map) {
-		Collection db_entities = map.getDbEntityMap().values();
-		Iterator iter = db_entities.iterator();
+		
+		Iterator iter = sortedDbEntities(map).iterator();
 		while (iter.hasNext()) {
 			DbEntity dbe = (DbEntity) iter.next();
 			out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-			if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
+			if (dbe.getSchema() != null
+				&& dbe.getSchema().trim().length() > 0) {
 				out.print(" schema=\"");
 				out.print(dbe.getSchema());
 				out.print('\"');
 			}
-			if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
+			if (dbe.getCatalog() != null
+				&& dbe.getCatalog().trim().length() > 0) {
 				out.print(" catalog=\"");
 				out.print(dbe.getCatalog());
 				out.print('\"');
@@ -333,8 +334,7 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void storeDbAttribute(PrintWriter out, DbEntity dbEntity) {
-		Collection db_attributes = dbEntity.getAttributeMap().values();
-		Iterator iter = db_attributes.iterator();
+		Iterator iter = sortedAttributes(dbEntity).iterator();
 
 		while (iter.hasNext()) {
 			DbAttribute attr = (DbAttribute) iter.next();
@@ -440,8 +440,7 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void storeObjEntities(PrintWriter out, DataMap map) {
-		Collection obj_entities = map.getObjEntityMap().values();
-		Iterator iter = obj_entities.iterator();
+		Iterator iter = sortedObjEntities(map).iterator();
 		while (iter.hasNext()) {
 			ObjEntity temp = (ObjEntity) iter.next();
 			out.print("\t<obj-entity name=\"");
@@ -477,8 +476,7 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void storeObjAttribute(PrintWriter out, ObjEntity obj_entity) {
-		Collection obj_attributes = obj_entity.getAttributeMap().values();
-		Iterator iter = obj_attributes.iterator();
+		Iterator iter = sortedAttributes(obj_entity).iterator();
 		while (iter.hasNext()) {
 			ObjAttribute temp = (ObjAttribute) iter.next();
 			out.print("\t\t<obj-attribute name=\"" + temp.getName() + '\"');
@@ -501,7 +499,7 @@ public class MapLoader extends DefaultHandler {
 
 	private void storeObjRelationships(PrintWriter out)
 		throws DataMapException {
-		Iterator iter = objRelationships.iterator();
+		Iterator iter = sortedRelationships(objRelationships).iterator();
 		while (iter.hasNext()) {
 			ObjRelationship temp = (ObjRelationship) iter.next();
 			out.print("\t<obj-relationship name=\"" + temp.getName() + '\"');
@@ -547,7 +545,7 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void storeDbRelationships(PrintWriter out) {
-		Iterator iter = dbRelationships.iterator();
+		Iterator iter = sortedRelationships(dbRelationships).iterator();
 		while (iter.hasNext()) {
 			DbRelationship temp = (DbRelationship) iter.next();
 			out.print("\t<");
@@ -567,7 +565,7 @@ public class MapLoader extends DefaultHandler {
 			out.print("\t</");
 			out.print(DB_RELATIONSHIP_TAG);
 			out.println('>');
-		} // End while()
+		}
 	}
 
 	private void storeDbAttributePair(PrintWriter out, DbRelationship db_rel) {
@@ -825,23 +823,35 @@ public class MapLoader extends DefaultHandler {
 		String source = atts.getValue("", "source");
 		if (null == source) {
 			throw new SAXException(
-				"MapLoaderImpl::processStartDbAttributePair(),"
-					+ " Unable to parse target. Attributes:\n"
+				" Unable to parse target. Attributes:\n"
 					+ printAttributes(atts).toString());
 		}
 		String target = atts.getValue("", "target");
 		if (null == target) {
 			throw new SAXException(
-				"MapLoaderImpl::processStartDbAttributePair(),"
-					+ " Unable to parse source. Attributes:\n"
+				" Unable to parse source. Attributes:\n"
 					+ printAttributes(atts).toString());
 		}
-		DbAttribute db_source =
+		DbAttribute dbSrc =
 			(DbAttribute) dbRelationship.getSourceEntity().getAttribute(source);
-		DbAttribute db_target =
+		if (dbSrc == null) {
+			throw new SAXException(
+				"Unable to parse source. Undefined join source:\n"
+					+ source
+					+ ", source entity: "
+					+ dbRelationship.getSourceEntity().getName());
+		}
+		DbAttribute dbTarget =
 			(DbAttribute) dbRelationship.getTargetEntity().getAttribute(target);
+		if (dbTarget == null) {
+			throw new SAXException(
+				"Unable to parse source. Undefined join target:\n"
+					+ target
+					+ ", target entity: "
+					+ dbRelationship.getTargetEntity().getName());
+		}
 
-		DbAttributePair pair = new DbAttributePair(db_source, db_target);
+		DbAttributePair pair = new DbAttributePair(dbSrc, dbTarget);
 		dbRelationship.addJoin(pair);
 	}
 
@@ -923,6 +933,37 @@ public class MapLoader extends DefaultHandler {
 			sb.append("Name: " + name + "\tValue: " + value + "\n");
 		}
 		return sb;
+	}
+	
+	
+	protected List sortedDbEntities(DataMap map) {
+		ArrayList list = new ArrayList(map.getDbEntitiesAsList());
+		Collections.sort(list, new PropertyComparator("name", DbEntity.class));
+		return list;
+	}
+	
+	protected List sortedObjEntities(DataMap map) {
+		ArrayList list = new ArrayList(map.getObjEntitiesAsList());
+		Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
+		return list;
+	}
+	
+	protected List sortedAttributes(Entity ent) {
+		ArrayList list = new ArrayList(ent.getAttributeList());
+		Collections.sort(list, new PropertyComparator("name", Attribute.class));
+		return list;
+	}
+	
+	protected List sortedRelationships(Entity ent) {
+		ArrayList list = new ArrayList(ent.getRelationshipList());
+		Collections.sort(list, new PropertyComparator("name", Relationship.class));
+		return list;
+	}
+	
+	protected List sortedRelationships(List rels) {
+		ArrayList list = new ArrayList(rels);
+		Collections.sort(list, new PropertyComparator("name", Relationship.class));
+		return list;
 	}
 }
 
