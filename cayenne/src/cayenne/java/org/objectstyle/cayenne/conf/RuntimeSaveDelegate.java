@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.conf;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -90,8 +89,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
     protected DataDomain findDomain(String domainName) {
         DataDomain domain = config.getDomain(domainName);
         if (domain == null) {
-            throw new IllegalArgumentException(
-                "Can't find DataDomain: " + domainName);
+            throw new IllegalArgumentException("Can't find DataDomain: " + domainName);
         }
 
         return domain;
@@ -127,6 +125,14 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         return new TransformIterator(config.getDomains().iterator(), tr);
     }
 
+    public Iterator propertyNames(String domainName) {
+        return findDomain(domainName).getProperties().keySet().iterator();
+    }
+
+    public String propertyValue(String domainName, String propertyName) {
+        return (String) findDomain(domainName).getProperties().get(propertyName);
+    }
+
     public String mapLocation(String domainName, String mapName) {
         return findDomain(domainName).getMap(mapName).getLocation();
     }
@@ -139,10 +145,6 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         };
 
         List maps = new ArrayList(findDomain(domainName).getDataMaps());
-
-        // sort to satisfy dependencies
-        Collections.sort(maps, new DataMap.MapComparator());
-
         return new TransformIterator(maps.iterator(), tr);
     }
 

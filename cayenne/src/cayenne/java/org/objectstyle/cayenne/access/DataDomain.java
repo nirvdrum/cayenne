@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
@@ -88,12 +89,18 @@ public class DataDomain implements QueryEngine {
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
     /** Stores mapping of data nodes to DataNode name keys. */
-    protected Map nodes = Collections.synchronizedMap(new HashMap());
+    protected Map nodes = Collections.synchronizedMap(new TreeMap());
     protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
     protected Collection nodesRef = Collections.unmodifiableCollection(nodes.values());
+    
+    /**
+     * Properties configured for DataDomain. These include properties of the DataRowStore
+     * and remote notifications.
+     */
+    protected Map properties = Collections.synchronizedMap(new TreeMap());
 
     /** Stores DataMaps by name. */
-    protected Map maps = Collections.synchronizedMap(new HashMap());
+    protected Map maps = Collections.synchronizedMap(new TreeMap());
     protected Map mapsRef = Collections.unmodifiableMap(maps);
 
     /** Stores mapping of data nodes to ObjEntity names.
@@ -110,12 +117,6 @@ public class DataDomain implements QueryEngine {
     protected TransactionDelegate transactionDelegate;
     protected String name;
 
-    /**
-     * Properties configured for DataDomain. These include properties of the DataRowStore
-     * and remote notifications.
-     */
-    protected Map properties;
-
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
      * creates a DataDomain with name "default".
@@ -131,7 +132,14 @@ public class DataDomain implements QueryEngine {
 
     public DataDomain(String name, Map properties) {
         setName(name);
-        this.properties = (properties != null) ? properties : Collections.EMPTY_MAP;
+        
+        // create map with predictable modification and synchronization behavior
+        Map localMap = new HashMap();
+        if(properties != null) {
+            localMap.putAll(properties);
+        }
+        
+        this.properties = localMap;
     }
 
     /** Returns "name" property value. */
@@ -145,6 +153,15 @@ public class DataDomain implements QueryEngine {
         if (snapshotCache != null) {
             this.snapshotCache.setName(name);
         }
+    }
+    
+    /**
+     * @since 1.1
+     * @return a Map of properties for this DataDomain. There is no guarantees
+     * of specific synchronization behavior of this map.
+     */
+    public Map getProperties() {
+        return properties;
     }
 
     /**

@@ -58,10 +58,17 @@ package org.objectstyle.cayenne.conf;
 import java.util.Iterator;
 
 /**
+ * Defines a set of callback methods that provide information
+ * to ConfigSaver when Cayenne project is saved.
+ * 
  * @author Andrei Adamchik
  */
 public interface ConfigSaverDelegate {
     public Iterator domainNames();
+    
+    public Iterator propertyNames(String domainName);
+    
+    public String propertyValue(String domainName, String propertyName);
     
     public Iterator mapNames(String domainName);
     

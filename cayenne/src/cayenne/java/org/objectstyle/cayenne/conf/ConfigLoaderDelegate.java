@@ -94,8 +94,16 @@ public interface ConfigLoaderDelegate {
         String mapName,
         String location,
         List depMapNames);
-        
+    
+    /**
+     * @since 1.0.4
+     */
     public void shouldLoadDataMaps(String domainName, Map locations, Map dependencies);
+    
+    /**
+     * @since 1.1
+     */
+    public void shouldLoadDataDomainProperties(String domainName, Map properties);
 
     public void shouldLoadDataNode(
         String domainName,

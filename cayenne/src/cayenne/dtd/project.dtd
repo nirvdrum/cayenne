@@ -8,11 +8,16 @@
 	project-version CDATA
 >
 
-<!ELEMENT domain (map*, node*)>
+<!ELEMENT domain (property*, map*, node*)>
 <!ATTLIST domain
 	name CDATA #REQUIRED
 >
 
+<!ELEMENT property>
+<!ATTLIST property
+	name CDATA #REQUIRED
+    value CDATA #REQUIRED
+>
 
 <!ELEMENT map (dep-map-ref*)>
 <!ATTLIST map

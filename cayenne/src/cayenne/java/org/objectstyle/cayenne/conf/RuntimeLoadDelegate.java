@@ -142,6 +142,23 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         return false;
     }
 
+    public void shouldLoadDataDomainProperties(String domainName, Map properties) {
+        if(properties == null || properties.isEmpty()) {
+            return;
+        }
+        
+        DataDomain domain = null;
+        try {
+            domain = findDomain(domainName);
+        } catch (FindException ex) {
+            logObj.log(logLevel, "Error: Domain is not loaded: " + domainName);
+            throw new ConfigurationException("Domain is not loaded: " + domainName);
+        }
+        
+        domain.getProperties().putAll(properties);
+    }
+
+
     public void shouldLoadDataDomain(String domainName) {
         if (domainName == null) {
             logObj.log(logLevel, "Error: unnamed <domain>.");

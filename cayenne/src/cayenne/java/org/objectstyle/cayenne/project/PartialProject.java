@@ -219,6 +219,7 @@ public class PartialProject extends Project {
         protected Map nodes = new HashMap();
         protected Map maps = new HashMap();
         protected Map mapDependencies = new HashMap();
+        protected Map properties = new HashMap();
 
         public DomainMetaData(String name) {
             this.name = name;
@@ -306,6 +307,15 @@ public class PartialProject extends Project {
             domains.put(name, new DomainMetaData(name));
         }
 
+        public void shouldLoadDataDomainProperties(String domainName, Map properties) {
+            if(properties == null || properties.isEmpty()) {
+                return;
+            }
+        
+            DomainMetaData domain = findDomain(domainName);
+            domain.properties.putAll(properties);
+        }
+        
         public void shouldLoadDataMaps(
             String domainName,
             Map locations,
@@ -368,6 +378,14 @@ public class PartialProject extends Project {
 
         public Iterator domainNames() {
             return domains.keySet().iterator();
+        }
+        
+        public Iterator propertyNames(String domainName) {
+            return findDomain(domainName).properties.keySet().iterator();
+        }
+
+        public String propertyValue(String domainName, String propertyName) {
+            return (String) findDomain(domainName).properties.get(propertyName);
         }
 
         public Iterator linkedMapNames(String domainName, String nodeName) {

@@ -201,6 +201,7 @@ public class ConfigLoader {
       */
     private class DomainHandler extends AbstractHandler {
         private String domainName;
+        private Map properties;
         private Map mapLocations;
         private Map mapDependencies;
 
@@ -212,6 +213,7 @@ public class ConfigLoader {
             domainName = attrs.getValue("", "name");
             mapLocations = new HashMap();
             mapDependencies = new HashMap();
+            properties = new HashMap();
             delegate.shouldLoadDataDomain(domainName);
         }
 
@@ -221,18 +223,26 @@ public class ConfigLoader {
             String qName,
             Attributes atts)
             throws SAXException {
-            if (localName.equals("map")) {
+
+            if (localName.equals("property")) {
+                new PropertyHandler(getParser(), this).init(atts, properties);
+            } else if (localName.equals("map")) {
+                // "map" elements go after "property" elements
+                // must flush properties if there are any
+                loadProperties();
+                
                 new MapHandler(getParser(), this).init(
                     localName,
                     atts,
-                    domainName, mapLocations, mapDependencies);
+                    domainName,
+                    mapLocations,
+                    mapDependencies);
             } else if (localName.equals("node")) {
+                // "node" elements go after "map" elements
+                // must flush maps if there are any
                 loadMaps();
                 
-                new NodeHandler(getParser(), this).init(
-                    localName,
-                    atts,
-                    domainName);
+                new NodeHandler(getParser(), this).init(localName, atts, domainName);
             } else {
                 String message =
                     "<node> or <map> should be the children of <domain>. <"
@@ -243,7 +253,18 @@ public class ConfigLoader {
         }
         
         protected void finished() {
+            loadProperties();
             loadMaps();
+        }
+        
+        private void loadProperties() {
+            if (properties.size() > 0) {
+                // load all properties 
+                delegate.shouldLoadDataDomainProperties(domainName, properties);
+                
+                // clean properties to avoid loading them twice
+                properties.clear();
+            }
         }
         
         private void loadMaps() {
@@ -257,6 +278,23 @@ public class ConfigLoader {
         }
     }
 
+    private class PropertyHandler extends AbstractHandler {
+
+        public PropertyHandler(XMLReader parser, ContentHandler parentHandler) {
+            super(parser, parentHandler);
+        }
+
+        public void init(Attributes attrs, Map properties)
+            throws SAXException {
+                
+            String name = attrs.getValue("", "name");
+            String value = attrs.getValue("", "location");
+            if(name != null && value != null) {
+                properties.put(name, value);
+            }
+        }
+    }
+    
     private class MapHandler extends AbstractHandler {
         protected String domainName;
         protected List depMaps = new ArrayList();
