@@ -132,6 +132,8 @@
         <unjar src="${otherlib.dir}/${commons.logging.jar}" dest="${core.build.deps}"/>
         <unjar src="${otherlib.dir}/${commons.collections.jar}" dest="${core.build.deps}"/>
         <unjar src="${otherlib.dir}/${commons.beanutils.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${commons.lang.jar}" dest="${core.build.deps}"/>
+        <unjar src="${otherlib.dir}/${ashwood.jar}" dest="${core.build.deps}"/>
         
         <!-- clean up unused classes -->
         <delete includeEmptyDirs="true">
