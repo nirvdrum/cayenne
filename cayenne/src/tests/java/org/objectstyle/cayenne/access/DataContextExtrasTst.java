@@ -81,52 +81,53 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class DataContextExtrasTst extends CayenneTestCase {
 
-    protected DataContext ctxt;
+    protected DataContext context;
 
     protected void setUp() throws Exception {
-        ctxt = createDataContext();
+        context = createDataContext();
     }
     
     public void testTransactionEventsEnabled() {
-        ctxt.setTransactionEventsEnabled(false);
-        assertFalse(ctxt.isTransactionEventsEnabled());
-        ctxt.setTransactionEventsEnabled(true);
-        assertTrue(ctxt.isTransactionEventsEnabled());
+        context.setTransactionEventsEnabled(false);
+        assertFalse(context.isTransactionEventsEnabled());
+        context.setTransactionEventsEnabled(true);
+        assertTrue(context.isTransactionEventsEnabled());
     }
 
     public void testHasChangesNew() throws Exception {
-        assertTrue("No changes expected in context", !ctxt.hasChanges());
-        ctxt.createAndRegisterNewObject("Artist");
+        assertTrue("No changes expected in context", !context.hasChanges());
+        context.createAndRegisterNewObject("Artist");
         assertTrue(
             "Object added to context, expected to report changes",
-            ctxt.hasChanges());
+            context.hasChanges());
     }
 
     public void testCreateAndRegisterNewObject() throws Exception {
-        Artist a1 = (Artist) ctxt.createAndRegisterNewObject("Artist");
-        assertTrue(ctxt.getObjectStore().getObjects().contains(a1));
-        assertTrue(ctxt.newObjects().contains(a1));
+        Artist a1 = (Artist) context.createAndRegisterNewObject("Artist");
+        assertTrue(context.getObjectStore().getObjects().contains(a1));
+        assertTrue(context.newObjects().contains(a1));
     }
 
     public void testIdObjectFromDataRow() throws Exception {
 		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100000));
-        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
+        DataObject obj = context.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
-        assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
+        assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertNotNull(obj.getCommittedSnapshot());
+        
+        assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
 		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100001));
         row.put("ARTIST_NAME", "ArtistXYZ");
-        DataObject obj = ctxt.objectFromDataRow(Artist.class, row, false);
+        DataObject obj = context.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
-        assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
+        assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertNotNull(obj.getCommittedSnapshot());
+		assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
     }
 
     public void testFullObjectFromDataRow() throws Exception {
@@ -134,11 +135,11 @@ public class DataContextExtrasTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(123456));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-		Artist obj = (Artist)ctxt.objectFromDataRow(Artist.class, row, false);
+		Artist obj = (Artist)context.objectFromDataRow(Artist.class, row, false);
 
-        assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
+        assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-        assertNotNull(ctxt.getObjectStore().getCachedSnapshot(obj.getObjectId()));
+        assertNotNull(context.getObjectStore().getCachedSnapshot(obj.getObjectId()));
         assertEquals("ArtistXYZ", obj.getArtistName());
     }
 
@@ -150,7 +151,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         for (int i = 0; i < cache + 2; i++) {
             Artist o1 = new Artist();
             o1.setArtistName("a" + i);
-            ctxt.registerNewObject(o1);
+            context.registerNewObject(o1);
         }
 
         // this should cause PK generation exception in commit later
@@ -163,7 +164,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
         try {
-            ctxt.commitChanges(Level.DEBUG);
+            context.commitChanges(Level.DEBUG);
             fail("Exception expected but not thrown due to missing PK generation routine.");
         }
         catch (CayenneRuntimeException ex) {
@@ -188,7 +189,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
         try {
-            ctxt.performQueries(Collections.singletonList(q), new SelectObserver());
+            context.performQueries(Collections.singletonList(q), new SelectObserver());
             fail("Query was invalid and was supposed to fail.");
         }
         catch (RuntimeException ex) {
@@ -200,7 +201,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testEntityResolver() {
-        EntityResolver er = ctxt.getEntityResolver();
+        EntityResolver er = context.getEntityResolver();
         assertNotNull(er);
     }
 }

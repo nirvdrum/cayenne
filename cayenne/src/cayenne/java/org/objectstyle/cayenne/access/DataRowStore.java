@@ -261,7 +261,7 @@ public class DataRowStore implements Serializable {
                     }
 
                     Map diff = buildSnapshotDiff(oldSnapshot, newSnapshot);
-                    if (!diff.isEmpty()) {
+                    if (diff != null) {
                         if (diffs == null) {
                             diffs = new HashMap();
                         }
@@ -287,16 +287,16 @@ public class DataRowStore implements Serializable {
 	 * Creates a map that contains only the keys that have values that differ
 	 * in the registered snapshot for a given ObjectId and a given snapshot. It
 	 * is assumed that key sets are the same in both snapshots (since they
-	 * should represent the same entity data). Returns an empty map if no
+	 * should represent the same entity data). Returns null if no
 	 * differences are found.
 	 */
-    protected Map buildSnapshotDiff(DataRow oldSnapshot, DataRow newSnapshot) {
+    protected DataRow buildSnapshotDiff(DataRow oldSnapshot, DataRow newSnapshot) {
         if (oldSnapshot == null) {
             return newSnapshot;
         }
 
         // build a diff...
-        Map diff = null;
+		DataRow diff = null;
 
         Iterator keys = oldSnapshot.keySet().iterator();
         while (keys.hasNext()) {
@@ -305,13 +305,13 @@ public class DataRowStore implements Serializable {
             Object newValue = newSnapshot.get(key);
             if (!Util.nullSafeEquals(oldValue, newValue)) {
                 if (diff == null) {
-                    diff = new HashMap();
+                    diff = new DataRow(10);
                 }
                 diff.put(key, newValue);
             }
         }
 
-        return (diff != null) ? diff : Collections.EMPTY_MAP;
+        return diff;
     }
 
     /**

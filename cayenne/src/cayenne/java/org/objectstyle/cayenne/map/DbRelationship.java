@@ -249,7 +249,7 @@ public class DbRelationship extends Relationship {
 		}
 	}
 
-	/** Common code to src?kSnapshotWithTargetSnapshot.  Both are functionally the
+	/** Common code to srcSnapshotWithTargetSnapshot.  Both are functionally the
 	 * same, except for the name, and whether they operate on a toMany or a toOne.*/
 	private Map srcSnapshotWithTargetSnapshot(Map targetSnapshot) {
 		Map idMap = new HashMap();

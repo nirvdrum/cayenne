@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -117,8 +119,9 @@ public class BatchQueryUtils {
     }
 
     public static Map buildSnapshotForUpdate(DataObject o) {
-        Map committedSnapshot = o.getCommittedSnapshot();
-        Map currentSnapshot = o.getCurrentSnapshot();
+    	DataContext context = o.getDataContext();
+        Map committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId(), context);
+        Map currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = null;
 
         if (committedSnapshot == null || committedSnapshot.isEmpty()) {
@@ -298,9 +301,11 @@ public class BatchQueryUtils {
         ObjEntity entity,
         DataObject o,
         DbRelationship masterDependentRel) {
+        	
         boolean isMasterDbEntity = (masterDependentRel == null);
-        Map committedSnapshot = o.getCommittedSnapshot();
-        Map currentSnapshot = o.getCurrentSnapshot();
+        DataContext context = o.getDataContext();
+        DataRow committedSnapshot = context.getObjectStore().getSnapshot(o.getObjectId(), context);
+        DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 
         if (committedSnapshot == null || committedSnapshot.isEmpty()) {

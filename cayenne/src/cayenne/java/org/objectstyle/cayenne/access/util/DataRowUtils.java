@@ -86,18 +86,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataRowUtils {
-    /**
-     * Returns an ObjectId of an object on the other side of the to-one relationship,
-     * given a snapshot of the source object. Returns null if snapshot FK columns
-     * indicate a null to-one relationship.
-     */
-    public static final ObjectId targetObjectId(
-        Class targetClass,
-        DbRelationship relationship,
-        Map sourceSnapshot) {
-        Map target = relationship.targetPkSnapshotWithSrcSnapshot(sourceSnapshot);
-        return (target != null) ? new ObjectId(targetClass, target) : null;
-    }
 
     /** 
      * Replaces all object attribute values with snapshot values. 
@@ -107,7 +95,7 @@ public class DataRowUtils {
     public static void refreshObjectWithSnapshot(
         ObjEntity objEntity,
         DataObject object,
-        Map snapshot,
+        DataRow snapshot,
         boolean invalidateToManyRelationships) {
 
         Map attrMap = objEntity.getAttributeMap();
@@ -182,7 +170,7 @@ public class DataRowUtils {
                 continue;
             }
 
-            ObjectId id = targetObjectId(targetClass, dbRel, snapshot);
+            ObjectId id = snapshot.createTargetObjectId(targetClass, dbRel);
             DataObject targetObject = (id != null) ? context.registeredObject(id) : null;
 
             object.writePropertyDirectly(rel.getName(), targetObject);
@@ -228,7 +216,7 @@ public class DataRowUtils {
                     ObjEntity entity =
                         object.getDataContext().getEntityResolver().lookupObjEntity(
                             object);
-                    forceMergeWithSnapshot(entity, object, (Map) diffs.get(oid));
+                    forceMergeWithSnapshot(entity, object, (DataRow) diffs.get(oid));
                 }
             }
         }
@@ -237,7 +225,7 @@ public class DataRowUtils {
     private static void forceMergeWithSnapshot(
         ObjEntity entity,
         DataObject anObject,
-        Map snapshot) {
+        DataRow snapshot) {
 
         DataContext context = anObject.getDataContext();
         Map oldSnap =
@@ -292,10 +280,9 @@ public class DataRowUtils {
                     (DbRelationship) rel.getDbRelationships().get(0);
 
                 ObjectId id =
-                    targetObjectId(
+                    snapshot.createTargetObjectId(
                         ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
-                        dbRelationship,
-                        snapshot);
+                        dbRelationship);
                 DataObject target = (id != null) ? context.registeredObject(id) : null;
 
                 anObject.writePropertyDirectly(rel.getName(), target);
@@ -314,16 +301,21 @@ public class DataRowUtils {
         DataObject anObject,
         Map snapshot) {
 
+        // TODO: once we use DataRow consistently instead of a Map, this line should go away.
+        // Instead method signiture should include "DataRow".
+        DataRow dataRow =
+            (snapshot instanceof DataRow) ? (DataRow) snapshot : new DataRow(snapshot);
+
         if (entity.isReadOnly()
             || anObject.getPersistenceState() == PersistenceState.HOLLOW) {
-            refreshObjectWithSnapshot(entity, anObject, snapshot, true);
+            refreshObjectWithSnapshot(entity, anObject, dataRow, true);
         }
         else if (anObject.getPersistenceState() == PersistenceState.COMMITTED) {
             // do not invalidate to-many relationships, since they might have just been prefetched...
-            refreshObjectWithSnapshot(entity, anObject, snapshot, false);
+            refreshObjectWithSnapshot(entity, anObject, dataRow, false);
         }
         else {
-            forceMergeWithSnapshot(entity, anObject, snapshot);
+            forceMergeWithSnapshot(entity, anObject, dataRow);
         }
     }
 
@@ -402,83 +394,6 @@ public class DataRowUtils {
         }
 
         return false;
-    }
-
-    /**
-     * Takes a snapshot of current object state.
-     */
-    public static DataRow takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
-
-        // for a HOLLOW object return snapshot from cache
-        if (anObject.getPersistenceState() == PersistenceState.HOLLOW
-            && anObject.getDataContext() != null) {
-
-            DataContext context = anObject.getDataContext();
-            ObjectId id = anObject.getObjectId();
-            return context.getObjectStore().getSnapshot(id, context);
-        }
-
-        DataRow snapshot = new DataRow(10);
-
-        Map attrMap = ent.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
-            //processing compound attributes correctly
-            snapshot.put(
-                objAttr.getDbAttributePath(),
-                anObject.readPropertyDirectly(attrName));
-        }
-
-        Map relMap = ent.getRelationshipMap();
-        Iterator itr = relMap.keySet().iterator();
-        while (itr.hasNext()) {
-            String relName = (String) itr.next();
-            ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-
-            // to-many will be handled on the other side
-            if (rel.isToMany()) {
-                continue;
-            }
-
-            if (rel.isToDependentEntity()) {
-                continue;
-            }
-
-            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
-            if (target == null) {
-                continue;
-            }
-
-            Map idParts = target.getObjectId().getIdSnapshot();
-
-            // this may happen in uncommitted objects
-            if (idParts.isEmpty()) {
-                continue;
-            }
-
-            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
-            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-            snapshot.putAll(fk);
-        }
-
-        // process object id map
-        // we should ignore any object id values if a corresponding attribute
-        // is a part of relationship "toMasterPK", since those values have been
-        // set above when db relationships where processed.
-        Map thisIdParts = anObject.getObjectId().getIdSnapshot();
-        if (thisIdParts != null) {
-            // put only thise that do not exist in the map
-            Iterator itm = thisIdParts.keySet().iterator();
-            while (itm.hasNext()) {
-                Object nextKey = itm.next();
-                if (!snapshot.containsKey(nextKey)) {
-                    snapshot.put(nextKey, thisIdParts.get(nextKey));
-                }
-            }
-        }
-        return snapshot;
     }
 
     /**

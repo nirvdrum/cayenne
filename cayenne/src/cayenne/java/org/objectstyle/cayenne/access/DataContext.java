@@ -368,10 +368,92 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** Takes a snapshot of current object state. */
+    /**
+     * Creates or gets from cache a DataRow reflecting current object state.
+     * 
+     * @since 1.1
+     */
+    public DataRow currentSnapshot(DataObject anObject) {
+        ObjEntity entity = getEntityResolver().lookupObjEntity(anObject);
+
+        // for a HOLLOW object return snapshot from cache
+        if (anObject.getPersistenceState() == PersistenceState.HOLLOW
+            && anObject.getDataContext() != null) {
+
+            ObjectId id = anObject.getObjectId();
+            return getObjectStore().getSnapshot(id, this);
+        }
+
+        DataRow snapshot = new DataRow(10);
+
+        Map attrMap = entity.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
+            //processing compound attributes correctly
+            snapshot.put(
+                objAttr.getDbAttributePath(),
+                anObject.readPropertyDirectly(attrName));
+        }
+
+        Map relMap = entity.getRelationshipMap();
+        Iterator itr = relMap.keySet().iterator();
+        while (itr.hasNext()) {
+            String relName = (String) itr.next();
+            ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+
+            // to-many will be handled on the other side
+            if (rel.isToMany()) {
+                continue;
+            }
+
+            if (rel.isToDependentEntity()) {
+                continue;
+            }
+
+            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
+            if (target == null) {
+                continue;
+            }
+
+            Map idParts = target.getObjectId().getIdSnapshot();
+
+            // this may happen in uncommitted objects
+            if (idParts.isEmpty()) {
+                continue;
+            }
+
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+            snapshot.putAll(fk);
+        }
+
+        // process object id map
+        // we should ignore any object id values if a corresponding attribute
+        // is a part of relationship "toMasterPK", since those values have been
+        // set above when db relationships where processed.
+        Map thisIdParts = anObject.getObjectId().getIdSnapshot();
+        if (thisIdParts != null) {
+            // put only thise that do not exist in the map
+            Iterator itm = thisIdParts.keySet().iterator();
+            while (itm.hasNext()) {
+                Object nextKey = itm.next();
+                if (!snapshot.containsKey(nextKey)) {
+                    snapshot.put(nextKey, thisIdParts.get(nextKey));
+                }
+            }
+        }
+        return snapshot;
+    }
+
+    /** 
+     * Takes a snapshot of current object state. 
+     * 
+     * @deprecated Since 1.1 use "currentSnapshot"
+     */
     public Map takeObjectSnapshot(DataObject anObject) {
-        ObjEntity ent = getEntityResolver().lookupObjEntity(anObject);
-        return DataRowUtils.takeObjectSnapshot(ent, anObject);
+        return currentSnapshot(anObject);
     }
 
     /**

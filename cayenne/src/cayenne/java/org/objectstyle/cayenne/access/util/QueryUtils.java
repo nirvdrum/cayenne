@@ -64,6 +64,8 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
@@ -109,11 +111,13 @@ public class QueryUtils {
      * @param dataObject dataObject that may have changes
      */
     public static Map updatedProperties(DataObject dataObject) {
+        // Lazily created to avoid creating too many unnecessary objects
         Map result = null;
-        //Lazily created to avoid creating too many unnecessary objects
 
-        Map committedSnapshot = dataObject.getCommittedSnapshot();
-        Map currentSnapshot = dataObject.getCurrentSnapshot();
+        DataContext context = dataObject.getDataContext();
+        DataRow committedSnapshot =
+            context.getObjectStore().getSnapshot(dataObject.getObjectId(), context);
+        DataRow currentSnapshot = dataObject.getDataContext().currentSnapshot(dataObject);
 
         Iterator it = currentSnapshot.keySet().iterator();
         while (it.hasNext()) {

@@ -67,9 +67,10 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.access.EntityResolver;
-import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.access.util.DataRowUtils;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
@@ -82,14 +83,13 @@ import org.objectstyle.cayenne.util.PropertyComparator;
  */
 public class CayenneDataObject implements DataObject {
     private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
-    
-	protected long snapshotVersion = DEFAULT_VERSION;
-	
+
+    protected long snapshotVersion = DEFAULT_VERSION;
+
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
     protected transient DataContext dataContext;
     protected Map values = new HashMap();
-    
 
     /** Returns a data context this object is registered with, or null
      * if this object has no associated DataContext */
@@ -212,7 +212,7 @@ public class CayenneDataObject implements DataObject {
         }
 
         try {
-            Map snapshot =
+            DataRow snapshot =
                 dataContext.getObjectStore().getSnapshot(objectId, dataContext);
 
             ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
@@ -256,7 +256,7 @@ public class CayenneDataObject implements DataObject {
         if (persistenceState == PersistenceState.HOLLOW) {
             resolveFault();
         }
-        
+
         // 1. retain object snapshot to allow clean changes tracking
         // 2. change object state
         if (persistenceState == PersistenceState.COMMITTED) {
@@ -436,12 +436,19 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
+    /**
+     * @deprecated Since 1.1 use 
+     * getDataContext().getObjectStore().getSnapshot(this.getObjectId(), getDataContext())
+     */
     public Map getCommittedSnapshot() {
         return dataContext.getObjectStore().getSnapshot(getObjectId(), dataContext);
     }
 
+    /**
+     * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
+     */
     public Map getCurrentSnapshot() {
-        return dataContext.takeObjectSnapshot(this);
+        return dataContext.currentSnapshot(this);
     }
 
     /** A variation of  "toString" method, that may be more efficient in some cases.
@@ -538,7 +545,7 @@ public class CayenneDataObject implements DataObject {
         // DataContext will be set *IF* the DataContext it came from is also
         // deserialized.  Setting of DataContext is handled by the DataContext itself
     }
-    
+
     /**
      * Returns a version of a DataRow snapshot that was used to 
      * create this object.

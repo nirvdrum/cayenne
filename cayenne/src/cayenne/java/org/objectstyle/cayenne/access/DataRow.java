@@ -65,6 +65,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -115,15 +117,19 @@ public class DataRow extends HashMap {
       * CayenneRuntimeException is thrown.
       */
     public ObjectId createObjectId(ObjEntity entity) {
+    	return createObjectId(entity.getJavaClass(), entity.getDbEntity());
+    }
+    
+	public ObjectId createObjectId(Class objectClass, DbEntity entity) {
 
         // ... handle special case - PK.size == 1
         //     use some not-so-significant optimizations...
 
-        List pk = entity.getDbEntity().getPrimaryKey();
+        List pk = entity.getPrimaryKey();
         if (pk.size() == 1) {
             DbAttribute attr = (DbAttribute) pk.get(0);
             Object val = this.get(attr.getName());
-            return new ObjectId(entity.getJavaClass(), attr.getName(), val);
+            return new ObjectId(objectClass, attr.getName(), val);
         }
 
         // ... handle generic case - PK.size > 1
@@ -141,7 +147,24 @@ public class DataRow extends HashMap {
             idMap.put(attr.getName(), val);
         }
 
-        return new ObjectId(entity.getJavaClass(), idMap);
+        return new ObjectId(objectClass, idMap);
+    }
+
+    /**
+     * Returns an ObjectId of an object on the other side of the to-one relationship,
+     * for this DataRow representing a source of relationship. Returns null if snapshot 
+     * FK columns indicate a null to-one relationship.
+     */
+    public ObjectId createTargetObjectId(
+        Class targetClass,
+        DbRelationship relationship) {
+
+        if (relationship.isToMany()) {
+            throw new CayenneRuntimeException("Only 'to one' can have a target ObjectId.");
+        }
+        
+        Map target = relationship.targetPkSnapshotWithSrcSnapshot(this);
+        return (target != null) ? new ObjectId(targetClass, target) : null;
     }
 
     public String toString() {

@@ -122,13 +122,20 @@ public interface DataObject extends java.io.Serializable {
 	 */
     public void setToOneDependentTarget(String relName, DataObject val);
 
-    /** 
-     * Returns a snapshot for this object corresponding to the state 
+	/**
+	 * Returns a snapshot for this object corresponding to the state 
      * of the database when object was last fetched or committed. 
-     */ 
+     * 
+	 * @deprecated Since 1.1 use 
+	 * getDataContext().getObjectStore().getSnapshot(this.getObjectId(), getDataContext())
+	 */
     public Map getCommittedSnapshot();
     
-    /** Returns a snapshot of object current values. */
+	/**
+	 * Returns a snapshot of object current values.
+	 * 
+	 * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
+	 */
     public Map getCurrentSnapshot();
     
     /**

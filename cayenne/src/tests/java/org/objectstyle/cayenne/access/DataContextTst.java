@@ -89,7 +89,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testTakeObjectsSnapshot1() throws Exception {
         Artist artist = fetchArtist("artist1", false);
-        Map snapshot = context.takeObjectSnapshot(artist);
+        Map snapshot = context.currentSnapshot(artist);
         assertEquals(artist.getArtistName(), snapshot.get("ARTIST_NAME"));
         assertEquals(artist.getDateOfBirth(), snapshot.get("DATE_OF_BIRTH"));
     }
@@ -100,7 +100,7 @@ public class DataContextTst extends DataContextTestBase {
         artist.setArtistName(null);
         artist.setDateOfBirth(null);
 
-        Map snapshot = context.takeObjectSnapshot(artist);
+        Map snapshot = context.currentSnapshot(artist);
         assertTrue(snapshot.containsKey("ARTIST_NAME"));
         assertNull(snapshot.get("ARTIST_NAME"));
 
@@ -116,7 +116,7 @@ public class DataContextTst extends DataContextTestBase {
         context.registerNewObject(p1);
         p1.setToArtist(a1);
 
-        Map s1 = context.takeObjectSnapshot(p1);
+        Map s1 = context.currentSnapshot(p1);
         Map idMap = a1.getObjectId().getIdSnapshot();
         assertEquals(idMap.get("ARTIST_ID"), s1.get("ARTIST_ID"));
     }
@@ -281,7 +281,8 @@ public class DataContextTst extends DataContextTestBase {
         List objects = context.performQuery(query);
         assertEquals(artistCount, objects.size());
 
-        Map snapshot = ((Artist) objects.get(0)).getCommittedSnapshot();
+        Artist artist = (Artist) objects.get(0);
+        Map snapshot = context.getObjectStore().getSnapshot(artist.getObjectId(), context);
         assertEquals(3, snapshot.size());
     }
 

@@ -129,8 +129,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // object
         if (snapshot == null
             || snapshot.getVersion() != dataObject.getSnapshotVersion()) {
-            snapshot =
-                (DataRow) dataObject.getDataContext().takeObjectSnapshot(dataObject);
+            snapshot = dataObject.getDataContext().currentSnapshot(dataObject);
         }
 
         retainSnapshot(dataObject, snapshot);
@@ -342,8 +341,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     modifiedSnapshots = new HashMap();
                 }
 
-                DataRow dataRow =
-                    (DataRow) object.getDataContext().takeObjectSnapshot(object);
+                DataRow dataRow = object.getDataContext().currentSnapshot(object);
 
                 modifiedSnapshots.put(id, dataRow);
                 dataRow.setReplacesVersion(object.getSnapshotVersion());
@@ -380,8 +378,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     modifiedSnapshots = new HashMap();
                 }
 
-                DataRow dataRow =
-                    (DataRow) object.getDataContext().takeObjectSnapshot(object);
+                DataRow dataRow = object.getDataContext().currentSnapshot(object);
                 modifiedSnapshots.put(id.getReplacementId(), dataRow);
                 dataRow.setReplacesVersion(object.getSnapshotVersion());
 

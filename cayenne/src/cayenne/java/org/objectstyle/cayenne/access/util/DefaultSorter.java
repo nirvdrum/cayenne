@@ -78,6 +78,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataRow;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -331,18 +333,19 @@ public class DefaultSorter implements DependencySorter {
         Class targetClass) {
         DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
 
-        Map snapshot = null;
+        DataRow snapshot = null;
 
         // IMPORTANT: don't try to get snapshots for new objects, this will result in exception
         if (obj.getPersistenceState() != PersistenceState.NEW) {
-            snapshot = obj.getCommittedSnapshot();
+            DataContext context = obj.getDataContext();
+            snapshot = context.getObjectStore().getSnapshot(obj.getObjectId(), context);
         }
 
         if (snapshot == null) {
-            snapshot = obj.getCurrentSnapshot();
+            snapshot = obj.getDataContext().currentSnapshot(obj);
         }
 
-        ObjectId id = DataRowUtils.targetObjectId(targetClass, finalRel, snapshot);
+        ObjectId id = snapshot.createTargetObjectId(targetClass, finalRel);
         return (id != null) ? obj.getDataContext().registeredObject(id) : null;
     }
 
