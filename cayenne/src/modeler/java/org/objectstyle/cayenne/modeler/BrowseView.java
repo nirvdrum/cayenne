@@ -631,7 +631,7 @@ public class BrowseView
 
         currentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 
-        Object[] data = getUserObjects(currentNode);
+        Object[] data = currentNode.getUserObjectPath();
         if (data.length == 0) {
             // this should clear the right-side panel
             mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, null));
@@ -699,17 +699,6 @@ public class BrowseView
             mediator.fireProcedureDisplayEvent(e);
 
         }
-    }
-
-    /** Gets array of the user objects ending with this and starting with one under root. 
-      * That is the array of actual objects rather than wrappers.*/
-    private Object[] getUserObjects(DefaultMutableTreeNode node) {
-        List list = new ArrayList();
-        while (!node.isRoot()) {
-            list.add(0, node.getUserObject());
-            node = (DefaultMutableTreeNode) node.getParent();
-        }
-        return list.toArray();
     }
 
     private synchronized void fixOrdering() {
