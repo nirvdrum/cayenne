@@ -55,9 +55,13 @@ package org.objectstyle.cayenne;
  *
  */ 
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.objectstyle.art.*;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public class CDOOne2ManyTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(CDOOne2ManyTst.class.getName());
@@ -65,6 +69,25 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
     public CDOOne2ManyTst(String name) {
         super(name);
     }
+    
+ /*   public void testSelectViaRelationship() throws Exception {
+        
+        // setup test
+        Artist a1 = newArtist(); 
+        Painting p1 = newPainting();
+        a1.addToPaintingArray(p1);
+        ctxt.commitChanges();
+        
+        
+        // do select
+        Expression e = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        SelectQuery q = new SelectQuery("Painting", e);
+        
+        // *** TESTING THIS *** 
+        List paints = ctxt.performQuery(q);
+        assertEquals(1, paints.size());
+        assertSame(p1, paints.get(0));
+    } */
     
     public void testNewAdd() throws Exception { 
         Artist a1 = newArtist();        
@@ -86,6 +109,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         assertEquals(1, a2.getPaintingArray().size());
         assertEquals(paintingName, ((Painting)a2.getPaintingArray().get(0)).getPaintingTitle());
     }
+    
     
     public void testNewAddMultiples() throws Exception { 
         Artist a1 = newArtist();        
