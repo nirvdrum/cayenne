@@ -6,7 +6,7 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/install/compile.html</prev>
-	<next>/userguide/quickstart/modeler.html</next>
+	<next>/userguide/quickstart/comline.html</next>
 </navigator> 
 <body>
     <section name="3. Quick Start">
@@ -24,7 +24,6 @@
     	<p>Cayenne Tutorials:</p>
     	
     	<ul>
-    		<li><a href="modeler.html">"Using CayenneModeler" Tutorial</a></li>
     		<li><a href="comline.html">"Command-line Application" Tutorial</a></li>
     		<li><a href="webapp.html">"JSP/Struts Web Application" Tutorial</a></li>
     		<li><a href="tapestrywebapp.html">"Tapestry Web Application" Tutorial</a></li>
