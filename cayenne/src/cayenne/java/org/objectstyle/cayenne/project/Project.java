@@ -58,13 +58,13 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /**
@@ -112,7 +112,7 @@ public class Project {
         }
 
         // take a snapshot of files used by the project
-        files = buildFileList();
+        files = Collections.synchronizedList(buildFileList());
     }
 
     /**
@@ -145,7 +145,7 @@ public class Project {
     public Validator getValidator() {
         return new Validator(this);
     }
-    
+
     /**
      * Looks up and returns a file wrapper for a project
      * object. Returns null if no file exists.
@@ -158,11 +158,13 @@ public class Project {
         // to avoid full scan, a map may be a better 
         // choice of collection here, 
         // though normally projects have very few files...
-        Iterator it = files.iterator();
-        while (it.hasNext()) {
-            ProjectFile file = (ProjectFile) it.next();
-            if (file.getObject() == obj) {
-                return file;
+        synchronized (files) {
+            Iterator it = files.iterator();
+            while (it.hasNext()) {
+                ProjectFile file = (ProjectFile) it.next();
+                if (file.getObject() == obj) {
+                    return file;
+                }
             }
         }
 
@@ -273,20 +275,88 @@ public class Project {
         return ((ProjectConfiguration) config).getProjectFile();
     }
 
-    /** Saves project. */
+    /** 
+     * Saves project. 
+     */
     public void save() throws ProjectException {
-        // 1. Traverse project tree and update/create file wrappers
-        List deletedFiles = new ArrayList();
+
+        // 1. Traverse project tree to find file wrappers that require update.
         List modifiedFiles = new ArrayList();
-        List newFiles = new ArrayList();
-        
-         
+        List wrappedObjects = new ArrayList();
+
+        Iterator nodes = new ProjectTraversal(this).treeNodes();
+        while (nodes.hasNext()) {
+            Object[] nodePath = (Object[]) nodes.next();
+            Object obj = ProjectTraversal.objectFromPath(nodePath);
+
+            ProjectFile existingFile = findFile(obj);
+
+            if (existingFile == null) {
+                ProjectFile newFile = ProjectFile.projectFileForObject(obj);
+                if (newFile != null) {
+                    modifiedFiles.add(newFile);
+                }
+            } else {
+                wrappedObjects.add(existingFile.getObject());
+                if (existingFile.getStatus() == ProjectFile.FILE_MODIFIED) {
+                    modifiedFiles.add(existingFile);
+                }
+            }
+        }
 
         // 2. Try saving individual file wrappers
+        processSave(modifiedFiles);
 
         // 3. Commit changes
+        Iterator saved = modifiedFiles.iterator();
+        while (saved.hasNext()) {
+            ProjectFile f = (ProjectFile) saved.next();
+            f.saveCommit();
+        }
+
+        // 4. Take care of deleted
+        processDelete(wrappedObjects);
         
-        // 4. Refresh file list
+        // 5. Refresh file list
         files = buildFileList();
+    }
+    
+
+    protected void processSave(List modifiedFiles) throws ProjectException {
+        try {
+            Iterator modified = modifiedFiles.iterator();
+            while (modified.hasNext()) {
+                ProjectFile f = (ProjectFile) modified.next();
+                f.saveTemp();
+            }
+        } catch (Exception ex) {
+            logObj.info("*** Project save failed, reverting.", ex);
+
+            // revert
+            Iterator modified = modifiedFiles.iterator();
+            while (modified.hasNext()) {
+                ProjectFile f = (ProjectFile) modified.next();
+                f.saveUndo();
+            }
+
+            throw new ProjectException("Project save failed and was canceled.", ex);
+        }
+    }
+
+    protected void processDelete(List existingObjects) {
+
+        // check for deleted
+        synchronized (files) {
+            Iterator oldFiles = files.iterator();
+            while (oldFiles.hasNext()) {
+                ProjectFile f = (ProjectFile) oldFiles.next();
+                if (f.getObject() == null || !existingObjects.contains(f.getObject())) {
+                    boolean result = f.saveDelete();
+                    if (!result) {
+                        logObj.info("*** Failed to delete old file, ignoring.");
+                    }
+                }
+            }
+        }
     }
 }

@@ -78,6 +78,7 @@ public abstract class ProjectFile {
     protected String name;
     protected String extension;
     protected int status;
+    protected File tempFile;
 
     static {
         fileTypes.add(new RootProjectFile());
@@ -151,21 +152,28 @@ public abstract class ProjectFile {
     /**
      * Saves ProjectFile's underlying object to a temporary 
      * file, returning this file to the caller. If any problems are 
-     * encountered during saving, a ProjectException is thrown.
+     * encountered during saving, an Exception is thrown.
      */
-    public File saveTemp() throws ProjectException {
-        return null;
+    public void saveTemp() throws Exception {
     }
 
     /**
      * Finishes saving the underlying object.
      */
-    public void saveCommit(File tempFile) {}
+    public boolean saveDelete() {
+    	return false;
+    }
+    
+    /**
+     * Finishes saving the underlying object.
+     */
+    public void saveCommit() {}
+
 
     /**
      * Cleans up after unsuccessful or canceled save attempt.
      */
-    public void saveUndo(File tempFile) {}
+    public void saveUndo() {}
 
     /**
      * Returns the status.
@@ -182,5 +190,4 @@ public abstract class ProjectFile {
     public void setStatus(int status) {
         this.status = status;
     }
-
 }

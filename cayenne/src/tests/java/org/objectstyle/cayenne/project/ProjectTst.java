@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -92,10 +93,119 @@ public class ProjectTst extends CayenneTestCase {
     public void testValidator() throws Exception {
         Validator v1 = p.getValidator();
         assertSame(p, v1.getProject());
-        
+
         Validator v2 = p.getValidator();
         assertSame(p, v2.getProject());
-        
+
         assertTrue(v1 != v2);
+    }
+
+    public void testProcessSave() throws Exception {
+        ArrayList list = new ArrayList();
+        SaveEmulator file = new SaveEmulator(false);
+        list.add(file);
+        list.add(file);
+
+        p.processSave(list);
+        assertEquals(2, file.saveTempCount);
+        assertEquals(0, file.commitCount);
+        assertEquals(0, file.undoCount);
+    }
+
+    public void testProcessSaveFail() throws Exception {
+        ArrayList list = new ArrayList();
+        SaveEmulator file = new SaveEmulator(true);
+        list.add(file);
+
+        try {
+            p.processSave(list);
+            fail("Save must have failed.");
+        } catch (ProjectException ex) {
+            // exception expected
+            assertEquals(1, file.saveTempCount);
+            assertEquals(0, file.commitCount);
+            assertEquals(1, file.undoCount);
+        }
+    }
+
+
+    class SaveEmulator extends ProjectFile {
+        protected int commitCount;
+        protected int undoCount;
+        protected int deleteCount;
+        protected int saveTempCount;
+        protected boolean shouldFail;
+
+        public SaveEmulator(boolean shouldFail) {
+            this.shouldFail = shouldFail;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#canHandle(Object)
+         */
+        public boolean canHandle(Object obj) {
+            return false;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#createProjectFile(Object)
+         */
+        public ProjectFile createProjectFile(Object obj) {
+            return null;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+         */
+        public Object getObject() {
+            return null;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
+         */
+        public String getObjectName() {
+            return null;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
+         */
+        public void saveToFile(File f) throws Exception {
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#saveCommit()
+         */
+        public void saveCommit() {
+            commitCount++;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#saveDelete()
+         */
+        public boolean saveDelete() {
+            deleteCount++;
+            return !shouldFail;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#saveTemp()
+         */
+        public void saveTemp() throws Exception {
+            saveTempCount++;
+            
+            if(shouldFail) {
+            	throw new Exception("You forced me to fail...");
+            }
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#saveUndo()
+         */
+        public void saveUndo() {
+            undoCount++;
+        }
+
     }
 }
