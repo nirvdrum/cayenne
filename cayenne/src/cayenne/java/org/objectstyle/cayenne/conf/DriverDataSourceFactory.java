@@ -103,7 +103,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     /**
      * @see DataSourceFactory#initWithParentConfiguration(Configuration)
      */
-    public void initWithParentConfiguration(Configuration conf) {
+    public void initializeWithParentConfiguration(Configuration conf) {
         this.parentConfiguration = conf;
     }
 
@@ -150,45 +150,12 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     protected InputStream getInputStream(String location) {
-        if (parentConfiguration == null) {
+        if (this.parentConfiguration == null) {
             throw new ConfigurationException("No parent Configuration set - cannot continue.");
         }
 
-        // check for web application
-        InputStream is = this.getWebAppInputStream(location);
-
-        // if not a web app, return to normal behavior
-        if (is == null) {
-            is =
-                this
-                    .parentConfiguration
-                    .getResourceLocator()
-                    .findResourceStream(
-                    location);
-        }
-
-        return is;
-    }
-
-    protected InputStream getWebAppInputStream(String location) {
-        // webapp patch - first lookup in WEB-INF
-        if (this.parentConfiguration != null) {
-            // determine what kind of servlet environment is accessible
-            try {
-                Class.forName("javax.servlet.ServletContext");
-                if (this.parentConfiguration
-                    instanceof BasicServletConfiguration) {
-                    BasicServletConfiguration servlConf =
-                        (BasicServletConfiguration) this.parentConfiguration;
-                    return servlConf.getMapConfiguration(location);
-                }
-            } catch (Exception ex) {
-                // no web app
-            }
-
-        }
-
-        return null;
+        return this.parentConfiguration.getResourceLocator()
+        			.findResourceStream(location);
     }
 
     /**

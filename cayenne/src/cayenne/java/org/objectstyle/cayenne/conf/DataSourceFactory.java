@@ -69,7 +69,7 @@ public interface DataSourceFactory {
     /**
      * Initializes factory with the parent configuration object.
      */
-    public void initWithParentConfiguration(Configuration conf);
+    public void initializeWithParentConfiguration(Configuration conf);
     
     /** 
      * Returns DataSource object corresponding to <code>location</code>.

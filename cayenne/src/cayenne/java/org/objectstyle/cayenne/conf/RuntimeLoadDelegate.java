@@ -302,7 +302,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                 logLevel,
                 "using factory: " + localFactory.getClass().getName());
 
-            localFactory.initWithParentConfiguration(config);
+            localFactory.initializeWithParentConfiguration(config);
             DataSource ds = localFactory.getDataSource(dataSource, logLevel);
             if (ds != null) {
                 logObj.log(logLevel, "loaded datasource.");
