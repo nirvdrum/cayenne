@@ -55,71 +55,62 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
-import org.objectstyle.cayenne.modeler.model.TopModel;
-import org.objectstyle.cayenne.modeler.view.StatusBarView;
-import org.scopemvc.controller.basic.BasicController;
+import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
+import org.objectstyle.cayenne.modeler.action.ProjectAction;
+import org.objectstyle.cayenne.modeler.action.RemoveAction;
+import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
 /**
  * @author Andrei Adamchik
  */
-public class StatusBarController extends ModelerController {
+public class ActionController extends ModelerController {
 
-    public StatusBarController(ModelerController parent) {
+    /**
+     * Constructor for ActionController.
+     */
+    public ActionController(ModelerController parent) {
         super(parent);
     }
 
+    /**
+     * Performs control handling, invoking appropriate action method.
+     */
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(PROJECT_CLOSED_ID)) {
-            doUpdate("Project Closed...");
+            projectClosed();
         }
     }
 
-    protected void doUpdate(String message) {
-        TopModel model = (TopModel) getModel();
-        if (model == null) {
-            return;
-        }
-
-        synchronized (model) {
-            model.setStatusMessage(message);
-            ((StatusBarView) getView()).refresh();
-        }
-
-        // start message cleanup thread that would remove the message after X seconds
-        if (message != null && message.trim().length() > 0) {
-            Thread cleanup = new ExpireThread(message, 6);
-            cleanup.start();
-        }
+    protected void projectClosed() {
+        disableAllActions();
+        getAction(ProjectAction.ACTION_NAME).setEnabled(false);
+        getAction(RemoveAction.ACTION_NAME).setName("Remove");
+        getAction(SaveAction.ACTION_NAME).setEnabled(false);
+        getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
     }
 
-    class ExpireThread extends Thread {
-        protected int seconds;
-        protected String message;
+    protected CayenneAction getAction(String key) {
+        return (CayenneAction) getTopModel().getActionMap().get(key);
+    }
 
-        public ExpireThread(String message, int seconds) {
-            this.seconds = seconds;
-            this.message = message;
-        }
+    /** 
+     * Disables all controlled actions.
+     */
+    protected void disableAllActions() {
+        // disable everything we can
+        Object[] keys = getTopModel().getActionMap().allKeys();
+        int len = keys.length;
+        for (int i = 0; i < len; i++) {
 
-        public void run() {
-            try {
-                sleep(seconds * 1000);
-            } catch (InterruptedException e) {
-                // ignore exception
+            // "save" button has its own rules
+            if (keys[i].equals(SaveAction.ACTION_NAME)) {
+                continue;
             }
 
-            TopModel model = (TopModel) getModel();
-            if (model == null) {
-                return;
-            }
-
-            synchronized (model) {
-                if (message.equals(model.getStatusMessage())) {
-                    doUpdate(null);
-                }
-            }
+            getTopModel().getActionMap().get(keys[i]).setEnabled(false);
         }
     }
 }

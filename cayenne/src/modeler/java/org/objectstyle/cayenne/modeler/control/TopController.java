@@ -68,9 +68,10 @@ import org.scopemvc.core.ControlException;
  *  
  * @author Andrei Adamchik
  */
-public class TopController extends BasicController {
+public class TopController extends ModelerController {
     protected StatusBarController statusController;
     protected EventController eventController;
+    protected ActionController actionController;
 
     // should refactor to SPanel
     protected Editor view;
@@ -80,26 +81,40 @@ public class TopController extends BasicController {
      */
     public TopController(Editor view) {
         this.view = view;
+        setModel(new TopModel());
 
-        TopModel model = new TopModel();
-        statusController = new StatusBarController(model);
-        eventController = new EventController(model);
-        setModel(model);
+        statusController = new StatusBarController(this);
+        eventController = new EventController(this);
+        actionController = new ActionController(this);
     }
 
-    public void projectClosed() {
-        // reset controllers
-        eventController.reset();
+    /**
+     * Action method invoked on project closing.
+     */
+    protected void projectClosed(Control control) {
+        // --- update view
+        view.getRecentFileMenu().rebuildFromPreferences();
+        if (view.getView() != null) {
+            view.getContentPane().remove(view.getView());
+            view.setView(null);
+        }
+        // repaint is needed, since sometimes there is a 
+        // trace from menu left on the screen
+        view.repaint();
+        view.updateTitle();
 
-        // clear view
-        view.projectClosed();
-
-        // clear model
+        // --- update model
         getTopModel().setCurrentProject(null);
 
-        // update status bar
-        statusController.handleControl(
-            new Control(TopModel.STATUS_MESSAGE_KEY, "Project closed..."));
+        // --- propagate event to child controllers
+        control.markUnmatched();
+        eventController.handleControl(control);
+
+        control.markUnmatched();
+        actionController.handleControl(control);
+
+        control.markUnmatched();
+        statusController.handleControl(control);
     }
 
     public void projectOpened(Project project) {
@@ -124,19 +139,24 @@ public class TopController extends BasicController {
         statusController.setView(view);
     }
 
-    public TopModel getTopModel() {
-        return (TopModel) getModel();
-    }
-
     protected void doHandleControl(Control control) throws ControlException {
         // pass control to the child that knows how to handle it
         if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
             control.markUnmatched();
             statusController.doHandleControl(control);
+        } else if (control.matchesID(PROJECT_CLOSED_ID)) {
+            projectClosed(control);
         }
     }
 
     public EventController getEventController() {
         return eventController;
+    }
+
+    /**
+     * Returns the child action controller.
+     */
+    public ActionController getActionController() {
+        return actionController;
     }
 }

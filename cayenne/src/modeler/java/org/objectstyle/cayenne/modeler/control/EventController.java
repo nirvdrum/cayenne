@@ -100,8 +100,9 @@ import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.scopemvc.core.Control;
+import org.scopemvc.core.ControlException;
 
 /** 
  * Implementation of event dispatching in CayenneModeler using <i>mediator</i>
@@ -114,12 +115,11 @@ import org.objectstyle.cayenne.project.ProjectTraversal;
  * 
  * @author Andrei Adamchik
  */
-public class EventController {
+public class EventController extends ModelerController {
 
     static Logger logObj = Logger.getLogger(EventController.class);
 
     protected EventListenerList listenerList;
-    protected TopModel model;
 
     DataDomain currentDomain = null;
     DataNode currentNode = null;
@@ -134,9 +134,18 @@ public class EventController {
     /** Changes have been made, need to be saved. */
     protected boolean dirty;
 
-    public EventController(TopModel model) {
+    public EventController(ModelerController parent) {
+        super(parent);
         this.listenerList = new EventListenerList();
-        this.model = model;
+    }
+
+    /**
+      * Performs control handling.
+      */
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(PROJECT_CLOSED_ID)) {
+            reset();
+        }
     }
 
     public void reset() {
@@ -160,7 +169,7 @@ public class EventController {
         currentDbAttr = null;
         currentObjRel = null;
         currentDbRel = null;
-        model.setSelectedPath(ProjectTraversal.EMPTY_PATH);
+        getTopModel().setSelectedPath(ProjectTraversal.EMPTY_PATH);
     }
 
     public DataNode getCurrentDataNode() {
@@ -269,10 +278,10 @@ public class EventController {
         }
 
         clearState();
-        
+
         currentDomain = e.getDomain();
-        model.setSelectedPath(currentDomain);
-        
+        getTopModel().setSelectedPath(currentDomain);
+
         EventListener[] list;
         list = getListeners(DomainDisplayListener.class);
         for (int i = 0; i < list.length; i++) {

@@ -59,7 +59,9 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.view.UnsavedChangesDialog;
+import org.scopemvc.core.Control;
 
 /**
  * @author Andrei Adamchik
@@ -92,9 +94,8 @@ public class ProjectAction extends CayenneAction {
             return false;
         }
 
-        // later may create an event, right now notify frame
-        // directly
-        Editor.getFrame().getController().projectClosed();
+        Editor.getFrame().getController().handleControl(
+            new Control(ModelerController.PROJECT_CLOSED_ID));
         return true;
     }
 

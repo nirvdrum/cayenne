@@ -99,6 +99,7 @@ import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.control.TopController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -123,6 +124,7 @@ import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
+import org.scopemvc.core.Control;
 import org.scopemvc.util.UIStrings;
 
 /** 
@@ -165,6 +167,9 @@ public class Editor
         return frame;
     }
 
+    /**
+     * Main method that starts the CayenneModeler.
+     */
     public static void main(String[] args) {
         // redirect all logging to the log file
         configLogging();
@@ -368,26 +373,6 @@ public class Editor
         }
     }
 
-    public void projectClosed() {
-        recentFileMenu.rebuildFromPreferences();
-
-        if (view != null) {
-            getContentPane().remove(view);
-            view = null;
-        }
-
-        disableMenu();
-
-        getAction(ProjectAction.ACTION_NAME).setEnabled(false);
-        getAction(RemoveAction.ACTION_NAME).setName("Remove");
-        getAction(SaveAction.ACTION_NAME).setEnabled(false);
-        getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
-
-        // repaint is needed, since there is a trace from menu left on the screen
-        repaint();
-        updateTitle();
-    }
-
     public void projectOpened() {
         EventController evController = controller.getEventController();
         view = new EditorView(evController);
@@ -485,31 +470,13 @@ public class Editor
         }
     }
 
-    /** 
-     * Disables all menu  for the case when no project is open.
-     * The only menus that are never disabled are:
-     * <ul>
-     * <li>"New Project"</li> 
-     * <li>"Open Project"</li>
-     * <li>"Exit"</li>
-     * </ul> 
-     */
-    private void disableMenu() {
-        // disable everything we can
-        Object[] keys = controller.getTopModel().getActionMap().allKeys();
-        int len = keys.length;
-        for (int i = 0; i < len; i++) {
-            // "save" button has its own rules
-            if (keys[i].equals(SaveAction.ACTION_NAME)) {
-                continue;
-            }
-
-            controller.getTopModel().getActionMap().get(keys[i]).setEnabled(false);
-        }
-    }
-
     private void enableProjectMenu() {
-        disableMenu();
+        // this is a temporary hack till all event handling is removed out
+        // of Editor
+        controller.getActionController().handleControl(
+            new Control(ModelerController.PROJECT_CLOSED_ID));
+            
+            
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
         getAction(ProjectAction.ACTION_NAME).setEnabled(true);
     }
@@ -592,5 +559,21 @@ public class Editor
      */
     public TopController getController() {
         return controller;
+    }
+
+    /**
+     * Returns the recentFileMenu.
+     * @return RecentFileMenu
+     */
+    public RecentFileMenu getRecentFileMenu() {
+        return recentFileMenu;
+    }
+    
+    /**
+     * Sets the view.
+     * @param view The view to set
+     */
+    public void setView(EditorView view) {
+        this.view = view;
     }
 }

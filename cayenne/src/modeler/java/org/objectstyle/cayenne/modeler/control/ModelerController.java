@@ -56,70 +56,28 @@
 package org.objectstyle.cayenne.modeler.control;
 
 import org.objectstyle.cayenne.modeler.model.TopModel;
-import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.scopemvc.controller.basic.BasicController;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
 
 /**
  * @author Andrei Adamchik
  */
-public class StatusBarController extends ModelerController {
+public class ModelerController extends BasicController {
+	public static final String PROJECT_CLOSED_ID = "projectClosed";
 
-    public StatusBarController(ModelerController parent) {
-        super(parent);
+    /**
+     * Constructor for ModelerController.
+     */
+    public ModelerController() {}
+    
+    public ModelerController(ModelerController parent) {
+    	setModel(parent.getTopModel());
+    	setParent(parent);
     }
 
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(PROJECT_CLOSED_ID)) {
-            doUpdate("Project Closed...");
-        }
-    }
-
-    protected void doUpdate(String message) {
-        TopModel model = (TopModel) getModel();
-        if (model == null) {
-            return;
-        }
-
-        synchronized (model) {
-            model.setStatusMessage(message);
-            ((StatusBarView) getView()).refresh();
-        }
-
-        // start message cleanup thread that would remove the message after X seconds
-        if (message != null && message.trim().length() > 0) {
-            Thread cleanup = new ExpireThread(message, 6);
-            cleanup.start();
-        }
-    }
-
-    class ExpireThread extends Thread {
-        protected int seconds;
-        protected String message;
-
-        public ExpireThread(String message, int seconds) {
-            this.seconds = seconds;
-            this.message = message;
-        }
-
-        public void run() {
-            try {
-                sleep(seconds * 1000);
-            } catch (InterruptedException e) {
-                // ignore exception
-            }
-
-            TopModel model = (TopModel) getModel();
-            if (model == null) {
-                return;
-            }
-
-            synchronized (model) {
-                if (message.equals(model.getStatusMessage())) {
-                    doUpdate(null);
-                }
-            }
-        }
+    /**
+     * Returns model cast into TopModel.
+     */
+    public TopModel getTopModel() {
+        return (TopModel) getModel();
     }
 }
