@@ -71,12 +71,15 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -90,6 +93,7 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
   * @author Andrei Adamchik
   */
 public class DbGenerator {
+	Logger logObj = Logger.getLogger(DbGenerator.class);
 
 	protected DataNode node;
 	protected DataMap map;
@@ -124,7 +128,7 @@ public class DbGenerator {
 		if (map == null) {
 			throw new IllegalArgumentException("DataMap must not be null.");
 		}
-		
+
 		this.map = map;
 		this.node = adapter.createDataNode("internal");
 		node.addDataMap(map);
@@ -174,7 +178,33 @@ public class DbGenerator {
 
 		PkGenerator pkGenerator = adapter.getPkGenerator();
 		dropPK = pkGenerator.dropAutoPkStatements(dbEntitiesRequiringAutoPK);
-		createPK = pkGenerator.createAutoPkStatements(dbEntitiesRequiringAutoPK);
+		createPK =
+			pkGenerator.createAutoPkStatements(dbEntitiesRequiringAutoPK);
+	}
+
+	/**
+	 * Returns <code>true</code> if there is nothing to be done by this generator.
+	 * If <code>respectConfiguredSettings</code> is <code>true</code>,
+	 * checks are done applying currently configured settings,
+	 * otherwise check is done, assuming that all possible generated
+	 * objects.
+	 */
+	public boolean isEmpty(boolean respectConfiguredSettings) {
+		if (dbEntitiesInInsertOrder.isEmpty()
+			&& dbEntitiesRequiringAutoPK.isEmpty()) {
+			return true;
+		}
+
+		if (!respectConfiguredSettings) {
+			return false;
+		}
+
+		return !(
+			shouldDropTables
+				|| shouldCreateTables
+				|| shouldCreateFKConstraints
+				|| shouldCreatePKSupport
+				|| shouldDropPKSupport);
 	}
 
 	/** Returns DbAdapter associated with this DbGenerator. */
@@ -233,6 +263,12 @@ public class DbGenerator {
 	 * invokes <code>public void runGenerator(DataSource ds)</code>.
 	 */
 	public void runGenerator(DataSourceInfo dsi) throws Exception {
+		// do a pre-check. Maybe there is no need to run anything
+		// and therefore no need to create a connection
+		if (isEmpty(true)) {
+			return;
+		}
+
 		PoolManager dataSource =
 			new PoolManager(
 				dsi.getJdbcDriver(),
@@ -325,13 +361,13 @@ public class DbGenerator {
 			if (shouldDropPKSupport) {
 				getAdapter().getPkGenerator().dropAutoPk(
 					node,
-					dbEntitiesInInsertOrder);
+					dbEntitiesRequiringAutoPK);
 			}
 
 			if (shouldCreatePKSupport) {
 				getAdapter().getPkGenerator().createAutoPk(
 					node,
-					dbEntitiesInInsertOrder);
+					dbEntitiesRequiringAutoPK);
 			}
 		} finally {
 			node.setDataSource(null);
@@ -451,7 +487,42 @@ public class DbGenerator {
 		Iterator it = map.getDbEntities().iterator();
 		while (it.hasNext()) {
 			DbEntity nextEntity = (DbEntity) it.next();
+
+			// do sanity checks...
+
+			// TODO: [Andrus] Any ideas how to integrate this with Validator?
+			// validation rules here are similar to generic validation,
+			// but still have its own distinction
+
+			// derived DbEntities are not included in generated SQL
 			if (nextEntity instanceof DerivedDbEntity) {
+				continue;
+			}
+
+			// tables with no columns are not included
+			if (nextEntity.getAttributes().size() == 0) {
+				logObj.info(
+					"Skipping entity with no attributes: "
+						+ nextEntity.getName());
+				continue;
+			}
+
+			// tables with invalid DbAttributes are not included
+			boolean invalidAttributes = false;
+			Iterator nextDbAtributes = nextEntity.getAttributes().iterator();
+			while (nextDbAtributes.hasNext()) {
+				DbAttribute attr = (DbAttribute) nextDbAtributes.next();
+				if (attr.getType() == TypesMapping.NOT_DEFINED) {
+					logObj.info(
+						"Skipping entity, attribute type is undefined: "
+							+ nextEntity.getName()
+							+ "."
+							+ attr.getName());
+					invalidAttributes = true;
+					break;
+				}
+			}
+			if (invalidAttributes) {
 				continue;
 			}
 
@@ -460,31 +531,32 @@ public class DbGenerator {
 			// check if an automatic PK generation can be potentailly supported
 			// in this entity. For now simply check that the key is not propagated
 			Iterator relationships = nextEntity.getRelationships().iterator();
-			
+
 			// create a copy of the original PK list, 
 			// since the list will be modified locally
 			List pkAttributes = new ArrayList(nextEntity.getPrimaryKey());
-            while(pkAttributes.size() > 0 && relationships.hasNext()) {
-            	DbRelationship nextRelationship = (DbRelationship)relationships.next();
-            	if(!nextRelationship.isToMasterPK()) {
-            		continue;
-            	}
-            	
-            	// supposedly all source attributes of the relationship
-            	// to master entity must be a part of primary key,
-            	// so 
-            	Iterator joins = nextRelationship.getJoins().iterator();
-            	while(joins.hasNext()) {
-            		DbAttributePair join = (DbAttributePair)joins.next();
-            		pkAttributes.remove(join.getSource());         	
-            	}
-            }
-            
-            // primary key is needed only if at least one of the primary key attributes
-            // is not propagated via releationship
-            if(pkAttributes.size() > 0) {
+			while (pkAttributes.size() > 0 && relationships.hasNext()) {
+				DbRelationship nextRelationship =
+					(DbRelationship) relationships.next();
+				if (!nextRelationship.isToMasterPK()) {
+					continue;
+				}
+
+				// supposedly all source attributes of the relationship
+				// to master entity must be a part of primary key,
+				// so 
+				Iterator joins = nextRelationship.getJoins().iterator();
+				while (joins.hasNext()) {
+					DbAttributePair join = (DbAttributePair) joins.next();
+					pkAttributes.remove(join.getSource());
+				}
+			}
+
+			// primary key is needed only if at least one of the primary key attributes
+			// is not propagated via releationship
+			if (pkAttributes.size() > 0) {
 				tablesWithAutoPk.add(nextEntity);
-            }
+			}
 		}
 
 		// sort the list

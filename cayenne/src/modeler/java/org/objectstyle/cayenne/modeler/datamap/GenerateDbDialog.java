@@ -120,7 +120,7 @@ public class GenerateDbDialog
     protected JCheckBox dropPK;
 
     public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter, DbGenerator gen) {
-        super(Editor.getFrame(), "Generate Database", true);
+        super(Editor.getFrame(), "Generate Database Schema", true);
         
         this.dsi = dsi;
         this.adapter = adapter;
@@ -228,11 +228,9 @@ public class GenerateDbDialog
     }
 
     protected void generateDBSchema() {
-        gen.setShouldDropTables(dropTables.isSelected());
-
         try {
             gen.runGenerator(dsi);
-            JOptionPane.showMessageDialog(this, "Generation Complete.");
+            JOptionPane.showMessageDialog(this, "Schema Generation Complete.");
 
         } catch (Exception ex) {
             if (ex instanceof SQLException) {
@@ -255,7 +253,7 @@ public class GenerateDbDialog
         FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
         JFileChooser fc = new JFileChooser(fileView);
         fc.setDialogType(JFileChooser.SAVE_DIALOG);
-        fc.setDialogTitle("Create database");
+        fc.setDialogTitle("Save SQL Script");
         if (null != projDir) {
             fc.setCurrentDirectory(projDir);
         }
