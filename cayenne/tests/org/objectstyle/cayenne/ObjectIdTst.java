@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -103,32 +103,31 @@ public class ObjectIdTst extends TestCase {
     
     public void testEquals3() throws Exception {
         String nm = "12345";
-        DbAttribute at = new DbAttribute();
+        String pknm = "xyzabc";
 
         HashMap hm1 = new HashMap();
-        hm1.put(at, "123");
+        hm1.put(pknm, "123");
         
         HashMap hm2 = new HashMap();
-        hm2.put(at, "123");
+        hm2.put(pknm, "123");
         
         ObjectId oid1 = new ObjectId(nm, hm1);
         ObjectId oid2 = new ObjectId(nm, hm2);
         assertEquals(oid1, oid2);       
     }
     
-    
     public void testIdAsMapKey() throws Exception {
         HashMap map =  new HashMap();
         Object o1 = new Object();
         
         String nm = "12345";
-        DbAttribute at = new DbAttribute();
+        String pknm = "xyzabc";
 
         HashMap hm1 = new HashMap();
-        hm1.put(at, "123");
+        hm1.put(pknm, "123");
         
         HashMap hm2 = new HashMap();
-        hm2.put(at, "123");
+        hm2.put(pknm, "123");
         
         ObjectId oid1 = new ObjectId(nm, hm1);
         ObjectId oid2 = new ObjectId(nm, hm2);
@@ -150,12 +149,10 @@ public class ObjectIdTst extends TestCase {
         String nm = "12345";
 
         HashMap hm1 = new HashMap();
-        DbAttribute at1 = new DbAttribute();
-        hm1.put(at1, "123");
+        hm1.put("pk1", "123");
         
         HashMap hm2 = new HashMap();
-        DbAttribute at2 = new DbAttribute();
-        hm2.put(at2, "123");
+        hm2.put("pk2", "123");
         
         ObjectId oid1 = new ObjectId(nm, hm1);
         ObjectId oid2 = new ObjectId(nm, hm2);

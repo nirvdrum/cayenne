@@ -53,47 +53,74 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.*;
-import junit.framework.*;
-import org.objectstyle.cayenne.exp.*;
+import java.util.HashMap;
 
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.ObjectId;
 
 public class ObjEntityTst extends TestCase {
-    protected ObjEntity ent;
-    
-    
-    public ObjEntityTst(String name) {
-        super(name);
-    }
-    
-    
-    public void setUp() throws Exception {
-        ent = new ObjEntity();
-    }
-    
-    
-    public void testClassName() throws Exception {
-        String tstName = "tst_name";
-        ent.setClassName(tstName);
-        assertEquals(tstName, ent.getClassName());
-    }
-    
-    public void testAttributeForDbAttribute() throws Exception {
-        ObjEntity ae = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Artist");
-        DbEntity dae = ae.getDbEntity();
-        
-        assertNull(ae.getAttributeForDbAttribute((DbAttribute)dae.getAttribute("ARTIST_ID")));       
-        assertNotNull(ae.getAttributeForDbAttribute((DbAttribute)dae.getAttribute("ARTIST_NAME")));       
-    }
-    
-    
-    public void testRelationshipForDbRelationship() throws Exception {
-        ObjEntity ae = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Artist");
-        DbEntity dae = ae.getDbEntity();
-        
-        assertNull(ae.getRelationshipForDbRelationship(new DbRelationship()));       
-        assertNotNull(ae.getRelationshipForDbRelationship((DbRelationship)dae.getRelationship("paintingArray")));       
-    }
+	protected ObjEntity ent;
+
+	public ObjEntityTst(String name) {
+		super(name);
+	}
+
+	public void setUp() throws Exception {
+		ent = new ObjEntity();
+	}
+
+	public void testClassName() throws Exception {
+		String tstName = "tst_name";
+		ent.setClassName(tstName);
+		assertEquals(tstName, ent.getClassName());
+	}
+
+	public void testAttributeForDbAttribute() throws Exception {
+		ObjEntity ae =
+			org.objectstyle.TestMain.getSharedDomain().lookupEntity("Artist");
+		DbEntity dae = ae.getDbEntity();
+
+		assertNull(
+			ae.getAttributeForDbAttribute(
+				(DbAttribute) dae.getAttribute("ARTIST_ID")));
+		assertNotNull(
+			ae.getAttributeForDbAttribute(
+				(DbAttribute) dae.getAttribute("ARTIST_NAME")));
+	}
+
+	public void testRelationshipForDbRelationship() throws Exception {
+		ObjEntity ae =
+			org.objectstyle.TestMain.getSharedDomain().lookupEntity("Artist");
+		DbEntity dae = ae.getDbEntity();
+
+		assertNull(ae.getRelationshipForDbRelationship(new DbRelationship()));
+		assertNotNull(
+			ae.getRelationshipForDbRelationship(
+				(DbRelationship) dae.getRelationship("paintingArray")));
+	}
+
+	public void testObjectIdFromSnapshot() throws Exception {
+		DbAttribute at = new DbAttribute();
+		at.setName("xyz");
+		at.setPrimaryKey(true);
+		DbEntity dbe = new DbEntity("123");
+		dbe.addAttribute(at);
+		ent.setDbEntity(dbe);
+		ent.setName("456");
+
+		// test same id created by different methods
+		HashMap map = new HashMap();
+		map.put(at.getName(), "123");
+
+		HashMap map2 = new HashMap();
+		map2.put(at.getName(), "123");
+
+		ObjectId ref = new ObjectId(ent.getName(), map);
+		ObjectId oid = ent.objectIdFromSnapshot(map2);
+
+		assertEquals(ref, oid);
+	}
 }
