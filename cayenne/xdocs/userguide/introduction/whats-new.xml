@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="1. Introduction"/>
 <body>
     <section name="1. Introduction">     
-        <subsection name="1.1 What's New in 1.1">
+        <subsection name="1.1 Guide to 1.1 Features">
         	<p>Cayenne version 1.1 introduces a large number of new features and enhancements
         	over 1.0. This chapter lists most of them, providing the links to more detailed 
         	information about each feature.</p>
@@ -54,9 +54,12 @@
             <p>Original implementation was submitted by Fabricio Voznika.</p>
             </subsection>
             
-            <subsection name="1.1.6 Expression API">
-            <p>There is a new expression parser that allows easy creation of complex expressions from 
-            strings ("Expression.fromString(..)"). In-memory evaluation API is improved, and now supports 
+            <subsection name="1.1.6 Expression API Enhancements">
+            <p>There is a new expression parser that allows creation of complex expressions from 
+            strings ("Expression.fromString(..)"). This greatly redices the amount of code needed to build an
+            expression. 
+            </p><p>
+            In-memory evaluation API is improved, and now supports 
             both boolean conditions (via "Expression.match" method) and generic expressions evaluation 
             (via "Expression.evaluate" method), it also includes support for arithmetic operations.</p>
             
@@ -100,7 +103,14 @@
             </subsection>
             
             <subsection name="1.1.14 Support for Queries in CayenneModeler and DataMap DTD.">
-            <p></p>
+            <p>Queries are made first-class mapping objects. They can be modeled in CayenneModeler 
+            and stored in DataMaps. Application code can then reuse such queries.
+            </p>
+            
+             <ul>
+             	<li><a href="../../modelerguide/modeling-queries/index.html">Mapping Queries</a></li>
+           	 	<li><a href="../fetch/datamap-queries.html">Using Mapped Queries</a></li>
+            </ul>
             </subsection>
             
             <subsection name="1.1.15 Non-refreshing Select Queries">
