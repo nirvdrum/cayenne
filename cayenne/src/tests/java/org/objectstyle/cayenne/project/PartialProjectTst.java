@@ -92,7 +92,7 @@ public class PartialProjectTst extends CayenneTestCase {
         }
 
         // copy cayenne.xml
-        File src = new File(getTestResourceDir(), Configuration.DOMAIN_FILE);
+        File src = new File(getTestResourceDir(), "lightweight-cayenne.xml");
         if (!Util.copy(src, testProjectFile)) {
             throw new Exception("Can't copy from " + src);
         }

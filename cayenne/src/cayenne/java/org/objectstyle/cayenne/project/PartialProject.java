@@ -67,10 +67,9 @@ import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.conf.Configuration;
 
 /**
- * PartialProject is a "lightweight" ApplicationProject implementation. It can
- * work with projects even when some of the resources are missing, it never
- * instantiates Cayenne stack objects, using other, lightweight, data structures
- * instead.
+ * PartialProject is a "lightweight" project implementation. It can work with
+ * projects even when some of the resources are missing. It never instantiates
+ * Cayenne stack objects, using other, lightweight, data structures instead.
  * 
  * @author Andrei Adamchik
  */
