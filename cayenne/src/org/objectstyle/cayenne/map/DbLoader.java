@@ -57,8 +57,7 @@
 package org.objectstyle.cayenne.map;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,7 +102,7 @@ public class DbLoader {
             metaData = con.getMetaData();
         return metaData;
     }
-    
+
     /** 
      * Returns database connection used by this DbLoader.
      */
@@ -111,11 +110,12 @@ public class DbLoader {
         return con;
     }
 
-    /**  Retrieves catalogues for the database associated with this DbLoader.
-      *
-      *  @return ArrayList with the catalog names, empty Array if none found.
-      */
-    public ArrayList getCatalogs() throws SQLException {
+    /** 
+     * Retrieves catalogues for the database associated with this DbLoader.
+     *
+     * @return List with the catalog names, empty Array if none found.
+     */
+    public List getCatalogs() throws SQLException {
         ArrayList catalogs = new ArrayList();
         ResultSet rs = getMetaData().getCatalogs();
         while (rs.next()) {
@@ -126,9 +126,12 @@ public class DbLoader {
         return catalogs;
     }
 
-    /** Retrieves the schemas for the database.
-     *  @return ArrayList with the schema names, empty Array if none found.*/
-    public ArrayList getSchemas() throws SQLException {
+    /** 
+     * Retrieves the schemas for the database.
+     * 
+     * @return List with the schema names, empty Array if none found.
+     */
+    public List getSchemas() throws SQLException {
         ArrayList schemas = new ArrayList();
         ResultSet rs = getMetaData().getSchemas();
         while (rs.next()) {
@@ -139,10 +142,13 @@ public class DbLoader {
         return schemas;
     }
 
-    /** Gets all the table types for the given database type.
-     *  Types may be such as "TABLE", "VIEW", "SYSTEM TABLE", etc.
-     *  @return ArrayList of Strings, empty array if nothing found. */
-    public ArrayList getTableTypes() throws SQLException {
+    /** 
+     * Returns all the table types for the given database.
+     * Types may be such as "TABLE", "VIEW", "SYSTEM TABLE", etc.
+     * 
+     * @return List of Strings, empty array if nothing found. 
+     */
+    public List getTableTypes() throws SQLException {
         ArrayList types = new ArrayList();
         ResultSet rs = getMetaData().getTableTypes();
         while (rs.next()) {
@@ -154,7 +160,7 @@ public class DbLoader {
     }
 
     /** 
-     * Gets all the table names for given combination of the criteria.
+     * Returns all table names for given combination of the criteria.
      * 
      * @param catalog The name of the catalog, may be null.
      * @param schemaPattern The pattern for schema name, use "%" for wildcard.
@@ -162,9 +168,9 @@ public class DbLoader {
      * if null or "" defaults to "%".
      * @param types The types of table names to retrieve, null returns all types.
      * 
-     * @return ArrayList of TableInfo objects, empty array if nothing found.
+     * @return List of TableInfo objects, empty array if nothing found.
      */
-    public ArrayList getTables(
+    public List getTables(
         String catalog,
         String schemaPattern,
         String tableNamePattern,
@@ -211,7 +217,7 @@ public class DbLoader {
      * 
      * @return true if need to continue, false if must stop loading. 
      */
-    public boolean loadDbEntities(DataMap map, ArrayList tables)
+    public boolean loadDbEntities(DataMap map, List tables)
         throws SQLException {
         boolean ret_code = true;
         dbEntityList = new ArrayList();
@@ -258,7 +264,6 @@ public class DbLoader {
             dbEntity.setSchema(table.getSchema());
             dbEntity.setCatalog(table.getCatalog());
 
-
             // --  Create DbAttributes from column information  --
             ResultSet rs =
                 getMetaData().getColumns(
@@ -272,7 +277,7 @@ public class DbLoader {
                 String columnName = rs.getString("COLUMN_NAME");
                 boolean allowNulls = rs.getBoolean("NULLABLE");
                 int columnType = rs.getInt("DATA_TYPE");
-                int columnSize =  rs.getInt("COLUMN_SIZE");
+                int columnSize = rs.getInt("COLUMN_SIZE");
 
                 // ignore precision of non-decimal columns
                 int decimalDigits = -1;
@@ -450,9 +455,11 @@ public class DbLoader {
         return createDataMapFromDB(schemaName, null);
     }
 
-    /** Performs database reverse engineering and generates DataMap object
-      * that contains default mapping of the tables and views. Allows to 
-      * limit types of tables to read (usually only tables and views are relevant). */
+    /** 
+     * Performs database reverse engineering and generates DataMap object
+     * that contains default mapping of the tables and views. 
+     * Allows to limit types of tables to read. 
+     */
     public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
         throws SQLException {
         DataMap dataMap;
@@ -461,17 +468,21 @@ public class DbLoader {
         return loadDataMapFromDB(schemaName, tableTypes, dataMap);
     }
 
-    /** Performs database reverse engineering and generates DataMap object
-      * that contains default mapping of the tables and views. Allows to 
-      * limit types of tables to read (usually only tables and views are relevant). */
+    /** 
+     * Performs database reverse engineering and generates DataMap object
+     * that contains default mapping of the tables and views. Allows to 
+     * limit types of tables to read. 
+     */
     public DataMap loadDataMapFromDB(
         String schemaName,
         String[] tableTypes,
         DataMap dataMap)
         throws SQLException {
-        if (false
-            == loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes)))
+            
+        if (!loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes))) {
             return dataMap;
+        }
+        
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);
         loadObjRelationships(dataMap);

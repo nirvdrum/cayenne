@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.action;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -54,10 +53,12 @@ package org.objectstyle.cayenne.gui.action;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui.action;
+
 
 import java.awt.event.ActionEvent;
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -139,7 +140,7 @@ public class ImportDbAction extends AbstractAction
 		}// End while()
 
 		
-		ArrayList schemas;
+		List schemas;
 		DbLoader loader = new DbLoader(conn, adapter);
 		try {
 			schemas = loader.getSchemas();

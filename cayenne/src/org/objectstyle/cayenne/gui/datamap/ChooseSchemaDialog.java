@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,21 +53,17 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
 
 import org.objectstyle.cayenne.gui.Editor;
-
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
 
 /** Used to select schema of the database. */
 public class ChooseSchemaDialog extends JDialog
@@ -77,7 +72,7 @@ implements ActionListener
 	public static final int SELECT 	= 0;
 	public static final int CANCEL 	= 1;
 
-	private ArrayList schemaList = new ArrayList();
+	private List schemaList = new ArrayList();
 	private String	  schemaName = null;
 	
 	JComboBox schemaSelect;
@@ -85,7 +80,7 @@ implements ActionListener
 	JButton cancel		= new JButton("Cancel");
 	private int choice  = CANCEL;
 
-	public ChooseSchemaDialog(ArrayList schema_list)
+	public ChooseSchemaDialog(List schema_list)
 	{
 		super(Editor.getFrame(), "Select Schema", true);
 		schemaList = schema_list;		
