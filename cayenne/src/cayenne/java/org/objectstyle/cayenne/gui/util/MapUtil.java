@@ -200,19 +200,6 @@ public class MapUtil {
 	 * source attributes are primary keys of their corresponding entities.
 	 */
 	public static boolean isValidForDepPk(DbRelationship rel) {
-		Iterator it = rel.getJoins().iterator();
-		// handle case with no joins
-		if(!it.hasNext()) {
-			return false;
-		}
-		
-		while (it.hasNext()) {
-			DbAttributePair join = (DbAttributePair) it.next();
-			if (!join.getTarget().isPrimaryKey() || !join.getSource().isPrimaryKey()) {
-				return false;
-			}
-		}
-
-		return true;
+        return MapLoader.isValidForDepPk(rel);
 	}
 }
