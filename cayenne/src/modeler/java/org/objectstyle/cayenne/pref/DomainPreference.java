@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.objectstyle.cayenne.DataObjectUtils;
+import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -124,10 +125,8 @@ public class DomainPreference extends _DomainPreference {
         // detail object PK must match...
 
         int pk = DataObjectUtils.intPKForObject(this);
-        PreferenceDetail preference = (PreferenceDetail) DataObjectUtils.objectForPK(
-                getDataContext(),
-                javaClass,
-                pk);
+        PreferenceDetail preference = (PreferenceDetail) DataObjectUtils
+                .objectForPK(getDataContext(), javaClass, pk);
 
         if (preference != null) {
             preference.setDomainPreference(this);
@@ -137,12 +136,26 @@ public class DomainPreference extends _DomainPreference {
             return preference;
         }
 
-        preference = (PreferenceDetail) getDataContext().createAndRegisterNewObject(
-                javaClass);
+        preference = (PreferenceDetail) getDataContext()
+                .createAndRegisterNewObject(javaClass);
 
         preference.setDomainPreference(this);
         getDataContext().commitChanges();
         return preference;
+    }
+
+    /**
+     * Overrides super implementation to handle non-persistent properties on object state
+     * changes.
+     */
+    public void setPersistenceState(int state) {
+
+        // if invalidated
+        if (state == PersistenceState.HOLLOW) {
+            properties = null;
+        }
+
+        super.setPersistenceState(state);
     }
 
     class DomainProperties extends Properties {
