@@ -104,6 +104,7 @@ implements ActionListener
     JMenuItem  closeProjectMenu = new JMenuItem("Close Project");
     JMenuItem saveMenu   		= new JMenuItem("Save");
     JMenuItem  exitMenu    		= new JMenuItem("Exit");
+    ArrayList lastOpenProjMenus = new ArrayList();
 /*
 	JMenu editMenu			= new JMenu("Edit");
 	JMenuItem cutMenu		= new JMenu("Cut");
@@ -203,7 +204,9 @@ implements ActionListener
         fileMenu.addSeparator();
         fileMenu.add(saveMenu);
         fileMenu.addSeparator();
+        fileMenu.addSeparator();        
         fileMenu.add(exitMenu);
+		reloadLastProjList();
         
         projectMenu.add(createDomainMenu);
         projectMenu.add(createDataMapMenu);
@@ -222,6 +225,43 @@ implements ActionListener
     }
     
     
+    private void reloadLastProjList() {
+		// Get list of last opened proj files and trim it down to 4
+    	Preferences pref = Preferences.getPreferences();
+       	Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
+		while (arr.size() > 4)
+			arr.remove(arr.size()-1);
+		for (int i = 0; i < arr.size(); i++) {
+			if (lastOpenProjMenus.size() <= i) {
+				JMenuItem item = new JMenuItem((String)arr.get(i));
+				fileMenu.insert(item, lastOpenProjMenus.size()+6);
+				lastOpenProjMenus.add(item);
+				item.addActionListener(this);
+			} else {
+				JMenuItem item = (JMenuItem)lastOpenProjMenus.get(i);
+				item.setText((String)arr.get(i));
+			}
+		}
+    }
+
+	/** Adds path to the list of last opened projects in preferences. */
+	private void addToLastProjList(String path) {
+    	Preferences pref = Preferences.getPreferences();
+       	Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
+		// Add proj path to the preferences
+		// Prevent duplicate entries.
+		if (arr.contains(path)) {
+			arr.remove(path);
+		}
+		arr.insertElementAt(path, 0);
+		while (arr.size() > 4)
+			arr.remove(arr.size()-1);
+		pref.remove(Preferences.LAST_PROJ_FILES);
+		Iterator iter = arr.iterator();
+		while (iter.hasNext())
+			pref.addProperty(Preferences.LAST_PROJ_FILES, iter.next());
+	}
+
     
     private void initToolBar() {
     	String path = "org/objectstyle/gui/";
@@ -302,6 +342,7 @@ implements ActionListener
 		return true;	
 	}
 
+
 	private void exitEditor() {
 		if (!checkSaveOnClose())
 			return;
@@ -342,6 +383,8 @@ implements ActionListener
             generateClasses();
         } else if (src == exitMenu) {
         	exitEditor();
+        } else if (lastOpenProjMenus.contains(src)) {
+        	openProject(((JMenuItem)src).getText());
         }
     }
 
@@ -399,6 +442,7 @@ implements ActionListener
 	{
 		if (false == checkSaveOnClose())
 			return false;
+		reloadLastProjList();
         getContentPane().remove(view);
         view = null;
         mediator = null;
@@ -533,17 +577,17 @@ implements ActionListener
             if ( ret_code != JFileChooser.APPROVE_OPTION)
                 return;
             file = fileChooser.getSelectedFile();
-			System.out.println("File path is " + file.getAbsolutePath());
             if (!file.exists())
             	file.createNewFile();
             // Save dir path to the preferences
-            pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
+            pref.setProperty(Preferences.LAST_DIR, file.getParent());
             // Create project file (cayenne.xml)
             File proj_file = new File(file.getAbsolutePath() 
             							+ File.separator 
             							+ "cayenne.xml");
             if (!proj_file.exists())
             	proj_file.createNewFile();
+            addToLastProjList(proj_file.getAbsolutePath());
 			
 			FileWriter fw = new FileWriter(proj_file);
 			PrintWriter pw = new PrintWriter(fw, true);
@@ -565,26 +609,30 @@ implements ActionListener
         }
     }
 
+	private void openProject(String file_path) {
+    	if (mediator != null) {
+    		if (false == closeProject())
+    			return;
+    	}
+		if (null == file_path || file_path.trim().length() == 0)
+			return;
+		File file = new File(file_path);
+		if (!file.exists()) {
+			JOptionPane.showMessageDialog(this, 
+					"Project file " + file_path + " does not exist.");
+			return;
+		}
+		openProject(file);
+	}
+
 	/** Open specified project file. File must already exist. */
 	private void openProject(File file) {
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
-       	Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
         try {
             // Save dir path to the preferences
 			pref.setProperty(Preferences.LAST_DIR, file.getParent());
-			// Add proj path to the preferences
-			// Prevent duplicate entries.
-			if (arr.contains(file.getAbsolutePath())) {
-				arr.remove(file.getAbsolutePath());
-			}
-			arr.add(0, file.getAbsolutePath());
-			while (arr.size() > 4)
-				arr.remove(arr.size()-1);
-			pref.remove(Preferences.LAST_PROJ_FILES);
-			Iterator iter = arr.iterator();
-			while (iter.hasNext())
-				pref.addProperty(Preferences.LAST_PROJ_FILES, iter.next());
+			addToLastProjList(file.getAbsolutePath());
 			// Initialize gui configuration
 			GuiConfiguration.initSharedConfig(file);
             GuiConfiguration config = GuiConfiguration.getGuiConfig();
@@ -598,7 +646,6 @@ implements ActionListener
             e.printStackTrace();
         }
     }
-
     /** Open cayenne.xml file using file chooser. */
     private void openProject() {
     	if (mediator != null) {
