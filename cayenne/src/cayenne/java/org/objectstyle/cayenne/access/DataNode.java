@@ -504,6 +504,7 @@ public class DataNode implements QueryEngine {
 				statement.addBatch();
 			}
 
+            // execute the whole batch
 			int[] results = statement.executeBatch();
 			delegate.nextBatchCount(query, results);
 
@@ -539,7 +540,7 @@ public class DataNode implements QueryEngine {
 
 		PreparedStatement statement = con.prepareStatement(queryStr);
 		try {
-			// run batch
+			// run batch queries one by one
 			query.reset();
 			while (query.next()) {
 				queryBuilder.bindParameters(statement, query, dbAttributes);

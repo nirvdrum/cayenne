@@ -113,7 +113,7 @@ public class OracleAdapter extends JdbcAdapter {
         } catch (Exception ex) {
             logObj.info(
                 "Error getting Oracle driver information, ignoring. "
-                    + "Note that certain adapter features will not work.",
+                    + "Note that certain adapter features will be disabled.",
                 ex);
         }
     }
