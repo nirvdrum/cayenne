@@ -343,21 +343,6 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * @deprecated Use Log4J-based equivalent
-	 */
-	public static java.util.logging.Level getLogLevel() {
-		return Log4JConverter.getJSDKLogLevel(logLevel);
-	}
-
-
-	/**
-	 * @deprecated Use Log4J-based equivalent
-	 */
-	public static void setLogLevel(java.util.logging.Level logLevel) {
-		setLoggingLevel(Log4JConverter.getLog4JLogLevel(logLevel));
-	}
-
-	/**
 	 * Returns the logLevel.
 	 * @return Level
 	 */

@@ -65,7 +65,6 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.Log4JConverter;
 
 /** 
  * Simple implementation of OperationObserver interface. 
@@ -145,22 +144,12 @@ public class DefaultOperationObserver implements OperationObserver {
 		return transactionRolledback;
 	}
 
-	/** @deprecated Use Log4J-based API instead. */
-	public java.util.logging.Level queryLogLevel() {
-		return Log4JConverter.getJSDKLogLevel(loggingLevel);
-	}
-
 	/** 
 	 * Returns a log level level that should be used when 
 	 * logging query execution. 
 	 */
 	public Level getLoggingLevel() {
 		return loggingLevel;
-	}
-
-	/** @deprecated Use Log4J-based API instead. */
-	public void setQueryLogLevel(java.util.logging.Level level) {
-		this.setLoggingLevel(Log4JConverter.getLog4JLogLevel(level));
 	}
 
 	/** 

@@ -66,11 +66,6 @@ import org.apache.log4j.Level;
  * @author Andrei Adamchik
  */
 public interface OperationHints {
-	
-    /** 
-     * @deprecated Use Log4J-based equivalent.
-     */
-    public java.util.logging.Level queryLogLevel();
     
     /** 
      * Returns a log level level that should be used when 

@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.AbstractHandler;
-import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -114,15 +113,6 @@ public class DomainHelper {
 	/** Creates new DomainHelper. */
 	public DomainHelper(Configuration config) throws Exception {
 		this(config, Level.DEBUG);
-	}
-
-	/**
-	 * @deprecated Java logging API is deprectaed in Cayenne. Use corresponding
-	 * Log4J-based constructor.
-	 */
-	public DomainHelper(Configuration config, java.util.logging.Level logLevel)
-		throws Exception {
-		this(config, Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
 	/** Creates new DomainHelper that uses specified level of verbosity. */

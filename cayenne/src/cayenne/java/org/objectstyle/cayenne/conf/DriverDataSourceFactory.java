@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.AbstractHandler;
-import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
@@ -125,16 +124,6 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	  * directory or a user home directory. */
 	public DataSource getDataSource(String location) throws Exception {
 		return getDataSource(location, Level.DEBUG);
-	}
-
-	/**
-	 * @deprecated Use Log4J-based equivalent.
-	 */
-	public DataSource getDataSource(
-		String location,
-		java.util.logging.Level logLevel)
-		throws Exception {
-		return getDataSource(location, Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
 	public DataSource getDataSource(String location, Level logLevel)

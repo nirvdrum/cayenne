@@ -77,18 +77,6 @@ public interface Query {
 	public Level getLoggingLevel();
 	
 	public void setLoggingLevel(Level level);
-	
-	/**
-	 * @deprecated Use Log4J-based equivalent
-	 */
-	public java.util.logging.Level getLogLevel();
-
-
-	/**
-	 * @deprecated Use Log4J-based equivalent
-	 */
-	public void setLogLevel(java.util.logging.Level logLevel);
-    
 
 	/** Returns the name of root ObjEntity associated with the query. */
 	public String getObjEntityName();

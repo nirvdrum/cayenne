@@ -63,7 +63,6 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.Log4JConverter;
 
 /** 
  * OperationObserver that accumulates select query results provided 
@@ -89,13 +88,6 @@ public class SelectObserver extends DefaultOperationObserver {
 	protected int selectCount;
 
 	public SelectObserver() {}
-	
-	/**
-	 * @deprecated use Log4J-based constructor.
-	 */
-	public SelectObserver(java.util.logging.Level logLevel) {
-		this(Log4JConverter.getLog4JLogLevel(logLevel));
-	}
 	
 	public SelectObserver(Level logLevel) {
 		super.setLoggingLevel(logLevel);

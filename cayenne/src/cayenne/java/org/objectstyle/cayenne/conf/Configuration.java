@@ -70,7 +70,6 @@ import org.apache.log4j.PropertyConfigurator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
@@ -164,20 +163,6 @@ public abstract class Configuration {
 
 	public static ClassLoader getResourceLoader() {
 		return resourceLoader;
-	}
-
-	/**
-	* @deprecated Use Log4J-based equivalent
-	*/
-	public static java.util.logging.Level getLogLevel() {
-		return Log4JConverter.getJSDKLogLevel(logLevel);
-	}
-
-	/**
-	 * @deprecated Use Log4J-based equivalent
-	 */
-	public static void setLogLevel(java.util.logging.Level logLevel) {
-		setLoggingLevel(Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
 	/** 

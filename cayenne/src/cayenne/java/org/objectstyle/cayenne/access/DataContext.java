@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
-import org.objectstyle.cayenne.util.Log4JConverter;
 import org.objectstyle.cayenne.util.Util;
 
 /** User-level Cayenne access class. Provides isolated object view of 
@@ -552,14 +551,6 @@ public class DataContext implements QueryEngine {
 	 *  insert, update and delete queries to commit their state to the database. */
 	public void commitChanges() throws CayenneRuntimeException {
 		commitChanges((Level) null);
-	}
-
-	/** 
-	 * @deprecated Use Log4J-based equivalent.
-	 */
-	public void commitChanges(java.util.logging.Level logLevel)
-		throws CayenneRuntimeException {
-		commitChanges(Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
 	/** 

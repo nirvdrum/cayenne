@@ -62,7 +62,6 @@ public class AllTests {
         TestSuite suite = new TestSuite("Util Package Tests");
         suite.addTestSuite(UtilTst.class);
         suite.addTestSuite(UtilExtTst.class);
-        suite.addTestSuite(LogFormatterTst.class);
         suite.addTestSuite(NameConverterTst.class);
         suite.addTestSuite(ResourceLocatorTst.class);
         suite.addTestSuite(CayenneMapTst.class);
