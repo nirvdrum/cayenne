@@ -285,13 +285,13 @@ public class DomainHelper {
 			else
 				datasource = "";
 			pw.println("\t\t datasource=\"" + datasource + "\"");
-			if (nodes[i].getAdapter() != null)
+			if (nodes[i].getAdapter() != null) {
 				pw.println(
 					"\t\t adapter=\""
 						+ nodes[i].getAdapter().getClass().getName()
 						+ "\"");
-			else
-				pw.println("\t\t adapter=\"\"");
+			}
+			
 			String factory = nodes[i].getDataSourceFactory();
 			if (null != factory)
 				factory = factory.trim();
