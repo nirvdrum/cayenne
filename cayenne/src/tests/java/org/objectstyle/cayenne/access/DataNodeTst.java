@@ -35,7 +35,7 @@
 package org.objectstyle.cayenne.access;
 
 import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.map.AshwoodEntitySorter;
+import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 public class DataNodeTst extends BasicTestCase {
@@ -75,26 +75,30 @@ public class DataNodeTst extends BasicTestCase {
 
     public void testAdapter() throws Exception {
         DataNode node = new DataNode();
+
+        // entity sorter should have been created ... and since 1.2 shouldn't change no
+        // matter what adapter we use.
+        EntitySorter sorter = node.getEntitySorter();
+        assertNotNull(sorter);
         assertNull(node.getAdapter());
-        assertFalse(node.getEntitySorter() instanceof AshwoodEntitySorter);
 
         JdbcAdapter a1 = new JdbcAdapter();
         a1.setSupportsFkConstraints(true);
         node.setAdapter(a1);
 
         assertSame(a1, node.getAdapter());
-        assertTrue(node.getEntitySorter() instanceof AshwoodEntitySorter);
+        assertSame(sorter, node.getEntitySorter());
 
         JdbcAdapter a2 = new JdbcAdapter();
         a2.setSupportsFkConstraints(false);
         node.setAdapter(a2);
 
         assertSame(a2, node.getAdapter());
-        assertFalse(node.getEntitySorter() instanceof AshwoodEntitySorter);
-        
+        assertSame(sorter, node.getEntitySorter());
+
         // flip FK flag and reset the same adapter, see if sorter has changed
         a2.setSupportsFkConstraints(true);
         node.setAdapter(a2);
-        assertTrue(node.getEntitySorter() instanceof AshwoodEntitySorter);
+        assertSame(sorter, node.getEntitySorter());
     }
 }

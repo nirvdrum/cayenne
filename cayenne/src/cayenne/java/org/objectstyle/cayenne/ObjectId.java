@@ -188,7 +188,7 @@ public class ObjectId implements Serializable {
      * Returns a value of id attribute identified by the name of DbAttribute.
      */
     public Object getValueForAttribute(String attrName) {
-        return objectIdKeys.get(attrName);
+        return getIdSnapshot().get(attrName);
     }
 
     /**
