@@ -888,7 +888,7 @@ class PDFDocumentCreator {
                 }
                 else {
                     HeaderFooter footer = new HeaderFooter(
-                            new Phrase("Table of Content"),
+                            new Phrase("Contents"),
                             false);
                     footer.setBorderWidthBottom(0f);
                     footer.setAlignment(Element.ALIGN_CENTER);
