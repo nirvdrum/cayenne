@@ -60,7 +60,6 @@
     <target name="release">
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-modeler.xml" target="dist-src"/>
-		<ant antfile="build-tests.xml" target="dist-src"/>
 		<ant antfile="build-tutorials.xml" target="dist-src"/>
 		<ant antfile="build-doc.xml" target="dist-src"/>
 		
