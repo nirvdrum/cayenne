@@ -63,7 +63,7 @@ import java.util.List;
  * 
  * @author Andrei Adamchik
  */
-public class StoredProcedure {
+public class Procedure {
     protected String name;
     protected String schema;
     protected boolean returningRows;
@@ -73,15 +73,19 @@ public class StoredProcedure {
     /**
      * Default constructor for StoredProcedure.
      */
-    public StoredProcedure() {
+    public Procedure() {
         super();
+    }
+    
+    public Procedure(String name) {
+        this.name = name;
     }
 
     /**
      * Creates an instance of StoredProcedure with the specified name and select
      * behaviour.
      */
-    public StoredProcedure(String schema, String name, boolean returningRows) {
+    public Procedure(String schema, String name, boolean returningRows) {
         this.schema = schema;
         this.name = name;
         this.returningRows = returningRows;
@@ -159,13 +163,13 @@ public class StoredProcedure {
      * Creates and adds a StoredProcedureParam to the list of parameters.
      */
     public void addParam(String name, int type) {
-        addParam(new StoredProcedureParam(name, type)); 
+        addParam(new ProcedureParam(name, type)); 
     }
     
     /**
       * Adds a StoredProcedureParam to the list of parameters.
       */
-    public void addParam(StoredProcedureParam param) {
+    public void addParam(ProcedureParam param) {
         if (param == null) {
             throw new IllegalArgumentException("Attempt to add a null StoredProcedureParam.");
         }
@@ -174,7 +178,7 @@ public class StoredProcedure {
         param.setStoredProcedure(this);
     }
 
-    public void removeParam(StoredProcedureParam param) {
+    public void removeParam(ProcedureParam param) {
         params.remove(param);
     }
 

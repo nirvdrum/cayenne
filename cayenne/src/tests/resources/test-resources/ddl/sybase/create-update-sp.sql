@@ -1,4 +1,4 @@
-CREATE PROCEDURE cayenne_tst_upd_proc @aName VARCHAR(255), @paintingPrice INT AS 
+CREATE PROCEDURE cayenne_tst_upd_proc @paintingPrice INT AS 
 BEGIN 
 	BEGIN TRANSACTION UPDATE
 	PAINTING SET ESTIMATED_PRICE = ESTIMATED_PRICE * 2 

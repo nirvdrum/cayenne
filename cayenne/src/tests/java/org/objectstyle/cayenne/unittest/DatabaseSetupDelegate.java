@@ -136,7 +136,6 @@ public class DatabaseSetupDelegate {
 
     protected void executeDDL(Connection con, String ddl) throws Exception {
         logObj.info(ddl);
-
         Statement st = con.createStatement();
 
         try {

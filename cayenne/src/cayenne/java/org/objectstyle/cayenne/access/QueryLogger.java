@@ -59,6 +59,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
  * A QueryLogger is intended to log special events during query executions.
@@ -79,7 +80,7 @@ import org.apache.log4j.Logger;
 public class QueryLogger {
 	private static Logger logObj = Logger.getLogger(QueryLogger.class);	
 	
-	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+	public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
 	
 
 	/** Utility method that appends SQL literal for the specified object to the buffer.

@@ -78,7 +78,8 @@ public class OracleDelegate extends DatabaseSetupDelegate {
     }
 
     public boolean supportsStoredProcedures() {
-        return true;
+    	// this is temporary till we create DDL support in test cases
+        return false;
     }
     
     /**

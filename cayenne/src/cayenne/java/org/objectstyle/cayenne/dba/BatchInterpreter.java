@@ -71,8 +71,8 @@ import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
  * BatchInterpreter performs BatchQueries in a JDBC specific fashion
- * Its descendants may even employ some RDBS specific features for
- * the sake of batch efficiency. It is mostly used by DataNodes.
+ * Its descendants may even employ some RDBMS specific features for the sake of
+ * batch efficiency. It is mostly used by DataNodes.
  *
  * @author Andriy Shapochka
  */

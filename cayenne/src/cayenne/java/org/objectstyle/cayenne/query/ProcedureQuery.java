@@ -51,42 +51,70 @@
  * individuals on behalf of the ObjectStyle Group.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- *
  */
-package org.objectstyle.cayenne.map;
+
+package org.objectstyle.cayenne.query;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
- * A descriptor for the StoredProcedure parameter.
+ * A query based on StoredProcedure.
  * 
  * @author Andrei Adamchik
  */
-public class StoredProcedureParam extends MapObject {
-    protected int type;
+public class ProcedureQuery extends AbstractQuery {
+    protected Procedure procedure;
+    protected Map params = new HashMap();
 
-    /**
-     * Constructor for StoredProcedureParam.
-     */
-    public StoredProcedureParam() {
-        super();
+    public ProcedureQuery() {
+    }
+
+    public ProcedureQuery(
+        Class rootClass,
+        Procedure procedure) {
+        setRoot(rootClass);
+        setProcedure(procedure);
+    }
+
+    public ProcedureQuery(
+        DbEntity dbEntity,
+        Procedure procedure) {
+        setRoot(dbEntity);
+        setProcedure(procedure);
     }
 
     /**
-     * Constructor for StoredProcedureParam.
+     * Returns Query.STORED_PROCEDURE_QUERY.
      */
-    public StoredProcedureParam(String name, int type) {
-        this.objName = name;
-        this.type = type;
+    public int getQueryType() {
+        return STORED_PROCEDURE_QUERY;
     }
 
-    /** 
-     * Returns the StoredProcedure owning this parameter.
-     */
-    public StoredProcedure getStoredProcedure() {
-        return (StoredProcedure) getParent();
+    public Procedure getProcedure() {
+        return procedure;
     }
 
-    /** Sets the StoredProcedure that owns this parameter. */
-    public void setStoredProcedure(StoredProcedure storedProc) {
-        setParent(storedProc);
+    public void setProcedure(Procedure procedure) {
+        this.procedure = procedure;
+    }
+
+    public Map getParams() {
+        return params;
+    }
+
+    public void addParam(String name, Object value) {
+        params.put(name, value);
+    }
+
+    public void removeParam(String name) {
+        params.remove(name);
+    }
+
+    public void clearParams() {
+        params.clear();
     }
 }

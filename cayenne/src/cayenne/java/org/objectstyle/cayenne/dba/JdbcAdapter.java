@@ -93,6 +93,7 @@ import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
 import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
@@ -178,6 +179,8 @@ public class JdbcAdapter implements DbAdapter {
             return SqlSelectTranslator.class;
         } else if (q instanceof SqlModifyQuery) {
             return SqlModifyTranslator.class;
+        } else if (q instanceof ProcedureQuery) {
+            return ProcedureTranslator.class;
         } else {
             throw new CayenneRuntimeException(
                 "Unrecognized query class..." + q.getClass().getName());
@@ -212,7 +215,8 @@ public class JdbcAdapter implements DbAdapter {
         }
 
         StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
+        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(
+            " (");
 
         // columns
         Iterator it = ent.getAttributeList().iterator();
@@ -313,9 +317,10 @@ public class JdbcAdapter implements DbAdapter {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();
 
-        buf.append("ALTER TABLE ").append(
-            ((DbEntity)rel.getSourceEntity()).getFullyQualifiedName()).append(
-            " ADD FOREIGN KEY (");
+        buf
+            .append("ALTER TABLE ")
+            .append(((DbEntity) rel.getSourceEntity()).getFullyQualifiedName())
+            .append(" ADD FOREIGN KEY (");
 
         Iterator jit = rel.getJoins().iterator();
         boolean first = true;
@@ -333,7 +338,7 @@ public class JdbcAdapter implements DbAdapter {
 
         buf
             .append(") REFERENCES ")
-            .append(((DbEntity)rel.getTargetEntity()).getFullyQualifiedName())
+            .append(((DbEntity) rel.getTargetEntity()).getFullyQualifiedName())
             .append(" (")
             .append(refBuf.toString())
             .append(')');
@@ -389,29 +394,32 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     public BatchInterpreter getInsertBatchInterpreter() {
-      if (insertBatchInterpreter == null) {
-        insertBatchInterpreter = new BatchInterpreter();
-        insertBatchInterpreter.setAdapter(this);
-        insertBatchInterpreter.setQueryBuilder(new InsertBatchQueryBuilder(this));
-      }
-      return insertBatchInterpreter;
+        if (insertBatchInterpreter == null) {
+            insertBatchInterpreter = new BatchInterpreter();
+            insertBatchInterpreter.setAdapter(this);
+            insertBatchInterpreter.setQueryBuilder(
+                new InsertBatchQueryBuilder(this));
+        }
+        return insertBatchInterpreter;
     }
 
     public BatchInterpreter getDeleteBatchInterpreter() {
-      if (deleteBatchInterpreter == null) {
-        deleteBatchInterpreter = new BatchInterpreter();
-        deleteBatchInterpreter.setAdapter(this);
-        deleteBatchInterpreter.setQueryBuilder(new DeleteBatchQueryBuilder(this));
-      }
-      return deleteBatchInterpreter;
+        if (deleteBatchInterpreter == null) {
+            deleteBatchInterpreter = new BatchInterpreter();
+            deleteBatchInterpreter.setAdapter(this);
+            deleteBatchInterpreter.setQueryBuilder(
+                new DeleteBatchQueryBuilder(this));
+        }
+        return deleteBatchInterpreter;
     }
 
     public BatchInterpreter getUpdateBatchInterpreter() {
-      if (updateBatchInterpreter == null) {
-        updateBatchInterpreter = new BatchInterpreter();
-        updateBatchInterpreter.setAdapter(this);
-        updateBatchInterpreter.setQueryBuilder(new UpdateBatchQueryBuilder(this));
-      }
-      return updateBatchInterpreter;
+        if (updateBatchInterpreter == null) {
+            updateBatchInterpreter = new BatchInterpreter();
+            updateBatchInterpreter.setAdapter(this);
+            updateBatchInterpreter.setQueryBuilder(
+                new UpdateBatchQueryBuilder(this));
+        }
+        return updateBatchInterpreter;
     }
 }

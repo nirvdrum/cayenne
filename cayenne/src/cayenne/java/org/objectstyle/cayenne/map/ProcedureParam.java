@@ -51,59 +51,58 @@
  * individuals on behalf of the ObjectStyle Group.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
+ *
  */
-
-package org.objectstyle.cayenne.query;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.objectstyle.cayenne.map.StoredProcedure;
+package org.objectstyle.cayenne.map;
 
 /**
- * A query based on StoredProcedure.
+ * A descriptor for the StoredProcedure parameter.
  * 
  * @author Andrei Adamchik
  */
-public class StoredProcedureQuery extends AbstractQuery {
-    protected StoredProcedure storedProcedure;
-    protected Map params = new HashMap();
+public class ProcedureParam extends MapObject {
+    protected int type;
 
-    public StoredProcedureQuery() {
-    }
-
-    public StoredProcedureQuery(StoredProcedure storedProcedure) {
-        this.storedProcedure = storedProcedure;
+    /**
+     * Constructor for StoredProcedureParam.
+     */
+    public ProcedureParam() {
+        super();
     }
 
     /**
-     * Returns Query.STORED_PROCEDURE_QUERY.
+     * Constructor for StoredProcedureParam.
      */
-    public int getQueryType() {
-        return STORED_PROCEDURE_QUERY;
+    public ProcedureParam(String name, int type) {
+        this.objName = name;
+        this.type = type;
     }
 
-    public StoredProcedure getStoredProcedure() {
-        return storedProcedure;
+    /** 
+     * Returns the StoredProcedure owning this parameter.
+     */
+    public Procedure getStoredProcedure() {
+        return (Procedure) getParent();
     }
 
-    public void setStoredProcedure(StoredProcedure storedProcedure) {
-        this.storedProcedure = storedProcedure;
-    }
-
-    public Map getParams() {
-        return params;
-    }
-
-    public void addParam(String name, Object value) {
-        params.put(name, value);
+    /** Sets the StoredProcedure that owns this parameter. */
+    public void setStoredProcedure(Procedure storedProc) {
+        setParent(storedProc);
     }
     
-    public void removeParam(String name) {
-        params.remove(name);
+    /**
+     * Returns the type.
+     * @return int
+     */
+    public int getType() {
+        return type;
     }
-    
-    public void clearParams() {
-    	params.clear();
+
+    /**
+     * Sets the type.
+     * @param type The type to set
+     */
+    public void setType(int type) {
+        this.type = type;
     }
 }

@@ -59,15 +59,15 @@ package org.objectstyle.cayenne.query;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.map.StoredProcedure;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
  * Select query based on a stored procedure.
  *  
  * @author Andrei Adamchik
  */
-public class SelectStoredProcedureQuery
-    extends StoredProcedureQuery
+public class ProcedureSelectQuery
+    extends ProcedureQuery
     implements GenericSelectQuery {
 
     protected int pageSize;
@@ -77,17 +77,15 @@ public class SelectStoredProcedureQuery
     /**
      * Constructor for SelectStoredProcedureQuery.
      */
-    public SelectStoredProcedureQuery() {
+    public ProcedureSelectQuery() {
         super();
     }
 
     /**
      * Constructor for SelectStoredProcedureQuery.
      */
-    public SelectStoredProcedureQuery(
-        Class root,
-        StoredProcedure storedProcedure) {
-        setStoredProcedure(storedProcedure);
+    public ProcedureSelectQuery(Class root, Procedure storedProcedure) {
+        setProcedure(storedProcedure);
         setRoot(root);
     }
 
@@ -120,13 +118,13 @@ public class SelectStoredProcedureQuery
         this.pageSize = pageSize;
     }
 
-    public void setStoredProcedure(StoredProcedure storedProcedure) {
+    public void setProcedure(Procedure storedProcedure) {
         if (storedProcedure != null && !storedProcedure.isReturningRows()) {
             throw new IllegalArgumentException(
                 "StoredProcedure for SelectStoredProcedureQuery "
                     + "must return a ResultSet.");
         }
-        super.setStoredProcedure(storedProcedure);
+        super.setProcedure(storedProcedure);
     }
 
     /**
@@ -150,5 +148,12 @@ public class SelectStoredProcedureQuery
 
     public void clearResultParams() {
         resultParams.clear();
+    }
+
+    /**
+     * Returns Query.SELECT_QUERY.
+     */
+    public int getQueryType() {
+        return SELECT_QUERY;
     }
 }
