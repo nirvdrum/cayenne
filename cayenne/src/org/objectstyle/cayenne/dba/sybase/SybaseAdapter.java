@@ -192,7 +192,7 @@ public class SybaseAdapter extends JdbcAdapter {
             .append(" BEGIN TRANSACTION")
             .append(" UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + 1")
             .append(" WHERE TABLE_NAME = @tname")
-            .append(" SELECT NEXT_ID from AUTO_PK_SUPPORT where NEXT_ID = @tname")
+            .append(" SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = @tname")
             .append(" COMMIT")
             .append(" END");
         return buf.toString();
