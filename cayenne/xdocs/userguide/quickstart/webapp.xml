@@ -112,9 +112,9 @@
     		<p>Configuration files included in this tutorial are:
     		
     		<ul>
-    			<li><a href="../../tutorial/cayenne-cmd-app/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorial/cayenne-cmd-app/driverinfo.xml">driverinfo.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
     		Open <code>cayenne.xml</code> 

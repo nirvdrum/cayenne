@@ -61,9 +61,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.ErrorDebugDialog;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.CayenneToolbarButton;
-import org.objectstyle.cayenne.gui.util.GUIErrorHandler;
 
 /**
  * Superclass of CayenneModeler actions that implements support 
@@ -165,7 +165,7 @@ public abstract class CayenneAction extends AbstractAction {
 		try {
 			performAction(e);
 		} catch (Throwable th) {
-			GUIErrorHandler.guiException(th);
+			ErrorDebugDialog.guiException(th);
 		}
 	}
 

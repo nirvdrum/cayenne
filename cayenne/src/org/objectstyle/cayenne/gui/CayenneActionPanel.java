@@ -60,7 +60,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.gui.util.GUIErrorHandler;
 
 /**
  * Superclass of Cayenne JPanels that implement ActionListener.
@@ -87,7 +86,7 @@ public abstract class CayenneActionPanel
 		try {
 			performAction(e);
 		} catch (Throwable th) {
-			GUIErrorHandler.guiException(th);
+			ErrorDebugDialog.guiException(th);
 		}
 	}
 }

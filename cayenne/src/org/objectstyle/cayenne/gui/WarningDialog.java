@@ -53,23 +53,38 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui;
 
-package org.objectstyle.cayenne.gui.util;
-
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.ErrorDebugDialog;
+import java.awt.HeadlessException;
 
 /**
- * Handles GUI errors.
+ * Dialog for CayenneModeler warnings.
  * 
  * @author Andrei Adamchik
  */
-public class GUIErrorHandler {
-    public static void guiException(Throwable th) {
-    	th.printStackTrace();
-    	
-    	ErrorDebugDialog dialog = new ErrorDebugDialog(Editor.getFrame(), th);
-    	dialog.show();
-    }
-}
+public class WarningDialog extends ErrorDebugDialog {
 
+	/**
+	 * Constructor for WarningDialog.
+	 * 
+	 * @param owner
+	 * @param title
+	 * @param throwable
+	 * @param detailed
+	 * @throws HeadlessException
+	 */
+	public WarningDialog(
+		Editor owner,
+		String title,
+		Throwable throwable,
+		boolean detailed)
+		throws HeadlessException {
+		super(owner, title, throwable, detailed);
+	}
+
+	protected String infoHTML() {
+		return "<font face='Arial,Helvetica' size='+1' color='blue'>"
+			+ getTitle()
+			+ "</font>";
+	}
+}

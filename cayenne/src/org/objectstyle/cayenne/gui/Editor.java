@@ -60,7 +60,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,9 +69,10 @@ import javax.swing.*;
 import org.objectstyle.cayenne.gui.action.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.gui.util.RecentFileMenu;
+import org.objectstyle.cayenne.gui.util.XmlFilter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.Preferences;
 
 /** 
@@ -468,7 +468,7 @@ public class Editor
 				AboutDialog win = new AboutDialog(this);
 			}
 		} catch (Exception ex) {
-			GUIErrorHandler.guiException(ex);
+			ErrorDebugDialog.guiException(ex);
 		}
 	}
 

@@ -64,8 +64,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.GuiConfiguration;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.cayenne.gui.util.RecentFileMenuItem;
@@ -77,7 +76,7 @@ import org.objectstyle.cayenne.util.Preferences;
 public class OpenProjectAction extends ProjectAction {
 	static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
 	public static final String ACTION_NAME = "Open Project";
-	
+
 	/**
 	 * Constructor for OpenProjectAction.
 	 * @param name
@@ -158,11 +157,9 @@ public class OpenProjectAction extends ProjectAction {
 			Editor.getFrame().projectOpened();
 			Editor.getFrame().setProjectTitle(file.getAbsolutePath());
 
-		} catch (Exception e) {
-			logObj.log(
-				Level.WARNING,
-				"Error loading project file.",
-				e.getMessage());
+		} catch (Exception ex) {
+			logObj.log(Level.WARNING, "Error loading project file.", ex);
+			ErrorDebugDialog.guiWarning(ex, "Error loading project");
 		}
 	}
 }

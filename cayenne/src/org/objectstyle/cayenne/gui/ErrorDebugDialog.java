@@ -64,26 +64,57 @@ import java.io.*;
 import javax.swing.*;
 
 /**
- * Displays unexpected CayenneModeler exceptions.
+ * Displays CayenneModeler exceptions and warning messages.
  * 
  * @author Andrei Adamchik
  */
 public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 	protected JButton close;
+	protected JButton showHide;
 	protected JTextArea exText = new JTextArea();
+	protected JPanel exPanel;
 	protected Throwable throwable;
+	protected boolean detailed;
+
+	public static void guiException(Throwable th) {
+		if (th != null) {
+			th.printStackTrace();
+		}
+
+		ErrorDebugDialog dialog =
+			new ErrorDebugDialog(
+				Editor.getFrame(),
+				"CayenneModeler Error",
+				th,
+				true);
+		dialog.show();
+	}
+
+	public static void guiWarning(Throwable th, String message) {
+		if (th != null) {
+			th.printStackTrace();
+		}
+
+		WarningDialog dialog =
+			new WarningDialog(Editor.getFrame(), message, th, false);
+		dialog.show();
+	}
 
 	/**
 	 * Constructor for ErrorDebugDialog.
-	 * @param owner
-	 * @throws HeadlessException
 	 */
-	public ErrorDebugDialog(Editor owner, Throwable throwable)
+	protected ErrorDebugDialog(
+		Editor owner,
+		String title,
+		Throwable throwable,
+		boolean detailed)
 		throws HeadlessException {
-		super(owner, "CayenneModeler Error", true);
-		init();
+
+		super(owner, title, true);
 
 		setThrowable(throwable);
+		setDetailed(detailed);
+		init();
 	}
 
 	protected void init() {
@@ -93,14 +124,7 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 		pane.setLayout(new BorderLayout());
 
 		// info area
-		JEditorPane infoText =
-			new JEditorPane(
-				"text/html",
-				"<b><font face='Arial,Helvetica' size='+1' color='red'>CayenneModeler Error</font></b><br>"
-					+ "<font face='Arial,Helvetica' size='-1'>Please copy the message below and "
-					+ "report this error by going to <br>"
-					+ "<a href='http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068'>"
-					+ "http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068</a></font>");
+		JEditorPane infoText = new JEditorPane("text/html", infoHTML());
 		infoText.setBackground(pane.getBackground());
 		infoText.setEditable(false);
 		// popup hyperlinks
@@ -112,32 +136,53 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 		pane.add(infoPanel, BorderLayout.NORTH);
 
 		// exception area
-		exText.setEditable(false);
-		exText.setLineWrap(true);
-		exText.setWrapStyleWord(true);
-		exText.setRows(16);
-		exText.setColumns(40);
-		JScrollPane exScroll =
-			new JScrollPane(
-				exText,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		JPanel exPanel = new JPanel();
-		exPanel.setLayout(new BorderLayout());
-		exPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		exPanel.add(exScroll, BorderLayout.CENTER);
-		pane.add(exPanel, BorderLayout.CENTER);
+		if (throwable != null) {
+			exText.setEditable(false);
+			exText.setLineWrap(true);
+			exText.setWrapStyleWord(true);
+			exText.setRows(16);
+			exText.setColumns(40);
+			JScrollPane exScroll =
+				new JScrollPane(
+					exText,
+					JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			exPanel = new JPanel();
+			exPanel.setLayout(new BorderLayout());
+			exPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			exPanel.add(exScroll, BorderLayout.CENTER);
 
-		// buttons
+			// buttons
+			showHide = new JButton("");
+			showHide.addActionListener(this);
+			if (isDetailed()) {
+				showDetails();
+			} else {
+				hideDetails();
+			}
+		}
+
 		close = new JButton("Close");
 		close.addActionListener(this);
-		pane.add(
-			PanelFactory.createButtonPanel(new JButton[] { close }),
-			BorderLayout.SOUTH);
+
+		JButton[] buttons =
+			(showHide != null) ? new JButton[] { showHide, close }
+		: new JButton[] { close };
+		pane.add(PanelFactory.createButtonPanel(buttons), BorderLayout.SOUTH);
 
 		// prepare to display
 		this.pack();
 		this.centerWindow();
+	}
+
+	protected String infoHTML() {
+		return "<b><font face='Arial,Helvetica' size='+1' color='red'>"
+			+ getTitle()
+			+ "</font></b><br>"
+			+ "<font face='Arial,Helvetica' size='-1'>Please copy the message below and "
+			+ "report this error by going to <br>"
+			+ "<a href='http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068'>"
+			+ "http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068</a></font>";
 	}
 
 	protected void setThrowable(Throwable throwable) {
@@ -178,6 +223,42 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == close) {
 			this.dispose();
+		} else if (e.getSource() == showHide) {
+			if (isDetailed()) {
+				hideDetails();
+			} else {
+				showDetails();
+			}
+			this.pack();
+			this.centerWindow();
 		}
+	}
+
+	protected void hideDetails() {
+		getContentPane().remove(exPanel);
+		showHide.setText("Show Details");
+		setDetailed(false);
+	}
+
+	protected void showDetails() {
+		getContentPane().add(exPanel, BorderLayout.CENTER);
+		showHide.setText("Hide Details");
+		setDetailed(true);
+	}
+
+	/**
+	 * Returns the detailed.
+	 * @return boolean
+	 */
+	public boolean isDetailed() {
+		return detailed;
+	}
+
+	/**
+	 * Sets the detailed.
+	 * @param detailed The detailed to set
+	 */
+	public void setDetailed(boolean detailed) {
+		this.detailed = detailed;
 	}
 }
