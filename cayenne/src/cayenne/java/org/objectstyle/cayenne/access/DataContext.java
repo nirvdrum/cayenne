@@ -698,12 +698,200 @@ public class DataContext implements QueryEngine, Serializable {
             return;
         }
 
-        ContextCommit worker = new ContextCommit(this);
-        try {
-          worker.commit(logLevel);
+        List queryList = new ArrayList();
+        List rawUpdObjects = new ArrayList();
+        List updObjects = new ArrayList();
+        List delObjects = new ArrayList();
+        List insObjects = new ArrayList();
+        Map updatedIds = new HashMap();
+
+        synchronized (objectStore) {
+            Iterator it = objectStore.getObjectIterator();
+            while (it.hasNext()) {
+                DataObject nextObject = (DataObject) it.next();
+                int objectState = nextObject.getPersistenceState();
+
+                // 1. deal with inserts
+                if (objectState == PersistenceState.NEW) {
+                    filterReadOnly(nextObject);
+                    insObjects.add(nextObject);
+                }
+                // 2. deal with deletes
+                else if (objectState == PersistenceState.DELETED) {
+                    filterReadOnly(nextObject);
+                    delObjects.add(nextObject);
+                }
+                // 3. deal with updates
+                else if (objectState == PersistenceState.MODIFIED) {
+                    filterReadOnly(nextObject);
+                    rawUpdObjects.add(nextObject);
+                }
+            }
         }
-        catch (CayenneException ex) {
-          throw new CayenneRuntimeException(ex);
+
+        //CM: Note on ordering of operations:  The order the queries are created is important
+        // Although there is some ordering code in DataNode.performQueries, it still seems that
+        // the order of the queries in queryList matters (should investigate this, but I don't
+        // have the time - somebody?).   Updates come first, so that any nullify delete rules
+        // will nullify fk's before the other object is deleted (causing grief with integrity constraints
+        // where the fk exists and points to a non-existent record).  Then flattened deletes,
+        // because nothing typically relies on those records (no constraints will hurt), then
+        // other deletions.  Inserts follow, and finally flattenedInserts.
+        // Inserts/Deletes could probably be swapped (untested), but flattened inserts
+        // must definitely come last, to ensure that the rows they point to are all inserted and ready.
+
+        //We must create permanent ids before doing the updates, so fk's that point to
+        // new objects will not be set to null
+        if (insObjects.size() > 0) {
+            // create permanent id's and orders insObjects in the correct order for insertion
+            // (which is very important with respect to dependent pk's and reflexive relationships)
+            OperationSorter.sortObjectsInInsertOrder(insObjects);
+            createPermIds(insObjects);
+        }
+
+        // prepare updates (filter "fake" updates, update id's, build queries)
+        if (rawUpdObjects.size() > 0) {
+            Iterator updIt = rawUpdObjects.iterator();
+            while (updIt.hasNext()) {
+                DataObject nextObject = (DataObject) updIt.next();
+                UpdateQuery updateQuery = QueryHelper.updateQuery(nextObject);
+                if (updateQuery != null) {
+                    queryList.add(updateQuery);
+                    updObjects.add(nextObject);
+
+                    ObjectId updId =
+                        updatedId(nextObject.getObjectId(), updateQuery);
+                    if (updId != null) {
+                        updatedIds.put(nextObject.getObjectId(), updId);
+                    }
+                } else {
+                    // object was not really modified,
+                    // put this object back in unmodified state right away
+                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
+                }
+            }
+        }
+
+        //Flattened relationship deletes happen *before* all other deletes, to be
+        //sure that if they link to any other records that should be deleted, that
+        // the deletions happen in the correct order (link records first,
+        // then linked-to records)
+        queryList.addAll(this.getFlattenedDeleteQueries());
+        if (delObjects.size() > 0) {
+            OperationSorter.sortObjectsInDeleteOrder(delObjects);
+            Iterator delIt = delObjects.iterator();
+            while (delIt.hasNext()) {
+                queryList.add(
+                    QueryHelper.deleteQuery((DataObject) delIt.next()));
+            }
+
+        }
+        // prepare inserts (create id's, build queries)
+        if (insObjects.size() > 0) {
+            // create insert queries
+            Iterator insIt = insObjects.iterator();
+            while (insIt.hasNext()) {
+                DataObject nextObject = (DataObject) insIt.next();
+
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug(
+                        "Creating InsertQuery for object of class "
+                            + nextObject.getClass());
+                }
+                Map snapshot = takeObjectSnapshot(nextObject);
+
+                //Don't create the string (expensive) if it's not needed
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug("snapshot for insert :" + snapshot);
+                }
+                queryList.add(
+                    QueryHelper.insertQuery(
+                        snapshot,
+                        nextObject.getObjectId()));
+            }
+        }
+
+        //Flattened relationship inserts happen *after* all other inserts, to be
+        //sure that the records they are linking to have already been inserted
+        queryList.addAll(this.getFlattenedInsertQueries());
+
+        if (queryList.size() == 0) {
+            // nothing to commit
+            return;
+        }
+
+        ContextCommitObserver result =
+            new ContextCommitObserver(
+                logLevel,
+                this,
+                insObjects,
+                updObjects,
+                delObjects);
+
+        // post event: WILL_COMMIT
+        EventManager eventMgr = EventManager.getDefaultManager();
+        DataContextEvent commitChangesEvent = null;
+        if (this.postDataContextTransactionEvents) {
+            result.registerForDataContextEvents();
+            commitChangesEvent = new DataContextEvent(this);
+            eventMgr.postEvent(commitChangesEvent, WILL_COMMIT);
+        }
+
+        // try/finally needed to remove observer from event notifications
+        try {
+            this.getParent().performQueries(queryList, result);
+            if (result.isTransactionRolledback()) {
+                // post event: DID_ROLLBACK
+                if ((this.postDataContextTransactionEvents)
+                    && (commitChangesEvent != null)) {
+                    eventMgr.postEvent(commitChangesEvent, DID_ROLLBACK);
+                }
+                throw new CayenneRuntimeException("Transaction was rolled back.");
+            } else if (!result.isTransactionCommitted()) {
+                // normally should never get here, since uncommitted transaction should
+                // be already rolled back, aren't they?
+                throw new CayenneRuntimeException("Error committing transaction.");
+            }
+
+            // re-register objects whose id's where updated
+            Iterator idIt = updatedIds.keySet().iterator();
+            while (idIt.hasNext()) {
+                ObjectId oldId = (ObjectId) idIt.next();
+                ObjectId newId = (ObjectId) updatedIds.get(oldId);
+
+                DataObject obj = objectStore.changeObjectKey(oldId, newId);
+                if (obj != null) {
+                    obj.setObjectId(newId);
+                }
+            }
+            this.clearFlattenedUpdateQueries();
+
+            // post event: DID_COMMIT
+            if ((this.postDataContextTransactionEvents)
+                && (commitChangesEvent != null)) {
+                eventMgr.postEvent(commitChangesEvent, DID_COMMIT);
+            }
+        } finally {
+            if (commitChangesEvent != null) {
+                result.unregisterFromDataContextEvents();
+            }
+        }
+
+        // this makes sure the ContextCommitObserver isn't GC'ed prematurely
+        result = null;
+
+    }
+
+    /**
+     * Throws an exception if <code>dataObj</code> parameter is
+     * mapped to a "read-only" entity.
+     */
+    private void filterReadOnly(DataObject dataObj)
+        throws CayenneRuntimeException {
+        ObjEntity oe = getEntityResolver().lookupObjEntity(dataObj);
+        if (oe.isReadOnly()) {
+            throw new CayenneRuntimeException(
+                "Attempt to commit a read-only object, " + oe.getName() + ".");
         }
     }
 
@@ -893,6 +1081,95 @@ public class DataContext implements QueryEngine, Serializable {
         this.performQueries(qWrapper, resultConsumer);
     }
 
+    /**
+     * Returns ObjectId if id needs to be updated
+     * after UpdateQuery is committed,
+     * or null, if current id is good enough.
+     */
+    private ObjectId updatedId(ObjectId id, UpdateQuery upd) {
+        Map idMap = id.getIdSnapshot();
+
+        Map updAttrs = upd.getUpdAttributes();
+        Iterator it = updAttrs.keySet().iterator();
+
+        Map newIdMap = null;
+        while (it.hasNext()) {
+            Object key = it.next();
+            if (!idMap.containsKey(key))
+                continue;
+
+            if (newIdMap == null)
+                newIdMap = new HashMap(idMap);
+
+            newIdMap.put(key, updAttrs.get(key));
+        }
+
+        return (newIdMap != null)
+            ? new ObjectId(id.getObjClass(), newIdMap)
+            : null;
+    }
+
+    /**
+     *  Populates the <code>map</code> with ObjectId values from master objects
+     *  related to this object.
+     */
+    private void appendPkFromMasterRelationships(
+        Map map,
+        DataObject dataObject) {
+        ObjEntity objEntity =
+            this.getEntityResolver().lookupObjEntity(dataObject);
+        DbEntity dbEntity = objEntity.getDbEntity();
+
+        Iterator it = dbEntity.getRelationshipMap().values().iterator();
+        while (it.hasNext()) {
+            DbRelationship dbRel = (DbRelationship) it.next();
+            if (!dbRel.isToMasterPK()) {
+                continue;
+            }
+
+            ObjRelationship rel =
+                objEntity.getRelationshipForDbRelationship(dbRel);
+            if (rel == null) {
+                continue;
+            }
+
+            DataObject targetDo =
+                (DataObject) dataObject.readPropertyDirectly(rel.getName());
+            if (targetDo == null) {
+                // this is bad, since we will not be able to obtain PK in any other way
+                // throw an exception
+                throw new CayenneRuntimeException("Null master object, can't create primary key.");
+            }
+
+            Map idMap = targetDo.getObjectId().getIdSnapshot();
+            if (idMap == null) {
+                // this is bad, since we will not be able to obtain PK in any other way
+                // provide a detailed error message
+                StringBuffer msg =
+                    new StringBuffer("Can't create primary key, master object has no PK snapshot.");
+                msg
+                    .append("\nrelationship name: ")
+                    .append(dbRel.getName())
+                    .append(", src object: ")
+                    .append(dataObject.getObjectId().getObjClass().getName())
+                    .append(", target obj: ")
+                    .append(targetDo.getObjectId().getObjClass().getName());
+                throw new CayenneRuntimeException(msg.toString());
+            }
+
+            map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
+        }
+    }
+
+    /**
+     * Creates permanent ObjectId's for the list of new objects.
+     */
+    private void createPermIds(List objects) {
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            createPermId((DataObject) it.next());
+        }
+    }
 
     /** Creates permanent ObjectId for <code>anObject</code>.
      *  Object must already have a temporary ObjectId.
@@ -1107,11 +1384,11 @@ public class DataContext implements QueryEngine, Serializable {
     private List getFlattenedInsertQueries() {
         List result = new ArrayList();
         /*
-
+        
         int i;
-
+        
         Iterator objectIterator;
-
+        
         objectIterator = flattenedInserts.keySet().iterator();
         while (objectIterator.hasNext()) {
         	DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1151,7 +1428,7 @@ public class DataContext implements QueryEngine, Serializable {
         List result = new ArrayList();
         /*int i;
         Iterator objectIterator;
-
+        
         objectIterator = flattenedDeletes.keySet().iterator();
         while (objectIterator.hasNext()) {
         	DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1222,6 +1499,11 @@ public class DataContext implements QueryEngine, Serializable {
 
     PrimaryKeyGenerationSupport getKeyGenerator() {
         return keyGenerator;
+    }
+
+    public void commit(Level logLevel) throws CayenneException {
+        ContextCommit worker = new ContextCommit(this);
+        worker.commit(logLevel);
     }
 
     void fireWillCommit() {
@@ -1363,306 +1645,5 @@ public class DataContext implements QueryEngine, Serializable {
             return source;
         }
 
-    }
-
-    //This method is not in usage anymore. It will be removed
-    //as soon as the new version of commitChanges is sufficiently tested.
-    //The methods used by this version (see the methods below) of commitChanges
-    //should likely removed as well
-    private void commitChangesOld(Level logLevel) throws CayenneRuntimeException {
-        // are we set up properly?
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
-        }
-
-        // is there anything to do?
-        if (this.hasChanges() == false) {
-            return;
-        }
-
-        List queryList = new ArrayList();
-        List rawUpdObjects = new ArrayList();
-        List updObjects = new ArrayList();
-        List delObjects = new ArrayList();
-        List insObjects = new ArrayList();
-        Map updatedIds = new HashMap();
-
-        synchronized (objectStore) {
-            Iterator it = objectStore.getObjectIterator();
-            while (it.hasNext()) {
-                DataObject nextObject = (DataObject) it.next();
-                int objectState = nextObject.getPersistenceState();
-
-                // 1. deal with inserts
-                if (objectState == PersistenceState.NEW) {
-                    filterReadOnly(nextObject);
-                    insObjects.add(nextObject);
-                }
-                // 2. deal with deletes
-                else if (objectState == PersistenceState.DELETED) {
-                    filterReadOnly(nextObject);
-                    delObjects.add(nextObject);
-                }
-                // 3. deal with updates
-                else if (objectState == PersistenceState.MODIFIED) {
-                    filterReadOnly(nextObject);
-                    rawUpdObjects.add(nextObject);
-                }
-            }
-        }
-
-        //CM: Note on ordering of operations:  The order the queries are created is important
-        // Although there is some ordering code in DataNode.performQueries, it still seems that
-        // the order of the queries in queryList matters (should investigate this, but I don't
-        // have the time - somebody?).   Updates come first, so that any nullify delete rules
-        // will nullify fk's before the other object is deleted (causing grief with integrity constraints
-        // where the fk exists and points to a non-existent record).  Then flattened deletes,
-        // because nothing typically relies on those records (no constraints will hurt), then
-        // other deletions.  Inserts follow, and finally flattenedInserts.
-        // Inserts/Deletes could probably be swapped (untested), but flattened inserts
-        // must definitely come last, to ensure that the rows they point to are all inserted and ready.
-
-        //We must create permanent ids before doing the updates, so fk's that point to
-        // new objects will not be set to null
-        if (insObjects.size() > 0) {
-            // create permanent id's and orders insObjects in the correct order for insertion
-            // (which is very important with respect to dependent pk's and reflexive relationships)
-            OperationSorter.sortObjectsInInsertOrder(insObjects);
-            createPermIds(insObjects);
-        }
-
-        // prepare updates (filter "fake" updates, update id's, build queries)
-        if (rawUpdObjects.size() > 0) {
-            Iterator updIt = rawUpdObjects.iterator();
-            while (updIt.hasNext()) {
-                DataObject nextObject = (DataObject) updIt.next();
-                UpdateQuery updateQuery = QueryHelper.updateQuery(nextObject);
-                if (updateQuery != null) {
-                    queryList.add(updateQuery);
-                    updObjects.add(nextObject);
-
-                    ObjectId updId =
-                        updatedId(nextObject.getObjectId(), updateQuery);
-                    if (updId != null) {
-                        updatedIds.put(nextObject.getObjectId(), updId);
-                    }
-                } else {
-                    // object was not really modified,
-                    // put this object back in unmodified state right away
-                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
-                }
-            }
-        }
-
-        //Flattened relationship deletes happen *before* all other deletes, to be
-        //sure that if they link to any other records that should be deleted, that
-        // the deletions happen in the correct order (link records first,
-        // then linked-to records)
-        queryList.addAll(this.getFlattenedDeleteQueries());
-        if (delObjects.size() > 0) {
-            OperationSorter.sortObjectsInDeleteOrder(delObjects);
-            Iterator delIt = delObjects.iterator();
-            while (delIt.hasNext()) {
-                queryList.add(
-                    QueryHelper.deleteQuery((DataObject) delIt.next()));
-            }
-
-        }
-        // prepare inserts (create id's, build queries)
-        if (insObjects.size() > 0) {
-            // create insert queries
-            Iterator insIt = insObjects.iterator();
-            while (insIt.hasNext()) {
-                DataObject nextObject = (DataObject) insIt.next();
-
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug(
-                        "Creating InsertQuery for object of class "
-                            + nextObject.getClass());
-                }
-                Map snapshot = takeObjectSnapshot(nextObject);
-
-                //Don't create the string (expensive) if it's not needed
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug("snapshot for insert :" + snapshot);
-                }
-                queryList.add(
-                    QueryHelper.insertQuery(
-                        snapshot,
-                        nextObject.getObjectId()));
-            }
-        }
-
-        //Flattened relationship inserts happen *after* all other inserts, to be
-        //sure that the records they are linking to have already been inserted
-        queryList.addAll(this.getFlattenedInsertQueries());
-
-        if (queryList.size() == 0) {
-            // nothing to commit
-            return;
-        }
-
-        ContextCommitObserver result =
-            new ContextCommitObserver(
-                logLevel,
-                this,
-                insObjects,
-                updObjects,
-                delObjects);
-
-        // post event: WILL_COMMIT
-        EventManager eventMgr = EventManager.getDefaultManager();
-        DataContextEvent commitChangesEvent = null;
-        if (this.postDataContextTransactionEvents) {
-            result.registerForDataContextEvents();
-            commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, WILL_COMMIT);
-        }
-
-        // try/finally needed to remove observer from event notifications
-        try {
-            this.getParent().performQueries(queryList, result);
-            if (result.isTransactionRolledback()) {
-                // post event: DID_ROLLBACK
-                if ((this.postDataContextTransactionEvents)
-                    && (commitChangesEvent != null)) {
-                    eventMgr.postEvent(commitChangesEvent, DID_ROLLBACK);
-                }
-                throw new CayenneRuntimeException("Transaction was rolled back.");
-            } else if (!result.isTransactionCommitted()) {
-                // normally should never get here, since uncommitted transaction should
-                // be already rolled back, aren't they?
-                throw new CayenneRuntimeException("Error committing transaction.");
-            }
-
-            // re-register objects whose id's where updated
-            Iterator idIt = updatedIds.keySet().iterator();
-            while (idIt.hasNext()) {
-                ObjectId oldId = (ObjectId) idIt.next();
-                ObjectId newId = (ObjectId) updatedIds.get(oldId);
-
-                DataObject obj = objectStore.changeObjectKey(oldId, newId);
-                if (obj != null) {
-                    obj.setObjectId(newId);
-                }
-            }
-            this.clearFlattenedUpdateQueries();
-
-            // post event: DID_COMMIT
-            if ((this.postDataContextTransactionEvents)
-                && (commitChangesEvent != null)) {
-                eventMgr.postEvent(commitChangesEvent, DID_COMMIT);
-            }
-        } finally {
-            if (commitChangesEvent != null) {
-                result.unregisterFromDataContextEvents();
-            }
-        }
-
-        // this makes sure the ContextCommitObserver isn't GC'ed prematurely
-        result = null;
-    }
-
-    /**
-     * Returns ObjectId if id needs to be updated
-     * after UpdateQuery is committed,
-     * or null, if current id is good enough.
-     */
-    private ObjectId updatedId(ObjectId id, UpdateQuery upd) {
-        Map idMap = id.getIdSnapshot();
-
-        Map updAttrs = upd.getUpdAttributes();
-        Iterator it = updAttrs.keySet().iterator();
-
-        Map newIdMap = null;
-        while (it.hasNext()) {
-            Object key = it.next();
-            if (!idMap.containsKey(key))
-                continue;
-
-            if (newIdMap == null)
-                newIdMap = new HashMap(idMap);
-
-            newIdMap.put(key, updAttrs.get(key));
-        }
-
-        return (newIdMap != null)
-            ? new ObjectId(id.getObjClass(), newIdMap)
-            : null;
-    }
-
-    /**
-     *  Populates the <code>map</code> with ObjectId values from master objects
-     *  related to this object.
-     */
-    private void appendPkFromMasterRelationships(
-        Map map,
-        DataObject dataObject) {
-        ObjEntity objEntity =
-            this.getEntityResolver().lookupObjEntity(dataObject);
-        DbEntity dbEntity = objEntity.getDbEntity();
-
-        Iterator it = dbEntity.getRelationshipMap().values().iterator();
-        while (it.hasNext()) {
-            DbRelationship dbRel = (DbRelationship) it.next();
-            if (!dbRel.isToMasterPK()) {
-                continue;
-            }
-
-            ObjRelationship rel =
-                objEntity.getRelationshipForDbRelationship(dbRel);
-            if (rel == null) {
-                continue;
-            }
-
-            DataObject targetDo =
-                (DataObject) dataObject.readPropertyDirectly(rel.getName());
-            if (targetDo == null) {
-                // this is bad, since we will not be able to obtain PK in any other way
-                // throw an exception
-                throw new CayenneRuntimeException("Null master object, can't create primary key.");
-            }
-
-            Map idMap = targetDo.getObjectId().getIdSnapshot();
-            if (idMap == null) {
-                // this is bad, since we will not be able to obtain PK in any other way
-                // provide a detailed error message
-                StringBuffer msg =
-                    new StringBuffer("Can't create primary key, master object has no PK snapshot.");
-                msg
-                    .append("\nrelationship name: ")
-                    .append(dbRel.getName())
-                    .append(", src object: ")
-                    .append(dataObject.getObjectId().getObjClass().getName())
-                    .append(", target obj: ")
-                    .append(targetDo.getObjectId().getObjClass().getName());
-                throw new CayenneRuntimeException(msg.toString());
-            }
-
-            map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
-        }
-    }
-
-    /**
-     * Creates permanent ObjectId's for the list of new objects.
-     */
-    private void createPermIds(List objects) {
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            createPermId((DataObject) it.next());
-        }
-    }
-
-    /**
-     * Throws an exception if <code>dataObj</code> parameter is
-     * mapped to a "read-only" entity.
-     */
-    private void filterReadOnly(DataObject dataObj)
-        throws CayenneRuntimeException {
-        ObjEntity oe = getEntityResolver().lookupObjEntity(dataObj);
-        if (oe.isReadOnly()) {
-            throw new CayenneRuntimeException(
-                "Attempt to commit a read-only object, " + oe.getName() + ".");
-        }
     }
 }
