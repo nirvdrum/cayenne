@@ -53,82 +53,55 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.conf;
+package org.objectstyle.cayenne.util;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.util.WebappResourceLocator;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
-  * BasicServletConfiguration is a Configuration that uses ServletContext 
-  * to locate resources. 
-  * This class can only be used in a context of a servlet/jsp container.
-  * It resolves configuration file paths relative to the web application
-  * "WEB-INF" directory.
-  * 
-  * <p>
-  * BasicServletConfiguration is compatible with Servlet Specification 2.2 and higher.
-  * Also look at ServletConfiguration for the information how to utilize listeners 
-  * introduced in Servlet Specification 2.3.
-  * </p>
-  *
-  * @author Andrei Adamchik
-  * @author Scott Finnerty
-  */
-public class BasicServletConfiguration extends DefaultConfiguration {
-	private static Logger logObj = Logger.getLogger(DefaultConfiguration.class);
+ * @author Andrei Adamchik
+ */
+public class WebappResourceLocator extends ResourceLocator {
+    private static Logger logObj;
 
-    public static final String CONFIGURATION_PATH_KEY = "cayenne.configuration.path";
+    // Create a Predicate that will enable logging only when
+    // Configuration.isLoggingConfigured() returns true.
+    // The passed predicate argument is ignored.
+    static {
+        Predicate p = new Predicate() {
+            public boolean evaluate(Object o) {
+                return Configuration.isLoggingConfigured();
+            }
+        };
 
-    protected ServletContext servletContext;
-
-    public static BasicServletConfiguration initializeConfiguration(ServletContext ctxt) {
-        BasicServletConfiguration conf = new BasicServletConfiguration(ctxt);
-        Configuration.initializeSharedConfiguration(conf);
-
-        return conf;
+        logObj = new PredicateLogger(WebappResourceLocator.class, p);
     }
+    
+    protected ServletContext context;
 
-    public BasicServletConfiguration() {
-    	super();
-
-    }
-
-    public BasicServletConfiguration(ServletContext ctxt) {
-    	super();
-        this.setServletContext(ctxt);
-
-        ResourceLocator l = new WebappResourceLocator(servletContext);
-        l.setSkipAbsolutePath(true);
-        l.setSkipClasspath(false);
-        l.setSkipCurrentDirectory(true);
-        l.setSkipHomeDirectory(true);
-
-        // check for a configuration path in the context parameters
-        String configurationPath = ctxt.getInitParameter(CONFIGURATION_PATH_KEY);
-        if (configurationPath != null && configurationPath.trim().length() > 0) {
-            l.addFilesystemPath(configurationPath);
-        }
-
-        this.setResourceLocator(l);
+    public WebappResourceLocator(ServletContext context) {
+        this.context = context;
     }
 
     /**
-     * Sets the servletContext.
-     * @param servletContext The servletContext to set
+     * Looks for resources relative to /WEB-INF/ directory using ServletContext.
      */
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
+    public URL findResource(String location) {
+        URL url = null;
+        
+        try {
+            url = context.getResource("/WEB-INF/" + location);
+        } catch (MalformedURLException e) {
+            logObj.debug("Malformed url, ignoring.", e);
+        }
+        
+        return (url != null) ? url : super.findResource(location);
     }
 
-    /** Returns current application context object. */
-    public ServletContext getServletContext() {
-        return servletContext;
-    }
-
-	public boolean canInitialize() {
-		return (getServletContext() != null);
-	}
 }

@@ -515,7 +515,7 @@ public class ResourceLocator {
 	/**
 	 * Custom logger that can be dynamically turned on/off by evaluating a Predicate.
 	 */
-	private static class PredicateLogger extends Logger {
+	protected static class PredicateLogger extends Logger {
 		private Logger _target;
 		private Predicate _predicate;
 

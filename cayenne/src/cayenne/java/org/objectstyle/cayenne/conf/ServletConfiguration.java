@@ -64,6 +64,7 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
   * ServletConfiguration is a Configuration that uses ServletContext to locate resources. 
@@ -93,28 +94,23 @@ import org.objectstyle.cayenne.access.DataContext;
   * @author Andrei Adamchik
   */
 public class ServletConfiguration
-    extends BasicServletConfiguration
     implements HttpSessionListener, ServletContextListener {
 
     public static final String DATA_CONTEXT_KEY = "cayenne.datacontext";
 
     public ServletConfiguration() {}
 
-    public ServletConfiguration(ServletContext context) {}
-
     /** Returns default Cayenne DataContext associated with session <code>s</code>. */
     public static DataContext getDefaultContext(HttpSession s) {
         return (DataContext) s.getAttribute(DATA_CONTEXT_KEY);
     }
 
-    /** Sets itself as a Cayenne shared Configuration object that can later
-      * be obtained by calling <code>Configuration.getSharedConfiguration()</code>.
-      * This method is a part of  ServletContextListener interface and is called
+    /** Establishes a Cayenne shared Configuration object that can later be obtained by calling 
+      * <code>Configuration.getSharedConfiguration()</code>.
+      * This method is a part of ServletContextListener interface and is called
       * on application startup. */
     public void contextInitialized(ServletContextEvent sce) {
-        this.servletContext = sce.getServletContext();
-        servletContext.log("*************** app created");
-        Configuration.initializeSharedConfiguration(this);
+        setConfiguration(newConfiguration(sce.getServletContext()));
     }
 
     /** Currently does nothing. <i>In the future it should close down
@@ -128,12 +124,28 @@ public class ServletConfiguration
       * is a part of HttpSessionListener interface and is called every time
       * when a new session is created. */
     public void sessionCreated(HttpSessionEvent se) {
-        servletContext.log("*************** session created");
-        se.getSession().setAttribute(DATA_CONTEXT_KEY, getDomain().createDataContext());
+        se.getSession().setAttribute(DATA_CONTEXT_KEY, getConfiguration().getDomain().createDataContext());
     }
 
     /** Does nothing. This method
       * is a part of HttpSessionListener interface and is called every time
       * when a session is destroyed. */
     public void sessionDestroyed(HttpSessionEvent se) {}
+
+    /** Return an instance of Configuration that will be initialized as the shared configuration.
+      * Provides an extension point for the developer to provide their own custom configuration.
+      */
+    protected Configuration newConfiguration(ServletContext sc) {
+        return new BasicServletConfiguration(sc);
+    }
+
+    /** Initializes the configuration.  */
+    protected void setConfiguration(Configuration configuration) {
+        Configuration.initializeSharedConfiguration(configuration);
+    }
+
+    /** Returns the current configuration. */
+    protected Configuration getConfiguration() {
+        return Configuration.getSharedConfiguration();
+    }
 }
