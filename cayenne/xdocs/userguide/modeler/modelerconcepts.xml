@@ -134,8 +134,7 @@
 		<p>
 		CayenneModeler supports three scenarios of use:
 		<ol>
-		<li>	Creating the Data Map and generating database schema from it</li
-		>
+		<li>	Creating the Data Map and generating database schema from it</li>
 		<li>	Using existing database schema to create Data Map </li>
 		<li>	Combination of 1 and 2. </li>
 		</ol>

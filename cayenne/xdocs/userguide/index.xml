@@ -70,9 +70,7 @@
             <li><a href="webobjects.html">7. Cayenne and WebObjects</a>
             <ul>
                 <li><a href="webobjects.html#intro">7.1 Introduction</a></li>
-                <li><a href="webobjects.html#feature">7.2 Feature Comparison</a></li>
-                <li><a href="webobjects.html#together">7.3 Working Together</a></li>
-                <li><a href="webobjects.html#terms">7.4 Terms Translation</a></li>
+                <li><a href="webobjects.html#terms">7.2 Terms Translation</a></li>
             </ul></li>
         </ul>
     </section>

@@ -37,16 +37,8 @@
             for any kind of Java applications.</p>
         </subsection>
         
-        <subsection name="7.2 Feature Comparison" anchor="feature">
-            <p> To Be Done </p>
-        </subsection>
-        
-        <subsection name="7.3 Working Together" anchor="together">
-            <p> To Be Done </p>
-        </subsection>
-        
-        <subsection name="7.4 Terms Translation" anchor="terms">
-            <p>Some design patterns used in Cayenne may be familiar to EOF folk. 
+        <subsection name="7.2 Terms Translation" anchor="terms">
+            <p>Some design patterns used in Cayenne may be familiar to the EOF folk. 
             This section is intended to make Cayenne understanding 
             easier if you have WebObjects/EOF background. Below Cayenne 
             terms are defined in WebObjects terms whenever it is possible.</p>
