@@ -85,7 +85,7 @@ public abstract class BatchQuery extends AbstractQuery {
 
     /**
      * Repositions batch to the next object, so that subsequent calls to
-     * getObject(int) would return the values of the next batch object. Retunrs
+     * getObject(int) would return the values of the next batch object. Returns
      * <code>true</code> if batch has more objects to iterate over,
      * <code>false</code> otherwise.
      */
