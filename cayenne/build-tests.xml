@@ -14,7 +14,7 @@
 	<property name="test.filter" value="**/*Tst.class"/>
 	<property environment="test.env"/>
 	
-    <path id="classpath">
+    <path id="agnostic-classpath">
     	<fileset dir="${otherlib.dir}">
 			<include name="${ant-junitreport.jar}"/>
 			<include name="${junit.jar}"/>
@@ -155,10 +155,27 @@
          </condition>
     </target>
     
+    <target name="use-embedded-hsqldb" unless="cayenne.test.connection">
+	    <echo message="using internal_embedded_datasource for test connection."/>
+	    <property name="cayenne.test.connection" value="internal_embedded_datasource"/>
+        <path id="classpath">
+            <path refid="agnostic-classpath"/>
+            <fileset dir="${otherlib.dir}">
+    			<include name="${hsqldb.jar}"/>
+    		</fileset>
+        </path>
+    </target>
+
+    <target name="use-specified-connection" if="cayenne.test.connection">
+        <path refid="classpath">
+          <pathelement path="agnostic-classpath"/>
+        </path>
+    </target>
+
     <!-- This is a simple property check, misspelled property can still -->
     <!-- lead to failed connection to the test database. -->
-    <target name="check-connection" unless="cayenne.test.connection">
-    	<fail>'cayenne.test.connection' property must be defined to point to a named connection entry.</fail>
+    <!-- dependency order is important as use-embedded-hsqldb sets the conditional -->
+    <target name="check-connection" depends="use-specified-connection,use-embedded-hsqldb">
     </target>
 </project>
 
