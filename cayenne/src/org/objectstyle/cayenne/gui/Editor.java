@@ -142,13 +142,19 @@ implements ActionListener
         createObjEntityMenu.addActionListener(this);
         createDbEntityMenu.addActionListener(this);
         removeMenu.addActionListener(this);
+        removeMenu.setAccelerator(KeyStroke.getKeyStroke(
+				        	KeyEvent.VK_D, ActionEvent.CTRL_MASK));
         openProjectMenu.addActionListener(this);
+        openProjectMenu.setAccelerator(KeyStroke.getKeyStroke(
+				        	KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         openDataMapMenu.addActionListener(this);
         closeProjectMenu.addActionListener(this);
         saveMapMenu.addActionListener(this);
         saveProjectMenu.addActionListener(this);
         saveMapAsMenu.addActionListener(this);
         saveAllMenu.addActionListener(this);
+        saveAllMenu.setAccelerator(KeyStroke.getKeyStroke(
+				        	KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         exitMenu.addActionListener(this);
 
         importDbMenu.addActionListener(this);
