@@ -71,6 +71,7 @@ import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
+import org.objectstyle.art.MeaningfulPKTest1;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
 import org.objectstyle.cayenne.CayenneDataObject;
@@ -112,6 +113,14 @@ public class DataContextTst extends CayenneTestCase {
 		opObserver = new TestOperationObserver();
 	}
 
+    public void testInsertWithMeaningfulPK() throws Exception {
+    	MeaningfulPKTest1 obj = (MeaningfulPKTest1)ctxt.createAndRegisterNewObject("MeaningfulPKTest1");
+    	obj.setArtistId(new Integer(1000));
+    	obj.setArtistName("aaa-aaa");
+    	obj.setDateOfBirth(new java.util.Date());
+    	ctxt.commitChanges();
+    }
+    
 	public void testCreatePermId1() throws Exception {
 		Artist artist = new Artist();
 		ctxt.registerNewObject(artist);

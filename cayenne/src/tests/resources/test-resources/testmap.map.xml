@@ -173,6 +173,11 @@
 	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="GALLERY_NAME"/>
 	</obj-entity>
+	<obj-entity name="MeaningfulPKTest1" className="org.objectstyle.art.MeaningfulPKTest1" dbEntityName="ARTIST">
+		<obj-attribute name="artistId" type="java.lang.Integer" db-attribute-path="ARTIST_ID"/>
+		<obj-attribute name="artistName" type="java.lang.String" db-attribute-path="ARTIST_NAME"/>
+		<obj-attribute name="dateOfBirth" type="java.util.Date" db-attribute-path="DATE_OF_BIRTH"/>
+	</obj-entity>
 	<obj-entity name="Painting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING" superClassName="org.objectstyle.art.ArtDataObject">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
@@ -297,6 +302,9 @@
 	<obj-relationship name="artistExhibitArray" source="Exhibit" target="ArtistExhibit" toMany="true" deleteRule="Cascade">
 		<db-relationship-ref source="EXHIBIT" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
 	</obj-relationship>
+	<obj-relationship name="artistExhibitArray" source="MeaningfulPKTest1" target="ArtistExhibit" toMany="true">
+		<db-relationship-ref source="ARTIST" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
+	</obj-relationship>
 	<obj-relationship name="childGroupsArray" source="ArtGroup" target="ArtGroup" toMany="true" deleteRule="Nullify">
 		<db-relationship-ref source="ARTGROUP" target="ARTGROUP" name="toChildGroups"/>
 	</obj-relationship>
@@ -328,6 +336,9 @@
 	</obj-relationship>
 	<obj-relationship name="paintingArray" source="Gallery" target="Painting" toMany="true" deleteRule="Deny">
 		<db-relationship-ref source="GALLERY" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="paintingArray" source="MeaningfulPKTest1" target="CompoundPainting" toMany="true">
+		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
 	</obj-relationship>
 	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" toMany="true" deleteRule="Deny">
 		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
