@@ -208,7 +208,10 @@ public class DataContext implements QueryEngine {
 					newDataObject(
 						lookupEntity(oid.getObjEntityName()).getClassName());
 			} catch (Exception ex) {
-				throw new CayenneRuntimeException("Error creating object.", ex);
+				String entity = (oid != null) ? oid.getObjEntityName() : null;
+				throw new CayenneRuntimeException(
+					"Error creating object for entity '" + entity + "'.",
+					ex);
 			}
 
 			obj.setObjectId(oid);
