@@ -61,7 +61,9 @@ import java.util.Map;
 import org.objectstyle.cayenne.map.Procedure;
 
 /**
- * A query based on StoredProcedure.
+ * A query based on Procedure. Can be used as a select query,
+ * or as a query of an arbitrary complexity, performing data modification, selecting 
+ * data (possibly with multiple result sets per call), returning values via OUT parameters.
  * 
  * @author Andrei Adamchik
  */
