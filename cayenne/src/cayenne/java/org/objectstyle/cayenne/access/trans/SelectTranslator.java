@@ -135,8 +135,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         // build GROUP BY
         buildGroupByList();
 
-        // build ORDER BY,
-        String orderByStr = new OrderingTranslator(this).doTranslation();
+        // build ORDER BY
+        OrderingTranslator orderingTranslator = new OrderingTranslator(this); 
+        String orderByStr = orderingTranslator.doTranslation();
 
         // assemble
         StringBuffer queryBuf = new StringBuffer();
@@ -146,12 +147,30 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             queryBuf.append("DISTINCT ");
         }
 
+        List selectColumnExpList = new ArrayList();
+        
+        for (int i = 0; i < columnList.size(); i++)
+        {
+            selectColumnExpList.add(getColumn(i));
+        }
+        
+        // append any column expressions used in the order by if this query 
+        // uses the DISTINCT modifier
+        if (forceDistinct || getSelectQuery().isDistinct()) {
+            List orderByColumnList = orderingTranslator.getOrderByColumnList();
+            for (int i = 0; i < orderByColumnList.size(); i++) {
+                String orderByColumnExp = (String) orderByColumnList.get(i);
+                if (selectColumnExpList.contains(orderByColumnExp) == false)
+                    selectColumnExpList.add(orderByColumnExp);
+            }
+        }
+        
         // append columns (unroll the loop's first element)
-        int columnCount = columnList.size();
-        appendColumn(queryBuf, 0); // assume there is at least 1 element
+        int columnCount = selectColumnExpList.size();
+        queryBuf.append((String) selectColumnExpList.get(0)); // assume there is at least 1 element
         for (int i = 1; i < columnCount; i++) {
             queryBuf.append(", ");
-            appendColumn(queryBuf, i);
+            queryBuf.append((String) selectColumnExpList.get(i));
         }
 
         // append from clause
@@ -356,10 +375,10 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         }
     }
 
-    private void appendColumn(StringBuffer queryBuf, int index) {
+    private String getColumn(int index) {
         DbAttribute attr = (DbAttribute) columnList.get(index);
         String alias = aliasForTable((DbEntity) attr.getEntity());
-        queryBuf.append(attr.getAliasedName(alias));
+        return attr.getAliasedName(alias);
     }
 
     private void appendGroupBy(StringBuffer queryBuf, int index) {

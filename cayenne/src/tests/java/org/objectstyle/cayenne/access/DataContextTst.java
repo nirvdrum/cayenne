@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataContextTst extends DataContextTestBase {
@@ -278,6 +279,24 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(java.util.Date.class, a1.getDateOfBirth().getClass());
     }
 
+    public void testCaseInsensitiveOrdering() throws Exception {
+        // case insensitive ordering appends extra columns
+        // to the query when query is using DISTINCT... 
+        // verify that the result is not messaged up
+
+        SelectQuery query = new SelectQuery(Artist.class);
+        Ordering ordering = new Ordering("artistName", false);
+        ordering.setCaseInsensitive(true);
+		query.addOrdering(ordering);
+		query.setDistinct(true);
+		
+        List objects = context.performQuery(query);
+        assertEquals(artistCount, objects.size());
+        
+        Map snapshot = ((Artist)objects.get(0)).getCommittedSnapshot();
+        assertEquals(3, snapshot.size());
+    }
+
     public void testPerformSelectQuery1() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
         List objects = context.performQuery(query);
@@ -359,9 +378,9 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testCommitChangesRO2() throws Exception {
         ROArtist a1 = fetchROArtist("artist1");
-		a1.writePropertyDirectly("artistName", "abc");
-		a1.setPersistenceState(PersistenceState.MODIFIED);
-		
+        a1.writePropertyDirectly("artistName", "abc");
+        a1.setPersistenceState(PersistenceState.MODIFIED);
+
         try {
             context.commitChanges();
             fail("Updating a 'read-only' object must fail.");

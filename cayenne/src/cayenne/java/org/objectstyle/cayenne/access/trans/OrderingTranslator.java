@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -71,6 +72,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
  */
 public class OrderingTranslator extends QueryAssemblerHelper {
 
+    protected List orderByColumnList = new ArrayList();
+    
     public OrderingTranslator(QueryAssembler queryAssembler) {
         super(queryAssembler);
     }
@@ -94,21 +97,24 @@ public class OrderingTranslator extends QueryAssemblerHelper {
             if (i > 0)
                 buf.append(", ");
 
+            StringBuffer ordComp = new StringBuffer();
+
             Ordering ord = (Ordering) list.get(i);
 
             //UPPER is (I think) part of the SQL99 standard, and I'm not convinced it's universally available
             // - should the syntax used here be defined by the Db specific adaptor perhaps, or at least
             // possibly specified by the db adaptor (a DB specific OrderingTranslator hook)?
             if (ord.isCaseInsensitive()) {
-                buf.append("UPPER(");
+                ordComp.append("UPPER(");
+
             }
 
             Expression exp = ord.getSortSpec();
 
             if (exp.getType() == Expression.OBJ_PATH) {
-                appendObjPath(buf, exp);
+                appendObjPath(ordComp, exp);
             } else if (exp.getType() == Expression.DB_PATH) {
-                appendDbPath(buf, exp);
+                appendDbPath(ordComp, exp);
             } else {
                 throw new CayenneRuntimeException(
                     "Unsupported ordering expression: " + exp);
@@ -116,8 +122,12 @@ public class OrderingTranslator extends QueryAssemblerHelper {
 
             //Close UPPER() modifier
             if (ord.isCaseInsensitive()) {
-                buf.append(")");
+                ordComp.append(")");
             }
+
+            orderByColumnList.add(ordComp.toString());
+            
+            buf.append(ordComp.toString());
 
             // "ASC" is a noop, omit it from the query 
             if (!ord.isAscending()) {
@@ -126,5 +136,17 @@ public class OrderingTranslator extends QueryAssemblerHelper {
         }
 
         return buf.length() > 0 ? buf.toString() : null;
+    }
+
+    /**
+     * Returns the column expressions (not Expressions) used in
+     * the order by clause.  E.g., in the case of an case-insensitive 
+     * order by, an element of the list would be 
+     * <code>UPPER(&lt;column reference&gt;)</code>
+     *  
+     * @return
+     */    
+    public List getOrderByColumnList() {
+        return orderByColumnList;
     }
 }
