@@ -102,7 +102,7 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ObjRelationshipPane
+public class ObjEntityRelationshipTab
     extends JPanel
     implements
         ObjEntityDisplayListener,
@@ -123,7 +123,7 @@ public class ObjRelationshipPane
     CayenneTable table;
     JButton resolve;
 
-    public ObjRelationshipPane(EventController mediator) {
+    public ObjEntityRelationshipTab(EventController mediator) {
         this.mediator = mediator;
 
         init();

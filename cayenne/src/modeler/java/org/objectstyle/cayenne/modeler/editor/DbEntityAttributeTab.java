@@ -90,7 +90,7 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class DbAttributePane
+public class DbEntityAttributeTab
     extends JPanel
     implements
         DbEntityDisplayListener,
@@ -103,7 +103,7 @@ public class DbAttributePane
     protected CayenneTable table;
     protected JButton editParams;
 
-    public DbAttributePane(EventController temp_mediator) {
+    public DbEntityAttributeTab(EventController temp_mediator) {
         super();
         mediator = temp_mediator;
         mediator.addDbEntityDisplayListener(this);

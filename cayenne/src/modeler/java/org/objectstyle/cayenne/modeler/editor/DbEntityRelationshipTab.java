@@ -100,7 +100,7 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbRelationshipPane extends JPanel implements ActionListener,
+public class DbEntityRelationshipTab extends JPanel implements ActionListener,
         DbEntityDisplayListener, DbEntityListener, DbRelationshipListener,
         ExistingSelectionProcessor, ListSelectionListener, TableModelListener {
 
@@ -108,7 +108,7 @@ public class DbRelationshipPane extends JPanel implements ActionListener,
     protected CayenneTable table;
     protected JButton resolve;
 
-    public DbRelationshipPane(EventController mediator) {
+    public DbEntityRelationshipTab(EventController mediator) {
         super();
 
         this.mediator = mediator;

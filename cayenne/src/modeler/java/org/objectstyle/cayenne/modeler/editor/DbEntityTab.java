@@ -97,7 +97,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class DbEntityPane
+public class DbEntityTab
     extends JPanel
     implements ExistingSelectionProcessor, DbEntityDisplayListener, ActionListener {
 
@@ -117,7 +117,7 @@ public class DbEntityPane
     protected JTextField customPKName;
     protected JTextField customPKSize;
 
-    public DbEntityPane(EventController mediator) {
+    public DbEntityTab(EventController mediator) {
         super();
         this.mediator = mediator;
 

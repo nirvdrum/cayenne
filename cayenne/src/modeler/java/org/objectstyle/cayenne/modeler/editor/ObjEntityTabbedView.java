@@ -55,116 +55,118 @@
  */
 package org.objectstyle.cayenne.modeler.editor;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 
-public class DbEntityEditorView
-    extends JPanel
-    implements
-        ChangeListener,
-        DbEntityDisplayListener,
-        DbRelationshipDisplayListener,
-        DbAttributeDisplayListener {
+/**
+ * Tabbed ObjEntity editor panel.
+ * 
+ * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplayListener,
+        ObjRelationshipDisplayListener, ObjAttributeDisplayListener {
 
     protected EventController mediator;
-    protected JTabbedPane tab;
-    protected DbEntityPane entityPanel;
-    protected DbAttributePane attributesPanel;
-    protected DbRelationshipPane relationshipsPanel;
+    protected ObjEntityRelationshipTab relationshipsPanel;
+    protected ObjEntityAttributeTab attributesPanel;
 
-    public DbEntityEditorView(EventController mediator) {
-        super();
+    public ObjEntityTabbedView(EventController mediator) {
         this.mediator = mediator;
-        mediator.addDbEntityDisplayListener(this);
-        mediator.addDbAttributeDisplayListener(this);
-        mediator.addDbRelationshipDisplayListener(this);
 
-        setLayout(new BorderLayout());
-        tab = new JTabbedPane();
-        tab.setTabPlacement(JTabbedPane.TOP);
-        add(tab, BorderLayout.CENTER);
-        
+        initView();
+        initController();
+    }
+
+    private void initView() {
+        setTabPlacement(JTabbedPane.TOP);
+
         // add panels to tabs
-        // note that those panels that have no internal scrollable tables 
+        // note that those panels that have no internal scrollable tables
         // must be wrapped in a scroll pane
-        
-        entityPanel = new DbEntityPane(mediator);
-        tab.addTab("Entity", new JScrollPane(entityPanel));
-        attributesPanel = new DbAttributePane(mediator);
-        tab.addTab("Attributes", attributesPanel);
-        relationshipsPanel = new DbRelationshipPane(mediator);
-        tab.addTab("Relationships", relationshipsPanel);
 
-        tab.addChangeListener(this);
+        ObjEntityTab entityPanel = new ObjEntityTab(mediator);
+        addTab("Entity", new JScrollPane(entityPanel));
+
+        attributesPanel = new ObjEntityAttributeTab(mediator);
+        addTab("Attributes", attributesPanel);
+        relationshipsPanel = new ObjEntityRelationshipTab(mediator);
+        addTab("Relationships", relationshipsPanel);
     }
 
-    /** Handle focus when tab changes. */
-    public void stateChanged(ChangeEvent e) {
-        // find source view
-        Component selected = tab.getSelectedComponent();
-        while (selected instanceof JScrollPane) {
-			selected = ((JScrollPane)selected).getViewport().getView();
-        }
+    private void initController() {
+        mediator.addObjEntityDisplayListener(this);
+        mediator.addObjAttributeDisplayListener(this);
+        mediator.addObjRelationshipDisplayListener(this);
 
-        ExistingSelectionProcessor proc = (ExistingSelectionProcessor)selected;
-        proc.processExistingSelection();
+        addChangeListener(new ChangeListener() {
+
+            public void stateChanged(ChangeEvent e) {
+                Component selected = getSelectedComponent();
+                while (selected instanceof JScrollPane) {
+                    selected = ((JScrollPane) selected).getViewport().getView();
+                }
+
+                ((ExistingSelectionProcessor) selected).processExistingSelection();
+            }
+        });
     }
 
-    /** If entity is null hides it's contents, otherwise makes it visible. */
-    public void currentDbEntityChanged(EntityDisplayEvent e) {
+    public void currentObjEntityChanged(EntityDisplayEvent e) {
         if (e.getEntity() == null)
-            tab.setVisible(false);
+            setVisible(false);
         else {
-            if (e.isTabReset())
-                tab.setSelectedIndex(0);
-            tab.setVisible(true);
+            if (e.isTabReset()) {
+                setSelectedIndex(0);
+            }
+
+            setVisible(true);
         }
     }
 
-    public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
+    public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
         if (e.getEntity() == null) {
             return;
         }
 
         // update relationship selection
         Relationship rel = e.getRelationship();
-        if (rel instanceof DbRelationship) {
-            relationshipsPanel.selectRelationship((DbRelationship) rel);
+        if (rel instanceof ObjRelationship) {
+            relationshipsPanel.selectRelationship((ObjRelationship) rel);
         }
 
         // Display relationship tab
-        tab.setSelectedIndex(2);
+        setSelectedIndex(2);
     }
 
-    public void currentDbAttributeChanged(AttributeDisplayEvent e) {
+    public void currentObjAttributeChanged(AttributeDisplayEvent e) {
         if (e.getEntity() == null)
             return;
 
         // update relationship selection
         Attribute attr = e.getAttribute();
-        if (attr instanceof DbAttribute) {
-            attributesPanel.selectAttribute((DbAttribute) attr);
+        if (attr instanceof ObjAttribute) {
+            attributesPanel.selectAttribute((ObjAttribute) attr);
         }
 
         // Display attribute tab
-        tab.setSelectedIndex(1);
+        setSelectedIndex(1);
+        getSelectedComponent();
     }
 }

@@ -90,7 +90,7 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
 /**
  * @author Andrei Adamchik
  */
-public class ProcedureParameterPane
+public class ProcedureParameterTab
     extends JPanel
     implements
         ProcedureParameterListener,
@@ -98,7 +98,7 @@ public class ProcedureParameterPane
         ExistingSelectionProcessor,
         ActionListener {
 
-    private static Logger logObj = Logger.getLogger(ProcedureParameterPane.class);
+    private static Logger logObj = Logger.getLogger(ProcedureParameterTab.class);
 
     protected EventController eventController;
 
@@ -106,7 +106,7 @@ public class ProcedureParameterPane
     protected JButton moveUp;
     protected JButton moveDown;
 
-    public ProcedureParameterPane(EventController eventController) {
+    public ProcedureParameterTab(EventController eventController) {
         this.eventController = eventController;
 
         init();
@@ -116,7 +116,7 @@ public class ProcedureParameterPane
 
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
-                ProcedureParameterPane.this.processExistingSelection();
+                ProcedureParameterTab.this.processExistingSelection();
             }
         });
         

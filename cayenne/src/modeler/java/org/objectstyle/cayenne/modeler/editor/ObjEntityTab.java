@@ -102,11 +102,11 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class ObjEntityPane
+public class ObjEntityTab
     extends JPanel
     implements ObjEntityDisplayListener, ExistingSelectionProcessor {
 
-    private static Logger logObj = Logger.getLogger(ObjEntityPane.class);
+    private static Logger logObj = Logger.getLogger(ObjEntityTab.class);
 
     private static final Object noInheritance =
         new MapObject("Direct Mapping to Table/View") {
@@ -125,7 +125,7 @@ public class ObjEntityPane
     protected JCheckBox readOnly;
     protected JCheckBox optimisticLocking;
 
-    public ObjEntityPane(EventController mediator) {
+    public ObjEntityTab(EventController mediator) {
         this.mediator = mediator;
         initView();
         initController();

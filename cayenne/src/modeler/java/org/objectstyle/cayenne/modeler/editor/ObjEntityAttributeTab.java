@@ -90,7 +90,7 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class ObjAttributePane
+public class ObjEntityAttributeTab
     extends JPanel
     implements
         ObjEntityDisplayListener,
@@ -101,7 +101,7 @@ public class ObjAttributePane
     protected EventController mediator;
     protected CayenneTable table;
 
-    public ObjAttributePane(EventController mediator) {
+    public ObjEntityAttributeTab(EventController mediator) {
         this.mediator = mediator;
 
         init();

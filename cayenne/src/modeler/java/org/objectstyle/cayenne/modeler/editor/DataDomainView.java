@@ -91,8 +91,8 @@ import com.jgoodies.forms.layout.FormLayout;
 /** 
  * Panel for editing DataDomain.
  */
-public class DataDomainDetailView extends JPanel implements DomainDisplayListener {
-    private static Logger logObj = Logger.getLogger(DataDomainDetailView.class);
+public class DataDomainView extends JPanel implements DomainDisplayListener {
+    private static Logger logObj = Logger.getLogger(DataDomainView.class);
 
     protected EventController eventController;
 
@@ -104,7 +104,7 @@ public class DataDomainDetailView extends JPanel implements DomainDisplayListene
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
 
-    public DataDomainDetailView(EventController eventController) {
+    public DataDomainView(EventController eventController) {
         this.eventController = eventController;
 
         // Create and layout components

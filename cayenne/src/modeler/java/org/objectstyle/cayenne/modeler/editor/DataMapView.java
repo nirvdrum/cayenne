@@ -91,7 +91,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class DataMapDetailView extends JPanel implements DataMapDisplayListener {
+public class DataMapView extends JPanel implements DataMapDisplayListener {
 
     protected EventController eventController;
 
@@ -99,7 +99,7 @@ public class DataMapDetailView extends JPanel implements DataMapDisplayListener 
     protected JLabel location;
     protected JComboBox nodeSelector;
 
-    public DataMapDetailView(EventController eventController) {
+    public DataMapView(EventController eventController) {
         this.eventController = eventController;
 
         initView();

@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * @author Andrei Adamchik
  */
-public class ProcedurePane
+public class ProcedureTab
     extends JPanel
     implements ProcedureDisplayListener, ExistingSelectionProcessor {
 
@@ -91,7 +91,7 @@ public class ProcedurePane
     protected JCheckBox returnsValue;
     protected boolean ignoreChange;
 
-    public ProcedurePane(EventController eventController) {
+    public ProcedureTab(EventController eventController) {
         this.eventController = eventController;
 
         init();
@@ -114,7 +114,7 @@ public class ProcedurePane
                 if (procedure != null && !ignoreChange) {
                     procedure.setReturningValue(returnsValue.isSelected());
                     eventController.fireProcedureEvent(
-                        new ProcedureEvent(ProcedurePane.this, procedure));
+                        new ProcedureEvent(ProcedureTab.this, procedure));
                 }
             }
         });

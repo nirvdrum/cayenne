@@ -53,82 +53,53 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.modeler.editor;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
-import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 
-/** 
- * Tabbed ObjEntity editor panel.
+/**
+ * Tabbed panel for stored procedure editing.
  * 
- * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ObjEntityEditorView
-    extends JPanel
-    implements
-        ObjEntityDisplayListener,
-        ObjRelationshipDisplayListener,
-        ObjAttributeDisplayListener {
+public class ProcedureTabbedView
+    extends JTabbedPane
+    implements ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
-    protected EventController mediator;
-    protected JTabbedPane tab;
-    protected ObjRelationshipPane relationshipsPanel;
-    protected ObjAttributePane attributesPanel;
+    protected EventController eventController;
+    protected ProcedureTab procedurePanel;
+    protected ProcedureParameterTab procedureParameterPanel;
 
-    public ObjEntityEditorView(EventController mediator) {
-        this.mediator = mediator;
+    public ProcedureTabbedView(EventController eventController) {
+        this.eventController = eventController;
 
-        initView();
-        initController();
-    }
+        // init view
+        setTabPlacement(JTabbedPane.TOP);
+        procedurePanel = new ProcedureTab(eventController);
+        addTab("Procedure", new JScrollPane(procedurePanel));
+        procedureParameterPanel = new ProcedureParameterTab(eventController);
+        addTab("Parameters", procedureParameterPanel);
 
-    private void initView() {
-        tab = new JTabbedPane();
-        tab.setTabPlacement(JTabbedPane.TOP);
-
-        // add panels to tabs
-        // note that those panels that have no internal scrollable tables 
-        // must be wrapped in a scroll pane
-
-        ObjEntityPane entityPanel = new ObjEntityPane(mediator);
-        tab.addTab("Entity", new JScrollPane(entityPanel));
-
-        attributesPanel = new ObjAttributePane(mediator);
-        tab.addTab("Attributes", attributesPanel);
-        relationshipsPanel = new ObjRelationshipPane(mediator);
-        tab.addTab("Relationships", relationshipsPanel);
-
-        setLayout(new BorderLayout());
-        add(tab, BorderLayout.CENTER);
-    }
-
-    private void initController() {
-        mediator.addObjEntityDisplayListener(this);
-        mediator.addObjAttributeDisplayListener(this);
-        mediator.addObjRelationshipDisplayListener(this);
-
-        tab.addChangeListener(new ChangeListener() {
+        // init listeners
+        eventController.addProcedureDisplayListener(this);
+        eventController.addProcedureParameterDisplayListener(this);
+        this.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                Component selected = tab.getSelectedComponent();
+                // find source view
+                Component selected = ProcedureTabbedView.this.getSelectedComponent();
                 while (selected instanceof JScrollPane) {
                     selected = ((JScrollPane) selected).getViewport().getView();
                 }
@@ -138,46 +109,27 @@ public class ObjEntityEditorView
         });
     }
 
-    public void currentObjEntityChanged(EntityDisplayEvent e) {
-        if (e.getEntity() == null)
-            tab.setVisible(false);
+    /**
+     * Invoked when currently selected Procedure object is changed.
+     */
+    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+        if (e.getProcedure() == null)
+            setVisible(false);
         else {
             if (e.isTabReset()) {
-                tab.setSelectedIndex(0);
+                this.setSelectedIndex(0);
             }
-
-            tab.setVisible(true);
+            this.setVisible(true);
         }
     }
 
-    public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
-        if (e.getEntity() == null) {
-            return;
-        }
-
-        // update relationship selection
-        Relationship rel = e.getRelationship();
-        if (rel instanceof ObjRelationship) {
-            relationshipsPanel.selectRelationship((ObjRelationship) rel);
-        }
-
-        // Display relationship tab
-        tab.setSelectedIndex(2);
-    }
-
-    public void currentObjAttributeChanged(AttributeDisplayEvent e) {
-        if (e.getEntity() == null)
+    public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
+        if (e.getProcedureParameter() == null)
             return;
 
-        // update relationship selection
-        Attribute attr = e.getAttribute();
-        if (attr instanceof ObjAttribute) {
-            attributesPanel.selectAttribute((ObjAttribute) attr);
-        }
-
-        // Display attribute tab
-        tab.setSelectedIndex(1);
-
-        tab.getSelectedComponent();
+        ProcedureParameter parameter = e.getProcedureParameter();
+        procedureParameterPanel.selectParameter(parameter);
+        setSelectedIndex(1);
     }
+
 }

@@ -118,12 +118,12 @@ public class EditorView
     protected ProjectTreeView treePanel;
     protected JPanel detailPanel;
     protected JPanel emptyPanel;
-    protected DataDomainDetailView domainView;
-    protected DataNodeDetailView nodeView;
-    protected DataMapDetailView dataMapView;
-    protected ObjEntityEditorView objDetailView;
-    protected DbEntityEditorView dbDetailView;
-    protected ProcedureDetailView procedureView;
+    protected DataDomainView domainView;
+    protected DataNodeView nodeView;
+    protected DataMapView dataMapView;
+    protected ObjEntityTabbedView objDetailView;
+    protected DbEntityTabbedView dbDetailView;
+    protected ProcedureTabbedView procedureView;
     protected QueryDetailView queryView;
 
     protected CardLayout detailLayout;
@@ -155,25 +155,25 @@ public class EditorView
         // some but not all panels must be wrapped in a scroll pane
         addPanelToDetailView(new JPanel(), EMPTY_VIEW);
         
-        domainView = new DataDomainDetailView(eventController);
+        domainView = new DataDomainView(eventController);
         addPanelToDetailView(new JScrollPane(domainView), DOMAIN_VIEW);
         
-        nodeView = new DataNodeDetailView(eventController);
+        nodeView = new DataNodeView(eventController);
         addPanelToDetailView(new JScrollPane(nodeView), NODE_VIEW);
         
-        dataMapView = new DataMapDetailView(eventController);
+        dataMapView = new DataMapView(eventController);
         addPanelToDetailView(new JScrollPane(dataMapView), DATA_MAP_VIEW);
         
-        procedureView = new ProcedureDetailView(eventController);
+        procedureView = new ProcedureTabbedView(eventController);
         addPanelToDetailView(procedureView, PROCEDURE_VIEW);
         
         queryView = new QueryDetailView(eventController);
         addPanelToDetailView(new JScrollPane(queryView), QUERY_VIEW);
         
-        objDetailView = new ObjEntityEditorView(eventController);
+        objDetailView = new ObjEntityTabbedView(eventController);
         addPanelToDetailView(objDetailView, OBJ_VIEW);
         
-        dbDetailView = new DbEntityEditorView(eventController);
+        dbDetailView = new DbEntityTabbedView(eventController);
         addPanelToDetailView(dbDetailView, DB_VIEW);
 
 		eventController.addDomainDisplayListener(this);

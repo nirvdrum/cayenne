@@ -92,10 +92,10 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class DataNodeDetailView
+public class DataNodeView
     extends JPanel
     implements DocumentListener, ActionListener, DataNodeDisplayListener {
-    private static Logger logObj = Logger.getLogger(DataNodeDetailView.class);
+    private static Logger logObj = Logger.getLogger(DataNodeView.class);
 
     protected EventController mediator;
     protected DataNode node;
@@ -137,7 +137,7 @@ public class DataNodeDetailView
     /** Cludge to prevent marking domain as dirty during initial load. */
     private boolean ignoreChange;
 
-    public DataNodeDetailView(EventController temp_mediator) {
+    public DataNodeView(EventController temp_mediator) {
         super();
         mediator = temp_mediator;
         mediator.addDataNodeDisplayListener(this);
