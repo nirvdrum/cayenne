@@ -91,4 +91,17 @@ public interface Query {
 	 * UPDATE_QUERY, DELETE_QUERY  
 	 */
     public int getQueryType();
+    
+    /**
+	 * Returns the root object of this query.  Might be a String, ObjEntity, DbEntity or Class,
+	 * depending on the query in question
+	 * @return Object
+	 */
+	public Object getRoot();
+	
+	/**
+	 * Sets the root of the query
+	 * @param value The new root
+	 */
+	public void setRoot(Object value);
 }

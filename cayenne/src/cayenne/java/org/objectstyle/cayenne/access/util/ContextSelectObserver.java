@@ -90,7 +90,7 @@ public class ContextSelectObserver extends SelectObserver {
     public void nextDataRows(Query query, List dataRows) {
         ArrayList result = new ArrayList();
         if (dataRows != null && dataRows.size() > 0) {
-            ObjEntity ent = context.lookupEntity(query.getObjEntityName());
+            ObjEntity ent = context.getEntityResolver().lookupObjEntity(query.getObjEntityName());
             Iterator it = dataRows.iterator();
             while (it.hasNext()) {
                 result.add(

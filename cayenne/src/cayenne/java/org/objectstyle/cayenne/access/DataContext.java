@@ -746,10 +746,11 @@ public class DataContext implements QueryEngine, Serializable {
         this.performQueries(qWrapper, resultConsumer);
     }
 
-    /** Delegates entity name resolution to parent QueryEngine. */
+    /** Delegates entity name resolution to parent QueryEngine. 
+     * @deprecated use getEntityResolver.lookupObjEntity()*/
     public ObjEntity lookupEntity(String objEntityName) {
-        return parent.lookupEntity(objEntityName);
-    }
+    	return this.getEntityResolver().lookupObjEntity(objEntityName);
+     }
 
     /**
      * Returns ObjectId if id needs to be updated 
@@ -782,8 +783,10 @@ public class DataContext implements QueryEngine, Serializable {
      *  related to this object. 
      */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
+        //ObjEntity objEntity =
+          //  parent.lookupEntity(dataObject.getObjectId().getObjEntityName());
         ObjEntity objEntity =
-            parent.lookupEntity(dataObject.getObjectId().getObjEntityName());
+			this.getEntityResolver().lookupObjEntity(dataObject.getClass());
         DbEntity dbEntity = objEntity.getDbEntity();
 
         Iterator it = dbEntity.getRelationshipMap().values().iterator();
@@ -856,7 +859,8 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
         TempObjectId tempId = (TempObjectId) anObject.getObjectId();
-        ObjEntity objEntity = parent.lookupEntity(tempId.getObjEntityName());
+        //ObjEntity objEntity = parent.lookupEntity(tempId.getObjEntityName());
+        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(tempId.getObjEntityName());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = parent.dataNodeForObjEntity(objEntity);
 
@@ -969,4 +973,8 @@ public class DataContext implements QueryEngine, Serializable {
         // initialized new snapshot manager
         snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
     }
+    
+   	public EntityResolver getEntityResolver() {
+   		return parent.getEntityResolver();
+   	}
 }

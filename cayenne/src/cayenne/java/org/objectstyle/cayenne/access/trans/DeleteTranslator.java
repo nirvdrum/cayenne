@@ -87,8 +87,7 @@ public class DeleteTranslator extends QueryAssembler {
 		StringBuffer queryBuf = new StringBuffer("DELETE FROM ");
 
 		// 1. append table name
-		DbEntity dbEnt =
-			engine.lookupEntity(query.getObjEntityName()).getDbEntity();
+		DbEntity dbEnt = engine.getEntityResolver().lookupDbEntity(query);
 		queryBuf.append(dbEnt.getFullyQualifiedName());
 
 		// 2. build qualifier

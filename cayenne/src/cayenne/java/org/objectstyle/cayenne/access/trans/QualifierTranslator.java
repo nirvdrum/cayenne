@@ -315,9 +315,7 @@ public class QualifierTranslator
 	 */
 	public ObjEntity getObjEntity() {
 		return (isTranslateParentQual())
-			? queryAssembler.getEngine().lookupEntity(
-				((SelectQuery) queryAssembler.getQuery())
-					.getParentObjEntityName())
+			? queryAssembler.getEngine().getEntityResolver().lookupObjEntity((queryAssembler.getQuery()))
 			: super.getObjEntity();
 	}
 

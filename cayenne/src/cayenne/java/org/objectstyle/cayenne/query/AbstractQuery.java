@@ -52,12 +52,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
+
 package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Level;
-
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /** 
  * Superclass of all query classes. 
@@ -65,20 +66,24 @@ import org.apache.log4j.Level;
  * @author Andrei Adamchik
  */
 public abstract class AbstractQuery implements Query {
-    
-    /** Name of the ObjEntity that is the base of this query. */
-    protected String objEntityName;
-    protected Level logLevel = DEFAULT_LOG_LEVEL;    
-    
-    public void setObjEntityName(String objEntityName) {
-        this.objEntityName = objEntityName;
-    }
-    
-    public String getObjEntityName() {
-        return objEntityName;
-    }
-    
-    
+	/** The root object this query is bsaed on - maybe an entity name , class, ObjEntity or 
+	 * DbEntity, depending on the specific query and how it was constructed */
+	protected Object root;
+	protected Level logLevel = DEFAULT_LOG_LEVEL;
+
+	public void setObjEntityName(String objEntityName) {
+		this.root = objEntityName;
+	}
+
+	public String getObjEntityName() {
+		//In the short term it should still be a String
+		//Longer term, this will change, and this method will be deprecated
+		if (root instanceof String) {
+			return (String) root;
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the <code>logLevel</code> property of this query.
 	 * Log level is a hint to QueryEngine that performs this query
@@ -88,12 +93,37 @@ public abstract class AbstractQuery implements Query {
 		return logLevel;
 	}
 
-
 	/**
 	 * Sets the <code>logLevel</code> property.
 	 */
 	public void setLoggingLevel(Level logLevel) {
 		this.logLevel = logLevel;
 	}
-    
+
+	/**
+	 * Returns the root of this query
+	 * @return Object
+	 */
+	public Object getRoot() {
+		return root;
+	}
+
+	/**
+	 * Sets the root of the query
+	 * @param value The new root
+	 * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity or Class
+	 */
+	public void setRoot(Object value) {
+		if (!((value instanceof String)
+			|| (value instanceof ObjEntity)
+			|| (value instanceof DbEntity)
+			|| (value instanceof Class))) {
+			throw new IllegalArgumentException(
+				getClass().getName()
+					+ ".setRoot takes a String, ObjEntity, DbEntity or Class only.  It was passed a "
+					+ value.getClass().getName());
+		}
+		this.root = value;
+	}
+
 }

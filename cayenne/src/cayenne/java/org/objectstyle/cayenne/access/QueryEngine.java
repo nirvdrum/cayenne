@@ -88,13 +88,19 @@ public interface QueryEngine {
     
     
     /** Resolves entity name to ObjEntity.
-     *
-     *  @see org.objectstyle.cayenne.map.ObjEntity */
+     *  @see org.objectstyle.cayenne.map.ObjEntity 
+     *  @deprecated use getEntityResolver().lookupObjEntity() */
    	public ObjEntity lookupEntity(String objEntityName);
    	
    	
    	/** Returns DataNode that should handle database operations for
       * a specified <code>objEntity</code>. */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity);
+    
+    /**
+     * Returns a resolver for this query engine that is capable of resolving
+     * between classes, entity names, and obj/db entities
+     */
+    public EntityResolver getEntityResolver();
 }
 

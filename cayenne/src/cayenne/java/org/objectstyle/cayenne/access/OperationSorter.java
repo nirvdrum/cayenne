@@ -327,16 +327,10 @@ public class OperationSorter {
 			if (opType1 == opType2) {
 				if (opType1 == Query.INSERT_QUERY) {
 
-					String ent1 =
-						queryEngine
-							.lookupEntity(q1.getObjEntityName())
-							.getDbEntity()
-							.getName();
-					String ent2 =
-						queryEngine
-							.lookupEntity(q2.getObjEntityName())
-							.getDbEntity()
-							.getName();
+					EntityResolver er=queryEngine.getEntityResolver();
+					String ent1 = er.lookupDbEntity(q1).getName();
+					String ent2 = er.lookupDbEntity(q2).getName();
+							
 					if (ent1.equals(ent2))
 						return 0;
 					else {
@@ -353,16 +347,10 @@ public class OperationSorter {
 				} else if (opType1 == Query.DELETE_QUERY) {
 
 					// delete operation uses insert ordering in reverse order
-					String ent1 =
-						queryEngine
-							.lookupEntity(q1.getObjEntityName())
-							.getDbEntity()
-							.getName();
-					String ent2 =
-						queryEngine
-							.lookupEntity(q2.getObjEntityName())
-							.getDbEntity()
-							.getName();
+					EntityResolver er=queryEngine.getEntityResolver();
+					String ent1 = er.lookupDbEntity(q1).getName();
+					String ent2 = er.lookupDbEntity(q2).getName();
+
 					if (ent1.equals(ent2))
 						return 0;
 					else {
@@ -412,7 +400,7 @@ public class OperationSorter {
 
 		private DbEntity lookupEntity(DataObject o) {
 			String name = o.getObjectId().getObjEntityName();
-			return o.getDataContext().lookupEntity(name).getDbEntity();
+			return o.getDataContext().getEntityResolver().lookupDbEntity(name);
 		}
 	}
 }

@@ -123,7 +123,7 @@ public class IncrementalFaultList implements List {
         this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
         this.pageSize = query.getPageSize();
-        this.rootEntity = dataContext.lookupEntity(query.getObjEntityName());
+        this.rootEntity = dataContext.getEntityResolver().lookupObjEntity(query.getObjEntityName());
 
         // create an internal query, it is a partial replica of 
         // the original query and will serve as a value holder for 

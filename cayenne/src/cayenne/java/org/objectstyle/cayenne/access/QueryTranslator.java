@@ -137,8 +137,6 @@ public abstract class QueryTranslator {
 	}
 
 	public ObjEntity getRootEntity() {
-		return (query.getObjEntityName() != null)
-			? engine.lookupEntity(query.getObjEntityName())
-			: null;
+		return engine.getEntityResolver().lookupObjEntity(query);
 	}
 }

@@ -217,7 +217,7 @@ public final class QueryHelper {
 		QueryEngine e,
 		SelectQuery q,
 		String prefetchPath) {
-		ObjEntity ent = e.lookupEntity(q.getObjEntityName());
+		ObjEntity ent = e.getEntityResolver().lookupObjEntity(q.getRoot());
 		SelectQuery newQ = new SelectQuery();
 
 		Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, prefetchPath);
@@ -262,7 +262,7 @@ public final class QueryHelper {
 		ObjectId oid,
 		String relName) {
 		SelectQuery sel = new SelectQuery();
-		ObjEntity ent = e.lookupEntity(oid.getObjEntityName());
+		ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjEntityName());
 		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
 		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
 		sel.setObjEntityName(destEnt.getName());

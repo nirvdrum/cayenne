@@ -60,6 +60,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -95,6 +96,8 @@ public class DataNode implements QueryEngine {
 	protected DbAdapter adapter;
 	protected String dataSourceLocation;
 	protected String dataSourceFactory;
+
+	private EntityResolver entityResolver;
 
 	/** Creates unnamed DataNode */
 	public DataNode() {}
@@ -229,17 +232,10 @@ public class DataNode implements QueryEngine {
 		return (lookupEntity(objEntity.getName()) != null) ? this : null;
 	}
 
-	/** Lookup an entity by name across all node maps. */
+	/** Lookup an entity by name across all node maps.
+     * @deprecated use getEntityResolver.lookupObjEntity()*/
 	public ObjEntity lookupEntity(String objEntityName) {
-		DataMap[] maps = this.getDataMaps();
-		int mapLen = maps.length;
-		for (int i = 0; i < mapLen; i++) {
-			ObjEntity anEntity = maps[i].getObjEntity(objEntityName);
-			if (anEntity != null) {
-				return anEntity;
-			}
-		}
-		return null;
+		return this.getEntityResolver().lookupObjEntity(objEntityName);
 	}
 
 	/** Run multiple queries using one of the pooled connections. */
@@ -448,6 +444,19 @@ public class DataNode implements QueryEngine {
 		ArrayList qWrapper = new ArrayList(1);
 		qWrapper.add(query);
 		this.performQueries(qWrapper, opObserver);
+	}
+	
+	public EntityResolver getEntityResolver() {
+		if(entityResolver==null) {
+			List maps;
+			if(dataMaps!=null && dataMaps.length!=0) {
+				maps=Arrays.asList(dataMaps);
+			} else {
+				maps=new ArrayList();
+			}
+			entityResolver=new EntityResolver(maps);
+		}
+		return entityResolver;
 	}
 
 }
