@@ -249,7 +249,7 @@ public abstract class SimpleNode extends Expression implements Node {
         }
     }
 
-    public boolean evaluateBoolean(Object o) {
+    public boolean match(Object o) {
         return ColnversionUtil.toBoolean(evaluate(o));
     }
 }

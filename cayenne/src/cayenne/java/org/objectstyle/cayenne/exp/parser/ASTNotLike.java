@@ -86,7 +86,7 @@ public class ASTNotLike extends PatternMatchNode {
             return Boolean.FALSE;
         }
 
-        return match(s1) ? Boolean.FALSE : Boolean.TRUE;
+        return matchPattern(s1) ? Boolean.FALSE : Boolean.TRUE;
     }
 
     /**

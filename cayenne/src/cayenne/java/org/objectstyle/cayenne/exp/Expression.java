@@ -413,10 +413,10 @@ public abstract class Expression implements Serializable, XMLSerializable {
     /** 
      * Method for in-memory evaluation of expressions. 
      * 
-     * @deprecated Since 1.1 use {@link #evaluate(Object)} or {@link #evaluateBoolean(Object)}.
+     * @deprecated Since 1.1 use {@link #evaluate(Object)} or {@link #match(Object)}.
      */
     public boolean eval(Object o) {
-        return evaluateBoolean(o);
+        return match(o);
     }
 
     /**
@@ -435,7 +435,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * 
      * @since 1.1
      */
-    public boolean evaluateBoolean(Object o) {
+    public boolean match(Object o) {
         return ColnversionUtil.toBoolean(evaluate(o));
     }
 
@@ -452,7 +452,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
 
         for (int i = 0; i < size; i++) {
             Object o = objects.get(i);
-            if (evaluateBoolean(o)) {
+            if (match(o)) {
                 filtered.addLast(o);
             }
         }

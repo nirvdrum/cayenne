@@ -86,7 +86,7 @@ public class ASTLikeIgnoreCase extends PatternMatchNode {
             return Boolean.FALSE;
         }
 
-        return match(s1) ? Boolean.TRUE : Boolean.FALSE;
+        return matchPattern(s1) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     /**

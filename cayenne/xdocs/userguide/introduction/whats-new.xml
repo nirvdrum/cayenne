@@ -44,15 +44,26 @@
             <p>Original implementation was submitted by Fabricio Voznika.</p>
             </subsection>
             
-            <subsection name="1.1.6 SnapshotEvents">
+            <subsection name="1.1.6 Expression API">
+            <p>There is a new expression parser that allows easy creation of complex expressions from 
+            strings ("Expression.fromString(..)"). In-memory evaluation API is improved, and now supports 
+            both boolean conditions (via "Expression.match" method) and generic expressions evaluation 
+            (via "Expression.evaluate" method), it also includes support for arithmetic operations.</p>
+            
+            <ul>
+            <li><a href="../expressions/common.html">Expressions</a></li>
+            </ul>
+            </subsection>
+            
+            <subsection name="1.1.7 SnapshotEvents">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.7 DataContextDelegate">
+            <subsection name="1.1.8 DataContextDelegate">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.8 Explicit Transaction API and Container Managed Transactions">
+            <subsection name="1.1.9 Explicit Transaction API and Container Managed Transactions">
             <p>Cayenne now supports container-managed transactions. As a result it can be used inside EJBs
             out of the box. It also allows a high degree of transactions customization. The following user guide 
             chapter explains Transactions design and behavior in details:</p>
@@ -62,41 +73,45 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.9 Lazy Relationship Creation">
+            <subsection name="1.1.10 Lazy Relationship Creation">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.9 OpenBase Adapter">
+            <subsection name="1.1.11 OpenBase Adapter">
             <p>A dedicated adapter is implemented for OpenBase DB Engine.</p>
             </subsection>
             
-            <subsection name="1.1.10 SQL Server Adapter">
+            <subsection name="1.1.12 SQL Server Adapter">
             <p>A dedicated adapter is implemented for MS SQL Server Engine.</p>
             </subsection>
             
-            <subsection name="1.1.11 New Default CayenneModeler Look and Feel">
+            <subsection name="1.1.13 New Default CayenneModeler Look and Feel">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.12 Non-refreshing Select Queries">
+            <subsection name="1.1.14 Support for Queries in CayenneModeler and DataMap DTD.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.13 CayenneModeler Support for Custom Class Templates.">
+            <subsection name="1.1.15 Non-refreshing Select Queries">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.14 CayenneModeler Support for UI Customizable Classpath for Jars.">
+            <subsection name="1.1.16 CayenneModeler Support for Custom Class Templates.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.15 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
+            <subsection name="1.1.17 CayenneModeler Support for UI Customizable Classpath for Jars.">
+            <p></p>
+            </subsection>
+            
+            <subsection name="1.1.18 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
             <p>A dialog used to select mapping of ObjRelationship to one DbRelationship (simple relationship)
             or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
             can be selected. This dialog has been completely redesigned to remove this limitation.</p>
             </subsection>
             
-            <subsection name="1.1.16 CayenneModeler Productivity Enhancements.">
+            <subsection name="1.1.19 CayenneModeler Productivity Enhancements.">
             <p>CayenneModeler now uses defaults where appropriate when working with mappings. This is
             to reduce manual operations. Some examples are:
             </p>

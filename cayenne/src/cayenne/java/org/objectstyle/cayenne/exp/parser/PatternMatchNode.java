@@ -80,7 +80,7 @@ public abstract class PatternMatchNode extends ConditionNode {
         this.ignoringCase = ignoringCase;
     }
 
-    protected boolean match(String string) {
+    protected boolean matchPattern(String string) {
         return (string != null) ? regexUtil.match(getPattern(), string) : false;
     }
 

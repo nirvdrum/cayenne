@@ -3,16 +3,17 @@
 <toc name="toc-user-guide" chapter="10. Using Expressions"/>
 <body>
     <section name="10. Using Expressions">        
-		<subsection name="10.3 Simplified Expression API">
-		<p>Building expressions using previously described techniques is not intuitive,
-		requires lots of code, and is error-prone. For most real-life cases Cayenne provides
-		simpler and cleaner API discussed in this chapter.
+		<subsection name="10.3 Expression Factory Utilities">
+		<p>Sometimes there is a need to build an expression by combining other existing expressions. Also
+		quiet often it is desirable to use strongly typed API instead of interpreted string expressions.
+		The following sections describe ExpressionFactory and Expression methods that allow to construct
+		expressions step by step via API calls.
 		</p>
 		
 		<subsection name="10.3.1 Path/Value Expressions">
 		<p>The most simple expressions are the ones that match an object property
-		(or more commonly - object property path) with a value or a list of values. 
-		ExpressionFactory provides a set of methods to build such "path/value" expressions:</p>
+		path with a value or a list of values. ExpressionFactory provides a set of methods to build 
+		such "path/value" expressions:</p>
 		
 		<ul>
         	<li>public static Expression <b>matchExp</b>(String pathSpec, Object value)<br/>
@@ -114,8 +115,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 // find artists whose name starts with "D"
 // with invalid or null date of birth
 
-Expression qual = 
-   ExpressionFactory.greaterOrEqualExp("dateOfBirth", new Date());
+Expression qual = ExpressionFactory.greaterOrEqualExp("dateOfBirth", new Date());
    
 // 1. chain expressions, note the assignment back to "qual", 
 // since a new instance is created
@@ -165,7 +165,6 @@ SelectQuery select = new SelectQuery(Artist.class, qual);
             	<p></p>
             	</li>
 			</ul>
-			
 			</subsection>
 		</subsection>
     </section>

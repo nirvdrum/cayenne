@@ -11,8 +11,13 @@
 		DataObjects. The following API is used for expressions evaluation: </p>
 		
 			<ul>
-            <li>public boolean <b>eval</b>(Object object)<br/>
-            Returns true if an object matches expression criteria.
+            <li>public Object <b>evaluate</b>(Object object)<br/>
+            Evaluates expression with object, returning the result.
+            <p></p>
+            </li>
+            
+            <li>public boolean <b>match</b>(Object object)<br/>
+            Returns true if an object "matches" expression criteria.
             <p></p>
             </li>
             		
@@ -30,9 +35,7 @@ public class User extends CayenneDataObject {
          ...
      }
 }
-
 ... 
-
 public class NonPersistentUser extends Object {
      protected String name;
      public String getName() {
@@ -40,20 +43,17 @@ public class NonPersistentUser extends Object {
      }
      ...
 }
-
 ... 
 Expression exp = ExpressionFactory.inExp("name", new Object[] {"John", "Bob"});  
-
-
 User persistentObject;
 NonPersistentUser nonPersistentBean;
 ... 
 // evaluate with DataObject
-if(exp.eval(persistentObject)) {
+if(exp.match(persistentObject)) {
     // do something
 }
 
-if(exp.eval(nonPersistentBean)) {
+if(exp.match(nonPersistentBean)) {
     // do something else
 }
 </source>

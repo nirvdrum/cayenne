@@ -99,9 +99,9 @@
     	</item>
     	
     	<item name="10. Using Expressions"  href="/userguide/expressions/index.html">
-    		<item name="10.1 Building Expressions"  href="/userguide/expressions/common.html"/>
-    		<item name="10.2 Path Expressions"  href="/userguide/expressions/path.html"/>
-    		<item name="10.3 Simplified Expression API"  href="/userguide/expressions/shortcut.html"/>
+    		<item name="10.1 Path Expressions"  href="/userguide/expressions/path.html"/>
+    		<item name="10.2 Building Expressions"  href="/userguide/expressions/common.html"/>
+    		<item name="10.3 Expression Factory Utilities"  href="/userguide/expressions/shortcut.html"/>
     		<item name="10.4 NULL Handling"  href="/userguide/expressions/nulls.html"/>
     		<item name="10.5 In-Memory Evaluation"  href="/userguide/expressions/in-memory.html"/>
     	</item>

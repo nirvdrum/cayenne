@@ -143,13 +143,13 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist match = new Artist();
         match.setArtistName("abc");
-        assertTrue(equalTo.evaluateBoolean(match));
-        assertFalse(notEqualTo.evaluateBoolean(match));
+        assertTrue(equalTo.match(match));
+        assertFalse(notEqualTo.match(match));
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("123");
-        assertFalse("Failed: " + equalTo, equalTo.evaluateBoolean(noMatch));
-        assertTrue("Failed: " + notEqualTo, notEqualTo.evaluateBoolean(noMatch));
+        assertFalse("Failed: " + equalTo, equalTo.match(noMatch));
+        assertTrue("Failed: " + notEqualTo, notEqualTo.match(noMatch));
     }
 
     public void testEvaluateEQUAL_TODataObject() throws Exception {
@@ -165,9 +165,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Expression e = new ASTEqual(new ASTObjPath("toArtist"), a1);
 
-        assertTrue(e.evaluateBoolean(p1));
-        assertFalse(e.evaluateBoolean(p2));
-        assertFalse(e.evaluateBoolean(p3));
+        assertTrue(e.match(p1));
+        assertFalse(e.match(p2));
+        assertFalse(e.match(p3));
     }
 
     public void testEvaluateAND() throws Exception {
@@ -178,11 +178,11 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist match = new Artist();
         match.setArtistName("abc");
-        assertTrue(e.evaluateBoolean(match));
+        assertTrue(e.match(match));
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("123");
-        assertFalse(e.evaluateBoolean(noMatch));
+        assertFalse(e.match(noMatch));
     }
 
     public void testEvaluateOR() throws Exception {
@@ -193,15 +193,15 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist match1 = new Artist();
         match1.setArtistName("abc");
-        assertTrue("Failed: " + e, e.evaluateBoolean(match1));
+        assertTrue("Failed: " + e, e.match(match1));
 
         Artist match2 = new Artist();
         match2.setArtistName("xyz");
-        assertTrue("Failed: " + e, e.evaluateBoolean(match2));
+        assertTrue("Failed: " + e, e.match(match2));
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("123");
-        assertFalse("Failed: " + e, e.evaluateBoolean(noMatch));
+        assertFalse("Failed: " + e, e.match(noMatch));
     }
 
     public void testEvaluateNOT() throws Exception {
@@ -209,11 +209,11 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("abc");
-        assertFalse(e.evaluateBoolean(noMatch));
+        assertFalse(e.match(noMatch));
 
         Artist match = new Artist();
         match.setArtistName("123");
-        assertTrue("Failed: " + e, e.evaluateBoolean(match));
+        assertTrue("Failed: " + e, e.match(match));
     }
 
     public void testEvaluateLESS_THAN() throws Exception {
@@ -222,15 +222,15 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(10001));
-        assertFalse("Failed: " + e, e.evaluateBoolean(noMatch));
+        assertFalse("Failed: " + e, e.match(noMatch));
 
         Painting noMatch1 = new Painting();
         noMatch1.setEstimatedPrice(new BigDecimal(10000));
-        assertFalse("Failed: " + e, e.evaluateBoolean(noMatch1));
+        assertFalse("Failed: " + e, e.match(noMatch1));
 
         Painting match = new Painting();
         match.setEstimatedPrice(new BigDecimal(9999));
-        assertTrue("Failed: " + e, e.evaluateBoolean(match));
+        assertTrue("Failed: " + e, e.match(match));
     }
 
     public void testEvaluateLESS_THAN_EQUAL_TO() throws Exception {
@@ -239,15 +239,15 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(10001));
-        assertFalse(e.evaluateBoolean(noMatch));
+        assertFalse(e.match(noMatch));
 
         Painting match1 = new Painting();
         match1.setEstimatedPrice(new BigDecimal(10000));
-        assertTrue(e.evaluateBoolean(match1));
+        assertTrue(e.match(match1));
 
         Painting match = new Painting();
         match.setEstimatedPrice(new BigDecimal(9999));
-        assertTrue("Failed: " + e, e.evaluateBoolean(match));
+        assertTrue("Failed: " + e, e.match(match));
     }
 
     public void testEvaluateGREATER_THAN() throws Exception {
@@ -256,15 +256,15 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(9999));
-        assertFalse(e.evaluateBoolean(noMatch));
+        assertFalse(e.match(noMatch));
 
         Painting noMatch1 = new Painting();
         noMatch1.setEstimatedPrice(new BigDecimal(10000));
-        assertFalse(e.evaluateBoolean(noMatch1));
+        assertFalse(e.match(noMatch1));
 
         Painting match = new Painting();
         match.setEstimatedPrice(new BigDecimal(10001));
-        assertTrue("Failed: " + e, e.evaluateBoolean(match));
+        assertTrue("Failed: " + e, e.match(match));
     }
 
     public void testEvaluateGREATER_THAN_EQUAL_TO() throws Exception {
@@ -275,15 +275,15 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(9999));
-        assertFalse(e.evaluateBoolean(noMatch));
+        assertFalse(e.match(noMatch));
 
         Painting match1 = new Painting();
         match1.setEstimatedPrice(new BigDecimal(10000));
-        assertTrue(e.evaluateBoolean(match1));
+        assertTrue(e.match(match1));
 
         Painting match = new Painting();
         match.setEstimatedPrice(new BigDecimal(10001));
-        assertTrue("Failed: " + e, e.evaluateBoolean(match));
+        assertTrue("Failed: " + e, e.match(match));
     }
 
     public void testEvaluateBETWEEN() throws Exception {
@@ -301,23 +301,23 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(21));
-        assertFalse(between.evaluateBoolean(noMatch));
-        assertTrue(notBetween.evaluateBoolean(noMatch));
+        assertFalse(between.match(noMatch));
+        assertTrue(notBetween.match(noMatch));
 
         Painting match1 = new Painting();
         match1.setEstimatedPrice(new BigDecimal(20));
-        assertTrue(between.evaluateBoolean(match1));
-        assertFalse(notBetween.evaluateBoolean(match1));
+        assertTrue(between.match(match1));
+        assertFalse(notBetween.match(match1));
 
         Painting match2 = new Painting();
         match2.setEstimatedPrice(new BigDecimal(10));
-        assertTrue("Failed: " + between, between.evaluateBoolean(match2));
-        assertFalse("Failed: " + notBetween, notBetween.evaluateBoolean(match2));
+        assertTrue("Failed: " + between, between.match(match2));
+        assertFalse("Failed: " + notBetween, notBetween.match(match2));
 
         Painting match3 = new Painting();
         match3.setEstimatedPrice(new BigDecimal(11));
-        assertTrue("Failed: " + between, between.evaluateBoolean(match3));
-        assertFalse("Failed: " + notBetween, notBetween.evaluateBoolean(match3));
+        assertTrue("Failed: " + between, between.match(match3));
+        assertFalse("Failed: " + notBetween, notBetween.match(match3));
     }
 
     public void testEvaluateIN() throws Exception {
@@ -333,23 +333,23 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Painting noMatch1 = new Painting();
         noMatch1.setEstimatedPrice(new BigDecimal("21"));
-        assertFalse(in.evaluateBoolean(noMatch1));
-        assertTrue(notIn.evaluateBoolean(noMatch1));
+        assertFalse(in.match(noMatch1));
+        assertTrue(notIn.match(noMatch1));
 
         Painting noMatch2 = new Painting();
         noMatch2.setEstimatedPrice(new BigDecimal("11"));
-        assertFalse("Failed: " + in, in.evaluateBoolean(noMatch2));
-        assertTrue("Failed: " + notIn, notIn.evaluateBoolean(noMatch2));
+        assertFalse("Failed: " + in, in.match(noMatch2));
+        assertTrue("Failed: " + notIn, notIn.match(noMatch2));
 
         Painting match1 = new Painting();
         match1.setEstimatedPrice(new BigDecimal("20"));
-        assertTrue(in.evaluateBoolean(match1));
-        assertFalse(notIn.evaluateBoolean(match1));
+        assertTrue(in.match(match1));
+        assertFalse(notIn.match(match1));
 
         Painting match2 = new Painting();
         match2.setEstimatedPrice(new BigDecimal("10"));
-        assertTrue("Failed: " + in, in.evaluateBoolean(match2));
-        assertFalse("Failed: " + notIn, notIn.evaluateBoolean(match2));
+        assertTrue("Failed: " + in, in.match(match2));
+        assertFalse("Failed: " + notIn, notIn.match(match2));
     }
 
     public void testEvaluateLIKE1() throws Exception {
@@ -358,18 +358,18 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist noMatch = new Artist();
         noMatch.setArtistName("dabc");
-        assertFalse(like.evaluateBoolean(noMatch));
-        assertTrue(notLike.evaluateBoolean(noMatch));
+        assertFalse(like.match(noMatch));
+        assertTrue(notLike.match(noMatch));
 
         Artist match1 = new Artist();
         match1.setArtistName("abc123d");
-        assertTrue("Failed: " + like, like.evaluateBoolean(match1));
-        assertFalse("Failed: " + notLike, notLike.evaluateBoolean(match1));
+        assertTrue("Failed: " + like, like.match(match1));
+        assertFalse("Failed: " + notLike, notLike.match(match1));
 
         Artist match2 = new Artist();
         match2.setArtistName("abcd");
-        assertTrue("Failed: " + like, like.evaluateBoolean(match2));
-        assertFalse("Failed: " + notLike, notLike.evaluateBoolean(match2));
+        assertTrue("Failed: " + like, like.match(match2));
+        assertFalse("Failed: " + notLike, notLike.match(match2));
     }
 
     public void testEvaluateLIKE2() throws Exception {
@@ -378,18 +378,18 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");
-        assertFalse(like.evaluateBoolean(noMatch1));
-        assertTrue(notLike.evaluateBoolean(noMatch1));
+        assertFalse(like.match(noMatch1));
+        assertTrue(notLike.match(noMatch1));
 
         Artist noMatch2 = new Artist();
         noMatch2.setArtistName("abc123d");
-        assertFalse("Failed: " + like, like.evaluateBoolean(noMatch2));
-        assertTrue("Failed: " + notLike, notLike.evaluateBoolean(noMatch2));
+        assertFalse("Failed: " + like, like.match(noMatch2));
+        assertTrue("Failed: " + notLike, notLike.match(noMatch2));
 
         Artist match = new Artist();
         match.setArtistName("abcXd");
-        assertTrue("Failed: " + like, like.evaluateBoolean(match));
-        assertFalse("Failed: " + notLike, notLike.evaluateBoolean(match));
+        assertTrue("Failed: " + like, like.match(match));
+        assertFalse("Failed: " + notLike, notLike.match(match));
     }
 
     public void testEvaluateLIKE3() throws Exception {
@@ -398,11 +398,11 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("/a/");
-        assertFalse(like.evaluateBoolean(noMatch1));
+        assertFalse(like.match(noMatch1));
 
         Artist match = new Artist();
         match.setArtistName("/./");
-        assertTrue("Failed: " + like, like.evaluateBoolean(match));
+        assertTrue("Failed: " + like, like.match(match));
     }
 
     public void testEvaluateLIKE_IGNORE_CASE() throws Exception {
@@ -412,18 +412,18 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");
-        assertFalse(like.evaluateBoolean(noMatch1));
-        assertTrue(notLike.evaluateBoolean(noMatch1));
+        assertFalse(like.match(noMatch1));
+        assertTrue(notLike.match(noMatch1));
 
         Artist match1 = new Artist();
         match1.setArtistName("abcd");
-        assertTrue("Failed: " + like, like.evaluateBoolean(match1));
-        assertFalse("Failed: " + notLike, notLike.evaluateBoolean(match1));
+        assertTrue("Failed: " + like, like.match(match1));
+        assertFalse("Failed: " + notLike, notLike.match(match1));
 
         Artist match2 = new Artist();
         match2.setArtistName("ABcD");
-        assertTrue("Failed: " + like, like.evaluateBoolean(match2));
-        assertFalse("Failed: " + notLike, notLike.evaluateBoolean(match2));
+        assertTrue("Failed: " + like, like.match(match2));
+        assertFalse("Failed: " + notLike, notLike.match(match2));
     }
 
     public void testEvaluateADD() throws Exception {
