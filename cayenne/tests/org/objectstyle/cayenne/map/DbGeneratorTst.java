@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,13 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
-
 
 /** Test cases for DbGenerator.
   *
@@ -76,13 +75,18 @@ public class DbGeneratorTst extends TestCase {
     }
 
     public void setUp() throws Exception {
-        gen = new DbGenerator(
-                  TestMain.getSharedConnection(),
-                  TestMain.getSharedNode().getAdapter());
+        gen =
+            new DbGenerator(
+                TestMain.getSharedConnection(),
+                TestMain.getSharedNode().getAdapter());
     }
 
-
     public void testGetAdapter() throws Exception {
-        assertSame(TestMain.getSharedNode().getAdapter(), gen.getAdapter());
+        try {
+            assertSame(TestMain.getSharedNode().getAdapter(), gen.getAdapter());
+        }
+        finally {
+            gen.getCon().close();
+        }
     }
 }

@@ -75,7 +75,10 @@ public class DbLoaderTst extends TestCase {
     }
 
     public void setUp() throws Exception {
-        loader = new DbLoader(TestMain.getSharedConnection(), TestMain.getSharedNode().getAdapter());
+        loader =
+            new DbLoader(
+                TestMain.getSharedConnection(),
+                TestMain.getSharedNode().getAdapter());
     }
 
     /** 
@@ -85,57 +88,62 @@ public class DbLoaderTst extends TestCase {
      * TODO: need to break to a bunch of private methods that test individual aspects. 
      */
     public void testLoad() throws Exception {
-        boolean supportsFK =
-            TestMain.getSharedNode().getAdapter().supportsFkConstraints();
+        try {
+            boolean supportsFK =
+                TestMain.getSharedNode().getAdapter().supportsFkConstraints();
 
-        DataMap map = new DataMap();
+            DataMap map = new DataMap();
 
-        // *** TESTING THIS ***
-        loader.loadDbEntities(
-            map,
-            loader.getTables(null, null, "%", new String[] { "TABLE" }));
-        DbEntity dae = map.getDbEntity("ARTIST");
-
-        // sometimes table names get converted to lowercase
-        if (dae == null) {
-            dae = map.getDbEntity("artist");
-        }
-
-        assertNotNull(dae);
-        assertEquals("ARTIST", dae.getName().toUpperCase());
-        assertTrue(((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
-
-        if (supportsFK) {
             // *** TESTING THIS ***
-            loader.loadDbRelationships(map);
-            List rels = dae.getRelationshipList();
-            assertNotNull(rels);
-            assertTrue(rels.size() > 0);
-        }
+            loader.loadDbEntities(
+                map,
+                loader.getTables(null, null, "%", new String[] { "TABLE" }));
+            DbEntity dae = map.getDbEntity("ARTIST");
 
-        // *** TESTING THIS ***
-        loader.loadObjEntities(map);
+            // sometimes table names get converted to lowercase
+            if (dae == null) {
+                dae = map.getDbEntity("artist");
+            }
 
-        ObjEntity ae = map.getObjEntity("Artist");
-        assertNotNull(ae);
-        assertEquals("Artist", ae.getName());
+            assertNotNull(dae);
+            assertEquals("ARTIST", dae.getName().toUpperCase());
+            assertTrue(((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
 
-        // assert primary key is not an attribute
-        assertNull(ae.getAttribute("artistId"));
+            if (supportsFK) {
+                // *** TESTING THIS ***
+                loader.loadDbRelationships(map);
+                List rels = dae.getRelationshipList();
+                assertNotNull(rels);
+                assertTrue(rels.size() > 0);
+            }
 
-        if (supportsFK) {
             // *** TESTING THIS ***
-            loader.loadObjRelationships(map);
-            List rels = ae.getRelationshipList();
-            assertNotNull(rels);
-            assertTrue(rels.size() > 0);
+            loader.loadObjEntities(map);
+
+            ObjEntity ae = map.getObjEntity("Artist");
+            assertNotNull(ae);
+            assertEquals("Artist", ae.getName());
+
+            // assert primary key is not an attribute
+            assertNull(ae.getAttribute("artistId"));
+
+            if (supportsFK) {
+                // *** TESTING THIS ***
+                loader.loadObjRelationships(map);
+                List rels = ae.getRelationshipList();
+                assertNotNull(rels);
+                assertTrue(rels.size() > 0);
+            }
+
+            // now when the map is loaded, test 
+            // various things
+
+            // selectively check how different types were processed
+            checkTypes(map);
         }
-
-        // now when the map is loaded, test 
-        // various things
-
-        // selectively check how different types were processed
-        checkTypes(map);
+        finally {
+            loader.getCon().close();
+        }
     }
 
     private DataMap originalMap() {
@@ -145,31 +153,30 @@ public class DbLoaderTst extends TestCase {
     /** Selectively check how different types were processed. */
     public void checkTypes(DataMap map) {
         DbEntity dbe = map.getDbEntity("PAINTING");
-        
+
         // take into account a possibility of a lowercase names
-        if(dbe == null) {
+        if (dbe == null) {
             dbe = map.getDbEntity("painting");
         }
-        
+
         DbAttribute integerAttr = (DbAttribute) dbe.getAttribute("PAINTING_ID");
         DbAttribute decimalAttr = (DbAttribute) dbe.getAttribute("ESTIMATED_PRICE");
         DbAttribute varcharAttr = (DbAttribute) dbe.getAttribute("PAINTING_TITLE");
 
         // check decimal
-        // commented out until forward enginnering precision bug is fixed (563136)
-     /*   assertEquals(
-            msgForTypeMismatch(Types.DECIMAL, decimalAttr),
-            Types.DECIMAL,
-            decimalAttr.getType()); */
+        // commented out until forward engineering precision bug is fixed (563136)
+        /*   assertEquals(
+               msgForTypeMismatch(Types.DECIMAL, decimalAttr),
+               Types.DECIMAL,
+               decimalAttr.getType()); */
 
         // check varchar
         assertEquals(
             msgForTypeMismatch(Types.VARCHAR, varcharAttr),
             Types.VARCHAR,
             varcharAttr.getType());
-         assertEquals(255, varcharAttr.getMaxLength());
-        
-        
+        assertEquals(255, varcharAttr.getMaxLength());
+
         // check integer
         assertEquals(
             msgForTypeMismatch(Types.INTEGER, integerAttr),

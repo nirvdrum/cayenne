@@ -102,6 +102,13 @@ public class DbLoader {
             metaData = con.getMetaData();
         return metaData;
     }
+    
+    /** 
+     * Returns database connection used by this DbLoader.
+     */
+    public Connection getCon() {
+        return con;
+    }
 
     /**  Retrieves catalogues for the database associated with this DbLoader.
       *

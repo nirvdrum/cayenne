@@ -1,4 +1,3 @@
-package org.objectstyle;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle;
  * <http://objectstyle.org/>.
  *
  */
+
+package org.objectstyle;
 
 import java.io.*;
 import java.sql.Connection;
@@ -186,7 +187,7 @@ public class TestMain implements TestConstants {
             PoolDataSource poolDS =
                 new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
             DataSource ds =
-                new PoolManager(poolDS, 1, 4, dsi.getUserName(), dsi.getPassword());
+                new PoolManager(poolDS, 1, 2, dsi.getUserName(), dsi.getPassword());
 
             // map
             String[] maps = new String[] { TEST_MAP_PATH };

@@ -80,7 +80,12 @@ public class QueryAssemblerTst extends TestCase {
     }
 
     public void testGetQuery() throws java.lang.Exception {
-        assertNotNull(qa.getQuery());
+        try {
+            assertNotNull(qa.getQuery());
+        }
+        finally {
+            qa.dispose();
+        }
     }
 
     public void testAddToParamList() throws java.lang.Exception {
