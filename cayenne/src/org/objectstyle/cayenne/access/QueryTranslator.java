@@ -57,10 +57,17 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /** 
@@ -73,61 +80,65 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public abstract class QueryTranslator {
-    static Logger logObj = Logger.getLogger(QueryTranslator.class.getName());
+	static Logger logObj = Logger.getLogger(QueryTranslator.class.getName());
 
-    /** Query being translated. */
-    protected Query query;
+	/** Query being translated. */
+	protected Query query;
 
-    /** JDBC database connection needed to create PreparedStatement. */
-    protected Connection con;
+	/** JDBC database connection needed to create PreparedStatement. */
+	protected Connection con;
 
-    /** Used mainly for name resolution. */
-    protected QueryEngine engine;
+	/** Used mainly for name resolution. */
+	protected QueryEngine engine;
 
-    /** Adapter helping to do SQL literal conversions, etc. */
-    protected DbAdapter adapter;
+	/** Adapter helping to do SQL literal conversions, etc. */
+	protected DbAdapter adapter;
 
-    
-    /** 
-     * Creates PreparedSatatement. <code>logLevel</code> 
-     * parameter is supplied to allow
-     * control of logging of produced SQL. 
-     */
-    public abstract PreparedStatement createStatement(Level logLevel)
-        throws Exception;
+	/** 
+	 * Creates PreparedSatatement. <code>logLevel</code> 
+	 * parameter is supplied to allow
+	 * control of logging of produced SQL. 
+	 */
+	public abstract PreparedStatement createStatement(Level logLevel) throws Exception;
 
-    /** Returns query object being processed. */
-    public Query getQuery() {
-        return query;
-    }
+	/** Returns query object being processed. */
+	public Query getQuery() {
+		return query;
+	}
 
-    public void setQuery(Query query) {
-        this.query = query;
-    }
+	public void setQuery(Query query) {
+		this.query = query;
+	}
 
-    /** Returns Connection object used by this assembler. */
-    public Connection getCon() {
-        return con;
-    }
+	/** Returns Connection object used by this assembler. */
+	public Connection getCon() {
+		return con;
+	}
 
-    public void setCon(Connection con) {
-        this.con = con;
-    }
+	public void setCon(Connection con) {
+		this.con = con;
+	}
 
-    /** Returns QueryEngine used by this assembler. */
-    public QueryEngine getEngine() {
-        return engine;
-    }
+	/** Returns QueryEngine used by this assembler. */
+	public QueryEngine getEngine() {
+		return engine;
+	}
 
-    public void setEngine(QueryEngine engine) {
-        this.engine = engine;
-    }
+	public void setEngine(QueryEngine engine) {
+		this.engine = engine;
+	}
 
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
+	public DbAdapter getAdapter() {
+		return adapter;
+	}
 
-    public void setAdapter(DbAdapter adapter) {
-        this.adapter = adapter;
-    }
+	public void setAdapter(DbAdapter adapter) {
+		this.adapter = adapter;
+	}
+
+	public ObjEntity getRootEntity() {
+		return (query.getObjEntityName() != null)
+			? engine.lookupEntity(query.getObjEntityName())
+			: null;
+	}
 }

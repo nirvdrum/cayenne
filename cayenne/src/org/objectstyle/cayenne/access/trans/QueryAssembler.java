@@ -109,10 +109,6 @@ public abstract class QueryAssembler extends QueryTranslator {
      */
     public abstract String aliasForTable(DbEntity dbEnt);
 
-    public ObjEntity getRootEntity() {
-        return engine.lookupEntity(query.getObjEntityName());
-    }
-
     /** Returns <code>true</code> if table aliases are supported.
       * Default implementation returns false. */
     public boolean supportsTableAliases() {

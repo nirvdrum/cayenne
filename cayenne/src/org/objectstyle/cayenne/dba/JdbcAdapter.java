@@ -113,7 +113,7 @@ public class JdbcAdapter implements DbAdapter {
 			return t;
 		} catch (Exception ex) {
 			throw new CayenneRuntimeException(
-				"Can't load query class: " + queryClass);
+				"Can't load translator class: " + queryClass);
 		}
 	}
 

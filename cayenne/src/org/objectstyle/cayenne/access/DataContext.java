@@ -86,8 +86,7 @@ public class DataContext implements QueryEngine {
 	protected QueryEngine parent;
 	protected HashMap registeredMap = new HashMap();
 	protected HashMap committedSnapshots = new HashMap();
-	protected RelationshipDataSource relDataSource =
-		new RelationshipDataSource();
+	protected RelationshipDataSource relDataSource = new RelationshipDataSource();
 
 	public DataContext() {
 		this(null);
@@ -209,9 +208,7 @@ public class DataContext implements QueryEngine {
 		DataObject obj = (DataObject) registeredMap.get(oid);
 		if (obj == null) {
 			try {
-				obj =
-					newDataObject(
-						lookupEntity(oid.getObjEntityName()).getClassName());
+				obj = newDataObject(lookupEntity(oid.getObjEntityName()).getClassName());
 			} catch (Exception ex) {
 				String entity = (oid != null) ? oid.getObjEntityName() : null;
 				throw new CayenneRuntimeException(
@@ -235,9 +232,7 @@ public class DataContext implements QueryEngine {
 			.newInstance();
 	}
 
-	protected void refreshObjectWithSnapshot(
-		DataObject anObject,
-		Map snapshot) {
+	protected void refreshObjectWithSnapshot(DataObject anObject, Map snapshot) {
 		refreshObjectWithSnapshot(
 			lookupEntity(anObject.getObjectId().getObjEntityName()),
 			anObject,
@@ -272,16 +267,12 @@ public class DataContext implements QueryEngine {
 				// create an empty one.
 
 				ToManyList relList =
-					new ToManyList(
-						relDataSource,
-						anObject.getObjectId(),
-						rel.getName());
+					new ToManyList(relDataSource, anObject.getObjectId(), rel.getName());
 				anObject.writePropertyDirectly(rel.getName(), relList);
 				continue;
 			}
 
-			DbRelationship dbRel =
-				(DbRelationship) rel.getDbRelationshipList().get(0);
+			DbRelationship dbRel = (DbRelationship) rel.getDbRelationshipList().get(0);
 
 			// dependent to one relationship is optional and can be null.
 			if (dbRel.isToDependentPK()) {
@@ -293,11 +284,8 @@ public class DataContext implements QueryEngine {
 				continue;
 			}
 
-			ObjectId destId =
-				new ObjectId(rel.getTargetEntity().getName(), destMap);
-			anObject.writePropertyDirectly(
-				rel.getName(),
-				registeredObject(destId));
+			ObjectId destId = new ObjectId(rel.getTargetEntity().getName(), destMap);
+			anObject.writePropertyDirectly(rel.getName(), registeredObject(destId));
 		}
 		anObject.setPersistenceState(PersistenceState.COMMITTED);
 	}
@@ -352,8 +340,7 @@ public class DataContext implements QueryEngine {
 		Iterator it = attrMap.keySet().iterator();
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
-			DbAttribute dbAttr =
-				((ObjAttribute) attrMap.get(attrName)).getDbAttribute();
+			DbAttribute dbAttr = ((ObjAttribute) attrMap.get(attrName)).getDbAttribute();
 			map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
 		}
 
@@ -362,7 +349,7 @@ public class DataContext implements QueryEngine {
 		while (itr.hasNext()) {
 			String relName = (String) itr.next();
 			ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-		
+
 			// to-many will be handled on the other side
 			if (rel.isToMany()) {
 				continue;
@@ -372,14 +359,12 @@ public class DataContext implements QueryEngine {
 				continue;
 			}
 
-			DataObject target =
-				(DataObject) anObject.readPropertyDirectly(relName);
+			DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
 			if (target == null) {
 				continue;
 			}
 
-			DbRelationship dbRel =
-				(DbRelationship) rel.getDbRelationshipList().get(0);
+			DbRelationship dbRel = (DbRelationship) rel.getDbRelationshipList().get(0);
 			Map idParts = target.getObjectId().getIdSnapshot();
 
 			// this may happen in uncommitted objects
@@ -484,9 +469,7 @@ public class DataContext implements QueryEngine {
 		try {
 			dobj = newDataObject(objClassName);
 		} catch (Exception ex) {
-			throw new CayenneRuntimeException(
-				"Error instantiating object.",
-				ex);
+			throw new CayenneRuntimeException("Error instantiating object.", ex);
 		}
 
 		registerNewObject(dobj, objEntityName);
@@ -499,9 +482,7 @@ public class DataContext implements QueryEngine {
 	 * @param objEntityName a name of the ObjEntity in the map used to get 
 	 *  persistence information for this object.
 	 */
-	public void registerNewObject(
-		DataObject dataObject,
-		String objEntityName) {
+	public void registerNewObject(DataObject dataObject, String objEntityName) {
 		// set "to many" relationship arrays
 
 		TempObjectId tempId = new TempObjectId(objEntityName);
@@ -512,8 +493,7 @@ public class DataContext implements QueryEngine {
 		while (it.hasNext()) {
 			ObjRelationship rel = (ObjRelationship) it.next();
 			if (rel.isToMany()) {
-				ToManyList relList =
-					new ToManyList(relDataSource, tempId, rel.getName());
+				ToManyList relList = new ToManyList(relDataSource, tempId, rel.getName());
 				dataObject.writePropertyDirectly(rel.getName(), relList);
 			}
 		}
@@ -567,14 +547,14 @@ public class DataContext implements QueryEngine {
 		commitChanges((Level) null);
 	}
 
-    /** 
-     * @deprecated Use Log4J-based equivalent.
-     */
+	/** 
+	 * @deprecated Use Log4J-based equivalent.
+	 */
 	public void commitChanges(java.util.logging.Level logLevel)
 		throws CayenneRuntimeException {
 		commitChanges(Log4JConverter.getLog4JLogLevel(logLevel));
 	}
-	
+
 	/** 
 	 * Commits changes of the object graph to the database.
 	 * Checks what objects have changed in the context. 
@@ -599,15 +579,18 @@ public class DataContext implements QueryEngine {
 
 			// 1. deal with inserts
 			if (objectState == PersistenceState.NEW) {
+				filterReadOnly(nextObject);
 				insObjects.add(nextObject);
 			}
 			// 2. deal with deletes
 			else if (objectState == PersistenceState.DELETED) {
+				filterReadOnly(nextObject);
 				queryList.add(QueryHelper.deleteQuery(nextObject));
 				delObjects.add(nextObject);
 			}
 			// 3. deal with updates
 			else if (objectState == PersistenceState.MODIFIED) {
+				filterReadOnly(nextObject);
 				rawUpdObjects.add(nextObject);
 			}
 		}
@@ -638,8 +621,7 @@ public class DataContext implements QueryEngine {
 					queryList.add(updateQuery);
 					updObjects.add(nextObject);
 
-					ObjectId updId =
-						updatedId(nextObject.getObjectId(), updateQuery);
+					ObjectId updId = updatedId(nextObject.getObjectId(), updateQuery);
 					if (updId != null) {
 						updatedIds.put(nextObject.getObjectId(), updId);
 					}
@@ -653,11 +635,7 @@ public class DataContext implements QueryEngine {
 
 		if (queryList.size() > 0) {
 			CommitProcessor result =
-				new CommitProcessor(
-					logLevel,
-					insObjects,
-					updObjects,
-					delObjects);
+				new CommitProcessor(logLevel, insObjects, updObjects, delObjects);
 			parent.performQueries(queryList, result);
 			if (!result.isTransactionCommitted())
 				throw new CayenneRuntimeException("Error committing transaction.");
@@ -678,6 +656,18 @@ public class DataContext implements QueryEngine {
 				registeredMap.put(newId, obj);
 
 			}
+		}
+	}
+
+	/**
+	 * Throws an exception if <code>dataObj</code> parameter is
+	 * mapped to a "read-only" entity.
+	 */
+	private void filterReadOnly(DataObject dataObj) throws CayenneRuntimeException {
+		String name = dataObj.getObjectId().getObjEntityName();
+		if (lookupEntity(name).isReadOnly()) {
+			throw new CayenneRuntimeException(
+				"Attempt to commit a read-only object, " + name + ".");
 		}
 	}
 
@@ -732,9 +722,7 @@ public class DataContext implements QueryEngine {
 	 * queries that require prefetching relationships, will create additional
 	 * queries to perform necessary prefetching. 
 	 */
-	public void performQueries(
-		List queries,
-		OperationObserver resultConsumer) {
+	public void performQueries(List queries, OperationObserver resultConsumer) {
 
 		// find queries that require prefetching
 		List prefetch = new ArrayList();
@@ -803,18 +791,14 @@ public class DataContext implements QueryEngine {
 			newIdMap.put(key, updAttrs.get(key));
 		}
 
-		return (newIdMap != null)
-			? new ObjectId(id.getObjEntityName(), newIdMap)
-			: null;
+		return (newIdMap != null) ? new ObjectId(id.getObjEntityName(), newIdMap) : null;
 	}
 
 	/** 
 	 *  Populates the <code>map</code> with ObjectId values from master objects 
 	 *  related to this object. 
 	 */
-	private void appendPkFromMasterRelationships(
-		Map map,
-		DataObject dataObject) {
+	private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
 		ObjEntity objEntity =
 			parent.lookupEntity(dataObject.getObjectId().getObjEntityName());
 		DbEntity dbEntity = objEntity.getDbEntity();
@@ -826,8 +810,7 @@ public class DataContext implements QueryEngine {
 				continue;
 			}
 
-			ObjRelationship rel =
-				objEntity.getRelationshipForDbRelationship(dbRel);
+			ObjRelationship rel = objEntity.getRelationshipForDbRelationship(dbRel);
 			if (rel == null) {
 				continue;
 			}
@@ -888,8 +871,7 @@ public class DataContext implements QueryEngine {
 	 * 
 	 *   @return Newly created ObjectId.
 	 */
-	public ObjectId createPermId(DataObject anObject)
-		throws CayenneRuntimeException {
+	public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
 		TempObjectId tempId = (TempObjectId) anObject.getObjectId();
 		ObjEntity objEntity = parent.lookupEntity(tempId.getObjEntityName());
 		DbEntity dbEntity = objEntity.getDbEntity();
@@ -925,8 +907,7 @@ public class DataContext implements QueryEngine {
 
 			try {
 				PkGenerator gen = aNode.getAdapter().getPkGenerator();
-				Object pk =
-					gen.generatePkForDbEntity(aNode, objEntity.getDbEntity());
+				Object pk = gen.generatePkForDbEntity(aNode, objEntity.getDbEntity());
 				autoPkDone = true;
 				idMap.put(attr.getName(), pk);
 			} catch (Exception ex) {
@@ -1013,9 +994,7 @@ public class DataContext implements QueryEngine {
 
 		public void nextQueryException(Query query, Exception ex) {
 			super.nextQueryException(query, ex);
-			throw new CayenneRuntimeException(
-				"Raising from query exception.",
-				ex);
+			throw new CayenneRuntimeException("Raising from query exception.", ex);
 		}
 
 		public void nextGlobalException(Exception ex) {
@@ -1028,9 +1007,7 @@ public class DataContext implements QueryEngine {
 		/** Will do query sorting to try to satisfy DB ref. integrity rules */
 		public List orderQueries(DataNode aNode, List queryList) {
 			OperationSorter sorter = aNode.getAdapter().getOpSorter(aNode);
-			return (sorter != null)
-				? sorter.sortedQueries(queryList)
-				: queryList;
+			return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
 		}
 	}
 
@@ -1051,15 +1028,11 @@ public class DataContext implements QueryEngine {
 		public void nextDataRows(Query query, List dataRows) {
 			ArrayList result = new ArrayList();
 			if (dataRows != null && dataRows.size() > 0) {
-				ObjEntity ent =
-					DataContext.this.lookupEntity(query.getObjEntityName());
+				ObjEntity ent = DataContext.this.lookupEntity(query.getObjEntityName());
 				Iterator it = dataRows.iterator();
 				while (it.hasNext()) {
 					result.add(
-						DataContext.this.objectFromDataRow(
-							ent,
-							(Map) it.next(),
-							true));
+						DataContext.this.objectFromDataRow(ent, (Map) it.next(), true));
 				}
 			}
 

@@ -75,7 +75,6 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import sun.security.krb5.internal.crypto.a1;
 
 public class DataContextTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
@@ -422,11 +421,65 @@ public class DataContextTst extends CayenneTestCase {
 		assertEquals(artistCount, objects.size());
 		assertTrue("Map expected, got " + objects.get(0).getClass(), objects.get(0) instanceof Map);
 	}
+	
+	public void testCommitChangesRO1() throws Exception {
+		Artist a1 = (Artist)ctxt.createAndRegisterNewObject("ROArtist");
+		a1.setArtistName("abc");		
+		
+		try {
+			ctxt.commitChanges();
+			fail("Inserting a 'read-only' object must fail.");
+		}
+		catch(Exception ex) {
+			// exception is expected, 
+			// must blow on saving new "read-only" object.
+		}
+	}
+	
+	public void testCommitChangesRO2() throws Exception {
+		Artist a1 = fetchROArtist("artist1");
+		a1.setArtistName("abc");
+		
+		try {
+			ctxt.commitChanges();
+			fail("Updating a 'read-only' object must fail.");
+		}
+		catch(Exception ex) {
+			// exception is expected, 
+			// must blow on saving new "read-only" object.
+		}
+	}
+	
+	public void testCommitChangesRO3() throws Exception {
+		Artist a1 = fetchROArtist("artist1");
+		ctxt.deleteObject(a1);
+		
+		try {
+			ctxt.commitChanges();
+			fail("Deleting a 'read-only' object must fail.");
+		}
+		catch(Exception ex) {
+			// exception is expected, 
+			// must blow on saving new "read-only" object.
+		}
+	}
 
 	private Artist fetchArtist(String name) {
 		SelectQuery q =
 			new SelectQuery(
 				"Artist",
+				ExpressionFactory.binaryPathExp(
+					Expression.EQUAL_TO,
+					"artistName",
+					name));
+		List ats = ctxt.performQuery(q);
+		return (ats.size() > 0) ? (Artist) ats.get(0) : null;
+	}
+	
+	private Artist fetchROArtist(String name) {
+		SelectQuery q =
+			new SelectQuery(
+				"ROArtist",
 				ExpressionFactory.binaryPathExp(
 					Expression.EQUAL_TO,
 					"artistName",

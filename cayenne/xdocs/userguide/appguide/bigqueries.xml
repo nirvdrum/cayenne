@@ -92,7 +92,8 @@ Artist artist = (Artist)ctxt.objectFromDataRow("Artist", row);
             </ul>
             
             <p>An obvious drawback of "read-only" entities is of course the inability to make any 
-            direct modifications to persistent objects.</p>            
+            direct modifications to persistent objects. An attempt to save changes to "read-only"
+            objects will result in an exception being thrown.</p>            
             </subsection>
             
 			<subsection name="5.8.3 ResultIterator: Incremental Data Processing" anchor="iterator">

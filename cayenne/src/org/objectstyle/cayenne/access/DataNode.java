@@ -241,8 +241,9 @@ public class DataNode implements QueryEngine {
 						getAdapter().getQueryTranslator(nextQuery);
 					transl.setEngine(this);
 					transl.setCon(con);
-					PreparedStatement prepStmt =
-						transl.createStatement(logLevel);
+					
+					PreparedStatement prepStmt = transl.createStatement(logLevel);
+					
 
 					// if ResultIterator is returned to the user,
 					// DataNode is not responsible for closing the connections
@@ -254,6 +255,7 @@ public class DataNode implements QueryEngine {
 						runIteratedSelect(opObserver, prepStmt, transl);
 						return;
 					}
+					
 					if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
 						runSelect(opObserver, prepStmt, transl);
 					} else {
@@ -397,11 +399,11 @@ public class DataNode implements QueryEngine {
 		throws Exception {
 
 		try {
-			// 2.b execute update
+			// execute update
 			int count = prepStmt.executeUpdate();
 			QueryLogger.logUpdateCount(observer.getLoggingLevel(), count);
 
-			// 3.b send results back to consumer
+			// send results back to consumer
 			observer.nextCount(transl.getQuery(), count);
 		} finally {
 			prepStmt.close();
