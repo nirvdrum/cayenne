@@ -98,8 +98,6 @@ public class ClassGenerator {
 			// if Cayenne URL is not null, load resource from this URL
 			Properties props = new Properties();
 			String loaderProp = null;
-			String fileLoaderPathProp = null;
-
 			// init special loaders
 			if (classLoaderUrl != null && classLoaderUrl.startsWith("jar:")) {
 				loaderProp = "jar";
@@ -111,10 +109,6 @@ public class ClassGenerator {
 				classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
 
 				loaderProp = "file";
-				fileLoaderPathProp = classLoaderUrl;
-				props.put(
-					"file.resource.loader.class",
-					"org.apache.velocity.runtime.resource.loader.FileResourceLoader");
 				props.put("file.resource.loader.path", classLoaderUrl);
 			}
 
@@ -122,17 +116,16 @@ public class ClassGenerator {
 			if (loaderProp.indexOf("file") < 0) {
 				loaderProp += ",file";
 			}
-			fileLoaderPathProp =
-				(fileLoaderPathProp != null) ? fileLoaderPathProp + ",." : ".";
+			
+			// use custome file loader
+			props.put(
+				"file.resource.loader.class",
+				"org.objectstyle.cayenne.gen.AbsFileResourceLoader");
 
 			// always add Classpath loader for default templates
 			loaderProp = (loaderProp != null) ? loaderProp + ",class" : "class";
-			props.put(
-				"class.resource.loader.class",
-				"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-
 			props.put("resource.loader", loaderProp);
-			props.put("file.resource.loader.path", fileLoaderPathProp);
+
 			Velocity.init(props);
 		} catch (Exception ex) {
 			throw new CayenneRuntimeException("Can't initialize VTL", ex);
