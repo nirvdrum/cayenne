@@ -79,7 +79,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Tests query routing in DataNode.performQueries()
@@ -90,6 +90,8 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
     private NodeSwitchingMockup node;
 
     protected void setUp() throws Exception {
+        super.setUp();
+        
         node = new NodeSwitchingMockup();
     }
 

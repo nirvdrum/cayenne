@@ -63,11 +63,6 @@ import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 public class DefaultResultIteratorTst extends IteratorTestBase {
     protected DefaultResultIterator it;
 
-    public void setUp() throws Exception {
-        super.setUp();
-        it = null;
-    }
-
     protected void init() throws Exception {
         super.init();
         SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
@@ -101,7 +96,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
             // caller must close the connection
             assertFalse(conn.isClosed());
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }
@@ -125,7 +121,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
             it.checkNextRow();
             assertTrue(it.hasNextRow());
 
-        } finally {
+        }
+        finally {
             cleanup();
         }
     }
@@ -134,7 +131,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
         try {
             init();
             assertTrue(it.hasNextRow());
-        } finally {
+        }
+        finally {
             cleanup();
         }
     }
@@ -153,7 +151,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
             // rows must end here
             assertFalse(it.hasNextRow());
 
-        } finally {
+        }
+        finally {
             cleanup();
         }
     }
@@ -172,7 +171,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
             // rows must end here
             assertFalse(it.hasNextRow());
 
-        } finally {
+        }
+        finally {
             cleanup();
         }
     }
@@ -183,7 +183,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
             assertFalse(it.isClosingConnection());
             it.setClosingConnection(true);
             assertTrue(it.isClosingConnection());
-        } finally {
+        }
+        finally {
             it.setClosingConnection(false);
             cleanup();
         }
@@ -206,7 +207,8 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
                 new DataContextTst().artistName(9),
                 dataRow.get("ARTIST_NAME"));
 
-        } finally {
+        }
+        finally {
             cleanup();
         }
     }

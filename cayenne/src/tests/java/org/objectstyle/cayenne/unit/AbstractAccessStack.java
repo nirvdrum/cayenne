@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -79,217 +79,31 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
+ * Defines a set of algorithms useful for a generic AccessStack.
+ * 
  * @author Andrei Adamchik
  */
-public class TestDatabaseManager {
-    private static Logger logObj = Logger.getLogger(TestDatabaseManager.class);
+public abstract class AbstractAccessStack {
+    private static Logger logObj = Logger.getLogger(AbstractAccessStack.class);
 
-    protected DataMap map;
-    protected DataNode node;
-    protected DatabaseSetupDelegate delegate;
+    protected CayenneTestResources resources;
 
-    public TestDatabaseManager(DataNode node, DataMap map) throws Exception {
-        this.map = map;
-        this.node = node;
-        this.delegate = DatabaseSetupDelegate.createDelegate(node.getAdapter());
-    }
-
-    /** Deletes all data from the database tables mentioned in the DataMap. */
-    public void cleanTableData() throws Exception {
-        // TODO: move this to delegate
-        boolean isFirebird = node.getAdapter() instanceof FirebirdAdapter;
-
-        Connection conn = node.getDataSource().getConnection();
-
-        List list = this.dbEntitiesInInsertOrder(map);
-        try {
-            if (conn.getAutoCommit()) {
-                conn.setAutoCommit(false);
-            }
-
-            Statement stmt = conn.createStatement();
-
-            ListIterator it = list.listIterator(list.size());
-            while (it.hasPrevious()) {
-                DbEntity ent = (DbEntity) it.previous();
-                if (ent instanceof DerivedDbEntity) {
-                    continue;
-                }
-
-                // this may not work on tables with reflexive relationships
-                // at least on Firebird it doesn't... 
-
-                if (isFirebird && "ARTGROUP".equalsIgnoreCase(ent.getName())) {
-                    int deleted = 0;
-                    String deleteChildren =
-                        "DELETE FROM "
-                            + ent.getName()
-                            + " WHERE GROUP_ID NOT IN (SELECT DISTINCT PARENT_GROUP_ID FROM "
-                            + ent.getName()
-                            + ")";
-                    do {
-                        deleted = stmt.executeUpdate(deleteChildren);
-                    }
-                    while (deleted > 0);
-                }
-
-                String deleteSql = "DELETE FROM " + ent.getName();
-                stmt.executeUpdate(deleteSql);
-            }
-            conn.commit();
-            stmt.close();
-        }
-        finally {
-            conn.close();
-        }
-    }
-
-    /** Drops all test tables. */
-    public void dropTestTables() throws Exception {
-        Connection conn = node.getDataSource().getConnection();
-        DbAdapter adapter = node.getAdapter();
-        List list = this.dbEntitiesInInsertOrder(map);
-
-        try {
-            delegate.willDropTables(conn, map);
-
-            DatabaseMetaData md = conn.getMetaData();
-            ResultSet tables = md.getTables(null, null, "%", null);
-            List allTables = new ArrayList();
-
-            while (tables.next()) {
-                // 'toUpperCase' is needed since most databases
-                // are case insensitive, and some will convert names to lower case (PostgreSQL)
-                String name = tables.getString("TABLE_NAME");
-                if (name != null)
-                    allTables.add(name.toUpperCase());
-            }
-            tables.close();
-
-            // drop all tables in the map
-            Statement stmt = conn.createStatement();
-
-            ListIterator it = list.listIterator(list.size());
-            while (it.hasPrevious()) {
-                DbEntity ent = (DbEntity) it.previous();
-                if (!allTables.contains(ent.getName())) {
-                    continue;
-                }
-
-                try {
-                    String dropSql = adapter.dropTable(ent);
-                    logObj.info("Drop table: " + dropSql);
-                    stmt.execute(dropSql);
-                }
-                catch (SQLException sqe) {
-                    logObj.warn(
-                        "Can't drop table " + ent.getName() + ", ignoring...",
-                        sqe);
-                }
-            }
-
-            delegate.droppedTables(conn, map);
-        }
-        finally {
-            conn.close();
-        }
-
-        // drop primary key support
-        adapter.getPkGenerator().dropAutoPk(node, list);
-    }
-
-    /** Creates all test tables in the database. */
-    public void setupTestTables() throws Exception {
-        Connection conn = node.getDataSource().getConnection();
-
-        try {
-            delegate.willCreateTables(conn, map);
-            Statement stmt = conn.createStatement();
-            Iterator it = tableCreateQueries(map);
-            while (it.hasNext()) {
-                String query = (String) it.next();
-                QueryLogger.logQuery(
-                    QueryLogger.DEFAULT_LOG_LEVEL,
-                    query,
-                    Collections.EMPTY_LIST);
-                stmt.execute(query);
-            }
-            delegate.createdTables(conn, map);
-        }
-        finally {
-            conn.close();
-        }
-
-        // create primary key support
-        DbAdapter adapter = node.getAdapter();
-        List filteredEntities =
-            this.dbEntitiesInInsertOrder(
-                ((DataMap) node.getDataMaps().iterator().next()));
-        adapter.getPkGenerator().createAutoPk(node, filteredEntities);
-    }
-
-    /** 
-     * Creates primary key support for all node DbEntities.
-     * Will use its facilities provided by DbAdapter to generate
-     * any necessary database objects and data for primary
-     * key support.
-     */
-    public void createPkSupportForMapEntities(DataNode node) throws Exception {
-        Iterator dataMaps = node.getDataMaps().iterator();
-        while (dataMaps.hasNext()) {
-            List filteredEntities =
-                this.dbEntitiesInInsertOrder(((DataMap) dataMaps.next()));
-            node.getAdapter().getPkGenerator().createAutoPk(node, filteredEntities);
-        }
-    }
-
-    /** Returns iterator of preprocessed table create queries */
-    protected Iterator tableCreateQueries(DataMap map) throws Exception {
-        DbAdapter adapter = node.getAdapter();
-        DbGenerator gen = new DbGenerator(adapter, map);
-        List orderedEnts = this.dbEntitiesInInsertOrder(map);
-        List queries = new ArrayList();
-
-        // table definitions
-        Iterator it = orderedEnts.iterator();
-        while (it.hasNext()) {
-            DbEntity ent = (DbEntity) it.next();
-            if (ent instanceof DerivedDbEntity) {
-                continue;
-            }
-
-            queries.add(adapter.createTable(ent));
-        }
-
-        // FK constraints
-        if (adapter.supportsFkConstraints()) {
-            it = orderedEnts.iterator();
-            while (it.hasNext()) {
-                DbEntity ent = (DbEntity) it.next();
-                if (ent instanceof DerivedDbEntity) {
-                    continue;
-                }
-
-                List qs = gen.createFkConstraintsQueries(ent);
-                queries.addAll(qs);
-            }
-        }
-
-        return queries.iterator();
+    public AccessStackAdapter getAdapter(DataNode node) {
+        return resources.getAccessStackAdapter(node.getAdapter());
     }
 
     /**
      * Helper method that orders DbEntities to satisfy referential
      * constraints and returns an ordered list.
      */
-    private List dbEntitiesInInsertOrder(DataMap map) {
+    protected List dbEntitiesInInsertOrder(DataNode node, DataMap map) {
         List entities = new ArrayList(map.getDbEntities());
 
         // filter varios unsupported tests...
 
         // LOBs
-        boolean excludeLOB = !delegate.supportsLobs();
-        boolean excludeBinPK = !delegate.supportsBinaryPK();
+        boolean excludeLOB = !getAdapter(node).supportsLobs();
+        boolean excludeBinPK = !getAdapter(node).supportsBinaryPK();
         if (excludeLOB || excludeBinPK) {
             Iterator it = entities.iterator();
             List filtered = new ArrayList();
@@ -347,19 +161,167 @@ public class TestDatabaseManager {
         return entities;
     }
 
-    /**
-     * Returns the delegate.
-     * @return DatabaseSetupDelegate
-     */
-    public DatabaseSetupDelegate getDelegate() {
-        return delegate;
+    protected void deleteTestData(DataNode node, DataMap map) throws Exception {
+        // TODO: move this to delegate
+        boolean isFirebird = node.getAdapter() instanceof FirebirdAdapter;
+
+        Connection conn = node.getDataSource().getConnection();
+        List list = this.dbEntitiesInInsertOrder(node, map);
+        try {
+            if (conn.getAutoCommit()) {
+                conn.setAutoCommit(false);
+            }
+
+            Statement stmt = conn.createStatement();
+
+            ListIterator it = list.listIterator(list.size());
+            while (it.hasPrevious()) {
+                DbEntity ent = (DbEntity) it.previous();
+                if (ent instanceof DerivedDbEntity) {
+                    continue;
+                }
+
+                // this may not work on tables with reflexive relationships
+                // at least on Firebird it doesn't... 
+
+                if (isFirebird && "ARTGROUP".equalsIgnoreCase(ent.getName())) {
+                    int deleted = 0;
+                    String deleteChildren =
+                        "DELETE FROM "
+                            + ent.getName()
+                            + " WHERE GROUP_ID NOT IN (SELECT DISTINCT PARENT_GROUP_ID FROM "
+                            + ent.getName()
+                            + ")";
+                    do {
+                        deleted = stmt.executeUpdate(deleteChildren);
+                    }
+                    while (deleted > 0);
+                }
+
+                String deleteSql = "DELETE FROM " + ent.getName();
+                stmt.executeUpdate(deleteSql);
+            }
+            conn.commit();
+            stmt.close();
+        }
+        finally {
+            conn.close();
+        }
     }
 
-    /**
-     * Sets the delegate.
-     * @param delegate The delegate to set
+    protected void dropSchema(DataNode node, DataMap map) throws Exception {
+        Connection conn = node.getDataSource().getConnection();
+        List list = dbEntitiesInInsertOrder(node, map);
+
+        try {
+            getAdapter(node).willDropTables(conn, map);
+
+            DatabaseMetaData md = conn.getMetaData();
+            ResultSet tables = md.getTables(null, null, "%", null);
+            List allTables = new ArrayList();
+
+            while (tables.next()) {
+                // 'toUpperCase' is needed since most databases
+                // are case insensitive, and some will convert names to lower case (PostgreSQL)
+                String name = tables.getString("TABLE_NAME");
+                if (name != null)
+                    allTables.add(name.toUpperCase());
+            }
+            tables.close();
+
+            // drop all tables in the map
+            Statement stmt = conn.createStatement();
+
+            ListIterator it = list.listIterator(list.size());
+            while (it.hasPrevious()) {
+                DbEntity ent = (DbEntity) it.previous();
+                if (!allTables.contains(ent.getName())) {
+                    continue;
+                }
+
+                try {
+                    String dropSql = node.getAdapter().dropTable(ent);
+                    logObj.info("Drop table: " + dropSql);
+                    stmt.execute(dropSql);
+                }
+                catch (SQLException sqe) {
+                    logObj.warn(
+                        "Can't drop table " + ent.getName() + ", ignoring...",
+                        sqe);
+                }
+            }
+
+            getAdapter(node).droppedTables(conn, map);
+        }
+        finally {
+            conn.close();
+        }
+
+        // drop primary key support
+        node.getAdapter().getPkGenerator().dropAutoPk(node, list);
+    }
+
+    protected void createPKSupport(DataNode node, DataMap map) throws Exception {
+        List filteredEntities = dbEntitiesInInsertOrder(node, map);
+        node.getAdapter().getPkGenerator().createAutoPk(node, filteredEntities);
+    }
+
+    protected void createSchema(DataNode node, DataMap map) throws Exception {
+        Connection conn = node.getDataSource().getConnection();
+
+        try {
+            getAdapter(node).willCreateTables(conn, map);
+            Statement stmt = conn.createStatement();
+            Iterator it = tableCreateQueries(node, map);
+            while (it.hasNext()) {
+                String query = (String) it.next();
+                QueryLogger.logQuery(
+                    QueryLogger.DEFAULT_LOG_LEVEL,
+                    query,
+                    Collections.EMPTY_LIST);
+                stmt.execute(query);
+            }
+            getAdapter(node).createdTables(conn, map);
+        }
+        finally {
+            conn.close();
+        }
+    }
+
+    /** 
+     * Returns iterator of preprocessed table create queries.
      */
-    public void setDelegate(DatabaseSetupDelegate delegate) {
-        this.delegate = delegate;
+    protected Iterator tableCreateQueries(DataNode node, DataMap map) throws Exception {
+        DbAdapter adapter = node.getAdapter();
+        DbGenerator gen = new DbGenerator(adapter, map);
+        List orderedEnts = dbEntitiesInInsertOrder(node, map);
+        List queries = new ArrayList();
+
+        // table definitions
+        Iterator it = orderedEnts.iterator();
+        while (it.hasNext()) {
+            DbEntity ent = (DbEntity) it.next();
+            if (ent instanceof DerivedDbEntity) {
+                continue;
+            }
+
+            queries.add(adapter.createTable(ent));
+        }
+
+        // FK constraints
+        if (adapter.supportsFkConstraints()) {
+            it = orderedEnts.iterator();
+            while (it.hasNext()) {
+                DbEntity ent = (DbEntity) it.next();
+                if (ent instanceof DerivedDbEntity) {
+                    continue;
+                }
+
+                List qs = gen.createFkConstraintsQueries(ent);
+                queries.addAll(qs);
+            }
+        }
+
+        return queries.iterator();
     }
 }

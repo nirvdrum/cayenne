@@ -59,7 +59,7 @@ import java.sql.Types;
 import java.util.List;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

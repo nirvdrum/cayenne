@@ -65,8 +65,8 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.TestBean;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.TestBean;
 
 /**
  * @author Andrei Adamchik

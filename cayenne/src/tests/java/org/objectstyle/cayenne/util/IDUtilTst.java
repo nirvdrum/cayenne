@@ -1,7 +1,7 @@
 package org.objectstyle.cayenne.util;
 
 import org.objectstyle.cayenne.access.types.ByteArrayTypeTst;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

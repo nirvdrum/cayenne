@@ -55,14 +55,14 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import org.objectstyle.cayenne.unittest.CayenneSimpleTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * Tests compatibility of the new expressions package with the old one.
  * 
  * @author Andrei Adamchik
  */
-public class ParsedExpBackwardCompatTst extends CayenneSimpleTestCase {
+public class ParsedExpBackwardCompatTst extends BasicTestCase {
 
     public void testOr() throws Exception {
         Expression compareTo = simpleExp().orExp(simpleExp());

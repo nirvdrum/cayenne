@@ -67,7 +67,7 @@ import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * 
@@ -79,7 +79,9 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
     private DataContext context;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+        
+        deleteTestData();
         context = getDomain().createDataContext();
     }
 

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Tests issues not directly related to Cayenne.
@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class MiscTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        deleteTestData();
     }
 
     public void testNothing() throws Exception {

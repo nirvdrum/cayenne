@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.io.InputStream;
 
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**

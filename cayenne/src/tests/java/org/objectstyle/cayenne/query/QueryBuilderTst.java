@@ -3,12 +3,12 @@ package org.objectstyle.cayenne.query;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneSimpleTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class QueryBuilderTst extends CayenneSimpleTestCase {
+public class QueryBuilderTst extends BasicTestCase {
     protected QueryBuilder builder;
 
     protected void setUp() throws Exception {

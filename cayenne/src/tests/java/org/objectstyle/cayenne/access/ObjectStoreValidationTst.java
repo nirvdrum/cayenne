@@ -59,7 +59,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**

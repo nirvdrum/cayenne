@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,24 +53,49 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
-import junit.framework.TestCase;
+import java.sql.Connection;
 
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
- * A test case that requires no DB access.
- * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-public class CayenneSimpleTestCase extends TestCase {
-    static {
-        Configuration.configureCommonLogging();
+public class SybaseStackAdapter extends AccessStackAdapter {
+
+    /**
+     * Constructor for SybaseDelegate.
+     * @param adapter
+     */
+    public SybaseStackAdapter(DbAdapter adapter) {
+        super(adapter);
     }
 
-    public CayenneSimpleTestCase() {
-        super();
+    public boolean supportsStoredProcedures() {
+        return true;
     }
+
+    public void createdTables(Connection con, DataMap map) throws Exception {
+        executeDDL(con, super.ddlFile("sybase", "create-select-sp.sql"));
+        executeDDL(con, super.ddlFile("sybase", "create-update-sp.sql"));
+        executeDDL(con, super.ddlFile("sybase", "create-out-sp.sql"));
+    }
+
+    public void willDropTables(Connection con, DataMap map) throws Exception {
+        executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
+        executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
+        executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
+    }
+
+    public boolean supportsLobs() {
+        return true;
+    }
+
+    public boolean handlesNullVsEmptyLOBs() {
+        // TODO Sybase handling of this must be fixed
+        return false;
+    }
+
 }

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjEntityTst extends CayenneTestCase {
     protected ObjEntity ent;

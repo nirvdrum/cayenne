@@ -60,12 +60,14 @@ import java.util.Collections;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ToManyListTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
+        super.setUp();
+        
         context = createDataContext();
     }
 

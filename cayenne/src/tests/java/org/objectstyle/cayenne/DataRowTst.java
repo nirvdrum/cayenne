@@ -55,11 +55,10 @@
  */
 package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -53,63 +53,105 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
+
+import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
  * @author Andrei Adamchik
  */
-public class MultiNodeMappingProject {
-    protected static MultiNodeMappingProject instance;
-
-    public static final String MAP1_PATH = "test-resources/map-db1.map.xml";
-    public static final String MAP2_PATH = "test-resources/map-db2.map.xml";
-
-    public static final String NODE1_NAME = "node1";
-    public static final String NODE2_NAME = "node2";
-
-    private static boolean initDone;
+public class SimpleAccessStack extends AbstractAccessStack implements AccessStack {
 
     protected DataDomain domain;
 
-    public static void init() {
-        if (initDone) {
-            return;
+    public SimpleAccessStack(CayenneTestResources resources, DataMap map)
+        throws Exception {
+
+        this.resources = resources;
+        this.domain = new DataDomain("domain");
+        initNode(map);
+    }
+
+    public SimpleAccessStack(CayenneTestResources resources, DataMap map1, DataMap map2)
+        throws Exception {
+
+        this.resources = resources;
+        this.domain = new DataDomain("domain");
+        initNode(map1);
+        initNode(map2);
+    }
+
+    protected void initNode(DataMap map) throws Exception {
+        DataNode node = resources.newDataNode(map.getName());
+
+        // tweak mapping with a delegate
+        Iterator procedures = map.getProcedures().iterator();
+        while (procedures.hasNext()) {
+            Procedure proc = (Procedure) procedures.next();
+            getAdapter(node).tweakProcedure(proc);
         }
-        initDone = true;
-        instance = new MultiNodeMappingProject();
+
+        node.addDataMap(map);
+        this.domain.addNode(node);
     }
 
-    public static MultiNodeMappingProject getInstance() {
-        return instance;
+    public void setGenerateSchema(boolean flag) throws Exception {
+        if (flag) {
+            dropSchema();
+            createSchema();
+            createPKSupport();
+        }
     }
 
-    /**
-     * Constructor for MultiNodeMappingProject.
-     */
-    private MultiNodeMappingProject() {
-        super();
-        domain =
-            CayenneTestResources.getResources().createCayenneStack(
-                new String[] { MAP1_PATH, MAP2_PATH },
-                new String[] { NODE1_NAME, NODE2_NAME });
-    }
-
-    /**
-     * Returns the domain.
-     * @return DataDomain
-     */
-    public DataDomain getDomain() {
+    public DataDomain getDataDomain() {
         return domain;
     }
 
-    public DataNode getNode1() {
-        return domain.getNode(NODE1_NAME);
+    /** 
+     * Deletes all data from the database tables mentioned in the DataMap. 
+     */
+    public void deleteTestData() throws Exception {
+        Iterator it = domain.getDataNodes().iterator();
+        while (it.hasNext()) {
+            DataNode node = (DataNode) it.next();
+            deleteTestData(node, (DataMap) node.getDataMaps().iterator().next());
+        }
     }
 
-    public DataNode getNode2() {
-        return domain.getNode(NODE2_NAME);
+    /** Drops all test tables. */
+    public void dropSchema() throws Exception {
+        Iterator it = domain.getDataNodes().iterator();
+        while (it.hasNext()) {
+            DataNode node = (DataNode) it.next();
+            dropSchema(node, (DataMap) node.getDataMaps().iterator().next());
+        }
+    }
+
+    /** Creates all test tables in the database. */
+    public void createSchema() throws Exception {
+        Iterator it = domain.getDataNodes().iterator();
+        while (it.hasNext()) {
+            DataNode node = (DataNode) it.next();
+            createSchema(node, (DataMap) node.getDataMaps().iterator().next());
+        }
+    }
+
+    /** 
+     * Creates primary key support for all node DbEntities.
+     * Will use its facilities provided by DbAdapter to generate
+     * any necessary database objects and data for primary
+     * key support.
+     */
+    public void createPKSupport() throws Exception {
+        Iterator it = domain.getDataNodes().iterator();
+        while (it.hasNext()) {
+            DataNode node = (DataNode) it.next();
+            createPKSupport(node, (DataMap) node.getDataMaps().iterator().next());
+        }
     }
 }

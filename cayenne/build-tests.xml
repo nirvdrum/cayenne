@@ -19,6 +19,7 @@
 			<include name="${ant-junitreport.jar}"/>
 			<include name="${junit.jar}"/>
 			<include name="${mockrunner.jar}"/>
+			<include name="${spring.jar}"/>
 		</fileset>
     	<fileset dir="${ant.home}/lib">
 			<include name="*.jar"/>		

@@ -93,16 +93,16 @@ public class DataContextTst extends DataContextTestBase {
         List paintings = context.performQuery(new SelectQuery(Painting.class));
         Painting p = (Painting) paintings.get(0);
         Artist a = p.getToArtist();
-        
+
         assertEquals(PersistenceState.HOLLOW, a.getPersistenceState());
         context.deleteObject(a);
         assertEquals(PersistenceState.DELETED, a.getPersistenceState());
     }
-    
+
     public void testDeleteNew() throws Exception {
         Artist artist = (Artist) context.createAndRegisterNewObject(Artist.class);
         artist.setArtistName("a");
-        
+
         assertEquals(PersistenceState.NEW, artist.getPersistenceState());
         context.deleteObject(artist);
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
@@ -188,13 +188,13 @@ public class DataContextTst extends DataContextTestBase {
             public boolean shouldProcessDelete(DataObject object) {
                 return true;
             }
-            
+
             public void finishedMergeChanges(DataObject object) {
-            
+
             }
-        
+
             public void finishedProcessDelete(DataObject object) {
-            
+
             }
         };
 
@@ -265,7 +265,7 @@ public class DataContextTst extends DataContextTestBase {
         Map idMap = a1.getObjectId().getIdSnapshot();
         assertEquals(idMap.get("ARTIST_ID"), s1.get("ARTIST_ID"));
     }
-    
+
     /**
      * Testing snapshot with to-one fault. This was a bug CAY-96.
      */
@@ -361,7 +361,7 @@ public class DataContextTst extends DataContextTestBase {
     public void testDerivedEntityFetch1() throws Exception {
 
         // some DBs don't support HAVING
-        if (!getDatabaseSetupDelegate().supportsHaving()) {
+        if (!getAccessStackAdapter().supportsHaving()) {
             return;
         }
 
@@ -382,7 +382,7 @@ public class DataContextTst extends DataContextTestBase {
      */
     public void testDerivedEntityFetch2() throws Exception {
         // some DBs don't support HAVING
-        if (!getDatabaseSetupDelegate().supportsHaving()) {
+        if (!getAccessStackAdapter().supportsHaving()) {
             return;
         }
 

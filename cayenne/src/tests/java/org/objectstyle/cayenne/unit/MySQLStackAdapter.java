@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,50 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
-import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 /**
- * Helper class for the test cases that use a DataMap with all relationships
- * mapped one way.
- * 
  * @author Andrei Adamchik
  */
-public class OneWayMappingProject {
-    protected static OneWayMappingProject instance;
+public class MySQLStackAdapter extends AccessStackAdapter {
 
-    public static final String ONE_WAY_MAP_PATH = "test-resources/one-way-map.map.xml";
-    private static boolean initDone;
-
-    protected DataDomain domain;
-
-    public static void init() {
-        if (initDone) {
-            return;
-        }
-        initDone = true;
-        instance = new OneWayMappingProject();
+    public MySQLStackAdapter(DbAdapter adapter) {
+        super(adapter);
     }
 
-    public static OneWayMappingProject getInstance() {
-    	return instance;
+    public boolean supportsLobs() {
+        return true;
     }
     
-    /**
-     * Constructor for OneWayMappingProject.
-     */
-    public OneWayMappingProject() {
-        super();
-        domain = CayenneTestResources.getResources().createCayenneStack(ONE_WAY_MAP_PATH);
-    }
-
-
-    /**
-     * Returns the domain.
-     * @return DataDomain
-     */
-    public DataDomain getDomain() {
-        return domain;
+    public boolean supportsCaseSensitiveLike() {
+        return false;
     }
 }

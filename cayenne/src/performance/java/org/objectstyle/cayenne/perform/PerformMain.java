@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
 import org.objectstyle.perform.PerformanceTest;
 import org.objectstyle.perform.PerformanceTestRunner;
 import org.objectstyle.perform.PerformanceTestSuite;
@@ -198,7 +197,7 @@ public class PerformMain {
                     dsi.getPassword());
 
             // map
-            DataMap map = new MapLoader().loadDataMap(CayenneTestResources.TEST_MAP_PATH);
+            DataMap map = new MapLoader().loadDataMap("test-resources/testmap.map.xml");
 
             // node
             Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;

@@ -60,7 +60,7 @@ import java.util.List;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DbEntityTst extends CayenneTestCase {
     protected DbEntity ent;

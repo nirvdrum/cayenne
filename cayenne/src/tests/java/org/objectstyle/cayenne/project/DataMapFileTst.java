@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

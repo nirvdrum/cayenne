@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.event;
 
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 /**
  * @author Andrei Adamchik

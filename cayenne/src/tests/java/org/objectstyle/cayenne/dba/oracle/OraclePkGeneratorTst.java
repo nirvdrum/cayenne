@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.dba.oracle;
 
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -59,7 +59,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ResourceLocatorTst extends CayenneTestCase {
 	private File fTmpFileInCurrentDir;

@@ -54,79 +54,37 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.db2.DB2Adapter;
-import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
-import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
-import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
-import org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter;
-import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
-import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
-import org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter;
-import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Defines API and a common superclass for testing various datbase features.
+ * Defines API and a common superclass for testing various database features.
  * Different databases support different feature sets that need to be tested
  * differently. Many things implemented in subclasses may become future
  * candidates for inclusin in the corresponding adapter code.
  * 
  * @author Andrei Adamchik
  */
-public class DatabaseSetupDelegate {
-    private static Logger logObj =
-        Logger.getLogger(DatabaseSetupDelegate.class);
-
-    protected static Map delegates = new HashMap();
-
-    static {
-        delegates.put(OracleAdapter.class, OracleDelegate.class);
-        delegates.put(SybaseAdapter.class, SybaseDelegate.class);
-        delegates.put(FirebirdAdapter.class, FirebirdDelegate.class);
-        delegates.put(PostgresAdapter.class, PostgresDelegate.class);
-        delegates.put(MySQLAdapter.class, MySQLDelegate.class);
-        delegates.put(HSQLDBAdapter.class, HSQLDBDelegate.class);
-        delegates.put(OpenBaseAdapter.class, OpenBaseDelegate.class);
-        delegates.put(DB2Adapter.class, DB2SetupDelegate.class);
-        delegates.put(SQLServerAdapter.class, SQLServerDelegate.class);
-    }
+public class AccessStackAdapter {
+    private static Logger logObj = Logger.getLogger(AccessStackAdapter.class);
 
     protected DbAdapter adapter;
 
-    public static DatabaseSetupDelegate createDelegate(DbAdapter adapter) {
-        Class delegateClass = (Class) delegates.get(adapter.getClass());
-        if (delegateClass != null) {
-            try {
-                Constructor c =
-                    delegateClass.getConstructor(
-                        new Class[] { DbAdapter.class });
-                return (DatabaseSetupDelegate) c.newInstance(
-                    new Object[] { adapter });
-            } catch (Exception ex) {
-                throw new CayenneRuntimeException(
-                    "Error instantiating delegate.",
-                    ex);
-            }
-        }
-        return new DatabaseSetupDelegate(adapter);
-    }
-
-    protected DatabaseSetupDelegate(DbAdapter adapter) {
+    public AccessStackAdapter(DbAdapter adapter) {
         this.adapter = adapter;
+    }
+    
+    public DbAdapter getAdapter() {
+        return adapter;
     }
 
     public void willDropTables(Connection con, DataMap map) throws Exception {
@@ -136,7 +94,7 @@ public class DatabaseSetupDelegate {
     public void droppedTables(Connection con, DataMap map) throws Exception {
 
     }
-    
+
     /**
      * Callback method that allows Delegate to customize
      * test procedure.
@@ -144,8 +102,7 @@ public class DatabaseSetupDelegate {
     public void tweakProcedure(Procedure proc) {
     }
 
-    public void willCreateTables(Connection con, DataMap map)
-        throws Exception {
+    public void willCreateTables(Connection con, DataMap map) throws Exception {
     }
 
     public void createdTables(Connection con, DataMap map) throws Exception {
@@ -155,44 +112,44 @@ public class DatabaseSetupDelegate {
     public boolean supportsStoredProcedures() {
         return false;
     }
-    
+
     /**
      * Returns true if the target database has support for large objects (BLOB,
      * CLOB).
      */
     public boolean supportsLobs() {
-    	return false;
+        return false;
     }
-    
+
     public boolean supportsBinaryPK() {
         return true;
     }
-    
+
     public boolean supportsHaving() {
         return true;
     }
-    
+
     public boolean supportsDroppingPK() {
         return true;
     }
-    
+
     public boolean supportsCaseSensitiveLike() {
         return true;
     }
-    
+
     protected void executeDDL(Connection con, String ddl) throws Exception {
         logObj.info(ddl);
         Statement st = con.createStatement();
 
         try {
             st.execute(ddl);
-        } finally {
+        }
+        finally {
             st.close();
         }
     }
 
-    protected void executeDDL(Connection con, File sourceFile)
-        throws Exception {
+    protected void executeDDL(Connection con, File sourceFile) throws Exception {
         // not sure if all JDBC adapters will like multiline statements
         // separated with '\n'. Oracle & Sybase seem OK, though
         // joining with space is probably safer, though produces agly code
@@ -207,7 +164,9 @@ public class DatabaseSetupDelegate {
     protected File ddlFile(String database, String name) {
         return new File(
             new File(
-                new File(CayenneTestCase.getDefaultTestResourceDir(), "ddl"),
+                new File(
+                    CayenneTestResources.getResources().getTestResourcesDir(),
+                    "ddl"),
                 database),
             name);
     }

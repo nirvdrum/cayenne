@@ -61,7 +61,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -69,12 +69,6 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class DataContextSerializationTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(DataContextSerializationTst.class);
-
-    protected void setUp() throws Exception {
-        // IMPORTANT: call super to fix the environment - 
-        // other unit tests may have messed up the shared domain
-        super.setUp();
-    }
 
     public void testSerializeWithSharedCache() throws Exception {
         DataContext context = createDataContextWithSharedCache();

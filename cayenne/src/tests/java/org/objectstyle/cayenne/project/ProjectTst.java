@@ -61,7 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.project.validator.Validator;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

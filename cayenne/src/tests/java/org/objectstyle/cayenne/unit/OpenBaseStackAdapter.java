@@ -53,20 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 
 /**
  * @author Andrei Adamchik
  */
-public class PostgresDelegate extends DatabaseSetupDelegate {
+public class OpenBaseStackAdapter extends AccessStackAdapter {
 
-    public PostgresDelegate(DbAdapter adapter) {
+    public OpenBaseStackAdapter(DbAdapter adapter) {
         super(adapter);
     }
+
+    public boolean supportsHaving() {
+        return false;
+    }
     
-    public boolean supportsLobs() {
-        return true;
+    public boolean supportsDroppingPK() {
+        return false;
     }
 }

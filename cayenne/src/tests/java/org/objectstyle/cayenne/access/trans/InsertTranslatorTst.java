@@ -61,7 +61,7 @@ import java.util.Map;
 import org.objectstyle.art.MeaningfulPKTest1;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.query.InsertQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

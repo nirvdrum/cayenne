@@ -53,22 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
 
+package org.objectstyle.cayenne.unit;
+
+import java.sql.Connection;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.objectstyle.cayenne.access.DataContextStoredProcTst;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 
 /**
  * @author Andrei Adamchik
- * @since 1.1
  */
-public class SQLServerDelegate extends SybaseDelegate {
+public class OracleStackAdapter extends AccessStackAdapter {
 
-    public SQLServerDelegate(DbAdapter adapter) {
+    /**
+     * Constructor for OracleDelegate.
+     * @param adapter
+     */
+    public OracleStackAdapter(DbAdapter adapter) {
         super(adapter);
     }
-    
-    public boolean handlesNullVsEmptyLOBs() {
+
+    public boolean supportsStoredProcedures() {
         return true;
+    }
+
+    /**
+     * Oracle 8i does not support more then 1 "LONG xx" column per table
+     * PAINTING_INFO need to be fixed.
+     */
+    public void willCreateTables(Connection con, DataMap map) {
+        DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
+        DbAttribute textReview = (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
+        textReview.setType(Types.VARCHAR);
+        textReview.setMaxLength(255);
+    }
+
+    public void createdTables(Connection con, DataMap map) throws Exception {
+        executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
+        executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
+        executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
+        executeDDL(con, super.ddlFile("oracle", "create-out-sp.sql"));
+    }
+
+    public boolean supportsLobs() {
+        return true;
+    }
+
+    public void tweakProcedure(Procedure proc) {
+        if (DataContextStoredProcTst.SELECT_STORED_PROCEDURE.equals(proc.getName())
+            && proc.getCallParameters().size() == 2) {
+            List params = new ArrayList(proc.getCallParameters());
+
+            proc.clearCallParameters();
+            proc.addCallParameter(
+                new ProcedureParameter(
+                    "result",
+                    OracleAdapter.getOracleCursorType(),
+                    ProcedureParameter.OUT_PARAMETER));
+            Iterator it = params.iterator();
+            while (it.hasNext()) {
+                ProcedureParameter param = (ProcedureParameter) it.next();
+                proc.addCallParameter(param);
+            }
+
+            proc.setReturningValue(true);
+        }
     }
 
 }

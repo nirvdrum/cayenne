@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -82,9 +82,21 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
     protected DataContext ctxt;
 
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        // Don't run this on MySQL
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
+            return;
+        }
+
+        deleteTestData();
+        ctxt = createDataContext();
+    }
+
     public void testUpdate() throws Exception {
         // Don't run this on MySQL
-        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
 
@@ -101,7 +113,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
             ctxt,
             Collections.singletonList(q),
             observer);
-            
+
         // check that price have doubled
         SelectQuery select = new SelectQuery(Artist.class);
         select.addPrefetch("paintingArray");
@@ -116,7 +128,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
     public void testSelect1() throws Exception {
         // Don't run this on MySQL
-        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
 
@@ -151,7 +163,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
     public void testSelect2() throws Exception {
         // Don't run this on MySQL
-        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
 
@@ -187,7 +199,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
     public void testSelect3() throws Exception {
         // Don't run this on MySQL
-        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
 
@@ -226,7 +238,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
     public void testOutParams() throws Exception {
         // Don't run this on MySQL
-        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
 
@@ -267,15 +279,5 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         a.addToPaintingArray(p);
 
         ctxt.commitChanges();
-    }
-
-    protected void setUp() throws Exception {
-        // Don't run this on MySQL
-        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
-            return;
-        }
-
-        cleanTableData();
-        ctxt = createDataContext();
     }
 }

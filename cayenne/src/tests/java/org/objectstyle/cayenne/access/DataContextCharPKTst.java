@@ -60,89 +60,82 @@ import java.util.Map;
 
 import org.objectstyle.art.CharPkTest;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
 public class DataContextCharPKTst extends CayenneTestCase {
-	protected DataContext ctxt;
+    protected DataContext ctxt;
 
-	protected void setUp() throws Exception {
-		cleanTableData();
-		ctxt = createDataContext();
-	}
+    protected void setUp() throws Exception {
+        super.setUp();
 
-	public void testInsert() throws Exception {
-		CharPkTest object =
-			(CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
-		object.setOtherCol("object-XYZ");
-		object.setPkCol("PK1");
-		ctxt.commitChanges();
+        deleteTestData();
+        ctxt = createDataContext();
+    }
 
-		List rows =
-			ctxt.performQuery(
-				new SqlSelectQuery(
-					CharPkTest.class,
-					"SELECT * FROM CHAR_PK_TEST"));
-		assertNotNull(rows);
-		assertEquals(1, rows.size());
-		Map row = (Map) rows.get(0);
+    public void testInsert() throws Exception {
+        CharPkTest object = (CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
+        object.setOtherCol("object-XYZ");
+        object.setPkCol("PK1");
+        ctxt.commitChanges();
 
-		Object val = row.get("OTHER_COL");
-		if (val == null) {
-			val = row.get("other_col");
-		}
-		assertEquals("object-XYZ", val);
+        List rows =
+            ctxt.performQuery(
+                new SqlSelectQuery(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST"));
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
 
-		val = row.get("PK_COL");
-		if (val == null) {
-			val = row.get("pk_col");
-		}
-		assertEquals("PK1", val);
-	}
+        Object val = row.get("OTHER_COL");
+        if (val == null) {
+            val = row.get("other_col");
+        }
+        assertEquals("object-XYZ", val);
 
-	public void testDelete() throws Exception {
-		CharPkTest object =
-			(CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
-		object.setOtherCol("object-XYZ");
-		object.setPkCol("PK1");
-		ctxt.commitChanges();
+        val = row.get("PK_COL");
+        if (val == null) {
+            val = row.get("pk_col");
+        }
+        assertEquals("PK1", val);
+    }
 
-		ctxt.deleteObject(object);
-		ctxt.commitChanges();
+    public void testDelete() throws Exception {
+        CharPkTest object = (CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
+        object.setOtherCol("object-XYZ");
+        object.setPkCol("PK1");
+        ctxt.commitChanges();
 
-		List rows =
-			ctxt.performQuery(
-				new SqlSelectQuery(
-					CharPkTest.class,
-					"SELECT * FROM CHAR_PK_TEST"));
-		assertNotNull(rows);
-		assertEquals(0, rows.size());
-	}
+        ctxt.deleteObject(object);
+        ctxt.commitChanges();
 
-	public void testUpdate() throws Exception {
-		CharPkTest object =
-			(CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
-		object.setOtherCol("object-XYZ");
-		object.setPkCol("PK1");
-		ctxt.commitChanges();
+        List rows =
+            ctxt.performQuery(
+                new SqlSelectQuery(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST"));
+        assertNotNull(rows);
+        assertEquals(0, rows.size());
+    }
 
-		object.setOtherCol("UPDATED");
-		ctxt.commitChanges();
+    public void testUpdate() throws Exception {
+        CharPkTest object = (CharPkTest) ctxt.createAndRegisterNewObject("CharPkTest");
+        object.setOtherCol("object-XYZ");
+        object.setPkCol("PK1");
+        ctxt.commitChanges();
 
-		List rows =
-			ctxt.performQuery(
-				new SqlSelectQuery(
-					CharPkTest.class,
-					"SELECT * FROM CHAR_PK_TEST"));
-		assertNotNull(rows);
-		assertEquals(1, rows.size());
-		Map row = (Map) rows.get(0);
-		Object val = row.get("OTHER_COL");
-		if (val == null) {
-			val = row.get("other_col");
-		}
-		assertEquals("UPDATED", val);
-	}
+        object.setOtherCol("UPDATED");
+        ctxt.commitChanges();
+
+        List rows =
+            ctxt.performQuery(
+                new SqlSelectQuery(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST"));
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+        Map row = (Map) rows.get(0);
+        Object val = row.get("OTHER_COL");
+        if (val == null) {
+            val = row.get("other_col");
+        }
+        assertEquals("UPDATED", val);
+    }
 }

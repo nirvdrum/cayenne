@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,39 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
 
-import java.sql.Connection;
+package org.objectstyle.cayenne.unit;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
-import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.util.Util;
 
 /**
+ * Superclass of test cases requiring multiple DataContexts with 
+ * the same parent DataDomain.
+ * 
  * @author Andrei Adamchik
  */
-public class FirebirdDelegate extends DatabaseSetupDelegate {
-    Logger logObj = Logger.getLogger(FirebirdAdapter.class);
+public abstract class MultiContextTestCase extends CayenneTestCase {
 
-    public FirebirdDelegate(DbAdapter adapter) {
-        super(adapter);
-        // TODO Auto-generated constructor stub
+    protected void setUp() throws Exception {
+        super.setUp();
+        deleteTestData();
     }
 
-    public boolean supportsBinaryPK() {
-        return false;
+    protected void fixSharedConfiguration() {
+        // for context to deserialize properly, 
+        // Configuration singleton must have the right default domain
+        Configuration config = Configuration.getSharedConfiguration();
+        if (getDomain() != config.getDomain()) {
+            if (config.getDomain() != null) {
+                config.removeDomain(config.getDomain().getName());
+            }
+            config.addDomain(getDomain());
+        }
     }
 
-    public void willCreateTables(Connection con, DataMap map) throws Exception {
-        logObj.warn(
-            "*** Firebird does not support binary PK. Corresponding test tables will be skipped.");
+    /**
+     * Helper method to create a new DataContext with the ObjectStore
+     * state being the mirror of the given context. This is done by
+     * serializing/deserializing the DataContext.
+     */
+    protected DataContext mirrorDataContext(DataContext context) throws Exception {
+        fixSharedConfiguration();
 
-        // modify DataMap
+        DataContext mirror = (DataContext) Util.cloneViaSerialization(context);
 
-        map.removeDbEntity("BINARY_PK_TEST1", false);
-        map.removeDbEntity("BINARY_PK_TEST2", false);
+        assertNotSame(context, mirror);
+        assertNotSame(context.getObjectStore(), mirror.getObjectStore());
 
-        super.willCreateTables(con, map);
+        if (context.isUsingSharedSnapshotCache()) {
+            assertSame(
+                context.getObjectStore().getDataRowCache(),
+                mirror.getObjectStore().getDataRowCache());
+        }
+        else {
+            assertNotSame(
+                context.getObjectStore().getDataRowCache(),
+                mirror.getObjectStore().getDataRowCache());
+        }
+
+        return mirror;
     }
 }

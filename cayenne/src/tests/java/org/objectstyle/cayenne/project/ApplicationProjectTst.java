@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

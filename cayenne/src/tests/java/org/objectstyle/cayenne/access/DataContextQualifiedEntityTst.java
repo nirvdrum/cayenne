@@ -61,7 +61,7 @@ import java.util.List;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.testdo.inherit.AbstractPerson;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

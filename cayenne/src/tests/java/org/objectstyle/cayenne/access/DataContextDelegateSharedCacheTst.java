@@ -63,8 +63,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.unittest.MultiContextTestCase;
-import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
+import org.objectstyle.cayenne.unit.MultiContextTestCase;
+import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 /**
  * @author Andrei Adamchik

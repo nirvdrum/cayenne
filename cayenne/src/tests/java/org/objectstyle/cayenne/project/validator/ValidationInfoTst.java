@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.project.validator;
 
 import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

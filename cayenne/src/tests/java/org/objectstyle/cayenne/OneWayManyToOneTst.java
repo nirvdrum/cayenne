@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
+import org.objectstyle.cayenne.unit.OneWayMappingTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -72,7 +72,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        deleteTestData();
         ctxt = getDomain().createDataContext();
     }
 

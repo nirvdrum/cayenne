@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class UtilExtTst extends CayenneTestCase {
 

@@ -75,6 +75,8 @@ public class QueryResultTst extends TestCase {
     protected Query[] queries;
 
     protected void setUp() throws Exception {
+        super.setUp();
+        
         result = new QueryResult();
         queries =
             new Query[] {

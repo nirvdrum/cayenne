@@ -56,7 +56,7 @@
  
 package org.objectstyle.cayenne.exp;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,49 +53,63 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
 
-import java.sql.Connection;
-
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
+package org.objectstyle.cayenne.unit.util;
 
 /**
+ * Helper class allowing unit tests to wait till a code in question
+ * executes in a separate thread. There is still some element of uncertainty remains,
+ * since this implementation simply tries to give other threads enough time to execute,
+ * instead of watching for threads activity. 
+ * 
+ * <p>Note that result sampling is done every 300 ms., so if the test succeeds earlier,
+ * test case wouldn't have to wait for the whole time period specified by timeout.</p>
+ * 
  * @author Andrei Adamchik
  */
-public class SybaseDelegate extends DatabaseSetupDelegate {
+public abstract class ThreadedTestHelper {
 
-    /**
-     * Constructor for SybaseDelegate.
-     * @param adapter
-     */
-    public SybaseDelegate(DbAdapter adapter) {
-        super(adapter);
+    protected abstract void assertResult() throws Exception;
+
+    public void assertWithTimeout(long timeoutMs) throws Exception {
+        long checkEveryXMs;
+        int maxMumberOfChecks;
+
+        if (timeoutMs < 300) {
+            maxMumberOfChecks = 1;
+            checkEveryXMs = timeoutMs;
+        }
+        else {
+            maxMumberOfChecks = Math.round(timeoutMs / 300.00f);
+            checkEveryXMs = 300;
+        }
+
+        // TODO: for things asserting that a certain event DID NOT happen
+        // we need a better implementation, that should probably sleep for 
+        // the whole timeout interval, since otherwise we may have a false
+        // positive (i.e. assertion succeeded not because a certain thing did not
+        // happen, but rather cause it happened after the assertion was run).
+
+        // for now lets wait for at least one time slice to decrease 
+        // the possibility of false positives
+        Thread.sleep(checkEveryXMs);
+        maxMumberOfChecks--;
+
+        // wait 5 seconds at the most (10 times 0.5 sec.)
+        for (int i = 0; i < maxMumberOfChecks; i++) {
+            try {
+                assertResult();
+
+                // success... return immediately
+                return;
+            }
+            catch (Throwable th) {
+                // wait some more
+                Thread.sleep(checkEveryXMs);
+            }
+        }
+
+        // if it throws, it throws...
+        assertResult();
     }
-
-    public boolean supportsStoredProcedures() {
-        return true;
-    }
-
-    public void createdTables(Connection con, DataMap map) throws Exception {
-        executeDDL(con, super.ddlFile("sybase", "create-select-sp.sql"));
-        executeDDL(con, super.ddlFile("sybase", "create-update-sp.sql"));
-        executeDDL(con, super.ddlFile("sybase", "create-out-sp.sql"));
-    }
-
-    public void willDropTables(Connection con, DataMap map) throws Exception {
-        executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
-        executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
-        executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
-    }
-
-    public boolean supportsLobs() {
-        return true;
-    }
-
-    public boolean handlesNullVsEmptyLOBs() {
-        // TODO Sybase handling of this must be fixed
-        return false;
-    }
-
 }

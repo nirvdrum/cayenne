@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,24 +53,18 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
-
-import org.objectstyle.cayenne.dba.DbAdapter;
+package org.objectstyle.cayenne.unit;
 
 /**
+ * Super class of test cases that use DataMap with 
+ * one-way relationships.
+ * 
  * @author Andrei Adamchik
  */
-public class OpenBaseDelegate extends DatabaseSetupDelegate {
+public class OneWayMappingTestCase extends CayenneTestCase {
 
-    public OpenBaseDelegate(DbAdapter adapter) {
-        super(adapter);
-    }
-
-    public boolean supportsHaving() {
-        return false;
-    }
-    
-    public boolean supportsDroppingPK() {
-        return false;
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources.getResources().getAccessStack(
+            CayenneTestResources.ONEWAY_ACCESS_STACK);
     }
 }

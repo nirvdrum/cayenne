@@ -61,7 +61,7 @@ import java.io.InputStream;
 import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.project.ProjectDataSourceFactory;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 public class ConfigurationTst extends CayenneTestCase {

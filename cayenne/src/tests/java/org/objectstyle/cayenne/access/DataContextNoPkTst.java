@@ -65,61 +65,57 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class DataContextNoPkTst extends CayenneTestCase
-{
-  protected DataContext ctxt;
+public class DataContextNoPkTst extends CayenneTestCase {
+    protected DataContext ctxt;
 
-  protected void setUp() throws Exception
-  {
-    ctxt = createDataContext();
+    protected void setUp() throws Exception {
+        super.setUp();
+        
+        ctxt = createDataContext();
 
-    // create NO_PK_TEST records
-    Map map1 = new HashMap();
-    map1.put("ATTRIBUTE1", new Integer(1));
+        // create NO_PK_TEST records
+        Map map1 = new HashMap();
+        map1.put("ATTRIBUTE1", new Integer(1));
 
-    Map map2 = new HashMap();
-    map2.put("ATTRIBUTE1", new Integer(2));
+        Map map2 = new HashMap();
+        map2.put("ATTRIBUTE1", new Integer(2));
 
-    List queries = new ArrayList();
-    queries.add(new DeleteQuery(NoPkTest.class));
-    queries.add(new InsertQuery(NoPkTest.class, map1));
-    queries.add(new InsertQuery(NoPkTest.class, map2));
-    ctxt.performQueries(queries, new QueryResult());
-  }
-
-  public void testNoPkFetchObjects() throws Exception
-  {
-    try
-    {
-      List objects = ctxt.performQuery(new SelectQuery(NoPkTest.class));
-      fail(
-        "Query for entity with no primary key must have failed, instead we got "
-          + objects.size()
-          + " rows.");
+        List queries = new ArrayList();
+        queries.add(new DeleteQuery(NoPkTest.class));
+        queries.add(new InsertQuery(NoPkTest.class, map1));
+        queries.add(new InsertQuery(NoPkTest.class, map2));
+        ctxt.performQueries(queries, new QueryResult());
     }
-    catch (CayenneRuntimeException ex)
-    {
-      // exception expected
+
+    public void testNoPkFetchObjects() throws Exception {
+        try {
+            List objects = ctxt.performQuery(new SelectQuery(NoPkTest.class));
+            fail(
+                "Query for entity with no primary key must have failed, instead we got "
+                    + objects.size()
+                    + " rows.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // exception expected
+        }
     }
-  }
 
-  public void testNoPkFetchDataRows() throws Exception
-  {
-    SelectQuery query = new SelectQuery(NoPkTest.class);
-    query.setFetchingDataRows(true);
+    public void testNoPkFetchDataRows() throws Exception {
+        SelectQuery query = new SelectQuery(NoPkTest.class);
+        query.setFetchingDataRows(true);
 
-    List rows = ctxt.performQuery(query);
-    assertNotNull(rows);
-    assertEquals(2, rows.size());
+        List rows = ctxt.performQuery(query);
+        assertNotNull(rows);
+        assertEquals(2, rows.size());
 
-    Map row1 = (Map) rows.get(0);
-    Map row2 = (Map) rows.get(1);
+        Map row1 = (Map) rows.get(0);
+        Map row2 = (Map) rows.get(1);
 
-    // assert that rows have different values 
-    // (there was a bug earlier that fetched distinct rows for
-    // entities with no primary key.
-    assertTrue(!row1.get("ATTRIBUTE1").equals(row2.get("ATTRIBUTE1")));
-  }
+        // assert that rows have different values 
+        // (there was a bug earlier that fetched distinct rows for
+        // entities with no primary key.
+        assertTrue(!row1.get("ATTRIBUTE1").equals(row2.get("ATTRIBUTE1")));
+    }
 }

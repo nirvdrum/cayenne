@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Tests objects registration in DataContext.
@@ -75,6 +75,8 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
+        super.setUp();
+        
         ctxt = createDataContext();
     }
 

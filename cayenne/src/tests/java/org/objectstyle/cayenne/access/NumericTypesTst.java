@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -81,7 +81,9 @@ public class NumericTypesTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+        
+        deleteTestData();
         context = createDataContext();
     }
 

@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.event;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 import junit.framework.Assert;
 

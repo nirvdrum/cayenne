@@ -59,7 +59,7 @@ import java.sql.Types;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class JdbcAdapterTst extends CayenneTestCase {
 	protected JdbcAdapter adapter;

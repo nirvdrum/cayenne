@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,19 +53,43 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
-import org.objectstyle.cayenne.dba.DbAdapter;
+import java.sql.Connection;
+
+import org.objectstyle.cayenne.access.DataNode;
 
 /**
+ * Superclass of test cases that require multiple DataNodes.
+ * 
  * @author Andrei Adamchik
  */
-public class HSQLDBDelegate extends DatabaseSetupDelegate {
-    public HSQLDBDelegate(DbAdapter adapter) {
-        super(adapter);
+public class MultiNodeTestCase extends CayenneTestCase {
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources.getResources().getAccessStack(
+            CayenneTestResources.MULTINODE_ACCESS_STACK);
+    }
+    
+    /**
+     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
+     */
+    public DataNode getNode() {
+        throw new RuntimeException(
+            "'getNode() makes no sense in multinode environment.. "
+                + "use getNode1() or getNode2()");
     }
 
-    public boolean supportsHaving() {
-        return false;
+    public Connection getConnection() {
+        throw new RuntimeException(
+            "'getConnection() makes no sense in multinode environment.. "
+                + "obtain it via an appropraite DataNode.");
+    }
+
+    public DataNode getNode1() {
+        return accessStack.getDataDomain().getNode("map-db1");
+    }
+
+    public DataNode getNode2() {
+        return accessStack.getDataDomain().getNode("map-db2");
     }
 }

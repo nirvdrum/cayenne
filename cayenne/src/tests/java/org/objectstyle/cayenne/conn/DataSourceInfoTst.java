@@ -55,7 +55,7 @@
  */ 
 package org.objectstyle.cayenne.conn;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
 

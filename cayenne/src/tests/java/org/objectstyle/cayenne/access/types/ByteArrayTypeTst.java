@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.access.types;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

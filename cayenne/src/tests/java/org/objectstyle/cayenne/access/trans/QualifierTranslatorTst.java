@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.exp.TstUnaryExpSuite;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class QualifierTranslatorTst extends CayenneTestCase {
     private static Logger logObj =
@@ -77,12 +77,12 @@ public class QualifierTranslatorTst extends CayenneTestCase {
     protected TstQueryAssembler qa;
 
     protected void setUp() throws java.lang.Exception {
-        qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
+        qa = TstQueryAssembler.assembler(getNode(), Query.SELECT_QUERY);
     }
 
     public void testNonQualifiedQuery() throws java.lang.Exception {
         qa.dispose();
-        qa = TstQueryAssembler.assembler(getDomain(), Query.INSERT_QUERY);
+        qa = TstQueryAssembler.assembler(getNode(), Query.INSERT_QUERY);
 
         try {
             new QualifierTranslator(qa).doTranslation();

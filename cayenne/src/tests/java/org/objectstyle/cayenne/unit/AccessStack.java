@@ -53,36 +53,26 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 
 /**
+ * DataDomain wrapper used for testing a specific Cayenne stack configuration.
+ * 
  * @author Andrei Adamchik
  */
-public class OneWayMappingTestCase extends CayenneTestCase {
+public interface AccessStack {
+    public AccessStackAdapter getAdapter(DataNode node);
+    
+    public DataDomain getDataDomain();
 
-    /**
-     * Constructor for OneWayMappingTestCase.
-     */
-    public OneWayMappingTestCase() {
-        super();
-        OneWayMappingProject.init();
-    }
+    public void deleteTestData() throws Exception;
 
-    /**
-     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getDomain()
-     */
-    public DataDomain getDomain() {
-        return OneWayMappingProject.getInstance().getDomain();
-    }
+    public void dropSchema() throws Exception;
 
+    public void createSchema() throws Exception;
 
-    /**
-     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
-     */
-    public DataNode getNode() {
-        return (DataNode)getDomain().getDataNodes().iterator().next();
-    }
+    public void createPKSupport() throws Exception;
 }

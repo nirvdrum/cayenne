@@ -60,8 +60,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.unittest.*;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.TestBean;
 
 public class OrderingTst extends CayenneTestCase {
 

@@ -58,41 +58,44 @@ package org.objectstyle.cayenne.access.trans;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class QueryAssemblerTst extends CayenneTestCase {
-	protected TstQueryAssembler qa;
+    protected TstQueryAssembler qa;
 
-	protected void setUp() throws java.lang.Exception {
-		qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
-	}
+    protected void setUp() throws Exception {
+        qa = TstQueryAssembler.assembler(getNode(), Query.SELECT_QUERY);
+    }
 
-	public void testGetQuery() throws java.lang.Exception {
-		try {
-			assertNotNull(qa.getQuery());
-		} finally {
-			qa.dispose();
-		}
-	}
+    public void testGetQuery() throws java.lang.Exception {
+        try {
+            assertNotNull(qa.getQuery());
+        }
+        finally {
+            qa.dispose();
+        }
+    }
 
-	public void testAddToParamList() throws java.lang.Exception {
-		try {
-			assertEquals(0, qa.getAttributes().size());
-			assertEquals(0, qa.getValues().size());
+    public void testAddToParamList() throws java.lang.Exception {
+        try {
+            assertEquals(0, qa.getAttributes().size());
+            assertEquals(0, qa.getValues().size());
 
-			qa.addToParamList(new DbAttribute(), new Object());
-			assertEquals(1, qa.getAttributes().size());
-			assertEquals(1, qa.getValues().size());
-		} finally {
-			qa.dispose();
-		}
-	}
+            qa.addToParamList(new DbAttribute(), new Object());
+            assertEquals(1, qa.getAttributes().size());
+            assertEquals(1, qa.getValues().size());
+        }
+        finally {
+            qa.dispose();
+        }
+    }
 
-	public void testCreateStatement() throws java.lang.Exception {
-		try {
-			assertNotNull(qa.createStatement(Level.INFO));
-		} finally {
-			qa.dispose();
-		}
-	}
+    public void testCreateStatement() throws java.lang.Exception {
+        try {
+            assertNotNull(qa.createStatement(Level.INFO));
+        }
+        finally {
+            qa.dispose();
+        }
+    }
 }

@@ -59,7 +59,7 @@ import java.io.StringWriter;
 
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ClassGeneratorTst extends CayenneTestCase {
 

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 public class TestCaseDataFactory {
 
@@ -80,7 +80,8 @@ public class TestCaseDataFactory {
 
     public static void createArtist(String artistName) throws Exception {
 
-        Connection conn = CayenneTestResources.getResources().getSharedConnection();
+        Connection conn =
+            CayenneTestResources.getResources().getDataSource().getConnection();
 
         try {
             conn.setAutoCommit(false);
@@ -97,7 +98,8 @@ public class TestCaseDataFactory {
         boolean paintingInfo)
         throws Exception {
 
-        Connection conn = CayenneTestResources.getResources().getSharedConnection();
+        Connection conn =
+            CayenneTestResources.getResources().getDataSource().getConnection();
 
         try {
             conn.setAutoCommit(false);
@@ -144,7 +146,8 @@ public class TestCaseDataFactory {
         String artistName,
         String[] groupNames)
         throws Exception {
-        Connection conn = CayenneTestResources.getResources().getSharedConnection();
+        Connection conn =
+            CayenneTestResources.getResources().getDataSource().getConnection();
 
         try {
             conn.setAutoCommit(false);
@@ -177,7 +180,8 @@ public class TestCaseDataFactory {
     }
 
     public static void createUnconnectedGroup(String groupName) throws Exception {
-        Connection conn = CayenneTestResources.getResources().getSharedConnection();
+        Connection conn =
+            CayenneTestResources.getResources().getDataSource().getConnection();
 
         try {
             conn.setAutoCommit(false);

@@ -61,7 +61,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class PkGeneratorTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(PkGeneratorTst.class);
@@ -71,7 +71,7 @@ public class PkGeneratorTst extends CayenneTestCase {
     protected DbEntity paintEnt;
 
     protected void setUp() throws java.lang.Exception {
-        cleanTableData();
+        deleteTestData();
         node = (DataNode) getDomain().getDataNodes().iterator().next();
         pkGen = node.getAdapter().getPkGenerator();
         paintEnt = node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();

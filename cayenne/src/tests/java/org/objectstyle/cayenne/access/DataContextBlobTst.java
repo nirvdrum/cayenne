@@ -61,7 +61,7 @@ import java.util.List;
 import org.objectstyle.art.BlobTest;
 import org.objectstyle.cayenne.access.types.ByteArrayTypeTst;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -70,16 +70,18 @@ public class DataContextBlobTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+
+        deleteTestData();
         ctxt = createDataContext();
     }
 
     protected boolean skipTests() {
-        return !super.getDatabaseSetupDelegate().supportsLobs();
+        return !getAccessStackAdapter().supportsLobs();
     }
 
     protected boolean skipEmptyLOBTests() {
-        return !super.getDatabaseSetupDelegate().handlesNullVsEmptyLOBs();
+        return !getAccessStackAdapter().handlesNullVsEmptyLOBs();
     }
 
     public void testEmptyBlob() throws Exception {

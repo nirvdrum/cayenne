@@ -3,7 +3,7 @@ package org.objectstyle.cayenne.conf;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

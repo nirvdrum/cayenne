@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -96,7 +96,7 @@ public class DataContextTestBase extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        cleanTableData();
+        deleteTestData();
         populateTables();
 
         context = createDataContext();

@@ -53,19 +53,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
 import java.io.File;
 import java.sql.Connection;
-import java.util.Calendar;
-import java.util.Date;
-
-import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.event.EventManager;
 
@@ -75,80 +72,67 @@ import org.objectstyle.cayenne.event.EventManager;
  * 
  * @author Andrei Adamchik
  */
-public abstract class CayenneTestCase extends TestCase {
-
+public abstract class CayenneTestCase extends BasicTestCase {
     static {
-        // init resources if needed
-        CayenneTestResources.init();
-    }
-
-    public static File getDefaultTestResourceDir() {
-        return new File(
-            new File(new File(new File("build"), "tests"), "deps"),
-            "test-resources");
-    }
-
-    /**
-     * Utility method to strip the time part from the Date.
-     */
-    public static Date stripTime(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
-    }
-
-    protected void setUp() throws Exception {
-        // make sure that the right domain is setup as shared, as some tests
-        // may overwrite that
-        Configuration config = Configuration.getSharedConfiguration();
-        if (getDomain() != config.getDomain()) {
-            if (config.getDomain() != null) {
-                config.removeDomain(config.getDomain().getName());
+        // create dummy shared config
+        Configuration config = new DefaultConfiguration() {
+            public void initialize() {
             }
-            config.addDomain(getDomain());
-        }
+        };
+
+        Configuration.initializeSharedConfiguration(config);
+
+        // make sure CayenneTestResources is loaded
+        CayenneTestResources.class.getName();
+    }
+
+    protected AccessStack accessStack;
+
+    public CayenneTestCase() {
+        this.accessStack = buildAccessStack();
+    }
+
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources.getResources().getAccessStack(
+            CayenneTestResources.TEST_ACCESS_STACK);
+    }
+
+    protected AccessStackAdapter getAccessStackAdapter() {
+        return accessStack.getAdapter(getNode());
     }
 
     /**
      * Returns directory that should be used by all test 
      * cases that perform file operations.
      */
-    public File getTestDir() {
+    protected File getTestDir() {
         return CayenneTestResources.getResources().getTestDir();
     }
 
-    public File getTestResourceDir() {
-        return getDefaultTestResourceDir();
+    protected DataSourceInfo getConnectionInfo() throws Exception {
+        return CayenneTestResources.getResources().getConnectionInfo();
     }
 
-    public Connection getConnection() {
-        return CayenneTestResources.getResources().getSharedConnection();
+    protected Connection getConnection() throws Exception {
+        return getNode().getDataSource().getConnection();
     }
 
-    public DataDomain getDomain() {
-        return CayenneTestResources.getResources().getSharedDomain();
+    protected DataDomain getDomain() {
+        return accessStack.getDataDomain();
     }
 
-    public DataNode getNode() {
-        return CayenneTestResources.getResources().getSharedNode();
+    protected DataNode getNode() {
+        return (DataNode) getDomain().getDataNodes().iterator().next();
     }
 
-    public DataSourceInfo getFreshConnInfo() throws Exception {
-        return CayenneTestResources.getResources().getFreshConnInfo();
-    }
-
-    public DataContext createDataContext() {
+    protected DataContext createDataContext() {
         return createDataContextWithSharedCache();
     }
 
     /**
      * Creates a DataContext that uses shared snapshot cache and is based on default test domain.
      */
-    public DataContext createDataContextWithSharedCache() {
+    protected DataContext createDataContextWithSharedCache() {
         // remove listeners for snapshot events
         EventManager.getDefaultManager().removeAllListeners(
             getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
@@ -167,7 +151,7 @@ public abstract class CayenneTestCase extends TestCase {
     /**
      * Creates a DataContext that uses local snapshot cache and is based on default test domain.
      */
-    public DataContext createDataContextWithLocalCache() {
+    protected DataContext createDataContextWithLocalCache() {
         DataContext context = getDomain().createDataContext(false);
 
         assertNotSame(
@@ -177,15 +161,14 @@ public abstract class CayenneTestCase extends TestCase {
         return context;
     }
 
-    public TestDatabaseManager getDatabaseSetup() {
-        return CayenneTestResources.getResources().getDatabaseManager();
+    /**
+     * Returns AccessStack.
+     */
+    protected AccessStack getAccessStack() {
+        return accessStack;
     }
 
-    public DatabaseSetupDelegate getDatabaseSetupDelegate() {
-        return getDatabaseSetup().getDelegate();
-    }
-
-    public void cleanTableData() throws Exception {
-        getDatabaseSetup().cleanTableData();
+    protected void deleteTestData() throws Exception {
+        accessStack.deleteTestData();
     }
 }

@@ -62,7 +62,7 @@ import java.sql.PreparedStatement;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -74,12 +74,14 @@ public class IteratorTestBase extends CayenneTestCase {
 	protected SelectQuery query;
 
 	protected void setUp() throws Exception {
+        super.setUp();
+        
 		conn = null;
 		st = null;
 		transl = null;
 		query = null;
 
-		cleanTableData();
+		deleteTestData();
 		new DataContextTst().populateTables();
 	}
 

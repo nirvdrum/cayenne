@@ -39,6 +39,7 @@
     <classpathentry exported="true" kind="lib" path="otherlib/jdom-b9.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/macosx-ui-1.4.2_03.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/mockrunner-0.2.7.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/spring-1.0.jar"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -61,7 +61,7 @@ import java.util.Date;
 
 import org.objectstyle.art.DateTest;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Tests Date handling in Cayenne.
@@ -71,6 +71,13 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DateTimeTypesTst extends CayenneTestCase {
 
     protected DataContext context;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        deleteTestData();
+        context = createDataContext();
+    }
 
     public void testDate() throws Exception {
         DateTest test = (DateTest) context.createAndRegisterNewObject("DateTest");
@@ -101,11 +108,12 @@ public class DateTimeTypesTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(DateTest.class);
         DateTest testRead = (DateTest) context.performQuery(q).get(0);
         assertNotNull(testRead.getTimeColumn());
-        
+
         // OpenBase fails to store seconds for the time
         // do an approximate match rounding to minutes
-        
-        assertTrue(Math.abs(nowTime.getTime() - testRead.getTimeColumn().getTime()) < 1000 * 60);
+
+        assertTrue(
+            Math.abs(nowTime.getTime() - testRead.getTimeColumn().getTime()) < 1000 * 60);
     }
 
     public void testTimestamp() throws Exception {
@@ -114,10 +122,10 @@ public class DateTimeTypesTst extends CayenneTestCase {
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2003, 1, 1, 1, 20, 30);
-        
+
         // most databases fail millisecond accuracy
         // cal.set(Calendar.MILLISECOND, 55);
-        
+
         Date now = cal.getTime();
         test.setTimestampColumn(now);
         context.commitChanges();
@@ -126,10 +134,5 @@ public class DateTimeTypesTst extends CayenneTestCase {
         DateTest testRead = (DateTest) context.performQuery(q).get(0);
         assertNotNull(testRead.getTimestampColumn());
         assertEquals(now, testRead.getTimestampColumn());
-    }
-
-    protected void setUp() throws Exception {
-        cleanTableData();
-        context = createDataContext();
     }
 }

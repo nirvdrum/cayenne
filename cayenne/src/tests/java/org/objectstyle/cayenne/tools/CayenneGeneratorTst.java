@@ -65,8 +65,8 @@ import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 

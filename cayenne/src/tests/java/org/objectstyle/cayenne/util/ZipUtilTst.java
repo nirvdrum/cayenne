@@ -2,7 +2,7 @@ package org.objectstyle.cayenne.util;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -10,7 +10,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ZipUtilTst extends CayenneTestCase {
 
     public void testUnzip() throws Exception {
-        File jar = new File(getTestResourceDir(), "jar-test.jar");
+        File jar = new File(getTestResourcesDir(), "jar-test.jar");
         File unjarDir = getTestDir();
         File unjarRootDir = new File(unjarDir, "jar-test");
         File manifest =
@@ -35,7 +35,7 @@ public class ZipUtilTst extends CayenneTestCase {
     }
 
     public void testZip() throws Exception {
-        File jar = new File(getTestResourceDir(), "jar-test.jar");
+        File jar = new File(getTestResourcesDir(), "jar-test.jar");
         File unjarDir = getTestDir();
         File unjarRootDir = new File(unjarDir, "jar-test");
         File newJarFile = new File(unjarDir, "new-jar.jar");

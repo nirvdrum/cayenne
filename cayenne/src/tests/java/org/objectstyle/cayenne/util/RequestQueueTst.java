@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

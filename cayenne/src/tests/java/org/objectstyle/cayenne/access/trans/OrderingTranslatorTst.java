@@ -60,15 +60,15 @@ import org.objectstyle.cayenne.TranslationTestCase;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class OrderingTranslatorTst extends CayenneTestCase {
 
     protected TstQueryAssembler qa;
     protected SelectQuery q;
 
-    protected void setUp() throws java.lang.Exception {
-        qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
+    protected void setUp() throws Exception {
+        qa = TstQueryAssembler.assembler(getNode(), Query.SELECT_QUERY);
         q = (SelectQuery) qa.getQuery();
     }
 
@@ -85,7 +85,8 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 
             assertNotNull(orderBySql);
             tstCase.assertTranslatedWell(orderBySql);
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -103,7 +104,8 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 
             assertNotNull(orderBySql);
             tstCase.assertTranslatedWell(orderBySql);
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -122,7 +124,8 @@ public class OrderingTranslatorTst extends CayenneTestCase {
             assertNotNull(orderBySql);
             assertTrue(orderBySql.indexOf("UPPER(") != -1);
             tstCase.assertTranslatedWell(orderBySql);
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -147,7 +150,8 @@ public class OrderingTranslatorTst extends CayenneTestCase {
             // and ensure there is only ONE upper modifier
             assertTrue(orderBySql.indexOf("UPPER(", indexOfUpper + 1) == -1);
             tstCase.assertTranslatedWell(orderBySql);
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -173,7 +177,8 @@ public class OrderingTranslatorTst extends CayenneTestCase {
             assertTrue(orderBySql.indexOf("UPPER(", indexOfUpper + 1) != -1);
 
             tstCase.assertTranslatedWell(orderBySql);
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }
@@ -192,7 +197,8 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 
             assertNotNull(orderBySql);
             tstCase.assertTranslatedWell(orderBySql);
-        } finally {
+        }
+        finally {
             qa.dispose();
         }
     }

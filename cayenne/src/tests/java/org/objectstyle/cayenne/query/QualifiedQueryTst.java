@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class QualifiedQueryTst extends CayenneTestCase {
 	protected QualifiedQuery query;

@@ -7,7 +7,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.TstTraversalHandler;
-import org.objectstyle.cayenne.unittest.CayenneSimpleTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * Tests parameterized expressions of the new form introduced in 1.1
@@ -15,7 +15,7 @@ import org.objectstyle.cayenne.unittest.CayenneSimpleTestCase;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ParameterizedExpressionTst extends CayenneSimpleTestCase {
+public class ParameterizedExpressionTst extends BasicTestCase {
     /**
      * Tests how parameter substitution algorithm works on an expression
      * with no parameters.

@@ -65,7 +65,7 @@ import java.util.List;
 import org.objectstyle.art.CompoundPainting;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -78,7 +78,9 @@ public class DataContextCompoundOETst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+        
+        deleteTestData();
         ctxt = createDataContext();
     }
 

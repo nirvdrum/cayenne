@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.query;
 import java.util.Collections;
 
 import org.objectstyle.cayenne.TestOperationObserver;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public abstract class SelectQueryBase extends CayenneTestCase {
 
@@ -66,7 +66,7 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     protected TestOperationObserver opObserver;
     
     protected void setUp() throws Exception {
-        cleanTableData();
+        deleteTestData();
         populateTables();
         query = new SelectQuery();
         opObserver = new TestOperationObserver();

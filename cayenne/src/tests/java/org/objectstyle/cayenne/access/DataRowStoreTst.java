@@ -7,7 +7,7 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -66,12 +66,14 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class DbLoaderTst extends CayenneTestCase {
     protected DbLoader loader;
 
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
+        super.setUp();
+
         loader = new DbLoader(getConnection(), getNode().getAdapter(), null);
     }
 
@@ -89,7 +91,7 @@ public class DbLoaderTst extends CayenneTestCase {
 
             boolean supportsUnique = getNode().getAdapter().supportsUniqueConstraints();
 
-            boolean supportsLobs = super.getDatabaseSetupDelegate().supportsLobs();
+            boolean supportsLobs = getAccessStackAdapter().supportsLobs();
 
             DataMap map = new DataMap();
 

@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /** 
  * "Lightweight" test cases for DataContext. These
@@ -85,9 +85,11 @@ public class DataContextExtrasTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
+        super.setUp();
+
         context = createDataContext();
     }
-    
+
     public void testTransactionEventsEnabled() {
         context.setTransactionEventsEnabled(false);
         assertFalse(context.isTransactionEventsEnabled());
@@ -108,7 +110,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertTrue(context.getObjectStore().getObjects().contains(a1));
         assertTrue(context.newObjects().contains(a1));
     }
-    
+
     public void testCreateAndRegisterNewObjectWithClass() throws Exception {
         Artist a1 = (Artist) context.createAndRegisterNewObject(Artist.class);
         assertTrue(context.getObjectStore().getObjects().contains(a1));
@@ -116,33 +118,33 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testIdObjectFromDataRow() throws Exception {
-		DataRow row = new DataRow(10);
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100000));
         DataObject obj = context.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
         assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        
+
         assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
-		DataRow row = new DataRow(10);
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100001));
         row.put("ARTIST_NAME", "ArtistXYZ");
         DataObject obj = context.objectFromDataRow(Artist.class, row, false);
         assertNotNull(obj);
         assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-		assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
+        assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
     }
 
     public void testFullObjectFromDataRow() throws Exception {
-		DataRow row = new DataRow(10);
+        DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(123456));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
-		Artist obj = (Artist)context.objectFromDataRow(Artist.class, row, false);
+        Artist obj = (Artist) context.objectFromDataRow(Artist.class, row, false);
 
         assertTrue(context.getObjectStore().getObjects().contains(obj));
         assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
@@ -152,10 +154,10 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
     public void testCommitChangesError() throws Exception {
         // can't run this test due to the nature of some adapters
-        if(!getDatabaseSetupDelegate().supportsDroppingPK()) {
+        if (!getAccessStackAdapter().supportsDroppingPK()) {
             return;
         }
-        
+
         JdbcPkGenerator gen = (JdbcPkGenerator) getNode().getAdapter().getPkGenerator();
         int cache = gen.getPkCacheSize();
 
@@ -184,7 +186,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
         finally {
             observerLogger.setLevel(oldLevel);
-            getDatabaseSetup().createPkSupportForMapEntities(getNode());
+            accessStack.createPKSupport();
         }
     }
 

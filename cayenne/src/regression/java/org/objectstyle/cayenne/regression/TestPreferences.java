@@ -61,7 +61,7 @@ import java.util.Properties;
 import org.apache.commons.collections.ExtendedProperties;
 import org.objectstyle.cayenne.conf.ConnectionProperties;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.objectstyle.cayenne.unit.CayenneTestResources;
 
 /**
  * @author Andrei Adamchik

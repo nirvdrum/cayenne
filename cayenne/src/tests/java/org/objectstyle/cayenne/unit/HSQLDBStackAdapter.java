@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,47 +53,19 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.unit;
 
-package org.objectstyle.cayenne.unittest;
-
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 /**
- * Superclass of test cases requiring multiple DataContexts with 
- * the same parent DataDomain.
- * 
  * @author Andrei Adamchik
  */
-public abstract class MultiContextTestCase extends CayenneTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-        cleanTableData();
+public class HSQLDBStackAdapter extends AccessStackAdapter {
+    public HSQLDBStackAdapter(DbAdapter adapter) {
+        super(adapter);
     }
 
-    /**
-     * Helper method to create a new DataContext with the ObjectStore
-     * state being the mirror of the given context. This is done by
-     * serializing/deserializing the DataContext.
-     */
-    protected DataContext mirrorDataContext(DataContext context) throws Exception {
-        DataContext mirror = (DataContext) Util.cloneViaSerialization(context);
-
-        assertNotSame(context, mirror);
-        assertNotSame(context.getObjectStore(), mirror.getObjectStore());
-
-        if (context.isUsingSharedSnapshotCache()) {
-            assertSame(
-                context.getObjectStore().getDataRowCache(),
-                mirror.getObjectStore().getDataRowCache());
-        }
-        else {
-            assertNotSame(
-                context.getObjectStore().getDataRowCache(),
-                mirror.getObjectStore().getDataRowCache());
-        }
-
-        return mirror;
+    public boolean supportsHaving() {
+        return false;
     }
 }

@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.unittest.CayenneSimpleTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ObjEntityInheritanceTst extends CayenneSimpleTestCase {
+public class ObjEntityInheritanceTst extends BasicTestCase {
     protected DataMap map;
 
     protected ObjEntity entity1;

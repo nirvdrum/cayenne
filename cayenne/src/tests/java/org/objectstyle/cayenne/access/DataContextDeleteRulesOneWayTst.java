@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.art.oneway.Gallery;
 import org.objectstyle.art.oneway.Painting;
-import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
+import org.objectstyle.cayenne.unit.OneWayMappingTestCase;
 
 /**
  * 
@@ -67,7 +67,9 @@ public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
     private DataContext context;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+        
+        deleteTestData();
         context = getDomain().createDataContext();
     }
 

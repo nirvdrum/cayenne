@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access.util;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

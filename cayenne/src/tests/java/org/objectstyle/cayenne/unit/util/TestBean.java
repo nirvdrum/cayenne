@@ -53,55 +53,89 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unittest;
 
-import java.sql.Connection;
+package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- * Superclass of test cases that require multiple DataNodes.
+ * A non-persistent Java Bean used for various expressions testing.
  * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class MultiNodeTestCase extends CayenneTestCase {
+public class TestBean {
+    protected Integer integer;
+    protected String string;
+    protected String property1;
+    protected int property2;
+    protected Collection collection;
 
-    /**
-     * Constructor for MultiNodeTestCase.
-     */
-    public MultiNodeTestCase() {
-        super();
-        MultiNodeMappingProject.init();
+    public static TestBean testFixtureWithCollection(
+        String rootBaseName,
+        String childBaseName) {
+        TestBean root = new TestBean(rootBaseName, 0);
+
+        Collection collection = new ArrayList(10);
+        for (int i = 0; i < 10; i++) {
+            collection.add(new TestBean(childBaseName + i, i));
+        }
+
+        root.setCollection(collection);
+        return root;
     }
 
-    /**
-     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getDomain()
-     */
-    public DataDomain getDomain() {
-        return MultiNodeMappingProject.getInstance().getDomain();
+    public TestBean() {
+
     }
 
-    /**
-     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
-     */
-    public DataNode getNode() {
-        throw new RuntimeException(
-            "'getNode() makes no sense in multinode environment.. "
-                + "use getNode1() or getNode2()");
+    public TestBean(String string, int intValue) {
+        this.string = string;
+        this.integer = new Integer(intValue);
     }
 
-    public Connection getConnection() {
-        throw new RuntimeException(
-            "'getConnection() makes no sense in multinode environment.. "
-                + "obtain it via an appropraite DataNode.");
+    public TestBean(int intValue) {
+        integer = new Integer(intValue);
     }
 
-    public DataNode getNode1() {
-        return MultiNodeMappingProject.getInstance().getNode1();
+    public Integer getInteger() {
+        return integer;
     }
 
-    public DataNode getNode2() {
-        return MultiNodeMappingProject.getInstance().getNode2();
+    public void setInteger(Integer integer) {
+        this.integer = integer;
+    }
+
+    public String getString() {
+        return string;
+    }
+
+    public void setString(String string) {
+        this.string = string;
+    }
+
+    public String getProperty1() {
+        return property1;
+    }
+
+    public void setProperty1(String property1) {
+        this.property1 = property1;
+    }
+
+    public int getProperty2() {
+        return property2;
+    }
+
+    public void setProperty2(int property2) {
+        this.property2 = property2;
+    }
+
+    public Collection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(Collection collection) {
+        this.collection = collection;
     }
 }

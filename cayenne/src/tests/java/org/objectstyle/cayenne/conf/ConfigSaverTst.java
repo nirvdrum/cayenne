@@ -60,7 +60,7 @@ import java.io.StringWriter;
 
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Test cases for DomainHelper class.

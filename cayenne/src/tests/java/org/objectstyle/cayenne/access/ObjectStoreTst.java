@@ -63,7 +63,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -72,7 +72,9 @@ public class ObjectStoreTst extends CayenneTestCase {
     protected DataContext context;
     protected ObjectStore objectStore;
 
-    protected void setUp() {
+    protected void setUp() throws Exception {
+        super.setUp();
+        
         this.context = createDataContext();
 
         // create ObjectStore outside of this DataContext

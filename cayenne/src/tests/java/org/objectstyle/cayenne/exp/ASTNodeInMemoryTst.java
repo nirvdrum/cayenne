@@ -67,8 +67,8 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.TestBean;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.TestBean;
 
 /**
  * Test case for in memory expression evaluation by ASTNode produced from

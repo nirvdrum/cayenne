@@ -61,7 +61,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
 

@@ -61,7 +61,7 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * DataDomain unit tests.

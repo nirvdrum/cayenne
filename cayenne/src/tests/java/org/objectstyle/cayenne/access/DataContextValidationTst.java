@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.validation.ValidationException;
 import org.objectstyle.cayenne.validation.ValidationResult;
 

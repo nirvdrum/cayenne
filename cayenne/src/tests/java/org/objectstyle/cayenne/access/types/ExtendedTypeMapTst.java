@@ -60,7 +60,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 public class ExtendedTypeMapTst extends CayenneTestCase {

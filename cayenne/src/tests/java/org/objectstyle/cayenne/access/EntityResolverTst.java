@@ -10,16 +10,16 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver sharedResolver;
 
     protected void setUp() throws Exception {
+        super.setUp();
+        
         sharedResolver = new EntityResolver(getDomain().getDataMaps());
     }
-
-    ////Private conveniences
 
     private DbEntity getArtistDbEntity() {
         return getDomain().getMapForDbEntity("ARTIST").getDbEntity("ARTIST");

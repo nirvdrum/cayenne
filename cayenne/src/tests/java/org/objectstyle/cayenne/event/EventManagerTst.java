@@ -62,8 +62,8 @@ import java.util.EventObject;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 public class EventManagerTst extends CayenneTestCase implements EventListener {
     private static final Logger log = Logger.getLogger(EventManagerTst.class);

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.unit;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -6,10 +6,10 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 /**
  * @author Andrei Adamchik
  */
-public class DB2SetupDelegate extends DatabaseSetupDelegate {
-    private static Logger logObj = Logger.getLogger(DB2SetupDelegate.class);
+public class DB2StackAdapter extends AccessStackAdapter {
+    private static Logger logObj = Logger.getLogger(DB2StackAdapter.class);
 
-    public DB2SetupDelegate(DbAdapter adapter) {
+    public DB2StackAdapter(DbAdapter adapter) {
         super(adapter);
     }
 

@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.query;
  */
 
 import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class SqlSelectQueryTst extends CayenneTestCase {
 

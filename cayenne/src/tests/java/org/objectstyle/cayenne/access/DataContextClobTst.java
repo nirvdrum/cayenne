@@ -59,7 +59,7 @@ import java.util.List;
 
 import org.objectstyle.art.ClobTest;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -69,17 +69,19 @@ public class DataContextClobTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+
+        deleteTestData();
         ctxt = createDataContext();
     }
 
     protected boolean skipTests() {
-        return !super.getDatabaseSetupDelegate().supportsLobs();
+        return !getAccessStackAdapter().supportsLobs();
     }
-    
-	protected boolean skipEmptyLOBTests() {
-		return !super.getDatabaseSetupDelegate().handlesNullVsEmptyLOBs();
-	}
+
+    protected boolean skipEmptyLOBTests() {
+        return !getAccessStackAdapter().handlesNullVsEmptyLOBs();
+    }
 
     public void testEmptyClob() throws Exception {
         if (skipEmptyLOBTests()) {
@@ -124,7 +126,9 @@ public class DataContextClobTst extends CayenneTestCase {
         assertEquals(1, objects2.size());
 
         ClobTest clobObj2 = (ClobTest) objects2.get(0);
-        assertNull("Expected null, got: '" + clobObj2.getClobCol() + "'", clobObj2.getClobCol());
+        assertNull(
+            "Expected null, got: '" + clobObj2.getClobCol() + "'",
+            clobObj2.getClobCol());
 
         // update and save Clob
         clobObj2.setClobCol("updated rather small clob...");
@@ -154,7 +158,7 @@ public class DataContextClobTst extends CayenneTestCase {
             }
             clobObj1.setClobCol(new String(bytes));
         }
-        
+
         ctxt.commitChanges();
 
         // read the CLOB in the new context

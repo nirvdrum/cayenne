@@ -53,89 +53,38 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.unit;
 
-package org.objectstyle.cayenne.unittest;
-
-import java.util.ArrayList;
-import java.util.Collection;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.springframework.beans.factory.FactoryBean;
 
 /**
- * A non-persistent Java Bean used for various expressions testing.
+ * A Spring-compatible factory to load DataMaps.
  * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-public class TestBean {
-    protected Integer integer;
-    protected String string;
-    protected String property1;
-    protected int property2;
-    protected Collection collection;
+public class DataMapFactory implements FactoryBean {
+    protected DataMap map;
+    protected String location;
 
-    public static TestBean testFixtureWithCollection(
-        String rootBaseName,
-        String childBaseName) {
-        TestBean root = new TestBean(rootBaseName, 0);
+    public DataMapFactory(String location) {
+        this.location = location;
+    }
 
-        Collection collection = new ArrayList(10);
-        for (int i = 0; i < 10; i++) {
-            collection.add(new TestBean(childBaseName + i, i));
+    public Object getObject() throws Exception {
+        if (map == null) {
+            map = new MapLoader().loadDataMap(location);
         }
 
-        root.setCollection(collection);
-        return root;
+        return map;
     }
 
-    public TestBean() {
-
+    public Class getObjectType() {
+        return DataMap.class;
     }
 
-    public TestBean(String string, int intValue) {
-        this.string = string;
-        this.integer = new Integer(intValue);
-    }
-
-    public TestBean(int intValue) {
-        integer = new Integer(intValue);
-    }
-
-    public Integer getInteger() {
-        return integer;
-    }
-
-    public void setInteger(Integer integer) {
-        this.integer = integer;
-    }
-
-    public String getString() {
-        return string;
-    }
-
-    public void setString(String string) {
-        this.string = string;
-    }
-
-    public String getProperty1() {
-        return property1;
-    }
-
-    public void setProperty1(String property1) {
-        this.property1 = property1;
-    }
-
-    public int getProperty2() {
-        return property2;
-    }
-
-    public void setProperty2(int property2) {
-        this.property2 = property2;
-    }
-
-    public Collection getCollection() {
-        return collection;
-    }
-
-    public void setCollection(Collection collection) {
-        this.collection = collection;
+    public boolean isSingleton() {
+        return true;
     }
 }

@@ -61,6 +61,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
+ * Helper class to expose methods with default access defined in DataRowUtils.
+ * 
  * @author Andrei Adamchik
  */
 public class MockupDataRowUtils extends DataRowUtils {

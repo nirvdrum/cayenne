@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class SelectTranslatorTst extends CayenneTestCase {
 	private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);

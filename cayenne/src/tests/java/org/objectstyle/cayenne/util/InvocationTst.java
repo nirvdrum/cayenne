@@ -61,7 +61,7 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class InvocationTst extends CayenneTestCase {
 	private String _methodName = "myListenerMethod";

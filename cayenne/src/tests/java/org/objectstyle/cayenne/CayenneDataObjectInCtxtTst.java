@@ -63,13 +63,13 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        deleteTestData();
         context = getDomain().createDataContext();
     }
 

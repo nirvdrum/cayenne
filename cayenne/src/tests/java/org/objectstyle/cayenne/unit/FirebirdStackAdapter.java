@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -52,61 +52,40 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
-package org.objectstyle.cayenne.exp;
+ */
+package org.objectstyle.cayenne.unit;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import java.sql.Connection;
 
-public class BinaryExpressionTst extends CayenneTestCase {
-    // non-existent type
-    private static final int defaultType = -33;
-    protected BinaryExpression expr;
-    
-    protected void setUp() throws java.lang.Exception {
-        expr = new BinaryExpression(defaultType);
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class FirebirdStackAdapter extends AccessStackAdapter {
+    Logger logObj = Logger.getLogger(FirebirdAdapter.class);
+
+    public FirebirdStackAdapter(DbAdapter adapter) {
+        super(adapter);
+        // TODO Auto-generated constructor stub
     }
-    
-    
-    public void testGetType() throws java.lang.Exception {
-        assertEquals(defaultType, expr.getType());
+
+    public boolean supportsBinaryPK() {
+        return false;
     }
-    
-    
-    public void testGetOperandCount() throws java.lang.Exception {
-        assertEquals(2, expr.getOperandCount());
+
+    public void willCreateTables(Connection con, DataMap map) throws Exception {
+        logObj.warn(
+            "*** Firebird does not support binary PK. Corresponding test tables will be skipped.");
+
+        // modify DataMap
+
+        map.removeDbEntity("BINARY_PK_TEST1", false);
+        map.removeDbEntity("BINARY_PK_TEST2", false);
+
+        super.willCreateTables(con, map);
     }
-    
-    
-    public void testGetOperandAtIndex() throws java.lang.Exception {
-        expr.getOperand(0);
-        expr.getOperand(1);
-        
-        try {
-            expr.getOperand(2);
-            fail();
-        }
-        catch(Exception ex) {
-            // exception expected..
-        }
-    }
-    
-    
-    public void testSetOperandAtIndex() throws java.lang.Exception {
-        Object o1 = new Object();
-        Object o2 = new Object();
-        
-        expr.setOperand(0, o1);
-        expr.setOperand(1, o2);
-        assertSame(o1, expr.getOperand(0));
-        assertSame(o2, expr.getOperand(1));  
-        
-        try {
-            expr.setOperand(2, o1);
-            fail();
-        }
-        catch(Exception ex) {
-            // exception expected..
-        }
-    }
-    
 }

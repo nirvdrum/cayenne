@@ -63,7 +63,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
 import org.xml.sax.InputSource;
 
 public class MapLoaderLoadTst extends TestCase {
@@ -71,10 +70,12 @@ public class MapLoaderLoadTst extends TestCase {
     private String testDataMap;
 
     public void setUp() throws Exception {
+        super.setUp();
+
         mapLoader = new MapLoader();
         testDataMap =
             ClassLoader
-                .getSystemResource(CayenneTestResources.TEST_MAP_PATH)
+                .getSystemResource("test-resources/testmap.map.xml")
                 .toExternalForm();
     }
 

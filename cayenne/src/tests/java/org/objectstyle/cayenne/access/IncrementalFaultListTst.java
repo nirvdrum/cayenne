@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -81,7 +81,7 @@ public class IncrementalFaultListTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        cleanTableData();
+        deleteTestData();
         new DataContextTst().populateTables(true);
 
         SelectQuery q = new SelectQuery("Artist");

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -69,6 +69,8 @@ public class PartialProjectTst extends CayenneTestCase {
     protected PartialProject project;
 
     protected void setUp() throws Exception {
+        super.setUp();
+        
         // create new test directory, copy cayenne.xml in there
         File baseDir = super.getTestDir();
         for (int i = 1; i < 100; i++) {
@@ -84,7 +86,7 @@ public class PartialProjectTst extends CayenneTestCase {
         }
 
         // copy cayenne.xml
-        File src = new File(getTestResourceDir(), "lightweight-cayenne.xml");
+        File src = new File(getTestResourcesDir(), "lightweight-cayenne.xml");
         if (!Util.copy(src, testProjectFile)) {
             throw new Exception("Can't copy from " + src);
         }

@@ -5,7 +5,7 @@ import org.objectstyle.art.BinaryPKTest1;
 import org.objectstyle.art.BinaryPKTest2;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -16,12 +16,14 @@ public class DataContextBinaryPKTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+
+        deleteTestData();
         context = createDataContext();
     }
 
     public void testInsertBinaryPK() throws Exception {
-        if (!getDatabaseSetupDelegate().supportsBinaryPK()) {
+        if (!getAccessStackAdapter().supportsBinaryPK()) {
             return;
         }
 
@@ -40,7 +42,7 @@ public class DataContextBinaryPKTst extends CayenneTestCase {
     }
 
     public void testFetchRelationshipBinaryPK() throws Exception {
-        if (!getDatabaseSetupDelegate().supportsBinaryPK()) {
+        if (!getAccessStackAdapter().supportsBinaryPK()) {
             return;
         }
 

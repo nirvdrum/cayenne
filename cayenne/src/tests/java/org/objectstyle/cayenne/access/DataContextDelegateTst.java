@@ -62,7 +62,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * Tests various DataContextDelegate methods invocation and consequences on

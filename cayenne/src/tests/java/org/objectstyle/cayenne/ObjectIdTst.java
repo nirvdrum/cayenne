@@ -60,7 +60,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjectIdTst extends CayenneTestCase {
 

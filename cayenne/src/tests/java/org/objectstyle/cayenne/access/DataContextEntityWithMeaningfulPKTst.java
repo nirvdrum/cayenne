@@ -61,7 +61,7 @@ import org.objectstyle.art.MeaningfulPKDep;
 import org.objectstyle.art.MeaningfulPKTest1;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
@@ -70,7 +70,9 @@ public class DataContextEntityWithMeaningfulPKTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        cleanTableData();
+        super.setUp();
+        
+        deleteTestData();
         ctxt = getDomain().createDataContext();
     }
 

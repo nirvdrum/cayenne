@@ -72,8 +72,8 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
-import org.objectstyle.cayenne.unittest.MultiContextTestCase;
-import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
+import org.objectstyle.cayenne.unit.MultiContextTestCase;
+import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 /**
  * Test suite for testing behavior of multiple DataContexts that share the same

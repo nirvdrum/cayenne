@@ -60,7 +60,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.DeleteQuery;
@@ -68,31 +69,37 @@ import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
 
 public class TstQueryAssembler extends QueryAssembler {
 
     protected List dbRels = new ArrayList();
 
-    public static TstQueryAssembler assembler(QueryEngine e, int qType) {
+    public static TstQueryAssembler assembler(DataNode node, int qType) {
         switch (qType) {
             case Query.INSERT_QUERY :
-                return new TstQueryAssembler(e, new InsertQuery());
+                return new TstQueryAssembler(node, new InsertQuery());
             case Query.DELETE_QUERY :
-                return new TstQueryAssembler(e, new DeleteQuery());
+                return new TstQueryAssembler(node, new DeleteQuery());
             case Query.SELECT_QUERY :
-                return new TstQueryAssembler(e, new SelectQuery());
+                return new TstQueryAssembler(node, new SelectQuery());
             case Query.UPDATE_QUERY :
-                return new TstQueryAssembler(e, new UpdateQuery());
+                return new TstQueryAssembler(node, new UpdateQuery());
             default :
                 throw new RuntimeException("Unknown query type: " + qType);
         }
     }
 
-    public TstQueryAssembler(QueryEngine e, Query q) {
-        super.setAdapter(CayenneTestResources.getResources().getSharedNode().getAdapter());
-        super.setCon(CayenneTestResources.getResources().getSharedConnection());
-        super.setEngine(e);
+    public TstQueryAssembler(DataNode node, Query q) {
+
+        super.setAdapter(node.getAdapter());
+
+        try {
+            super.setCon(node.getDataSource().getConnection());
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error getting connection...", ex);
+        }
+        super.setEngine(node);
         super.setQuery(q);
     }
 

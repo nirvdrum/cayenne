@@ -144,7 +144,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testSelectLikeCaseSensitive() throws Exception {
-        if (!getDatabaseSetupDelegate().supportsCaseSensitiveLike()) {
+        if (!getAccessStackAdapter().supportsCaseSensitiveLike()) {
             return;
         }
 
