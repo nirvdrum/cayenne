@@ -55,7 +55,6 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-
 import java.util.*;
 
 /**
@@ -79,10 +78,8 @@ public class DataMap {
       * name) serves as a key. */
     private SortedMap dbEntityMap = new TreeMap();
 
-
     /** Creates an empty DataMap */
     public DataMap() {}
-
 
     /** Creates an empty DataMap and assigns it a <code>name</code>. */
     public DataMap(String name) {
@@ -98,7 +95,6 @@ public class DataMap {
         this.name = name;
     }
 
-
     /** Returns "location" property value.
       * Location is abstract and treated differently
       * by different loaders. See Configuration class
@@ -106,7 +102,6 @@ public class DataMap {
     public String getLocation() {
         return location;
     }
-
 
     /** Sets "location" property. Usually location is set by
       * map loader when map is created from a XML file,
@@ -116,19 +111,16 @@ public class DataMap {
         this.location = location;
     }
 
-
     public SortedMap getObjEntityMap() {
         return Collections.unmodifiableSortedMap(objEntityMap);
     }
 
-   
     /** Returns sorted unmodifiable map of DbEntities
       * contained in this DataMap. Keys are DbEntity
-      * names (same as database table names). */ 
+      * names (same as database table names). */
     public SortedMap getDbEntityMap() {
         return Collections.unmodifiableSortedMap(dbEntityMap);
     }
-
 
     /** Adds ObjEntity to the list of map entities.
       * If there is another entity registered under the same name
@@ -140,7 +132,6 @@ public class DataMap {
         }
     }
 
-    
     /** Adds DbEntity to the list of map entities.
       * If there is another entity registered under the same name
       * already, does nothing. */
@@ -149,7 +140,6 @@ public class DataMap {
         if (!dbEntityMap.containsKey(name))
             dbEntityMap.put(name, dbEntity);
     }
-
 
     /** Return an array of object entities (by copy) */
     public ObjEntity[] getObjEntities() {
@@ -177,34 +167,26 @@ public class DataMap {
         return immutableEnts;
     }
 
-
-
     /** Returns a list of ObjEntities stored in this DataMap. */
     public List getObjEntitiesAsList() {
         return new ArrayList(objEntityMap.values());
     }
 
-
     public List getDbEntitiesAsList() {
         return new ArrayList(dbEntityMap.values());
     }
 
-
-
     /** Get DbEntity by its name.*/
     public DbEntity getDbEntity(String db_entity_name) {
-        DbEntity temp = (DbEntity)getDbEntityMap().get(db_entity_name);
+        DbEntity temp = (DbEntity) getDbEntityMap().get(db_entity_name);
         return temp;
     }
-
-
 
     /** Get ObjEntity by its name. */
     public ObjEntity getObjEntity(String obj_entity_name) {
-        ObjEntity temp = (ObjEntity)getObjEntityMap().get(obj_entity_name);
+        ObjEntity temp = (ObjEntity) getObjEntityMap().get(obj_entity_name);
         return temp;
     }
-
 
     /** Get the object entity mapped to the specified database table.
     *  The search is conducted in case-independent manner.
@@ -213,40 +195,35 @@ public class DataMap {
         Collection obj_entity_coll = objEntityMap.values();
         Iterator iter = obj_entity_coll.iterator();
         while (iter.hasNext()) {
-            ObjEntity temp = (ObjEntity)iter.next();
+            ObjEntity temp = (ObjEntity) iter.next();
             if (temp.getDbEntity().getName().equalsIgnoreCase(db_table_name))
                 return temp;
         } // End while()
         return null;
     }
 
-
     /** Get the database entity mapped to the specified data object class */
     public DbEntity getDbEntityByObjEntityName(String data_object_class_name) {
-        ObjEntity obj_temp = (ObjEntity)getObjEntityMap().get(data_object_class_name);
+        ObjEntity obj_temp = (ObjEntity) getObjEntityMap().get(data_object_class_name);
         if (null == obj_temp)
             return null;
         return obj_temp.getDbEntity();
     }
 
-    /** Change the db entity name */
-    public void changeDbEntityName(String old_name, String new_name) {
-        DbEntity temp = getDbEntity(old_name);
-        temp.setName(new_name);
+    /** Renames DbEntity. */
+    public void renameDbEntity(String oldName, String newName) {
+        getDbEntity(oldName).setName(newName);
     }
 
-    /** Change the obj entity name */
-    public void changeObjEntityName(String old_name, String new_name) {
-        ObjEntity temp = getObjEntity(old_name);
-        temp.setName(new_name);
+    /** Renames ObjEntity */
+    public void renameObjEntity(String oldName, String newName) {
+        getObjEntity(oldName).setName(newName);
     }
-
 
     /** "Dirty" remove of the DbEntity from the data map. */
     public void removeDbEntity(String entity_name) {
         dbEntityMap.remove(entity_name);
     }
-
 
     /** Clean remove of the DbEntity from the data map.
      *  If there are any ObjEntities or ObjRelationship entities
@@ -259,7 +236,7 @@ public class DataMap {
         // No db entity to remove? return.
         if (null == db_entity) {
             System.out.println("Entity " + entity_name + " is not found");
-            return ;
+            return;
         }
         dbEntityMap.remove(entity_name);
 
@@ -267,7 +244,7 @@ public class DataMap {
         for (int i = 0; i < db_entity_arr.length; i++) {
             Iterator rel_iter = db_entity_arr[i].getRelationshipList().iterator();
             while (rel_iter.hasNext()) {
-                DbRelationship rel = (DbRelationship)rel_iter.next();
+                DbRelationship rel = (DbRelationship) rel_iter.next();
                 if (rel.getTargetEntity() == db_entity)
                     db_entity_arr[i].removeRelationship(rel.getName());
             }
@@ -277,16 +254,17 @@ public class DataMap {
         Collection obj_entity_coll = objEntityMap.values();
         Iterator obj_entity_iter = obj_entity_coll.iterator();
         while (obj_entity_iter.hasNext()) {
-            ObjEntity temp = (ObjEntity)obj_entity_iter.next();
+            ObjEntity temp = (ObjEntity) obj_entity_iter.next();
             if (temp.getDbEntity() == db_entity) {
                 temp.clearDbMapping();
-            } else {
+            }
+            else {
                 Iterator iter = temp.getRelationshipList().iterator();
                 while (iter.hasNext()) {
-                    ObjRelationship rel = (ObjRelationship)iter.next();
+                    ObjRelationship rel = (ObjRelationship) iter.next();
                     Iterator db_rel_iter = rel.getDbRelationshipList().iterator();
                     while (db_rel_iter.hasNext()) {
-                        DbRelationship db_rel = (DbRelationship)db_rel_iter.next();
+                        DbRelationship db_rel = (DbRelationship) db_rel_iter.next();
                         if (db_rel.getTargetEntity() == db_entity) {
                             rel.removeAllDbRelationships();
                             break;
@@ -297,22 +275,21 @@ public class DataMap {
         } // End looping through ObjEntities
     }
 
-
     /** Clean remove of the ObjEntity from the data map.
      *  Removes all ObjRelationships referencing this ObjEntity
      */
     public void deleteObjEntity(String entity_name) {
-        ObjEntity entity = (ObjEntity)objEntityMap.get(entity_name);
+        ObjEntity entity = (ObjEntity) objEntityMap.get(entity_name);
         if (null == entity) {
             System.out.println("Entity " + entity_name + " is not found");
-            return ;
+            return;
         }
         objEntityMap.remove(entity_name);
         ObjEntity[] obj_entity_arr = getObjEntities();
         for (int i = 0; i < obj_entity_arr.length; i++) {
             Iterator rel_iter = obj_entity_arr[i].getRelationshipList().iterator();
             while (rel_iter.hasNext()) {
-                ObjRelationship rel = (ObjRelationship)rel_iter.next();
+                ObjRelationship rel = (ObjRelationship) rel_iter.next();
                 if (rel.getTargetEntity() == entity || rel.getSourceEntity() == entity) {
                     obj_entity_arr[i].removeRelationship(rel.getName());
                 }
@@ -320,12 +297,10 @@ public class DataMap {
         } // End for()
     }
 
-
     /** "Dirty" remove of the ObjEntity from the data map.*/
     public void removeObjEntity(String entity_name) {
         objEntityMap.remove(entity_name);
     }
-
 
     //methods needed by DataMapValidator
     //there are no friend classes in Java
