@@ -55,19 +55,49 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * @author Andrei Adamchik
  */
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Validator Package Tests");
-	    suite.addTestSuite(ValidatorTst.class);
-	    suite.addTestSuite(DomainValidatorTst.class);
-	    suite.addTestSuite(DataNodeValidatorTst.class);
-	    suite.addTestSuite(ObjEntityValidatorTst.class);
-		return suite;
-	}
-}
+public class ObjEntityValidatorTst extends ValidatorTestBase {
 
+    /**
+     * Constructor for ObjEntityValidatorTst.
+     * @param arg0
+     */
+    public ObjEntityValidatorTst(String arg0) {
+        super(arg0);
+    }
+
+    public void testValidateNoName() throws Exception {
+        DataDomain d1 = new DataDomain("d1");
+
+        DataMap m1 = new DataMap("m1");
+        d1.addMap(m1);
+
+        ObjEntity oe1 = new ObjEntity("oe1");
+        oe1.setDbEntity(new DbEntity("de1"));
+        oe1.setClassName("java.class.name");
+        m1.addObjEntity(oe1);
+
+        validator.reset();
+        new ObjEntityValidator().validateObject(
+            new Object[] { conf, d1, m1, oe1 },
+            validator);
+        assertValidator(ValidationResult.VALID);
+
+        // now remove the name
+        oe1.setName(null);
+        
+        validator.reset();
+        new ObjEntityValidator().validateObject(
+            new Object[] { conf, d1, m1, oe1 },
+            validator);
+        assertValidator(ValidationResult.ERROR);
+    }
+
+}
