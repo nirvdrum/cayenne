@@ -160,15 +160,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             DataObject object = (DataObject) it.next();
 
             // remove object but not snapshot
-			objectMap.remove(object.getObjectId());
-			snapshotCache.forgetSnapshot(object.getObjectId());
+            objectMap.remove(object.getObjectId());
+            snapshotCache.forgetSnapshot(object.getObjectId());
 
             object.setDataContext(null);
             object.setObjectId(null);
             object.setPersistenceState(PersistenceState.TRANSIENT);
         }
-
-        
 
         // no snapshot events needed... snapshots maybe cleared, but no database changes
         // have occured.
@@ -404,7 +402,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             DataObject dataObj = (DataObject) it.next();
 
             ObjectId oid = dataObj.getObjectId();
-			objectMap.remove(oid);
+            objectMap.remove(oid);
             removeSnapshot(oid);
 
             dataObj.setDataContext(null);
@@ -441,6 +439,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized void removeObject(ObjectId id) {
         if (id != null) {
             objectMap.remove(id);
+			removeSnapshot(id);
         }
     }
 
@@ -449,10 +448,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * via ObjectStore are deprecated due to architecture changes.
      */
     public synchronized void removeSnapshot(ObjectId id) {
-        getSnapshotCache().processSnapshotChanges(
-            this,
-            Collections.EMPTY_MAP,
-            Collections.singletonList(id));
+        snapshotCache.forgetSnapshot(id);
     }
 
     /** 
