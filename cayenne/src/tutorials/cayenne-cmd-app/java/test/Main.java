@@ -84,11 +84,14 @@ public class Main {
         dali.setArtistName("Salvador Dali");
 
         // create new Painting object
-        Painting paint = (Painting) ctxt.createAndRegisterNewObject("Painting");
-        paint.setPaintingTitle("Sleep");
+        Painting painting = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        painting.setPaintingTitle("Sleep");
 
         // establish relationship between artist and painting
-        dali.addToPaintingArray(paint);
+        dali.addToPaintingArray(painting);
+        
+        // establish relationship between painting and gallery
+        gallery.addToPaintingArray(painting);
 
         // commit to the database
         // using log level of WARN to show the query execution
