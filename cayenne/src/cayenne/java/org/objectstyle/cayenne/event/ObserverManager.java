@@ -143,7 +143,7 @@ public class ObserverManager extends Object
 				Invocation invocation = (Invocation)iter.next();
 
 				// fire invocation, detect if anything went wrong
-				if (!invocation.fire(event))
+				if (invocation.fire(event) == false)
 				{
 					log.debug("invalid invocation detected");
 
