@@ -55,29 +55,47 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import org.objectstyle.util.ResourceLocator;
 import java.util.logging.Logger;
 import java.io.InputStream;
+import javax.servlet.ServletContext;
+
+import org.objectstyle.util.ResourceLocator;
+
 
 /**
- * Subclass of Configuration that uses System CLASSPATH to locate resources.
+ * Subclass of Configuration that uses ServletContext to locate resources. 
+ * This class can only be used in a context of a servlet/jsp container.
+ * It resolves configuration file paths relative to the web application
+ * "WEB-INF" directory.
  *
  * @author Andrei Adamchik
  */
-public class DefaultConfiguration extends Configuration {
-    static Logger logObj = Logger.getLogger(DefaultConfiguration.class.getName());
+public class ServletConfiguration extends Configuration {
+    static Logger logObj = Logger.getLogger(ServletConfiguration.class.getName());
+
+    protected ServletContext ctxt;
 
 
-    /** Returns domain configuration as a stream or null if it
-      * can not be found. */
+    /** Creates new ServletConfiguration object and sets
+      * its internal ServletContext to <code>ctxt</code>. 
+      * ServletContext is used by this object to resolve
+      * filelocations. */
+    public ServletConfiguration(ServletContext ctxt) {
+        this.ctxt = ctxt;
+    }
+
+
+    /** Locates domain configuration file in a web application
+      * looking for "cayenne.xml" in application "WEB-INF" directory. */
     public InputStream getDomainConfig() {
-        return ResourceLocator.findResourceInClasspath(DOMAIN_FILE);
+        return ctxt.getResourceAsStream("/WEB-INF/" + DOMAIN_FILE);
     }
     
-    /** Returns DataMap configuration from a specified location or null if it
-      * can not be found. */
+    /** Locates data map configuration file via ServletContext 
+      * associated with this Configuration treating 
+      * <code>location</code> as relative to application "WEB-INF" directory.. */
     public InputStream getMapConfig(String location) {
-        return ResourceLocator.findResourceInClasspath(location);
+        return ctxt.getResourceAsStream("/WEB-INF/" + location);
     }
 }
 

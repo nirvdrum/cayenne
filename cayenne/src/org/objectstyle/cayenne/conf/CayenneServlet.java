@@ -55,29 +55,32 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import org.objectstyle.util.ResourceLocator;
-import java.util.logging.Logger;
-import java.io.InputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
+
 
 /**
- * Subclass of Configuration that uses System CLASSPATH to locate resources.
- *
- * @author Andrei Adamchik
+  * Servlet used to configure Cayenne on web application
+  * startup. To automatically configure Cayenne during startup,
+  * add an entry in your web.xml configuration file similar to this:
+  *<pre>&lt;servlet&gt;
+    &lt;servlet-name&gt;cayenne-config&lt;/servlet-name&gt; 
+    &lt;servlet-class&gt;org.objectstyle.cayenne.conf.CayenneServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;</pre>
+  *
+  * <p><i>TODO: this is a good entry point for Cayenne web administration.
+  * Need some ideas what should be included in such admin tool. </i></p>
+  *
+  * @author Andrei Adamchik
  */
-public class DefaultConfiguration extends Configuration {
-    static Logger logObj = Logger.getLogger(DefaultConfiguration.class.getName());
-
-
-    /** Returns domain configuration as a stream or null if it
-      * can not be found. */
-    public InputStream getDomainConfig() {
-        return ResourceLocator.findResourceInClasspath(DOMAIN_FILE);
-    }
+public class CayenneServlet extends HttpServlet {
     
-    /** Returns DataMap configuration from a specified location or null if it
-      * can not be found. */
-    public InputStream getMapConfig(String location) {
-        return ResourceLocator.findResourceInClasspath(location);
+    /** Initializes Cayenne objects. */
+    public void init() throws ServletException {
+        super.init();
+        ServletConfiguration conf = new ServletConfiguration(this.getServletContext());
+        Configuration.initSharedConfig(conf);
     }
 }
 

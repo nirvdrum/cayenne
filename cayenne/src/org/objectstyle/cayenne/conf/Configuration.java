@@ -74,8 +74,6 @@ import java.io.*;
  * By default org.objectstyle.cayenne.conf.DefaultConfiguration is instantiated.
  * </p>
  *
- * <p>This is a complete rewrite of deprecated ConfigManager class.</p>   
- *
  * @author Andrei Adamchik
  */
 public abstract class Configuration {
@@ -86,7 +84,11 @@ public abstract class Configuration {
 
     private static Configuration sharedConfig;
 
-    /** Use this method as an entry point to all Cayenne access objects */
+    /** Use this method as an entry point to all Cayenne access objects.
+      * <p>Note that if you want to provide custom Configuration,
+      * make sure you call one of <code>initSharedConfig</code> methods
+      * before your application code has a chance to call this method.
+      */
     public synchronized static Configuration getSharedConfig() {
         if (sharedConfig == null)
             initSharedConfig();
