@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.project.validator;
 
 import java.util.Iterator;
 
-import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.Util;
@@ -77,7 +77,7 @@ public class DbRelationshipValidator extends TreeNodeValidator {
     public void validateObject(ProjectPath path, Validator validator) {
         DbRelationship rel = (DbRelationship) path.getObject();
         if (rel.getTargetEntity() == null) {
-            validator.registerError("DbRelationship has no target entity.", path);
+            validator.registerWarning("DbRelationship has no target entity.", path);
         }
         else if (rel.getJoins().size() == 0) {
             validator.registerWarning("DbRelationship has no joins.", path);
@@ -86,7 +86,7 @@ public class DbRelationshipValidator extends TreeNodeValidator {
             // validate joins
             Iterator joins = rel.getJoins().iterator();
             while (joins.hasNext()) {
-                DbAttributePair join = (DbAttributePair) joins.next();
+                DbJoin join = (DbJoin) joins.next();
                 if (join.getSource() == null && join.getTarget() == null) {
                     validator.registerWarning(
                         "DbRelationship join has no source and target attributes selected.",

@@ -90,9 +90,15 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     // ====================================================
     // DataMaps that provide dependencies for this DataMap
     // ====================================================
+    /**
+     * @deprecated since 1.1
+     */
     private List dependencies = new ArrayList();
 
     // read-through reference for public access
+    /**
+     * @deprecated since 1.1
+     */
     private List dependenciesRef = Collections.unmodifiableList(dependencies);
 
     // ====================================================
@@ -255,6 +261,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * 
      * @throws IllegalArgumentException if a <code>map</code> argument
      * already depends on thsi map directly or indirectly.
+     * 
+     * @deprecated since 1.1
      */
     public void addDependency(DataMap map) throws IllegalArgumentException {
         if (map.isDependentOn(this)) {
@@ -272,11 +280,17 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         logObj.debug("added dependency: '" + map.getName() + "'");
     }
 
+    /**
+     * @deprecated since 1.1
+     */
     public void removeDependency(DataMap map) {
         dependencies.remove(map);
         logObj.debug("removed dependency: '" + map.getName() + "'");
     }
 
+    /**
+     * @deprecated since 1.1
+     */
     public List getDependencies() {
         return dependenciesRef;
     }
@@ -288,6 +302,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * For instance if the following dependency exists:
      * map1 -> map2 -> map3, calling <code>map1.isDependentOn(map3)</code>
      * will return <code>true</code>.
+     * 
+     * @deprecated since 1.1
      */
     public boolean isDependentOn(DataMap map) {
         if (dependencies.size() == 0) {
@@ -310,6 +326,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return false;
     }
 
+    /**
+     * @deprecated since 1.1
+     */
     public void clearDependencies() {
         dependencies.clear();
     }
@@ -330,8 +349,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * to this map. Overwrites all existing entities with the
      * new ones.
      * 
-     * <p><i>FIXME: will need to implement advanced merge
-     * that allows different policies for overwriting entities.
+     * <p><i>TODO: will need to implement advanced merge that allows 
+     * different policies for overwriting entities.
      * </i></p>
      */
     public void mergeWithDataMap(DataMap map) {
@@ -502,6 +521,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     /**
      * Returns all DbEntities in this DataMap, including entities
      * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+     * 
+     * @deprecated since 1.1
      */
     public Collection getDbEntities(boolean includeDeps) {
         if (!includeDeps || getDependencies().isEmpty()) {
@@ -521,6 +542,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
 
     /**
      * Returns a list of DbEntity names.
+     * 
+     * @deprecated since 1.1
      */
     public List getDbEntityNames(boolean includeDeps) {
         List ents = new ArrayList(dbEntityMap.keySet());
@@ -550,6 +573,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return namespace != null ? namespace.getDbEntity(dbEntityName) : null;
     }
 
+    /**
+     * @deprecated since 1.1
+     */
     public DbEntity getDbEntity(String dbEntityName, boolean searchDependencies) {
         DbEntity ent = (DbEntity) dbEntityMap.get(dbEntityName);
         if (ent != null || !searchDependencies) {
@@ -603,6 +629,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return namespace != null ? namespace.getObjEntity(objEntityName) : null;
     }
 
+    /**
+     * @deprecated since 1.1
+     */
     public ObjEntity getObjEntity(String objEntityName, boolean searchDependencies) {
         ObjEntity ent = (ObjEntity) objEntityMap.get(objEntityName);
         if (ent != null || !searchDependencies) {
@@ -764,6 +793,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     /**
      * Returns stored procedures associated with this DataMap, including procedures from 
      * dependent maps if requested.
+     * 
+     * @deprecated since 1.1
      */
     public Collection getProcedures(boolean includeDeps) {
         if (!includeDeps || this.getDependencies().isEmpty()) {
@@ -815,6 +846,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     /**
      * Returns a named stored procedure or null if no such procedure exists in the map,
      * searching dependent maps if requested.
+     * 
+     * @deprecated since 1.1
      */
     public Procedure getProcedure(String name, boolean searchDependencies) {
         Procedure procedure = (Procedure) procedureMap.get(name);

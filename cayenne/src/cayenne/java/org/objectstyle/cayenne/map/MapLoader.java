@@ -58,13 +58,11 @@ package org.objectstyle.cayenne.map;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -140,34 +138,6 @@ public class MapLoader extends DefaultHandler {
     private StringBuffer charactersBuffer;
     private Map attributes;
 
-    /**
-     * Returns <code>true</code> if this relationship's <code>toDependentPk</code>
-     * property can be potentially set to <code>true</code>.
-     * This means that destination and
-     * source attributes are primary keys of their corresponding entities.
-     */
-    public static boolean isValidForDepPk(DbRelationship rel) {
-        Iterator it = rel.getJoins().iterator();
-        // handle case with no joins
-        if (!it.hasNext()) {
-            return false;
-        }
-
-        while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
-            if (!join.getTarget().isPrimaryKey() || !join.getSource().isPrimaryKey()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /** Loads the data map from the input source (usually file). */
-    public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
-        return loadDataMap(src, Collections.EMPTY_LIST);
-    }
-
     /** 
      * Prints DataMap encoded as XML to a provided PrintWriter.
      * 
@@ -178,15 +148,17 @@ public class MapLoader extends DefaultHandler {
         map.encodeAsXML(out);
     }
 
-    public synchronized DataMap loadDataMap(InputSource src, List deps)
-        throws DataMapException {
+    /** 
+     * Loads a DataMap from XML input source. 
+     */
+    public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
+        if (src == null) {
+            throw new NullPointerException("Null InputSource.");
+        }
+
         try {
             String mapName = mapNameFromLocation(src.getSystemId());
             dataMap = new DataMap(mapName);
-            Iterator it = deps.iterator();
-            while (it.hasNext()) {
-                dataMap.addDependency((DataMap) it.next());
-            }
 
             dbRelationshipMap = new HashMap();
             XMLReader parser = Util.createXmlReader();
@@ -196,19 +168,62 @@ public class MapLoader extends DefaultHandler {
             parser.parse(src);
         }
         catch (SAXException e) {
-            logObj.log(Level.INFO, "Wrapped Exception.", e.getException());
-            logObj.log(Level.INFO, "SAX Exception cause.", e.getCause());
-
             dataMap = null;
-            throw new DataMapException("Wrong DataMap format.", e);
-
+            throw new DataMapException(
+                "Wrong DataMap format, last processed tag: <" + currentTag,
+                Util.unwindException(e));
         }
         catch (Exception e) {
-            logObj.log(Level.INFO, "Exception.", e);
             dataMap = null;
-            throw new DataMapException("Error loading DataMap.", e);
+            throw new DataMapException(
+                "Error loading DataMap, last processed tag: <" + currentTag,
+                Util.unwindException(e));
         }
         return dataMap;
+    }
+
+    /**
+     * @deprecated since 1.1 explicit DataMap dependencies are not supported, and 
+     * {@link #loadDataMap(InputSource)} should be used.
+     */
+    public synchronized DataMap loadDataMap(InputSource src, List deps)
+        throws DataMapException {
+        DataMap map = loadDataMap(src);
+
+        Iterator it = deps.iterator();
+        while (it.hasNext()) {
+            map.addDependency((DataMap) it.next());
+        }
+
+        return map;
+    }
+
+    /**
+     * Loads DataMap from file specified by <code>uri</code> parameter.
+     *
+     * @throws DataMapException if source URI does not resolve to a valid map files
+     */
+    public DataMap loadDataMap(String uri) throws DataMapException {
+        // configure resource locator
+        ResourceLocator locator = configLocator();
+        InputStream in = locator.findResourceStream(uri);
+        if (in == null) {
+            throw new DataMapException("Can't find data map " + uri);
+        }
+
+        try {
+            InputSource inSrc = new InputSource(in);
+            inSrc.setSystemId(uri);
+            return loadDataMap(inSrc);
+        }
+        finally {
+            try {
+                in.close();
+            }
+            catch (IOException ioex) {
+            }
+        }
+
     }
 
     /**
@@ -256,34 +271,6 @@ public class MapLoader extends DefaultHandler {
         locator.setClassLoader(Configuration.getResourceLoader());
 
         return locator;
-    }
-
-    /**
-     * Loads DataMap from file specified by <code>uri</code> parameter.
-     *
-     * @throws DataMapException if source URI does not resolve to a valid map files
-     */
-    public DataMap loadDataMap(String uri) throws DataMapException {
-        // configure resource locator
-        ResourceLocator locator = configLocator();
-        InputStream in = locator.findResourceStream(uri);
-        if (in == null) {
-            throw new DataMapException("Can't find data map " + uri);
-        }
-
-        try {
-            InputSource inSrc = new InputSource(in);
-            inSrc.setSystemId(uri);
-            return loadDataMap(inSrc);
-        }
-        finally {
-            try {
-                in.close();
-            }
-            catch (IOException ioex) {
-            }
-        }
-
     }
 
     public void startElement(
@@ -680,25 +667,21 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processStartDbAttributePair(Attributes atts) throws SAXException {
-        String source = atts.getValue("", "source");
-        String target = atts.getValue("", "target");
-        DbAttribute dbSrc = null;
-        DbAttribute dbTarget = null;
-
-        if (source != null) {
-            dbSrc = (DbAttribute) dbRelationship.getSourceEntity().getAttribute(source);
-        }
-
-        if (target != null) {
-            dbTarget =
-                (DbAttribute) dbRelationship.getTargetEntity().getAttribute(target);
-        }
-
-        DbAttributePair pair = new DbAttributePair(dbSrc, dbTarget);
-        dbRelationship.addJoin(pair);
+        DbJoin join = new DbJoin(dbRelationship);
+        join.setSourceName(atts.getValue("", "source"));
+        join.setTargetName(atts.getValue("", "target"));
+        dbRelationship.addJoin(join);
     }
 
     private void processStartObjRelationship(Attributes atts) throws SAXException {
+        String name = atts.getValue("", "name");
+        if (null == name) {
+            throw new SAXException(
+                "MapLoaderImpl::processStartObjRelationship(),"
+                    + " Unable to parse target. Attributes:\n"
+                    + printAttributes(atts).toString());
+        }
+
         String sourceName = atts.getValue("", "source");
         if (sourceName == null) {
             throw new SAXException(
@@ -715,32 +698,18 @@ public class MapLoader extends DefaultHandler {
                     + sourceName);
         }
 
-        String targetName = atts.getValue("", "target");
-        if (targetName == null) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship() - null target entity.");
-        }
-
-        String name = atts.getValue("", "name");
-        if (null == name) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartObjRelationship(),"
-                    + " Unable to parse target. Attributes:\n"
-                    + printAttributes(atts).toString());
-        }
-
-        int deleteRule = DeleteRule.NO_ACTION;
         String deleteRuleName = atts.getValue("", "deleteRule");
-        if (null != deleteRuleName) {
-            deleteRule = DeleteRule.deleteRuleForName(deleteRuleName);
-        }
-
-        String lock = atts.getValue("", "lock");
+        int deleteRule =
+            (deleteRuleName != null)
+                ? DeleteRule.deleteRuleForName(deleteRuleName)
+                : DeleteRule.NO_ACTION;
 
         objRelationship = new ObjRelationship(name);
         objRelationship.setSourceEntity(source);
-        objRelationship.setTargetEntityName(targetName);
+        objRelationship.setTargetEntityName(atts.getValue("", "target"));
         objRelationship.setDeleteRule(deleteRule);
-        objRelationship.setUsedForLocking(TRUE.equalsIgnoreCase(lock));
+        objRelationship.setUsedForLocking(
+            TRUE.equalsIgnoreCase(atts.getValue("", "lock")));
         source.addRelationship(objRelationship);
     }
 
@@ -959,15 +928,6 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processEndDbRelationship() {
-        // validation check: if "toDepPK" is set and source target is NOT a PK, unset it
-        if (dbRelationship.isToDependentPK() && !isValidForDepPk(dbRelationship)) {
-            logObj.warn(
-                "Relationship '"
-                    + dbRelationship.getName()
-                    + "': 'toDependentPK' is incorrectly set to true, unsetting...");
-            dbRelationship.setToDependentPK(false);
-        }
-
         dbRelationship = null;
     }
 

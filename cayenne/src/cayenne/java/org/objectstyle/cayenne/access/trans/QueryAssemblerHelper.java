@@ -64,8 +64,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -362,7 +362,7 @@ public abstract class QueryAssemblerHelper {
         if (relationship != null) {
             // Can't properly handle multiple joins....
             if (relationship.getJoins().size() == 1) {
-                DbAttributePair join = (DbAttributePair) relationship.getJoins().get(0);
+                DbJoin join = (DbJoin) relationship.getJoins().get(0);
                 return join.getSource();
             }
         }
@@ -422,12 +422,12 @@ public abstract class QueryAssemblerHelper {
             throw new CayenneRuntimeException(msg.toString());
         }
 
-        DbAttributePair join = (DbAttributePair) joins.get(0);
+        DbJoin join = (DbJoin) joins.get(0);
 
         DbAttribute att = null;
 
         if (rel.isToMany()) {
-            DbEntity ent = (DbEntity) join.getTarget().getEntity();
+            DbEntity ent = (DbEntity) join.getRelationship().getTargetEntity();
             List pk = ent.getPrimaryKey();
             if (pk.size() != 1) {
                 StringBuffer msg = new StringBuffer();

@@ -66,8 +66,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
@@ -348,7 +348,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 List joins = dbRel.getJoins();
                 int jLen = joins.size();
                 for (int j = 0; j < jLen; j++) {
-                    DbAttributePair join = (DbAttributePair) joins.get(j);
+                    DbJoin join = (DbJoin) joins.get(j);
                     DbAttribute src = join.getSource();
                     if (!columnList.contains(src)) {
                         columnList.add(src);
@@ -379,7 +379,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                     List joins = dbRel.getJoins();
                     int jLen = joins.size();
                     for (int j = 0; j < jLen; j++) {
-                        DbAttributePair join = (DbAttributePair) joins.get(j);
+                        DbJoin join = (DbJoin) joins.get(j);
                         DbAttribute target = join.getTarget();
                         if (!columnList.contains(target)) {
                             columnList.add(target);
@@ -420,7 +420,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         List joins = rel.getJoins();
         int len = joins.size();
         for (int i = 0; i < len; i++) {
-            DbAttributePair join = (DbAttributePair) joins.get(i);
+            DbJoin join = (DbJoin) joins.get(i);
 
             if (andFlag) {
                 queryBuf.append(" AND ");
@@ -432,11 +432,11 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             queryBuf
                 .append(srcAlias)
                 .append('.')
-                .append(join.getSource().getName())
+                .append(join.getSourceName())
                 .append(" = ")
                 .append(targetAlias)
                 .append('.')
-                .append(join.getTarget().getName());
+                .append(join.getTargetName());
         }
     }
 

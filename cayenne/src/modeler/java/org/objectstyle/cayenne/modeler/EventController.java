@@ -216,6 +216,13 @@ public class EventController extends ModelerController {
         getTopModel().setSelectedPath(ProjectPath.EMPTY_PATH);
     }
 
+    protected void refreshNamespace() {
+        DataDomain domain = getCurrentDataDomain();
+        if (domain != null) {
+            domain.getEntityResolver().clearCache();
+        }
+    }
+
     public DataNode getCurrentDataNode() {
         return currentNode;
     }
@@ -468,26 +475,30 @@ public class EventController extends ModelerController {
 
     }
 
-    /** Informs all listeners of the DataMapEvent. 
-      * Does not send the event to its originator. */
+    /** 
+     * Informs all listeners of the DataMapEvent. 
+     * Does not send the event to its originator. 
+     */
     public void fireDataMapEvent(DataMapEvent e) {
         EventListener[] list = getListeners(DataMapListener.class);
         debugEvent(e, list);
 
+        setDirty(true);
+        if (e.getId() == DataMapEvent.REMOVE) {
+            refreshNamespace();
+        }
+
         for (int i = 0; i < list.length; i++) {
-            DataMapListener temp = (DataMapListener) list[i];
+            DataMapListener listener = (DataMapListener) list[i];
             switch (e.getId()) {
                 case DataMapEvent.ADD :
-                    temp.dataMapAdded(e);
-                    setDirty(true);
+                    listener.dataMapAdded(e);
                     break;
                 case DataMapEvent.CHANGE :
-                    temp.dataMapChanged(e);
-                    setDirty(true);
+                    listener.dataMapChanged(e);
                     break;
                 case DataMapEvent.REMOVE :
-                    temp.dataMapRemoved(e);
-                    setDirty(true);
+                    listener.dataMapRemoved(e);
                     break;
                 default :
                     throw new IllegalArgumentException(
@@ -499,9 +510,14 @@ public class EventController extends ModelerController {
     /** Informs all listeners of the EntityEvent. 
       * Does not send the event to its originator. */
     public void fireObjEntityEvent(EntityEvent e) {
-        setDirty(true);
         EventListener[] list = getListeners(ObjEntityListener.class);
         debugEvent(e, list);
+
+        setDirty(true);
+        if (e.getId() == DataMapEvent.REMOVE) {
+            refreshNamespace();
+        }
+
         for (int i = 0; i < list.length; i++) {
             ObjEntityListener temp = (ObjEntityListener) list[i];
             switch (e.getId()) {
@@ -524,9 +540,14 @@ public class EventController extends ModelerController {
     /** Informs all listeners of the EntityEvent. 
       * Does not send the event to its originator. */
     public void fireDbEntityEvent(EntityEvent e) {
-        setDirty(true);
         EventListener[] list = getListeners(DbEntityListener.class);
         debugEvent(e, list);
+
+        setDirty(true);
+        if (e.getId() == DataMapEvent.REMOVE) {
+            refreshNamespace();
+        }
+
         for (int i = 0; i < list.length; i++) {
             DbEntityListener temp = (DbEntityListener) list[i];
             switch (e.getId()) {
@@ -551,9 +572,14 @@ public class EventController extends ModelerController {
      * Does not send the event to its originator. 
      */
     public void fireQueryEvent(QueryEvent e) {
-        setDirty(true);
         EventListener[] list = getListeners(QueryListener.class);
         debugEvent(e, list);
+
+        setDirty(true);
+        if (e.getId() == DataMapEvent.REMOVE) {
+            refreshNamespace();
+        }
+
         for (int i = 0; i < list.length; i++) {
             QueryListener listener = (QueryListener) list[i];
             switch (e.getId()) {
@@ -578,9 +604,14 @@ public class EventController extends ModelerController {
      * Does not send the event to its originator. 
      */
     public void fireProcedureEvent(ProcedureEvent e) {
-        setDirty(true);
         EventListener[] list = getListeners(ProcedureListener.class);
         debugEvent(e, list);
+
+        setDirty(true);
+        if (e.getId() == DataMapEvent.REMOVE) {
+            refreshNamespace();
+        }
+
         for (int i = 0; i < list.length; i++) {
             ProcedureListener listener = (ProcedureListener) list[i];
             switch (e.getId()) {

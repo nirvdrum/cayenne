@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
@@ -138,6 +137,8 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 
     public Class getColumnClass(int col) {
         switch (col) {
+            case REL_TARGET :
+                return ObjEntity.class;
             case REL_CARDINALITY :
             case REL_LOCKING :
                 return Boolean.class;
@@ -159,9 +160,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
             return rel.getName();
         }
         else if (column == REL_TARGET) {
-            return (rel.getTargetEntity() != null)
-                ? rel.getTargetEntity().getName()
-                : null;
+            return rel.getTargetEntity();
         }
         else if (column == REL_LOCKING) {
             return rel.isUsedForLocking() ? Boolean.TRUE : Boolean.FALSE;
@@ -189,22 +188,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
             fireTableCellUpdated(row, column);
         }
         else if (column == REL_TARGET) {
-            if (value == null) {
-                return;
-            }
-
-            String targetName = value.toString().trim();
-
-            // Remove db relationship mappings.
-            relationship.clearDbRelationships();
-
-            // Set new target, if applicable
-            ObjEntity target = null;
-            if (!"".equals(targetName)) {
-                DataMap map = mediator.getCurrentDataMap();
-                target = map.getObjEntity(targetName, true);
-            }
-
+            ObjEntity target = (ObjEntity) value;
             relationship.setTargetEntity(target);
 
             // now try to connect DbEntities if we can do it in one step

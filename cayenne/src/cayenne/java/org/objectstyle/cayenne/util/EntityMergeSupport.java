@@ -63,8 +63,8 @@ import java.util.List;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -181,7 +181,7 @@ public class EntityMergeSupport {
                 DbRelationship rel = (DbRelationship) rit.next();
                 Iterator jit = rel.getJoins().iterator();
                 while (jit.hasNext()) {
-                    DbAttributePair join = (DbAttributePair) jit.next();
+                    DbJoin join = (DbJoin) jit.next();
                     if (join.getSource() == dba) {
                         isFK = true;
                         break;

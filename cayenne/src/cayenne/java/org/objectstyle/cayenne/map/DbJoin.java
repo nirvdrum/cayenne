@@ -53,114 +53,98 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
-/** 
- * A DbAttributePair represents a join between two database tables. A PK/FK
- * relationship consists of one or more joins. Correspinding Cayenne descriptor
- * object, DbRelationship, contains one or more DbAtributePairs.
+/**
+ * Defines a join between two attributes of a given relationship.
  * 
- * @author Misha Shengaout
+ * @since 1.1
  * @author Andrei Adamchik
- * 
- * @deprecated Since 1.1 {@link DbJoin} is used.
  */
-public class DbAttributePair implements XMLSerializable {
-    protected DbAttribute source;
-    protected DbAttribute target;
+public class DbJoin implements XMLSerializable {
+    protected DbRelationship relationship;
+    protected String sourceName;
+    protected String targetName;
 
-    public DbAttributePair() {
+    public DbJoin(DbRelationship relationship) {
+        this.relationship = relationship;
     }
 
-    public DbAttributePair(DbAttribute sourceAttribute, DbAttribute targetAttribute) {
-        this.setSource(sourceAttribute);
-        this.setTarget(targetAttribute);
+    public DbJoin(DbRelationship relationship, String sourceName, String targetName) {
+        this.relationship = relationship;
+        this.sourceName = sourceName;
+        this.targetName = targetName;
     }
 
-    /**
-     * Used as DbJoi  converter in deprecated methods.
-     * 
-     * @since 1.1
+    public DbJoin createReverseJoin() {
+        DbRelationship r = getNonNullRelationship();
+
+        DbJoin reverse = new DbJoin(r.getReverseRelationship());
+        reverse.setTargetName(sourceName);
+        reverse.setSourceName(targetName);
+        return reverse;
+    }
+
+    /** 
+     * Returns DbAttribute on on the left side of the join. 
      */
-    DbJoin toDbJoin(DbRelationship relationship) {
-        DbJoin join = new DbJoin(relationship);
-        join.setSourceName(source != null ? source.getName() : null);
-        join.setTargetName(target != null ? target.getName() : null);
-        return join;
+    public DbAttribute getSource() {
+        if (sourceName == null) {
+            return null;
+        }
+
+        Relationship r = getNonNullRelationship();
+        Entity entity = r.getSourceEntity();
+        if (entity == null) {
+            return null;
+        }
+
+        return (DbAttribute) entity.getAttribute(sourceName);
+    }
+
+    public DbAttribute getTarget() {
+        if (targetName == null) {
+            return null;
+        }
+
+        Relationship r = getNonNullRelationship();
+        Entity entity = r.getTargetEntity();
+        if (entity == null) {
+            return null;
+        }
+
+        return (DbAttribute) entity.getAttribute(targetName);
     }
 
     /**
      * Prints itself as XML to the provided XMLEncoder.
-     * 
-     * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
         encoder.print("<db-attribute-pair");
 
         // sanity check
-        if (getSource() != null) {
+        if (getSourceName() != null) {
             encoder.print(" source=\"");
-            encoder.print(getSource().getName());
+            encoder.print(getSourceName());
             encoder.print("\"");
         }
 
-        if (getTarget() != null) {
+        if (getTargetName() != null) {
             encoder.print(" target=\"");
-            encoder.print(getTarget().getName());
+            encoder.print(getTargetName());
             encoder.print("\"");
         }
 
         encoder.println("/>");
     }
 
-    /**
-     * Creates and returns a new join going in reverse direction.
-     * 
-     * @since 1.0.5
-     */
-    public DbAttributePair createReverseJoin() {
-        return new DbAttributePair(target, source);
-    }
-
-    /** Returns DbAttribute on on the left side of the join. */
-    public DbAttribute getSource() {
-        return source;
-    }
-
-    /** Set DbAttribute name on on the left side of the join. */
-    public void setSource(DbAttribute sourceAttribute) {
-        this.source = sourceAttribute;
-    }
-
-    /** Returns DbAttribute on on the right side of the join. */
-    public DbAttribute getTarget() {
-        return target;
-    }
-
-    /** Set DbAttribute name on on the right side of the join. */
-    public void setTarget(DbAttribute targetAttribute) {
-        this.target = targetAttribute;
-    }
-
-    public int hashCode() {
-        return super.hashCode() + source.hashCode() + target.hashCode();
-    }
-
-    /**
-     * Returns <code>true</code> if this join and 
-     * object parameter both represent joins between
-     * the same DbAttributes.
-     */
     public boolean equals(Object o) {
         if (o == null) {
-            return false;
-        }
-
-        if (o.getClass() != DbAttributePair.class) {
             return false;
         }
 
@@ -168,7 +152,45 @@ public class DbAttributePair implements XMLSerializable {
             return true;
         }
 
-        DbAttributePair j = (DbAttributePair) o;
-        return j.source == this.source && j.target == this.target;
+        if (!(o instanceof DbJoin)) {
+            return false;
+        }
+
+        DbJoin j = (DbJoin) o;
+        return j.relationship == this.relationship
+            && Util.nullSafeEquals(j.sourceName, this.sourceName)
+            && Util.nullSafeEquals(j.targetName, this.targetName);
+    }
+
+    public DbRelationship getRelationship() {
+        return relationship;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setRelationship(DbRelationship relationship) {
+        this.relationship = relationship;
+    }
+
+    public void setSourceName(String string) {
+        sourceName = string;
+    }
+
+    public void setTargetName(String string) {
+        targetName = string;
+    }
+
+    private final DbRelationship getNonNullRelationship() {
+        if (relationship == null) {
+            throw new CayenneRuntimeException("Join has no parent Relationship.");
+        }
+
+        return relationship;
     }
 }

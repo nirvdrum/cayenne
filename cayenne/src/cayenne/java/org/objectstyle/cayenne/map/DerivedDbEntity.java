@@ -104,22 +104,20 @@ public class DerivedDbEntity extends DbEntity {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<db-entity name=\"" + getName() + '\"');
+        encoder.print("<db-entity name=\"" + getName());
+
         if (getSchema() != null && getSchema().trim().length() > 0) {
-            encoder.print(" schema=\"");
+            encoder.print("\" schema=\"");
             encoder.print(getSchema().trim());
-            encoder.print('\"');
-        }
-        if (getCatalog() != null && getCatalog().trim().length() > 0) {
-            encoder.print(" catalog=\"");
-            encoder.print(getCatalog().trim());
-            encoder.print('\"');
         }
 
-        DbEntity parent = getParentEntity();
-        String name = (parent != null) ? parent.getName() : "";
+        if (getCatalog() != null && getCatalog().trim().length() > 0) {
+            encoder.print("\" catalog=\"");
+            encoder.print(getCatalog().trim());
+        }
+
         encoder.print(" parentName=\"");
-        encoder.print(name);
+        encoder.print(getParentEntityName());
         encoder.print("\">");
 
         encoder.indent(1);
@@ -154,10 +152,10 @@ public class DerivedDbEntity extends DbEntity {
 
             Iterator joins = protoRel.getJoins().iterator();
             while (joins.hasNext()) {
-                DbAttributePair protoJoin = (DbAttributePair) joins.next();
-                DbAttribute src =
-                    (DbAttribute) getAttribute(protoJoin.getSource().getName());
-                DbAttributePair join = new DbAttributePair(src, protoJoin.getTarget());
+                DbJoin protoJoin = (DbJoin) joins.next();
+                DbJoin join = new DbJoin(rel);
+                join.setSourceName(protoJoin.getSourceName());
+                join.setTargetName(protoJoin.getTargetName());
                 rel.addJoin(join);
             }
 

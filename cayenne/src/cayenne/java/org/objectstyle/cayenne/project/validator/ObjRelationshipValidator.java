@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.project.validator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -135,7 +135,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
                     (DbRelationship) inverse.getDbRelationships().get(0);
                 Iterator attributePairIterator = firstRel.getJoins().iterator();
                 while (attributePairIterator.hasNext()) {
-                    DbAttributePair pair = (DbAttributePair) attributePairIterator.next();
+                    DbJoin pair = (DbJoin) attributePairIterator.next();
                     if (pair.getSource().isMandatory()) {
                         validator.registerWarning(
                             "ObjRelationship "

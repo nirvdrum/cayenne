@@ -67,11 +67,10 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -171,11 +170,8 @@ public class MapUtil {
         map.removeProcedure(oldName);
         map.addProcedure(procedure);
     }
-    
-    public static void setQueryName(
-        DataMap map,
-        Query query,
-        String newName) {
+
+    public static void setQueryName(DataMap map, Query query, String newName) {
 
         String oldName = query.getName();
 
@@ -316,16 +312,6 @@ public class MapUtil {
     }
 
     /**
-     * Returns <code>true</code> if this relationship's <code>toDependentPk</code>
-     * property can be potentially set to <code>true</code>. 
-     * This means that destination and
-     * source attributes are primary keys of their corresponding entities.
-     */
-    public static boolean isValidForDepPk(DbRelationship rel) {
-        return MapLoader.isValidForDepPk(rel);
-    }
-
-    /**
       * Returns true if one of relationship joins uses a given attribute
       * as a source.
       */
@@ -338,7 +324,7 @@ public class MapUtil {
 
         Iterator it = relationship.getJoins().iterator();
         while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
+            DbJoin join = (DbJoin) it.next();
             if (join.getSource() == attribute) {
                 return true;
             }
@@ -360,7 +346,7 @@ public class MapUtil {
 
         Iterator it = relationship.getJoins().iterator();
         while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
+            DbJoin join = (DbJoin) it.next();
             if (join.getTarget() == attribute) {
                 return true;
             }

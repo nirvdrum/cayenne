@@ -241,7 +241,7 @@ public class DbEntity extends Entity implements DbAttributeListener {
                     DbRelationship rel = (DbRelationship) it.next();
                     Iterator joins = rel.getJoins().iterator();
                     while (joins.hasNext()) {
-                        DbAttributePair join = (DbAttributePair) joins.next();
+                        DbJoin join = (DbJoin) joins.next();
                         if (join.getSource() == attr || join.getTarget() == attr) {
                             joins.remove();
                         }

@@ -95,8 +95,9 @@ public class ValidatorTestBase extends CayenneTestCase {
         DbEntity target = new DbEntity("e2" + counter++);
         map.addDbEntity(src);
         map.addDbEntity(target);
-        DbRelationship dr1 = new DbRelationship(src, target, null);
-        dr1.setName(name);
+        DbRelationship dr1 = new DbRelationship(name);
+        dr1.setSourceEntity(src);
+        dr1.setTargetEntity(target);
         src.addRelationship(dr1);
         return dr1;
     }

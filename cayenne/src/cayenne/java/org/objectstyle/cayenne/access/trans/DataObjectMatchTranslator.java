@@ -66,8 +66,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
@@ -117,10 +117,10 @@ public class DataObjectMatchTranslator {
             // match on this FK
             Iterator joins = rel.getJoins().iterator();
             while (joins.hasNext()) {
-                DbAttributePair join = (DbAttributePair) joins.next();
+                DbJoin join = (DbJoin) joins.next();
 
                 // index by target name
-                attributes.put(join.getTarget().getName(), join.getSource());
+                attributes.put(join.getTargetName(), join.getSource());
             }
         }
     }

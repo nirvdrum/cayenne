@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -285,8 +285,8 @@ class DataRowUtils {
                 .getJoins()
                 .iterator();
         while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
-            String propertyName = join.getSource().getName();
+            DbJoin join = (DbJoin) it.next();
+            String propertyName = join.getSourceName();
 
             // for equality to be true, snapshot must contain all matching pk
             // values
@@ -336,8 +336,8 @@ class DataRowUtils {
                 .iterator();
 
         while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
-            String propertyName = join.getSource().getName();
+            DbJoin join = (DbJoin) it.next();
+            String propertyName = join.getSourceName();
 
             if (currentId == null) {
                 // for equality to be true, snapshot must contain no pk values

@@ -82,8 +82,8 @@ import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.types.UtilDateType;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -450,7 +450,7 @@ public class JdbcAdapter implements DbAdapter {
         Iterator jit = rel.getJoins().iterator();
         boolean first = true;
         while (jit.hasNext()) {
-            DbAttributePair join = (DbAttributePair) jit.next();
+            DbJoin join = (DbJoin) jit.next();
             if (!first) {
                 buf.append(", ");
                 refBuf.append(", ");
@@ -458,8 +458,8 @@ public class JdbcAdapter implements DbAdapter {
             else
                 first = false;
 
-            buf.append(join.getSource().getName());
-            refBuf.append(join.getTarget().getName());
+            buf.append(join.getSourceName());
+            refBuf.append(join.getTargetName());
         }
 
         buf

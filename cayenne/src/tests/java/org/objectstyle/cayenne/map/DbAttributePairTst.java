@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
+ * @deprecated as DbAttributePair is deprecated.
  * @author Andrei Adamchik
  */
 public class DbAttributePairTst extends CayenneTestCase {

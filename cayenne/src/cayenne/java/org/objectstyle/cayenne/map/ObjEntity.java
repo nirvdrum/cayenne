@@ -114,7 +114,8 @@ public class ObjEntity extends Entity {
         encoder.print("<obj-entity name=\"");
         encoder.print(getName());
 
-        if (getSuperEntityName() != null) {
+        // additionally validate that superentity exists
+        if (getSuperEntityName() != null && getSuperEntity() != null) {
             encoder.print("\" superEntityName=\"");
             encoder.print(getSuperEntityName());
         }
@@ -134,7 +135,7 @@ public class ObjEntity extends Entity {
 
         if (getSuperEntityName() == null && getDbEntity() != null) {
             encoder.print("\" dbEntityName=\"");
-            encoder.print(getDbEntity().getName());
+            encoder.print(getDbEntityName());
         }
 
         if (getSuperEntityName() == null && getSuperClassName() != null) {

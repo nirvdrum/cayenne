@@ -64,8 +64,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.Validate;
-
 import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.ConfigLoaderDelegate;
 import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
@@ -252,7 +252,6 @@ public class PartialProject extends Project {
     protected class MapMetaData {
         protected String name;
         protected String location;
-        protected List maps = new ArrayList();
 
         public MapMetaData(String name) {
             this.name = name;
@@ -331,6 +330,26 @@ public class PartialProject extends Project {
             domain.properties.putAll(properties);
         }
 
+        public void shouldLoadDataMaps(String domainName, Map locations) {
+            if (locations.size() == 0) {
+                return;
+            }
+
+            DomainMetaData domain = findDomain(domainName);
+
+            // load DataMaps tree
+            Iterator it = locations.keySet().iterator();
+            while (it.hasNext()) {
+                String name = (String) it.next();
+                MapMetaData map = new MapMetaData(name);
+                map.location = (String) locations.get(name);
+                domain.maps.put(name, map);
+            }
+        }
+
+        /**
+         * @deprecated since 1.1
+         */
         public void shouldLoadDataMaps(
             String domainName,
             Map locations,
@@ -348,7 +367,6 @@ public class PartialProject extends Project {
                 String name = (String) it.next();
                 MapMetaData map = new MapMetaData(name);
                 map.location = (String) locations.get(name);
-                map.maps = (List) dependencies.get(name);
                 domain.maps.put(name, map);
             }
         }
@@ -365,7 +383,6 @@ public class PartialProject extends Project {
 
             MapMetaData map = new MapMetaData(mapName);
             map.location = location;
-            map.maps = depMapNames;
             findDomain(domainName).maps.put(mapName, map);
         }
 
@@ -384,13 +401,14 @@ public class PartialProject extends Project {
         }
 
         public void shouldRegisterDataView(
-            String dataViewName, String dataViewLocation) {
-          Validate.notNull(dataViewName);
-          Validate.notNull(dataViewLocation);
-          if (dataViewLocations == null) {
-            dataViewLocations = new HashMap();
-          }
-          dataViewLocations.put(dataViewName, dataViewLocation);
+            String dataViewName,
+            String dataViewLocation) {
+            Validate.notNull(dataViewName);
+            Validate.notNull(dataViewLocation);
+            if (dataViewLocations == null) {
+                dataViewLocations = new HashMap();
+            }
+            dataViewLocations.put(dataViewName, dataViewLocation);
         }
     }
 
@@ -402,10 +420,11 @@ public class PartialProject extends Project {
             return projectVersion;
         }
 
+        /**
+         * @deprecated since 1.1
+         */
         public Iterator dependentMapNames(String domainName, String mapName) {
-            return ((MapMetaData) findDomain(domainName).maps.get(mapName))
-                .maps
-                .iterator();
+            return IteratorUtils.EMPTY_ITERATOR;
         }
 
         public Iterator domainNames() {
@@ -413,17 +432,17 @@ public class PartialProject extends Project {
         }
 
         public Iterator viewNames() {
-          if (dataViewLocations == null) {
-            dataViewLocations = new HashMap();
-          }
-          return dataViewLocations.keySet().iterator();
+            if (dataViewLocations == null) {
+                dataViewLocations = new HashMap();
+            }
+            return dataViewLocations.keySet().iterator();
         }
 
         public String viewLocation(String dataViewName) {
-          if (dataViewLocations == null) {
-            dataViewLocations = new HashMap();
-          }
-          return (String)dataViewLocations.get(dataViewName);
+            if (dataViewLocations == null) {
+                dataViewLocations = new HashMap();
+            }
+            return (String) dataViewLocations.get(dataViewName);
         }
 
         public Iterator propertyNames(String domainName) {

@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -81,7 +82,9 @@ import org.objectstyle.cayenne.query.Query;
  * since org.objectstyle.cayenne.access.EntityResolver is deprecated and will be removed.
  */
 public class EntityResolver {
+    private static Logger logObj = Logger.getLogger(EntityResolver.class);
 
+    protected boolean indexedByClass;
     protected Map queryCache;
     protected Map dbEntityCache;
     protected Map objEntityCache;
@@ -91,6 +94,7 @@ public class EntityResolver {
     protected Map entityInheritanceCache;
 
     public EntityResolver() {
+        this.indexedByClass = true;
         this.maps = new ArrayList();
         this.mapsRef = Collections.unmodifiableList(maps);
         this.queryCache = new HashMap();
@@ -177,7 +181,6 @@ public class EntityResolver {
      * list of maps.
      */
     protected synchronized void constructCache() {
-        // clear chache
         clearCache();
 
         // rebuild index
@@ -195,7 +198,7 @@ public class EntityResolver {
 
                 // index by class
                 String className = oe.getClassName();
-                if (className != null) {
+                if (indexedByClass && className != null) {
                     Class entityClass;
                     try {
                         entityClass =
@@ -203,7 +206,7 @@ public class EntityResolver {
                     }
                     catch (ClassNotFoundException e) {
                         throw new CayenneRuntimeException(
-                            "Cannot find class " + oe.getClassName());
+                            "Cannot find class " + className);
                     }
 
                     if (objEntityCache.get(entityClass) != null) {
@@ -222,6 +225,12 @@ public class EntityResolver {
                         dbEntityCache.put(entityClass, oe.getDbEntity());
                     }
                 }
+            }
+
+            // index ObjEntity inheritance
+            objEntities = map.getObjEntities().iterator();
+            while (objEntities.hasNext()) {
+                ObjEntity oe = (ObjEntity) objEntities.next();
 
                 // build inheritance tree... include nodes that 
                 // have no children to avoid uneeded cache rebuilding on lookup...
@@ -232,14 +241,28 @@ public class EntityResolver {
                     entityInheritanceCache.put(oe.getName(), node);
                 }
 
-                ObjEntity superOE = oe.getSuperEntity();
-                if (superOE != null) {
+                String superOEName = oe.getSuperEntityName();
+                if (superOEName != null) {
                     EntityInheritanceTree superNode =
-                        (EntityInheritanceTree) entityInheritanceCache.get(
-                            superOE.getName());
+                        (EntityInheritanceTree) entityInheritanceCache.get(superOEName);
+                        
                     if (superNode == null) {
-                        superNode = new EntityInheritanceTree(superOE);
-                        entityInheritanceCache.put(superOE.getName(), superNode);
+                        // do direct entity lookup to avoid recursive cache rebuild
+                        ObjEntity superOE = (ObjEntity) objEntityCache.get(superOEName);
+                        if (superOE != null) {
+                            superNode = new EntityInheritanceTree(superOE);
+                            entityInheritanceCache.put(superOEName, superNode);
+                        }
+                        else {
+                            // bad mapping?
+                            logObj.debug(
+                                "Invalid superEntity '"
+                                    + superOEName
+                                    + "' for entity '"
+                                    + oe.getName()
+                                    + "'");
+                            continue;
+                        }
                     }
 
                     superNode.addChildNode(node);
@@ -281,6 +304,9 @@ public class EntityResolver {
      * @return the required DbEntity, or null if none matches the specifier
      */
     public synchronized DbEntity lookupDbEntity(Class aClass) {
+        if (!indexedByClass) {
+            throw new CayenneRuntimeException("Class index is disabled.");
+        }
         return this._lookupDbEntity(aClass);
     }
 
@@ -403,6 +429,10 @@ public class EntityResolver {
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
     public synchronized ObjEntity lookupObjEntity(Class aClass) {
+        if (!indexedByClass) {
+            throw new CayenneRuntimeException("Class index is disabled.");
+        }
+
         return this._lookupObjEntity(aClass);
     }
 
@@ -551,5 +581,19 @@ public class EntityResolver {
         // try procedure
         Procedure procedure = lookupProcedure(q);
         return (procedure != null) ? procedure.getDataMap() : null;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public boolean isIndexedByClass() {
+        return indexedByClass;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setIndexedByClass(boolean b) {
+        indexedByClass = b;
     }
 }

@@ -146,23 +146,10 @@ public class ConfigSaver {
         while (maps.hasNext()) {
             String mapName = (String) maps.next();
             String mapLocation = delegate.mapLocation(domainName, mapName);
-            Iterator depMaps = delegate.dependentMapNames(domainName, mapName);
 
             pw.print("\t<map name=\"" + mapName.trim());
             pw.print("\" location=\"" + mapLocation.trim());
-
-            if (!depMaps.hasNext()) {
-                pw.println("\"/>");
-            }
-            else {
-                pw.println("\">");
-                while (depMaps.hasNext()) {
-                    String depName = (String) depMaps.next();
-                    pw.println("\t\t<dep-map-ref name=\"" + depName.trim() + "\"/>");
-                }
-
-                pw.println("\t</map>");
-            }
+            pw.println("\"/>");
         }
 
         // store nodes

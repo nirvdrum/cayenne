@@ -139,10 +139,7 @@ public class ObjEntityPane
         qualifier = CayenneWidgetFactory.createTextField();
 
         dbEntityCombo = CayenneWidgetFactory.createComboBox();
-        dbEntityCombo.setRenderer(CellRenderers.listRendererWithIcons());
-
         superEntityCombo = CayenneWidgetFactory.createComboBox();
-        superEntityCombo.setRenderer(CellRenderers.listRendererWithIcons());
 
         readOnly = new JCheckBox();
         optimisticLocking = new JCheckBox();
@@ -383,11 +380,12 @@ public class ObjEntityPane
 
         // init DbEntities 
         DataMap map = mediator.getCurrentDataMap();
-        Object[] dbEntities = map.getDbEntities().toArray();
+        Object[] dbEntities = map.getNamespace().getDbEntities().toArray();
         Arrays.sort(dbEntities, Comparators.getDataMapChildrenComparator());
 
         DefaultComboBoxModel dbModel = new DefaultComboBoxModel(dbEntities);
         dbModel.setSelectedItem(entity.getDbEntity());
+        dbEntityCombo.setRenderer(CellRenderers.entityListRendererWithIcons(map));
         dbEntityCombo.setModel(dbModel);
 
         // if a super-entity selected, disable table selection
@@ -410,7 +408,9 @@ public class ObjEntityPane
         };
 
         Object[] objEntities =
-            CollectionUtils.select(map.getObjEntities(), inheritanceFilter).toArray();
+            CollectionUtils
+                .select(map.getNamespace().getObjEntities(), inheritanceFilter)
+                .toArray();
         Arrays.sort(objEntities, Comparators.getDataMapChildrenComparator());
         Object[] finalObjEntities = new Object[objEntities.length + 1];
         finalObjEntities[0] = noInheritance;
@@ -419,6 +419,7 @@ public class ObjEntityPane
         DefaultComboBoxModel superEntityModel =
             new DefaultComboBoxModel(finalObjEntities);
         superEntityModel.setSelectedItem(entity.getSuperEntity());
+        superEntityCombo.setRenderer(CellRenderers.entityListRendererWithIcons(map));
         superEntityCombo.setModel(superEntityModel);
     }
 
@@ -446,4 +447,5 @@ public class ObjEntityPane
 
         initFromModel(entity);
     }
+
 }

@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -174,22 +174,14 @@ public class BatchQueryUtils {
         Map snapshot = new HashMap(sourceId.size() + destinationId.size());
         List joins = firstRelationship.getJoins();
         for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-            DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
-            DbAttribute sourceAttribute = thisJoin.getSource();
-            DbAttribute targetAttribute = thisJoin.getTarget();
-            snapshot.put(
-                targetAttribute.getName(),
-                sourceId.get(sourceAttribute.getName()));
+            DbJoin join = (DbJoin) joins.get(i);
+            snapshot.put(join.getTargetName(), sourceId.get(join.getSourceName()));
         }
 
         joins = secondRelationship.getJoins();
         for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-            DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
-            DbAttribute sourceAttribute = thisJoin.getSource();
-            DbAttribute targetAttribute = thisJoin.getTarget();
-            snapshot.put(
-                sourceAttribute.getName(),
-                destinationId.get(targetAttribute.getName()));
+            DbJoin join = (DbJoin) joins.get(i);
+            snapshot.put(join.getSourceName(), destinationId.get(join.getTargetName()));
         }
 
         return snapshot;
@@ -290,9 +282,9 @@ public class BatchQueryUtils {
         String srcDbAttributeName,
         DbRelationship masterDependentRel) {
         for (Iterator i = masterDependentRel.getJoins().iterator(); i.hasNext();) {
-            DbAttributePair join = (DbAttributePair) i.next();
-            if (srcDbAttributeName.equals(join.getSource().getName()))
-                return join.getTarget().getName();
+            DbJoin join = (DbJoin) i.next();
+            if (srcDbAttributeName.equals(join.getSourceName()))
+                return join.getTargetName();
         }
         return null;
     }

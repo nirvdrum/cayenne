@@ -83,8 +83,8 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -315,7 +315,7 @@ public class DefaultSorter implements DependencySorter {
                 boolean newReflexive = entity.equals(target);
                 Iterator j = candidate.getJoins().iterator();
                 while (j.hasNext()) {
-                    DbAttributePair join = (DbAttributePair) j.next();
+                    DbJoin join = (DbJoin) j.next();
                     DbAttribute targetAttribute = join.getTarget();
                     if (targetAttribute.isPrimaryKey()) {
                         ForeignKey fk = new ForeignKey();
@@ -323,7 +323,7 @@ public class DefaultSorter implements DependencySorter {
                         fk.setPkTableSchema(target.getSchema());
                         fk.setPkTableName(target.getName());
                         fk.setPkColumnName(targetAttribute.getName());
-                        fk.setColumnName(join.getSource().getName());
+                        fk.setColumnName(join.getSourceName());
                         fk.setKeySequence(keySequence++);
                         table.addForeignKey(fk);
 

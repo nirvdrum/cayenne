@@ -136,7 +136,6 @@ public class DbEntityPane
         parentLabel.setEnabled(false);
 
         parentEntities = CayenneWidgetFactory.createComboBox();
-        parentEntities.setRenderer(CellRenderers.listRendererWithIcons());
         parentEntities.setEditable(false);
         parentEntities.setEnabled(false);
 
@@ -231,7 +230,8 @@ public class DbEntityPane
 
             // build a list consisting of non-derived entities
 
-            Collection allEntities = mediator.getCurrentDataMap().getDbEntities(true);
+            DataMap map = mediator.getCurrentDataMap();
+            Collection allEntities = map.getNamespace().getDbEntities();
             java.util.List entities = new ArrayList(allEntities.size());
             Iterator it = allEntities.iterator();
 
@@ -244,6 +244,7 @@ public class DbEntityPane
 
             DefaultComboBoxModel model = new DefaultComboBoxModel(entities.toArray());
             model.setSelectedItem(((DerivedDbEntity) entity).getParentEntity());
+            parentEntities.setRenderer(CellRenderers.entityListRendererWithIcons(map));
             parentEntities.setModel(model);
         }
         else {

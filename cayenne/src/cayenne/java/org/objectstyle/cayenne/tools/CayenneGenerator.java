@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.tools;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
@@ -142,25 +141,7 @@ public class CayenneGenerator extends Task {
     /** Loads and returns DataMap based on <code>map</code> attribute. */
     protected DataMap loadDataMap() throws Exception {
         InputSource in = new InputSource(map.getCanonicalPath());
-        return new MapLoader().loadDataMap(in, loadDependencies());
-    }
-
-    /**
-     * Loads and returns DataMaps that are required by this map to resolve
-     * dependencies. If no dependencies found, returns empty array.
-     */
-    protected List loadDependencies() throws Exception {
-        List deps = new ArrayList();
-
-        if (mapDeps != null && mapDeps.length > 0) {
-            MapLoader loader = new MapLoader();
-            for (int i = 0; i < mapDeps.length; i++) {
-                InputSource in = new InputSource(mapDeps[i].getCanonicalPath());
-                deps.add(loader.loadDataMap(in));
-            }
-        }
-
-        return deps;
+        return new MapLoader().loadDataMap(in);
     }
 
     /** 

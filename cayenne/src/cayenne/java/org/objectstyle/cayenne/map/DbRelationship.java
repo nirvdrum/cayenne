@@ -98,10 +98,13 @@ public class DbRelationship extends Relationship {
         super(name);
     }
 
-    public DbRelationship(DbEntity src, DbEntity target, DbAttributePair pr) {
-        this.setSourceEntity(src);
-        this.setTargetEntity(target);
-        this.addJoin(pr);
+    /**
+     * @deprecated Since 1.1 use any other constructor.
+     */
+    public DbRelationship(DbEntity src, DbEntity target, DbAttributePair join) {
+        setSourceEntity(src);
+        setTargetEntity(target);
+        addJoin(join.toDbJoin(this));
     }
 
     /**
@@ -114,10 +117,16 @@ public class DbRelationship extends Relationship {
         encoder.print(getName());
         encoder.print("\" source=\"");
         encoder.print(getSourceEntity().getName());
-        encoder.print("\" target=\"");
-        encoder.print(getTargetEntityName());
-        encoder.print("\" toDependentPK=\"");
-        encoder.print(isToDependentPK());
+
+        if (getTargetEntityName() != null && getTargetEntity() != null) {
+            encoder.print("\" target=\"");
+            encoder.print(getTargetEntityName());
+        }
+
+        if (isToDependentPK() && isValidForDepPk()) {
+            encoder.print("\" toDependentPK=\"true");
+        }
+
         encoder.print("\" toMany=\"");
         encoder.print(isToMany());
         encoder.println("\">");
@@ -129,6 +138,11 @@ public class DbRelationship extends Relationship {
         encoder.println("</db-relationship>");
     }
 
+    /**
+     * Returns a target of this relationship. If relationship is not attached
+     * to a DbEntity, and DbENtity doesn't have a namcespace, and exception
+     * is thrown.
+     */
     public Entity getTargetEntity() {
         String targetName = getTargetEntityName();
         if (targetName == null) {
@@ -182,7 +196,7 @@ public class DbRelationship extends Relationship {
 
         Iterator it = joins.iterator();
         while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
+            DbJoin join = (DbJoin) it.next();
             reverse.addJoin(join.createReverseJoin());
         }
 
@@ -202,7 +216,7 @@ public class DbRelationship extends Relationship {
         }
 
         Entity src = this.getSourceEntity();
-        DbAttributePair testJoin = new DbAttributePair(null, null);
+        DbJoin testJoin = new DbJoin(this);
 
         Iterator it = target.getRelationships().iterator();
         while (it.hasNext()) {
@@ -217,11 +231,11 @@ public class DbRelationship extends Relationship {
             Iterator jit = otherJoins.iterator();
             boolean joinsMatch = true;
             while (jit.hasNext()) {
-                DbAttributePair join = (DbAttributePair) jit.next();
+                DbJoin join = (DbJoin) jit.next();
 
                 // flip join and try to find similar
-                testJoin.setSource(join.getTarget());
-                testJoin.setTarget(join.getSource());
+                testJoin.setSourceName(join.getTargetName());
+                testJoin.setTargetName(join.getSourceName());
                 if (!joins.contains(testJoin)) {
                     joinsMatch = false;
                     break;
@@ -243,7 +257,7 @@ public class DbRelationship extends Relationship {
     public boolean isToPK() {
         Iterator it = getJoins().iterator();
         while (it.hasNext()) {
-            DbAttributePair join = (DbAttributePair) it.next();
+            DbJoin join = (DbJoin) it.next();
             if (join.getTarget().isPrimaryKey()) {
                 return true;
             }
@@ -280,6 +294,30 @@ public class DbRelationship extends Relationship {
     }
 
     /**
+     * @since 1.1
+     */
+    public boolean isValidForDepPk() {
+        Iterator it = getJoins().iterator();
+        // handle case with no joins
+        if (!it.hasNext()) {
+            return false;
+        }
+
+        while (it.hasNext()) {
+            DbJoin join = (DbJoin) it.next();
+            DbAttribute target = join.getTarget();
+            DbAttribute source = join.getSource();
+
+            if ((target != null && !target.isPrimaryKey())
+                || (source != null && !source.isPrimaryKey())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Returns a list of joins. List is returned by reference, so 
      * any modifications of the list will affect this relationship.
      */
@@ -287,12 +325,40 @@ public class DbRelationship extends Relationship {
         return joins;
     }
 
-    /** Adds a join. */
+    /** 
+     * Adds a join.
+     * 
+     * @deprecated Since 1.1 use {@link #addJoin(DbJoin)}
+     */
     public void addJoin(DbAttributePair join) {
-        joins.add(join);
+        if (join != null) {
+            addJoin(join.toDbJoin(this));
+        }
     }
 
+    /** 
+     * Adds a join.
+     * 
+     * @since 1.1
+     */
+    public void addJoin(DbJoin join) {
+        if (join != null) {
+            joins.add(join);
+        }
+    }
+
+    /** 
+     * Removes a join.
+     * 
+     * @deprecated Since 1.1 use {@link #removeJoin(DbJoin)}
+     */
     public void removeJoin(DbAttributePair join) {
+        if (join != null) {
+            joins.remove(join.toDbJoin(this));
+        }
+    }
+
+    public void removeJoin(DbJoin join) {
         joins.remove(join);
     }
 
@@ -300,7 +366,7 @@ public class DbRelationship extends Relationship {
         joins.clear();
     }
 
-    public void setJoins(List newJoins) {
+    public void setJoins(Collection newJoins) {
         if (null != newJoins) {
             this.removeAllJoins();
             joins.addAll(newJoins);
@@ -328,27 +394,27 @@ public class DbRelationship extends Relationship {
 
         // optimize for the most common single column join
         if (numJoins == 1) {
-            DbAttributePair join = (DbAttributePair) joins.get(0);
-            Object val = srcSnapshot.get(join.getSource().getName());
+            DbJoin join = (DbJoin) joins.get(0);
+            Object val = srcSnapshot.get(join.getSourceName());
             if (val == null) {
                 foundNulls++;
                 idMap = Collections.EMPTY_MAP;
             }
             else {
-                idMap = Collections.singletonMap(join.getTarget().getName(), val);
+                idMap = Collections.singletonMap(join.getTargetName(), val);
             }
         }
         // handle generic case: numJoins > 1
         else {
             idMap = new HashMap(numJoins * 2);
             for (int i = 0; i < numJoins; i++) {
-                DbAttributePair join = (DbAttributePair) joins.get(i);
-                Object val = srcSnapshot.get(join.getSource().getName());
+                DbJoin join = (DbJoin) joins.get(i);
+                Object val = srcSnapshot.get(join.getSourceName());
                 if (val == null) {
                     foundNulls++;
                 }
                 else {
-                    idMap.put(join.getTarget().getName(), val);
+                    idMap.put(join.getTargetName(), val);
                 }
             }
         }
@@ -374,26 +440,26 @@ public class DbRelationship extends Relationship {
 
         // optimize for the most common single column join
         if (len == 1) {
-            DbAttributePair join = (DbAttributePair) joins.get(0);
-            Object val = targetSnapshot.get(join.getTarget().getName());
+            DbJoin join = (DbJoin) joins.get(0);
+            Object val = targetSnapshot.get(join.getTargetName());
             if (val == null) {
                 throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
             }
             else {
-                idMap = Collections.singletonMap(join.getSource().getName(), val);
+                idMap = Collections.singletonMap(join.getSourceName(), val);
             }
         }
         // general case
         else {
             idMap = new HashMap(len * 2);
             for (int i = 0; i < len; i++) {
-                DbAttributePair join = (DbAttributePair) joins.get(i);
-                Object val = targetSnapshot.get(join.getTarget().getName());
+                DbJoin join = (DbJoin) joins.get(i);
+                Object val = targetSnapshot.get(join.getTargetName());
                 if (val == null) {
                     throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
                 }
                 else {
-                    idMap.put(join.getSource().getName(), val);
+                    idMap.put(join.getSourceName(), val);
                 }
             }
         }
@@ -428,7 +494,9 @@ public class DbRelationship extends Relationship {
         return srcSnapshotWithTargetSnapshot(targetSnapshot);
     }
 
-    /** Set relationship multiplicity. */
+    /** 
+     * Sets relationship multiplicity. 
+     */
     public void setToMany(boolean toMany) {
         this.toMany = toMany;
         this.firePropertyDidChange();
@@ -443,19 +511,13 @@ public class DbRelationship extends Relationship {
     final static class JoinTransformers {
         static final Transformer targetExtractor = new Transformer() {
             public Object transform(Object input) {
-                return (input instanceof DbAttributePair)
-                    ? ((DbAttributePair) input).getTarget()
-                    : input;
-
+                return (input instanceof DbJoin) ? ((DbJoin) input).getTarget() : input;
             }
         };
 
         static final Transformer sourceExtractor = new Transformer() {
             public Object transform(Object input) {
-                return (input instanceof DbAttributePair)
-                    ? ((DbAttributePair) input).getSource()
-                    : input;
-
+                return (input instanceof DbJoin) ? ((DbJoin) input).getSource() : input;
             }
         };
     }

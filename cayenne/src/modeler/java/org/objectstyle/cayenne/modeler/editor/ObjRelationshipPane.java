@@ -60,7 +60,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.DefaultCellEditor;
@@ -79,6 +78,7 @@ import javax.swing.table.TableColumn;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.EntityEvent;
@@ -93,10 +93,11 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /** 
- * Displays ObjRelationships for the current obj entity. 
+ * Displays ObjRelationships for the edited ObjEntity. 
  * 
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
@@ -131,7 +132,8 @@ public class ObjRelationshipPane
 
     private void init() {
         table = new CayenneTable();
-        table.setDefaultRenderer(String.class, new CellRenderer());
+        table.setDefaultRenderer(String.class, new StringRenderer());
+        table.setDefaultRenderer(ObjEntity.class, new EntityRenderer());
 
         resolve = new JButton("Edit Relationship");
 
@@ -238,21 +240,12 @@ public class ObjRelationshipPane
     }
 
     /** 
-     * Creates a lost of ObjEntity names.
+     * Creates a list of ObjEntity names.
      */
     private Object[] createObjEntityComboModel() {
         DataMap map = mediator.getCurrentDataMap();
-        Collection objEntities = map.getObjEntities(true);
-        int len = objEntities.size();
-        Object[] names = objEntities.toArray();
-
-        for (int i = 0; i < len; i++) {
-            // substitute Entities with their names
-            names[i] = ((Entity) names[i]).getName();
-        }
-
-        Arrays.sort(names);
-        return names;
+        Collection objEntities = map.getNamespace().getObjEntities();
+        return objEntities.toArray();
     }
 
     public void objEntityChanged(EntityEvent e) {
@@ -282,30 +275,35 @@ public class ObjRelationshipPane
         table.select(ind);
     }
 
-    /** Refresh the list of obj entities (targets). 
-      * Also refresh the table in case some obj relationships were deleted.*/
+    /** 
+     * Refresh the list of ObjEntity targets. Also refresh the table in case some 
+     * ObjRelationships were deleted.
+     */
     private void reloadEntityList(EntityEvent e) {
         if (e.getSource() == this)
             return;
+
         // If current model added/removed, do nothing.
-        if (mediator.getCurrentObjEntity() == e.getEntity())
+        ObjEntity entity = mediator.getCurrentObjEntity();
+        if (entity == e.getEntity() || entity == null) {
             return;
-        // If this is just loading new currentObjEntity, do nothing
-        if (mediator.getCurrentObjEntity() == null)
-            return;
-        TableColumn col;
-        col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
+        }
+
+        TableColumn col =
+            table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
+
         JComboBox combo = (JComboBox) editor.getComponent();
+        combo.setRenderer(CellRenderers.entityListRendererWithIcons(entity.getDataMap()));
         combo.setModel(new DefaultComboBoxModel(createObjEntityComboModel()));
-        ObjRelationshipTableModel model;
-        model = (ObjRelationshipTableModel) table.getModel();
+
+        ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
         model.fireTableDataChanged();
     }
 
-    protected void rebuildTable(ObjEntity ent) {
+    protected void rebuildTable(ObjEntity entity) {
         final ObjRelationshipTableModel model =
-            new ObjRelationshipTableModel(ent, mediator, this);
+            new ObjRelationshipTableModel(entity, mediator, this);
 
         model.addTableModelListener(new TableModelListener() {
             public void tableChanged(TableModelEvent e) {
@@ -336,11 +334,13 @@ public class ObjRelationshipPane
 
         col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
         col.setMinWidth(150);
-        JComboBox combo =
-            CayenneWidgetFactory.createComboBox(createObjEntityComboModel(), true);
-        combo.setEditable(false);
-        combo.setSelectedIndex(-1);
-        DefaultCellEditor editor = new DefaultCellEditor(combo);
+        JComboBox targetCombo =
+            CayenneWidgetFactory.createComboBox(createObjEntityComboModel(), false);
+        targetCombo.setRenderer(
+            CellRenderers.entityListRendererWithIcons(entity.getDataMap()));
+        targetCombo.setEditable(false);
+        targetCombo.setSelectedIndex(-1);
+        DefaultCellEditor editor = new DefaultCellEditor(targetCombo);
         editor.setClickCountToStart(1);
         col.setCellEditor(editor);
 
@@ -349,15 +349,56 @@ public class ObjRelationshipPane
 
         col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
         col.setMinWidth(60);
-        combo = CayenneWidgetFactory.createComboBox(deleteRules, false);
-        combo.setEditable(false);
-        combo.setSelectedIndex(0); //Default to the first value
-        editor = new DefaultCellEditor(combo);
+        JComboBox deleteRulesCombo =
+            CayenneWidgetFactory.createComboBox(deleteRules, false);
+        deleteRulesCombo.setEditable(false);
+        deleteRulesCombo.setSelectedIndex(0); //Default to the first value
+        editor = new DefaultCellEditor(deleteRulesCombo);
         editor.setClickCountToStart(1);
         col.setCellEditor(editor);
     }
 
-    final class CellRenderer extends DefaultTableCellRenderer {
+    class EntityRenderer extends StringRenderer {
+
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
+
+            if (value instanceof MapObject) {
+                MapObject mapObject = (MapObject) value;
+                String label = mapObject.getName();
+
+                if (mapObject instanceof Entity) {
+                    Entity entity = (Entity) mapObject;
+
+                    // for different namespace display its name
+                    DataMap dataMap = entity.getDataMap();
+                    if (dataMap != null && dataMap != mediator.getCurrentDataMap()) {
+                        label += " (" + dataMap.getName() + ")";
+                    }
+                }
+
+                value = label;
+            }
+
+            super.getTableCellRendererComponent(
+                table,
+                value,
+                isSelected,
+                hasFocus,
+                row,
+                column);
+
+            setForeground(foreground(row));
+            return this;
+        }
+    }
+
+    class StringRenderer extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(
             JTable table,
@@ -375,18 +416,22 @@ public class ObjRelationshipPane
                 row,
                 column);
 
+            setForeground(foreground(row));
+
+            return this;
+        }
+
+        // set grey foreground for inherited rows...
+        Color foreground(int row) {
             ObjRelationshipTableModel model =
                 (ObjRelationshipTableModel) table.getModel();
             ObjRelationship relationship = model.getRelationship(row);
 
-            Color foreground =
-                (relationship != null
+            return (
+                relationship != null
                     && relationship.getSourceEntity() != model.getEntity())
-                    ? Color.GRAY
-                    : Color.BLACK;
-            setForeground(foreground);
-
-            return this;
+                ? Color.GRAY
+                : Color.BLACK;
         }
     }
 }

@@ -57,9 +57,8 @@ package org.objectstyle.cayenne.modeler.dialog;
 
 import java.util.ArrayList;
 
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
@@ -68,7 +67,7 @@ import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
  *  don't take place until commit() is called. Creation of the new
  *  DbAttributes is not allowed - user should choose from the existing ones.
 */
-public class DbAttributePairTableModel extends CayenneTableModel {
+public class DbJoinTableModel extends CayenneTableModel {
 
     // Columns
     static final int SOURCE = 0;
@@ -81,7 +80,7 @@ public class DbAttributePairTableModel extends CayenneTableModel {
     /** Is the table editable. */
     private boolean editable;
 
-    public DbAttributePairTableModel(
+    public DbJoinTableModel(
         DbRelationship relationship,
         EventController mediator,
         Object src) {
@@ -92,7 +91,7 @@ public class DbAttributePairTableModel extends CayenneTableModel {
         this.target = (DbEntity) relationship.getTargetEntity();
     }
 
-    public DbAttributePairTableModel(
+    public DbJoinTableModel(
         DbRelationship relationship,
         EventController mediator,
         Object src,
@@ -103,7 +102,7 @@ public class DbAttributePairTableModel extends CayenneTableModel {
     }
 
     public Class getElementsClass() {
-        return DbAttributePair.class;
+        return DbJoin.class;
     }
 
     /** Mode new attribute pairs from list to the DbRelationship. */
@@ -131,23 +130,23 @@ public class DbAttributePairTableModel extends CayenneTableModel {
             return "";
     }
 
-    public DbAttributePair getJoin(int row) {
+    public DbJoin getJoin(int row) {
         return (row >= 0 && row < objectList.size())
-            ? (DbAttributePair) objectList.get(row)
+            ? (DbJoin) objectList.get(row)
             : null;
     }
 
     public Object getValueAt(int row, int column) {
-        DbAttributePair join = getJoin(row);
+        DbJoin join = getJoin(row);
         if (join == null) {
             return null;
         }
 
         if (column == SOURCE) {
-            return (join.getSource() == null) ? null : join.getSource().getName();
+            return join.getSourceName();
         }
         else if (column == TARGET) {
-            return (join.getTarget() == null) ? null : join.getTarget().getName();
+            return join.getTargetName();
         }
         else {
             return null;
@@ -156,31 +155,27 @@ public class DbAttributePairTableModel extends CayenneTableModel {
     }
 
     public void setUpdatedValueAt(Object aValue, int row, int column) {
-        DbAttributePair join = getJoin(row);
+        DbJoin join = getJoin(row);
         if (join == null) {
             return;
         }
 
         String value = (String) aValue;
-
         if (column == SOURCE) {
-            if (null == source)
-                return;
-            DbAttribute attrib = (DbAttribute) source.getAttribute(value);
-            if (null == attrib) {
-                return;
+            if (source == null || source.getAttribute(value) == null) {
+                value = null;
             }
-            join.setSource(attrib);
+
+            join.setSourceName(value);
         }
         else if (column == TARGET) {
-            if (null == target)
-                return;
-            DbAttribute attrib = (DbAttribute) target.getAttribute(value);
-            if (null == attrib) {
-                return;
+            if (target == null || target.getAttribute(value) == null) {
+                value = null;
             }
-            join.setTarget(attrib);
+
+            join.setTargetName(value);
         }
+        
         fireTableRowsUpdated(row, row);
     }
 

@@ -175,12 +175,12 @@ public class DbEntityTst extends CayenneTestCase {
         DbRelationship rel = new DbRelationship("relfrom");
         ent.addRelationship(rel);
         rel.setTargetEntity(otherEntity);
-        rel.addJoin(new DbAttributePair(a1, a11));
+        rel.addJoin(new DbJoin(rel, "a1", "a11"));
 
         DbRelationship rel1 = new DbRelationship("relto");
         otherEntity.addRelationship(rel1);
         rel1.setTargetEntity(ent);
-        rel1.addJoin(new DbAttributePair(a11, a1));
+        rel1.addJoin(new DbJoin(rel1, "a11", "a1"));
 
         // check that the test case is working
         assertSame(a1, ent.getAttribute(a1.getName()));

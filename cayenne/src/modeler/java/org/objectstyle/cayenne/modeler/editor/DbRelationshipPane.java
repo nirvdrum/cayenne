@@ -56,26 +56,30 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
@@ -88,6 +92,7 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /** 
@@ -126,6 +131,7 @@ public class DbRelationshipPane
     protected void init() {
         setLayout(new BorderLayout());
         table = new CayenneTable();
+        table.setDefaultRenderer(DbEntity.class, new EntityRenderer());
         resolve = new JButton("Database Mapping");
         JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
         add(panel, BorderLayout.CENTER);
@@ -147,10 +153,7 @@ public class DbRelationshipPane
         if (table.getSelectedRow() >= 0) {
             DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
             rel = model.getRelationship(table.getSelectedRow());
-            if (rel.getTargetEntity() != null)
-                resolve.setEnabled(true);
-            else
-                resolve.setEnabled(false);
+            resolve.setEnabled(rel.getTargetEntity() != null);
         }
     }
 
@@ -176,10 +179,7 @@ public class DbRelationshipPane
             DbRelationshipTableModel model;
             model = (DbRelationshipTableModel) table.getModel();
             rel = model.getRelationship(table.getSelectedRow());
-            if (rel.getTargetEntity() != null)
-                resolve.setEnabled(true);
-            else
-                resolve.setEnabled(false);
+            resolve.setEnabled(rel.getTargetEntity() != null);
 
             // scroll table
             UIUtil.scrollToSelectedRow(table);
@@ -233,9 +233,9 @@ public class DbRelationshipPane
         }
     }
 
-    protected void rebuildTable(DbEntity dbEnt) {
+    protected void rebuildTable(DbEntity entity) {
         DbRelationshipTableModel model =
-            new DbRelationshipTableModel(dbEnt, mediator, this);
+            new DbRelationshipTableModel(entity, mediator, this);
         model.addTableModelListener(this);
         table.setModel(model);
         table.setRowHeight(25);
@@ -244,29 +244,13 @@ public class DbRelationshipPane
         col.setMinWidth(150);
         col = table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
         col.setMinWidth(150);
-        JComboBox combo = CayenneWidgetFactory.createComboBox(createComboModel(), false);
+        
+        JComboBox combo = CayenneWidgetFactory.createComboBox();
+        combo.setRenderer(CellRenderers.entityListRendererWithIcons(entity.getDataMap()));
+        combo.setModel(createComboModel());
         combo.setEditable(false);
         col.setCellEditor(new DefaultCellEditor(combo));
         table.getSelectionModel().addListSelectionListener(this);
-    }
-
-    /** 
-     * Creates a list of DbEntity names.
-     */
-    private Object[] createComboModel() {
-        DataMap map = mediator.getCurrentDataMap();
-        Collection dbEntities = map.getDbEntities(true);
-        int len = dbEntities.size();
-        Object[] names = dbEntities.toArray();
-
-        for (int i = 0; i < len; i++) {
-            // substitute DbEntities with their names
-            names[i] = ((DbEntity) names[i]).getName();
-        }
-
-        Arrays.sort(names);
-
-        return names;
     }
 
     public void dbEntityChanged(EntityEvent e) {
@@ -318,10 +302,59 @@ public class DbRelationshipPane
             table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
         JComboBox combo = (JComboBox) editor.getComponent();
-        combo.setModel(new DefaultComboBoxModel(createComboModel()));
+        combo.setModel(createComboModel());
 
         DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         model.fireTableDataChanged();
         table.getSelectionModel().addListSelectionListener(this);
     }
+
+    /** 
+     * Creates a list of DbEntities.
+     */
+    private ComboBoxModel createComboModel() {
+        DataMap map = mediator.getCurrentDataMap();
+        Object[] objects = map.getNamespace().getDbEntities().toArray();
+        return new DefaultComboBoxModel(objects);
+    }
+
+    class EntityRenderer extends DefaultTableCellRenderer {
+
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
+
+            if (value instanceof MapObject) {
+                MapObject mapObject = (MapObject) value;
+                String label = mapObject.getName();
+
+                if (mapObject instanceof Entity) {
+                    Entity entity = (Entity) mapObject;
+
+                    // for different namespace display its name
+                    DataMap dataMap = entity.getDataMap();
+                    if (dataMap != null && dataMap != mediator.getCurrentDataMap()) {
+                        label += " (" + dataMap.getName() + ")";
+                    }
+                }
+
+                value = label;
+            }
+
+            super.getTableCellRendererComponent(
+                table,
+                value,
+                isSelected,
+                hasFocus,
+                row,
+                column);
+
+            return this;
+        }
+    }
+
 }

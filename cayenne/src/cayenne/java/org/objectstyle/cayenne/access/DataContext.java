@@ -89,8 +89,8 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
@@ -507,8 +507,8 @@ public class DataContext implements QueryEngine, Serializable {
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
                 Iterator joins = dbRel.getJoins().iterator();
                 while (joins.hasNext()) {
-                    DbAttributePair join = (DbAttributePair) joins.next();
-                    String key = join.getSource().getName();
+                    DbJoin join = (DbJoin) joins.next();
+                    String key = join.getSourceName();
                     snapshot.put(key, storedSnapshot.get(key));
                 }
 

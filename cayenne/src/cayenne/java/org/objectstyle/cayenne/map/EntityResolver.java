@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.Collection;
+import java.util.Iterator;
 
+import org.apache.commons.collections.collection.CompositeCollection;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.Query;
 
@@ -84,6 +86,50 @@ public class EntityResolver
 
     public EntityResolver(Collection dataMaps) {
         super(dataMaps);
+    }
+
+    public Collection getDbEntities() {
+        CompositeCollection c = new CompositeCollection();
+        Iterator it = getDataMaps().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            c.addComposited(map.getDbEntities());
+        }
+
+        return c;
+    }
+
+    public Collection getObjEntities() {
+        CompositeCollection c = new CompositeCollection();
+        Iterator it = getDataMaps().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            c.addComposited(map.getObjEntities());
+        }
+
+        return c;
+    }
+
+    public Collection getProcedures() {
+        CompositeCollection c = new CompositeCollection();
+        Iterator it = getDataMaps().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            c.addComposited(map.getProcedures());
+        }
+
+        return c;
+    }
+
+    public Collection getQueries() {
+        CompositeCollection c = new CompositeCollection();
+        Iterator it = getDataMaps().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            c.addComposited(map.getQueries());
+        }
+
+        return c;
     }
 
     public DbEntity getDbEntity(String name) {
@@ -169,5 +215,13 @@ public class EntityResolver
 
     public synchronized void setDataMaps(Collection maps) {
         super.setDataMaps(maps);
+    }
+
+    public boolean isIndexedByClass() {
+        return super.isIndexedByClass();
+    }
+
+    public void setIndexedByClass(boolean b) {
+        super.setIndexedByClass(b);
     }
 }

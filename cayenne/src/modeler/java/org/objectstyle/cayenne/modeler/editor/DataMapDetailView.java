@@ -59,14 +59,10 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -101,28 +97,7 @@ public class DataMapDetailView extends JPanel implements DataMapDisplayListener 
 
     protected JTextField name;
     protected JLabel location;
-    protected JPanel depMapsPanel;
     protected JComboBox nodeSelector;
-    protected Map mapLookup = new HashMap();
-
-    private ActionListener mapCheckboxListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            JCheckBox src = (JCheckBox) e.getSource();
-            DataMap map = (DataMap) mapLookup.get(src);
-
-            if (map != null) {
-                DataMap curMap = eventController.getCurrentDataMap();
-                if (src.isSelected()) {
-                    curMap.addDependency(map);
-                }
-                else {
-                    curMap.removeDependency(map);
-                }
-
-                eventController.fireDataMapEvent(new DataMapEvent(this, curMap));
-            }
-        }
-    };
 
     public DataMapDetailView(EventController eventController) {
         this.eventController = eventController;
@@ -230,24 +205,6 @@ public class DataMapDetailView extends JPanel implements DataMapDisplayListener 
         }
 
         nodeSelector.setModel(model);
-
-        // rebuild dependency list
-
-        if (depMapsPanel != null) {
-            remove(depMapsPanel);
-            depMapsPanel = null;
-        }
-
-        mapLookup.clear();
-
-        // add a list of dependencies
-        Collection maps = eventController.getCurrentDataDomain().getDataMaps();
-
-        if (maps.size() > 1) {
-            depMapsPanel = buildMapsPanel(map, maps);
-            add(depMapsPanel, BorderLayout.CENTER);
-            validate();
-        }
     }
 
     private JPanel buildTopPanel() {
@@ -263,36 +220,6 @@ public class DataMapDetailView extends JPanel implements DataMapDisplayListener 
         return builder.getPanel();
     }
 
-    private JPanel buildMapsPanel(DataMap selectedMap, Collection allMaps) {
-        FormLayout layout =
-            new FormLayout("right:max(50dlu;pref), 3dlu, left:max(170dlu;pref)", "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.appendSeparator("Depends on DataMaps");
-        Iterator it = allMaps.iterator();
-        while (it.hasNext()) {
-            DataMap nextMap = (DataMap) it.next();
-            if (nextMap != selectedMap) {
-                JCheckBox check = new JCheckBox();
-                JLabel label = CayenneWidgetFactory.createLabel(nextMap.getName());
-                builder.append(check, label);
-                check.addActionListener(mapCheckboxListener);
-                if (nextMap.isDependentOn(selectedMap)) {
-                    check.setEnabled(false);
-                    label.setEnabled(false);
-                }
-
-                if (selectedMap.isDependentOn(nextMap)) {
-                    check.setSelected(true);
-                }
-
-                mapLookup.put(check, nextMap);
-            }
-        }
-
-        return builder.getPanel();
-    }
 
     /**
      * Refreshes the view, rebuilds the list of other DataMaps that this one 

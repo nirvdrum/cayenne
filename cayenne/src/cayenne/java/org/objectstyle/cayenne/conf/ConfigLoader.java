@@ -58,9 +58,7 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.util.AbstractHandler;
@@ -115,9 +113,11 @@ public class ConfigLoader {
             delegate.startedLoading();
             parser.parse(new InputSource(in));
             delegate.finishedLoading();
-        } catch (IOException ioex) {
+        }
+        catch (IOException ioex) {
             getDelegate().loadError(ioex);
-        } catch (SAXException saxex) {
+        }
+        catch (SAXException saxex) {
             getDelegate().loadError(saxex);
         }
 
@@ -148,7 +148,8 @@ public class ConfigLoader {
             if (localName.equals("domains")) {
                 delegate.shouldLoadProjectVersion(attrs.getValue("", "project-version"));
                 new DomainsHandler(parser, this);
-            } else {
+            }
+            else {
                 throw new SAXParseException(
                     "<domains> should be the root element. <"
                         + localName
@@ -187,7 +188,7 @@ public class ConfigLoader {
             throws SAXException {
             if (localName.equals("domain")) {
                 new DomainHandler(getParser(), this).init(localName, atts);
-            } 
+            }
             else if (localName.equals("view")) {
                 new ViewHandler(getParser(), this).init(atts);
             }
@@ -200,16 +201,15 @@ public class ConfigLoader {
             }
         }
     }
-    
+
     private class ViewHandler extends AbstractHandler {
 
         public ViewHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(Attributes attrs)
-            throws SAXException {
-                
+        public void init(Attributes attrs) throws SAXException {
+
             String name = attrs.getValue("", "name");
             String location = attrs.getValue("", "location");
             delegate.shouldRegisterDataView(name, location);
@@ -223,7 +223,6 @@ public class ConfigLoader {
         private String domainName;
         private Map properties;
         private Map mapLocations;
-        private Map mapDependencies;
 
         public DomainHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
@@ -232,7 +231,6 @@ public class ConfigLoader {
         public void init(String name, Attributes attrs) throws SAXException {
             domainName = attrs.getValue("", "name");
             mapLocations = new HashMap();
-            mapDependencies = new HashMap();
             properties = new HashMap();
             delegate.shouldLoadDataDomain(domainName);
         }
@@ -246,24 +244,26 @@ public class ConfigLoader {
 
             if (localName.equals("property")) {
                 new PropertyHandler(getParser(), this).init(atts, properties);
-            } else if (localName.equals("map")) {
+            }
+            else if (localName.equals("map")) {
                 // "map" elements go after "property" elements
                 // must flush properties if there are any
                 loadProperties();
-                
+
                 new MapHandler(getParser(), this).init(
                     localName,
                     atts,
                     domainName,
-                    mapLocations,
-                    mapDependencies);
-            } else if (localName.equals("node")) {
+                    mapLocations);
+            }
+            else if (localName.equals("node")) {
                 // "node" elements go after "map" elements
                 // must flush maps if there are any
                 loadMaps();
-                
+
                 new NodeHandler(getParser(), this).init(localName, atts, domainName);
-            } else {
+            }
+            else {
                 String message =
                     "<node> or <map> should be the children of <domain>. <"
                         + localName
@@ -271,29 +271,28 @@ public class ConfigLoader {
                 throw new SAXParseException(message, null);
             }
         }
-        
+
         protected void finished() {
             loadProperties();
             loadMaps();
         }
-        
+
         private void loadProperties() {
             if (properties.size() > 0) {
                 // load all properties 
                 delegate.shouldLoadDataDomainProperties(domainName, properties);
-                
+
                 // clean properties to avoid loading them twice
                 properties.clear();
             }
         }
-        
+
         private void loadMaps() {
             if (mapLocations.size() > 0) {
                 // load all maps 
-                delegate.shouldLoadDataMaps(domainName, mapLocations, mapDependencies);
+                delegate.shouldLoadDataMaps(domainName, mapLocations);
                 // clean map locations to avoid loading maps twice
                 mapLocations.clear();
-                mapDependencies.clear();
             }
         }
     }
@@ -304,34 +303,30 @@ public class ConfigLoader {
             super(parser, parentHandler);
         }
 
-        public void init(Attributes attrs, Map properties)
-            throws SAXException {
-                
+        public void init(Attributes attrs, Map properties) throws SAXException {
+
             String name = attrs.getValue("", "name");
             String value = attrs.getValue("", "value");
-            if(name != null && value != null) {
+            if (name != null && value != null) {
                 properties.put(name, value);
             }
         }
     }
-    
+
     private class MapHandler extends AbstractHandler {
         protected String domainName;
-        protected List depMaps = new ArrayList();
         protected String mapName;
         protected String location;
         private Map mapLocations;
-        private Map mapDependencies;
 
         public MapHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs, String domainName, Map locations, Map dependencies)
+        public void init(String name, Attributes attrs, String domainName, Map locations)
             throws SAXException {
             this.domainName = domainName;
             this.mapLocations = locations;
-            this.mapDependencies = dependencies;
             mapName = attrs.getValue("", "name");
             location = attrs.getValue("", "location");
         }
@@ -343,11 +338,12 @@ public class ConfigLoader {
             Attributes attrs)
             throws SAXException {
             if (localName.equals("dep-map-ref")) {
-                new DepMapRefHandler(getParser(), this).init(
-                    localName,
-                    attrs,
-                    depMaps);
-            } else {
+
+                // this is no longer supported, but kept as noop 
+                // for backwards compatibility
+                new DepMapRefHandler(getParser(), this).init(localName, attrs);
+            }
+            else {
                 throw new SAXParseException(
                     "<dep-map-ref> should be the only map child. <"
                         + localName
@@ -358,7 +354,6 @@ public class ConfigLoader {
 
         protected void finished() {
             mapLocations.put(mapName, location);
-            mapDependencies.put(mapName, depMaps);
         }
     }
 
@@ -400,7 +395,8 @@ public class ConfigLoader {
                     attrs,
                     domainName,
                     nodeName);
-            } else {
+            }
+            else {
                 throw new SAXParseException(
                     "<map-ref> should be the only node child. <"
                         + localName
@@ -410,17 +406,15 @@ public class ConfigLoader {
         }
     }
 
+    // this handler is deprecated, but is kept around for backwards compatibility
     private class DepMapRefHandler extends AbstractHandler {
 
-        public DepMapRefHandler(
-            XMLReader parser,
-            ContentHandler parentHandler) {
+        public DepMapRefHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(String name, Attributes attrs, List depMaps)
+        public void init(String name, Attributes attrs)
             throws SAXException {
-            depMaps.add(attrs.getValue("", "name"));
         }
     }
 

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Collection;
+
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -88,4 +90,24 @@ public interface MappingNamespace {
      * such Query is found in the MappingNamespace.
      */
     public Query getQuery(String name);
+
+    /**
+     * Returns all DbEntities in the namespace.
+     */
+    public Collection getDbEntities();
+
+    /**
+     * Returns all ObjEntities in the namespace.
+     */
+    public Collection getObjEntities();
+
+    /**
+     * Returns all Procedures in the namespace.
+     */
+    public Collection getProcedures();
+
+    /**
+     * Returns all Queries in the namespace.
+     */
+    public Collection getQueries();
 }

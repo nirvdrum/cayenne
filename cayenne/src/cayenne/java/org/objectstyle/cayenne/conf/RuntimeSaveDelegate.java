@@ -113,6 +113,9 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         return config.getProjectVersion();
     }
 
+    /**
+     * @deprecated since 1.1, since dependencies are no longer tracked explicitly.
+     */
     public Iterator dependentMapNames(String domainName, String mapName) {
         Transformer tr = new Transformer() {
             public Object transform(Object input) {

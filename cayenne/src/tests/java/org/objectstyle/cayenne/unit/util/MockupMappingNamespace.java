@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.unit.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,5 +104,21 @@ public class MockupMappingNamespace implements MappingNamespace {
 
     public Query getQuery(String name) {
         return (Query) queries.get(name);
+    }
+
+    public Collection getDbEntities() {
+        return dbEntities.values();
+    }
+
+    public Collection getObjEntities() {
+        return objEntities.values();
+    }
+
+    public Collection getProcedures() {
+        return procedures.values();
+    }
+
+    public Collection getQueries() {
+        return queries.values();
     }
 }

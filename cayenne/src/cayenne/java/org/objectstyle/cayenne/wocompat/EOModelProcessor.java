@@ -70,8 +70,8 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.parser.ASTDbPath;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -196,7 +196,7 @@ public class EOModelProcessor {
         if (dbEntityName != null) {
             int i = 0;
             String dbEntityBaseName = dbEntityName;
-            while (dataMap.getDbEntity(dbEntityName, false) != null) {
+            while (dataMap.getDbEntity(dbEntityName) != null) {
                 dbEntityName = dbEntityBaseName + i++;
             }
 
@@ -394,15 +394,10 @@ public class EOModelProcessor {
                 Iterator jIt = joins.iterator();
                 while (jIt.hasNext()) {
                     Map joinMap = (Map) jIt.next();
-                    String srcAttrName = (String) joinMap.get("sourceAttribute");
-                    String targetAttrName = (String) joinMap.get("destinationAttribute");
 
-                    DbAttribute srcAttr =
-                        EODbAttribute.findForEOAttributeName(dbSrc, srcAttrName);
-                    DbAttribute targetAttr =
-                        EODbAttribute.findForEOAttributeName(dbTarget, targetAttrName);
-
-                    DbAttributePair join = new DbAttributePair(srcAttr, targetAttr);
+                    DbJoin join = new DbJoin(dbRel);
+                    join.setSourceName((String) joinMap.get("sourceAttribute"));
+                    join.setTargetName((String) joinMap.get("destinationAttribute"));
                     dbRel.addJoin(join);
                 }
             }

@@ -57,9 +57,11 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
+import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.FileConfiguration;
+import org.objectstyle.cayenne.conf.RuntimeLoadDelegate;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
@@ -81,11 +83,14 @@ public class ProjectConfiguration extends FileConfiguration {
         this.setIgnoringLoadFailures(true);
 
         // configure deterministic file opening rules
-		ResourceLocator locator = this.getResourceLocator();
+        ResourceLocator locator = this.getResourceLocator();
         locator.setSkipAbsolutePath(false);
         locator.setSkipClasspath(true);
         locator.setSkipCurrentDirectory(true);
         locator.setSkipHomeDirectory(true);
+
+        // install custom loader
+        setLoaderDelegate(new ProjectLoader());
     }
 
     /**
@@ -113,6 +118,7 @@ public class ProjectConfiguration extends FileConfiguration {
 
     /**
      * Returns a DataSource factory for projects.
+     * 
      * @see org.objectstyle.cayenne.project.ProjectDataSourceFactory
      */
     public DataSourceFactory getDataSourceFactory() {
@@ -124,4 +130,25 @@ public class ProjectConfiguration extends FileConfiguration {
         }
     }
 
+    final class ProjectLoader extends RuntimeLoadDelegate {
+
+        public ProjectLoader() {
+            super(
+                ProjectConfiguration.this,
+                ProjectConfiguration.this.getLoadStatus(),
+                ProjectConfiguration.getLoggingLevel());
+        }
+
+        public void shouldLoadDataDomain(String domainName) {
+            super.shouldLoadDataDomain(domainName);
+
+            try {
+                // disable class indexing 
+                findDomain(domainName).getEntityResolver().setIndexedByClass(false);
+            }
+            catch (Exception ex) {
+                throw new ConfigurationException("Domain is not loaded: " + domainName);
+            }
+        }
+    }
 }

@@ -81,8 +81,8 @@ import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -525,7 +525,7 @@ class ContextCommit {
 
                 Iterator joinsIterator = dbRelationship.getJoins().iterator();
                 while (joinsIterator.hasNext()) {
-                    DbAttributePair dbAttrPair = (DbAttributePair) joinsIterator.next();
+                    DbJoin dbAttrPair = (DbJoin) joinsIterator.next();
                     DbAttribute dbAttribute = dbAttrPair.getSource();
                     if (!attributes.contains(dbAttribute)) {
                         attributes.add(dbAttribute);

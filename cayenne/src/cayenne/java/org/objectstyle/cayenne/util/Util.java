@@ -283,6 +283,12 @@ public class Util {
                 return unwindException(e.getTargetException());
             }
         }
+        else if (th instanceof SAXException) {
+            SAXException sax = (SAXException) th;
+            if (sax.getException() != null) {
+                return unwindException(sax.getException());
+            }
+        }
 
         return th;
     }

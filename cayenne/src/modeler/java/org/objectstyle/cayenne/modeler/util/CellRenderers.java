@@ -74,6 +74,8 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.MapObject;
+import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
@@ -174,6 +176,64 @@ public final class CellRenderers {
      */
     public static ListCellRenderer listRendererWithIcons() {
         return new ListRenderer(true);
+    }
+
+    /**
+     * Returns a ListCellRenderer to display Cayenne project tree nodes with icons.
+     */
+    public static ListCellRenderer entityListRendererWithIcons(MappingNamespace namespace) {
+        return new EntityRenderer(namespace);
+    }
+
+    final static class EntityRenderer extends DefaultListCellRenderer {
+        MappingNamespace namespace;
+
+        EntityRenderer(MappingNamespace namespace) {
+            this.namespace = namespace;
+        }
+
+        /**
+          * Will trim the value to fit defined size.
+          */
+        public Component getListCellRendererComponent(
+            JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus) {
+
+            // the sequence is important - call super with converted value,
+            // then set an icon, and then return "this" 
+            ImageIcon icon = CellRenderers.iconForObject(value);
+
+            if (value instanceof MapObject) {
+                MapObject mapObject = (MapObject) value;
+                String label = mapObject.getName();
+
+                if (mapObject instanceof Entity) {
+                    Entity entity = (Entity) mapObject;
+
+                    // for different namespace display its name
+                    DataMap dataMap = entity.getDataMap();
+                    if (dataMap != null && dataMap != this.namespace) {
+                        label += " (" + dataMap.getName() + ")";
+                    }
+                }
+                
+                value = label;
+            }
+
+            super.getListCellRendererComponent(
+                list,
+                value,
+                index,
+                isSelected,
+                cellHasFocus);
+
+            setIcon(icon);
+
+            return this;
+        }
     }
 
     final static class ListRenderer extends DefaultListCellRenderer {

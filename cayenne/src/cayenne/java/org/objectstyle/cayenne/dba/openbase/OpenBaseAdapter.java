@@ -71,8 +71,8 @@ import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
@@ -272,7 +272,7 @@ public class OpenBaseAdapter extends JdbcAdapter {
                 "Only a single join relationships are supported by OpenBase. Ignoring extra joins.");
         }
 
-        DbAttributePair join = (DbAttributePair) rel.getJoins().get(0);
+        DbJoin join = (DbJoin) rel.getJoins().get(0);
 
         buf
             .append("INSERT INTO _SYS_RELATIONSHIP (")
@@ -281,11 +281,11 @@ public class OpenBaseAdapter extends JdbcAdapter {
             .append(") VALUES ('")
             .append(sourceEntity.getFullyQualifiedName())
             .append("', '")
-            .append(join.getSource().getName())
+            .append(join.getSourceName())
             .append("', '")
             .append(targetEntity.getFullyQualifiedName())
             .append("', '")
-            .append(join.getTarget().getName())
+            .append(join.getTargetName())
             .append("', 0, 0, ")
             .append(toMany)
             .append(", '=', '")
@@ -325,7 +325,7 @@ public class OpenBaseAdapter extends JdbcAdapter {
             throws Exception {
 
             // These to types map to "text"; and when setting "text" as object
-            // OB assumes that the object is the actula CLOB... weird
+            // OB assumes that the object is the actual CLOB... weird
             if (type == Types.CLOB || type == Types.LONGVARCHAR) {
                 st.setString(pos, (String) val);
             }

@@ -69,7 +69,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
@@ -636,7 +636,7 @@ public class CayenneDataObject implements DataObject {
             DbRelationship dbRelationship = (DbRelationship) dbRels.get(0);
             Iterator joins = dbRelationship.getJoins().iterator();
             while (joins.hasNext()) {
-                DbAttributePair join = (DbAttributePair) joins.next();
+                DbJoin join = (DbJoin) joins.next();
                 if (join.getSource().isMandatory()) {
                     validate = true;
                     break;

@@ -62,8 +62,8 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
@@ -148,7 +148,7 @@ public class HSQLDBAdapter extends JdbcAdapter {
         Iterator jit = rel.getJoins().iterator();
         boolean first = true;
         while (jit.hasNext()) {
-            DbAttributePair join = (DbAttributePair) jit.next();
+            DbJoin join = (DbJoin) jit.next();
             if (!first) {
                 buf.append(", ");
                 refBuf.append(", ");
@@ -156,8 +156,8 @@ public class HSQLDBAdapter extends JdbcAdapter {
             else
                 first = false;
 
-            buf.append(join.getSource().getName());
-            refBuf.append(join.getTarget().getName());
+            buf.append(join.getSourceName());
+            refBuf.append(join.getTargetName());
         }
 
         buf.append(") REFERENCES ");

@@ -100,8 +100,8 @@ public interface ConfigLoaderDelegate {
     public void shouldRegisterDataView(String name, String location);
 
     /**
-     * @deprecated Since 1.0.4 this method is no longer called during project loading.
-     * shouldLoadDataMaps(String,Map,Map) is used instead.
+     * @deprecated Since 1.1 this method is no longer called during project loading.
+     * {@link #shouldLoadDataMaps(String,Map)} is used instead.
      */
     public void shouldLoadDataMap(
         String domainName,
@@ -110,9 +110,15 @@ public interface ConfigLoaderDelegate {
         List depMapNames);
     
     /**
-     * @since 1.0.4
+     * @deprecated Since 1.1 this method is no longer called during project loading.
+     * {@link #shouldLoadDataMaps(String,Map)} is used instead.
      */
     public void shouldLoadDataMaps(String domainName, Map locations, Map dependencies);
+    
+    /**
+     * @since 1.1
+     */
+    public void shouldLoadDataMaps(String domainName, Map locations);
     
     /**
      * @since 1.1

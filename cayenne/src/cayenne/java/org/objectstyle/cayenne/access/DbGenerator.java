@@ -82,8 +82,8 @@ import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
@@ -590,7 +590,7 @@ public class DbGenerator {
                 // so 
                 Iterator joins = nextRelationship.getJoins().iterator();
                 while (joins.hasNext()) {
-                    DbAttributePair join = (DbAttributePair) joins.next();
+                    DbJoin join = (DbJoin) joins.next();
                     pkAttributes.remove(join.getSource());
                 }
             }

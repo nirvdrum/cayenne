@@ -89,6 +89,9 @@ public interface ConfigSaverDelegate {
     
     public String mapLocation(String domainName, String mapName);
     
+    /**
+     * @deprecated since 1.1, since dependencies are no longer tracked explicitly.
+     */
     public Iterator dependentMapNames(String domainName, String mapName);
     
     public Iterator linkedMapNames(String domainName, String nodeName);

@@ -60,6 +60,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -76,8 +77,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
@@ -231,10 +232,9 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         // init UI components
         setTitle("DbRelationship Info: " + start.getName() + " to " + end.getName());
 
-        table.setModel(
-            new DbAttributePairTableModel(relationship, getMediator(), this, true));
+        table.setModel(new DbJoinTableModel(relationship, getMediator(), this, true));
         TableColumn sourceColumn =
-            table.getColumnModel().getColumn(DbAttributePairTableModel.SOURCE);
+            table.getColumnModel().getColumn(DbJoinTableModel.SOURCE);
         sourceColumn.setMinWidth(150);
         JComboBox comboBox =
             CayenneWidgetFactory.createComboBox(
@@ -244,7 +244,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         sourceColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
         TableColumn targetColumn =
-            table.getColumnModel().getColumn(DbAttributePairTableModel.TARGET);
+            table.getColumnModel().getColumn(DbJoinTableModel.TARGET);
         targetColumn.setMinWidth(150);
         comboBox =
             CayenneWidgetFactory.createComboBox(
@@ -287,17 +287,15 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
     private void initController() {
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                DbAttributePairTableModel model =
-                    (DbAttributePairTableModel) table.getModel();
-                model.addRow(new DbAttributePair());
+                DbJoinTableModel model = (DbJoinTableModel) table.getModel();
+                model.addRow(new DbJoin(relationship));
                 table.select(model.getRowCount() - 1);
             }
         });
 
         removeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                DbAttributePairTableModel model =
-                    (DbAttributePairTableModel) table.getModel();
+                DbJoinTableModel model = (DbJoinTableModel) table.getModel();
                 stopEditing();
                 int row = table.getSelectedRow();
                 model.removeRow(model.getJoin(row));
@@ -363,7 +361,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
                     oldName));
         }
 
-        DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
+        DbJoinTableModel model = (DbJoinTableModel) table.getModel();
         model.commit();
 
         // If new DbRelationship was created, add it to the source.
@@ -373,7 +371,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
 
         // check "to dep pk" setting,
         // maybe this is no longer valid
-        if (relationship.isToDependentPK() && !MapUtil.isValidForDepPk(relationship)) {
+        if (relationship.isToDependentPK() && !relationship.isValidForDepPk()) {
             relationship.setToDependentPK(false);
         }
 
@@ -392,7 +390,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
                 reverseRelationship.setToMany(!relationship.isToMany());
             }
 
-            java.util.List revJoins = getReverseJoins();
+            Collection revJoins = getReverseJoins(reverseRelationship);
             reverseRelationship.setJoins(revJoins);
 
             // check if joins map to a primary key of this entity
@@ -401,7 +399,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
                 if (it.hasNext()) {
                     boolean toDepPK = true;
                     while (it.hasNext()) {
-                        DbAttributePair join = (DbAttributePair) it.next();
+                        DbJoin join = (DbJoin) it.next();
                         if (!join.getTarget().isPrimaryKey()) {
                             toDepPK = false;
                             break;
@@ -423,8 +421,8 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         hide();
     }
 
-    private List getReverseJoins() {
-        List joins = relationship.getJoins();
+    private Collection getReverseJoins(DbRelationship reverse) {
+        Collection joins = relationship.getJoins();
 
         if ((joins == null) || (joins.size() == 0)) {
             return Collections.EMPTY_LIST;
@@ -434,9 +432,15 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
 
         // Loop through the list of attribute pairs, create reverse pairs
         // and put them to the reverse list.
-        for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-            DbAttributePair pair = (DbAttributePair) joins.get(i);
-            reverseJoins.add(new DbAttributePair(pair.getTarget(), pair.getSource()));
+        Iterator it = joins.iterator();
+        while (it.hasNext()) {
+            DbJoin pair = (DbJoin) it.next();
+            DbJoin reverseJoin = pair.createReverseJoin();
+
+            // since reverse relationship is not yet initialized,
+            // reverse join will not have it set automatically
+            reverseJoin.setRelationship(reverse);
+            reverseJoins.add(reverseJoin);
         }
 
         return reverseJoins;

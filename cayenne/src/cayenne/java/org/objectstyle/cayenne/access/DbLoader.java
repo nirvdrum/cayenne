@@ -72,8 +72,8 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -525,6 +525,7 @@ public class DbLoader {
                         String pkName = rs.getString("PKCOLUMN_NAME");
                         String fkName = rs.getString("FKCOLUMN_NAME");
                         
+                        // skip invalid joins...
                         DbAttribute pkAtt = (DbAttribute) pkEntity.getAttribute(pkName);
                         if(pkAtt == null) {
                             logObj.info("no attribute for declared primary key: " + pkName);
@@ -537,9 +538,9 @@ public class DbLoader {
                                 "no attribute for declared foreign key: " + fkName);
                             continue;
                         }
-
-                        forwardRelationship.addJoin(new DbAttributePair(pkAtt, fkAtt));
-                        reverseRelationship.addJoin(new DbAttributePair(fkAtt, pkAtt));
+                        
+                        forwardRelationship.addJoin(new DbJoin(forwardRelationship, pkName, fkName));
+                        reverseRelationship.addJoin(new DbJoin(reverseRelationship, fkName, pkName));
                     }
                 }
                 while (rs.next());
@@ -566,7 +567,7 @@ public class DbLoader {
 
         Iterator joinsIt = joins.iterator();
         while (joinsIt.hasNext()) {
-            DbAttributePair join = (DbAttributePair) joinsIt.next();
+            DbJoin join = (DbJoin) joinsIt.next();
             if (!join.getTarget().isPrimaryKey()) {
                 toPK = false;
                 break;

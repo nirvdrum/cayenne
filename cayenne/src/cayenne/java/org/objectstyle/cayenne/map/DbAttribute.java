@@ -177,16 +177,24 @@ public class DbAttribute extends Attribute {
      * @since 1.1
      */
     public boolean isForeignKey() {
-        Iterator relationships = this.getEntity().getRelationships().iterator();
+        String name = getName();
+        if (name == null) {
+            // won't be able to match joins...
+            return false;
+        }
+
+        Iterator relationships = getEntity().getRelationships().iterator();
         while (relationships.hasNext()) {
             DbRelationship relationship = (DbRelationship) relationships.next();
             Iterator joins = relationship.getJoins().iterator();
+
             while (joins.hasNext()) {
-                DbAttributePair join = (DbAttributePair) joins.next();
-                if (join.getSource() == this
-                    && join.getTarget() != null
-                    && join.getTarget().isPrimaryKey()) {
-                    return true;
+                DbJoin join = (DbJoin) joins.next();
+                if (name.equals(join.getSourceName())) {
+                    DbAttribute target = join.getTarget();
+                    if (target != null && target.isPrimaryKey()) {
+                        return true;
+                    }
                 }
             }
         }

@@ -76,6 +76,7 @@ import org.scopemvc.core.Control;
  */
 public class OpenProjectAction extends ProjectAction {
     private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
+
     protected ProjectOpener fileChooser = new ProjectOpener();
 
     public static String getActionName() {
@@ -88,15 +89,15 @@ public class OpenProjectAction extends ProjectAction {
     public OpenProjectAction() {
         super(getActionName());
     }
+
     public String getIconName() {
         return "icon-open.gif";
     }
+
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
     }
-    /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
+
     public void performAction(ActionEvent e) {
         // Save and close (if needed) currently open project.
         if (getMediator() != null && !closeProject()) {
@@ -107,13 +108,18 @@ public class OpenProjectAction extends ProjectAction {
             RecentFileMenuItem menu = (RecentFileMenuItem) e.getSource();
             f = menu.getFile();
         }
+
         if (f == null) {
             openProject();
-        } else {
+        }
+        else {
             openProject(f);
         }
     }
-    /** Opens cayenne.xml file using file chooser. */
+
+    /** 
+     * Opens cayenne.xml file using file chooser dialog. 
+     */
     public void openProject() {
         try {
             // Get the project file name (always cayenne.xml)
@@ -121,10 +127,12 @@ public class OpenProjectAction extends ProjectAction {
             if (file != null) {
                 openProject(file);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logObj.warn("Error loading project file.", e);
         }
     }
+
     /** Opens specified project file. File must already exist. */
     public void openProject(File file) {
         ModelerPreferences pref = ModelerPreferences.getPreferences();
@@ -144,15 +152,18 @@ public class OpenProjectAction extends ProjectAction {
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
-            } else {
+            }
+            else {
                 CayenneModelerFrame.getFrame().getController().handleControl(
                     new Control(ModelerController.PROJECT_OPENED_ID, project));
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.warn("Error loading project file.", ex);
             ErrorDebugDialog.guiWarning(ex, "Error loading project");
         }
     }
+
     protected boolean processUpgrades(Project project) throws ProjectException {
         // must really concat all messages, this is a temp hack...
         String msg = (String) project.getUpgradeMessages().get(0);
@@ -166,7 +177,7 @@ public class OpenProjectAction extends ProjectAction {
         if (returnCode == JOptionPane.NO_OPTION) {
             return false;
         }
-        
+
         // perform upgrade
         logObj.info("Will upgrade project " + project.getMainFile());
         project.upgrade();
