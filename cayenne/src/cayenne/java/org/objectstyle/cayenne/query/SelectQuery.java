@@ -94,7 +94,7 @@ public class SelectQuery
     protected boolean distinct;
     protected boolean fetchingDataRows;
     protected boolean refreshingObjects = true;
-    protected boolean resolvingInherited;
+    protected boolean resolvingInherited = true;
     protected int fetchLimit;
     protected Expression parentQualifier;
     protected String parentObjEntityName;

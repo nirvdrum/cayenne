@@ -46,7 +46,7 @@
             <a href="http://jakarta.apache.org/ant/index.html" target="_new">http://jakarta.apache.org/ant/index.html</a>.
             Ant is needed for:
             <ul>
-            	<li><a href="../appguide/javagen.html#javagen"><code>cgen</code> Ant task</a>
+            	<li><a href="../javagen.html"><code>cgen</code> Ant task</a>
             	for class generation. An alternative to <code>cgen</code> is to use CayenneModeler 
             	GUI tool.</li>
             	<li><a href="compile.html">Building Cayenne from source</a>, for instance when 

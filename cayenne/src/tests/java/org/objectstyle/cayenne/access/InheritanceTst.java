@@ -167,6 +167,7 @@ public class InheritanceTst extends PeopleTestCase {
 
         // select Abstract Ppl
         SelectQuery query = new SelectQuery(AbstractPerson.class);
+        query.setResolvingInherited(false);
         assertFalse(query.isResolvingInherited());
         List abstractPpl = context.performQuery(query);
         assertEquals(6, abstractPpl.size());
