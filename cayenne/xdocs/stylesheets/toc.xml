@@ -90,7 +90,11 @@
     	
     	<item name="12. Deployment"  href="/userguide/deploy/index.html">
     		<item name="12.1 Standalone Applications"  href="/userguide/deploy/standalone-application.html"/>
-    		<item name="12.2 Web Applications"  href="/userguide/deploy/web-application.html"/>
+    		<item name="12.2 Web Applications"  href="/userguide/deploy/web-application.html">
+    			<item name="12.2.1 Initialization Servlet"  href="/userguide/deploy/init-servlet.html"/>
+    			<item name="12.2.2 WebApplicationListener"  href="/userguide/deploy/webapplicationlistener.html"/>
+    			<item name="12.2.3 WebApplicationContextProvider"  href="/userguide/deploy/webapplicationcontextprovider.html"/>
+    		</item>
     		<item name="12.3 Customizing Configuration"  href="/userguide/deploy/custom.html"/>
     		<item name="12.4 Using JNDI"  href="/userguide/deploy/jndi.html"/>
     		<item name="12.5 Deployment with Ant"  href="/userguide/deploy/cdeploy.html"/>

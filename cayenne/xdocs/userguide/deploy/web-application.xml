@@ -1,10 +1,9 @@
 <document>
 <title>User Guide - Deployment</title>
-<toc name="toc-user-guide" chapter="12. Deployment"/>
+<toc name="toc-user-guide" chapter="12. Deployment" subchapter="12.2 Web Applications"/>
 <body>
      <section name="12. Deployment">
-           
-           <subsection name="12.2 Web Applications" anchor="web">
+           <subsection name="12.2 Web Applications">
 
                <p>When deploying an application in a web container it is possible to use the procedure described earlier for the standalone 
 				applications, as long as all Cayenne project XML files are placed in the location accessible to the application ClassLoader 
@@ -35,185 +34,21 @@
 				or "mywebapp/WEB-INF/".
 				</panel>
 
-               <p>Further we will discuss container requirements and steps needed to take advantage of the features above.
+               <p>Further we will discuss in detail three main approaches to web application configuration, mentioning
+				container requirements and specific configuration steps:
                </p>
+				<ul>
+					<li><a href="init-servlet.html">Initialization Servlet</a></li>
+					<li><a href="webapplicationlistener.html">WebApplicationListener</a></li>
+					<li><a href="webapplicationcontextprovider.html">WebApplicationContextProvider</a></li>
+				</ul>
 
-				<panel name="Servlet Specification Versions">Cayenne web application configuration options evolved together
+				<panel name="Servlet Specification Versions">Cayenne web application configuration evolved together
 				with Servlet Specification. So while it is possible to use Cayenne in a container with any level of Servlet Specification support,
-				some of the features are only available starting at a certain Servlet Specification version, as indicated below. Check your
-				container documentation to determine the version that you have. For example Tomcat 3.* supports specification version 
+				some of the features are only available starting at a certain Servlet Specification version, as indicated in the following chapters. 
+				Check your container documentation to determine the version that you have. For example Tomcat 3.* supports specification version 
 				2.2, Tomcat 4.* - 2.3, Tomcat 5.* - 2.4.
 				</panel>
-               
-               <subsection name="12.2.1 Initialization Servlet">
-				<table>
-				<tr>
-					<th>Description:</th>
-					<td>This configuration approach is based on setting up BasicServletConfiguration instance as a shared configuration object
-					within a custom "initialization servlet" init() method on application startup. Later session DataContext is created on
-					demand and retrieved via BasicServletConfiguration.getDefaultContext(..) static method.</td>
-				</tr>
-				<tr>
-					<th>Servlet Spec. Compatibility:</th>
-					<td>Any</td>
-				</tr>
-				<tr>
-					<th>Participating classes:</th>
-					<td>org.objectstyle.cayenne.conf.BasicServletConfiguration, javax.servlet.HttpServlet</td>
-				</tr>
-				<tr>
-					<th>Allows cayenne.xml in WEB-INF/:</th>
-					<td>Yes</td>
-				</tr>
-				<tr>
-					<th>Session-bound DataContext:</th>
-					<td>Yes</td>
-				</tr>
-				<tr>
-					<th>Request thread-bound DataContext:</th>
-					<td>No</td>
-				</tr>
-				</table>
-               
-
-<p>Sample initialization servlet code:</p>
-<source>
-package com.somepackage;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
-
-public class MyServlet extends HttpServlet {
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-  
-        BasicServletConfiguration.initializeConfiguration(config.getServletContext());
-        
-        // perfom any other application initialization...
-    }
-...
-</source>
-            
-<p>Sample <code>web.xml</code> snippet: </p>      
-<source>&amp;lt;servlet&amp;gt;
-    &amp;lt;servlet-name&amp;gt;myservl&amp;lt;/servlet-name&amp;gt;
-    &amp;lt;servlet-class&amp;gt;com.somepackage.MyServlet&amp;lt;/servlet-class&amp;gt;
-    &amp;lt;load-on-startup&amp;gt;0&amp;lt;/load-on-startup&amp;gt;
-&amp;lt;/servlet&amp;gt;</source>
-
-<p>Sample DataContext retrieval code: </p>  
-<source>
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
-import javax.servlet.http.HttpServletRequest;
-...
-
-// this code is executed within requrest, so assume we have access to request object
-HttpServletRequest r;
-
-// get session DataContext to perform database queries
-DataContext context = BasicServletConfiguration.getDefaultContext(r.getSession());
-</source>
-			</subsection>
-
-
-			<subsection name="12.2.2 WebApplicationListener">
-				<table>
-				<tr>
-					<th>Description:</th>
-					<td>This configuration approach is based on setting up a WebApplicationListener as a listener for servlet context 
-					and session events. Session DataContext is retrieved via BasicServletConfiguration.getDefaultContext(..) static method.
-					Listener approach is 100% configuration-based and removes a need for special initialization servlet.</td>
-				</tr>
-				<tr>
-					<th>Servlet Spec. Compatibility:</th>
-					<td>Version 2.3 and newer</td>
-				</tr>
-				<tr>
-					<th>Participating classes:</th>
-					<td>org.objectstyle.cayenne.conf.BasicServletConfiguration, org.objectstyle.cayenne.conf.WebApplicationListener</td>
-				</tr>
-				<tr>
-					<th>Allows cayenne.xml in WEB-INF/:</th>
-					<td>Yes</td>
-				</tr>
-				<tr>
-					<th>Session-bound DataContext:</th>
-					<td>Yes</td>
-				</tr>
-				<tr>
-					<th>Request thread-bound DataContext:</th>
-					<td>No</td>
-				</tr>
-				</table>
-
-<p>Sample <code>web.xml</code> snippet: </p>      
-<source>&amp;lt;listener&amp;gt;
-   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.WebApplicationListener&amp;lt;/listener-class&amp;gt;
-&amp;lt;/listener&amp;gt; 
-</source>
-<p>Sample DataContext retrieval code: </p>  
-<source>
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
-import javax.servlet.http.HttpServletRequest;
-...
-
-// this code is executed within requrest, so assume we have access to request object
-HttpServletRequest r;
-
-// get session DataContext to perform database queries
-DataContext context = BasicServletConfiguration.getDefaultContext(r.getSession());
-</source>
-		</subsection>
-		
-		
-			<subsection name="12.2.3 WebApplicationContextProvider">
-				<table>
-				<tr>
-					<th>Description:</th>
-					<td>This configuration approach is based on setting up a WebApplicationContextProvider as a listener for servlet context, 
-					session, and also request events. On each request session DataContext is rebound to the request worker thread, and can be 
-					obtained via DataContext.getThreadDataContext().
-					Listener approach allows to remove any Servlet API dependencies from the context retrieval code.</td>
-				</tr>
-				<tr>
-					<th>Servlet Spec. Compatibility:</th>
-					<td>Version 2.4 and newer</td>
-				</tr>
-				<tr>
-					<th>Participating classes:</th>
-					<td>org.objectstyle.cayenne.conf.BasicServletConfiguration, org.objectstyle.cayenne.conf.WebApplicationContextProvider</td>
-				</tr>
-				<tr>
-					<th>Allows cayenne.xml in WEB-INF/:</th>
-					<td>Yes</td>
-				</tr>
-				<tr>
-					<th>Session-bound DataContext:</th>
-					<td>Yes</td>
-				</tr>
-				<tr>
-					<th>Request thread-bound DataContext:</th>
-					<td>No</td>
-				</tr>
-				</table>
-
-<p>Sample <code>web.xml</code> snippet: </p>      
-<source>&amp;lt;listener&amp;gt;
-   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.WebApplicationContextProvider&amp;lt;/listener-class&amp;gt;
-&amp;lt;/listener&amp;gt; 
-</source>
-<p>Sample DataContext retrieval code: </p>  
-<source>
-import org.objectstyle.cayenne.access.DataContext;
-...
-// get session DataContext bound to the current request thread
-DataContext context = DataContext.getThreadDataContext();
-</source>
-		</subsection>
 </subsection>    
     </section>
 </body>
