@@ -79,7 +79,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         p1.setToPaintingInfo(pi1);
         p1.setToGallery(g1);
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
     }
 
     public void testReadNestedProperty1() throws Exception {
@@ -310,5 +310,16 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
                     name));
         List pts = ctxt.performQuery(q);
         return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
+    }
+
+    public void testToManyUnfaulted() throws Exception {
+        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        artist.setArtistName("test");
+        assertTrue(artist.readPropertyDirectly("paintingArray") instanceof Fault);
+
+        ctxt.commitChanges();
+
+        // check that to-many is still fault
+        assertTrue(artist.readPropertyDirectly("paintingArray") instanceof Fault);
     }
 }

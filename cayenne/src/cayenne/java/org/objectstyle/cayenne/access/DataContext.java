@@ -835,17 +835,12 @@ public class DataContext implements QueryEngine, Serializable {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
 
-        // initialize to-many relationships with empty lists
+        // initialize to-many relationships with a fault
         Iterator it = objEntity.getRelationships().iterator();
         while (it.hasNext()) {
             ObjRelationship rel = (ObjRelationship) it.next();
             if (rel.isToMany()) {
-                ToManyList relList =
-                    new ToManyList(
-                        relationshipDataSource,
-                        dataObject.getObjectId(),
-                        rel.getName());
-                dataObject.writePropertyDirectly(rel.getName(), relList);
+                dataObject.writePropertyDirectly(rel.getName(), Fault.getToManyFault());
             }
         }
 
