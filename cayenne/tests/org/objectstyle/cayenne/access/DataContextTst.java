@@ -56,11 +56,11 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import javax.sql.ConnectionPoolDataSource;
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
@@ -68,6 +68,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -291,7 +292,7 @@ public class DataContextTst extends TestCase {
 		return "artist" + ind;
 	}
 
-	public void populateTables() throws java.lang.Exception {
+	public void populateTables() throws Exception {
 		String insertArtist =
 			"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
 
@@ -332,40 +333,80 @@ public class DataContextTst extends TestCase {
 		}
 	}
 
+	/** Give each artist a single painting. */
+	public void populatePaintings() throws Exception {
+		String insertPaint =
+			"INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID) VALUES (?,?,?)";
+
+		Connection conn = TestMain.getSharedConnection();
+
+		try {
+			conn.setAutoCommit(false);
+
+			PreparedStatement stmt = conn.prepareStatement(insertPaint);
+
+			for (int i = 1; i <= artistCount; i++) {
+				stmt.setInt(1, i);
+				stmt.setString(2, "P_" + artistName(i));
+				stmt.setInt(3, i);
+				stmt.executeUpdate();
+			}
+
+			stmt.close();
+			conn.commit();
+		} finally {
+			conn.close();
+		}
+	}
+
 	public void testPerformIteratedQuery1() throws Exception {
-        SelectQuery q1 = new SelectQuery("Artist");
+		SelectQuery q1 = new SelectQuery("Artist");
 		ResultIterator it = ctxt.performIteratedQuery(q1);
-		
+
 		try {
 			int count = 0;
-			while(it.hasNextRow()) {
+			while (it.hasNextRow()) {
 				it.nextDataRow();
 				count++;
 			}
-			
+
 			assertEquals(DataContextTst.artistCount, count);
-		}
-		finally {
+		} finally {
 			it.close();
 		}
 	}
-	
-	
-    public void testPerformIteratedQuery2() throws Exception {
-        SelectQuery q1 = new SelectQuery("Artist");
+
+	public void testPerformIteratedQuery2() throws Exception {
+		populatePaintings();
+
+		SelectQuery q1 = new SelectQuery("Artist");
 		ResultIterator it = ctxt.performIteratedQuery(q1);
+
+		// just for this test increase pool size
+		changeMaxConnections(1);
 		
 		try {
-			int count = 0;
-			while(it.hasNextRow()) {
-				it.nextDataRow();
-				count++;
+			while (it.hasNextRow()) {
+				Map row = it.nextDataRow();
+
+				// try instantiating an object and fetching its relationships
+				Artist obj = (Artist) ctxt.objectFromDataRow("Artist", row);
+				List paintings = obj.getPaintingArray();
+				assertNotNull(paintings);
+				assertEquals(1, paintings.size());
 			}
+		} finally {
+			// change allowed connections back
+			changeMaxConnections(-1);
 			
-			assertEquals(DataContextTst.artistCount, count);
-		}
-		finally {
 			it.close();
 		}
 	}
+
+	public void changeMaxConnections(int delta) {
+		DataNode node = ((DataDomain) ctxt.getParent()).getDataNodes()[0];
+		PoolManager manager = (PoolManager) node.getDataSource();
+		manager.setMaxConnections(manager.getMaxConnections() + delta);
+	}
+
 }
