@@ -88,11 +88,8 @@ public class DataObjectPropertyComparator implements Comparator {
      */
     public DataObjectPropertyComparator(List orderingsList) {
         super();
-        int i;
         orderings = new Ordering[orderingsList.size()];
-        for (i = 0; i < orderingsList.size(); i++) {
-            orderings[i] = (Ordering) orderingsList.get(i);
-        }
+        orderingsList.toArray(orderings);
     }
 
     public int compare(Object o1, Object o2) {
