@@ -73,7 +73,7 @@
                <attribute name="Implementation-Version" value="${project.version}"/>
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.modeler.Editor"/>
-               <attribute name="Class-Path" value="../cayenne.jar scope-bin.jar"/>
+               <attribute name="Class-Path" value="../cayenne.jar scope-bin-1.0.1.jar"/>
             </manifest>
         </jar>
     </target>  
