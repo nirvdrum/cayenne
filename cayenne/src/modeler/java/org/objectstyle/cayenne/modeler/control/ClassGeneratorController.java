@@ -9,9 +9,9 @@ import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.model.ClassGeneratorModel;
-import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.view.ClassGeneratorDialog;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -32,16 +32,24 @@ public class ClassGeneratorController extends BasicController {
     public static final String CHOOSE_LOCATION_CONTROL =
         "cayenne.modeler.classgenerator.choose.button";
 
-    public ClassGeneratorController(Project project, DataMap map) {
-        setModel(prepareModel(project, map));
+    public ClassGeneratorController(Project project, DataMap map, ObjEntity selectedEntity) {
+        setModel(prepareModel(project, map, selectedEntity));
     }
 
-    protected Object prepareModel(Project project, DataMap map) {
+    protected Object prepareModel(
+        Project project,
+        DataMap map,
+        ObjEntity selectedEntity) {
+        	
         // validate entities
         Validator validator = new Validator(project);
         validator.validate();
 
-        ClassGeneratorModel model = new ClassGeneratorModel(map, validator.validationResults());
+        ClassGeneratorModel model =
+            new ClassGeneratorModel(
+                map,
+                selectedEntity,
+                validator.validationResults());
 
         // by default generate pairs of classes
         model.setPairs(true);

@@ -86,7 +86,8 @@ public class GenerateClassesAction extends CayenneAction {
         Project project = super.getTopModel().getCurrentProject();
         new ClassGeneratorController(
             project,
-            getMediator().getCurrentDataMap())
+            getMediator().getCurrentDataMap(),
+            getMediator().getCurrentObjEntity())
             .startup();
     }
 

@@ -22,12 +22,12 @@ public class ClassGeneratorModel extends BasicModel {
     protected boolean pairs;
     protected List entities;
 
-    public ClassGeneratorModel(DataMap map, List validationInfo) {
+    public ClassGeneratorModel(DataMap map, ObjEntity selectedEntity, List validationInfo) {
         this.map = map;
-        prepareEntities(validationInfo);
+        prepareEntities(selectedEntity, validationInfo);
     }
 
-    protected void prepareEntities(List validationInfo) {
+    protected void prepareEntities(ObjEntity selectedEntity, List validationInfo) {
         Map failedEntities = new HashMap();
         
         if(validationInfo != null) {
@@ -52,7 +52,8 @@ public class ClassGeneratorModel extends BasicModel {
             if (errorMessage != null) {
                 wrapper = new ClassGeneratorEntityWrapper(ent, false, errorMessage);
             } else {
-                wrapper = new ClassGeneratorEntityWrapper(ent, true);
+            	boolean enabled = (selectedEntity != null) ? selectedEntity == ent : true;
+                wrapper = new ClassGeneratorEntityWrapper(ent, enabled);
             }
 
             tmp.add(wrapper);
