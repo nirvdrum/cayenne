@@ -58,10 +58,11 @@ package org.objectstyle.cayenne.conf;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
+import org.objectstyle.cayenne.access.QueryLogger;
 
 
 /** Looks up DataSource objects via JNDI.
@@ -86,21 +87,25 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
 	}
 
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
-        if(logLevel == null)
+        if(logLevel == null) {
             logLevel = Level.FINER;
+        }
             
         try {
-            logObj.log(logLevel, "loading JNDI data source from (" + location + ").");
+            QueryLogger.logConnect(logLevel, location);
+            
             Context initCtx = new InitialContext();
             Context envCtx = (Context) initCtx.lookup("java:comp/env");
 
-            if(envCtx == null)
+            if(envCtx == null) {
                 logObj.log(logLevel, "warning: java:comp/env context is null.");
-
-            return (DataSource)envCtx.lookup(location);
+            }
             
+            DataSource ds = (DataSource)envCtx.lookup(location);
+            QueryLogger.logConnectSuccess(logLevel);
+            return ds;
         } catch(Exception ex) {
-            logObj.log(logLevel, "error loading datasource.", ex);
+            QueryLogger.logConnectFailure(logLevel, ex);
             throw ex;
         }
     }

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.*;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,8 +63,11 @@ import javax.sql.DataSource;
 
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.util.AbstractHandler;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -79,26 +82,23 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	static Logger logObj =
 		Logger.getLogger(DriverDataSourceFactory.class.getName());
 
-    private static boolean applyWebAppPatch;
-    
-    static {
-    	// determine if servlet environment is even accessible
-    	try {
-    		Class.forName("javax.servlet.http.HttpSession");
-    		applyWebAppPatch = true;
-    	}
-    	catch(Exception ex) {
-    		applyWebAppPatch = false;
-    	}
-    }
-    	
+	private static boolean applyWebAppPatch;
+
+	static {
+		// determine if servlet environment is even accessible
+		try {
+			Class.forName("javax.servlet.http.HttpSession");
+			applyWebAppPatch = true;
+		} catch (Exception ex) {
+			applyWebAppPatch = false;
+		}
+	}
+
 	protected XMLReader parser;
 	protected DataSourceInfo driverInfo;
 	protected Level logLevel = Level.FINER;
 	protected ResourceLocator locator;
 	protected Configuration parentConfig;
-	
-	
 
 	public DriverDataSourceFactory() throws Exception {
 		parser = Util.createXmlReader();
@@ -130,13 +130,23 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 		throws Exception {
 		this.logLevel = logLevel;
 		load(location);
-		return new PoolManager(
-			driverInfo.getJdbcDriver(),
-			driverInfo.getDataSourceUrl(),
-			driverInfo.getMinConnections(),
-			driverInfo.getMaxConnections(),
-			driverInfo.getUserName(),
-			driverInfo.getPassword());
+
+		QueryLogger.logConnect(logLevel, driverInfo);
+		try {
+			PoolManager pm =
+				new PoolManager(
+					driverInfo.getJdbcDriver(),
+					driverInfo.getDataSourceUrl(),
+					driverInfo.getMinConnections(),
+					driverInfo.getMaxConnections(),
+					driverInfo.getUserName(),
+					driverInfo.getPassword());
+			QueryLogger.logConnectSuccess(logLevel);
+			return pm;
+		} catch (Exception ex) {
+			QueryLogger.logConnectFailure(logLevel, ex);
+			throw ex;
+		}
 	}
 
 	/** Returns DataSourceInfo property. */
@@ -146,14 +156,15 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
 	protected InputStream getInputStream(String location) {
 		InputStream in = getWebAppInputStream(location);
-		
+
 		// if not a web app, return to normal behavior
 		return (in != null) ? in : locator.findResourceStream(location);
 	}
-	
+
 	protected InputStream getWebAppInputStream(String location) {
 		// webapp patch - first lookup in WEB-INF
-		if (applyWebAppPatch && parentConfig != null
+		if (applyWebAppPatch
+			&& parentConfig != null
 			&& (parentConfig instanceof ServletConfiguration)) {
 			ServletConfiguration servlConf =
 				(ServletConfiguration) parentConfig;

@@ -61,13 +61,19 @@ import javax.sql.DataSource;
 
 import org.objectstyle.TestConstants;
 import org.objectstyle.cayenne.ConnectionSetup;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.perform.*;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.perform.PerformanceTest;
+import org.objectstyle.perform.PerformanceTestRunner;
+import org.objectstyle.perform.PerformanceTestSuite;
+import org.objectstyle.perform.ResultRenderer;
 
 /** Runs performance tests. */
 public class PerformMain implements TestConstants {
@@ -85,7 +91,6 @@ public class PerformMain implements TestConstants {
 		} else {
 			new PerformanceTestRunner(null).runTest(prepareTest(args[0]));
 		}
-
 	}
 
 	public static PerformanceTest prepareTest(String testClass) {

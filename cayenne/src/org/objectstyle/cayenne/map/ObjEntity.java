@@ -128,25 +128,29 @@ public class ObjEntity extends Entity {
 		return null;
 	}
 
-	/** Creates an object id from the values in object snapshot.
+	/** 
+	 * Creates an object id from the values in object snapshot.
 	 * If needed attributes are missing in a snapshot or if it is null,
-	 * CayenneRuntimeException is thrown. */
+	 * CayenneRuntimeException is thrown. 
+	 */
 	public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
 		HashMap idMap = new HashMap();
 		Iterator it = getDbEntity().getPrimaryKey().iterator();
 		while (it.hasNext()) {
 			DbAttribute attr = (DbAttribute) it.next();
 			Object val = objectSnapshot.get(attr.getName());
-			if (val == null)
+			if (val == null) {
 				throw new CayenneRuntimeException(
 					"Invalid snapshot value for '"
 						+ attr.getName()
 						+ "'. Must be present and not null.");
+			}
 
 			idMap.put(attr.getName(), val);
 		}
 
-		return new ObjectId(this.getName(), idMap);
+		ObjectId id = new ObjectId(this.getName(), idMap);		
+		return id;
 	}
 
 	/** Clears all the mapping between this obj entity and its current db entity.
@@ -162,7 +166,7 @@ public class ObjEntity extends Entity {
 			if (null != dbAttr) {
 				objAttr.setDbAttribute(null);
 			}
-		} // End while()
+		}
 
 		Iterator rel_it = getRelationshipList().iterator();
 		while (rel_it.hasNext()) {

@@ -361,24 +361,28 @@ public class DataContext implements QueryEngine {
 		while (itr.hasNext()) {
 			String relName = (String) itr.next();
 			ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-			if (rel.isToMany())
+			if (rel.isToMany()) {
 				continue;
+			}
 
-			if (rel.isToDependentEntity())
+			if (rel.isToDependentEntity()) {
 				continue;
+			}
 
 			DataObject target =
 				(DataObject) anObject.readPropertyDirectly(relName);
-			if (target == null)
+			if (target == null) {
 				continue;
+			}
 
 			DbRelationship dbRel =
 				(DbRelationship) rel.getDbRelationshipList().get(0);
 			Map idParts = target.getObjectId().getIdSnapshot();
 
 			// this may happen in uncommitted objects
-			if (idParts == null)
+			if (idParts == null) {
 				continue;
+			}
 
 			Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
 			map.putAll(fk);
@@ -457,17 +461,20 @@ public class DataContext implements QueryEngine {
 		return obj;
 	}
 
-	/** Return a snapshot of all object persistent field values as of last
-	 *  commit or fetch operation.
+	/** 
+	 * Return a snapshot of all object persistent field values as of last
+	 * commit or fetch operation.
 	 *
-	 *  @return a map of object values with DbAttribute names as keys 
-	 *  corresponding to the latest value read from or committed to the database. */
+	 * @return a map of object values with DbAttribute names as keys 
+	 * corresponding to the latest value read from or committed to the database. */
 	public Map getCommittedSnapshot(DataObject dataObject) {
 		return (Map) committedSnapshots.get(dataObject.getObjectId());
 	}
 
-	/** Instantiates new object and registers it with itself. Object class
-	 * is determined from ObjEntity. Object class must have a default constructor. */
+	/** 
+	 * Instantiates new object and registers it with itself. Object class
+	 * is determined from ObjEntity. Object class must have a default constructor. 
+	 */
 	public DataObject createAndRegisterNewObject(String objEntityName) {
 		String objClassName = lookupEntity(objEntityName).getClassName();
 		DataObject dobj = null;
@@ -513,8 +520,9 @@ public class DataContext implements QueryEngine {
 		dataObject.setDataContext(this);
 	}
 
-	/** Notifies data context that a registered object need to be deleted on
-	 *  next commit.
+	/** 
+	 * Notifies data context that a registered object need to be deleted on
+	 * next commit.
 	 *
 	 * @param deleteObject data object that we want to delete.
 	 */

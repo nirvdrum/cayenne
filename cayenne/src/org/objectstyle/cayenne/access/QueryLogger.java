@@ -140,6 +140,46 @@ public class QueryLogger {
 		logObj.setLevel(level);
 	}
 
+	/**
+	 * Logs database connection event using container data source.
+	 */
+	public static void logConnect(Level logLevel, String dataSource) {
+		if (logObj.isLoggable(logLevel)) {
+			logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
+		}
+	}
+
+	/**
+	 * Logs database connection event.
+	 */
+	public static void logConnect(Level logLevel, DataSourceInfo dsi) {
+		if (logObj.isLoggable(logLevel)) {
+			StringBuffer buf =
+				new StringBuffer("Connecting. DataSource information:");
+
+			if (dsi != null) {
+				buf.append("\nDriver class: ").append(dsi.getJdbcDriver());
+				buf.append("\nCayenne DbAdapter: ").append(
+					dsi.getAdapterClass());
+				buf.append("\nDatabase URL: ").append(dsi.getDataSourceUrl());
+				buf.append("\nLogin: ").append(dsi.getUserName());
+				buf.append("\nPassword: *******");
+			} else {
+				buf.append(" unavailable");
+			}
+
+			logObj.log(logLevel, buf.toString());
+		}
+	}
+
+	public static void logConnectSuccess(Level logLevel) {
+		logObj.log(logLevel, "+++ Connecting: SUCCESS.");
+	}
+
+	public static void logConnectFailure(Level logLevel, Throwable th) {
+		logObj.log(logLevel, "*** Connecting: FAILURE.", th);
+	}
+
 	public static void logQuery(Level logLevel, String queryStr, List params) {
 		logQuery(logLevel, queryStr, params, -1);
 	}
@@ -193,7 +233,7 @@ public class QueryLogger {
 		if (time >= 0) {
 			buf.append(" - took ").append(time).append(" ms.");
 		}
-		
+
 		logObj.log(logLevel, buf.toString());
 	}
 
