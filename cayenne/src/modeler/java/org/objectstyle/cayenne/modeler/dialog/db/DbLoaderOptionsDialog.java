@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
@@ -65,6 +66,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -74,8 +76,6 @@ import javax.swing.event.ChangeListener;
 import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.PanelFactory;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -103,14 +103,16 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
      */
     public DbLoaderOptionsDialog(Collection schemas, String dbUserName,
             boolean loadProcedures) {
-        super(Application.getFrame(), "DB Reengineering Options", true);
+        super(Application.getFrame(), "Reengineer DB Schema: Select Options");
 
         init();
         initController();
         initFromModel(schemas, dbUserName, loadProcedures);
 
-        this.pack();
-        this.centerWindow();
+        pack();
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        setModal(true);
+        centerWindow();
     }
 
     /** Sets up the graphical components. */
@@ -119,14 +121,14 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
         // create widgets...
         selectButton = new JButton("Continue");
         cancelButton = new JButton("Cancel");
-        schemaSelector = CayenneWidgetFactory.createComboBox();
-        tableNamePatternField = CayenneWidgetFactory.createTextField();
-        procNamePatternField = CayenneWidgetFactory.createTextField();
+        schemaSelector = new JComboBox();
+        tableNamePatternField = new JTextField();
+        procNamePatternField = new JTextField();
         loadProcedures = new JCheckBox();
 
         // assemble
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(200dlu;pref)",
+                "right:pref, 3dlu, fill:max(170dlu;pref):grow",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -136,15 +138,13 @@ public class DbLoaderOptionsDialog extends CayenneDialog {
         builder.append("Load Procedures:", loadProcedures);
         procedureLabel = builder.append("Procedure Name Pattern:", procNamePatternField);
 
-        JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {
-                selectButton, cancelButton
-        });
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(selectButton);
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
         getContentPane().add(buttons, BorderLayout.SOUTH);
-
-        setResizable(false);
     }
 
     protected void initController() {

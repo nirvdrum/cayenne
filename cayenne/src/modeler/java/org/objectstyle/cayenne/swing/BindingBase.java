@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.swing;
 
-import java.util.Map;
-
 import ognl.Ognl;
 import ognl.OgnlException;
 
@@ -67,12 +65,13 @@ import org.objectstyle.cayenne.validation.ValidationException;
 /**
  * @author Andrei Adamchik
  */
+// TODO: extend BindingExpression, unless we decide to make it a composition...
 public abstract class BindingBase implements ObjectBinding {
 
     private Object compiled;
 
     protected Object context;
-    protected String propertyExpression;
+    protected String expression;
 
     protected BindingDelegate delegate;
     protected boolean modelUpdateDisabled;
@@ -100,7 +99,7 @@ public abstract class BindingBase implements ObjectBinding {
                     + propertyExpression, BindingBase.unwind(ex));
         }
 
-        this.propertyExpression = propertyExpression;
+        this.expression = propertyExpression;
     }
 
     public Object getContext() {
@@ -127,8 +126,8 @@ public abstract class BindingBase implements ObjectBinding {
         this.usingNullForEmptyStrings = b;
     }
 
-    public String getPropertyExpression() {
-        return propertyExpression;
+    public String getExpression() {
+        return expression;
     }
 
     public BindingDelegate getDelegate() {
@@ -215,20 +214,6 @@ public abstract class BindingBase implements ObjectBinding {
         }
 
         throw new BindingException("Evaluation failed in context: " + context, root);
-    }
-
-    public Object getValue(Map contextVariables) {
-        if (context == null) {
-            throw new BindingException("No context");
-        }
-
-        try {
-            return Ognl.getValue(compiled, contextVariables, context);
-        }
-        catch (OgnlException ex) {
-            throw new BindingException("Evaluation failed in context: " + context, Util
-                    .unwindException(ex));
-        }
     }
 
 }

@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.swing;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -74,10 +76,32 @@ public class BindingFactory {
         checkingForValueChange = true;
     }
 
+    public ObjectBinding bindToCheckbox(JCheckBox checkbox, String property) {
+        CheckboxBinding binding = new CheckboxBinding(checkbox, property);
+        return prepareBinding(binding);
+    }
+
+    public ObjectBinding bindToTable(
+            JTable table,
+            String listBinding,
+            String[] headers,
+            BindingExpression[] columns,
+            Class[] columnClass,
+            boolean[] editableState) {
+
+        TableBinding binding = new TableBinding(
+                table,
+                listBinding,
+                headers,
+                columns,
+                columnClass,
+                editableState);
+        return prepareBinding(binding);
+    }
+
     public ObjectBinding bindToButton(JButton button, String action) {
         ActionBinding binding = new ActionBinding(button, action);
-        prepareBinding(binding);
-        return binding;
+        return prepareBinding(binding);
     }
 
     public ObjectBinding bindToComboSelection(
@@ -88,25 +112,23 @@ public class BindingFactory {
                 component,
                 property,
                 noSelectionValue);
-        prepareBinding(binding);
-        return binding;
+        return prepareBinding(binding);
     }
 
     public ObjectBinding bindToTextArea(JTextArea component, String property) {
         TextBinding binding = new TextBinding(component, property);
-        prepareBinding(binding);
-        return binding;
+        return prepareBinding(binding);
     }
 
     public ObjectBinding bindToTextField(JTextField component, String property) {
         TextBinding binding = new TextBinding(component, property);
-        prepareBinding(binding);
-        return binding;
+        return prepareBinding(binding);
     }
 
-    protected void prepareBinding(BindingBase binding) {
+    protected ObjectBinding prepareBinding(BindingBase binding) {
         binding.setUsingNullForEmptyStrings(isUsingNullForEmptyStrings());
         binding.setCheckingForValueChange(isCheckingForValueChange());
+        return binding;
     }
 
     public boolean isCheckingForValueChange() {

@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,59 +53,75 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.editor.datanode;
+package org.objectstyle.cayenne.modeler.dialog.db;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.modeler.ProjectController;
+import java.sql.Connection;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.modeler.ClassLoadingService;
+import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
-import org.objectstyle.cayenne.swing.BindingBuilder;
-import org.objectstyle.cayenne.swing.BindingDelegate;
-import org.objectstyle.cayenne.swing.ObjectBinding;
-import org.objectstyle.cayenne.util.Util;
 
 /**
+ * A component for choosing a DataSource. Users can choose from the DataSources configured
+ * in preferences, and one extra set of connection settings. This object will create and
+ * keep open a JDBC connection. It is caller responsibility to dispose of it properly.
+ * 
  * @author Andrei Adamchik
  */
-public abstract class DataSourceEditor extends CayenneController {
+// TODO: after refactoring DbLoader to accept a DataSource instead of connection this
+// dialog should be merged with superclass - DataSourceWizard.
+public class ConnectionWizard extends DataSourceWizard {
 
-    protected ObjectBinding[] fieldAdapters;
-    protected DataNode node;
-    protected BindingDelegate nodeChangeProcessor;
+    protected Connection connection;
+    protected DbAdapter adapter;
 
-    public DataSourceEditor(ProjectController controller,
-            BindingDelegate nodeChangeProcessor) {
-        super(controller);
-        this.nodeChangeProcessor = nodeChangeProcessor;
-        initBindings();
+    public ConnectionWizard(CayenneController parent, String title,
+            String altDataSourceKey, DBConnectionInfo altDataSource) {
+        super(parent, title, altDataSourceKey, altDataSource);
     }
 
-    public DataNode getNode() {
-        return node;
-    }
+    /**
+     * Overrides superclass to keep an open connection around for the caller's use.
+     */
+    public void okAction() {
+        // build connection and adapter...
 
-    public void setNode(DataNode node) {
-        if (!Util.nullSafeEquals(this.node, node)) {
-            this.node = node;
+        DBConnectionInfo info = getConnectionInfo();
+        ClassLoadingService classLoader = getApplication().getClassLoadingService();
 
-            for (int i = 0; i < fieldAdapters.length; i++) {
-                fieldAdapters[i].updateView();
-            }
+        try {
+            this.adapter = info.makeAdapter(classLoader);
         }
-    }
-
-    protected void initBindings() {
-        BindingBuilder builder = new BindingBuilder(
-                getApplication().getBindingFactory(),
-                this);
-        builder.setDelegate(nodeChangeProcessor);
-        prepareBindings(builder);
-    }
-
-    protected abstract void prepareBindings(BindingBuilder builder);
-
-    protected void refreshView() {
-        for (int i = 0; i < fieldAdapters.length; i++) {
-            fieldAdapters[i].updateView();
+        catch (Throwable th) {
+            reportError("DbAdapter Error", th);
+            return;
         }
+
+        try {
+            this.connection = info.makeDataSource(classLoader).getConnection();
+        }
+        catch (Throwable th) {
+            reportError("Connection Error", th);
+            return;
+        }
+
+        // set success flag, and unblock the caller...
+        canceled = false;
+        view.dispose();
+    }
+
+    /**
+     * Returns configured DB connection.
+     */
+    public Connection getConnection() {
+        return connection;
+    }
+
+    /**
+     * Returns configured DbAdapter.
+     */
+    public DbAdapter getAdapter() {
+        return adapter;
     }
 }

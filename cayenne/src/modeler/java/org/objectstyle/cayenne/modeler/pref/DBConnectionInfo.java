@@ -49,9 +49,9 @@ public class DBConnectionInfo extends _DBConnectionInfo {
     /**
      * Creates a DbAdapter based on configured values.
      */
-    public DbAdapter makeAdapter(ClassLoadingService classLoader) throws SQLException {
+    public DbAdapter makeAdapter(ClassLoadingService classLoader) throws Exception {
         if (getDbAdapter() == null) {
-            throw new SQLException("No DbAdapter set.");
+            throw new Exception("No DbAdapter set.");
         }
 
         try {
@@ -59,7 +59,7 @@ public class DBConnectionInfo extends _DBConnectionInfo {
         }
         catch (Throwable th) {
             th = Util.unwindException(th);
-            throw new SQLException("DbAdapter load error: " + th.getLocalizedMessage());
+            throw new Exception("DbAdapter load error: " + th.getLocalizedMessage());
         }
     }
 

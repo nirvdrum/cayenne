@@ -31,6 +31,14 @@
 		<db-attribute name="url" type="VARCHAR" length="254"/>
 		<db-attribute name="user_name" type="VARCHAR" length="254"/>
 	</db-entity>
+	<db-entity name="db_generator_defaults">
+		<db-attribute name="create_fk" type="INTEGER"/>
+		<db-attribute name="create_pk" type="INTEGER"/>
+		<db-attribute name="create_tables" type="INTEGER"/>
+		<db-attribute name="drop_pk" type="INTEGER"/>
+		<db-attribute name="drop_tables" type="INTEGER"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="fs_path">
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="path" type="VARCHAR" length="254"/>
@@ -48,6 +56,13 @@
 		<obj-attribute name="password" type="java.lang.String" db-attribute-path="password"/>
 		<obj-attribute name="url" type="java.lang.String" db-attribute-path="url"/>
 		<obj-attribute name="userName" type="java.lang.String" db-attribute-path="user_name"/>
+	</obj-entity>
+	<obj-entity name="DBGeneratorDefaults" className="org.objectstyle.cayenne.modeler.pref.DBGeneratorDefaults" lock-type="optimistic" dbEntityName="db_generator_defaults" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
+		<obj-attribute name="createFK" type="java.lang.Boolean" db-attribute-path="create_fk"/>
+		<obj-attribute name="createPK" type="java.lang.Boolean" db-attribute-path="create_pk"/>
+		<obj-attribute name="createTables" type="java.lang.Boolean" db-attribute-path="create_tables"/>
+		<obj-attribute name="dropPK" type="java.lang.Boolean" db-attribute-path="drop_pk"/>
+		<obj-attribute name="dropTables" type="java.lang.Boolean" db-attribute-path="drop_tables"/>
 	</obj-entity>
 	<obj-entity name="DataMapDefaults" className="org.objectstyle.cayenne.modeler.pref.DataMapDefaults" lock-type="optimistic" dbEntityName="data_map_defaults" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
 		<obj-attribute name="generatePairs" type="java.lang.Boolean" db-attribute-path="generate_pairs"/>

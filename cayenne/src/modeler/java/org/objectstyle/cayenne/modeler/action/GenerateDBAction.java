@@ -57,18 +57,17 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.dialog.db.GenerateDbController;
-import org.objectstyle.cayenne.modeler.util.CayenneAction;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.modeler.dialog.db.DBGeneratorOptions;
+import org.objectstyle.cayenne.modeler.dialog.db.DataSourceWizard;
+import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.project.ProjectPath;
 
-/** 
+/**
  * Action that generates database tables from a DataMap.
  */
-public class GenerateDBAction extends CayenneAction {
+public class GenerateDBAction extends DBWizardAction {
 
     public static String getActionName() {
         return "Generate Database Schema";
@@ -79,12 +78,21 @@ public class GenerateDBAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-        generateDb();
-    }
 
-    protected void generateDb() {
+        DBConnectionInfo nodeInfo = preferredDataSource();
+        String nodeKey = preferredDataSourceLabel(nodeInfo);
 
-        DataNode node = getProjectController().getCurrentDataNode();
+        DataSourceWizard connectWizard = new DataSourceWizard(
+                getProjectController(),
+                "Generate DB Schema: Connect to Database",
+                nodeKey,
+                nodeInfo);
+
+        if (!connectWizard.startupAction()) {
+            // canceled
+            return;
+        }
+
         DataMap map = getProjectController().getCurrentDataMap();
 
         // sanity check
@@ -92,19 +100,17 @@ public class GenerateDBAction extends CayenneAction {
             throw new IllegalStateException("No current DataMap selected.");
         }
 
-        // detect default node even if one is not selected
-        if (node == null) {
-            node =
-                ModelerUtil.getNodeLinkedToMap(getProjectController().getCurrentDataDomain(), map);
-        }
-
-        // start scope-based controller
-        new GenerateDbController(node, map).startup();
+        // ... show dialog...
+        new DBGeneratorOptions(
+                getProjectController(),
+                "Generate DB Schema: Options",
+                connectWizard.getConnectionInfo(),
+                map).startupAction();
     }
 
     /**
-    * Returns <code>true</code> if path contains a DataMap object.
-    */
+     * Returns <code>true</code> if path contains a DataMap object.
+     */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;

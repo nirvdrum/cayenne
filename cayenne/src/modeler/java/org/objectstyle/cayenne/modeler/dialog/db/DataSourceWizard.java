@@ -57,31 +57,29 @@ package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.Component;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.ClassLoadingService;
 import org.objectstyle.cayenne.modeler.dialog.pref.PreferenceDialog;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.swing.BindingBuilder;
 import org.objectstyle.cayenne.swing.ObjectBinding;
-import org.objectstyle.cayenne.util.Util;
 
 /**
- * A component for choosing a DataSource. User can choose from the DataSources configured
- * in preferences, and one extra set of connection settings.
+ * A subclass of ConnectionWizard that tests configured DataSource, but does not keep an
+ * open connection.
  * 
  * @author Andrei Adamchik
  */
-public class DataSourceChooser extends CayenneController {
+public class DataSourceWizard extends CayenneController {
 
-    protected DataSourceChooserView view;
+    protected DataSourceWizardView view;
 
     protected DBConnectionInfo altDataSource;
     protected String altDataSourceKey;
@@ -90,20 +88,18 @@ public class DataSourceChooser extends CayenneController {
 
     protected String dataSourceKey;
 
-    protected Connection connection;
-    protected DbAdapter adapter;
-
     // this object is a clone of an object selected from the dropdown, as we need to allow
     // local temporary modifications
     protected DBConnectionInfo connectionInfo;
 
     protected boolean canceled;
 
-    public DataSourceChooser(CayenneController parent, String altDataSourceKey,
-            DBConnectionInfo altDataSource) {
+    public DataSourceWizard(CayenneController parent, String title,
+            String altDataSourceKey, DBConnectionInfo altDataSource) {
         super(parent);
 
-        this.view = new DataSourceChooserView(this);
+        this.view = new DataSourceWizardView(this);
+        this.view.setTitle(title);
         this.altDataSource = altDataSource;
         this.altDataSourceKey = altDataSourceKey;
         this.connectionInfo = new DBConnectionInfo();
@@ -168,35 +164,32 @@ public class DataSourceChooser extends CayenneController {
     }
 
     /**
-     * Returns configure DB connection.
+     * Tests that the entered information is valid and can be used to open a conneciton.
+     * Does not store the open connection.
      */
-    public Connection getConnection() {
-        return connection;
-    }
-
-    /**
-     * Returns configured DbAdapter.
-     */
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
-
     public void okAction() {
-        // build connection and adapter...
-
         DBConnectionInfo info = getConnectionInfo();
         ClassLoadingService classLoader = getApplication().getClassLoadingService();
 
+        // try making an adapter...
         try {
-            this.adapter = info.makeAdapter(classLoader);
+            info.makeAdapter(classLoader);
         }
         catch (Throwable th) {
             reportError("DbAdapter Error", th);
             return;
         }
 
+        // doing connection testing...
+        // attempt opening the connection, and close it right away
         try {
-            this.connection = info.makeDataSource(classLoader).getConnection();
+            Connection connection = info.makeDataSource(classLoader).getConnection();
+            try {
+                connection.close();
+            }
+            catch (SQLException ex) {
+                // ignore close error
+            }
         }
         catch (Throwable th) {
             reportError("Connection Error", th);
@@ -226,17 +219,6 @@ public class DataSourceChooser extends CayenneController {
 
     public Component getView() {
         return view;
-    }
-
-    private void reportError(String title, Throwable th) {
-        th = Util.unwindException(th);
-
-        th.printStackTrace();
-        JOptionPane.showMessageDialog(
-                getView(),
-                th.getMessage(),
-                title,
-                JOptionPane.ERROR_MESSAGE);
     }
 
     protected void refreshDataSources() {

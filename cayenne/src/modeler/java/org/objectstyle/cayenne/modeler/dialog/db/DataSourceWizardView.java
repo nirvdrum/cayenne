@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -56,85 +56,79 @@
 package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.FlowLayout;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.modeler.dialog.db.GenerateDbController;
-import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
-import org.objectstyle.cayenne.modeler.util.PanelFactory;
-import org.scopemvc.view.swing.SAction;
-import org.scopemvc.view.swing.SButton;
-import org.scopemvc.view.swing.SPanel;
-import org.scopemvc.view.swing.STable;
-import org.scopemvc.view.swing.SwingView;
+import org.objectstyle.cayenne.modeler.dialog.pref.DBConnectionInfoEditor;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * View for DbEntity validation errors display. Used
- * as a warning dialog for DB schema generation.
- * 
  * @author Andrei Adamchik
  */
+public class DataSourceWizardView extends JDialog {
 
-// TODO: This class should behave just like validation dialog,
-// i.e. allow to click on errors and go to the problem location.
-// Need some reusable widget for that.
-public class DbEntityValidationDialog extends SPanel {
+    protected JComboBox dataSources;
+    protected JButton configButton;
+    protected JButton okButton;
+    protected JButton cancelButton;
+    protected DBConnectionInfoEditor connectionInfo;
 
-    public DbEntityValidationDialog() {
-        init();
+    public DataSourceWizardView(CayenneController controller) {
+        this.dataSources = new JComboBox();
+
+        this.configButton = new JButton("...");
+        this.configButton.setToolTipText("configure local DataSource");
+        this.okButton = new JButton("Continue");
+        this.cancelButton = new JButton("Cancel");
+        this.connectionInfo = new DBConnectionInfoEditor(controller);
+
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(new FormLayout(
+                "20dlu:grow, pref, 3dlu, fill:max(50dlu;pref), 3dlu, fill:20dlu",
+                "p"));
+        builder.setDefaultDialogBorder();
+
+        builder.addLabel("Saved DataSources:", cc.xy(2, 1));
+        builder.add(dataSources, cc.xy(4, 1));
+        builder.add(configButton, cc.xy(6, 1));
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(okButton);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(builder.getPanel(), BorderLayout.NORTH);
+        getContentPane().add(connectionInfo.getView(), BorderLayout.CENTER);
+        getContentPane().add(buttons, BorderLayout.SOUTH);
+
+        setTitle("DB Connection Info");
     }
 
-    private void init() {
-        setDisplayMode(SwingView.MODAL_DIALOG);
-        setTitle("Generate DB Schema: Validation Messages");
-        setLayout(new BorderLayout());
+    public JComboBox getDataSources() {
+        return dataSources;
+    }
 
-        // build entity table
-        STable table = new STable() {
-            protected final Dimension preferredSize = new Dimension(450, 300);
-            public Dimension getPreferredScrollableViewportSize() {
-                return preferredSize;
-            }
-        };
-        
-        table.setBackground(ValidatorDialog.WARNING_COLOR);
-        table.setRowHeight(25);
-        table.setRowMargin(3);
-        table.setColumnNames(new String[] { "Name", "Problems" });
-        table.setColumnSelectors(new String[] { "validatedObject.name", "message" });
+    public JButton getCancelButton() {
+        return cancelButton;
+    }
 
-        // make sure that long columns are not squeezed
-        table.getColumnModel().getColumn(0).setMinWidth(100);
-        table.getColumnModel().getColumn(1).setMinWidth(350);
+    public JButton getConfigButton() {
+        return configButton;
+    }
 
-        // build action buttons
-        SButton continueButton =
-            new SButton(new SAction(GenerateDbController.GENERATION_OPTIONS_CONTROL));
-        continueButton.setEnabled(true);
+    public JButton getOkButton() {
+        return okButton;
+    }
 
-        SButton cancelButton =
-            new SButton(new SAction(GenerateDbController.CANCEL_CONTROL));
-        cancelButton.setEnabled(true);
-
-        // assemble
-        JPanel panel = PanelFactory.createTablePanel(table, new JComponent[] {
-        }, new JButton[] { continueButton, cancelButton });
-
-        JEditorPane message =
-            new JEditorPane(
-                "text/html",
-                "<center>Some tables can't be created due to validation problems below.<br> "
-                    + "If \"Continue\" is selected, problematic tables will be skiped.</center>");
-        message.setBackground(this.getBackground());
-        message.setEditable(false);
-        message.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        add(message, BorderLayout.NORTH);
-        add(panel, BorderLayout.CENTER);
+    public DBConnectionInfoEditor getConnectionInfo() {
+        return connectionInfo;
     }
 }

@@ -95,10 +95,7 @@ public class ClassGeneratorDialog extends SPanel {
     protected STable table;
 
     public ClassGeneratorDialog() {
-        init();
-    }
 
-    private void init() {
         // create widgets
         final STextField superClassPackage = new STextField(30);
         superClassPackage.setSelector("superClassPackage");
@@ -199,9 +196,8 @@ public class ClassGeneratorDialog extends SPanel {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(selectAllButton);
         buttons.add(Box.createHorizontalStrut(20));
-        buttons.add(generateButton);
         buttons.add(cancelButton);
-          
+        buttons.add(generateButton);
 
         setDisplayMode(SwingView.MODAL_DIALOG);
         setTitle("Generate Java Classes");

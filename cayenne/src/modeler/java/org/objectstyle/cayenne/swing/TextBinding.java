@@ -76,14 +76,15 @@ import org.objectstyle.cayenne.validation.ValidationException;
  * @author Andrei Adamchik
  */
 public class TextBinding extends BindingBase {
+
     protected JTextComponent textComponent;
-    
+
     protected Color defaultBGColor;
     protected Color errorColor;
     protected String defaultToolTip;
 
-    public TextBinding(JTextField textField, String property) {
-        super(property);
+    public TextBinding(JTextField textField, String expression) {
+        super(expression);
         this.textComponent = textField;
         initComponentDefaults();
 

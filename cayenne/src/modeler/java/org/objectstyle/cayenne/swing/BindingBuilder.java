@@ -55,12 +55,19 @@
  */
 package org.objectstyle.cayenne.swing;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
+ * A builder for component bindings that delegates the creation of the binding to the
+ * underlying factory, and itself configures a number of binding parameters.
+ * 
  * @author Andrei Adamchik
  */
 public class BindingBuilder {
@@ -68,11 +75,8 @@ public class BindingBuilder {
     protected BindingFactory factory;
     protected BindingDelegate delegate;
     protected Object context;
+    protected Map actionsMap;
 
-    public BindingBuilder(BindingFactory factory) {
-        this.factory = factory;
-    }
-    
     public BindingBuilder(BindingFactory factory, Object context) {
         this.factory = factory;
         this.context = context;
@@ -94,14 +98,28 @@ public class BindingBuilder {
         this.context = context;
     }
 
+    public BindingFactory getFactory() {
+        return factory;
+    }
+
+    public ObjectBinding bindToCheckbox(JCheckBox checkbox, String property) {
+        ObjectBinding binding = factory.bindToCheckbox(checkbox, property);
+        return initBinding(binding, delegate);
+    }
+
+    public ObjectBinding bindToCheckbox(JCheckBox checkbox, String property, String action) {
+        ObjectBinding binding = factory.bindToCheckbox(checkbox, property);
+        return initBinding(binding, getActionDelegate(action));
+    }
+
     public ObjectBinding bindToAction(JButton button, String action) {
         ObjectBinding binding = factory.bindToButton(button, action);
-        return initBinding(binding);
+        return initBinding(binding, delegate);
     }
 
     public ObjectBinding bindToComboSelection(JComboBox component, String property) {
         ObjectBinding binding = factory.bindToComboSelection(component, property, null);
-        return initBinding(binding);
+        return initBinding(binding, delegate);
     }
 
     public ObjectBinding bindToComboSelection(
@@ -112,22 +130,52 @@ public class BindingBuilder {
                 component,
                 property,
                 noSelectionValue);
-        return initBinding(binding);
+        return initBinding(binding, delegate);
+    }
+
+    public ObjectBinding bindToComboSelection(
+            JComboBox component,
+            String property,
+            String action,
+            String noSelectionValue) {
+        ObjectBinding binding = factory.bindToComboSelection(
+                component,
+                property,
+                noSelectionValue);
+        return initBinding(binding, getActionDelegate(action));
     }
 
     public ObjectBinding bindToTextArea(JTextArea component, String property) {
         ObjectBinding binding = factory.bindToTextArea(component, property);
-        return initBinding(binding);
+        return initBinding(binding, delegate);
     }
 
     public ObjectBinding bindToTextField(JTextField component, String property) {
         ObjectBinding binding = factory.bindToTextField(component, property);
-        return initBinding(binding);
+        return initBinding(binding, delegate);
     }
 
-    protected ObjectBinding initBinding(ObjectBinding binding) {
+    protected ObjectBinding initBinding(ObjectBinding binding, BindingDelegate delegate) {
         binding.setDelegate(delegate);
         binding.setContext(context);
         return binding;
+    }
+
+    protected BindingDelegate getActionDelegate(String action) {
+        BindingDelegate delegate = null;
+
+        if (actionsMap == null) {
+            actionsMap = new HashMap();
+        }
+        else {
+            delegate = (BindingDelegate) actionsMap.get(action);
+        }
+
+        if (delegate == null) {
+            delegate = new ActionDelegate(action);
+            actionsMap.put(action, delegate);
+        }
+
+        return delegate;
     }
 }

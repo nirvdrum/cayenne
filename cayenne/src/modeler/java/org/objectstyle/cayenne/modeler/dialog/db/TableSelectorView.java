@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -56,15 +56,10 @@
 package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
-
-import org.objectstyle.cayenne.modeler.dialog.pref.DBConnectionInfoEditor;
-import org.objectstyle.cayenne.modeler.util.CayenneController;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -73,62 +68,31 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * @author Andrei Adamchik
  */
-public class DataSourceChooserView extends JDialog {
+public class TableSelectorView extends JPanel {
 
-    protected JComboBox dataSources;
-    protected JButton configButton;
-    protected JButton okButton;
-    protected JButton cancelButton;
-    protected DBConnectionInfoEditor connectionInfo;
+    protected JTable tables;
 
-    public DataSourceChooserView(CayenneController controller) {
-        this.dataSources = new JComboBox();
-
-        this.configButton = new JButton("...");
-        this.configButton.setToolTipText("configure local DataSource");
-        this.okButton = new JButton("Continue");
-        this.cancelButton = new JButton("Cancel");
-        this.connectionInfo = new DBConnectionInfoEditor(controller);
+    public TableSelectorView() {
+        tables = new JTable();
+        tables.setRowHeight(25);
+        tables.setRowMargin(3);
 
         CellConstraints cc = new CellConstraints();
         PanelBuilder builder = new PanelBuilder(new FormLayout(
-                "20dlu:grow, pref, 3dlu, fill:max(50dlu;pref), 3dlu, fill:20dlu",
-                "p"));
+                "fill:min(50dlu;pref):grow",
+                "p, 3dlu, fill:40dlu:grow"));
         builder.setDefaultDialogBorder();
+        builder.addSeparator("Select Tables", cc.xy(1, 1));
+        builder.add(new JScrollPane(
+                tables,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), cc.xy(1, 3));
 
-        builder.addLabel("Saved DataSources:", cc.xy(2, 1));
-        builder.add(dataSources, cc.xy(4, 1));
-        builder.add(configButton, cc.xy(6, 1));
-
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttons.add(cancelButton);
-        buttons.add(okButton);
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(builder.getPanel(), BorderLayout.NORTH);
-        getContentPane().add(connectionInfo.getView(), BorderLayout.CENTER);
-        getContentPane().add(buttons, BorderLayout.SOUTH);
-
-        setTitle("DB Connection Info");
+        setLayout(new BorderLayout());
+        add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    public JComboBox getDataSources() {
-        return dataSources;
-    }
-
-    public JButton getCancelButton() {
-        return cancelButton;
-    }
-
-    public JButton getConfigButton() {
-        return configButton;
-    }
-
-    public JButton getOkButton() {
-        return okButton;
-    }
-
-    public DBConnectionInfoEditor getConnectionInfo() {
-        return connectionInfo;
+    public JTable getTables() {
+        return tables;
     }
 }

@@ -66,9 +66,12 @@ import java.awt.event.KeyEvent;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * A superclass of CayenneModeler controllers.
@@ -76,6 +79,8 @@ import org.objectstyle.cayenne.modeler.Application;
  * @author Andrei Adamchik
  */
 public abstract class CayenneController {
+
+    private static final Logger logObj = Logger.getLogger(CayenneController.class);
 
     protected CayenneController parent;
     protected Application application;
@@ -98,6 +103,21 @@ public abstract class CayenneController {
     }
 
     public abstract Component getView();
+
+    /**
+     * Utility method to provide a visual indication an execution error. This
+     * implementation logs an error and pops up a dialog window with error message.
+     */
+    protected void reportError(String title, Throwable th) {
+        th = Util.unwindException(th);
+        logObj.info("Error in " + getClass().getName(), th);
+
+        JOptionPane.showMessageDialog(
+                getView(),
+                th.getMessage(),
+                title,
+                JOptionPane.ERROR_MESSAGE);
+    }
 
     /**
      * Centers view on parent window.
