@@ -79,8 +79,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Andrei Adamchik
  */
 public abstract class QueryAssemblerHelper {
-	private static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class);
-	
+    private static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class);
+
     protected QueryAssembler queryAssembler;
 
     public QueryAssemblerHelper() {
@@ -214,6 +214,16 @@ public abstract class QueryAssemblerHelper {
     }
 
     /**
+     * @deprecated Since 1.0B5, use method that also takes and Expression parameter.
+     */
+    protected void appendLiteral(
+        StringBuffer buf,
+        Object val,
+        DbAttribute attr) {
+        appendLiteral(buf, val, attr, null);
+    }
+
+    /**
      * Appends SQL code to the query buffer to handle <code>val</code> as a
      * parameter to the PreparedStatement being built. Adds <code>val</code>
      * into QueryAssembler parameter list. 
@@ -236,7 +246,8 @@ public abstract class QueryAssemblerHelper {
     protected void appendLiteral(
         StringBuffer buf,
         Object val,
-        DbAttribute attr) {
+        DbAttribute attr,
+        Expression parentExpression) {
         if (val == null) {
             buf.append("NULL");
         } else if (val instanceof DataObject) {
@@ -269,9 +280,10 @@ public abstract class QueryAssemblerHelper {
             appendLiteralDirect(
                 buf,
                 snap.get(snap.keySet().iterator().next()),
-                attr);
+                attr,
+                parentExpression);
         } else {
-            appendLiteralDirect(buf, val, attr);
+            appendLiteralDirect(buf, val, attr, parentExpression);
         }
     }
 
@@ -285,10 +297,11 @@ public abstract class QueryAssemblerHelper {
      * @param val object that should be appended as a literal to the query. 
      * Must be of one of "standard JDBC" types. Can not be null.
      */
-    private final void appendLiteralDirect(
+    protected void appendLiteralDirect(
         StringBuffer buf,
         Object val,
-        DbAttribute attr) {
+        DbAttribute attr,
+        Expression parentExpression) {
         buf.append('?');
 
         // we are hoping that when processing parameter list, 
@@ -370,7 +383,7 @@ public abstract class QueryAssemblerHelper {
     protected void processRelTermination(
         StringBuffer buf,
         DbRelationship rel) {
-        	
+
         if (rel.isToMany()) {
             // append joins
             queryAssembler.dbRelationshipAdded(rel);

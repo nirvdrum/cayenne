@@ -265,6 +265,7 @@ public class TypesMapping {
             || type == Types.FLOAT
             || type == Types.REAL;
     }
+    
 
     /** Returns an array of string names of the default JDBC data types.*/
     public static String[] getDatabaseTypes() {

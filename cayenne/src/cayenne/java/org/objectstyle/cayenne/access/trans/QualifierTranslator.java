@@ -80,9 +80,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class QualifierTranslator
     extends QueryAssemblerHelper
     implements TraversalHandler {
-    	
+
     private static Logger logObj = Logger.getLogger(QueryUtils.class);
-	
 
     private ExpressionTraversal treeWalker = new ExpressionTraversal();
     private StringBuffer qualBuf = new StringBuffer();
@@ -183,7 +182,7 @@ public class QualifierTranslator
 
             processColumn(qualBuf, attr);
             qualBuf.append(objectMatchTranslator.getOperation());
-            appendLiteral(qualBuf, val, attr);
+            appendLiteral(qualBuf, val, attr, objectMatchTranslator.getExpression());
         }
 
         objectMatchTranslator.reset();
@@ -243,21 +242,21 @@ public class QualifierTranslator
             case Expression.IN :
                 buf.append(" IN ");
                 break;
-			case Expression.NOT_IN :
-				buf.append(" NOT IN ");
-				break;
+            case Expression.NOT_IN :
+                buf.append(" NOT IN ");
+                break;
             case Expression.LIKE :
                 buf.append(" LIKE ");
                 break;
-			case Expression.NOT_LIKE :
-				buf.append(" NOT LIKE ");
-				break;
+            case Expression.NOT_LIKE :
+                buf.append(" NOT LIKE ");
+                break;
             case Expression.LIKE_IGNORE_CASE :
                 buf.append(") LIKE UPPER(");
                 break;
-			case Expression.NOT_LIKE_IGNORE_CASE :
-				buf.append(") NOT LIKE UPPER(");
-				break;
+            case Expression.NOT_LIKE_IGNORE_CASE :
+                buf.append(") NOT LIKE UPPER(");
+                break;
             case Expression.ADD :
                 buf.append(" + ");
                 break;
@@ -276,16 +275,17 @@ public class QualifierTranslator
                 else if (childIndex == 1)
                     buf.append(" AND ");
                 break;
-			case Expression.NOT_BETWEEN :
-				if (childIndex == 0)
-					buf.append(" NOT BETWEEN ");
-				else if (childIndex == 1)
-					buf.append(" AND ");
-				break;
+            case Expression.NOT_BETWEEN :
+                if (childIndex == 0)
+                    buf.append(" NOT BETWEEN ");
+                else if (childIndex == 1)
+                    buf.append(" AND ");
+                break;
         }
 
         if (matchingObject) {
             objectMatchTranslator.setOperation(buf.toString());
+            objectMatchTranslator.setExpression(node);
         }
     }
 
@@ -358,7 +358,7 @@ public class QualifierTranslator
         } else if (parentNode.getType() == Expression.LIST) {
             appendList(parentNode, paramsDbType(parentNode));
         } else {
-            appendLiteral(qualBuf, leaf, paramsDbType(parentNode));
+            appendLiteral(qualBuf, leaf, paramsDbType(parentNode), parentNode);
         }
     }
 
@@ -402,13 +402,13 @@ public class QualifierTranslator
         // process first element outside the loop
         // (unroll loop to avoid condition checking
         if (it.hasNext())
-            appendLiteral(qualBuf, it.next(), paramDesc);
+            appendLiteral(qualBuf, it.next(), paramDesc, listExpr);
         else
             return;
 
         while (it.hasNext()) {
             qualBuf.append(", ");
-            appendLiteral(qualBuf, it.next(), paramDesc);
+            appendLiteral(qualBuf, it.next(), paramDesc, listExpr);
         }
     }
 
@@ -463,10 +463,11 @@ public class QualifierTranslator
     protected void appendLiteral(
         StringBuffer buf,
         Object val,
-        DbAttribute attr) {
+        DbAttribute attr,
+        Expression parentExpression) {
 
         if (!matchingObject) {
-            super.appendLiteral(buf, val, attr);
+            super.appendLiteral(buf, val, attr, parentExpression);
         } else if (val == null || (val instanceof DataObject)) {
             objectMatchTranslator.setDataObject((DataObject) val);
         } else {
@@ -477,7 +478,7 @@ public class QualifierTranslator
     protected void processRelTermination(
         StringBuffer buf,
         DbRelationship rel) {
-        
+
         if (!matchingObject) {
             super.processRelTermination(buf, rel);
         } else {

@@ -64,6 +64,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -76,10 +77,21 @@ public class DataObjectMatchTranslator {
     protected Map attributes;
     protected Map values;
     protected String operation;
+    protected Expression expression;
+
+    public Expression getExpression() {
+        return expression;
+    }
+
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
 
     public void reset() {
         attributes = null;
         values = null;
+        operation = null;
+        expression = null;
     }
 
     /**
