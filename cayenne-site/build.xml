@@ -32,10 +32,12 @@
      * to see targets):
      *
      *  1. site			- (default) creates Cayenne website
-     *  2. site-internal - builds pages defined in cayenne-site, ignoring 
+     *  2. internal	- builds pages defined in cayenne-site, ignoring 
      *  						documents in external projects.
-     *  3. help        - prints this message
-     *  4. clean		- cleans the build
+     *  3. latest		- builds pages from the latest Cayenne checkout
+     *  4. stable	- builds pages from the stable Cayenne checkout.
+     *  5. help        - prints this message
+     *  6. clean		- cleans the build
      *
      *
      * ENVIRONMENT:
@@ -70,34 +72,46 @@
 		<ant antfile="build-latest.xml" target="site"/>
 		<ant antfile="build-site.xml" target="site"/>
 		
-		<!-- assemble -->
-		<loadfile property="license.text" srcFile="${cayenne.latest}/doc/licenses/LICENSE"/>
-		<copy todir="${dist}">
-			<fileset dir="${build}/cayenne-site/out"  includes="**/*.html"/>
-			<fileset dir="${build}/cayenne-latest/out"  includes="**/*.html"/>
-             
-			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
-				<filter token="SFLOGO" value="${sf.logo}"/>
-			</filterset>
-			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
-				<filter token="JNLOGO" value="${java.net.logo}"/>
-			</filterset>
-			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
-				<filter token="LICENSE" value="${license.text}"/>
-			</filterset>
-		</copy>
-		
+		<antcall target="assemble"/>
 		<antcall target="rsync-prompt"/>
     </target>
     
 	<!-- ============================================= -->
-    <!-- Deploys only pages in cayenne-site project, skipping -->
-    <!-- Cayenne User Guides and other documents external to -->
-    <!-- cayenne-site. -->
+    <!-- Deploys only pages located in cayenne-site project -->
     <!-- ============================================= -->
-    <target name="site-internal" depends="prepare">
+    <target name="internal" depends="prepare">
 		<ant antfile="build-site.xml" target="site"/>
 		
+		<antcall target="assemble"/>
+		<antcall target="rsync-prompt"/>
+    </target>
+    
+    
+	<!-- ============================================= -->
+    <!-- Deploys only pages located ithe stable cayenne checkout. -->
+    <!-- ============================================= -->
+    <target name="stable" depends="prepare">
+		<ant antfile="build-stable.xml" target="site"/>
+		
+		<antcall target="assemble"/>
+		<antcall target="rsync-prompt"/>
+    </target>
+    
+	<!-- ============================================= -->
+    <!-- Deploys only pages located in the latest cayenne checkout. -->
+    <!-- ============================================= -->
+    <target name="latest" depends="prepare">
+		<ant antfile="build-latest.xml" target="site"/>
+		
+		<antcall target="assemble"/>
+		<antcall target="rsync-prompt"/>
+    </target>
+    
+
+	<!-- ============================================= -->
+    <!-- Assembles prebuilt docs. -->
+    <!-- ============================================= -->
+    <target name="assemble">
 		<!-- assemble -->
 		<loadfile property="license.text" srcFile="${cayenne.latest}/doc/licenses/LICENSE"/>
 		<copy todir="${dist}">
@@ -113,8 +127,6 @@
 				<filter token="LICENSE" value="${license.text}"/>
 			</filterset>
 		</copy>
-		
-		<antcall target="rsync-prompt"/>
     </target>
     
     <target name="rsync-prompt">
