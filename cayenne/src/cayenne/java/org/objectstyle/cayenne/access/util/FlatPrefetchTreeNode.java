@@ -198,16 +198,20 @@ class FlatPrefetchTreeNode {
      * Registers an object in a map of resolved objects, connects this object to parent if
      * parent exists.
      */
-    void objectResolved(Map id, DataObject object, DataObject parent) {
+    void putResolved(Map id, DataObject object) {
         resolved.put(id, object);
+    }
 
+    void connectToParent(DataObject object, DataObject parent) {
         if (parent != null && categorizeByParent) {
+            // TODO: this leaves a hole - duplicates 
             List peers = (List) partitionedByParent.get(parent);
             peers.add(object);
         }
     }
 
     void connectToParents() {
+
         if (!isPhantom() && categorizeByParent) {
             Iterator it = partitionedByParent.entrySet().iterator();
             while (it.hasNext()) {

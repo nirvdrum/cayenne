@@ -149,8 +149,12 @@ final class FlatPrefetchResolver {
             if (object == null) {
                 existing = false;
                 object = objectFromFlatRow(flatRow, node);
-                node.objectResolved(id, object, parentObject);
+                node.putResolved(id, object);
             }
+
+            // categorization by parent needed even if an object is already there
+            // (many-to-many case)
+            node.connectToParent(object, parentObject);
         }
 
         // recursively resolve for children

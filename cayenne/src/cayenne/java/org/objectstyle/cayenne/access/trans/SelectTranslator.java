@@ -441,9 +441,14 @@ public class SelectTranslator extends QueryAssembler {
             PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
             ObjRelationship r = pq.getLastPrefetchHint();
             if ((r != null) && (r.getReverseRelationship() == null)) {
+
                 // Prefetching a single step toMany relationship which
                 // has no reverse obj relationship. Add the FK attributes
                 // of the relationship (wouldn't otherwise be included)
+
+                // TODO: seems like a hack for srcPkSnapshotWithTargetSnapshot benefit;
+                // if we have a flat row with multiple joins, this will violate the naming
+                // conventions.
                 DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);
 
                 List joins = dbRel.getJoins();
@@ -455,7 +460,7 @@ public class SelectTranslator extends QueryAssembler {
             }
         }
 
-        // hanlde joint prefetches
+        // handle joint prefetches
         if (!query.getJointPrefetches().isEmpty()) {
             Iterator jointPrefetches = query.getJointPrefetches().iterator();
             while (jointPrefetches.hasNext()) {
