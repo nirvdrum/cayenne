@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,10 +54,15 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
+package org.objectstyle.cayenne.exp;
 
-/** RuntimeException subclass thrown in cases of errors during 
- * expressions creation/parsing. */
-public class ExpressionException extends java.lang.RuntimeException {
+/** 
+ * RuntimeException subclass thrown in cases of errors during 
+ * expressions creation/parsing.
+ * 
+ * @author Andrei Adamchik
+ */
+public class ExpressionException extends RuntimeException {
     private Exception exception;
     
     /**

@@ -12,9 +12,14 @@
 	<target name="unjar-deps" unless="unjar.exists"> 
 		<mkdir dir="${unjar.dir}"/>
         <unjar src="${velocity.jar}" dest="${unjar.dir}"/>
+        <unjar src="${commons.logging.jar}" dest="${unjar.dir}"/>
+        <unjar src="${commons.collections.jar}" dest="${unjar.dir}"/>
+        <unjar src="${commons.beanutils.jar}" dest="${unjar.dir}"/>
         
-        <delete dir="${unjar.dir}" includeEmptyDirs="true">
-        	<include name="**/META-INF/**"/>
+        <delete includeEmptyDirs="true">
+            <fileset dir="${unjar.dir}">
+        		<include name="**/META-INF/**"/>
+        	</fileset>
         </delete>
     </target>
     

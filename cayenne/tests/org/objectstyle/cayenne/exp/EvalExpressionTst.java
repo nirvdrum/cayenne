@@ -78,11 +78,11 @@ public class EvalExpressionTst extends TestCase {
     	
     	Artist match = new Artist();
     	match.setArtistName("abc");
-    	// assertTrue(eval.evaluate(match));
+    	assertTrue(eval.evaluate(match));
     	
     	Artist noMatch = new Artist();
     	noMatch.setArtistName("123");
-    	// assertTrue(!eval.evaluate(noMatch));
+    	assertTrue(!eval.evaluate(noMatch));
     }
 }
 

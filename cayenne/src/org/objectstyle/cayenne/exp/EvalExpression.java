@@ -56,16 +56,22 @@
 package org.objectstyle.cayenne.exp;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Class that performs expression evaluation.
+ * Class that performs in-memory Cayenne expressions evaluation.
  * 
  * @author Andrei Adamchik
  */
 public class EvalExpression extends ExpressionTraversal {
+	static Logger logObj = Logger.getLogger(EvalExpression.class.getName());
+
 	protected Expression exp;
 	protected boolean stop;
-	protected boolean match;
 
 	/**
 	 * Constructor for EvalExpression.
@@ -85,12 +91,11 @@ public class EvalExpression extends ExpressionTraversal {
 		reinit(o);
 		traverseExpression(exp);
 
-		return match;
+		return ((EvalHandler) getHandler()).getMatch();
 	}
 
 	protected void reinit(Object o) {
 		stop = false;
-		match = false;
 		((EvalHandler) getHandler()).reinit(o);
 	}
 
@@ -106,24 +111,87 @@ public class EvalExpression extends ExpressionTraversal {
 	}
 
 	class EvalHandler extends TraversalHelper {
-		protected ArrayList stack = new ArrayList(10);
-		protected int op;
+		protected ArrayList stack = new ArrayList(20);
 		protected Object obj;
 
+		public boolean getMatch() {
+			return popBoolean();
+		}
+
+		/** 
+		 * Resets handler to start processing a new expresson.
+		 */
 		protected void reinit(Object obj) {
 			stack.clear();
+
+			// default - evaluate to false
+			push(false);
+
 			this.obj = obj;
 		}
-		
-		
 
-		/** Populates expression array with value. */
-		public void objectNode(Object leaf, Expression parentNode) {
-			if (parentNode.getType() == Expression.OBJ_PATH) {
-				
+		/** 
+		 * Evaluates expression using values from the stack, pushes
+		 * the result on the stack.
+		 */
+		public void endBinaryNode(Expression node, Expression parentNode) {
+			Object v2 = pop();
+			Object v1 = pop();
+
+	//		logObj.severe("compare: " + v1 + ", " + v2);
+
+			int type = node.getType();
+			if (type == Expression.EQUAL_TO) {
+				push(Util.nullSafeEquals(v1, v2));
 			} else {
-				
+				push(null);
 			}
+		}
+
+		/** 
+		 * Pushes leaf value on the stack. If leaf is an object expression,
+		 * it is first evaluated, and the result is pushed on the stack.
+		 */
+		public void objectNode(Object leaf, Expression parentNode) {
+			// push value on the stack
+			if (parentNode.getType() == Expression.OBJ_PATH) {
+
+				try {
+					push(PropertyUtils.getProperty(obj, (String) leaf));
+				} catch (Exception ex) {
+					String msg = "Error reading property '" + leaf + "'.";
+					logObj.log(Level.WARNING, msg, ex);
+					throw new ExpressionException(msg, ex);
+				}
+			} else {
+				push(leaf);
+			}
+		}
+
+		/** 
+		 * Pops a value from the stack.
+		 */
+		public final Object pop() {
+			return stack.remove(stack.size() - 1);
+		}
+
+		public final boolean popBoolean() {
+			Object obj = pop();
+			return (obj != null) ? ((Boolean) obj).booleanValue() : false;
+		}
+
+		/**
+		 * Pushes a value to the stack.
+		 */
+		public final void push(Object obj) {
+			stack.add(obj);
+		}
+
+		/**
+		 * Pushes a boolean value to the stack.
+		 */
+		public final void push(boolean b) {
+			stack.add(b ? Boolean.TRUE : Boolean.FALSE);
 		}
 	}
 }

@@ -13,3 +13,5 @@ Changes in this release:
 to make API friendlier.
 
 2. Added convenience constructors to ObjectId
+
+3. Added file logging to CayenneModeler
