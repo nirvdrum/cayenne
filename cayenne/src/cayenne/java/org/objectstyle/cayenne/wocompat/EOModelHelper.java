@@ -133,7 +133,7 @@ public class EOModelHelper {
         if (type.equals("NSNumber"))
             return "java.lang.Integer";
         if (type.equals("NSCalendarDate"))
-            return "java.sql.Date";
+            return "java.sql.Timestamp";
         if (type.equals("NSDecimalNumber"))
             return "java.math.BigDecimal";
         if (type.equals("NSData"))
