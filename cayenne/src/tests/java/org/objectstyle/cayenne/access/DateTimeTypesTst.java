@@ -68,60 +68,60 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * 
  * @author Andrei Adamchik
  */
-public class DataContextDatesTst extends CayenneTestCase {
+public class DateTimeTypesTst extends CayenneTestCase {
 
-    protected DataContext ctxt;
+    protected DataContext context;
 
     public void testDate() throws Exception {
-        DateTest test = (DateTest) ctxt.createAndRegisterNewObject("DateTest");
+        DateTest test = (DateTest) context.createAndRegisterNewObject("DateTest");
 
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2002, 1, 1);
         Date nowDate = cal.getTime();
         test.setDateColumn(nowDate);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         SelectQuery q = new SelectQuery(DateTest.class);
-        DateTest testRead = (DateTest) ctxt.performQuery(q).get(0);
+        DateTest testRead = (DateTest) context.performQuery(q).get(0);
         assertNotNull(testRead.getDateColumn());
         assertEquals(nowDate, testRead.getDateColumn());
     }
 
     public void testTime() throws Exception {
-        DateTest test = (DateTest) ctxt.createAndRegisterNewObject("DateTest");
+        DateTest test = (DateTest) context.createAndRegisterNewObject("DateTest");
 
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(1970, 0, 1, 1, 20, 30);
         Date nowTime = cal.getTime();
         test.setTimeColumn(nowTime);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         SelectQuery q = new SelectQuery(DateTest.class);
-        DateTest testRead = (DateTest) ctxt.performQuery(q).get(0);
+        DateTest testRead = (DateTest) context.performQuery(q).get(0);
         assertNotNull(testRead.getTimeColumn());
         assertEquals(nowTime, testRead.getTimeColumn());
     }
 
     public void testTimestamp() throws Exception {
-        DateTest test = (DateTest) ctxt.createAndRegisterNewObject("DateTest");
+        DateTest test = (DateTest) context.createAndRegisterNewObject("DateTest");
 
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2003, 1, 1, 1, 20, 30);
         Date now = cal.getTime();
         test.setTimestampColumn(now);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         SelectQuery q = new SelectQuery(DateTest.class);
-        DateTest testRead = (DateTest) ctxt.performQuery(q).get(0);
+        DateTest testRead = (DateTest) context.performQuery(q).get(0);
         assertNotNull(testRead.getTimestampColumn());
         assertEquals(now, testRead.getTimestampColumn());
     }
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        ctxt = createDataContext();
+        context = createDataContext();
     }
 }

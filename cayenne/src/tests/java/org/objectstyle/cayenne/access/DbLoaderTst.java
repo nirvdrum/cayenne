@@ -232,10 +232,13 @@ public class DbLoaderTst extends CayenneTestCase {
     public void checkTypes(DataMap map) {
         DbEntity dbe = getDbEntity(map, "PAINTING");
         DbEntity floatTest = getDbEntity(map, "FLOAT_TEST");
+		DbEntity smallintTest = getDbEntity(map, "SMALLINT_TEST");
         DbAttribute integerAttr = getDbAttribute(dbe, "PAINTING_ID");
         DbAttribute decimalAttr = getDbAttribute(dbe, "ESTIMATED_PRICE");
         DbAttribute varcharAttr = getDbAttribute(dbe, "PAINTING_TITLE");
         DbAttribute floatAttr = getDbAttribute(floatTest, "FLOAT_COL");
+		DbAttribute smallintAttr = getDbAttribute(smallintTest, "SMALLINT_COL");
+        
         // check decimal
         // postgresql does not have a decimal type, instead columns that
         // are declared as DECIMAL will be converted to NUMERIC instead
@@ -269,6 +272,11 @@ public class DbLoaderTst extends CayenneTestCase {
             msgForTypeMismatch(Types.FLOAT, floatAttr),
             Types.FLOAT == floatAttr.getType()
                 || Types.DOUBLE == floatAttr.getType());
+                
+		// check smallint
+		assertTrue(
+			msgForTypeMismatch(Types.SMALLINT, smallintAttr),
+			Types.SMALLINT == smallintAttr.getType());
     }
 
     public void checkAllDBEntities(DataMap map) {

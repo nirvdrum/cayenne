@@ -55,10 +55,13 @@
  */
 package org.objectstyle.cayenne.dba.sybase;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.objectstyle.cayenne.access.types.AbstractType;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -72,50 +75,91 @@ import org.objectstyle.cayenne.dba.PkGenerator;
  */
 public class SybaseAdapter extends JdbcAdapter {
 
-	/**
-	 * Installs appropriate ExtendedTypes as converters for passing values
-	 * between JDBC and Java layers.
-	 */
-	protected void configureExtendedTypes(ExtendedTypeMap map) {
-		super.configureExtendedTypes(map);
+    /**
+     * Installs appropriate ExtendedTypes as converters for passing values
+     * between JDBC and Java layers.
+     */
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+        super.configureExtendedTypes(map);
 
-		// create specially configured CharType handler
-		map.registerType(new CharType(true, false));
+        // create specially configured CharType handler
+        map.registerType(new CharType(true, false));
 
-		// create specially configured ByteArrayType handler
-		map.registerType(new ByteArrayType(true, false));
-	}
+        // create specially configured ByteArrayType handler
+        map.registerType(new ByteArrayType(true, false));
 
-	/** 
-	 * Creates and returns a primary key generator. 
-	 * Overrides superclass implementation to return an
-	 * instance of SybasePkGenerator.
-	 */
-	protected PkGenerator createPkGenerator() {
-		return new SybasePkGenerator();
-	}
-	/**
-	 *
-	 */
+        // address Sybase driver inability to handle java.lang.Short
+        map.registerType(new SybaseShortType());
+    }
 
-	public void bindParameter(
-		PreparedStatement statement,
-		Object object,
-		int pos,
-		int sqlType,
-		int precision)
-		throws SQLException, Exception {
+    /** 
+     * Creates and returns a primary key generator. 
+     * Overrides superclass implementation to return an
+     * instance of SybasePkGenerator.
+     */
+    protected PkGenerator createPkGenerator() {
+        return new SybasePkGenerator();
+    }
+    /**
+     *
+     */
 
-		// Sybase driver doesn't like CLOBs and BLOBs as parameters
-		if (object == null) {
-			if (sqlType == Types.CLOB) {
-				sqlType = Types.VARCHAR;
-			} else if (sqlType == Types.BLOB) {
-				sqlType = Types.VARBINARY;
-			}
-		}
+    public void bindParameter(
+        PreparedStatement statement,
+        Object object,
+        int pos,
+        int sqlType,
+        int precision)
+        throws SQLException, Exception {
 
-		super.bindParameter(statement, object, pos, sqlType, precision);
-	}
+        // Sybase driver doesn't like CLOBs and BLOBs as parameters
+        if (object == null) {
+            if (sqlType == Types.CLOB) {
+                sqlType = Types.VARCHAR;
+            }
+            else if (sqlType == Types.BLOB) {
+                sqlType = Types.VARBINARY;
+            }
+        }
 
+        super.bindParameter(statement, object, pos, sqlType, precision);
+    }
+
+    /**
+     * Recasts java.lang.Short to java.lang.Integer when 
+     * binding values to PreparedStatement to address Sybase
+     * JDBC driver limitations.
+     */
+    static final class SybaseShortType extends AbstractType {
+
+        public String getClassName() {
+            return Short.class.getName();
+        }
+
+        public Object materializeObject(ResultSet rs, int index, int type)
+            throws Exception {
+            short s = rs.getShort(index);
+            return (rs.wasNull()) ? null : new Short(s);
+        }
+
+        public Object materializeObject(CallableStatement st, int index, int type)
+            throws Exception {
+            short s = st.getShort(index);
+            return (st.wasNull()) ? null : new Short(s);
+        }
+
+        public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision)
+            throws Exception {
+
+            if (val instanceof Short) {
+                val = new Integer(((Short) val).intValue());
+            }
+            super.setJdbcObject(st, val, pos, type, precision);
+        }
+    }
 }
