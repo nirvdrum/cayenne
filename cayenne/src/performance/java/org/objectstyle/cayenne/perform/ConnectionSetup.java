@@ -62,9 +62,9 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.conf.DomainHelper;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.ResourceLocator;
@@ -95,7 +95,7 @@ public class ConnectionSetup  {
 		DisconnectedFactory factory = new DisconnectedFactory();
         DefaultConfiguration conf = new DefaultConfiguration();
 		conf.setOverrideFactory(factory);
-        DomainHelper helper = new DomainHelper(conf);
+        ConfigLoader helper = new ConfigLoader(conf);
         InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DOMAIN_FILE);
         if(in == null)
             throw new RuntimeException("Can't find '" + Configuration.DOMAIN_FILE + "'.");

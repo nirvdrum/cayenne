@@ -67,15 +67,10 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * 
  * @author Andrei Adamchik
  */
-public class DomainHelperTst extends CayenneTestCase {
+public class ConfigSaverTst extends CayenneTestCase {
 
-	public DomainHelperTst(String name) {
+	public ConfigSaverTst(String name) {
 		super(name);
-	}
-
-	public void testLoadDomains() throws Exception {
-		DomainHelper helper = new DomainHelper(new EmptyConfiguration());
-		new DomainHelperSimpleSuite().test(helper);
 	}
 
 	public void testStoreFullDataNode() throws Exception {
@@ -117,7 +112,7 @@ public class DomainHelperTst extends CayenneTestCase {
 		StringWriter str = new StringWriter();
 		PrintWriter out = new PrintWriter(str);
 
-		DomainHelper.storeDataNode(out, info);
+		ConfigSaver.storeDataNode(out, info);
 
 		out.close();
 		str.close();

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.project;
 import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DomainHelper;
+import org.objectstyle.cayenne.conf.ConfigSaver;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
 /**
@@ -100,7 +100,7 @@ public class DataNodeFile extends ProjectFile {
 
     public void save(PrintWriter out) throws Exception {
         ProjectDataSource src = (ProjectDataSource) nodeObj.getDataSource();
-        DomainHelper.storeDataNode(out, src.getDataSourceInfo());
+        ConfigSaver.storeDataNode(out, src.getDataSourceInfo());
     }
 
     /**

@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.conf;
 
 
 /** Runs multiple domain config cases. */
-public class DomainHelperSimpleSuite extends DomainHelperSuite {
+public class ConfigLoaderSimpleSuite extends ConfigLoaderSuite {
 
     protected void buildCases() {
         buildCase1();
@@ -75,7 +75,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         .append("\n   </domain>")
         .append("\n </domains>");
 
-        DomainHelperCase aCase = new DomainHelperCase();
+        ConfigLoaderCase aCase = new ConfigLoaderCase();
         aCase.setConfigInfo(buf.toString());
         aCase.setTotalDomains(1);
         cases.add(aCase);
@@ -90,7 +90,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         .append("\n   </domain>")
         .append("\n </domains>");
 
-        DomainHelperCase aCase = new DomainHelperCase();
+        ConfigLoaderCase aCase = new ConfigLoaderCase();
         aCase.setConfigInfo(buf.toString());
         aCase.setTotalDomains(1);
         aCase.setFailedMaps(1);
@@ -106,7 +106,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         .append("\n   </domain>")
         .append("\n </domains>");
 
-        DomainHelperCase aCase = new DomainHelperCase();
+        ConfigLoaderCase aCase = new ConfigLoaderCase();
         aCase.setConfigInfo(buf.toString());
         aCase.setTotalDomains(1);
         cases.add(aCase);
@@ -127,7 +127,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         .append("\n </domains>");
 
 
-        DomainHelperCase aCase = new DomainHelperCase();
+        ConfigLoaderCase aCase = new ConfigLoaderCase();
         aCase.setConfigInfo(buf.toString());
         aCase.setFailedDataSources(1);
         aCase.setTotalDomains(1);
@@ -149,7 +149,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         .append("\n </domains>");
 
 
-        DomainHelperCase aCase = new DomainHelperCase();
+        ConfigLoaderCase aCase = new ConfigLoaderCase();
         aCase.setConfigInfo(buf.toString());
         aCase.setFailedDataSources(1);
         aCase.setTotalDomains(1);

@@ -59,7 +59,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.DomainHelper;
+import org.objectstyle.cayenne.conf.ConfigSaver;
 
 /**
  * ApplicationProjectFile is a ProjectFile abstraction of the 
@@ -106,7 +106,7 @@ public class ApplicationProjectFile extends ProjectFile {
         List children = getProject().getChildren();
         DataDomain[] domains = new DataDomain[children.size()];
         children.toArray(domains);
-        DomainHelper.storeDomains(out, domains);
+        ConfigSaver.storeDomains(out, domains);
     }
 
     public boolean canHandle(Object obj) {

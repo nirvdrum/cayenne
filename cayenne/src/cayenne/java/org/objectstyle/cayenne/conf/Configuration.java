@@ -242,7 +242,7 @@ public abstract class Configuration {
 			throw new ConfigException(msg.toString());
 		}
 
-		DomainHelper helper = new DomainHelper(this, getLoggingLevel());
+		ConfigLoader helper = new ConfigLoader(this, getLoggingLevel());
 		if (!helper.loadDomains(in)) {
 			StringBuffer msg = new StringBuffer();
 			msg.append("[").append(this.getClass().getName()).append(

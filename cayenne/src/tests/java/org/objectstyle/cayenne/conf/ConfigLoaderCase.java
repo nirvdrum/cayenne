@@ -62,7 +62,7 @@ import junit.framework.Assert;
 
 
 /** Test setup for a certain setup of domain configuration. */
-public class DomainHelperCase {
+public class ConfigLoaderCase {
     protected int failedMaps;
     protected int failedDataSources;
     protected int failedAdapters;
@@ -72,7 +72,7 @@ public class DomainHelperCase {
 
 
     /** Evaluates test case built from this object state. */
-    public void test(DomainHelper helper) throws Exception {
+    public void test(ConfigLoader helper) throws Exception {
         InputStream in = new ByteArrayInputStream(configInfo.getBytes());
         helper.loadDomains(in);
         Assert.assertEquals(totalDomains, helper.getDomains().size());

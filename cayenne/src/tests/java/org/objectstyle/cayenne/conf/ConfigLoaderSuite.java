@@ -63,20 +63,20 @@ import org.apache.log4j.Logger;
 
 
 /** Runs multiple domain config cases. */
-public abstract class DomainHelperSuite {
-    private static Logger logObj = Logger.getLogger(DomainHelperSuite.class);
+public abstract class ConfigLoaderSuite {
+    private static Logger logObj = Logger.getLogger(ConfigLoaderSuite.class);
 
     protected List cases = new ArrayList();
 
-    public DomainHelperSuite() {
+    public ConfigLoaderSuite() {
         buildCases();
     }
 
     /** Evaluates multiple cases */
-    public void test(DomainHelper helper) throws Exception {
+    public void test(ConfigLoader helper) throws Exception {
         Iterator it = cases.iterator();
         while(it.hasNext()) {
-            DomainHelperCase aCase = (DomainHelperCase)it.next();
+            ConfigLoaderCase aCase = (ConfigLoaderCase)it.next();
 
             try {
                 aCase.test(helper);

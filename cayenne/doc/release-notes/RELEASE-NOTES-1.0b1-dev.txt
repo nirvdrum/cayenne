@@ -24,6 +24,9 @@ application expressions.
 
 5. Added parametrized queries based on parametrized expressions.
 
+6. DomainHelper is refactored (and deprecated) into 2 classes - 
+ConfigLoader and ConfigSaver.
+
 
 
 
