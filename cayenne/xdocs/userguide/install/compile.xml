@@ -4,30 +4,25 @@
 <body>
     <section name="2. Installation">        
 		<subsection name="2.4 Compiling from Source" anchor="compile">	
-			<panel name="Note:">JSDK1.4 and Ant must be present to compile Cayenne.</panel>
-	    
-			<p>Normally users wouldn't need to build Cayenne from source. 
-            All required prebuilt JAR's are included with the distribution. 
-            For those users who need to recompile Cayenne (for example if they modified the
-			source code to customize or test certain aspects), distribution includes
-			an Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). 
-			To rebuild Cayenne (possibly with custom changes) execute the following commands. 
-			Windows:</p>
-
-		<source>cd %CAYENNE_HOME%\src
-%ANT_HOME%\bin\ant.bat</source>
-
-		<p>UNIX</p>
+			<panel name="Note:">Normally users don't need to build Cayenne from source. 
+            All required prebuilt JAR's are included with the distribution.</panel>
+            
+            <p>If there is a need to rebuild Cayenne with custom modifications, the best way to
+            do that is to check out the source
+            from <a href="http://sourceforge.net/cvs/?group_id=48132">anonymous CVS</a> (preferred 
+            way) or to download one of the latest stable or development <a href=
+            "http://objectstyle.org/downloads/cayenne/cvs-snapshots/">CVS snapshots</a>.
+            See <a href="../../developerguide/index.html">Developer Guide</a> for details on how to 
+            build Cayenne.  However since CVS checkout contains all needed dependencies (except for Java and Ant), 
+            this should be very easy:</p>          
 
 		<source>cd $CAYENNE_HOME/src
-$ANT_HOME/bin/ant</source>
+ant</source>
 
-			<p>Note that the original cayenne.jar file should be present in the
-			<code>[cayenne_install_dir]/lib</code> directory, since it contains dependencies
-			not included as a source code. The result of the build is two new JAR files:
-			<code>[cayenne_install_dir]/lib/cayenne-cust.jar</code> and
-			<code>[cayenne_install_dir]/lib/cayenne-tests-cust.jar</code>.
-			</p>
+<p> </p>
+
+			<panel name="Note:">Cayenne Team discontinued shipping of "build.xml"  file with Cayenne distribution
+			to avoid maintaining two parallel build systems, and reduce confusion.</panel>
 		</subsection>
     </section>
 </body>
