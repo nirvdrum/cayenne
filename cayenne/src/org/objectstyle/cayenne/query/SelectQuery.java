@@ -139,6 +139,10 @@ public class SelectQuery extends QualifiedQuery {
 	 * Returns <code>true</code> if there is no custom query 
 	 * attributes specified, and the query results
 	 * will contain only the root entity attributes.
+	 * 
+	 * <p>Note that queries that DO NOT use root entity attributes
+	 * always return data rows instead of DataObjects.
+	 * </p>
 	 */
 	public boolean isUsingRootEntityAttributes() {
 		return resultsDbAttributes.size() == 0;
@@ -168,12 +172,17 @@ public class SelectQuery extends QualifiedQuery {
 	 * This is a hint to QueryEngine executing this query.
 	 */
 	public boolean isFetchingDataRows() {
-		return fetchingDataRows;
+		return !isUsingRootEntityAttributes() || fetchingDataRows;
 	}
+
 
 	/**	
 	 * Sets query result type. If <code>flag</code> parameter is
 	 * <code>true</code>, then results will be in the form of data rows.
+	 * 
+	 * <p><i>Note that if <code>isUsingRootEntityAttributes()</code>
+	 * returns <code>false</code>, this setting has no effect, and data 
+	 * rows are always fetched.</i></p>
 	 */
 	public void setFetchingDataRows(boolean flag) {
 		this.fetchingDataRows = flag;
