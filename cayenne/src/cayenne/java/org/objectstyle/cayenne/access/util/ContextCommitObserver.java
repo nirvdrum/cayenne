@@ -203,18 +203,18 @@ public class ContextCommitObserver
             EventManager mgr = EventManager.getDefaultManager();
             mgr.addListener(
                 this,
-                DataContextEvent.class,
                 "dataContextWillCommit",
+                DataContextEvent.class,
                 DataContext.WILL_COMMIT);
             mgr.addListener(
                 this,
-                DataContextEvent.class,
                 "dataContextDidCommit",
+                DataContextEvent.class,
                 DataContext.DID_COMMIT);
             mgr.addListener(
                 this,
-                DataContextEvent.class,
                 "dataContextDidRollback",
+                DataContextEvent.class,
                 DataContext.DID_ROLLBACK);
         } catch (NoSuchMethodException nsm) {
             // this really should not happen since we implement all required methods

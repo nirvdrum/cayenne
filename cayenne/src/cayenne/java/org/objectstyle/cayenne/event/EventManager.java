@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.event;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.EventObject;
@@ -92,15 +91,15 @@ public class EventManager extends Object {
 	}
 
 	public void addListener(EventListener listener,
-							Class handledEventArgumentClass,
 							String methodName,
+							Class eventParameterClass,
 							EventSubject subject)
 		throws NoSuchMethodException {
 		if (listener == null) {
 			throw new IllegalArgumentException("listener must not be null");
 		}
 
-		if (handledEventArgumentClass == null) {
+		if (eventParameterClass == null) {
 			throw new IllegalArgumentException("event class must not be null");
 		}
 
@@ -108,8 +107,7 @@ public class EventManager extends Object {
 			throw new IllegalArgumentException("subject must not be null");
 		}
 
-		Method method = listener.getClass().getMethod(methodName, new Class[] { handledEventArgumentClass });		
-		Invocation inv = new Invocation(listener, method);
+		Invocation inv = new Invocation(listener, methodName, eventParameterClass);
 
 		Set listenersForSubject = this.listenersForSubject(subject);
 		if (listenersForSubject == null) {
@@ -171,13 +169,13 @@ public class EventManager extends Object {
 			// used to collect all invalid invocations in order to remove
 			// them at the end of this posting cycle
 			List invalidInvocations = null;
-
+			Object[] eventArgument = new Object[]{event};
 			Iterator iter = listenersForSubject.iterator();
 			while (iter.hasNext()) {
 				Invocation inv = (Invocation)iter.next();
 
 				// fire invocation, detect if anything went wrong
-				if (inv.fire(event) == false) {
+				if (inv.fire(eventArgument) == false) {
 					if (invalidInvocations == null) {
 						invalidInvocations = new ArrayList();
 					}

@@ -56,94 +56,198 @@
 
 package org.objectstyle.cayenne.event;
 
-import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 import junit.framework.Assert;
 
 public class InvocationTst extends CayenneTestCase {
-	private Method _method;
+	private String _methodName = "myListenerMethod";
 
-	public InvocationTst(String arg0) throws NoSuchMethodException {
+	public InvocationTst(String arg0) {
 		super(arg0);
-		_method = this.getClass().getMethod("method", null);
 	}
 
-	public void testReflexive() throws Exception {
-		Invocation inv = new Invocation(this, _method);		
+	public void testEqualsReflexive() throws NoSuchMethodException {
+		Invocation inv0 = new Invocation(this, _methodName);		
 
-		Assert.assertEquals(inv, inv);
+		Assert.assertEquals(inv0, inv0);
 	}
 
-	public void testSymmetric() throws Exception {
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, _method);
+	public void testEqualsSymmetric() throws NoSuchMethodException {
+		Invocation inv01 = new Invocation(this, _methodName);
+		Invocation inv02 = new Invocation(this, _methodName);
 		
-		Assert.assertEquals(inv, inv2);
-		Assert.assertEquals(inv2, inv);
+		Assert.assertEquals(inv01, inv02);
+		Assert.assertEquals(inv02, inv01);
 	}
 
-	public void testTransitive() throws Exception {
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, _method);
-		Invocation inv3 = new Invocation(this, _method);
+	public void testEqualsTransitive() throws NoSuchMethodException {
+		Invocation inv01 = new Invocation(this, _methodName);
+		Invocation inv02 = new Invocation(this, _methodName);
+		Invocation inv03 = new Invocation(this, _methodName);
 		
-		Assert.assertEquals(inv, inv2);
-		Assert.assertEquals(inv2, inv3);
-		Assert.assertEquals(inv, inv3);
+		Assert.assertEquals(inv01, inv02);
+		Assert.assertEquals(inv02, inv03);
+		Assert.assertEquals(inv01, inv03);
 	}
 
-	public void testNull() {
-		Invocation inv = new Invocation(this, _method);
-		Assert.assertTrue(inv.equals(null) == false);
+	public void testEqualsNull() throws NoSuchMethodException {
+		Invocation inv0 = new Invocation(this, _methodName);
+
+		Assert.assertTrue(inv0.equals(null) == false);
 	}
 
-	public void testDifferentMethods() throws Exception  {
-		Method m2 = this.getClass().getMethod("anotherMethod", null);
+	public void testEqualsDifferentMethods() throws NoSuchMethodException  {
+		Invocation inv0 = new Invocation(this, _methodName);
+		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
 
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, m2);
-
-		Assert.assertTrue(inv.equals(inv2) == false);
+		Assert.assertTrue(inv0.equals(inv1) == false);
 	}
 
-	public void testAddToSet() throws Exception {
+	public void testEqualsNoVsOneArg() throws NoSuchMethodException {
+		Invocation inv0 = new Invocation(this, _methodName);
+		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
+
+		Assert.assertTrue(inv0.equals(inv1) == false);
+	}
+
+	public void testAddToSet() throws NoSuchMethodException {
 		HashSet set = new HashSet();
 		
-		Invocation inv = new Invocation(this, _method);
-		set.add(inv);
-		set.add(inv);
+		Invocation inv0 = new Invocation(this, _methodName);
+
+		set.add(inv0);
+		set.add(inv0);
+
 		Assert.assertEquals(1, set.size());
 	}
 
-	public void testAddTwo() {
-		HashSet set = new HashSet();
+	public void testAddTwo() throws NoSuchMethodException {
+		Set set = new HashSet();
 		
-		Invocation inv = new Invocation(this, _method);
-		Invocation inv2 = new Invocation(this, _method);
+		Invocation inv01 = new Invocation(this, _methodName);
+		Invocation inv02 = new Invocation(this, _methodName);
 		
-		set.add(inv);
-		set.add(inv2);
+		set.add(inv01);
+		set.add(inv02);
+
 		Assert.assertEquals(1, set.size());
+	}
+
+	public void testEmptyParamTypes() throws NoSuchMethodException {
+		try {
+			new Invocation(this, _methodName, new Class[]{});
+			Assert.fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testNullParamTypes0() throws NoSuchMethodException {
+		try {
+			new Invocation(this, _methodName, new Class[]{null});
+			Assert.fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testNullParamTypes1() throws NoSuchMethodException {
+		try {
+			new Invocation(this, _methodName, new Class[]{String.class, null});
+			Assert.fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testFireNoArgument() throws NoSuchMethodException {
+		Invocation inv0 = new Invocation(this, _methodName);
+
+		Assert.assertTrue(inv0.fire());
+	}
+
+	public void testFireOneArgument() throws NoSuchMethodException {
+		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
+
+		Assert.assertTrue(inv1.fire("foo"));
+	}
+
+	public void testFireWrongArgumentCount0() throws Exception {
+		Invocation inv0 = new Invocation(this, _methodName);
+
+		try {
+			inv0.fire("foo");
+			Assert.fail();
+		}
+
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testFireWrongArgumentCount1() throws Exception {
+		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
+
+		try {
+			inv1.fire();
+			Assert.fail();
+		}
+
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testFireWrongArgumentCount2() throws Exception {
+		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
+
+		try {
+			inv1.fire(new Object[]{"foo", "bar"});
+			Assert.fail();
+		}
+
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testFireNullArgArray() throws Exception {
+		Invocation inv1 = new Invocation(this, _methodName, new Class[]{Object.class});
+
+		try {
+			inv1.fire((Object[])null);
+			Assert.fail();
+		}
+
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	public void testGarbageCollection() throws NoSuchMethodException {
 		// create an invocation with an listener that will be garbage collected
-		Invocation inv = new Invocation(new String(), String.class.getMethod("toString", null));
-		
+		Invocation inv0 = new Invocation(new String(), "toString");
+
 		// (hopefully) make the listener go away
 		System.gc();
 		System.gc();
 
-		Assert.assertEquals(false, inv.fire(new CayenneEvent(this)));
-	}
-	
-	// these methods exist for the test of Invocation equality
-	public void method() {
+		Assert.assertEquals(false, inv0.fire());
 	}
 
-	public void anotherMethod() {
+	
+	// these methods exist for the test of Invocation equality
+	public void myListenerMethod() {
 	}
+
+	public void myListenerMethod(Object o) {
+	}
+
 }

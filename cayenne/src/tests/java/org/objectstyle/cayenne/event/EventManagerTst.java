@@ -96,7 +96,7 @@ public class EventManagerTst
 	public void testNullNotification() {
 		// null notification
 		try {
-			_eventManager.addListener(this, CayenneEvent.class, "testNullObserver", null);
+			_eventManager.addListener(this, "testNullObserver", CayenneEvent.class, null);
 			Assert.fail();
 		}
 
@@ -107,7 +107,7 @@ public class EventManagerTst
 		// invalid event class
 		try {
 			EventSubject subject = EventSubject.getSubject(this.getClass(), "");		
-			_eventManager.addListener(this, null, "testNullObserver", subject);
+			_eventManager.addListener(this, "testNullObserver", null, subject);
 			Assert.fail();
 		}
 
@@ -118,7 +118,7 @@ public class EventManagerTst
 		// empty string notification
 		try {
 			EventSubject subject = EventSubject.getSubject(this.getClass(), "");		
-			_eventManager.addListener(this, CayenneEvent.class, "testNullObserver", subject);
+			_eventManager.addListener(this, "testNullObserver", CayenneEvent.class, subject);
 			Assert.fail();
 		}
 
@@ -130,7 +130,7 @@ public class EventManagerTst
 	public void testNonexistingMethod() {
 		try {
 			EventSubject subject = EventSubject.getSubject(this.getClass(), "hansi");		
-			_eventManager.addListener(this, CayenneEvent.class, "thisMethodDoesNotExist", subject);
+			_eventManager.addListener(this, "thisMethodDoesNotExist", CayenneEvent.class, subject);
 			Assert.fail();
 		}
 
@@ -138,11 +138,11 @@ public class EventManagerTst
 			Assert.assertTrue(e instanceof NoSuchMethodException);
 		}
 	}
-	
+
 	public void testInvalidArgumentTypes() {
 		try {
 			EventSubject subject = EventSubject.getSubject(this.getClass(), "hansi");		
-			_eventManager.addListener(this, CayenneEvent.class, "seeTheWrongMethod", subject);
+			_eventManager.addListener(this, "seeTheWrongMethod", CayenneEvent.class, subject);
 			Assert.fail();
 		}
 
@@ -153,7 +153,7 @@ public class EventManagerTst
 
 	public void testNonretainedListener() throws NoSuchMethodException {
 		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
-		_eventManager.addListener(new EventManagerTst(""), CayenneEvent.class, "seeNotification", subject);
+		_eventManager.addListener(new EventManagerTst(""), "seeNotification", CayenneEvent.class, subject);
 		
 		// (hopefully) make the listener go away
 		System.gc();
@@ -165,7 +165,7 @@ public class EventManagerTst
 	public void testSuccessfulNotification() {
 		try {
 			EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");		
-			_eventManager.addListener(this, CayenneEvent.class, "seeNotification", subject);
+			_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject);
 			_eventManager.postEvent(new CayenneEvent(this), subject);
 			
 			Assert.assertTrue(_didReceiveNotification);
@@ -188,15 +188,15 @@ public class EventManagerTst
 
 	public void testRemove() throws NoSuchMethodException {
 		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");		
-		_eventManager.addListener(this, CayenneEvent.class, "seeNotification", subject);
+		_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject);
 		Assert.assertTrue(_eventManager.removeListener(this, subject));
 	}
 
 	public void testRemoveAll() throws NoSuchMethodException {
 		EventSubject subject1 = EventSubject.getSubject(this.getClass(), "XXX1");
 		EventSubject subject2 = EventSubject.getSubject(this.getClass(), "XXX2");
-		_eventManager.addListener(this, CayenneEvent.class, "seeNotification", subject1);
-		_eventManager.addListener(this, CayenneEvent.class, "seeNotification", subject2);
+		_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject1);
+		_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject2);
 
 		Assert.assertTrue(_eventManager.removeListener(this));
 		Assert.assertEquals(false, _eventManager.removeListener(this, subject1));

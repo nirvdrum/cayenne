@@ -58,52 +58,99 @@ package org.objectstyle.cayenne.event;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.util.EventObject;
 
 import org.apache.log4j.Logger;
 
 public class Invocation extends Object {
 	private static final Logger log = Logger.getLogger(Invocation.class);
-	
-	private Method _method;
+
 	private WeakReference _target;
-	
-	public Invocation(Object target, Method method) {
+	private Method _method;
+	private Class[] _parameterTypes;
+
+	private Invocation() {
+	}
+
+	public Invocation(Object target, String methodName)
+		throws NoSuchMethodException {
+		this(target, methodName, (Class[])null);
+	}
+
+	public Invocation(Object target, String methodName, Class parameterType)
+		throws NoSuchMethodException {
+		this(target, methodName, new Class[]{parameterType});
+	}
+
+	public Invocation(Object target, String methodName, Class[] parameterTypes)
+		throws NoSuchMethodException {
 		super();
 
 		if (target == null) {
 			throw new IllegalArgumentException("target argument must not be null");
 		}
 
-		if (method == null) {
-			throw new IllegalArgumentException("method argument must not be null");
+		if (methodName == null) {
+			throw new IllegalArgumentException("method name must not be null");
 		}	
 
-		_method = method;
+		if (parameterTypes != null) {
+			if (parameterTypes.length > 0) {
+				for (int i = 0; i < parameterTypes.length; i++) {
+					if (parameterTypes[i] == null) {
+						throw new IllegalArgumentException("parameter type[" + i + "] must not be null");
+					}
+				}
+			}
+			else {
+				throw new IllegalArgumentException("parameter types must not be empty");
+			}
+		}
+
+		_method = target.getClass().getMethod(methodName, parameterTypes);
+		_parameterTypes = parameterTypes;
 		_target = new WeakReference(target);
 	}
 
-	public boolean fire(EventObject event) {
-		boolean success = true;
+	public boolean fire() {
+		return this.fire((Object[])null);
+	}
 
-		if (event == null) {
-			throw new IllegalArgumentException("event must not be null!");
+	public boolean fire(Object argument) {
+		return this.fire(new Object[]{argument});
+	}
+
+	public boolean fire(Object[] arguments) {
+		boolean success = false;
+
+		if (_parameterTypes == null) {
+			if (arguments != null) {
+				throw new IllegalArgumentException("arguments unexpectedly != null");
+			}
+		}
+		else {
+			if (arguments == null) {
+				throw new IllegalArgumentException("arguments must not be null");
+			}
+			else {
+				if (_parameterTypes.length != arguments.length) {
+					throw new IllegalArgumentException("inconsistent number of arguments: expected"
+														+ _parameterTypes.length
+														+ ", got "
+														+ arguments.length);
+				}
+			}
 		}
 
 		Object currentTarget = _target.get();
 
 		if (currentTarget != null) {
 			try {	
-				_method.invoke(currentTarget, new Object[] { event });
+				_method.invoke(currentTarget, arguments);
+				success = true;
 			}
-
 			catch (Exception ex) {
 				log.error("exception while firing '" + _method.getName() + "'", ex);
-				success = false;
 			}
-		}
-		else {
-			success = false;
 		}
 
 		return success;
