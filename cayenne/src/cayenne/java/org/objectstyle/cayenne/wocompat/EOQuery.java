@@ -143,7 +143,7 @@ public class EOQuery extends SelectQuery {
         return bindings.keySet();
     }
 
-    public String getBindingClass(String name) {
+    public String bindingClass(String name) {
         if (bindings == null) {
             initBindings();
         }

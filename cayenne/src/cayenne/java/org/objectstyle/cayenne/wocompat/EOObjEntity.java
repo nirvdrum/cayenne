@@ -55,10 +55,12 @@
  */
 package org.objectstyle.cayenne.wocompat;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
@@ -184,15 +186,17 @@ public class EOObjEntity extends ObjEntity {
      */
     public Collection getEOQueries() {
         if (filteredQueries == null) {
-            Predicate queryFilter = new Predicate() {
-                public boolean evaluate(Object object) {
-                    Query query = (Query) object;
-                    return query.getRoot() == EOObjEntity.this;
-                }
-            };
+            Collection queries = getDataMap().getQueries();
+            if (queries.isEmpty()) {
+                filteredQueries = Collections.EMPTY_LIST;
+            } else {
+                Map params = Collections.singletonMap("root", EOObjEntity.this);
+                Expression filter = Expression
+                        .fromString("root = $root")
+                        .expWithParameters(params);
 
-            filteredQueries = CollectionUtils.predicatedCollection(getDataMap()
-                    .getQueries(), queryFilter);
+                filteredQueries = filter.filter(queries, new ArrayList());
+            }
         }
 
         return filteredQueries;

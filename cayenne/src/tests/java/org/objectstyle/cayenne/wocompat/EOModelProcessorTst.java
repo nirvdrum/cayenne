@@ -116,9 +116,9 @@ public class EOModelProcessorTst extends BasicTestCase {
         Collection bindings = eoQuery.getBindingNames();
         assertNotNull(bindings);
         assertEquals(3, bindings.size());
-        assertEquals("java.lang.String", eoQuery.getBindingClass("x"));
-        assertEquals("java.lang.String", eoQuery.getBindingClass("y"));
-        assertEquals("java.lang.Object", eoQuery.getBindingClass("z"));
+        assertEquals("java.lang.String", eoQuery.bindingClass("x"));
+        assertEquals("java.lang.String", eoQuery.bindingClass("y"));
+        assertEquals("java.lang.Object", eoQuery.bindingClass("z"));
     }
 
     protected void assertLoaded(String mapName, DataMap map) throws Exception {

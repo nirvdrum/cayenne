@@ -60,7 +60,9 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -469,18 +471,26 @@ public abstract class Expression implements Serializable, XMLSerializable {
         if (objects == null || objects.size() == 0) {
             return Collections.EMPTY_LIST;
         }
-
-        int size = objects.size();
-        LinkedList filtered = new LinkedList();
-
-        for (int i = 0; i < size; i++) {
-            Object o = objects.get(i);
+        
+        return (List) filter(objects, new LinkedList());
+    }
+    
+    /**
+     * Adds objects matching this expression from the source collection 
+     * to the target collection.
+     * 
+     * @since 1.1
+     */
+    public Collection filter(Collection source, Collection target) {
+        Iterator it = source.iterator();
+        while (it.hasNext()) {
+            Object o = it.next();
             if (match(o)) {
-                filtered.addLast(o);
+                target.add(o);
             }
         }
-
-        return filtered;
+        
+        return target;
     }
 
     /**

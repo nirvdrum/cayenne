@@ -280,16 +280,37 @@ public class ClassGenerator {
     public String getProp() {
         return prop;
     }
+    
+    /**
+     * Capitalizes the first letter of the property name.
+     * 
+     * @since 1.1
+     */
+    public String capitalized(String name) {
+        if (name == null || name.length() == 0)
+            return name;
+
+        char c = Character.toUpperCase(name.charAt(0));
+        return (name.length() == 1) ? Character.toString(c) : c + name.substring(1);
+    }
+    
+    /**
+     * Converts property name to Java constants naming convention.
+     * 
+     * @since 1.1
+     */
+    public String capitalizedAsConstant(String name) {
+        if (name == null || name.length() == 0)
+            return name;
+
+        return NameConverter.javaToUnderscored(name);
+    }
 
     /** Returns current property name with capitalized first letter */
     public String getCappedProp() {
-        if (prop == null || prop.length() == 0)
-            return prop;
-
-        char c = Character.toUpperCase(prop.charAt(0));
-        return (prop.length() == 1) ? Character.toString(c) : c + prop.substring(1);
+        return capitalized(prop);
     }
-
+    
     /**
      * @return a current property name converted to a format used by java static
      *         final variables - all capitalized with underscores.
@@ -297,10 +318,7 @@ public class ClassGenerator {
      * @since 1.0.3
      */
     public String getPropAsConstantName() {
-        if (prop == null || prop.length() == 0)
-            return prop;
-
-        return NameConverter.javaToUnderscored(prop);
+        return capitalizedAsConstant(prop);
     }
 
     /**
