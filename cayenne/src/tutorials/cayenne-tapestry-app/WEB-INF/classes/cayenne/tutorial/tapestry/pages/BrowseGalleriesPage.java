@@ -39,8 +39,13 @@ public abstract class BrowseGalleriesPage extends ApplicationPage {
         // fetch the galleries if we do not have them cached
         if (getGalleryList() == null) {
             SelectQuery query = new SelectQuery(Gallery.class);
-            Ordering ordering = new Ordering("galleryName", Ordering.ASC);
-            query.addOrdering(ordering);
+            query.addOrdering(new Ordering(Gallery.GALLERY_NAME_PROPERTY, Ordering.ASC));
+
+            // prefetch paintings and artist, since they are displayed on the screen
+            // this should improve performance
+            query.addPrefetch(Gallery.PAINTING_ARRAY_PROPERTY);
+            query.addPrefetch(
+                Gallery.PAINTING_ARRAY_PROPERTY + "." + Painting.TO_ARTIST_PROPERTY);
 
             setGalleryList(getVisitDataContext().performQuery(query));
         }

@@ -50,14 +50,22 @@ public abstract class BrowseArtistsPage extends ApplicationPage {
     }
 
     public void pageBeginRender(PageEvent event) {
-
         // refetch artists only if they are not initialized
         if (getArtistList() == null) {
             DataContext ctxt = getVisitDataContext();
 
             SelectQuery query = new SelectQuery(Artist.class);
-            Ordering ordering = new Ordering("artistName", Ordering.ASC);
-            query.addOrdering(ordering);
+            
+            // note - generated class _Artist contains the names of class properties
+            // as "public static final Strings"
+            query.addOrdering(new Ordering(Artist.ARTIST_NAME_PROPERTY, Ordering.ASC));
+
+            // prefetch paintings and galleries, since they are displayed 
+            // for each artist.
+            // this should improve performance
+            query.addPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+            query.addPrefetch(
+                Artist.PAINTING_ARRAY_PROPERTY + "." + Painting.TO_GALLERY_PROPERTY);
 
             setArtistList(ctxt.performQuery(query));
         }

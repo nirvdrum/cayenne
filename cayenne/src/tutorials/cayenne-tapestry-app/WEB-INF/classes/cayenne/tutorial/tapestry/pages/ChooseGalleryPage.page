@@ -4,17 +4,9 @@
   "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
 
 <page-specification class="cayenne.tutorial.tapestry.pages.ChooseGalleryPage">
-	<component id="paintingTitle" type="Insert">
-    	<binding name="value" expression="painting.paintingTitle"/>
-	</component>
-  
   	<component id="galleries" type="Foreach">
   		<binding name="source" expression="galleryList"/>
   		<binding name="value" expression="gallery"/>
-	</component>
-
- 	<component id="galleryName" type="Insert">
-    	<binding name="value" expression="gallery.galleryName"/>
 	</component>
 		
 	<component id="savePaintingToGalleryLink" type="ActionLink">
@@ -23,5 +15,5 @@
 
 	<property-specification name="galleryList" type="java.util.List" persistent="no"/>
 	<property-specification name="gallery" type="cayenne.tutorial.tapestry.domain.Gallery" persistent="no"/>
-	<property-specification name="painting" type="cayenne.tutorial.tapestry.domain.Painting" persistent="no"/>
+	<property-specification name="painting" type="cayenne.tutorial.tapestry.domain.Painting" persistent="yes"/>
 </page-specification>

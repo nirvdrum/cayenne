@@ -40,7 +40,7 @@ public abstract class ChooseGalleryPage extends ApplicationPage {
 
     public void pageBeginRender(PageEvent event) {
         SelectQuery query = new SelectQuery(Gallery.class);
-        Ordering ordering = new Ordering("galleryName", Ordering.ASC);
+        Ordering ordering = new Ordering(Gallery.GALLERY_NAME_PROPERTY, Ordering.ASC);
         query.addOrdering(ordering);
 
         setGalleryList(getVisitDataContext().performQuery(query));
