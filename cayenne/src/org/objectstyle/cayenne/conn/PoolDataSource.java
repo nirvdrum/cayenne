@@ -80,7 +80,6 @@ public class PoolDataSource implements ConnectionPoolDataSource {
 	}
 
 	public PoolDataSource(String jdbcDriver, String connectionUrl) throws SQLException {
-		logObj.fine("Init new driver : driver - " + jdbcDriver + ", url - " + connectionUrl);
 		nonPooledDatasource = new DriverDataSource(jdbcDriver, connectionUrl);
 	}
 
