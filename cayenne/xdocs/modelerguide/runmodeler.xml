@@ -13,7 +13,7 @@
     <section name="2. Running CayenneModeler">
         	<p>CayenneModeler is a regular Java application and can be run on
         	a JSDK1.4 compatible JVM. Main class is
-        	<code>org.objectstyle.cayenne.gui.Editor</code>. For convenience
+        	<code>org.objectstyle.cayenne.modeler.Editor</code>. For convenience
         	Cayenne distribution provides run scripts to start modeler on
         	Windows
         	and UNIX platforms. To take advantage of these scripts, user must
