@@ -283,7 +283,6 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         assertEquals(artistCount, artists.size());
 
         Artist a1 = (Artist) artists.get(0);
-        logObj.warn("artist: " + a1);
         assertEquals(artistName(1), a1.getArtistName());
         ToManyList toMany = (ToManyList) a1.readPropertyDirectly("artistExhibitArray");
         assertNotNull(toMany);

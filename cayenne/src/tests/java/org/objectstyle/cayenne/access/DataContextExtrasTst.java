@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
@@ -69,8 +68,10 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -87,6 +88,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        deleteTestData();
         context = createDataContext();
     }
 
@@ -153,40 +155,31 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testCommitChangesError() throws Exception {
-        // can't run this test due to the nature of some adapters
-        if (!getAccessStackAdapter().supportsDroppingPK()) {
-            return;
-        }
 
-        JdbcPkGenerator gen = (JdbcPkGenerator) getNode().getAdapter().getPkGenerator();
-        int cache = gen.getPkCacheSize();
+        // setup mockup PK generator that will blow on PK request
+        // to emulate an exception
+        PkGenerator newGenerator = new JdbcPkGenerator() {
+            public Object generatePkForDbEntity(DataNode node, DbEntity ent)
+                throws Exception {
+                throw new CayenneRuntimeException("Synthetic error....");
+            }
+        };
 
-        // make sure we insert enough objects to exhaust the cache
-        for (int i = 0; i < cache + 2; i++) {
-            Artist o1 = new Artist();
-            o1.setArtistName("a" + i);
-            context.registerNewObject(o1);
-        }
+        PkGenerator oldGenerator = getNode().getAdapter().getPkGenerator();
+        JdbcAdapter adapter = (JdbcAdapter) getNode().getAdapter();
 
-        // this should cause PK generation exception in commit later
-        DataMap map = (DataMap) getNode().getDataMaps().iterator().next();
-
-        gen.dropAutoPk(getNode(), new ArrayList(map.getDbEntities()));
-
-        // disable logging for thrown exceptions
-        Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
-        Level oldLevel = observerLogger.getLevel();
-        observerLogger.setLevel(Level.ERROR);
+        adapter.setPkGenerator(newGenerator);
         try {
-            context.commitChanges(Level.DEBUG);
+            Artist newArtist = (Artist) context.createAndRegisterNewObject(Artist.class);
+            newArtist.setArtistName("aaa");
+            context.commitChanges();
             fail("Exception expected but not thrown due to missing PK generation routine.");
         }
         catch (CayenneRuntimeException ex) {
             // exception expected
         }
         finally {
-            observerLogger.setLevel(oldLevel);
-            accessStack.createPKSupport();
+            adapter.setPkGenerator(oldGenerator);
         }
     }
 

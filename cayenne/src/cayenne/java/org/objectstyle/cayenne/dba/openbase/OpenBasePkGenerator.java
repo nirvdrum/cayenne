@@ -275,9 +275,12 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
 
         StringBuffer buffer = new StringBuffer();
 
-        // should we use CLUSTERED by default? 
-        // probably not, since this will kill other existing clustered indexes... 
-        buffer.append("CREATE UNIQUE INDEX ").append(entity.getName()).append(" (");
+        // compound PK doesn't work well with UNIQUE index...
+        // create a regular one in this case
+        buffer
+            .append(pk.size() == 1 ? "CREATE UNIQUE INDEX " : "CREATE INDEX ")
+            .append(entity.getName())
+            .append(" (");
 
         Iterator it = pk.iterator();
 
@@ -296,7 +299,7 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
     public void reset() {
         // noop
     }
-    
+
     /**
      * Returns zero, since PK caching is not feasible with OpenBase PK
      * generation mechanism.

@@ -69,8 +69,4 @@ public class OpenBaseStackAdapter extends AccessStackAdapter {
     public boolean supportsHaving() {
         return false;
     }
-    
-    public boolean supportsDroppingPK() {
-        return false;
-    }
 }

@@ -159,9 +159,20 @@ public class JdbcAdapter implements DbAdapter {
         return new JdbcPkGenerator();
     }
 
-    /** Returns primary key generator associated with this DbAdapter. */
+    /** 
+     * Returns primary key generator associated with this DbAdapter. 
+     */
     public PkGenerator getPkGenerator() {
         return pkGenerator;
+    }
+    
+    /**
+     * Sets new primary key generator.
+     * 
+     * @since 1.1
+     */
+    public void setPkGenerator(PkGenerator pkGenerator) {
+        this.pkGenerator = pkGenerator;
     }
 
     public QueryTranslator getQueryTranslator(Query query) throws Exception {

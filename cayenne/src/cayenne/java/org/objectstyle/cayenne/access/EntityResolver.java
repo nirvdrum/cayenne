@@ -219,7 +219,8 @@ public class EntityResolver {
                 dbEntityCache.put(oe.getName(), de);
                 objEntityCache.put(oe.getName(), oe);
 
-                // build inheritance tree 
+                // build inheritance tree... include nodes that 
+                // have no children to avoid uneeded cache rebuilding on lookup...
                 EntityInheritanceTree node =
                     (EntityInheritanceTree) entityInheritanceCache.get(oe.getName());
                 if (node == null) {
@@ -350,7 +351,7 @@ public class EntityResolver {
 
     /**
      * Returns EntityInheritanceTree representing inheritance hierarchy 
-     * that includes a give ObjEntity as root, and all its subentities.
+     * that starts with a given ObjEntity as root, and includes all its subentities.
      * If ObjEntity has no known subentities, null is returned.
      * 
      * @since 1.1
@@ -361,18 +362,17 @@ public class EntityResolver {
             (EntityInheritanceTree) entityInheritanceCache.get(entity.getName());
 
         if (tree == null) {
-            // reconstruct cache just in case some of the datamaps
+            // since we keep inheritance trees for all entities, null means
+            // unknown entity...
+
+            // rebuild cache just in case some of the datamaps
             // have changed and now contain the required information
             constructCache();
             tree = (EntityInheritanceTree) entityInheritanceCache.get(entity.getName());
         }
 
         // don't return "trivial" trees
-        if (tree != null && tree.getChildrenCount() == 0) {
-            return null;
-        }
-
-        return tree;
+        return (tree == null || tree.getChildrenCount() == 0) ? null : tree;
     }
 
     /**

@@ -129,10 +129,6 @@ public class AccessStackAdapter {
         return true;
     }
 
-    public boolean supportsDroppingPK() {
-        return true;
-    }
-
     public boolean supportsCaseSensitiveLike() {
         return true;
     }
