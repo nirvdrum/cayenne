@@ -61,11 +61,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
@@ -183,9 +185,12 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         try {
             Statement st = con.createStatement();
             try {
-                ResultSet rs =
-                    st.executeQuery(
-                        "SELECT " + pkGeneratingSequenceName + ".nextval FROM DUAL");
+                String sql = "SELECT " + pkGeneratingSequenceName + ".nextval FROM DUAL";
+                QueryLogger.logQuery(
+                    QueryLogger.DEFAULT_LOG_LEVEL,
+                    sql,
+                    Collections.EMPTY_LIST);
+                ResultSet rs = st.executeQuery(sql);
                 try {
                     //Object pk = null;
                     if (!rs.next()) {
@@ -263,8 +268,12 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         try {
             Statement sel = con.createStatement();
             try {
-                ResultSet rs =
-                    sel.executeQuery("SELECT LOWER(SEQUENCE_NAME) FROM ALL_SEQUENCES");
+                String sql = "SELECT LOWER(SEQUENCE_NAME) FROM ALL_SEQUENCES";
+                QueryLogger.logQuery(
+                    QueryLogger.DEFAULT_LOG_LEVEL,
+                    sql,
+                    Collections.EMPTY_LIST);
+                ResultSet rs = sel.executeQuery(sql);
                 try {
                     List sequenceList = new ArrayList();
                     while (rs.next()) {
