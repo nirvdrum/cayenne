@@ -74,6 +74,8 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Default implementation of ResultIterator interface. Serves as a
@@ -96,7 +98,6 @@ public class DefaultResultIterator implements ResultIterator {
     protected ResultDescriptor descriptor;
 
     protected int mapCapacity;
-    protected int idMapCapacity;
 
     protected boolean closingConnection;
     protected boolean isClosed;
@@ -156,7 +157,6 @@ public class DefaultResultIterator implements ResultIterator {
         this.fetchLimit = fetchLimit;
 
         this.mapCapacity = (int) Math.ceil((descriptor.getNames().length) / 0.75);
-        this.idMapCapacity = (int) Math.ceil((descriptor.getIdIndexes().length) / 0.75);
 
         checkNextRow();
     }
@@ -259,23 +259,24 @@ public class DefaultResultIterator implements ResultIterator {
             throw cex;
         }
         catch (Exception otherex) {
-            logObj.warn("Error", otherex);
-            throw new CayenneException("Exception materializing column.", otherex);
+            throw new CayenneException(
+                "Exception materializing column.",
+                Util.unwindException(otherex));
         }
     }
 
     /**
      * Reads a row from the internal ResultSet at the current
      * cursor position, processing only columns that are part of the ObjectId
-     * of a terget class.
+     * of a target class.
      */
-    protected Map readIdRow() throws SQLException, CayenneException {
+    protected Map readIdRow(DbEntity entity) throws SQLException, CayenneException {
         try {
-            Map idRow = new DataRow(idMapCapacity);
+            Map idRow = new DataRow(2);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();
-            int[] idIndex = descriptor.getIdIndexes();
+            int[] idIndex = descriptor.getIdIndexes(entity);
             int len = idIndex.length;
 
             for (int i = 0; i < len; i++) {
@@ -300,7 +301,9 @@ public class DefaultResultIterator implements ResultIterator {
         }
         catch (Exception otherex) {
             logObj.warn("Error", otherex);
-            throw new CayenneException("Exception materializing id column.", otherex);
+            throw new CayenneException(
+                "Exception materializing id column.",
+                Util.unwindException(otherex));
         }
     }
 
@@ -399,16 +402,26 @@ public class DefaultResultIterator implements ResultIterator {
     /**
      * Reads just ObjectId columns and returns them as a map.
      *
-     * @see org.objectstyle.cayenne.access.ResultIterator#nextObjectId()
+     * @deprecated Since 1.1 use {@link #nextObjectId(DbEntity)}
      */
     public Map nextObjectId() throws CayenneException {
+        return nextObjectId(null);
+    }
+
+    /**
+     * Returns a map of ObjectId values from the next result row.
+     * Primary key columns are determined from the provided DbEntity.
+     * 
+     * @since 1.1
+     */
+    public Map nextObjectId(DbEntity entity) throws CayenneException {
         if (!hasNextRow()) {
             throw new CayenneException("An attempt to read uninitialized row or past the end of the iterator.");
         }
 
         try {
             // read
-            Map row = readIdRow();
+            Map row = readIdRow(entity);
 
             // rewind
             checkNextRow();

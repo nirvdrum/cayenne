@@ -58,8 +58,10 @@ package org.objectstyle.cayenne.access;
 import java.sql.ResultSet;
 import java.util.Map;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
-import org.objectstyle.cayenne.unit.*;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.unit.JDBCAccessTestCase;
 
 public class DefaultResultIteratorTst extends JDBCAccessTestCase {
     protected DefaultResultIterator it;
@@ -158,15 +160,18 @@ public class DefaultResultIteratorTst extends JDBCAccessTestCase {
         }
     }
 
-    public void testNextObjectId() throws java.lang.Exception {
+    public void testNextObjectId() throws Exception {
         try {
             init();
+
+            DbEntity entity =
+                getDomain().getEntityResolver().lookupDbEntity(Artist.class);
 
             // must be as many rows as we have artists
             // inserted in the database
             for (int i = 0; i < DataContextTst.artistCount; i++) {
                 assertTrue(it.hasNextRow());
-                it.nextObjectId();
+                it.nextObjectId(entity);
             }
 
             // rows must end here
@@ -178,7 +183,7 @@ public class DefaultResultIteratorTst extends JDBCAccessTestCase {
         }
     }
 
-    public void testIsClosingConnection() throws java.lang.Exception {
+    public void testIsClosingConnection() throws Exception {
         try {
             init();
             assertFalse(it.isClosingConnection());

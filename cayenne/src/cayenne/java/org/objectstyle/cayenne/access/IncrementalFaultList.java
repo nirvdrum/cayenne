@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -222,8 +223,9 @@ public class IncrementalFaultList implements List {
                     }
 
                     // continue reading ids
+                    DbEntity entity = rootEntity.getDbEntity();
                     while (it.hasNextRow()) {
-                        elements.add(it.nextObjectId());
+                        elements.add(it.nextObjectId(entity));
                     }
 
                     QueryLogger.logSelectCount(
@@ -237,7 +239,9 @@ public class IncrementalFaultList implements List {
                 }
             }
             catch (CayenneException e) {
-                throw new CayenneRuntimeException("Error performing query.", e);
+                throw new CayenneRuntimeException(
+                    "Error performing query.",
+                    Util.unwindException(e));
             }
 
             unfetchedObjects =
@@ -323,8 +327,13 @@ public class IncrementalFaultList implements List {
                 Object obj = elements.get(i);
                 if (isUnresolved(obj)) {
                     ids.add(obj);
-                    quals.add(
-                        ExpressionFactory.matchAllDbExp((Map) obj, Expression.EQUAL_TO));
+
+                    Map map = (Map) obj;
+                    if (map.isEmpty()) {
+                        throw new CayenneRuntimeException("Empty id map at index " + i);
+                    }
+
+                    quals.add(ExpressionFactory.matchAllDbExp(map, Expression.EQUAL_TO));
                 }
             }
 
@@ -341,7 +350,7 @@ public class IncrementalFaultList implements List {
             while (fetchBegin < qualsSize) {
                 SelectQuery query =
                     new SelectQuery(
-                        rootEntity.getName(),
+                        rootEntity,
                         ExpressionFactory.joinExp(
                             Expression.OR,
                             quals.subList(fetchBegin, fetchEnd)));

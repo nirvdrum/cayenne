@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
@@ -99,6 +100,7 @@ public class ResultDescriptor {
     protected List javaTypes = new ArrayList();
     protected ExtendedTypeMap typesMapping;
     protected ObjEntity rootEntity;
+    protected boolean indexedIds;
 
     /**
      * Creates and returns a ResultDescritor based on ResultSet metadata.
@@ -174,18 +176,6 @@ public class ResultDescriptor {
             }
         }
 
-        if (idWidth == 0) {
-            descriptor.idIndexes = emptyInt;
-        }
-        else {
-            descriptor.idIndexes = new int[idWidth];
-            for (int i = 0, j = 0; i < len; i++) {
-                if (columns[i].isPrimaryKey()) {
-                    descriptor.idIndexes[j++] = i;
-                }
-            }
-        }
-
         return descriptor;
     }
 
@@ -231,6 +221,48 @@ public class ResultDescriptor {
         this.javaTypes.add(javaType);
     }
 
+    /**
+     * Reindexes primary key based on DbEntity.
+     * 
+     * @since 1.1
+     */
+    protected void indexIds(DbEntity entity) {
+        // TODO: maybe check if the entity has changed,
+        // and reindex again... since now we assume that once indexing
+        // is done, the entity is always the same...
+
+        if (!indexedIds) {
+            synchronized (this) {
+                if (!indexedIds) {
+                    idIndexes = emptyInt;
+
+                    if (entity == null) {
+                        return;
+                    }
+
+                    indexedIds = true;
+
+                    int resultWidth = names.length;
+                    int[] tmp = new int[resultWidth];
+                    int j = 0;
+                    for (int i = 0; i < resultWidth; i++) {
+                        DbAttribute attribute =
+                            (DbAttribute) entity.getAttribute(names[i]);
+                        if (attribute != null && attribute.isPrimaryKey()) {
+                            tmp[j++] = i;
+                        }
+                    }
+
+                    if (j > 0) {
+                        this.idIndexes = new int[j];
+                        System.arraycopy(tmp, 0, idIndexes, 0, j);
+                    }
+
+                }
+            }
+        }
+    }
+
     public void index() {
 
         // assert validity
@@ -240,7 +272,6 @@ public class ResultDescriptor {
 
         // init various things
         int resultWidth = dbAttributes.size();
-        int idWidth = 0;
         int outWidth = 0;
         this.names = new String[resultWidth];
         this.jdbcTypes = new int[resultWidth];
@@ -249,11 +280,6 @@ public class ResultDescriptor {
 
             // set type
             jdbcTypes[i] = attr.getType();
-
-            // check if this is an ID
-            if (attr.isPrimaryKey()) {
-                idWidth++;
-            }
 
             // check if this is a stored procedure OUT parameter
             if (attr instanceof ProcedureParameterWrapper) {
@@ -276,21 +302,6 @@ public class ResultDescriptor {
             }
 
             names[i] = name;
-        }
-
-        if (idWidth == 0) {
-            this.idIndexes = emptyInt;
-        }
-        else {
-            this.idIndexes = new int[idWidth];
-            for (int i = 0, j = 0; i < resultWidth; i++) {
-                DbAttribute attr = (DbAttribute) dbAttributes.get(i);
-                jdbcTypes[i] = attr.getType();
-
-                if (attr.isPrimaryKey()) {
-                    idIndexes[j++] = i;
-                }
-            }
         }
 
         if (outWidth == 0) {
@@ -375,7 +386,19 @@ public class ResultDescriptor {
         return converters;
     }
 
+    /**
+     * @deprecated Since 1.1 use {@link #getIdIndexes(DbEntity)}.
+     * @return
+     */
     public int[] getIdIndexes() {
+        return getIdIndexes(null);
+    }
+
+    /**
+     * @since 1.1
+     */
+    public int[] getIdIndexes(DbEntity entity) {
+        indexIds(entity);
         return idIndexes;
     }
 

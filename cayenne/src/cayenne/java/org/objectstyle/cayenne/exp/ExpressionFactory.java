@@ -353,11 +353,11 @@ public class ExpressionFactory {
     public static Expression matchAnyDbExp(Map map, int pairType) {
         List pairs = new ArrayList();
 
-        Iterator it = map.keySet().iterator();
+        Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
-            String key = (String) it.next();
-            Object value = map.get(key);
-            pairs.add(binaryDbPathExp(pairType, key, value));
+            Map.Entry entry = (Map.Entry) it.next();
+            pairs.add(
+                binaryDbPathExp(pairType, (String) entry.getKey(), entry.getValue()));
         }
 
         return joinExp(Expression.OR, pairs);
@@ -373,11 +373,11 @@ public class ExpressionFactory {
     public static Expression matchAllDbExp(Map map, int pairType) {
         List pairs = new ArrayList();
 
-        Iterator it = map.keySet().iterator();
+        Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
-            String key = (String) it.next();
-            Object value = map.get(key);
-            pairs.add(binaryDbPathExp(pairType, key, value));
+            Map.Entry entry = (Map.Entry) it.next();
+            pairs.add(
+                binaryDbPathExp(pairType, (String) entry.getKey(), entry.getValue()));
         }
 
         return joinExp(Expression.AND, pairs);
@@ -393,11 +393,10 @@ public class ExpressionFactory {
     public static Expression matchAnyExp(Map map, int pairType) {
         List pairs = new ArrayList();
 
-        Iterator it = map.keySet().iterator();
+        Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
-            String key = (String) it.next();
-            Object value = map.get(key);
-            pairs.add(binaryPathExp(pairType, key, value));
+            Map.Entry entry = (Map.Entry) it.next();
+            pairs.add(binaryPathExp(pairType, (String) entry.getKey(), entry.getValue()));
         }
 
         return joinExp(Expression.OR, pairs);
@@ -413,11 +412,10 @@ public class ExpressionFactory {
     public static Expression matchAllExp(Map map, int pairType) {
         List pairs = new ArrayList();
 
-        Iterator it = map.keySet().iterator();
+        Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
-            String key = (String) it.next();
-            Object value = map.get(key);
-            pairs.add(binaryPathExp(pairType, key, value));
+            Map.Entry entry = (Map.Entry) it.next();
+            pairs.add(binaryPathExp(pairType, (String) entry.getKey(), entry.getValue()));
         }
 
         return joinExp(Expression.AND, pairs);
@@ -567,7 +565,7 @@ public class ExpressionFactory {
         }
 
         Expression exp = expressionOfType(type);
-        for(int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++) {
             exp.setOperand(i, expressions.get(i));
         }
         return exp;

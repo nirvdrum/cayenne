@@ -64,6 +64,7 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Exhibit;
+import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -148,6 +149,12 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         SQLTemplate query = new SQLTemplate(Object.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
 
+        // customize for postgres, since it converts attributes to lowercase
+        query.setTemplate(
+            PostgresAdapter.class.getName(),
+            "SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH')"
+                + " FROM ARTIST ORDER BY ARTIST_ID");
+
         MockupOperationObserver observer = new MockupOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
 
@@ -155,7 +162,10 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         assertEquals(DataContextTestBase.artistCount, data.size());
         Map row = (Map) data.get(2);
         assertEquals(3, row.size());
-        assertEquals(new Integer(33003), row.get("ARTIST_ID"));
+        assertEquals(
+            "Can't find ARTIST_ID: " + row,
+            new Integer(33003),
+            row.get("ARTIST_ID"));
     }
 
     public void testPerfomQueriesSelectingSQLTemplateAlias() throws Exception {

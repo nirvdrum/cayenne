@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.map.DbEntity;
 
 /**
  * Defines API of an iterator over the records returned as a result
@@ -93,8 +94,18 @@ public interface ResultIterator {
     
     /** 
 	 * Returns a map of ObjectId values from the next result row.
+     * 
+     * @deprecated Since 1.1 use {@link #nextObjectId(DbEntity)}
 	 */
     public Map nextObjectId() throws CayenneException;
+    
+    /**
+     * Returns a map of ObjectId values from the next result row.
+     * Primary key columns are determined from the provided DbEntity.
+     * 
+     * @since 1.1
+     */
+    public Map nextObjectId(DbEntity entity) throws CayenneException;
     
     /**
      * Skips current data row instead of reading it.

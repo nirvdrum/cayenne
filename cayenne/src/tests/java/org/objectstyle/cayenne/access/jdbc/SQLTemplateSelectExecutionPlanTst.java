@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
@@ -78,6 +79,12 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
     public void testExecuteSelect() throws Exception {
         SQLTemplate template = new SQLTemplate(Object.class, true);
         template.setDefaultTemplate("SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)");
+
+        // customize for postgres, since it converts attributes to lowercase
+        template.setTemplate(
+            PostgresAdapter.class.getName(),
+            "SELECT #result('ARTIST_ID'), RTRIM(#result('ARTIST_NAME')), #result('DATE_OF_BIRTH')"
+                + " FROM ARTIST WHERE ARTIST_ID = #bind($id)");
 
         Map bindings = new HashMap();
         bindings.put("id", new Integer(33005));

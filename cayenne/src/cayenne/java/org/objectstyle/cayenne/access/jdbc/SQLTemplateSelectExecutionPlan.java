@@ -119,57 +119,45 @@ public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
             // TODO: we may cache prep statements for this loop, using merged string as a key
             // since it is very likely that it will be the same for multiple parameter sets...
             PreparedStatement statement = connection.prepareStatement(compiled.getSql());
-            try {
-                bind(statement, compiled.getBindings());
-                ResultSet rs = statement.executeQuery();
 
-                ResultDescriptor descriptor;
-                if (compiled.getResultColumns().length > 0) {
-                    descriptor =
-                        ResultDescriptor.createDescriptor(
-                            compiled.getResultColumns(),
-                            adapter.getExtendedTypes());
-                }
-                else {
-                    descriptor =
-                        ResultDescriptor.createDescriptor(rs, adapter.getExtendedTypes());
-                }
+            bind(statement, compiled.getBindings());
+            ResultSet rs = statement.executeQuery();
 
-                DefaultResultIterator result =
-                    new DefaultResultIterator(
-                        connection,
-                        statement,
-                        rs,
-                        descriptor,
-                        query.getFetchLimit());
+            ResultDescriptor descriptor =
+                (compiled.getResultColumns().length > 0)
+                    ? ResultDescriptor.createDescriptor(
+                        compiled.getResultColumns(),
+                        adapter.getExtendedTypes())
+                    : ResultDescriptor.createDescriptor(rs, adapter.getExtendedTypes());
 
-                // TODO: Should do something about closing ResultSet and PreparedStatement in this method,
-                // instead of relying on DefaultResultIterator to do that later
+            DefaultResultIterator result =
+                new DefaultResultIterator(
+                    connection,
+                    statement,
+                    rs,
+                    descriptor,
+                    query.getFetchLimit());
 
-                if (!observer.isIteratedResult()) {
-                    // note that we don't need to close ResultIterator
-                    // since "dataRows" will do it internally
-                    List resultRows = result.dataRows(true);
-                    QueryLogger.logSelectCount(
-                        query.getLoggingLevel(),
-                        resultRows.size(),
-                        System.currentTimeMillis() - t1);
+            if (!observer.isIteratedResult()) {
+                // note that we don't need to close ResultIterator
+                // since "dataRows" will do it internally
+                List resultRows = result.dataRows(true);
+                QueryLogger.logSelectCount(
+                    query.getLoggingLevel(),
+                    resultRows.size(),
+                    System.currentTimeMillis() - t1);
 
-                    observer.nextDataRows(query, resultRows);
-                }
-                else {
-                    try {
-                        result.setClosingConnection(true);
-                        observer.nextDataRows(query, result);
-                    }
-                    catch (Exception ex) {
-                        result.close();
-                        throw ex;
-                    }
-                }
+                observer.nextDataRows(query, resultRows);
             }
-            finally {
-                statement.close();
+            else {
+                try {
+                    result.setClosingConnection(true);
+                    observer.nextDataRows(query, result);
+                }
+                catch (Exception ex) {
+                    result.close();
+                    throw ex;
+                }
             }
         }
     }
