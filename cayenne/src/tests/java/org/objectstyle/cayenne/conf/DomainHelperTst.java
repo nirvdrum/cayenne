@@ -59,6 +59,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -134,7 +135,7 @@ public class DomainHelperTst extends CayenneTestCase {
 		if (info.getJdbcDriver() != null) {
 			assertTrue(
 				"Driver not saved: " + info.getJdbcDriver(),
-				buf.toString().indexOf("<driver class=\"" + info.getJdbcDriver() + "\">")
+				buf.toString().indexOf("<driver project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\" class=\"" + info.getJdbcDriver() + "\">")
 					>= 0);
 		}
 		

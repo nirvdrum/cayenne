@@ -70,6 +70,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
@@ -318,7 +319,7 @@ public class MapLoader extends DefaultHandler {
         dbRelationshipRefs = new ArrayList();
         dbRelationships = new ArrayList();
         out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        out.println("<data-map>");
+        out.println("<data-map project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\">");
         storeDbEntities(out, map);
         storeObjEntities(out, map);
         storeDbRelationships(out);

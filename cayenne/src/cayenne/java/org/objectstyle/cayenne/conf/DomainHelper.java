@@ -327,7 +327,7 @@ public class DomainHelper {
 	 * <code>info</code> object may contain full or partial information.
 	 */
 	public static void storeDataNode(PrintWriter out, DataSourceInfo info) {
-		out.print("<driver");
+		out.print("<driver project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\"");
 		if (info.getJdbcDriver() != null) {
 			out.print(" class=\"" + info.getJdbcDriver() + "\"");
 		}
