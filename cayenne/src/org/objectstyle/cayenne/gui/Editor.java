@@ -156,6 +156,8 @@ implements ActionListener
             saveDataMap(mediator.getCurrentDataMap());
         } else if (src == saveProjectMenu) {
             saveProject();
+        } else if (src == saveAllMenu) {
+            saveAll();
         } else if (src == importDbMenu) {
             importDb();
         } else if (src == generateMenu) {
@@ -326,7 +328,7 @@ implements ActionListener
 			Configuration.initSharedConfig("org.objectstyle.cayenne.gui.GuiConfiguration");
             GuiConfiguration config;
             config = GuiConfiguration.getGuiConfig();
-            MediatorImpl mediator = MediatorImpl.getMediator(config);
+            Mediator mediator = Mediator.getMediator(config);
             project(mediator);
         } catch (Exception e) {
             System.out.println("Error loading project file, " + e.getMessage());
@@ -351,7 +353,7 @@ implements ActionListener
 			GuiConfiguration.initSharedConfig(file);
             GuiConfiguration config;
             config = GuiConfiguration.getGuiConfig();
-            MediatorImpl mediator = MediatorImpl.getMediator(config);
+            Mediator mediator = Mediator.getMediator(config);
             project(mediator);
 
         } catch (Exception e) {
@@ -459,6 +461,10 @@ implements ActionListener
 		} 
 		else 
 			saveProject();
+	}
+
+	private void saveAll() {
+		saveProject();
 	}
 	
 	private void saveProject() {
