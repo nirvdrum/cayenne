@@ -251,7 +251,7 @@ public class GenerateDbDialog
     }
 
     protected void storeSQL() {
-        File projDir = Editor.getProject().getProjectDir();
+        File projDir = Editor.getProject().getProjectDirectory();
         FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
         JFileChooser fc = new JFileChooser(fileView);
         fc.setDialogType(JFileChooser.SAVE_DIALOG);

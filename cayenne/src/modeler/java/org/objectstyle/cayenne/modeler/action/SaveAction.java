@@ -107,7 +107,7 @@ public class SaveAction extends CayenneAction {
                 return false;
             }
 
-            p.setProjectDir(projectDir);
+            p.setProjectDirectory(projectDir);
         }
 
         p.save();

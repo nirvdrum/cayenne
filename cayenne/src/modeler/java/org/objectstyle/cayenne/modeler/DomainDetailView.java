@@ -150,8 +150,8 @@ public class DomainDetailView
 
         Project project = Editor.getProject();
         if (project instanceof ApplicationProject) {
-            ((ApplicationProject) project).getConfig().removeDomain(aName);
-            ((ApplicationProject) project).getConfig().addDomain(domain);
+            ((ApplicationProject) project).getConfiguration().removeDomain(aName);
+            ((ApplicationProject) project).getConfiguration().addDomain(domain);
         }
 
         DomainEvent event = new DomainEvent(this, domain, aName);

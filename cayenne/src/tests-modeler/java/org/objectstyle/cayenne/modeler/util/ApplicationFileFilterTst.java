@@ -59,6 +59,8 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.conf.Configuration;
+
 /**
  * @author Andrei Adamchik
  */
@@ -74,7 +76,7 @@ public class ApplicationFileFilterTst extends TestCase {
 	}
 	
 	public void testAcceptCayenneXml() throws Exception {
-		assertTrue(filter.accept(new File("cayenne.xml")));
+		assertTrue(filter.accept(new File(Configuration.DEFAULT_DOMAIN_FILE)));
 	}
 	
 	public void testRejectOther() throws Exception {
