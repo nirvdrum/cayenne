@@ -144,7 +144,9 @@ public class DataDomain implements QueryEngine {
 					Iterator newMapEntities = map.getObjEntitiesAsList(false).iterator(); //No dependencies
 					while (newMapEntities.hasNext()) {
 						ObjEntity newEntity = (ObjEntity) newMapEntities.next();
-						if (newEntity.getClassName().equals(existingEntity.getClassName())) {
+						String newClassName=newEntity.getClassName();
+						//Allow multiple "null" class names
+						if ((null!=newClassName) && (newClassName.equals(existingEntity.getClassName()))) {
 							throw new CayenneRuntimeException(
 								"Cannot add DataMap "
 									+ map.getName()
@@ -446,7 +448,6 @@ public class DataDomain implements QueryEngine {
 				nodeQueries = new ArrayList();
 				queryMap.put(aNode, nodeQueries);
 			}
-
 			nodeQueries.add(nextQ);
 		} // perform queries on each node
 		Iterator nodeIt = queryMap.keySet().iterator();

@@ -244,21 +244,28 @@ public class DataMap {
 			throw new NullPointerException("Attempt to add ObjEntity with no name.");
 		}
 
-		ObjEntity existingEntity = (ObjEntity) classNameObjEntityMap.get(objEntity.getClassName());
-		if (existingEntity != null) {
-			throw new IllegalArgumentException(
-				getClass().getName()
-					+ ": Cannot add ObjEntity "
-					+ objEntity.getName()
-					+ " because this DataMap already has an ObjEntity ("
-					+ existingEntity.getName()
-					+ ") for the class "
-					+ objEntity.getClassName());
+		//Never check for uniquness if the class name is null - typically this will be during modelling, or
+		// perhaps when there are "generic" records which have no class.  
+		if(null!=objEntity.getClassName()) {
+			ObjEntity existingEntity = (ObjEntity) classNameObjEntityMap.get(objEntity.getClassName());
+			if (existingEntity != null) {
+				throw new IllegalArgumentException(
+					getClass().getName()
+						+ ": Cannot add ObjEntity "
+						+ objEntity.getName()
+						+ " because this DataMap already has an ObjEntity ("
+						+ existingEntity.getName()
+						+ ") for the class "
+						+ objEntity.getClassName());
+			}
 		}
 		objEntityMap.put(objEntity.getName(), objEntity);
 		
-		//Do not add to the className map until adding was otherwise successful
-		classNameObjEntityMap.put(objEntity.getClassName(), objEntity);
+		//Do not add to the className map until adding was otherwise successful, and 
+		// do not add if there is no real classname
+		if(null!=objEntity.getClassName()) {
+			classNameObjEntityMap.put(objEntity.getClassName(), objEntity);
+		}
 	}
 
 	/** 
