@@ -10,17 +10,17 @@
            <subsection name="4.3 Generating Java Classes" anchor="javagen">
             <p>Java classes can be generated from an existing DataMap using CayenneModeler
             tool or a special <a href="http://jakarat.apache.org/ant/">Ant</a> task, 
-            <code>CayenneGen</code>, implemented by <a href=
+            <code>Cgen</code> (short for "Cayenne Class Generator"), implemented by <a href=
             "../../api/org/objectstyle/cayenne/tools/CayenneGenerator.html">CayenneGenerator</a>
             Java class. 
-            This chapter describes how to use <code>CayenneGen</code> task. For details on 
+            This chapter describes how to use <code>Cgen</code> task. For details on 
             how class generation can be done using GUI see 
             <a href="../modeler/index.html">CayenneModeler chapter</a>.</p>
             
-            <subsection name="4.3.1 CayenneGen" anchor="cayennegen">
+            <subsection name="4.3.1 Cgen (Cayenne Class Generator)" anchor="cayennegen">
 			<h3>Description</h3>
 			
-			<p><code>CayenneGen</code> is an Ant task that generates and maintains DataObjects
+			<p><code>Cgen</code> is an Ant task that generates and maintains DataObjects
 			source files based on Cayenne DataMap. If "makepairs" is set to "true" (default), this task
 			will generate a pair of classes (superclass/subclass) for each ObjEntity in the
 			DataMap. Superclasses should not be changed manually, since they are always 
@@ -89,10 +89,10 @@
 			subclasses and superclasses will be saved in the same directory "src/java/dobj" regardless
 			of their package names:</p>
 <source>
-&amp;lt;taskdef name="cayennegen" classname="org.objectstyle.cayenne.tools.CayenneGenerator"&amp;gt;
+&amp;lt;taskdef name="cgen" classname="org.objectstyle.cayenne.tools.CayenneGenerator"&amp;gt;
      &amp;lt;classpath refid="classpath"/&amp;gt;
 &amp;lt;/taskdef&amp;gt;
-&amp;lt;cayennegen map="src/datamap.xml" destDir="src/java/dobj"/&amp;gt;
+&amp;lt;cgen map="src/datamap.xml" destDir="src/java/dobj"/&amp;gt;
 </source>
 
 			</subsection>
