@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.dba.postgres;
 
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
@@ -63,7 +66,10 @@ import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
  * DbAdapter implementation for <a href="http://www.postgresql.org">PostgreSQL RDBMS</a>.
@@ -78,10 +84,11 @@ test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
 test-postgresql.jdbc.driver = org.postgresql.Driver
 </pre>
  * 
- * @author Dirk Olmes, Holger Hoffstaette
+ * @author Dirk Olmes
+ * @author Holger Hoffstaette
+ * @author Andrus Adamchik
  */
-public class PostgresAdapter extends JdbcAdapter
-{
+public class PostgresAdapter extends JdbcAdapter {
     /**
      * Installs appropriate ExtendedTypes as converters for passing values
      * between JDBC and Java layers.
@@ -91,20 +98,141 @@ public class PostgresAdapter extends JdbcAdapter
 
         // create specially configured CharType handler
         map.registerType(new CharType(true, true));
-        
+
         // create specially configured ByteArrayType handler
         map.registerType(new ByteArrayType(true, true));
     }
-    
 
-	/**
-	 * Adds the CASCADE option to the DROP TABLE clause.
-	 * @see JdbcAdapter#dropTable(DbEntity)
-	 */
-	public String dropTable(DbEntity ent) {
-		return super.dropTable(ent) + " CASCADE";
-	}
-	
+    /**
+     * Customizes table creating procedure for postgres. One difference
+     * with generic implementation is that "bytea" type has no length
+     * unlike similar binary types in other databases.
+     * 
+     * @since 1.0.2
+     */
+    public String createTable(DbEntity ent) {
+
+        // later we may support view creation
+        // for derived DbEntities
+        if (ent instanceof DerivedDbEntity) {
+            throw new CayenneRuntimeException(
+                "Can't create table for derived DbEntity '" + ent.getName() + "'.");
+        }
+
+        StringBuffer buf = new StringBuffer();
+        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
+
+        // columns
+        Iterator it = ent.getAttributes().iterator();
+        boolean first = true;
+        while (it.hasNext()) {
+            if (first) {
+                first = false;
+            } else {
+                buf.append(", ");
+            }
+
+            DbAttribute at = (DbAttribute) it.next();
+
+            // attribute may not be fully valid, do a simple check
+            if (at.getType() == TypesMapping.NOT_DEFINED) {
+                throw new CayenneRuntimeException(
+                    "Undefined type for attribute '"
+                        + ent.getFullyQualifiedName()
+                        + "."
+                        + at.getName()
+                        + "'.");
+            }
+
+            String[] types = externalTypesForJdbcType(at.getType());
+            if (types == null || types.length == 0) {
+                throw new CayenneRuntimeException(
+                    "Undefined type for attribute '"
+                        + ent.getFullyQualifiedName()
+                        + "."
+                        + at.getName()
+                        + "': "
+                        + at.getType());
+            }
+
+            String type = types[0];
+            buf.append(at.getName()).append(' ').append(type);
+
+            // append size and precision (if applicable)
+            if (typeSupportsLength(at.getType())) {
+                int len = at.getMaxLength();
+                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
+
+                // sanity check
+                if (prec > len) {
+                    prec = -1;
+                }
+
+                if (len > 0) {
+                    buf.append('(').append(len);
+
+                    if (prec >= 0) {
+                        buf.append(", ").append(prec);
+                    }
+
+                    buf.append(')');
+                }
+            }
+
+            if (at.isMandatory()) {
+                buf.append(" NOT NULL");
+            } else {
+                buf.append(" NULL");
+            }
+        }
+
+        // primary key clause
+        Iterator pkit = ent.getPrimaryKey().iterator();
+        if (pkit.hasNext()) {
+            if (first)
+                first = false;
+            else
+                buf.append(", ");
+
+            buf.append("PRIMARY KEY (");
+            boolean firstPk = true;
+            while (pkit.hasNext()) {
+                if (firstPk)
+                    firstPk = false;
+                else
+                    buf.append(", ");
+
+                DbAttribute at = (DbAttribute) pkit.next();
+                buf.append(at.getName());
+            }
+            buf.append(')');
+        }
+        buf.append(')');
+        return buf.toString();
+    }
+
+    private boolean typeSupportsLength(int type) {
+        // "bytea" type does not support length
+        String[] externalTypes = externalTypesForJdbcType(type);
+        if (externalTypes != null && externalTypes.length > 0) {
+            for (int i = 0; i < externalTypes.length; i++) {
+                if ("bytea".equalsIgnoreCase(externalTypes[i])) {
+                    return false;
+                }
+            }
+        }
+
+        return TypesMapping.supportsLength(type);
+    }
+
+    /**
+     * Adds the CASCADE option to the DROP TABLE clause.
+     * @see JdbcAdapter#dropTable(DbEntity)
+     */
+    public String dropTable(DbEntity ent) {
+        return super.dropTable(ent) + " CASCADE";
+    }
+
     /**
      * Returns a trimming translator.
      */
@@ -112,10 +240,10 @@ public class PostgresAdapter extends JdbcAdapter
         return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
     }
 
-	/**
-	 * @see JdbcAdapter#createPkGenerator()
-	 */
-	protected PkGenerator createPkGenerator() {
-		return new PostgresPkGenerator();
-	}
+    /**
+     * @see JdbcAdapter#createPkGenerator()
+     */
+    protected PkGenerator createPkGenerator() {
+        return new PostgresPkGenerator();
+    }
 }
