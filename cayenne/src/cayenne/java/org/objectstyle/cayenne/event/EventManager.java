@@ -59,13 +59,15 @@ package org.objectstyle.cayenne.event;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.EventObject;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.Invocation;
 
 /**
  * This class acts as bridge between an Object that wants to inform others about
@@ -77,23 +79,47 @@ import org.apache.log4j.Logger;
  */
 public class EventManager extends Object {
 	private static final Logger log = Logger.getLogger(EventManager.class);
-	private static final EventManager _instance = new EventManager();
+	private static final EventManager _defaultManager = new EventManager();
 
-	private HashMap _subjects;
+	// keeps weak references to subjects
+	private Map _subjects;
 
+	/**
+	 * @HH: writeme!
+	 * @return EventManager
+	 */
 	public static EventManager getDefaultManager() {
-		return _instance;
+		return _defaultManager;
 	}
-	
+
+	/**
+	 * @HH: writeme!
+	 * @return EventManager
+	 */
 	public EventManager() {
 		super();
-		_subjects = new HashMap();
+		_subjects = new WeakHashMap();
 	}
 
-	public void addListener(EventListener listener,
-							String methodName,
-							Class eventParameterClass,
-							EventSubject subject)
+	/**
+	 * @HH: writeme!
+	 */
+	synchronized public void addListener(EventListener listener,
+											String methodName,
+											Class eventParameterClass,
+											EventSubject subject)
+		throws NoSuchMethodException {
+		this.addListener(listener, methodName, eventParameterClass, subject, this);
+	}
+
+	/**
+	 * @HH: writeme!
+	 */
+	synchronized public void addListener(EventListener listener,
+											String methodName,
+											Class eventParameterClass,
+											EventSubject subject,
+											Object sender)
 		throws NoSuchMethodException {
 		if (listener == null) {
 			throw new IllegalArgumentException("listener must not be null");
@@ -109,20 +135,28 @@ public class EventManager extends Object {
 
 		Invocation inv = new Invocation(listener, methodName, eventParameterClass);
 
-		Set listenersForSubject = this.listenersForSubject(subject);
-		if (listenersForSubject == null) {
-			this.addSubject(subject);
-			listenersForSubject = this.listenersForSubject(subject);
+		Map subjectQueues = this.invocationQueuesForSubject(subject);
+		if (subjectQueues == null) {
+			// make sure the subject can be associated with invocation queues
+			subjectQueues = new WeakHashMap();
+			_subjects.put(subject, subjectQueues);
 		}
 
-		listenersForSubject.add(inv);
+		Set queueForSender = this.invocationQueueForSubjectAndSender(subject, sender);
+		if (queueForSender == null) {
+			// create a new listener 'queue'; must keep strong references
+			queueForSender = new HashSet();
+			subjectQueues.put(sender, queueForSender);
+		}
+
+		queueForSender.add(inv);
 	}
 
 	/**
 	 * @return <code>true</code> if <code>listener</code> could be removed for
 	 * all existing subjects, else returns <code>false</code>.
 	 */
-	public boolean removeListener(EventListener listener) {
+	synchronized public boolean removeListener(EventListener listener) {
 		boolean didRemove = false;
 
 		if ((_subjects.isEmpty() == false) && (listener != null)) {
@@ -139,20 +173,27 @@ public class EventManager extends Object {
 	 * @return <code>true</code> if <code>listener</code> could be removed for
 	 * the given subject, else returns <code>false</code>.
 	 */
-	public boolean removeListener(EventListener listener, EventSubject subject) {
+	synchronized public boolean removeListener(EventListener listener,
+												EventSubject subject) {
 		boolean didRemove = false;
 
 		if ((listener != null) && (subject != null)) {
-			Set listenersForSubject = this.listenersForSubject(subject);
-
-			if ((listenersForSubject != null) && (listenersForSubject.isEmpty() == false)) {
-				// remove all invocations with the given target
-				Iterator listenerIter = listenersForSubject.iterator();
-				while (listenerIter.hasNext()) {
-					Invocation inv = (Invocation)listenerIter.next();
-					if (inv.getTarget() == listener) {
-						listenerIter.remove();
-						didRemove = true;
+			Map subjectQueues = this.invocationQueuesForSubject(subject);
+			if (subjectQueues != null) {
+				// iterate over all invocation queues for this subject
+				Iterator queueIter = subjectQueues.values().iterator();
+				while (queueIter.hasNext()) {
+					Set invocations = (Set)queueIter.next();
+					if ((invocations != null) && (invocations.isEmpty() == false)) {
+						// remove all invocations with the given target
+						Iterator invIter = invocations.iterator();
+						while (invIter.hasNext()) {
+							Invocation inv = (Invocation)invIter.next();
+							if (inv.getTarget() == listener) {
+								invIter.remove();
+								didRemove = true;
+							}
+						}
 					}
 				}
 			}
@@ -161,60 +202,79 @@ public class EventManager extends Object {
 		return didRemove;
 	}
 
-	public void postEvent(EventObject event, EventSubject subject) {
-		// get current listeners for subject
-		Set listenersForSubject = this.listenersForSubject(subject);
+	/**
+	 * @HH: writeme!
+	 */
+	synchronized public void postEvent(EventObject event, EventSubject subject) {
+		if (event == null) {
+			throw new IllegalArgumentException("event must not be null");
+		}
 
-		if ((listenersForSubject != null) && (listenersForSubject.isEmpty() == false)) {
-			// used to collect all invalid invocations in order to remove
-			// them at the end of this posting cycle
-			List invalidInvocations = null;
-			Object[] eventArgument = new Object[]{event};
-			Iterator iter = listenersForSubject.iterator();
-			while (iter.hasNext()) {
-				Invocation inv = (Invocation)iter.next();
-				Class[] invParamTypes = inv.getParameterTypes();
+		if (subject == null) {
+			throw new IllegalArgumentException("subject must not be null");
+		}
 
-				// we only process event listeners which take exactly
-				// one argument in their registered methods: the passed
-				// event or a valid subclass thereof
-				if ((invParamTypes != null)
-					&& (invParamTypes.length == 1)
-					&& (invParamTypes[0].isAssignableFrom(event.getClass()))) {
-					// fire invocation, detect if anything went wrong
-					// (e.g. GC'ed invocation targets)
-					if (inv.fire(eventArgument) == false) {
-						if (invalidInvocations == null) {
-							invalidInvocations = new ArrayList();
-						}
+		// collect listener invocations for subject
+		Set specificInvocations = this.invocationQueueForSubjectAndSender(subject, event.getSource());
+		Set defaultInvocations = this.invocationQueueForSubjectAndSender(subject, this);
+		Set[] invocationQueues = new Set[]{specificInvocations, defaultInvocations};
+		Object[] eventArgument = new Object[]{event};
+
+		for (int i = 0; i < invocationQueues.length; i++) {
+			Set currentQueue = invocationQueues[i];
+			if ((currentQueue != null) && (currentQueue.isEmpty() == false)) {
+				// used to collect all invalid invocations in order to remove
+				// them at the end of this posting cycle
+				List invalidInvocations = null;
+				Iterator iter = currentQueue.iterator();
+				while (iter.hasNext()) {
+					Invocation inv = (Invocation)iter.next();
+					Class[] invParamTypes = inv.getParameterTypes();
 	
-						invalidInvocations.add(inv);
+					// we only process event listeners which take exactly
+					// one argument in their registered methods: the passed
+					// event or a valid subclass thereof
+					if ((invParamTypes != null)
+						&& (invParamTypes.length == 1)
+						&& (invParamTypes[0].isAssignableFrom(event.getClass()))) {
+						// fire invocation, detect if anything went wrong
+						// (e.g. GC'ed invocation targets)
+						if (inv.fire(eventArgument) == false) {
+							if (invalidInvocations == null) {
+								invalidInvocations = new ArrayList();
+							}
+		
+							invalidInvocations.add(inv);
+						}
 					}
 				}
-			}
-
-			// clear out all invalid invocations
-			if (invalidInvocations != null) {
-				listenersForSubject.removeAll(invalidInvocations);
+	
+				// clear out all invalid invocations
+				if (invalidInvocations != null) {
+					currentQueue.removeAll(invalidInvocations);
+				}
 			}
 		}
 	}
 
-	// register a new subject and a corresponding listener queue
-	private void addSubject(EventSubject subject) {
-		// make sure we don't add a subject twice, losing the old observers
-		if (_subjects.get(subject) == null) {
-			_subjects.put(subject, new HashSet());
+	private Map invocationQueuesForSubject(EventSubject subject) {
+		return (Map)_subjects.get(subject);
+	}
+
+	private Set invocationQueueForSubjectAndSender(EventSubject subject, Object sender) {
+		if (sender == null) {
+			sender = this;
 		}
+
+		Map subjectEntries = this.invocationQueuesForSubject(subject);
+		Set queue = null;
+
+		if (subjectEntries != null) {
+			queue = (Set)subjectEntries.get(sender);
+		}
+
+		return queue;
 	}
 
-	// remove a subject and its listener queue
-	private void removeSubject(EventSubject subject) {
-		_subjects.remove(subject);
-	}
-
-	// return all registered listeners (Invocations) for the subject
-	private Set listenersForSubject(EventSubject subject) {
-		return (Set)_subjects.get(subject);
-	}
 }
+
