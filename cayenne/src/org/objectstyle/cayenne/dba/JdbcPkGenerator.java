@@ -307,7 +307,7 @@ public class JdbcPkGenerator implements PkGenerator {
      * any significant performance increase. Therefore it does
      * not make sense to use bigger values, since this may 
      * potentially create big gaps in the database primary
-     * key sequences in cases like server crashes or restarts.
+     * key sequences in cases like application crashes or restarts.
      * </i></p>
      */
     public void setPkCacheSize(int pkCacheSize) {
