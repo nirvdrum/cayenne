@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -64,6 +68,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.util.PropertyComparator;
 import org.scopemvc.core.IntIndexSelector;
 import org.scopemvc.core.ModelChangeEvent;
 import org.scopemvc.core.Selector;
@@ -82,15 +87,30 @@ public class MapObjRelationshipModel extends BasicModel {
         Selector.fromString("dbRelationshipPath");
     public static final Selector RELATIONSHIP_SELECTOR =
         Selector.fromString("relationship");
+    public static final Selector RELATIONSHIP_DESCRIPTION_SELECTOR =
+        Selector.fromString("relationshipDescription");
     public static final Selector SELECTED_PATH_COMPONENT_SELECTOR =
         Selector.fromString("selectedPathComponent");
+    public static final Selector OBJECT_TARGET_SELECTOR =
+        Selector.fromString("objectTarget");
+    public static final Selector OBJECT_TARGETS_SELECTOR =
+        Selector.fromString("objectTargets");
 
     protected ObjRelationship relationship;
     protected ListModel dbRelationshipPath;
     protected EntityRelationshipsModel selectedPathComponent;
+    protected ObjEntity objectTarget;
+    protected List objectTargets;
 
-    public MapObjRelationshipModel(ObjRelationship relationship) {
+    public MapObjRelationshipModel(
+        ObjRelationship relationship,
+        Collection objEntities) {
         this.relationship = relationship;
+        this.objectTarget = (ObjEntity) relationship.getTargetEntity();
+
+        // prepare entities - create a copy and sort
+        this.objectTargets = new ArrayList(objEntities);
+        Collections.sort(objectTargets, new PropertyComparator("name", ObjEntity.class));
 
         // validate -
         // current limitation is that an ObjRelationship must have source 
@@ -115,6 +135,13 @@ public class MapObjRelationshipModel extends BasicModel {
         return relationship;
     }
 
+    public String getRelationshipDescription() {
+        return EntityRelationshipsModel.displayName(
+            relationship.getName(),
+            relationship.getSourceEntity(),
+            objectTarget);
+    }
+
     public ListModel getDbRelationshipPath() {
         return dbRelationshipPath;
     }
@@ -125,11 +152,38 @@ public class MapObjRelationshipModel extends BasicModel {
 
     public void setSelectedPathComponent(EntityRelationshipsModel selectedPathComponent) {
         if (this.selectedPathComponent != selectedPathComponent) {
+            unlistenOldSubmodel(SELECTED_PATH_COMPONENT_SELECTOR);
             this.selectedPathComponent = selectedPathComponent;
+            listenNewSubmodel(SELECTED_PATH_COMPONENT_SELECTOR);
             fireModelChange(
                 ModelChangeEvent.VALUE_CHANGED,
                 SELECTED_PATH_COMPONENT_SELECTOR);
         }
+    }
+
+    public ObjEntity getObjectTarget() {
+        return objectTarget;
+    }
+
+    public void setObjectTarget(ObjEntity objectTarget) {
+        if (this.objectTarget != objectTarget) {
+            unlistenOldSubmodel(OBJECT_TARGET_SELECTOR);
+            this.objectTarget = objectTarget;
+            listenNewSubmodel(OBJECT_TARGET_SELECTOR);
+            fireModelChange(ModelChangeEvent.VALUE_CHANGED, OBJECT_TARGET_SELECTOR);
+
+            // "description" is a derived property, so fire it too
+            fireModelChange(
+                ModelChangeEvent.VALUE_CHANGED,
+                RELATIONSHIP_DESCRIPTION_SELECTOR);
+        }
+    }
+
+    /**
+     * Returns a list of ObjEntities available for target mapping.
+     */
+    public List getObjectTargets() {
+        return objectTargets;
     }
 
     public void modelChanged(ModelChangeEvent event) {
@@ -249,6 +303,6 @@ public class MapObjRelationshipModel extends BasicModel {
     }
 
     public DbEntity getEndEntity() {
-        return ((ObjEntity) relationship.getTargetEntity()).getDbEntity();
+        return objectTarget.getDbEntity();
     }
 }

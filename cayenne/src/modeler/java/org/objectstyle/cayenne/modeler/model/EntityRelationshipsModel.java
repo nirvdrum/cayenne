@@ -86,7 +86,7 @@ public class EntityRelationshipsModel extends BasicModel {
     protected String defaultTargetName;
     protected Object[] relationshipNames;
 
-    private static String nameFromDisplayName(String displayName) {
+    static String nameFromDisplayName(String displayName) {
         if (displayName == null) {
             return null;
         }
@@ -96,17 +96,18 @@ public class EntityRelationshipsModel extends BasicModel {
             : displayName;
     }
 
-    private static String displayNameFromName(Relationship relationship) {
+    static String displayName(Relationship relationship) {
         if (relationship == null) {
             return null;
         }
+        return displayName(
+            relationship.getName(),
+            relationship.getSourceEntity(),
+            relationship.getTargetEntity());
+    }
 
-        return relationship.getName()
-            + " ["
-            + relationship.getSourceEntity().getName()
-            + " -> "
-            + relationship.getTargetEntityName()
-            + "]";
+    static String displayName(String name, Entity source, Entity target) {
+        return name + " [" + source.getName() + " -> " + target.getName() + "]";
     }
 
     /**
@@ -124,7 +125,7 @@ public class EntityRelationshipsModel extends BasicModel {
      */
     public EntityRelationshipsModel(Relationship relationship) {
         this.sourceEntity = relationship.getSourceEntity();
-        this.relationshipDisplayName = displayNameFromName(relationship);
+        this.relationshipDisplayName = displayName(relationship);
     }
 
     public synchronized Object[] getRelationshipNames() {
@@ -138,7 +139,7 @@ public class EntityRelationshipsModel extends BasicModel {
             Iterator it = relationships.iterator();
             for (int i = 0; i < size; i++) {
                 DbRelationship next = (DbRelationship) it.next();
-                names[i] = displayNameFromName(next);
+                names[i] = displayName(next);
             }
             Arrays.sort(names);
             this.relationshipNames = names;
@@ -175,7 +176,7 @@ public class EntityRelationshipsModel extends BasicModel {
 
     public void setRelationshipName(String relationshipName) {
         setRelationshipDisplayName(
-            displayNameFromName(sourceEntity.getRelationship(relationshipName)));
+            displayName(sourceEntity.getRelationship(relationshipName)));
     }
 
     public Relationship getSelectedRelationship() {

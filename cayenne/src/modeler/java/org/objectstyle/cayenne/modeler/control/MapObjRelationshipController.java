@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
@@ -95,7 +96,9 @@ public class MapObjRelationshipController extends BasicController {
         ObjRelationship relationship) {
 
         this.mediator = mediator;
-        MapObjRelationshipModel model = new MapObjRelationshipModel(relationship);
+        Collection objEntities = mediator.getCurrentDataMap().getObjEntities(true);
+        MapObjRelationshipModel model =
+            new MapObjRelationshipModel(relationship, objEntities);
         setModel(model);
     }
 

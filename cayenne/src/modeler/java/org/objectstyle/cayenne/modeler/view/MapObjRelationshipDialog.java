@@ -76,7 +76,9 @@ import org.objectstyle.cayenne.modeler.model.MapObjRelationshipModel;
 import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
+import org.scopemvc.view.swing.SComboBox;
 import org.scopemvc.view.swing.SLabel;
+import org.scopemvc.view.swing.SListCellRenderer;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STable;
 import org.scopemvc.view.swing.STableModel;
@@ -121,23 +123,21 @@ public class MapObjRelationshipDialog extends SPanel {
         SLabel objRelationshipLabel = new SLabel();
         Font boldFont = objRelationshipLabel.getFont().deriveFont(Font.BOLD);
         objRelationshipLabel.setFont(boldFont);
-        objRelationshipLabel.setSelector("relationship.name");
+        objRelationshipLabel.setSelector(
+            MapObjRelationshipModel.RELATIONSHIP_DESCRIPTION_SELECTOR);
 
-        SLabel srcEntityLabel = new SLabel();
-        srcEntityLabel.setFont(boldFont);
-        srcEntityLabel.setSelector("relationship.sourceEntity.name");
-
-        SLabel targetEntityLabel = new SLabel();
-        targetEntityLabel.setFont(boldFont);
-        targetEntityLabel.setSelector("relationship.targetEntity.name");
+        SComboBox targetCombo = new SComboBox();
+        targetCombo.setSelector(MapObjRelationshipModel.OBJECT_TARGETS_SELECTOR);
+        targetCombo.setSelectionSelector(MapObjRelationshipModel.OBJECT_TARGET_SELECTOR);
+        SListCellRenderer renderer = (SListCellRenderer) targetCombo.getRenderer();
+        renderer.setTextSelector("name");
 
         DefaultFormBuilder builder =
             new DefaultFormBuilder(
                 new FormLayout("right:max(50dlu;pref), 3dlu, left:max(180dlu;pref)", ""));
         builder.setDefaultDialogBorder();
         builder.append("ObjRelationship:", objRelationshipLabel);
-        builder.append("Source ObjEntity:", srcEntityLabel);
-        builder.append("Target ObjEntity:", targetEntityLabel);
+        builder.append("Target ObjEntity:", targetCombo);
 
         pathTable = new ObjRelationshipPathTable();
         STableModel pathTableModel = new STableModel(pathTable);
@@ -156,7 +156,7 @@ public class MapObjRelationshipDialog extends SPanel {
         // assemble
         setDisplayMode(SwingView.MODAL_DIALOG);
         setTitle("Map ObjRelationship");
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(5, 5));
 
         add(builder.getPanel(), BorderLayout.NORTH);
         add(new JScrollPane(pathTable), BorderLayout.CENTER);
@@ -195,7 +195,7 @@ public class MapObjRelationshipDialog extends SPanel {
     }
 
     class ObjRelationshipPathTable extends STable {
-        final Dimension preferredSize = new Dimension(300, 300);
+        final Dimension preferredSize = new Dimension(300, 100);
 
         ObjRelationshipPathTable() {
             setRowHeight(25);
