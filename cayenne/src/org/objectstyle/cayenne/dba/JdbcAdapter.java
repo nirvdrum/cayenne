@@ -82,7 +82,7 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /** 
-     * Creates and returns primary key generator. This factory
+     * Creates and returns a primary key generator. This factory
      * method should be overriden by JdbcAdapter subclasses to
      * provide custom implementations of PKGenerator. 
      */

@@ -67,7 +67,8 @@ import org.objectstyle.cayenne.query.*;
 
 
 /** 
- * Default primary key generator implementation. 
+ * Default primary key generator implementation. Uses a lookup table named
+ * "AUTO_PK_SUPPORT" to search and increment primary keys for tables.  
  * 
  * @author Andrei Adamchik
  */
