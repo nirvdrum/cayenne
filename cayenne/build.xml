@@ -156,6 +156,12 @@
             <metainf dir="doc" includes="LICENSE"/>
             <manifest>
                <attribute name="Built-By" value="${user.name}"/>
+               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
+               <attribute name="Specification-Version" value="${project.name}"/>
+               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
+               <attribute name="Implementation-Version" value="${project.version}"/>
+               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
             </manifest>
         </jar>
     </target>
@@ -179,6 +185,12 @@
             
             <manifest>
                <attribute name="Built-By" value="${user.name}"/>
+               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
+               <attribute name="Specification-Version" value="${project.name}"/>
+               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
+               <attribute name="Implementation-Version" value="${project.version}-dep"/>
+               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
             </manifest>
         </jar>
     </target>
