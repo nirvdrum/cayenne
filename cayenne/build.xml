@@ -43,7 +43,8 @@
      * 10. test         - runs JUnit tests
      * 11. performance  - runs performance tests
      * 12. regression   - runs regression test application
-     * 13. help         - prints this message
+	 * 13. pdf          - builds PDF documentation
+     * 14. help         - prints this message
      *
      *
      * ENVIRONMENT:
@@ -191,6 +192,13 @@
     <!-- ========================================== -->
     <target name="api" description="builds Javdoc API documentation.">
 		<ant antfile="build-cayenne.xml" target="api"/>
+    </target> 
+	
+	 <!-- ========================================== -->
+    <!-- Builds PDF documenatation.                 -->
+    <!-- ========================================== -->
+    <target name="pdf" description="builds PDF documentation.">
+		<ant antfile="build-fop.xml"/>
     </target> 
 </project>
 
