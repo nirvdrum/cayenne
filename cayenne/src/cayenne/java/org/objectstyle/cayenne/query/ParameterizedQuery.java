@@ -55,84 +55,22 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
+import java.util.Map;
 
 /**
- * Defining a generic selecting or updating query that can be executed in Cayenne.
+ * Defines a query that can serve as a template for other queries. ParameterizedQuery
+ * interface is used mainly in DataContext convenience methods, simplifying execution of
+ * the mapped queries.
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public interface Query {
-
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+public interface ParameterizedQuery extends Query {
 
     /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
+     * Creates a new query based on current query as a template, and using a Map of named
+     * parameters. In case of select queries, it is up to the implementing query to name
+     * the new query to avoid cache key conflicts.
      */
-    public static final int SELECT_QUERY = 1;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int INSERT_QUERY = 2;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int UPDATE_QUERY = 3;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int DELETE_QUERY = 4;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int UNKNOWN_QUERY = 5;
-
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    public String getName();
-
-    /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    public void setName(String name);
-
-    /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
-     */
-    public Level getLoggingLevel();
-
-    public void setLoggingLevel(Level level);
-
-    /**
-     * Returns one of the values: SELECT_QUERY, INSERT_QUERY, UPDATE_QUERY, DELETE_QUERY
-     * 
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public int getQueryType();
-
-    /**
-     * Returns the root object of this query. Might be a String, ObjEntity, DbEntity or
-     * Class, depending on the query in question
-     * 
-     * @return Object
-     */
-    public Object getRoot();
-
-    /**
-     * Sets the root of the query.
-     * 
-     * @param value The new root
-     */
-    public void setRoot(Object value);
+    public Query createQuery(Map parameters);
 }

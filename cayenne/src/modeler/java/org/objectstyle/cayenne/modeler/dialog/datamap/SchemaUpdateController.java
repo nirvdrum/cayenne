@@ -59,7 +59,9 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Control;
@@ -103,9 +105,10 @@ public class SchemaUpdateController extends DefaultsPreferencesController {
         boolean doAll = ((DefaultsPreferencesModel) getModel()).isAllEntities();
         String defaultSchema = dataMap.getDefaultSchema();
 
-        Iterator it = dataMap.getDbEntities().iterator();
-        while (it.hasNext()) {
-            DbEntity entity = (DbEntity) it.next();
+        // set schema for DbEntities
+        Iterator dbEntities = dataMap.getDbEntities().iterator();
+        while (dbEntities.hasNext()) {
+            DbEntity entity = (DbEntity) dbEntities.next();
             if (doAll || Util.isEmptyString(entity.getSchema())) {
                 if (!Util.nullSafeEquals(defaultSchema, entity.getSchema())) {
                     entity.setSchema(defaultSchema);
@@ -117,6 +120,20 @@ public class SchemaUpdateController extends DefaultsPreferencesController {
             }
         }
 
+        // set schema for procedures...
+        Iterator procedures = dataMap.getProcedures().iterator();
+        while (procedures.hasNext()) {
+            Procedure procedure = (Procedure) procedures.next();
+            if (doAll || Util.isEmptyString(procedure.getSchema())) {
+                if (!Util.nullSafeEquals(defaultSchema, procedure.getSchema())) {
+                    procedure.setSchema(defaultSchema);
+
+                    // any way to batch events, a big change will flood the app with
+                    // procedure events..?
+                    mediator.fireProcedureEvent(new ProcedureEvent(this, procedure));
+                }
+            }
+        }
         shutdown();
     }
 }

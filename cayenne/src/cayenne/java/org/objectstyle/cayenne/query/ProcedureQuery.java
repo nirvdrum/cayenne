@@ -92,7 +92,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  */
 public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
-        XMLSerializable {
+        ParameterizedQuery, XMLSerializable {
 
     /**
      * If set, allows to fetch results as DataObjects.
@@ -206,6 +206,32 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
 
         encoder.indent(-1);
         encoder.println("</query>");
+    }
+
+    /**
+     * Creates and returns a new ProcedureQuery built using this query as a prototype and
+     * substituting template parameters with the values from the map.
+     * 
+     * @since 1.1
+     */
+    public Query createQuery(Map parameters) {
+        // create a query replica
+        ProcedureQuery query = new ProcedureQuery();
+
+        if (root != null) {
+            query.setRoot(root);
+        }
+
+        query.setLoggingLevel(logLevel);
+        query.setResultType(resultType);
+
+        selectProperties.copyToProperties(query.selectProperties);
+        query.setParameters(parameters);
+
+        // TODO: implement algorithm for building the name based on the original name and
+        // the hashcode of the map of parameters. This way query clone can take advantage
+        // of caching.
+        return query;
     }
 
     public String getCachePolicy() {

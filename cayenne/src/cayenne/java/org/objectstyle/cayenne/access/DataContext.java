@@ -98,47 +98,47 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.ParameterizedQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
-/** 
- * Class that provides applications with access to Cayenne persistence features. 
- * In most cases this is the only access class directly used in the application.
- * 
+/**
+ * Class that provides applications with access to Cayenne persistence features. In most
+ * cases this is the only access class directly used in the application.
  * <p>
- * Most common DataContext use pattern is to create one DataContext per session. 
- * "Session" may be a an HttpSesession in a web application, or any other similar 
- * concept in a multiuser application.
+ * Most common DataContext use pattern is to create one DataContext per session. "Session"
+ * may be a an HttpSesession in a web application, or any other similar concept in a
+ * multiuser application.
+ * </p>
+ * <p>
+ * DataObjects are registered with DataContext either implicitly when they are fetched via
+ * a query, or read via a relationship from another object, or explicitly via calling
+ * {@link #createAndRegisterNewObject(Class)}during new DataObject creation. DataContext
+ * tracks changes made to its DataObjects in memory, and flushes them to the database when
+ * {@link #commitChanges()}is called. Until DataContext is committed, changes made to its
+ * objects are not visible in other DataContexts.
+ * </p>
+ * <p>
+ * Each DataObject can belong only to a single DataContext. To create a replica of an
+ * object from a different DataContext in a local context, use
+ * {@link #localObjects(java.util.List)}method.
+ * <p>
+ * <i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide. </a> </i>
+ * </p>
  * 
- * </p><p>
- * DataObjects are registered with DataContext either implicitly when they are 
- * fetched via a query, or read via a relationship from another object, 
- * or explicitly via calling {@link #createAndRegisterNewObject(Class)} during 
- * new DataObject creation. DataContext tracks changes made to its DataObjects in memory, 
- * and flushes them to the database when {@link #commitChanges()} is called. Until 
- * DataContext is committed, changes made to its objects are not visible in other 
- * DataContexts.</p><p>
- * 
- * Each DataObject can belong only to a single DataContext. To create a replica of an object
- * from a different DataContext in a local context, use {@link #localObjects(java.util.List)} 
- * method.
- *
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- *
  * @author Andrei Adamchik
  */
 public class DataContext implements QueryEngine, Serializable {
 
-    // noop delegate 
-    private static final DataContextDelegate defaultDelegate =
-        new DataContextDelegate() {
+    // noop delegate
+    private static final DataContextDelegate defaultDelegate = new DataContextDelegate() {
 
         public GenericSelectQuery willPerformSelect(
-            DataContext context,
-            GenericSelectQuery query) {
+                DataContext context,
+                GenericSelectQuery query) {
             return query;
         }
 
@@ -160,12 +160,15 @@ public class DataContext implements QueryEngine, Serializable {
     };
 
     // DataContext events
-    public static final EventSubject WILL_COMMIT =
-        EventSubject.getSubject(DataContext.class, "DataContextWillCommit");
-    public static final EventSubject DID_COMMIT =
-        EventSubject.getSubject(DataContext.class, "DataContextDidCommit");
-    public static final EventSubject DID_ROLLBACK =
-        EventSubject.getSubject(DataContext.class, "DataContextDidRollback");
+    public static final EventSubject WILL_COMMIT = EventSubject.getSubject(
+            DataContext.class,
+            "DataContextWillCommit");
+    public static final EventSubject DID_COMMIT = EventSubject.getSubject(
+            DataContext.class,
+            "DataContextDidCommit");
+    public static final EventSubject DID_ROLLBACK = EventSubject.getSubject(
+            DataContext.class,
+            "DataContextDidRollback");
 
     // event posting default for new DataContexts
     private static boolean transactionEventsEnabledDefault;
@@ -183,29 +186,29 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient QueryEngine parent;
 
     /**
-     * Stores the name of parent DataDomain. Used to defer initialization 
-     * of the parent QueryEngine after deserialization. This helps
-     * avoid an issue with certain servlet engines (e.g. Tomcat) where
-     * HttpSessions with DataContext's are deserialized at startup
-     * before Cayenne stack is fully initialized.
+     * Stores the name of parent DataDomain. Used to defer initialization of the parent
+     * QueryEngine after deserialization. This helps avoid an issue with certain servlet
+     * engines (e.g. Tomcat) where HttpSessions with DataContext's are deserialized at
+     * startup before Cayenne stack is fully initialized.
      */
     protected transient String lazyInitParentDomainName;
 
     /**
-      * A factory method of DataObjects. Uses Configuration ClassLoader to
-      * instantiate a new instance of DataObject of a given class.
-      */
+     * A factory method of DataObjects. Uses Configuration ClassLoader to instantiate a
+     * new instance of DataObject of a given class.
+     */
     private static final DataObject newDataObject(String className) throws Exception {
         return (DataObject) Configuration
-            .getResourceLoader()
-            .loadClass(className)
-            .newInstance();
+                .getResourceLoader()
+                .loadClass(className)
+                .newInstance();
     }
 
     /**
-     * Factory method that creates and returns a new instance of DataContext based on default domain. If more
-     * than one domain exists in the current configuration, {@link #createDataContext(String)
-     * createDataContext(String domainName)} must be used instead.
+     * Factory method that creates and returns a new instance of DataContext based on
+     * default domain. If more than one domain exists in the current configuration,
+     * {@link #createDataContext(String)createDataContext(String domainName)}must be used
+     * instead.
      */
     public static DataContext createDataContext() {
         return Configuration.getSharedConfiguration().getDomain().createDataContext();
@@ -216,13 +219,13 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public static DataContext createDataContext(boolean useSharedCache) {
         return Configuration.getSharedConfiguration().getDomain().createDataContext(
-            useSharedCache);
+                useSharedCache);
     }
 
     /**
-     * Factory method that creates and returns a new instance of DataContext using named 
-     * domain as its parent. If there is no domain matching the name argument, an exception 
-     * is thrown.
+     * Factory method that creates and returns a new instance of DataContext using named
+     * domain as its parent. If there is no domain matching the name argument, an
+     * exception is thrown.
      */
     public static DataContext createDataContext(String domainName) {
         DataDomain domain = Configuration.getSharedConfiguration().getDomain(domainName);
@@ -235,9 +238,7 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * @since 1.1
      */
-    public static DataContext createDataContext(
-        String domainName,
-        boolean useSharedCache) {
+    public static DataContext createDataContext(String domainName, boolean useSharedCache) {
 
         DataDomain domain = Configuration.getSharedConfiguration().getDomain(domainName);
         if (domain == null) {
@@ -247,17 +248,17 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Default constructor that creates a DataContext that has no
-     * association with a DataDomain. 
+     * Default constructor that creates a DataContext that has no association with a
+     * DataDomain.
      */
     public DataContext() {
         this(null, null);
     }
 
     /**
-     * Creates new DataContext and initializes it with the parent QueryEngine. 
-     * Normally parent is an instance of DataDomain. DataContext will use parent
-     * to execute database queries, updates, and access mapping information.
+     * Creates new DataContext and initializes it with the parent QueryEngine. Normally
+     * parent is an instance of DataDomain. DataContext will use parent to execute
+     * database queries, updates, and access mapping information.
      * 
      * @deprecated since 1.1 use {@link #DataContext(QueryEngine, ObjectStore)}
      */
@@ -274,8 +275,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Creates a DataContext with parent QueryEngine and a DataRowStore that 
-     * should be used by the ObjectStore.
+     * Creates a DataContext with parent QueryEngine and a DataRowStore that should be
+     * used by the ObjectStore.
      * 
      * @since 1.1
      * @param parent parent QueryEngine used to communicate with the data source.
@@ -297,8 +298,7 @@ public class DataContext implements QueryEngine, Serializable {
     private final void awakeFromDeserialization() {
         if (parent == null && lazyInitParentDomainName != null) {
 
-            DataDomain domain =
-                Configuration.getSharedConfiguration().getDomain(
+            DataDomain domain = Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName);
 
             this.parent = domain;
@@ -309,9 +309,9 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** 
-     * Returns parent QueryEngine object. In most cases returned object
-     * is an instance of DataDomain.
+    /**
+     * Returns parent QueryEngine object. In most cases returned object is an instance of
+     * DataDomain.
      */
     public QueryEngine getParent() {
         awakeFromDeserialization();
@@ -319,15 +319,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * <i>
-     * Note: currently nested DataContexts are not supported,
-     * so this method simply calls "getParent()". Using this method is preferrable
-     * to calling "getParent()" directly and casting it to DataDomain, since it more
-     * likely to be compatible with the future releases of Cayenne.</i>
+     * <i>Note: currently nested DataContexts are not supported, so this method simply
+     * calls "getParent()". Using this method is preferrable to calling "getParent()"
+     * directly and casting it to DataDomain, since it more likely to be compatible with
+     * the future releases of Cayenne. </i>
      * 
-     * @return DataDomain that is a direct or indirect parent
-     * of this DataContext.
-     * 
+     * @return DataDomain that is a direct or indirect parent of this DataContext.
      * @since 1.1
      */
     public DataDomain getParentDataDomain() {
@@ -342,9 +339,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Sets a DataContextDelegate for this context. Delegate
-     * is notified of certain events in the DataContext lifecycle
-     * and can customize DataContext behavior.
+     * Sets a DataContextDelegate for this context. Delegate is notified of certain events
+     * in the DataContext lifecycle and can customize DataContext behavior.
      * 
      * @since 1.1
      */
@@ -362,10 +358,9 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @return a delegate instance if it is initialized, or a shared
-     * noop implementation the context has no delegate. Useful to prevent
-     * extra null checks and conditional logic in the code.
-     * 
+     * @return a delegate instance if it is initialized, or a shared noop implementation
+     *         the context has no delegate. Useful to prevent extra null checks and
+     *         conditional logic in the code.
      * @since 1.1
      */
     DataContextDelegate nonNullDelegate() {
@@ -381,40 +376,41 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns <code>true</code> if there are any modified,
-     * deleted or new objects registered with this DataContext,
-     * <code>false</code> otherwise.
+     * Returns <code>true</code> if there are any modified, deleted or new objects
+     * registered with this DataContext, <code>false</code> otherwise.
      */
     public boolean hasChanges() {
         return getObjectStore().hasChanges();
     }
 
-    /** Returns a list of objects that are registered
-     *  with this DataContext and have a state PersistenceState.NEW
+    /**
+     * Returns a list of objects that are registered with this DataContext and have a
+     * state PersistenceState.NEW
      */
     public Collection newObjects() {
         return getObjectStore().objectsInState(PersistenceState.NEW);
     }
 
-    /** Returns a list of objects that are registered
-     *  with this DataContext and have a state PersistenceState.DELETED
+    /**
+     * Returns a list of objects that are registered with this DataContext and have a
+     * state PersistenceState.DELETED
      */
     public Collection deletedObjects() {
         return getObjectStore().objectsInState(PersistenceState.DELETED);
     }
 
-    /** Returns a list of objects that are registered
-     *  with this DataContext and have a state PersistenceState.MODIFIED
+    /**
+     * Returns a list of objects that are registered with this DataContext and have a
+     * state PersistenceState.MODIFIED
      */
     public Collection modifiedObjects() {
         return getObjectStore().objectsInState(PersistenceState.MODIFIED);
     }
 
     /**
-     * Returns an object for a given ObjectId.
-     * If object is not registered with this context,
-     * a "hollow" object fault is created, registered, 
-     * and returned to the caller.
+     * Returns an object for a given ObjectId. If object is not registered with this
+     * context, a "hollow" object fault is created, registered, and returned to the
+     * caller.
      */
     public DataObject registeredObject(ObjectId oid) {
         // must synchronize on ObjectStore since we must read and write atomically
@@ -425,15 +421,11 @@ public class DataContext implements QueryEngine, Serializable {
                     obj = DataContext.newDataObject(oid.getObjClass().getName());
                 }
                 catch (Exception ex) {
-                    String entity =
-                        (oid != null)
-                            ? getEntityResolver()
-                                .lookupObjEntity(oid.getObjClass())
-                                .getName()
-                            : null;
+                    String entity = (oid != null) ? getEntityResolver().lookupObjEntity(
+                            oid.getObjClass()).getName() : null;
                     throw new CayenneRuntimeException(
-                        "Error creating object for entity '" + entity + "'.",
-                        ex);
+                            "Error creating object for entity '" + entity + "'.",
+                            ex);
                 }
 
                 obj.setObjectId(oid);
@@ -455,7 +447,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         // for a HOLLOW object return snapshot from cache
         if (anObject.getPersistenceState() == PersistenceState.HOLLOW
-            && anObject.getDataContext() != null) {
+                && anObject.getDataContext() != null) {
 
             ObjectId id = anObject.getObjectId();
             return getObjectStore().getSnapshot(id, this);
@@ -469,9 +461,8 @@ public class DataContext implements QueryEngine, Serializable {
             String attrName = (String) it.next();
             ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
             //processing compound attributes correctly
-            snapshot.put(
-                objAttr.getDbAttributePath(),
-                anObject.readPropertyDirectly(attrName));
+            snapshot.put(objAttr.getDbAttributePath(), anObject
+                    .readPropertyDirectly(attrName));
         }
 
         Map relMap = entity.getRelationshipMap();
@@ -493,13 +484,14 @@ public class DataContext implements QueryEngine, Serializable {
             // if target is Fault, get id attributes from stored snapshot
             // to avoid unneeded fault triggering
             if (targetObject instanceof Fault) {
-                DataRow storedSnapshot =
-                    getObjectStore().getSnapshot(anObject.getObjectId(), this);
+                DataRow storedSnapshot = getObjectStore().getSnapshot(
+                        anObject.getObjectId(),
+                        this);
                 if (storedSnapshot == null) {
                     throw new CayenneRuntimeException(
-                        "No matching objects found for ObjectId "
-                            + anObject.getObjectId()
-                            + ". Object may have been deleted externally.");
+                            "No matching objects found for ObjectId "
+                                    + anObject.getObjectId()
+                                    + ". Object may have been deleted externally.");
                 }
 
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
@@ -513,7 +505,7 @@ public class DataContext implements QueryEngine, Serializable {
                 continue;
             }
 
-            // target is resolved regular to-one, so extract 
+            // target is resolved regular to-one, so extract
             // FK from PK of the target object
             DataObject target = (DataObject) targetObject;
             Map idParts = target.getObjectId().getIdSnapshot();
@@ -546,8 +538,8 @@ public class DataContext implements QueryEngine, Serializable {
         return snapshot;
     }
 
-    /** 
-     * Takes a snapshot of current object state. 
+    /**
+     * Takes a snapshot of current object state.
      * 
      * @deprecated Since 1.1 use "currentSnapshot"
      */
@@ -556,9 +548,9 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Creates a list of DataObjects local to this DataContext from a list 
-     * of DataObjects coming from a different DataContext. Note that all objects
-     * in the source list must be either in COMMITTED or in HOLLOW state.
+     * Creates a list of DataObjects local to this DataContext from a list of DataObjects
+     * coming from a different DataContext. Note that all objects in the source list must
+     * be either in COMMITTED or in HOLLOW state.
      * 
      * @since 1.0.3
      */
@@ -571,18 +563,17 @@ public class DataContext implements QueryEngine, Serializable {
 
             // sanity check
             if (object.getPersistenceState() != PersistenceState.COMMITTED
-                && object.getPersistenceState() != PersistenceState.HOLLOW) {
+                    && object.getPersistenceState() != PersistenceState.HOLLOW) {
                 throw new CayenneRuntimeException(
-                    "Only COMMITTED and HOLLOW objects can be transferred between contexts. "
-                        + "Invalid object state '"
-                        + PersistenceState.persistenceStateName(
-                            object.getPersistenceState())
-                        + "', ObjectId: "
-                        + object.getObjectId());
+                        "Only COMMITTED and HOLLOW objects can be transferred between contexts. "
+                                + "Invalid object state '"
+                                + PersistenceState.persistenceStateName(object
+                                        .getPersistenceState())
+                                + "', ObjectId: "
+                                + object.getObjectId());
             }
 
-            DataObject localObject =
-                (object.getDataContext() != this)
+            DataObject localObject = (object.getDataContext() != this)
                     ? registeredObject(object.getObjectId())
                     : object;
             localObjects.add(localObject);
@@ -592,15 +583,15 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Converts a list of data rows to a list of DataObjects. 
+     * Converts a list of data rows to a list of DataObjects.
      * 
      * @since 1.1
      */
     public List objectsFromDataRows(
-        ObjEntity entity,
-        List dataRows,
-        boolean refresh,
-        boolean resolveInheritanceHierarchy) {
+            ObjEntity entity,
+            List dataRows,
+            boolean refresh,
+            boolean resolveInheritanceHierarchy) {
 
         if (dataRows == null || dataRows.size() == 0) {
             return new ArrayList(1);
@@ -610,20 +601,20 @@ public class DataContext implements QueryEngine, Serializable {
         // we can't build a valid ObjectId
         DbEntity dbEntity = entity.getDbEntity();
         if (dbEntity == null) {
-            throw new CayenneRuntimeException(
-                "ObjEntity '" + entity.getName() + "' has no DbEntity.");
+            throw new CayenneRuntimeException("ObjEntity '"
+                    + entity.getName()
+                    + "' has no DbEntity.");
         }
 
         if (dbEntity.getPrimaryKey().size() == 0) {
-            throw new CayenneRuntimeException(
-                "Can't create ObjectId for '"
+            throw new CayenneRuntimeException("Can't create ObjectId for '"
                     + entity.getName()
                     + "'. Reason: DbEntity '"
                     + dbEntity.getName()
                     + "' has no Primary Key defined.");
         }
 
-        // check inheritance 
+        // check inheritance
         EntityInheritanceTree tree = null;
         if (resolveInheritanceHierarchy) {
             tree = getEntityResolver().lookupInheritanceTree(entity);
@@ -659,41 +650,44 @@ public class DataContext implements QueryEngine, Serializable {
                     if (refresh) {
                         // make all COMMITTED objects HOLLOW
                         if (object.getPersistenceState() == PersistenceState.COMMITTED) {
-                            // TODO: temporary hack - should do lazy conversion - make an object HOLLOW
-                            // and resolve on first read... unfortunately lots of other things break...
+                            // TODO: temporary hack - should do lazy conversion - make an
+                            // object HOLLOW
+                            // and resolve on first read... unfortunately lots of other
+                            // things break...
 
                             DataRowUtils.mergeObjectWithSnapshot(
-                                objectEntity,
-                                object,
-                                dataRow);
+                                    objectEntity,
+                                    object,
+                                    dataRow);
                             // object.setPersistenceState(PersistenceState.HOLLOW);
                         }
-                        // merge all MODIFIED objects immediately 
-                        else if (
-                            object.getPersistenceState() == PersistenceState.MODIFIED) {
+                        // merge all MODIFIED objects immediately
+                        else if (object.getPersistenceState() == PersistenceState.MODIFIED) {
                             DataRowUtils.mergeObjectWithSnapshot(
-                                objectEntity,
-                                object,
-                                dataRow);
+                                    objectEntity,
+                                    object,
+                                    dataRow);
                         }
-                        // TODO: temporary hack - should do lazy conversion - keep an object HOLLOW
-                        // and resolve on first read...unfortunately lots of other things break...
-                        else if (
-                            object.getPersistenceState() == PersistenceState.HOLLOW) {
+                        // TODO: temporary hack - should do lazy conversion - keep an
+                        // object HOLLOW
+                        // and resolve on first read...unfortunately lots of other things
+                        // break...
+                        else if (object.getPersistenceState() == PersistenceState.HOLLOW) {
                             DataRowUtils.mergeObjectWithSnapshot(
-                                objectEntity,
-                                object,
-                                dataRow);
+                                    objectEntity,
+                                    object,
+                                    dataRow);
                         }
                     }
-                    // TODO: temporary hack - this else clause must go... unfortunately lots of other things break
+                    // TODO: temporary hack - this else clause must go... unfortunately
+                    // lots of other things break
                     // at the moment...
                     else {
                         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
                             DataRowUtils.mergeObjectWithSnapshot(
-                                objectEntity,
-                                object,
-                                dataRow);
+                                    objectEntity,
+                                    object,
+                                    dataRow);
                         }
                     }
 
@@ -702,7 +696,7 @@ public class DataContext implements QueryEngine, Serializable {
                     results.add(object);
                 }
 
-                // now deal with snapshots 
+                // now deal with snapshots
                 getObjectStore().snapshotsUpdatedForObjects(results, dataRows, refresh);
             }
         }
@@ -712,38 +706,34 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Converts a list of DataRows to a List of DataObject registered with this
-     * DataContext. Internally calls {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}.
+     * DataContext. Internally calls
+     * {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}.
      * 
      * @since 1.1
      * @see DataRow
      * @see DataObject
      */
     public List objectsFromDataRows(
-        Class objectClass,
-        List dataRows,
-        boolean refresh,
-        boolean resolveInheritanceHierarchy) {
+            Class objectClass,
+            List dataRows,
+            boolean refresh,
+            boolean resolveInheritanceHierarchy) {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(objectClass);
-        return objectsFromDataRows(
-            entity,
-            dataRows,
-            refresh,
-            resolveInheritanceHierarchy);
+        return objectsFromDataRows(entity, dataRows, refresh, resolveInheritanceHierarchy);
     }
 
     /**
-     * Creates a DataObject from DataRow. This is a convenience
-     * shortcut to {@link #objectsFromDataRows(Class,java.util.List,boolean,boolean)}.
+     * Creates a DataObject from DataRow. This is a convenience shortcut to
+     * {@link #objectsFromDataRows(Class,java.util.List,boolean,boolean)}.
      * 
      * @see DataRow
      * @see DataObject
      */
     public DataObject objectFromDataRow(
-        Class objectClass,
-        DataRow dataRow,
-        boolean refresh) {
-        List list =
-            objectsFromDataRows(
+            Class objectClass,
+            DataRow dataRow,
+            boolean refresh) {
+        List list = objectsFromDataRows(
                 objectClass,
                 Collections.singletonList(dataRow),
                 refresh,
@@ -761,30 +751,28 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
-        List list =
-            objectsFromDataRows(ent, Collections.singletonList(dataRow), false, false);
+        List list = objectsFromDataRows(
+                ent,
+                Collections.singletonList(dataRow),
+                false,
+                false);
         return (DataObject) list.get(0);
     }
 
     /**
-     * Use {@link 
-     * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
+     * Use {@link #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
      * objectFromDataRow(Class, DataRow, boolean)} instead.
      * 
      * @deprecated Since 1.1
      */
-    public DataObject objectFromDataRow(
-        ObjEntity objEntity,
-        Map dataRow,
-        boolean refresh) {
+    public DataObject objectFromDataRow(ObjEntity objEntity, Map dataRow, boolean refresh) {
 
         // backwards compatibility... wrap this in a DataRow
         if (!(dataRow instanceof DataRow)) {
             dataRow = new DataRow(dataRow);
         }
 
-        List list =
-            objectsFromDataRows(
+        List list = objectsFromDataRows(
                 objEntity,
                 Collections.singletonList(dataRow),
                 refresh,
@@ -793,27 +781,28 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Creates and returns a read-only DataObject from a DataRow.
-     * Newly created object is registered with this DataContext. 
+     * Creates and returns a read-only DataObject from a DataRow. Newly created object is
+     * registered with this DataContext.
      * 
-     * @deprecated Since 1.1 use {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)} instead.
+     * @deprecated Since 1.1 use
+     *             {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}instead.
      */
     protected DataObject readOnlyObjectFromDataRow(
-        ObjEntity objEntity,
-        Map dataRow,
-        boolean refresh) {
+            ObjEntity objEntity,
+            Map dataRow,
+            boolean refresh) {
 
         return this.objectFromDataRow(objEntity, dataRow, refresh);
     }
 
     /**
-     * Instantiates new object and registers it with itself. Object class
-     * is determined from ObjEntity. Object class must have a default constructor.
-     * 
-     * <p><i>Note: preferred way to create new objects is via 
-     * {@link #createAndRegisterNewObject(Class)} method. It works exactly 
-     * the same way, but makes the application type-safe.
-     * </i></p>
+     * Instantiates new object and registers it with itself. Object class is determined
+     * from ObjEntity. Object class must have a default constructor.
+     * <p>
+     * <i>Note: preferred way to create new objects is via
+     * {@link #createAndRegisterNewObject(Class)}method. It works exactly the same way,
+     * but makes the application type-safe. </i>
+     * </p>
      * 
      * @see #createAndRegisterNewObject(Class)
      */
@@ -838,7 +827,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Instantiates new object and registers it with itself. Object class must have a 
+     * Instantiates new object and registers it with itself. Object class must have a
      * default constructor.
      * 
      * @since 1.1
@@ -850,8 +839,8 @@ public class DataContext implements QueryEngine, Serializable {
 
         ObjEntity entity = getEntityResolver().lookupObjEntity(objectClass);
         if (entity == null) {
-            throw new IllegalArgumentException(
-                "Class is not mapped with Cayenne: " + objectClass.getName());
+            throw new IllegalArgumentException("Class is not mapped with Cayenne: "
+                    + objectClass.getName());
         }
 
         DataObject dataObject = null;
@@ -866,28 +855,28 @@ public class DataContext implements QueryEngine, Serializable {
         return dataObject;
     }
 
-    /** Registers a new object (that is not yet persistent) with itself.
-     *
-     * @param dataObject new object that we want to make persistent.
-     * @param objEntityName a name of the ObjEntity in the map used to get
-     *  persistence information for this object.
+    /**
+     * Registers a new object (that is not yet persistent) with itself.
      * 
-     * @deprecated since 1.1 this method is deprecated. It is misleading to think that 
-     * Cayenne supports more than one class per ObjEntity. Use {@link #registerNewObject(DataObject)}
-     * instead.
+     * @param dataObject new object that we want to make persistent.
+     * @param objEntityName a name of the ObjEntity in the map used to get persistence
+     *            information for this object.
+     * @deprecated since 1.1 this method is deprecated. It is misleading to think that
+     *             Cayenne supports more than one class per ObjEntity. Use
+     *             {@link #registerNewObject(DataObject)}instead.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
         ObjEntity entity = getEntityResolver().lookupObjEntity(objEntityName);
         if (entity == null) {
-            throw new IllegalArgumentException(
-                "Invalid ObjEntity name: " + objEntityName);
+            throw new IllegalArgumentException("Invalid ObjEntity name: " + objEntityName);
         }
 
         registerNewObjectWithEntity(dataObject, entity);
     }
 
-    /** Registers a new object (that is not yet persistent) with itself.
-     *
+    /**
+     * Registers a new object (that is not yet persistent) with itself.
+     * 
      * @param dataObject new object that we want to make persistent.
      */
     public void registerNewObject(DataObject dataObject) {
@@ -898,17 +887,15 @@ public class DataContext implements QueryEngine, Serializable {
         ObjEntity entity = getEntityResolver().lookupObjEntity(dataObject);
         if (entity == null) {
             throw new IllegalArgumentException(
-                "Can't find ObjEntity for DataObject class: "
-                    + dataObject.getClass().getName()
-                    + ", class is likely not mapped.");
+                    "Can't find ObjEntity for DataObject class: "
+                            + dataObject.getClass().getName()
+                            + ", class is likely not mapped.");
         }
 
         registerNewObjectWithEntity(dataObject, entity);
     }
 
-    private void registerNewObjectWithEntity(
-        DataObject dataObject,
-        ObjEntity objEntity) {
+    private void registerNewObjectWithEntity(DataObject dataObject, ObjEntity objEntity) {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
 
@@ -927,54 +914,52 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @deprecated Since 1.1, use 
-     * {@link #unregisterObjects(java.util.Collection) unregisterObjects(Collections.singletonList(dataObject))}
-     * to invalidate a single object.
+     * @deprecated Since 1.1, use
+     *             {@link #unregisterObjects(java.util.Collection) unregisterObjects(Collections.singletonList(dataObject))}
+     *             to invalidate a single object.
      */
     public void unregisterObject(DataObject dataObject) {
         unregisterObjects(Collections.singletonList(dataObject));
     }
 
     /**
-     * Unregisters a Collection of DataObjects from the DataContext 
-     * and the underlying ObjectStore. This operation also unsets 
-     * DataContext and ObjectId for each object and changes its state 
-     * to TRANSIENT.
+     * Unregisters a Collection of DataObjects from the DataContext and the underlying
+     * ObjectStore. This operation also unsets DataContext and ObjectId for each object
+     * and changes its state to TRANSIENT.
      */
     public void unregisterObjects(Collection dataObjects) {
         getObjectStore().objectsUnregistered(dataObjects);
     }
 
     /**
-     * @deprecated Since 1.1, use 
-     * {@link #invalidateObjects(java.util.Collection) invalidateObjects(Collections.singletonList(dataObject))}
-     * to invalidate a single object.
+     * @deprecated Since 1.1, use
+     *             {@link #invalidateObjects(java.util.Collection) invalidateObjects(Collections.singletonList(dataObject))}
+     *             to invalidate a single object.
      */
     public void invalidateObject(DataObject dataObject) {
         invalidateObjects(Collections.singletonList(dataObject));
     }
 
     /**
-      * "Invalidates" a Collection of DataObject. This operation would remove 
-      * each object's snapshot from cache and change object's state to HOLLOW.
-      * On the next access to this object, it will be refeched.
-      */
+     * "Invalidates" a Collection of DataObject. This operation would remove each object's
+     * snapshot from cache and change object's state to HOLLOW. On the next access to this
+     * object, it will be refeched.
+     */
     public void invalidateObjects(Collection dataObjects) {
         getObjectStore().objectsInvalidated(dataObjects);
     }
 
     /**
-     * Notifies data context that a registered object need to be deleted on
-     * next commit.
-     *
+     * Notifies data context that a registered object need to be deleted on next commit.
+     * 
      * @param anObject data object that we want to delete.
      */
 
     public void deleteObject(DataObject anObject) {
         if (anObject.getPersistenceState() == PersistenceState.DELETED
-            || anObject.getPersistenceState() == PersistenceState.TRANSIENT) {
+                || anObject.getPersistenceState() == PersistenceState.TRANSIENT) {
 
-            // Drop out... especially in case of DELETED we might be about to get 
+            // Drop out... especially in case of DELETED we might be about to get
             // into a horrible
             // recursive loop due to CASCADE delete rules.
             // Assume that everything must have been done correctly already
@@ -989,10 +974,10 @@ public class DataContext implements QueryEngine, Serializable {
 
         // Save the current state in case of a deny, in which case it should be reset.
         // We cannot delay setting it to deleted, as Cascade deletes might cause
-        // recursion, and the "deleted" state is the best way we have of noticing that and bailing out (see above)
+        // recursion, and the "deleted" state is the best way we have of noticing that and
+        // bailing out (see above)
         int oldState = anObject.getPersistenceState();
-        int newState =
-            (oldState == PersistenceState.NEW)
+        int newState = (oldState == PersistenceState.NEW)
                 ? PersistenceState.TRANSIENT
                 : PersistenceState.DELETED;
         anObject.setPersistenceState(newState);
@@ -1015,7 +1000,7 @@ public class DataContext implements QueryEngine, Serializable {
                 List toMany = (List) anObject.readNestedProperty(relationship.getName());
 
                 if (toMany.size() > 0) {
-                    // Get a copy of the list so that deleting objects doesn't 
+                    // Get a copy of the list so that deleting objects doesn't
                     // result in concurrent modification exceptions
                     relatedObjects = new ArrayList(toMany);
                 }
@@ -1033,9 +1018,9 @@ public class DataContext implements QueryEngine, Serializable {
             }
 
             switch (relationship.getDeleteRule()) {
-                case DeleteRule.NULLIFY :
-                    ObjRelationship inverseRelationship =
-                        relationship.getReverseRelationship();
+                case DeleteRule.NULLIFY:
+                    ObjRelationship inverseRelationship = relationship
+                            .getReverseRelationship();
                     if (inverseRelationship == null) {
                         // with next relationship... nothing we can do here
                         continue;
@@ -1045,10 +1030,8 @@ public class DataContext implements QueryEngine, Serializable {
                         Iterator iterator = relatedObjects.iterator();
                         while (iterator.hasNext()) {
                             DataObject relatedObject = (DataObject) iterator.next();
-                            relatedObject.removeToManyTarget(
-                                inverseRelationship.getName(),
-                                anObject,
-                                true);
+                            relatedObject.removeToManyTarget(inverseRelationship
+                                    .getName(), anObject, true);
                         }
                     }
                     else {
@@ -1058,13 +1041,13 @@ public class DataContext implements QueryEngine, Serializable {
                         while (iterator.hasNext()) {
                             DataObject relatedObject = (DataObject) iterator.next();
                             relatedObject.setToOneTarget(
-                                inverseRelationship.getName(),
-                                null,
-                                true);
+                                    inverseRelationship.getName(),
+                                    null,
+                                    true);
                         }
                     }
                     break;
-                case DeleteRule.CASCADE :
+                case DeleteRule.CASCADE:
                     //Delete all related objects
                     Iterator iterator = relatedObjects.iterator();
                     while (iterator.hasNext()) {
@@ -1072,13 +1055,12 @@ public class DataContext implements QueryEngine, Serializable {
                         this.deleteObject(relatedObject);
                     }
                     break;
-                case DeleteRule.DENY :
+                case DeleteRule.DENY:
                     int relatedObjectsCount = relatedObjects.size();
                     if (relatedObjectsCount != 0) {
                         //Clean up - we shouldn't be deleting this object
                         anObject.setPersistenceState(oldState);
-                        throw new DeleteDenyException(
-                            "Cannot delete a "
+                        throw new DeleteDenyException("Cannot delete a "
                                 + getEntityResolver().lookupObjEntity(anObject).getName()
                                 + " because it has "
                                 + relatedObjectsCount
@@ -1091,11 +1073,11 @@ public class DataContext implements QueryEngine, Serializable {
                                 + "as it's delete rule");
                     }
                     break;
-                default :
+                default:
                     //Clean up - we shouldn't be deleting this object
                     anObject.setPersistenceState(oldState);
-                    throw new CayenneRuntimeException(
-                        "Unknown type of delete rule " + relationship.getDeleteRule());
+                    throw new CayenneRuntimeException("Unknown type of delete rule "
+                            + relationship.getDeleteRule());
             }
         }
 
@@ -1107,13 +1089,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Refetches object data for ObjectId. This method is used
-     * internally by Cayenne to resolve objects in state
-     * <code>PersistenceState.HOLLOW</code>. It can also be used
-     * to refresh certain objects.
-     *
-     * @throws CayenneRuntimeException if object id doesn't match
-     * any records, or if there is more than one object is fetched.
+     * Refetches object data for ObjectId. This method is used internally by Cayenne to
+     * resolve objects in state <code>PersistenceState.HOLLOW</code>. It can also be
+     * used to refresh certain objects.
+     * 
+     * @throws CayenneRuntimeException if object id doesn't match any records, or if there
+     *             is more than one object is fetched.
      */
     public DataObject refetchObject(ObjectId oid) {
 
@@ -1130,14 +1111,13 @@ public class DataContext implements QueryEngine, Serializable {
         List results = this.performQuery(sel);
 
         if (results.size() != 1) {
-            String msg =
-                (results.size() == 0)
+            String msg = (results.size() == 0)
                     ? "No matching objects found for ObjectId " + oid
                     : "More than 1 object found for ObjectId "
-                        + oid
-                        + ". Fetch matched "
-                        + results.size()
-                        + " objects.";
+                            + oid
+                            + ". Fetch matched "
+                            + results.size()
+                            + " objects.";
 
             throw new CayenneRuntimeException(msg);
         }
@@ -1145,10 +1125,10 @@ public class DataContext implements QueryEngine, Serializable {
         return (DataObject) results.get(0);
     }
 
-    /** 
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
-     * queries are not necessarily based on an ObjEntity. Use 
-     * {@link ObjEntity#getDataMap()} to obtain DataMap from ObjEntity.
+    /**
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}since queries are not
+     *             necessarily based on an ObjEntity. Use {@link ObjEntity#getDataMap()}
+     *             to obtain DataMap from ObjEntity.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         if (this.getParent() == null) {
@@ -1158,8 +1138,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns a DataNode that should hanlde queries for all
-     * DataMap components.
+     * Returns a DataNode that should hanlde queries for all DataMap components.
      * 
      * @since 1.1
      */
@@ -1171,26 +1150,26 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Reverts any changes that have occurred to objects registered with DataContext. 
+     * Reverts any changes that have occurred to objects registered with DataContext.
      */
     public void rollbackChanges() {
         getObjectStore().objectsRolledBack();
     }
 
     /**
-     * Synchronizes object graph with the database. Executes needed
-     * insert, update and delete queries (generated internally).
+     * Synchronizes object graph with the database. Executes needed insert, update and
+     * delete queries (generated internally).
      */
     public void commitChanges() throws CayenneRuntimeException {
         commitChanges(null);
     }
 
     /**
-     * Synchronizes object graph with the database. Executes needed
-     * insert, update and delete queries (generated internally).
-     *
-     * @param logLevel if logLevel is higher or equals to the level
-     * set for QueryLogger, statements execution will be logged.
+     * Synchronizes object graph with the database. Executes needed insert, update and
+     * delete queries (generated internally).
+     * 
+     * @param logLevel if logLevel is higher or equals to the level set for QueryLogger,
+     *            statements execution will be logged.
      */
     public void commitChanges(Level logLevel) throws CayenneRuntimeException {
 
@@ -1198,7 +1177,7 @@ public class DataContext implements QueryEngine, Serializable {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
 
-        // prevent multiple commits occuring simulteneously 
+        // prevent multiple commits occuring simulteneously
         synchronized (getObjectStore()) {
             // is there anything to do?
             if (!this.hasChanges()) {
@@ -1228,8 +1207,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Performs a single database query that does not select rows.
-     * Returns an array of update counts.
+     * Performs a single database query that does not select rows. Returns an array of
+     * update counts.
      * 
      * @since 1.1
      */
@@ -1237,19 +1216,53 @@ public class DataContext implements QueryEngine, Serializable {
         QueryResult result = new QueryResult();
         performQueries(Collections.singletonList(query), result);
         List updateCounts = result.getUpdates(query);
-        
-        if(updateCounts == null || updateCounts.isEmpty()) {
+
+        if (updateCounts == null || updateCounts.isEmpty()) {
             return new int[0];
         }
-        
+
         int len = updateCounts.size();
         int[] counts = new int[len];
-        
-        for(int i = 0; i < len; i++) {
-            counts[i] = ((Number)updateCounts.get(i)).intValue();
+
+        for (int i = 0; i < len; i++) {
+            counts[i] = ((Number) updateCounts.get(i)).intValue();
         }
-        
+
         return counts;
+    }
+
+    /**
+     * Performs a named mapped query that does not select rows. Returns an array of update
+     * counts.
+     * 
+     * @since 1.1
+     */
+    public int[] performNonSelectingQuery(String queryName) {
+        return performNonSelectingQuery(queryName, Collections.EMPTY_MAP);
+    }
+
+    /**
+     * Performs a named mapped non-selecting query using a map of parameters. Returns an
+     * array of update counts.
+     * 
+     * @since 1.1
+     */
+    public int[] performNonSelectingQuery(String queryName, Map parameters) {
+        // find query...
+        Query query = getEntityResolver().getQuery(queryName);
+        if (query == null) {
+            throw new CayenneRuntimeException("There is no saved query for name '"
+                    + queryName
+                    + "'.");
+        }
+
+        if (parameters != null
+                && !parameters.isEmpty()
+                && query instanceof ParameterizedQuery) {
+            query = ((ParameterizedQuery) query).createQuery(parameters);
+        }
+
+        return performNonSelectingQuery(query);
     }
 
     /**
@@ -1257,7 +1270,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Returned ResultIterator will provide access to DataRows.
      */
     public ResultIterator performIteratedQuery(GenericSelectQuery query)
-        throws CayenneException {
+            throws CayenneException {
 
         IteratedSelectObserver observer = new IteratedSelectObserver();
         observer.setLoggingLevel(query.getLoggingLevel());
@@ -1265,18 +1278,17 @@ public class DataContext implements QueryEngine, Serializable {
         return observer.getResultIterator();
     }
 
-    /** 
-     * Delegates queries execution to parent QueryEngine. If there are select
-     * queries that require prefetching relationships, will create additional
-     * queries to perform necessary prefetching.
+    /**
+     * Delegates queries execution to parent QueryEngine. If there are select queries that
+     * require prefetching relationships, will create additional queries to perform
+     * necessary prefetching.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
         // note - use external transaction for iterated queries;
         // other types of transactions won't be safe in this case
-        Transaction transaction =
-            (observer.isIteratedResult())
-                ? Transaction.externalTransaction(
-                    getParentDataDomain().getTransactionDelegate())
+        Transaction transaction = (observer.isIteratedResult())
+                ? Transaction.externalTransaction(getParentDataDomain()
+                        .getTransactionDelegate())
                 : getParentDataDomain().createTransaction();
 
         transaction.performQueries(this, queries, observer);
@@ -1288,10 +1300,10 @@ public class DataContext implements QueryEngine, Serializable {
      * @since 1.1
      */
     public void performQueries(
-        Collection queries,
-        OperationObserver resultConsumer,
-        Transaction transaction) {
-        
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
+
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
@@ -1307,8 +1319,9 @@ public class DataContext implements QueryEngine, Serializable {
                 GenericSelectQuery genericSelect = (GenericSelectQuery) query;
 
                 // filter via a delegate
-                GenericSelectQuery filteredSelect =
-                    localDelegate.willPerformSelect(this, genericSelect);
+                GenericSelectQuery filteredSelect = localDelegate.willPerformSelect(
+                        this,
+                        genericSelect);
 
                 // suppressed by the delegate
                 if (filteredSelect != null) {
@@ -1324,12 +1337,13 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Performs prefetching. Prefetching would resolve a set of relationships
-     * for a list of DataObjects in the most optimized way (preferrably in
-     * a single query per relationship).
-     *
-     * <p><i>WARNING: Currently supports only "one-step" to one relationships. This is an
-     * arbitrary limitation and will be removed eventually.</i></p>
+     * Performs prefetching. Prefetching would resolve a set of relationships for a list
+     * of DataObjects in the most optimized way (preferrably in a single query per
+     * relationship).
+     * <p>
+     * <i>WARNING: Currently supports only "one-step" to one relationships. This is an
+     * arbitrary limitation and will be removed eventually. </i>
+     * </p>
      */
     public void prefetchRelationships(SelectQuery query, List objects) {
         Collection prefetches = query.getPrefetches();
@@ -1343,24 +1357,23 @@ public class DataContext implements QueryEngine, Serializable {
         while (prefetchesIt.hasNext()) {
             String prefetchKey = (String) prefetchesIt.next();
             if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
-                throw new CayenneRuntimeException(
-                    "Only one-step relationships are "
+                throw new CayenneRuntimeException("Only one-step relationships are "
                         + "supported at the moment, this will be fixed soon. "
                         + "Unsupported path : "
                         + prefetchKey);
             }
 
-            ObjRelationship relationship =
-                (ObjRelationship) entity.getRelationship(prefetchKey);
+            ObjRelationship relationship = (ObjRelationship) entity
+                    .getRelationship(prefetchKey);
             if (relationship == null) {
                 throw new CayenneRuntimeException("Invalid relationship: " + prefetchKey);
             }
 
             if (relationship.isToMany()) {
                 throw new CayenneRuntimeException(
-                    "Only to-one relationships are supported at the moment. "
-                        + "Can't prefetch to-many: "
-                        + prefetchKey);
+                        "Only to-one relationships are supported at the moment. "
+                                + "Can't prefetch to-many: "
+                                + prefetchKey);
             }
 
             PrefetchHelper.resolveToOneRelations(this, objects, prefetchKey);
@@ -1368,30 +1381,28 @@ public class DataContext implements QueryEngine, Serializable {
 
     }
 
-    /** 
+    /**
      * Delegates query execution to parent QueryEngine.
-     *  
-     * @deprecated Since 1.1 use performQueries(List, OperationObserver).
-     * This method is redundant and doesn't add value.
+     * 
+     * @deprecated Since 1.1 use performQueries(List, OperationObserver). This method is
+     *             redundant and doesn't add value.
      */
     public void performQuery(Query query, OperationObserver operationObserver) {
         this.performQueries(Collections.singletonList(query), operationObserver);
     }
-    
 
     /**
-     * Performs a single selecting query. If if query is a SelectQuery
-     * that require prefetching relationships, will create additional
-     * queries to perform necessary prefetching. Various query setting 
-     * control the behavior of this method and the results returned:
-     * 
+     * Performs a single selecting query. If if query is a SelectQuery that require
+     * prefetching relationships, will create additional queries to perform necessary
+     * prefetching. Various query setting control the behavior of this method and the
+     * results returned:
      * <ul>
-     * <li>Query caching policy defines whether
-     * the results are retrieved from cache or fetched from the database. Note that
-     * queries that use caching must have a name that is used as a caching key.</li>
-     * <li>Query refreshing policy controls whether to refresh existing data objects
-     * and ignore any cached values.</li>
-     * <li>Query data rows policy defines whether the result should be returned as 
+     * <li>Query caching policy defines whether the results are retrieved from cache or
+     * fetched from the database. Note that queries that use caching must have a name that
+     * is used as a caching key.</li>
+     * <li>Query refreshing policy controls whether to refresh existing data objects and
+     * ignore any cached values.</li>
+     * <li>Query data rows policy defines whether the result should be returned as
      * DataObjects or DataRows.</li>
      * </ul>
      * 
@@ -1399,10 +1410,9 @@ public class DataContext implements QueryEngine, Serializable {
      *         {@link GenericSelectQuery#isFetchingDataRows()}.
      */
     public List performQuery(GenericSelectQuery query) {
-        return performQuery(query, query.isRefreshingObjects());
+        return performQuery(query, query.getName(), query.isRefreshingObjects());
     }
 
-    
     /**
      * Returns a list of objects or DataRows for a named query stored in one of the
      * DataMaps. Internally Cayenne uses a caching policy defined in the named query. If
@@ -1411,16 +1421,40 @@ public class DataContext implements QueryEngine, Serializable {
      * @param queryName a name of a GenericSelectQuery defined in one of the DataMaps. If
      *            no such query is defined, this method will throw a
      *            CayenneRuntimeException.
+     * @param refresh A flag that determines whether refresh is required in case a query
+     *            uses caching.
      * @since 1.1
      */
     public List performQuery(String queryName, boolean refresh) {
+        return performQuery(queryName, Collections.EMPTY_MAP, refresh);
+    }
 
+    /**
+     * Returns a list of objects or DataRows for a named query stored in one of the
+     * DataMaps. Internally Cayenne uses a caching policy defined in the named query. If
+     * refresh flag is true, a refresh is forced no matter what the caching policy is.
+     * 
+     * @param queryName a name of a GenericSelectQuery defined in one of the DataMaps. If
+     *            no such query is defined, this method will throw a
+     *            CayenneRuntimeException.
+     * @param parameters A map of parameters to use with stored query.
+     * @param refresh A flag that determines whether refresh is required in case a query
+     *            uses caching.
+     * @since 1.1
+     */
+    public List performQuery(String queryName, Map parameters, boolean refresh) {
         // find query...
         Query query = getEntityResolver().getQuery(queryName);
         if (query == null) {
             throw new CayenneRuntimeException("There is no saved query for name '"
                     + queryName
                     + "'.");
+        }
+
+        if (parameters != null
+                && !parameters.isEmpty()
+                && query instanceof ParameterizedQuery) {
+            query = ((ParameterizedQuery) query).createQuery(parameters);
         }
 
         if (!(query instanceof GenericSelectQuery)) {
@@ -1430,11 +1464,13 @@ public class DataContext implements QueryEngine, Serializable {
                     + query);
         }
 
-        return performQuery((GenericSelectQuery) query, refresh);
+        return performQuery((GenericSelectQuery) query, query.getName(), refresh);
     }
-    
-    
-    List performQuery(GenericSelectQuery query, boolean refreshCache) {
+
+    /**
+     * Worker method for executing GenericSelectQuery taking caching into account.
+     */
+    List performQuery(GenericSelectQuery query, String cacheKey, boolean refreshCache) {
 
         // check if result pagination is requested
         // let a list handle fetch in this case
@@ -1449,13 +1485,12 @@ public class DataContext implements QueryEngine, Serializable {
         boolean useCache = localCache || sharedCache;
 
         String name = query.getName();
-        
+
         // sanity check
         if (useCache && name == null) {
             throw new CayenneRuntimeException(
                     "Caching of unnamed queries is not supported.");
         }
-        
 
         // get results from cache...
         if (!refreshCache && useCache) {
@@ -1464,11 +1499,12 @@ public class DataContext implements QueryEngine, Serializable {
             if (localCache) {
                 // results should have been stored as rows or objects when
                 // they were originally cached... do no conversions now
-                results = getObjectStore().getCachedQueryResult(name);
+                results = getObjectStore().getCachedQueryResult(cacheKey);
             }
             else if (sharedCache) {
 
-                List rows = getObjectStore().getDataRowCache().getCachedSnapshots(name);
+                List rows = getObjectStore().getDataRowCache().getCachedSnapshots(
+                        cacheKey);
                 if (rows != null) {
 
                     // decorate shared cached lists with immutable list to avoid messing
@@ -1491,31 +1527,30 @@ public class DataContext implements QueryEngine, Serializable {
                 return results;
             }
         }
-        
+
         // must fetch...
         SelectObserver observer = new SelectObserver(query.getLoggingLevel());
         performQueries(queryWithPrefetches(query, observer), observer);
-        
+
         List results = (query.isFetchingDataRows())
                 ? observer.getResults(query)
                 : observer.getResultsAsObjects(this, query);
-        
-        
+
         // cache results if needed
         if (useCache) {
             if (localCache) {
-                getObjectStore().cacheQueryResult(name, results);
+                getObjectStore().cacheQueryResult(cacheKey, results);
             }
             else if (sharedCache) {
                 getObjectStore().getDataRowCache().cacheSnapshots(
-                        name,
+                        cacheKey,
                         observer.getResults(query));
             }
         }
 
         return results;
     }
-    
+
     /**
      * Expands a SelectQuery into a collection of queries, including prefetch queries if
      * needed.
@@ -1571,27 +1606,26 @@ public class DataContext implements QueryEngine, Serializable {
                 continue;
             }
 
-            DataObject targetDo =
-                (DataObject) dataObject.readPropertyDirectly(rel.getName());
+            DataObject targetDo = (DataObject) dataObject.readPropertyDirectly(rel
+                    .getName());
             if (targetDo == null) {
                 // this is bad, since we will not be able to obtain PK in any other way
                 // throw an exception
-                throw new CayenneRuntimeException("Null master object, can't create primary key.");
+                throw new CayenneRuntimeException(
+                        "Null master object, can't create primary key.");
             }
 
             Map idMap = targetDo.getObjectId().getIdSnapshot();
             if (idMap == null) {
                 // this is bad, since we will not be able to obtain PK in any other way
                 // provide a detailed error message
-                StringBuffer msg =
-                    new StringBuffer("Can't create primary key, master object has no PK snapshot.");
-                msg
-                    .append("\nrelationship name: ")
-                    .append(dbRel.getName())
-                    .append(", src object: ")
-                    .append(dataObject.getObjectId().getObjClass().getName())
-                    .append(", target obj: ")
-                    .append(targetDo.getObjectId().getObjClass().getName());
+                StringBuffer msg = new StringBuffer(
+                        "Can't create primary key, master object has no PK snapshot.");
+                msg.append("\nrelationship name: ").append(dbRel.getName()).append(
+                        ", src object: ").append(
+                        dataObject.getObjectId().getObjClass().getName()).append(
+                        ", target obj: ").append(
+                        targetDo.getObjectId().getObjClass().getName());
                 throw new CayenneRuntimeException(msg.toString());
             }
 
@@ -1599,32 +1633,31 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** Creates permanent ObjectId for <code>anObject</code>.
-     *  Object must already have a temporary ObjectId.
-     *
-     *  <p>This method is called when we are about to save a new object to
-     *  the database. Primary key columns are populated assigning values
-     *  in the following sequence:
-     *  <ul>
-     *     <li>Object attribute values are used.</li>
-     *     <li>Values from ObjectId's propagated from master relationshop
-     *     are used. <i>If master object does not have a permanent id
-     *     created yet, an exception is thrown.</i></li>
-     *     <li>Values generated from the database provided by DbAdapter.
-     *     <i>Autogeneration only works for a single column. If more than
-     *     one column requires an autogenerated primary key, an exception is
-     *     thrown</i></li>
-     *   </ul>
-     *
-     *   @return Newly created ObjectId.
+    /**
+     * Creates permanent ObjectId for <code>anObject</code>. Object must already have a
+     * temporary ObjectId.
+     * <p>
+     * This method is called when we are about to save a new object to the database.
+     * Primary key columns are populated assigning values in the following sequence:
+     * <ul>
+     * <li>Object attribute values are used.</li>
+     * <li>Values from ObjectId's propagated from master relationshop are used. <i>If
+     * master object does not have a permanent id created yet, an exception is thrown.
+     * </i></li>
+     * <li>Values generated from the database provided by DbAdapter. <i>Autogeneration
+     * only works for a single column. If more than one column requires an autogenerated
+     * primary key, an exception is thrown </i></li>
+     * </ul>
      * 
+     * @return Newly created ObjectId.
      * @deprecated Since 1.1 this method is no longer used.
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
         ObjectId id = anObject.getObjectId();
         if (!(id instanceof TempObjectId)) {
             return id;
-            //If the id is not a temp, then it must be permanent.  Return it and do nothing else
+            //If the id is not a temp, then it must be permanent. Return it and do
+            // nothing else
         }
 
         if (id.getReplacementId() != null) {
@@ -1652,15 +1685,15 @@ public class DataContext implements QueryEngine, Serializable {
             // try object value as PK
             ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(attr);
             if (objAttr != null) {
-                idMap.put(
-                    attr.getName(),
-                    anObject.readPropertyDirectly(objAttr.getName()));
+                idMap.put(attr.getName(), anObject
+                        .readPropertyDirectly(objAttr.getName()));
                 continue;
             }
 
             // run PK autogeneration
             if (autoPkDone) {
-                throw new CayenneRuntimeException("Primary Key autogeneration only works for a single attribute.");
+                throw new CayenneRuntimeException(
+                        "Primary Key autogeneration only works for a single attribute.");
             }
 
             try {
@@ -1676,7 +1709,8 @@ public class DataContext implements QueryEngine, Serializable {
 
         ObjectId permId = new ObjectId(anObject.getClass(), idMap);
 
-        // note that object registration did not change (new id is not attached to context, only to temp. oid)
+        // note that object registration did not change (new id is not attached to
+        // context, only to temp. oid)
         id.setReplacementId(permId);
         return permId;
     }
@@ -1686,7 +1720,8 @@ public class DataContext implements QueryEngine, Serializable {
         out.defaultWriteObject();
 
         // If the "parent" of this datacontext is a DataDomain, then just write the
-        // name of it.  Then when deserialization happens, we can get back the DataDomain by name,
+        // name of it. Then when deserialization happens, we can get back the DataDomain
+        // by name,
         // from the shared configuration (which will either load it if need be, or return
         // an existing one.
 
@@ -1709,8 +1744,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     //serialization support
-    private void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
 
         // 1. read non-transient properties
         in.defaultReadObject();
@@ -1727,9 +1762,9 @@ public class DataContext implements QueryEngine, Serializable {
         }
         else {
             throw new CayenneRuntimeException(
-                "Parent attribute of DataContext was neither a QueryEngine nor "
-                    + "the name of a valid DataDomain:"
-                    + value);
+                    "Parent attribute of DataContext was neither a QueryEngine nor "
+                            + "the name of a valid DataDomain:"
+                            + value);
         }
 
         // 3. Deserialize local snapshots cache
@@ -1783,8 +1818,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns <code>true</code> if the ObjectStore uses
-     * shared cache of a parent DataDomain.
+     * Returns <code>true</code> if the ObjectStore uses shared cache of a parent
+     * DataDomain.
      * 
      * @since 1.1
      */
@@ -1793,8 +1828,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns whether this DataContext performs object validation before
-     * commit is executed.
+     * Returns whether this DataContext performs object validation before commit is
+     * executed.
      * 
      * @since 1.1
      */
@@ -1803,8 +1838,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Sets the property defining whether this DataContext should perform 
-     * object validation before commit is executed.
+     * Sets the property defining whether this DataContext should perform object
+     * validation before commit is executed.
      * 
      * @since 1.1
      */
@@ -1844,8 +1879,8 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @deprecated Since 1.1 this method is not used in Cayenne. 
-     * All flattened relationship logic was moved to the ObjectStore
+     * @deprecated Since 1.1 this method is not used in Cayenne. All flattened
+     *             relationship logic was moved to the ObjectStore
      */
     protected void clearFlattenedUpdateQueries() {
         objectStore.flattenedDeletes.clear();
@@ -1853,24 +1888,24 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @deprecated Since 1.1 this method is not used in Cayenne. 
-     * All flattened relationship logic was moved to the ObjectStore
+     * @deprecated Since 1.1 this method is not used in Cayenne. All flattened
+     *             relationship logic was moved to the ObjectStore
      */
     public void registerFlattenedRelationshipDelete(
-        DataObject source,
-        ObjRelationship relationship,
-        DataObject destination) {
+            DataObject source,
+            ObjRelationship relationship,
+            DataObject destination) {
         objectStore.flattenedRelationshipUnset(source, relationship, destination);
     }
 
     /**
-     * @deprecated Since 1.1 this method is not used in Cayenne. 
-     * All flattened relationship logic was moved to the ObjectStore
+     * @deprecated Since 1.1 this method is not used in Cayenne. All flattened
+     *             relationship logic was moved to the ObjectStore
      */
     public void registerFlattenedRelationshipInsert(
-        DataObject source,
-        ObjRelationship relationship,
-        DataObject destination) {
+            DataObject source,
+            ObjRelationship relationship,
+            DataObject destination) {
         objectStore.flattenedRelationshipSet(source, relationship, destination);
     }
 }

@@ -171,10 +171,7 @@ public class DataMapView extends JPanel {
         builder.append("DataNode:", nodeSelector, 3);
 
         builder.appendSeparator("Entity Defaults");
-        builder.append(
-                "DB Schema:",
-                defaultSchema.getTextField(),
-                updateDefaultSchema);
+        builder.append("DB Schema:", defaultSchema.getTextField(), updateDefaultSchema);
         builder.append(
                 "Java Package:",
                 defaultPackage.getTextField(),
@@ -183,10 +180,7 @@ public class DataMapView extends JPanel {
                 "DataObject Superclass:",
                 defaultSuperclass.getTextField(),
                 updateDefaultSuperclass);
-        builder.append(
-                "Optimistic Locking:",
-                defaultLockType,
-                updateDefaultLockType);
+        builder.append("Optimistic Locking:", defaultLockType, updateDefaultLockType);
 
         this.setLayout(new BorderLayout());
         add(builder.getPanel(), BorderLayout.CENTER);
@@ -441,7 +435,7 @@ public class DataMapView extends JPanel {
             return;
         }
 
-        if (dataMap.getDbEntities().size() > 0) {
+        if (dataMap.getDbEntities().size() > 0 || dataMap.getProcedures().size() > 0) {
             new SchemaUpdateController(eventController, dataMap).startup();
         }
     }

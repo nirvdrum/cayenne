@@ -55,84 +55,40 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import junit.framework.TestCase;
 
 /**
- * Defining a generic selecting or updating query that can be executed in Cayenne.
- * 
- * @see org.objectstyle.cayenne.access.QueryEngine
  * @author Andrei Adamchik
  */
-public interface Query {
+public class ProcedureQueryTst extends TestCase {
 
-    public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    public void testCreateQuery() throws Exception {
+        ProcedureQuery template = new ProcedureQuery();
+        Query clone = template.createQuery(Collections.EMPTY_MAP);
+        assertTrue(clone instanceof ProcedureQuery);
+        assertNotSame(template, clone);
+    }
 
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int SELECT_QUERY = 1;
+    public void testCreateQueryWithParameters() throws Exception {
+        Map params = new HashMap();
+        params.put("a", "1");
+        params.put("b", "2");
 
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int INSERT_QUERY = 2;
+        ProcedureQuery template = new ProcedureQuery();
+        ProcedureQuery clone = (ProcedureQuery) template.createQuery(params);
 
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int UPDATE_QUERY = 3;
+        assertEquals(params, clone.getParameters());
+    }
 
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int DELETE_QUERY = 4;
+    public void testResultType() throws Exception {
+        ProcedureQuery query = new ProcedureQuery();
+        assertNull(query.getResultType());
 
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int UNKNOWN_QUERY = 5;
-
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    public String getName();
-
-    /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    public void setName(String name);
-
-    /**
-     * Returns the <code>logLevel</code> property of this query. Log level is a hint to
-     * QueryEngine that performs this query to log execution with a certain priority.
-     */
-    public Level getLoggingLevel();
-
-    public void setLoggingLevel(Level level);
-
-    /**
-     * Returns one of the values: SELECT_QUERY, INSERT_QUERY, UPDATE_QUERY, DELETE_QUERY
-     * 
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public int getQueryType();
-
-    /**
-     * Returns the root object of this query. Might be a String, ObjEntity, DbEntity or
-     * Class, depending on the query in question
-     * 
-     * @return Object
-     */
-    public Object getRoot();
-
-    /**
-     * Sets the root of the query.
-     * 
-     * @param value The new root
-     */
-    public void setRoot(Object value);
+        query.setResultType(Object.class);
+        assertSame(Object.class, query.getResultType());
+    }
 }

@@ -63,7 +63,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.DataContextStoredProcTst;
+import org.objectstyle.cayenne.access.DataContextProcedureQueryTst;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -122,7 +122,7 @@ public class OracleStackAdapter extends AccessStackAdapter {
     }
 
     public void tweakProcedure(Procedure proc) {
-        if (DataContextStoredProcTst.SELECT_STORED_PROCEDURE.equals(proc.getName())
+        if (DataContextProcedureQueryTst.SELECT_STORED_PROCEDURE.equals(proc.getName())
             && proc.getCallParameters().size() == 2) {
             List params = new ArrayList(proc.getCallParameters());
 

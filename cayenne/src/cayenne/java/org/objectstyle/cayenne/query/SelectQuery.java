@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
-        XMLSerializable {
+        ParameterizedQuery, XMLSerializable {
 
     public static final String DISTINCT_PROPERTY = "cayenne.SelectQuery.distinct";
     public static final boolean DISTINCT_DEFAULT = false;
@@ -294,8 +294,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
-     * A shortcut for {@link #queryWithParameters(Map, boolean)} that prunes
-     * parts of qualifier that have no parameter value set.
+     * A shortcut for {@link #queryWithParameters(Map, boolean)}that prunes parts of
+     * qualifier that have no parameter value set.
      */
     public SelectQuery queryWithParameters(Map parameters) {
         return queryWithParameters(parameters, true);
@@ -328,8 +328,22 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         if (qualifier != null) {
             query.setQualifier(qualifier.expWithParameters(parameters, pruneMissing));
         }
+        
+        // TODO: implement algorithm for building the name based on the original name and
+        // the hashcode of the map of parameters. This way query clone can take advantage
+        // of caching.
 
         return query;
+    }
+
+    /**
+     * Creates and returns a new SelectQuery built using this query as a prototype and
+     * substituting qualifier parameters with the values from the map.
+     * 
+     * @since 1.1
+     */
+    public Query createQuery(Map parameters) {
+        return queryWithParameters(parameters);
     }
 
     /**
@@ -359,7 +373,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     /**
      * Removes ordering.
      * 
-     * @since 1.1 
+     * @since 1.1
      */
     public void removeOrdering(Ordering ordering) {
         this.orderings.remove(ordering);
@@ -455,11 +469,11 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public void clearPrefetches() {
         prefetches.clear();
     }
-    
+
     /**
      * Removes prefetch.
      * 
-     * @since 1.1 
+     * @since 1.1
      */
     public void removePrefetch(String prefetch) {
         this.prefetches.remove(prefetch);

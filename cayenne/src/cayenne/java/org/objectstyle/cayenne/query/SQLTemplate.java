@@ -84,7 +84,15 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- *         SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ * 
+ *  
+ *   
+ *    
+ *              SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
+ *      
+ *     
+ *    
+ *   
  *  
  * </pre>
  * 
@@ -115,7 +123,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  */
 public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
-        XMLSerializable {
+        ParameterizedQuery, XMLSerializable {
 
     private static final Transformer nullMapTransformer = new Transformer() {
 
@@ -318,7 +326,21 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         selectProperties.copyToProperties(query.selectProperties);
         query.setParameters(parameters);
 
+        // TODO: implement algorithm for building the name based on the original name and
+        // the hashcode of the map of parameters. This way query clone can take advantage
+        // of caching.
+
         return query;
+    }
+
+    /**
+     * Creates and returns a new SQLTemplate built using this query as a prototype and
+     * substituting template parameters with the values from the map.
+     * 
+     * @since 1.1
+     */
+    public Query createQuery(Map parameters) {
+        return queryWithParameters(parameters);
     }
 
     public String getCachePolicy() {
@@ -395,12 +417,11 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         String template = (String) templates.get(key);
         return (template != null) ? template : defaultTemplate;
     }
-    
+
     /**
-     * Returns template for key, or null if there is no template
-     * configured for this key. Unlike {@link #getTemplate(String)}
-     * this method does not return a default template as a failover strategy,
-     * rather it returns null.
+     * Returns template for key, or null if there is no template configured for this key.
+     * Unlike {@link #getTemplate(String)}this method does not return a default template
+     * as a failover strategy, rather it returns null.
      */
     public synchronized String getCustomTemplate(String key) {
         return (templates != null) ? (String) templates.get(key) : null;

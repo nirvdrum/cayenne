@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 /**
  * @author Andrei Adamchik
  */
-public class DataContextStoredProcTst extends CayenneTestCase {
+public class DataContextProcedureQueryTst extends CayenneTestCase {
     public static final String UPDATE_STORED_PROCEDURE = "cayenne_tst_upd_proc";
     public static final String SELECT_STORED_PROCEDURE = "cayenne_tst_select_proc";
     public static final String OUT_STORED_PROCEDURE = "cayenne_tst_out_proc";
