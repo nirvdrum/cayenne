@@ -1,0 +1,75 @@
+<document>
+<title>User Guide - Data Views</title>
+<toc name="toc-user-guide" chapter="14. Data Views"/>
+<body>
+    <section name="14. Data Views">
+        <subsection name="14.2 Data Views in Action" anchor="dvinaction">
+            <p>
+            Here we illustrate the discussion of Data Views with configuration samples and code snippets.
+            To support the Data View configuration the Cayenne project DTD was extended to include references
+            to data view configuration files. This information is loaded into the Cayenne Configuration instance
+            along with the Data Domain, Data Node, and Data Map configuration entries. Since the Data View 
+            functionality is optional and would not be very useful in some deployment scenarios (server-side 
+            applications) the Data View configiuration itself is not loaded at the time of initialization. Neither
+            Data View instances are created by the configuration process. You can create a Data View in your Swing
+            application with the code similar to the following:
+            </p>
+            <source>
+//Assume, this is your Cayenne Configuration instance.
+Configuration cayenneConfiguration = ...;
+
+//You will need to setup a Cayenne EntityResolver in your DataView
+//For example you can retrieve it from the DataContext in use
+//with dataContext.getEntityResolver();
+//or construct your own composite one, spanning several Data Domains.
+EntityResolver entityResolver = ...;
+
+//Create new DataView instance, and set its entityResolver
+//*before* loading the actual configuration
+DataView dataView = new DataView();
+dataView.setEntityResolver(entityResolver);
+
+//Load the configuration
+cayenneConfiguration.loadDataView(dataView);
+
+//Here we go. Our Data View is ready to be used in the application
+//This way you can create several of them, completely separated if needed.
+            </source>
+            <p>
+            It is worth mentioning one instance of DataView serves to incorporate several
+            Data View configurations saved in different files. Therefore it defines single
+            namespace and easily resolves inter-configuration references among the ObjEntityViews
+            </p>
+            <p>
+            Next, let us see how a Swing table model and JTable can be configured with our Data View
+            to display and edit a list of data objects.
+            </p>
+            <source>
+DataView dataView = ...;
+
+JTable featureTable = ...;
+//This is a descendant of javax.swing.table.AbstractTableModel
+DOTableModel tableModel = new DOTableModel();
+ObjEntityView featureView = dataView.getObjEntityView("ProductFeatureView");
+
+//Retrieve a list of data objects (with SelectQuery, say)
+//and initialize the model with it
+DataObjectList featureDataObjects = ...;
+tableModel.setDataObjects(matrixEntries);
+featureTable.setModel(tableModel);
+
+//set the apropriate TableCellRenderers and Editors
+new CellRenderers().installRenderers(featureTable);
+new CellEditors().installEditors(featureTable);
+//Ready to fly? Yes, sir!
+            </source>
+            <p>
+            In fact, there is many more cool things you could do with DataViews to build your 
+            Cayenne enabled Swing rich client faster and cleaner, and separate the GUI related stuff
+            from your domain logic defining the clear declarative rules telling the framework 
+            how to interprete, render, and edit the ObjEntities and DataObjects your application relies upon.
+            </p>
+        </subsection>
+    </section>
+</body>
+</document>

@@ -1,0 +1,61 @@
+<document>
+<title>User Guide - Data Views</title>
+<toc name="toc-user-guide" chapter="14. Data Views"/>
+<body>
+    <section name="14. Data Views">
+    	<p>The Cayenne framework provides means to develop persistent layers of
+    domain objects and wraps the JDBC specific logic so that the solid part of
+    manipulations with the data can be performed uniformly and in terms of
+    pure domain Java objects. While this greatly simplifies the design and the
+    implementation of business tiers and the persistense related operations
+    there usually remains a time consuming task. It comprises the building of
+    the presentation layer and binding it with the business and data objects
+    based on Cayenne. One who has the experience of the Swing GUI development
+    knows how much time it takes to work out all the minutest details of
+    formatting, in-place input validation, handling the interactive data
+    modification, enforcing naming, order, and formatting consistensy, etc.
+    Whenever the domain or requirements change, for example, new attributes
+    are added to an ObjEntity, formats or captions for some kind of data are
+    modified, or relationships acquire a meaning different from the original
+    one, the developer is faced with the necessity to go through the number of
+    Swing data models, panels, various helpers fishing out the bits of code to
+    be corrected. Another important feature is easiness of the prototyping of
+    data aware GUIs. Those who, at one time or another, worked with Borland
+    VCL for C++ or Delphi or DataExpress/dbSwing for Java and similar
+    frameworks could recall how painless it was to create a rough prototype of
+    the GUI working with the relational database and bind it to the actual
+    data. That was possible due to the layer of easily configured data aware
+    classes and components. And once the working prototype had been ready its
+    refinement went smoothly.</p>
+
+    <p>Having more than a yearlong experience in the development and the
+    maintainance of the Swing GUIs built on top of the Cayenne framework with
+    one of the major requirements the GUIs must be quickly and seamlessly
+    integrated with the database schemas that have similar structure in the
+    main and still may greatly differ in what extra data they store and how
+    these data should be rendered and modified interactively, the author
+    decided to try and come up with an approach to deal with the problems
+    enumerated above. One can imagine the idea of Cayenne Data Views as a
+    bridge between the domain defined in terms of Cayenne DataObjects and a
+    presentation layer built with Swing. In fact, they may be used in the Web
+    environments as well but Swing interfaces is the main direction of the
+    ongoing effort. Conceptually, Data Views are close to the application
+    facades described, for instance, by Martin Fowler. The following figure
+    outlines the responsibilities and the applicability area of the
+    &#34;Cayenne Data View&#34; subproject.</p>
+
+    <img src="/images/userguide/dataview/dataview-usecases.gif" width="564" height="702" alt="DataView UseCases"/>
+
+    <p>The validation rules mentioned in the Use Cases are meant to be
+    &#34;lightweght&#34;, i.e. it is generally agreed the validation related
+    code to enforce the business rules should be located in the domain area
+    but, still, there are various checks one could prefer to perform right in
+    the presentation layer like inclusion in a predefined range of values,
+    correct input format, sometimes, even preliminary credit card number
+    validity check with the well known Luhn algorithm, the other kinds of
+    sanity checks. Presently the validation is on the list of the features to
+    be added.</p>
+
+    </section>
+</body>
+</document>
