@@ -98,6 +98,7 @@
     <!-- directories.                               -->
     <!-- ========================================== -->
     <target name="prepare">
+        <tstamp/>
         <mkdir dir="${dist.base}"/>
         <mkdir dir="${dist}"/>
         <mkdir dir="${dist}/lib"/>

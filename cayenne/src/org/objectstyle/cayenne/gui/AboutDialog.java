@@ -176,7 +176,10 @@ public class AboutDialog extends JDialog implements ActionListener {
 	public String getInfoString() {
 		String version = getParentEditor().getProperty("cayenne.version");
 		String versionStr = (version != null) ? "Version " + version : "";
-		return infoString + versionStr;
+		
+		String buildDate = getParentEditor().getProperty("cayenne.build.date");
+		String buildDateStr = (buildDate != null) ? "\nBuilt on " + buildDate : "";
+		return infoString + versionStr + buildDateStr;
 	}
 
 	/** Set up the graphical components. */

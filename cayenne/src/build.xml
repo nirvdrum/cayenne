@@ -87,6 +87,7 @@
            <include name="gui.properties"/>
        </fileset>
        <filterset>
+           <filter token="CAYENNE_BUILD_DATE" value="${TODAY}" />
            <filter token="CAYENNE_VERSION" value="${project.version}" />
        </filterset>
     </copy>
