@@ -1,7 +1,7 @@
 <document>
 <title>User Guide - Introduction</title>
 <body>
-    <section name="1. Introduction">
+    <section name="1. Introduction" toc="/userguide/index.html">
     
 		<subsection name="1.1 About Cayenne" anchor="about">
             <p>Cayenne is a free Java object-relational (O/R) persistence framework.

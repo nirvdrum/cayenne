@@ -203,7 +203,7 @@
     <td width="100%">
     <table bgcolor="$bannerborder" border="0" cellpadding="3" cellspacing="2" width="100%">
         <tr>
-           <td bgcolor="$subbannerbg" class="section-title">$subsection.getAttributeValue("name")</td>
+           <td bgcolor="$subbannerbg" class="subsection-title">$subsection.getAttributeValue("name")</td>
         </tr>
     </table>
         #foreach ( $item in $subsection.getChildren() )
@@ -230,9 +230,19 @@
     <a name="$section.getAttributeValue("anchor")"></a>
     #end
     <table bgcolor="$bannerborder" border="0" cellpadding="3" cellspacing="2" width="100%">
-        <tbody>
-            <tr>
-                <td bgcolor="$bannerbg" class="section-title">$section.getAttributeValue("name")</td></tr></tbody></table>
+        <tr>
+                <td bgcolor="$bannerbg">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr><td class="section-title">
+                    $section.getAttributeValue("name")
+#if( $section.getAttributeValue("toc") )
+                #set ($toc = "table of contents...")
+                <td class="small-black" align="right">#projectanchor($toc $section.getAttributeValue("toc"))</td>
+#end
+                </td></tr></table>
+                </td>
+        </tr>
+    </table>
 
         #foreach ( $item in $section.getChildren() )
             #if ($item.getName().equals("img"))

@@ -1,7 +1,7 @@
 <document>
 <title>User Guide - Installation</title>
 <body>
-    <section name="2. Installation">
+    <section name="2. Installation" toc="/userguide/index.html">
         <subsection name="2.1 System Requirements" anchor="sys_req">
             <p>Cayenne, including GUI tools, is written in 100% Java,
             and therefore should run out of the box on any Java-compatible platform. 

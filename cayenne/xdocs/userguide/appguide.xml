@@ -6,7 +6,7 @@
     </properties>
     
 <body>
-    <section name="4. Writing Cayenne Applications">
+    <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">
         <subsection name="4.1 Introduction" anchor="intro">
             <p>The following steps (discussed in detail below) are needed
             to write a Cayenne application:</p>
@@ -113,7 +113,8 @@ import org.objectstyle.exp.ExpressionFactory;
 // assume this exists and initialized
 DataContext ctxt;
 ...
-Expression e = ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
+Expression e = 
+   ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
 SelectQuery q = new SelectQuery("Painting", e);
 List realArt = ctxt.performQuery(q);
 ...

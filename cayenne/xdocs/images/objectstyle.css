@@ -34,13 +34,11 @@
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
 }
 
-
 .section-title {
-	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 12pt; FONT-WEIGTH: bold
+	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 12pt; FONT-WEIGHT: bold
 }
-
 .subsection-title {
-	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 12pt; LINE-HEIGHT: 11pt; 
+	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 11pt; FONT-WEIGHT: bold 
 }
 
 .large-dkblue {
