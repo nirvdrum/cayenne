@@ -13,6 +13,16 @@
         </section>
         
         <section name="Project News">
+<p><u><i>[March 2, 2005]</i></u> <strong>Confluence Wiki Launch</strong></p>
+		<p>We are glad to announce an official launch of <a href="http://objectstyle.org/confluence/display/CAY/Home">Confluence Wiki</a> 
+		for Cayenne. Confluence is more that just a classic Wiki. It has blogs, advanced permissions management 
+ 		and a number of other tools for collaborative content creation. It also uses Jira logins, so you won't
+		need a second id to get in. Confluence should help us to 
+		<a href="http://objectstyle.org/confluence/display/CAY/Cayenne+FAQ">update the FAQ</a>, 
+		<a href="http://objectstyle.org/confluence/pages/viewrecentblogposts.action?key=CAY">blog latest Cayenne
+		developments</a>,
+		and <a href="http://objectstyle.org/confluence/display/CAY/Cayenne+Examples">post examples</a>. Many thanks to Atlassian for providing us free license.</p>
+
            <p><u><i>[February 7, 2005]</i></u> <strong>Cayenne 1.2 M2</strong></p>
 		<p>Second 1.2 milestone is <a href="download.html">available for download</a>. 
 It removes all previously deprecated API, features real support for auto-increment columns, adds a 

@@ -3,6 +3,9 @@
 
 <body>
     <section name="Cayenne FAQ">
+	<panel name="FAQ is being moved to Wiki">Note that this FAQ is outdated and is being moved
+	to our new Wiki - http://objectstyle.org/confluence/display/CAY/Cayenne+FAQ
+	</panel>
     	<p> This is a list of Cayenne Frequently Asked Questions.
     	If you have a question not answered here, feel free to ask it on 
     	<a href="http://objectstyle.org/cayenne/lists.html">cayenne-user</a> 
