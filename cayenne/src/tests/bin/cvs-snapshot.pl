@@ -34,7 +34,9 @@ die_with_email("Cayenne checkout folder does not exist: $opt_c") unless -d $opt_
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = 1900 + $year;
 $mon = 1 + $mon;
-my $label = "$year-$mon-$mday-$hour-$min";	
+$min = "0$min" if $min < 10;
+$hour = "0$hour" if $hour < 10;
+my $label = "$year-$mon-$mday-$hour$min";	
 my $out_file = "$ENV{'HOME'}/cayenne-cvs-snapshot-$label.txt";
 unlink $out_file if -f $out_file;
 
