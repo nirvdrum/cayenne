@@ -22,12 +22,14 @@ import org.objectstyle.cayenne.access.DataDomain;
 Configuration conf = Configuration.getSharedConfiguration();
 DataDomain domain = conf.getDomain();
 </source>
-<p> </p>
+<p>As discussed in the following chapters Configuration works behind the scenes 
+	and users rarely care about it. Application code is normally only concered 
+	with obtaining a DataContext.</p>
 <panel name="Spring Integration Note:">Spring Framework 
 	(http://www.springframework.org) is a popular configuration and deployment 
 	environment for all types of applications. Spring contains Cayenne 
 	integration classes since version 1.2. It works with Cayenne 1.1 or 
-	newer.</panel>
+	newer and in the spirit of "dependency injection" doesn't depend on singleton Configuration.</panel>
     </section>
 </body>
 </document>

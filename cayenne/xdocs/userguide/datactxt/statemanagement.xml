@@ -5,52 +5,55 @@
     <section name="6. Using DataContext">
 	<subsection name="6.3 DataObject State Management">
 	
-	<p>Second and most important function of DataContext (first being performing queries) is 
-	keeping track of changes made to the registered DataObjects. Each object 
-	should be registered with DataContext to become "persistent".</p>
+	<p>Arguably the second most important function of DataContext (first is 
+		performing queries) is keeping track of changes made to the registered 
+		DataObjects. "Registered" is a keyword here - registering an object 
+		with DataContext is what gives this object its persistent qualities.</p>
 	
-	<subsection name="6.3.1 Registering DataObjects">
-	<p>There are two ways for objects to get registered: (1) when they are fetched via query API and (2)
-	explicitly for the newly created objects.</p>
+	<subsection name="6.3.1 How to Register a DataObject">
+	<p>Behind the scenes "registering an object" results in storing this object 
+		in a map using its ObjectId as a key, setting "dataContext" property of 
+		a DataObject to the current DataContext, and taking a snapshot of all 
+		persistent properties to be able to track later modifications. Objects 
+		can become "registered" in two ways:</p>
+	<ul>
+		<li>automatically when they are fetched via query API</li>
+		<li>explicitly for the newly created objects</li>
+	</ul>
 	
-	<p>Objects fetched via query API are registered automatically.
-	DataContext takes a snapshot of each object's persistent properties and stores it internally 
-	to be able to track later modifications to objects.
-	</p>
-	
-	<p>Newly created objects must be registered with DataContext explicitly:</p>
+	<p>Whenever a selecting query is executed by a DataContext, all fetched 
+		objects are automatically registered with this DataContext. On the 
+		other hand, newly created objects must be registered explicitly:</p>
 	
 <source>
 import org.objectstyle.cayenne.access.DataContext;
 ...
-DataContext ctxt; // assume this exists
+DataContext context; // assume this exists
 
-// artist inherits from CayenneDataObject...
 Artist artist = new Artist();
+context.registerNewObject(artist);
 
-ctxt.registerNewObject(artist);
-
-// after the line above is executed
-// artist object aquired "persistent" behavior
-// and is managed by DataContext
+// after the line above is executed, artist object acquired "persistent" behavior
+// and is said to be "managed" by DataContext
 </source>
 
-	<p>To reduce the amount of code needed to make new objects persistent, DataContext provides a 
-	shortcut to create and register DataObjects in one method call. This requires a default no-argument 
-	constructor in the DataObject class.</p>
+	<p>This code can be simplified - object creation and registrations steps 
+		can be combined in one method call:</p>
 <source>
 import org.objectstyle.cayenne.access.DataContext;
 ...
-DataContext ctxt; // assume this exists
+DataContext context; // assume this exists
 
-Artist artist = (Artist)ctxt.createAndRegisterNewObject(Artist.class);
+Artist artist = (Artist) context.createAndRegisterNewObject(Artist.class);
 </source>
+	<p>This method relies on the presence of a no-argument constructor in the 
+		DataObject class.</p>
 		</subsection>
 		
 		<subsection name="6.3.2 Checking the State of Registered DataObjects">
 		<p>State transitions of DataObjects from persistence point of view are discussed in the
 		"Design" chapter. State of each individual object is described by an integer
-		constant obtained via a call to <code>DataObject.getPeristenceState()</code>
+		constant obtained via a call to <code>DataObject.getPeristenceState()</code>.
 		Allowed states are defined as static variables in <a href=
 		"../../api/cayenne/org/objectstyle/cayenne/PersistenceState.html">PersistenceState</a> class.</p>
 		
@@ -58,33 +61,30 @@ Artist artist = (Artist)ctxt.createAndRegisterNewObject(Artist.class);
 <source>
 import org.objectstyle.cayenne.access.DataContext;
 ...
-DataContext ctxt; // assume this exists
+DataContext context; // assume this exists
 
 // artist will become PersistenceState.NEW
-Artist artist = (Artist)ctxt.createAndRegisterNewObject(Artist.class);
+Artist artist = (Artist) context.createAndRegisterNewObject(Artist.class);
+</source>
+
+		<p>When a DataContext is committed, such object  becomes "COMMITTED":</p>
+<source>
+// artist will become PersistenceState.COMMITTED
+context.commitChanges();
 </source>
 		
 		<p>When any of the attributes or relationships of the fetched or committed object are changed, such
 		an object becomes MODIFIED:</p>
 <source>
-// assume this was fetched earlier
-Artist artist;
-
 // this will change the object state to PersistenceState.MODIFIED
 artist.setName("NewName");
 </source>
 
-		<p>When a fetched or committed object is explicitly deleted from the DataContext, and object becomes DELETED:</p>
+		<p>When a fetched or committed object is explicitly deleted from the 
+			DataContext, object becomes DELETED:</p>
 <source>
-import org.objectstyle.cayenne.access.DataContext;
-...
-DataContext ctxt; // assume this exists
-
-// assume this was fetched earlier
-Artist artist;
-
 // this will change the object state to PersistenceState.DELETED
-ctxt.deleteObject(artist);
+context.deleteObject(artist);
 </source>
 
 		<p>DataContext is said to have changes if it has one or more registered objects in a state
@@ -104,16 +104,18 @@ ctxt.deleteObject(artist);
 		</ul>
 		</subsection>
 		
-		<subsection name="6.3.3 Committing All Modified DataObjects">
-		<p>All of the objects with changes (what "changes" mean is discussed above) are committed to the
-		database with a single method call on the DataContext:
+		<subsection name="6.3.3 Saving All Uncommitted DataObjects">
+		<p>All of the uncommitted objects ("uncommitted" means "new", 
+			"modified" or "deleted") are saved ("committed") to the database 
+			with a single method call on the DataContext: </p>
 		
 		<ul>
 			<li><code>public void <b>commitChanges()</b></code></li>
 		</ul>
 		
-		Method <code>commitChanges</code> takes care of building correct SQL statements, generating primary
-		keys and transactional behaviour. It roughly follows this scenario:
+		<p>Method <code>commitChanges</code> takes care of building correct SQL 
+			statements, generating primary keys and transactional behaviour. It 
+			roughly follows this scenario:</p>
 		
 		<ul>
 			<li>Checks if there are any changed objects.</li>
@@ -126,7 +128,6 @@ ctxt.deleteObject(artist);
 			<li>Changes all committed objects state to PersistenceState.COMMITTED.</li>
 			<li>Updates internally stored snapshots of the recently saved objects.</li>
 		</ul>
-		</p>
 		</subsection>
 		
 	        <subsection name="6.3.3 Undoing All Uncommitted Changes">

@@ -66,6 +66,7 @@
     		<item name="8.5 DataObjectUtils"  href="/userguide/dataobjects/dataobjectutils.html"/>
     		<item name="8.6 DataObject Validation"  href="/userguide/dataobjects/validation.html"/>
     		<item name="8.7 Handling Inheritance"  href="/userguide/dataobjects/dataobjects-inheritance.html"/>
+			<item name="8.8 Deleting Objects"  href="/userguide/dataobjects/delete.html"/>
     	</item>
     	
     	<item name="9. Using Stored Procedures"  href="/userguide/stored-procedures/index.html">
