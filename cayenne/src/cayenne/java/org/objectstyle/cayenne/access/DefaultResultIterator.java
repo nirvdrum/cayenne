@@ -107,6 +107,15 @@ public class DefaultResultIterator implements ResultIterator {
     protected int fetchedSoFar;
     protected int fetchLimit;
 
+    protected DefaultResultIterator(
+        Connection connection,
+        Statement statement,
+        ResultSet resultSet) {
+        this.connection = connection;
+        this.statement = statement;
+        this.resultSet = resultSet;
+    }
+
     /** 
      * Creates new DefaultResultIterator. Initializes it with ResultSet and
      * query metadata.
@@ -117,30 +126,30 @@ public class DefaultResultIterator implements ResultIterator {
         SelectQueryAssembler assembler)
         throws SQLException, CayenneException {
 
-        this.statement = statement;
-        this.connection = assembler.getCon();
-        this.resultSet = statement.executeQuery();
-
+        this(assembler.getCon(), statement, statement.executeQuery());
+        
         initResultDescriptor(
             assembler.getSnapshotDesc(resultSet),
             assembler.getResultTypes(resultSet),
-            adapter.getTypeConverter());
-
-        // check fetch limit
-        int limit = assembler.getFetchLimit();
-        this.fetchLimit = (limit > 0) ? limit : Integer.MAX_VALUE;
+            adapter.getTypeConverter(),
+            assembler.getFetchLimit());
 
         checkNextRow();
     }
 
+    /**
+     * Initailizes the fields needed to process ResultSet.
+     */
     protected void initResultDescriptor(
         DbAttribute[] rowDescriptor,
         String[] javaTypes,
-        ExtendedTypeMap typeMap) {
+        ExtendedTypeMap typeMap,
+        int fetchLimit) {
 
         this.resultWidth = rowDescriptor.length;
         this.converters = new ExtendedType[resultWidth];
         this.rowDescriptor = rowDescriptor;
+        this.fetchLimit = fetchLimit;
 
         // this list will hold positions of PK atributes
         List idIndexList = new ArrayList(resultWidth);
@@ -161,7 +170,6 @@ public class DefaultResultIterator implements ResultIterator {
             this.idIndex[i] = ((Integer) idIndexList.get(i)).intValue();
         }
     }
-    
 
     /**
      * @deprecated since 1.0-Beta1 this method is no longer used.
@@ -176,7 +184,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected void checkNextRow() throws SQLException, CayenneException {
         nextRow = false;
-        if (fetchedSoFar < fetchLimit && resultSet.next()) {
+        if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit) && resultSet.next()) {
             nextRow = true;
             fetchedSoFar++;
         }
