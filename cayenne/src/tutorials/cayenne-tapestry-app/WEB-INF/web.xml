@@ -8,6 +8,10 @@
 <servlet>
 	<servlet-name>CayenneTapestryApp</servlet-name>
 	<servlet-class>cayenne.tutorial.tapestry.ArtistAppServlet</servlet-class>
+	<init-param>
+			<param-name>org.apache.tapestry.application-specification</param-name>
+			<param-value>ArtistApp.application</param-value>
+	</init-param>
 	<load-on-startup>0</load-on-startup>
 </servlet>
  

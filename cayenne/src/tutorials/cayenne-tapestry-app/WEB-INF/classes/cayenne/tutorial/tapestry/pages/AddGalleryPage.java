@@ -1,52 +1,57 @@
 package cayenne.tutorial.tapestry.pages;
 
-import cayenne.tutorial.tapestry.Visit;
-import cayenne.tutorial.tapestry.domain.Gallery;
-import net.sf.tapestry.IRequestCycle;
-
+import org.apache.tapestry.IRequestCycle;
+import org.apache.tapestry.event.PageEvent;
 import org.objectstyle.cayenne.access.DataContext;
 
+import cayenne.tutorial.tapestry.domain.Gallery;
+
 /**
+ * A page to add new Art Galleries to the system.
+ * 
  * @author Eric Schneider
- *
  */
-public class AddGalleryPage extends EditorPage {
+public abstract class AddGalleryPage extends EditorPage {
 
-	private Gallery gallery;
+    // properties are defined as abstract setters and getters
+    // and are declared in AddGalleryPage.page file
+    public abstract void setGallery(Gallery value);
+    public abstract Gallery getGallery();
 
-	public void setGallery(Gallery value) {
-		gallery = value;
-	}
+    public void saveGalleryAction(IRequestCycle cycle) {
+        Gallery gallery = getGallery();
 
-	public Gallery getGallery() {
-		return gallery;
-	}
+        if (!assertNotNull(gallery.getGalleryName())) {
+            appendHtmlToErrorMessage("You must provide a gallery name.");
+            return;
+        }
 
-	public void saveGalleryAction(IRequestCycle cycle) {
-		
-		if (!assertNotNull(gallery.getGalleryName()) ) {
-			appendHtmlToErrorMessage("You must provide a gallery name.");	
-			return;
-		}
+        DataContext ctxt = getVisitDataContext();
+        ctxt.registerNewObject(gallery);
 
-		Visit visit = (Visit) this.getPage().getVisit();
-		DataContext ctxt = visit.getDataContext();
+        // commit to the database
+        ctxt.commitChanges();
 
-		ctxt.registerNewObject(gallery);
+        BrowseGalleriesPage nextPage =
+            (BrowseGalleriesPage) cycle.getPage("BrowseGalleriesPage");
 
-		// commit to the database
-		ctxt.commitChanges();
+        // update the next page if it has cached galleries
+        // to avoid unneeded refreshing
+        if (nextPage.getGalleryList() != null) {
+            nextPage.getGalleryList().add(gallery);
+        }
 
-		BrowseGalleriesPage nextPage =
-			(BrowseGalleriesPage) cycle.getPage("BrowseGalleriesPage");
+        cycle.activate(nextPage);
+    }
 
-		cycle.setPage(nextPage);
-	}
+    public void pageBeginRender(PageEvent event) {
 
-	public void initialize() {
-		super.initialize();
-		
-		gallery = new Gallery();
-	}
+        // create new Gallery when page is initialized. 
+        // Do not intsert it into DataContext just yet.
+        // Instead if we register it here, and the user abandons 
+        // the page, we will have to find a way to rollback the context,
+        // to avoid grabage carried over to other pages
+        setGallery(new Gallery());
+    }
 
 }

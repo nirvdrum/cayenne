@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!DOCTYPE page-specification PUBLIC 
-	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
-	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+<!DOCTYPE page-specification PUBLIC
+  "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
 
 <page-specification class="cayenne.tutorial.tapestry.pages.AddGalleryPage">
-
-  	<component id="pageWrapper" type="PageWrapper" />
 	
 	<component id="hasErrors" type="Conditional">
    		<binding name="condition" expression="hasErrorMessage"/>
@@ -17,8 +14,6 @@
 		<binding name="raw" expression="true"/>
 	</component>
 	
-	<component id="addGalleryForm" type="Form" />
-	
 	<component id="galleryName" type="TextField">
 		<binding name="value" expression="gallery.galleryName" />
 	</component>
@@ -27,4 +22,5 @@
 		<binding name="listener" expression="listeners.saveGalleryAction"/>
 	</component>
 
+	<property-specification name="gallery" type="cayenne.tutorial.tapestry.domain.Gallery" persistent="yes"/>
 </page-specification>

@@ -1,89 +1,65 @@
 package cayenne.tutorial.tapestry.pages;
 
-import cayenne.tutorial.tapestry.Visit;
-import cayenne.tutorial.tapestry.domain.Artist;
-import cayenne.tutorial.tapestry.domain.Painting;
-
 import java.util.List;
 
-import net.sf.tapestry.IRequestCycle;
-import net.sf.tapestry.RequestCycleException;
-import net.sf.tapestry.html.BasePage;
-
+import org.apache.tapestry.IRequestCycle;
+import org.apache.tapestry.event.PageEvent;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
+import cayenne.tutorial.tapestry.domain.Artist;
+import cayenne.tutorial.tapestry.domain.Painting;
+
 /**
+ * Page that shows a list of artists with their paintings.
+ * 
  * @author Eric Schneider
- *
  */
-public class BrowseArtistsPage extends BasePage {
+public abstract class BrowseArtistsPage extends ApplicationPage {
 
-	private List artistList;
-	private Artist artist;
-	public Painting painting;
+    // properties are defined as abstract setters and getters
+    // and are declared in BrowseArtistsPage.page file
+    public abstract void setArtist(Artist value);
+    public abstract Artist getArtist();
 
-	public void setArtistList(List value) {
-		artistList = value;
-	}
+    public abstract void setPainting(Painting value);
+    public abstract Painting getPainting();
 
-	public List getArtistList() {
-		return artistList;
-	}
+    public abstract void setArtistList(List value);
+    public abstract List getArtistList();
 
-	public void setArtist(Artist value) {
-		artist = value;
-	}
+    public boolean getIsOnDisplay() {
+        return (getPainting().getToGallery() != null);
+    }
 
-	public Artist getArtist() {
-		return artist;
-	}
+    public void addPaintingAction(IRequestCycle cycle) {
+        AddPaintingPage nextPage = (AddPaintingPage) cycle.getPage("AddPaintingPage");
 
-	public boolean getIsOnDisplay() {
-		return (painting.getToGallery() != null);
-	}
+        nextPage.setArtist(getArtist());
 
-	public void addPaintingAction(IRequestCycle cycle) {
-		AddPaintingPage nextPage =
-			(AddPaintingPage) cycle.getPage("AddPaintingPage");
+        cycle.activate(nextPage);
+    }
 
-		nextPage.setArtist(getArtist());
+    public void submitPaintingToGalleryAction(IRequestCycle cycle) {
+        ChooseGalleryPage nextPage =
+            (ChooseGalleryPage) cycle.getPage("ChooseGalleryPage");
 
-		cycle.setPage(nextPage);
-	}
+        nextPage.setPainting(getPainting());
+        cycle.activate(nextPage);
+    }
 
-	public void submitPaintingToGalleryAction(IRequestCycle cycle) {
-		ChooseGalleryPage nextPage =
-			(ChooseGalleryPage) cycle.getPage("ChooseGalleryPage");
+    public void pageBeginRender(PageEvent event) {
 
-		nextPage.setPainting(painting);
+        // refetch artists only if they are not initialized
+        if (getArtistList() == null) {
+            DataContext ctxt = getVisitDataContext();
 
-		cycle.setPage(nextPage);
-	}
+            SelectQuery query = new SelectQuery(Artist.class);
+            Ordering ordering = new Ordering("artistName", Ordering.ASC);
+            query.addOrdering(ordering);
 
-	protected void prepareForRender(IRequestCycle cycle)
-		throws RequestCycleException {
-
-		super.prepareForRender(cycle);
-
-		Visit visit = (Visit) getVisit();
-
-		DataContext ctxt = visit.getDataContext();
-
-		SelectQuery query = new SelectQuery(Artist.class);
-		Ordering ordering = new Ordering("artistName", Ordering.ASC);
-		query.addOrdering(ordering);
-
-		artistList = ctxt.performQuery(query);
-	}
-
-	public void detach() {
-		super.detach();
-
-		artistList = null;
-		artist = null;
-		painting = null;
-	}
-
+            setArtistList(ctxt.performQuery(query));
+        }
+    }
 }

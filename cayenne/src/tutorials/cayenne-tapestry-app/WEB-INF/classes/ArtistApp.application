@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-
 <!DOCTYPE application PUBLIC 
-	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
-	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+  "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
 
-<application name="Artist Web App" engine-class="net.sf.tapestry.engine.SimpleEngine">
-
-  <property name="net.sf.tapestry.visit-class">cayenne.tutorial.tapestry.Visit</property>
+<application name="Artist Web App">
+  <property name="org.apache.tapestry.visit-class">cayenne.tutorial.tapestry.Visit</property>
 
   <page name="Home" specification-path="/cayenne/tutorial/tapestry/pages/Home.page"/>
   <page name="Main" specification-path="/cayenne/tutorial/tapestry/pages/Main.page"/>
@@ -18,5 +15,5 @@
   <page name="AddPaintingPage" specification-path="/cayenne/tutorial/tapestry/pages/AddPaintingPage.page"/>
   <page name="ChooseGalleryPage" specification-path="/cayenne/tutorial/tapestry/pages/ChooseGalleryPage.page"/>
   
-  <component-alias type="PageWrapper" specification-path="/cayenne/tutorial/tapestry/components/PageWrapper.jwc"/>
+  <component-type type="PageWrapper" specification-path="/cayenne/tutorial/tapestry/components/PageWrapper.jwc"/>
 </application>

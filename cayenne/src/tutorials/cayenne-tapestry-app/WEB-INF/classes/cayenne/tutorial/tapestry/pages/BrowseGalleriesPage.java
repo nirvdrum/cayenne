@@ -1,69 +1,48 @@
 package cayenne.tutorial.tapestry.pages;
 
-import cayenne.tutorial.tapestry.Visit;
-import cayenne.tutorial.tapestry.domain.Gallery;
-import cayenne.tutorial.tapestry.domain.Painting;
-
 import java.util.List;
 
-import net.sf.tapestry.IRequestCycle;
-import net.sf.tapestry.RequestCycleException;
-import net.sf.tapestry.html.BasePage;
-
-import org.objectstyle.cayenne.access.DataContext;
+import org.apache.tapestry.IRequestCycle;
+import org.apache.tapestry.event.PageEvent;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
+import cayenne.tutorial.tapestry.domain.Gallery;
+import cayenne.tutorial.tapestry.domain.Painting;
+
 /**
+ * Page displaying galleries with their paintings.
+ * 
  * @author Eric Schneider
- *
  */
-public class BrowseGalleriesPage extends BasePage {
+public abstract class BrowseGalleriesPage extends ApplicationPage {
 
-	private DataContext ctxt;
+    // properties are defined as abstract setters and getters
+    // and are declared in BrowseGalleriesPage.page file
+    public abstract void setGallery(Gallery value);
+    public abstract Gallery getGallery();
 
-	private List galleryList;
-	public Gallery gallery;
-	public Painting painting;
+    public abstract void setPainting(Painting value);
+    public abstract Painting getPainting();
 
-	public void setGalleryList(List value) {
-		galleryList = value;
-	}
+    public abstract void setGalleryList(List value);
+    public abstract List getGalleryList();
 
-	public List getGalleryList() {
-		return galleryList;
-	}
+    public void removePaintingAction(IRequestCycle cycle) {
+        getGallery().removeFromPaintingArray(getPainting());
 
-	public void removePaintingAction(IRequestCycle cycle) {
+        // commit to the database
+        getVisitDataContext().commitChanges();
+    }
 
-		gallery.removeFromPaintingArray(painting);
+    public void pageBeginRender(PageEvent event) {
+        // fetch the galleries if we do not have them cached
+        if (getGalleryList() == null) {
+            SelectQuery query = new SelectQuery(Gallery.class);
+            Ordering ordering = new Ordering("galleryName", Ordering.ASC);
+            query.addOrdering(ordering);
 
-		// commit to the database
-		ctxt.commitChanges();
-
-	}
-
-	protected void prepareForRender(IRequestCycle cycle)
-		throws RequestCycleException {
-
-		super.prepareForRender(cycle);
-
-		Visit visit = (Visit) this.getPage().getVisit();
-		ctxt = visit.getDataContext();
-
-		SelectQuery query = new SelectQuery(Gallery.class);
-		Ordering ordering = new Ordering("galleryName", Ordering.ASC);
-		query.addOrdering(ordering);
-
-		galleryList = ctxt.performQuery(query);
-	}
-
-	public void detach() {
-		super.detach();
-
-		galleryList = null;
-		gallery = null;
-		painting = null;
-	}
-
+            setGalleryList(getVisitDataContext().performQuery(query));
+        }
+    }
 }

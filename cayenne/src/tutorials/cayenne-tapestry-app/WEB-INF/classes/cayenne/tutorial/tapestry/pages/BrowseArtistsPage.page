@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!DOCTYPE page-specification PUBLIC 
-	"-//Howard Lewis Ship//Tapestry Specification 1.3//EN" 
-	"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd">
+<!DOCTYPE page-specification PUBLIC
+  "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+  "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd">
 
 <page-specification class="cayenne.tutorial.tapestry.pages.BrowseArtistsPage">
-
-  	<component id="pageWrapper" type="PageWrapper" />
-  
 	<component id="artists" type="Foreach">
   		<binding name="source" expression="artistList"/>
   		<binding name="value" expression="artist"/>
@@ -49,11 +45,8 @@
 	<component id="submitPaintingLink" type="ActionLink">
     	<binding name="listener" expression="listeners.submitPaintingToGalleryAction"/>
 	</component>
-	
-	<component id="addArtistLink" type="PageLink">
-		<static-binding name="page">AddArtistPage</static-binding>
-		<field-binding name="stateful" field-name="Boolean.FALSE"/>
-    </component>
 
-
+	<property-specification name="artistList" type="java.util.List" persistent="yes"/>
+	<property-specification name="artist" type="cayenne.tutorial.tapestry.domain.Artist" persistent="no"/>
+	<property-specification name="painting" type="cayenne.tutorial.tapestry.domain.Painting" persistent="no"/>
 </page-specification>

@@ -21,8 +21,8 @@
     <classpathentry exported="true" kind="lib" path="otherlib/commons-logging-1.0.3.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/junit-3.8.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/log4j-1.2.8.jar"/>
-    <classpathentry exported="true" kind="lib" path="otherlib/net.sf.tapestry-2.2.jar"/>
-    <classpathentry exported="true" kind="lib" path="otherlib/ognl-2.3.1-opt.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/tapestry-3.0-beta-3.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/ognl-2.5.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/scope-bin-1.0.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/servlet-2.3.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/struts-1.0.jar"/>
