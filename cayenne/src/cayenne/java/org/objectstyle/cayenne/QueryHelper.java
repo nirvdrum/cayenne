@@ -285,7 +285,7 @@ public final class QueryHelper {
         // sanity check
         if (dbRels == null || dbRels.size() == 0) {
             throw new CayenneRuntimeException(
-                "ObjRelatitionship '" + rel.getName() + "' is unmapped.");
+                "ObjRelationship '" + rel.getName() + "' is unmapped.");
         }
 
         // build a reverse DB path
