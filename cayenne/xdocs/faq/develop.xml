@@ -12,22 +12,20 @@
     	Cayenne is tested and proven to be 100% compatible with 
     	the following engines:
     	<ul> 
-    		<li><a href="http://oracle.com/">Oracle</a> (8, 8i, 9i)</li>
-    		<li><a href="http://www.sybase.com/">Sybase (11.9)</a></li>
-    		<li><a href="http://www.mysql.com/">MySQL</a></li>
-    		<li><a href="http://www.postgresql.org/">PostgreSQL</a> (7.3 and newer)</li>
-    		<li><a href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-    		<li><a href="http://www.ibm.com/db2/">DB2</a></li>
-    		<li><a href="http://firebird.sourceforge.net/">FireBird (Interbase)</a></li> 
+    		<li><a href="http://oracle.com/" target="_new">Oracle</a> (8, 8i, 9i)</li>
+    		<li><a href="http://www.sybase.com/" target="_new">Sybase (11.9)</a></li>
+    		<li><a href="http://www.microsoft.com/sql/default.asp" target="_new">Microsoft SQL Server</a></li>
+    		<li><a href="http://www.mysql.com/" target="_new">MySQL</a></li>
+    		<li><a href="http://www.postgresql.org/" target="_new">PostgreSQL</a> (7.3 and newer)</li>
+    		<li><a href="http://hsqldb.sourceforge.net/" target="_new">HSQLDB</a></li>
+    		<li><a href="http://www.ibm.com/db2/" target="_new">DB2</a></li>
+    		<li><a href="http://firebird.sourceforge.net/" target="_new">FireBird (Interbase)</a></li>
+    		<li><a href="http://www.openbase.com/" target="_new">OpenBase</a></li>
     	</ul>
     	
     	Adapters for other engines are constantly added. Users can create their own adapters as well.
     	</p>
-    	<p></p>
-    	
-    	<panel name="Note on MS SQLServer adapter:">SybaseAdapter works pretty well with SQLServer. 
-    	A separate adapter maybe created in the future.
-    	</panel>
+    	<p> </p>
     	</subsection>
     	
     	

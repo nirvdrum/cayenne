@@ -18,7 +18,7 @@
     	is Oracle). If you are still having this problem, here is a few suggested solutions:
     	
     	<ul>
-    		<li>If you are using MySQL, MYSQL JDBC driver offers "auto-reconnect" feature. Use a URL parameter "autoReconnect" set to "true"
+    		<li>If you are using MySQL, MySQL JDBC driver offers "auto-reconnect" feature. Use a URL parameter "autoReconnect" set to "true"
     		to enable reconnection. E.g.: <i>jdbc:mysql://localhost/test?autoReconnect=true</i>. Unfortunately other
     		databases do not have such feature.</li>
     		

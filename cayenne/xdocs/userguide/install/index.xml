@@ -20,16 +20,13 @@
             </panel>
                 
             <p><strong>- Access to a relational database and JDBC driver for 
-            this database.</strong> Out of the box, Cayenne would 
-            support Oracle, Sybase and MySQL databases. 
-            Certain level of support exists for any other database that has a 
-            JDBC driver available but this is untested and not guaranteed. List of
-            available JDBC drivers can be found at 
+            this database.</strong> Out of the box Cayenne supports <a href=
+            "../../faq/develop.html#db">a number of databases</a>. 
+            If your database is not on the list, there is a very good chance you can 
+            still use Cayenne with it, as long as there is a 
+            JDBC driver available. List of available JDBC drivers can be found at 
             <a href="http://industry.java.sun.com/products/jdbc/drivers">
-            http://industry.java.sun.com/products/jdbc/drivers</a>.
-            
-            <i>Note that to run Cayenne unit tests you will need database privileges
-            to create and drop tables.</i></p>
+            http://industry.java.sun.com/products/jdbc/drivers</a>.</p>
             
       		<p><strong>- XML SAX Parser (JDK1.3 only).</strong> If the system runs JDK1.3, a
 			third party SAX parser is required (JDK1.4 has a parser already bundled with it). Cayenne
