@@ -31,9 +31,9 @@
     <!-- ============================================= -->
     <!-- Copies images and other resources. -->
     <!-- ============================================= -->
-	<target name="resources" depends="check-properties">
+	<target name="resources" depends="check-properties,release-subproject">
         <copy todir="${doc.root}/images">
-            <fileset dir="${cayenne.location}/xdocs/images" includes="**/**"/>
+            <fileset dir="${subproject.dist}/doc/images" includes="**/**"/>
         </copy>
     </target>
     
