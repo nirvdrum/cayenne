@@ -55,9 +55,14 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -65,8 +70,10 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 
+/**
+ * @author Andrei Adamchik
+ */
 public class ModelerUtil {
-
     /**
      * Builds a consistent title that starts with the application name.
      */

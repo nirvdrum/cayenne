@@ -55,8 +55,15 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import javax.swing.JRootPane;
+import java.awt.Container;
+import java.awt.Window;
 
+import javax.swing.JDialog;
+import javax.swing.JRootPane;
+import javax.swing.WindowConstants;
+
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.scopemvc.controller.basic.ViewContext;
 import org.scopemvc.controller.swing.SwingContext;
 import org.scopemvc.core.View;
@@ -66,6 +73,8 @@ import org.scopemvc.view.swing.SwingView;
  * @author Andrei Adamchik
  */
 public class ModelerContext extends SwingContext {
+    static Logger logObj = Logger.getLogger(ModelerContext.class);
+
     public static void setupContext() {
         ViewContext.clearThreadContext();
         ViewContext.setGlobalContext(new ModelerContext());
@@ -78,10 +87,30 @@ public class ModelerContext extends SwingContext {
         super();
     }
 
-    protected void showViewInPrimaryWindow(SwingView inView) {}
+    protected void showViewInPrimaryWindow(SwingView view) {}
 
+    /**
+     * Overrides super implementation to allow using Scope
+     * together with normal Swing code that CayenneModeler already has.
+     */
     protected JRootPane findRootPaneFor(View view) {
         JRootPane pane = super.findRootPaneFor(view);
-        return (pane != null) ? pane : Editor.getFrame().getRootPane();
+
+        if (pane != null) {
+            return pane;
+        }
+
+        if (((SwingView) view).getDisplayMode() != SwingView.PRIMARY_WINDOW) {
+            return pane;
+        }
+
+        return Editor.getFrame().getRootPane();
+    }
+
+    /**
+     * @see org.scopemvc.controller.swing.SwingContext#getDefaultParentWindow()
+     */
+    protected Window getDefaultParentWindow() {
+        return Editor.getFrame();
     }
 }

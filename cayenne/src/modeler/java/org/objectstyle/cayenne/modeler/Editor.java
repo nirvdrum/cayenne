@@ -122,6 +122,7 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.model.TopModel;
+import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.modeler.util.XmlFilter;
@@ -130,6 +131,7 @@ import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.scopemvc.core.Control;
+import org.scopemvc.util.UIStrings;
 
 /** 
  * Main frame of CayenneModeler. Responsibilities include 
@@ -250,6 +252,9 @@ public class Editor
         super(ModelerConstants.TITLE);
 
         frame = this;
+        
+        // force Scope to use CayenneModeler properties
+        UIStrings.setPropertiesName(ModelerStrings.DEFAULT_MESSAGE_BUNDLE);
 
         ModelerContext.setupContext();
         initEmptyActions();

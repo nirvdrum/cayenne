@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
  * 
  * @author Andrei Adamchik
  */
-public final class ModelerStrings {
+public class ModelerStrings {
     static final Logger logObj = Logger.getLogger(ModelerStrings.class);
 
     public static final String DEFAULT_MESSAGE_BUNDLE =

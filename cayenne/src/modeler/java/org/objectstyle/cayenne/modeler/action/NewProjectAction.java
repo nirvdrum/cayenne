@@ -56,10 +56,12 @@
 package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.control.ProjectTypeSelectControl;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
@@ -68,7 +70,7 @@ import org.objectstyle.cayenne.project.Project;
  * @author Andrei Adamchik
  */
 public class NewProjectAction extends ProjectAction {
-    static Logger logObj = Logger.getLogger(NewProjectAction.class.getName());
+    static Logger logObj = Logger.getLogger(NewProjectAction.class);
     public static final String ACTION_NAME = "New Project";
 
     public NewProjectAction() {
@@ -78,7 +80,7 @@ public class NewProjectAction extends ProjectAction {
     public String getIconName() {
         return "icon-new.gif";
     }
-    
+
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
     }
@@ -86,16 +88,16 @@ public class NewProjectAction extends ProjectAction {
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
-        newProject();
+        // Save and close (if needed) currently open project.
+        if (getMediator() != null && !closeProject()) {
+            return;
+        }
+        
+        new ProjectTypeSelectControl().startup();
     }
 
-    protected void newProject() {
+    public void newAppProject() {
         try {
-            // Save and close (if needed) currently open project.
-            if (getMediator() != null && !closeProject()) {
-                return;
-            }
-
             Project project = new ApplicationProject(null);
             Editor.getFrame().getController().getTopModel().setCurrentProject(project);
             setMediator(new Mediator());

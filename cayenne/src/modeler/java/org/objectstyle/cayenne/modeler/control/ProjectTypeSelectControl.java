@@ -53,38 +53,61 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.view;
+package org.objectstyle.cayenne.modeler.control;
 
-import java.awt.FlowLayout;
-import java.awt.Font;
-
-import javax.swing.Box;
-
-import org.objectstyle.cayenne.modeler.model.TopModel;
-import org.scopemvc.view.swing.SLabel;
-import org.scopemvc.view.swing.SPanel;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.action.NewProjectAction;
+import org.objectstyle.cayenne.modeler.action.ProjectAction;
+import org.objectstyle.cayenne.modeler.view.ProjectTypeSelectDialog;
+import org.scopemvc.controller.basic.BasicController;
+import org.scopemvc.core.Control;
+import org.scopemvc.core.ControlException;
 
 /**
- * CayenneModeler bottom status bar. Can display messages about 
- * events happenning in the modeler.
- * 
  * @author Andrei Adamchik
  */
-public class StatusBarView extends SPanel {
-	
-    public StatusBarView() {
-    	init();
+public class ProjectTypeSelectControl extends BasicController {
+    static Logger logObj = Logger.getLogger(ProjectTypeSelectControl.class);
+
+    public static final String CREATE_APP_PROJECT_CONTROL =
+        "cayenne.modeler.project.app.button";
+    public static final String CREATE_MAP_PROJECT_CONTROL =
+        "cayenne.modeler.project.map.button";
+    public static final String CANCEL_PROJECT_CREATE_CONTROL =
+        "cayenne.modeler.project.cancel.button";
+
+    /**
+     * Constructor for ProjectTypeSelectControl.
+     */
+    public ProjectTypeSelectControl() {
+        super();
     }
-    
-    protected void init() {
-    	setLayout(new FlowLayout(FlowLayout.LEFT, 3, 1));
-    	
-    	// add placeholder
-    	add(Box.createVerticalStrut(16));
-    	
-    	SLabel label = new SLabel();
-    	label.setFont(getFont().deriveFont(Font.PLAIN, 10));
-    	label.setSelector(TopModel.STATUS_MESSAGE_KEY);
-    	add(label);
+
+    /**
+     * @see org.scopemvc.controller.basic.BasicController#startup()
+     */
+    public void startup() {
+        setView(new ProjectTypeSelectDialog());
+        super.startup();
+    }
+    /**
+     * @see org.scopemvc.controller.basic.BasicController#doHandleControl(Control)
+     */
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(CANCEL_PROJECT_CREATE_CONTROL)) {
+            shutdown();
+        } else if (control.matchesID(CREATE_APP_PROJECT_CONTROL)) {
+            doCreateAppProject();
+        }
+    }
+
+    protected void doCreateAppProject() {
+        // delegate to Editor action.
+        // in the future Scope controllers should handle this
+
+        ((NewProjectAction) Editor.getFrame().getAction(NewProjectAction.ACTION_NAME))
+            .newAppProject();
+        shutdown();
     }
 }
