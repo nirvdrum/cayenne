@@ -57,19 +57,26 @@ package org.objectstyle.cayenne.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.objectstyle.cayenne.gui.event.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.gui.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DataMapDisplayListener;
+import org.objectstyle.cayenne.gui.event.DataMapEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
+import org.objectstyle.cayenne.gui.util.SaveHandler;
 import org.objectstyle.cayenne.map.DataMap;
 
 /** 
@@ -107,6 +114,7 @@ public class DataMapDetailView
 		mediator.addDataMapDisplayListener(this);
 		// Create and layout components
 		init();
+
 		// Add listeners
 		location.getDocument().addDocumentListener(this);
 		name.getDocument().addDocumentListener(this);
@@ -189,49 +197,79 @@ public class DataMapDetailView
 		}
 	}
 
-	private void selectMapLocation() {
+	protected void selectMapLocation() {
 		DataMap map = mediator.getCurrentDataMap();
+
+		SaveHandler saveHandler = new SaveHandler(mediator);
+		String oldLocation = map.getLocation();
+
+		String projDirStr = mediator.getConfig().getProjDir();
+		File projDir = (projDirStr != null) ? new File(projDirStr) : null;
+
 		try {
-			// Get the project file name (always cayenne.xml)
-			File file = null;
-			String proj_dir_str = mediator.getConfig().getProjDir();
-			File proj_dir = null;
-			if (proj_dir_str != null)
-				proj_dir = new File(proj_dir_str);
-			JFileChooser fc;
-			FileSystemViewDecorator file_view;
-			file_view = new FileSystemViewDecorator(proj_dir);
-			fc = new JFileChooser(file_view);
+			// don't allow changes on unsaved project
+			if (!saveHandler.shouldProceed()) {
+				return;
+			}
+
+			FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
+			JFileChooser fc = new JFileChooser(fileView);
 			fc.setDialogType(JFileChooser.SAVE_DIALOG);
 			fc.setDialogTitle("Data Map location");
 			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			if (null != proj_dir)
-				fc.setCurrentDirectory(proj_dir);
-			int ret_code = fc.showSaveDialog(this);
-			if (ret_code != JFileChooser.APPROVE_OPTION)
-				return;
-			file = fc.getSelectedFile();
 
-			// Create new file
-			if (!file.exists())
-				file.createNewFile();
+			if (projDir != null) {
+				fc.setCurrentDirectory(projDir);
+			}
+
+			if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+				return;
+			}
+
+			File file = fc.getSelectedFile();
+
 			// Determine and set new data map location
-			String new_file_location = file.getAbsolutePath();
-			String relative_location;
+			String newFileLocation = file.getAbsolutePath();
+
 			// If it is set, use path striped of proj dir and following separator
 			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-				relative_location = new_file_location;
-			else
-				relative_location =
-					new_file_location.substring(proj_dir_str.length() + 1);
-			map.setLocation(relative_location);
-			location.setText(relative_location);
-			// Map location changed
-			mediator.fireDataMapEvent(new DataMapEvent(this, map));
+			String relLocation =
+				(projDirStr == null)
+					? newFileLocation
+					: newFileLocation.substring(projDirStr.length() + 1);
 
-		} catch (Exception e) {
-			logObj.warn("Error setting map location.", e);
+			if (relLocation.equals(map.getLocation())) {
+				return;
+			}
+
+			// Create new file
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			map.setLocation(relLocation);
+			location.setText(relLocation);
+		} catch (IOException ioex) {
+			ErrorDebugDialog.guiWarning(ioex, "Error renaming map.");
+			return;
+		} catch (Throwable th) {
+			ErrorDebugDialog.guiException(th);
+			return;
+		}
+
+		// Map location changed
+		mediator.fireDataMapEvent(new DataMapEvent(this, map));
+		saveHandler.saveProject();
+
+		// remove old location
+		if (oldLocation != null) {
+			File oldFile =
+				(projDir != null)
+					? new File(projDir, oldLocation)
+					: new File(oldLocation);
+			if (!oldFile.delete()) {
+				logObj.info("Can't delete old file: " + oldFile);
+			}
 		}
 	}
 
@@ -290,8 +328,7 @@ public class DataMapDetailView
 		}
 
 		depMapsPanel = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
-		depMapsPanel.setBorder(
-			BorderFactory.createTitledBorder("Depends on DataMaps"));
+		depMapsPanel.setBorder(BorderFactory.createTitledBorder("Depends on DataMaps"));
 		add(depMapsPanel, BorderLayout.CENTER);
 		validate();
 	}

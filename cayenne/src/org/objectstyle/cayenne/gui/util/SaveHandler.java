@@ -55,119 +55,129 @@
  */
 package org.objectstyle.cayenne.gui.util;
 
-import java.io.File;
-import java.io.IOException;
+import javax.swing.JOptionPane;
 
-import javax.swing.Icon;
-import javax.swing.filechooser.FileSystemView;
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.action.SaveAction;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
 
-/** 
- * Limits access to the specified root directory and its sub-directories.
- * If root directory is null, uses system file system view. 
+/**
+ * A <b>SaveHandler</b> is a utility class that pops up a dialog
+ * when saving a project is a condition of further actions.
+ * Also allows saving project unconditionally.
+ * 
+ * @author Andrei Adamchik
  */
-public class FileSystemViewDecorator extends FileSystemView {
-	FileSystemView system;
-	File rootDir;
+public class SaveHandler {
+	protected String message =
+		"The project has changes and must be saved "
+			+ "before the operation can continue.\n "
+			+ "Do you want to save project?";
 
-	public FileSystemViewDecorator(File root_dir) {
-		system = FileSystemView.getFileSystemView();
-		rootDir = root_dir;
+	protected String title = "Operation Requires Saving Project";
+	protected Mediator mediator;
+
+	public SaveHandler(Mediator mediator) {
+		this.mediator = mediator;
 	}
 
-	public boolean isRoot(File f) {
-		if (rootDir != null)
-			return f.equals(rootDir);
-		else
-			return system.isRoot(f);
+	public SaveHandler(Mediator mediator, String title, String message) {
+		this(mediator);
+		setMessage(message);
+		setTitle(title);
 	}
 
-	public Boolean isTraversable(File f) {
-		return system.isTraversable(f);
+	/**
+	 * Main method that checks if the user can
+	 * proceed with the operation. Side effect may be
+	 * saving a project.
+	 */
+	public boolean shouldProceed() {
+		// no saving is needed
+		if (!mediator.isDirty()) {
+			return true;
+		}
+
+		// user chose not to save
+		if (JOptionPane
+			.showConfirmDialog(
+				Editor.getFrame(),
+				message,
+				title,
+				JOptionPane.YES_NO_OPTION)
+			!= JOptionPane.YES_OPTION) {
+			return false;
+		}
+
+		// check if save succeeded
+		return saveProject();
+	}
+
+	/**
+	 * Saves project. If save failed, returns false.
+	 */
+	public boolean saveProject() {
+		if(!mediator.isDirty()) {
+			return true;
+		}
+		
+		SaveAction action =
+			(SaveAction) Editor.getFrame().getAction(SaveAction.ACTION_NAME);
+		
+		// save quietly
+		action.performAction(ErrorMsg.ERROR);
+
+		// check if save succeeded
+		return !mediator.isDirty();
 	}
 	
-	public String getSystemDisplayName(File f) {
-		return system.getSystemDisplayName(f);
-	}
-	
-	public String getSystemTypeDescription(File f) {
-		return system.getSystemTypeDescription(f);
-	}
-	
-	public Icon getSystemIcon(File f) {
-		return system.getSystemIcon(f);
-	}
-	
-	public boolean isParent(File folder, File file) {
-		return system.isParent(folder, file);
-	}
-	
-	public File getChild(File parent, String fileName) {
-		return system.getChild(parent, fileName);
-	}
-	
-	public boolean isFileSystem(File f) {
-		return system.isFileSystem(f);
-	}
-	
-	public File createNewFolder(File containingDir) throws IOException {
-		return system.createNewFolder(containingDir);
+
+	/**
+	 * Returns the mediator.
+	 * @return Mediator
+	 */
+	public Mediator getMediator() {
+		return mediator;
 	}
 
-	public boolean isHiddenFile(File f) {
-		return system.isHiddenFile(f);
-	}
-	public boolean isFileSystemRoot(File dir) {
-		if (rootDir != null)
-			return dir.equals(rootDir);
-		else
-			return system.isFileSystemRoot(dir);
-	}
-	public boolean isDrive(File dir) {
-		return system.isDrive(dir);
+	/**
+	 * Returns the message.
+	 * @return String
+	 */
+	public String getMessage() {
+		return message;
 	}
 
-	public boolean isFloppyDrive(File dir) {
-		return system.isFloppyDrive(dir);
-	}
-	public boolean isComputerNode(File dir) {
-		return system.isComputerNode(dir);
-	}
-	public File[] getRoots() {
-		if (rootDir != null)
-			return new File[] { rootDir };
-		else
-			return system.getRoots();
-	}
-	public File getHomeDirectory() {
-		if (rootDir != null)
-			return rootDir;
-		else
-			return system.getHomeDirectory();
-	}
-	public File getDefaultDirectory() {
-		if (rootDir != null)
-			return rootDir;
-		else
-			return system.getDefaultDirectory();
+	/**
+	 * Returns the title.
+	 * @return String
+	 */
+	public String getTitle() {
+		return title;
 	}
 
-	public File createFileObject(File dir, String filename) {
-		return system.createFileObject(dir, filename);
+	/**
+	 * Sets the mediator.
+	 * @param mediator The mediator to set
+	 */
+	public void setMediator(Mediator mediator) {
+		this.mediator = mediator;
 	}
 
-	public File createFileObject(String path) {
-		return system.createFileObject(path);
+	/**
+	 * Sets the message.
+	 * @param message The message to set
+	 */
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
-	public File[] getFiles(File dir, boolean useFileHiding) {
-		return system.getFiles(dir, useFileHiding);
-	}
-
-	public File getParentDirectory(File dir) {
-		return system.getParentDirectory(dir);
-	}
-
-	protected File createFileSystemRoot(File f) {
-		return super.createFileSystemRoot(f);
+	/**
+	 * Sets the title.
+	 * @param title The title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
 	}
 }

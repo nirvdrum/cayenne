@@ -152,7 +152,7 @@ public class OpenProjectAction extends ProjectAction {
 
 			// Initialize gui configuration
 			// uncomment to debug GUI
-			Configuration.setLoggingLevel(Level.ERROR);
+			Configuration.setLoggingLevel(Level.INFO);
 
 			GuiConfiguration.initSharedConfig(file);
 			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));

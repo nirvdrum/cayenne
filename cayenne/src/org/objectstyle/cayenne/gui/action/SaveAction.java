@@ -120,9 +120,7 @@ public class SaveAction extends CayenneAction {
 		while (iter.hasNext()) {
 			DataNode node = (DataNode) iter.next();
 			// If using direct connection, save into separate file
-			if (node
-				.getDataSourceFactory()
-				.equals(DataSourceFactory.DIRECT_FACTORY)) {
+			if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
 				saveDataNode(node);
 			}
 		}
@@ -141,14 +139,12 @@ public class SaveAction extends CayenneAction {
 			File master = (File) tempLookup.get(tmp);
 			if (master.exists()) {
 				if (!master.delete()) {
-					throw new IOException(
-						"Unable to remove old master file " + master);
+					throw new IOException("Unable to remove old master file " + master);
 				}
 			}
 
 			if (!tmp.renameTo(master)) {
-				throw new IOException(
-					"Unable to move " + tmp + " to " + master);
+				throw new IOException("Unable to move " + tmp + " to " + master);
 			}
 		}
 	}
@@ -184,14 +180,12 @@ public class SaveAction extends CayenneAction {
 	protected void saveProject() throws Exception {
 		Mediator mediator = getMediator();
 		File file = tempFileForFile(mediator.getConfig().getProjFile());
-        String masterPath = ((File)tempLookup.get(file)).getAbsolutePath();
+		String masterPath = ((File) tempLookup.get(file)).getAbsolutePath();
 
 		FileWriter fw = new FileWriter(file);
 
 		try {
-			DomainHelper.storeDomains(
-				new PrintWriter(fw),
-				mediator.getDomains());
+			DomainHelper.storeDomains(new PrintWriter(fw), mediator.getDomains());
 			Editor.getFrame().addToLastProjList(masterPath);
 		} finally {
 			fw.flush();
@@ -203,8 +197,7 @@ public class SaveAction extends CayenneAction {
 	protected void saveDataNode(DataNode node) throws Exception {
 		Mediator mediator = getMediator();
 		File projDir = new File(mediator.getConfig().getProjDir());
-		File file =
-			tempFileForFile(new File(projDir, node.getDataSourceLocation()));
+		File file = tempFileForFile(new File(projDir, node.getDataSourceLocation()));
 
 		FileWriter fw = new FileWriter(file);
 		try {
@@ -244,14 +237,16 @@ public class SaveAction extends CayenneAction {
 	 * This method is synchronized to prevent problems on double-clicking "save".
 	 */
 	public synchronized void performAction(ActionEvent e) {
+		performAction(ErrorMsg.WARNING);
+	}
+
+	public synchronized void performAction(int warningLevel) {
 		Mediator mediator = getMediator();
 		Validator val = new Validator(mediator);
 		int validationCode = val.validate();
 
 		// If no serious errors, perform save.
-		if (validationCode == ErrorMsg.NO_ERROR
-			|| validationCode == ErrorMsg.WARNING) {
-
+		if (validationCode < ErrorMsg.ERROR) {
 			try {
 				saveAll();
 			} catch (Exception ex) {
@@ -266,16 +261,12 @@ public class SaveAction extends CayenneAction {
 		}
 
 		// If there were errors or warnings at validation, display them
-		if (validationCode == ErrorMsg.ERROR
-			|| validationCode == ErrorMsg.WARNING) {
-			ValidatorDialog dialog;
-			dialog =
-				new ValidatorDialog(
-					Editor.getFrame(),
-					mediator,
-					val.getErrorMessages(),
-					validationCode);
-			dialog.setVisible(true);
+		if (validationCode >= warningLevel) {
+			new ValidatorDialog(
+				Editor.getFrame(),
+				mediator,
+				val.getErrorMessages(),
+				validationCode).setVisible(true);
 		}
 	}
 }
