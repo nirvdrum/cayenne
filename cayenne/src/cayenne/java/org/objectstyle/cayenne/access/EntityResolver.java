@@ -98,13 +98,13 @@ public class EntityResolver {
     public synchronized void addDataMap(DataMap map) {
         if (!maps.contains(map)) {
             maps.add(map);
-            constructCache();
+            clearCache();
         }
     }
 
     public synchronized void removeDataMap(DataMap map) {
-        if(maps.remove(map)) {
-        	constructCache();
+        if (maps.remove(map)) {
+            clearCache();
         }
     }
 
@@ -115,15 +115,24 @@ public class EntityResolver {
         return new ArrayList(maps);
     }
 
+    /**
+     * Removes all entity mappings from the cache.
+     * Cache can be rebuilt either explicitly by calling
+     * <code>constructCache</code>, or on demand by calling any of the
+     * <code>lookup...</code> methods.
+     */
+    protected synchronized void clearCache() {
+        dbEntityCache.clear();
+        objEntityCache.clear();
+    }
+
     /** 
      * Creates caches of DbEntities by ObjEntity, 
      * DataObject class, and ObjEntity name using internal 
      * list of maps.
      */
     protected synchronized void constructCache() {
-        dbEntityCache.clear();
-        objEntityCache.clear();
-
+        clearCache();
         Iterator mapIterator = maps.iterator();
         while (mapIterator.hasNext()) {
             int i;
