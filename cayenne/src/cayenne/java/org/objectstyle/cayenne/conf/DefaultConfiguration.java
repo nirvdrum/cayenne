@@ -159,7 +159,6 @@ public class DefaultConfiguration extends Configuration {
 		}
 
 		logObj.debug("initialize finished.");
-		this.didInitialize();
 	}
 
 	/**

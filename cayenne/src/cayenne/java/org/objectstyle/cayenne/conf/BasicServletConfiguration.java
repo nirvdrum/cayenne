@@ -115,7 +115,7 @@ public class BasicServletConfiguration extends Configuration {
 	}
 
 	public ResourceLocator getResourceLocator() {
-		// @HH create a suitable ResourceLoader here
+		// @HH maybe create a suitable ResourceLoader here?
 		return null;
 	}
 
