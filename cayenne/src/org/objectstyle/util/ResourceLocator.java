@@ -59,7 +59,6 @@ import java.io.*;
 import java.net.URL;
 import java.util.logging.Logger;
 
-
 /** Utility class to find resources (usually files) using most common Java approaches.
   * Some ideas were inspired by Velocity ResourceLoader classes (Copyright: Apache 
   * Software Foundation).
@@ -69,19 +68,18 @@ import java.util.logging.Logger;
 public class ResourceLocator {
     static Logger logObj = Logger.getLogger(ResourceLocator.class.getName());
 
-
     /** Returns a resource as InputStream if it is found in CLASSPATH. 
       * Returns null otherwise. Lookup is normally performed in all JAR and
       * ZIP files and directories available to CLassLoader. */
     public static InputStream findResourceInClasspath(String name) {
         try {
-            URL url = ResourceLocator.class.getClassLoader().getResource(name);
+            URL url = findURLInClasspath(name);
             return (url != null) ? url.openStream() : null;
-        } catch(IOException ioex) {
+        }
+        catch (IOException ioex) {
             return null;
         }
     }
-
 
     /** Returns a resource as InputStream if it is found in the filesystem. 
       * Returns null otherwise. Lookup is first performed relative to the user 
@@ -89,44 +87,38 @@ public class ResourceLocator {
       * relative to the current directory. */
     public static InputStream findResourceInFileSystem(String name) {
         try {
-            // look in home directory
-            String homeDirPath = System.getProperty("user.home") + File.separator + name;
-            File file = new File(homeDirPath);
-
-            if(file.canRead())
-                return new FileInputStream(file);
-
-            // look in current directory
-            String curDirPath = '.' + File.separator + name;
-            file = new File(curDirPath);
-            if(file.canRead())
-                return new FileInputStream(file);
-            
-        } catch(IOException ioex) {
+            File f = findFileInFileSystem(name);
+            return (f != null) ? new FileInputStream(f) : null;
+        }
+        catch (IOException ioex) {
             return null;
         }
-        
-        return null;
     }
-    
+
+    /** Looks up for a file in the filesystem.
+     *  @see #findResourceInFileSystem()
+     */
     public static File findFileInFileSystem(String name) {
         // look in home directory
         String homeDirPath = System.getProperty("user.home") + File.separator + name;
         File file = new File(homeDirPath);
 
-        if(file.canRead())
+        if (file.canRead())
             return file;
 
         // look in current directory
         String curDirPath = '.' + File.separator + name;
         file = new File(curDirPath);
-        if(file.canRead())
+        if (file.canRead())
             return file;
         return null;
     }
-    
+
+
+    /** Looks up for resource in CLASSPATH.
+     *  @see #findResourceInClasspath()
+     */
     public static URL findURLInClasspath(String name) {
-        URL url = ResourceLocator.class.getClassLoader().getResource(name);
-        return (url != null) ? url : null;
+        return ResourceLocator.class.getClassLoader().getResource(name);
     }
 }
