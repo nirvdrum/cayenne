@@ -2,8 +2,8 @@
 <title>Frequently Asked Questions: Develop with Cayenne</title>
 
 <body>
-    <section name="FAQ: Develop with Cayenne">
-		<subsection name="When I start my application, Cayenne immediately connects to the database. How about lazy connection that happens on the first database call?" 
+    <section name="FAQ 3: Develop with Cayenne">
+		<subsection name="Q 3.1 When I start my application, Cayenne immediately connects to the database. How about lazy connection that happens on the first database call?" 
 		anchor="lazy_connection">
     	
     	<p>This question implies that you are not using a container-provided 
@@ -15,8 +15,8 @@
     	</p>
     	</subsection>
     	
-        <subsection name="I am getting exceptions similar to 'Error generating PK' or 'No suitable DataNode to handle entity 'XYZ'." 
-		anchor="a">
+        <subsection name="Q 3.2 I am getting exceptions similar to 'Error generating PK' or 'No suitable DataNode to handle entity 'XYZ'." 
+		anchor="linking">
     	
     	<p>Likely cause of these errors is that one of your Cayenne DataMaps is not 
     	linked to any DataNodes. This is pending a better, more intuitive GUI. 
@@ -34,7 +34,7 @@
     	</p>
     	</subsection>
     	
-    	<subsection name="I reverse-engineered my Oracle database. Why is that all FLOAT columns are not showing properly?" 
+    	<subsection name="Q 3.3 I reverse-engineered my Oracle database. Why is that all FLOAT columns are not showing properly?" 
 		anchor="float">
     	
     	<p>This seems to be a problem with Oracle JDBC driver. It's connection.getMetadata().getColumns() 
@@ -44,7 +44,7 @@
     	</p>
     	</subsection>
     	
-    	<subsection name="How do I log an output of a single query.?" 
+    	<subsection name="Q 3.4 How do I log an output of a single query?" 
 		anchor="log_query">
     	
     	<p>Cayenne logging system is based on Jakarta 

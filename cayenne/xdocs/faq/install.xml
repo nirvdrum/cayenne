@@ -2,8 +2,8 @@
 <title>Frequently Asked Questions: Installation</title>
 
 <body>
-    <section name="FAQ: Installation">
-    	<subsection name="I installed Cayenne in $JRE_HOME/lib/ext and now I am getting strange errors. What's wrong?" 
+    <section name="FAQ 2: Installation">
+    	<subsection name="Q 2.1 I installed Cayenne in $JRE_HOME/lib/ext and now I am getting strange errors. What's wrong?" 
     	anchor="ext_dir">
     	
     	<p>In the very early Alpha releases of Cayenne we recommended $JRE_HOME/lib/ext

@@ -2,8 +2,8 @@
 <title>Frequently Asked Questions: Cayenne Design</title>
 
 <body>
-    <section name="FAQ: Cayenne Design">
- 		<subsection name="Why do application objects have to extend 'CayenneDataObject?'? What about an arbitrary Java class persistence?" 
+    <section name="FAQ 4: Cayenne Design">
+ 		<subsection name="Q 4.1 Why do application objects have to extend 'CayenneDataObject?'? What about an arbitrary Java class persistence?" 
 		anchor="inheritance">
     	
     	<p>First, strictly speaking persistence classes do not have to extend 
