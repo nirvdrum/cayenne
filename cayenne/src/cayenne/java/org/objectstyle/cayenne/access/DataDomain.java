@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
@@ -515,4 +516,12 @@ public class DataDomain implements QueryEngine {
         }
     }
 
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(ObjectUtils.identityToString(this)).append(":[").append(
+            name).append(
+            "]");
+
+        return buffer.toString();
+    }
 }

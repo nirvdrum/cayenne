@@ -55,9 +55,12 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
@@ -66,6 +69,17 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class DataContextSerializationTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(DataContextSerializationTst.class);
+
+    protected void setUp() {
+        // fix the environment - other unit tests may have messed up the shared domain
+        Configuration config = Configuration.getSharedConfiguration();
+        if (super.getDomain() != config.getDomain()) {
+            if (config.getDomain() != null) {
+                config.removeDomain(config.getDomain().getName());
+            }
+            config.addDomain(super.getDomain());
+        }
+    }
 
     public void testSerializeNew() throws Exception {
         DataContext context = super.createDataContext();
@@ -90,7 +104,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
     }
 
     public void testSerializeCommitted() throws Exception {
-        DataContext context = super.createDataContext();
+        DataContext context = DataContext.createDataContext();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");
@@ -100,6 +114,14 @@ public class DataContextSerializationTst extends CayenneTestCase {
         DataContext deserializedContext =
             (DataContext) Util.cloneViaSerialization(context);
 
+        logObj.warn(
+            "registered domains: "
+                + new ArrayList(Configuration.getSharedConfiguration().getDomains()));
+        logObj.warn(
+            " domains in question: "
+                + context.getParent()
+                + "--"
+                + deserializedContext.getParent());
         assertSame(context.getParent(), deserializedContext.getParent());
 
         // there should be only one object registered
