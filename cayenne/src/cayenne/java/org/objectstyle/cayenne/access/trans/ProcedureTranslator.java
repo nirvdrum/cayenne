@@ -146,11 +146,27 @@ public class ProcedureTranslator
         initValues();
         String sqlStr = createSqlString();
 
-        QueryLogger.logQuery(
+        
+        if(QueryLogger.isLoggable(logLevel)) {
+            // need to convert OUT/VOID parameters to loggable strings
+            long time = System.currentTimeMillis() - t1;
+            
+            List loggableParameters = new ArrayList(values.size());
+            Iterator it = values.iterator();
+            while(it.hasNext()) {
+              Object val = it.next();
+              if(val instanceof NotInParam) {
+              	 val = val.toString();
+              }
+              loggableParameters.add(val);
+            }
+            
+            QueryLogger.logQuery(
             logLevel,
             sqlStr,
-            values,
-            System.currentTimeMillis() - t1);
+					loggableParameters,
+            time);
+        }
         CallableStatement stmt = con.prepareCall(sqlStr);
         initStatement(stmt);
         return stmt;
