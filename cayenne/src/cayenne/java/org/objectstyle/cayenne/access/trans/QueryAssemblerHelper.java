@@ -133,7 +133,11 @@ public abstract class QueryAssemblerHelper {
                     processRelTermination(buf, rel);
                 } else {
                     // find and add joins ....
-                    processRelParts(rel);
+                    Iterator relit = rel.getDbRelationships().iterator();
+                    while (relit.hasNext()) {
+                        queryAssembler.dbRelationshipAdded(
+                            (DbRelationship) relit.next());
+                    }
                 }
                 lastRelationship = rel;
             } else {

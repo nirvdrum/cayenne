@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -99,86 +99,25 @@ public class SelectTranslator extends SelectQueryAssembler {
      */
     private boolean forceDistinct;
 
-	/**
-	 * Returns a list of DbAttributes representing columns
-	 * in this query.
-	 * @deprecated Since 1.0 Beta1; use #getColumns() instead.
-	 */
-	protected List getColumnList() {
-		return this.getColumns();
-	}
+    /**
+     * Returns a list of DbAttributes representing columns
+     * in this query.
+     * @deprecated Since 1.0 Beta1; use #getColumns() instead.
+     */
+    protected List getColumnList() {
+        return this.getColumns();
+    }
 
-	/**
-	 * Returns a list of DbAttributes representing columns
-	 * in this query.
-	 */
-	protected List getColumns() {
-		return columnList;
-	}
+    /**
+     * Returns a list of DbAttributes representing columns
+     * in this query.
+     */
+    protected List getColumns() {
+        return columnList;
+    }
 
     public int getFetchLimit() {
         return getSelectQuery().getFetchLimit();
-    }
-
-    /**
-     * Returns an ordered list of DbAttributes that describe the
-     * result columns in the in the ResultSet. ResultSet column names are ignored,
-     * names specified in the query are used instead. */
-    public DbAttribute[] getSnapshotDesc(ResultSet rs) {
-        int len = columnList.size();
-        if (len == 0) {
-            throw new CayenneRuntimeException("Call 'createStatement' first");
-        }
-
-        DbAttribute[] desc = new DbAttribute[len];
-        columnList.toArray(desc);
-        return desc;
-    }
-
-    /**
-     * Returns ordered list of Java class names that should be used for fetched values.
-     * ResultSet types are ignored, types specified in the query are used instead.
-     */
-    public String[] getResultTypes(ResultSet rs) {
-        int len = columnList.size();
-        if (len == 0) {
-            throw new CayenneRuntimeException("Call 'createStatement' first.");
-        }
-
-        String[] types = new String[len];
-        for (int i = 0; i < len; i++) {
-            DbAttribute attr = (DbAttribute) columnList.get(i);
-            ObjAttribute objAttr =
-                getRootEntity().getAttributeForDbAttribute(attr);
-
-            // use explicit type mapping specified in ObjAttribute,
-            // or use default JDBC mapping if no ObjAttribute exists
-            types[i] =
-                (objAttr != null)
-                    ? objAttr.getType()
-                    : TypesMapping.getJavaBySqlType(attr.getType());
-        }
-        return types;
-    }
-
-    public String[] getResultNames(ResultSet rs) {
-        int len = columnList.size();
-        if (len == 0) {
-            throw new CayenneRuntimeException("Call 'createStatement' first.");
-        }
-
-        String[] paths = new String[len];
-        for (int i = 0; i < len; i++) {
-            DbAttribute attr = (DbAttribute) columnList.get(i);
-            ObjAttribute objAttr =
-                getRootEntity().getAttributeForDbAttribute(attr);
-
-            paths[i] =
-                (objAttr != null)
-                    ? objAttr.getDbAttributePath()
-                    : attr.getName();
-        }
-        return paths;
     }
 
     /**
@@ -342,7 +281,8 @@ public class SelectTranslator extends SelectQueryAssembler {
             List custAttrNames = q.getCustomDbAttributes();
             int len = custAttrNames.size();
             for (int i = 0; i < len; i++) {
-                Attribute attr = dbe.getAttribute((String)custAttrNames.get(i));
+                Attribute attr =
+                    dbe.getAttribute((String) custAttrNames.get(i));
                 if (attr == null) {
                     throw new CayenneRuntimeException(
                         "Attribute does not exist: " + custAttrNames.get(i));
@@ -377,13 +317,14 @@ public class SelectTranslator extends SelectQueryAssembler {
             // relationship keys
             Iterator rels = oe.getRelationships().iterator();
             while (rels.hasNext()) {
-                ObjRelationship rel = (ObjRelationship)rels.next();
-                DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(0);
+                ObjRelationship rel = (ObjRelationship) rels.next();
+                DbRelationship dbRel =
+                    (DbRelationship) rel.getDbRelationships().get(0);
 
                 List joins = dbRel.getJoins();
                 int jLen = joins.size();
                 for (int j = 0; j < jLen; j++) {
-                    DbAttributePair join = (DbAttributePair)joins.get(j);
+                    DbAttributePair join = (DbAttributePair) joins.get(j);
                     DbAttribute src = join.getSource();
                     if (!columnList.contains(src)) {
                         columnList.add(src);
@@ -394,7 +335,7 @@ public class SelectTranslator extends SelectQueryAssembler {
             // add remaining needed attrs from DbEntity
             Iterator dbattrs = dbe.getAttributes().iterator();
             while (dbattrs.hasNext()) {
-                DbAttribute dba = (DbAttribute)dbattrs.next();
+                DbAttribute dba = (DbAttribute) dbattrs.next();
                 if (dba.isPrimaryKey()) {
                     if (!columnList.contains(dba)) {
                         columnList.add(dba);
@@ -411,12 +352,13 @@ public class SelectTranslator extends SelectQueryAssembler {
                     //Prefetching a single step toMany relationship which
                     // has no reverse obj relationship.  Add the FK attributes
                     // of the relationship (wouldn't otherwise be included)
-                    DbRelationship dbRel = (DbRelationship)r.getDbRelationships().get(0);
+                    DbRelationship dbRel =
+                        (DbRelationship) r.getDbRelationships().get(0);
 
                     List joins = dbRel.getJoins();
                     int jLen = joins.size();
                     for (int j = 0; j < jLen; j++) {
-                        DbAttributePair join = (DbAttributePair)joins.get(j);
+                        DbAttributePair join = (DbAttributePair) joins.get(j);
                         DbAttribute target = join.getTarget();
                         if (!columnList.contains(target)) {
                             columnList.add(target);
@@ -454,16 +396,15 @@ public class SelectTranslator extends SelectQueryAssembler {
 
         boolean andFlag = false;
 
-		List joins = rel.getJoins();
-		int len = joins.size();
-		for (int i = 0; i < len; i++) {
-			DbAttributePair join = (DbAttributePair)joins.get(i);
+        List joins = rel.getJoins();
+        int len = joins.size();
+        for (int i = 0; i < len; i++) {
+            DbAttributePair join = (DbAttributePair) joins.get(i);
 
             if (andFlag) {
-				queryBuf.append(" AND ");
-            }
-            else {
-				andFlag = true;
+                queryBuf.append(" AND ");
+            } else {
+                andFlag = true;
             }
 
             queryBuf
@@ -555,4 +496,19 @@ public class SelectTranslator extends SelectQueryAssembler {
     public boolean supportsTableAliases() {
         return true;
     }
+
+    public ResultDescriptor getResultDescriptor(ResultSet rs) {
+        if (columnList.size() == 0) {
+            throw new CayenneRuntimeException("Call 'createStatement' first");
+        }
+
+        ResultDescriptor descriptor =
+            new ResultDescriptor(
+                getAdapter().getExtendedTypes(),
+                getRootEntity());
+        descriptor.addDbAttributes(columnList);
+        descriptor.index();
+        return descriptor;
+    }
+
 }

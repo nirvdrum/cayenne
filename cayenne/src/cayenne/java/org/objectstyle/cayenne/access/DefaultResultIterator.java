@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -72,9 +71,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 
 /**
  * Default implementation of ResultIterator interface. Serves as a
@@ -95,12 +92,8 @@ public class DefaultResultIterator implements ResultIterator {
     protected ResultSet resultSet;
 
     // Result descriptor
-    protected DbAttribute[] rowDescriptor;
-    protected ExtendedType[] converters;
-    protected String[] resultNames;
+    protected ResultDescriptor descriptor;
 
-    protected int[] idIndex;
-    protected int resultWidth;
     protected int mapCapacity;
     protected int idMapCapacity;
 
@@ -111,75 +104,26 @@ public class DefaultResultIterator implements ResultIterator {
     protected int fetchedSoFar;
     protected int fetchLimit;
 
-
-    protected DefaultResultIterator(
+    public DefaultResultIterator(
         Connection connection,
         Statement statement,
-        ResultSet resultSet) {
+        ResultSet resultSet,
+        ResultDescriptor descriptor,
+        int fetchLimit)
+        throws SQLException, CayenneException {
+
         this.connection = connection;
         this.statement = statement;
         this.resultSet = resultSet;
-    }
+        this.descriptor = descriptor;
+        this.fetchLimit = fetchLimit;
 
-    /**
-     * Creates new DefaultResultIterator. Executes the query, setting internal
-     * ResultSet.
-     */
-    public DefaultResultIterator(
-        PreparedStatement statement,
-        DbAdapter adapter,
-        SelectQueryAssembler assembler)
-        throws SQLException, CayenneException {
-
-        this(assembler.getCon(), statement, statement.executeQuery());
-
-        initResultDescriptor(
-            assembler.getSnapshotDesc(resultSet),
-            assembler.getResultNames(resultSet),
-            assembler.getResultTypes(resultSet),
-            adapter.getExtendedTypes(),
-            assembler.getFetchLimit());
+        this.mapCapacity =
+            (int) Math.ceil(((double) descriptor.getNames().length) / 0.75);
+        this.idMapCapacity =
+            (int) Math.ceil(((double) descriptor.getIdIndexes().length) / 0.75);
 
         checkNextRow();
-    }
-
-    /**
-     * Initailizes the fields needed to process ResultSet.
-     */
-    protected void initResultDescriptor(
-        DbAttribute[] rowDescriptor,
-        String[] resultNames,
-        String[] javaTypes,
-        ExtendedTypeMap typeMap,
-        int fetchLimit) {
-
-        this.resultWidth = rowDescriptor.length;
-        this.converters = new ExtendedType[resultWidth];
-        this.rowDescriptor = rowDescriptor;
-        this.fetchLimit = fetchLimit;
-        this.resultNames = resultNames;
-
-        // this list will hold positions of PK atributes
-        List idIndexList = new ArrayList(resultWidth);
-
-        for (int i = 0; i < resultWidth; i++) {
-            // index id columns
-            if (rowDescriptor[i].isPrimaryKey()) {
-                idIndexList.add(new Integer(i));
-            }
-
-            // initialize converters
-            converters[i] = typeMap.getRegisteredType(javaTypes[i]);
-        }
-
-        int indexSize = idIndexList.size();
-        this.idIndex = new int[indexSize];
-        for (int i = 0; i < indexSize; i++) {
-            this.idIndex[i] = ((Integer) idIndexList.get(i)).intValue();
-        }
-
-        this.mapCapacity = (int)Math.ceil(((double)resultWidth) / 0.75);
-        this.idMapCapacity = (int)Math.ceil(((double)indexSize) / 0.75);
     }
 
     /**
@@ -195,7 +139,8 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected void checkNextRow() throws SQLException, CayenneException {
         nextRow = false;
-        if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit) && resultSet.next()) {
+        if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit)
+            && resultSet.next()) {
             nextRow = true;
             fetchedSoFar++;
         }
@@ -254,6 +199,10 @@ public class DefaultResultIterator implements ResultIterator {
     protected Map readDataRow() throws SQLException, CayenneException {
         try {
             Map dataRow = new HashMap(mapCapacity, 0.75f);
+            ExtendedType[] converters = descriptor.getConverters();
+            int[] jdbcTypes = descriptor.getJdbcTypes();
+            String[] names = descriptor.getNames();
+            int resultWidth = names.length;
 
             // process result row columns,
             for (int i = 0; i < resultWidth; i++) {
@@ -262,12 +211,8 @@ public class DefaultResultIterator implements ResultIterator {
                     converters[i].materializeObject(
                         resultSet,
                         i + 1,
-                        rowDescriptor[i].getType());
-//                dataRow.put(rowDescriptor[i].getName(), val);
-                String key = (resultNames != null && resultNames[i] != null ?
-                              resultNames[i] :
-                              rowDescriptor[i].getName());
-                dataRow.put(key, val);
+                        jdbcTypes[i]);
+                dataRow.put(names[i], val);
             }
 
             return dataRow;
@@ -289,7 +234,10 @@ public class DefaultResultIterator implements ResultIterator {
     protected Map readIdRow() throws SQLException, CayenneException {
         try {
             Map idRow = new HashMap(idMapCapacity, 0.75f);
-
+            ExtendedType[] converters = descriptor.getConverters();
+            int[] jdbcTypes = descriptor.getJdbcTypes();
+            String[] names = descriptor.getNames();
+            int[] idIndex = descriptor.getIdIndexes();
             int len = idIndex.length;
 
             for (int i = 0; i < len; i++) {
@@ -302,8 +250,8 @@ public class DefaultResultIterator implements ResultIterator {
                     converters[index].materializeObject(
                         resultSet,
                         index + 1,
-                        rowDescriptor[index].getType());
-                idRow.put(rowDescriptor[index].getName(), val);
+                        jdbcTypes[index]);
+                idRow.put(names[index], val);
             }
 
             return idRow;

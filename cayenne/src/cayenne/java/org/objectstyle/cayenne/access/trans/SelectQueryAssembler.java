@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 
 
 /**
@@ -70,16 +70,9 @@ import org.objectstyle.cayenne.map.DbAttribute;
 public abstract class SelectQueryAssembler extends QueryAssembler {
 
     /**
-     * Returns an ordered array of DbAttributes that describe the
-     * result columns in the in the ResultSet.
+     * Returns a descriptor that contains information needed for the ResultSet processing.
      */
-    public abstract DbAttribute[] getSnapshotDesc(ResultSet rs);
-
-    /**
-     * Returns ordered array of Java class names that should be used
-     * for values in the ResultSet.
-     */
-    public abstract String[] getResultTypes(ResultSet rs);
+    public abstract ResultDescriptor getResultDescriptor(ResultSet rs);
 
     /**
      * Returns a maximum number of rows that the underlying
@@ -87,6 +80,4 @@ public abstract class SelectQueryAssembler extends QueryAssembler {
      * zero, all rows will be returned.
      */
     public abstract int getFetchLimit();
-
-    public abstract String[] getResultNames(ResultSet rs);
 }

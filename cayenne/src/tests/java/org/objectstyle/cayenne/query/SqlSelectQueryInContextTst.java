@@ -67,7 +67,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 
 	protected SqlSelectQuery q;
 
-	public void setUp() throws java.lang.Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		q = new SqlSelectQuery();
 	}
@@ -76,7 +76,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 		return q;
 	}
 
-	public void testSelect1() throws java.lang.Exception {
+	public void testSelect1() throws Exception {
 
         q.setRoot(Artist.class);
 		q.setSqlString("select count(*)  from ARTIST");

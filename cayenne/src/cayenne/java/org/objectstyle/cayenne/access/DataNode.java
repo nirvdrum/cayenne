@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -304,10 +305,12 @@ public class DataNode implements QueryEngine {
                                 con,
                                 (BatchQuery) nextQuery,
                                 opObserver);
-                        } else if(nextQuery instanceof ProcedureQuery) {
-                        	runStoredProcedureUpdate(con, nextQuery, opObserver); 
-                        }
-                        else {
+                        } else if (nextQuery instanceof ProcedureQuery) {
+                            runStoredProcedureUpdate(
+                                con,
+                                nextQuery,
+                                opObserver);
+                        } else {
                             runUpdate(con, nextQuery, opObserver);
                         }
                     }
@@ -394,10 +397,19 @@ public class DataNode implements QueryEngine {
 
         PreparedStatement prepStmt =
             transl.createStatement(query.getLoggingLevel());
+        ResultSet rs = prepStmt.executeQuery();
 
         SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
         DefaultResultIterator it =
-            new DefaultResultIterator(prepStmt, getAdapter(), assembler);
+            new DefaultResultIterator(
+                con,
+                prepStmt,
+                rs,
+                assembler.getResultDescriptor(rs),
+                assembler.getFetchLimit());
+
+        // TODO: Should do something about closing ResultSet and PreparedStatement in this method, 
+        // instead of replying on DefaultResultIterator to do that later
 
         if (readAll) {
             // note that we don't need to close ResultIterator
@@ -411,7 +423,6 @@ public class DataNode implements QueryEngine {
             delegate.nextDataRows(query, resultRows);
         } else {
             try {
-
                 it.setClosingConnection(true);
                 delegate.nextDataRows(transl.getQuery(), it);
             } catch (Exception ex) {

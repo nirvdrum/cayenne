@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -74,13 +75,12 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public class ResultDescriptor {
+    private static Logger logObj = Logger.getLogger(ResultDescriptor.class);
 
     // indexed data
     protected String[] names;
     protected int[] jdbcTypes;
     protected ExtendedType[] converters;
-
-    protected int resultWidth;
     protected int[] idIndexes;
 
     // unindexed data
@@ -124,8 +124,7 @@ public class ResultDescriptor {
         }
 
         // init various things
-        this.resultWidth = dbAttributes.size();
-
+        int resultWidth = dbAttributes.size();
         int idWidth = 0;
         this.names = new String[resultWidth];
         this.jdbcTypes = new int[resultWidth];
@@ -158,12 +157,12 @@ public class ResultDescriptor {
         }
 
         this.idIndexes = new int[idWidth];
-        for (int i = 0, j = 0; i < resultWidth; i++, j++) {
+        for (int i = 0, j = 0; i < resultWidth; i++) {
             DbAttribute attr = (DbAttribute) dbAttributes.get(i);
             jdbcTypes[i] = attr.getType();
 
             if (attr.isPrimaryKey()) {
-                idIndexes[j] = i;
+                idIndexes[j++] = i;
             }
         }
 
@@ -179,14 +178,20 @@ public class ResultDescriptor {
     }
 
     protected void initConvertersFromJavaTypes() {
+    	logObj.debug("Creating converters using custom java types.");
+        int resultWidth = dbAttributes.size();
         this.converters = new ExtendedType[resultWidth];
 
         for (int i = 0; i < resultWidth; i++) {
-            converters[i] = typesMapping.getRegisteredType((String) javaTypes.get(i));
+            converters[i] =
+                typesMapping.getRegisteredType((String) javaTypes.get(i));
         }
     }
 
     protected void initDefaultConverters() {
+		logObj.debug("Creating converters using default JDBC->Java type mapping.");
+		
+        int resultWidth = dbAttributes.size();
         this.converters = new ExtendedType[resultWidth];
 
         for (int i = 0; i < resultWidth; i++) {
@@ -196,6 +201,8 @@ public class ResultDescriptor {
     }
 
     protected void initConvertersFromMapping() {
+		logObj.debug("Creating converters using ObjAttributes.");
+		
         // assert that we have all the data
         if (dbAttributes.size() == 0) {
             throw new IllegalArgumentException("DbAttributes list is empty.");
@@ -205,6 +212,7 @@ public class ResultDescriptor {
             throw new IllegalArgumentException("Root ObjEntity is null.");
         }
 
+        int resultWidth = dbAttributes.size();
         this.converters = new ExtendedType[resultWidth];
 
         for (int i = 0; i < resultWidth; i++) {
@@ -212,7 +220,7 @@ public class ResultDescriptor {
             DbAttribute attr = (DbAttribute) dbAttributes.get(i);
             ObjAttribute objAttr = rootEntity.getAttributeForDbAttribute(attr);
             if (objAttr != null) {
-                javaType = objAttr.getDbAttributePath();
+                javaType = objAttr.getType();
             } else {
                 javaType = TypesMapping.getJavaBySqlType(attr.getType());
             }
@@ -235,9 +243,5 @@ public class ResultDescriptor {
 
     public String[] getNames() {
         return names;
-    }
-
-    public int getResultWidth() {
-        return resultWidth;
     }
 }
