@@ -3,10 +3,31 @@
 <toc name="toc-user-guide" chapter="3. Quick Start"/>
 <body>
     <section name="3. Quick Start">
-      	<p>This chapter explains in short what steps are required to write a Cayenne 
-      	application, and then presents a few tutorials showing examples of various applications.
-      	Each of the tutorials provides a simple SQL script to create 
-        the tables and data needed. </p>
+      	<subsection name="Common Setup Steps">
+		<p>These setup steps are the same for all tutorials in this chapter:</p>
+
+		<p><strong>1. Install Cayenne:</strong><br/> 
+		Check <a href="../install/index.html">these</a> and  <a href="../install/install.html">these</a> instructions. 
+		In particular, JDK 1.4 or newer must be installed.</p>
+
+		<p><strong>2. Get access to a Relational Database:</strong><br/> 
+		For instance this can be a shared database running
+		somewhere on the server in your organization. If you don't have access to such database 
+		(or don't have permissions to create and drop tables in it), it will probably be simpler if you
+		install a local database on the development machine. All the tutorial SQL scripts were written
+		for MySQL, so installing MySQL should be the simplest option.</p>
+
+		<p><strong>3. Install JDBC Driver:</strong><br/> 
+		Install JDBC driver for the database used in step (2). Put the driver jars somewhere 
+		in the filesystem. You don't have to add them to CLASSPATH for the CayenneModeler to run,
+		however you may need to do that to run your application.</p>
+
+		<p><strong>4. Start CayenneModeler GUI Application, Configure Driver Settings:</strong><br/> 
+		Follow <a href="../../modelerguide/modeler-intro/runmodeler.html">these instructions</a> 
+		to start the Modeler. Then
+		go to <code>"Tools > Preferences > ClassPath"</code> and create an entry or entries for
+		the JDBC driver JAR files installed in the step (3). Once these preferences are saved, they will be 
+		used by the Modeler, even after it is restarted.</p>
         
         <panel name="Note:">
         Source code for the tutorials discussed in this chapter is bundled with Cayenne 
@@ -19,6 +40,8 @@
             
         <img src="/images/userguide/quickstart-schema.jpg" width="400" height="200" border="0" 
         align="middle" alt="Art Catalog Schema"/>
+</subsection>
+		
     </section>
 </body>
 </document>

@@ -8,18 +8,7 @@
 		web application framework. This section shows how to write and a deploy a Tapestry web 
 		application	using Cayenne as an O/R layer.</p>
     	
-   	    <panel name="Note:">
-    		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
-    	</panel>
-    	
-    	<p></p>
-    	<panel name="Note:">
-    		Configuration given in this tutorial assumes Servlet 2.3 compatible
-    		container. For older containers, move cayenne files from WEB-INF to WEB-INF/classes
-    		(e.g. "mv cayenne.xml datanode.driver.xml datamap.map.xml classes/") and remove listener
-    		section from the web.xml.
-    	</panel>
-
+    
    	<p>Tutorial steps:</p>
     	
     	<ul>
@@ -31,9 +20,7 @@
     	</ul>
     	
        	<subsection name="3.4.1 Tutorial Setup" anchor="1">
-       		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
-       		installation instructions</a>. In particular, JSDK 1.4 must be installed.
-       		</p>
+       		<p>- Make sure you successfully finished <a href="index.html">common setup steps</a>.</p>
        		
        		<p>- Install a web container. This tutorial was tested with <a href=
     		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.1.10.
@@ -49,11 +36,8 @@
     		the tutorial project directory.</p>
 
     		
-    		<p> - Doublecheck the JDBC driver installation for the target database. If you haven't 
-    		installed it already, you may copy the driver jar file to 
-       		<code>WEB-INF/lib</code> subdirectory of the tutorial project. Alternatively if you want it to be 
-       		shared by all web applications and you are using Tomcat, you may copy it to
-       		<code>$CATALINA_HOME/common/lib</code> instead.
+    		<p> - Copy JDBC driver jar file to 
+       		<code>WEB-INF/lib</code> subdirectory of the tutorial project.
        		</p>
        		
     		<p>- Obtain the latest <a href="http://jakarta.apache.org/tapestry/">Tapestry 

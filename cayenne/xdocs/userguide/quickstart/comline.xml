@@ -4,11 +4,9 @@
 <body>
     <section name="3. Quick Start">
     	<subsection name="3.2 Command-Line Tutorial">    	
-    	<p>This section shows how to write a simple command-line application using Cayenne.</p>
-    	
-    	<panel name="Note:">
-    		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
-    	</panel>
+    	<p>This is a simple command-line Cayenne application tutorial. Full tutorial source code is included in 
+    	Cayenne distribution in "src/tutorials" folder.
+    	</p>
     		
     	
     	<p>Tutorial steps:</p>
@@ -24,13 +22,7 @@
     	</ul>
     	
        	<subsection name="3.2.1 Tutorial Setup" anchor="1">
-       		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
-       		installation instructions</a>. In particular, JSDK 1.4 must be installed.
-       		</p>
-       		
-    		<p>- Add cayenne.jar to the CLASSPATH of the application. Do not
-    		put it in JRE extendsions directory - eventually this will lead to 
-    		ClassNotFoundException problems.</p>
+       		<p>- Make sure you successfully finished <a href="index.html">common setup steps</a>.</p>
     		
     		<p>- Create a new folder named <code>cayenne-cmd-app</code> 
     		anywhere in the filesystem. This directory is referred to as 
@@ -78,8 +70,8 @@
     	<subsection name="3.2.5 Generate Java Code for DataObjects" anchor="5">
     		<p>Create "<code>java</code>" subdirectory in the project directory.
     		Use CayenneModeler to generate Java classes for DataObjects by going to 
-    		<strong>"Tools -> Generate Classes"</strong> and selecting the newly created
-    		"java" directory in the opened popup:</p>
+    		<code>"Tools > Generate Classes"</code> and selecting the newly created
+    		"java" directory as the output directory:</p>
     		<img src="/images/modelerguide/generate-classes.jpg" width="520" height="416" border="0" align="middle"
 			alt="Generate Classes Dialog"/>
 			
