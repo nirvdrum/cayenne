@@ -1,4 +1,3 @@
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -59,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.util.Date;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
  * @author Andrei Adamchik
  */
 public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
+
     protected Artist artist;
 
     protected void setUp() throws Exception {
@@ -85,8 +86,8 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that delegate method is invoked on external change
-     * of object in the store.
+     * Test case to prove that delegate method is invoked on external change of object in
+     * the store.
      * 
      * @throws Exception
      */
@@ -98,19 +99,18 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
 
         final boolean[] methodInvoked = new boolean[1];
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
-            public boolean shouldMergeChanges(
-                DataObject object,
-                DataRow snapshotInStore) {
+
+            public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
                 methodInvoked[0] = true;
                 return true;
             }
         };
         altContext.setDelegate(delegate);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
-        Artist altArtist =
-            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        Artist altArtist = (Artist) altContext.getObjectStore().getObject(
+                artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
@@ -123,6 +123,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         // assert that delegate was consulted when an object store
         // was refreshed
         ThreadedTestHelper helper = new ThreadedTestHelper() {
+
             protected void assertResult() throws Exception {
                 assertTrue("Delegate was not consulted", methodInvoked[0]);
             }
@@ -143,18 +144,17 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         DataContext altContext = mirrorDataContext(context);
 
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
-            public boolean shouldMergeChanges(
-                DataObject object,
-                DataRow snapshotInStore) {
+
+            public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore) {
                 return false;
             }
         };
         altContext.setDelegate(delegate);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
-        Artist altArtist =
-            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        Artist altArtist = (Artist) altContext.getObjectStore().getObject(
+                artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
         assertEquals(oldName, altArtist.getArtistName());
@@ -169,8 +169,8 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that delegate method is invoked on external change
-     * of object in the store.
+     * Test case to prove that delegate method is invoked on external change of object in
+     * the store.
      * 
      * @throws Exception
      */
@@ -181,6 +181,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
 
         final boolean[] methodInvoked = new boolean[1];
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
+
             public boolean shouldProcessDelete(DataObject object) {
                 methodInvoked[0] = true;
                 return true;
@@ -188,10 +189,10 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         };
         altContext.setDelegate(delegate);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
-        Artist altArtist =
-            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        Artist altArtist = (Artist) altContext.getObjectStore().getObject(
+                artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
@@ -204,6 +205,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         // assert that delegate was consulted when an object store
         // was refreshed
         ThreadedTestHelper helper = new ThreadedTestHelper() {
+
             protected void assertResult() throws Exception {
                 assertTrue("Delegate was not consulted", methodInvoked[0]);
             }
@@ -212,8 +214,8 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that delegate method is invoked on external change
-     * of object in the store, and is able to block further object processing.
+     * Test case to prove that delegate method is invoked on external change of object in
+     * the store, and is able to block further object processing.
      * 
      * @throws Exception
      */
@@ -224,6 +226,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
 
         final boolean[] methodInvoked = new boolean[1];
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
+
             public boolean shouldProcessDelete(DataObject object) {
                 methodInvoked[0] = true;
                 return false;
@@ -231,10 +234,10 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         };
         altContext.setDelegate(delegate);
 
-        // make sure we have a fully resolved copy of an artist object 
+        // make sure we have a fully resolved copy of an artist object
         // in the second context
-        Artist altArtist =
-            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        Artist altArtist = (Artist) altContext.getObjectStore().getObject(
+                artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
@@ -247,6 +250,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         // assert that delegate was consulted when an object store
         // was refreshed, and actually blocked object expulsion
         ThreadedTestHelper helper = new ThreadedTestHelper() {
+
             protected void assertResult() throws Exception {
                 assertTrue("Delegate was not consulted", methodInvoked[0]);
             }
@@ -257,8 +261,8 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
     }
 
     /**
-     * Test case to prove that delegate method is invoked on an unsuccessful 
-     * fault resolution.
+     * Test case to prove that delegate method is invoked on an unsuccessful fault
+     * resolution.
      * 
      * @throws Exception
      */
@@ -268,6 +272,7 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
 
         final boolean[] methodInvoked = new boolean[1];
         DataContextDelegate delegate = new DefaultDataContextDelegate() {
+
             public boolean shouldProcessDelete(DataObject object) {
                 methodInvoked[0] = true;
                 return true;
@@ -281,14 +286,15 @@ public class DataContextDelegateSharedCacheTst extends MultiContextTestCase {
         assertEquals(PersistenceState.HOLLOW, noSuchArtist.getPersistenceState());
 
         // attempt to resolve
-        noSuchArtist.resolveFault();
 
-        ThreadedTestHelper helper = new ThreadedTestHelper() {
-            protected void assertResult() throws Exception {
-                assertTrue("Delegate was not consulted", methodInvoked[0]);
-            }
-        };
-        helper.assertWithTimeout(3000);
+        try {
+            noSuchArtist.resolveFault();
+        }
+        catch (CayenneRuntimeException ex) {
+            // expected, as fault resolving failed...
+        }
+
+        assertTrue("Delegate was not consulted", methodInvoked[0]);
         assertEquals(PersistenceState.TRANSIENT, noSuchArtist.getPersistenceState());
     }
 }

@@ -255,7 +255,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
     /**
      * Test case to prove that deleting an object in one ObjectStore and
-     * committed to the database will be reflected in the peer ObjectStore
+     * committing to the database will be reflected in the peer ObjectStore
      * using the same DataRowCache. By default COMMITTED objects will be
      * changed to TRANSIENT.
      * 

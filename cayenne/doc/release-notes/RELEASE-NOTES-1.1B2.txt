@@ -1,0 +1,20 @@
+Cayenne Release Notes 1.1 B2
+Date: 
+============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+To browse individual bug reports, see 
+http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
+
+Changes, Features And Improvements:
+
+- DataObject.resolveFault() will now throw an exception if the underlying DB row does not exist
+  follow this link for further discussion:
+  http://objectstyle.org/cayenne/lists/cayenne-user/2004/07/0124.html
+
+Bugs Fixed:
+
+
+

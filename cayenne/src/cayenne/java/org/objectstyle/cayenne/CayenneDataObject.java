@@ -213,6 +213,11 @@ public class CayenneDataObject implements DataObject {
     public void resolveFault() {
         if (getPersistenceState() == PersistenceState.HOLLOW && dataContext != null) {
             dataContext.getObjectStore().resolveHollow(this);
+            if (getPersistenceState() != PersistenceState.COMMITTED) {
+                throw new CayenneRuntimeException(
+                        "Error resolving fault, no matching row exists in the database for ObjectId: "
+                                + getObjectId());
+            }
         }
     }
 
