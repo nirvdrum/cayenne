@@ -129,7 +129,7 @@ public class ProjectTreeView
         ProcedureListener,
         ProcedureDisplayListener {
 
-    private static Logger logObj = Logger.getLogger(ProjectTreeView.class);
+    private static final Logger logObj = Logger.getLogger(ProjectTreeView.class);
 
     protected EventController mediator;
     protected ProjectTree browseTree;

@@ -129,13 +129,15 @@ public class SelectQueryOrderingTab extends JPanel {
         setLayout(new BorderLayout());
 
         CellConstraints cc = new CellConstraints();
+        // "fill:350dlu" is used instead of preferred size, so
+        // that bottom browser does not resize all the way when the window is enlarged
         PanelBuilder builder = new PanelBuilder(new FormLayout(
-                "fill:min(400dlu;pref), 3dlu, fill:min(100dlu;pref)",
+                "fill:350dlu, 3dlu, left:min(100dlu;pref)",
                 "top:p:grow, 3dlu, fill:100dlu"));
 
         // orderings table must grow as the panel is resized
-        builder.add(new JScrollPane(table), cc.xy(1, 1, "d, fill"));
-        builder.add(removeButton, cc.xywh(3, 1, 1, 1));
+        builder.add(table, cc.xy(1, 1, "d, fill"));
+        builder.add(removeButton, cc.xy(3, 1, "d, top"));
         builder.add(new JScrollPane(
                 browser,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
@@ -172,6 +173,8 @@ public class SelectQueryPropertiesPanel extends JPanel {
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.CENTER);
+
+        // store children
     }
 
     private void initController() {
@@ -280,6 +283,18 @@ public class SelectQueryPropertiesPanel extends JPanel {
             }
 
             return super.getListCellRendererComponent(list, object, arg2, arg3, arg4);
+        }
+    }
+
+    public void setEnabled(boolean flag) {
+        super.setEnabled(flag);
+
+        // propagate to children
+
+        Container mainPanel = (Container) getComponent(0);
+        Component[] children = mainPanel.getComponents();
+        for (int i = 0; i < children.length; i++) {
+            children[i].setEnabled(flag);
         }
     }
 }

@@ -53,6 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.modeler.editor;
 
 import javax.swing.JScrollPane;
@@ -63,22 +64,18 @@ import javax.swing.event.ChangeListener;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * A tabbed view for configuring a select query.
- * 
  * @author Andrei Adamchik
  */
-public class SelectQueryTabbedView extends JTabbedPane {
+public class SQLTemplateTabbedView extends JTabbedPane {
 
     protected EventController mediator;
-    protected SelectQueryMainTab mainTab;
-    protected SelectQueryPrefetchTab prefetchTab;
-    protected SelectQueryOrderingTab orderingTab;
+    protected SQLTemplateMainTab mainTab;
     protected int lastSelectionIndex;
 
-    public SelectQueryTabbedView(EventController mediator) {
+    public SQLTemplateTabbedView(EventController mediator) {
         this.mediator = mediator;
 
         initView();
@@ -88,14 +85,8 @@ public class SelectQueryTabbedView extends JTabbedPane {
     private void initView() {
         setTabPlacement(JTabbedPane.TOP);
 
-        this.mainTab = new SelectQueryMainTab(mediator);
-        addTab("Select Query", new JScrollPane(mainTab));
-
-        this.orderingTab = new SelectQueryOrderingTab(mediator);
-        addTab("Orderings", new JScrollPane(orderingTab));
-
-        this.prefetchTab = new SelectQueryPrefetchTab(mediator);
-        addTab("Prefetches", new JScrollPane(prefetchTab));
+        this.mainTab = new SQLTemplateMainTab(mediator);
+        addTab("SQLTemplate", new JScrollPane(mainTab));
     }
 
     private void initController() {
@@ -116,7 +107,7 @@ public class SelectQueryTabbedView extends JTabbedPane {
     }
 
     void initFromModel() {
-        if (!(mediator.getCurrentQuery() instanceof SelectQuery)) {
+        if (!(mediator.getCurrentQuery() instanceof SQLTemplate)) {
             setVisible(false);
             return;
         }
@@ -142,12 +133,6 @@ public class SelectQueryTabbedView extends JTabbedPane {
         switch (lastSelectionIndex) {
             case 0:
                 mainTab.initFromModel();
-                break;
-            case 1:
-                orderingTab.initFromModel();
-                break;
-            case 2:
-                prefetchTab.initFromModel();
                 break;
         }
     }

@@ -83,15 +83,18 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
+import org.objectstyle.cayenne.query.ProcedureQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Main display area split into the project navigation tree on the right and selected
- * object editor on the left.
+ * Main display area split into the project navigation tree on the left and selected
+ * object editor on the right.
  */
 public class EditorView extends JPanel implements ObjEntityDisplayListener,
         DbEntityDisplayListener, DomainDisplayListener, DataMapDisplayListener,
-        DataNodeDisplayListener, ProcedureDisplayListener, QueryDisplayListener,
-        PropertyChangeListener {
+        DataNodeDisplayListener, ProcedureDisplayListener, QueryDisplayListener {
 
     private static final int INIT_DIVIDER_LOCATION = 170;
 
@@ -102,72 +105,82 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
     private static final String OBJ_VIEW = "ObjView";
     private static final String DB_VIEW = "DbView";
     private static final String PROCEDURE_VIEW = "ProcedureView";
-    private static final String QUERY_VIEW = "QueryView";
+    private static final String SELECT_QUERY_VIEW = "SelectQueryView";
+    private static final String SQL_TEMPLATE_VIEW = "SQLTemplateView";
+    private static final String PROCEDURE_QUERY_VIEW = "ProcedureQueryView";
 
     protected EventController eventController;
-    protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-    protected ProjectTreeView treePanel;
+    protected JSplitPane splitPane;
     protected Container detailPanel;
-    protected Component emptyPanel;
-    protected Component domainView;
-    protected Component nodeView;
-    protected Component dataMapView;
-    protected Component objDetailView;
-    protected Component dbDetailView;
-    protected Component procedureView;
-    protected Component queryView;
 
     protected CardLayout detailLayout;
-    protected ModelerPreferences prefs;
 
     public EditorView(EventController eventController) {
-        super(new BorderLayout());
-
         this.eventController = eventController;
-        this.detailPanel = new JPanel();
-        this.emptyPanel = new JPanel();
+        initView();
+        initController();
+    }
 
-        add(splitPane, BorderLayout.CENTER);
-        treePanel = new ProjectTreeView(eventController);
-        splitPane.setLeftComponent(treePanel);
-        splitPane.setRightComponent(detailPanel);
-        splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
+    private void initView() {
 
+        // init widgets
+        ProjectTreeView treePanel = new ProjectTreeView(eventController);
         treePanel.setMinimumSize(new Dimension(INIT_DIVIDER_LOCATION, 200));
 
-        prefs = ModelerPreferences.getPreferences();
-        int preferredSize = prefs.getInt(
+        this.detailPanel = new JPanel();
+        this.splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+
+        int preferredSize = ModelerPreferences.getPreferences().getInt(
                 ModelerPreferences.EDITOR_TREE_WIDTH,
                 INIT_DIVIDER_LOCATION);
         splitPane.setDividerLocation(preferredSize);
 
-        detailLayout = new CardLayout();
+        // assemble...
+
+        this.detailLayout = new CardLayout();
         detailPanel.setLayout(detailLayout);
 
         // some but not all panels must be wrapped in a scroll pane
-        addPanelToDetailView(new JPanel(), EMPTY_VIEW);
+        // those that are not wrapped usually have there own scrollers
+        // in subpanels...
 
-        domainView = new DataDomainView(eventController);
-        addPanelToDetailView(new JScrollPane(domainView), DOMAIN_VIEW);
+        detailPanel.add(new JPanel(), EMPTY_VIEW);
 
-        nodeView = new DataNodeView(eventController);
-        addPanelToDetailView(new JScrollPane(nodeView), NODE_VIEW);
+        Component domainView = new DataDomainView(eventController);
+        detailPanel.add(new JScrollPane(domainView), DOMAIN_VIEW);
 
-        dataMapView = new DataMapView(eventController);
-        addPanelToDetailView(new JScrollPane(dataMapView), DATA_MAP_VIEW);
+        Component nodeView = new DataNodeView(eventController);
+        detailPanel.add(new JScrollPane(nodeView), NODE_VIEW);
 
-        procedureView = new ProcedureTabbedView(eventController);
-        addPanelToDetailView(procedureView, PROCEDURE_VIEW);
+        Component dataMapView = new DataMapView(eventController);
+        detailPanel.add(new JScrollPane(dataMapView), DATA_MAP_VIEW);
 
-        queryView = new SelectQueryTabbedView(eventController);
-        addPanelToDetailView(new JScrollPane(queryView), QUERY_VIEW);
+        Component procedureView = new ProcedureTabbedView(eventController);
+        detailPanel.add(procedureView, PROCEDURE_VIEW);
 
-        objDetailView = new ObjEntityTabbedView(eventController);
-        addPanelToDetailView(objDetailView, OBJ_VIEW);
+        Component selectQueryView = new SelectQueryTabbedView(eventController);
+        detailPanel.add(selectQueryView, SELECT_QUERY_VIEW);
 
-        dbDetailView = new DbEntityTabbedView(eventController);
-        addPanelToDetailView(dbDetailView, DB_VIEW);
+        Component sqlTemplateView = new SQLTemplateTabbedView(eventController);
+        detailPanel.add(new JScrollPane(sqlTemplateView), SQL_TEMPLATE_VIEW);
 
+        Component procedureQueryView = new ProcedureQueryView(eventController);
+        detailPanel.add(new JScrollPane(procedureQueryView), PROCEDURE_QUERY_VIEW);
+
+        Component objDetailView = new ObjEntityTabbedView(eventController);
+        detailPanel.add(objDetailView, OBJ_VIEW);
+
+        Component dbDetailView = new DbEntityTabbedView(eventController);
+        detailPanel.add(dbDetailView, DB_VIEW);
+
+        splitPane.setLeftComponent(treePanel);
+        splitPane.setRightComponent(detailPanel);
+
+        setLayout(new BorderLayout());
+        add(splitPane, BorderLayout.CENTER);
+    }
+
+    private void initController() {
         eventController.addDomainDisplayListener(this);
         eventController.addDataNodeDisplayListener(this);
         eventController.addDataMapDisplayListener(this);
@@ -175,10 +188,17 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
         eventController.addDbEntityDisplayListener(this);
         eventController.addProcedureDisplayListener(this);
         eventController.addQueryDisplayListener(this);
-    }
 
-    protected void addPanelToDetailView(Component panel, String name) {
-        detailPanel.add(panel, name);
+        splitPane.addPropertyChangeListener(
+                JSplitPane.DIVIDER_LOCATION_PROPERTY,
+                new PropertyChangeListener() {
+
+                    public void propertyChange(PropertyChangeEvent e) {
+                        ModelerPreferences.getPreferences().put(
+                                ModelerPreferences.EDITOR_TREE_WIDTH,
+                                String.valueOf(splitPane.getDividerLocation()));
+                    }
+                });
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
@@ -224,16 +244,19 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
     }
 
     public void currentQueryChanged(QueryDisplayEvent e) {
-        if (e.getQuery() == null)
-            detailLayout.show(detailPanel, EMPTY_VIEW);
-        else
-            detailLayout.show(detailPanel, QUERY_VIEW);
-    }
+        Query query = e.getQuery();
 
-    public void propertyChange(PropertyChangeEvent e) {
-        if (e.getSource() == splitPane) {
-            prefs.put(ModelerPreferences.EDITOR_TREE_WIDTH, String.valueOf(splitPane
-                    .getDividerLocation()));
+        if (query instanceof SelectQuery) {
+            detailLayout.show(detailPanel, SELECT_QUERY_VIEW);
+        }
+        else if (query instanceof SQLTemplate) {
+            detailLayout.show(detailPanel, SQL_TEMPLATE_VIEW);
+        }
+        else if (query instanceof ProcedureQuery) {
+            detailLayout.show(detailPanel, PROCEDURE_QUERY_VIEW);
+        }
+        else {
+            detailLayout.show(detailPanel, EMPTY_VIEW);
         }
     }
 }
