@@ -60,14 +60,35 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.QueryHelper;
+import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -88,7 +109,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     //Will not be directly serialized - see read/writeObject for details
     protected transient QueryEngine parent;
-    
+
     protected Map registeredMap = Collections.synchronizedMap(new HashMap());
     protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
     protected RelationshipDataSource relDataSource = new RelationshipDataSource();
@@ -780,20 +801,24 @@ public class DataContext implements QueryEngine, Serializable {
 
         // find queries that require prefetching
         List prefetch = new ArrayList();
-        Iterator it = queries.iterator();
-        while (it.hasNext()) {
-            Object q = it.next();
-            if (q instanceof SelectQuery) {
-                SelectQuery sel = (SelectQuery) q;
-                List prefetchRels = sel.getPrefetchList();
-                if (prefetchRels != null && prefetchRels.size() > 0) {
-                    Iterator prIt = prefetchRels.iterator();
-                    while (prIt.hasNext()) {
-                        prefetch.add(
-                            QueryHelper.selectPrefetchPath(
-                                this,
-                                sel,
-                                (String) prIt.next()));
+
+        // if we expect iterated queries, ignore prefetching
+        if (!resultConsumer.isIteratedResult()) {
+            Iterator it = queries.iterator();
+            while (it.hasNext()) {
+                Object q = it.next();
+                if (q instanceof SelectQuery) {
+                    SelectQuery sel = (SelectQuery) q;
+                    List prefetchRels = sel.getPrefetchList();
+                    if (prefetchRels != null && prefetchRels.size() > 0) {
+                        Iterator prIt = prefetchRels.iterator();
+                        while (prIt.hasNext()) {
+                            prefetch.add(
+                                QueryHelper.selectPrefetchPath(
+                                    this,
+                                    sel,
+                                    (String) prIt.next()));
+                        }
                     }
                 }
             }
@@ -808,6 +833,86 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         parent.performQueries(finalQueries, resultConsumer);
+    }
+
+    /**
+     * Performs prefetching. Prefetching would resolve a set of relationships
+     * for a list of DataObjects in the most optimized way (preferrably in 
+     * a single query per relationship).
+     * 
+     * <p><i>Currently supports only "one-step" to one relationships. This is an
+     * arbitrary limitation and will be removed soon.</i></p>
+     */
+    public void prefetchRelationships(SelectQuery query, List objects) {
+        List prefetches = query.getPrefetchList();
+
+        if (objects == null
+            || prefetches == null
+            || objects.size() == 0
+            || prefetches.size() == 0) {
+            return;
+        }
+
+        int prefetchSize = prefetches.size();
+        int objectsSize = objects.size();
+        ArrayList queries = new ArrayList(prefetchSize);
+        ObjEntity oe = lookupEntity(query.getObjEntityName());
+
+        for (int i = 0; i < prefetchSize; i++) {
+            String prefetchKey = (String) prefetches.get(i);
+            if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
+                throw new CayenneRuntimeException(
+                    "Only one-step relationships are "
+                        + "supported at the moment, this will be fixed soon. Unsupported path : "
+                        + prefetchKey);
+            }
+
+            ArrayList needPrefetch = new ArrayList();
+            for (int j = 0; j < objectsSize; j++) {
+                CayenneDataObject obj = (CayenneDataObject) objects.get(j);
+                Object dest = obj.readNestedProperty(prefetchKey);
+
+                if (dest == null) {
+                    continue;
+                } else if (dest instanceof DataObject) {
+                    DataObject destDO = (DataObject) dest;
+                    if (destDO.getPersistenceState() == PersistenceState.HOLLOW) {
+                        needPrefetch.add(destDO);
+                    }
+                } else {
+                    throw new CayenneRuntimeException(
+                        "Invalid/unsupported prefetch key '"
+                            + prefetchKey
+                            + "'. Resulting object must be a DataObject, instead it was "
+                            + dest.getClass().getName());
+                }
+            }
+
+            if (needPrefetch.size() > 0) {
+
+                ObjRelationship r = (ObjRelationship) oe.getRelationship(prefetchKey);
+                if (r == null) {
+                    throw new CayenneRuntimeException(
+                        "Invalid prefetch key '"
+                            + prefetchKey
+                            + "'. No relationship found with this name in "
+                            + oe.getName());
+                }
+
+                ObjRelationship rev = r.getReverseRelationship();
+
+                Expression inExp =
+                    ExpressionFactory.binaryPathExp(
+                        Expression.IN,
+                        rev.getName(),
+                        needPrefetch);
+                queries.add(new SelectQuery(r.getTargetEntity().getName(), inExp));
+            }
+        }
+
+        if (queries.size() > 0) {
+            this.performQueries(queries, new SelectProcessor(query.getLoggingLevel()));
+        }
     }
 
     /** Delegates query execution to parent QueryEngine. */

@@ -180,6 +180,10 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public void addPrefetch(String relPath) {
 		prefetches.add(relPath);
 	}
+	
+	public void addPrefetches(List relPaths) {
+		prefetches.addAll(relPaths);
+	}
 
 	/**
 	 * Returns <code>true</code> if this query 

@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
@@ -99,6 +99,15 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         assertEquals(DataContextTst.artistCount, list.size());
     }
 
+    public void testIterator() throws Exception {
+        Iterator it = list.iterator();
+        while(it.hasNext()) {
+        	Object obj = it.next();
+        	assertNotNull(obj);
+        	assertTrue(obj instanceof DataObject);
+        }
+    }
+    
     public void testPageIndex() throws Exception {
         assertEquals(0, list.pageIndex(0));
         assertEquals(0, list.pageIndex(1));

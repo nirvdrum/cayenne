@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -98,8 +97,8 @@ public class IncrementalFaultList implements List {
     protected int pageSize;
     protected List elements;
     protected DataContext dataContext;
-    protected Level logLevel;
     protected ObjEntity rootEntity;
+    protected SelectQuery internalQuery;
 
     /**
      * Creates a new list copying settings from another list.
@@ -107,7 +106,7 @@ public class IncrementalFaultList implements List {
      */
     public IncrementalFaultList(IncrementalFaultList list) {
         this.pageSize = list.pageSize;
-        this.logLevel = list.logLevel;
+        this.internalQuery = list.internalQuery;
         this.dataContext = list.dataContext;
         this.rootEntity = list.rootEntity;
         elements = Collections.synchronizedList(new ArrayList());
@@ -123,8 +122,16 @@ public class IncrementalFaultList implements List {
         this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
         this.pageSize = query.getPageSize();
-        this.logLevel = query.getLoggingLevel();
         this.rootEntity = dataContext.lookupEntity(query.getObjEntityName());
+
+        // create an internal query, it is a partial replica of 
+        // the original query and will serve as a value holder for 
+        // various parameters
+        this.internalQuery = new SelectQuery(query.getObjEntityName());
+        this.internalQuery.setLoggingLevel(query.getLoggingLevel());
+        if (query instanceof SelectQuery) {
+            this.internalQuery.addPrefetches(((SelectQuery) query).getPrefetchList());
+        }
 
         fillIn(query);
     }
@@ -167,6 +174,14 @@ public class IncrementalFaultList implements List {
             } catch (CayenneException e) {
                 throw new CayenneRuntimeException("Error performing query.", e);
             }
+
+            // process prefetching
+            if (internalQuery.getPrefetchList().size() > 0) {
+                int endOfPage = (elements.size() < pageSize) ? elements.size() : pageSize;
+                dataContext.prefetchRelationships(
+                    internalQuery,
+                    elements.subList(0, endOfPage));
+            }
         }
     }
 
@@ -204,7 +219,7 @@ public class IncrementalFaultList implements List {
                     rootEntity.getName(),
                     ExpressionFactory.joinExp(Expression.OR, quals));
 
-            query.setLoggingLevel(logLevel);
+            query.setLoggingLevel(query.getLoggingLevel());
 
             List objects = dataContext.performQuery(query);
 
@@ -268,6 +283,14 @@ public class IncrementalFaultList implements List {
                     throw new CayenneRuntimeException("Can't find id for " + idMap);
                 }
             }
+        }
+
+        // process prefetching
+        if (internalQuery.getPrefetchList().size() > 0) {
+            int endOfPage = (elements.size() < toIndex) ? elements.size() : toIndex;
+            dataContext.prefetchRelationships(
+                internalQuery,
+                elements.subList(fromIndex, endOfPage));
         }
     }
 
