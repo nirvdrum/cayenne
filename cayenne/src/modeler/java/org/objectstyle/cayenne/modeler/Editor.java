@@ -59,6 +59,8 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -161,6 +163,8 @@ public class Editor
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
     protected TopController controller;
 
+	private ModelerPreferences prefs;
+
     /** Returns an editor singleton object. */
     public static Editor getFrame() {
         return frame;
@@ -173,22 +177,34 @@ public class Editor
 		// redirect all logging to the log file
 		configLogging();
 
+		// get preferences
+		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+
 		// set L&F
 		try {
-			ModelerPreferences prefs = ModelerPreferences.getPreferences();
-			String laf = (String)prefs.getString(ModelerPreferences.EDITOR_LAFNAME, "");
-			LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
+			String laf = (String)prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
 
-			for (int i = 0; i < installed.length; i++) {
-				LookAndFeelInfo lif = installed[i];
-				if (lif.getName().equals(laf)) {
-					UIManager.setLookAndFeel(lif.getClassName());
-					break;
+			if (laf != null) {
+				LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
+				for (int i = 0; i < installed.length; i++) {
+					LookAndFeelInfo lif = installed[i];
+					if (lif.getName().equals(laf)) {
+						UIManager.setLookAndFeel(lif.getClassName());
+						break;
+					}
 				}
+			}
+			else {
+				// no L&F set - use native platform look
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			}
 		}
 		catch(Exception e){
 			logObj.warn("Could not set selected LookAndFeel - using default.", e);
+		}
+		finally {
+			// remember L&F in prefs
+			prefs.setProperty(ModelerPreferences.EDITOR_LAFNAME, UIManager.getLookAndFeel().getName());
 		}
 
         // check jdk version
@@ -308,7 +324,27 @@ public class Editor
 			}
 		});
 
-		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+		this.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				if (e.getComponent() == Editor.this) {
+					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_WIDTH,
+										String.valueOf(Editor.this.getWidth()));
+					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_HEIGHT,
+										String.valueOf(Editor.this.getHeight()));
+				}
+			}
+
+			public void componentMoved(ComponentEvent e) {
+				if (e.getComponent() == Editor.this) {
+					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_X,
+										String.valueOf(Editor.this.getX()));
+					prefs.setProperty(ModelerPreferences.EDITOR_FRAME_Y,
+										String.valueOf(Editor.this.getY()));
+				}
+			}
+		});
+
+		prefs = ModelerPreferences.getPreferences();
 
 		int newWidth = prefs.getInt(ModelerPreferences.EDITOR_FRAME_WIDTH, 650);
 		int newHeight = prefs.getInt(ModelerPreferences.EDITOR_FRAME_HEIGHT, 550);
@@ -619,4 +655,6 @@ public class Editor
     public void setView(EditorView view) {
         this.view = view;
     }
+
+	
 }
