@@ -63,6 +63,34 @@
     </target>
 
 
+    <!-- ============================================= -->
+    <!-- Deploys Cayenne web site in a local           -->
+    <!-- directory.                                    -->
+    <!-- ============================================= -->
+    <target name="deploy-web" depends="prepare,doc,api" if="deploy.web">
+    	 <delete dir="${deploy.web}/cayenne"/>
+         <mkdir dir="${deploy.web}/cayenne"/>
+             
+         <!-- copy all but HTML -->
+         <copy todir="${deploy.web}/cayenne">
+             <fileset dir="${dist}/doc"> 
+             	<exclude name="**/*.html"/>
+             </fileset>
+         </copy>
+         
+         <!-- do replacement in HTML files -->
+         <copy todir="${deploy.web}/cayenne">
+             <fileset dir="${dist}/doc"> 
+             	<include name="**/*.html"/>
+             </fileset>
+             
+             <filterset begintoken="!--" endtoken="--">
+				<filter token="SFLOGO" value="${sf.logo}"/>
+			 </filterset>
+         </copy>
+    </target>
+    
+    
     <!-- ========================================== -->
     <!-- Creates Cayenne distribution and build     -->
     <!-- directories.                               -->
@@ -298,7 +326,7 @@
                     use="true"
                     windowtitle="Cayenne API">
             <doctitle><![CDATA[<h2>Cayenne API Documentation (Version ${project.version})</h2>]]></doctitle>
-            <bottom><![CDATA[<i>Copyright &#169; 2001-2002 <a href=
+            <bottom><![CDATA[<!--SFLOGO--> &nbsp; <i>Copyright &#169; 2001-2002 <a href=
             "http://objectstyle.org">ObjectStyle.org</a> All Rights Reserved.</i>]]>
             </bottom>
             <classpath refid="classpath"/>

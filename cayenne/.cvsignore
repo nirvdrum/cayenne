@@ -5,3 +5,4 @@ tmp
 .classpath
 .project
 testrun
+build.properties
