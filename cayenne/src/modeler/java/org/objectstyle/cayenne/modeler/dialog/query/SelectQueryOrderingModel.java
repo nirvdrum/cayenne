@@ -66,7 +66,7 @@ import org.scopemvc.model.collection.ListModel;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class OrderingsModel extends QueryModel {
+public class SelectQueryOrderingModel extends QueryModel {
 
     public static final Selector CURRENT_PATH_SELECTOR =
         Selector.fromString("currentPath");
@@ -78,7 +78,7 @@ public class OrderingsModel extends QueryModel {
     protected Object[] currentPath;
     protected ListModel orderings;
 
-    public OrderingsModel(Query query) {
+    public SelectQueryOrderingModel(Query query) {
         super(query);
         
         // TODO: must copy orderings to allow "cancel"

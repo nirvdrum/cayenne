@@ -86,7 +86,7 @@ public class SelectQueryModel extends QueryModel {
     protected boolean fetchingDataRows;
     protected boolean distinct;
     protected List prefetches;
-    protected OrderingsModel orderings;
+    protected SelectQueryOrderingModel orderings;
 
     public SelectQueryModel(Query query) {
         super(query);
@@ -108,7 +108,7 @@ public class SelectQueryModel extends QueryModel {
         this.fetchingDataRows = selectQuery.isFetchingDataRows();
         this.qualifier = selectQuery.getQualifier();
 
-        this.orderings = new OrderingsModel(selectQuery);
+        this.orderings = new SelectQueryOrderingModel(selectQuery);
         this.prefetches = new ArrayList(selectQuery.getPrefetches());
     }
 
@@ -196,7 +196,7 @@ public class SelectQueryModel extends QueryModel {
         }
     }
 
-    public OrderingsModel getOrderings() {
+    public SelectQueryOrderingModel getOrderings() {
         return orderings;
     }
 }

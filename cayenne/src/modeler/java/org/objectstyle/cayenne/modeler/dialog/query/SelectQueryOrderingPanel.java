@@ -83,7 +83,7 @@ import org.scopemvc.view.swing.STableModel;
  */
 public class SelectQueryOrderingPanel extends SPanel {
     private static Logger logObj = Logger.getLogger(SelectQueryOrderingPanel.class);
-    
+
     private static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
     private static final Dimension TABLE_DIM = new Dimension(460, 100);
 
@@ -107,17 +107,18 @@ public class SelectQueryOrderingPanel extends SPanel {
 
         browser = new MultiColumnBrowser();
         browser.setPreferredColumnSize(BROWSER_CELL_DIM);
+        browser.setDefaultRenderer();
 
         orderingsTable = new OrderingsTable();
         STableModel orderingsTableModel = new STableModel(orderingsTable);
-        orderingsTableModel.setSelector(OrderingsModel.ORDERINGS_SELECTOR);
+        orderingsTableModel.setSelector(SelectQueryOrderingModel.ORDERINGS_SELECTOR);
         orderingsTableModel.setColumnNames(
             new String[] { "Path", "Direction", "Case Sensitive" });
         orderingsTableModel.setColumnSelectors(
             new Selector[] {
-                OrderingsModel.ORDERING_SPEC_SELECTOR,
-                OrderingsModel.ORDERING_SPEC_SELECTOR,
-                OrderingsModel.ORDERING_SPEC_SELECTOR });
+                SelectQueryOrderingModel.ORDERING_SPEC_SELECTOR,
+                SelectQueryOrderingModel.ORDERING_SPEC_SELECTOR,
+                SelectQueryOrderingModel.ORDERING_SPEC_SELECTOR });
 
         orderingsTable.setModel(orderingsTableModel);
         //   orderingsTable.setSelectionSelector(
@@ -146,21 +147,21 @@ public class SelectQueryOrderingPanel extends SPanel {
         browser.addTreeSelectionListener(new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent e) {
                 Object[] path = e.getPath() != null ? e.getPath().getPath() : null;
-                ((OrderingsModel) getBoundModel()).setCurrentPath(path);
+                ((SelectQueryOrderingModel) getShownModel()).setCurrentPath(path);
             }
         });
     }
 
     public void setBoundModel(Object model) {
         super.setBoundModel(model);
-        
+
         Object submodel = getShownModel();
-        
+
         logObj.warn("B model: " + submodel);
-        
+
         // init root icon
-        if (submodel instanceof OrderingsModel) {
-            Object root = ((OrderingsModel) submodel).getRoot();
+        if (submodel instanceof SelectQueryOrderingModel) {
+            Object root = ((SelectQueryOrderingModel) submodel).getRoot();
             if (root instanceof Entity) {
                 EntityTreeModel treeModel = new EntityTreeModel((Entity) root);
                 logObj.warn("model: " + treeModel);

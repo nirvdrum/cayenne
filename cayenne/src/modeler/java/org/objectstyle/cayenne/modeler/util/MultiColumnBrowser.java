@@ -55,19 +55,28 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -102,6 +111,9 @@ import org.objectstyle.cayenne.event.EventSubject;
  */
 public class MultiColumnBrowser extends JPanel {
     private static Logger logObj = Logger.getLogger(MultiColumnBrowser.class);
+
+    private static final ImageIcon rightArrow =
+        CellRenderers.buildIcon("scroll_right.gif");
     private static final EventSubject treeSelectionSubject =
         EventSubject.getSubject(MultiColumnBrowser.class, "TreeSelectionEvent");
 
@@ -114,17 +126,13 @@ public class MultiColumnBrowser extends JPanel {
     protected Dimension preferredColumnSize;
 
     private List columns;
-    private ListSelectionListener browserSelector = new PanelController();
+    private ListSelectionListener browserSelector;
 
     public MultiColumnBrowser() {
         this(DEFAULT_MIN_COLUMNS_COUNT);
     }
 
     public MultiColumnBrowser(int minColumns) {
-        this(minColumns, CellRenderers.listRendererWithIcons());
-    }
-
-    public MultiColumnBrowser(int minColumns, ListCellRenderer renderer) {
         if (minColumns < DEFAULT_MIN_COLUMNS_COUNT) {
             throw new IllegalArgumentException(
                 "Expected "
@@ -134,8 +142,7 @@ public class MultiColumnBrowser extends JPanel {
         }
 
         this.minColumns = minColumns;
-        this.renderer = renderer;
-
+        this.browserSelector = new PanelController();
         initView();
     }
 
@@ -182,23 +189,68 @@ public class MultiColumnBrowser extends JPanel {
     }
 
     /**
+     * Resets currently used renderer to default one that will
+     * use the "name" property of objects and display a small
+     * arrow to the right of all non-leaf nodes.
+     */
+    public void setDefaultRenderer() {
+        if (!(renderer instanceof MultiColumnBrowserRenderer)) {
+            setRenderer(new MultiColumnBrowserRenderer());
+        }
+    }
+
+    /**
      * Returns ListCellRenderer for individual elements of each column.
      */
     public ListCellRenderer getRenderer() {
         return renderer;
     }
 
-    public void setRenderer(ListCellRenderer renderer) {
-        this.renderer = renderer;
+    /**
+     * Initializes the renderer of column cells.
+     */
+    public synchronized void setRenderer(ListCellRenderer renderer) {
+        if (this.renderer != renderer) {
+            this.renderer = renderer;
+
+            // update existing browser
+            if (columns != null && columns.size() > 0) {
+                Iterator it = columns.iterator();
+                while (it.hasNext()) {
+                    JList column = (JList) it.next();
+                    column.setCellRenderer(renderer);
+                }
+            }
+        }
     }
 
-    public void setModel(TreeModel model) {
-        this.model = model;
+    /**
+     * Initializes browser model.
+     */
+    public synchronized void setModel(TreeModel model) {
+        if (model == null) {
+            throw new NullPointerException("Null tree model.");
+        }
 
-        // display first column
-        initFromModel();
+        if (this.model != model) {
+            this.model = model;
+
+            // display first column
+            Object root = model.getRoot();
+            this.selectionPath = new Object[] { root };
+
+            // TODO: to make it more generic, we must clean the columns first
+            // instead here we make an assumption that the browser hasn't been used yet
+            if (!model.isLeaf(model.getRoot())) {
+                BrowserPanel firstPanel = (BrowserPanel) columns.get(0);
+                firstPanel.setRootNode(root);
+            }
+        }
     }
 
+    /**
+     * Returns browser model.
+     */
     public TreeModel getModel() {
         return model;
     }
@@ -215,7 +267,7 @@ public class MultiColumnBrowser extends JPanel {
     // ====================================================
 
     private void initView() {
-        columns = new ArrayList(minColumns);
+        columns = Collections.synchronizedList(new ArrayList(minColumns));
         adjustViewColumns(minColumns);
     }
 
@@ -247,10 +299,7 @@ public class MultiColumnBrowser extends JPanel {
     private BrowserPanel appendColumn() {
         BrowserPanel panel = new BrowserPanel();
         panel.addListSelectionListener(browserSelector);
-
-        if (renderer != null) {
-            panel.setCellRenderer(renderer);
-        }
+        panel.setCellRenderer(renderer);
 
         columns.add(panel);
         JScrollPane scroller =
@@ -320,19 +369,6 @@ public class MultiColumnBrowser extends JPanel {
 
             // Scroll the area into view.
             viewport.scrollRectToVisible(rectangle);
-        }
-    }
-
-    /**
-     *  Builds initial view.
-     */
-    private void initFromModel() {
-        Object root = model.getRoot();
-        selectionPath = new Object[] { root };
-
-        if (!model.isLeaf(model.getRoot())) {
-            BrowserPanel firstPanel = (BrowserPanel) columns.get(0);
-            firstPanel.setRootNode(root);
         }
     }
 
@@ -461,4 +497,71 @@ public class MultiColumnBrowser extends JPanel {
             }
         }
     };
+
+    // ====================================================
+    // Default renderer that shows non-leaf nodes with a 
+    // small right arrow. Unfortunately we can't subclass
+    // DefaultListCellRenerer since it extends JLabel that
+    // does not allow the layout that we need.
+    // ====================================================
+    final class MultiColumnBrowserRenderer implements ListCellRenderer, Serializable {
+
+        ListCellRenderer leafRenderer;
+        JPanel nonLeafPanel;
+        ListCellRenderer nonLeafTextRenderer;
+
+        MultiColumnBrowserRenderer() {
+
+            leafRenderer = CellRenderers.listRenderer();
+
+            nonLeafTextRenderer = new DefaultListCellRenderer() {
+                public Border getBorder() {
+                    return null;
+                }
+            };
+
+            nonLeafPanel = new JPanel();
+            nonLeafPanel.setLayout(new BorderLayout());
+            nonLeafPanel.add(new JLabel(rightArrow), BorderLayout.EAST);
+            nonLeafPanel.add((Component) nonLeafTextRenderer, BorderLayout.WEST);
+        }
+
+        public Component getListCellRendererComponent(
+            JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus) {
+
+            if (getModel().isLeaf(value)) {
+                return leafRenderer.getListCellRendererComponent(
+                    list,
+                    value,
+                    index,
+                    isSelected,
+                    cellHasFocus);
+            }
+
+            Object renderedValue = ModelerUtil.getObjectName(value);
+            if (renderedValue == null) {
+                // render NULL as empty string
+                renderedValue = " ";
+            }
+
+            Component text =
+                nonLeafTextRenderer.getListCellRendererComponent(
+                    list,
+                    renderedValue,
+                    index,
+                    isSelected,
+                    cellHasFocus);
+
+            nonLeafPanel.setComponentOrientation(text.getComponentOrientation());
+            nonLeafPanel.setBackground(text.getBackground());
+            nonLeafPanel.setForeground(text.getForeground());
+            nonLeafPanel.setEnabled(text.isEnabled());
+            return nonLeafPanel;
+        }
+    }
+
 }

@@ -115,7 +115,7 @@ public final class CellRenderers {
         attributeIcon = buildIcon("icon-attribute.gif");
     }
 
-    static ImageIcon buildIcon(String path) {
+    public static ImageIcon buildIcon(String path) {
         ClassLoader cl = CellRenderers.class.getClassLoader();
         URL url = cl.getResource(CayenneAction.RESOURCE_PATH + path);
         return new ImageIcon(url);
