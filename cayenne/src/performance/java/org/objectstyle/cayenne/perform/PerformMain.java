@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.perform.PerformanceTest;
 import org.objectstyle.perform.PerformanceTestRunner;
@@ -196,7 +197,14 @@ public class PerformMain implements TestConstants {
 			node.addDataMap(map);
 
 			// generate pk's
-			node.createPkSupportForMapEntities();
+			DataMap[] dataMaps = node.getDataMaps();
+			int len = dataMaps.length;
+			for (int i = 0; i < len; i++) {
+				DbEntity[] ents = dataMaps[i].getDbEntities();
+				node.getAdapter().getPkGenerator().createAutoPk(
+					node,
+					dataMaps[i].getDbEntitiesAsList());
+			}
 
 			// domain
 			sharedDomain = new DataDomain("Shared Domain");
