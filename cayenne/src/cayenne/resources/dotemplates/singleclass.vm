@@ -44,17 +44,18 @@ public class $classGen.className extends $classGen.superClassName {
 #foreach( $rel in ${classGen.Entity.Relationships} )
 #set( $classGen.Prop = $rel.Name )## let controller know about current property
 #if( $rel.ToMany )
-    public void addTo${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) obj) {
+#if ( ! $rel.ReadOnly )    public void addTo${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) obj) {
         addToManyTarget("${rel.name}", obj, true);
     }
     public void removeFrom${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) obj) {
         removeToManyTarget("${rel.name}", obj, true);
     }
+#end
     public List get${classGen.cappedProp}() {
         return (List)readProperty("${rel.name}");
     }
 #else
-#if ("true" != "${classGen.getEntity().isReadOnly()}")
+#if ( ! ${classGen.getEntity().isReadOnly()} && ! $rel.ReadOnly )
     public void set${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) $classGen.formatVariableName(${rel.name})) {
         setToOneTarget("${rel.name}", $classGen.formatVariableName(${rel.name}), true);
     }
