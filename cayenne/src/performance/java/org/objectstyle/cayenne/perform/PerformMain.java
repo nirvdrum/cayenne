@@ -77,141 +77,155 @@ import org.objectstyle.perform.ResultRenderer;
 
 /** Runs performance tests. */
 public class PerformMain implements TestConstants {
-	static Logger logObj = Logger.getLogger(PerformMain.class.getName());
+    static Logger logObj = Logger.getLogger(PerformMain.class.getName());
 
-	public static DataDomain sharedDomain;
+    public static DataDomain sharedDomain;
 
-	public static void main(String[] args) {
-		Configuration.configCommonLogging();
-		prepareDomain();
+    public static void main(String[] args) {
+        Configuration.configCommonLogging();
+        prepareDomain();
 
-		if (args.length == 0) {
-			ResultRenderer renderer = new ResultRenderer();
-			new PerformanceTestRunner(renderer).runSuite(prepareTests());
-			renderer.showResults();
-		} else {
-			new PerformanceTestRunner(null).runTest(prepareTest(args[0]));
-		}
-	}
+        if (args.length == 0) {
 
-	public static PerformanceTest prepareTest(String testClass) {
-		try {
-			return PerformanceTestSuite.testForClass(testClass);
-		}
-		catch(Exception ex) {
-			throw new RuntimeException("Error", ex);
-		}
-	}
+            // dry run
+            new PerformanceTestRunner(new ResultRenderer()).runSuite(prepareDryRun());
 
-	public static PerformanceTestSuite prepareTests() {
-		PerformanceTestSuite suite = new PerformanceTestSuite();
-		suite.addTestPair(
-			"Insert",
-			"Inserting "
-				+ CayennePerformanceTest.objCount
-				+ " records, Cayenne vs. JDBC.",
-			"org.objectstyle.cayenne.perform.test.InsertTest",
-			"org.objectstyle.cayenne.perform.test.InsertRefTest");
+            // real tests
+            ResultRenderer renderer = new ResultRenderer();
+            new PerformanceTestRunner(renderer).runSuite(prepareTests());
+            renderer.showResults();
+        } else {
+            new PerformanceTestRunner(null).runTest(prepareTest(args[0]));
+        }
+    }
 
-		suite.addTestPair(
-			"Select",
-			"Select "
-				+ CayennePerformanceTest.objCount
-				+ " records, Cayenne objects vs. JDBC.",
-			"org.objectstyle.cayenne.perform.test.SelectTest",
-			"org.objectstyle.cayenne.perform.test.SelectRefTest");
+    public static PerformanceTest prepareTest(String testClass) {
+        try {
+            return PerformanceTestSuite.testForClass(testClass);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error", ex);
+        }
+    }
 
-		suite.addTestPair(
-			"Select",
-			"Select "
-				+ CayennePerformanceTest.objCount
-				+ " records, Cayenne data rows vs. Cayenne objects.",
-			"org.objectstyle.cayenne.perform.test.SelectDataRowsTest",
-			"org.objectstyle.cayenne.perform.test.SelectTest");
-			
-		suite.addTestPair(
-			"Select",
-			"Select "
-				+ CayennePerformanceTest.objCount
-				+ " records, Cayenne objects vs. Cayenne read-only objects.",
-			"org.objectstyle.cayenne.perform.test.SelectTest",
-			"org.objectstyle.cayenne.perform.test.SelectReadOnlyTest");
-			
-		suite.addTestPair(
-			"Select",
-			"Select "
-				+ CayennePerformanceTest.objCount
-				+ " records, Cayenne objects vs. Cayenne objects (iterated list - size 50).",
-			"org.objectstyle.cayenne.perform.test.SelectTest",
-			"org.objectstyle.cayenne.perform.test.SelectIteratedTest");
+    public static PerformanceTestSuite prepareDryRun() {
+        PerformanceTestSuite dryRunSuite = new PerformanceTestSuite();
 
-		suite.addTestPair(
-			"Select Small Lists",
-			"Select one record over and over again, JDBC Prep. Statement. vs. JDBC Statement",
-			"org.objectstyle.cayenne.perform.test.PreparedSmallSelectTest",
-			"org.objectstyle.cayenne.perform.test.SmallSelectTest");
+        dryRunSuite.addTestPair(
+            "Dry Run",
+            "Dry Run",
+            "org.objectstyle.cayenne.perform.test.SelectTest",
+            "org.objectstyle.cayenne.perform.test.SelectReadOnlyTest");
+        return dryRunSuite;
+    }
 
-		suite.addTestPair(
-			"Select Small Lists",
-			"Select one record over and over again, Cayenne vs. JDBC Statement (being reopened in every query)",
-			"org.objectstyle.cayenne.perform.test.CayenneSmallSelectTest",
-			"org.objectstyle.cayenne.perform.test.ReopenedSmallSelectTest");
-			
-		suite.addTestPair(
-			"Select Small Lists",
-			"Select one record over and over again, Cayenne SelectQuery vs. Cayenne SQLSelectQuery",
-			"org.objectstyle.cayenne.perform.test.DataRowsSmallSelectTest",
-			"org.objectstyle.cayenne.perform.test.SQLSmallSelectTest");
-			
+    public static PerformanceTestSuite prepareTests() {
+        PerformanceTestSuite suite = new PerformanceTestSuite();
 
-		return suite;
-	}
+        suite.addTestPair(
+            "Insert",
+            "Inserting "
+                + CayennePerformanceTest.objCount
+                + " records, Cayenne vs. JDBC.",
+            "org.objectstyle.cayenne.perform.test.InsertTest",
+            "org.objectstyle.cayenne.perform.test.InsertRefTest");
 
-	public static void prepareDomain() {
-		try {
-			DataSourceInfo dsi =
-				new ConnectionSetup(true, true).buildConnectionInfo();
+        suite.addTestPair(
+            "Select",
+            "Select "
+                + CayennePerformanceTest.objCount
+                + " records, Cayenne objects vs. JDBC.",
+            "org.objectstyle.cayenne.perform.test.SelectTest",
+            "org.objectstyle.cayenne.perform.test.SelectRefTest");
 
-			PoolDataSource poolDS =
-				new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
+       suite.addTestPair(
+            "Select",
+            "Select "
+                + CayennePerformanceTest.objCount
+                + " records, Cayenne objects vs. Cayenne read-only objects.",
+            "org.objectstyle.cayenne.perform.test.SelectTest",
+            "org.objectstyle.cayenne.perform.test.SelectReadOnlyTest");
+            
+            
+        suite.addTestPair(
+            "Select",
+            "Select "
+                + CayennePerformanceTest.objCount
+                + " records, Cayenne data rows vs. Cayenne objects.",
+            "org.objectstyle.cayenne.perform.test.SelectDataRowsTest",
+            "org.objectstyle.cayenne.perform.test.SelectTest");
 
-			DataSource ds =
-				new PoolManager(
-					poolDS,
-					dsi.getMinConnections(),
-					dsi.getMaxConnections(),
-					dsi.getUserName(),
-					dsi.getPassword());
+        suite.addTestPair(
+            "Select",
+            "Select "
+                + CayennePerformanceTest.objCount
+                + " records, Cayenne objects vs. Cayenne objects (iterated list - size 50).",
+            "org.objectstyle.cayenne.perform.test.SelectTest",
+            "org.objectstyle.cayenne.perform.test.SelectIteratedTest");
 
-			// map
-			DataMap map = new MapLoader().loadDataMap(TEST_MAP_PATH);
+        suite.addTestPair(
+            "Select Small Lists",
+            "Select one record over and over again, JDBC Prep. Statement. vs. JDBC Statement",
+            "org.objectstyle.cayenne.perform.test.PreparedSmallSelectTest",
+            "org.objectstyle.cayenne.perform.test.SmallSelectTest");
 
-			// node
-			DataNode node = new DataNode("node");
-			node.setDataSource(ds);
-			String adapterClass = dsi.getAdapterClass();
-			if (adapterClass == null)
-				adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-			node.setAdapter(
-				(DbAdapter) Class.forName(adapterClass).newInstance());
-			node.addDataMap(map);
+        suite.addTestPair(
+            "Select Small Lists",
+            "Select one record over and over again, Cayenne vs. JDBC Statement (being reopened in every query)",
+            "org.objectstyle.cayenne.perform.test.CayenneSmallSelectTest",
+            "org.objectstyle.cayenne.perform.test.ReopenedSmallSelectTest");
 
-			// generate pk's
-			DataMap[] dataMaps = node.getDataMaps();
-			int len = dataMaps.length;
-			for (int i = 0; i < len; i++) {
-				DbEntity[] ents = dataMaps[i].getDbEntities();
-				node.getAdapter().getPkGenerator().createAutoPk(
-					node,
-					dataMaps[i].getDbEntitiesAsList());
-			}
+        suite.addTestPair(
+            "Select Small Lists",
+            "Select one record over and over again, Cayenne SelectQuery vs. Cayenne SQLSelectQuery",
+            "org.objectstyle.cayenne.perform.test.DataRowsSmallSelectTest",
+            "org.objectstyle.cayenne.perform.test.SQLSmallSelectTest");
 
-			// domain
-			sharedDomain = new DataDomain("Shared Domain");
-			sharedDomain.addNode(node);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
-		}
-	}
+        return suite;
+    }
+
+    public static void prepareDomain() {
+        try {
+            DataSourceInfo dsi = new ConnectionSetup(true, true).buildConnectionInfo();
+
+            PoolDataSource poolDS =
+                new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
+
+            DataSource ds =
+                new PoolManager(
+                    poolDS,
+                    dsi.getMinConnections(),
+                    dsi.getMaxConnections(),
+                    dsi.getUserName(),
+                    dsi.getPassword());
+
+            // map
+            DataMap map = new MapLoader().loadDataMap(TEST_MAP_PATH);
+
+            // node
+            DataNode node = new DataNode("node");
+            node.setDataSource(ds);
+            String adapterClass = dsi.getAdapterClass();
+            if (adapterClass == null)
+                adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
+            node.setAdapter((DbAdapter) Class.forName(adapterClass).newInstance());
+            node.addDataMap(map);
+
+            // generate pk's
+            DataMap[] dataMaps = node.getDataMaps();
+            int len = dataMaps.length;
+            for (int i = 0; i < len; i++) {
+                DbEntity[] ents = dataMaps[i].getDbEntities();
+                node.getAdapter().getPkGenerator().createAutoPk(
+                    node,
+                    dataMaps[i].getDbEntitiesAsList());
+            }
+
+            // domain
+            sharedDomain = new DataDomain("Shared Domain");
+            sharedDomain.addNode(node);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+    }
 }
