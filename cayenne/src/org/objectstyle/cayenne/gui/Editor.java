@@ -97,7 +97,7 @@ implements ActionListener
 {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 
-	private static final String TITLE = "Cayenne modeler";
+	private static final String TITLE = "CayenneModeler";
 	/** To indicate in title that the proj is dirty. */
 	private static final String DIRTY_STRING = "* - ";
 
