@@ -72,7 +72,7 @@ import org.apache.log4j.Logger;
  */
 public class Invocation extends Object {
 	private static final Logger log = Logger.getLogger(Invocation.class);
-
+ 
 	private WeakReference _target;
 	private Method _method;
 	private Class[] _parameterTypes;
