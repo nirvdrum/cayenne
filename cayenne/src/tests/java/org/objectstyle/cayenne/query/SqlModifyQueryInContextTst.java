@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.query;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import org.objectstyle.art.Artist;
+
 public class SqlModifyQueryInContextTst extends SelectQueryBase {
     private static final int _artistCount = 2;
 
@@ -77,7 +79,7 @@ public class SqlModifyQueryInContextTst extends SelectQueryBase {
     }
 
     public void testInsert() throws java.lang.Exception {
-        q.setObjEntityName("Artist");
+        q.setRoot(Artist.class);
         q.setSqlString(
             "insert into ARTIST (ARTIST_ID, ARTIST_NAME) values (1, 'big artist')");
         performQuery();
@@ -89,7 +91,7 @@ public class SqlModifyQueryInContextTst extends SelectQueryBase {
     public void testDelete() throws java.lang.Exception {
         insertArtists();
 
-        q.setObjEntityName("Artist");
+        q.setRoot(Artist.class);
         q.setSqlString("delete from ARTIST where ARTIST_ID > 1");
         performQuery();
 

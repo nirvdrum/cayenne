@@ -58,23 +58,57 @@ package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Level;
 
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
-public class QueryTst extends CayenneTestCase {    
+public class QueryTst extends CayenneTestCase {
+	protected Query query;    
     public QueryTst(String name) {
         super(name);
     }
     
+    public void setUp() throws java.lang.Exception {
+        query = new TstUnqualifiedQuery();
+    }
+
     
     public void testObjEntityName() throws Exception {
-        Query query = new TstUnqualifiedQuery();
         assertNull(query.getObjEntityName());
         
         query.setObjEntityName("SomeEntity");
         assertSame("SomeEntity", query.getObjEntityName());
     }
     
+    public void testSetRootEntityName() {
+    	assertNull(query.getRoot());
+    	query.setRoot("SomeEntity");
+    	assertSame("SomeEntity", query.getRoot());
+    }
+    
+    public void testSetRootObjEntity() {
+    	assertNull(query.getRoot());
+    	ObjEntity e= getSharedDomain().getEntityResolver().lookupObjEntity("Artist");
+    	query.setRoot(e);
+    	this.assertSame(e, query.getRoot());
+    }
+    
+    public void testSetRootClass() {
+    	assertNull(query.getRoot());
+	   	query.setRoot(Artist.class);
+    	this.assertSame(Artist.class, query.getRoot());
+    }
+
+    public void testSetInvalidRoot() {
+    	assertNull(query.getRoot());
+    	try {
+		   	query.setRoot(new Integer(1));
+		   	fail("Should not be able to set the root to an Integer");
+    	} catch (IllegalArgumentException e) {
+    	}
+    }
+
     public void testLoggingLevel() throws Exception {
         Query query = new TstUnqualifiedQuery();
         assertEquals(Query.DEFAULT_LOG_LEVEL, query.getLoggingLevel());

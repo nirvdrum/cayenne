@@ -56,8 +56,10 @@
 
 package org.objectstyle.cayenne.query;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SelectQueryBasicsTst extends CayenneTestCase {
@@ -181,4 +183,5 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         q.setParentObjEntityName("SomeEntity");
         assertSame("SomeEntity", q.getParentObjEntityName());
     }
+   
 }

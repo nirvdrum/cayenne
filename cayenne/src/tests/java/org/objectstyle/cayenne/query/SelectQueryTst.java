@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 
@@ -72,7 +73,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testFetchLimit() throws java.lang.Exception {
-        query.setObjEntityName("Artist");
+ 		query.setRoot(Artist.class);
         query.setFetchLimit(7);
         performQuery();
 
@@ -82,8 +83,8 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(7, objects.size());
     }
 
-    public void testSelectAllObjects() throws java.lang.Exception {
-        query.setObjEntityName("Artist");
+    public void testSelectAllObjectsRootEntityName() throws java.lang.Exception {
+        query.setRoot(Artist.class);
         performQuery();
 
         // check query results
@@ -92,8 +93,30 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
+    public void testSelectAllObjectsRootClass() throws java.lang.Exception {
+ 		query.setRoot(Artist.class);
+        performQuery();
+
+        // check query results
+        ArrayList objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(_artistCount, objects.size());
+    }
+    
+    public void testSelectAllObjectsRootObjEntity() throws java.lang.Exception {
+		//Crude technique to obtain the Artist ObjEntity, but it works
+  		query.setRoot(this.getSharedDomain().getEntityResolver().lookupObjEntity("Artist"));
+        performQuery();
+
+        // check query results
+        ArrayList objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(_artistCount, objects.size());
+    }
+
+
    public void testOrderByIgnoreCase() throws Exception {
-        query.setObjEntityName("Artist");
+ 		query.setRoot(Artist.class);
         Expression qual =
             ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist11");
         query.setQualifier(qual);
@@ -108,7 +131,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
     /** Test how "like ignore case" works when using uppercase parameter. */
     public void testSelectLikeIgnoreCaseObjects1() throws Exception {
-        query.setObjEntityName("Artist");
+ 		query.setRoot(Artist.class);
         Expression qual =
             ExpressionFactory.binaryPathExp(
                 Expression.LIKE_IGNORE_CASE,
@@ -125,7 +148,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
     /** Test how "like ignore case" works when using lowercase parameter. */
     public void testSelectLikeIgnoreCaseObjects2() throws Exception {
-        query.setObjEntityName("Artist");
+  		query.setRoot(Artist.class);
         Expression qual =
             ExpressionFactory.binaryPathExp(
                 Expression.LIKE_IGNORE_CASE,
@@ -141,7 +164,7 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testSelectCustAttributes() throws java.lang.Exception {
-        query.setObjEntityName("Artist");
+ 		query.setRoot(Artist.class);
         query.addCustDbAttribute("ARTIST_NAME");
 
         List results = getSharedDomain().createDataContext().performQuery(query);

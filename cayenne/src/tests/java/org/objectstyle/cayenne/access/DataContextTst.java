@@ -68,6 +68,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
+import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.ObjectId;
@@ -364,9 +365,9 @@ public class DataContextTst extends CayenneTestCase {
 
 	public void testPerformQueries() throws Exception {
 		SelectQuery q1 = new SelectQuery();
-		q1.setObjEntityName("Artist");
+		q1.setRoot(Artist.class);
 		SelectQuery q2 = new SelectQuery();
-		q2.setObjEntityName("Gallery");
+		q2.setRoot(Gallery.class);
 
 		ArrayList qs = new ArrayList();
 		qs.add(q1);

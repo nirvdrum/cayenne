@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access.trans;
 
 import org.apache.log4j.Logger;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.TranslationTestCase;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
@@ -82,7 +83,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
         try {
             TranslationTestCase tstCase =
                 new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.ASC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
@@ -97,7 +98,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
         try {
             TranslationTestCase tstCase =
                 new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME DESC");
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.DESC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
@@ -112,7 +113,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
         try {
             TranslationTestCase tstCase =
                 new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.ASC, true);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
 
@@ -131,7 +132,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
                     "Artist",
                     null,
                     "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.DESC, true);
             q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
@@ -156,7 +157,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
                     "Artist",
                     null,
                     "<ta.>ARTIST_NAME, <ta.>ESTIMATED_PRICE");
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.ASC, true);
             q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC, true);
             String orderBySql = new OrderingTranslator(qa).doTranslation();
@@ -182,7 +183,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
                     "Artist",
                     null,
                     "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addOrdering("artistName", Ordering.DESC);
             q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
             String orderBySql = new OrderingTranslator(qa).doTranslation();

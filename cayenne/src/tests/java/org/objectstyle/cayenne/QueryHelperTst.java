@@ -55,8 +55,10 @@ package org.objectstyle.cayenne;
  *
  */
 
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.*;
 
@@ -71,7 +73,17 @@ public class QueryHelperTst extends CayenneTestCase {
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
         SelectQuery reverseQ =
             QueryHelper.selectPrefetchPath(getSharedDomain(), q, "paintingArray");
-            assertEquals("Painting", reverseQ.getObjEntityName());
+		assertEquals("Painting", reverseQ.getObjEntityName());
+		Object queryRoot=reverseQ.getRoot();
+		if(queryRoot instanceof String) {
+			assertEquals("Painting", queryRoot);
+		} else if (queryRoot instanceof ObjEntity) {
+			assertEquals(getSharedDomain().getEntityResolver().lookupObjEntity("Painting"), queryRoot);
+		} else if (queryRoot instanceof Class) {
+			assertEquals(Painting.class ,queryRoot);
+		} else {
+			fail("Query root is of an untestable type :"+queryRoot.getClass());
+		}
         assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
         
         Expression newPath = (Expression)reverseQ.getQualifier().getOperand(0);

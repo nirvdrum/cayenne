@@ -60,6 +60,8 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.objectstyle.art.Artist;
+
 public class SqlSelectQueryInContextTst extends SelectQueryBase {
 	private static final int _artistCount = 10;
 
@@ -80,7 +82,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 
 	public void testSelect1() throws java.lang.Exception {
 
-		q.setObjEntityName("Artist");
+        q.setRoot(Artist.class);
 		q.setSqlString("select count(*)  from ARTIST");
 		performQuery();
 
@@ -95,7 +97,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 
 	public void testSelect2() throws java.lang.Exception {
 		// use fetch limit
-		q.setObjEntityName("Artist");
+        q.setRoot(Artist.class);
 		q.setSqlString("select ARTIST_NAME from ARTIST");
 		q.setFetchLimit(5);
 		performQuery();

@@ -126,7 +126,7 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 						getSharedDomain().getEntityResolver().lookupObjEntity(
 							cases[i].getRootEntity());
 					assertNotNull(ent);
-					qa.getQuery().setObjEntityName(ent.getName());
+					qa.getQuery().setRoot(ent);
 					cases[i].assertTranslatedWell(
 						new QualifierTranslator(qa).doTranslation(),
 						false);

@@ -63,6 +63,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistAssets;
+import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.ArtistPaintingCounts;
+import org.objectstyle.art.Painting;
+import org.objectstyle.art.SubPainting;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -104,7 +109,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.setQualifier(
                 ExpressionFactory.binaryExp(Expression.LIKE, "artistName", "a%"));
             q.addOrdering("dateOfBirth", Ordering.ASC);
@@ -130,7 +135,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
         Connection con = getSharedConnection();
         try {
             // query with "distinct" set
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.setDistinct(true);
 
             String generatedSql = buildTranslator(con).createSqlString();
@@ -153,7 +158,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("ArtistAssets");
+            q.setRoot(ArtistAssets.class);
             q.setQualifier(ExpressionFactory.matchExp("toArtist", a1));
 
             String sql = buildTranslator(con).createSqlString();
@@ -182,7 +187,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("ArtistAssets");
+            q.setRoot(ArtistAssets.class);
             q.setParentObjEntityName("Painting");
             q.setParentQualifier(
                 ExpressionFactory.matchExp("toArtist.artistName", "abc"));
@@ -231,7 +236,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("ArtistExhibit");
+            q.setRoot(ArtistExhibit.class);
             q.setQualifier(
                 ExpressionFactory.binaryPathExp(
                     Expression.LIKE,
@@ -279,7 +284,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("ArtistExhibit");
+            q.setRoot(ArtistExhibit.class);
             q.setQualifier(
                 ExpressionFactory.binaryPathExp(
                     Expression.LIKE,
@@ -321,7 +326,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.setQualifier(
                 ExpressionFactory.binaryPathExp(
                     Expression.GREATER_THAN,
@@ -368,7 +373,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // query with qualifier and ordering
-            q.setObjEntityName("Painting");
+            q.setRoot(Painting.class);
             q.setQualifier(
                 ExpressionFactory.binaryPathExp(
                     Expression.GREATER_THAN,
@@ -410,7 +415,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // configure query with entity that maps one-to-one to DbEntity
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
@@ -433,7 +438,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // configure query with custom attributes
-            q.setObjEntityName("Artist");
+            q.setRoot(Artist.class);
             q.addCustDbAttribute("ARTIST_ID");
 
             SelectTranslator transl = buildTranslator(con);
@@ -457,7 +462,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // configure query with entity that maps to a subset of DbEntity
-            q.setObjEntityName("SubPainting");
+            q.setRoot(SubPainting.class);
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
@@ -479,7 +484,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
         try {
             // configure query with derived entity that maps to a subset of DbEntity
-            q.setObjEntityName("ArtistPaintingCounts");
+            q.setRoot(ArtistPaintingCounts.class);
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
