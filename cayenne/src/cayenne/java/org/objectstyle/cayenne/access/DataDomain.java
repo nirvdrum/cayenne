@@ -330,20 +330,19 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Unregisters DataMap matching <code>name</code> parameter.
-     * Also removes map from any child DataNodes that use it.
+     * Removes named DataMap from this DataDomain and any underlying DataNodes that
+     * include it.
      */
     public synchronized void removeMap(String mapName) {
         DataMap map = getMap(mapName);
         if (map == null) {
-            logObj.debug("attempt to remove non-existing map: " + mapName);
             return;
         }
 
         // remove from data nodes
-        Iterator it = nodes.keySet().iterator();
+        Iterator it = nodes.values().iterator();
         while (it.hasNext()) {
-            DataNode node = (DataNode) nodes.get(it.next());
+            DataNode node = (DataNode) it.next();
             node.removeDataMap(mapName);
         }
 
@@ -354,22 +353,21 @@ public class DataDomain implements QueryEngine {
         reindexNodes();
     }
 
-    /** 
-     * Removes a DataNode. 
+    /**
+     * Removes a DataNode from DataDomain. Any maps previously associated with this node
+     * within domain will still be kept around, however they wan't be mapped to any node.
      */
     public synchronized void removeDataNode(String nodeName) {
-        DataNode nodeToRemove = (DataNode) nodes.remove(nodeName);
-        if (nodeToRemove == null) {
-            return;
-        }
-        
-        nodeToRemove.setEntityResolver(null);
+        DataNode removed = (DataNode) nodes.remove(nodeName);
+        if (removed != null) {
 
-        Iterator it = nodesByDataMapName.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            if (entry.getValue() == nodeToRemove) {
-                it.remove();
+            removed.setEntityResolver(null);
+
+            Iterator it = nodesByDataMapName.values().iterator();
+            while (it.hasNext()) {
+                if (it.next() == removed) {
+                    it.remove();
+                }
             }
         }
     }
