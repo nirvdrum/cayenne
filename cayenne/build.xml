@@ -279,7 +279,7 @@
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
     <target name="doc" depends="prepare">
-        <!-- copy all licenses inclusing ours -->
+        <!-- copy all licenses including ours -->
         <copy todir="${dist}/doc">
             <fileset dir="doc">
                <include name="LICENSE*"/>
@@ -315,6 +315,11 @@
             <fileset dir="src/dtd">
                 <include name="**/*.dtd"/>
             </fileset>
+        </copy>
+        
+        <!-- copy tutorial code -->
+        <copy todir="${dist}/doc/tutorial" filtering="no">
+            <fileset dir="doc/tutorial"/>
         </copy>
     </target>
 
