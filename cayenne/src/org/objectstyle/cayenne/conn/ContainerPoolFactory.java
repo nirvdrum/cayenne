@@ -158,13 +158,13 @@ public class ContainerPoolFactory implements ObjectFactory {
         // We only know how to deal with <code>javax.naming.Reference</code>s
         // that specify a class name of "javax.sql.DataSource"
         if ((obj == null) || !(obj instanceof Reference)) {
-            logObj.fine("unsupported or null reference: " + obj);
+            logObj.info("unsupported or null reference: " + obj);
             return null;
         }
 
         Reference ref = (Reference) obj;
         if (!"javax.sql.DataSource".equals(ref.getClassName())) {
-            logObj.fine("unsupported type: " + ref.getClassName());
+            logObj.info("unsupported type: " + ref.getClassName());
             return null;
         }
 
@@ -210,8 +210,8 @@ public class ContainerPoolFactory implements ObjectFactory {
             username = ra.getContent().toString();
         }
 
-        logObj.fine("Loading datasource driver: " + driver);
-        logObj.fine("Connecting to URL: " + url);
+        logObj.info("Loading datasource driver: " + driver);
+        logObj.info("Connecting to URL: " + url);
         return new PoolManager(driver, url, min, max, username, password);
     }
 }
