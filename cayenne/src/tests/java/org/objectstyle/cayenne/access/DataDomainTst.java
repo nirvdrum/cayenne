@@ -67,11 +67,10 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DataDomainTst extends CayenneTestCase {
 
 	public void testName() throws Exception {
-		String tstName = "tst_name";
-		DataDomain domain = new DataDomain();
-		assertNull(domain.getName());
-		domain.setName(tstName);
-		assertEquals(tstName, domain.getName());
+		DataDomain domain = new DataDomain("some name");
+		assertEquals("some name", domain.getName());
+		domain.setName("tst_name");
+		assertEquals("tst_name", domain.getName());
 	}
 
 	public void testNodes() throws java.lang.Exception {

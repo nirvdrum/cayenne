@@ -113,6 +113,8 @@ public class CayenneTestCase extends TestCase {
     }
 
     public DataContext createDataContext() {
+    	// clear cache...
+    	getDomain().getSnapshotCache().clear();
         return getDomain().createDataContext();
     }
 

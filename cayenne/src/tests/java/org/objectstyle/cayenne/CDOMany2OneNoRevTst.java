@@ -103,7 +103,7 @@ public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Painting1 p2 = fetchPainting1();

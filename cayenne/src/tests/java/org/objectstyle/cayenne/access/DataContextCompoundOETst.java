@@ -79,7 +79,7 @@ public class DataContextCompoundOETst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     private void populateTables() throws Exception {

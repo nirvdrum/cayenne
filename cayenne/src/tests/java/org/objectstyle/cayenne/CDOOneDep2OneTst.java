@@ -82,7 +82,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
         // do save 
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         PaintingInfo pi2 = fetchPaintingInfo();
@@ -123,7 +123,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         PaintingInfo pi2 = fetchPaintingInfo();
@@ -147,7 +147,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         // do save II
         ctxt.commitChanges();
         ObjectId pi2oid = pi2.getObjectId();
-        resetContext();
+		ctxt = createDataContext();
 
         PaintingInfo pi3 = fetchPaintingInfo();
         Painting p3 = pi3.getPainting();

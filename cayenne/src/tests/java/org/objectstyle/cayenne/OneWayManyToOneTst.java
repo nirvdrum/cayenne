@@ -80,7 +80,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         DataDomain dom = getDomain();
         setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
 
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     public void testSavedAdd() throws Exception {
@@ -98,7 +98,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
 
         // do save II
         ctxt.commitChanges();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         Painting p3 = fetchPainting();
         Gallery g3 = p3.getToGallery();
@@ -122,7 +122,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         p1.setToGallery(g12);
         ctxt.commitChanges();
 
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         Painting p2 = fetchPainting();
         Gallery g21 = p2.getToGallery();
@@ -150,7 +150,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
 		
 		//And save so we can be sure that the save did the right thing
 		ctxt.commitChanges();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         Painting p2 = fetchPainting();
         Gallery g21 = p2.getToGallery();

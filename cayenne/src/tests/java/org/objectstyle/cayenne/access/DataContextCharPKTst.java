@@ -70,7 +70,7 @@ public class DataContextCharPKTst extends CayenneTestCase {
 
 	protected void setUp() throws Exception {
 		getDatabaseSetup().cleanTableData();
-		ctxt = getDomain().createDataContext();
+		ctxt = createDataContext();
 	}
 
 	public void testInsert() throws Exception {

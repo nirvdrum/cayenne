@@ -70,12 +70,6 @@ public class DomainValidatorTst extends ValidatorTestBase {
         new DomainValidator().validateObject(new ProjectPath(new Object[] { project, d1 }), validator);
         assertValidator(ValidationInfo.VALID);
 
-        // should complain about no name
-        DataDomain d2 = new DataDomain();
-        validator.reset();
-        new DomainValidator().validateObject(new ProjectPath(new Object[] { project, d2 }), validator);
-        assertValidator(ValidationInfo.ERROR);
-
         // should complain about duplicate name
         DataDomain d3 = new DataDomain("xyz");
         project.getConfiguration().addDomain(d3);

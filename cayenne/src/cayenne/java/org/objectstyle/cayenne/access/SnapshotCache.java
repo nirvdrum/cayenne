@@ -55,25 +55,29 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.event.EventSubject;
-//import org.shiftone.cache.Cache;
-//import org.shiftone.cache.CacheManager;
+import org.objectstyle.cayenne.util.Util;
+import org.shiftone.cache.Cache;
+import org.shiftone.cache.CacheManager;
 
 /**
  * @author Andrei Adamchik
  */
-public class SnapshotCache {
+public class SnapshotCache implements Serializable {
     private static Logger logObj = Logger.getLogger(SnapshotCache.class);
 
     protected String name;
-    protected EventSubject snapshotEventSubject;
-    //   protected Cache snapshots;
+    protected Cache snapshots;
 
     /**
      * Creates new SnapshotCache, assigning it a specified name.
@@ -84,10 +88,9 @@ public class SnapshotCache {
         }
 
         this.name = name;
-        this.snapshotEventSubject = EventSubject.getSubject(this.getClass(), name);
 
         // TODO: these values will be configurable
-        //   this.snapshots = CacheManager.getInstance().newCache(12 * 60 * 60 * 1000, 10000);
+        this.snapshots = CacheManager.getInstance().newCache(12 * 60 * 60 * 1000, 10000);
     }
 
     /**
@@ -98,48 +101,27 @@ public class SnapshotCache {
     public String getName() {
         return name;
     }
+    
+    public void setName(String name) {
+    	this.name = name;
+    }
+
+    public Map getSnapshot(ObjectId oid) {
+        return (Map) snapshots.getObject(oid);
+    }
 
     /**
      * Returns EventSubject used by this SnapshotCache to notify of snapshot changes.
      */
     public EventSubject getSnapshotEventSubject() {
-        return snapshotEventSubject;
+        return EventSubject.getSubject(this.getClass(), name);
     }
-
+    
     /**
-     * Updates internal cache with the changes from the SnapshotEvent.
+     * Expires and removes all stored snapshots without sending any notification events.
      */
-    protected synchronized void processSnapshotsChangeEvent(SnapshotEvent event) {
-        // DELETED: evict deleted snapshots
-        Collection deleted = event.deletedIds();
-        if (!deleted.isEmpty()) {
-            Iterator it = deleted.iterator();
-            while (it.hasNext()) {
-                it.next();
-                //          snapshots.remove(it.next());
-            }
-        }
-
-        // MODIFIED: merge diffs
-        Map updates = event.modifiedDiffs();
-        if (!updates.isEmpty()) {
-            Iterator it = updates.keySet().iterator();
-            while (it.hasNext()) {
-                it.next();
-                /*  Object key = it.next();
-                Map diff = (Map) updates.get(key);
-                
-                Map snapshot = (Map) snapshots.getObject(key);
-                if (snapshot == null) {
-                    // insert new snapshot
-                    snapshots.addObject(key, diff);
-                }
-                else {
-                    // merge
-                    snapshot.putAll(diff);
-                } */
-            }
-        }
+    public void clear() {
+    	snapshots.clear();
     }
 
     /**
@@ -147,18 +129,99 @@ public class SnapshotCache {
      * sends the event to all listeners. Outgoing event will have a source 
      * set ot this SnapshotCache.
      */
-    public void postSnapshotsChangeEvent(SnapshotEvent event) {
+    public void registerSnapshotChanges(
+        Object source,
+        Map updatedSnapshots,
+        Collection deletedSnapshotIds) {
+
+        // update the internal cache, prepare snapshot event
+        Map diffs = null;
+
+        // DELETED: evict deleted snapshots
+        if (!deletedSnapshotIds.isEmpty()) {
+            Iterator it = deletedSnapshotIds.iterator();
+            while (it.hasNext()) {
+                snapshots.remove(it.next());
+            }
+        }
+
+        // MODIFIED: replace/add snapshots, generate diffs for event
+        if (!updatedSnapshots.isEmpty()) {
+            Iterator it = updatedSnapshots.keySet().iterator();
+            while (it.hasNext()) {
+
+                Object key = it.next();
+                Map newSnapshot = (Map) updatedSnapshots.get(key);
+                Map oldSnapshot = (Map) snapshots.remove(key);
+
+                // generate diff for the updated event, if this not a new snapshot
+
+                // TODO: added snapshots may be simply the newer copies of
+                // previously expired snapshots... this means that
+                // we also might send notifications for added ...
+                // but sending notifications for truly new or recently fetched 
+                // objects will result in serious performance degradation...
+                
+                // so we need to keep track of expired ids...
+                
+                if (oldSnapshot != null) {
+                    Map diff = buildSnapshotDiff((ObjectId) key, newSnapshot);
+                    if (!diff.isEmpty()) {
+                        if (diffs == null) {
+                            diffs = new HashMap();
+                        }
+
+                        diffs.put(key, diff);
+                    }
+                }
+
+                snapshots.addObject(key, newSnapshot);
+            }
+        }
+
+        SnapshotEvent event =
+            SnapshotEvent.createEvent(source, diffs, deletedSnapshotIds);
         if (logObj.isDebugEnabled()) {
             logObj.debug("postSnapshotsChangeEvent: " + event);
         }
-
-        // first do whatever is needed to update the internal cache
-        processSnapshotsChangeEvent(event);
 
         // now notify children;
         // create a chained event so that its source is SnapshotCache.
         // EventManager.getDefaultManager().postEvent(
         //     SnapshotEvent.createEvent(this, event),
         //   snapshotEventSubject);
+    }
+
+    /**
+      * Creates a map that contains only the keys that have values
+      * that differ in the registered snapshot for a given ObjectId and
+      * a given snapshot. It is assumed that key sets are the same in 
+      * both snapshots (since they should represent the same entity data).
+      * Returns an empty map if no differences are found.
+      */
+    protected Map buildSnapshotDiff(ObjectId oid, Map newSnapshot) {
+        Map oldSnapshot = getSnapshot(oid);
+
+        if (oldSnapshot == null) {
+            return newSnapshot;
+        }
+
+        // build a diff...
+        Map diff = null;
+
+        Iterator keys = oldSnapshot.keySet().iterator();
+        while (keys.hasNext()) {
+            Object key = keys.next();
+            Object oldValue = oldSnapshot.get(key);
+            Object newValue = newSnapshot.get(key);
+            if (!Util.nullSafeEquals(oldValue, newValue)) {
+                if (diff == null) {
+                    diff = new HashMap();
+                }
+                diff.put(key, newValue);
+            }
+        }
+
+        return (diff != null) ? diff : Collections.EMPTY_MAP;
     }
 }

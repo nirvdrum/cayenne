@@ -70,7 +70,7 @@ public class DataContextClobTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     protected boolean skipTests() {

@@ -129,7 +129,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Artist a2 = fetchArtist();
@@ -155,7 +155,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Artist a2 = fetchArtist();
@@ -169,7 +169,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Gallery g2 = fetchGallery();
@@ -184,7 +184,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         Painting p3 = fetchPainting();
         assertNull(p3.getToGallery());
@@ -200,7 +200,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Gallery g2 = fetchGallery();
@@ -216,7 +216,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         Gallery g3 = fetchGallery();
         assertEquals(1, g3.getPaintingArray().size());

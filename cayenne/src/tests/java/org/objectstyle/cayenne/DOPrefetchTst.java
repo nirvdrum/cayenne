@@ -72,7 +72,7 @@ public class DOPrefetchTst extends CayenneDOTestBase {
         p1.setToArtist(a1);
         ctxt.commitChanges();
         
-        super.resetContext();
+		ctxt = createDataContext();
         Expression e = ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist%");
         SelectQuery q = new SelectQuery("Artist", e);
         

@@ -81,7 +81,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been persisted to the db
 
-        DataContext freshContext = getDomain().createDataContext();
+        DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
         query.setQualifier(
             ExpressionFactory.binaryPathExp(
@@ -119,7 +119,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been persisted to the db
 
-        DataContext freshContext = getDomain().createDataContext();
+        DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
         query.setQualifier(
             ExpressionFactory.binaryPathExp(
@@ -153,7 +153,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         assertEquals(1, artist.getPaintingArray().size());
         context.commitChanges();
 
-        DataContext freshContext = getDomain().createDataContext();
+        DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Painting.class);
         query.setQualifier(
             ExpressionFactory.binaryPathExp(
@@ -185,7 +185,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been deleted from the db
 
-        DataContext freshContext = getDomain().createDataContext();
+        DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
         query.setQualifier(
             ExpressionFactory.binaryPathExp(
@@ -214,7 +214,7 @@ public class DataContextRollbackTst extends DataContextTestBase {
         context.commitChanges();
 
         //.. and ensure that the correct data is in the db
-        DataContext freshContext = getDomain().createDataContext();
+        DataContext freshContext = createDataContext();
         SelectQuery query = new SelectQuery(Artist.class);
         query.setQualifier(
             ExpressionFactory.binaryPathExp(

@@ -79,7 +79,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         p1.setToPaintingInfo(pi1);
         p1.setToGallery(g1);
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
     }
 
     public void testReadNestedProperty1() throws Exception {

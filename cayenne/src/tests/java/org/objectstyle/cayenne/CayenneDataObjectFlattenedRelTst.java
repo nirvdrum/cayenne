@@ -34,7 +34,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         ft2.addToFt3Array(ft3);
         ctxt.commitChanges();
 
-        this.resetContext(); //We need a new context
+		ctxt = createDataContext(); //We need a new context
         SelectQuery q = new SelectQuery(FlattenedTest3.class);
         q.setQualifier(ExpressionFactory.matchExp("name", "FT3Name"));
         List results = ctxt.performQuery(q);
@@ -103,7 +103,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         assertFalse(ctxt.hasChanges());
 
         // refetch artist with a different context
-        resetContext();
+		ctxt = createDataContext();
         a1 = fetchArtist();
         groupList = a1.getGroupArray();
         assertEquals(1, groupList.size());
@@ -221,7 +221,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
             fail("Should not have thrown the exception " + e.getMessage());
         }
 
-        this.resetContext();
+		ctxt = createDataContext();
         results = ctxt.performQuery(q);
         assertEquals(1, results.size());
 

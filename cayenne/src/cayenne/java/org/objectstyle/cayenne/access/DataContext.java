@@ -143,15 +143,19 @@ public class DataContext implements QueryEngine, Serializable {
     private List flattenedInserts = new ArrayList();
     private List flattenedDeletes = new ArrayList();
 
+    protected ObjectStore objectStore;
+
     protected transient QueryEngine parent;
-    // When deserialized, the parent domain name is stored in
-    // this variable until the parent is actually needed.  This helps
-    // avoid an issue with certain servlet engines (e.g. Tomcat) where
-    // HttpSessions with DataContext's are deserialized at startup
-    // before the configuration has been read.
+
+    /**
+     * Stores the name of parent DataDomain. Used to defer initialization 
+     * of the parent QueryEngine after deserialization. This helps
+     * avoid an issue with certain servlet engines (e.g. Tomcat) where
+     * HttpSessions with DataContext's are deserialized at startup
+     * before Cayenne stack is fully initialized.
+     */
     protected transient String lazyInitParentDomainName;
 
-    protected transient ObjectStore objectStore;
     protected transient ToManyListDataSource relationshipDataSource;
 
     /**
@@ -191,18 +195,36 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataContext(QueryEngine parent) {
         setParent(parent);
-        this.objectStore = new ObjectStore();
+
+        SnapshotCache snapshotCache = null;
+        if (parent != null) {
+            snapshotCache = ((DataDomain) parent).getSnapshotCache();
+        }
+
+        this.objectStore = new ObjectStore(snapshotCache);
         this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
     }
 
-    /** Returns parent QueryEngine object. */
-    public QueryEngine getParent() {
+    /**
+     * Initializes parent if deserialization left it uninitialized.
+     */
+    private final void awakeFromDeserialization() {
         if (parent == null && lazyInitParentDomainName != null) {
             this.parent =
                 Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName);
+
+            if (parent instanceof DataDomain) {
+                this.objectStore.setSnapshotCache(
+                    ((DataDomain) parent).getSnapshotCache());
+            }
         }
+    }
+
+    /** Returns parent QueryEngine object. */
+    public QueryEngine getParent() {
+        awakeFromDeserialization();
         return parent;
     }
 
@@ -250,6 +272,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Returns ObjectStore associated with this DataContext.
      */
     public ObjectStore getObjectStore() {
+        awakeFromDeserialization();
         return objectStore;
     }
 
@@ -264,28 +287,28 @@ public class DataContext implements QueryEngine, Serializable {
 
         return !this.getFlattenedInserts().isEmpty()
             || !this.getFlattenedDeletes().isEmpty()
-            || objectStore.hasChanges();
+            || getObjectStore().hasChanges();
     }
 
     /** Returns a list of objects that are registered
      *  with this DataContext and have a state PersistenceState.NEW
      */
     public Collection newObjects() {
-        return objectStore.objectsInState(PersistenceState.NEW);
+        return getObjectStore().objectsInState(PersistenceState.NEW);
     }
 
     /** Returns a list of objects that are registered
      *  with this DataContext and have a state PersistenceState.DELETED
      */
     public Collection deletedObjects() {
-        return objectStore.objectsInState(PersistenceState.DELETED);
+        return getObjectStore().objectsInState(PersistenceState.DELETED);
     }
 
     /** Returns a list of objects that are registered
      *  with this DataContext and have a state PersistenceState.MODIFIED
      */
     public Collection modifiedObjects() {
-        return objectStore.objectsInState(PersistenceState.MODIFIED);
+        return getObjectStore().objectsInState(PersistenceState.MODIFIED);
     }
 
     /**
@@ -296,7 +319,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataObject registeredObject(ObjectId oid) {
         // must synchronize on ObjectStore since we must read and write atomically
-        synchronized (objectStore) {
+        synchronized (getObjectStore()) {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
@@ -401,7 +424,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         // now deal with snapshots 
-        objectStore.snapshotsUpdatedForObjects(results, dataRows, refresh);
+        getObjectStore().snapshotsUpdatedForObjects(results, dataRows, refresh);
 
         return results;
     }
@@ -542,7 +565,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        objectStore.addObject(dataObject);
+        getObjectStore().addObject(dataObject);
         dataObject.setDataContext(this);
         dataObject.setPersistenceState(PersistenceState.NEW);
     }
@@ -563,7 +586,7 @@ public class DataContext implements QueryEngine, Serializable {
      * to TRANSIENT.
      */
     public void unregisterObjects(Collection dataObjects) {
-        objectStore.objectsUnregistered(dataObjects);
+        getObjectStore().objectsUnregistered(dataObjects);
     }
 
     /**
@@ -581,7 +604,7 @@ public class DataContext implements QueryEngine, Serializable {
       * On the next access to this object, it will be refeched.
       */
     public void invalidateObjects(Collection dataObjects) {
-        objectStore.objectsInvalidated(dataObjects);
+        getObjectStore().objectsInvalidated(dataObjects);
     }
 
     /**
@@ -727,7 +750,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataObject refetchObject(ObjectId oid) {
 
-        synchronized (objectStore) {
+        synchronized (getObjectStore()) {
             DataObject object = objectStore.getObject(oid);
 
             // clean up any cached data for this object
@@ -760,7 +783,7 @@ public class DataContext implements QueryEngine, Serializable {
      * registered with this data context.
      */
     public void rollbackChanges() {
-        synchronized (objectStore) {
+        synchronized (getObjectStore()) {
             List objectsToUnregister = new ArrayList();
             Iterator it = objectStore.getObjectIterator();
 
@@ -819,7 +842,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         // prevent multiple commits occuring simulteneously 
-        synchronized (objectStore) {
+        synchronized (getObjectStore()) {
             // is there anything to do?
             if (this.hasChanges() == false) {
                 return;
@@ -1138,7 +1161,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         // If the "parent" of this datacontext is a DataDomain, then just write the
-        // name of it.  Then when deser happens, we can get back the DataDomain by name,
+        // name of it.  Then when deserialization happens, we can get back the DataDomain by name,
         // from the shared configuration (which will either load it if need be, or return
         // an existing one.
         out.defaultWriteObject();
@@ -1150,13 +1173,9 @@ public class DataContext implements QueryEngine, Serializable {
             out.writeObject(domain.getName());
         }
         else {
+            // Hope that whatever this.parent is, that it is Serializable
             out.writeObject(this.parent);
-            //Hope that whatever this.parent is, that it is Serializable
         }
-
-        //For writing, just write the objects.  They will be serialized possibly
-        // as just objectIds... it's up to the object itself.  Reading will do magic
-        out.writeObject(objectStore);
     }
 
     private void readObject(ObjectInputStream in)
@@ -1189,13 +1208,11 @@ public class DataContext implements QueryEngine, Serializable {
         // serialized, it will then set the objects datacontext to the correctone
         // If deser'd "otherwise", it will not have a datacontext (good)
 
-        objectStore = (ObjectStore) in.readObject();
-
-        synchronized (objectStore) {
+        synchronized (getObjectStore()) {
             Iterator it = objectStore.getObjectIterator();
             while (it.hasNext()) {
-                DataObject obj = (DataObject) it.next();
-                obj.setDataContext(this);
+                DataObject object = (DataObject) it.next();
+                object.setDataContext(this);
             }
         }
     }

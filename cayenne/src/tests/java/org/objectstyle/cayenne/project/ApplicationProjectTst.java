@@ -81,7 +81,7 @@ public class ApplicationProjectTst extends CayenneTestCase {
 
     public void testProjectFileForObject() throws Exception {
     	DataNode node = new DataNode("dn");
-    	DataDomain dm = new DataDomain();
+    	DataDomain dm = new DataDomain("dd");
     	dm.addNode(node);
     	p.getConfiguration().addDomain(dm);
     	

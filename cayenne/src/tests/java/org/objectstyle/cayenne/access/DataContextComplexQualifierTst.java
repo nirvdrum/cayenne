@@ -73,7 +73,7 @@ public class DataContextComplexQualifierTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     public void testQualifyOnToManyFlattened() throws Exception {

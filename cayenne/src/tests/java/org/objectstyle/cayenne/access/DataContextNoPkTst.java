@@ -73,7 +73,7 @@ public class DataContextNoPkTst extends CayenneTestCase
 
   protected void setUp() throws Exception
   {
-    ctxt = getDomain().createDataContext();
+    ctxt = createDataContext();
 
     // create NO_PK_TEST records
     Map map1 = new HashMap();

@@ -65,7 +65,7 @@ public class CDOReflexiveRelDeleteTst extends CayenneDOTestBase {
 
 	public void setUp() throws Exception {
 		super.setUp();
-		this.resetContext();
+		ctxt = createDataContext();
 
 		parentGroup=(ArtGroup)ctxt.createAndRegisterNewObject("ArtGroup");
 		parentGroup.setName("parent");

@@ -187,7 +187,7 @@ public class SelectQueryTst extends SelectQueryBase {
         query.setRoot(Artist.class);
         query.addCustomDbAttribute("ARTIST_NAME");
 
-        List results = getDomain().createDataContext().performQuery(query);
+        List results = createDataContext().performQuery(query);
 
         // check query results
         assertEquals(_artistCount, results.size());

@@ -95,7 +95,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         a1.addToPaintingArray(p1);
         ctxt.commitChanges();
 
-        resetContext();
+		ctxt = createDataContext();
         
         // do select
         Expression e =
@@ -174,7 +174,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Painting p2 = fetchPainting();
@@ -190,7 +190,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Painting p2 = fetchPainting();
@@ -205,7 +205,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         Painting p3 = fetchPainting();
         assertNull(p3.getToGallery());
@@ -222,7 +222,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Painting p2 = fetchPainting();
@@ -244,7 +244,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         Painting p3 = fetchPainting();
         Gallery g3 = p3.getToGallery();
@@ -261,7 +261,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Painting p2 = fetchPainting();
@@ -278,7 +278,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
 
         // do save II
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         Painting p3 = fetchPainting();
         Gallery g3 = p3.getToGallery();

@@ -644,7 +644,7 @@ public class DbLoader {
         DataMap dataMap =
             (DataMap) NamedObjectFactory.createObject(
                 DataMap.class,
-                new DataDomain());
+                null);
         return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
     }
 

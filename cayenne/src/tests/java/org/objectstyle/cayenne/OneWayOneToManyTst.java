@@ -81,7 +81,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         DataDomain dom = getDomain();
         setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
 
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     public void testReadList() throws Exception {
@@ -98,7 +98,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         assertEquals(2, a1.getPaintingArray().size());
         ctxt.commitChanges();
 
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         Artist a2 = fetchArtist();
         assertNotNull(a2);
@@ -132,7 +132,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
     	
     	ctxt.commitChanges(); //Save so we can be sure the rollback really worked
     	
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         Artist a2 = fetchArtist();
         assertNotNull(a2);

@@ -87,9 +87,6 @@ import org.objectstyle.cayenne.query.Query;
 public class DataDomain implements QueryEngine {
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
-    /** Stores "name" property. */
-    protected String name;
-
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new HashMap());
     protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
@@ -109,23 +106,37 @@ public class DataDomain implements QueryEngine {
 
     protected PrimaryKeyHelper primaryKeyHelper;
 
-    /** Creates an unnamed DataDomain */
+    protected SnapshotCache snapshotCache;
+
+    /** 
+     * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
+     * creates a DataDomain with name "default".
+     */
     public DataDomain() {
+        this("default");
     }
 
     /** Creates DataDomain and assigns it a <code>name</code>. */
     public DataDomain(String name) {
-        this.name = name;
+        this.snapshotCache = new SnapshotCache(name);
     }
 
     /** Returns "name" property value. */
     public String getName() {
-        return name;
+        return this.snapshotCache.getName();
     }
 
     /** Sets "name" property to a new value. */
     public void setName(String name) {
-        this.name = name;
+        this.snapshotCache.setName(name);
+    }
+    
+    public SnapshotCache getSnapshotCache() {
+    	return snapshotCache;
+    }
+    
+    public void setSnapshotCache(SnapshotCache snapshotCache) {
+    	this.snapshotCache = snapshotCache;
     }
 
     /** Registers new DataMap with this domain. */
@@ -519,7 +530,7 @@ public class DataDomain implements QueryEngine {
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append(ObjectUtils.identityToString(this)).append(":[").append(
-            name).append(
+            getName()).append(
             "]");
 
         return buffer.toString();

@@ -68,7 +68,7 @@ public class CDOOne2OneDepTst extends CayenneDOTestBase {
         // needed to save without errors
         p1.setToArtist(a1);
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
         
         // test database data
         Painting p2 = fetchPainting();
@@ -85,7 +85,7 @@ public class CDOOne2OneDepTst extends CayenneDOTestBase {
         // needed to save without errors
         p1.setToArtist(a1);
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
         
         // test database data
         Painting p2 = fetchPainting();
@@ -116,7 +116,7 @@ public class CDOOne2OneDepTst extends CayenneDOTestBase {
         
         // do save 
         ctxt.commitChanges();
-        resetContext();
+		ctxt = createDataContext();
 
         // test database data
         Painting p2 = fetchPainting();

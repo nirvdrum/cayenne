@@ -75,7 +75,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     public void testInsert() throws Exception {
@@ -92,7 +92,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
         ctxt.commitChanges(Level.WARN);
 
         // reset context
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         SelectQuery q = new SelectQuery(CompoundPkTest.class);
         List objs = ctxt.performQuery(q);
@@ -135,7 +135,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
         ctxt.commitChanges(Level.WARN);
 
         // reset context
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
 
         Expression qual = ExpressionFactory.matchExp("toCompoundPk", master);
         SelectQuery q = new SelectQuery(CompoundFkTest.class, qual);
@@ -173,7 +173,7 @@ public class DataContextCompoundRelTst extends CayenneTestCase {
 		   ctxt.commitChanges(Level.WARN);
 
 		   // reset context
-		   ctxt = getDomain().createDataContext();
+		   ctxt = createDataContext();
 
 		   Expression qual = ExpressionFactory.matchExp("compoundFkArray", detail1);
 		   SelectQuery q = new SelectQuery(CompoundPkTest.class, qual);
