@@ -103,10 +103,8 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
         assertNull(context.getObjectStore().getObject(oid2));
 
         Expression e = Expression.fromString("galleryName = $name");
-        SelectQuery q =
-            new SelectQuery(
-                Gallery.class,
-                e.expWithParameters(Collections.singletonMap("name", "gallery2")));
+        SelectQuery q = new SelectQuery(Gallery.class, e.expWithParameters(Collections
+                .singletonMap("name", "gallery2")));
         q.addPrefetch("exhibitArray.artistExhibitArray");
 
         List galleries = context.performQuery(q);
@@ -129,10 +127,8 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
     public void testToManyToManyFirstStepResolved() throws Exception {
 
         Expression e = Expression.fromString("galleryName = $name");
-        SelectQuery q =
-            new SelectQuery(
-                Gallery.class,
-                e.expWithParameters(Collections.singletonMap("name", "gallery2")));
+        SelectQuery q = new SelectQuery(Gallery.class, e.expWithParameters(Collections
+                .singletonMap("name", "gallery2")));
         q.addPrefetch("exhibitArray");
         q.addPrefetch("exhibitArray.artistExhibitArray");
 
@@ -159,4 +155,37 @@ public class DataContextPrefetchMultistepTst extends DataContextTestBase {
         ArtistExhibit ae1 = (ArtistExhibit) aexhibits.get(0);
         assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
     }
+
+    public void testMixedPrefetch1() {
+
+        Expression e = Expression.fromString("galleryName = $name");
+        SelectQuery q = new SelectQuery(Gallery.class, e.expWithParameters(Collections
+                .singletonMap("name", "gallery2")));
+        q.addJointPrefetch("exhibitArray");
+        q.addPrefetch("exhibitArray.artistExhibitArray");
+
+        List galleries = context.performQuery(q);
+        assertEquals(1, galleries.size());
+
+        Gallery g2 = (Gallery) galleries.get(0);
+
+        // this relationship should be resolved
+        assertTrue(g2.readPropertyDirectly("exhibitArray") instanceof ToManyList);
+        ToManyList exhibits = (ToManyList) g2.readPropertyDirectly("exhibitArray");
+        assertFalse(exhibits.needsFetch());
+        assertEquals(1, exhibits.size());
+
+        Exhibit e1 = (Exhibit) exhibits.get(0);
+        assertEquals(PersistenceState.COMMITTED, e1.getPersistenceState());
+
+        // this to-many must also be resolved
+        assertTrue(e1.readPropertyDirectly("artistExhibitArray") instanceof ToManyList);
+        ToManyList aexhibits = (ToManyList) e1.readPropertyDirectly("artistExhibitArray");
+        assertFalse(aexhibits.needsFetch());
+        assertEquals(1, exhibits.size());
+
+        ArtistExhibit ae1 = (ArtistExhibit) aexhibits.get(0);
+        assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
+    }
+
 }
