@@ -167,7 +167,6 @@ public class DefaultOperationObserver implements OperationObserver {
     }
 
     public void nextCount(Query query, int resultCount) {
-        logObj.debug("update count: " + resultCount);
     }
 
     public void nextBatchCount(Query query, int[] resultCount) {
@@ -179,8 +178,6 @@ public class DefaultOperationObserver implements OperationObserver {
     }
 
     public void nextDataRows(Query query, List dataRows) {
-        int count = (dataRows == null) ? -1 : dataRows.size();
-        logObj.debug("result count: " + count);
     }
 
     public void nextDataRows(Query q, ResultIterator it) {

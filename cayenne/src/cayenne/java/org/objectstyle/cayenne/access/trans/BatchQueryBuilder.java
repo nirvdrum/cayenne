@@ -61,7 +61,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -144,8 +143,6 @@ public abstract class BatchQueryBuilder {
         BatchQuery query,
         List dbAttributes)
         throws SQLException, Exception {
-
-        QueryLogger.logBatchQueryParameters(query.getLoggingLevel(), query);
 
         int attributeCount = dbAttributes.size();
 

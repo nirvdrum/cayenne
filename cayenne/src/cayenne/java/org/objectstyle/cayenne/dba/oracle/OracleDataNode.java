@@ -72,6 +72,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
@@ -193,22 +194,27 @@ public class OracleDataNode extends DataNode {
         LOBBatchQueryWrapper selectQuery = new LOBBatchQueryWrapper(query);
         List qualifierAttributes = selectQuery.getDbAttributesForLOBSelectQualifier();
 
+        Level logLevel = query.getLoggingLevel();
+        boolean isLoggable = QueryLogger.isLoggable(logLevel);
+
         query.reset();
         while (selectQuery.next()) {
             int updated = 0;
             String updateStr = queryBuilder.createSqlString(query);
 
             // 1. run row update
-            QueryLogger.logQuery(
-                query.getLoggingLevel(),
-                updateStr,
-                Collections.EMPTY_LIST);
-
+            QueryLogger.logQuery(logLevel, updateStr, Collections.EMPTY_LIST);
             PreparedStatement statement = con.prepareStatement(updateStr);
             try {
+
+                if (isLoggable) {
+                    List bindings = queryBuilder.getValuesForLOBUpdateParameters(query);
+                    QueryLogger.logQueryParameters(logLevel, "bind", bindings);
+                }
+
                 queryBuilder.bindParameters(statement, query, dbAttributes);
                 updated = statement.executeUpdate();
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), updated);
+                QueryLogger.logUpdateCount(logLevel, updated);
             }
             finally {
                 try {
@@ -219,87 +225,123 @@ public class OracleDataNode extends DataNode {
             }
 
             // 2. run row LOB update (SELECT...FOR UPDATE and writing out LOBs)
-
-            List lobAttributes = selectQuery.getDbAttributesForUpdatedLOBColumns();
-            if (lobAttributes.size() > 0) {
-                String selectStr =
-                    queryBuilder.createLOBSelectString(
-                        query,
-                        lobAttributes,
-                        qualifierAttributes);
-
-                QueryLogger.logQuery(
-                    query.getLoggingLevel(),
-                    selectStr,
-                    Collections.EMPTY_LIST);
-
-                PreparedStatement selectStatement = con.prepareStatement(selectStr);
-
-                try {
-                    queryBuilder.bindLOBParameters(
-                        selectStatement,
-                        selectQuery,
-                        qualifierAttributes);
-
-                    ResultSet result = selectStatement.executeQuery();
-
-                    try {
-                        if (!result.next()) {
-                            throw new CayenneRuntimeException("Missing LOB row.");
-                        }
-
-                        // read the only expected row
-                        int size = lobAttributes.size();
-                        for (int i = 0; i < size; i++) {
-                            DbAttribute attribute = (DbAttribute) lobAttributes.get(i);
-                            int type = attribute.getType();
-
-                            if (type == Types.CLOB) {
-                                Clob clob = result.getClob(i + 1);
-                                Object clobVal = selectQuery.getUpdatedClobValue(i);
-
-                                if (clobVal instanceof char[]) {
-                                    writeClob(clob, (char[]) clobVal);
-                                }
-                                else {
-                                    writeClob(clob, clobVal.toString());
-                                }
-                            }
-                            else if (type == Types.BLOB) {
-                                Blob blob = result.getBlob(i + 1);
-                                writeBlob(blob, selectQuery.getUpdatedBlobValue(i));
-                            }
-                            else {
-                                throw new CayenneRuntimeException(
-                                    "Only BLOB or CLOB is expected here, got: " + type);
-                            }
-                        }
-
-                        if (result.next()) {
-                            throw new CayenneRuntimeException("More than one LOB row found.");
-                        }
-                    }
-                    finally {
-                        try {
-                            result.close();
-                        }
-                        catch (Exception e) {
-                        }
-                    }
-
-                }
-                finally {
-                    try {
-                        selectStatement.close();
-                    }
-                    catch (Exception e) {
-                    }
-                }
-
-            }
+            processLOBRow(con, queryBuilder, selectQuery, qualifierAttributes);
 
             // finally, notify delegate that the row was updated
             delegate.nextCount(query, updated);
+        }
+    }
+
+    /**
+     * Selects a LOB row and writes LOB values.
+     */
+    protected void processLOBRow(
+        Connection con,
+        LOBBatchQueryBuilder queryBuilder,
+        LOBBatchQueryWrapper selectQuery,
+        List qualifierAttributes)
+        throws SQLException, Exception {
+
+        List lobAttributes = selectQuery.getDbAttributesForUpdatedLOBColumns();
+        if (lobAttributes.size() == 0) {
+            return;
+        }
+
+        Level logLevel = selectQuery.getLoggingLevel();
+        boolean isLoggable = QueryLogger.isLoggable(logLevel);
+
+        List qualifierValues = selectQuery.getValuesForLOBSelectQualifier();
+        List lobValues = selectQuery.getValuesForUpdatedLOBColumns();
+        int parametersSize = qualifierValues.size();
+        int lobSize = lobAttributes.size();
+
+        String selectStr =
+            queryBuilder.createLOBSelectString(
+                selectQuery.getQuery(),
+                lobAttributes,
+                qualifierAttributes);
+
+        if (isLoggable) {
+            QueryLogger.logQuery(logLevel, selectStr, qualifierValues);
+			QueryLogger.logQueryParameters(logLevel, "write LOB", lobValues);
+        }
+
+        PreparedStatement selectStatement = con.prepareStatement(selectStr);
+        try {
+            for (int i = 0; i < parametersSize; i++) {
+                Object value = qualifierValues.get(i);
+                DbAttribute attribute = (DbAttribute) qualifierAttributes.get(i);
+
+                adapter.bindParameter(
+                    selectStatement,
+                    value,
+                    i + 1,
+                    attribute.getType(),
+                    attribute.getPrecision());
+            }
+
+            ResultSet result = selectStatement.executeQuery();
+
+            try {
+                if (!result.next()) {
+                    throw new CayenneRuntimeException("Missing LOB row.");
+                }
+
+                // read the only expected row
+
+                for (int i = 0; i < lobSize; i++) {
+                    DbAttribute attribute = (DbAttribute) lobAttributes.get(i);
+                    int type = attribute.getType();
+
+                    if (type == Types.CLOB) {
+                        Clob clob = result.getClob(i + 1);
+                        Object clobVal = lobValues.get(i);
+
+                        if (clobVal instanceof char[]) {
+                            writeClob(clob, (char[]) clobVal);
+                        }
+                        else {
+                            writeClob(clob, clobVal.toString());
+                        }
+                    }
+                    else if (type == Types.BLOB) {
+                        Blob blob = result.getBlob(i + 1);
+
+                        Object blobVal = lobValues.get(i);
+                        if (blobVal instanceof byte[]) {
+                            writeBlob(blob, (byte[]) blobVal);
+                        }
+                        else {
+                            String className =
+                                (blobVal != null) ? blobVal.getClass().getName() : null;
+                            throw new CayenneRuntimeException(
+                                "Unsupported class of BLOB value: " + className);
+                        }
+                    }
+                    else {
+                        throw new CayenneRuntimeException(
+                            "Only BLOB or CLOB is expected here, got: " + type);
+                    }
+                }
+
+                if (result.next()) {
+                    throw new CayenneRuntimeException("More than one LOB row found.");
+                }
+            }
+            finally {
+                try {
+                    result.close();
+                }
+                catch (Exception e) {
+                }
+            }
+        }
+        finally {
+            try {
+                selectStatement.close();
+            }
+            catch (Exception e) {
+            }
         }
     }
 

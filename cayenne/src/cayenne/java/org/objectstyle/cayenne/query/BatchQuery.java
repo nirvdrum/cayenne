@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.DbEntity;
@@ -92,6 +93,15 @@ public abstract class BatchQuery extends AbstractQuery {
     public abstract boolean next();
 
     public abstract Object getObject(int valueIndex);
+
+    public List getValuesForUpdateParameters() {
+        int len = getDbAttributes().size();
+        List values = new ArrayList(len);
+        for (int i = 0; i < len; i++) {
+            values.add(getObject(i));
+        }
+        return values;
+    }
 
     /**
      * Returns the number of objects grouped in the batch query.

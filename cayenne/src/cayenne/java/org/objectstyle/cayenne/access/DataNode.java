@@ -487,16 +487,26 @@ public class DataNode implements QueryEngine {
 
         String queryStr = queryBuilder.createSqlString(query);
         Level logLevel = query.getLoggingLevel();
+        boolean isLoggable = QueryLogger.isLoggable(logLevel);
 
         // log batch SQL execution
         QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
         List dbAttributes = query.getDbAttributes();
 
+        // run batch
+        query.reset();
+
         PreparedStatement statement = con.prepareStatement(queryStr);
         try {
-            // run batch
-            query.reset();
             while (query.next()) {
+
+                if (isLoggable) {
+                    QueryLogger.logQueryParameters(
+                        logLevel,
+                        "batch bind",
+                        query.getValuesForUpdateParameters());
+                }
+
                 queryBuilder.bindParameters(statement, query, dbAttributes);
                 statement.addBatch();
             }
@@ -505,7 +515,7 @@ public class DataNode implements QueryEngine {
             int[] results = statement.executeBatch();
             delegate.nextBatchCount(query, results);
 
-            if (QueryLogger.isLoggable(logLevel)) {
+            if (isLoggable) {
                 QueryLogger.logUpdateCount(logLevel, statement.getUpdateCount());
             }
         }
@@ -529,22 +539,36 @@ public class DataNode implements QueryEngine {
         OperationObserver delegate)
         throws SQLException, Exception {
 
+        Level logLevel = query.getLoggingLevel();
+        boolean isLoggable = QueryLogger.isLoggable(logLevel);
+
         String queryStr = queryBuilder.createSqlString(query);
 
         // log batch SQL execution
-        QueryLogger.logQuery(query.getLoggingLevel(), queryStr, Collections.EMPTY_LIST);
+        QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
         List dbAttributes = query.getDbAttributes();
+
+        // run batch queries one by one
+        query.reset();
 
         PreparedStatement statement = con.prepareStatement(queryStr);
         try {
-            // run batch queries one by one
-            query.reset();
             while (query.next()) {
+                if (isLoggable) {
+                    QueryLogger.logQueryParameters(
+                        logLevel,
+                        "bind",
+                        query.getValuesForUpdateParameters());
+                }
+
                 queryBuilder.bindParameters(statement, query, dbAttributes);
 
                 int updated = statement.executeUpdate();
                 delegate.nextCount(query, updated);
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), updated);
+
+                if (isLoggable) {
+                    QueryLogger.logUpdateCount(logLevel, updated);
+                }
             }
         }
         finally {

@@ -81,319 +81,328 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class QueryLogger {
-	private static Logger logObj = Logger.getLogger(QueryLogger.class);
+    private static Logger logObj = Logger.getLogger(QueryLogger.class);
 
-	public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
-	public static final int TRIM_VALUES_THRESHOLD = 300;
+    public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
+    public static final int TRIM_VALUES_THRESHOLD = 300;
 
-	/** 
-	 * Utility method that appends SQL literal for the specified object to the buffer.
-	*
-	* <p>Note: this method is not intended to build SQL queries, rather this is used 
-	* in logging routines only. In particular it will trim large values to avoid 
-	* flooding the logs.</p> 
-	*
-	*  @param buf buffer to append value
-	*  @param anObject object to be transformed to SQL literal.
-	*/
-	public static void sqlLiteralForObject(StringBuffer buf, Object anObject) {
-		// 0. Null
-		if (anObject == null) {
-			buf.append("NULL");
-		}
-		// 1. String literal
-		else if (anObject instanceof String) {
-			buf.append('\'');
-			// lets escape quotes
-			String literal = (String) anObject;
-			if (literal.length() > TRIM_VALUES_THRESHOLD) {
-				literal = literal.substring(0, TRIM_VALUES_THRESHOLD) + "...";
-			}
+    /** 
+     * Utility method that appends SQL literal for the specified object to the buffer.
+    *
+    * <p>Note: this method is not intended to build SQL queries, rather this is used 
+    * in logging routines only. In particular it will trim large values to avoid 
+    * flooding the logs.</p> 
+    *
+    *  @param buf buffer to append value
+    *  @param anObject object to be transformed to SQL literal.
+    */
+    public static void sqlLiteralForObject(StringBuffer buf, Object anObject) {
+        // 0. Null
+        if (anObject == null) {
+            buf.append("NULL");
+        }
+        // 1. String literal
+        else if (anObject instanceof String) {
+            buf.append('\'');
+            // lets escape quotes
+            String literal = (String) anObject;
+            if (literal.length() > TRIM_VALUES_THRESHOLD) {
+                literal = literal.substring(0, TRIM_VALUES_THRESHOLD) + "...";
+            }
 
-			int curPos = 0;
-			int endPos = 0;
+            int curPos = 0;
+            int endPos = 0;
 
-			while ((endPos = literal.indexOf('\'', curPos)) >= 0) {
-				buf.append(literal.substring(curPos, endPos + 1)).append('\'');
-				curPos = endPos + 1;
-			}
+            while ((endPos = literal.indexOf('\'', curPos)) >= 0) {
+                buf.append(literal.substring(curPos, endPos + 1)).append('\'');
+                curPos = endPos + 1;
+            }
 
-			if (curPos < literal.length())
-				buf.append(literal.substring(curPos));
+            if (curPos < literal.length())
+                buf.append(literal.substring(curPos));
 
-			buf.append('\'');
-		}
-		// 2. Numeric literal
-		else if (anObject instanceof Number) {
-			// process numeric value (do something smart in the future)
-			buf.append(anObject);
-		}
-		// 3. Date
-		else if (anObject instanceof java.sql.Date) {
-			buf.append('\'').append(anObject).append('\'');
-		}
-		// 4. Date
-		else if (anObject instanceof java.sql.Time) {
-			buf.append('\'').append(anObject).append('\'');
-		}
-		// 5 Date
-		else if (anObject instanceof java.util.Date) {
-			long time = ((java.util.Date) anObject).getTime();
-			buf.append('\'').append(new java.sql.Timestamp(time)).append('\'');
-		}
-		// 6. byte[]
-		else if (anObject instanceof byte[]) {
-			buf.append("< ");
-			byte[] b = (byte[]) anObject;
+            buf.append('\'');
+        }
+        // 2. Numeric literal
+        else if (anObject instanceof Number) {
+            // process numeric value (do something smart in the future)
+            buf.append(anObject);
+        }
+        // 3. Date
+        else if (anObject instanceof java.sql.Date) {
+            buf.append('\'').append(anObject).append('\'');
+        }
+        // 4. Date
+        else if (anObject instanceof java.sql.Time) {
+            buf.append('\'').append(anObject).append('\'');
+        }
+        // 5 Date
+        else if (anObject instanceof java.util.Date) {
+            long time = ((java.util.Date) anObject).getTime();
+            buf.append('\'').append(new java.sql.Timestamp(time)).append('\'');
+        }
+        // 6. byte[]
+        else if (anObject instanceof byte[]) {
+            buf.append("< ");
+            byte[] b = (byte[]) anObject;
 
-			int len = b.length;
-			boolean trimming = false;
-			if(len > TRIM_VALUES_THRESHOLD) {
-				len = TRIM_VALUES_THRESHOLD;
-				trimming = true;
-			}
+            int len = b.length;
+            boolean trimming = false;
+            if (len > TRIM_VALUES_THRESHOLD) {
+                len = TRIM_VALUES_THRESHOLD;
+                trimming = true;
+            }
 
-			for (int i = 0; i < len; i++) {
-				appendFormattedByte(buf, b[i]);
-				buf.append(' ');
-			}
-			
-			if(trimming) {
-				buf.append("...");
-			}
-			buf.append('>');
-		} else if (anObject instanceof Boolean) {
-			buf.append('\'').append(anObject).append('\'');
-		} else {
-			// unknown
-			buf
-				.append("[")
-				.append(anObject.getClass().getName())
-				.append(": ")
-				.append(anObject)
-				.append("]");
-		}
-	}
+            for (int i = 0; i < len; i++) {
+                appendFormattedByte(buf, b[i]);
+                buf.append(' ');
+            }
 
-	/**
-	 * Prints a byte value to a StringBuffer as a double digit hex value.
-	 */
-	protected static void appendFormattedByte(
-		StringBuffer buf,
-		byte byteValue) {
-		
-		String hexDecode = "0123456789ABCDEF";
-	
-		buf.append(hexDecode.charAt(byteValue >>> 4 ));
-		buf.append(hexDecode.charAt(byteValue & 0x0F));
-	}
+            if (trimming) {
+                buf.append("...");
+            }
+            buf.append('>');
+        }
+        else if (anObject instanceof Boolean) {
+            buf.append('\'').append(anObject).append('\'');
+        }
+        else {
+            // unknown
+            buf
+                .append("[")
+                .append(anObject.getClass().getName())
+                .append(": ")
+                .append(anObject)
+                .append("]");
+        }
+    }
 
-	/** 
-	 * Returns current logging level.
-	 */
-	public static Level getLoggingLevel() {
-		Level level = logObj.getLevel();
-		return (level != null) ? level : DEFAULT_LOG_LEVEL;
-	}
+    /**
+     * Prints a byte value to a StringBuffer as a double digit hex value.
+     */
+    protected static void appendFormattedByte(StringBuffer buf, byte byteValue) {
 
-	/**
-	 * Sets logging level.
-	 */
-	public static void setLoggingLevel(Level level) {
-		logObj.setLevel(level);
-	}
+        String hexDecode = "0123456789ABCDEF";
 
-	/**
-	 * Logs database connection event using container data source.
-	 */
-	public static void logConnect(Level logLevel, String dataSource) {
-		if (isLoggable(logLevel)) {
-			logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
-		}
-	}
+        buf.append(hexDecode.charAt(byteValue >>> 4));
+        buf.append(hexDecode.charAt(byteValue & 0x0F));
+    }
 
-	public static void logConnect(
-		Level logLevel,
-		String url,
-		String userName,
-		String password) {
-		if (isLoggable(logLevel)) {
-			StringBuffer buf = new StringBuffer("Opening connection: ");
+    /** 
+     * Returns current logging level.
+     */
+    public static Level getLoggingLevel() {
+        Level level = logObj.getLevel();
+        return (level != null) ? level : DEFAULT_LOG_LEVEL;
+    }
 
-			// append URL on the same line to make log somewhat grep-friendly
-			buf.append(url);
-			buf.append("\n\tLogin: ").append(userName);
-			buf.append("\n\tPassword: *******");
+    /**
+     * Sets logging level.
+     */
+    public static void setLoggingLevel(Level level) {
+        logObj.setLevel(level);
+    }
 
-			logObj.log(logLevel, buf.toString());
-		}
-	}
+    /**
+     * Logs database connection event using container data source.
+     */
+    public static void logConnect(Level logLevel, String dataSource) {
+        if (isLoggable(logLevel)) {
+            logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
+        }
+    }
 
-	/**
-	 * Logs database connection event.
-	 */
-	public static void logPoolCreated(Level logLevel, DataSourceInfo dsi) {
-		if (isLoggable(logLevel)) {
-			StringBuffer buf = new StringBuffer("Created connection pool: ");
+    public static void logConnect(
+        Level logLevel,
+        String url,
+        String userName,
+        String password) {
+        if (isLoggable(logLevel)) {
+            StringBuffer buf = new StringBuffer("Opening connection: ");
 
-			if (dsi != null) {
-				// append URL on the same line to make log somewhat grep-friendly
-				buf.append(dsi.getDataSourceUrl());
+            // append URL on the same line to make log somewhat grep-friendly
+            buf.append(url);
+            buf.append("\n\tLogin: ").append(userName);
+            buf.append("\n\tPassword: *******");
 
-				if (dsi.getAdapterClassName() != null) {
-					buf.append("\n\tCayenne DbAdapter: ").append(
-						dsi.getAdapterClassName());
-				}
+            logObj.log(logLevel, buf.toString());
+        }
+    }
 
-				buf.append("\n\tDriver class: ").append(dsi.getJdbcDriver());
+    /**
+     * Logs database connection event.
+     */
+    public static void logPoolCreated(Level logLevel, DataSourceInfo dsi) {
+        if (isLoggable(logLevel)) {
+            StringBuffer buf = new StringBuffer("Created connection pool: ");
 
-				if (dsi.getMinConnections() >= 0) {
-					buf.append("\n\tMin. connections in the pool: ").append(
-						dsi.getMinConnections());
-				}
-				if (dsi.getMaxConnections() >= 0) {
-					buf.append("\n\tMax. connections in the pool: ").append(
-						dsi.getMaxConnections());
-				}
+            if (dsi != null) {
+                // append URL on the same line to make log somewhat grep-friendly
+                buf.append(dsi.getDataSourceUrl());
 
-				buf.append("\n\tLogin: ").append(dsi.getUserName());
-				buf.append("\n\tPassword: *******");
-			} else {
-				buf.append(" pool information unavailable");
-			}
+                if (dsi.getAdapterClassName() != null) {
+                    buf.append("\n\tCayenne DbAdapter: ").append(
+                        dsi.getAdapterClassName());
+                }
 
-			logObj.log(logLevel, buf.toString());
-		}
-	}
+                buf.append("\n\tDriver class: ").append(dsi.getJdbcDriver());
 
-	public static void logConnectSuccess(Level logLevel) {
-		logObj.log(logLevel, "+++ Connecting: SUCCESS.");
-	}
+                if (dsi.getMinConnections() >= 0) {
+                    buf.append("\n\tMin. connections in the pool: ").append(
+                        dsi.getMinConnections());
+                }
+                if (dsi.getMaxConnections() >= 0) {
+                    buf.append("\n\tMax. connections in the pool: ").append(
+                        dsi.getMaxConnections());
+                }
 
-	public static void logConnectFailure(Level logLevel, Throwable th) {
-		logObj.log(logLevel, "*** Connecting: FAILURE.", th);
-	}
+                buf.append("\n\tLogin: ").append(dsi.getUserName());
+                buf.append("\n\tPassword: *******");
+            }
+            else {
+                buf.append(" pool information unavailable");
+            }
 
-	public static void logQuery(Level logLevel, String queryStr, List params) {
-		logQuery(logLevel, queryStr, params, -1);
-	}
+            logObj.log(logLevel, buf.toString());
+        }
+    }
 
-	/** 
-	 * Log query content using Log4J Category with "INFO" priority.
-	 *
-	 * @param queryStr Query SQL string
-	 * @param params optional list of query parameters that are used when 
-	 * executing query in prepared statement.
-	 */
-	public static void logQuery(
-		Level logLevel,
-		String queryStr,
-		List params,
-		long time) {
-		if (isLoggable(logLevel)) {
-			StringBuffer buf = new StringBuffer(queryStr);
-			if (params != null && params.size() > 0) {
-				buf.append(" [params: ");
-				sqlLiteralForObject(buf, params.get(0));
+    public static void logConnectSuccess(Level logLevel) {
+        logObj.log(logLevel, "+++ Connecting: SUCCESS.");
+    }
 
-				int len = params.size();
-				for (int i = 1; i < len; i++) {
-					buf.append(", ");
-					sqlLiteralForObject(buf, params.get(i));
-				}
+    public static void logConnectFailure(Level logLevel, Throwable th) {
+        logObj.log(logLevel, "*** Connecting: FAILURE.", th);
+    }
 
-				buf.append(']');
-			}
+    public static void logQuery(Level logLevel, String queryStr, List params) {
+        logQuery(logLevel, queryStr, params, -1);
+    }
 
-			// log preparation time only if it is something significant
-			if (time > 10) {
-				buf.append(" - prepared in ").append(time).append(" ms.");
-			}
+    /** 
+     * Log query content using Log4J Category with "INFO" priority.
+     *
+     * @param queryStr Query SQL string
+     * @param params optional list of query parameters that are used when 
+     * executing query in prepared statement.
+     */
+    public static void logQuery(
+        Level logLevel,
+        String queryStr,
+        List params,
+        long time) {
+        if (isLoggable(logLevel)) {
+            StringBuffer buf = new StringBuffer(queryStr);
+            if (params != null && params.size() > 0) {
+                buf.append(" [bind: ");
+                sqlLiteralForObject(buf, params.get(0));
 
-			logObj.log(logLevel, buf.toString());
-		}
-	}
+                int len = params.size();
+                for (int i = 1; i < len; i++) {
+                    buf.append(", ");
+                    sqlLiteralForObject(buf, params.get(i));
+                }
 
-	public static void logBatchQueryParameters(
-		Level logLevel,
-		BatchQuery batch) {
-		if (isLoggable(logLevel)) {
-			int attributeCount = batch.getDbAttributes().size();
-			if (attributeCount > 0) {
-				StringBuffer buf = new StringBuffer("[batch params: ");
-				sqlLiteralForObject(buf, batch.getObject(0));
+                buf.append(']');
+            }
 
-				for (int i = 1; i < attributeCount; i++) {
-					buf.append(", ");
-					sqlLiteralForObject(buf, batch.getObject(i));
-				}
+            // log preparation time only if it is something significant
+            if (time > 10) {
+                buf.append(" - prepared in ").append(time).append(" ms.");
+            }
 
-				buf.append(']');
-				logObj.log(logLevel, buf.toString());
-			}
-		}
-	}
+            logObj.log(logLevel, buf.toString());
+        }
+    }
 
-	public static void logSelectCount(Level logLevel, int count) {
-		logSelectCount(logLevel, count, -1);
-	}
+    /**
+     * @deprecated Since 1.0 Beta3 use "logQueryParameters(Level,String,List)"
+     */
+    public static void logBatchQueryParameters(Level logLevel, BatchQuery batch) {
+        logQueryParameters(logLevel, "batch params", batch.getValuesForUpdateParameters());
+    }
 
-	public static void logSelectCount(Level logLevel, int count, long time) {
-		if (isLoggable(logLevel)) {
-			StringBuffer buf = new StringBuffer();
+    public static void logQueryParameters(
+        Level logLevel,
+        String label,
+        List parameters) {
 
-			if (count == 1) {
-				buf.append("=== returned 1 row.");
-			} else {
-				buf.append("=== returned ").append(count).append(" rows.");
-			}
+        if (isLoggable(logLevel) && parameters.size() > 0) {
+            int len = parameters.size();
+            StringBuffer buf = new StringBuffer("[");
+            buf.append(label).append(": ");
 
-			if (time >= 0) {
-				buf.append(" - took ").append(time).append(" ms.");
-			}
+            sqlLiteralForObject(buf, parameters.get(0));
 
-			logObj.log(logLevel, buf.toString());
-		}
-	}
+            for (int i = 1; i < len; i++) {
+                buf.append(", ");
+                sqlLiteralForObject(buf, parameters.get(i));
+            }
 
-	public static void logUpdateCount(Level logLevel, int count) {
-		if (isLoggable(logLevel)) {
-			String countStr =
-				(count == 1)
-					? "=== updated 1 row."
-					: "=== updated " + count + " rows.";
-			logObj.log(logLevel, countStr);
-		}
-	}
+            buf.append(']');
+            logObj.log(logLevel, buf.toString());
+        }
+    }
 
-	public static void logCommitTransaction(Level logLevel) {
-		logObj.log(logLevel, "+++ transaction committed.");
-	}
+    public static void logSelectCount(Level logLevel, int count) {
+        logSelectCount(logLevel, count, -1);
+    }
 
-	public static void logRollbackTransaction(Level logLevel) {
-		logObj.log(logLevel, "*** transaction rolled back.");
-	}
+    public static void logSelectCount(Level logLevel, int count, long time) {
+        if (isLoggable(logLevel)) {
+            StringBuffer buf = new StringBuffer();
 
-	public static void logQueryError(Level logLevel, Throwable th) {
-		if (th != null) {
-			th = Util.unwindException(th);
-		}
+            if (count == 1) {
+                buf.append("=== returned 1 row.");
+            }
+            else {
+                buf.append("=== returned ").append(count).append(" rows.");
+            }
 
-		logObj.log(logLevel, "*** error.", th);
-	}
+            if (time >= 0) {
+                buf.append(" - took ").append(time).append(" ms.");
+            }
 
-	public static void logQueryStart(Level logLevel, int count) {
-		if (isLoggable(logLevel)) {
-			String countStr =
-				(count == 1)
-					? "--- will run 1 query."
-					: "--- will run " + count + " queries.";
-			logObj.log(logLevel, countStr);
-		}
-	}
+            logObj.log(logLevel, buf.toString());
+        }
+    }
 
-	public static boolean isLoggable(Level logLevel) {
-		return logObj.isEnabledFor(logLevel);
-	}
+    public static void logUpdateCount(Level logLevel, int count) {
+        if (isLoggable(logLevel)) {
+            String countStr =
+                (count == 1) ? "=== updated 1 row." : "=== updated " + count + " rows.";
+            logObj.log(logLevel, countStr);
+        }
+    }
+
+    public static void logCommitTransaction(Level logLevel) {
+        logObj.log(logLevel, "+++ transaction committed.");
+    }
+
+    public static void logRollbackTransaction(Level logLevel) {
+        logObj.log(logLevel, "*** transaction rolled back.");
+    }
+
+    public static void logQueryError(Level logLevel, Throwable th) {
+        if (th != null) {
+            th = Util.unwindException(th);
+        }
+
+        logObj.log(logLevel, "*** error.", th);
+    }
+
+    public static void logQueryStart(Level logLevel, int count) {
+        if (isLoggable(logLevel)) {
+            String countStr =
+                (count == 1)
+                    ? "--- will run 1 query."
+                    : "--- will run " + count + " queries.";
+            logObj.log(logLevel, countStr);
+        }
+    }
+
+    public static boolean isLoggable(Level logLevel) {
+        return logObj.isEnabledFor(logLevel);
+    }
 
 }

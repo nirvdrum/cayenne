@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access.trans;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,6 +72,31 @@ public class LOBUpdateBatchQueryBuilder extends LOBBatchQueryBuilder {
 
     public LOBUpdateBatchQueryBuilder(DbAdapter adapter) {
         super(adapter);
+    }
+
+    public List getValuesForLOBUpdateParameters(BatchQuery query) {
+        int len = query.getDbAttributes().size();
+        UpdateBatchQuery updateBatch = (UpdateBatchQuery) query;
+
+        List values = new ArrayList(len);
+        List qualifierAttributes = updateBatch.getIdDbAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+
+        int updatedLen = updatedDbAttributes.size();
+        int qualifierLen = qualifierAttributes.size();
+        for (int i = 0; i < updatedLen; i++) {
+            DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
+            Object value = query.getObject(i);
+            if(isUpdateableColumn(value, attribute.getType())) {
+            	values.add(value);
+            }
+        }
+
+		for (int i = 0; i < qualifierLen; i++) {
+			values.add(query.getObject(updatedLen + i));
+        }
+
+        return values;
     }
 
     public String createSqlString(BatchQuery batch) {

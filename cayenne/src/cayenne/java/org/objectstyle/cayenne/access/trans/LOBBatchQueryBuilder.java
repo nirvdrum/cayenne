@@ -64,7 +64,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -82,6 +81,9 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
     public LOBBatchQueryBuilder(DbAdapter adapter) {
         super(adapter);
     }
+    
+    
+    public abstract List getValuesForLOBUpdateParameters(BatchQuery query);
 
     public String createLOBSelectString(
         BatchQuery updateQuery,
@@ -152,29 +154,6 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
         }
     }
 
-    /**
-       * Binds BatchQuery parameters to the PreparedStatement. 
-       */
-    public void bindLOBParameters(
-        PreparedStatement statement,
-        LOBBatchQueryWrapper query,
-        List qualifierAttributes)
-        throws SQLException, Exception {
-
-        int attributeCount = qualifierAttributes.size();
-
-        for (int i = 0; i < attributeCount; i++) {
-            Object value = query.getLOBSelectQualifierValue(i);
-            DbAttribute attribute = (DbAttribute) qualifierAttributes.get(i);
-
-            adapter.bindParameter(
-                statement,
-                value,
-                i + 1,
-                attribute.getType(),
-                attribute.getPrecision());
-        }
-    }
 
     /**
      * Binds BatchQuery parameters to the PreparedStatement. 
@@ -185,8 +164,6 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
         List dbAttributes)
         throws SQLException, Exception {
 
-        QueryLogger.logBatchQueryParameters(query.getLoggingLevel(), query);
-
         int attributeCount = dbAttributes.size();
 
         // i - attribute position in the query
@@ -196,6 +173,7 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
             DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
             int type = attribute.getType();
 
+            // TODO: (Andrus) This works as long as there is no LOBs in qualifier
             if (isUpdateableColumn(value, type)) {
                 adapter.bindParameter(
                     statement,

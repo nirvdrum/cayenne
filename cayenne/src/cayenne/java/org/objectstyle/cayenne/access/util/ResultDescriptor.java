@@ -287,9 +287,6 @@ public class ResultDescriptor {
     }
 
     protected void initDefaultConverters() {
-        logObj.debug(
-            "Creating converters using default JDBC->Java type mapping.");
-
         int resultWidth = dbAttributes.size();
         this.converters = new ExtendedType[resultWidth];
 
@@ -300,7 +297,6 @@ public class ResultDescriptor {
     }
 
     protected void initConvertersFromMapping() {
-        logObj.debug("Creating converters using ObjAttributes.");
 
         // assert that we have all the data
         if (dbAttributes.size() == 0) {

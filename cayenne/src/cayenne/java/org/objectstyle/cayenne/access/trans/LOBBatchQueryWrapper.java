@@ -60,6 +60,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
@@ -132,8 +133,7 @@ public class LOBBatchQueryWrapper {
                     continue;
                 }
 
-                if (((DbAttribute) dbAttributes.get(i)).getType()
-                    == Types.BLOB) {
+                if (((DbAttribute) dbAttributes.get(i)).getType() == Types.BLOB) {
                     updatedLOBAttributes[i] = convertToBlobValue(value);
                 }
                 else {
@@ -190,7 +190,7 @@ public class LOBBatchQueryWrapper {
     /**
      * Returns a list of DbAttributes that correspond to 
      * the LOB columns updated in the current row in the batch query. 
-     * The list will not include LOB attributes that have null or empty.
+     * The list will not include LOB attributes that are null or empty.
      */
     public List getDbAttributesForUpdatedLOBColumns() {
         if (!hasNext) {
@@ -208,30 +208,37 @@ public class LOBBatchQueryWrapper {
         return attributes;
     }
 
-    public byte[] getUpdatedBlobValue(int i) {
+    public List getValuesForLOBSelectQualifier() {
         if (!hasNext) {
             throw new IllegalStateException("No more rows in the BatchQuery.");
         }
 
-        // translate index 
-        return (byte[]) getNthNonNullObject(updatedLOBAttributes, i);
-    }
-
-    public Object getUpdatedClobValue(int i) {
-        if (!hasNext) {
-            throw new IllegalStateException("No more rows in the BatchQuery.");
+        int len = this.qualifierAttributes.length;
+        List values = new ArrayList(len);
+        for (int i = 0; i < len; i++) {
+            if (this.qualifierAttributes[i]) {
+                values.add(query.getObject(i));
+            }
         }
-        return getNthNonNullObject(updatedLOBAttributes, i);
+        
+        return values;
     }
+    
+	public List getValuesForUpdatedLOBColumns() {
+		if (!hasNext) {
+			throw new IllegalStateException("No more rows in the BatchQuery.");
+		}
 
-    public Object getLOBSelectQualifierValue(int i) {
-        if (!hasNext) {
-            throw new IllegalStateException("No more rows in the BatchQuery.");
-        }
-
-        int valueIndex = translateIndex(this.qualifierAttributes, i);
-        return query.getObject(valueIndex);
-    }
+		int len = this.updatedLOBAttributes.length;
+		List values = new ArrayList(len);
+		for (int i = 0; i < len; i++) {
+			if (this.updatedLOBAttributes[i] != null) {
+				values.add(this.updatedLOBAttributes[i]);
+			}
+		}
+        
+		return values;
+	}
 
     /**
      * Returns wrapped BatchQuery.
@@ -239,38 +246,8 @@ public class LOBBatchQueryWrapper {
     public BatchQuery getQuery() {
         return query;
     }
-
-    protected int translateIndex(boolean[] indices, int index) {
-        int len = indices.length;
-
-        // find [index] occurrance of "true" in the array
-        for (int i = 0, j = -1; i < len; i++) {
-            if (indices[i]) {
-                j++;
-            }
-
-            if (j == index) {
-                return i;
-            }
-        }
-
-        throw new IndexOutOfBoundsException("Invalid index: " + index);
-    }
-
-    protected Object getNthNonNullObject(Object[] objects, int n) {
-        int len = objects.length;
-
-        // find [index] occurrance of "true" in the array
-        for (int i = 0, j = -1; i < len; i++) {
-            if (objects[i] != null) {
-                j++;
-            }
-
-            if (j == n) {
-                return objects[i];
-            }
-        }
-
-        throw new IndexOutOfBoundsException("Invalid index: " + n);
+    
+    public Level getLoggingLevel() {
+    	return this.query.getLoggingLevel();
     }
 }
