@@ -75,7 +75,7 @@ public abstract class AbstractType implements ExtendedType {
 			st.setObject(pos, val, type, precision);
         }
         else {
-			st.setObject(pos, val);
+			st.setObject(pos, val, type);
         }
     }
 
