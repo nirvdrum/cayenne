@@ -34,12 +34,13 @@
      *  2. release-site
      *                - creates a full Cayenne website distribution.
      *  3. build      - (default target) builds all subproject JAR files.
-     *  4. clean      - cleans temporary build and distribution directories
-     *  5. clean-java - cleans all build directories, preserving the docs and such
-     *  5. doc        - builds Cayenne documentation including Javadocs.
-     *  6. api        - builds Javdoc API documentation.
-     *  7. javacc     - runs javacc
-     *  8. help       - prints this message
+     *  4. compile    - compiles all subprojects source files.
+     *  5. clean      - cleans temporary build and distribution directories
+     *  6. clean-java - cleans all build directories, preserving the docs and such
+     *  7. doc        - builds Cayenne documentation including Javadocs.
+     *  8. api        - builds Javdoc API documentation.
+     *  9. javacc     - runs javacc
+     *  10. help      - prints this message
      *
      *
      * ENVIRONMENT:
@@ -90,6 +91,15 @@
     <target name="build">
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="dist-bin"/>
+    </target>
+    
+    <!-- ========================================== -->
+    <!-- Compiles all Cayenne Java subprojects.     -->
+    <!-- ========================================== -->
+    <target name="compile">
+		<ant antfile="build-cayenne.xml" target="compile"/>
+		<ant antfile="build-tests.xml" target="compile"/>
+		<ant antfile="build-performance.xml" target="compile"/>
     </target>
 
 

@@ -29,6 +29,7 @@
     
     <path id="classpath-performance">
 		<path refid="classpath-tests"/>
+		<pathelement path="build/tests/classes"/>
     </path>
     
 	<path id="javacc-classpath">
