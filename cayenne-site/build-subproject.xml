@@ -5,7 +5,26 @@
 <!-- ================================================= -->
 <project default="site">
 
-    <target name="site" depends="doc,resources,api,tutorials,release-notes"/>
+    <target name="site" depends="doc,assemble,resources,api,tutorials,release-notes"/>
+    
+	<!-- ============================================= -->
+    <!-- Assembles prebuilt docs. -->
+    <!-- ============================================= -->
+    <target name="assemble">
+		<copy todir="${doc.root}">
+			<fileset dir="${build}/${subproject.name}/out"  includes="**/*.html"/>
+
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="SFLOGO" value="${sf.logo}"/>
+			</filterset>
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="JNLOGO" value="${java.net.logo}"/>
+			</filterset>
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="LICENSE" value="${license.text}"/>
+			</filterset>
+		</copy>
+    </target>
     
     <!-- ============================================= -->
     <!-- Builds a set of project documentation -->

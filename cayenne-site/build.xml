@@ -13,7 +13,6 @@
     <property file="${user.home}/build.properties" />
     <property file="default.properties" />
     
-    
     <!-- ============================================= -->
     <!-- Derived Properties. These properties are -->
     <!-- derived from other properties. You probably -->
@@ -54,6 +53,8 @@
     <target name="prepare" >
     	<tstamp/>
     	
+    	<loadfile property="license.text" srcFile="${cayenne.latest}/doc/licenses/LICENSE"/>
+    	
 		<taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
 			<classpath>
 				<pathelement path="${ant.home}/lib/ant.jar"/>
@@ -71,8 +72,6 @@
     	<ant antfile="build-stable.xml" target="site"/>
 		<ant antfile="build-latest.xml" target="site"/>
 		<ant antfile="build-site.xml" target="site"/>
-		
-		<antcall target="assemble"/>
 		<antcall target="rsync-prompt"/>
     </target>
     
@@ -81,8 +80,6 @@
     <!-- ============================================= -->
     <target name="internal" depends="prepare">
 		<ant antfile="build-site.xml" target="site"/>
-		
-		<antcall target="assemble"/>
 		<antcall target="rsync-prompt"/>
     </target>
     
@@ -92,8 +89,6 @@
     <!-- ============================================= -->
     <target name="stable" depends="prepare">
 		<ant antfile="build-stable.xml" target="site"/>
-		
-		<antcall target="assemble"/>
 		<antcall target="rsync-prompt"/>
     </target>
     
@@ -102,31 +97,7 @@
     <!-- ============================================= -->
     <target name="latest" depends="prepare">
 		<ant antfile="build-latest.xml" target="site"/>
-		
-		<antcall target="assemble"/>
 		<antcall target="rsync-prompt"/>
-    </target>
-    
-
-	<!-- ============================================= -->
-    <!-- Assembles prebuilt docs. -->
-    <!-- ============================================= -->
-    <target name="assemble">
-		<!-- assemble -->
-		<loadfile property="license.text" srcFile="${cayenne.latest}/doc/licenses/LICENSE"/>
-		<copy todir="${dist}">
-			<fileset dir="${build}/cayenne-site/out"  includes="**/*.html"/>
-
-			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
-				<filter token="SFLOGO" value="${sf.logo}"/>
-			</filterset>
-			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
-				<filter token="JNLOGO" value="${java.net.logo}"/>
-			</filterset>
-			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
-				<filter token="LICENSE" value="${license.text}"/>
-			</filterset>
-		</copy>
     </target>
     
     <target name="rsync-prompt">

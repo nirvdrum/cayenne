@@ -14,8 +14,14 @@
         
         <section name="Project News">
         
+		<p><u><i>[April 25, 2004]</i></u> <strong>M6 - Cayenne 1.1 Milestone  Release</strong></p>
+		<p>This release includes SQLTemplate, a scriptable raw SQL query, and also a number of 
+		bug fixes and other enhancements. For details see <a href="release-notes/RELEASE-NOTES-1.1M6.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1M6.txt">upgrade instructions</a>.
+		</p>
+         
         <p><u><i>[April 14, 2004]</i></u> <strong>Cayenne Success Story - AccessPoint Inc.</strong></p>
-         <p>A story submitted by Bret Gregory: "I work for <a href="http://www.accesspointinc.com/" target="_new">AccessPoint 
+		<p>A story submitted by Bret Gregory: "I work for <a href="http://www.accesspointinc.com/" target="_new">AccessPoint 
          Inc.</a>, a privately-held CLEC offering 
         integrated communications services to small- and medium-sized businesses.  We use Cayenne for 
         our internal accounting and reconciliation application.  This application allows us to recognize 

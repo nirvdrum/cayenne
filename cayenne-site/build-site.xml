@@ -5,7 +5,12 @@
 <!-- ================================================= -->
 <project default="site">
 
-    <target name="site" depends="doc,resources"/>
+    <target name="site" depends="doc,resources"> 
+		<ant antfile="build-subproject.xml" target="assemble">
+    		<property name="subproject.name" value="cayenne-site"/>
+    		<property name="doc.root" value="${dist}"/>
+    	</ant>
+    </target>
 
     <!-- ========================================== -->
     <!-- Builds Site documenatation. -->
