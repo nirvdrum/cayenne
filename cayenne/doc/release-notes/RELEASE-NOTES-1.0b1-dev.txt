@@ -15,7 +15,7 @@ mandatory (based on mandatory attributes).
 
 2. Added Validation menu item on the File menu in the modeller.
 
-3. Initial support for PostgreSQL and HSQLDB.
+3. Support for PostgreSQL and HSQLDB.
 
 4. Modeler uses the platform's look&feel by default; this is
 configurable in modeler.preferences (for now).
@@ -29,8 +29,21 @@ database specific strint typeName to allow reverse engineering of
 unhandled types.
 
 8. DbAdapter.getTypeConverter is renamed to "getExtendedTypes', since the original
-method name is confusing.
+method name is confusing. 'getTypeConverter' is deprecated.
 
-9. ExtendedType.toJdbcObject is deprected and replacred with 'setJdbcObject'
+9. ExtendedType.toJdbcObject is deprected and replaced with 'setJdbcObject'
 to give ExtendedType more control over setting JDBC values.
+
+10. Changed DataContext.commitChanges() to use a different, much more efficient, 
+algorithm for committing changes. In its core is Ashwood graph library
+(http://objectstyle.org/ashwood/) used to order operations according to the database 
+constraints. Another major performance improvment is using JDBC batch update feature for all
+DataContext update operations.
+
+11. DbAdapter.getQualifierFactory is deprecated and replaced with "getQualifierTranslator"
+to remove unneeded indirection. QualifierTranslatorFactory class itself is deprecated.
+
+12. org.objectstyle.cayenne.access.OperationSorter is deprecated, and replaced
+with correct implementation: org.objectstyle.cayenne.access.util.DefaultSorter, based
+on Ashwood library. 
 
