@@ -171,6 +171,9 @@ public class EOModelProcessor {
         List attributes = (List) entityMap.get("attributes");
         DbEntity dbEntity = e.getDbEntity();
 
+		String isReadOnlyString = (String) entityMap.get("isReadOnly");
+		e.setReadOnly("Y".equals(isReadOnlyString));
+		
         if (pks == null) {
             pks = Collections.EMPTY_LIST;
         }
@@ -192,9 +195,19 @@ public class EOModelProcessor {
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
             Map attrMap = (Map) it.next();
-            String dbAttrName = (String) attrMap.get("columnName");
+            
+			String prototypeName = (String) attrMap.get("prototypeName");
+			Map prototypeAttrMap = helper.getPrototypeAttributeMapFor(prototypeName);
+			
+			String dbAttrName = (String) attrMap.get("columnName");
+			if (null == dbAttrName)  dbAttrName = (String) prototypeAttrMap.get("columnName");;
+			
             String attrName = (String) attrMap.get("name");
+			if (null == attrName)  attrName = (String) prototypeAttrMap.get("name");;
+			
             String attrType = (String) attrMap.get("valueClassName");
+			if (null == attrType)  attrType = (String) prototypeAttrMap.get("valueClassName");;
+			
             String javaType = helper.javaTypeForEOModelerType(attrType);
             EODbAttribute dbAttr = null;
 
@@ -216,14 +229,25 @@ public class EOModelProcessor {
                 dbAttr.setEoAttributeName(attrName);
                 dbEntity.addAttribute(dbAttr);
 
-                Integer width = (Integer) attrMap.get("width");
-                if (width != null)
-                    dbAttr.setMaxLength(width.intValue());
+				Integer width = (Integer) attrMap.get("width");
+				if (null == width)  width = (Integer) prototypeAttrMap.get("width");
+				
+				if (width != null)
+					dbAttr.setMaxLength(width.intValue());
+
+				Integer scale = (Integer) attrMap.get("scale");
+				if (null == scale)  scale = (Integer) prototypeAttrMap.get("scale");
+				
+				if (scale != null)
+					dbAttr.setPrecision(scale.intValue());
 
                 if (pks.contains(attrName))
                     dbAttr.setPrimaryKey(true);
 
                 Object allowsNull = attrMap.get("allowsNull");
+				// TODO: Unclear that allowsNull should be inherited from EOPrototypes
+				// if (null == allowsNull)  allowsNull = prototypeAttrMap.get("allowsNull");;
+                 
                 dbAttr.setMandatory(!"Y".equals(allowsNull));
             }
 

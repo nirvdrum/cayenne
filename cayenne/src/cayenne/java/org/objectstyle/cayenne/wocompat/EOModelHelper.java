@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.wocompat;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -122,10 +123,10 @@ public class EOModelHelper {
      *  to String representation of Objective C type. 
      */
     public String javaTypeForEOModelerType(String type) {
-        if(type == null) {
-        	return null;
+        if (type == null) {
+            return null;
         }
-        
+
         if (type.equals("NSString"))
             return "java.lang.String";
         if (type.equals("NSNumber"))
@@ -137,7 +138,32 @@ public class EOModelHelper {
         if (type.equals("NSData"))
             return "byte[]";
 
-        throw new IllegalArgumentException("Unknown data type: " + type);
+        // don't know what the class is mapped to... 
+        // do some minimum sanity check and use as is
+        try {
+            return Class.forName(type).getName();
+        }
+        catch (ClassNotFoundException aClassNotFoundException) {
+            try {
+                return Class.forName("java.lang." + type).getName();
+            }
+            catch (ClassNotFoundException anotherClassNotFoundException) {
+                try {
+                    return Class.forName("java.util." + type).getName();
+                }
+                catch (ClassNotFoundException yetAnotherClassNotFoundException) {
+                    try {
+                        return ClassLoader
+                            .getSystemClassLoader()
+                            .loadClass(type)
+                            .getName();
+                    }
+                    catch (ClassNotFoundException e) {
+                        throw new IllegalArgumentException("Unknown data type: " + type);
+                    }
+                }
+            }
+        }
     }
 
     /** Returns a DataMap associated with this helper. */
@@ -153,6 +179,49 @@ public class EOModelHelper {
     /** Returns an iterator of model names. */
     public Iterator modelNames() {
         return entityClassIndex.keySet().iterator();
+    }
+
+    private Map prototypeValues = null;
+
+    public Map getPrototypeAttributeMapFor(String aPrototypeAttributeName) {
+        if (prototypeValues == null) {
+
+            Map eoPrototypesEntityMap = this.entityInfo("EOPrototypes");
+
+            // no prototypes
+            if (eoPrototypesEntityMap == null) {
+                prototypeValues = Collections.EMPTY_MAP;
+            }
+            else {
+                List eoPrototypeAttributes =
+                    (List) eoPrototypesEntityMap.get("attributes");
+
+                prototypeValues = new HashMap();
+                Iterator it = eoPrototypeAttributes.iterator();
+                while (it.hasNext()) {
+                    Map attrMap = (Map) it.next();
+
+                    String attrName = (String) attrMap.get("name");
+
+                    Map prototypeAttrMap = new HashMap();
+                    prototypeValues.put(attrName, prototypeAttrMap);
+
+                    prototypeAttrMap.put("name", attrMap.get("name"));
+                    prototypeAttrMap.put("prototypeName", attrMap.get("prototypeName"));
+                    prototypeAttrMap.put("columnName", attrMap.get("columnName"));
+                    prototypeAttrMap.put("valueClassName", attrMap.get("valueClassName"));
+                    prototypeAttrMap.put("width", attrMap.get("width"));
+                    prototypeAttrMap.put("allowsNull", attrMap.get("allowsNull"));
+                    prototypeAttrMap.put("scale", attrMap.get("scale"));
+                }
+            }
+        }
+
+        Map aMap = (Map) prototypeValues.get(aPrototypeAttributeName);
+        if (null == aMap)
+            aMap = Collections.EMPTY_MAP;
+
+        return aMap;
     }
 
     /** Returns an info map for the entity called <code>entityName</code>. */
