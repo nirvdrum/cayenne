@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,13 +54,21 @@ package org.objectstyle.cayenne.map;
  *
  */
 
+package org.objectstyle.cayenne.map;
+
 import java.io.Writer;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
-/** Generates Java classes source code using VTL (Velocity template engine) for
-  * the ObjEntities in the DataMap. */
+/** 
+ * Generates Java classes source code using VTL (Velocity template engine) for
+ * the ObjEntities in the DataMap. This class is abstract and does not deal with 
+ * filesystem issues directly. Concrete subclasses should provide ways to store
+ * generated files by implementing "openWriter" and "closeWriter" methods.
+ * 
+ * @author Andrei Adamchik 
+ */
 public abstract class MapClassGenerator {
 
     public static final String SINGLE_CLASS_TEMPLATE = "dotemplates/singleclass.vm";
@@ -71,6 +78,8 @@ public abstract class MapClassGenerator {
 
     protected DataMap map;
     protected String superPkg;
+
+    public MapClassGenerator() {}
 
     public MapClassGenerator(DataMap map) {
         this.map = map;
@@ -229,6 +238,20 @@ public abstract class MapClassGenerator {
      */
     public void setSuperPkg(String superPkg) {
         this.superPkg = superPkg;
+    }
+
+    /**
+     * Returns DataMap used as information source about generated classes.
+     */
+    public DataMap getMap() {
+        return map;
+    }
+
+    /**
+     * Returns DataMap used as information source about generated classes.
+     */
+    public void setMap(DataMap map) {
+        this.map = map;
     }
 
 }
