@@ -175,10 +175,11 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Indicate whether log4j has been initialized; can be used when
-	 * subclasses customize the initialization process.
+	 * Indicate whether log4j has been initialized. Can be used when
+	 * subclasses customize the initialization process, or to configure 
+     * Log4J outside of Cayenne.
 	 */
-	protected synchronized static void setLoggingConfigured(boolean state) {
+	public synchronized static void setLoggingConfigured(boolean state) {
 		loggingConfigured = state;
 	}
 
