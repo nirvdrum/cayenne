@@ -88,6 +88,7 @@ import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.conn.PoolManager;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server, etc.
@@ -199,8 +200,8 @@ public class DataNode implements QueryEngine {
 
         // TODO: since sorting may be disabled even for databases
         // that enforce constraints, in cases when constraints are
-        // defined as deferrable, this may need more fine grained 
-        // control from the user, maybe via ContextCommitObserver?  
+        // defined as deferrable, this may need more fine grained
+        // control from the user, maybe via ContextCommitObserver?
         if (adapter != null && adapter.supportsFkConstraints()) {
             this.dependencySorter = new DefaultSorter(this);
         }
@@ -383,7 +384,7 @@ public class DataNode implements QueryEngine {
                 assembler.getResultDescriptor(rs),
                 ((GenericSelectQuery) query).getFetchLimit());
 
-        // TODO: Should do something about closing ResultSet and PreparedStatement in this method, 
+        // TODO: Should do something about closing ResultSet and PreparedStatement in this method,
         // instead of relying on DefaultResultIterator to do that later
 
         if (!delegate.isIteratedResult()) {
@@ -703,5 +704,19 @@ public class DataNode implements QueryEngine {
 
     public DependencySorter getDependencySorter() {
         return dependencySorter;
+    }
+
+    /**
+     * Tries to close JDBC connections opened by this node's data source.
+     */
+    public synchronized void shutdown() {
+        DataSource ds = getDataSource();
+        try {
+            if (ds instanceof PoolManager) {
+                ((PoolManager)ds).dispose();
+            }
+        }
+        catch (SQLException ex) {
+        }
     }
 }

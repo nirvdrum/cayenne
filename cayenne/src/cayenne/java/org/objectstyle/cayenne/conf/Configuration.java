@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002-2003 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002-2003 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -59,6 +59,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -71,8 +72,8 @@ import org.objectstyle.cayenne.util.CayenneMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
- * This class is an entry point to Cayenne. It loads all 
- * configuration files and instantiates main Cayenne objects. Used as a 
+ * This class is an entry point to Cayenne. It loads all
+ * configuration files and instantiates main Cayenne objects. Used as a
  * singleton via the {@link #getSharedConfiguration} method.
  *
  * <p>To use a custom subclass of Configuration, Java applications must
@@ -94,7 +95,7 @@ public abstract class Configuration {
     protected static Configuration sharedConfiguration = null;
     private static boolean loggingConfigured = false;
 
-    /** 
+    /**
      * Defines a ClassLoader to use for resource lookup.
      * Configuration objects that are using ClassLoaders
      * to locate resources may need to be bootstrapped
@@ -109,8 +110,9 @@ public abstract class Configuration {
 	protected ConfigStatus loadStatus = new ConfigStatus();
 	protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
 	protected boolean ignoringLoadFailures = false;
+    protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
 
-	/** 
+	/**
 	 * Sets <code>cl</code> class's ClassLoader to serve
 	 * as shared configuration resource ClassLoader.
 	 * If shared Configuration object does not use ClassLoader,
@@ -120,9 +122,9 @@ public abstract class Configuration {
 		resourceLoader = cl.getClassLoader();
 	}
 
-    /** 
-     * Configures Cayenne logging properties. 
-     * Search for the properties file called <code>cayenne-log.properties</code> 
+    /**
+     * Configures Cayenne logging properties.
+     * Search for the properties file called <code>cayenne-log.properties</code>
      * is first done in $HOME/.cayenne, then in CLASSPATH.
      */
     public synchronized static void configureCommonLogging() {
@@ -140,8 +142,8 @@ public abstract class Configuration {
         }
     }
 
-    /** 
-     * Configures Cayenne logging properties using properties found at the specified URL. 
+    /**
+     * Configures Cayenne logging properties using properties found at the specified URL.
      */
     public synchronized static void configureCommonLogging(URL propsFile) {
         if (!Configuration.isLoggingConfigured()) {
@@ -167,7 +169,7 @@ public abstract class Configuration {
 
 	/**
 	 * Indicate whether log4j has been initialized. Can be used when
-	 * subclasses customize the initialization process, or to configure 
+	 * subclasses customize the initialization process, or to configure
      * Log4J outside of Cayenne.
 	 */
 	public synchronized static void setLoggingConfigured(boolean state) {
@@ -195,9 +197,9 @@ public abstract class Configuration {
         return Configuration.resourceLoader;
     }
 
-    /** 
-     * Returns default log level for loading configuration. 
-     * Log level is made static so that applications can set it 
+    /**
+     * Returns default log level for loading configuration.
+     * Log level is made static so that applications can set it
      * before shared Configuration object is instantiated.
      */
     public static Level getLoggingLevel() {
@@ -214,7 +216,7 @@ public abstract class Configuration {
 
 	/**
 	 * Creates and initializes shared Configuration object.
-	 * By default {@link DefaultConfiguration} will be 
+	 * By default {@link DefaultConfiguration} will be
 	 * instantiated and assigned to a singleton instance of
 	 * Configuration.
 	 */
@@ -356,11 +358,11 @@ public abstract class Configuration {
 	}
 
     /**
-     * Returns an internal property for the DataSource factory that 
-     * will override any settings configured in XML. 
+     * Returns an internal property for the DataSource factory that
+     * will override any settings configured in XML.
      * Subclasses may override this method to provide a special factory for
      * DataSource creation that will take precedence over any factories
-     * configured in a cayenne project. 
+     * configured in a cayenne project.
      */
     public DataSourceFactory getDataSourceFactory() {
         return this.overrideFactory;
@@ -386,8 +388,8 @@ public abstract class Configuration {
         return (DataDomain)this.dataDomains.get(name);
     }
 
-    /** 
-     * Returns default domain of this configuration. If no domains are 
+    /**
+     * Returns default domain of this configuration. If no domains are
      * configured, <code>null</code> is returned. If more than one domain
      * exists in this configuration, a CayenneRuntimeException is thrown,
      * indicating that the domain name must be explicitly specified.
@@ -462,4 +464,29 @@ public abstract class Configuration {
 		return new RuntimeLoadDelegate(this, this.getLoadStatus(), Configuration.getLoggingLevel());
 	}
 
+    /**
+     * Shutdowns all owned domains. Invokes DataDomain.shutdown().
+     */
+    public void shutdown() {
+        Collection domains = getDomains();
+        for (Iterator i = domains.iterator(); i.hasNext(); ) {
+            DataDomain domain = (DataDomain)i.next();
+            domain.shutdown();
+        }
+    }
+
+    private class ConfigurationShutdownHook extends Thread {
+        public void run() {
+            shutdown();
+        }
+    }
+
+    public void installConfigurationShutdownHook() {
+        uninstallConfigurationShutdownHook();
+        Runtime.getRuntime().addShutdownHook(configurationShutdownHook);
+    }
+
+    public void uninstallConfigurationShutdownHook() {
+        Runtime.getRuntime().removeShutdownHook(configurationShutdownHook);
+    }
 }

@@ -240,7 +240,7 @@ public class DataDomain implements QueryEngine {
 
     /**
      * Clears the list of internal DataMaps. In most cases it is wise to call
-     * "reset" before doing that. 
+     * "reset" before doing that.
      */
     public void clearDataMaps() {
         maps.clear();
@@ -510,6 +510,20 @@ public class DataDomain implements QueryEngine {
         }
 
         return primaryKeyHelper;
+    }
+
+    /**
+     * Shutdowns all owned data nodes. Invokes DataNode.shutdown().
+     */
+    public void shutdown() {
+        Collection dataNodes = getDataNodes();
+        for (Iterator i = dataNodes.iterator(); i.hasNext(); ) {
+            DataNode node = (DataNode)i.next();
+            try {
+                node.shutdown();
+            } catch (Exception ex) {
+            }
+        }
     }
 
 }
