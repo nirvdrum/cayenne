@@ -1,17 +1,16 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>CayenneModeler Guide - CayenneModeler Concepts</title>
 
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
 <navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/modeler/runmodeler.html</prev>
-	<next>/userguide/modeler/mapschema.html</next>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/runmodeler.html</prev>
+	<next>/modelerguide/mapschema.html</next>
 </navigator>
 <body>
-    <section name="6. CayenneModeler GUI Tool">
- 	<subsection name="6.3. Concepts and Terminology" anchor="concepts">
+ 	<section name="3. Concepts and Terminology" anchor="concepts">
 		<p>
 			CayenneModeler is a GUI tool for creating the data access classes
 			and associated data model.
@@ -140,7 +139,6 @@
 		</ol>
 		This document will concentrate on scenarios 1 and 2.
 		</p>
-		</subsection>
     </section>
 </body>
 </document>

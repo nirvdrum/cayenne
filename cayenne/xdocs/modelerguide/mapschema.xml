@@ -1,18 +1,16 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>CayenneModeler Guide</title>
 
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
 <navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/modeler/modelerconcepts.html</prev>
-	<next>/userguide/modeler/schemamap.html</next>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/modelerconcepts.html</prev>
+	<next>/modelerguide/schemamap.html</next>
 </navigator>
 <body>
-    <section name="6. CayenneModeler GUI Tool">
- 	<subsection name="6.4. Data Map First, Database Second"
-	anchor="map_first">
+ 	<section name="4. Data Map First, Database Second" anchor="map_first">
 
 		Here are the steps to create a new Cayenne project.
 		<ol>
@@ -114,7 +112,6 @@
 			The system will bring you to the appropriate screen when you click
 			the error message.</li>
 		</ol>
-	 </subsection>
     </section>
 </body>
 </document>

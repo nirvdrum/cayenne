@@ -1,17 +1,15 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>CayenneModeler Guide</title>
 
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
 <navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/modeler/schemamap.html</prev>
-	<next>/userguide/webobjects.html</next>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/schemamap.html</prev>
 </navigator>
 <body>
-    <section name="6. CayenneModeler GUI Tool">
-        <subsection name="6.6 Generating Primary Key Support in the Database" anchor="pk">
+        <section name="6. Generating Primary Key Support in the Database" anchor="pk">
         	<p>One of Cayenne core features is automatic generation of the database primary
         	keys for the new objects. This requires a set of special database objects to
         	be present in the database. (Those are adapter specific and can be special lookup tables,
@@ -50,7 +48,6 @@
         	   on <strong>"Save SQL"</strong> button to store the queries, and let
         	   the authorized DBA to run these statements.</li>
         	</ul>
-        </subsection>
     </section>
 </body>
 </document>

@@ -1,18 +1,16 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>CayenneModeler Guide</title>
 
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
 <navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/modeler/mapschema.html</prev>
-	<next>/userguide/modeler/pksupport.html</next>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/mapschema.html</prev>
+	<next>/modelerguide/pksupport.html</next>
 </navigator>
 <body>
-    <section name="6. CayenneModeler GUI Tool">
- 	 <subsection name="6.5 Database First, DataMap Second" anchor="map_from_db" >
-
+ 	 <section name="5. Database First, DataMap Second" anchor="map_from_db" >
 		<ol>
 		<li>Do steps 1 through 6 of the previous section to create project and a domain.</li>
 		<li>Click Tools->Reverse Engineer Database.
@@ -39,7 +37,6 @@
 		See previous section for more details on editing and saving the newly
 		created model, as well as creating data nodes.
 		</p>
-	</subsection>
     </section>
 </body>
 </document>

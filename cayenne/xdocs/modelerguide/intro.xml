@@ -1,17 +1,16 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
+<title>CayenneModeler Guide - Introduction</title>
 
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
 <navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/deploy.html</prev>
-	<next>/userguide/modeler/runmodeler.html</next>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/index.html</prev>
+	<next>/modelerguide/runmodeler.html</next>
 </navigator>
 <body>
-    <section name="6. CayenneModeler GUI Tool">
-        <subsection name="6.1 Introduction" anchor="intro">
+   <section name="1. Introduction" anchor="intro">
             <p>CayenneModeler is a Java GUI application that performs the
             following functions:
             <ul>
@@ -25,7 +24,6 @@
             	and nodes.</li>
             </ul>
             </p>
-        </subsection>
     </section>
 </body>
 </document>
