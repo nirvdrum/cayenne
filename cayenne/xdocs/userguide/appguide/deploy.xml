@@ -12,21 +12,33 @@
 <body>
      <section name="5. Writing Cayenne Applications">        
         <subsection name="5.9 Deployment" anchor="deploy">
-           <p>As described in <a href="project.html">Cayenne Project</a>
-           chapter, a Cayenne application would need access to <code>cayenne.xml</code>
-           file, data map file(s) and (optionally) datasource file(s). These files are
-           located and loaded by the application 
-           <a href="../design.html#config">Configuration object</a>. Depending on which
-           concrete subclass of Configuration is used, configuration files are located 
-           differently. Below is a few standard deployment scenarious. Cayenne users
-           may subclass Configuration to define other loading strategies.
+           <p>Cayenne application deployment is about configuring the application 
+           so that in runtime it could find a main project file (cayenne.xml) and 
+           associated resources, such as DataMaps and DataNode XML files.
            </p>
            
-           <subsection name="5.9.1 Standalone Applications" anchor="standalone">
+           <subsection name="5.9.1 Configuration" anchor="config">
+           <p>Central piece in Cayenne deployment is <a href=
+           "../../api/cayenne/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
+            class. It locates and loads all the mapping and configuration information required 
+            for Cayenne runtime. By default Configuration uses singleton model, i.e. normally 
+            there is only one instance of either Configuration (or its subclass) that exists 
+            in the application. This shared instance can be accessed via a static method like that:
+            </p>
+
+<source>import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.access.DataDomain;
+...           
+Configuration conf = Configuration.getSharedConfig();
+DataDomain domain = conf.getDomain();
+</source>
+        	</subsection>
+        
+           <subsection name="5.9.2 Standalone Applications" anchor="standalone">
                <p>In a standalone Java application, normally a <a href=
-               "../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a> 
+               "../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>
                 will be used to locate and load configuration files. This approach
-                does not require any special Java code. Shared configuration objects
+                does not require any additional steps. Shared configuration objects
                 can simply be obtained by calling <code>getSharedConfig</code>:</p>
                 
 <source>import org.objectstyle.cayenne.conf.Configuration;
@@ -58,11 +70,12 @@ Configuration conf = Configuration.getSharedConfig();
                datasource configuration files from the application distribution (jar file).
                A compiled application can be deployed as a jar file containing <code>cayenne.xml</code>
                and datamap files, without any datasource files.  This way a user wouldn't
-               need to rebuild a jar for each of target environments that has a different database server.
+               need to rebuild a jar for each of the target environments that has a 
+               different database server or user id.
                </p>
                
                <p>
-               Simple use case for this feature is when a Java project needs to be deployed
+               Most common example of this feature is when a Java project needs to be deployed
                in development, test, and production environments. All a deployer would need to
                do is to create datasource files in the home directory of each of the servers. After that
                the same jar file can be deployed on any of them without any changes. 
@@ -74,7 +87,7 @@ Configuration conf = Configuration.getSharedConfig();
 
            </subsection>
            
-           <subsection name="5.9.2 Web Applications" anchor="web">
+           <subsection name="5.9.3 Web Applications" anchor="web">
                <p>When deploying an application in a web container, it is still possible 
                to use the procedure described for the standalone applications above.
                But Cayenne provides a better way to do that. Suggested way is to use <a href=
@@ -168,7 +181,32 @@ DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
 </source>
                </subsection>
                
-               <subsection name="5.9.3 Using JNDI Example" anchor="jndi">
+			<subsection name="5.9.4 Customizing Configuration" anchor="custom">
+				<p>A user can create her own subclass of Configuration and use it instead. 
+				Custom subclasses are usually created to load configuration files from 
+				non-standard locations, to automatically configure Cayenne during 
+				certain events that happen in deployment containers, etc. Cayenne framework
+				provides a few implementations of Configuration discussed later in this chapter.
+				</p>
+
+				<p>To ensure that Cayenne uses configuration object of the right class, 
+				Configuration singleton must be initialized properly before any calls 
+				to Configuration are made: 
+            	</p>
+
+<source>import org.objectstyle.cayenne.conf.Configuration
+...
+String myConfigSubclass = "my.package.ConfigSubclass";
+Configuration.initSharedConfig(myConfigSubclass);
+</source>
+
+            	<p>After this code is executed any subsequent calls to "Configuration.getSharedConfig" 
+            	will return an instance of the custom class instead of DefaultConfiguration.
+            	</p>
+			</subsection>
+               
+               
+               <subsection name="5.9.5 Using JNDI Example" anchor="jndi">
                
                 <p>In many cases it is desirable to connect to the database
                 using a preconfigured DataSource accessible via JNDI. In this case,

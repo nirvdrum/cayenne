@@ -11,8 +11,7 @@
                 <li><a href="intro.html#about">1.1 About Cayenne</a></li>
                 <li><a href="intro.html#contrib">1.2 Contributors</a></li>
                 <li><a href="intro.html#license">1.3 License</a></li>
-            </ul></li>
-            
+            </ul></li>  
             
             <li><a href="install/index.html">2. Installation</a>
             <ul>
@@ -41,7 +40,6 @@
                 <li><a href="design/datasrc.html#connect">4.6 Cayenne DataSource</a></li>
                 <li><a href="design/crossdb.html#crossdb">4.7 Cross-Database Issues</a></li>
                 <li><a href="design/autopk.html#pk">4.8 Primary Key Generation</a></li>
-                <li><a href="design/config.html#config">4.9 Configuration</a></li>
             </ul></li>
             
             <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>

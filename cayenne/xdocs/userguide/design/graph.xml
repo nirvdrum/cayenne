@@ -11,21 +11,18 @@
             <p>After the mapping is done Cayenne uses it to create 
             an "object graph" on request from the application. Object graph is a set 
             of objects interconnected via relationships. Object graph is a useful abstraction 
-            when thinking about all the data objects in Cayenne application.</p>
-            
+            when thinking about all the data objects in Cayenne application. </p>
             <panel name="Note:">There is no "ObjectGraph" class in Cayenne - this is a 
-            pure logical concept. Other terms used for object graph are
-            "business objects layer", "persistent objects", etc.</panel>
+            pure logical concept transparent to the user. Other terms describing
+            the same concept as object graph are "business objects layer", 
+            "persistent objects", etc.</panel>
             
             <p>Object graph in Cayenne has the following major properties that make it useful:</p>
             <ul>
-            	<li><i>All operations on the object graph are controllable by the application.</i></li>
-            	
+            	<li><i>All operations on the object graph are controllable by the application.</i></li>            	
             	<li><i>Initial set of objects on the graph is accessible via a query interface.</i></li>
-            	
             	<li><i>Most objects related to the initial objects can be obtained via
             	simple method calls on initial objects.</i></li>
-            	
             	<li><i>Object identity and uniquing in a certain context.</i> 
             	Cayenne ensures that there will be no more than one object in any given 
             	context that corresponds to a given database row. For instance if an object is 
@@ -33,7 +30,6 @@
             	via a query interface for the same database row (think same primary key), only
             	one object will be created in Cayenne. For the later case an object will not be created,
             	but rather an already existing object will be reused.</li>
-            	
             	<li><i>Synchronization with the database.</i> Object graph
             		changes can be synchronized with the database in a single method call.
             		This greatly simplifies management of changes and solves transactional issues.

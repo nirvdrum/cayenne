@@ -11,9 +11,10 @@
 <body>
     <section name="5. Writing Cayenne Applications">            
             <subsection name="5.7 Saving Modified Objects" anchor="cayenne_save">
-            <p>Continuing the previous example, this section shows how to save changes made to
-            DataObjects. Lets do the following operations: double the price of the first
-            retrieved painting, add new painting that belongs to the same artist as the 
+            <p>Continuing the previous example, this section shows how to 
+            save changes made to DataObjects. Lets do the following operations: 
+            double the price of the first retrieved painting, add new painting 
+            that belongs to the same artist as the 
             painting fetched before, save all changes:</p>
             
 <source>
@@ -26,7 +27,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.Artist;
 ...
-
 // assume this exists and initialized
 DataContext ctxt;
 ...
@@ -36,24 +36,19 @@ SelectQuery q = new SelectQuery("Painting", e);
 List realArt = ctxt.performQuery(q);
 if(realArt.size() > 0) {
   Painting firstPainting = (Painting)realArt.get(0);
-  
   // double the price
   double oldPrice = firstPainting.getEstimatedPrice().doubleValue();
   firstPainting.setEstimatedPrice(new BigDecimal(oldPrice * 2.00));
-  
   // create new painting and register it with DataContext
   // "Painting" string is a name of ObjEntity in the DataMap
   Painting newPainting = (Painting)ctxt.createAndRegisterNewObject("Painting");
   newPainting.setTitle("Sunset as it is");
-  
   // get artist via relationship
   // "toArtist" is a relationship property name
   // that is being accessed via getter
   Artist artist = firstPainting.getToArtist();
-  
   // assign new painting to an artist
   artist.addToPaintingArray(newPinting);
-  
   // save all the changes we've made so far
   ctxt.commitChanges();
 }
