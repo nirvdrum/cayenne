@@ -89,7 +89,7 @@ public class EventManager extends Object {
     public static final int DEFAULT_DISPATCH_THREAD_COUNT = 5;
 
     // keeps weak references to subjects
-	protected Map subjects;
+    protected Map subjects;
     protected List eventQueue;
 
     /**
@@ -292,12 +292,35 @@ public class EventManager extends Object {
 
     /**
      * Sends an event to all registered objects about a particular subject.
+     * Event is sent asynchronously. Event is queued by EventManager, and then
+     * this method returns. Later an event dispatch thread wakes up and dispatches 
+     * the event.
      * 
      * @param event the event to be posted to the observers
      * @param subject the subject about which observers will be notified
      * @throws IllegalArgumentException if event or subject are null
      */
     public void postEvent(EventObject event, EventSubject subject) {
+		postEvent(event, subject, false);
+    }
+
+	/**
+	 * Sends an event to all registered objects about a particular subject.
+	 * <code>dispatchImmediately</code> argument 
+	 * 
+	 * @param event the event to be posted to the observers
+	 * @param subject the subject about which observers will be notified
+	 * @param dispatchImmediately control whether the even dispatched from
+	 * this method, blocking this thread until all listeners have processed 
+	 * the event, or should be queued for asynchronous notification.
+	 * 
+	 * @throws IllegalArgumentException if event or subject are null
+	 */
+    public void postEvent(
+        EventObject event,
+        EventSubject subject,
+        boolean dispatchImmediately) {
+
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -308,10 +331,16 @@ public class EventManager extends Object {
 
         Dispatch dispatch = new Dispatch(event, subject);
 
-        // add dispatch to the queue
-        synchronized (eventQueue) {
-            eventQueue.add(dispatch);
-            eventQueue.notifyAll();
+        if (dispatchImmediately) {
+            dispatchEvent(dispatch);
+        }
+        else {
+
+            // add dispatch to the queue and return
+            synchronized (eventQueue) {
+                eventQueue.add(dispatch);
+                eventQueue.notifyAll();
+            }
         }
     }
 

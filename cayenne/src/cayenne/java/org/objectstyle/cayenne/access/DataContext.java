@@ -1439,7 +1439,7 @@ public class DataContext implements QueryEngine, Serializable {
         if (this.transactionEventsEnabled) {
             EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, DataContext.WILL_COMMIT);
+            eventMgr.postEvent(commitChangesEvent, DataContext.WILL_COMMIT, true);
         }
     }
 
@@ -1448,7 +1448,7 @@ public class DataContext implements QueryEngine, Serializable {
         if ((this.transactionEventsEnabled)) {
             EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, DataContext.DID_ROLLBACK);
+            eventMgr.postEvent(commitChangesEvent, DataContext.DID_ROLLBACK, true);
         }
     }
 
@@ -1457,7 +1457,7 @@ public class DataContext implements QueryEngine, Serializable {
         if ((this.transactionEventsEnabled)) {
             EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
-            eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
+            eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT, true);
         }
     }
 

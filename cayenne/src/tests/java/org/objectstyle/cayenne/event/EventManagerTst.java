@@ -63,6 +63,7 @@ import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
 
 public class EventManagerTst extends CayenneTestCase implements EventListener {
     private static final Logger log = Logger.getLogger(EventManagerTst.class);
@@ -218,9 +219,9 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
 
         _eventManager.postEvent(new CayenneEvent(this), subject);
 
-		assertReceivedEvents(1, listener1);
-		assertReceivedEvents(1, listener2);
-		assertReceivedEventsForClass(2);
+        assertReceivedEvents(1, listener1);
+        assertReceivedEvents(1, listener2);
+        assertReceivedEventsForClass(2);
     }
 
     public void testSuccessfulNotificationIndividualSender() throws Exception {
@@ -233,8 +234,8 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
             this);
         _eventManager.postEvent(new CayenneEvent(this), subject);
 
-		assertReceivedEvents(1, this);
-		assertReceivedEventsForClass(1);
+        assertReceivedEvents(1, this);
+        assertReceivedEventsForClass(1);
     }
 
     public void testSuccessfulNotificationIndividualSenderTwice() throws Exception {
@@ -248,8 +249,8 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
             this);
         _eventManager.postEvent(new CayenneEvent(this), subject);
 
-		assertReceivedEvents(2, this);
-		assertReceivedEventsForClass(2);
+        assertReceivedEvents(2, this);
+        assertReceivedEventsForClass(2);
     }
 
     public void testSuccessfulNotificationBothDefaultAndIndividualSender()
@@ -272,9 +273,9 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
 
         _eventManager.postEvent(new CayenneEvent(this), subject);
 
-		assertReceivedEvents(1, listener1);
-		assertReceivedEvents(1, listener2);
-		assertReceivedEventsForClass(2);
+        assertReceivedEvents(1, listener1);
+        assertReceivedEvents(1, listener2);
+        assertReceivedEventsForClass(2);
     }
 
     public void testRemoveOnEmptyList() {
@@ -385,55 +386,28 @@ public class EventManagerTst extends CayenneTestCase implements EventListener {
     }
 
     // allows just enough time for the event threads to run
-    private static void assertReceivedEvents(int expected, EventManagerTst listener)
+    private static void assertReceivedEvents(
+        final int expected,
+        final EventManagerTst listener)
         throws Exception {
 
-        // if expected 0 events, lets wait some time just in case,
-        // since we can have a false positive
-        if (expected == 0) {
-            Thread.sleep(500);
-        }
-
-        // wait 5 seconds at the most (10 times 0.5 sec.)
-        for (int i = 0; i < 10; i++) {
-
-            try {
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
                 assertEquals(expected, listener._numberOfReceivedEvents);
-                return;
             }
-            catch (Throwable th) {
-                // wait some more
-                Thread.sleep(500);
-            }
-        }
-
-        // if it throws, it throws...
-        assertEquals(expected, listener._numberOfReceivedEvents);
+        };
+        helper.assertWithTimeout(5000);
     }
 
     // allows just enough time for the event threads to run
-    private static void assertReceivedEventsForClass(int expected) throws Exception {
-
-        // if expected 0 events, lets wait some time just in case,
-        // since we can have a false positive
-        if (expected == 0) {
-            Thread.sleep(500);
-        }
-
-        // wait 5 seconds at the most (10 times 0.5 sec.)
-        for (int i = 0; i < 10; i++) {
-            try {
+    private static void assertReceivedEventsForClass(final int expected)
+        throws Exception {
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
                 assertEquals(expected, _numberOfReceivedEventsForClass);
-				return;
             }
-            catch (Throwable th) {
-                // wait some more
-                Thread.sleep(500);
-            }
-        }
-
-        // if it throws, it throws...
-        assertEquals(expected, _numberOfReceivedEventsForClass);
+        };
+        helper.assertWithTimeout(5000);
     }
 }
 

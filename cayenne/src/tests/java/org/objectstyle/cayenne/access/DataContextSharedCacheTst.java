@@ -48,9 +48,9 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
+import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -80,18 +80,10 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         try {
             // prepare a second context
-            logObj.warn(
-                "initial domain BEFORE: "
-                    + Configuration.getSharedConfiguration().getDomain("domain"));
-            logObj.warn("expected domain BEFORE: " + getDomain());
             DataContext altContext = mirrorDataContext(context);
-            Artist altArtist =
+            final Artist altArtist =
                 (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
             assertNotNull(altArtist);
-
-            logObj.warn("initial domain: " + context.getParent());
-            logObj.warn("Cloned domain: " + altContext.getParent());
-            logObj.warn("expected domain: " + getDomain());
             assertFalse(altArtist == artist);
             assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
@@ -99,7 +91,13 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
             artist.setArtistName("version2");
             context.commitChanges();
 
-            assertEquals(artist.getArtistName(), altArtist.getArtistName());
+            ThreadedTestHelper helper = new ThreadedTestHelper() {
+                protected void assertResult() throws Exception {
+                    assertEquals(artist.getArtistName(), altArtist.getArtistName());
+                }
+            };
+            helper.assertWithTimeout(5000);
+
         }
         finally {
             // reset shared settings to default
