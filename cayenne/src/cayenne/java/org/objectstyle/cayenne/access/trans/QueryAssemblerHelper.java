@@ -143,11 +143,10 @@ public abstract class QueryAssemblerHelper {
             } else {
                 ObjAttribute objAttr = (ObjAttribute) pathComp;
                 if (lastRelationship != null) {
+                    List lastDbRelList = lastRelationship.getDbRelationships();
                     DbRelationship lastDbRel =
-                        (DbRelationship) lastRelationship
-                            .getDbRelationships()
-                            .get(
-                            0);
+                        (DbRelationship) lastDbRelList.get(
+                            lastDbRelList.size() - 1);
                     processColumn(buf, objAttr.getDbAttribute(), lastDbRel);
                 } else {
                     processColumn(buf, objAttr.getDbAttribute());
@@ -343,11 +342,21 @@ public abstract class QueryAssemblerHelper {
         StringBuffer buf,
         ObjRelationship rel) {
 
-        List dbRels = rel.getDbRelationships();
+        Iterator dbRels = rel.getDbRelationships().iterator();
 
-        // get last DbRelationship on the list
-        DbRelationship dbRel = (DbRelationship) dbRels.get(dbRels.size() - 1);
-        processRelTermination(buf, dbRel);
+        // scan DbRelationships
+        while (dbRels.hasNext()) {
+            DbRelationship dbRel = (DbRelationship) dbRels.next();
+
+            // if this is a last relationship in the path,
+            // it needs special handling
+            if (!dbRels.hasNext()) {
+                processRelTermination(buf, dbRel);
+            } else {
+                // find and add joins ....
+                queryAssembler.dbRelationshipAdded(dbRel);
+            }
+        }
     }
 
     /** 

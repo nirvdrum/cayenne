@@ -95,7 +95,7 @@ public abstract class QueryAssembler extends QueryTranslator {
      * <code>createStatement</code>. Usually there is no need
      * to invoke it explicitly. 
      */
-    public abstract String createSqlString() throws java.lang.Exception;
+    public abstract String createSqlString() throws Exception;
 
     public String aliasForTable(DbEntity ent, DbRelationship rel) {
         return aliasForTable(ent); //Default implementation

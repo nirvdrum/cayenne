@@ -471,7 +471,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                     (tableList.get(i) != null)
                         ? ((DbEntity) tableList.get(i)).getName()
                         : "<null entity>";
-                msg.append("\n").append(aliasList.get(0)).append(
+                msg.append("\n").append(aliasList.get(i)).append(
                     " => ").append(
                     dbeName);
             }

@@ -27,3 +27,5 @@ and deletes were failing. Bug report 730396:
   http://sourceforge.net/tracker/?func=detail&aid=730396&group_id=48132&atid=452068
 
 4. Added the ability to select generated objects superclass from the modeler.
+
+5. Fixed a SelectQuery translator bug that generated incorrect SQL when matching on flattened relationships.
