@@ -96,7 +96,6 @@ public class ProcedureDetailView
         // init listeners
         eventController.addProcedureDisplayListener(this);
         eventController.addProcedureParameterDisplayListener(this);
-
         this.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 // find source view
@@ -106,19 +105,6 @@ public class ProcedureDetailView
                 }
 
                 ((ExistingSelectionProcessor) selected).processExistingSelection();
-            }
-        });
-
-        this.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                // find source view
-                Component selected = ProcedureDetailView.this.getSelectedComponent();
-                while (selected instanceof JScrollPane) {
-                    selected = ((JScrollPane) selected).getViewport().getView();
-                }
-
-                ExistingSelectionProcessor proc = (ExistingSelectionProcessor) selected;
-                proc.processExistingSelection();
             }
         });
     }
@@ -138,14 +124,12 @@ public class ProcedureDetailView
     }
 
     public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
-        if (e.getProcedure() == null)
+        if (e.getProcedureParameter() == null)
             return;
 
-        // update relationship selection
         ProcedureParameter parameter = e.getProcedureParameter();
         procedureParameterPanel.selectParameter(parameter);
-
-        // Display attribute tab
-        this.setSelectedIndex(1);
+        setSelectedIndex(1);
     }
+
 }
