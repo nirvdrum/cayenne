@@ -95,7 +95,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		super();
 		mediator = data_map_editor;
 		setViewportView(browseTree);
-		//browseTree.setCellRenderer(new BrowseViewRenderer());
+		browseTree.setCellRenderer(new BrowseViewRenderer());
 		load();
 		browseTree.addTreeSelectionListener(this);		
 		mediator.addDomainListener(this);

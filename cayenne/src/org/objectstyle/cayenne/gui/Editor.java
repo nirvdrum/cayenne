@@ -548,7 +548,8 @@ implements ActionListener
 
 
 class EditorView extends JPanel 
-implements ObjEntityDisplayListener, DbEntityDisplayListener {
+implements ObjEntityDisplayListener, DbEntityDisplayListener
+, DomainDisplayListener {
     Mediator mediator;
 
     private static final int INIT_DIVIDER_LOCATION = 170;
@@ -565,7 +566,7 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener {
     BrowseView treePanel;
     JPanel detailPanel = new JPanel();
     JPanel emptyPanel = new JPanel();
-    JPanel domainView = new JPanel();
+    DomainDetailView domainView;
     JPanel nodeView = new JPanel();
     JPanel dataMapView = new JPanel();
     ObjDetailView objDetailView;
@@ -587,14 +588,24 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener {
 
 		JPanel temp = new JPanel();
 		detailPanel.add(temp, EMPTY_VIEW);
+		domainView = new DomainDetailView(temp_mediator);
+		detailPanel.add(domainView, DOMAIN_VIEW);
+		
         objDetailView = new ObjDetailView(temp_mediator);
         detailPanel.add(objDetailView, OBJ_VIEW);
         dbDetailView = new DbDetailView(temp_mediator);
         detailPanel.add(dbDetailView, DB_VIEW);
         
+        mediator.addDomainDisplayListener(this);
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityDisplayListener(this);
     }
+
+   	public void currentDomainChanged(DomainDisplayEvent e)
+   	{
+   		detailLayout.show(detailPanel, DOMAIN_VIEW);
+   	}
+
     
    	public void currentObjEntityChanged(EntityDisplayEvent e)
    	{
