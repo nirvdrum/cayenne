@@ -79,7 +79,11 @@ import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SPanel;
 
 /**
- * A controller for CacheSyncConfigDialog and its subviews.
+ * A controller for CacheSyncConfigDialog and its subviews. Builds a model out 
+ * of a DataDomain properties map, and on save updates DataDomain properties with
+ * configuration changes made by the user. This controller manages one main dialog
+ * view, and its subviews organized using CardLayout. Each subview as well as the main dialog
+ * have their own independent models.
  * 
  * @author Andrei Adamchik
  */
