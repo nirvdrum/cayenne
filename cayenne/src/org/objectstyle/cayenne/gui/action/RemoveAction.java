@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.map.*;
 
-
 /** 
  * Removes currently selected object from the project. This can be 
  * Domain, DataNode, Entity, Attribute or Relationship.
@@ -77,16 +76,16 @@ public class RemoveAction extends CayenneAction {
 	public RemoveAction(Mediator mediator) {
 		super(mediator);
 	}
-	
+
 	public void performAction(ActionEvent e) {
 		remove();
 	}
-	
+
 	private void remove() {
-		if (mediator.getCurrentDbRelationship() != null)  {
+		if (mediator.getCurrentDbRelationship() != null) {
 			logObj.fine("current Db Rel is not null");
 		}
-		
+
 		Object src = Editor.getFrame();
 		if (mediator.getCurrentObjAttribute() != null) {
 			removeObjAttribute();
@@ -97,14 +96,14 @@ public class RemoveAction extends CayenneAction {
 		} else if (mediator.getCurrentDbRelationship() != null) {
 			removeDbRelationship();
 		} else if (mediator.getCurrentObjEntity() != null) {
-			mediator.removeObjEntity(src, mediator.getCurrentObjEntity());
+			removeObjEntity();
 		} else if (mediator.getCurrentDbEntity() != null) {
-			mediator.removeDbEntity(src, mediator.getCurrentDbEntity());
+			removeDbEntity();
 		} else if (mediator.getCurrentDataMap() != null) {
 			// In context of Data node just remove from Data Node
 			if (mediator.getCurrentDataNode() != null) {
 				removeDataMapFromDataNode();
-			// Not under Data Node? Remove completely
+				// Not under Data Node? Remove completely
 			} else {
 				mediator.removeDataMap(src, mediator.getCurrentDataMap());
 			}
@@ -114,69 +113,123 @@ public class RemoveAction extends CayenneAction {
 			mediator.removeDomain(src, mediator.getCurrentDataDomain());
 		}
 	}
-	
-	private void removeObjAttribute(){
+
+	/** 
+	 * Removes current DbEntity from its DataMap and fires 
+	 * "remove" EntityEvent.
+	 */
+	public void removeDbEntity() {
+		DbEntity ent = mediator.getCurrentDbEntity();
+		DataMap map = mediator.getCurrentDataMap();
+		map.deleteDbEntity(ent.getName());
+		mediator.fireDbEntityEvent(
+			new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+	}
+
+	/** 
+	 * Removes current object entity from its DataMap. 
+	 */
+	protected void removeObjEntity() {
+		ObjEntity ent = mediator.getCurrentObjEntity();
+		DataMap map = mediator.getCurrentDataMap();
+		map.deleteObjEntity(ent.getName());
+		mediator.fireObjEntityEvent(
+			new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+	}
+
+	protected void removeObjAttribute() {
 		ObjEntity entity = mediator.getCurrentObjEntity();
 		ObjAttribute attrib = mediator.getCurrentObjAttribute();
 		entity.removeAttribute(attrib.getName());
 		AttributeEvent e;
-		e = new AttributeEvent(Editor.getFrame(), attrib, entity
-							 , AttributeEvent.REMOVE);
+		e =
+			new AttributeEvent(
+				Editor.getFrame(),
+				attrib,
+				entity,
+				AttributeEvent.REMOVE);
 		mediator.fireObjAttributeEvent(e);
 		AttributeDisplayEvent ev;
-		ev = new AttributeDisplayEvent(Editor.getFrame(), null
-									, entity, mediator.getCurrentDataMap()
-									, mediator.getCurrentDataDomain());
+		ev =
+			new AttributeDisplayEvent(
+				Editor.getFrame(),
+				null,
+				entity,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireObjAttributeDisplayEvent(ev);
 	}
-	
-	private void removeDbAttribute(){
+
+	protected void removeDbAttribute() {
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbAttribute attrib = mediator.getCurrentDbAttribute();
 		entity.removeAttribute(attrib.getName());
 		AttributeEvent e;
-		e = new AttributeEvent(Editor.getFrame(), attrib, entity
-							 , AttributeEvent.REMOVE);
+		e =
+			new AttributeEvent(
+				Editor.getFrame(),
+				attrib,
+				entity,
+				AttributeEvent.REMOVE);
 		mediator.fireDbAttributeEvent(e);
 		AttributeDisplayEvent ev;
-		ev = new AttributeDisplayEvent(Editor.getFrame(), null
-									, entity, mediator.getCurrentDataMap()
-									, mediator.getCurrentDataDomain());
+		ev =
+			new AttributeDisplayEvent(
+				Editor.getFrame(),
+				null,
+				entity,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireDbAttributeDisplayEvent(ev);
 	}
-	
 
-	private void removeObjRelationship(){
+	protected void removeObjRelationship() {
 		ObjEntity entity = mediator.getCurrentObjEntity();
 		ObjRelationship rel = mediator.getCurrentObjRelationship();
 		entity.removeRelationship(rel.getName());
 		RelationshipEvent e;
-		e = new RelationshipEvent(Editor.getFrame(), rel, entity
-								, RelationshipEvent.REMOVE);
+		e =
+			new RelationshipEvent(
+				Editor.getFrame(),
+				rel,
+				entity,
+				RelationshipEvent.REMOVE);
 		mediator.fireObjRelationshipEvent(e);
 		RelationshipDisplayEvent ev;
-		ev = new RelationshipDisplayEvent(Editor.getFrame(), null
-									, entity, mediator.getCurrentDataMap()
-									, mediator.getCurrentDataDomain());
+		ev =
+			new RelationshipDisplayEvent(
+				Editor.getFrame(),
+				null,
+				entity,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireObjRelationshipDisplayEvent(ev);
 	}
-	
-	private void removeDbRelationship(){
+
+	protected void removeDbRelationship() {
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbRelationship rel = mediator.getCurrentDbRelationship();
 		entity.removeRelationship(rel.getName());
 		RelationshipEvent e;
-		e = new RelationshipEvent(Editor.getFrame(), rel, entity
-								, RelationshipEvent.REMOVE);
+		e =
+			new RelationshipEvent(
+				Editor.getFrame(),
+				rel,
+				entity,
+				RelationshipEvent.REMOVE);
 		mediator.fireDbRelationshipEvent(e);
 		RelationshipDisplayEvent ev;
-		ev = new RelationshipDisplayEvent(Editor.getFrame(), null
-									, entity, mediator.getCurrentDataMap()
-									, mediator.getCurrentDataDomain());
+		ev =
+			new RelationshipDisplayEvent(
+				Editor.getFrame(),
+				null,
+				entity,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireDbRelationshipDisplayEvent(ev);
 	}
-	
-	private void removeDataMapFromDataNode(){
+
+	protected void removeDataMapFromDataNode() {
 		DataNode node = mediator.getCurrentDataNode();
 		DataMap map = mediator.getCurrentDataMap();
 		// Get existing data maps
@@ -184,7 +237,7 @@ public class RemoveAction extends CayenneAction {
 		DataMap[] arr = new DataMap[maps.length - 1];
 		int j = 0;
 		for (int i = 0; i < maps.length; i++) {
-			DataMap temp = (DataMap)maps[i];
+			DataMap temp = (DataMap) maps[i];
 			if (temp == map) {
 				continue;
 			}
@@ -192,7 +245,7 @@ public class RemoveAction extends CayenneAction {
 			j++;
 		}
 		node.setDataMaps(arr);
-		
+
 		// Force reloading of the data node in the browse view
 		mediator.fireDataNodeEvent(new DataNodeEvent(Editor.getFrame(), node));
 	}

@@ -473,8 +473,8 @@ public class Mediator
 				default:
 					throw new IllegalArgumentException(
 								"Invalid EntityEvent type: " + e.getId());
-			}// End switch
-		}// End for()
+			}
+		}
 	}
 	
 	/** Informs all listeners of the EntityEvent. 
@@ -719,71 +719,6 @@ public class Mediator
 		
 	}
 	
-
-
-	/** Clean remove of the ObjEntity from map and all views. 
-	  * Removes entity from the map. 
-	  * If entity is current entity and last entity in the map, 
-	  * hide the detail views by sending <code>null</code> as current entity.
-	  * Otherwise select another current entity. */
-	public void removeObjEntity(Object src, ObjEntity entity) {
-		java.util.List list = currentMap.getObjEntitiesAsList();
-		int index = list.indexOf(entity);
-		currentMap.deleteObjEntity(entity.getName());
-		if (entity != currentObjEntity)
-			return;
-		// If no more entities (1 - the one that was deleted),
-		// hide detail view by firing event with no entity
-		if (list.size() <= 1)
-			fireObjEntityDisplayEvent(new EntityDisplayEvent(this
-													, null
-													, currentMap
-													, currentNode
-													, currentDomain));
-		else {
-			ObjEntity temp = (ObjEntity)list.get(index < list.size() - 1 
-												? index 
-												: index-1);
-			fireObjEntityDisplayEvent(new EntityDisplayEvent(this
-													, temp
-													, currentMap
-													, currentNode
-													, currentDomain));
-		}
-		fireObjEntityEvent(new EntityEvent(src, entity, EntityEvent.REMOVE));
-	}
-
-	/** Clean remove of the DbEntity from map and all views. 
-	  * Removes entity from the map. 
-	  * If entity is current entity and last entity in the map, 
-	  * hide the detail views by sending <code>null</code> as current entity.
-	  * Otherwise select another current entity. */
-	public void removeDbEntity(Object src, DbEntity entity) {
-		java.util.List list = currentMap.getDbEntitiesAsList();
-		int index = list.indexOf(entity);
-		currentMap.deleteDbEntity(entity.getName());
-		if (entity != currentDbEntity)
-			return;
-		// If no more entities (1 - the one that was deleted),
-		// hide detail view by firing event with no entity
-		if (list.size() <= 1)
-			fireDbEntityDisplayEvent(new EntityDisplayEvent(src
-													, null
-													, currentMap
-													, currentNode
-													, currentDomain));
-		else {
-			DbEntity temp = (DbEntity)list.get(index < list.size() - 1 
-												? index 
-												: index-1);
-			fireDbEntityDisplayEvent(new EntityDisplayEvent(src
-													, temp
-													, currentMap
-													, currentNode
-													, currentDomain));
-		}
-		fireDbEntityEvent(new EntityEvent(src, entity, EntityEvent.REMOVE));
-	}	
 	
 	public void removeDataMap(Object src, DataMap map) {
 		currentDomain.removeMap(map.getName());

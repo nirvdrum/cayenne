@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,12 +52,12 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+package org.objectstyle.cayenne.gui.event;
 
-import java.util.*;
+import java.util.EventListener;
 
-public interface DataNodeDisplayListener extends EventListener
-{
+public interface DataNodeDisplayListener extends EventListener {
 	public void currentDataNodeChanged(DataNodeDisplayEvent e);
 }

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.gui;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.awt.Component;
 import java.net.URL;
@@ -72,40 +72,49 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.map.*;
 
+/** 
+ * Tree of domains, data maps, data nodes (sources) and entities. 
+ * When item of the tree is selected, detailed view for that 
+ * item comes up. 
+ * 
+ *  @author Michael Misha Shengaout. 
+ */
+public class BrowseView
+	extends JScrollPane
+	implements
+		TreeSelectionListener,
+		DomainDisplayListener,
+		DomainListener,
+		DataMapDisplayListener,
+		DataMapListener,
+		DataNodeDisplayListener,
+		DataNodeListener,
+		ObjEntityListener,
+		ObjEntityDisplayListener,
+		DbEntityListener,
+		DbEntityDisplayListener {
+	static Logger logObj = Logger.getLogger(BrowseView.class.getName());
 
-/** Tree of domains, data maps, data nodes (sources) and entities. 
-  * When item of the tree is selected, detailed view for that 
-  * item comes up. 
-  *  @author Michael Misha Shengaout. */
-public class BrowseView extends JScrollPane 
-implements TreeSelectionListener, DomainDisplayListener, DomainListener
-, DataMapDisplayListener, DataMapListener, DataNodeDisplayListener, DataNodeListener
-, ObjEntityListener, ObjEntityDisplayListener
-, DbEntityListener, DbEntityDisplayListener
-{
-   static Logger logObj = Logger.getLogger(BrowseView.class.getName());
- 
-	
 	private static final int DOMAIN_NODE = 1;
 	private static final int NODE_NODE = 2;
 	private static final int MAP_NODE = 3;
 	private static final int OBJ_ENTITY_NODE = 4;
 	private static final int DB_ENTITY_NODE = 5;
-	
+
 	protected Mediator mediator;
-  	protected JTree	browseTree = new JTree();
+	protected JTree browseTree = new JTree();
 	protected DefaultMutableTreeNode rootNode;
 	protected DefaultMutableTreeNode currentNode;
-	
+
 	protected DefaultTreeModel model;
-	
+
 	public BrowseView(Mediator data_map_editor) {
 		super();
 		mediator = data_map_editor;
 		setViewportView(browseTree);
 		browseTree.setCellRenderer(new BrowseViewRenderer());
 		load();
-		browseTree.addTreeSelectionListener(this);		
+		browseTree.addTreeSelectionListener(this);
 		mediator.addDomainListener(this);
 		mediator.addDomainDisplayListener(this);
 		mediator.addDataNodeListener(this);
@@ -130,68 +139,71 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 			DefaultMutableTreeNode domain_ele;
 			domain_ele = loadDomain(temp_domains[i]);
 			rootNode.add(domain_ele);
-		}// End for(data domains)
+		} // End for(data domains)
 
 		// Put models into trees.
 		browseTree.setModel(model);
 		browseTree.setRootVisible(false);
 		// Set selection policy (one at a time) and add listeners
 		browseTree.getSelectionModel().setSelectionMode(
-									TreeSelectionModel.SINGLE_TREE_SELECTION);
+			TreeSelectionModel.SINGLE_TREE_SELECTION);
 		Enumeration level = rootNode.children();
 		if (null == level)
 			return;
 		while (level.hasMoreElements()) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)level.nextElement();
+			DefaultMutableTreeNode node =
+				(DefaultMutableTreeNode) level.nextElement();
 			TreePath path = new TreePath(node.getPath());
 			browseTree.expandPath(path);
-		}// End level
+		} // End level
 	}
-	
-	private DefaultMutableTreeNode loadDomain(DataDomain temp_domain)  {
+
+	private DefaultMutableTreeNode loadDomain(DataDomain temp_domain) {
 		DefaultMutableTreeNode domain_ele;
-		domain_ele = new DefaultMutableTreeNode(
-							new DataDomainWrapper(temp_domain), true);
+		domain_ele =
+			new DefaultMutableTreeNode(
+				new DataDomainWrapper(temp_domain),
+				true);
 		List map_list = temp_domain.getMapList();
 		Iterator map_iter = map_list.iterator();
-		while(map_iter.hasNext()) {
+		while (map_iter.hasNext()) {
 			DefaultMutableTreeNode map_ele;
-			map_ele = loadMap((DataMap)map_iter.next());
+			map_ele = loadMap((DataMap) map_iter.next());
 			domain_ele.add(map_ele);
-		}// End maps
+		} // End maps
 		DataNode[] nodes = temp_domain.getDataNodes();
 		for (int node_count = 0; node_count < nodes.length; node_count++) {
 			DefaultMutableTreeNode node_ele = loadNode(nodes[node_count]);
 			domain_ele.add(node_ele);
-		}// End for(data nodes)
+		} // End for(data nodes)
 		return domain_ele;
 	}
-	
+
 	private DefaultMutableTreeNode loadMap(DataMap map) {
 		DefaultMutableTreeNode map_ele;
 		DataMapWrapper map_wrap = new DataMapWrapper(map);
 		map_ele = new DefaultMutableTreeNode(map_wrap, true);
 		List obj_entities = map.getObjEntitiesAsList();
 		Iterator obj_iter = obj_entities.iterator();
-		while(obj_iter.hasNext()) {
-			Entity entity = (Entity)obj_iter.next();
+		while (obj_iter.hasNext()) {
+			Entity entity = (Entity) obj_iter.next();
 			EntityWrapper obj_entity_wrap = new EntityWrapper(entity);
 			DefaultMutableTreeNode obj_entity_ele;
 			obj_entity_ele = new DefaultMutableTreeNode(obj_entity_wrap, false);
 			map_ele.add(obj_entity_ele);
-		}// End obj entities
+		} // End obj entities
 		List db_entities = map.getDbEntitiesAsList();
 		Iterator db_iter = db_entities.iterator();
-		while(db_iter.hasNext()) {
-			Entity entity = (Entity)db_iter.next();
+		while (db_iter.hasNext()) {
+			Entity entity = (Entity) db_iter.next();
 			EntityWrapper db_entity_wrap = new EntityWrapper(entity);
 			DefaultMutableTreeNode db_entity_ele;
 			db_entity_ele = new DefaultMutableTreeNode(db_entity_wrap, false);
 			map_ele.add(db_entity_ele);
-		}// End db entities
+		} // End db entities
 		return map_ele;
 	}
-	
+
 	private DefaultMutableTreeNode loadNode(DataNode node) {
 		DefaultMutableTreeNode node_ele;
 		DataNodeWrapper node_wrap = new DataNodeWrapper(node);
@@ -200,10 +212,10 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		for (int j = 0; j < maps.length; j++) {
 			DefaultMutableTreeNode map_ele = loadMap(maps[j]);
 			node_ele.add(map_ele);
-		}// End for(maps)
+		} // End for(maps)
 		return node_ele;
 	}
-	
+
 	public void currentDomainChanged(DomainDisplayEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -212,7 +224,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		if (null == temp)
 			return;
 		showNode(temp);
-		
+
 	}
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
 		if (e.getSource() == this || e.isDataNodeChanged() == false)
@@ -233,24 +245,26 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		showNode(temp);
 	}
 
-	public void currentObjEntityChanged(EntityDisplayEvent e){
-		currentEntityChanged(e);
-	}
-	
-	public void currentDbEntityChanged(EntityDisplayEvent e){
+	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		currentEntityChanged(e);
 	}
 
-	private void currentEntityChanged(EntityDisplayEvent e) {
-		if (e.getSource() == this || e.isEntityChanged() == false)
-			return;
-		DefaultMutableTreeNode temp;
-		temp = getEntityNode(e.getDomain(), e.getDataMap(), e.getEntity());
-		if (null == temp)
-			return;
-		showNode(temp);
+	public void currentDbEntityChanged(EntityDisplayEvent e) {
+		currentEntityChanged(e);
 	}
-	
+
+	protected void currentEntityChanged(EntityDisplayEvent e) {
+		if (e.getSource() == this || !e.isEntityChanged()) {
+			return;
+		}
+		
+		DefaultMutableTreeNode treeNode = getEntityNode(e.getDomain(), e.getDataMap(), e.getEntity());
+		if (treeNode == null) {
+			return;
+		}
+		showNode(treeNode);
+	}
+
 	public void domainChanged(DomainEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -259,6 +273,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		if (null != node)
 			model.nodeChanged(node);
 	}
+	
 	public void domainAdded(DomainEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -266,6 +281,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		node = loadDomain(e.getDomain());
 		model.insertNodeInto(node, rootNode, rootNode.getChildCount());
 	}
+	
 	public void domainRemoved(DomainEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -274,11 +290,13 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		if (null != node)
 			model.removeNodeFromParent(node);
 	}
+	
 	public void dataNodeChanged(DataNodeEvent e) {
 		if (e.getSource() == this)
 			return;
 		DefaultMutableTreeNode node;
-		node = getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
+		node =
+			getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
 		if (null != node) {
 			model.nodeChanged(node);
 			DataMap[] maps = e.getDataNode().getDataMaps();
@@ -290,28 +308,32 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 					boolean found = false;
 					for (int j = 0; j < node.getChildCount(); j++) {
 						DefaultMutableTreeNode child;
-						child = (DefaultMutableTreeNode)node.getChildAt(j);
+						child = (DefaultMutableTreeNode) node.getChildAt(j);
 						DataMapWrapper wrap;
-						wrap = (DataMapWrapper)child.getUserObject();
+						wrap = (DataMapWrapper) child.getUserObject();
 						if (maps[i] == wrap.getDataMap()) {
 							found = true;
 							break;
 						}
-					}// End for(j)
+					} // End for(j)
 					if (false == found) {
 						DefaultMutableTreeNode map_ele = loadMap(maps[i]);
-						model.insertNodeInto(map_ele, node, node.getChildCount());
-						logObj.fine("Added map " + maps[i].getName() + " to node");
+						model.insertNodeInto(
+							map_ele,
+							node,
+							node.getChildCount());
+						logObj.fine(
+							"Added map " + maps[i].getName() + " to node");
 						break;
 					}
-				}// End for(i)
-			} else if (maps.length < node.getChildCount()){
+				} // End for(i)
+			} else if (maps.length < node.getChildCount()) {
 				for (int j = 0; j < node.getChildCount(); j++) {
 					boolean found = false;
 					DefaultMutableTreeNode child;
-					child = (DefaultMutableTreeNode)node.getChildAt(j);
+					child = (DefaultMutableTreeNode) node.getChildAt(j);
 					DataMapWrapper wrap;
-					wrap = (DataMapWrapper)child.getUserObject();
+					wrap = (DataMapWrapper) child.getUserObject();
 					for (int i = 0; i < maps.length; i++) {
 						if (maps[i] == wrap.getDataMap()) {
 							found = true;
@@ -319,14 +341,15 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 						}
 					}
 					if (!found) {
-						logObj.fine("About to remove map "+ wrap + " from node");
+						logObj.fine(
+							"About to remove map " + wrap + " from node");
 						model.removeNodeFromParent(child);
 						break;
 					}
-				}// End for(j)
+				} // End for(j)
 			}
-			
-		}// End if node found
+
+		} // End if node found
 	}
 	public void dataNodeAdded(DataNodeEvent e) {
 		if (e.getSource() == this)
@@ -343,11 +366,12 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		if (e.getSource() == this)
 			return;
 		DefaultMutableTreeNode node;
-		node = getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
+		node =
+			getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
 		if (null != node)
 			model.removeNodeFromParent(node);
 	}
-	
+
 	public void dataMapChanged(DataMapEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -356,7 +380,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		if (null != node)
 			model.nodeChanged(node);
 	}
-	
+
 	public void dataMapAdded(DataMapEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -384,32 +408,38 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 			for (int j = 0; j < maps.length; j++) {
 				if (maps[j] == map) {
 					node = getMapNode(domain, nodes[i], map);
-					if (null != node) 
+					if (null != node)
 						model.removeNodeFromParent(node);
-				}// End if found the map under node
-			}// End for(maps in the node)
-		}// End for(nodes in current domain)
+				} // End if found the map under node
+			} // End for(maps in the node)
+		} // End for(nodes in current domain)
 	}
-	
+
 	private ArrayList getNodesWithMap(DataMap map) {
 		return null;
 	}
-	
-	public void objEntityChanged(EntityEvent e)
-	{ entityChanged(e);}
-	public void objEntityAdded(EntityEvent e)
-	{ entityAdded(e); }
-	public void objEntityRemoved(EntityEvent e)
-	{entityRemoved(e);}
 
-	public void dbEntityChanged(EntityEvent e)
-	{ entityChanged(e);}
-	public void dbEntityAdded(EntityEvent e)
-	{ entityAdded(e); }
-	public void dbEntityRemoved(EntityEvent e)
-	{entityRemoved(e);}
+	public void objEntityChanged(EntityEvent e) {
+		entityChanged(e);
+	}
 
+	public void objEntityAdded(EntityEvent e) {
+		entityAdded(e);
+	}
 
+	public void objEntityRemoved(EntityEvent e) {
+		entityRemoved(e);
+	}
+
+	public void dbEntityChanged(EntityEvent e) {
+		entityChanged(e);
+	}
+	public void dbEntityAdded(EntityEvent e) {
+		entityAdded(e);
+	}
+	public void dbEntityRemoved(EntityEvent e) {
+		entityRemoved(e);
+	}
 
 	/** Makes Entity visible and selected.
 	 * 
@@ -424,74 +454,125 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		if (e.getSource() == this)
 			return;
 		DefaultMutableTreeNode temp;
-		temp = getEntityNode(mediator.getCurrentDataDomain()
-							, mediator.getCurrentDataMap()
-							, e.getEntity());
+		temp =
+			getEntityNode(
+				mediator.getCurrentDataDomain(),
+				mediator.getCurrentDataMap(),
+				e.getEntity());
 		if (null != temp)
 			model.nodeChanged(temp);
-		temp = getEntityNode(mediator.getCurrentDataDomain()
-							, mediator.getCurrentDataNode()
-							, mediator.getCurrentDataMap()
-							, e.getEntity());
+		temp =
+			getEntityNode(
+				mediator.getCurrentDataDomain(),
+				mediator.getCurrentDataNode(),
+				mediator.getCurrentDataMap(),
+				e.getEntity());
 		if (null != temp)
 			model.nodeChanged(temp);
 	}
 
-	/** Add the node for the entity and make it selected. */
-	public void entityAdded(EntityEvent e) {
+	/** 
+	 * Event handler for ObjEntity and DbEntity additions.
+	 * Adds a tree node for the entity and make it selected. 
+	 */
+	protected void entityAdded(EntityEvent e) {
 		if (e.getSource() == this)
 			return;
 		Entity entity = e.getEntity();
 		// Add a node and make it selected.
 		EntityWrapper wrapper = new EntityWrapper(entity);
-		DefaultMutableTreeNode map_node;
+
 		if (mediator.getCurrentDataNode() != null) {
-			map_node = getMapNode(mediator.getCurrentDataDomain()
-								, mediator.getCurrentDataNode()
-								, mediator.getCurrentDataMap());
+			DefaultMutableTreeNode map_node =
+				getMapNode(
+					mediator.getCurrentDataDomain(),
+					mediator.getCurrentDataNode(),
+					mediator.getCurrentDataMap());
 			if (map_node != null) {
 				currentNode = new DefaultMutableTreeNode(wrapper, false);
-				model.insertNodeInto(currentNode, map_node
-									, map_node.getChildCount());
+				model.insertNodeInto(
+					currentNode,
+					map_node,
+					map_node.getChildCount());
 			}
 		}
-		map_node = getMapNode(mediator.getCurrentDataDomain()
-							, mediator.getCurrentDataMap());
+
+		DefaultMutableTreeNode map_node =
+			getMapNode(
+				mediator.getCurrentDataDomain(),
+				mediator.getCurrentDataMap());
+
 		currentNode = new DefaultMutableTreeNode(wrapper, false);
 		// model.insertNodeInto(currentNode, map_node, map_node.getChildCount());
 		fixEntityPosition(map_node, currentNode);
 		showNode(currentNode);
 	}
 
-	public void entityRemoved(EntityEvent e) {
-		if (e.getSource() == this)
-			return;
 
-		DefaultMutableTreeNode temp;
-		temp = getEntityNode(mediator.getCurrentDataDomain()
-							, mediator.getCurrentDataMap()
-							, e.getEntity());
-		if (null != temp)
-			model.removeNodeFromParent(temp);
-		temp = getEntityNode(mediator.getCurrentDataDomain()
-							, mediator.getCurrentDataNode()
-							, mediator.getCurrentDataMap()
-							, e.getEntity());
-		if (null != temp)
-			model.removeNodeFromParent(temp);
+	/** 
+	 * Event handler for ObjEntity and DbEntity removals.
+	 * Removes a tree node for the entity and selects its sibling. 
+	 */
+	protected void entityRemoved(EntityEvent e) {
+		if (e.getSource() == this) {
+			return;
+		}
+
+		// remove from DataMap tree
+		DefaultMutableTreeNode treeNode =
+			getEntityNode(
+				mediator.getCurrentDataDomain(),
+				mediator.getCurrentDataMap(),
+				e.getEntity());
+
+		if (treeNode != null) {
+			if (treeNode == currentNode) {
+				willRemoveCurrentNode();
+			}
+			model.removeNodeFromParent(treeNode);
+		}
+
+		// remove from DataMap *reference* tree
+		treeNode =
+			getEntityNode(
+				mediator.getCurrentDataDomain(),
+				mediator.getCurrentDataNode(),
+				mediator.getCurrentDataMap(),
+				e.getEntity());
+
+		if (treeNode != null) {
+			if (treeNode == currentNode) {
+				willRemoveCurrentNode();
+			}
+			model.removeNodeFromParent(treeNode);
+		}
 	}
 
+	/** 
+	 * Selects a current node adjacent to the currently selected node.
+	 * This method is called before current node removal.
+	 */
+	protected void willRemoveCurrentNode() {
+		if (currentNode != null) {
+			DefaultMutableTreeNode newSelection = currentNode.getNextNode();
+			if (newSelection == null) {
+				newSelection = currentNode.getPreviousNode();
+			}
+			currentNode = newSelection;
+			showNode(currentNode);
+		}
+	}
 
-	
 	/** Get domain node by DataDomain. */
 	private DefaultMutableTreeNode getDomainNode(DataDomain domain) {
-		if (null == domain )
+		if (null == domain)
 			return null;
 		Enumeration domains = rootNode.children();
 		while (domains.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
-			temp_node = (DefaultMutableTreeNode)domains.nextElement();
-			DataDomainWrapper wrap = (DataDomainWrapper)temp_node.getUserObject();
+			temp_node = (DefaultMutableTreeNode) domains.nextElement();
+			DataDomainWrapper wrap =
+				(DataDomainWrapper) temp_node.getUserObject();
 			if (wrap.getDataDomain() == domain)
 				return temp_node;
 		}
@@ -500,7 +581,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 
 	/** Get map node by DataDomain and DataMap. */
 	private DefaultMutableTreeNode getMapNode(DataDomain domain, DataMap map) {
-		if (null == map )
+		if (null == map)
 			return null;
 		DefaultMutableTreeNode domain_node = getDomainNode(domain);
 		if (null == domain_node)
@@ -508,22 +589,23 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		Enumeration maps = domain_node.children();
 		while (maps.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
-			temp_node = (DefaultMutableTreeNode)maps.nextElement();
+			temp_node = (DefaultMutableTreeNode) maps.nextElement();
 			Object obj = temp_node.getUserObject();
 			// Skip Data Node-s under domain. Go only for DataMapWrappers.
-			if ( !(obj instanceof DataMapWrapper) )
+			if (!(obj instanceof DataMapWrapper))
 				continue;
-			DataMapWrapper wrap = (DataMapWrapper)obj;
+			DataMapWrapper wrap = (DataMapWrapper) obj;
 			if (wrap.getDataMap() == map)
 				return temp_node;
 		}
 		return null;
 	}
 
-	
 	/** Get data source (a.k.a. data node) node by DataDomain and DataNode. */
-	private DefaultMutableTreeNode getDataSourceNode(DataDomain domain, DataNode data) {
-		if (null == data )
+	private DefaultMutableTreeNode getDataSourceNode(
+		DataDomain domain,
+		DataNode data) {
+		if (null == data)
 			return null;
 		DefaultMutableTreeNode domain_node = getDomainNode(domain);
 		if (null == domain_node)
@@ -531,9 +613,10 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		Enumeration data_sources = domain_node.children();
 		while (data_sources.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
-			temp_node = (DefaultMutableTreeNode)data_sources.nextElement();
+			temp_node = (DefaultMutableTreeNode) data_sources.nextElement();
 			if (temp_node.getUserObject() instanceof DataNodeWrapper) {
-				DataNodeWrapper wrap = (DataNodeWrapper)temp_node.getUserObject();
+				DataNodeWrapper wrap =
+					(DataNodeWrapper) temp_node.getUserObject();
 				if (wrap.getDataNode() == data)
 					return temp_node;
 			}
@@ -541,10 +624,12 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		return null;
 	}
 
-	
 	/** Get map node by DataDomain, DataNode and DataMap. */
-	private DefaultMutableTreeNode getMapNode(DataDomain domain, DataNode data, DataMap map) {
-		if (null == map )
+	private DefaultMutableTreeNode getMapNode(
+		DataDomain domain,
+		DataNode data,
+		DataMap map) {
+		if (null == map)
 			return null;
 		DefaultMutableTreeNode data_node = getDataSourceNode(domain, data);
 		if (null == data_node)
@@ -552,18 +637,20 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		Enumeration maps = data_node.children();
 		while (maps.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
-			temp_node = (DefaultMutableTreeNode)maps.nextElement();
-			DataMapWrapper wrap = (DataMapWrapper)temp_node.getUserObject();
+			temp_node = (DefaultMutableTreeNode) maps.nextElement();
+			DataMapWrapper wrap = (DataMapWrapper) temp_node.getUserObject();
 			if (wrap.getDataMap() == map)
 				return temp_node;
 		}
 		return null;
 	}
 
-	
 	/** Get entity node by DataDomain, DataMap and Entity. */
-	private DefaultMutableTreeNode getEntityNode(DataDomain domain, DataMap map, Entity entity) {
-		if (null == entity )
+	private DefaultMutableTreeNode getEntityNode(
+		DataDomain domain,
+		DataMap map,
+		Entity entity) {
+		if (null == entity)
 			return null;
 		DefaultMutableTreeNode map_node = getMapNode(domain, map);
 		if (null == map_node)
@@ -571,19 +658,21 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		Enumeration entities = map_node.children();
 		while (entities.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
-			temp_node = (DefaultMutableTreeNode)entities.nextElement();
-			EntityWrapper wrap = (EntityWrapper)temp_node.getUserObject();
+			temp_node = (DefaultMutableTreeNode) entities.nextElement();
+			EntityWrapper wrap = (EntityWrapper) temp_node.getUserObject();
 			if (wrap.getEntity() == entity)
 				return temp_node;
 		}
 		return null;
 	}
 
-	
 	/** Get entity node by DataDomain, DataNode, DataMap and Entity. */
-	private DefaultMutableTreeNode getEntityNode(DataDomain domain, DataNode data
-	, DataMap map, Entity entity) {
-		if (null == entity )
+	private DefaultMutableTreeNode getEntityNode(
+		DataDomain domain,
+		DataNode data,
+		DataMap map,
+		Entity entity) {
+		if (null == entity)
 			return null;
 		DefaultMutableTreeNode map_node = getMapNode(domain, data, map);
 		if (null == map_node)
@@ -591,14 +680,13 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		Enumeration entities = map_node.children();
 		while (entities.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
-			temp_node = (DefaultMutableTreeNode)entities.nextElement();
-			EntityWrapper wrap = (EntityWrapper)temp_node.getUserObject();
+			temp_node = (DefaultMutableTreeNode) entities.nextElement();
+			EntityWrapper wrap = (EntityWrapper) temp_node.getUserObject();
 			if (wrap.getEntity() == entity)
 				return temp_node;
 		}
 		return null;
 	}
-
 
 	/** Makes node current, visible and selected.*/
 	private void showNode(DefaultMutableTreeNode node) {
@@ -607,77 +695,86 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		browseTree.scrollPathToVisible(path);
 		browseTree.setSelectionPath(path);
 	}
-	
-	
-	
-	/** Called when different node is selected. 
-	  * Changes current node and causes reloading of the corresponding
-	  * detail view by calling fireEntityDisplayEvent(). */
+
+	/** 
+	 * Called when different node is selected. 
+	 * Changes current node and causes reloading of the 
+	 * corresponding detail view by calling fireEntityDisplayEvent(). 
+	 */
 	public void valueChanged(TreeSelectionEvent e) {
-	    TreePath path = e.getNewLeadSelectionPath();
-	    if (path==null) 
-	    	return;
-	    	        
-	    currentNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-	    Object[] data = getUserObjects(currentNode);
-	    if (data.length == 0)
-	    	return;
-	    Object obj = data[data.length-1];
-	    if (obj instanceof DataDomain) {
-	    	mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, (DataDomain)obj));
-	    } else if (obj instanceof DataMap) {
-	    	if (data.length == 3) {
-	    		mediator.fireDataMapDisplayEvent(
-	    								new DataMapDisplayEvent(this
-	    								    , (DataMap)obj
-	    								    , (DataDomain)data[data.length-3]
-	    								    , (DataNode)data[data.length-2]));
-	    	} else if (data.length == 2){
-	    		mediator.fireDataMapDisplayEvent(
-	    								new DataMapDisplayEvent(this
-	    								    , (DataMap)obj
-	    								    , (DataDomain)data[data.length-2]));
-	    	}
-	    } else if (obj instanceof DataNode) {
-			if (data.length == 2){
-	    		mediator.fireDataNodeDisplayEvent(
-	    								new DataNodeDisplayEvent(this
-	    								    , (DataDomain)data[data.length-2]
-	    								    , (DataNode) obj));
-	    	}
-	    } else if (obj instanceof ObjEntity) {
-	    	if (data.length == 4) {
-	    		mediator.fireObjEntityDisplayEvent(
-	    								new EntityDisplayEvent(this
-	    								    , (Entity)obj
-	    								    , (DataMap)data[data.length-2]
-	    								    , (DataNode)data[data.length-3]
-	    								    , (DataDomain)data[data.length-4]));
-	    	} else if (data.length == 3){
-	    		mediator.fireObjEntityDisplayEvent(
-	    								new EntityDisplayEvent(this
-	    								    , (Entity)obj
-	    								    , (DataMap)data[data.length-2]
-	    								    , (DataDomain)data[data.length-3]));
-	    	}
-	    } else if (obj instanceof DbEntity) {
-	    	if (data.length == 4) {
-	    		mediator.fireDbEntityDisplayEvent(
-	    								new EntityDisplayEvent(this
-	    								    , (Entity)obj
-	    								    , (DataMap)data[data.length-2]
-	    								    , (DataNode)data[data.length-3]
-	    								    , (DataDomain)data[data.length-4]));
-	    	} else if (data.length == 3){
-	    		mediator.fireDbEntityDisplayEvent(
-	    								new EntityDisplayEvent(this
-	    								    , (Entity)obj
-	    								    , (DataMap)data[data.length-2]
-	    								    , (DataDomain)data[data.length-3]));
-	    	}
-	    }
+		TreePath path = e.getNewLeadSelectionPath();
+		if (path == null) {
+			return;
+		}
+
+		currentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+		Object[] data = getUserObjects(currentNode);
+		if (data.length == 0)
+			return;
+		Object obj = data[data.length - 1];
+		if (obj instanceof DataDomain) {
+			mediator.fireDomainDisplayEvent(
+				new DomainDisplayEvent(this, (DataDomain) obj));
+		} else if (obj instanceof DataMap) {
+			if (data.length == 3) {
+				mediator.fireDataMapDisplayEvent(
+					new DataMapDisplayEvent(
+						this,
+						(DataMap) obj,
+						(DataDomain) data[data.length - 3],
+						(DataNode) data[data.length - 2]));
+			} else if (data.length == 2) {
+				mediator.fireDataMapDisplayEvent(
+					new DataMapDisplayEvent(
+						this,
+						(DataMap) obj,
+						(DataDomain) data[data.length - 2]));
+			}
+		} else if (obj instanceof DataNode) {
+			if (data.length == 2) {
+				mediator.fireDataNodeDisplayEvent(
+					new DataNodeDisplayEvent(
+						this,
+						(DataDomain) data[data.length - 2],
+						(DataNode) obj));
+			}
+		} else if (obj instanceof ObjEntity) {
+			if (data.length == 4) {
+				mediator.fireObjEntityDisplayEvent(
+					new EntityDisplayEvent(
+						this,
+						(Entity) obj,
+						(DataMap) data[data.length - 2],
+						(DataNode) data[data.length - 3],
+						(DataDomain) data[data.length - 4]));
+			} else if (data.length == 3) {
+				mediator.fireObjEntityDisplayEvent(
+					new EntityDisplayEvent(
+						this,
+						(Entity) obj,
+						(DataMap) data[data.length - 2],
+						(DataDomain) data[data.length - 3]));
+			}
+		} else if (obj instanceof DbEntity) {
+			if (data.length == 4) {
+				mediator.fireDbEntityDisplayEvent(
+					new EntityDisplayEvent(
+						this,
+						(Entity) obj,
+						(DataMap) data[data.length - 2],
+						(DataNode) data[data.length - 3],
+						(DataDomain) data[data.length - 4]));
+			} else if (data.length == 3) {
+				mediator.fireDbEntityDisplayEvent(
+					new EntityDisplayEvent(
+						this,
+						(Entity) obj,
+						(DataMap) data[data.length - 2],
+						(DataDomain) data[data.length - 3]));
+			}
+		}
 	} // End valueChanged()
-	
+
 	/** Gets array of the user objects ending with this and starting with one under root. 
 	  * That is the array of actual objects rather than wrappers.*/
 	private Object[] getUserObjects(DefaultMutableTreeNode node) {
@@ -686,145 +783,151 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		while (!node.isRoot()) {
 			Object obj = node.getUserObject();
 			if (obj instanceof DataDomainWrapper)
-				list.add(0, ((DataDomainWrapper)obj).getDataDomain());
+				list.add(0, ((DataDomainWrapper) obj).getDataDomain());
 			else if (obj instanceof DataNodeWrapper)
-				list.add(0, ((DataNodeWrapper)obj).getDataNode());
+				list.add(0, ((DataNodeWrapper) obj).getDataNode());
 			else if (obj instanceof DataMapWrapper)
-				list.add(0, ((DataMapWrapper)obj).getDataMap() );
+				list.add(0, ((DataMapWrapper) obj).getDataMap());
 			else if (obj instanceof EntityWrapper)
-				list.add(0, ((EntityWrapper)obj).getEntity());
-			else throw new UnsupportedOperationException("Tree contains invalid wrapper");
-			node = (DefaultMutableTreeNode)node.getParent();
-		}// End while()
+				list.add(0, ((EntityWrapper) obj).getEntity());
+			else
+				throw new UnsupportedOperationException("Tree contains invalid wrapper");
+			node = (DefaultMutableTreeNode) node.getParent();
+		} // End while()
 		return list.toArray();
 	}
-	
-	
+
 	/** 
-     * Inserts entity node in alphabetical order. 
-     * Assumes that the tree is already ordered, except for one node. 
-     */
-    private void fixEntityPosition(
-        DefaultMutableTreeNode parent,
-        DefaultMutableTreeNode entityNode) {
-        Entity curEnt = ((EntityWrapper) entityNode.getUserObject()).getEntity();
-        boolean isObj = curEnt instanceof ObjEntity;
+	 * Inserts entity node in alphabetical order. 
+	 * Assumes that the tree is already ordered, except for one node. 
+	 */
+	private void fixEntityPosition(
+		DefaultMutableTreeNode parent,
+		DefaultMutableTreeNode entityNode) {
+		Entity curEnt =
+			((EntityWrapper) entityNode.getUserObject()).getEntity();
+		boolean isObj = curEnt instanceof ObjEntity;
 
-        int len = parent.getChildCount();
-        int ins = -1;
-        int rm = -1;
+		int len = parent.getChildCount();
+		int ins = -1;
+		int rm = -1;
 
-        for (int i = 0; i < len; i++) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
+		for (int i = 0; i < len; i++) {
+			DefaultMutableTreeNode node =
+				(DefaultMutableTreeNode) parent.getChildAt(i);
 
-            // remeber to remove node
-            if (node == entityNode) {
-                rm = i;
-                continue;
-            }
+			// remeber to remove node
+			if (node == entityNode) {
+				rm = i;
+				continue;
+			}
 
-            // no more insert checks
-            if (ins >= 0) {
-                continue;
-            }
+			// no more insert checks
+			if (ins >= 0) {
+				continue;
+			}
 
-            Entity e = ((EntityWrapper) node.getUserObject()).getEntity();
+			Entity e = ((EntityWrapper) node.getUserObject()).getEntity();
 
-            // ObjEntities go before DbEntities
-            if (isObj && (e instanceof DbEntity)) {
-                ins = i;
-            }
-            if (!isObj && (e instanceof ObjEntity)) {
-                continue;
-            }
+			// ObjEntities go before DbEntities
+			if (isObj && (e instanceof DbEntity)) {
+				ins = i;
+			}
+			if (!isObj && (e instanceof ObjEntity)) {
+				continue;
+			}
 
-            // Ignore unnamed
-            if (e.getName() == null) {
-                continue;
-            }
+			// Ignore unnamed
+			if (e.getName() == null) {
+				continue;
+			}
 
-            // Do alphabetical comparison
-            if (e.getName().compareTo(curEnt.getName()) > 0) {
-                ins = i;
-            }
-        }
+			// Do alphabetical comparison
+			if (e.getName().compareTo(curEnt.getName()) > 0) {
+				ins = i;
+			}
+		}
 
-        if (ins < 0) {
-            ins = len;
-        }
+		if (ins < 0) {
+			ins = len;
+		}
 
-        // remove
-        if (rm >= 0) {
-            model.removeNodeFromParent(entityNode);
-            if (rm < ins) {
-                ins--;
-            }
-        }
+		// remove
+		if (rm >= 0) {
+			model.removeNodeFromParent(entityNode);
+			if (rm < ins) {
+				ins--;
+			}
+		}
 
-        // insert
-        model.insertNodeInto(entityNode, parent, ins);
-    }
-    
-    static class BrowseViewRenderer extends DefaultTreeCellRenderer {
-    ImageIcon domainIcon;
-    ImageIcon nodeIcon;
-    ImageIcon mapIcon;
-    ImageIcon dbEntityIcon;
-    ImageIcon objEntityIcon;
+		// insert
+		model.insertNodeInto(entityNode, parent, ins);
+	}
 
-    public BrowseViewRenderer() {    	
-    	ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
-    	URL url = cl.getResource(Editor.RESOURCE_PATH + "images/domain16.jpg");
-        domainIcon = new ImageIcon(url);
-        
-    	url = cl.getResource(Editor.RESOURCE_PATH + "images/node16.gif");
-    	nodeIcon = new ImageIcon(url);
-    	
-    	url = cl.getResource(Editor.RESOURCE_PATH + "images/map16.jpg");
-    	mapIcon = new ImageIcon(url);
-    	
-    	url = cl.getResource(Editor.RESOURCE_PATH + "images/dbentity16.gif");
-    	dbEntityIcon = new ImageIcon(url);
-    	
-    	url = cl.getResource(Editor.RESOURCE_PATH + "images/objentity16.jpg");
-    	objEntityIcon = new ImageIcon(url);
-    }
+	static class BrowseViewRenderer extends DefaultTreeCellRenderer {
+		ImageIcon domainIcon;
+		ImageIcon nodeIcon;
+		ImageIcon mapIcon;
+		ImageIcon dbEntityIcon;
+		ImageIcon objEntityIcon;
 
-    public Component getTreeCellRendererComponent(
-                        JTree tree,
-                        Object value,
-                        boolean sel,
-                        boolean expanded,
-                        boolean leaf,
-                        int row,
-                        boolean hasFocus) {
+		public BrowseViewRenderer() {
+			ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
+			URL url =
+				cl.getResource(Editor.RESOURCE_PATH + "images/domain16.jpg");
+			domainIcon = new ImageIcon(url);
 
-        super.getTreeCellRendererComponent(
-                        tree, value, sel,
-                        expanded, leaf, row,
-                        hasFocus);
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-        if (node.isRoot())
-        	return this;
-        Object obj = node.getUserObject();
-        if (obj instanceof DataDomainWrapper) {
-            setIcon(domainIcon);
-        } 
-        else if (obj instanceof DataNodeWrapper) {
-            setIcon(nodeIcon);
-        } 
-        else if (obj instanceof DataMapWrapper) {
-            setIcon(mapIcon);
-        } 
-        else if (obj instanceof EntityWrapper) {
-        	EntityWrapper wrap = (EntityWrapper)obj;
-        	if (wrap.getEntity() instanceof DbEntity)
-            	setIcon(dbEntityIcon);
-            else if (wrap.getEntity() instanceof ObjEntity)
-            	setIcon(objEntityIcon);
-        } 
-        return this;
-    }
-}
+			url = cl.getResource(Editor.RESOURCE_PATH + "images/node16.gif");
+			nodeIcon = new ImageIcon(url);
+
+			url = cl.getResource(Editor.RESOURCE_PATH + "images/map16.jpg");
+			mapIcon = new ImageIcon(url);
+
+			url =
+				cl.getResource(Editor.RESOURCE_PATH + "images/dbentity16.gif");
+			dbEntityIcon = new ImageIcon(url);
+
+			url =
+				cl.getResource(Editor.RESOURCE_PATH + "images/objentity16.jpg");
+			objEntityIcon = new ImageIcon(url);
+		}
+
+		public Component getTreeCellRendererComponent(
+			JTree tree,
+			Object value,
+			boolean sel,
+			boolean expanded,
+			boolean leaf,
+			int row,
+			boolean hasFocus) {
+
+			super.getTreeCellRendererComponent(
+				tree,
+				value,
+				sel,
+				expanded,
+				leaf,
+				row,
+				hasFocus);
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+			if (node.isRoot())
+				return this;
+			Object obj = node.getUserObject();
+			if (obj instanceof DataDomainWrapper) {
+				setIcon(domainIcon);
+			} else if (obj instanceof DataNodeWrapper) {
+				setIcon(nodeIcon);
+			} else if (obj instanceof DataMapWrapper) {
+				setIcon(mapIcon);
+			} else if (obj instanceof EntityWrapper) {
+				EntityWrapper wrap = (EntityWrapper) obj;
+				if (wrap.getEntity() instanceof DbEntity)
+					setIcon(dbEntityIcon);
+				else if (wrap.getEntity() instanceof ObjEntity)
+					setIcon(objEntityIcon);
+			}
+			return this;
+		}
+	}
 
 }
