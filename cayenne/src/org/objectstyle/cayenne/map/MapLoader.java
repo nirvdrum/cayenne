@@ -75,20 +75,20 @@ import org.xml.sax.helpers.DefaultHandler;
 public class MapLoader extends DefaultHandler {
 	static Logger logObj = Logger.getLogger(MapLoader.class.getName());
 
-	private static final String DATA_MAP_TAG = "data-map";
-	private static final String DB_ENTITY_TAG = "db-entity";
-	private static final String OBJ_ENTITY_TAG = "obj-entity";
-	private static final String DB_ATTRIBUTE_TAG = "db-attribute";
-	private static final String DB_ATTRIBUTE_DERIVED_TAG =
+	public static final String DATA_MAP_TAG = "data-map";
+	public static final String DB_ENTITY_TAG = "db-entity";
+	public static final String OBJ_ENTITY_TAG = "obj-entity";
+	public static final String DB_ATTRIBUTE_TAG = "db-attribute";
+	public static final String DB_ATTRIBUTE_DERIVED_TAG =
 		"db-attribute-derived";
-	private static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
-	private static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
-	private static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
-	private static final String DB_RELATIONSHIP_TAG = "db-relationship";
-	private static final String DB_RELATIONSHIP_REF_TAG = "db-relationship-ref";
-	private static final String DB_ATTRIBUTE_PAIR_TAG = "db-attribute-pair";
-	private static final String TRUE = "true";
-	private static final String FALSE = "false";
+	public static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
+	public static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
+	public static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
+	public static final String DB_RELATIONSHIP_TAG = "db-relationship";
+	public static final String DB_RELATIONSHIP_REF_TAG = "db-relationship-ref";
+	public static final String DB_ATTRIBUTE_PAIR_TAG = "db-attribute-pair";
+	public static final String TRUE = "true";
+	public static final String FALSE = "false";
 
 	/* Reading from XML */
 	private DataMap dataMap;

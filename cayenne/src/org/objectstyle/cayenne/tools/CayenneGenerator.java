@@ -58,16 +58,16 @@ package org.objectstyle.cayenne.tools;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.Level;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DisconnectedConfiguration;
-import org.objectstyle.cayenne.gen.*;
+import org.objectstyle.cayenne.gen.AntClassGenerator;
+import org.objectstyle.cayenne.gen.ClassGenerator;
+import org.objectstyle.cayenne.gen.DefaultClassGenerator;
+import org.objectstyle.cayenne.gen.GenMapLoader;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
 import org.xml.sax.InputSource;
 
 /** 
@@ -161,7 +161,7 @@ public class CayenneGenerator extends Task {
 	/** Loads and returns DataMap based on <code>map</code> attribute. */
 	protected DataMap loadDataMap() throws Exception {
 		InputSource in = new InputSource(map.getCanonicalPath());
-		return new MapLoader().loadDataMap(in);
+		return new GenMapLoader().loadDataMap(in);
 	}
 
 	/** 
