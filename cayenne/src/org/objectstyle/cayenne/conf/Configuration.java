@@ -133,14 +133,20 @@ public abstract class Configuration {
 			locator.setSkipClasspath(false);
 			locator.setSkipCurDir(true);
 			locator.setSkipHomeDir(false);
+			configCommonLogging(locator.findResource(LOGGING_PROPS));
+		}
+	}
 
-			URL url = locator.findResource(LOGGING_PROPS);
-			if (url != null) {
-				PropertyConfigurator.configure(url);
+	/** 
+	 * Configures Cayenne logging properties using properties found at specified URL. 
+	 */
+	public synchronized static void configCommonLogging(URL propsFile) {
+		if (!loggingConfigured) {
+			if (propsFile != null) {
+				PropertyConfigurator.configure(propsFile);
 			} else {
 				BasicConfigurator.configure();
 			}
-
 			loggingConfigured = true;
 		}
 	}
