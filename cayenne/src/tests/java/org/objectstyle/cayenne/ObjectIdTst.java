@@ -58,15 +58,10 @@ package org.objectstyle.cayenne;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ObjectIdTst extends CayenneTestCase {
-	private static Logger logObj = Logger.getLogger(ObjectIdTst.class);
-
-	public ObjectIdTst(String name) {
-		super(name);
-	}
 
 	public void testObjEntityName() throws Exception {
 		Class class1=Number.class;
@@ -138,7 +133,12 @@ public class ObjectIdTst extends CayenneTestCase {
 
 		ObjectId ref = new ObjectId(class1, hm1);
 		ObjectId oid = new ObjectId(class1, hm2);
-		assertTrue(!ref.equals(oid));
+		assertFalse(ref.equals(oid));
+	}
+
+	public void testEqualsNull() {
+		ObjectId o = new ObjectId(Artist.class, "ARTIST_ID", 42);
+		assertFalse(o.equals(null));
 	}
 
 	public void testIdAsMapKey() throws Exception {
@@ -167,7 +167,7 @@ public class ObjectIdTst extends CayenneTestCase {
 
 		ObjectId oid1 = new ObjectId(class1, null);
 		ObjectId oid2 = new ObjectId(class2, null);
-		assertTrue(!oid1.equals(oid2));
+		assertFalse(oid1.equals(oid2));
 	}
 
 	public void testNotEqual2() throws Exception {
@@ -181,6 +181,6 @@ public class ObjectIdTst extends CayenneTestCase {
 
 		ObjectId oid1 = new ObjectId(class1, hm1);
 		ObjectId oid2 = new ObjectId(class1, hm2);
-		assertTrue(!oid1.equals(oid2));
+		assertFalse(oid1.equals(oid2));
 	}
 }
