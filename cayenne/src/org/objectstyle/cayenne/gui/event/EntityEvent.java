@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.EventObject;
 
@@ -64,56 +64,69 @@ import org.objectstyle.cayenne.map.Entity;
  * We don't need to store Domain and DataMap information in 
  * this type of event as they are always currentDataMap and currentDomain. 
  */
-public class EntityEvent extends EventObject
-{
+public class EntityEvent extends EventObject {
 	/** Entity changed. Display or re-display it.*/
-	public static final int CHANGE 	= 1;
+	public static final int CHANGE = 1;
 	/** New entity created. Display it or add to the list, if applicable.*/
-	public static final int ADD		= 2;
+	public static final int ADD = 2;
 	/** Entity removed. Display another one and/or remove this one from lists.*/
-	public static final int REMOVE	= 3;
-	
-	private int	id = CHANGE;
+	public static final int REMOVE = 3;
+
+	private int id = CHANGE;
 	private Entity entity;
 	private String oldName;
 	private String newName;
-	
+
 	/** Entity property(-ies) changed. */
-	public EntityEvent(Object src, Entity temp_entity)
-	{
+	public EntityEvent(Object src, Entity temp_entity) {
 		super(src);
 		entity = temp_entity;
 		oldName = newName = temp_entity.getName();
 	}
 
 	/** Entity added or removed. */
-	public EntityEvent(Object src, Entity temp_entity, int temp_id)
-	{
+	public EntityEvent(Object src, Entity temp_entity, int temp_id) {
 		this(src, temp_entity);
 		id = temp_id;
 	}
 
 	/** Entity name changed.*/
-	public EntityEvent(Object src, Entity temp_entity, String old_name)
-	{
+	public EntityEvent(Object src, Entity temp_entity, String old_name) {
 		this(src, temp_entity, CHANGE);
 		oldName = old_name;
 	}
-	
+
 	/** Get entity (obj or db). */
-	public Entity getEntity() {return entity;}
+	public Entity getEntity() {
+		return entity;
+	}
 	/** Get the type of the event.
 	 *  @return CHANGE, ADD or REMOVE.*/
-	public int getId() {return id;}
-	
+	public int getId() {
+		return id;
+	}
+
 	/** Returns the old entity name. Used only in CHANGE event. */
-	public String getOldName() {return oldName;}
-	
+	public String getOldName() {
+		return oldName;
+	}
+
 	/** Returns the new entity name. Used only in CHANGE event.*/
-	public String getNewName() {return newName;}
-	
+	public String getNewName() {
+		return newName;
+	}
+
 	/** Returns true if this event indicates a name change. */
 	public boolean isNameChange() {
-	    return (oldName == null) ? newName != null : !oldName.equals(newName);
+		return (oldName == null) ? newName != null : !oldName.equals(newName);
 	}
+
+	/**
+	 * Sets the oldName.
+	 * @param oldName The oldName to set
+	 */
+	public void setOldName(String oldName) {
+		this.oldName = oldName;
+	}
+
 }

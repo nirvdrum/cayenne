@@ -115,6 +115,7 @@ public class DbEntityPane
 		name.getDocument().addDocumentListener(this);
 		catalog.getDocument().addDocumentListener(this);
 		schema.getDocument().addDocumentListener(this);
+
 		parentEntities.addActionListener(this);
 		parentLabel.addActionListener(this);
 	}
@@ -165,26 +166,30 @@ public class DbEntityPane
 	}
 
 	private void textFieldChanged(DocumentEvent e) {
-		if (ignoreChange)
+		if (ignoreChange) {
 			return;
+		}
+
 		Document doc = e.getDocument();
 		DataMap map = mediator.getCurrentDataMap();
-		DbEntity current_entity = mediator.getCurrentDbEntity();
+		DbEntity curEntity = mediator.getCurrentDbEntity();
+		EntityEvent event = new EntityEvent(this, curEntity);
 		if (doc == name.getDocument()) {
 			// Change the name of the current db entity
 			MapUtil.setDbEntityName(
 				map,
-				(DbEntity) current_entity,
+				curEntity,
 				name.getText());
 			// Make sure new name is sent out to all listeners.
-			EntityEvent event = new EntityEvent(this, current_entity, oldName);
+			event.setOldName(oldName);
 			oldName = name.getText();
-			mediator.fireDbEntityEvent(event);
 		} else if (doc == catalog.getDocument()) {
-			current_entity.setCatalog(catalog.getText());
+			curEntity.setCatalog(catalog.getText());
 		} else if (doc == schema.getDocument()) {
-			current_entity.setSchema(schema.getText());
+			curEntity.setSchema(schema.getText());
 		}
+		
+		mediator.fireDbEntityEvent(event);
 	}
 
 	public void processExistingSelection() {
