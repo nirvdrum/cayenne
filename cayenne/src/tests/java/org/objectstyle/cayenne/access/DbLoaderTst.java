@@ -271,7 +271,7 @@ public class DbLoaderTst extends CayenneTestCase {
     }
 
     public void checkAllDBEntities(DataMap map) {
-        Iterator entIt = originalMap().getDbEntitiesAsList().iterator();
+        Iterator entIt = originalMap().getDbEntities().iterator();
         while (entIt.hasNext()) {
             DbEntity origEnt = (DbEntity) entIt.next();
             DbEntity newEnt = map.getDbEntity(origEnt.getName());

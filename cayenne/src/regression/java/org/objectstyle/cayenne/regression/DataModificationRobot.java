@@ -103,10 +103,10 @@ public class DataModificationRobot {
   public DataModificationRobot(DataContext context, Random randomizer, int newObjectPerEntityCount, int deleteObjectPerEntityCount) {
     this.context = context;
     this.randomizer = randomizer;
-    objEntities = new ArrayList();
+    objEntities = new ArrayList(32);
     for (Iterator i = context.getDataMaps().iterator(); i.hasNext();) {
       DataMap dataMap = (DataMap)i.next();
-      objEntities.addAll(dataMap.getObjEntitiesAsList(false));
+      objEntities.addAll(dataMap.getObjEntities());
     }
     insertionRandomizer = new Roulette(objEntities.size(), newObjectPerEntityCount, randomizer);
     deletionRandomizer = new Roulette(objEntities.size(), deleteObjectPerEntityCount, randomizer);

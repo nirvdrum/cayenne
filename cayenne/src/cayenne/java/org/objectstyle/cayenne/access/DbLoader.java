@@ -381,20 +381,16 @@ public class DbLoader {
         }
 
         // get primary keys for each table and store it in dbEntity
-        Iterator i = map.getDbEntitiesAsList().iterator();
+        Iterator i = map.getDbEntities().iterator();
         while (i.hasNext()) {
             DbEntity dbEntity = (DbEntity) i.next();
             String tableName = dbEntity.getName();
-            ResultSet rs =
-                metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
+            ResultSet rs = metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
 
             try {
                 while (rs.next()) {
                     String keyName = rs.getString(4);
-                    (
-                        (DbAttribute) dbEntity.getAttribute(
-                            keyName)).setPrimaryKey(
-                        true);
+                    ((DbAttribute)dbEntity.getAttribute(keyName)).setPrimaryKey(true);
                 }
             } finally {
                 rs.close();
@@ -550,7 +546,7 @@ public class DbLoader {
 
     /** Creates ObjRelationships based on map's previously loaded DbRelationships. */
     public void loadObjRelationships(DataMap map) throws SQLException {
-        Iterator it = map.getObjEntitiesAsList().iterator();
+        Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity objEnt = (ObjEntity) it.next();
             DbEntity dbEnt = objEnt.getDbEntity();
@@ -569,9 +565,8 @@ public class DbLoader {
                 objRel.setToMany(dbRel.isToMany());
                 objRel.setSourceEntity(objEnt);
                 objRel.setTargetEntity(
-                    (Entity) map.getMappedEntities(
-                        (DbEntity) dbRel.getTargetEntity()).get(
-                        0));
+                	(Entity)map.getMappedEntities(
+                		(DbEntity)dbRel.getTargetEntity()).get(0));
                 objEnt.addRelationship(objRel);
             }
         }

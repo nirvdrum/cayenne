@@ -79,7 +79,8 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
-/** Utility class that does forward engineering of the database.
+/**
+  * Utility class that does forward engineering of the database.
   * It can generate database schema using the data map. It is a 
   * counterpart of DbLoader class. 
   * 
@@ -87,7 +88,7 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
   * DbGenerator was initialized with or perform any other cleanup.
   *
   * @author Andrei Adamchik
- */
+  */
 public class DbGenerator {
 
 	protected DataNode node;
@@ -135,7 +136,7 @@ public class DbGenerator {
 		createFK = new HashMap();
 
 		DbAdapter adapter = getAdapter();
-		List dbEntities = map.getDbEntitiesAsList();
+		List dbEntities = new ArrayList(map.getDbEntities());
 		Iterator it = dbEntities.iterator();
 		boolean supportsFK = adapter.supportsFkConstraints();
 		while (it.hasNext()) {
@@ -369,7 +370,7 @@ public class DbGenerator {
 
 		// find tables that are in the map but not in the database
 		List missing = new ArrayList();
-		Iterator it = map.getDbEntitiesAsList().iterator();
+		Iterator it = map.getDbEntities().iterator();
 		while (it.hasNext()) {
 			DbEntity e = (DbEntity) it.next();
 			if (!tables.contains(e.getName().toLowerCase())) {
@@ -424,11 +425,9 @@ public class DbGenerator {
 	 * constraints and returns an ordered list. 
 	 */
 	private List dbEntitiesInInsertOrder() {
-		List list = map.getDbEntitiesAsList();
-		
 		// remove derived db entities
 	    List filteredList = new ArrayList();
-	    Iterator it = list.iterator();
+	    Iterator it = map.getDbEntities().iterator();
 	    while(it.hasNext()) {
 	    	Object next = it.next();
 	    	if(!(next instanceof DerivedDbEntity)) {

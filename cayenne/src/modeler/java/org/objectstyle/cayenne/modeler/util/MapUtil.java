@@ -132,7 +132,7 @@ public class MapUtil {
 	 * exist.
 	 */
 	public static void cleanObjMappings(DataMap map) {
-		Iterator ents = map.getObjEntitiesAsList().iterator();
+		Iterator ents = map.getObjEntities().iterator();
 		while (ents.hasNext()) {
 			ObjEntity ent = (ObjEntity) ents.next();
 			DbEntity dbEnt = ent.getDbEntity();

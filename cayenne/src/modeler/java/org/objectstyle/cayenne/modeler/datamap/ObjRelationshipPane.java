@@ -297,9 +297,8 @@ public class ObjRelationshipPane
     /** Create DefaultComboBoxModel with all obj entity names. */
     private DefaultComboBoxModel createObjEntityComboModel() {
         DataMap map = mediator.getCurrentDataMap();
-        Vector elements = new Vector();
-        java.util.List obj_entities = map.getObjEntitiesAsList(true);
-        Iterator iter = obj_entities.iterator();
+        Vector elements = new Vector(64);
+        Iterator iter = map.getObjEntities(true).iterator();
         while (iter.hasNext()) {
             ObjEntity entity = (ObjEntity) iter.next();
             String name = entity.getName();

@@ -119,7 +119,7 @@ public class DataMapTst extends CayenneTestCase {
 
 	// make sure deleting an ObjEntity & other entity's relationships to it
 	// works & does not cause a ConcurrentModificationException
-	public void testDelete() {
+	public void testDeleteObjEntity() {
 		ObjEntity e1 = new ObjEntity("1");
 		ObjEntity e2 = new ObjEntity("2");
 		e1.addRelationship(new ObjRelationship(e1, e2, false));

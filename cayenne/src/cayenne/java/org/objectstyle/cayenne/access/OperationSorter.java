@@ -96,12 +96,12 @@ public class OperationSorter {
 
 	/** Creates new OperationSorter based on all entities in DataMap array*/
 	public OperationSorter(QueryEngine queryEngine, List maps) {
-		List entities = new ArrayList();
+		List entities = new ArrayList(32);
 
 		if (maps != null) {
 			// copy all entities to the list ignoring the order
 			for (Iterator it = maps.iterator(); it.hasNext();) {
-				entities.addAll(((DataMap)it.next()).getDbEntitiesAsList());
+				entities.addAll(((DataMap)it.next()).getDbEntities());
 			}
 		}
 

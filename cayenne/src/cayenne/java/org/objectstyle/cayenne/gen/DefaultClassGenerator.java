@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.DataMap;
@@ -89,7 +90,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
      * in the DataMap.
      */
     public DefaultClassGenerator(DataMap map) {
-        this(map.getObjEntitiesAsList());
+        this(new ArrayList(map.getObjEntities()));
     }
 
     /** 

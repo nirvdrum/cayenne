@@ -257,19 +257,19 @@ public class DataDomain implements QueryEngine {
 			// add node to "ent name->node" map
 			Iterator nodeMaps = node.getDataMaps().iterator();
 			while (nodeMaps.hasNext()) {
-				DataMap map = (DataMap) nodeMaps.next();
+				DataMap map = (DataMap)nodeMaps.next();
 				this.addMap(map);
 
-				Iterator entities = map.getObjEntitiesAsList().iterator();
+				Iterator entities = map.getObjEntities().iterator();
 				while (entities.hasNext()) {
-					ObjEntity e = (ObjEntity) entities.next();
-					nodesByEntityName.put(e.getName(), node);
+					ObjEntity e = (ObjEntity)entities.next();
+					this.nodesByEntityName.put(e.getName(), node);
 				}
 
-				entities = map.getDbEntitiesAsList().iterator();
+				entities = map.getDbEntities().iterator();
 				while (entities.hasNext()) {
-					DbEntity e = (DbEntity) entities.next();
-					nodesByDbEntityName.put(e.getName(), node);
+					DbEntity e = (DbEntity)entities.next();
+					this.nodesByDbEntityName.put(e.getName(), node);
 				}
 			}
 		}
@@ -317,18 +317,18 @@ public class DataDomain implements QueryEngine {
 			DataNode node = (DataNode) nodes.next();
 			Iterator nodeMaps = node.getDataMaps().iterator();
 			while (nodeMaps.hasNext()) {
-				DataMap map = (DataMap) nodeMaps.next();
+				DataMap map = (DataMap)nodeMaps.next();
 				this.addMap(map);
 
-				Iterator it = map.getObjEntitiesAsList().iterator();
+				Iterator it = map.getObjEntities().iterator();
 				while (it.hasNext()) {
-					ObjEntity e = (ObjEntity) it.next();
+					ObjEntity e = (ObjEntity)it.next();
 					nodesByEntityName.put(e.getName(), node);
 				}
 
-				it = map.getDbEntitiesAsList().iterator();
+				it = map.getDbEntities().iterator();
 				while (it.hasNext()) {
-					DbEntity e = (DbEntity) it.next();
+					DbEntity e = (DbEntity)it.next();
 					nodesByDbEntityName.put(e.getName(), node);
 				}
 			}

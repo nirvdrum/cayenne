@@ -165,8 +165,8 @@ public class ProjectTraversal {
             handler.projectNode(mapPath);
 
             if (handler.shouldReadChildren(map, path)) {
-                this.traverseEntities(map.getObjEntitiesAsList().iterator(), mapPath);
-                this.traverseEntities(map.getDbEntitiesAsList().iterator(), mapPath);
+                this.traverseEntities(map.getObjEntities().iterator(), mapPath);
+                this.traverseEntities(map.getDbEntities().iterator(), mapPath);
             }
         }
     }

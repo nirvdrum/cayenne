@@ -124,7 +124,7 @@ public class CayenneGenerator extends Task {
 	protected void processMap() throws Exception {
 		DataMap dataMap = loadDataMap();
 		generator.setTimestamp(map.lastModified());
-		generator.setObjEntities(dataMap.getObjEntitiesAsList());
+		generator.setObjEntities(new ArrayList(dataMap.getObjEntities()));
 		generator.validateAttributes();
 		generator.execute();
 	}

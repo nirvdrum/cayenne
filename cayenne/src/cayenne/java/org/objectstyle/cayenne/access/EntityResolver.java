@@ -180,7 +180,7 @@ public class EntityResolver {
         Iterator mapIterator = maps.iterator();
         while (mapIterator.hasNext()) {
             DataMap thisMap = (DataMap) mapIterator.next();
-            Iterator objEntities = thisMap.getObjEntitiesAsList().iterator();
+            Iterator objEntities = thisMap.getObjEntities().iterator();
             while (objEntities.hasNext()) {
                 ObjEntity oe = (ObjEntity)objEntities.next();
                 DbEntity de = oe.getDbEntity();

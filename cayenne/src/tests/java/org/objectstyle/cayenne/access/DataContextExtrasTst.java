@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -193,7 +194,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         // this should cause PK generation exception in commit later
         DataMap map = (DataMap)getNode().getDataMaps().iterator().next();
 
-        gen.dropAutoPk(getNode(), map.getDbEntitiesAsList());
+        gen.dropAutoPk(getNode(), new ArrayList(map.getDbEntities()));
 
         // disable logging for thrown exceptions
 		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);

@@ -104,7 +104,7 @@ public class ObjEntityValidator extends TreeNodeValidator {
         }
         
         // check for duplicate class names in the parent context
-        Iterator it = map.getObjEntitiesAsList().iterator();
+        Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity otherEnt = (ObjEntity) it.next();
             if (otherEnt == ent) {
@@ -135,7 +135,7 @@ public class ObjEntityValidator extends TreeNodeValidator {
         }
 
         // check for duplicate names in the parent context
-        Iterator it = map.getObjEntitiesAsList().iterator();
+        Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity otherEnt = (ObjEntity) it.next();
             if (otherEnt == ent) {

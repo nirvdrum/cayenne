@@ -176,14 +176,10 @@ public class DbEntityPane
             updateState(true);
 
             // build a list consisting of non-derived entities
-            java.util.List ents = new ArrayList();
+            java.util.List ents = new ArrayList(64);
             ents.add("");
 
-            Iterator it =
-                mediator
-                    .getCurrentDataMap()
-                    .getDbEntitiesAsList(true)
-                    .iterator();
+            Iterator it = mediator.getCurrentDataMap().getDbEntities(true).iterator();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity) it.next();
                 if (!(ent instanceof DerivedDbEntity)) {
@@ -191,8 +187,7 @@ public class DbEntityPane
                 }
             }
 
-            DefaultComboBoxModel model =
-                new DefaultComboBoxModel(ents.toArray());
+            DefaultComboBoxModel model = new DefaultComboBoxModel(ents.toArray());
             DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
             if (parent != null) {
                 model.setSelectedItem(parent.getName());

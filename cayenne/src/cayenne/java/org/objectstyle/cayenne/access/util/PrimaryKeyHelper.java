@@ -244,11 +244,9 @@ public class PrimaryKeyHelper {
 	}
 
 	private List collectAllDbEntities() {
-		List entities = new ArrayList();
-		for (Iterator i = queryEngine.getDataMaps().iterator();
-			i.hasNext();
-			) {
-			entities.addAll(((DataMap) i.next()).getDbEntitiesAsList());
+		List entities = new ArrayList(32);
+		for (Iterator i = queryEngine.getDataMaps().iterator(); i.hasNext();) {
+			entities.addAll(((DataMap)i.next()).getDbEntities());
 		}
 		return entities;
 	}
@@ -259,14 +257,13 @@ public class PrimaryKeyHelper {
 		indexedDbEntities = new HashMap(dbEntitiesToResolve.size());
 		for (Iterator i = dbEntitiesToResolve.iterator(); i.hasNext();) {
 			DbEntity origin = (DbEntity) i.next();
-			for (Iterator j = origin.getRelationshipMap().values().iterator();
-				j.hasNext();
-				) {
+			for (Iterator j = origin.getRelationships().iterator(); j.hasNext();) {
 				DbRelationship relation = (DbRelationship) j.next();
 				if (relation.isToDependentPK()) {
 					DbEntity dst = (DbEntity) relation.getTargetEntity();
-					if (origin.equals(dst))
+					if (origin.equals(dst)) {
 						continue;
+					}
 					pkDependencyGraph.putArc(origin, dst, Boolean.TRUE);
 				}
 			}
@@ -274,8 +271,9 @@ public class PrimaryKeyHelper {
 		int index = 0;
 		for (Iterator i = dbEntitiesToResolve.iterator(); i.hasNext();) {
 			DbEntity entity = (DbEntity) i.next();
-			if (!pkDependencyGraph.containsVertex(entity))
+			if (!pkDependencyGraph.containsVertex(entity)) {
 				indexedDbEntities.put(entity, new Integer(index++));
+			}
 		}
 		boolean acyclic = GraphUtils.isAcyclic(pkDependencyGraph);
 		if (acyclic) {
@@ -305,8 +303,9 @@ public class PrimaryKeyHelper {
 
 	private class DbEntityComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			if (o1.equals(o2))
+			if (o1.equals(o2)) {
 				return 0;
+			}
 			Integer index1 = (Integer) indexedDbEntities.get((DbEntity) o1);
 			Integer index2 = (Integer) indexedDbEntities.get((DbEntity) o2);
 			return ComparatorUtils.NATURAL_COMPARATOR.compare(index1, index2);
@@ -315,8 +314,9 @@ public class PrimaryKeyHelper {
 
 	private class ObjEntityComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			if (o1.equals(o2))
+			if (o1.equals(o2)) {
 				return 0;
+			}
 			DbEntity e1 = ((ObjEntity) o1).getDbEntity();
 			DbEntity e2 = ((ObjEntity) o2).getDbEntity();
 			return dbEntityComparator.compare(e1, e2);

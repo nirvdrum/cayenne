@@ -225,8 +225,7 @@ public class ObjEntityPane
 
         Vector combo_entries = new Vector();
         DataMap map = mediator.getCurrentDataMap();
-        java.util.List entities = map.getDbEntitiesAsList();
-        Iterator iter = entities.iterator();
+        Iterator iter = map.getDbEntities().iterator();
         // First add empty element.
         EntityWrapper wrap = new EntityWrapper(null);
         selected_entry = wrap;

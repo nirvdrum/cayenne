@@ -105,7 +105,7 @@ public class PackageMenuAction extends CayenneAction {
             return;
         // Go through all obj entities in the current data map and
         // set their package names.
-        Iterator entities = map.getObjEntitiesAsList().iterator();
+        Iterator entities = map.getObjEntities().iterator();
         while (entities.hasNext()) {
         	ObjEntity entity = (ObjEntity)entities.next();
             String name = entity.getClassName();

@@ -96,8 +96,7 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_ENTITY_TAG = "db-entity";
     public static final String OBJ_ENTITY_TAG = "obj-entity";
     public static final String DB_ATTRIBUTE_TAG = "db-attribute";
-    public static final String DB_ATTRIBUTE_DERIVED_TAG =
-        "db-attribute-derived";
+    public static final String DB_ATTRIBUTE_DERIVED_TAG = "db-attribute-derived";
     public static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
     public static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
     public static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
@@ -1144,7 +1143,7 @@ public class MapLoader extends DefaultHandler {
     }
 
     protected List sortedRegularDbEntities(DataMap map) {
-        Iterator it = map.getDbEntitiesAsList().iterator();
+        Iterator it = map.getDbEntities().iterator();
         List derived = new ArrayList();
         while (it.hasNext()) {
             Object ent = it.next();
@@ -1153,15 +1152,13 @@ public class MapLoader extends DefaultHandler {
             }
         }
         if (derived.size() > 1) {
-            Collections.sort(
-                derived,
-                new PropertyComparator("name", DbEntity.class));
+            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
         }
         return derived;
     }
 
     protected List sortedDerivedDbEntities(DataMap map) {
-        Iterator it = map.getDbEntitiesAsList().iterator();
+        Iterator it = map.getDbEntities().iterator();
         List derived = new ArrayList();
         while (it.hasNext()) {
             Object ent = it.next();
@@ -1170,15 +1167,13 @@ public class MapLoader extends DefaultHandler {
             }
         }
         if (derived.size() > 1) {
-            Collections.sort(
-                derived,
-                new PropertyComparator("name", DbEntity.class));
+            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
         }
         return derived;
     }
 
     protected List sortedObjEntities(DataMap map) {
-        List list = new ArrayList(map.getObjEntitiesAsList());
+        List list = new ArrayList(map.getObjEntities());
         Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
         return list;
     }

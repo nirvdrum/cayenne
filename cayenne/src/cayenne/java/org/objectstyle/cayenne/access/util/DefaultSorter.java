@@ -131,21 +131,17 @@ public class DefaultSorter implements DependencySorter {
             return;
         }
 
-        Collection tables = new ArrayList();
-        dbEntityToTableMap = new HashMap();
-        reflexiveDbEntities = new HashMap();
-        for (Iterator i = queryEngine.getDataMaps().iterator();
-            i.hasNext();
-            ) {
+        Collection tables = new ArrayList(64);
+        dbEntityToTableMap = new HashMap(64);
+        reflexiveDbEntities = new HashMap(32);
+        for (Iterator i = queryEngine.getDataMaps().iterator(); i.hasNext();) {
             DataMap map = (DataMap) i.next();
-            Iterator entitiesToConvert = map.getDbEntitiesAsList().iterator();
+            Iterator entitiesToConvert = map.getDbEntities().iterator();
             while (entitiesToConvert.hasNext()) {
-                DbEntity entity = (DbEntity) entitiesToConvert.next();
-                Table table =
-                    new Table(
-                        entity.getCatalog(),
-                        entity.getSchema(),
-                        entity.getName());
+                DbEntity entity = (DbEntity)entitiesToConvert.next();
+                Table table = new Table(entity.getCatalog(),
+                						entity.getSchema(),
+                						entity.getName());
                 fillInMetadata(table, entity);
                 dbEntityToTableMap.put(entity, table);
                 tables.add(table);

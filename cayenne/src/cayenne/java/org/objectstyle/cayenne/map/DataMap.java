@@ -61,7 +61,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 
 import org.apache.log4j.Logger;
@@ -87,6 +86,7 @@ public class DataMap {
      * Contains a list of DataMaps that are used by this map.
      */
 	protected List dependencies = new ArrayList();
+	// read-through reference for public access to the dependencies list
 	protected List dependenciesRef = Collections.unmodifiableList(dependencies);
 
     /** 
@@ -94,8 +94,11 @@ public class DataMap {
      * The name of ObjEntity serves as a key. 
      */
     private CayenneMap objEntityMap = new CayenneMap(this);
+
+	// read-through reference for public access to the entire objEntityMap
 	private SortedMap objEntityMapRef = Collections.unmodifiableSortedMap(objEntityMap);
-	private Set objEntityNamesRef = Collections.unmodifiableSet(objEntityMap.keySet());
+
+	// read-through reference for public access to the ObjEntities
 	private Collection objEntityValuesRef = Collections.unmodifiableCollection(objEntityMap.values());
 
     /**
@@ -104,7 +107,12 @@ public class DataMap {
      * as a key.
      */
     private CayenneMap dbEntityMap = new CayenneMap(this);
-    private SortedMap dbEntityMapRef = Collections.unmodifiableSortedMap(dbEntityMap);
+
+	// read-through reference for public access to the entire dbEntityMap
+	private SortedMap dbEntityMapRef = Collections.unmodifiableSortedMap(dbEntityMap);
+
+	// read-through reference for public access to the DbEntities
+	private Collection dbEntityValuesRef = Collections.unmodifiableCollection(dbEntityMap.values());
 
     /**
      * Sorts an array of DataMaps in the right save order to satisfy
@@ -210,14 +218,14 @@ public class DataMap {
      * </i></p>
      */
     public void mergeWithDataMap(DataMap map) {
-        Iterator dbs = map.getDbEntitiesAsList().iterator();
+        Iterator dbs = new ArrayList(map.getDbEntities()).iterator();
         while (dbs.hasNext()) {
             DbEntity ent = (DbEntity) dbs.next();
             this.removeDbEntity(ent.getName());
             this.addDbEntity(ent);
         }
 
-        Iterator objs = map.getObjEntitiesAsList().iterator();
+        Iterator objs = new ArrayList(map.getObjEntities()).iterator();
         while (objs.hasNext()) {
             ObjEntity ent = (ObjEntity) objs.next();
             this.removeObjEntity(ent.getName());
@@ -284,7 +292,7 @@ public class DataMap {
 
 	/**
 	 * Returns a list of ObjEntities stored in this DataMap.
-	 * @!deprecated Since 1.0 Beta1; use #getObjEntities() instead.
+	 * @deprecated Since 1.0 Beta1; use #getObjEntities() instead.
 	 */
 	public List getObjEntitiesAsList() {
 		return this.getObjEntitiesAsList(false);
@@ -293,21 +301,10 @@ public class DataMap {
 	/**
 	 * Returns all ObjEntities in this DataMap, including entities
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
-	 * @!deprecated Since 1.0 Beta1; use #getObjEntities(boolean) instead.
+	 * @deprecated Since 1.0 Beta1; use #getObjEntities(boolean) instead.
 	 */
 	public List getObjEntitiesAsList(boolean includeDeps) {
-		List ents = new ArrayList(objEntityMap.values());
-
-		if (includeDeps) {
-			Iterator it = this.getDependencies().iterator();
-			while (it.hasNext()) {
-				DataMap dep = (DataMap) it.next();
-				// using "false" to avoid problems with circular dependencies
-				ents.addAll(dep.getObjEntitiesAsList(false));
-			}
-		}
-
-		return ents;
+		return new ArrayList(this.getObjEntities(includeDeps));
 	}
 
 	/**
@@ -322,12 +319,24 @@ public class DataMap {
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
 	 */
 	public Collection getObjEntities(boolean includeDeps) {
-		throw new UnsupportedOperationException("NYI!");
+		if (!includeDeps || (includeDeps && this.getDependencies().isEmpty())) {
+			return objEntityValuesRef;
+		}
+		else {
+			// create a copy until we can start to cache allObjEnts as well
+			List allObjEnts = new ArrayList(objEntityValuesRef);
+			Iterator dependentMaps = this.getDependencies().iterator();
+			while (dependentMaps.hasNext()) {
+				DataMap depMap = (DataMap)dependentMaps.next();
+				allObjEnts.addAll(depMap.getObjEntities());
+			}
+			return allObjEnts;
+		}
 	}
 
 	/**
 	 * Returns all DbEntities in this DataMap.
-	 * @!deprecated Since 1.0 Beta1; use #getDbEntities() instead.
+	 * @deprecated Since 1.0 Beta1; use #getDbEntities() instead.
 	 */
 	public List getDbEntitiesAsList() {
 		return this.getDbEntitiesAsList(false);
@@ -336,20 +345,10 @@ public class DataMap {
 	/**
 	 * Returns all DbEntities in this DataMap, including entities
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
-	 * @!deprecated Since 1.0 Beta1; use #getDbEntities(boolean) instead.
+	 * @deprecated Since 1.0 Beta1; use #getDbEntities(boolean) instead.
 	 */
 	public List getDbEntitiesAsList(boolean includeDeps) {
-		List ents = new ArrayList(dbEntityMap.values());
-
-		if (includeDeps) {
-			Iterator it = this.getDependencies().iterator();
-			while (it.hasNext()) {
-				DataMap dep = (DataMap) it.next();
-				// using "false" to avoid problems with circular dependencies
-				ents.addAll(dep.getDbEntitiesAsList(false));
-			}
-		}
-		return ents;
+		return new ArrayList(this.getDbEntities(includeDeps));
 	}
 
 	/**
@@ -364,7 +363,19 @@ public class DataMap {
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
 	 */
 	public Collection getDbEntities(boolean includeDeps) {
-		throw new UnsupportedOperationException("NYI!");
+		if (!includeDeps || (includeDeps && this.getDependencies().isEmpty())) {
+			return dbEntityValuesRef;
+		}
+		else {
+			// create a copy until we can start to cache allDbEnts as well
+			List allDbEnts = new ArrayList(dbEntityValuesRef);
+			Iterator dependentMaps = this.getDependencies().iterator();
+			while (dependentMaps.hasNext()) {
+				DataMap depMap = (DataMap)dependentMaps.next();
+				allDbEnts.addAll(depMap.getDbEntities());
+			}
+			return allDbEnts;
+		}
 	}
 
     /**
@@ -444,7 +455,7 @@ public class DataMap {
         }
 
 		List result = new ArrayList();
-        Iterator iter = this.getObjEntitiesAsList(true).iterator();
+        Iterator iter = this.getObjEntities(true).iterator();
         while (iter.hasNext()) {
             ObjEntity objEnt = (ObjEntity) iter.next();
             if (objEnt.getDbEntity() == dbEntity) {
@@ -476,9 +487,10 @@ public class DataMap {
 
         dbEntityMap.remove(dbEntityName);
 
-        Iterator dbEnts = this.getDbEntitiesAsList().iterator();
+        Iterator dbEnts = this.getDbEntities().iterator();
         while (dbEnts.hasNext()) {
         	DbEntity dbEnt = (DbEntity)dbEnts.next();
+			// @HH: write a test for this (concurrent relationship mods)
             Iterator rels = dbEnt.getRelationships().iterator();
             while (rels.hasNext()) {
                 DbRelationship rel = (DbRelationship)rels.next();
@@ -489,7 +501,7 @@ public class DataMap {
         }
 
         // Remove all obj relationships referencing removed DbRelationships.
-        Iterator objEnts = this.getObjEntityMap().values().iterator();
+        Iterator objEnts = this.getObjEntities().iterator();
         while (objEnts.hasNext()) {
             ObjEntity objEnt = (ObjEntity)objEnts.next();
             if (objEnt.getDbEntity() == dbEntityToDelete) {

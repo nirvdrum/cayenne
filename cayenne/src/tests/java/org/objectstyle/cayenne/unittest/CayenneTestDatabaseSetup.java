@@ -62,6 +62,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -101,7 +102,7 @@ public class CayenneTestDatabaseSetup {
     public void cleanTableData() throws Exception {
         Connection conn = resources.getSharedConnection();
 
-        List list = dbEntitiesInInsertOrder();
+        List list = this.dbEntitiesInInsertOrder();
         try {
             if (conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
@@ -142,7 +143,7 @@ public class CayenneTestDatabaseSetup {
         Connection conn = resources.getSharedConnection();
         DataNode node = resources.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        List list = dbEntitiesInInsertOrder();
+        List list = this.dbEntitiesInInsertOrder();
 
         try {
             delegate.willDropTables(conn, map);
@@ -211,9 +212,8 @@ public class CayenneTestDatabaseSetup {
         // create primary key support
         DataNode node = resources.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        adapter.getPkGenerator().createAutoPk(
-            node,
-            ((DataMap)node.getDataMaps().iterator().next()).getDbEntitiesAsList());
+        Collection ents = ((DataMap)node.getDataMaps().iterator().next()).getDbEntities();
+        adapter.getPkGenerator().createAutoPk(node, new ArrayList(ents));
     }
 
     /** 
@@ -225,20 +225,20 @@ public class CayenneTestDatabaseSetup {
     public void createPkSupportForMapEntities(DataNode node) throws Exception {
         Iterator dataMaps = node.getDataMaps().iterator();
         while (dataMaps.hasNext()) {
-            node.getAdapter().getPkGenerator().createAutoPk(
-                node,
-                ((DataMap)dataMaps.next()).getDbEntitiesAsList());
+			Collection ents = ((DataMap)dataMaps.next()).getDbEntities();
+            node.getAdapter().getPkGenerator().createAutoPk(node, new ArrayList(ents));
         }
     }
 
     /** Returns iterator of preprocessed table create queries */
     public Iterator tableCreateQueries() throws Exception {
-        List queries = new ArrayList();
         DbAdapter adapter = resources.getSharedNode().getAdapter();
         DbGenerator gen = new DbGenerator(adapter, map);
+		List orderedEnts = this.dbEntitiesInInsertOrder();
+		List queries = new ArrayList();
 
         // table definitions
-        Iterator it = dbEntitiesInInsertOrder().iterator();
+        Iterator it = orderedEnts.iterator();
         while (it.hasNext()) {
             DbEntity ent = (DbEntity) it.next();
             if (ent instanceof DerivedDbEntity) {
@@ -250,7 +250,7 @@ public class CayenneTestDatabaseSetup {
 
         // FK constraints
         if (adapter.supportsFkConstraints()) {
-            it = dbEntitiesInInsertOrder().iterator();
+            it = orderedEnts.iterator();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity) it.next();
                 if (ent instanceof DerivedDbEntity) {
@@ -265,14 +265,16 @@ public class CayenneTestDatabaseSetup {
         return queries.iterator();
     }
 
-    /** Helper method that orders DbEntities to satisfy referential
-     *  constraints and returns an ordered list. */
+    /**
+     * Helper method that orders DbEntities to satisfy referential
+     * constraints and returns an ordered list.
+     */
     private List dbEntitiesInInsertOrder() {
-        List list = map.getDbEntitiesAsList();
+        List entities = new ArrayList(map.getDbEntities());
 
         // filter out BLOB/CLOB tables if database does not support them
         if (!delegate.supportsLobs()) {
-            Iterator it = list.iterator();
+            Iterator it = entities.iterator();
             List filtered = new ArrayList();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity)it.next();
@@ -293,12 +295,12 @@ public class CayenneTestDatabaseSetup {
                 }
             }
 
-            list = filtered;
+            entities = filtered;
         }
 
         DataNode node = resources.getSharedNode();
-        node.getDependencySorter().sortDbEntities(list, false);
-        return list;
+        node.getDependencySorter().sortDbEntities(entities, false);
+        return entities;
     }
 
     /**

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.perform;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 import javax.sql.DataSource;
@@ -215,9 +217,8 @@ public class PerformMain {
             // generate pk's
             Iterator dataMaps = node.getDataMaps().iterator();
 			while (dataMaps.hasNext()) {
-                node.getAdapter().getPkGenerator().createAutoPk(
-                    node,
-                    ((DataMap)dataMaps.next()).getDbEntitiesAsList());
+				Collection ents = ((DataMap)dataMaps.next()).getDbEntities();
+                node.getAdapter().getPkGenerator().createAutoPk(node, new ArrayList(ents));
             }
 
             // domain

@@ -259,12 +259,11 @@ public class DbRelationshipPane
         table.getSelectionModel().addListSelectionListener(this);
     }
 
-    /** Create DefaultComboBoxModel with all obj entity names. */
+    /** Create DefaultComboBoxModel with all db entity names. */
     private DefaultComboBoxModel createComboModel() {
         DataMap map = mediator.getCurrentDataMap();
-        Vector elements = new Vector();
-        java.util.List db_entities = map.getDbEntitiesAsList(true);
-        Iterator iter = db_entities.iterator();
+        Vector elements = new Vector(64);
+        Iterator iter = map.getDbEntities(true).iterator();
         while (iter.hasNext()) {
             DbEntity entity = (DbEntity) iter.next();
             String name = entity.getName();

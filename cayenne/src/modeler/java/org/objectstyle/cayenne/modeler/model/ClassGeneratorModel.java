@@ -42,7 +42,7 @@ public class ClassGeneratorModel extends BasicModel {
         }
 
         List tmp = new ArrayList();
-        Iterator it = map.getObjEntitiesAsList().iterator();
+        Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity ent = (ObjEntity) it.next();
 

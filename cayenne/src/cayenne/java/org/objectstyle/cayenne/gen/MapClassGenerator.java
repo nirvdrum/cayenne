@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.gen;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -85,7 +86,7 @@ public abstract class MapClassGenerator {
     public MapClassGenerator() {}
 
     public MapClassGenerator(DataMap map) {
-        this(map.getObjEntitiesAsList());
+        this(new ArrayList(map.getObjEntities()));
     }
 
     public MapClassGenerator(List objEntities) {

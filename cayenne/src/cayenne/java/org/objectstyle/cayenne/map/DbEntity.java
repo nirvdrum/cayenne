@@ -187,7 +187,7 @@ public class DbEntity extends Entity {
 
         DataMap map = getDataMap();
         if (map != null) {
-            Iterator ents = map.getDbEntitiesAsList().iterator();
+            Iterator ents = map.getDbEntities().iterator();
             while (ents.hasNext()) {
             	DbEntity ent = (DbEntity)ents.next();
                 Iterator it = ent.getRelationships().iterator();
