@@ -186,7 +186,7 @@ public class ObjEntity extends Entity {
     /**
      * Returns the type of lock used by this ObjEntity. If this 
      * entity is not locked, this method would look in a super entity
-     * recyrsively, until it finds a lock somewhere in the inheritance
+     * recursively, until it finds a lock somewhere in the inheritance
      * hierarchy.
      * 
      * @since 1.1
