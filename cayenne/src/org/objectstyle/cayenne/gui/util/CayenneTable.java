@@ -165,10 +165,4 @@ public class CayenneTable extends JTable {
 		}
 		return edit;
 	}
-	/**
-	 * @see javax.swing.event.ListSelectionListener#valueChanged(ListSelectionEvent)
-	 */
-	public void valueChanged(ListSelectionEvent e) {
-		super.valueChanged(e);
-	}
 }
