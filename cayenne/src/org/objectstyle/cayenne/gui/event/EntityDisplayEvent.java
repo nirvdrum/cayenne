@@ -60,83 +60,50 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 
-/** 
- * This event is sent when the current entity has model changed.
- * It will trigger reloading of detail views of entities.
+/**
+ * Represents a display event of an Entity.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
-public class EntityDisplayEvent extends EventObject {
+public class EntityDisplayEvent extends DataMapDisplayEvent {
 	protected Entity entity;
-	protected DataMap dataMap;
-	protected DataDomain domain;
-	protected DataNode node;
 
 	/** Reset the tab display to tab 0 */
-	protected boolean tabReset = false;
+	protected boolean tabReset;
 
 	/** True if different from current entity */
 	protected boolean entityChanged = true;
-
 	protected boolean unselectAttributes;
 
-	public EntityDisplayEvent(Object src, Entity temp_entity) {
-		this(src, temp_entity, false);
-	}
-
-	public EntityDisplayEvent(Object src, Entity entity, boolean tabReset) {
-		super(src);
-		this.entity = entity;
-		this.tabReset = tabReset;
+	public EntityDisplayEvent(Object src, Entity entity) {
+		this(src, entity, null, null, null);
 	}
 
 	public EntityDisplayEvent(
 		Object src,
 		Entity entity,
-		DataMap dataMap,
+		DataMap map,
 		DataDomain domain) {
-		this(src, entity, dataMap, domain, false);
+
+		this(src, entity, map, null, domain);
 	}
 
 	public EntityDisplayEvent(
 		Object src,
 		Entity entity,
-		DataMap dataMap,
-		DataDomain domain,
-		boolean tabReset) {
-			
-		this(src, entity, tabReset);
-		this.dataMap = dataMap;
-		this.domain = domain;
-	}
-
-	public EntityDisplayEvent(
-		Object src,
-		Entity entity,
-		DataMap dataMap,
+		DataMap map,
 		DataNode node,
 		DataDomain domain) {
-			
-		this(src, entity, dataMap, domain);
-		this.node = node;
+
+		super(src, map, domain, node);
+		this.entity = entity;
+		setDataMapChanged(false);
 	}
 
 	/** Get [new current] entity (obj or db). */
 	public Entity getEntity() {
 		return entity;
-	}
-
-	/** Get dataMap. */
-	public DataMap getDataMap() {
-		return dataMap;
-	}
-
-	/** Get domain for this data map. */
-	public DataDomain getDomain() {
-		return domain;
-	}
-
-	/** Get data node (data source) associated with this data map. */
-	public DataNode getDataNode() {
-		return node;
 	}
 
 	public boolean isTabReset() {
@@ -168,49 +135,12 @@ public class EntityDisplayEvent extends EventObject {
 	}
 
 	/**
-	 * Returns the node.
-	 * @return DataNode
-	 */
-	public DataNode getNode() {
-		return node;
-	}
-
-
-	/**
-	 * Sets the dataMap.
-	 * @param dataMap The dataMap to set
-	 */
-	public void setDataMap(DataMap dataMap) {
-		this.dataMap = dataMap;
-	}
-
-
-	/**
-	 * Sets the domain.
-	 * @param domain The domain to set
-	 */
-	public void setDomain(DataDomain domain) {
-		this.domain = domain;
-	}
-
-
-	/**
 	 * Sets the entity.
 	 * @param entity The entity to set
 	 */
 	public void setEntity(Entity entity) {
 		this.entity = entity;
 	}
-
-
-	/**
-	 * Sets the node.
-	 * @param node The node to set
-	 */
-	public void setNode(DataNode node) {
-		this.node = node;
-	}
-
 
 	/**
 	 * Sets the tabReset.
@@ -219,6 +149,4 @@ public class EntityDisplayEvent extends EventObject {
 	public void setTabReset(boolean tabReset) {
 		this.tabReset = tabReset;
 	}
-
-
 }

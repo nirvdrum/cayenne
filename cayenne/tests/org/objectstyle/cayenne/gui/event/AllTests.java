@@ -67,7 +67,7 @@ public class AllTests {
 		suite.addTestSuite(EntityEventTst.class);
 		suite.addTestSuite(AttributeEventTst.class);
 		suite.addTestSuite(RelationshipEventTst.class);
-		suite.addTestSuite(ModelerDisplayEventTst.class);
+		suite.addTestSuite(DomainDisplayEventTst.class);
 		return suite;
 	}
 }

@@ -61,7 +61,10 @@ import javax.swing.JFrame;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * DataDomain validation message.
@@ -86,8 +89,9 @@ public class EntityErrorMsg extends ErrorMsg {
 	}
 
 	public void displayField(Mediator mediator, JFrame frame) {
-		EntityDisplayEvent event;
-		event = new EntityDisplayEvent(frame, entity, map, domain, true);
+		EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
+		event.setTabReset(true);
+		
 		if (entity instanceof ObjEntity) {
 			mediator.fireObjEntityDisplayEvent(event);
 		} else if (entity instanceof DbEntity) {

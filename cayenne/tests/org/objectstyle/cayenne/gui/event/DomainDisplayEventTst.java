@@ -57,21 +57,25 @@ package org.objectstyle.cayenne.gui.event;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.access.DataDomain;
+
 /**
  * @author Andrei Adamchik
  */
-public class ModelerDisplayEventTst extends TestCase {
+public class DomainDisplayEventTst extends TestCase {
 
 	/**
 	 * Constructor for ModelerDisplayEventTst.
 	 * @param arg0
 	 */
-	public ModelerDisplayEventTst(String arg0) {
+	public DomainDisplayEventTst(String arg0) {
 		super(arg0);
 	}
 	
-	public void testNoop() throws Exception {
-		
+	public void testDomain() throws Exception {
+		DataDomain d = new DataDomain("abc");
+		DomainDisplayEvent e = new DomainDisplayEvent(new Object(), d);
+		assertSame(d, e.getDomain());
 	}
 
 }

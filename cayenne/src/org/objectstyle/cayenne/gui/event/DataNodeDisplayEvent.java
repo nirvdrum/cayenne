@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,43 +52,52 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
-import java.util.*;
+ */
+package org.objectstyle.cayenne.gui.event;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.*;
 
-/** Event meaning change of the current DataNode.
-  * Contains in it the reference to the domain, to which this node belongs. 
-  */
-public class DataNodeDisplayEvent extends EventObject
-{
-	private DataDomain domain;
-	private DataNode node = null;
+/**
+ * Represents a display event of a DataNode.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class DataNodeDisplayEvent extends DomainDisplayEvent {
+
+	protected DataNode dataNode;
+	
 	/** True if data node is different from the current data node. */
-	private boolean dataNodeChanged = true;
-	
+	protected boolean dataNodeChanged = true;
+
 	/** Current DataNode changed. */
-	public DataNodeDisplayEvent(Object src, DataDomain temp_domain
-							 , DataNode temp_node)
-	{
-		super(src);
-		domain = temp_domain;
-		node = temp_node;
+	public DataNodeDisplayEvent(Object src, DataDomain domain, DataNode node) {
+		super(src, domain);
+		this.dataNode = node;
+		setDomainChanged(false);
 	}
-	
-	/** Get domain for this data map. */
-	public DataDomain getDomain() {return domain;}
 
 	/** Get data node (data source) associated with this data map. */
-	public DataNode getDataNode() {return node;}
+	public DataNode getDataNode() {
+		return dataNode;
+	}
 
 	/** Returns true if data node is different from the current data node. */
-	public boolean isDataNodeChanged() {return dataNodeChanged;}
-	public void setDataNodeChanged(boolean temp){
+	public boolean isDataNodeChanged() {
+		return dataNodeChanged;
+	}
+	
+	public void setDataNodeChanged(boolean temp) {
 		dataNodeChanged = temp;
 	}
+	/**
+	 * Sets the dataNode.
+	 * @param dataNode The dataNode to set
+	 */
+	public void setDataNode(DataNode dataNode) {
+		this.dataNode = dataNode;
+	}
+
 
 }

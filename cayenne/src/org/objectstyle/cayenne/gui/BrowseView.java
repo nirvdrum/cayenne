@@ -808,12 +808,12 @@ public class BrowseView
 			}
 		} else if (obj instanceof Entity) {
 			EntityDisplayEvent e =
-				new EntityDisplayEvent(this, (Entity) obj, false);
+				new EntityDisplayEvent(this, (Entity) obj);
 			e.setUnselectAttributes(true);
 			if (data.length == 4) {
 				e.setDataMap((DataMap) data[data.length - 2]);
 				e.setDomain((DataDomain) data[data.length - 4]);
-				e.setNode((DataNode) data[data.length - 3]);
+				e.setDataNode((DataNode) data[data.length - 3]);
 			} else if (data.length == 3) {
 				e.setDataMap((DataMap) data[data.length - 2]);
 				e.setDomain((DataDomain) data[data.length - 3]);

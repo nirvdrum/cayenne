@@ -53,36 +53,54 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.*;
+import java.util.EventObject;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.*;
 
-/** Event meaning change of the current Domain model.
-  * Contains in it the reference to the domain, to which this map belongs
-  * and (optionally) the Data Source assicuated with this map. */
-public class DomainDisplayEvent extends EventObject
-{
-	private DataDomain domain;
-	/** Returns true if domain is different from the current domain. */
-	private boolean domainChanged = true;
+/**
+ * Represents a display event of a DataDomain.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class DomainDisplayEvent extends EventObject {
+	protected DataDomain domain;
+	protected boolean domainChanged = true;
 
-	
-	public DomainDisplayEvent(Object src, DataDomain temp_domain)
-	{
+	public DomainDisplayEvent(Object src, DataDomain domain) {
 		super(src);
-		domain = temp_domain;
+		this.domain = domain;
 	}
-	
-	/** Get domain for this data map. */
-	public DataDomain getDomain() {return domain;}
 
-	/** Returns true if domain is different from the current domain. */
-	public boolean isDomainChanged() {return domainChanged;}
-	public void setDomainChanged(boolean temp){
-		domainChanged = temp;
+	/** Get domain for this data map. */
+	public DataDomain getDomain() {
+		return domain;
 	}
 	
+	/**
+	 * Sets the domain.
+	 * @param domain The domain to set
+	 */
+	public void setDomain(DataDomain domain) {
+		this.domain = domain;
+	}
+	
+	/**
+	 * Returns the domainChanged.
+	 * @return boolean
+	 */
+	public boolean isDomainChanged() {
+		return domainChanged;
+	}
+
+
+	/**
+	 * Sets the domainChanged.
+	 * @param domainChanged The domainChanged to set
+	 */
+	public void setDomainChanged(boolean domainChanged) {
+		this.domainChanged = domainChanged;
+	}
 }

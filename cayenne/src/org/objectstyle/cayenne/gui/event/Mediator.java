@@ -337,8 +337,10 @@ public class Mediator {
 	}
 
 	public void fireDomainDisplayEvent(DomainDisplayEvent e) {
-		if (e.getDomain() == currentDomain)
+		if (e.getDomain() == currentDomain) {
 			e.setDomainChanged(false);
+		}
+		
 		clearState();
 		currentDomain = e.getDomain();
 		EventListener[] list;

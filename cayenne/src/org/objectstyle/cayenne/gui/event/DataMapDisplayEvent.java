@@ -61,58 +61,52 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.*;
 
-/** Event meaning change of the current DataMap model.
-  * Contains in it the reference to the domain, to which this map belongs
-  * and (optionally) the Data Source assicuated with this map. */
-public class DataMapDisplayEvent extends EventObject {
+/**
+ * Represents a display event of a DataMap.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class DataMapDisplayEvent extends DataNodeDisplayEvent {
 	protected DataMap dataMap;
-	protected DataDomain domain;
-	protected DataNode node = null;
 
 	/** True if different from current data map. */
-	private boolean dataMapChanged = true;
+	protected boolean dataMapChanged = true;
 
-	public DataMapDisplayEvent(
-		Object src,
-		DataMap dataMap,
-		DataDomain domain) {
-		super(src);
-		this.dataMap = dataMap;
-		this.domain = domain;
+	public DataMapDisplayEvent(Object src, DataMap map, DataDomain domain) {
+		this(src, map, domain, null);
 	}
 
-	/** Current DataMap changed. */
 	public DataMapDisplayEvent(
 		Object src,
-		DataMap dataMap,
+		DataMap map,
 		DataDomain domain,
 		DataNode node) {
-			
-		this(src, dataMap, domain);
-		this.node = node;
-	}
 
+		super(src, domain, node);
+		this.dataMap = map;
+		setDataNodeChanged(false);
+	}
 
 	/** Get dataMap wrapper. */
 	public DataMap getDataMap() {
 		return dataMap;
 	}
 	
-
-	/** Get domain for this data map. */
-	public DataDomain getDomain() {
-		return domain;
+	/**
+	 * Sets the dataMap.
+	 * @param dataMap The dataMap to set
+	 */
+	public void setDataMap(DataMap dataMap) {
+		this.dataMap = dataMap;
 	}
 
-	/** Get data node (data source) associated with this data map. */
-	public DataNode getDataNode() {
-		return node;
-	}
 
 	/** Returns true if data map is different from the current data map. */
 	public boolean isDataMapChanged() {
 		return dataMapChanged;
 	}
+	
 	public void setDataMapChanged(boolean temp) {
 		dataMapChanged = temp;
 	}
