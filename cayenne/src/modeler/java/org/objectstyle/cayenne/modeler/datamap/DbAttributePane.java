@@ -59,7 +59,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import org.apache.log4j.Logger;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
