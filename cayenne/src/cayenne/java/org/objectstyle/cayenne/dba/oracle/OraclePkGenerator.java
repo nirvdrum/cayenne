@@ -118,7 +118,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
     public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
         List sequences = getExistingSequences(node);
 
-        // create needed sequences
+        // drop obsolete sequences
         Iterator it = dbEntities.iterator();
         while (it.hasNext()) {
             DbEntity ent = (DbEntity) it.next();
