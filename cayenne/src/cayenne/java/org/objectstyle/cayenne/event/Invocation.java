@@ -194,11 +194,16 @@ public class Invocation extends Object {
 		return hash;
 	}
 
-	protected Method getMethod() {
+	public Method getMethod() {
 		return _method;
 	}
 
-	protected Object getTarget() {
+	public Object getTarget() {
 		return _target.get();
 	}
+
+	public Class[] getParameterTypes() {
+		return _parameterTypes;
+	}
+
 }
