@@ -82,7 +82,7 @@
     <!-- Reports failures.                             -->
     <!-- ============================================= -->
     <target name="unit-test-report" depends="unit-test" if="test.modeler.failure">
-    	<!-- HTML report is only generated on failyures for speed -->
+    	<!-- HTML report is only generated on failures for speed -->
     	<junitreport todir="${test.report}">
 			<fileset dir="${test.output}">
 				<include name="TEST-*.xml"/>

@@ -70,15 +70,23 @@
     	<java fork="true" classname="org.apache.tools.ant.Main" failonerror="true">
     		<arg value="-f"/>
     		<arg value="build-tests.xml"/>
-    		<arg value="unit-test-report"/>
+    		<arg value="unit-test-run"/>
     		
 			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
+			<sysproperty key="cayenne.test.report" value="${cayenne.test.report}"/>
 			<sysproperty key="ant.home" value="${ant.home}"/>
 			<sysproperty key="dist" value="${dist}"/>
 			<sysproperty key="test.filter" value="${test.filter}"/>
 			<classpath refid="classpath"/>
     	</java>
     </target>    
+    
+    <!-- ============================================= -->
+    <!-- Defines testing sequence                      -->
+    <!-- ============================================= -->
+    <target name="unit-test-run" depends="unit-test,unit-test-report-needed,unit-test-report">
+    	<fail message="Cayenne tests failed, see files in ${test.output} for details." if="test.cayenne.failure"/>
+    </target>
     
     <!-- ============================================= -->
     <!-- Runs Unit tests.                              -->
@@ -101,8 +109,8 @@
         
         <junit fork="false" 
                haltonfailure="no" 
-               errorProperty="test.cayenne.failure"
-               failureProperty="test.cayenne.failure">
+               errorProperty="cayenne.test.failure"
+               failureProperty="cayenne.test.failure">
                
             <formatter type="xml" usefile="true"/>
             <batchtest todir="${test.output}">
@@ -116,7 +124,7 @@
     <!-- ============================================= -->
     <!-- Reports failures.                             -->
     <!-- ============================================= -->
-    <target name="unit-test-report" depends="unit-test" if="test.cayenne.failure">
+    <target name="unit-test-report" depends="unit-test" if="cayenne.test.report.needed">
     	<!-- HTML report is only generated on failures for speed -->
     	<junitreport todir="${test.report}">
 			<fileset dir="${test.output}">
@@ -124,9 +132,17 @@
 			</fileset>
 			<report format="frames" todir="${test.report}"/>
 		</junitreport>
-		
-		
-        <fail message="Cayenne tests failed, see files in ${test.output} for details"/>
+    </target>
+    
+    <target name="unit-test-report-needed">
+         <!-- In case of failures, always run report,  -->
+         <!-- in case of success, only when asked.     -->
+         <condition property="cayenne.test.report.needed">
+         	<or>
+         		<isset property="cayenne.test.failure"/>
+         		<istrue value="${cayenne.test.report}"/>
+         	</or>
+         </condition>
     </target>
     
     <!-- This is a simple property check, misspelled property can still -->
