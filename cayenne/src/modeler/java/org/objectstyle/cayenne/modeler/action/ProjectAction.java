@@ -64,13 +64,26 @@ import org.objectstyle.cayenne.modeler.view.UnsavedChangesDialog;
 /**
  * @author Andrei Adamchik
  */
-public abstract class ProjectAction extends CayenneAction {
+public class ProjectAction extends CayenneAction {
+    public static final String ACTION_NAME = "Close Project";
+
+    public ProjectAction() {
+        super(ACTION_NAME);
+    }
+
     /**
      * Constructor for ProjectAction.
      * @param name
      */
     public ProjectAction(String name) {
         super(name);
+    }
+
+    /**
+     * Closes current project.
+     */
+    public void performAction(ActionEvent e) {
+        closeProject();
     }
 
     /** Returns true if successfully closed project, false otherwise. */

@@ -165,7 +165,6 @@ public class Editor
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
     // these all must be put in actions
-    protected JMenuItem closeProjectMenu = new JMenuItem("Close Project");
     protected JMenuItem exitMenu = new JMenuItem("Exit");
     protected JMenuItem generateMenu = new JMenuItem("Generate Classes");
     protected JMenuItem setPackageMenu =
@@ -291,7 +290,7 @@ public class Editor
 
         fileMenu.add(getAction(NewProjectAction.ACTION_NAME).buildMenu());
         fileMenu.add(getAction(OpenProjectAction.ACTION_NAME).buildMenu());
-        fileMenu.add(closeProjectMenu);
+        fileMenu.add(getAction(ProjectAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
         fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
@@ -330,9 +329,7 @@ public class Editor
     protected void initOther() {
         // "legacy" code - need to hook up all menus and toolbars with actions 
         disableMenu();
-        closeProjectMenu.setEnabled(false);
 
-        closeProjectMenu.addActionListener(this);
         exitMenu.addActionListener(this);
 
         generateMenu.addActionListener(this);
@@ -409,7 +406,7 @@ public class Editor
 
         disableMenu();
 
-        closeProjectMenu.setEnabled(false);
+        getAction(ProjectAction.ACTION_NAME).setEnabled(false);
         getAction(RemoveAction.ACTION_NAME).setName("Remove");
         getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
@@ -474,9 +471,7 @@ public class Editor
         try {
             Object src = e.getSource();
 
-            if (src == closeProjectMenu) {
-                ((ProjectAction) getAction(NewProjectAction.ACTION_NAME)).closeProject();
-            } else if (src == setPackageMenu) {
+            if (src == setPackageMenu) {
                 // Set the same package name for all obj entities.
                 setPackageName();
             } else if (src == generateMenu) {
@@ -622,7 +617,7 @@ public class Editor
     private void enableProjectMenu() {
         disableMenu();
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
-        closeProjectMenu.setEnabled(true);
+        getAction(ProjectAction.ACTION_NAME).setEnabled(true);
     }
 
     private void enableDomainMenu() {
