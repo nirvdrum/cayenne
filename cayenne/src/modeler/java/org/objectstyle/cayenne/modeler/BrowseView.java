@@ -62,8 +62,6 @@ import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
@@ -74,7 +72,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -105,8 +102,7 @@ import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
-import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.modeler.util.ProjectTreeWrapper;
 
 /** 
  * Tree of domains, data maps, data nodes (sources) and entities. 
@@ -150,8 +146,8 @@ public class BrowseView
         browseTree = new ProjectTree(Editor.getProject());
         browseTree.setCellRenderer(new BrowseViewRenderer());
         setViewportView(browseTree);
-        
-        model = (DefaultTreeModel)browseTree.getModel();
+
+        model = (DefaultTreeModel) browseTree.getModel();
         rootNode = (DefaultMutableTreeNode) model.getRoot();
 
         // listen for mouse events
@@ -187,56 +183,6 @@ public class BrowseView
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityListener(this);
         mediator.addDbEntityDisplayListener(this);
-    }
-
-    private DefaultMutableTreeNode loadDomain(DataDomain domain) {
-        // wrap in a tree node
-        DefaultMutableTreeNode domainTreeNode = new DefaultMutableTreeNode(domain, true);
-
-        Iterator mapIt = domain.getMapList().iterator();
-        while (mapIt.hasNext()) {
-            DefaultMutableTreeNode mapTreeNode = loadMap((DataMap) mapIt.next());
-            domainTreeNode.add(mapTreeNode);
-        }
-        Iterator nodeIt = domain.getDataNodeList().iterator();
-        while (nodeIt.hasNext()) {
-            DefaultMutableTreeNode nodeTreeNode = loadNode((DataNode) nodeIt.next());
-            domainTreeNode.add(nodeTreeNode);
-        }
-        return domainTreeNode;
-    }
-
-    private DefaultMutableTreeNode loadMap(DataMap map) {
-        DefaultMutableTreeNode mapTreeNode = new DefaultMutableTreeNode(map, true);
-
-        Iterator oeIt = map.getObjEntitiesAsList().iterator();
-        while (oeIt.hasNext()) {
-            Entity entity = (Entity) oeIt.next();
-            DefaultMutableTreeNode oeTreeNode = new DefaultMutableTreeNode(entity, false);
-            mapTreeNode.add(oeTreeNode);
-        }
-
-        List db_entities = map.getDbEntitiesAsList();
-        Iterator db_iter = db_entities.iterator();
-        while (db_iter.hasNext()) {
-            Entity entity = (Entity) db_iter.next();
-            DefaultMutableTreeNode db_entity_ele;
-            db_entity_ele = new DefaultMutableTreeNode(entity, false);
-            mapTreeNode.add(db_entity_ele);
-        }
-
-        return mapTreeNode;
-    }
-
-    private DefaultMutableTreeNode loadNode(DataNode node) {
-        DefaultMutableTreeNode node_ele;
-        node_ele = new DefaultMutableTreeNode(node, true);
-        DataMap[] maps = node.getDataMaps();
-        for (int j = 0; j < maps.length; j++) {
-            DefaultMutableTreeNode map_ele = loadMap(maps[j]);
-            node_ele.add(map_ele);
-        }
-        return node_ele;
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
@@ -302,8 +248,8 @@ public class BrowseView
     public void domainAdded(DomainEvent e) {
         if (e.getSource() == this)
             return;
-        DefaultMutableTreeNode node;
-        node = loadDomain(e.getDomain());
+        DefaultMutableTreeNode node =
+            ProjectTreeWrapper.getInstance().wrapProjectNode(e.getDomain());
         model.insertNodeInto(node, rootNode, rootNode.getChildCount());
     }
 
@@ -340,7 +286,8 @@ public class BrowseView
                         }
                     }
                     if (false == found) {
-                        DefaultMutableTreeNode map_ele = loadMap(maps[i]);
+                        DefaultMutableTreeNode map_ele =
+                            ProjectTreeWrapper.getInstance().wrapProjectNode(maps[i]);
                         model.insertNodeInto(map_ele, node, node.getChildCount());
                         logObj.debug("Added map " + maps[i].getName() + " to node");
                         break;
@@ -376,7 +323,7 @@ public class BrowseView
         if (null == parent)
             return;
         DefaultMutableTreeNode node;
-        node = loadNode(e.getDataNode());
+        node = ProjectTreeWrapper.getInstance().wrapProjectNode(e.getDataNode());
         model.insertNodeInto(node, parent, parent.getChildCount());
     }
 
@@ -409,7 +356,7 @@ public class BrowseView
         if (null == parent)
             return;
         DefaultMutableTreeNode node;
-        node = loadMap(e.getDataMap());
+        node = ProjectTreeWrapper.getInstance().wrapProjectNode(e.getDataMap());
         model.insertNodeInto(node, parent, parent.getChildCount());
     }
 

@@ -780,12 +780,7 @@ public class Editor
             }
         }
 
-        if (title != null) {
-            title = ModelerUtil.buildTitle(title);
-
-        }
-
-        setTitle(title);
+        setTitle(ModelerUtil.buildTitle(title));
     }
 
     /**
