@@ -1440,7 +1440,7 @@ public class DataContext implements QueryEngine, Serializable {
 	/**
 	 * Sets default for posting transaction events by new DataContexts.
 	 */
-	public void setTransactionEventsEnabledDefault(boolean onOrOff) {
+	public static void setTransactionEventsEnabledDefault(boolean onOrOff) {
 		postDataContextTransactionEventsDefault = onOrOff;
 	}
 
