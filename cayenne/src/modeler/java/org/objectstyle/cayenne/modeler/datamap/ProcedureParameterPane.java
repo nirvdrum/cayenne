@@ -74,6 +74,8 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.map.event.MapEvent;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -116,6 +118,9 @@ public class ProcedureParameterPane
                 ProcedureParameterPane.this.processExistingSelection();
             }
         });
+        
+        moveDown.addActionListener(this);
+        moveUp.addActionListener(this);
     }
 
     protected void init() {
@@ -201,11 +206,12 @@ public class ProcedureParameterPane
 
         // number column tweaking
         TableColumn numberColumn =
-            table.getColumnModel().getColumn(ProcedureParameterTableModel.PARAMETER_NUMBER);
+            table.getColumnModel().getColumn(
+                ProcedureParameterTableModel.PARAMETER_NUMBER);
         numberColumn.setPreferredWidth(35);
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-		renderer.setHorizontalAlignment(SwingConstants.CENTER);
-		numberColumn.setCellRenderer(renderer);
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
+        numberColumn.setCellRenderer(renderer);
 
         // name column tweaking
         TableColumn nameColumn =
@@ -257,6 +263,25 @@ public class ProcedureParameterPane
     }
 
     public void actionPerformed(ActionEvent e) {
+        ProcedureParameterTableModel model =
+            (ProcedureParameterTableModel) table.getModel();
+        ProcedureParameter parameter = eventController.getCurrentProcedureParameter();
+        int index = -1;
 
+        if (e.getSource() == moveUp) {
+            index = model.moveRowUp(parameter);
+        }
+        else if (e.getSource() == moveDown) {
+            index = model.moveRowDown(parameter);
+        }
+
+        if (index >= 0) {
+            table.select(index);
+            
+            // note that 'setCallParameters' is donw by copy internally
+			parameter.getProcedure().setCallParameters(model.getObjectList());
+            eventController.fireProcedureEvent(
+                new ProcedureEvent(this, parameter.getProcedure(), MapEvent.CHANGE));
+        }
     }
 }

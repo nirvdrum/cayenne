@@ -69,98 +69,149 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class CayenneTableModel extends AbstractTableModel {
-	protected EventController mediator;
-	protected Object eventSource;
-	protected java.util.List objectList;
+    protected EventController mediator;
+    protected Object eventSource;
+    protected java.util.List objectList;
 
-	/**
-	 * Constructor for CayenneTableModel.
-	 */
-	public CayenneTableModel(
-		EventController mediator,
-		Object eventSource,
-		java.util.List objectList) {
-		super();
-		this.eventSource = eventSource;
-		this.mediator = mediator;
-		this.objectList = objectList;
+    /**
+     * Constructor for CayenneTableModel.
+     */
+    public CayenneTableModel(
+        EventController mediator,
+        Object eventSource,
+        java.util.List objectList) {
+        super();
+        this.eventSource = eventSource;
+        this.mediator = mediator;
+        this.objectList = objectList;
 
-		orderList();
-	}
+        orderList();
+    }
 
-	public void setValueAt(Object newVal, int row, int col) {
-        if(!Util.nullSafeEquals(newVal, getValueAt(row, col))) {
-        	setUpdatedValueAt(newVal, row, col);
+    public void setValueAt(Object newVal, int row, int col) {
+        if (!Util.nullSafeEquals(newVal, getValueAt(row, col))) {
+            setUpdatedValueAt(newVal, row, col);
         }
-	}
-	
-	/**
-	 * Sets a new value after it is already checked by the superclass 
-	 * and it is determined that the value has changed.
-	 */ 
-	public abstract void setUpdatedValueAt(Object newVal, int row, int col);
+    }
 
-	/**
-	 * Orders internal object list. Key returned by 
-	 * <code>getOrderingKey</code> is used for comparison.
-	 */
-	public void orderList() {
-		String key = getOrderingKey();
-		if (key != null) {
-			Collections.sort(
-				objectList,
-				new PropertyComparator(getOrderingKey(), getElementsClass()));
-		}
-	}
+    /**
+     * Sets a new value after it is already checked by the superclass 
+     * and it is determined that the value has changed.
+     */
+    public abstract void setUpdatedValueAt(Object newVal, int row, int col);
 
-	/**
-	 * Returns Java class of the internal list elements.
-	 */
-	public abstract Class getElementsClass();
+    /**
+     * Orders internal object list. Key returned by 
+     * <code>getOrderingKey</code> is used for comparison.
+     */
+    public void orderList() {
+        String key = getOrderingKey();
+        if (key != null) {
+            Collections.sort(
+                objectList,
+                new PropertyComparator(getOrderingKey(), getElementsClass()));
+        }
+    }
 
-	/** 
-	 * Returns the key by which to order elements
-	 * in the object list. Default value is "name".
-	 */
-	public String getOrderingKey() {
-		return "name";
-	}
+    /**
+     * Returns Java class of the internal list elements.
+     */
+    public abstract Class getElementsClass();
 
-	/**
-	 * Returns the number of objects on the list.
-	 */
-	public int getRowCount() {
-		return objectList.size();
-	}
+    /** 
+     * Returns the key by which to order elements
+     * in the object list. Default value is "name".
+     */
+    public String getOrderingKey() {
+        return "name";
+    }
 
-	/**
-	 * Returns an object used as an event source.
-	 */
-	public Object getEventSource() {
-		return eventSource;
-	}
+    /**
+     * Returns the number of objects on the list.
+     */
+    public int getRowCount() {
+        return objectList.size();
+    }
 
-	/** 
-	 * Returns EventController object. 
-	 */
-	public EventController getMediator() {
-		return mediator;
-	}
+    /**
+     * Returns an object used as an event source.
+     */
+    public Object getEventSource() {
+        return eventSource;
+    }
 
-	/**
-	 * Returns internal object list.
-	 */
-	public java.util.List getObjectList() {
-		return objectList;
-	}
+    /** 
+     * Returns EventController object. 
+     */
+    public EventController getMediator() {
+        return mediator;
+    }
 
-	public void addRow(Object row) {
-		objectList.add(row);
-		fireTableDataChanged();
-	}
+    /**
+     * Returns internal object list.
+     */
+    public java.util.List getObjectList() {
+        return objectList;
+    }
 
-	public void removeRow(Object row) {
-		objectList.remove(row);
-		fireTableDataChanged();
-	}
+    public void addRow(Object row) {
+        objectList.add(row);
+        fireTableDataChanged();
+    }
+
+    public void removeRow(Object row) {
+        objectList.remove(row);
+        fireTableDataChanged();
+    }
+
+    /**
+     * Moves a row up, jumping down if row is already at the top.
+     */
+    public int moveRowUp(Object row) {
+        int len = objectList.size();
+        if (len < 2) {
+            return -1;
+        }
+
+        int ind = objectList.indexOf(row);
+        if (ind <= 0) {
+            return -1;
+        }
+
+        int neighborIndex = ind - 1;
+        if (neighborIndex < 0) {
+            neighborIndex = len - 1;
+        }
+
+        swapRows(ind, neighborIndex);
+        return neighborIndex;
+    }
+
+    /**
+      * Moves a row down, jumping up if row is already at the bottom.
+      */
+    public int moveRowDown(Object row) {
+        int len = objectList.size();
+        if (len < 2) {
+            return -1;
+        }
+
+        int ind = objectList.indexOf(row);
+        if (ind <= 0) {
+            return -1;
+        }
+
+        int neighborIndex = ind + 1;
+        if (neighborIndex >= len) {
+            neighborIndex = 0;
+        }
+
+        swapRows(ind, neighborIndex);
+        return neighborIndex;
+    }
+
+    protected void swapRows(int i, int j) {
+        Collections.swap(objectList, i, j);
+        fireTableDataChanged();
+    }
 }

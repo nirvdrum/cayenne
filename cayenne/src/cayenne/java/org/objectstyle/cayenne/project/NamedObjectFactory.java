@@ -162,7 +162,7 @@ public abstract class NamedObjectFactory {
      * Creates a unique name for the new object and constructs
      * this object.
      */
-    protected String makeName(Object namingContext) {
+    protected synchronized String makeName(Object namingContext) {
         int c = 1;
         String name = null;
         do {
@@ -275,7 +275,7 @@ public abstract class NamedObjectFactory {
             // a duplicate name.. parameters are positional anyway..
             // still try to use unique names for visual consistency
             Procedure procedure = (Procedure) namingContext;
-            Iterator it = procedure.getCallOutParams().iterator();
+            Iterator it = procedure.getCallParameters().iterator();
             while (it.hasNext()) {
                 ProcedureParameter parameter = (ProcedureParameter) it.next();
                 if (name.equals(parameter.getName())) {

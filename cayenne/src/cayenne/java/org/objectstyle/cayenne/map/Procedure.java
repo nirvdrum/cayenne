@@ -77,9 +77,9 @@ public class Procedure extends MapObject {
         super();
     }
 
-	/**
-	 * Creates a named Procedure object.
-	 */
+    /**
+     * Creates a named Procedure object.
+     */
     public Procedure(String name) {
         super(name);
     }
@@ -103,6 +103,11 @@ public class Procedure extends MapObject {
      */
     public void setDataMap(DataMap dataMap) {
         this.setParent(dataMap);
+    }
+
+    public void setCallParameters(List parameters) {
+        clearCallParameters();
+        callParameters.addAll(parameters);
     }
 
     /**
@@ -148,10 +153,17 @@ public class Procedure extends MapObject {
     }
 
     /**
+     * @deprecated Since 1.0b4 use getCallOutParameters
+     */
+    public List getCallOutParams() {
+        return getCallOutParameters();
+    }
+
+    /**
      * Returns a list of OUT and INOUT call parameters. If procedure has a
      * return value, it will also be included as a call parameter.
      */
-    public List getCallOutParams() {
+    public List getCallOutParameters() {
         List outParams = new ArrayList(callParameters.size());
         Iterator it = callParameters.iterator();
         while (it.hasNext()) {
