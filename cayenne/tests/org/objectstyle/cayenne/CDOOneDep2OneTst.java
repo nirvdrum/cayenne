@@ -53,7 +53,7 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.logging.Logger;
 
@@ -61,61 +61,78 @@ import org.objectstyle.art.*;
 
 public class CDOOneDep2OneTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(CDOOneDep2OneTst.class.getName());
-    
+
     public CDOOneDep2OneTst(String name) {
         super(name);
     }
-    
-    public void testNewAdd() throws Exception {
-        Artist a1 = newArtist();        
+
+    public void testNewAdd1() throws Exception {
+        Artist a1 = newArtist();
         PaintingInfo pi1 = newPaintingInfo();
         Painting p1 = newPainting();
-        
+
         // needed to save without errors
         p1.setToArtist(a1);
-        
+
         // *** TESTING THIS *** 
         pi1.setPainting(p1);
-        
+
         // test before save
         assertSame(pi1, p1.getToPaintingInfo());
         assertSame(p1, pi1.getPainting());
-        
+
         // do save 
         ctxt.commitChanges();
         resetContext();
-	
+
         // test database data
         PaintingInfo pi2 = fetchPaintingInfo();
         Painting p2 = pi2.getPainting();
         assertNotNull(p2);
         assertEquals(paintingName, p2.getPaintingTitle());
     }
+
+
+    /** Tests how primary key is propagated from one new object to another. */
+  /*  public void testNewAdd2() throws Exception {
+        Artist a1 = this.newArtist();
+        Gallery g1 = this.newGallery();
+        Exhibit e1 = this.newExhibit(g1);
+        
+        ArtistExhibit ae1 = this.newAritistExhibit();
+        ae1.setToArtist(a1);
+        ae1.setToExhibit(e1);
+
+
+        // do save 
+        
+        // *** TESTING THIS *** 
+        ctxt.commitChanges();
+    } */
     
-    
-    public void testReplace() throws Exception { 
+
+    public void testReplace() throws Exception {
         String altPaintingName = "alt painting";
-        Artist a1 = newArtist();        
+        Artist a1 = newArtist();
         PaintingInfo pi1 = newPaintingInfo();
         Painting p1 = newPainting();
         p1.setPaintingTitle(altPaintingName);
-        
+
         pi1.setPainting(p1);
-        
+
         // do save
         ctxt.commitChanges();
         resetContext();
-        
+
         // test database data
         PaintingInfo pi2 = fetchPaintingInfo();
         Painting p21 = pi2.getPainting();
         assertNotNull(p21);
         assertEquals(altPaintingName, p21.getPaintingTitle());
         assertSame(pi2, p21.getToPaintingInfo());
-        
-        
+
         Painting p22 = newPainting();
-        
+
         // *** TESTING THIS *** 
         pi2.setPainting(p22);
 
@@ -123,22 +140,20 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         assertNull(p21.getToPaintingInfo());
         assertSame(pi2, p22.getToPaintingInfo());
         assertEquals(PersistenceState.MODIFIED, pi2.getPersistenceState());
-        
+
         // do save II
         ctxt.commitChanges();
         ObjectId pi2oid = pi2.getObjectId();
         resetContext();
-        
+
         PaintingInfo pi3 = fetchPaintingInfo();
         Painting p3 = pi3.getPainting();
         assertNotNull(p3);
         assertEquals(paintingName, p3.getPaintingTitle());
         assertSame(pi3, p3.getToPaintingInfo());
-        
+
         // test that object id was updated 
         assertEquals(pi2oid, pi3.getObjectId());
 
-        
     }
 }
-

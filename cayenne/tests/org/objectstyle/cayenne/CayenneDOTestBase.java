@@ -102,6 +102,10 @@ public class CayenneDOTestBase extends TestCase {
         return e1;
     }
     
+    protected ArtistExhibit newAritistExhibit() {
+        return (ArtistExhibit)ctxt.createAndRegisterNewObject("ArtistExhibit");
+    }
+    
     protected Gallery newGallery() {
         Gallery g1 = (Gallery)ctxt.createAndRegisterNewObject("Gallery");
         g1.setGalleryName(galleryName);
