@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.*;
 public class DirectoryFilter extends javax.swing.filechooser.FileFilter {
 
   public boolean accept(File f) {
-    if (f.isDirectory() && f.getName().equals("cayenne_config")) return true;
+    if (f.isDirectory()) return true;
     return false;
   }
 

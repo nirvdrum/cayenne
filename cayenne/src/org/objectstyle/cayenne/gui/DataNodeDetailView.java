@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gui;
 
 import java.awt.*;
 import java.util.*;
+import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -126,6 +127,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		maxConnections.getDocument().addDocumentListener(this);
 		factory.addActionListener(this);
 		adapter.addActionListener(this);
+		fileBtn.addActionListener(this);
 	}
 
 	private void init(){
@@ -286,8 +288,61 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 				return;
 			}
 			mediator.getCurrentDataNode().setAdapter(adapt);
+		} else if (src == fileBtn) {
+			selectNodeLocation();
 		}
 	}// End actionPerformed()
+	
+	private void selectNodeLocation() {
+		DataNode node = mediator.getCurrentDataNode();
+        try {
+            // Get the project file name (always cayenne.xml)
+            File file = null;
+            String proj_dir_str = mediator.getConfig().getProjDir();
+            File proj_dir = null;
+            if (proj_dir_str != null)
+            	proj_dir = new File(proj_dir_str);
+            JFileChooser fc;
+            FileSystemViewDecorator file_view;
+            file_view = new FileSystemViewDecorator(proj_dir);
+            fc = new JFileChooser(file_view);
+            fc.setFileFilter(new DirectoryFilter());
+            fc.setDialogType(JFileChooser.SAVE_DIALOG);
+            fc.setDialogTitle("Data Node location");
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY );
+            if (null != proj_dir)
+            	fc.setCurrentDirectory(proj_dir);
+            int ret_code = fc.showOpenDialog(this);
+            if ( ret_code != JFileChooser.APPROVE_OPTION)
+                return;
+            file = fc.getSelectedFile();
+			System.out.println("File path is " + file.getAbsolutePath());
+            String old_loc = node.getDataSourceLocation();
+            // Get absolute path for old location
+            if (null != proj_dir)
+            	old_loc = proj_dir + File.separator + old_loc;
+			// Create new file
+			if (!file.exists())
+				file.createNewFile();
+			// Determine and set new data map location
+			String new_file_location = file.getAbsolutePath();
+			String relative_location;
+			// If it is set, use path striped of proj dir and following separator
+			// If proj dir not set, use absolute location.
+			if (proj_dir_str == null)
+			 	relative_location = new_file_location;
+			else
+				relative_location 
+					= new_file_location.substring(proj_dir_str.length() + 1);
+			node.setDataSourceLocation(relative_location);
+            // Node location changed - mark current domain dirty
+			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+
+        } catch (Exception e) {
+            System.out.println("Error loading project file, " + e.getMessage());
+            e.printStackTrace();
+        }
+	}
 	
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
 		System.out.println("In currentDataNodeChanged() 1.0");
