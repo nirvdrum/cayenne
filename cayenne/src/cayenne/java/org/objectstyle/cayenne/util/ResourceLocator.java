@@ -311,12 +311,16 @@ public class ResourceLocator {
 		if (!willSkipAbsolutePath()) {
 			File f = new File(name);
 			if (f.isAbsolute() && f.exists()) {
+				logObj.debug("File found at absolute path: " + name);
 				try {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
 					logObj.debug("Malformed url, ignoring.", ex);
 				}
+			}
+			else {
+				logObj.debug("No file at absolute path: " + name);
 			}
 		}
 

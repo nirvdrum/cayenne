@@ -59,7 +59,6 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigurationException;
-import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * FileConfiguration loads a Cayenne configuraton file from a given
@@ -101,16 +100,15 @@ public class FileConfiguration extends DefaultConfiguration {
 		this.projectFile = new File(domainConfigurationName);
 
 		// configure the ResourceLocator for plain files
-		ResourceLocator l = this.getResourceLocator();
-		l.setSkipAbsolutePath(false);
-		l.setSkipClasspath(true);
-		l.setSkipCurrentDirectory(false);
-		l.setSkipHomeDirectory(true);
+		this.locator.setSkipAbsolutePath(false);
+		this.locator.setSkipClasspath(true);
+		this.locator.setSkipCurrentDirectory(false);
+		this.locator.setSkipHomeDirectory(true);
 
 		// add the file's location to the search path, if it exists
 		File projectDirectory = this.getProjectDirectory();
 		if (projectDirectory != null) {
-			l.addFilesystemPath(projectDirectory.getPath());
+			this.locator.addFilesystemPath(projectDirectory.getPath());
 		}
 	}
 
@@ -130,16 +128,15 @@ public class FileConfiguration extends DefaultConfiguration {
 		this.setProjectFile(domainConfigurationFile);
 
 		// configure the ResourceLocator for plain files
-		ResourceLocator l = this.getResourceLocator();
-		l.setSkipAbsolutePath(false);
-		l.setSkipClasspath(true);
-		l.setSkipCurrentDirectory(false);
-		l.setSkipHomeDirectory(true);
+		this.locator.setSkipAbsolutePath(false);
+		this.locator.setSkipClasspath(true);
+		this.locator.setSkipCurrentDirectory(false);
+		this.locator.setSkipHomeDirectory(true);
 
 		// add the file's location to the search path, if it exists
 		File projectDirectory = this.getProjectDirectory();
 		if (projectDirectory != null) {
-			l.addFilesystemPath(projectDirectory);
+			locator.addFilesystemPath(projectDirectory);
 		}
 	}
 
@@ -163,7 +160,7 @@ public class FileConfiguration extends DefaultConfiguration {
 	 * @throws IllegalArgumentException if <code>path</code> is <code>null</code>.
 	 */
 	public void addFilesystemPath(String path) {
-		this.getResourceLocator().addFilesystemPath(path);
+		this.locator.addFilesystemPath(path);
 	}
 
 	/**
@@ -174,7 +171,7 @@ public class FileConfiguration extends DefaultConfiguration {
 	 * not a directory or not readable.
 	 */
 	public void addFilesystemPath(File path) {
-		this.getResourceLocator().addFilesystemPath(path);
+		this.locator.addFilesystemPath(path);
 	}
 
 	/**

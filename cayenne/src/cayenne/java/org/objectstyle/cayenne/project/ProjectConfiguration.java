@@ -69,39 +69,45 @@ import org.objectstyle.cayenne.conf.FileConfiguration;
  */
 public class ProjectConfiguration extends FileConfiguration {
 
-	/**
-	 * Override parent implementation to ignore loading failures.
-	 * @see FileConfiguration#FileConfiguration(File)
-	 */
+    /**
+     * Override parent implementation to ignore loading failures.
+     * @see FileConfiguration#FileConfiguration(File)
+     */
     public ProjectConfiguration(File projectFile) {
-    	super(projectFile);
+        super(projectFile);
 
-		// ignore loading failures
-		this.setIgnoringLoadFailures(true);
-	}
+        // ignore loading failures
+        this.setIgnoringLoadFailures(true);
 
-	/**
-	 * Override parent implementation to prevent loading of
-	 * nonexisting files.
-	 * @see FileConfiguration#canInitialize()
-	 */
-	public boolean canInitialize() {
-		return (super.canInitialize() && this.getProjectFile().isFile());
-	}
+        // configure deterministic file opening rules
+        this.locator.setSkipAbsolutePath(false);
+        this.locator.setSkipClasspath(true);
+        this.locator.setSkipCurrentDirectory(true);
+        this.locator.setSkipHomeDirectory(true);
+    }
 
-	/**
-	 * Override parent implementation to allow for null files.
-	 * @see FileConfiguration#setProjectFile(File)
-	 */
-	protected void setProjectFile(File projectFile) {
-		if ((projectFile != null) && (projectFile.exists())) {
-			super.setProjectFile(projectFile);
-		}
-		else {
-			super.projectFile = projectFile;
-			this.setDomainConfigurationName(Configuration.DEFAULT_DOMAIN_FILE);
-		}
-	}
+    /**
+     * Override parent implementation to prevent loading of
+     * nonexisting files.
+     * @see FileConfiguration#canInitialize()
+     */
+    public boolean canInitialize() {
+        return (super.canInitialize() && this.getProjectFile().isFile());
+    }
+
+    /**
+     * Override parent implementation to allow for null files.
+     * @see FileConfiguration#setProjectFile(File)
+     */
+    protected void setProjectFile(File projectFile) {
+        if ((projectFile != null) && (projectFile.exists())) {
+            super.setProjectFile(projectFile);
+        }
+        else {
+            super.projectFile = projectFile;
+            this.setDomainConfigurationName(Configuration.DEFAULT_DOMAIN_FILE);
+        }
+    }
 
     /**
      * Returns a DataSource factory for projects.
@@ -110,7 +116,8 @@ public class ProjectConfiguration extends FileConfiguration {
     public DataSourceFactory getDataSourceFactory() {
         try {
             return new ProjectDataSourceFactory(this.getProjectDirectory());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new ProjectException("Error creating DataSourceFactory.", e);
         }
     }
