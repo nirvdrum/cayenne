@@ -416,6 +416,9 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         }
 
         ObjEntity entity = mediator.getCurrentObjEntity();
+        if(entity == null) {
+            return;
+        }
 
         if (Util.nullSafeEquals(newName, entity.getName())) {
             return;
