@@ -99,11 +99,38 @@ public class DataContext implements QueryEngine {
         return parent;
     }
 
-    /** Returns a list of objects that are registered
-    *  with this DataContext (including objects in all states
-    *  described in PersistenceState interface, except for transient). */
+    /** 
+     * Returns a list of objects that are registered
+     * with this DataContext (including objects in all states
+     * described in PersistenceState interface, except for transient). 
+     */
     public Collection registeredObjects() {
         return registeredMap.values();
+    }
+
+    /**
+     * Returns <code>true</code> if there are any modified,
+     * deleted or new objects registered with this DataContext,
+     * <code>false</code> otherwise.
+     * 
+     * <p><i>
+     * This implementation is rather naive and would scan all registered
+     * objects. A better implementation based on catching context events
+     * is needed.</i></p>
+     */
+    public boolean hasChanges() {
+        Iterator it = registeredObjects().iterator();
+        while (it.hasNext()) {
+            DataObject dobj = (DataObject) it.next();
+            int state = dobj.getPersistenceState();
+            if (state == PersistenceState.NEW
+                || state == PersistenceState.DELETED
+                || state == PersistenceState.MODIFIED) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Filter array of registered objects to return objects in a certian state */
@@ -536,9 +563,9 @@ public class DataContext implements QueryEngine {
                 }
             }
         }
-        
+
         List finalQueries = null;
-        if(prefetch.size() == 0) {
+        if (prefetch.size() == 0) {
             finalQueries = queries;
         }
         else {
@@ -836,7 +863,7 @@ public class DataContext implements QueryEngine {
                         DataContext.this.registerFetchedSnapshot(ent, (Map) it.next(), true));
                 }
             }
-            
+
             super.nextSnapshots(query, result);
         }
     }
@@ -847,7 +874,10 @@ public class DataContext implements QueryEngine {
                 list.setObjectList(new ArrayList());
             else {
                 SelectQuery sel =
-                    QueryHelper.selectRelationshipObjects(DataContext.this, list.getSrcObjectId(), list.getRelName());
+                    QueryHelper.selectRelationshipObjects(
+                        DataContext.this,
+                        list.getSrcObjectId(),
+                        list.getRelName());
                 List results = performQuery(sel);
                 list.setObjectList(results);
             }

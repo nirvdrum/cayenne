@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,8 @@ package org.objectstyle.cayenne.access;
  *
  */
 
+package org.objectstyle.cayenne.access;
+
 import java.util.logging.Level;
 
 import junit.framework.TestCase;
@@ -62,8 +63,15 @@ import junit.framework.TestCase;
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataContext.SelectProcessor;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
+/** 
+ * "Lightweight" test cases for DataContext. These
+ * tests do not require any additional database setup.
+ * 
+ * @author Andrei Adamchik
+ */
 public class DataContextExtrasTst extends TestCase {
     protected DataContext ctxt;
 
@@ -73,6 +81,14 @@ public class DataContextExtrasTst extends TestCase {
 
     protected void setUp() throws java.lang.Exception {
         ctxt = TestMain.getSharedDomain().createDataContext();
+    }
+
+    public void testHasChangesNew() throws Exception {
+        assertTrue("No changes expected in context", !ctxt.hasChanges());
+        ctxt.createAndRegisterNewObject("Artist");
+        assertTrue(
+            "Object added to context, expected to report changes",
+            ctxt.hasChanges());
     }
 
     public void testCreateAndRegisterNewObject() throws Exception {

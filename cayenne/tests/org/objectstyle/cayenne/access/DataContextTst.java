@@ -96,7 +96,7 @@ public class DataContextTst extends TestCase {
         ctxt = dom.createDataContext();
         opObserver = new TestOperationObserver();
     }
-
+    
     public void testCreatePermId1() throws Exception {
         Artist artist = new Artist();
         ctxt.registerNewObject(artist, "Artist");
