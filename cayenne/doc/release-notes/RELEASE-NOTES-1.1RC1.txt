@@ -12,6 +12,8 @@ Changes, Features And Improvements:
 
 - cayenne-log.properties included in cayenne.jar has more sensible defaults - 
   WARN for everything except for QueryLogger.
+- Removed confusing "New Project" dialog. Instead a default project is created with one empty
+  DataDomain.
 
 
 Bugs Fixed:

@@ -157,8 +157,7 @@ public class Application {
         // actions
         initActions();
 
-        // scope settings
-        // setup Scope..
+        // setup Scope.. TODO: this will go away if switch away from Scope
         // force Scope to use CayenneModeler properties
         UIStrings.setPropertiesName(ModelerConstants.DEFAULT_MESSAGE_BUNDLE);
         ViewContext.clearThreadContext();

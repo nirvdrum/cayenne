@@ -131,10 +131,6 @@ import org.objectstyle.cayenne.project.Project;
 /**
  * Main frame of CayenneModeler. Responsibilities include coordination of
  * enabling/disabling of menu and toolbar.
- * 
- * @author Michael Misha Shengaout
- * @author Andrei Adamchik
- * @since 1.1
  */
 public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListener,
         DataMapDisplayListener, ObjEntityDisplayListener, DbEntityDisplayListener,
@@ -142,17 +138,12 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         ObjRelationshipDisplayListener, DbRelationshipDisplayListener,
         QueryDisplayListener, ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
-    /**
-     * Label that indicates as a part of the title that the project has unsaved changes.
-     */
-    public static final String DIRTY_STRING = "* - ";
+    private static final String DIRTY_STRING = "* - ";
 
     protected EditorView view;
-    protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
+    protected RecentFileMenu recentFileMenu;
     protected CayenneModelerController controller;
     protected JLabel status;
-
-    private ModelerPreferences prefs;
 
     public CayenneModelerFrame(CayenneModelerController controller) {
         super(ModelerConstants.TITLE);
@@ -162,6 +153,8 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         initMenus();
         initToolbar();
         initStatusBar();
+
+        final ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
         this.addComponentListener(new ComponentAdapter() {
 
@@ -183,8 +176,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
                 }
             }
         });
-
-        prefs = ModelerPreferences.getPreferences();
 
         int newWidth = prefs.getInt(ModelerPreferences.EDITOR_FRAME_WIDTH, 650);
         int newHeight = prefs.getInt(ModelerPreferences.EDITOR_FRAME_HEIGHT, 550);
@@ -243,6 +234,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         fileMenu.add(getAction(RevertAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
 
+        recentFileMenu = new RecentFileMenu("Recent Files");
         recentFileMenu.rebuildFromPreferences();
         recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
         fileMenu.add(recentFileMenu);
@@ -521,15 +513,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
 
     public JLabel getStatus() {
         return status;
-    }
-
-    /**
-     * Returns the controller.
-     * 
-     * @return TopController
-     */
-    public CayenneModelerController getController1() {
-        return controller;
     }
 
     /**

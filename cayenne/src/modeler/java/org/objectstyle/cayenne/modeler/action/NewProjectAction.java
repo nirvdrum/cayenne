@@ -60,8 +60,11 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
+import org.objectstyle.cayenne.modeler.CayenneModelerController;
+import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  * @author Andrei Adamchik
@@ -84,16 +87,25 @@ public class NewProjectAction extends ProjectAction {
         return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
     public void performAction(ActionEvent e) {
+
+        CayenneModelerController controller = Application
+                .getInstance()
+                .getFrameController();
         // Save and close (if needed) currently open project.
-        if (Application.getInstance().getFrameController().getCurrentProject() != null
-                && !closeProject()) {
+        if (controller.getCurrentProject() != null && !closeProject()) {
             return;
         }
 
-        new ProjectTypeSelectControl().startup();
+        ApplicationProject project = new ApplicationProject(null);
+
+        // stick a DataDomain
+        DataDomain domain = (DataDomain) NamedObjectFactory.createObject(
+                DataDomain.class,
+                project.getConfiguration());
+        domain.getEntityResolver().setIndexedByClass(false);
+        project.getConfiguration().addDomain(domain);
+
+        controller.projectOpenedAction(project);
     }
 }

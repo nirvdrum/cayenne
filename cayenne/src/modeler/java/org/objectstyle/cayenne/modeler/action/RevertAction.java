@@ -60,10 +60,8 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
-import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
-import org.scopemvc.core.Control;
 
 /**
  * @author Andrei Adamchik
@@ -105,8 +103,10 @@ public class RevertAction extends CayenneAction {
             throw new CayenneRuntimeException("Only ApplicationProjects are supported.");
         }
         else {
-            new ProjectTypeSelectControl().handleControl(new Control(
-                    ProjectTypeSelectControl.CREATE_APP_PROJECT_CONTROL));
+            controller
+                    .getApplication()
+                    .getAction(NewProjectAction.getActionName())
+                    .performAction(e);
         }
     }
 }

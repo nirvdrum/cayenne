@@ -41,6 +41,7 @@
         <copy todir="${dist}/lib/modeler">
             <fileset dir="${otherlib.dir}">
                 <include name="${scope.jar}"/>
+                <include name="${hsqldb.jar}"/>
                 <include name="${jgoodies.forms.jar}"/>
                 <include name="${jgoodies.looks.jar}"/>
             </fileset>
@@ -74,7 +75,7 @@
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.modeler.Main"/>
                <attribute name="Class-Path" 
-               		value="../cayenne.jar ${jgoodies.forms.jar} ${scope.jar} ${jgoodies.looks.jar}"/>
+               		value="../cayenne.jar ${hsqldb.jar} ${jgoodies.forms.jar} ${scope.jar} ${jgoodies.looks.jar}"/>
             </manifest>
         </jar>
     </target>  
