@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.access.trans;
 
 import java.sql.ResultSet;
@@ -60,31 +60,33 @@ import java.sql.ResultSet;
 import org.objectstyle.cayenne.map.DbAttribute;
 
 
-/** 
+/**
  * Abstract superclass of Query translators.
- * Defines callback methods for helper classes 
- * that are delegated tasks of building query parts. 
- * 
+ * Defines callback methods for helper classes
+ * that are delegated tasks of building query parts.
+ *
  * @author Andrei Adamchik
  */
 public abstract class SelectQueryAssembler extends QueryAssembler {
 
-    /** 
+    /**
      * Returns an ordered array of DbAttributes that describe the
      * result columns in the in the ResultSet.
      */
     public abstract DbAttribute[] getSnapshotDesc(ResultSet rs);
 
-    /** 
+    /**
      * Returns ordered array of Java class names that should be used
      * for values in the ResultSet.
      */
     public abstract String[] getResultTypes(ResultSet rs);
-    
-    /** 
+
+    /**
      * Returns a maximum number of rows that the underlying
      * query should fetch. If the value is less than or equal to
      * zero, all rows will be returned.
      */
     public abstract int getFetchLimit();
+
+    public abstract String[] getResultNames(ResultSet rs);
 }

@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * SnapshotManager handles snapshot (data row) operations on objects.
  * This is a helper class that works in conjunction with DataContext.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class SnapshotManager {
@@ -91,8 +91,8 @@ public class SnapshotManager {
 		this.relDataSource = relDataSource;
 	}
 
-	/** 
-	 * Replaces all object attribute values with snapshot values. 
+	/**
+	 * Replaces all object attribute values with snapshot values.
 	 * Sets object state to COMMITTED.
 	 */
 	public void refreshObjectWithSnapshot(
@@ -101,22 +101,24 @@ public class SnapshotManager {
 		Map snapshot) {
 
 		DataContext context = anObject.getDataContext();
-		
+
 		Map attrMap = ent.getAttributeMap();
 		Iterator it = attrMap.keySet().iterator();
 		boolean isPartialSnapshot=false;
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
 			ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-			String dbAttrName=attr.getDbAttribute().getName();
+//			String dbAttrName=attr.getDbAttribute().getName();
+
+            String dbAttrPath = attr.getDbAttributePath();
 			anObject.writePropertyDirectly(
 				attrName,
-				snapshot.get(dbAttrName));
-			if(!snapshot.containsKey(dbAttrName)) {
-				//Note the distinction between 
-				// 1) the map returning null because there was no mapping 
-				// for that key and 
-				// 2) returning null because 'null' was the value mapped 
+				snapshot.get(dbAttrPath));
+			if(!snapshot.containsKey(dbAttrPath)) {
+				//Note the distinction between
+				// 1) the map returning null because there was no mapping
+				// for that key and
+				// 2) returning null because 'null' was the value mapped
 				// for that key.
 				// If the first case (this clause) then snapshot is only partial
 				isPartialSnapshot=true;
@@ -196,13 +198,19 @@ public class SnapshotManager {
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
 			ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-			String dbAttrName = attr.getDbAttribute().getName();
+//			String dbAttrName = attr.getDbAttribute().getName();
+//
+//			Object curVal = anObject.readPropertyDirectly(attrName);
+//			Object oldVal = oldSnap.get(dbAttrName);
+//			Object newVal = snapshot.get(dbAttrName);
 
-			Object curVal = anObject.readPropertyDirectly(attrName);
-			Object oldVal = oldSnap.get(dbAttrName);
-			Object newVal = snapshot.get(dbAttrName);
+            //processing compound attributes correctly
+            String dbAttrPath = attr.getDbAttributePath();
+            Object curVal = anObject.readPropertyDirectly(attrName);
+			Object oldVal = oldSnap.get(dbAttrPath);
+			Object newVal = snapshot.get(dbAttrPath);
 
-			// if value not modified, update it from snapshot, 
+			// if value not modified, update it from snapshot,
 			// otherwise leave it alone
 			if (Util.nullSafeEquals(curVal, oldVal)
 				&& !Util.nullSafeEquals(newVal, curVal)) {
@@ -230,8 +238,8 @@ public class SnapshotManager {
 		}
 	}
 
-	/** 
-	 * Takes a snapshot of current object state. 
+	/**
+	 * Takes a snapshot of current object state.
 	 */
 	public Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
 		Map map = new HashMap();
@@ -240,9 +248,12 @@ public class SnapshotManager {
 		Iterator it = attrMap.keySet().iterator();
 		while (it.hasNext()) {
 			String attrName = (String) it.next();
-			DbAttribute dbAttr =
-				((ObjAttribute) attrMap.get(attrName)).getDbAttribute();
-			map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
+            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
+//			DbAttribute dbAttr = objAttr.getDbAttribute();
+//			map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
+
+            //processing compound attributes correctly
+            map.put(objAttr.getDbAttributePath(), anObject.readPropertyDirectly(attrName));
 		}
 
 		Map relMap = ent.getRelationshipMap();
@@ -281,8 +292,8 @@ public class SnapshotManager {
 
 		// process object id map
 		// we should ignore any object id values if a corresponding attribute
-		// is a part of relationship "toMasterPK", since those values have been 
-		// set above when db relationships where processed.                
+		// is a part of relationship "toMasterPK", since those values have been
+		// set above when db relationships where processed.
 		Map thisIdParts = anObject.getObjectId().getIdSnapshot();
 		if (thisIdParts != null) {
 			// put only thise that do not exist in the map
@@ -297,13 +308,13 @@ public class SnapshotManager {
 	}
 
 	/**
-	 * Takes a list of "root" (or "source") objects, 
+	 * Takes a list of "root" (or "source") objects,
 	 * a list of destination objects, and the relationship which relates them
 	 * (from root to destination).  It then merges the destination objects
 	 * into the toMany relationships of the relevant root objects, thus clearing
 	 * the toMany fault.  This method is typically only used internally by Cayenne
 	 * and is not intended for client use.
-	 * @param rootObjects 
+	 * @param rootObjects
 	 * @param theRelationship
 	 * @param destinationObjects
 	 */
@@ -311,13 +322,13 @@ public class SnapshotManager {
 		List rootObjects,
 		ObjRelationship theRelationship,
 		List destinationObjects) {
-		
+
 		if(rootObjects.size()==0) {
 			return; //Nothing to do... avoid array index exceptions
 		}
-		
+
 		Class sourceObjectClass=((DataObject)rootObjects.get(0)).getClass();
-		
+
 		ObjRelationship reverseRelationship =
 			theRelationship.getReverseRelationship();
 		//Might be used later on... obtain and cast only once
@@ -357,7 +368,7 @@ public class SnapshotManager {
 		}
 
 		//destinationObjects has now been partitioned into a list per
-		//source object... 
+		//source object...
 		//Iterate over the source objects and fix up the relationship on
 		//each
 		Iterator rootIterator = rootObjects.iterator();

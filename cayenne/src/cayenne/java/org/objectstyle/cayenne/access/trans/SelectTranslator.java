@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -76,9 +77,9 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-/** 
+/**
  * Class that serves as a translator of SELECT queries to JDBC statements.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class SelectTranslator extends SelectQueryAssembler {
@@ -92,15 +93,15 @@ public class SelectTranslator extends SelectQueryAssembler {
 	private List groupByList;
 	private int aliasCounter;
 
-	/** 
+	/**
 	 * If set to <code>true</code>, indicates that distinct
-	 * select query is required no matter what the original query 
+	 * select query is required no matter what the original query
 	 * settings where. This flag can be set when joins are created
-	 * using "to-many" relationships. 
+	 * using "to-many" relationships.
 	 */
 	private boolean forceDistinct;
 
-	/** 
+	/**
 	 * Returns a list of DbAttributes representing columns
 	 * in this query.
 	 */
@@ -112,9 +113,9 @@ public class SelectTranslator extends SelectQueryAssembler {
 		return getSelectQuery().getFetchLimit();
 	}
 
-	/** 
+	/**
 	 * Returns an ordered list of DbAttributes that describe the
-	 * result columns in the in the ResultSet. ResultSet column names are ignored, 
+	 * result columns in the in the ResultSet. ResultSet column names are ignored,
 	 * names specified in the query are used instead. */
 	public DbAttribute[] getSnapshotDesc(ResultSet rs) {
 		int len = columnList.size();
@@ -127,9 +128,9 @@ public class SelectTranslator extends SelectQueryAssembler {
 		return desc;
 	}
 
-	/** 
+	/**
 	 * Returns ordered list of Java class names that should be used for fetched values.
-	 * ResultSet types are ignored, types specified in the query are used instead. 
+	 * ResultSet types are ignored, types specified in the query are used instead.
 	 */
 	public String[] getResultTypes(ResultSet rs) {
 		int len = columnList.size();
@@ -151,6 +152,26 @@ public class SelectTranslator extends SelectQueryAssembler {
 					: TypesMapping.getJavaBySqlType(attr.getType());
 		}
 		return types;
+	}
+
+    public String[] getResultNames(ResultSet rs) {
+        int len = columnList.size();
+        if (len == 0) {
+            throw new CayenneRuntimeException("Call 'createStatement' first.");
+        }
+
+        String[] paths = new String[len];
+        for (int i = 0; i < len; i++) {
+            DbAttribute attr = (DbAttribute) columnList.get(i);
+            ObjAttribute objAttr =
+                getRootEntity().getAttributeForDbAttribute(attr);
+
+            paths[i] =
+                (objAttr != null)
+                    ? objAttr.getDbAttributePath()
+                    : attr.getName();
+        }
+        return paths;
 	}
 
 	/**
@@ -302,7 +323,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 		}
 	}
 
-	/** 
+	/**
 	 * Returns a list of DbAttributes used in query.
 	 */
 	private void appendAttributes() {
@@ -331,12 +352,22 @@ public class SelectTranslator extends SelectQueryAssembler {
 			int len = attrs.size();
 			for (int i = 0; i < len; i++) {
 				ObjAttribute oa = (ObjAttribute) attrs.get(i);
-				Attribute dbAttr = oa.getDbAttribute();
-				if (dbAttr == null) {
-					throw new CayenneRuntimeException(
-						"ObjAttribute has no DbAttribute: " + oa.getName());
-				}
-				columnList.add(dbAttr);
+                Iterator dbPathIterator = oa.getDbPathIterator();
+                while (dbPathIterator.hasNext()) {
+                    Object pathPart = dbPathIterator.next();
+                    if (pathPart instanceof DbRelationship) {
+                        DbRelationship rel = (DbRelationship)pathPart;
+                        dbRelationshipAdded(rel);
+                    } else if (pathPart instanceof DbAttribute) {
+//                        Attribute dbAttr = oa.getDbAttribute();
+                        DbAttribute dbAttr = (DbAttribute)pathPart;
+                        if (dbAttr == null) {
+                            throw new CayenneRuntimeException(
+                                    "ObjAttribute has no DbAttribute: " + oa.getName());
+                        }
+                        columnList.add(dbAttr);
+                    }
+                }
 			}
 
 			// relationship keys
@@ -369,7 +400,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 					}
 				}
 			}
-			
+
 			//May require some special handling for prefetch selects
 			// if the prefetch is of a certain type
 			if (q instanceof PrefetchSelectQuery) {
@@ -378,7 +409,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 				if ((r != null) && (r.getReverseRelationship() == null)) {
 					//Prefetching a single step toMany relationship which
 					// has no reverse obj relationship.  Add the FK attributes
-					// of the relationship (wouldn't otherwise be included)  
+					// of the relationship (wouldn't otherwise be included)
 					DbRelationship dbRel =
 						(DbRelationship) r.getDbRelationshipList().get(0);
 
@@ -443,9 +474,9 @@ public class SelectTranslator extends SelectQueryAssembler {
 		}
 	}
 
-	/** 
+	/**
 	 * Stores a new relationship in an internal list.
-	 * Later it will be used to create joins to relationship 
+	 * Later it will be used to create joins to relationship
 	 * destination table.
 	 */
 	public void dbRelationshipAdded(DbRelationship rel) {
@@ -483,7 +514,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 		return (String) aliasLookup.get(rel);
 	}
 
-	/** 
+	/**
 	 * Overrides superclass implementation. Will return an alias that
 	 * should be used for a specified DbEntity in the query
 	 * (or null if this DbEntity is not included in the FROM clause).

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.map;
 import java.util.Iterator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.collections.IteratorUtils;
+import org.objectstyle.cayenne.CayenneException;
 
 /**
  * An ObjAttribute is a mapping descriptor of a Java class property.
@@ -190,5 +191,57 @@ public class ObjAttribute extends Attribute {
 
     public String getDbAttributePath() {
         return dbAttributePath;
+    }
+
+    public boolean isCompound() {
+        return (dbAttributePath != null && dbAttributePath.indexOf('.') >= 0);
+    }
+
+    public boolean mapsToDependentDbEntity() {
+        Iterator i = getDbPathIterator();
+        if (!i.hasNext()) return false;
+        Object o = i.next();
+        if (!i.hasNext()) return false;
+        Object o1 = i.next();
+        if (!(o1 instanceof DbAttribute)) return false;
+        DbRelationship toDependent = (DbRelationship)o;
+        return toDependent.isToDependentPK();
+    }
+
+    public void validate() throws CayenneException {
+        String head = "ObjAttribute: " + getName() + " ";
+        ObjEntity ent = (ObjEntity)getEntity();
+        if(ent == null) {
+            throw new CayenneException(head + "Parent ObjEntity not defined.");
+        }
+        head += "ObjEntity: " + ent.getName() + " ";
+
+        if (getName() == null)
+            throw new CayenneException(head + "ObjAttribute's name not defined.");
+
+        if (getDbAttributePath() == null)
+            throw new CayenneException(head + "dbAttributePath not defined.");
+
+        try {
+            Iterator i = getDbPathIterator();
+            boolean dbAttributeFound = false;
+            while (i.hasNext()) {
+                Object pathPart = i.next();
+                if (pathPart instanceof DbRelationship) {
+                    DbRelationship r = (DbRelationship)pathPart;
+                    if (r.isToMany())
+                        throw new CayenneException(
+                                head + "DbRelationship: " + r.getName() + " is to-many.");
+                } else if (pathPart instanceof DbAttribute) {
+                    dbAttributeFound = true;
+                }
+            }
+            if (!dbAttributeFound)
+                throw new CayenneException(head + "DbAttribute not found.");
+        } catch (CayenneException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new CayenneException(head + ex.getMessage(), ex);
+        }
     }
 }

@@ -97,7 +97,7 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  * Currently ContextCommit resolves primary key dependencies,
  * referential integrity dependencies including multi-reflexive entities,
  * generates primary keys, creates batches for massive data modifications,
- * assignes operations to data nodes. It indirectly relies on graph
+ * assigns operations to data nodes. It indirectly relies on graph
  * algorithms provided by ASHWOOD.
  *
  * @author Andriy Shapochka

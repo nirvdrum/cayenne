@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -68,9 +68,9 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
-/** 
+/**
  * Class works as a translator of raw SELECT queries to JDBC statements.
- * 
+ *
  * @author Andrei Adamchik
  */
 public class SqlSelectTranslator extends SelectQueryAssembler {
@@ -88,9 +88,9 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
 		return (SqlSelectQuery) query;
 	}
 
-	/**     
+	/**
 	 * Returns an ordered array of DbAttributes that describe the
-	 * result columns in the in the ResultSet. Uses ResultSet info. 
+	 * result columns in the in the ResultSet. Uses ResultSet info.
 	 */
 	public DbAttribute[] getSnapshotDesc(ResultSet rs) {
 		DbAttribute[] attrs = getRawQuery().getResultDescriptors();
@@ -99,12 +99,12 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
 			: attrs;
 	}
 
-	/** 
+	/**
 	 * Returns ordered array of DbAttributes for the result set.
-	 * This is a failover method to obtain result description when 
-	 * query has no description data. It is called internally from 
+	 * This is a failover method to obtain result description when
+	 * query has no description data. It is called internally from
 	 * "getSnapshotDesc".
-	 * 
+	 *
 	 * <p><i>Note that DbAttributes created by this method do not belong to
 	 * any entity and only have their name and type initialized.</i></p>
 	 */
@@ -176,6 +176,20 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
 			logObj.error("Error", sqex);
 			throw new CayenneRuntimeException("Error reading metadata.", sqex);
 		}
+	}
+
+    public String[] getResultNames(ResultSet rs) {
+        ObjAttribute[] attrs = getRawQuery().getObjDescriptors();
+        if (attrs == null || attrs.length == 0) {
+            return null;
+        }
+
+        int len = attrs.length;
+        String[] paths = new String[len];
+        for (int i = 0; i < len; i++) {
+            paths[i] = attrs[i].getDbAttributePath();
+        }
+        return paths;
 	}
 
 	public String aliasForTable(DbEntity dbEnt) {
