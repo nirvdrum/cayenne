@@ -161,7 +161,7 @@ public class SqlSelectTranslator
      */
     public ResultDescriptor getResultDescriptor(ResultSet rs) {
         ResultDescriptor descriptor =
-            new ResultDescriptor(getAdapter().getExtendedTypes(), null);
+            new ResultDescriptor(getAdapter().getExtendedTypes());
 
         DbAttribute[] attrs = getRawQuery().getResultDescriptors();
         if (attrs == null || attrs.length == 0) {
