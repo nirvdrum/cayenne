@@ -114,11 +114,11 @@ public class SybasePkGenerator extends JdbcPkGenerator {
      */
     public void createAutoPkSupport(DataNode node) throws Exception {
         // need to drop procedure first
-        super.runSchemaUpdate(node, safePkProcDrop());
+        super.runUpdate(node, safePkProcDrop());
 
         // create objects
         super.createAutoPkSupport(node);
-        super.runSchemaUpdate(node, unsafePkProcCreate());
+        super.runUpdate(node, unsafePkProcCreate());
     }
 
     /** 
@@ -142,8 +142,8 @@ public class SybasePkGenerator extends JdbcPkGenerator {
      *  @param node node that provides access to a DataSource.
      */
     public void dropAutoPkSupport(DataNode node) throws Exception {
-        super.runSchemaUpdate(node, safePkProcDrop());
-        super.runSchemaUpdate(node, safePkTableDrop());
+        super.runUpdate(node, safePkProcDrop());
+        super.runUpdate(node, safePkTableDrop());
     }
 
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {

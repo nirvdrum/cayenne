@@ -163,7 +163,7 @@ public class JdbcPkGenerator implements PkGenerator {
         }
 
         if (shouldCreate) {
-            runSchemaUpdate(node, createAutoPkSupportString());
+            runUpdate(node, createAutoPkSupportString());
         }
     }
 
@@ -192,7 +192,7 @@ public class JdbcPkGenerator implements PkGenerator {
         }
 
         if (shouldDrop) {
-            runSchemaUpdate(node, dropAutoPkSupportString());
+            runUpdate(node, dropAutoPkSupportString());
         }
     }
 
@@ -229,22 +229,30 @@ public class JdbcPkGenerator implements PkGenerator {
 
         // create new one if needed
         if (shouldInsert) {
-            runSchemaUpdate(node, createAutoPkSupportForDbEntityString(ent));
+            runUpdate(node, createAutoPkSupportForDbEntityString(ent));
         }
     }
 
     /** 
-     * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
-     * to track the results of the execution.
+     * Runs JDBC update over a Connection obtained from DataNode. 
+     * Returns a number of objects returned from update.
      * 
      * @throws java.lang.Exception in case of query failure. 
      */
-    public void runSchemaUpdate(DataNode node, String sql) throws Exception {
-        SqlModifyQuery q = new SqlModifyQuery();
-        q.setSqlString(sql);
-
-        PkSchemaProcessor pr = new PkSchemaProcessor();
-        node.performQuery(q, pr);
+    public int runUpdate(DataNode node, String sql) throws SQLException {
+        Connection con = node.getDataSource().getConnection();
+        try {
+            Statement upd = con.createStatement();
+            try {
+                return upd.executeUpdate(sql);
+            }
+            finally {
+                upd.close();
+            }
+        }
+        finally {
+            con.close();
+        }
     }
 
     /** 
@@ -416,21 +424,4 @@ public class JdbcPkGenerator implements PkGenerator {
             throw new CayenneRuntimeException("Error generating PK.", ex);
         }
     }
-
-    /** OperationObserver for schema operations. */
-    class PkSchemaProcessor extends DefaultOperationObserver {
-        public void nextQueryException(Query query, Exception ex) {
-            super.nextQueryException(query, ex);
-            String entityName = (query != null) ? query.getObjEntityName() : null;
-            throw new CayenneRuntimeException(
-                "Error running operation '" + entityName + "'.",
-                ex);
-        }
-
-        public void nextGlobalException(Exception ex) {
-            super.nextGlobalException(ex);
-            throw new CayenneRuntimeException("Error creating PK.", ex);
-        }
-    }
-
 }
