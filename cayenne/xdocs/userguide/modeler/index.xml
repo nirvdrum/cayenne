@@ -13,7 +13,35 @@
     <section name="6. CayenneModeler GUI Tool">
         <subsection name="6.1 Introduction" anchor="intro">
             <p>CayenneModeler is a Java GUI application that performs the 
-            following functions:</p>
+            following functions:
+            <ul>
+            	<li>Reverse-engineering of RDBMS schema to create Cayenne 
+            	data maps.</li>
+            	<li>Forward-engineering (generation) of the database schema 
+            	from a data map.</li>
+            	<li>Java class generation from a data map.</li>
+            	<li>Cayenne project deployment organization into domains 
+            	and nodes.</li>
+            </ul>
+            </p>
+        </subsection>
+        
+        <subsection name="6.2 Running CayenneModeler" anchor="run">
+        	<p>CayenneModeler is a regular Java application and can be run on
+        	a JSDK1.4 compatible JVM. Main class is 
+        	<code>org.objectstyle.cayenne.gui.Editor</code>. For convenience
+        	Cayenne distribution provides run scripts to start modeler on Windows
+        	and UNIX platforms. To take advantage of these scripts, user must set
+        	CAYENNE_HOME and JAVA_HOME environment variables as described in the 
+        	<a href="../install.html#inst">installation section</a>. To run 
+        	CayenneModeler use the following commands. Windows:        		
+        	</p>
+        	
+        	<source>%CAYENNE_HOME%\bin\modeler.bat</source>
+        	
+        	<p>UNIX:</p>
+        	
+        	<source>$CAYENNE_HOME/bin/modeler.sh</source>
         </subsection>
     </section>
 </body>

@@ -37,24 +37,24 @@
             
             <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary 
             distribution WILL NOT need Ant. Only if you plan to <a href="#compile">build it yourself</a>
-            (you don't have to!), you will need Ant. Version 1.4.1 or newer is required, 
-            older versions will not work. Ant can be downloaded from 
+			(you don't have to!), you will need Ant. Version 1.4.1 or newer is required,
+			older versions will not work. Ant can be downloaded from
             <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.</p>
         </subsection>
 
         <subsection name="2.2 Installation" anchor="inst">
-            <p>This section describes installing Cayenne from source or binary distribution.
-            Building Cayenne from CVS is a different topic covered elsewhere.</p>
+            <p>This section describes the steps needed to install Cayenne source or 
+            binary distribution.</p>
             
-            <p>Download the latest distribution from <a href=
+            <p>Download Cayenne from <a href=
             "http://objectstyle.org/cayenne/download.html">
             http://objectstyle.org/cayenne/download.html</a>. 
             Choose the type of download that fits your needs. If you need
             a stable version, download source or binary <strong>release</strong>.
-            To get the latest features, download source or binary <strong>milestone or nightly
-            build</strong>. This way you will be able to use the latest features, but this comes with
-            all the risks of using development code. Downloaded file is called something like 
-            <code>cayenne-[release-info].tar.gz</code>.
+            To get the latest features, download source or binary <strong>nightly
+            build</strong> (of course when using nightly builds users run into the risks 
+            accociated with running development code). Downloaded file is called 
+            something like <code>cayenne-[release-suffix].tar.gz</code>.
             </p>
             
             <p>Unpack <code>cayenne-[release-suffix].tar.gz</code> into the target installation
@@ -68,6 +68,22 @@
             <p>or if you happen to have GNU tar</p>
                 
             <source># tar xzf [filename].tar.gz</source>
+            
+            <p>To take advantage of the scripts located in the <code>bin</code>
+            directory of Cayenne, set the following environment variables:
+            <ul>
+                <li><code>CAYENNE_HOME</code> - should point to
+                the directory created when your unpacked Cayenne distribution in the previous 
+                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
+                    
+                <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
+                It may already exist in the environment.</li>
+            </ul>
+            
+            <i>Note that these variables are only necessary to use the scripts
+            that run unit tests and start CayenneModeler. 
+            They are probably not needed on a deployment machine.</i>
+            </p>
             
             <p>Installation is complete.</p>
         </subsection>
@@ -100,19 +116,10 @@
         
         
         <subsection name="2.4 Unit Tests" anchor="tests">        
-            <p>[Optional] Run tests. To do that, you will need to set the following
-            environment variables:</p>
-            
-            <ul>
-                <li><code>CAYENNE_HOME</code> - should point to
-                the directory created when your unpacked Cayenne distribution in the previous 
-                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
-                    
-                <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
-                You may already have it set.</li>
-            </ul>
-            
-            <p>When	this is done, you can run test start script. On Windows, from the command line run:</p>
+            <p>[Optional] Run tests. To do that, you will need to set CAYENNE_HOME and 
+            JAVA_HOME environment variables as described <a href="#inst">above</a>. When 
+            this is 
+            done, you can run test start script. On Windows, from the command line run:</p>
             
             <source>%CAYENNE_HOME%\bin\runtests.bat</source>
                 
@@ -120,10 +127,10 @@
 			
             <source>$CAYENNE_HOME/bin/runtests.sh</source>
                 
-            <p>Test runner will present a graphic login panel that has some canned settings for
-            supported databases (use dropdown in the upper right corner):</p>
-            <img src="/images/ulogin.gif" width="402" height="254" border="0" align="middle" 
-            alt="Cayenne Login Panel"/>
+			<p>Test runner will present a graphic login panel that has some canned settings for
+			supported databases (use dropdown in the upper right corner):</p>
+			<img src="/images/ulogin.gif" width="402" height="254" border="0" align="middle"
+			alt="Cayenne Login Panel"/>
             
             <panel name="Note:">
             Use &quot;-nogui&quot; flag when calling runtests.sh if you need 
@@ -138,37 +145,38 @@
 			Virtual Machine. For example you can put a database vendor JAR
 			file containing the driver in $JAVA_HOME/jre/lib/ext directory. 
 	        Note that there is a combo box in the top left corner of the login panel
-	        that allows user to select a canned driver and URL information. Of course you are
-	        free to overwrite any of the canned data.
+	        that allows user to select a canned driver and URL information. 
+	        You must overwrite any of the canned data to provide the information that matches your
+	        environment.
 			</p>
 			
 			<p>Test results will be printed in a terminal window.</p>
         </subsection>
         
-        <subsection name="2.5 Compiling Cayenne from Source" anchor="compile"> 
-        <panel name="Note:">Normally users don't need to compile Cayenne. Prebuilt JAR's
-        are included with both source and binary distributions.</panel>
-        
-        <p>For those users who need to recompile Cayenne (for example if they modified the 
-        source code to customize or test certain aspects), Cayenne source distribution 
-        provides Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). To build
-        custom Cayenne jars execute the following commands. Windows:</p>
-        
-        <source>cd %CAYENNE_HOME%\src
+		<subsection name="2.5 Compiling Cayenne from Source" anchor="compile">
+			<panel name="Note:">Normally users don't need to compile Cayenne. Prebuilt JAR's
+			are included with both source and binary distributions.</panel>
+
+			<p>For those users who need to recompile Cayenne (for example if they modified the
+			source code to customize or test certain aspects), Cayenne source distribution
+			provides Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). To build
+			custom Cayenne jars execute the following commands. Windows:</p>
+
+		<source>cd %CAYENNE_HOME%\src
 %ANT_HOME%\bin\ant.bat</source>
 
 		<p>UNIX</p>
-		
+
 		<source>cd $CAYENNE_HOME/src
 $ANT_HOME/bin/ant</source>
 
-		<p>Note that the original cayenne.jar file should be present in the 
-		<code>[cayenne_install_dir]/lib</code> directory, since it contains dependencies
-		not included as a source code. The result of the build is two new JAR files: 
-		<code>[cayenne_install_dir]/lib/cayenne-cust.jar</code> and
-		<code>[cayenne_install_dir]/lib/cayenne-tests-cust.jar</code>.
-		</p>        
-        </subsection>  
+			<p>Note that the original cayenne.jar file should be present in the
+			<code>[cayenne_install_dir]/lib</code> directory, since it contains dependencies
+			not included as a source code. The result of the build is two new JAR files:
+			<code>[cayenne_install_dir]/lib/cayenne-cust.jar</code> and
+			<code>[cayenne_install_dir]/lib/cayenne-tests-cust.jar</code>.
+			</p>
+		</subsection>
     </section>
 </body>
 </document>

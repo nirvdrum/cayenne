@@ -58,6 +58,7 @@
             <li><a href="modeler/index.html">6. CayenneModeler GUI Tool</a>
             <ul>
                 <li><a href="modeler/index.html#intro">6.1 Introduction</a></li>
+                <li><a href="modeler/index.html#run">6.2 Running CayenneModeler</a></li>
             </ul></li>
             
             <li><a href="webobjects.html">7. Cayenne and WebObjects</a>
