@@ -53,8 +53,18 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.art;
 
-public class DeleteRuleTest2 extends org.objectstyle.art.auto._DeleteRuleTest2 {
+package org.objectstyle.cayenne.unit;
 
+/**
+ * @author Andrei Adamchik
+ */
+public abstract class RelationshipTestCase extends CayenneTestCase {
+
+    public static final String RELATIONSHIP_ACCESS_STACK = "RelationshipStack";
+
+    protected AccessStack buildAccessStack() {
+        return CayenneTestResources.getResources().getAccessStack(
+            RELATIONSHIP_ACCESS_STACK);
+    }
 }

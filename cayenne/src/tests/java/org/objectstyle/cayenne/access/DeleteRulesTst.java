@@ -53,8 +53,80 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.art;
+package org.objectstyle.cayenne.access;
 
-public class FlattenedTest2 extends org.objectstyle.art.auto._FlattenedTest2 {
+import org.objectstyle.cayenne.testdo.relationship.DeleteRuleTest1;
+import org.objectstyle.cayenne.testdo.relationship.DeleteRuleTest2;
+import org.objectstyle.cayenne.testdo.relationship.DeleteRuleTest3;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
+
+public class DeleteRulesTst extends RelationshipTestCase {
+
+    private DataContext context;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        deleteTestData();
+        context = createDataContext();
+    }
+
+    public void testDenyToOne() {
+        //DeleteRuleTest1 test2
+        DeleteRuleTest1 test1 =
+            (DeleteRuleTest1) context.createAndRegisterNewObject("DeleteRuleTest1");
+        DeleteRuleTest2 test2 =
+            (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
+        test1.setTest2(test2);
+        context.commitChanges();
+
+        try {
+            context.deleteObject(test1);
+            fail("Should have thrown an exception");
+        }
+        catch (Exception e) {
+            //GOOD!
+        }
+        context.commitChanges();
+
+    }
+
+    public void testNoActionToOne() {
+        DeleteRuleTest2 test2 =
+            (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
+        DeleteRuleTest3 test3 =
+            (DeleteRuleTest3) context.createAndRegisterNewObject("DeleteRuleTest3");
+        test3.setToDeleteRuleTest2(test2);
+        context.commitChanges();
+
+        try {
+            context.deleteObject(test3);
+            context.commitChanges();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Shouldn't have thrown an exception");
+        }
+
+    }
+
+    public void testNoActionToMany() {
+        DeleteRuleTest2 test2 =
+            (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
+        DeleteRuleTest3 test3 =
+            (DeleteRuleTest3) context.createAndRegisterNewObject("DeleteRuleTest3");
+        test3.setToDeleteRuleTest2(test2);
+        context.commitChanges();
+
+        try {
+            context.deleteObject(test2);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Shouldn't have thrown an exception");
+        }
+
+        // don't commit, since this will cause a constraint exception
+    }
 
 }

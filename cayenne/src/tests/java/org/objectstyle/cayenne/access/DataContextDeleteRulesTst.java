@@ -59,9 +59,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.DeleteRuleTest1;
-import org.objectstyle.art.DeleteRuleTest2;
-import org.objectstyle.art.DeleteRuleTest3;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
@@ -69,10 +66,9 @@ import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-/**
- * 
- * @author Craig Miskell
- */
+// TODO: redefine all test cases in terms of entities in "relationships" map
+// and merge this test case with DeleteRulesTst that inherits 
+// from RelationshipTestCase.
 public class DataContextDeleteRulesTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(DataContextDeleteRulesTst.class);
 
@@ -80,7 +76,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         deleteTestData();
         context = getDomain().createDataContext();
     }
@@ -117,7 +113,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
     /**
      * Tests that deleting a source of a flattened relationship with
      * CASCADE rule results in deleting a join and a target.
-     */    
+     */
     public void testCascadeToManyFlattened() {
         // testing Artist.groupArray relationship
         ArtGroup aGroup = (ArtGroup) context.createAndRegisterNewObject(ArtGroup.class);
@@ -128,9 +124,9 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
         assertTrue(anArtist.getGroupArray().contains(aGroup));
 
         context.commitChanges();
-        
+
         assertEquals(0, context.getObjectStore().flattenedDeletes.size());
-        
+
         context.deleteObject(anArtist);
 
         assertEquals(PersistenceState.DELETED, aGroup.getPersistenceState());
@@ -244,26 +240,6 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
         context.commitChanges();
     }
 
-    public void testDenyToOne() {
-        //DeleteRuleTest1 test2
-        DeleteRuleTest1 test1 =
-            (DeleteRuleTest1) context.createAndRegisterNewObject("DeleteRuleTest1");
-        DeleteRuleTest2 test2 =
-            (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
-        test1.setTest2(test2);
-        context.commitChanges();
-
-        try {
-            context.deleteObject(test1);
-            fail("Should have thrown an exception");
-        }
-        catch (Exception e) {
-            //GOOD!
-        }
-        context.commitChanges();
-
-    }
-
     public void testDenyToMany() {
         //Gallery paintingArray
         Gallery gallery = (Gallery) context.createAndRegisterNewObject("Gallery");
@@ -282,43 +258,4 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
         }
         context.commitChanges();
     }
-
-    public void testNoActionToOne() {
-        DeleteRuleTest2 test2 =
-            (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
-        DeleteRuleTest3 test3 =
-            (DeleteRuleTest3) context.createAndRegisterNewObject("DeleteRuleTest3");
-        test3.setToDeleteRuleTest2(test2);
-        context.commitChanges();
-
-        try {
-            context.deleteObject(test3);
-            context.commitChanges();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Shouldn't have thrown an exception");
-        }
-
-    }
-
-    public void testNoActionToMany() {
-        DeleteRuleTest2 test2 =
-            (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
-        DeleteRuleTest3 test3 =
-            (DeleteRuleTest3) context.createAndRegisterNewObject("DeleteRuleTest3");
-        test3.setToDeleteRuleTest2(test2);
-        context.commitChanges();
-
-        try {
-            context.deleteObject(test2);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Shouldn't have thrown an exception");
-        }
-
-        // don't commit, since this will cause a constraint exception
-    }
-
 }

@@ -58,6 +58,9 @@
 	<bean id="LockingMap" class="org.objectstyle.cayenne.unit.DataMapFactory">
 		<constructor-arg><value>test-resources/locking.map.xml</value></constructor-arg>
 	</bean>
+	<bean id="RelationshipMap" class="org.objectstyle.cayenne.unit.DataMapFactory">
+		<constructor-arg><value>test-resources/relationships.map.xml</value></constructor-arg>
+	</bean>
 	<bean id="OneWayMap" class="org.objectstyle.cayenne.unit.DataMapFactory">
 		<constructor-arg><value>test-resources/one-way-map.map.xml</value></constructor-arg>
 	</bean>
@@ -93,6 +96,11 @@
 		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg><list><ref bean="LockingMap"/></list></constructor-arg>
 	</bean>
+	<bean id="RelationshipStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
+		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
+		<constructor-arg><list><ref bean="RelationshipMap"/></list></constructor-arg>
+	</bean>
 	<bean id="OneWayStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
 		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
@@ -110,7 +118,12 @@
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
 		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg>
-			<list><ref bean="TestMap"/><ref bean="PeopleMap"/><ref bean="LockingMap"/></list>
+			<list>
+				<ref bean="TestMap"/>
+				<ref bean="PeopleMap"/>
+				<ref bean="LockingMap"/>
+				<ref bean="RelationshipMap"/>
+			</list>
 		</constructor-arg>
 	</bean>
 	

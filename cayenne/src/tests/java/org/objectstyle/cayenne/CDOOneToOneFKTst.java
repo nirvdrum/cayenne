@@ -55,10 +55,10 @@
  */
 package org.objectstyle.cayenne;
 
-import org.objectstyle.art.ToOneFK1;
-import org.objectstyle.art.ToOneFK2;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.testdo.relationship.ToOneFK1;
+import org.objectstyle.cayenne.testdo.relationship.ToOneFK2;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
  * Tests the behavior of one-to-one relationship where to-one
@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class CDOOneToOneFKTst extends CayenneTestCase {
+public class CDOOneToOneFKTst extends RelationshipTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {

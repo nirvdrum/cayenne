@@ -1,4 +1,4 @@
-package org.objectstyle.art.auto;
+package org.objectstyle.cayenne.testdo.relationship.auto;
 
 import java.util.List;
 
@@ -23,10 +23,10 @@ public class _FlattenedTest1 extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void addToFt2Array(org.objectstyle.art.FlattenedTest2 obj) {
+    public void addToFt2Array(org.objectstyle.cayenne.testdo.relationship.FlattenedTest2 obj) {
         addToManyTarget("ft2Array", obj, true);
     }
-    public void removeFromFt2Array(org.objectstyle.art.FlattenedTest2 obj) {
+    public void removeFromFt2Array(org.objectstyle.cayenne.testdo.relationship.FlattenedTest2 obj) {
         removeToManyTarget("ft2Array", obj, true);
     }
     public List getFt2Array() {
@@ -34,10 +34,10 @@ public class _FlattenedTest1 extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void addToFt3Array(org.objectstyle.art.FlattenedTest3 obj) {
+    public void addToFt3Array(org.objectstyle.cayenne.testdo.relationship.FlattenedTest3 obj) {
         addToManyTarget("ft3Array", obj, true);
     }
-    public void removeFromFt3Array(org.objectstyle.art.FlattenedTest3 obj) {
+    public void removeFromFt3Array(org.objectstyle.cayenne.testdo.relationship.FlattenedTest3 obj) {
         removeToManyTarget("ft3Array", obj, true);
     }
     public List getFt3Array() {

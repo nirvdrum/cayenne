@@ -56,18 +56,11 @@
 package org.objectstyle.cayenne;
 
 import java.util.List;
-import java.util.Map;
 
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
-import org.objectstyle.art.FlattenedTest1;
-import org.objectstyle.art.FlattenedTest2;
-import org.objectstyle.art.FlattenedTest3;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.MockupDataRowUtils;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
@@ -76,33 +69,10 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
+// TODO: redefine all test cases in terms of entities in "relationships" map
+// and merge this test case with FlattenedRelationshipsTst that inherits 
+// from RelationshipTestCase.
 public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
-    public void testToOneSeriesFlattenedRel() {
-        FlattenedTest1 ft1 =
-            (FlattenedTest1) ctxt.createAndRegisterNewObject("FlattenedTest1");
-        ft1.setName("FT1Name");
-        FlattenedTest2 ft2 =
-            (FlattenedTest2) ctxt.createAndRegisterNewObject("FlattenedTest2");
-        ft2.setName("FT2Name");
-        FlattenedTest3 ft3 =
-            (FlattenedTest3) ctxt.createAndRegisterNewObject("FlattenedTest3");
-        ft3.setName("FT3Name");
-
-        ft2.setToFT1(ft1);
-        ft2.addToFt3Array(ft3);
-        ctxt.commitChanges();
-
-        ctxt = createDataContext(); //We need a new context
-        SelectQuery q = new SelectQuery(FlattenedTest3.class);
-        q.setQualifier(ExpressionFactory.matchExp("name", "FT3Name"));
-        List results = ctxt.performQuery(q);
-
-        assertEquals(1, results.size());
-
-        FlattenedTest3 fetchedFT3 = (FlattenedTest3) results.get(0);
-        FlattenedTest1 fetchedFT1 = fetchedFT3.getToFT1();
-        assertEquals("FT1Name", fetchedFT1.getName());
-    }
 
     public void testReadFlattenedRelationship() throws Exception {
         //Test no groups
@@ -284,62 +254,5 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         assertEquals(0, group.getArtistArray().size());
         //a1 = fetchArtist();
         //assertTrue(group.getArtistArray().contains(a1));
-    }
-
-    public void testTakeObjectSnapshotFlattenedFault() throws Exception {
-        createTestData("test");
-
-        // fetch 
-        List ft3s = ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
-        assertEquals(1, ft3s.size());
-        FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
-
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
-
-        // test that taking a snapshot does not trigger a fault, and generally works well 
-        Map snapshot = ctxt.currentSnapshot(ft3);
-
-        assertEquals("ft3", snapshot.get("NAME"));
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
-
-    }
-
-    public void testIsToOneTargetModifiedFlattenedFault1() throws Exception {
-        createTestData("test");
-
-        // fetch 
-        List ft3s = ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
-        assertEquals(1, ft3s.size());
-        FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
-
-        // mark as dirty for the purpose of the test...
-        ft3.setPersistenceState(PersistenceState.MODIFIED);
-
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
-
-        // test that checking for modifications does not trigger a fault, and generally works well
-        ObjEntity entity = ctxt.getEntityResolver().lookupObjEntity(FlattenedTest3.class);
-        ObjRelationship flattenedRel = (ObjRelationship) entity.getRelationship("toFT1");
-        assertFalse(
-            MockupDataRowUtils.isToOneTargetModified(
-                flattenedRel,
-                ft3,
-                ctxt.getObjectStore().getCachedSnapshot(ft3.getObjectId())));
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
-    }
-
-    public void testRefetchWithFlattenedFaultToOneTarget1() throws Exception {
-        createTestData("test");
-
-        // fetch 
-        List ft3s = ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
-        assertEquals(1, ft3s.size());
-        FlattenedTest3 ft3 = (FlattenedTest3) ft3s.get(0);
-
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
-
-        // refetch
-        ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
-        assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
     }
 }
