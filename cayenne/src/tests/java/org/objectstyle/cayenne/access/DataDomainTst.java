@@ -183,7 +183,7 @@ public class DataDomainTst extends CayenneTestCase {
 	}
 	
 	public void testEntityResolver() {
-		assertNotNull(getSharedDomain().getEntityResolver());
+		assertNotNull(getDomain().getEntityResolver());
 		
 		DataDomain domain = new DataDomain("dom1");
 		assertNotNull(domain.getEntityResolver());

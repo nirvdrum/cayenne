@@ -76,7 +76,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
         it =
             new DefaultResultIterator(
                 st,
-                getSharedNode().getAdapter(),
+                getNode().getAdapter(),
                 (SelectQueryAssembler) transl);
     }
 

@@ -100,10 +100,10 @@ public class CayenneTestResources {
         if (initDone) {
             return;
         }
+        initDone = true;
         Configuration.configCommonLogging();
         probeJDKVersion();
         startDbConnections();
-        initDone = true;
     }
 
     /**

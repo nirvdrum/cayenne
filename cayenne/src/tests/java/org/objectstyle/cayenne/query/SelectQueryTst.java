@@ -105,7 +105,7 @@ public class SelectQueryTst extends SelectQueryBase {
     
     public void testSelectAllObjectsRootObjEntity() throws java.lang.Exception {
 		//Crude technique to obtain the Artist ObjEntity, but it works
-  		query.setRoot(this.getSharedDomain().getEntityResolver().lookupObjEntity("Artist"));
+  		query.setRoot(this.getDomain().getEntityResolver().lookupObjEntity("Artist"));
         performQuery();
 
         // check query results
@@ -167,7 +167,7 @@ public class SelectQueryTst extends SelectQueryBase {
  		query.setRoot(Artist.class);
         query.addCustDbAttribute("ARTIST_NAME");
 
-        List results = getSharedDomain().createDataContext().performQuery(query);
+        List results = getDomain().createDataContext().performQuery(query);
 
         // check query results
         assertEquals(_artistCount, results.size());
@@ -180,7 +180,7 @@ public class SelectQueryTst extends SelectQueryBase {
     protected void populateTables() throws java.lang.Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-        Connection conn = getSharedConnection();
+        Connection conn = getConnection();
 
         try {
             conn.setAutoCommit(false);

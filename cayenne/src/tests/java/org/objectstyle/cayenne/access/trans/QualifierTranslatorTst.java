@@ -74,12 +74,12 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 	}
 
 	protected void setUp() throws java.lang.Exception {
-		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
+		qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
 	}
 
 	public void testNonQualifiedQuery() throws java.lang.Exception {
 		qa.dispose();
-		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.INSERT_QUERY);
+		qa = TstQueryAssembler.assembler(getDomain(), Query.INSERT_QUERY);
 
 		try {
 			new QualifierTranslator(qa).doTranslation();
@@ -123,7 +123,7 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 					((QualifiedQuery) qa.getQuery()).setQualifier(
 						cases[i].getCayenneExp());
 					ObjEntity ent =
-						getSharedDomain().getEntityResolver().lookupObjEntity(
+						getDomain().getEntityResolver().lookupObjEntity(
 							cases[i].getRootEntity());
 					assertNotNull(ent);
 					qa.getQuery().setRoot(ent);

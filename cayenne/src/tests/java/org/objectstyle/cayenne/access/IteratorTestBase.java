@@ -83,7 +83,7 @@ public class IteratorTestBase extends CayenneTestCase {
 		st = null;
 		transl = null;
 
-		getSharedDatabaseSetup().cleanTableData();
+		getDatabaseSetup().cleanTableData();
 		new DataContextTst("Helper").populateTables();
 	}
 
@@ -92,13 +92,13 @@ public class IteratorTestBase extends CayenneTestCase {
      * Initializes internal state.
      */
 	protected void init() throws Exception {
-		conn = getSharedConnection();
+		conn = getConnection();
 
 		SelectQuery q = new SelectQuery("Artist");
 		q.addOrdering("artistName", true);
 
-		transl = getSharedNode().getAdapter().getQueryTranslator(q);
-		transl.setEngine(getSharedNode());
+		transl = getNode().getAdapter().getQueryTranslator(q);
+		transl.setEngine(getNode());
 		transl.setCon(conn);
 
 		st = transl.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);

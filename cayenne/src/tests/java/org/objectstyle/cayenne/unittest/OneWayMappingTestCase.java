@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,40 +53,20 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.unittest;
 
-import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.*;
+/**
+ * @author Andrei Adamchik
+ */
+public class OneWayMappingTestCase extends CayenneTestCase {
 
-public class QueryHelperTst extends CayenneTestCase {
-    public QueryHelperTst(String name) {
+    /**
+     * Constructor for OneWayMappingTestCase.
+     * @param name
+     */
+    public OneWayMappingTestCase(String name) {
         super(name);
     }
 
-    public void testSelectPrefetchPath() throws Exception {
-        SelectQuery q = new SelectQuery("Artist");
-        q.setQualifier(
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
-        SelectQuery reverseQ =
-            QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
-		assertEquals("Painting", reverseQ.getObjEntityName());
-		Object queryRoot=reverseQ.getRoot();
-		if(queryRoot instanceof String) {
-			assertEquals("Painting", queryRoot);
-		} else if (queryRoot instanceof ObjEntity) {
-			assertEquals(getDomain().getEntityResolver().lookupObjEntity("Painting"), queryRoot);
-		} else if (queryRoot instanceof Class) {
-			assertEquals(Painting.class ,queryRoot);
-		} else {
-			fail("Query root is of an untestable type :"+queryRoot.getClass());
-		}
-        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
-        
-        Expression newPath = (Expression)reverseQ.getQualifier().getOperand(0);
-        assertNotNull("Null path operand.", newPath);
-        assertEquals("toArtist.artistName", newPath.getOperand(0));
-    }
 }
+

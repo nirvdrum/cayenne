@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,40 +53,46 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.unittest;
 
-import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.access.DataDomain;
 
-public class QueryHelperTst extends CayenneTestCase {
-    public QueryHelperTst(String name) {
-        super(name);
+/**
+ * Helper class for the test cases that use a DataMap with all relationships
+ * mapped one way.
+ * 
+ * @author Andrei Adamchik
+ */
+public class OneWayMappingProject {
+    protected static OneWayMappingProject instance;
+
+    public static final String ONE_WAY_MAP_PATH = "test-resources/one-way-map.map.xml";
+    private static boolean initDone;
+
+    protected DataDomain domain;
+
+    public static void init() {
+        if (initDone) {
+            return;
+        }
+        initDone = true;
+        instance = new OneWayMappingProject();
     }
 
-    public void testSelectPrefetchPath() throws Exception {
-        SelectQuery q = new SelectQuery("Artist");
-        q.setQualifier(
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
-        SelectQuery reverseQ =
-            QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
-		assertEquals("Painting", reverseQ.getObjEntityName());
-		Object queryRoot=reverseQ.getRoot();
-		if(queryRoot instanceof String) {
-			assertEquals("Painting", queryRoot);
-		} else if (queryRoot instanceof ObjEntity) {
-			assertEquals(getDomain().getEntityResolver().lookupObjEntity("Painting"), queryRoot);
-		} else if (queryRoot instanceof Class) {
-			assertEquals(Painting.class ,queryRoot);
-		} else {
-			fail("Query root is of an untestable type :"+queryRoot.getClass());
-		}
-        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
-        
-        Expression newPath = (Expression)reverseQ.getQualifier().getOperand(0);
-        assertNotNull("Null path operand.", newPath);
-        assertEquals("toArtist.artistName", newPath.getOperand(0));
+    /**
+     * Constructor for OneWayMappingProject.
+     */
+    public OneWayMappingProject() {
+        super();
+        domain = CayenneTestResources.getResources().createCayenneStack(ONE_WAY_MAP_PATH);
+    }
+
+
+    /**
+     * Returns the domain.
+     * @return DataDomain
+     */
+    public DataDomain getDomain() {
+        return domain;
     }
 }

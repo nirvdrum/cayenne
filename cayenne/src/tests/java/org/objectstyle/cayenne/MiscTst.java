@@ -75,7 +75,7 @@ public class MiscTst extends CayenneTestCase {
     }
 
     public void setUp() throws Exception {
-        getSharedDatabaseSetup().cleanTableData();
+        getDatabaseSetup().cleanTableData();
     }
 
     public void testNothing() throws Exception {

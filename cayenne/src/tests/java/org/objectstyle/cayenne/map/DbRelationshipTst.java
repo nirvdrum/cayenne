@@ -71,7 +71,7 @@ public class DbRelationshipTst extends CayenneTestCase {
     }
     
     public void setUp() throws Exception {
-        DataDomain dom = getSharedDomain();
+        DataDomain dom = getDomain();
         artistEnt = dom.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
         paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
         galleryEnt = dom.getEntityResolver().lookupObjEntity("Gallery").getDbEntity();

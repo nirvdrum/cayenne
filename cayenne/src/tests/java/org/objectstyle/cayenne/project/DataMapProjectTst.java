@@ -90,7 +90,7 @@ public class DataMapProjectTst extends CayenneTestCase {
         }
 
         // copy shared datamap to the test location
-        DataMap m = getSharedNode().getDataMaps()[0];
+        DataMap m = getNode().getDataMaps()[0];
 
         PrintWriter out = new PrintWriter(new FileOutputStream(f));
 

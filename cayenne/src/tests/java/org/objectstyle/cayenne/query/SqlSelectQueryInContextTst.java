@@ -112,7 +112,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 	protected void populateTables() throws java.lang.Exception {
 		String insertArtist =
 			"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-		Connection conn = getSharedConnection();
+		Connection conn = getConnection();
 
 		try {
 			conn.setAutoCommit(false);

@@ -15,7 +15,7 @@ public class EntityResolverTst extends CayenneTestCase {
 
     public EntityResolverTst(String name) {
         super(name);
-        maps.addAll(getSharedDomain().getMapList());
+        maps.addAll(getDomain().getMapList());
     }
 
     protected void setUp() throws Exception {
@@ -25,11 +25,11 @@ public class EntityResolverTst extends CayenneTestCase {
     ////Private conveniences
 
     private DbEntity getArtistDbEntity() {
-        return getSharedDomain().getMapForDbEntity("ARTIST").getDbEntity("ARTIST");
+        return getDomain().getMapForDbEntity("ARTIST").getDbEntity("ARTIST");
     }
 
     private ObjEntity getArtistObjEntity() {
-        return getSharedDomain().getMapForObjEntity("Artist").getObjEntity("Artist");
+        return getDomain().getMapForObjEntity("Artist").getObjEntity("Artist");
     }
 
     private void assertIsArtistDbEntity(DbEntity ae) {

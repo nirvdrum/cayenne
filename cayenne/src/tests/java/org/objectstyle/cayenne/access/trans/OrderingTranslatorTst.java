@@ -75,7 +75,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
     }
 
     protected void setUp() throws java.lang.Exception {
-        qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
+        qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
         q = (SelectQuery) qa.getQuery();
     }
 

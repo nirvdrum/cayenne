@@ -79,8 +79,8 @@ public class DbLoaderTst extends CayenneTestCase {
 	public void setUp() throws Exception {
 		loader =
 			new DbLoader(
-				getSharedConnection(),
-				getSharedNode().getAdapter(), null);
+				getConnection(),
+				getNode().getAdapter(), null);
 	}
 
 	/** 
@@ -92,7 +92,7 @@ public class DbLoaderTst extends CayenneTestCase {
 	public void testLoad() throws Exception {
 		try {
 			boolean supportsFK =
-				getSharedNode().getAdapter().supportsFkConstraints();
+				getNode().getAdapter().supportsFkConstraints();
 
 			DataMap map = new DataMap();
 
@@ -149,7 +149,7 @@ public class DbLoaderTst extends CayenneTestCase {
 	}
 
 	private DataMap originalMap() {
-		return getSharedNode().getDataMaps()[0];
+		return getNode().getDataMaps()[0];
 	}
 
 	/** Selectively check how different types were processed. */

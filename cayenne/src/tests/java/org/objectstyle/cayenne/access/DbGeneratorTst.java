@@ -74,12 +74,12 @@ public class DbGeneratorTst extends CayenneTestCase {
     public void setUp() throws Exception {
         gen =
             new DbGenerator(
-                getSharedNode().getAdapter(),
-                getSharedNode().getDataMaps()[0]);
+                getNode().getAdapter(),
+                getNode().getDataMaps()[0]);
     }
 
     public void testAdapter() throws Exception {
-        assertSame(getSharedNode().getAdapter(), gen.getAdapter());
+        assertSame(getNode().getAdapter(), gen.getAdapter());
     }
 
     public void testCreatePkSupport() throws Exception {

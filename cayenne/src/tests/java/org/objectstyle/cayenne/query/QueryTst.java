@@ -89,7 +89,7 @@ public class QueryTst extends CayenneTestCase {
     
     public void testSetRootObjEntity() {
     	assertNull(query.getRoot());
-    	ObjEntity e= getSharedDomain().getEntityResolver().lookupObjEntity("Artist");
+    	ObjEntity e= getDomain().getEntityResolver().lookupObjEntity("Artist");
     	query.setRoot(e);
     	this.assertSame(e, query.getRoot());
     }

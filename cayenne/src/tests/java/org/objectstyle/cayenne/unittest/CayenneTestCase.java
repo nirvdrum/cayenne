@@ -94,15 +94,15 @@ public class CayenneTestCase extends TestCase {
     	return CayenneTestResources.getResources().getTestDir();
     }
     
-    public Connection getSharedConnection() {
+    public Connection getConnection() {
         return CayenneTestResources.getResources().getSharedConnection();
     }
 
-    public DataDomain getSharedDomain() {
+    public DataDomain getDomain() {
         return CayenneTestResources.getResources().getSharedDomain();
     }
 
-    public DataNode getSharedNode() {
+    public DataNode getNode() {
         return CayenneTestResources.getResources().getSharedNode();
     }
 
@@ -111,10 +111,10 @@ public class CayenneTestCase extends TestCase {
     }
 
     public DataContext createDataContext() {
-        return getSharedDomain().createDataContext();
+        return getDomain().createDataContext();
     }
     
-    public CayenneTestDatabaseSetup getSharedDatabaseSetup() {
+    public CayenneTestDatabaseSetup getDatabaseSetup() {
     	return CayenneTestResources.getResources().getSharedDatabaseSetup();
     } 
 }

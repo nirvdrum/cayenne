@@ -89,13 +89,13 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         q = new SelectQuery();
-        artistEnt = getSharedDomain().getEntityResolver().lookupObjEntity("Artist").getDbEntity();
+        artistEnt = getDomain().getEntityResolver().lookupObjEntity("Artist").getDbEntity();
     }
 
     private SelectTranslator buildTranslator(Connection con) throws Exception {
         SelectTranslator transl =
-            (SelectTranslator) getSharedNode().getAdapter().getQueryTranslator(q);
-        transl.setEngine(getSharedNode());
+            (SelectTranslator) getNode().getAdapter().getQueryTranslator(q);
+        transl.setEngine(getNode());
         transl.setCon(con);
 
         return transl;
@@ -105,7 +105,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * Tests query creation with qualifier and ordering.
      */
     public void testCreateSqlString1() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -132,7 +132,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * Tests query creation with "distinct" specified.
      */
     public void testCreateSqlString2() throws java.lang.Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
         try {
             // query with "distinct" set
             q.setRoot(Artist.class);
@@ -154,7 +154,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     public void testCreateSqlString3() throws Exception {
         ObjectId id = new ObjectId(Artist.class, "ARTIST_ID", 35);
         Artist a1 = (Artist) createDataContext().registeredObject(id);
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -183,7 +183,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * Tests query creation with relationship from derived entity.
      */
     public void testCreateSqlString4() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -232,7 +232,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * and "ArtistExhibit.toExhibit.toGallery.paintingArray.toArtist.artistName".
      */
     public void testCreateSqlString5() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -280,7 +280,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * and "ArtistExhibit.toArtist.paintingArray.paintingTitle".
      */
     public void testCreateSqlString6() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -322,7 +322,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * Check translation "Artist.dateOfBirth > ? AND Artist.dateOfBirth < ?".
      */
     public void testCreateSqlString7() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -369,7 +369,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * Check translation "Painting.toArtist.dateOfBirth > ? AND Painting.toArtist.dateOfBirth < ?".
      */
     public void testCreateSqlString8() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // query with qualifier and ordering
@@ -411,7 +411,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     
     
     public void testBuildColumnList1() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // configure query with entity that maps one-to-one to DbEntity
@@ -434,7 +434,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     }
 
     public void testBuildColumnList2() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // configure query with custom attributes
@@ -458,7 +458,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     }
 
     public void testBuildColumnList3() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // configure query with entity that maps to a subset of DbEntity
@@ -468,7 +468,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             List columns = transl.getColumnList();
 
-            ObjEntity subPainting = getSharedDomain().getEntityResolver().lookupObjEntity("SubPainting");
+            ObjEntity subPainting = getDomain().getEntityResolver().lookupObjEntity("SubPainting");
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2 
@@ -480,7 +480,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     }
 
     public void testBuildColumnList4() throws Exception {
-        Connection con = getSharedConnection();
+        Connection con = getConnection();
 
         try {
             // configure query with derived entity that maps to a subset of DbEntity
@@ -490,7 +490,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             List columns = transl.getColumnList();
 
-            ObjEntity countsEnt = getSharedDomain().getEntityResolver().lookupObjEntity("ArtistPaintingCounts");
+            ObjEntity countsEnt = getDomain().getEntityResolver().lookupObjEntity("ArtistPaintingCounts");
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2 

@@ -72,7 +72,7 @@ public class QueryAssemblerTst extends CayenneTestCase {
 	}
 
 	protected void setUp() throws java.lang.Exception {
-		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
+		qa = TstQueryAssembler.assembler(getDomain(), Query.SELECT_QUERY);
 	}
 
 	public void testGetQuery() throws java.lang.Exception {

@@ -84,7 +84,7 @@ public class IncrementalFaultListTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        getSharedDatabaseSetup().cleanTableData();
+        getDatabaseSetup().cleanTableData();
         new DataContextTst("Helper").populateTables();
 
         SelectQuery q = new SelectQuery("Artist");

@@ -91,10 +91,10 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 	}
 
 	public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
-        CayenneTestDatabaseSetup setup = getSharedDatabaseSetup();
+        CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();        
 
-		DataNode node = getSharedDomain().getDataNodes()[0];
+		DataNode node = getDomain().getDataNodes()[0];
 		setup.createPkSupportForMapEntities(node);
 
 		DbEntity artistEnt = node.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
@@ -112,7 +112,7 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 	
 	public void testPopulatedNodeEntityResolver() {
 		//Test shared node (one loaded with a real model)
-		assertNotNull(getSharedDomain().getDataNodes()[0].getEntityResolver());
+		assertNotNull(getDomain().getDataNodes()[0].getEntityResolver());
 	}
 	
 	public void testEmptyNodeEntityResolver() {

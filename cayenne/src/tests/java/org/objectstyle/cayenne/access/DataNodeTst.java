@@ -115,7 +115,7 @@ public class DataNodeTst extends IteratorTestBase {
 		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
 
 		try {
-			getSharedNode().performQueries(queries, observer);
+			getNode().performQueries(queries, observer);
 
 			assertEquals(0, observer.getResultCount());
 			assertTrue(
@@ -128,7 +128,7 @@ public class DataNodeTst extends IteratorTestBase {
 
 	protected DataNode newDataNode() {
 		DataNode node = new DataNode("dummy");
-		node.setAdapter(getSharedNode().getAdapter());
+		node.setAdapter(getNode().getAdapter());
 		return node;
 	}
 

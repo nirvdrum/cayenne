@@ -86,7 +86,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     protected void setUp() throws java.lang.Exception {
-        ctxt = getSharedDomain().createDataContext();
+        ctxt = getDomain().createDataContext();
     }
 
     public void testHasChangesNew() throws Exception {
@@ -180,7 +180,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
     public void testCommitChangesError() throws Exception {
         JdbcPkGenerator gen =
-            (JdbcPkGenerator) getSharedNode().getAdapter().getPkGenerator();
+            (JdbcPkGenerator) getNode().getAdapter().getPkGenerator();
         int cache = gen.getPkCacheSize();
 
         // make sure we insert enough objects to exhaust the cache
@@ -191,9 +191,9 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
 
         // this should cause PK generation exception in commit later
-        DataMap map = getSharedNode().getDataMaps()[0];
+        DataMap map = getNode().getDataMaps()[0];
 
-        gen.dropAutoPk(getSharedNode(), map.getDbEntitiesAsList());
+        gen.dropAutoPk(getNode(), map.getDbEntitiesAsList());
 
         // disable logging for thrown exceptions
         Level oldLevel = DefaultOperationObserver.logObj.getLevel();

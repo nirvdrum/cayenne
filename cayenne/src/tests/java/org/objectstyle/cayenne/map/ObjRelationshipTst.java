@@ -65,12 +65,12 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ObjRelationshipTst extends CayenneTestCase {
     protected ObjRelationship rel;
-    protected DbEntity artistDBEntity = getSharedDomain().getEntityResolver().lookupDbEntity(Artist.class);
+    protected DbEntity artistDBEntity = getDomain().getEntityResolver().lookupDbEntity(Artist.class);
 	//There may not be an ObjEntity for Artist_exhibit... jump straight to the dbentity
-    protected DbEntity artistExhibitDBEntity = getSharedDomain().getMapForDbEntity("ARTIST_EXHIBIT").getDbEntity("ARTIST_EXHIBIT");
-	protected DbEntity exhibitDBEntity = getSharedDomain().getEntityResolver().lookupDbEntity(Exhibit.class);
-	protected DbEntity paintingDbEntity = getSharedDomain().getEntityResolver().lookupDbEntity(Painting.class);
-	protected DbEntity galleryDBEntity = getSharedDomain().getEntityResolver().lookupDbEntity(Gallery.class);
+    protected DbEntity artistExhibitDBEntity = getDomain().getMapForDbEntity("ARTIST_EXHIBIT").getDbEntity("ARTIST_EXHIBIT");
+	protected DbEntity exhibitDBEntity = getDomain().getEntityResolver().lookupDbEntity(Exhibit.class);
+	protected DbEntity paintingDbEntity = getDomain().getEntityResolver().lookupDbEntity(Painting.class);
+	protected DbEntity galleryDBEntity = getDomain().getEntityResolver().lookupDbEntity(Gallery.class);
    
     public ObjRelationshipTst(String name) {
         super(name);
@@ -101,7 +101,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
     
     public void testGetReverseRel1() throws Exception {
-        DataDomain dom = getSharedDomain();
+        DataDomain dom = getDomain();
         ObjEntity artistObjEnt = dom.getEntityResolver().lookupObjEntity("Artist");
         ObjEntity paintingObjEnt = dom.getEntityResolver().lookupObjEntity("Painting");
         
@@ -114,7 +114,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
     
     public void testGetReverseRel2() throws Exception {
-        DataDomain dom = getSharedDomain();
+        DataDomain dom = getDomain();
         ObjEntity artistEnt = dom.getEntityResolver().lookupObjEntity("Artist");
         ObjEntity paintingEnt = dom.getEntityResolver().lookupObjEntity("Painting");
         
@@ -212,7 +212,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     
     //Test a relationship loaded from the test datamap that we know should be flattened
     public void testKnownFlattenedRelationship() {
-        ObjEntity artistEnt = getSharedDomain().getEntityResolver().lookupObjEntity("Artist");
+        ObjEntity artistEnt = getDomain().getEntityResolver().lookupObjEntity("Artist");
      	ObjRelationship theRel=(ObjRelationship)artistEnt.getRelationship("groupArray");
      	assertNotNull(theRel);
      	assertTrue(theRel.isFlattened());

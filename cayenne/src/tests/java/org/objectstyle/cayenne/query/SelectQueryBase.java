@@ -72,7 +72,7 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     
     
     public void setUp() throws Exception {
-        getSharedDatabaseSetup().cleanTableData();
+        getDatabaseSetup().cleanTableData();
         populateTables();
         query = new SelectQuery();
         opObserver = new TestOperationObserver();
@@ -81,7 +81,7 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     
     protected void performQuery() throws Exception {
         // run query
-        getSharedDomain().performQuery(getQuery(), opObserver);
+        getDomain().performQuery(getQuery(), opObserver);
         
         // check query errors
         opObserver.assertAllExceptions();

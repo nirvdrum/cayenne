@@ -66,7 +66,7 @@ public class TypesMappingBase extends CayenneTestCase {
     }
 
     protected TypesMapping createTypesMapping() throws Exception {
-        Connection conn = getSharedConnection();
+        Connection conn = getConnection();
 
         try {
             DatabaseMetaData md = conn.getMetaData();
