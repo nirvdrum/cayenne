@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.parser.ASTDbPath;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -212,7 +212,7 @@ public class ObjEntity extends Entity {
         ObjEntity superEntity = getSuperEntity();
         return (superEntity != null) ? superEntity.getLockType() : lockType;
     }
-    
+
     /**
      * Returns the type of lock used by this ObjEntity, regardless of
      * what locking type is used by super entities.
@@ -690,7 +690,31 @@ public class ObjEntity extends Entity {
     }
 
     /**
-     * Transforms Expression rooted in this entity to an analogous expression 
+     * Transforms an Expression to an analogous expression in terms of the underlying
+     * DbEntity.
+     * 
+     * @since 1.1
+     */
+    public Expression translateToDbPath(Expression expression) {
+
+        if (expression == null) {
+            return null;
+        }
+
+        if (getDbEntity() == null) {
+            throw new CayenneRuntimeException(
+                "Can't translate expression to DB_PATH, no DbEntity for '"
+                    + getName()
+                    + "'.");
+        }
+
+        // converts all OBJ_PATH expressions to DB_PATH expressions
+        // and pass control to the DB entity
+        return expression.transform(new DBPathConverter());
+    }
+
+    /**
+     * Transforms an Expression rooted in this entity to an analogous expression 
      * rooted in related entity.
      * 
      * @since 1.1
@@ -773,10 +797,7 @@ public class ObjEntity extends Entity {
             // convert obj_path to db_path
 
             String converted = toDbPath(resolvePathComponents(expression));
-            Expression transformed =
-                ExpressionFactory.expressionOfType(Expression.DB_PATH);
-            transformed.setOperand(0, converted);
-            return transformed;
+            return new ASTDbPath(converted);
         }
     }
 }

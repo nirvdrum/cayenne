@@ -96,7 +96,7 @@ public class PrefetchHelper {
             DataObject sourceObject = (DataObject) objects.get(i);
             DataObject targetObject =
                 (DataObject) sourceObject.readPropertyDirectly(relName);
-            
+
             ObjectId oid = targetObject.getObjectId();
             oids.add(oid);
         }
@@ -146,8 +146,7 @@ public class PrefetchHelper {
         }
 
         ObjEntity ent =
-            context.getEntityResolver().lookupObjEntity(
-                (DataObject) objects.get(0));
+            context.getEntityResolver().lookupObjEntity((DataObject) objects.get(0));
         ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
         ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
 
@@ -194,9 +193,9 @@ public class PrefetchHelper {
         List results = context.performQuery(sel);
 
         // sort the resulting objects into individual lists for each source object
-        
-        List destObjects = context.objectsFromDataRows(destEnt, results, false);
-		int nrows = destObjects.size();
+
+        List destObjects = context.objectsFromDataRows(destEnt, results, false, false);
+        int nrows = destObjects.size();
         for (int k = 0; k < nrows; k++) {
             Map row = (Map) results.get(k);
             ((List) listMap.get(row.get(dbKey))).add(destObjects.get(k));
@@ -208,8 +207,7 @@ public class PrefetchHelper {
             ObjectId oid = object.getObjectId();
             List list = (List) listMap.get(oid.getValueForAttribute(dbKey));
 
-            ((ToManyList) object.readPropertyDirectly(relName)).setObjectList(
-                list);
+            ((ToManyList) object.readPropertyDirectly(relName)).setObjectList(list);
         }
     }
 }

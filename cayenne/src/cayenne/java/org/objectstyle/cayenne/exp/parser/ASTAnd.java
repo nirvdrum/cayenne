@@ -59,7 +59,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * "And" expression.
@@ -100,7 +100,7 @@ public class ASTAnd extends AggregateConditionNode {
         }
 
         for (int i = 0; i < len; i++) {
-            if (!ColnversionUtil.toBoolean(evaluateChild(i, o))) {
+            if (!ConversionUtil.toBoolean(evaluateChild(i, o))) {
                 return Boolean.FALSE;
             }
         }

@@ -53,61 +53,87 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ConversionUtil;
+import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unit.PeopleTestCase;
 
 /**
- * "Greate Than" expression.
- * 
  * @author Andrei Adamchik
  */
-public class ASTGreater extends ConditionNode {
-    public ASTGreater(ASTPath path, Object value) {
-        super(ExpressionParserTreeConstants.JJTGREATER);
-        jjtAddChild(path, 0);
-        jjtAddChild(new ASTScalar(value), 1);
+public class EntityResolverInheritanceTst extends PeopleTestCase {
+    protected EntityResolver resolver;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        resolver = new EntityResolver(getDomain().getDataMaps());
     }
 
-    /**
-     * Constructor used by expression parser. Do not invoke directly.
-     */
-    ASTGreater(int id) {
-        super(id);
+    private ObjEntity getAbstractPerson() {
+        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity(
+            "AbstractPerson");
     }
 
-    protected Object evaluateNode(Object o) throws Exception {
-        int len = jjtGetNumChildren();
-        if (len != 2) {
-            return Boolean.FALSE;
-        }
-        
-        Comparable c1 = ConversionUtil.toComparabe(evaluateChild(0, o));
-        if(c1 == null) {
-            return Boolean.FALSE;
-        }
-        
-        Comparable c2 = ConversionUtil.toComparabe(evaluateChild(1, o));
-        if(c2 == null) {
-            return Boolean.FALSE;
-        }
-        
-        return c1.compareTo(c2) > 0 ? Boolean.TRUE : Boolean.FALSE;
+    private ObjEntity getClientRep() {
+        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity(
+            "ClientRepresentative");
     }
 
-    /**
-     * Creates a copy of this expression node, without copying children.
-     */
-    public Expression shallowCopy() {
-        return new ASTGreater(id);
+    private ObjEntity getEmployee() {
+        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity("Employee");
     }
 
-    protected String getExpressionOperator(int index) {
-        return ">";
+    private ObjEntity getManager() {
+        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity("Manager");
     }
 
-    public int getType() {
-        return Expression.GREATER_THAN;
+    public void testLookupAbstractPersonTree() throws Exception {
+        EntityInheritanceTree tree = resolver.lookupInheritanceTree(getAbstractPerson());
+        assertNotNull(tree);
+        assertEquals(2, tree.getChildrenCount());
+        assertSame(getAbstractPerson(), tree.getEntity());
     }
+
+    public void testLookupEmployeeTree() throws Exception {
+        EntityInheritanceTree tree = resolver.lookupInheritanceTree(getEmployee());
+        assertNotNull(tree);
+        assertEquals(1, tree.getChildrenCount());
+        assertSame(getEmployee(), tree.getEntity());
+    }
+
+    public void testLookupManagerTree() throws Exception {
+        EntityInheritanceTree tree = resolver.lookupInheritanceTree(getManager());
+        assertNull(tree);
+    }
+
+    public void testLookupTreeRefresh() throws Exception {
+        ObjEntity super1 = new ObjEntity("super1");
+        ObjEntity sub1 = new ObjEntity("sub1");
+        ObjEntity sub2 = new ObjEntity("sub2");
+
+        super1.setClassName("java.lang.Float");
+
+        sub1.setSuperEntityName("super1");
+        sub1.setClassName("java.lang.Object");
+
+        sub2.setSuperEntityName("super1");
+        sub2.setClassName("java.lang.Integer");
+
+        DataMap map = new DataMap("test");
+        map.addObjEntity(super1);
+        map.addObjEntity(sub1);
+        map.addObjEntity(sub2);
+
+        assertNull(resolver.lookupInheritanceTree(super1));
+
+        resolver.addDataMap(map);
+        EntityInheritanceTree tree = resolver.lookupInheritanceTree(super1);
+        assertNotNull(tree);
+        assertEquals(2, tree.getChildrenCount());
+        assertSame(super1, tree.getEntity());
+    }
+
 }

@@ -69,7 +69,7 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.parser.ExpressionParser;
 import org.objectstyle.cayenne.exp.parser.ParseException;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
@@ -455,7 +455,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * @since 1.1
      */
     public boolean match(Object o) {
-        return ColnversionUtil.toBoolean(evaluate(o));
+        return ConversionUtil.toBoolean(evaluate(o));
     }
 
     /**

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.exp.parser;
 import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * "Not" expression.
@@ -82,7 +82,7 @@ public class ASTNot extends AggregateConditionNode {
             return Boolean.FALSE;
         }
 
-        return ColnversionUtil.toBoolean(evaluateChild(0, o))
+        return ConversionUtil.toBoolean(evaluateChild(0, o))
             ? Boolean.FALSE
             : Boolean.TRUE;
     }

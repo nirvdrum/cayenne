@@ -185,10 +185,16 @@ public class SelectObserver extends DefaultOperationObserver {
                 ? ((GenericSelectQuery) rootQuery).isRefreshingObjects()
                 : true;
 
+        boolean resolveHierarchy =
+            (rootQuery instanceof GenericSelectQuery)
+                ? ((GenericSelectQuery) rootQuery).isResolvingInherited()
+                : false;
+
         return new PrefetchTreeNode(entity, rootQuery).resolveObjectTree(
             dataContext,
             entity,
-            refresh);
+            refresh,
+            resolveHierarchy);
     }
 
     /** 
@@ -364,10 +370,16 @@ public class SelectObserver extends DefaultOperationObserver {
         List resolveObjectTree(
             DataContext dataContext,
             ObjEntity entity,
-            boolean refresh) {
+            boolean refresh,
+            boolean resolveHierarchy) {
 
             // resolve objects
-            this.objects = dataContext.objectsFromDataRows(entity, dataRows, refresh);
+            this.objects =
+                dataContext.objectsFromDataRows(
+                    entity,
+                    dataRows,
+                    refresh,
+                    resolveHierarchy);
 
             // resolve children
             if (children != null) {
@@ -375,7 +387,11 @@ public class SelectObserver extends DefaultOperationObserver {
                 while (it.hasNext()) {
                     Map.Entry entry = (Map.Entry) it.next();
                     PrefetchTreeNode node = (PrefetchTreeNode) entry.getValue();
-                    node.resolveObjectTree(PrefetchTreeNode.this, dataContext, refresh);
+                    node.resolveObjectTree(
+                        PrefetchTreeNode.this,
+                        dataContext,
+                        refresh,
+                        resolveHierarchy);
                 }
             }
 
@@ -387,7 +403,8 @@ public class SelectObserver extends DefaultOperationObserver {
         void resolveObjectTree(
             PrefetchTreeNode parent,
             DataContext dataContext,
-            boolean refresh) {
+            boolean refresh,
+            boolean resolveHierarchy) {
 
             // skip most operations on a "phantom" node that had no prefetch query
             if (dataRows != null) {
@@ -396,7 +413,8 @@ public class SelectObserver extends DefaultOperationObserver {
                     dataContext.objectsFromDataRows(
                         (ObjEntity) incomingRelationship.getTargetEntity(),
                         dataRows,
-                        refresh);
+                        refresh,
+                        resolveHierarchy);
 
                 // connect to parent
                 if (parent != null
@@ -424,7 +442,11 @@ public class SelectObserver extends DefaultOperationObserver {
                 while (it.hasNext()) {
                     Map.Entry entry = (Map.Entry) it.next();
                     PrefetchTreeNode node = (PrefetchTreeNode) entry.getValue();
-                    node.resolveObjectTree(PrefetchTreeNode.this, dataContext, refresh);
+                    node.resolveObjectTree(
+                        PrefetchTreeNode.this,
+                        dataContext,
+                        refresh,
+                        resolveHierarchy);
                 }
             }
         }

@@ -60,7 +60,7 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * "Negate" expression.
@@ -91,7 +91,7 @@ public class ASTNegate extends SimpleNode {
             return null;
         }
 
-        BigDecimal result = ColnversionUtil.toBigDecimal(evaluateChild(0, o));
+        BigDecimal result = ConversionUtil.toBigDecimal(evaluateChild(0, o));
         return result != null ? result.negate() : null;
     }
 

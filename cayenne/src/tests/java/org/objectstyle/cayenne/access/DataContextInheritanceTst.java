@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
@@ -70,37 +71,64 @@ import org.objectstyle.cayenne.unit.PeopleTestCase;
 /**
  * @author Andrei Adamchik
  */
-public class DataContextQualifiedEntityTst extends PeopleTestCase {
+public class DataContextInheritanceTst extends PeopleTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
         super.setUp();
 
-        deleteTestData();
         context = createDataContext();
+        deleteTestData();
+        setupData();
     }
 
-    public void testSelect() throws Exception {
-        setupData();
-
-        // just check that an appropriate qualifier was applied
-        // no inheritance checks in this case...
-
+    public void testNoInheritanceResolving() throws Exception {
         // select Abstract Ppl
-        List abstractPpl = context.performQuery(new SelectQuery(AbstractPerson.class));
+        SelectQuery query = new SelectQuery(AbstractPerson.class);
+        assertFalse(query.isResolvingInherited());
+        List abstractPpl = context.performQuery(query);
         assertEquals(6, abstractPpl.size());
 
-        // select Customer Reps
-        List customerReps =
-            context.performQuery(new SelectQuery(CustomerRepresentative.class));
+        Iterator it = abstractPpl.iterator();
+        while (it.hasNext()) {
+            Object next = it.next();
+            assertTrue(
+                "Unknown object class: " + next.getClass().getName(),
+                next.getClass() == AbstractPerson.class);
+        }
+    }
+
+    public void testInheritanceResolving() throws Exception {
+        List customerReps = new ArrayList();
+        List employees = new ArrayList();
+        List managers = new ArrayList();
+
+        // select Abstract Ppl
+        SelectQuery query = new SelectQuery(AbstractPerson.class);
+        query.setResolvingInherited(true);
+        assertTrue(query.isResolvingInherited());
+        List abstractPpl = context.performQuery(query);
+        assertEquals(6, abstractPpl.size());
+
+        Iterator it = abstractPpl.iterator();
+        while (it.hasNext()) {
+            Object next = it.next();
+
+            if (next instanceof CustomerRepresentative) {
+                customerReps.add(next);
+            }
+
+            if (next instanceof Employee) {
+                employees.add(next);
+            }
+
+            if (next instanceof Manager) {
+                managers.add(next);
+            }
+        }
+
         assertEquals(1, customerReps.size());
-
-        // select Employees
-        List employees = context.performQuery(new SelectQuery(Employee.class));
         assertEquals(5, employees.size());
-
-        // select Managers
-        List managers = context.performQuery(new SelectQuery(Manager.class));
         assertEquals(2, managers.size());
     }
 

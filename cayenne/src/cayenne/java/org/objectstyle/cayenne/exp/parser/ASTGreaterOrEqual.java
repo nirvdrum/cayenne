@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * "Greater Than Or Equal To" expression.
@@ -84,12 +84,12 @@ public class ASTGreaterOrEqual extends ConditionNode {
             return Boolean.FALSE;
         }
 
-        Comparable c1 = ColnversionUtil.toComparabe(evaluateChild(0, o));
+        Comparable c1 = ConversionUtil.toComparabe(evaluateChild(0, o));
         if (c1 == null) {
             return Boolean.FALSE;
         }
 
-        Comparable c2 = ColnversionUtil.toComparabe(evaluateChild(1, o));
+        Comparable c2 = ConversionUtil.toComparabe(evaluateChild(1, o));
         if (c2 == null) {
             return Boolean.FALSE;
         }

@@ -94,9 +94,13 @@ public class OracleStackAdapter extends AccessStackAdapter {
      */
     public void willCreateTables(Connection con, DataMap map) {
         DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
-        DbAttribute textReview = (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
-        textReview.setType(Types.VARCHAR);
-        textReview.setMaxLength(255);
+
+        if (paintingInfo != null) {
+            DbAttribute textReview =
+                (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
+            textReview.setType(Types.VARCHAR);
+            textReview.setMaxLength(255);
+        }
     }
 
     public void createdTables(Connection con, DataMap map) throws Exception {

@@ -139,4 +139,13 @@ public class ProcedureQuery
     public boolean isRefreshingObjects() {
         return true;
     }
+    
+    /**
+     * Currently always returns false.
+     * 
+     * @since 1.1
+     */
+    public boolean isResolvingInherited() {
+        return false;
+    }
 }

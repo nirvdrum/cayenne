@@ -57,7 +57,7 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * "Not like, ignore case" expression.
@@ -81,7 +81,7 @@ public class ASTNotLikeIgnoreCase extends PatternMatchNode {
             return Boolean.FALSE;
         }
 
-        String s1 = ColnversionUtil.toString(evaluateChild(0, o));
+        String s1 = ConversionUtil.toString(evaluateChild(0, o));
         if (s1 == null) {
             return Boolean.FALSE;
         }

@@ -65,6 +65,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -82,12 +83,14 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class EntityResolver {
+
     protected Map queryCache;
     protected Map dbEntityCache;
     protected Map objEntityCache;
     protected Map procedureCache;
     protected List maps;
     protected List mapsRef;
+    protected Map entityInheritanceCache;
 
     public EntityResolver() {
         this.maps = new ArrayList();
@@ -96,6 +99,7 @@ public class EntityResolver {
         this.dbEntityCache = new HashMap();
         this.objEntityCache = new HashMap();
         this.procedureCache = new HashMap();
+        this.entityInheritanceCache = new HashMap();
     }
 
     /**
@@ -166,6 +170,7 @@ public class EntityResolver {
         dbEntityCache.clear();
         objEntityCache.clear();
         procedureCache.clear();
+        entityInheritanceCache.clear();
     }
 
     /**
@@ -174,7 +179,10 @@ public class EntityResolver {
      * list of maps.
      */
     protected synchronized void constructCache() {
+        // clear chache
         clearCache();
+
+        // rebuild index
         Iterator mapIterator = maps.iterator();
         while (mapIterator.hasNext()) {
             DataMap thisMap = (DataMap) mapIterator.next();
@@ -188,9 +196,9 @@ public class EntityResolver {
                 Class entityClass;
                 try {
                     entityClass =
-                        Configuration.getResourceLoader().loadClass(
-                            oe.getClassName());
-                } catch (ClassNotFoundException e) {
+                        Configuration.getResourceLoader().loadClass(oe.getClassName());
+                }
+                catch (ClassNotFoundException e) {
                     throw new CayenneRuntimeException(
                         "Cannot find class " + oe.getClassName());
                 }
@@ -201,8 +209,7 @@ public class EntityResolver {
                             + ": More than one ObjEntity ("
                             + oe.getName()
                             + " and "
-                            + ((ObjEntity) objEntityCache.get(entityClass))
-                                .getName()
+                            + ((ObjEntity) objEntityCache.get(entityClass)).getName()
                             + ") uses the class "
                             + entityClass.getName());
                 }
@@ -211,6 +218,27 @@ public class EntityResolver {
                 objEntityCache.put(entityClass, oe);
                 dbEntityCache.put(oe.getName(), de);
                 objEntityCache.put(oe.getName(), oe);
+
+                // build inheritance tree 
+                EntityInheritanceTree node =
+                    (EntityInheritanceTree) entityInheritanceCache.get(oe.getName());
+                if (node == null) {
+                    node = new EntityInheritanceTree(oe);
+                    entityInheritanceCache.put(oe.getName(), node);
+                }
+
+                ObjEntity superOE = oe.getSuperEntity();
+                if (superOE != null) {
+                    EntityInheritanceTree superNode =
+                        (EntityInheritanceTree) entityInheritanceCache.get(
+                            superOE.getName());
+                    if (superNode == null) {
+                        superNode = new EntityInheritanceTree(superOE);
+                        entityInheritanceCache.put(superOE.getName(), superNode);
+                    }
+
+                    superNode.addChildNode(node);
+                }
             }
 
             // index stored procedures
@@ -219,14 +247,14 @@ public class EntityResolver {
                 Procedure proc = (Procedure) procedures.next();
                 procedureCache.put(proc.getName(), proc);
             }
-            
+
             // index queries
             Iterator queries = thisMap.getQueries().iterator();
             while (queries.hasNext()) {
                 Query query = (Query) queries.next();
                 String name = query.getName();
                 Object existingQuery = queryCache.put(name, query);
-                
+
                 if (existingQuery != null && query != existingQuery) {
                     throw new CayenneRuntimeException(
                         "More than one Query for name" + name);
@@ -304,16 +332,46 @@ public class EntityResolver {
         Object root = q.getRoot();
         if (root instanceof DbEntity) {
             return (DbEntity) root;
-        } else if (root instanceof Class) {
+        }
+        else if (root instanceof Class) {
             return this.lookupDbEntity((Class) root);
-        } else if (root instanceof ObjEntity) {
+        }
+        else if (root instanceof ObjEntity) {
             return this.lookupDbEntity((ObjEntity) root);
-        } else if (root instanceof String) {
+        }
+        else if (root instanceof String) {
             return this.lookupDbEntity((String) root);
-        } else if (root instanceof DataObject) {
+        }
+        else if (root instanceof DataObject) {
             return this.lookupDbEntity((DataObject) root);
         }
         return null;
+    }
+
+    /**
+     * Returns EntityInheritanceTree representing inheritance hierarchy 
+     * of an ObjEntity.
+     * 
+     * @since 1.1
+     */
+    public EntityInheritanceTree lookupInheritanceTree(ObjEntity entity) {
+
+        EntityInheritanceTree tree =
+            (EntityInheritanceTree) entityInheritanceCache.get(entity.getName());
+
+        if (tree == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            tree = (EntityInheritanceTree) entityInheritanceCache.get(entity.getName());
+        }
+
+        // don't return "trivial" trees
+        if (tree != null && tree.getChildrenCount() == 0) {
+            return null;
+        }
+
+        return tree;
     }
 
     /**
@@ -386,13 +444,17 @@ public class EntityResolver {
                 "Cannot safely resolve the ObjEntity for the query "
                     + q
                     + " because the root of the query is a DbEntity");
-        } else if (root instanceof ObjEntity) {
+        }
+        else if (root instanceof ObjEntity) {
             return (ObjEntity) root;
-        } else if (root instanceof Class) {
+        }
+        else if (root instanceof Class) {
             return this.lookupObjEntity((Class) root);
-        } else if (root instanceof String) {
+        }
+        else if (root instanceof String) {
             return this.lookupObjEntity((String) root);
-        } else if (root instanceof DataObject) {
+        }
+        else if (root instanceof DataObject) {
             return this.lookupObjEntity((DataObject) root);
         }
         return null;
@@ -409,7 +471,7 @@ public class EntityResolver {
         Entity ent = lookupObjEntity(queryRoot);
         return (ent != null) ? ent.getQuery(queryName) : null;
     }
-    
+
     /**
      * Returns a named query or null if no query exists for a given name.
      * 
@@ -431,14 +493,15 @@ public class EntityResolver {
         Object root = q.getRoot();
         if (root instanceof Procedure) {
             return (Procedure) root;
-        } else if (root instanceof String) {
+        }
+        else if (root instanceof String) {
             return this.lookupProcedure((String) root);
         }
         return null;
     }
 
     public Procedure lookupProcedure(String procedureName) {
-        
+
         Procedure result = (Procedure) procedureCache.get(procedureName);
         if (result == null) {
             // reconstruct cache just in case some of the datamaps
@@ -446,10 +509,10 @@ public class EntityResolver {
             constructCache();
             result = (Procedure) procedureCache.get(procedureName);
         }
-        
+
         return result;
     }
-    
+
     /**
      * Searches for DataMap that holds Query root object.
      * 

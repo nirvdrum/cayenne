@@ -64,7 +64,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
@@ -222,13 +222,13 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
 
         if (this.caseInsensitive) {
             // TODO: to upper case should probably be defined as a separate expression type
-            value1 = ColnversionUtil.toUpperCase(value1);
-            value2 = ColnversionUtil.toUpperCase(value2);
+            value1 = ConversionUtil.toUpperCase(value1);
+            value2 = ConversionUtil.toUpperCase(value2);
         }
 
         int compareResult =
-            ColnversionUtil.toComparabe(value1).compareTo(
-                ColnversionUtil.toComparabe(value2));
+            ConversionUtil.toComparabe(value1).compareTo(
+                ConversionUtil.toComparabe(value2));
         return (ascending) ? compareResult : -compareResult;
     }
 

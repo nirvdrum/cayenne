@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import java.io.PrintWriter;
+import java.util.Map;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.Entity;
@@ -77,8 +78,18 @@ public class ASTDbPath extends ASTPath {
     }
 
     protected Object evaluateNode(Object o) throws Exception {
-        // TODO: implement resolving DB_PATH for DataObjects.
-        return (o instanceof Entity) ? evaluateEntityNode((Entity) o) : null;
+        // TODO: implement resolving DB_PATH for DataObjects
+
+        if (o instanceof Entity) {
+            return evaluateEntityNode((Entity) o);
+        }
+
+        if (o instanceof Map) {
+            // evaluate DataRows
+            return ((Map) o).get(path);
+        }
+
+        return null;
     }
 
     /**

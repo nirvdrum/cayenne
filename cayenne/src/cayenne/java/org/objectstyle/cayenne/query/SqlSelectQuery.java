@@ -187,6 +187,15 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     }
 
     /**
+     * Currently always returns false.
+     * 
+     * @since 1.1
+     */
+    public boolean isResolvingInherited() {
+        return false;
+    }
+    
+    /**
      * Returns the resultDescriptors.
      * @return DbAttribute[]
      */

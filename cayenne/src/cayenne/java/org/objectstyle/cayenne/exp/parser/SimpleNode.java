@@ -240,15 +240,11 @@ public abstract class SimpleNode extends Expression implements Node {
             return evaluateNode(o);
         }
         catch (Throwable th) {
-            if (th instanceof ExpressionException) {
-                throw (ExpressionException) th;
-            }
-            else {
-                throw new ExpressionException(
-                    "Error evaluating expression.",
-                    this.toString(),
-                    Util.unwindException(th));
-            }
+            String string = this.toString();
+            throw new ExpressionException(
+                "Error evaluating expression '" + string + "'",
+                string,
+                Util.unwindException(th));
         }
     }
 }

@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.exp.ExpressionException;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public final class ColnversionUtil {
+public final class ConversionUtil {
 
     public static boolean toBoolean(Object object) {
         if (object instanceof Boolean) {
@@ -158,6 +158,6 @@ public final class ColnversionUtil {
         }
     }
 
-    private ColnversionUtil() {
+    private ConversionUtil() {
     }
 }

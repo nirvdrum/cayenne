@@ -97,6 +97,14 @@ public interface GenericSelectQuery extends Query {
      * @since 1.1
      */
     public boolean isRefreshingObjects();
+    
+    /**
+     * Returns true if objects fetched via this query should be fully
+     * resolved according to the inheritance hierarchy.
+     * 
+     * @since 1.1
+     */
+    public boolean isResolvingInherited();
 	
 	/**
 	 * Returns query page size. Page size is a hint

@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
+import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -489,7 +490,7 @@ public class DataContext implements QueryEngine, Serializable {
             if (targetObject == null) {
                 continue;
             }
-            
+
             // if target is Fault, get id attributes from stored snapshot
             // to avoid unneeded fault triggering
             if (targetObject instanceof Fault) {
@@ -501,15 +502,15 @@ public class DataContext implements QueryEngine, Serializable {
                             + anObject.getObjectId()
                             + ". Object may have been deleted externally.");
                 }
-                
+
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
                 Iterator joins = dbRel.getJoins().iterator();
-                while(joins.hasNext()) {
-                    DbAttributePair join = (DbAttributePair)joins.next();
+                while (joins.hasNext()) {
+                    DbAttributePair join = (DbAttributePair) joins.next();
                     String key = join.getSource().getName();
                     snapshot.put(key, storedSnapshot.get(key));
                 }
-                
+
                 continue;
             }
 
@@ -596,7 +597,11 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1
      */
-    public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
+    public List objectsFromDataRows(
+        ObjEntity entity,
+        List dataRows,
+        boolean refresh,
+        boolean resolveInheritanceHierarchy) {
 
         if (dataRows == null || dataRows.size() == 0) {
             return new ArrayList(1);
@@ -619,6 +624,12 @@ public class DataContext implements QueryEngine, Serializable {
                     + "' has no Primary Key defined.");
         }
 
+        // check inheritance 
+        EntityInheritanceTree tree = null;
+        if (resolveInheritanceHierarchy) {
+            tree = getEntityResolver().lookupInheritanceTree(entity);
+        }
+
         List results = new ArrayList(dataRows.size());
         Iterator it = dataRows.iterator();
 
@@ -627,7 +638,20 @@ public class DataContext implements QueryEngine, Serializable {
             synchronized (getObjectStore().getDataRowCache()) {
                 while (it.hasNext()) {
                     DataRow dataRow = (DataRow) it.next();
-                    ObjectId anId = dataRow.createObjectId(entity);
+
+                    // determine entity to use
+                    ObjEntity objectEntity = entity;
+
+                    if (tree != null) {
+                        objectEntity = tree.entityMatchingRow(dataRow);
+
+                        // still null.... looks like inheritance qualifiers are messed up
+                        if (objectEntity == null) {
+                            objectEntity = entity;
+                        }
+                    }
+
+                    ObjectId anId = dataRow.createObjectId(objectEntity);
 
                     // this will create a HOLLOW object if it is not registered yet
                     DataObject object = registeredObject(anId);
@@ -639,26 +663,38 @@ public class DataContext implements QueryEngine, Serializable {
                             // TODO: temporary hack - should do lazy conversion - make an object HOLLOW
                             // and resolve on first read... unfortunately lots of other things break...
 
-                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                            DataRowUtils.mergeObjectWithSnapshot(
+                                objectEntity,
+                                object,
+                                dataRow);
                             // object.setPersistenceState(PersistenceState.HOLLOW);
                         }
                         // merge all MODIFIED objects immediately 
                         else if (
                             object.getPersistenceState() == PersistenceState.MODIFIED) {
-                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                            DataRowUtils.mergeObjectWithSnapshot(
+                                objectEntity,
+                                object,
+                                dataRow);
                         }
                         // TODO: temporary hack - should do lazy conversion - keep an object HOLLOW
                         // and resolve on first read...unfortunately lots of other things break...
                         else if (
                             object.getPersistenceState() == PersistenceState.HOLLOW) {
-                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                            DataRowUtils.mergeObjectWithSnapshot(
+                                objectEntity,
+                                object,
+                                dataRow);
                         }
                     }
                     // TODO: temporary hack - this else clause must go... unfortunately lots of other things break
                     // at the moment...
                     else {
                         if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                            DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
+                            DataRowUtils.mergeObjectWithSnapshot(
+                                objectEntity,
+                                object,
+                                dataRow);
                         }
                     }
 
@@ -686,9 +722,17 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1
      */
-    public List objectsFromDataRows(Class objectClass, List dataRows, boolean refresh) {
+    public List objectsFromDataRows(
+        Class objectClass,
+        List dataRows,
+        boolean refresh,
+        boolean resolveInheritanceHierarchy) {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(objectClass);
-        return objectsFromDataRows(entity, dataRows, false);
+        return objectsFromDataRows(
+            entity,
+            dataRows,
+            refresh,
+            resolveInheritanceHierarchy);
     }
 
     /**
@@ -701,8 +745,13 @@ public class DataContext implements QueryEngine, Serializable {
         Class objectClass,
         DataRow dataRow,
         boolean refresh) {
+        // TODO: this method must resolve inheritance if asked!!!
         List list =
-            objectsFromDataRows(objectClass, Collections.singletonList(dataRow), refresh);
+            objectsFromDataRows(
+                objectClass,
+                Collections.singletonList(dataRow),
+                refresh,
+                false);
         return (DataObject) list.get(0);
     }
 
@@ -720,7 +769,8 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
-        List list = objectsFromDataRows(ent, Collections.singletonList(dataRow), false);
+        List list =
+            objectsFromDataRows(ent, Collections.singletonList(dataRow), false, false);
         return (DataObject) list.get(0);
     }
 
@@ -742,7 +792,11 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         List list =
-            objectsFromDataRows(objEntity, Collections.singletonList(dataRow), refresh);
+            objectsFromDataRows(
+                objEntity,
+                Collections.singletonList(dataRow),
+                refresh,
+                false);
         return (DataObject) list.get(0);
     }
 
@@ -1101,7 +1155,6 @@ public class DataContext implements QueryEngine, Serializable {
 
         return (DataObject) results.get(0);
     }
-    
 
     /** 
      * Delegates node lookup to parent QueryEngine.
@@ -1115,7 +1168,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
         return this.getParent().dataNodeForObjEntity(objEntity);
     }
-    
+
     /**
      * Returns a DataNode that should hanlde queries for all
      * DataMap components.
@@ -1128,7 +1181,6 @@ public class DataContext implements QueryEngine, Serializable {
         }
         return this.getParent().lookupDataNode(dataMap);
     }
-
 
     /**
      * Reverts any changes that have occurred to objects registered with DataContext. 

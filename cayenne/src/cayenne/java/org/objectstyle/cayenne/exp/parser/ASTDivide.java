@@ -60,7 +60,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * "Divide" expression.
@@ -98,7 +98,7 @@ public class ASTDivide extends SimpleNode {
 
         BigDecimal result = null;
         for (int i = 0; i < len; i++) {
-            BigDecimal value = ColnversionUtil.toBigDecimal(evaluateChild(i, o));
+            BigDecimal value = ConversionUtil.toBigDecimal(evaluateChild(i, o));
 
             if (value == null) {
                 return null;

@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -299,10 +300,19 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         }
         else {
             // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
+
             ObjEntity oe = getRootEntity();
+            EntityInheritanceTree tree = null;
+
+            if (q.isResolvingInherited()) {
+                tree = getRootInheritanceTree();
+            }
 
             // ObjEntity attrs
-            Iterator attrs = oe.getAttributes().iterator();
+            Iterator attrs =
+                (tree != null)
+                    ? tree.allAttributes().iterator()
+                    : oe.getAttributes().iterator();
             while (attrs.hasNext()) {
                 ObjAttribute oa = (ObjAttribute) attrs.next();
                 Iterator dbPathIterator = oa.getDbPathIterator();
@@ -318,13 +328,19 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                             throw new CayenneRuntimeException(
                                 "ObjAttribute has no DbAttribute: " + oa.getName());
                         }
-                        columnList.add(dbAttr);
+
+                        if (!columnList.contains(dbAttr)) {
+                            columnList.add(dbAttr);
+                        }
                     }
                 }
             }
 
             // relationship keys
-            Iterator rels = oe.getRelationships().iterator();
+            Iterator rels =
+                (tree != null)
+                    ? tree.allRelationships().iterator()
+                    : oe.getRelationships().iterator();
             while (rels.hasNext()) {
                 ObjRelationship rel = (ObjRelationship) rels.next();
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
@@ -341,23 +357,21 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
 
             // add remaining needed attrs from DbEntity
-            Iterator dbattrs = dbe.getAttributes().iterator();
+            Iterator dbattrs = dbe.getPrimaryKey().iterator();
             while (dbattrs.hasNext()) {
                 DbAttribute dba = (DbAttribute) dbattrs.next();
-                if (dba.isPrimaryKey()) {
-                    if (!columnList.contains(dba)) {
-                        columnList.add(dba);
-                    }
+                if (!columnList.contains(dba)) {
+                    columnList.add(dba);
                 }
             }
 
-            //May require some special handling for prefetch selects
+            // May require some special handling for prefetch selects
             // if the prefetch is of a certain type
             if (q instanceof PrefetchSelectQuery) {
                 PrefetchSelectQuery pq = (PrefetchSelectQuery) q;
                 ObjRelationship r = pq.getLastPrefetchHint();
                 if ((r != null) && (r.getReverseRelationship() == null)) {
-                    //Prefetching a single step toMany relationship which
+                    // Prefetching a single step toMany relationship which
                     // has no reverse obj relationship.  Add the FK attributes
                     // of the relationship (wouldn't otherwise be included)
                     DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);

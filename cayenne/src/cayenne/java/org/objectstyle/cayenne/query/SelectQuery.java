@@ -94,6 +94,7 @@ public class SelectQuery
     protected boolean distinct;
     protected boolean fetchingDataRows;
     protected boolean refreshingObjects = true;
+    protected boolean resolvingInherited;
     protected int fetchLimit;
     protected Expression parentQualifier;
     protected String parentObjEntityName;
@@ -600,11 +601,31 @@ public class SelectQuery
     }
 
     /**
-     * Sets  <code>pageSize</code> property.
+     * Sets <code>pageSize</code> property.
      * 
      * @param pageSize The pageSize to set
      */
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+    
+    /**
+     * Returns true if objects fetched via this query should be fully
+     * resolved according to the inheritance hierarchy.
+     * 
+     * @since 1.1
+     */
+    public boolean isResolvingInherited() {
+        return resolvingInherited;
+    }
+
+    /**
+     * Sets whether the objects fetched via this query should be fully
+     * resolved according to the inheritance hierarchy.
+     * 
+     * @since 1.1
+     */
+    public void setResolvingInherited(boolean b) {
+        resolvingInherited = b;
     }
 }

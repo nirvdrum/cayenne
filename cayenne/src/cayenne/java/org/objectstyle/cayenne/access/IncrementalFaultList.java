@@ -158,6 +158,7 @@ public class IncrementalFaultList implements List {
         this.internalQuery.setRoot(query.getRoot());
         this.internalQuery.setLoggingLevel(query.getLoggingLevel());
         this.internalQuery.setFetchingDataRows(query.isFetchingDataRows());
+        this.internalQuery.setResolvingInherited(query.isResolvingInherited());
 
         if (!query.isFetchingDataRows() && (query instanceof SelectQuery)) {
             this.internalQuery.addPrefetches(((SelectQuery) query).getPrefetches());
@@ -165,17 +166,18 @@ public class IncrementalFaultList implements List {
 
         if (query.isFetchingDataRows()) {
             helper = new DataRowListHelper();
-        } else {
+        }
+        else {
             helper = new DataObjectListHelper();
         }
 
         fillIn(query);
     }
-    
+
     private boolean resolvesFirstPage() {
         return internalQuery.getPrefetches().isEmpty();
     }
-    
+
     /**
      * Performs initialization of the internal list of objects.
      * Only the first page is fully resolved. For the rest of
@@ -196,9 +198,9 @@ public class IncrementalFaultList implements List {
                 long t1 = System.currentTimeMillis();
                 ResultIterator it = dataContext.performIteratedQuery(query);
                 try {
-                    
+
                     rowWidth = it.getDataRowWidth();
-                    
+
                     // resolve first page if we can
                     if (resolvesFirstPage()) {
                         // read first page completely, the rest as ObjectIds
@@ -214,7 +216,8 @@ public class IncrementalFaultList implements List {
                                 dataContext.objectsFromDataRows(
                                     rootEntity,
                                     firstPage,
-                                    true));
+                                    query.isRefreshingObjects(),
+                                    query.isResolvingInherited()));
                         }
                     }
 
@@ -228,10 +231,12 @@ public class IncrementalFaultList implements List {
                         elements.size(),
                         System.currentTimeMillis() - t1);
 
-                } finally {
+                }
+                finally {
                     it.close();
                 }
-            } catch (CayenneException e) {
+            }
+            catch (CayenneException e) {
                 throw new CayenneRuntimeException("Error performing query.", e);
             }
 
@@ -280,7 +285,8 @@ public class IncrementalFaultList implements List {
             if (!(object instanceof Map)) {
                 throw new IllegalArgumentException("Only Map objects can be stored in this list.");
             }
-        } else {
+        }
+        else {
             if (!(object instanceof DataObject)) {
                 throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
             }
@@ -341,7 +347,7 @@ public class IncrementalFaultList implements List {
                             quals.subList(fetchBegin, fetchEnd)));
 
                 query.setFetchingDataRows(fetchesDataRows);
-                
+
                 if (!query.isFetchingDataRows()) {
                     query.addPrefetches(internalQuery.getPrefetches());
                 }
@@ -378,7 +384,8 @@ public class IncrementalFaultList implements List {
                     if (!found) {
                         if (first) {
                             first = false;
-                        } else {
+                        }
+                        else {
                             buf.append(", ");
                         }
 
@@ -387,7 +394,8 @@ public class IncrementalFaultList implements List {
                 }
 
                 throw new CayenneRuntimeException(buf.toString());
-            } else if (objects.size() > ids.size()) {
+            }
+            else if (objects.size() > ids.size()) {
                 throw new CayenneRuntimeException(
                     "Expected " + ids.size() + " objects, retrieved " + objects.size());
             }
@@ -586,7 +594,8 @@ public class IncrementalFaultList implements List {
                 resolveInterval(pageStart, pageStart + pageSize);
 
                 return elements.get(index);
-            } else {
+            }
+            else {
                 return o;
             }
         }
@@ -786,7 +795,8 @@ public class IncrementalFaultList implements List {
             if (objectInTheList instanceof DataObject) {
                 // due to object uniquing this should be sufficient
                 return object == objectInTheList;
-            } else {
+            }
+            else {
                 return ((DataObject) object).getObjectId().getIdSnapshot().equals(
                     objectInTheList);
             }
