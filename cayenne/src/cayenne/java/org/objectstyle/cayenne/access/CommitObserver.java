@@ -176,6 +176,9 @@ class CommitObserver extends DefaultOperationObserver implements
         // do nothing for now
     }
 
+    /**
+     * @since 1.2
+     */
     public void nextGeneratedDataRows(Query query, ResultIterator keysIterator) {
 
         // read and close the iterator before doing anything else
