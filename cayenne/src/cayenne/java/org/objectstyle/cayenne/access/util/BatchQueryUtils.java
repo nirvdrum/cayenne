@@ -64,7 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -76,6 +75,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Collection of utility methods to work with BatchQueries.
@@ -154,11 +154,11 @@ public class BatchQueryUtils {
 		return Collections.unmodifiableMap(snapshot);
 	}
 
+    /**
+     * @deprecated Since 1.1 use org.objectstyle.cayenne.util.Util.hashCode(Collectioin)
+     */
 	public static int hashCode(Collection c) {
-		HashCodeBuilder builder = new HashCodeBuilder();
-		for (Iterator i = c.iterator(); i.hasNext();)
-			builder.append(i.next());
-		return builder.toHashCode();
+		return Util.hashCode(c);
 	}
 
 	public static Map buildFlattenedSnapshot(

@@ -73,6 +73,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -82,6 +83,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -445,4 +447,14 @@ public class Util {
         Collections.sort(list, comparator);
         return list.iterator();
     }
+    
+    /**
+     * Utility method to build a hashCode of Collection.
+     */
+	public static int hashCode(Collection c) {
+		HashCodeBuilder builder = new HashCodeBuilder();
+		for (Iterator i = c.iterator(); i.hasNext();)
+			builder.append(i.next());
+		return builder.toHashCode();
+	}
 }
