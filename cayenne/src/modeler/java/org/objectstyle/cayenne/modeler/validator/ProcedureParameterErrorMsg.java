@@ -57,11 +57,13 @@ package org.objectstyle.cayenne.modeler.validator;
 
 import javax.swing.JFrame;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
@@ -70,6 +72,7 @@ import org.objectstyle.cayenne.project.validator.ValidationInfo;
  * @author Andrei Adamchik
  */
 public class ProcedureParameterErrorMsg extends ValidationDisplayHandler {
+    private static Logger logObj = Logger.getLogger(ProcedureParameterErrorMsg.class);
 
     public ProcedureParameterErrorMsg(ValidationInfo validationInfo) {
         super(validationInfo);
@@ -83,6 +86,17 @@ public class ProcedureParameterErrorMsg extends ValidationDisplayHandler {
         ProcedureParameter procedureParameter =
             (ProcedureParameter) path.firstInstanceOf(ProcedureParameter.class);
 
+        // Race condition between the two events...?
+        
+        // first display the stored procedure
+        // for whatever reason, other validators do not require this step
+        // (E.g. DbAttributeErrorMsg)
+        ProcedureDisplayEvent procedureEvent =
+            new ProcedureDisplayEvent(frame, procedure, map, domain);
+        procedureEvent.setTabReset(true);
+        mediator.fireProcedureDisplayEvent(procedureEvent);
+
+        // now show the failed parameter
         ProcedureParameterDisplayEvent event =
             new ProcedureParameterDisplayEvent(
                 frame,
@@ -90,7 +104,7 @@ public class ProcedureParameterErrorMsg extends ValidationDisplayHandler {
                 procedure,
                 map,
                 domain);
-                
+
         event.setTabReset(true);
         mediator.fireProcedureParameterDisplayEvent(event);
     }

@@ -57,9 +57,13 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.InputVerifier;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -84,6 +88,8 @@ public class ProcedurePane
     protected EventController eventController;
     protected JTextField name;
     protected JTextField schema;
+    protected JCheckBox returnsValue;
+    protected boolean ignoreChange;
 
     public ProcedurePane(EventController eventController) {
         this.eventController = eventController;
@@ -100,13 +106,32 @@ public class ProcedurePane
         this.setLayout(new BorderLayout());
         this.name = CayenneWidgetFactory.createTextField();
         this.schema = CayenneWidgetFactory.createTextField();
+        this.returnsValue = new JCheckBox();
+
+        returnsValue.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                Procedure procedure = eventController.getCurrentProcedure();
+                if (procedure != null && !ignoreChange) {
+                    procedure.setReturningValue(returnsValue.isSelected());
+                    eventController.fireProcedureEvent(
+                        new ProcedureEvent(ProcedurePane.this, procedure));
+                }
+            }
+        });
+
+        JLabel returnValueHelp =
+            CayenneWidgetFactory.createLabel(
+                "(first parameter will be used as return value)");
+        returnValueHelp.setFont(returnValueHelp.getFont().deriveFont(10));
 
         this.add(
             PanelFactory.createForm(
                 new Component[] {
                     CayenneWidgetFactory.createLabel("Procedure name: "),
-                    CayenneWidgetFactory.createLabel("Schema: ")},
-                new Component[] { name, schema },
+                    CayenneWidgetFactory.createLabel("Schema: "),
+                    CayenneWidgetFactory.createLabel("Returns Value: "),
+                    new JLabel()},
+                new Component[] { name, schema, returnsValue, returnValueHelp },
                 5,
                 5,
                 5,
@@ -126,7 +151,7 @@ public class ProcedurePane
     /**
       * Invoked when currently selected Procedure object is changed.
       */
-    public void currentProcedureChanged(ProcedureDisplayEvent e) {
+    public synchronized void currentProcedureChanged(ProcedureDisplayEvent e) {
         Procedure procedure = e.getProcedure();
         if (procedure == null || !e.isProcedureChanged()) {
             return;
@@ -134,6 +159,10 @@ public class ProcedurePane
 
         name.setText(procedure.getName());
         schema.setText(procedure.getSchema());
+        
+		ignoreChange = true;
+		returnsValue.setSelected(procedure.isReturningValue());
+		ignoreChange = false;
     }
 
     class FieldVerifier extends InputVerifier {

@@ -564,7 +564,15 @@ public class Editor
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         enableProcedureMenu();
-        getAction(RemoveAction.ACTION_NAME).setName("Remove Stored Procedure");
+
+        if (e.getProcedure() != null) {
+            getAction(RemoveAction.ACTION_NAME).setName("Remove Stored Procedure");
+            getAction(CreateAttributeAction.ACTION_NAME).setName(
+                "Create Procedure Parameter");
+        }
+        else {
+			getAction(CreateAttributeAction.ACTION_NAME).setName("Create Attribute");	
+        }
     }
 
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {
@@ -578,6 +586,14 @@ public class Editor
         enableProcedureMenu();
         if (e.getProcedureParameter() != null) {
             getAction(RemoveAction.ACTION_NAME).setName("Remove Procedure Parameter");
+        }
+
+        if (e.getProcedure() != null) {
+            getAction(CreateAttributeAction.ACTION_NAME).setName(
+                "Create Procedure Parameter");
+        }
+        else {
+            getAction(CreateAttributeAction.ACTION_NAME).setName("Create Attribute");
         }
     }
 
@@ -620,6 +636,9 @@ public class Editor
         getAction(CreateDerivedDbEntityAction.ACTION_NAME).setEnabled(true);
         getAction(CreateStoredProcedureAction.ACTION_NAME).setEnabled(true);
         getAction(GenerateDbAction.ACTION_NAME).setEnabled(true);
+        
+        // reset
+		getAction(CreateAttributeAction.ACTION_NAME).setName("Create Attribute");
     }
 
     private void enableObjEntityMenu() {

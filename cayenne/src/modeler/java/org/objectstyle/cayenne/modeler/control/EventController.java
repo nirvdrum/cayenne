@@ -130,7 +130,7 @@ import org.scopemvc.core.ControlException;
  */
 public class EventController extends ModelerController {
 
-    static Logger logObj = Logger.getLogger(EventController.class);
+    private static Logger logObj = Logger.getLogger(EventController.class);
 
     protected EventListenerList listenerList;
 
@@ -894,14 +894,16 @@ public class EventController extends ModelerController {
                     + source
                     + "]");
 
-            for (int i = 0; i < listenerCount; i++) {
-                String listenerName = listeners[i].getClass().getName();
-                int listenerDot = listenerName.lastIndexOf('.');
-                if (listenerDot >= 0) {
-                    listenerName = listenerName.substring(listenerDot);
-                }
-                logObj.debug(" {listener: " + listenerName + "}");
-            }
+            // listener debugging is commented out to reduce the number of generated logs
+            /*     for (int i = 0; i < listenerCount; i++) {
+                     String listenerName = listeners[i].getClass().getName();
+                     int listenerDot = listenerName.lastIndexOf('.');
+                     if (listenerDot >= 0) {
+                         listenerName = listenerName.substring(listenerDot);
+                     }
+                     logObj.debug(" {listener: " + listenerName + "}");
+                 }
+                 */
         }
     }
 }

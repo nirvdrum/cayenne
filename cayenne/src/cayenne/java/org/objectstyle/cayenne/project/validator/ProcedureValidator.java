@@ -1,6 +1,7 @@
 package org.objectstyle.cayenne.project.validator;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
@@ -19,6 +20,14 @@ public class ProcedureValidator extends TreeNodeValidator {
     public void validateObject(ProjectPath treeNodePath, Validator validator) {
 		Procedure procedure = (Procedure) treeNodePath.getObject();
         validateName(procedure, treeNodePath, validator);
+        
+        // check that return value is present
+        if(procedure.isReturningValue()) {
+        	List parameters = procedure.getCallParameters();
+        	if(parameters.size() == 0) {
+				validator.registerWarning("Procedure returns a value, but has no parameters.", treeNodePath);
+        	}
+        }
     }
 
     protected void validateName(Procedure procedure, ProjectPath path, Validator validator) {
