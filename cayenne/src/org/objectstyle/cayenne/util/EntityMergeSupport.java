@@ -118,7 +118,7 @@ public class EntityMergeSupport {
 			or.setToMany(dr.isToMany());
 			or.setSourceEntity(entity);
 			or.setTargetEntity(
-				map.getObjEntityByDbEntityName(dr.getTargetEntity().getName()));
+				(Entity)map.getMappedEntities((DbEntity)dr.getTargetEntity()).get(0));
 			entity.addRelationship(or);
 		}
 	}

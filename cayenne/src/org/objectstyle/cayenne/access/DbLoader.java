@@ -473,8 +473,8 @@ public class DbLoader {
 				objRel.setToMany(dbRel.isToMany());
 				objRel.setSourceEntity(objEnt);
 				objRel.setTargetEntity(
-					map.getObjEntityByDbEntityName(
-						dbRel.getTargetEntity().getName()));
+					(Entity)map.getMappedEntities(
+						(DbEntity)dbRel.getTargetEntity()).get(0));
 				objEnt.addRelationship(objRel);
 			}
 		}

@@ -49,4 +49,6 @@ are 100% compatible with the new format
 Now all files are first saved to the temporary file, and only
 on successful save, temp files will replace the master files.
 
-15. Cleaned CayenneException API
+15. Fixed CayenneException and CayenneRuntimeException to report
+exception cause properly.
+

@@ -335,27 +335,27 @@ public class DataMap {
 		return null;
 	}
 
-	/** Get the object entity mapped to the specified database table.
-	*  The search is conducted in case-independent manner.
-	*  @return The corresponding object entity, or null if not found.*/
-	public ObjEntity getObjEntityByDbEntityName(String db_table_name) {
-		Collection obj_entity_coll = objEntityMap.values();
-		Iterator iter = obj_entity_coll.iterator();
-		while (iter.hasNext()) {
-			ObjEntity temp = (ObjEntity) iter.next();
-			if (temp.getDbEntity().getName().equalsIgnoreCase(db_table_name))
-				return temp;
-		} // End while()
-		return null;
-	}
-
-	/** Get the database entity mapped to the specified data object class */
-	public DbEntity getDbEntityByObjEntityName(String data_object_class_name) {
-		ObjEntity obj_temp =
-			(ObjEntity) getObjEntityMap().get(data_object_class_name);
-		if (null == obj_temp)
+	/** 
+	 * Returns a list of ObjEntities mapped to this DbEntity.
+	 */
+	public List getMappedEntities(DbEntity dbEntity) {
+		ArrayList list = new ArrayList();
+		
+		if(dbEntity == null) {
 			return null;
-		return obj_temp.getDbEntity();
+		}
+		
+		Iterator iter = objEntityMap.keySet().iterator();
+		
+		while (iter.hasNext()) {
+			String name = (String)iter.next();
+			ObjEntity objEnt = getObjEntity(name) ;
+			if (objEnt.getDbEntity() == dbEntity) {
+				list.add(objEnt);
+			}
+		}
+		
+		return list;
 	}
 
 	/** Renames DbEntity. */

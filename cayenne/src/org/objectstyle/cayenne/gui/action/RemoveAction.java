@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.util.MapUtil;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -207,8 +208,9 @@ public class RemoveAction extends CayenneAction {
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbAttribute attrib = mediator.getCurrentDbAttribute();
 		entity.removeAttribute(attrib.getName());
-		AttributeEvent e;
-		e =
+		// MapUtil.cleanDeletedAttribute(mediator.getCurrentDataMap(), entity, attrib);
+		
+		AttributeEvent e =
 			new AttributeEvent(
 				Editor.getFrame(),
 				attrib,
@@ -231,8 +233,7 @@ public class RemoveAction extends CayenneAction {
 		ObjEntity entity = mediator.getCurrentObjEntity();
 		ObjRelationship rel = mediator.getCurrentObjRelationship();
 		entity.removeRelationship(rel.getName());
-		RelationshipEvent e;
-		e =
+		RelationshipEvent e =
 			new RelationshipEvent(
 				Editor.getFrame(),
 				rel,
@@ -255,16 +256,16 @@ public class RemoveAction extends CayenneAction {
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbRelationship rel = mediator.getCurrentDbRelationship();
 		entity.removeRelationship(rel.getName());
-		RelationshipEvent e;
-		e =
+		// MapUtil.cleanDeletedRelationship(mediator.getCurrentDataMap(), rel);
+		
+		RelationshipEvent e =
 			new RelationshipEvent(
 				Editor.getFrame(),
 				rel,
 				entity,
 				RelationshipEvent.REMOVE);
 		mediator.fireDbRelationshipEvent(e);
-		RelationshipDisplayEvent ev;
-		ev =
+		RelationshipDisplayEvent ev =
 			new RelationshipDisplayEvent(
 				Editor.getFrame(),
 				null,

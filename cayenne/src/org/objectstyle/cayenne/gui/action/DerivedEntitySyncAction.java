@@ -83,6 +83,7 @@ public class DerivedEntitySyncAction extends CayenneAction {
 			
 		if (ent != null && ent.getParentEntity() != null) {
 			ent.resetToParentView();
+		    // MapUtil.cleanDeletedRelationship(mediator.getCurrentDataMap(), rel);
 
 			// fire a chain of "remove/add" events for entity
 			// this seems to be the only way to refresh the view

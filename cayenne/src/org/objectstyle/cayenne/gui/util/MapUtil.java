@@ -121,6 +121,15 @@ public class MapUtil {
 		entity.addRelationship(rel);
 	}
 
+    /**
+     * Cleans any mappings of ObjEntities, ObjAttributes, 
+     * ObjRelationship to the corresponding Db* objects that not longer
+     * exist.
+     */
+    public static void cleanMappings(DataMap map) {
+//    	Iterator ents = map;
+    }
+    
 	/** 
 	 * Clears all the mapping between this obj entity and 
 	 * its current db entity. Clears mapping between 
