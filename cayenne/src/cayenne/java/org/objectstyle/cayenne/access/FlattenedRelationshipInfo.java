@@ -118,33 +118,34 @@ final class FlattenedRelationshipInfo {
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object obj) {
-        if (!(obj instanceof FlattenedRelationshipInfo)) {
+    public boolean equals(Object object) {
+
+        if (!(object instanceof FlattenedRelationshipInfo)) {
             return false;
         }
-        if (this == obj) {
+
+        if (this == object) {
             return true;
         }
 
-        FlattenedRelationshipInfo otherObj = (FlattenedRelationshipInfo) obj;
+        FlattenedRelationshipInfo otherFRI = (FlattenedRelationshipInfo) object;
 
-        if (!this.canonicalRelationshipName.equals(otherObj.canonicalRelationshipName)) {
+        if (!this.canonicalRelationshipName.equals(otherFRI.canonicalRelationshipName)) {
             return false;
         }
+
         // Check that either direct mapping matches (src=>src, dest=>dest), or that
         // cross mapping matches (src=>dest, dest=>src).
-        if (((this.source.equals(otherObj.source)) && (this.destination
-                .equals(otherObj.destination)))
-                || ((this.source.equals(otherObj.destination)) && (this.destination
-                        .equals(otherObj.source)))) {
-            return true;
-        }
-        return false;
+        return (this.source.equals(otherFRI.source) && this.destination
+                .equals(otherFRI.destination))
+                || (this.source.equals(otherFRI.destination) && this.destination
+                        .equals(otherFRI.source));
+
     }
 
     /**
-     * Because equals effectively ignores the order of dataObject1/2, summing the
-     * hashcodes is sufficient to fulfill the equals/hashcode contract
+     * Because equals effectively ignores the order of DataObjects, summing the hashcodes
+     * is sufficient to fulfill the equals/hashcode contract.
      * 
      * @see java.lang.Object#hashCode()
      */

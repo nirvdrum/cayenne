@@ -1098,20 +1098,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                             + relationship.getName());
         }
 
-        //Register this combination (so we can remove it later if an insert occurs before
+        // Register this combination (so we can remove it later if an insert occurs before
         // commit)
         FlattenedRelationshipInfo info = new FlattenedRelationshipInfo(
                 source,
                 destination,
                 relationship);
 
-        if (flattenedDeletes.contains(info)) {
-            //If this combination has already been deleted, simply undelete it.
-            logObj.debug("Undeleting flattened relationship");
-            flattenedDeletes.remove(info);
-        }
-        else if (!flattenedInserts.contains(info)) {
-            logObj.debug("Inserting flattened relationship");
+        // If this combination has already been deleted, simply undelete it.
+        if (!flattenedDeletes.remove(info) && !flattenedInserts.contains(info)) {
             flattenedInserts.add(info);
         }
     }
@@ -1143,13 +1138,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 destination,
                 relationship);
 
-        if (flattenedInserts.contains(info)) {
-            // If this combination has already been inserted, simply uninsert it.
-            logObj.debug("Uninserting to simulate the delete");
-            flattenedInserts.remove(info);
-        }
-        else if (!flattenedDeletes.contains(info)) { //Do not delete it twice
-            logObj.debug("Registering for deletes");
+        // If this combination has already been inserted, simply "uninsert" it
+        // also do not delete it twice
+        if (!flattenedInserts.remove(info) && !flattenedDeletes.contains(info)) {
             flattenedDeletes.add(info);
         }
     }
