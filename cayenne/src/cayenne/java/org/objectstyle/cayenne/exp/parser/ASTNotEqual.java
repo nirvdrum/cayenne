@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * "Not equal to" expression.
@@ -88,16 +89,8 @@ public class ASTNotEqual extends ConditionNode {
         }
 
         Object o1 = evaluateChild(0, o);
-        if (o1 == null) {
-            return Boolean.FALSE;
-        }
-
         Object o2 = evaluateChild(1, o);
-        if (o2 == null) {
-            return Boolean.FALSE;
-        }
-
-        return o1.equals(o2) ? Boolean.FALSE : Boolean.TRUE;
+        return Util.nullSafeEquals(o1, o2) ? Boolean.FALSE : Boolean.TRUE;
     }
 
     /**

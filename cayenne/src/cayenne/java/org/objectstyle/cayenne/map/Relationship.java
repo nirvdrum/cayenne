@@ -138,11 +138,11 @@ public abstract class Relationship extends MapObject {
         }
 
         sb.append(" -> ");
-        Entity target = this.getTargetEntity();
-        if (target == null)
+        String targetName = this.getTargetEntityName();
+        if (targetName == null)
             sb.append("<null>");
         else
-            sb.append(target.getName());
+            sb.append(targetName);
 
         sb.append("]");
         return sb.toString();

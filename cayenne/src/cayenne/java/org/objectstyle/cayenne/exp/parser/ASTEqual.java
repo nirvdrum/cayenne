@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * "Equal To" expression.
@@ -91,16 +92,8 @@ public class ASTEqual extends ConditionNode {
         }
 
         Object o1 = evaluateChild(0, o);
-        if (o1 == null) {
-            return Boolean.FALSE;
-        }
-
         Object o2 = evaluateChild(1, o);
-        if (o2 == null) {
-            return Boolean.FALSE;
-        }
-
-        return o1.equals(o2) ? Boolean.TRUE : Boolean.FALSE;
+        return Util.nullSafeEquals(o1, o2) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     /**

@@ -97,19 +97,14 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         assertEquals(new Integer(-3), node.evaluate(b2));
     }
 
- /*   public void testEvaluateOBJ_PATH_JavaBeanToMany() throws Exception {
-        ASTObjPath node = new ASTObjPath("collection.string");
-
-        TestBean b1 = TestBean.testFixtureWithCollection("r1", "rc1");
-        Object o1 = node.evaluate(b1);
-        assertTrue(o1 instanceof Collection);
-        Collection c1 = (Collection) o1;
-        assertEquals(10, c1.size());
-
-        Object first = c1.iterator().next();
-        assertTrue(first instanceof String);
-        assertEquals("rc10", first);
-    } */
+    /*
+     * public void testEvaluateOBJ_PATH_JavaBeanToMany() throws Exception { ASTObjPath
+     * node = new ASTObjPath("collection.string"); TestBean b1 =
+     * TestBean.testFixtureWithCollection("r1", "rc1"); Object o1 = node.evaluate(b1);
+     * assertTrue(o1 instanceof Collection); Collection c1 = (Collection) o1;
+     * assertEquals(10, c1.size()); Object first = c1.iterator().next(); assertTrue(first
+     * instanceof String); assertEquals("rc10", first); }
+     */
 
     public void testEvaluateOBJ_PATH_ObjEntity() throws Exception {
         ASTObjPath node = new ASTObjPath("paintingArray.paintingTitle");
@@ -148,6 +143,28 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         assertTrue("Failed: " + notEqualTo, notEqualTo.match(noMatch));
     }
 
+    public void testEvaluateEQUAL_TONull() throws Exception {
+        Expression equalTo = new ASTEqual(new ASTObjPath("artistName"), null);
+
+        Artist match = new Artist();
+        assertTrue(equalTo.match(match));
+
+        Artist noMatch = new Artist();
+        noMatch.setArtistName("123");
+        assertFalse("Failed: " + equalTo, equalTo.match(noMatch));
+    }
+    
+    public void testEvaluateNOT_EQUAL_TONull() throws Exception {
+        Expression equalTo = new ASTNotEqual(new ASTObjPath("artistName"), null);
+
+        Artist match = new Artist();
+        assertFalse(equalTo.match(match));
+
+        Artist noMatch = new Artist();
+        noMatch.setArtistName("123");
+        assertTrue("Failed: " + equalTo, equalTo.match(noMatch));
+    }
+
     public void testEvaluateEQUAL_TODataObject() throws Exception {
         DataContext context = createDataContext();
         Artist a1 = (Artist) context.createAndRegisterNewObject("Artist");
@@ -170,7 +187,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         Expression e1 = new ASTEqual(new ASTObjPath("artistName"), "abc");
         Expression e2 = new ASTEqual(new ASTObjPath("artistName"), "abc");
 
-        ASTAnd e = new ASTAnd(new Object[] { e1, e2 });
+        ASTAnd e = new ASTAnd(new Object[] {
+                e1, e2
+        });
 
         Artist match = new Artist();
         match.setArtistName("abc");
@@ -185,7 +204,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         Expression e1 = new ASTEqual(new ASTObjPath("artistName"), "abc");
         Expression e2 = new ASTEqual(new ASTObjPath("artistName"), "xyz");
 
-        ASTOr e = new ASTOr(new Object[] { e1, e2 });
+        ASTOr e = new ASTOr(new Object[] {
+                e1, e2
+        });
 
         Artist match1 = new Artist();
         match1.setArtistName("abc");
@@ -213,8 +234,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLESS_THAN() throws Exception {
-        Expression e =
-            new ASTLess(new ASTObjPath("estimatedPrice"), new BigDecimal(10000));
+        Expression e = new ASTLess(
+                new ASTObjPath("estimatedPrice"),
+                new BigDecimal(10000));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(10001));
@@ -230,8 +252,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateLESS_THAN_EQUAL_TO() throws Exception {
-        Expression e =
-            new ASTLessOrEqual(new ASTObjPath("estimatedPrice"), new BigDecimal(10000));
+        Expression e = new ASTLessOrEqual(
+                new ASTObjPath("estimatedPrice"),
+                new BigDecimal(10000));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(10001));
@@ -247,8 +270,8 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateGREATER_THAN() throws Exception {
-        Expression e =
-            new ASTGreater(new ASTObjPath("estimatedPrice"), new BigDecimal(10000));
+        Expression e = new ASTGreater(new ASTObjPath("estimatedPrice"), new BigDecimal(
+                10000));
 
         Painting noMatch = new Painting();
         noMatch.setEstimatedPrice(new BigDecimal(9999));
@@ -264,8 +287,7 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateGREATER_THAN_EQUAL_TO() throws Exception {
-        Expression e =
-            new ASTGreaterOrEqual(
+        Expression e = new ASTGreaterOrEqual(
                 new ASTObjPath("estimatedPrice"),
                 new BigDecimal(10000));
 
@@ -284,13 +306,11 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateBETWEEN() throws Exception {
         // evaluate both BETWEEN and NOT_BETWEEN
-        Expression between =
-            new ASTBetween(
+        Expression between = new ASTBetween(
                 new ASTObjPath("estimatedPrice"),
                 new BigDecimal(10),
                 new BigDecimal(20));
-        Expression notBetween =
-            new ASTNotBetween(
+        Expression notBetween = new ASTNotBetween(
                 new ASTObjPath("estimatedPrice"),
                 new BigDecimal(10),
                 new BigDecimal(20));
@@ -317,15 +337,15 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateIN() throws Exception {
-        Expression in =
-            new ASTIn(
-                new ASTObjPath("estimatedPrice"),
-                new ASTList(new Object[] { new BigDecimal("10"), new BigDecimal("20")}));
+        Expression in = new ASTIn(new ASTObjPath("estimatedPrice"), new ASTList(
+                new Object[] {
+                        new BigDecimal("10"), new BigDecimal("20")
+                }));
 
-        Expression notIn =
-            new ASTNotIn(
-                new ASTObjPath("estimatedPrice"),
-                new ASTList(new Object[] { new BigDecimal("10"), new BigDecimal("20")}));
+        Expression notIn = new ASTNotIn(new ASTObjPath("estimatedPrice"), new ASTList(
+                new Object[] {
+                        new BigDecimal("10"), new BigDecimal("20")
+                }));
 
         Painting noMatch1 = new Painting();
         noMatch1.setEstimatedPrice(new BigDecimal("21"));
@@ -403,8 +423,9 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateLIKE_IGNORE_CASE() throws Exception {
         Expression like = new ASTLikeIgnoreCase(new ASTObjPath("artistName"), "aBcD");
-        Expression notLike =
-            new ASTNotLikeIgnoreCase(new ASTObjPath("artistName"), "aBcD");
+        Expression notLike = new ASTNotLikeIgnoreCase(
+                new ASTObjPath("artistName"),
+                "aBcD");
 
         Artist noMatch1 = new Artist();
         noMatch1.setArtistName("dabc");
@@ -423,35 +444,37 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
     }
 
     public void testEvaluateADD() throws Exception {
-        Expression add = new ASTAdd(new Object[] { new Integer(1), new Double(5.5)});
+        Expression add = new ASTAdd(new Object[] {
+                new Integer(1), new Double(5.5)
+        });
         assertEquals(6.5, ((Number) add.evaluate(null)).doubleValue(), 0.0001);
     }
 
     public void testEvaluateSubtract() throws Exception {
-        Expression subtract =
-            new ASTSubtract(
-                new Object[] { new Integer(1), new Double(0.1), new Double(0.2)});
+        Expression subtract = new ASTSubtract(new Object[] {
+                new Integer(1), new Double(0.1), new Double(0.2)
+        });
         assertEquals(0.7, ((Number) subtract.evaluate(null)).doubleValue(), 0.0001);
     }
 
     public void testEvaluateMultiply() throws Exception {
-        Expression multiply =
-            new ASTMultiply(new Object[] { new Integer(2), new Double(3.5)});
+        Expression multiply = new ASTMultiply(new Object[] {
+                new Integer(2), new Double(3.5)
+        });
         assertEquals(7, ((Number) multiply.evaluate(null)).doubleValue(), 0.0001);
     }
 
     public void testEvaluateDivide() throws Exception {
-        Expression divide =
-            new ASTDivide(new Object[] { new BigDecimal("7.0"), new BigDecimal("2.0")});
+        Expression divide = new ASTDivide(new Object[] {
+                new BigDecimal("7.0"), new BigDecimal("2.0")
+        });
         assertEquals(3.5, ((Number) divide.evaluate(null)).doubleValue(), 0.0001);
     }
 
     public void testEvaluateNegate() throws Exception {
-        assertEquals(
-            -3,
-            ((Number) new ASTNegate(new Integer(3)).evaluate(null)).intValue());
-        assertEquals(
-            5,
-            ((Number) new ASTNegate(new Integer(-5)).evaluate(null)).intValue());
+        assertEquals(-3, ((Number) new ASTNegate(new Integer(3)).evaluate(null))
+                .intValue());
+        assertEquals(5, ((Number) new ASTNegate(new Integer(-5)).evaluate(null))
+                .intValue());
     }
 }
