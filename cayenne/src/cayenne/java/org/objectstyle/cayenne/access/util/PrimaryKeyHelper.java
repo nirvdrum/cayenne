@@ -142,7 +142,17 @@ public class PrimaryKeyHelper {
 		for (Iterator i = dataObjects.iterator(); i.hasNext();) {
 			idMap = new HashMap(idMap != null ? idMap.size() : 1);
 			DataObject object = (DataObject) i.next();
-			tempId = (TempObjectId) object.getObjectId();
+			ObjectId id = object.getObjectId();
+			if (!(id instanceof TempObjectId)) {
+				continue; //with next loop
+				//If the id is not a temp, then it must be permanent.  Do nothing else
+			}
+			
+			tempId = (TempObjectId) id;
+			if (tempId.getPermId() != null) {
+				continue;
+				//An id already exists... nothing further required (definitely do not create another)
+			}
 			
 			// first get values delivered via relationships
 			if (pkFromMaster)
