@@ -32,6 +32,22 @@
     	</ul>
     	</p>
     	</subsection>
+    	
+    	
+    	<subsection name="Q 5.2 
+    					I am having problems with logging output. How do I trace them down?" 
+    	anchor="logging">
+    	
+    	<p>First step would be to check that logging is configured per recommendations in the
+    	<a href="../userguide/deploy/logging.html">User Guide</a>. To further debug Log4J 
+    	initialization, start the application with a system property 
+    	<code>log4j.configDebug</code> set to "true". E.g.:
+    	</p>
+    	
+<source>
+java -Dlog4j.configDebug=true MyApp
+</source>
+    	</subsection>
     </section>
 </body>
 </document>

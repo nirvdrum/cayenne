@@ -62,6 +62,8 @@
     					<li><a href="deploy.html#reconnect">Q 5.1 
     					When my application is idle for a long period of time,
     					I get "connection was lost" or similar errors?</a></li>
+    					<li><a href="deploy.html#logging">Q 5.2 
+    					I am having problems with logging output. How do I trace them down?</a></li>
     				</ul>
     			</li>
     			<br/>
