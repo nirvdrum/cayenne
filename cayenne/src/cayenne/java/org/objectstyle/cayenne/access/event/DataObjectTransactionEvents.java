@@ -54,74 +54,10 @@
  *
  */ 
 
-package org.objectstyle.cayenne.event;
+package org.objectstyle.cayenne.access.event;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
-import org.objectstyle.cayenne.access.DataContext;
-
-public class DataContextTransactionEventHandler extends Object {
-	/** shared instance that will be registered for DataContext events */
-	private static DataContextTransactionEventHandler _instance = null;
-	private Collection _objectsToBeNotified;
-
-	private DataContextTransactionEventHandler() {
-		super();
-	}
-
-	public static void registerForDataContextEvents() {
-		if (_instance == null) {
-			_instance = new DataContextTransactionEventHandler();
-
-			try {
-				ObserverManager mgr = ObserverManager.getInstance();
-				mgr.addObserver(_instance, "dataContextWillCommit", DataContext.WILL_COMMIT);
-				mgr.addObserver(_instance, "dataContextDidCommit", DataContext.DID_COMMIT);
-			}
-	
-			catch (NoSuchMethodException ex) {
-				// this can never happen, we define the appropriate methods in this class
-				throw new IllegalStateException();
-			}
-		}
-	}
-
-	public void dataContextWillCommit(ObserverEvent event) {
-		DataContext ctx = (DataContext)event.getPublisher();
-
-		// build a list of objects that will be send the observerEvents and cache
-		// them here. Later, when notifying about a successful completion of a
-		// transaction we cannot build this list anymore since all the work will be done then
-		_objectsToBeNotified = this.getEventRecipientsFromDataContext(ctx);
-		Iterator iter = _objectsToBeNotified.iterator();
-		while (iter.hasNext()) {
-			Object element = iter.next();
-			if (element instanceof DataObjectTransactionEvents) {
-				((DataObjectTransactionEvents)element).willCommit();
-			}		
-		}
-	}
-	
-	public void dataContextDidCommit(ObserverEvent event) {
-		Iterator iter = _objectsToBeNotified.iterator();
-		while (iter.hasNext()) {
-			Object element = iter.next();
-			if (element instanceof DataObjectTransactionEvents) {
-				((DataObjectTransactionEvents)element).didCommit();
-			}
-		}
-		
-		// done notifying everything. Release the collection early
-		_objectsToBeNotified = null;
-	}
-	
-	private Collection getEventRecipientsFromDataContext(DataContext ctx) {
-		ArrayList candidates = new ArrayList();
-		candidates.addAll(ctx.deletedObjects());
-		candidates.addAll(ctx.modifiedObjects());
-		candidates.addAll(ctx.newObjects());
-		return candidates;
-	}
+public interface DataObjectTransactionEvents {
+	public void willCommit();
+	public void didCommit();
 }
+
