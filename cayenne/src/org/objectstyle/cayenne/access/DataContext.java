@@ -64,7 +64,11 @@ import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.UpdateQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /** User-level Cayenne access class. Provides isolated object view of 
   * the datasource to the application code. Normal use pattern is to 
@@ -230,12 +234,13 @@ public class DataContext implements QueryEngine {
 			.newInstance();
 	}
 
-
 	/** 
 	 * Replaces all object attribute values with snapshot values. 
 	 * Sets object state to COMMITTED.
 	 */
-	protected void refreshObjectWithSnapshot(DataObject anObject, Map snapshot) {
+	protected void refreshObjectWithSnapshot(
+		DataObject anObject,
+		Map snapshot) {
 		ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
 
 		Map attrMap = ent.getAttributeMap();
@@ -269,12 +274,14 @@ public class DataContext implements QueryEngine {
 				(DbRelationship) rel.getDbRelationshipList().get(0);
 
 			// dependent to one relationship is optional and can be null.
-			if (dbRel.isToDependentPK())
+			if (dbRel.isToDependentPK()) {
 				continue;
+			}
 
 			Map destMap = dbRel.targetPkSnapshotWithSrcSnapshot(snapshot);
-			if (destMap == null)
+			if (destMap == null) {
 				continue;
+			}
 
 			ObjectId destId =
 				new ObjectId(rel.getTargetEntity().getName(), destMap);
@@ -311,14 +318,12 @@ public class DataContext implements QueryEngine {
 			// use reference comparison to detect modifications for speed
 			// this is possible since changing the value even to an equivalent one is 
 			// technically a modfication.... 
-			if (curVal == oldVal) {
-				if ((newVal != null && !newVal.equals(curVal))
-					|| (curVal != null && !curVal.equals(newVal)))
-					anObject.writePropertyDirectly(attrName, newVal);
+			if (curVal == oldVal && !Util.nullSafeEquals(newVal, curVal)) {
+				anObject.writePropertyDirectly(attrName, newVal);
 			}
 		}
 	}
-	
+
 	/** Takes a snapshot of current object state. */
 	public Map takeObjectSnapshot(DataObject anObject) {
 		HashMap map = new HashMap();
