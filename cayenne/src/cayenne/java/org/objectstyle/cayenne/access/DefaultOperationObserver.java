@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.query.Query;
 /** 
  * Simple implementation of OperationObserver interface. 
  * Useful as a superclass of other implementations of OperationObserver.
- * This class would collect useful ststistics about the operation process. 
  * 
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
