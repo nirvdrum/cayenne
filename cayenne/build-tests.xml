@@ -16,6 +16,7 @@
 	
     <path id="classpath">
     	<fileset dir="${otherlib.dir}">
+			<include name="${ant-junitreport.jar}"/>
 			<include name="${junit.jar}"/>
 		</fileset>
     	<fileset dir="${ant.home}/lib">
