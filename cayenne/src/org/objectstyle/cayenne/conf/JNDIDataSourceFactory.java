@@ -55,24 +55,47 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 
 /** Looks up DataSource objects via JNDI.
   *
   * @author Andrei Adamchik
   */
 public class JNDIDataSourceFactory implements DataSourceFactory {
-
+    static Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class.getName());
 
     public JNDIDataSourceFactory() throws Exception {}
 
     /** Returns DataSource object corresponding to <code>location</code>.
       * Location is expected to be a path mapped in JNDI InitialContext. */
     public DataSource getDataSource(String location) throws Exception {
-        Context initCtx = new InitialContext();
-        Context envCtx = (Context) initCtx.lookup("java:comp/env");
-        return (DataSource)envCtx.lookup(location);
+        return getDataSource(location, Level.FINER);
+    }
+
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        if(logLevel == null)
+            logLevel = Level.FINER;
+            
+        try {
+            logObj.log(logLevel, "loading JNDI data source from (" + location + ").");
+            Context initCtx = new InitialContext();
+            Context envCtx = (Context) initCtx.lookup("java:comp/env");
+
+            if(envCtx == null)
+                logObj.log(logLevel, "warning: java:comp/env context is null.");
+
+            return (DataSource)envCtx.lookup(location);
+            
+        } catch(Exception ex) {
+            logObj.log(logLevel, "error loading datasource.", ex);
+            throw ex;
+        }
     }
 }

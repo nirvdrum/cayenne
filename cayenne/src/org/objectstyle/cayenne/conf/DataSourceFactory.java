@@ -55,6 +55,8 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
+import java.util.logging.Level;
+ 
 import javax.sql.DataSource;
 
 
@@ -65,4 +67,10 @@ public interface DataSourceFactory {
       * Concrete implementations may treat location differently - as a
       * file path, JNDI location, etc. */
     public DataSource getDataSource(String location) throws Exception;
+    
+    /** Returns DataSource object corresponding to <code>location</code>.
+      * Uses <code>logLevel</code> level of verbosity during data source loading.
+      * Concrete implementations may treat location differently - as a
+      * file path, JNDI location, etc. */
+    public DataSource getDataSource(String location, Level logLevel) throws Exception;
 }

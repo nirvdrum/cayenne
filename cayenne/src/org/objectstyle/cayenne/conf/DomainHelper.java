@@ -92,6 +92,7 @@ import org.objectstyle.util.Util;
 public class DomainHelper {
     static Logger logObj = Logger.getLogger(DomainHelper.class.getName());
 
+    private Level logLevel = Level.FINER;
     private Configuration config;
     private MapLoaderImpl loader;
     private XMLReader parser;
@@ -102,6 +103,7 @@ public class DomainHelper {
     private HashMap failedDataSources;
     private ArrayList failedMapRefs;
 
+
     /** If set, <code>factory</code> will override
       * factory settings in domain configuration file. */
     private DataSourceFactory factory;
@@ -109,6 +111,12 @@ public class DomainHelper {
 
     /** Creates new DomainHelper. */
     public DomainHelper(Configuration config) throws java.lang.Exception {
+        this(config, Level.FINER);
+    }
+
+    /** Creates new DomainHelper that uses specified level of verbosity. */
+    public DomainHelper(Configuration config, Level logLevel) throws java.lang.Exception {
+        this.logLevel = logLevel;
         this.config = config;
         parser = Util.createXmlReader();
         loader = new MapLoaderImpl();
@@ -171,6 +179,14 @@ public class DomainHelper {
       */
     public boolean loadDomains(InputStream in, DataSourceFactory factory) throws java.lang.Exception {
         this.factory = factory;
+
+        logObj.log(logLevel, "start configuration loading.");
+        if(factory != null)
+            logObj.log(logLevel,
+                       "factory "
+                       + factory.getClass().getName()
+                       + " will override any configured DataSourceFactory.");
+
 
         domains = new ArrayList();
         failedMaps = new HashMap();
@@ -240,7 +256,7 @@ public class DomainHelper {
             buf.append(" \" location=\"").append(map.getLocation());
             buf.append("\"/> ");
             pw.println(buf.toString());
-        }// End while()
+        }
 
         for (int i = 0; i < nodes.length; i++) {
             pw.println("\t<node name=\"" + nodes[i].getName() + "\"" );
@@ -284,6 +300,9 @@ public class DomainHelper {
             if (localName.equals("domains")) {
                 new DomainsHandler(parser, this);
             } else {
+                logObj.log(logLevel, "<domains> should be the root element. <"
+                           + localName
+                           + "> is unexpected.");
                 throw new SAXParseException("Config file is not of expected XML type", locator);
             }
         }
@@ -317,6 +336,9 @@ public class DomainHelper {
             if (localName.equals("domain")) {
                 new DomainHandler(getParser(), this).init(localName, atts);
             } else {
+                logObj.log(logLevel, "<domain> should be the only child of <domains>. <"
+                           + localName
+                           + "> is unexpected.");
                 throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
@@ -335,9 +357,12 @@ public class DomainHelper {
 
         public void init(String name, Attributes attrs) throws SAXException {
             String domainName = attrs.getValue("", "name");
-            if (domainName == null)
+            if (domainName == null) {
+                logObj.log(logLevel, "error: unnamed <domain>.");
                 throw new SAXParseException("Domain 'name' attribute must be not null.", locator);
+            }
 
+            logObj.log(logLevel, "loaded domain: " + domainName);
             domain = new DataDomain(domainName);
             domains.add(domain);
         }
@@ -349,6 +374,9 @@ public class DomainHelper {
             } else if (localName.equals("node")) {
                 new NodeHandler(getParser(), this).init(localName, atts, domain);
             } else {
+                logObj.log(logLevel, "<node> or <map> should be the children of <domain>. <"
+                           + localName
+                           + "> is unexpected.");
                 throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
@@ -361,15 +389,22 @@ public class DomainHelper {
 
         public void init(String name, Attributes attrs, DataDomain domain) throws SAXException {
             String mapName = attrs.getValue("", "name");
-            if (mapName == null)
+            if (mapName == null) {
+                logObj.log(logLevel, "error: <map> without 'name'.");
                 throw new SAXParseException("<map> 'name' attribute must be present.", locator);
+            }
 
             String location = attrs.getValue("", "location");
-            if (location == null)
+            if (location == null) {
+                logObj.log(logLevel, "error: <map> without 'location'.");
                 throw new SAXParseException("<map> 'location' attribute must be present.", locator);
+            }
+
+            logObj.log(logLevel, "loading <map name='" + mapName + "' location='" + location + "'>.");
 
             InputStream mapIn = config.getMapConfig(location);
             if (mapIn == null) {
+                logObj.log(logLevel, "warning: map location not found.");
                 failedMaps.put(mapName, location);
                 return ;
             }
@@ -378,11 +413,12 @@ public class DomainHelper {
             try {
                 map = loader.loadDataMap(new InputSource(mapIn));
             } catch (DataMapException dmex) {
-                logObj.log(Level.FINE, "Error loading map", dmex);
+                logObj.log(logLevel, "warning: map loading failed.", dmex);
                 failedMaps.put(mapName, location);
                 return;
             }
 
+            logObj.log(logLevel, "loaded <map name='" + mapName + "' location='" + location + "'>.");
             map.setName(mapName);
             map.setLocation(location);
             domain.addMap(map);
@@ -410,22 +446,34 @@ public class DomainHelper {
             this.domain = domain;
 
             String nodeName = attrs.getValue("", "name");
-            if (nodeName == null)
+            if (nodeName == null) {
+                logObj.log(logLevel, "error: <node> without 'name'.");
                 throw new SAXParseException("'<node name=' attribute must be present.", locator);
+            }
 
             String dataSrcLocation = attrs.getValue("", "datasource");
-            if (dataSrcLocation == null)
+            if (dataSrcLocation == null) {
+                logObj.log(logLevel, "error: <map> without 'datasource'.");
                 throw new SAXParseException("'<node datasource=' attribute must be present.", locator);
+            }
 
             String factoryName = attrs.getValue("", "factory");
-            if (factoryName == null)
+            if (factoryName == null) {
+                logObj.log(logLevel, "error: <map> without 'factory'.");
                 throw new SAXParseException("'<node factory=' attribute must be present.", locator);
+            }
+
+            logObj.log(logLevel, "loading <node name='" + nodeName
+                       + "' datasource='" + dataSrcLocation
+                       + "' factory='" + factoryName + "'>.");
 
             // unlike other parameters, adapter class is optional
             // default is used when none is specified.
             String adapterClass = attrs.getValue("", "adapter");
             if (adapterClass == null)
                 adapterClass = "org.objectstyle.cayenne.dba.JdbcAdapter";
+
+            logObj.log(logLevel, "node DbAdapter: " + adapterClass);
 
             this.node = new DataNode(nodeName);
             node.setDataSourceFactory(factoryName);
@@ -440,14 +488,16 @@ public class DomainHelper {
                                                  ? factory
                                                  : (DataSourceFactory)Class.forName(factoryName).newInstance();
 
-                DataSource ds = localFactory.getDataSource(dataSrcLocation);
+                DataSource ds = localFactory.getDataSource(dataSrcLocation, logLevel);
                 if(ds != null) {
+                    logObj.log(logLevel, "loaded datasource.");
                     node.setDataSource(ds);
                 } else {
+                    logObj.log(logLevel, "warning: null datasource.");
                     failedDataSources.put(nodeName, dataSrcLocation);
                 }
             } catch (Exception ex) {
-                logObj.log(Level.FINE, "Error loading DataSource", ex);
+                logObj.log(logLevel, "error: DataSource load failed", ex);
                 failedDataSources.put(nodeName, dataSrcLocation);
             }
 
@@ -455,6 +505,7 @@ public class DomainHelper {
             try {
                 node.setAdapter((DbAdapter)Class.forName(adapterClass).newInstance());
             } catch (Exception ex) {
+                logObj.log(logLevel, "instantiating adapter failed.", ex);
                 failedAdapters.put(nodeName, adapterClass);
             }
         }
@@ -464,6 +515,9 @@ public class DomainHelper {
             if (localName.equals("map-ref")) {
                 new MapRefHandler(getParser(), this).init(localName, attrs, domain, node);
             } else {
+                logObj.log(logLevel, "<domap-ref> should be the only node child. <"
+                           + localName
+                           + "> is unexpected.");
                 throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
@@ -490,13 +544,17 @@ public class DomainHelper {
 
         public void init(String name, Attributes attrs, DataDomain domain, DataNode node) throws SAXException {
             String mapName = attrs.getValue("", "name");
-            if (mapName == null)
+            if (mapName == null) {
+                logObj.log(logLevel, "<map-ref> has no 'name'.");
                 throw new SAXParseException("'<map-ref name=' attribute must be present.", locator);
+            }
 
             DataMap map = domain.getMap(mapName);
             if (map == null) {
+                logObj.log(logLevel, "warning: unknown map-ref: " + mapName + ".");
                 failedMapRefs.add(mapName);
             } else {
+                logObj.log(logLevel, "loaded map-ref: " + mapName + ".");
                 node.addDataMap(map);
             }
         }

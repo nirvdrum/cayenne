@@ -81,6 +81,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     private XMLReader parser;
     private DataSourceInfo driverInfo;
+    private Level logLevel = Level.FINER;
 
     public DriverDataSourceFactory() throws Exception {
         parser = Util.createXmlReader();
@@ -90,6 +91,12 @@ public class DriverDataSourceFactory implements DataSourceFactory {
       * Location is expected to be a path of a file relative to the current
       * directory or a user home directory. */
     public DataSource getDataSource(String location) throws Exception {
+        return getDataSource(location, Level.FINER);
+    }
+
+
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
+        this.logLevel = logLevel;
         load(location);
         return new PoolManager(driverInfo.getJdbcDriver(),
                                driverInfo.getDataSourceUrl(),
@@ -109,13 +116,21 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     /** Loads driver information from the file at <code>location</code>.
       * Called internally from "getDataSource" */
     protected void load(String location) throws Exception {
-        InputStream in = ResourceLocator.findResourceInFileSystem(location);
-        if (in == null)
-            in = ResourceLocator.findResourceInClasspath(location);
+        logObj.log(logLevel, "loading driver information from (" + location + ").");
 
-        if (in == null)
+        InputStream in = ResourceLocator.findResourceInFileSystem(location);
+        if (in == null) {
+            logObj.log(logLevel, "location not found in filesystem.");
+            in = ResourceLocator.findResourceInClasspath(location);
+        } else {
+            logObj.log(logLevel, "location found in filesystem.");
+        }
+
+        if (in == null) {
+            logObj.log(logLevel, "error: location not found.");
             throw new ConfigException("Can't find DataSource configuration file at "
                                       + location);
+        }
 
         RootHandler handler = new RootHandler();
         parser.setContentHandler(handler);
@@ -140,6 +155,8 @@ public class DriverDataSourceFactory implements DataSourceFactory {
             if (localName.equals("driver")) {
                 new DriverHandler(parser, this).init(localName, atts);
             } else {
+                logObj.log(logLevel, "<driver> must be the root element. <"
+                           + localName + "> is unexpected.");
                 throw new SAXException("Config file is not of expected XML type. '"
                                        + localName
                                        + "' unexpected.");
@@ -155,9 +172,12 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
         public void init(String name, Attributes attrs) throws SAXException {
             String className = attrs.getValue("", "class");
-            if (className == null)
+            if (className == null) {
+                logObj.log(logLevel, "error: <driver> has no 'class'.");
                 throw new SAXException("Driver 'class' attribute must be present.");
+            }
 
+            logObj.log(logLevel, "loading driver " + className);
             driverInfo = new DataSourceInfo();
             driverInfo.setJdbcDriver(className);
         }
@@ -177,6 +197,8 @@ public class DriverDataSourceFactory implements DataSourceFactory {
             } else if (localName.equals("connectionPool")) {
                 new ConnectionHandler(this.parser, this).init(localName, atts, driverInfo);
             } else {
+                logObj.log(logLevel, "<login, url, connectionPool> are valid. <"
+                           + localName + "> is unexpected.");
                 throw new SAXException("Config file is not of expected XML type");
             }
         }
@@ -198,8 +220,10 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
         public void init(String name, Attributes atts, DataSourceInfo driverInfo) throws SAXException {
             driverInfo.setDataSourceUrl(atts.getValue("value"));
-            if(driverInfo.getDataSourceUrl() == null)
+            if(driverInfo.getDataSourceUrl() == null) {
+                logObj.log(logLevel, "error: <url> has no 'value'.");
                 throw new SAXException("'<url value=' attribute is required.");
+            }
         }
     }
 
@@ -216,6 +240,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         }
 
         public void init(String name, Attributes atts, DataSourceInfo driverInfo) throws SAXException {
+            logObj.log(logLevel, "loading user name and password.");
             driverInfo.setUserName(atts.getValue("userName"));
             driverInfo.setPassword(atts.getValue("password"));
         }
@@ -243,7 +268,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 if(max != null)
                     driverInfo.setMaxConnections(Integer.parseInt(max));
             } catch(NumberFormatException nfex) {
-                logObj.log(Level.INFO, "Error loading numeric attribute", nfex);
+                logObj.log(logLevel, "Error loading numeric attribute", nfex);
                 throw new SAXException("Error reading numeric attribute.", nfex);
             }
         }
