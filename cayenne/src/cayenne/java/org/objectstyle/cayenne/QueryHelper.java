@@ -99,7 +99,6 @@ public final class QueryHelper {
 		UpdateQuery upd = new UpdateQuery();
 
 		ObjectId id = dataObject.getObjectId();
-		//upd.setObjEntityName(id.getObjEntityName());
 		upd.setRoot(dataObject.getClass());
 
 		Map committedSnapshot = dataObject.getCommittedSnapshot();
@@ -152,7 +151,6 @@ public final class QueryHelper {
 	public static DeleteQuery deleteQuery(DataObject dataObject) {
 		DeleteQuery del = new DeleteQuery();
 		ObjectId id = dataObject.getObjectId();
-		//del.setObjEntityName(id.getObjEntityName());
 		del.setRoot(dataObject.getClass());
 		del.setQualifier(ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
 		return del;
@@ -166,7 +164,6 @@ public final class QueryHelper {
 	 */
 	public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
 		InsertQuery ins = new InsertQuery();
-		//ins.setObjEntityName(permId.getObjEntityName());
 		ins.setRoot(permId.getObjEntityName());
 		ins.setObjectSnapshot(objectSnapshot);
 		ins.setObjectId(permId);
@@ -179,7 +176,6 @@ public final class QueryHelper {
 	 */
 	public static SelectQuery selectObjectForId(ObjectId oid) {
 		SelectQuery sel = new SelectQuery();
-		//sel.setObjEntityName(oid.getObjEntityName());
 		sel.setRoot(oid.getObjEntityName());
 		sel.setQualifier(ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
 		return sel;
@@ -197,7 +193,6 @@ public final class QueryHelper {
 		}
 		
 		SelectQuery sel = new SelectQuery();
-		//sel.setObjEntityName(((ObjectId)oids.get(1)).getObjEntityName());
 		sel.setRoot(((ObjectId)oids.get(1)).getObjEntityName());
 		
 		Iterator it = oids.iterator();
@@ -271,7 +266,6 @@ public final class QueryHelper {
 		ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjEntityName());
 		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
 		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
-		//sel.setObjEntityName(destEnt.getName());
 		sel.setRoot(destEnt);
 
 		// convert source PK into destination FK definition,

@@ -434,7 +434,6 @@ public class DataDomain implements QueryEngine {
 		// organize queries by node
 		while (it.hasNext()) {
 			Query nextQ = (Query) it.next();
-			//DataNode aNode = this.dataNodeForObjEntityName(nextQ.getObjEntityName());
 			DbEntity dbe=this.getEntityResolver().lookupDbEntity(nextQ);
 			DataNode aNode = this.dataNodeForDbEntity(dbe);
 			if (aNode == null) {
@@ -464,7 +463,6 @@ public class DataDomain implements QueryEngine {
 
 	/** Analyzes a query and sends it to appropriate DataNode */
 	public void performQuery(Query query, OperationObserver resultCons) {
-		//DataNode aNode = this.dataNodeForObjEntityName(query.getObjEntityName());
 		DbEntity dbe=this.getEntityResolver().lookupDbEntity(query);
 	 	DataNode aNode = this.dataNodeForDbEntity(dbe);
 

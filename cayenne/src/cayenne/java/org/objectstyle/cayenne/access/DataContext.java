@@ -678,7 +678,6 @@ public class DataContext implements QueryEngine, Serializable {
         int prefetchSize = prefetches.size();
         int objectsSize = objects.size();
         ArrayList queries = new ArrayList(prefetchSize);
-        //ObjEntity oe = lookupEntity(query.getObjEntityName());
         ObjEntity oe = this.getEntityResolver().lookupObjEntity(query);
 
         for (int i = 0; i < prefetchSize; i++) {
@@ -784,8 +783,6 @@ public class DataContext implements QueryEngine, Serializable {
      *  related to this object. 
      */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
-        //ObjEntity objEntity =
-          //  parent.lookupEntity(dataObject.getObjectId().getObjEntityName());
         ObjEntity objEntity =
 			this.getEntityResolver().lookupObjEntity(dataObject.getClass());
         DbEntity dbEntity = objEntity.getDbEntity();
@@ -860,7 +857,6 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
         TempObjectId tempId = (TempObjectId) anObject.getObjectId();
-        //ObjEntity objEntity = parent.lookupEntity(tempId.getObjEntityName());
         ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(tempId.getObjEntityName());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = parent.dataNodeForObjEntity(objEntity);
