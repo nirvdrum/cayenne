@@ -74,7 +74,10 @@ package org.objectstyle.cayenne.event;
 
 public class EventSubject extends Object {
 	private String _subject;
-	
+
+	/**
+	 * @HH: writeme!
+	 */
 	public static EventSubject getSubject(Class subjectOwner, String subjectName) {
 		if (subjectOwner == null) {
 			throw new IllegalArgumentException("owner class must not be null");
@@ -87,16 +90,25 @@ public class EventSubject extends Object {
 		return new EventSubject(subjectOwner.getName() + "." + subjectName);
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	// make sure that the only way to create subjects is via the factory method
 	private EventSubject() {
 		super();
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	private EventSubject(String subject) {
 		this();
 		_subject = subject;
 	}
 	
+	/**
+	 * @HH: writeme!
+	 */
 	public String toString() {
         StringBuffer buf = new StringBuffer(64);
 
