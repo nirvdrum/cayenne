@@ -102,7 +102,14 @@ public class ModelerPreferences extends ExtendedProperties {
     /** RDBMS Adapter */
     public static final String RDBMS_ADAPTER = "DbLoginPanel.adapterInput";
 
-    protected static ModelerPreferences sharedInstance;
+	/** GUI layout */
+	public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";
+	public static final String EDITOR_FRAME_WIDTH = "Editor.frameWidth";
+	public static final String EDITOR_FRAME_HEIGHT = "Editor.frameHeight";
+	public static final String EDITOR_FRAME_X  = "Editor.frameX";
+	public static final String EDITOR_FRAME_Y = "Editor.frameY";
+
+	protected static ModelerPreferences sharedInstance;
 
     protected ModelerPreferences() {}
 
