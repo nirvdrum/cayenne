@@ -56,12 +56,11 @@
 package org.objectstyle.cayenne;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
-import com.sun.tools.jdi.LinkedHashMap;
 
 public class ObjectIdTst extends CayenneTestCase {
 
