@@ -68,13 +68,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -107,8 +108,8 @@ public abstract class SelectPropertiesPanel extends JPanel {
         cachePolicyLabels.put(GenericSelectQuery.SHARED_CACHE, SHARED_CACHE_LABEL);
     }
 
-    protected TextFieldAdapter fetchLimit;
-    protected TextFieldAdapter pageSize;
+    protected TextAdapter fetchLimit;
+    protected TextAdapter pageSize;
     protected JComboBox cachePolicy;
     protected JCheckBox refreshesResults;
 
@@ -121,16 +122,16 @@ public abstract class SelectPropertiesPanel extends JPanel {
     }
 
     protected void initView() {
-        fetchLimit = new TextFieldAdapter(CayenneWidgetFactory.createTextField(7)) {
+        fetchLimit = new TextAdapter(new JTextField(7)) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setFetchLimit(text);
             }
         };
 
-        pageSize = new TextFieldAdapter(CayenneWidgetFactory.createTextField(7)) {
+        pageSize = new TextAdapter(new JTextField(7)) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setPageSize(text);
             }
         };

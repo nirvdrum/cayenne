@@ -104,9 +104,9 @@ public class ObjectQueryPropertiesPanel extends SelectPropertiesPanel {
         builder.addLabel("Refresh Results:", cc.xy(1, 9));
         builder.add(refreshesResults, cc.xy(3, 9));
         builder.addLabel("Fetch Limit, Rows:", cc.xy(1, 11));
-        builder.add(fetchLimit.getTextField(), cc.xy(3, 11));
+        builder.add(fetchLimit.getComponent(), cc.xy(3, 11));
         builder.addLabel("Page Size:", cc.xy(1, 13));
-        builder.add(pageSize.getTextField(), cc.xy(3, 13));
+        builder.add(pageSize.getComponent(), cc.xy(3, 13));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.CENTER);

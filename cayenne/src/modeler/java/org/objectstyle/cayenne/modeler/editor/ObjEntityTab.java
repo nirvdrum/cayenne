@@ -87,7 +87,7 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.CellRenderers;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -116,10 +116,10 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     };
 
     protected ProjectController mediator;
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
     protected JTextField className;
     protected JTextField superClassName;
-    protected TextFieldAdapter qualifier;
+    protected TextAdapter qualifier;
     protected JComboBox dbEntityCombo;
     protected JComboBox superEntityCombo;
     protected JButton tableLabel;
@@ -134,17 +134,17 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setEntityName(text);
             }
         };
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
-        qualifier = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        qualifier = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setQualifier(text);
             }
         };
@@ -166,7 +166,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("ObjEntity Configuration");
-        builder.append("ObjEntity Name:", name.getTextField());
+        builder.append("ObjEntity Name:", name.getComponent());
         builder.append("Inheritance:", superEntityCombo);
         builder.append(tableLabel, dbEntityCombo);
 
@@ -174,7 +174,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
         builder.append("Java Class:", className);
         builder.append("Superclass:", superClassName);
-        builder.append("Qualifier", qualifier.getTextField());
+        builder.append("Qualifier", qualifier.getComponent());
         builder.append("Read-Only:", readOnly);
         builder.append("Optimistic Locking:", optimisticLocking);
 
@@ -310,7 +310,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
      */
     private void initFromModel(final ObjEntity entity) {
         // TODO: this is a hack until we implement a real MVC
-        qualifier.getTextComponent().setBackground(Color.WHITE);
+        qualifier.getComponent().setBackground(Color.WHITE);
 
         name.setText(entity.getName());
         superClassName.setText(entity.getSuperClassName() != null ? entity
@@ -446,9 +446,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                                 "Change", "Cancel"
                         });
 
-                pane
-                        .createDialog(Application.getFrame(), "Update Class Name")
-                        .show();
+                pane.createDialog(Application.getFrame(), "Update Class Name").show();
                 if ("Change".equals(pane.getValue())) {
                     className.setText(suggestedClassName);
                     setClassName(suggestedClassName);

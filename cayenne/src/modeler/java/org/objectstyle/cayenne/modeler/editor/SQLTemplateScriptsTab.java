@@ -69,6 +69,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -78,7 +79,7 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.swing.TextAreaAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -100,7 +101,7 @@ public class SQLTemplateScriptsTab extends JPanel {
     protected ProjectController mediator;
 
     protected JList scripts;
-    protected TextAreaAdapter script;
+    protected TextAdapter script;
     protected ListSelectionListener scriptRefreshHandler;
 
     public SQLTemplateScriptsTab(ProjectController mediator) {
@@ -132,14 +133,10 @@ public class SQLTemplateScriptsTab extends JPanel {
         keys.add(0, DEFAULT_LABEL);
         scripts.setModel(new DefaultComboBoxModel(keys.toArray()));
 
-        script = new TextAreaAdapter(15, 30) {
+        script = new TextAdapter(new JTextArea(15, 30)) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setSQL(text);
-            }
-
-            protected void initModel(DocumentEvent e) {
-                setSQL(e);
             }
         };
 
@@ -154,7 +151,7 @@ public class SQLTemplateScriptsTab extends JPanel {
                 scripts,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), cc.xy(1, 2));
-        builder.add(new JScrollPane(script.getTextArea()), cc.xy(3, 2));
+        builder.add(new JScrollPane(script.getComponent()), cc.xy(3, 2));
 
         setLayout(new BorderLayout());
         add(builder.getPanel(), BorderLayout.CENTER);
@@ -174,7 +171,7 @@ public class SQLTemplateScriptsTab extends JPanel {
         displayScript();
         scripts.addListSelectionListener(scriptRefreshHandler);
 
-        script.getTextArea().setEnabled(true);
+        script.getComponent().setEnabled(true);
         setVisible(true);
     }
 
@@ -227,15 +224,15 @@ public class SQLTemplateScriptsTab extends JPanel {
 
     void disableEditor() {
         script.setText(null);
-        script.getTextArea().setEnabled(false);
-        script.getTextArea().setEditable(false);
-        script.getTextArea().setBackground(getBackground());
+        script.getComponent().setEnabled(false);
+        script.getComponent().setEditable(false);
+        script.getComponent().setBackground(getBackground());
     }
 
     void enableEditor() {
-        script.getTextArea().setEnabled(true);
-        script.getTextArea().setEditable(true);
-        script.getTextArea().setBackground(Color.WHITE);
+        script.getComponent().setEnabled(true);
+        script.getComponent().setEditable(true);
+        script.getComponent().setBackground(Color.WHITE);
     }
 
     void setSQL(DocumentEvent e) {

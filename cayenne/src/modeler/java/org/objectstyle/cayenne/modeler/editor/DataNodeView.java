@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
@@ -103,7 +103,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
     protected ProjectController mediator;
     protected DataNode node;
 
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
 
     protected JTextField location;
     protected JComboBox factory;
@@ -131,9 +131,9 @@ public class DataNodeView extends JPanel implements DocumentListener {
     private void initView() {
         // create widgets
 
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setDataNodeName(text);
             }
         };
@@ -167,7 +167,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
         topPanelBuilder.setDefaultDialogBorder();
 
         topPanelBuilder.appendSeparator("DataNode Configuration");
-        topPanelBuilder.append("DataNode Name:", name.getTextComponent());
+        topPanelBuilder.append("DataNode Name:", name.getComponent());
         topPanelBuilder.append("DataSource Factory", factory);
         topPanelBuilder.append("Location:", location);
         topPanelBuilder.append("DB Adapter:", adapter);
@@ -456,18 +456,19 @@ public class DataNodeView extends JPanel implements DocumentListener {
         DbAdapter newAdapter = null;
         if (adapterName != null && adapterName.trim().length() > 0) {
             try {
-                Class adapterClass = Application.getInstance().getClassLoadingService().loadClass(
-                        adapterName);
+                Class adapterClass = Application
+                        .getInstance()
+                        .getClassLoadingService()
+                        .loadClass(adapterName);
                 newAdapter = (DbAdapter) adapterClass.newInstance();
             }
             catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane
-                        .showMessageDialog(
-                                Application.getFrame(),
-                                ex.getMessage(),
-                                "Error loading adapter",
-                                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        Application.getFrame(),
+                        ex.getMessage(),
+                        "Error loading adapter",
+                        JOptionPane.ERROR_MESSAGE);
                 DbAdapter oldAdapter = node.getAdapter();
                 initDbAdapter(oldAdapter != null
                         ? oldAdapter.getClass().getName().trim()
@@ -511,18 +512,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
     private void initFactory(String factoryName) {
         DefaultComboBoxModel model = new DefaultComboBoxModel(new String[] {
                 DriverDataSourceFactory.class.getName(),
-                JNDIDataSourceFactory.class.getName(),
-                "Some stuff...",
-                "sadsad sad asd 234",
-                "sadsad sad asd 324",
-                "sadsad sad asd 324234",
-                "sadsad sad asd 324",
-                "sadsad sad asd 234234",
-                "sadsad sad asd 2344234",
-                "sadsad sad asd 3434",
-                "sadsad sad asd 3434",
-                "sadsad sad asd ",
-                "sadsad sad sadasd "
+                JNDIDataSourceFactory.class.getName()
         });
 
         if (factoryName != null && factoryName.length() > 0) {

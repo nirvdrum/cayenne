@@ -64,6 +64,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -73,7 +74,7 @@ import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.CellRenderers;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -92,7 +93,7 @@ import com.jgoodies.forms.layout.FormLayout;
 public class ProcedureQueryView extends JPanel {
 
     protected ProjectController mediator;
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
     protected JComboBox queryRoot;
     protected JCheckBox selecting;
     protected SelectPropertiesPanel properties;
@@ -106,9 +107,9 @@ public class ProcedureQueryView extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setQueryName(text);
             }
         };
@@ -140,7 +141,7 @@ public class ProcedureQueryView extends JPanel {
 
         builder.addSeparator("ProcedureQuery Settings", cc.xywh(1, 1, 3, 1));
         builder.addLabel("Query Name:", cc.xy(1, 3));
-        builder.add(name.getTextField(), cc.xy(3, 3));
+        builder.add(name.getComponent(), cc.xy(3, 3));
         builder.addLabel("Procedure:", cc.xy(1, 5));
         builder.add(queryRoot, cc.xy(3, 5));
         builder.addLabel("Is Selecting:", cc.xy(1, 7));

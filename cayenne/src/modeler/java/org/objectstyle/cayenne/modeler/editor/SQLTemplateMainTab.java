@@ -61,13 +61,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -87,7 +87,7 @@ import com.jgoodies.forms.layout.FormLayout;
 public class SQLTemplateMainTab extends JPanel {
 
     protected ProjectController mediator;
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
     protected JCheckBox selecting;
     protected SelectPropertiesPanel properties;
 
@@ -100,9 +100,9 @@ public class SQLTemplateMainTab extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setQueryName(text);
             }
         };
@@ -134,7 +134,7 @@ public class SQLTemplateMainTab extends JPanel {
 
         builder.addSeparator("SQLTemplate Settings", cc.xywh(1, 1, 3, 1));
         builder.addLabel("Query Name:", cc.xy(1, 3));
-        builder.add(name.getTextField(), cc.xy(3, 3));
+        builder.add(name.getComponent(), cc.xy(3, 3));
         builder.addLabel("Is Selecting:", cc.xy(1, 5));
         builder.add(selecting, cc.xy(3, 5));
 
@@ -235,7 +235,7 @@ public class SQLTemplateMainTab extends JPanel {
             // in case of null entity, set root to DataMap
             Object root = entity != null ? (Object) entity : mediator.getCurrentDataMap();
             template.setRoot(root);
-            
+
             mediator.fireQueryEvent(new QueryEvent(this, template));
         }
     }

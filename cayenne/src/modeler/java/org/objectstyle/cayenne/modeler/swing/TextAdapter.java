@@ -56,37 +56,108 @@
 package org.objectstyle.cayenne.modeler.swing;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
- * A validating adapter for JTextField. Override {@link #initModel(String)}to initialize
- * model on text change.
+ * A validating adapter for JTextComponent. Implement {@link #updateModel(String)}to
+ * initialize model on text change.
  * 
  * @author Andrei Adamchik
  */
-public abstract class TextComponentAdapter extends InputVerifier {
+public abstract class TextAdapter {
 
     protected Color defaultBGColor;
     protected Color errorColor;
     protected JTextComponent textComponent;
     protected String defaultToolTip;
+    protected boolean documentEventsDisabled;
 
-    protected TextComponentAdapter(JTextComponent textComponent) {
+    public TextAdapter(JTextField textField) {
+        this(textField, true, false, true);
+    }
+
+    public TextAdapter(JTextField textField, boolean checkOnFocusLost,
+            boolean checkOnTyping, boolean checkOnEnter) {
+        this(textField, true, false);
+
+        if (checkOnEnter) {
+
+            textField.addActionListener(new ActionListener() {
+
+                public void actionPerformed(ActionEvent e) {
+                    updateModel();
+                }
+            });
+        }
+    }
+
+    public TextAdapter(JTextArea textField) {
+        this(textField, false, true);
+    }
+
+    public TextAdapter(JTextComponent textComponent, boolean checkOnFocusLost,
+            boolean checkOnTyping) {
         this.errorColor = ValidatorDialog.WARNING_COLOR;
         this.defaultBGColor = textComponent.getBackground();
         this.defaultToolTip = textComponent.getToolTipText();
         this.textComponent = textComponent;
 
-        textComponent.setInputVerifier(this);
+        if (checkOnFocusLost) {
+            textComponent.setInputVerifier(new InputVerifier() {
+
+                public boolean verify(JComponent c) {
+                    updateModel();
+                    // release focus after coloring the field...
+                    return true;
+                }
+            });
+        }
+
+        if (checkOnTyping) {
+            textComponent.getDocument().addDocumentListener(new DocumentListener() {
+
+                public void insertUpdate(DocumentEvent e) {
+                    verifyTextChange(e);
+                }
+
+                public void changedUpdate(DocumentEvent e) {
+                    verifyTextChange(e);
+                }
+
+                public void removeUpdate(DocumentEvent e) {
+                    verifyTextChange(e);
+                }
+
+                void verifyTextChange(DocumentEvent e) {
+                    if (!documentEventsDisabled) {
+                        updateModel();
+                    }
+                }
+            });
+        }
     }
 
-    public JTextComponent getTextComponent() {
+    /**
+     * Updates bound model with document text.
+     */
+    protected abstract void updateModel(String text) throws ValidationException;
+
+    /**
+     * Returns internal text component.
+     */
+    public JTextComponent getComponent() {
         return textComponent;
     }
 
@@ -94,30 +165,29 @@ public abstract class TextComponentAdapter extends InputVerifier {
      * Sets the text of the underlying text field.
      */
     public void setText(String text) {
-        clear();
-        textComponent.setText(text);
+        documentEventsDisabled = true;
+        try {
+            clear();
+            textComponent.setText(text);
+        }
+        finally {
+            documentEventsDisabled = false;
+        }
     }
 
-    public boolean verify(JComponent c) {
+    protected void updateModel() {
         try {
-            initModel(textComponent.getText());
+            updateModel(textComponent.getText());
             clear();
         }
         catch (ValidationException vex) {
-
             textComponent.setBackground(errorColor);
             textComponent.setToolTipText(vex.getUnlabeledMessage());
         }
-
-        // release focus after coloring the field...
-        return true;
     }
 
     protected void clear() {
         textComponent.setBackground(defaultBGColor);
         textComponent.setToolTipText(defaultToolTip);
     }
-
-    protected abstract void initModel(String text) throws ValidationException;
-
 }

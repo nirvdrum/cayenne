@@ -64,6 +64,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
@@ -74,8 +75,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.datadomain.CacheSyncConfigController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
-import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.ApplicationProject;
@@ -92,8 +92,8 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
 
     protected ProjectController projectController;
 
-    protected TextFieldAdapter name;
-    protected TextFieldAdapter cacheSize;
+    protected TextAdapter name;
+    protected TextAdapter cacheSize;
     protected JCheckBox objectValidation;
     protected JCheckBox externalTransactions;
     protected JCheckBox sharedCache;
@@ -113,16 +113,16 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     protected void initView() {
 
         // create widgets
-        this.name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        this.name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setDomainName(text);
             }
         };
 
-        this.cacheSize = new TextFieldAdapter(CayenneWidgetFactory.createTextField(10)) {
+        this.cacheSize = new TextAdapter(new JTextField(10)) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setCacheSize(text);
             }
         };
@@ -144,12 +144,12 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DataDomain Configuration");
-        builder.append("DataDomain Name:", name.getTextField(), 3);
+        builder.append("DataDomain Name:", name.getComponent(), 3);
         builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
         builder.append("Container-Managed Transactions:", externalTransactions, 3);
 
         builder.appendSeparator("Cache Configuration");
-        builder.append("Max. Number of Objects:", cacheSize.getTextField(), 3);
+        builder.append("Max. Number of Objects:", cacheSize.getComponent(), 3);
         builder.append("Use Shared Cache:", sharedCache, 3);
         builder
                 .append(

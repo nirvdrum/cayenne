@@ -140,9 +140,9 @@ public abstract class RawQueryPropertiesPanel extends SelectPropertiesPanel {
         builder.addLabel("Refresh Results:", cc.xy(1, 9));
         builder.add(refreshesResults, cc.xy(3, 9));
         builder.addLabel("Fetch Limit, Rows:", cc.xy(1, 11));
-        builder.add(fetchLimit.getTextField(), cc.xywh(3, 11, 3, 1));
+        builder.add(fetchLimit.getComponent(), cc.xywh(3, 11, 3, 1));
         builder.addLabel("Page Size:", cc.xy(1, 13));
-        builder.add(pageSize.getTextField(), cc.xywh(3, 13, 3, 1));
+        builder.add(pageSize.getComponent(), cc.xywh(3, 13, 3, 1));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.CENTER);

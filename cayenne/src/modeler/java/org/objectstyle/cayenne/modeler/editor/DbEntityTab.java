@@ -85,7 +85,7 @@ import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.CellRenderers;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -104,7 +104,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
 
     protected ProjectController mediator;
 
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
     protected JTextField schema;
     protected JComboBox parentEntities;
     protected JButton parentLabel;
@@ -129,9 +129,9 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
     private void initView() {
 
         // create widgets
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setEntityName(text);
             }
         };
@@ -167,7 +167,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DbEntity Configuration");
-        builder.append("DbEntity name:", name.getTextField());
+        builder.append("DbEntity name:", name.getComponent());
         builder.append(schemaLabel, schema);
         builder.append(parentLabel, parentEntities);
 

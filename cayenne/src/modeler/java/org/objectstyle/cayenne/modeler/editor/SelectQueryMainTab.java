@@ -64,6 +64,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
@@ -71,7 +72,7 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.CellRenderers;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.query.Query;
@@ -94,9 +95,9 @@ public class SelectQueryMainTab extends JPanel {
 
     protected ProjectController mediator;
 
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
     protected JComboBox queryRoot;
-    protected TextFieldAdapter qualifier;
+    protected TextAdapter qualifier;
     protected JCheckBox distinct;
     protected ObjectQueryPropertiesPanel properties;
 
@@ -109,9 +110,9 @@ public class SelectQueryMainTab extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setQueryName(text);
             }
         };
@@ -119,9 +120,9 @@ public class SelectQueryMainTab extends JPanel {
         queryRoot = CayenneWidgetFactory.createComboBox();
         queryRoot.setRenderer(CellRenderers.listRendererWithIcons());
 
-        qualifier = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        qualifier = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setQueryQualifier(text);
             }
         };
@@ -140,11 +141,11 @@ public class SelectQueryMainTab extends JPanel {
 
         builder.addSeparator("SelectQuery Settings", cc.xywh(1, 1, 3, 1));
         builder.addLabel("Query Name:", cc.xy(1, 3));
-        builder.add(name.getTextField(), cc.xy(3, 3));
+        builder.add(name.getComponent(), cc.xy(3, 3));
         builder.addLabel("Query Root:", cc.xy(1, 5));
         builder.add(queryRoot, cc.xy(3, 5));
         builder.addLabel("Qualifier:", cc.xy(1, 7));
-        builder.add(qualifier.getTextField(), cc.xy(3, 7));
+        builder.add(qualifier.getComponent(), cc.xy(3, 7));
         builder.addLabel("Distinct:", cc.xy(1, 9));
         builder.add(distinct, cc.xy(3, 9));
 

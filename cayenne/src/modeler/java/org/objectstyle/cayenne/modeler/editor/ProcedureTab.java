@@ -62,6 +62,7 @@ import java.awt.event.ItemListener;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
@@ -69,7 +70,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -87,8 +88,8 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
         ExistingSelectionProcessor {
 
     protected ProjectController eventController;
-    protected TextFieldAdapter name;
-    protected TextFieldAdapter schema;
+    protected TextAdapter name;
+    protected TextAdapter schema;
     protected JCheckBox returnsValue;
     protected boolean ignoreChange;
 
@@ -102,16 +103,16 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
     private void initView() {
         // create widgets
 
-        this.name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        this.name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setProcedureName(text);
             }
         };
 
-        this.schema = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        this.schema = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setSchema(text);
             }
         };
@@ -133,9 +134,9 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
 
         builder.addSeparator("Stored Procedure Configuration", cc.xywh(1, 1, 5, 1));
         builder.addLabel("Procedure Name:", cc.xy(1, 3));
-        builder.add(name.getTextField(), cc.xywh(3, 3, 3, 1));
+        builder.add(name.getComponent(), cc.xywh(3, 3, 3, 1));
         builder.addLabel("Schema:", cc.xy(1, 5));
-        builder.add(schema.getTextField(), cc.xywh(3, 5, 3, 1));
+        builder.add(schema.getComponent(), cc.xywh(3, 5, 3, 1));
         builder.addLabel("Returns Value:", cc.xy(1, 7));
         builder.add(returnsValue, cc.xy(3, 7));
         builder.add(returnValueHelp, cc.xy(5, 7));

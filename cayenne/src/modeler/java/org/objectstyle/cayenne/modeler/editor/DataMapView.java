@@ -67,6 +67,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -86,7 +87,7 @@ import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.CellRenderers;
-import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
+import org.objectstyle.cayenne.modeler.swing.TextAdapter;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
@@ -103,12 +104,12 @@ public class DataMapView extends JPanel {
 
     protected ProjectController eventController;
 
-    protected TextFieldAdapter name;
+    protected TextAdapter name;
     protected JLabel location;
     protected JComboBox nodeSelector;
-    protected TextFieldAdapter defaultSchema;
-    protected TextFieldAdapter defaultPackage;
-    protected TextFieldAdapter defaultSuperclass;
+    protected TextAdapter defaultSchema;
+    protected TextAdapter defaultPackage;
+    protected TextAdapter defaultSuperclass;
     protected JCheckBox defaultLockType;
     protected JButton updateDefaultSchema;
     protected JButton updateDefaultPackage;
@@ -124,9 +125,9 @@ public class DataMapView extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        name = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setDataMapName(text);
             }
         };
@@ -136,25 +137,25 @@ public class DataMapView extends JPanel {
         nodeSelector.setRenderer(CellRenderers.listRendererWithIcons());
 
         updateDefaultSchema = new JButton("Update...");
-        defaultSchema = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        defaultSchema = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setDefaultSchema(text);
             }
         };
 
         updateDefaultPackage = new JButton("Update...");
-        defaultPackage = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        defaultPackage = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setDefaultPackage(text);
             }
         };
 
         updateDefaultSuperclass = new JButton("Update...");
-        defaultSuperclass = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+        defaultSuperclass = new TextAdapter(new JTextField()) {
 
-            protected void initModel(String text) {
+            protected void updateModel(String text) {
                 setDefaultSuperclass(text);
             }
         };
@@ -164,25 +165,28 @@ public class DataMapView extends JPanel {
 
         // assemble
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, left:max(110dlu;pref), 3dlu, fill:90",
+                "right:max(50dlu;pref), 3dlu, fill:max(110dlu;pref), 3dlu, fill:90",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DataMap Configuration");
-        builder.append("DataMap Name:", name.getTextField(), 3);
+        builder.append("DataMap Name:", name.getComponent(), 3);
         builder.append("File:", location, 3);
         builder.append("DataNode:", nodeSelector, 3);
 
         builder.appendSeparator("Entity Defaults");
-        builder.append("DB Schema:", defaultSchema.getTextField(), updateDefaultSchema);
+        builder.append(
+                "DB Schema:",
+                defaultSchema.getComponent(),
+                updateDefaultSchema);
         builder.append(
                 "Java Package:",
-                defaultPackage.getTextField(),
+                defaultPackage.getComponent(),
                 updateDefaultPackage);
         builder.append(
                 "DataObject Superclass:",
-                defaultSuperclass.getTextField(),
+                defaultSuperclass.getComponent(),
                 updateDefaultSuperclass);
         builder.append("Optimistic Locking:", defaultLockType, updateDefaultLockType);
 
