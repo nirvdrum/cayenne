@@ -155,7 +155,7 @@ public class SimpleTest implements TestConstants {
         long t4 = System.currentTimeMillis();
 
         // fetch into data domain 
-        domain.performQuery(q, new SelectOperationObserver());
+        domain.performQuery(q, new SelectObserver());
         long t5 = System.currentTimeMillis();
 
         // fetch into the new context in small chunks 

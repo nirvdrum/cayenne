@@ -253,10 +253,20 @@
     <target name="build-perf" depends="prepare,jar,jar-other">
         <ant dir="performance" target="compile"/>
         
-        <jar jarfile="${dist}/lib/cayenne_perf.jar" manifest="performance/MANIFEST.MF">
+        <jar jarfile="${dist}/lib/cayenne-perf.jar" manifest="performance/MANIFEST.MF">
             <fileset dir="performance/${build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>
+        
+        <copy todir="${dist}/bin" overwrite="true">
+            <fileset dir="performance" includes="*.bat,*.sh"/>
+        </copy>
+
+        <chmod perm="gu+x">
+            <fileset dir="${dist}/bin">
+                <include name="**/*.sh"/>
+            </fileset>
+        </chmod>
     </target>
     
 

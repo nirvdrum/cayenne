@@ -12,8 +12,31 @@
 <body>
     <section name="5. Writing Cayenne Applications">        
         <subsection name="5.8 Handling Big Result Sets" anchor="big">
-            <p>To Be Done.
-            </p>
+            <p>Working with tables that contain huge number of rows
+            (from tens of thousands to millions) often causes performance problems with 
+            traditional O/R approach. The reasons are obvious and in many cases are
+            not specific to O/R, but rather common to any database application: </p>
+            <ul>
+            	<li>It takes lots of time to create objects from a 
+            	large ResultSet returned from the database.</li>
+            	<li>It takes lots of memory to store all objects from
+            	a large ResultSet. Application may eventually run out of
+            	memory and crash.</li>
+            </ul>
+           
+            
+            <p>There is no single design patern that solves all these issues, therefore
+            Cayenne offers a few solutions suitable for different cases.</p>
+            
+            <subsection name="5.8.1 Data Rows" anchor="data_rows">
+            </subsection>
+            
+            <subsection name="5.8.2 ResultIterator: incremental data reads" anchor="iterator">
+            </subsection>
+            
+            <subsection name="5.8.3 Paged Results" anchor="paged">
+            <p>This feature is pending implementation in Cayenne.</p>
+            </subsection>
         </subsection>
     </section>
 </body>

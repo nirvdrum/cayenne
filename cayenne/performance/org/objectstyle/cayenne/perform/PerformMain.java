@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.perform;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.perform;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.perform;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
