@@ -203,7 +203,6 @@ public class DbLoader {
     public boolean loadDbEntities(DataMap map, ArrayList tables) throws SQLException {
     	boolean ret_code = true;
     	dbEntityList = new ArrayList();
-    	
         Iterator iter = tables.iterator();        
         int duplicate = YesNoToAllDialog.UNDEFINED;
         while (iter.hasNext()) {

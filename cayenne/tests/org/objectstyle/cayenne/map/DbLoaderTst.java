@@ -134,9 +134,6 @@ public class DbLoaderTst extends TestCase {
         // now when the map is loaded, test 
         // various things
 
-        /* This test fails on almost any database, used primarily for debugging. */
-        // checkDBEntities(map);
-
         // selectively check how different types were processed
         checkTypes(map);
     }
@@ -148,23 +145,36 @@ public class DbLoaderTst extends TestCase {
     /** Selectively check how different types were processed. */
     public void checkTypes(DataMap map) {
         DbEntity dbe = map.getDbEntity("PAINTING");
-		DbAttribute decimalAttr = (DbAttribute)dbe.getAttribute("ESTIMATED_PRICE");
-		DbAttribute varcharAttr = (DbAttribute)dbe.getAttribute("PAINTING_TITLE");	
-			
+        
+        // take into account a possibility of a lowercase names
+        if(dbe == null) {
+            dbe = map.getDbEntity("painting");
+        }
+        
+        DbAttribute integerAttr = (DbAttribute) dbe.getAttribute("PAINTING_ID");
+        DbAttribute decimalAttr = (DbAttribute) dbe.getAttribute("ESTIMATED_PRICE");
+        DbAttribute varcharAttr = (DbAttribute) dbe.getAttribute("PAINTING_TITLE");
+
         // check decimal
         assertEquals(
             msgForTypeMismatch(Types.DECIMAL, decimalAttr),
             Types.DECIMAL,
             decimalAttr.getType());
-        
+
         // check varchar
         assertEquals(
             msgForTypeMismatch(Types.VARCHAR, varcharAttr),
             Types.VARCHAR,
             varcharAttr.getType());
+        
+        // check integer
+        assertEquals(
+            msgForTypeMismatch(Types.INTEGER, integerAttr),
+            Types.INTEGER,
+            integerAttr.getType());
     }
 
-    public void checkDBEntities(DataMap map) {
+    public void checkAllDBEntities(DataMap map) {
         Iterator entIt = originalMap().getDbEntitiesAsList().iterator();
         while (entIt.hasNext()) {
             DbEntity origEnt = (DbEntity) entIt.next();
@@ -190,12 +200,13 @@ public class DbLoaderTst extends TestCase {
     private String msgForTypeMismatch(DbAttribute origAttr, DbAttribute newAttr) {
         return msgForTypeMismatch(origAttr.getType(), newAttr);
     }
-    
+
     private String msgForTypeMismatch(int origType, DbAttribute newAttr) {
         String nt = TypesMapping.getSqlNameByType(newAttr.getType());
+        String ot = TypesMapping.getSqlNameByType(origType);
         return attrMismatch(
             newAttr.getName(),
-            "expected type: <" + origType + ">, but was <" + nt + ">");
+            "expected type: <" + ot + ">, but was <" + nt + ">");
     }
 
     private String attrMismatch(String attrName, String msg) {
