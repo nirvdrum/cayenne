@@ -61,6 +61,10 @@ public class ASTLike extends SimpleNode {
     protected boolean negating;
     protected boolean ignoringCase;
 
+    public ASTLike(ASTPath path, Object value) {
+        this(path, value, false, false);
+    }
+
     public ASTLike(ASTPath path, Object value, boolean notLike, boolean ignoreCase) {
         super(ExpressionParserTreeConstants.JJTLIKE);
         jjtAddChild(path, 0);
@@ -72,7 +76,7 @@ public class ASTLike extends SimpleNode {
     ASTLike(int id) {
         super(id);
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

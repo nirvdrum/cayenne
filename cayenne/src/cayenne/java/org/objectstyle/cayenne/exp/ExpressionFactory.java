@@ -56,16 +56,24 @@
 
 package org.objectstyle.cayenne.exp;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.exp.parser.ExpressionParser;
-import org.objectstyle.cayenne.exp.parser.ParseException;
+import org.objectstyle.cayenne.exp.parser.ASTBetween;
+import org.objectstyle.cayenne.exp.parser.ASTDbPath;
+import org.objectstyle.cayenne.exp.parser.ASTEqual;
+import org.objectstyle.cayenne.exp.parser.ASTGreater;
+import org.objectstyle.cayenne.exp.parser.ASTGreaterOrEqual;
+import org.objectstyle.cayenne.exp.parser.ASTIn;
+import org.objectstyle.cayenne.exp.parser.ASTLess;
+import org.objectstyle.cayenne.exp.parser.ASTLessOrEqual;
+import org.objectstyle.cayenne.exp.parser.ASTLike;
+import org.objectstyle.cayenne.exp.parser.ASTList;
+import org.objectstyle.cayenne.exp.parser.ASTObjPath;
 
 /** 
  * Helper class to build expressions. 
@@ -185,27 +193,6 @@ public class ExpressionFactory {
         typeLookup[Expression.COUNT] = UnaryExpression.class;
         typeLookup[Expression.MIN] = UnaryExpression.class;
         typeLookup[Expression.MAX] = UnaryExpression.class;
-    }
-
-    /**
-     * Parses string, converting it to Expression. If string does
-     * not represent a semantically correct expression, an ExpressionException
-     * is thrown.
-     * 
-     * @since 1.1
-     */
-    public static Expression expFromString(String expressionString) {
-        if (expressionString == null) {
-            throw new NullPointerException("Null expression string.");
-        }
-
-        Reader reader = new StringReader(expressionString);
-        try {
-            return new ExpressionParser(reader).expression();
-        }
-        catch (ParseException ex) {
-            throw new ExpressionException(ex.getMessage(), ex);
-        }
     }
 
     /** 
@@ -450,85 +437,73 @@ public class ExpressionFactory {
     }
 
     /**
-     * An shortcut for <code>binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+     * A convenience method to create an DB_PATH "equal to" expression.
      */
     public static Expression matchDbExp(String pathSpec, Object value) {
-        return binaryDbPathExp(Expression.EQUAL_TO, pathSpec, value);
+        return new ASTEqual(new ASTDbPath(pathSpec), value);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.EQUAL_TO,
-     * pathSpec, value)
-     * </code>.
+     * A convenience method to create an OBJ_PATH "equal to" expression.
      */
     public static Expression matchExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.EQUAL_TO, pathSpec, value);
+        return new ASTEqual(new ASTObjPath(pathSpec), value);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.NOT_EQUAL_TO,
-     * pathSpec, value)
-     * </code>.
+     * A convenience method to create an OBJ_PATH "not equal to" expression.
      */
     public static Expression noMatchExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.NOT_EQUAL_TO, pathSpec, value);
+        return new ASTEqual(new ASTObjPath(pathSpec), value, true);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.LESS_THAN,
-     * pathSpec, value)
-     * </code>.
+     * A convenience method to create an OBJ_PATH "less than" expression.
      */
     public static Expression lessExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.LESS_THAN, pathSpec, value);
+        return new ASTLess(new ASTObjPath(pathSpec), value);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.LESS_THAN_EQUAL_TO,
-     * pathSpec, value)
-     * </code>.
+     * A convenience method to create an OBJ_PATH "less than or equal to" expression.
      */
     public static Expression lessOrEqualExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.LESS_THAN_EQUAL_TO, pathSpec, value);
+        return new ASTLessOrEqual(new ASTObjPath(pathSpec), value);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.GREATER_THAN,
-     * pathSpec, value)
-     * </code>.
+     * A convenience method to create an OBJ_PATH "greater than" expression.
      */
     public static Expression greaterExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.GREATER_THAN, pathSpec, value);
+        return new ASTGreater(new ASTObjPath(pathSpec), value);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.GREATER_THAN_EQUAL_TO,
-     * pathSpec, value)
-     * </code>.
+     * A convenience method to create an OBJ_PATH "greater than or equal to" expression.
      */
     public static Expression greaterOrEqualExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.GREATER_THAN_EQUAL_TO, pathSpec, value);
+        return new ASTGreaterOrEqual(new ASTObjPath(pathSpec), value);
     }
 
     /**
      * A convenience shortcut for building IN expression.
      */
     public static Expression inExp(String pathSpec, Object[] values) {
-        return binaryPathExp(Expression.IN, pathSpec, wrapPathOperand(values));
+        return new ASTIn(new ASTObjPath(pathSpec), new ASTList(values));
     }
 
     /**
      * A convenience shortcut for building IN expression.
      */
-    public static Expression inExp(String pathSpec, List values) {
-        return binaryPathExp(Expression.IN, pathSpec, wrapPathOperand(values));
+    public static Expression inExp(String pathSpec, Collection values) {
+        return new ASTIn(new ASTObjPath(pathSpec), new ASTList(values));
     }
 
     /**
      * A convenience shortcut for building NOT_IN expression.
      */
-    public static Expression notInExp(String pathSpec, List values) {
-        return binaryPathExp(Expression.NOT_IN, pathSpec, wrapPathOperand(values));
+    public static Expression notInExp(String pathSpec, Collection values) {
+        return new ASTIn(new ASTObjPath(pathSpec), new ASTList(values), true);
     }
 
     /**
@@ -536,15 +511,14 @@ public class ExpressionFactory {
      * @since 1.0.6
      */
     public static Expression notInExp(String pathSpec, Object[] values) {
-        return binaryPathExp(Expression.NOT_IN, pathSpec, wrapPathOperand(values));
+        return new ASTIn(new ASTObjPath(pathSpec), new ASTList(values), true);
     }
 
     /**
      * A convenience shortcut for building BETWEEN expressions.
      */
     public static Expression betweenExp(String pathSpec, Object value1, Object value2) {
-        Expression path = unaryExp(Expression.OBJ_PATH, pathSpec);
-        return ternaryExp(Expression.BETWEEN, path, value1, value2);
+        return new ASTBetween(new ASTObjPath(pathSpec), value1, value2);
     }
 
     /**
@@ -554,40 +528,35 @@ public class ExpressionFactory {
         String pathSpec,
         Object value1,
         Object value2) {
-        Expression path = unaryExp(Expression.OBJ_PATH, pathSpec);
-        return ternaryExp(Expression.NOT_BETWEEN, path, value1, value2);
+        return new ASTBetween(new ASTObjPath(pathSpec), value1, value2, true);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.LIKE, pathSpec,
-     * value)</code>.
+     * A convenience shortcut for building LIKE expression.
      */
     public static Expression likeExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.LIKE, pathSpec, value);
+        return new ASTLike(new ASTObjPath(pathSpec), value);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.NOT_LIKE, pathSpec,
-     * value)</code>.
+     * A convenience shortcut for building NOT_LIKE expression.
      */
     public static Expression notLikeExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.NOT_LIKE, pathSpec, value);
+        return new ASTLike(new ASTObjPath(pathSpec), value, true, false);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.
-     * LIKE_IGNORE_CASE, pathSpec, value)</code>.
+     * A convenience shortcut for building LIKE_IGNORE_CASE expression.
      */
     public static Expression likeIgnoreCaseExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.LIKE_IGNORE_CASE, pathSpec, value);
+        return new ASTLike(new ASTObjPath(pathSpec), value, false, true);
     }
 
     /**
-     * A convenience shortcut for <code>binaryPathExp(Expression.
-     * NOT_LIKE_IGNORE_CASE, pathSpec, value)</code>.
+     * A convenience shortcut for building NOT_LIKE_IGNORE_CASE expression.
      */
     public static Expression notLikeIgnoreCaseExp(String pathSpec, Object value) {
-        return binaryPathExp(Expression.NOT_LIKE_IGNORE_CASE, pathSpec, value);
+        return new ASTLike(new ASTObjPath(pathSpec), value, true, true);
     }
 
     /** 

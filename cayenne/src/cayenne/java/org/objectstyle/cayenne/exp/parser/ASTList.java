@@ -58,21 +58,41 @@ package org.objectstyle.cayenne.exp.parser;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.exp.Expression;
 
 /**
- * An expression that is a list of values.
+ * A leaf expression representing an immutable collection of values.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class ASTList extends SimpleNode {
 
-    public ASTList(Collection collection) {
+    /**
+     * Initializes a list expression with an Object[].
+     */
+    public ASTList(Object[] objects) {
         super(ExpressionParserTreeConstants.JJTLIST);
-        setValue(collection);
+        setValue(objects);
+    }
+
+    /**
+     * Initializes a list expression with a Java Collection
+     */
+    public ASTList(Collection objects) {
+        super(ExpressionParserTreeConstants.JJTLIST);
+        setValue(objects);
+    }
+
+    /**
+     * Initializes a list expression with a Java Iterator.
+     */
+    public ASTList(Iterator objects) {
+        super(ExpressionParserTreeConstants.JJTLIST);
+        setValue(objects);
     }
 
     ASTList(int id) {
@@ -83,9 +103,7 @@ public class ASTList extends SimpleNode {
      * Creates a copy of this expression node, without copying children.
      */
     public Expression shallowCopy() {
-        ASTList copy = new ASTList(id);
-        copy.value = value;
-        return copy;
+        return new ASTList(id);
     }
 
     public int getType() {
@@ -99,14 +117,21 @@ public class ASTList extends SimpleNode {
     public void encodeAsString(PrintWriter pw) {
         pw.print('(');
 
-        if ((children != null) && (children.length > 0)) {
-            for (int i = 0; i < children.length; ++i) {
+        Object[] values = (Object[]) value;
+
+        if ((values != null) && (values.length > 0)) {
+            for (int i = 0; i < values.length; ++i) {
                 if (i > 0) {
                     pw.print(getExpressionOperator(i));
                     pw.print(' ');
                 }
 
-                ((SimpleNode) children[i]).encodeAsString(pw);
+                if (values[i] instanceof Expression) {
+                    ((Expression) values[i]).encodeAsString(pw);
+                }
+                else {
+                    encodeScalarAsString(pw, values[i]);
+                }
             }
         }
 
@@ -130,23 +155,55 @@ public class ASTList extends SimpleNode {
             throw new ArrayIndexOutOfBoundsException(index);
         }
 
-        if (value != null && !(value instanceof Collection)) {
-            throw new IllegalArgumentException(
-                "Collection expected, got: " + value.getClass().getName());
-        }
+        setValue(value);
+    }
 
-        this.value = value;
+    /**
+     * Sets an internal collection of values. Value argument
+     * can be an Object[], a Collection or an iterator.
+     */
+    protected void setValue(Object value) {
+        if (value == null) {
+            this.value = null;
+        }
+        else if (value instanceof Object[]) {
+            this.value = value;
+        }
+        else if (value instanceof Collection) {
+            this.value = ((Collection) value).toArray();
+        }
+        else if (value instanceof Iterator) {
+            List values = new ArrayList();
+            Iterator it = (Iterator) value;
+            while (it.hasNext()) {
+                values.add(it.next());
+            }
+
+            this.value = values.toArray();
+        }
+        else {
+            throw new IllegalArgumentException(
+                "Invalid value class '"
+                    + value.getClass().getName()
+                    + "', expected null, Object[], Collection, Iterator");
+        }
     }
 
     public void jjtClose() {
+        super.jjtClose();
+
         // For backwards compatibility set a List value wrapping the nodes.
+        // or maybe we should rewrite the parser spec to insert children
+        // directly into internal collection?
         int size = jjtGetNumChildren();
-        List listValue = new ArrayList(size);
+        Object[] listValue = new Object[size];
         for (int i = 0; i < size; i++) {
-            listValue.add(unwrapChild(jjtGetChild(i)));
+            listValue[i] = unwrapChild(jjtGetChild(i));
         }
 
-        this.value = listValue;
-        super.jjtClose();
+        setValue(listValue);
+
+        // clean children - we are not supposed to use them anymore
+        children = null;
     }
 }

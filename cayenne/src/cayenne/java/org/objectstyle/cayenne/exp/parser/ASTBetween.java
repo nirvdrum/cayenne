@@ -66,6 +66,10 @@ import org.objectstyle.cayenne.exp.Expression;
 public class ASTBetween extends SimpleNode {
     protected boolean negating;
 
+    public ASTBetween(ASTPath path, Object value1, Object value2) {
+        this(path, value1, value2, false);
+    }
+
     public ASTBetween(ASTPath path, Object value1, Object value2, boolean notBetween) {
         super(ExpressionParserTreeConstants.JJTBETWEEN);
         jjtAddChild(path, 0);
@@ -77,7 +81,7 @@ public class ASTBetween extends SimpleNode {
     ASTBetween(int id) {
         super(id);
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

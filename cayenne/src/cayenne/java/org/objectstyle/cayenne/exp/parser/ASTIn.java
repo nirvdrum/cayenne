@@ -65,6 +65,10 @@ import org.objectstyle.cayenne.exp.Expression;
 public class ASTIn extends SimpleNode {
     protected boolean negating;
 
+    public ASTIn(ASTPath path, ASTList list) {
+        this(path, list, false);
+    }
+
     public ASTIn(ASTPath path, ASTList list, boolean notEqual) {
         super(ExpressionParserTreeConstants.JJTIN);
         jjtAddChild(path, 0);

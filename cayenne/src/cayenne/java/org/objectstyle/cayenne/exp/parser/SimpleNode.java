@@ -23,36 +23,26 @@ public abstract class SimpleNode extends Expression implements Node {
 
     protected Object value;
 
-    protected SimpleNode(int i) {
-        id = i;
-    }
-
-    protected void setValue(Object value) {
-        this.value = value;
-    }
-
-    protected Object getValue() {
-        return value;
-    }
-
-    protected String getExpressionOperator(int index) {
-        throw new UnsupportedOperationException(
-            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
-    }
-
     /**
-     * Implemented for backwards compatibility with exp package.
-     * @return
+     * Utility method that encodes an object that is not an expression Node to String.
      */
-    public String expName() {
-        return ExpressionParserTreeConstants.jjtNodeName[id];
-    }
+    protected static void encodeScalarAsString(PrintWriter pw, Object scalar) {
+        boolean quote = scalar instanceof String;
 
+        if (quote) {
+            pw.print('\"');
+        }
+        encodeAsEscapedString(pw, String.valueOf(scalar));
+        if (quote) {
+            pw.print('\"');
+        }
+    }
+    
     /**
      * Utility method that prints a string to the provided PrintWriter,
      * escaping special characters.
      */
-    protected void encodeAsEscapedString(PrintWriter pw, String source) {
+    protected static void encodeAsEscapedString(PrintWriter pw, String source) {
         int len = source.length();
         for (int i = 0; i < len; i++) {
             char c = source.charAt(i);
@@ -86,6 +76,31 @@ public abstract class SimpleNode extends Expression implements Node {
                     pw.print(c);
             }
         }
+    }
+
+    protected SimpleNode(int i) {
+        id = i;
+    }
+
+    protected void setValue(Object value) {
+        this.value = value;
+    }
+
+    protected Object getValue() {
+        return value;
+    }
+
+    protected String getExpressionOperator(int index) {
+        throw new UnsupportedOperationException(
+            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
+    }
+
+    /**
+     * Implemented for backwards compatibility with exp package.
+     * @return
+     */
+    public String expName() {
+        return ExpressionParserTreeConstants.jjtNodeName[id];
     }
 
     /** 

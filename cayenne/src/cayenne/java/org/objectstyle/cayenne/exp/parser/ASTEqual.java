@@ -66,6 +66,17 @@ import org.objectstyle.cayenne.exp.Expression;
 public class ASTEqual extends SimpleNode {
     protected boolean negating;
 
+    /**
+     * Creates "Equal To" expression.
+     */
+    public ASTEqual(ASTPath path, Object value) {
+        this(path, value, false);
+    }
+
+    /**
+     * Creates "Equal To" or "Not Equal To" expression, depending on
+     * <code>notEqual</code> value.
+     */
     public ASTEqual(ASTPath path, Object value, boolean notEqual) {
         super(ExpressionParserTreeConstants.JJTEQUAL);
         jjtAddChild(path, 0);
@@ -79,7 +90,7 @@ public class ASTEqual extends SimpleNode {
     ASTEqual(int id) {
         super(id);
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

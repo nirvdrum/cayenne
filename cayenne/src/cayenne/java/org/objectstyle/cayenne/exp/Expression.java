@@ -75,24 +75,17 @@ import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
-/** Defines basic API of a generic data expression. */
+/** 
+ * Superclass of Cayenne expressions that defines basic
+ * API for expressions use.
+ */
 public abstract class Expression implements Serializable, XMLSerializable {
     private static Logger logObj = Logger.getLogger(Expression.class);
 
-    /** Corresponds to SQL "A AND B" expression. */
     public static final int AND = 0;
-
-    /** Corresponds to SQL "A OR B" expression. */
     public static final int OR = 1;
-
-    /** Corresponds to SQL "NOT A" expression. */
     public static final int NOT = 2;
-
-    /** Corresponds to SQL "A = B" expression. */
     public static final int EQUAL_TO = 3;
-
-    /** Corresponds to SQL 'not equals' expression. 
-     *  Will be translated to an expression similar to <code>A != B</code> (or <code>A <> B</code>). */
     public static final int NOT_EQUAL_TO = 4;
     public static final int LESS_THAN = 5;
     public static final int GREATER_THAN = 6;
@@ -109,12 +102,26 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public static final int DIVIDE = 19;
     public static final int NEGATIVE = 20;
     public static final int POSITIVE = 21;
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int ALL = 22;
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int SOME = 23;
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int ANY = 24;
 
-    /** Expression interpreted as raw SQL. 
-    * No translations will be done for this kind of expressions. */
+    /** 
+     * Expression interpreted as raw SQL. 
+     * No translations will be done for this kind of expressions. 
+     */
     public static final int RAW_SQL = 25;
 
     /** 
@@ -157,19 +164,39 @@ public abstract class Expression implements Serializable, XMLSerializable {
      */
     public static final int DB_PATH = 27;
 
-    /** Interpreted as a comma-separated list of literals. */
+    /** 
+     * Interpreted as a comma-separated list of literals. 
+     */
     public static final int LIST = 28;
-    /** Interpreted as a subquery within a parent query. */
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int SUBQUERY = 29;
-    /** Interpreted as an aggregate count function. */
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int COUNT = 30;
-    /** Interpreted as an aggregate avg function. */
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int AVG = 31;
-    /** Interpreted as an aggregate sum function. */
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int SUM = 32;
-    /** Interpreted as an aggregate max function. */
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int MAX = 33;
-    /** Interpreted as an aggregate min function. */
+    
+    /**
+     * <i><b>Warning:</b> currently not supported in Cayenne.</i>
+     */
     public static final int MIN = 34;
 
     public static final int NOT_BETWEEN = 35;
@@ -467,9 +494,9 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public abstract Expression shallowCopy();
 
     /**
-     * Traverses a itself and tree of child expressions invoking visitor callback
-     * methods as it goes. This is an Expression-specific "Visitor"
-     * pattern implementation.
+     * Traverses itself and child expressions, notifying visitor via callback
+     * methods as it goes. This is an Expression-specific implementation of
+     * the "Visitor" design pattern.
      * 
      * @since 1.1
      */
@@ -482,7 +509,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
-     * Traverses itself and child expressions invoking visitor callback
+     * Traverses itself and child expressions, notifying visitor via callback
      * methods as it goes.
      * 
      * @since 1.1

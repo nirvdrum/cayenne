@@ -78,7 +78,7 @@ public class ASTScalar extends SimpleNode {
     ASTScalar(int id) {
         super(id);
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      */
@@ -89,14 +89,6 @@ public class ASTScalar extends SimpleNode {
     }
 
     public void encodeAsString(PrintWriter pw) {
-        boolean quote = value instanceof String;
-
-        if (quote) {
-            pw.print('\"');
-        }
-        encodeAsEscapedString(pw, String.valueOf(value));
-        if (quote) {
-            pw.print('\"');
-        }
+        SimpleNode.encodeScalarAsString(pw, value);
     }
 }
