@@ -101,12 +101,9 @@ sub success_email() {
 	if($opt_m) {
 		my $msg = $_[0];
     
-		open(MAIL, "| mail $opt_m") 
-			or die  "Can't start qmail: $!\n";
+		open(MAIL, "| mail -s "Cayenne Build Succeeded ($mon/$mday/$year)" $opt_m") 
+			or die  "Can't send mail: $!\n";
     
-		print MAIL "To: $opt_m\n";
-		print MAIL "From: $opt_m\n";
-		print MAIL "Subject: Cayenne Build Succeeded ($mon/$mday/$year)\n";
 		print MAIL "\n";
 		print MAIL "Message:\n\n";
 		print MAIL "  $msg\n";
@@ -120,12 +117,9 @@ sub die_with_email() {
 	
 	if($opt_m) {
     
-		open(MAIL, "| mail $opt_m") 
-		or die  "Can't start qmail: $!\n";
+		open(MAIL, "| mail -s "Subject: Cayenne Build Failed ($mon/$mday/$year)" $opt_m") 
+		or die  "Can't send mail: $!\n";
     
-		print MAIL "To: $opt_m\n";
-		print MAIL "From: $opt_m\n";
-		print MAIL "Subject: Cayenne Build Failed ($mon/$mday/$year)\n";
 		print MAIL "\n";
 		print MAIL "Error message:\n\n";
 		print MAIL "  $msg\n";
