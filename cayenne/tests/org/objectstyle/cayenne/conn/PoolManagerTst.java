@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conn;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,15 @@ package org.objectstyle.cayenne.conn;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conn;
 
 import java.sql.Connection;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 
-public class PoolManagerTst extends TestCase {
+public class PoolManagerTst extends CayenneTestCase {
 
     public PoolManagerTst(String name) {
         super(name);

@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ModelerEventTst extends TestCase {
+public class ModelerEventTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for ModelerEventTst.

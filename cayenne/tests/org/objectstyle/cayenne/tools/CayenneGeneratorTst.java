@@ -55,21 +55,23 @@ package org.objectstyle.cayenne.tools;
  *
  */
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
-
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 
-public class CayenneGeneratorTst extends TestCase {
+public class CayenneGeneratorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(CayenneGeneratorTst.class.getName());
 
     private static final Pattern pkgPat =

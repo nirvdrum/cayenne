@@ -55,16 +55,16 @@ package org.objectstyle.cayenne.access.trans;
  *
  */
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.logging.Logger;
 
-public class QualifierTranslatorTst extends TestCase {
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.QualifiedQuery;
+import org.objectstyle.cayenne.query.Query;
+
+public class QualifierTranslatorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(QualifierTranslatorTst.class.getName());
 
     protected TstQueryAssembler qa;

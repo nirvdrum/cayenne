@@ -57,8 +57,8 @@
 package org.objectstyle.cayenne.gui.validator;
 
 import javax.swing.JFrame;
-import junit.framework.TestCase;
 
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.Mediator;
 
@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.gui.event.Mediator;
  * 
  * @author Andrei Adamchik
  */
-public class ErrorMsgTst extends TestCase {
+public class ErrorMsgTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for ErrorMsgTst.

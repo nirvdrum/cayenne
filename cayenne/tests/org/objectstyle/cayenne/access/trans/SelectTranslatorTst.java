@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,15 @@ package org.objectstyle.cayenne.access.trans;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.trans;
 
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -70,7 +69,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-public class SelectTranslatorTst extends TestCase {
+public class SelectTranslatorTst extends CayenneTestCase {
 	static Logger logObj =
 		Logger.getLogger(SelectTranslatorTst.class.getName());
 

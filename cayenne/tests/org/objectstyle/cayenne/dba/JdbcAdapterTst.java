@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,18 @@ package org.objectstyle.cayenne.dba;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.dba;
 
-import java.sql.*;
-
-import junit.framework.TestCase;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Types;
 
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-public class JdbcAdapterTst extends TestCase {
+public class JdbcAdapterTst extends CayenneTestCase {
 	protected JdbcAdapter adapter;
 
 	public JdbcAdapterTst(String name) {

@@ -58,10 +58,10 @@ package org.objectstyle.cayenne.query;
 
 import java.util.logging.Level;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class QueryTst extends TestCase {    
+public class QueryTst extends CayenneTestCase {    
     public QueryTst(String name) {
         super(name);
     }

@@ -55,12 +55,11 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.*;
-import junit.framework.*;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.access.DataDomain;
 
 
-public class ObjRelationshipTst extends TestCase {
+public class ObjRelationshipTst extends CayenneTestCase {
     protected ObjRelationship rel;
     
     public ObjRelationshipTst(String name) {

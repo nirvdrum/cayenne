@@ -59,7 +59,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataContext;
 
-public class CayenneDataObjectTst extends TestCase {
+public class CayenneDataObjectTst extends CayenneTestCase {
     protected DataContext ctxt;
     
     public CayenneDataObjectTst(String name) {

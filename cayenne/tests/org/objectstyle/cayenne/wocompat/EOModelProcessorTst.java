@@ -55,13 +55,12 @@ package org.objectstyle.cayenne.wocompat;
  *
  */
 
-import java.io.*;
+import java.io.PrintWriter;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.*;
 
-public class EOModelProcessorTst extends TestCase {
+public class EOModelProcessorTst extends CayenneTestCase {
     private static final PrintWriter out = new NullPrintWriter();
 
     protected EOModelProcessor processor;

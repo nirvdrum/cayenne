@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.types;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,14 +53,14 @@ package org.objectstyle.cayenne.access.types;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.types;
 
-import java.sql.*;
-import java.util.*;
-import junit.framework.*;
-import org.objectstyle.cayenne.access.*;
+import java.sql.ResultSet;
+
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class ExtendedTypeMapTst extends TestCase {
+public class ExtendedTypeMapTst extends CayenneTestCase {
     public ExtendedTypeMapTst(String name) {
         super(name);
     }

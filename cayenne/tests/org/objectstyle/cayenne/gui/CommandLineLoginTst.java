@@ -55,18 +55,13 @@ package org.objectstyle.cayenne.gui;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import javax.swing.text.*;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
 
-public class CommandLineLoginTst extends TestCase {
+public class CommandLineLoginTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(CommandLineLoginTst.class.getName());
     
     protected InteractiveLogin.CommandLineLogin loginObj;

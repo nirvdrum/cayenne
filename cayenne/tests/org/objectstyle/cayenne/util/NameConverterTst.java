@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.util;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class NameConverterTst extends TestCase {
+public class NameConverterTst extends CayenneTestCase {
 
     public NameConverterTst(String name) {
         super(name);

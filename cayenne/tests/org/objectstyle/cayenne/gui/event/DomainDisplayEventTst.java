@@ -55,14 +55,13 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
 
 /**
  * @author Andrei Adamchik
  */
-public class DomainDisplayEventTst extends TestCase {
+public class DomainDisplayEventTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for ModelerDisplayEventTst.

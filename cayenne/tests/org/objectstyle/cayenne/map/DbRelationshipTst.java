@@ -55,12 +55,13 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.*;
-import junit.framework.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DbRelationshipTst extends TestCase {
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.access.DataDomain;
+
+public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;
     protected DbEntity paintingEnt;
     protected DbEntity galleryEnt;

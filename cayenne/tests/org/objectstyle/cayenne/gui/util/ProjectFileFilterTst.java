@@ -57,12 +57,12 @@
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ProjectFileFilterTst extends TestCase {
+public class ProjectFileFilterTst extends CayenneTestCase {
 	protected ProjectFileFilter filter;
 
 	/**

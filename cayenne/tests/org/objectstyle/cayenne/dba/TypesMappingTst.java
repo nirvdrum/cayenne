@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.dba;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.dba;
 
 import java.sql.*;
 import java.util.ArrayList;

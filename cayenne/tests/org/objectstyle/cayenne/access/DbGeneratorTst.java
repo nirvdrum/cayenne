@@ -57,16 +57,15 @@ package org.objectstyle.cayenne.access;
 
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
 /** Test cases for DbGenerator.
   *
   * @author Andrei Adamchik
   */
-public class DbGeneratorTst extends TestCase {
+public class DbGeneratorTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
 
 	protected DbGenerator gen;

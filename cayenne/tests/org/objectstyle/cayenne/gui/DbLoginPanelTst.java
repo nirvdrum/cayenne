@@ -57,12 +57,11 @@ package org.objectstyle.cayenne.gui;
 
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.testui.TestEditorFrame;
 
-public class DbLoginPanelTst extends TestCase {
+public class DbLoginPanelTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(DbLoginPanelTst.class.getName());
 
     protected TestEditorFrame frame;

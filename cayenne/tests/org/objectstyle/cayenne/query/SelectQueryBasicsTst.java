@@ -56,9 +56,9 @@
 
 package org.objectstyle.cayenne.query;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
-public class SelectQueryBasicsTst extends TestCase {
+public class SelectQueryBasicsTst extends CayenneTestCase {
 	protected SelectQuery q;
 
 	public SelectQueryBasicsTst(String name) {

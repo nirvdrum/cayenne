@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class ExpressionFactoryTst extends TestCase {
+public class ExpressionFactoryTst extends CayenneTestCase {
     // non-existent type
     private static final int badType = -50;
     

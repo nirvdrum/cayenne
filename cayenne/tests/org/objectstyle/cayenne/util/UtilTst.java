@@ -55,19 +55,17 @@ package org.objectstyle.cayenne.util;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.net.*;
-import javax.naming.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.util.*;
-
-import java.io.*;
-import java.util.jar.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class UtilTst extends TestCase {
+public class UtilTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(UtilTst.class.getName());
 
     private File fTmpFileInCurrentDir;

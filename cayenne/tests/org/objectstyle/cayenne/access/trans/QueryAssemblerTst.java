@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,16 +53,16 @@ package org.objectstyle.cayenne.access.trans;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.trans;
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class QueryAssemblerTst extends TestCase {
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.Query;
+
+public class QueryAssemblerTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(QueryAssemblerTst.class.getName());
 
     protected TstQueryAssembler qa;

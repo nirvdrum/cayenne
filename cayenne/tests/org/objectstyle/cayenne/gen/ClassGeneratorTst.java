@@ -58,11 +58,10 @@ package org.objectstyle.cayenne.gen;
 import java.io.StringWriter;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-public class ClassGeneratorTst extends TestCase {
+public class ClassGeneratorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(ClassGeneratorTst.class.getName());
 
     protected ClassGenerator cgen;

@@ -56,12 +56,11 @@
 
 package org.objectstyle.cayenne.access;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DbEntity;
 
-public class DataNodeExtrasTst extends TestCase {
+public class DataNodeExtrasTst extends CayenneTestCase {
 
 	public DataNodeExtrasTst(String name) {
 		super(name);

@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.query;
  *
  */
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.map.ObjAttribute;
 
-public class SqlSelectQueryTst extends TestCase {
+public class SqlSelectQueryTst extends CayenneTestCase {
     public SqlSelectQueryTst(String name) {
         super(name);
     }

@@ -55,15 +55,14 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 
 /**
  * @author Andrei Adamchik
  */
-public class RelationshipEventTst extends TestCase {
+public class RelationshipEventTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for RelationshipEventTst.

@@ -57,8 +57,7 @@ package org.objectstyle.cayenne.gui.validator;
 
 import java.sql.Types;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -70,7 +69,7 @@ import org.objectstyle.cayenne.map.*;
  * 
  * @author Andrei Adamchik
  */
-public class ValidatorTst extends TestCase {
+public class ValidatorTst extends CayenneTestCase {
 	protected Validator validator;
 
 	/**

@@ -57,12 +57,12 @@ package org.objectstyle.cayenne.gui.util;
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class EOModelFileFilterTst extends TestCase {
+public class EOModelFileFilterTst extends CayenneTestCase {
 	protected EOModelFileFilter filter;
 
 	/**

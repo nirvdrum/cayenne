@@ -55,16 +55,14 @@
  */
 package org.objectstyle.cayenne.gui.util;
 
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 
 /**
 * @author Andrei Adamchik
 */
-public class EntityWrapperTst extends TestCase {
+public class EntityWrapperTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for EntityWrapperTst.

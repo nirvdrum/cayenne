@@ -55,14 +55,11 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 
 
-public class QualifiedQueryTst extends TestCase {
+public class QualifiedQueryTst extends CayenneTestCase {
     protected QualifiedQuery query;    
     
     public QualifiedQueryTst(String name) {

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,15 +53,19 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
 
-import junit.framework.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 
-/** DataDomain unit tests.
-  * @author Andrei Adamchik */
-public class DataDomainTst extends TestCase {
+/**
+ * DataDomain unit tests.
+ * 
+ * @author Andrei Adamchik 
+ */
+public class DataDomainTst extends CayenneTestCase {
 
     public DataDomainTst(String name) {
         super(name);

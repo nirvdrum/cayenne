@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,14 +53,14 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.access;
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class ToManyListTst extends TestCase {
+public class ToManyListTst extends CayenneTestCase {
     private boolean flag;
     
     public ToManyListTst(String name) {

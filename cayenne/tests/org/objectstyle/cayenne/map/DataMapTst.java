@@ -55,11 +55,11 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import junit.framework.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /** DataMap unit tests.
   * @author Andrei Adamchik */
-public class DataMapTst extends TestCase {
+public class DataMapTst extends CayenneTestCase {
     
     public DataMapTst(String name) {
         super(name);

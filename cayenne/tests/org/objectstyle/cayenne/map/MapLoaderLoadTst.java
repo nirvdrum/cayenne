@@ -55,13 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestConstants;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.xml.sax.InputSource;
 
 
-public class MapLoaderLoadTst extends TestCase {
+public class MapLoaderLoadTst extends CayenneTestCase {
     protected MapLoader mapLoader;
     private String testDataMap;
 

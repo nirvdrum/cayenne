@@ -58,11 +58,11 @@ package org.objectstyle.cayenne.util;
 import java.io.File;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
 
-public class UtilExtTst extends TestCase {
+public class UtilExtTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(UtilTst.class.getName());
 
     private File fTmpFileInCurrentDir;

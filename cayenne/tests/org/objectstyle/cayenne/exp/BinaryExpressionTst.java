@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class BinaryExpressionTst extends TestCase {
+public class BinaryExpressionTst extends CayenneTestCase {
     // non-existent type
     private static final int defaultType = -33;
     protected BinaryExpression expr;

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,13 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.access;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
 
 
-public class DataSourceInfoTst extends TestCase {
+public class DataSourceInfoTst extends CayenneTestCase {
     
     private DataSourceInfo dsi;
     

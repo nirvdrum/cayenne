@@ -55,12 +55,14 @@
  */ 
 package org.objectstyle.cayenne.exp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class ExpressionFactoryExtrasTst extends TestCase {
+public class ExpressionFactoryExtrasTst extends CayenneTestCase {
     protected TstTraversalHandler handler;    
     
     public ExpressionFactoryExtrasTst(String name) {

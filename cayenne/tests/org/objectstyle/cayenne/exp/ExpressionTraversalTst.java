@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class ExpressionTraversalTst extends TestCase {
+public class ExpressionTraversalTst extends CayenneTestCase {
     protected TstTraversalHandler handler;
     protected ExpressionTraversal walker;
     

@@ -56,14 +56,17 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
-
-import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
@@ -74,7 +77,7 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
  * 
  * @author Andrei Adamchik
  */
-public class DataContextExtrasTst extends TestCase {
+public class DataContextExtrasTst extends CayenneTestCase {
 	protected DataContext ctxt;
 
 	public DataContextExtrasTst(String name) {

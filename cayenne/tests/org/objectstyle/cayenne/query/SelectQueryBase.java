@@ -57,12 +57,11 @@ package org.objectstyle.cayenne.query;
 
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.TestOperationObserver;
 
-public abstract class SelectQueryBase extends TestCase {
+public abstract class SelectQueryBase extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(SelectQueryBase.class.getName());
 
     protected SelectQuery query;

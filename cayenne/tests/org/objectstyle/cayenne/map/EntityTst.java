@@ -55,12 +55,14 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.*;
-import junit.framework.*;
-import org.objectstyle.cayenne.exp.*;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 
 
-public class EntityTst extends TestCase {
+public class EntityTst extends CayenneTestCase {
     protected Entity ent;
 
     public EntityTst(String name) {

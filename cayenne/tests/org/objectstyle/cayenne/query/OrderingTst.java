@@ -55,13 +55,10 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class OrderingTst extends TestCase {
+public class OrderingTst extends CayenneTestCase {
     
     public OrderingTst(String name) {
         super(name);

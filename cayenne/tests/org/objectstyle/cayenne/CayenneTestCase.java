@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,55 +52,47 @@ package org.objectstyle.cayenne.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
+import java.sql.Connection;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import junit.framework.TestCase;
 
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
-public class LogFormatterTst extends CayenneTestCase {
-    
-    public LogFormatterTst(String name) {
-        super(name);
-    }
-    
-    public void testLogThrown() throws java.lang.Exception {
-        try {
-            throw new Exception("test exception.");
-        }
-        catch(Exception ex) {
-            // reference log
-            StringWriter out = new StringWriter();
-            PrintWriter pout = new PrintWriter(out);
-            ex.printStackTrace(pout);
-            pout.flush();
-            pout.close();
-            
-            // test log
-            StringBuffer buf = new StringBuffer();
-            LogFormatter.logThrown(buf, ex);
-            assertEquals(out.toString(), buf.toString());
-        }
-    }
-    
-    public void testFormatLog() throws java.lang.Exception {
-        // test that logged message is part of output 
-        // do not test format, since it may vary...
-        
-        LogRecord log = new LogRecord(Level.SEVERE, "random msg abcd443543");
-        LogFormatter formatter = new LogFormatter();
-        assertTrue(formatter.format(log).indexOf(log.getMessage()) >= 0);
-    }
-    
-    public void testTrimClassName() throws java.lang.Exception {
-        // test that logged message is part of output 
-        // do not test format, since it may vary...
-        
-        assertEquals("xyz.abc", LogFormatter.trimClassName("xyz.abc"));
-        assertEquals("abc.123", LogFormatter.trimClassName("xyz.abc.123"));
-    }
+/**
+ * Superclass of Cayenne test cases. Provides access to shared
+ * connection resources.
+ * 
+ * @author Andrei Adamchik
+ */
+public class CayenneTestCase extends TestCase {
+
+	/**
+	 * Constructor for CayenneTestCase.
+	 * @param arg0
+	 */
+	public CayenneTestCase(String arg0) {
+		super(arg0);
+	}
+
+	public static Connection getSharedConnection() {
+		return TestMain.getResources().getSharedConnection();
+	}
+
+	public static DataDomain getSharedDomain() {
+		return TestMain.getResources().getSharedDomain();
+	}
+
+	public static DataNode getSharedNode() {
+		return TestMain.getResources().getSharedNode();
+	}
+
+	public static DataSourceInfo getFreshConnInfo() throws Exception {
+		return TestMain.getResources().getFreshConnInfo();
+	}
 }

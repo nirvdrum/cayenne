@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class DerivedDbEntityTst extends TestCase {
+public class DerivedDbEntityTst extends CayenneTestCase {
     protected DerivedDbEntity ent;
 
 

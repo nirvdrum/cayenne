@@ -59,17 +59,14 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class IteratorTestBase extends TestCase {
+public class IteratorTestBase extends CayenneTestCase {
 	protected Connection conn;
 	protected PreparedStatement st;
 	protected QueryTranslator transl;

@@ -55,15 +55,13 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataMapEventTst extends TestCase {
+public class DataMapEventTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for DataMapEventTst.

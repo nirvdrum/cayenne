@@ -60,13 +60,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 
-public class DbLoaderTst extends TestCase {
+public class DbLoaderTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
 
 	protected DbLoader loader;

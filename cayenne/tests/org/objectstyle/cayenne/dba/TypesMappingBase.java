@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,14 @@ package org.objectstyle.cayenne.dba;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.dba;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
-public class TypesMappingBase extends TestCase {
+public class TypesMappingBase extends CayenneTestCase {
     public TypesMappingBase(String name) {
         super(name);
     }

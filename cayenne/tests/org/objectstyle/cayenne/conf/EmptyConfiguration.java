@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,9 +54,9 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-
+package org.objectstyle.cayenne.conf;
 
 /** Configuration object used for tests that does not require "cayenne.xml". */
 public class EmptyConfiguration extends DefaultConfiguration {
-    public void init() throws java.lang.Exception {}
+    public void init() throws Exception {}
 }

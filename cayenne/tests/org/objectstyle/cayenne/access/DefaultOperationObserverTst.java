@@ -58,14 +58,13 @@ package org.objectstyle.cayenne.access;
 
 import java.util.logging.Level;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class DefaultOperationObserverTst extends TestCase {
+public class DefaultOperationObserverTst extends CayenneTestCase {
 	protected DefaultOperationObserver observer;
 
 	/**

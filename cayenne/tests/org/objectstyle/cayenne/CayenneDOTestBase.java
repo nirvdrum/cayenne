@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-public class CayenneDOTestBase extends TestCase {    
+public class CayenneDOTestBase extends CayenneTestCase {    
     static final String artistName = "artist with one painting";
     static final String galleryName = "my gallery";
     static final String textReview = "this painting sucks...";

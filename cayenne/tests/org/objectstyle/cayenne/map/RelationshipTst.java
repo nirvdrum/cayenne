@@ -55,11 +55,10 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.*;
-import junit.framework.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class RelationshipTst extends TestCase {
+public class RelationshipTst extends CayenneTestCase {
     protected Relationship rel;
     
     public RelationshipTst(String name) {

@@ -59,21 +59,24 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.TestMain;
-import org.objectstyle.art.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistAssets;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-public class DataContextTst extends TestCase {
+public class DataContextTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
 
 	public static final int artistCount = 25;

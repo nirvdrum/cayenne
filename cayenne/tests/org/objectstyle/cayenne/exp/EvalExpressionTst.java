@@ -55,14 +55,13 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class EvalExpressionTst extends TestCase {
+public class EvalExpressionTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for EvalExpressionTst.

@@ -55,17 +55,14 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.Entity;
 
 /**
  * @author Andrei Adamchik
  */
-public class AttributeEventTst extends TestCase {
+public class AttributeEventTst extends CayenneTestCase {
 
 	/**
 	 * Constructor for AttributeEventTst.

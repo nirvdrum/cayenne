@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class UnaryExpressionTst extends TestCase {
+public class UnaryExpressionTst extends CayenneTestCase {
     // non-existent type
     private static final int defaultType = -34;
     protected UnaryExpression expr;

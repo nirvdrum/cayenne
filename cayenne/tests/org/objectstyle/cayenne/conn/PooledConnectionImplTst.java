@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conn;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,11 @@ package org.objectstyle.cayenne.conn;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.conn;
 
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.CayenneTestCase;
 
-public class PooledConnectionImplTst extends TestCase {
+public class PooledConnectionImplTst extends CayenneTestCase {
     
     public PooledConnectionImplTst(String name) {
         super(name);

@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.conf;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 
 /**
@@ -67,7 +66,7 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
  * 
  * @author Andrei Adamchik
  */
-public class DomainHelperTst extends TestCase {
+public class DomainHelperTst extends CayenneTestCase {
 
 	public DomainHelperTst(String name) {
 		super(name);

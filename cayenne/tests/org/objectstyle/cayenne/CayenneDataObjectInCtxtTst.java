@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-public class CayenneDataObjectInCtxtTst extends TestCase {
+public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     static Logger logObj =
         Logger.getLogger(CayenneDataObjectInCtxtTst.class.getName());
 

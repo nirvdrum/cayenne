@@ -55,11 +55,10 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.*;
-import junit.framework.*;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 
-public class AttributeTst extends TestCase {
+public class AttributeTst extends CayenneTestCase {
     protected Attribute attr;
     
     public AttributeTst(String name) {
