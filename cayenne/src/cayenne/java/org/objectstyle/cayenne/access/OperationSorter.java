@@ -94,13 +94,13 @@ public class OperationSorter {
 	private List sortedEntities;
 
 	/** Creates new OperationSorter based on all entities in DataMap array*/
-	public OperationSorter(QueryEngine queryEngine, DataMap[] maps) {
+	public OperationSorter(QueryEngine queryEngine, List maps) {
 		List entities = new ArrayList();
 
 		if (maps != null) {
 			// copy all entities to the list ignoring the order
-			for (int i = 0; i < maps.length; i++) {
-				entities.addAll(maps[i].getDbEntitiesAsList());
+			for (Iterator it = maps.iterator(); it.hasNext();) {
+				entities.addAll(((DataMap)it.next()).getDbEntitiesAsList());
 			}
 		}
 
@@ -112,9 +112,15 @@ public class OperationSorter {
 	 * Creates a new OperationSorted which will sort entities for insert in the order
 	 * specified by the insOrderOfEntNames list
 	 */
+	/*
+	 * TODO: if this method is still required both constructors should be made
+	 * into appropriately named static factory methods, so that the method
+	 * signatures do not conflict.
+	 * 
 	public OperationSorter(QueryEngine queryEngine, List insOrderOfEntNames) {
 		queryComparator = new QueryComparator(queryEngine, insOrderOfEntNames);
 	}
+	*/
 
 	/** 
 	  *  Returns a new list containing all the DbEntities in <code>entities</code>,
