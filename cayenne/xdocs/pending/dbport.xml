@@ -24,8 +24,7 @@
 			
 			<p><code>CDataPort</code> is an Ant task uses Cayenne project with at least one 
 			DataMap and two DataNodes to port data from source DataNode to a destination DataNode. 
-			DataMap doesn't have to be linked to source or destination. Rather this will be done
-			dynamically during the task execution.
+			Only DataMaps linked to the source DataNode will be considered for porting.
 			</p>
 
 			<h3>Parameters</h3>
@@ -58,8 +57,8 @@
 					<td valign="top" align="center">Yes</td>
 				</tr>
 				<tr>
-					<td valign="top">createTables</td>
-					<td valign="top">If true, destination tables will be generated. False is default.</td>
+					<td valign="top">cleanDest</td>
+					<td valign="top">If false, will skip deleting data from the destination tables. True is default.</td>
 					<td valign="top" align="center">No</td>
 				</tr>
 				<tr>
@@ -80,12 +79,12 @@
 			
 			<h3>Examples:</h3>
 			<p>Here is an example of using <code>CDataPort</code> to port data using all
-			project DataMaps with table creation option:</p>
+			source DataMaps, excluding DBEntities with name matching "BILL_*":</p>
 <source>
 &amp;lt;taskdef name="cdataport" classname="org.objectstyle.cayenne.tools.CayenneDataPort"&amp;gt;
      &amp;lt;classpath refid="classpath"/&amp;gt;
 &amp;lt;/taskdef&amp;gt;
-&amp;lt;cdataport projectFile="subdir/cayenne.xml" srcNode="ProductionNode" destNode="DevNode" createTables="true"/&amp;gt;
+&amp;lt;cdataport projectFile="subdir/cayenne.xml" srcNode="ProductionNode" destNode="DevNode" excludeTables="BILL_*"/&amp;gt;
 </source>
 
 			</subsection>
