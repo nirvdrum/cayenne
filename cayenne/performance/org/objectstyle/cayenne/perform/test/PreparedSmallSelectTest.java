@@ -53,79 +53,59 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.perform.test;
 
-package org.objectstyle.perform;
+import java.sql.*;
+import java.util.ArrayList;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import org.objectstyle.art.Artist;
 
 /**
  * @author Andrei Adamchik
  */
-public class PerformanceTestRunner {
-	protected ResultRenderer renderer;
-	protected HashMap resultCache = new HashMap();
+public class PreparedSmallSelectTest extends SmallSelectTest {
 
 	/**
-	 * Constructor for PerformanceTestRunner.
+	 * Constructor for PreparedSmallSelectTest.
+	 * @param name
 	 */
-	public PerformanceTestRunner(ResultRenderer renderer) {
-		super();
-		this.renderer = renderer;
+	public PreparedSmallSelectTest(String name) {
+		super(name);
 	}
 
-	public void runSuite(PerformanceTestSuite suite) {
-		resultCache.clear();
-		
-		Iterator it = suite.getPairs().iterator();
-		while (it.hasNext()) {
-			PerformanceTestPair pair = (PerformanceTestPair) it.next();
-
-			TestResult mainResult = runTest(pair.getMainTest());
-			TestResult refResult = runTest(pair.getReferenceTest());
-
-			renderer.addResult(pair, new PairResult(mainResult, refResult));
-		}
-	}
-
-    /** 
-     * Runs performance test. This implementation will cache test
-     * results, so that the same test case is never run more than once.
-     * This will allow to speed up testing by reusing reference test results.
-     */
-	protected TestResult runTest(PerformanceTest test) {
-		if (test == null) {
-			return null;
-		}
-
-        // use cached result when possible
-		TestResult result = (TestResult)resultCache.get(test.getClass());
-		if(result != null) {
-			return result;
-		}
-		
-		result = new TestResult();
-
+	/**
+	 * @see org.objectstyle.perform.PerformanceTest#runTest()
+	 */
+	public void runTest() throws Exception {
+		Connection con = getConnection();
 		try {
-			test.prepare();
-			long start = System.currentTimeMillis();
-            test.runTest();
-			long end = System.currentTimeMillis();
-			result.setMs(end - start);
 
-		} catch (Exception ex) {
-			result.setTestEx(ex);
-		} finally {
+			PreparedStatement st =
+				con.prepareStatement(
+					"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = ?");
 			try {
-				test.cleanup();
-			} catch (Exception ex) {
-				result.setCleanupEx(ex);
-			}
-		}
+				for (int i = 0; i < QUERIES_COUNT; i++) {
+					st.setString(1, "artist_1000");
+					ResultSet rs = st.executeQuery();
+					try {
+						ArrayList artists = new ArrayList();
+						while (rs.next()) {
+							Artist artist = new Artist();
+							artist.setArtistName(rs.getString(2));
+							artists.add(artist);
 
-        // cache result
-        resultCache.put(test.getClass(), result);
-        
-		return result;
+							// read artist_id to provide closer comparison
+							Integer id = new Integer(rs.getInt(1));
+						}
+					} finally {
+						rs.close();
+					}
+				}
+			} finally {
+				st.close();
+			}
+		} finally {
+			con.close();
+		}
 	}
 }

@@ -80,6 +80,9 @@ public abstract class CayennePerformanceTest
 		super(name);
 	}
 
+    /** 
+     * Inserts 2000 artist records to the database.
+     */
 	protected void insertArtists() throws Exception {
 		Connection con = getConnection();
 		try {

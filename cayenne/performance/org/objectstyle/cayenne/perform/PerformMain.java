@@ -101,6 +101,13 @@ public class PerformMain implements TestConstants {
 		    "Select " + CayennePerformanceTest.objCount + " records, Cayenne data rows vs. Cayenne objects.",
 			"org.objectstyle.cayenne.perform.test.SelectDataRowsTest",
 			"org.objectstyle.cayenne.perform.test.SelectTest");
+			
+			
+		suite.addTestPair(
+		    "Select Small Lists",
+		    "Select one records over and over again, JDBC Prep. Statement. vs. JDBC Statement",
+			"org.objectstyle.cayenne.perform.test.PreparedSmallSelectTest",
+			"org.objectstyle.cayenne.perform.test.SmallSelectTest");
 
 		return suite;
 	}

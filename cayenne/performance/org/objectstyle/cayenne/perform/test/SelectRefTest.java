@@ -87,15 +87,27 @@ public class SelectRefTest extends CayennePerformanceTest {
 		Connection con = getConnection();
 		try {
 			Statement st = con.createStatement();
-			ResultSet rs = st.executeQuery("SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST");
-			ArrayList artists = new ArrayList();
-			while(rs.next()) {
-				Artist artist = new Artist();
-				artist.setArtistName(rs.getString(2));
-                artists.add(artist);
-                
-				// read artist_id to provide closer comparison
-				Integer id = new Integer(rs.getInt(1));
+
+			try {
+				ResultSet rs =
+					st.executeQuery(
+						"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST");
+
+				try {
+					ArrayList artists = new ArrayList();
+					while (rs.next()) {
+						Artist artist = new Artist();
+						artist.setArtistName(rs.getString(2));
+						artists.add(artist);
+
+						// read artist_id to provide closer comparison
+						Integer id = new Integer(rs.getInt(1));
+					}
+				} finally {
+					rs.close();
+				}
+			} finally {
+				st.close();
 			}
 		} finally {
 			con.close();

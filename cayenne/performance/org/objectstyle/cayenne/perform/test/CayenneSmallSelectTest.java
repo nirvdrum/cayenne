@@ -53,79 +53,45 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.perform.test;
 
-package org.objectstyle.perform;
-
-import java.util.HashMap;
-import java.util.Iterator;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.perform.CayennePerformanceTest;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class PerformanceTestRunner {
-	protected ResultRenderer renderer;
-	protected HashMap resultCache = new HashMap();
+public class CayenneSmallSelectTest extends CayennePerformanceTest {
+	protected DataContext ctxt;
 
 	/**
-	 * Constructor for PerformanceTestRunner.
+	 * Constructor for CayenneSmallSelectTest.
 	 */
-	public PerformanceTestRunner(ResultRenderer renderer) {
-		super();
-		this.renderer = renderer;
+	public CayenneSmallSelectTest(String name) {
+		super(name);
 	}
 
-	public void runSuite(PerformanceTestSuite suite) {
-		resultCache.clear();
-		
-		Iterator it = suite.getPairs().iterator();
-		while (it.hasNext()) {
-			PerformanceTestPair pair = (PerformanceTestPair) it.next();
-
-			TestResult mainResult = runTest(pair.getMainTest());
-			TestResult refResult = runTest(pair.getReferenceTest());
-
-			renderer.addResult(pair, new PairResult(mainResult, refResult));
-		}
+	public void prepare() throws Exception {
+		super.deleteArtists();
+		super.insertArtists();
+		ctxt = super.getDomain().createDataContext();
 	}
 
-    /** 
-     * Runs performance test. This implementation will cache test
-     * results, so that the same test case is never run more than once.
-     * This will allow to speed up testing by reusing reference test results.
-     */
-	protected TestResult runTest(PerformanceTest test) {
-		if (test == null) {
-			return null;
+	/**
+	 * @see org.objectstyle.perform.PerformanceTest#runTest()
+	 */
+	public void runTest() throws Exception {
+		for (int i = 0; i < SmallSelectTest.QUERIES_COUNT; i++) {
+			Expression qual =
+				ExpressionFactory.binaryPathExp(
+					Expression.EQUAL_TO,
+					"artistName",
+					"name_1000");
+			SelectQuery q = new SelectQuery("Artist", qual);
+			ctxt.performQuery(q);
 		}
-
-        // use cached result when possible
-		TestResult result = (TestResult)resultCache.get(test.getClass());
-		if(result != null) {
-			return result;
-		}
-		
-		result = new TestResult();
-
-		try {
-			test.prepare();
-			long start = System.currentTimeMillis();
-            test.runTest();
-			long end = System.currentTimeMillis();
-			result.setMs(end - start);
-
-		} catch (Exception ex) {
-			result.setTestEx(ex);
-		} finally {
-			try {
-				test.cleanup();
-			} catch (Exception ex) {
-				result.setCleanupEx(ex);
-			}
-		}
-
-        // cache result
-        resultCache.put(test.getClass(), result);
-        
-		return result;
 	}
 }
