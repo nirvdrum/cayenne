@@ -82,21 +82,17 @@ public class ObserverSubject extends Object {
 		if ((subjectName == null) || (subjectName.length() == 0)) {
 			throw new IllegalArgumentException("subjectName must not be empty");
 		}
-		
-		ObserverSubject instance = new ObserverSubject();
-		instance.setSubject(sender.getName() + "." + subjectName);
-		return instance;
+
+		return new ObserverSubject(sender.getName() + "." + subjectName);
 	}
 
-	/**
-	 *  make sure that the only way to create ObserverSubjects is via the static method.
-	 */
+	// make sure that the only way to create ObserverSubjects is via the factory method
 	private ObserverSubject() {
 		super();
-		_subject = null;
 	}
-	
-	private void setSubject(String subject) {
+
+	private ObserverSubject(String subject) {
+		this();
 		_subject = subject;
 	}
 	
