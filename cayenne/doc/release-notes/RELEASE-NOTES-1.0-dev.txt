@@ -14,4 +14,6 @@ Changes in this release:
 Bug report number 760819:
 
    http://sourceforge.net/tracker/?func=detail&aid=760819&group_id=48132&atid=452068
+   
+3. Added User Guide chapter on prefetching.
 
