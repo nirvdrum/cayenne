@@ -74,12 +74,21 @@ import org.objectstyle.cayenne.map.*;
 public class CayenneGenerator extends Task {
 
     protected File map;
-    protected AntClassGenerator generator;
+    protected DefaultClassGenerator generator;
 
     public CayenneGenerator() {
         bootstrapVelocity();
-        generator = new AntClassGenerator();
-        generator.setParentTask(this);
+        generator = createGenerator();
+    }
+    
+    /** 
+     * Factory method to create internal class generator. 
+     * Called from constructor.
+     */
+    protected DefaultClassGenerator createGenerator() {
+        AntClassGenerator gen = new AntClassGenerator();
+        gen.setParentTask(this);
+        return gen;
     }
 
     /** Initialize Velocity with class loader of the right class. */
