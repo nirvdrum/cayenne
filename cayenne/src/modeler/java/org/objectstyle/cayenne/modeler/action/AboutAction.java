@@ -59,6 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.AboutDialog;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -84,7 +85,7 @@ public class AboutAction extends CayenneAction {
     /**
      * Always returns <code>true</code>.
      */
-    public boolean enableForObjectPath(Object[] obj) {
+    public boolean enableForPath(ProjectPath path) {
         return true;
     }
 }

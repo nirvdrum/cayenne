@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * Superclass of CayenneModeler actions that implements support 
@@ -163,7 +164,7 @@ public abstract class CayenneAction extends AbstractAction {
      * currently selected object. Default implementation simply 
      * returns <code>false</code>.
      */
-    public boolean enableForObjectPath(Object[] obj) {
+    public boolean enableForPath(ProjectPath obj) {
     	return false;
     }
 

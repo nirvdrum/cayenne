@@ -74,8 +74,8 @@ public class ObjEntityValidator extends TreeNodeValidator {
         super();
     }
 
-    public void validateObject(Object[] path, Validator validator) {
-        ObjEntity ent = (ObjEntity) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        ObjEntity ent = (ObjEntity) path.getObject();
         validateName(ent, path, validator);
 		validateClassName(ent, path, validator);
 		
@@ -91,14 +91,14 @@ public class ObjEntityValidator extends TreeNodeValidator {
 
     }
 
-	private void validateClassName(ObjEntity ent, Object[] path, Validator validator) {
+	private void validateClassName(ObjEntity ent, ProjectPath path, Validator validator) {
 		String className = ent.getClassName();
 		
         if (Util.isEmptyString(className)) {
         	return; //empty is ok
         }
         
-		DataMap map = (DataMap) ProjectPath.objectParentFromPath(path);
+		DataMap map = (DataMap) path.getObjectParent();
         if (map == null) {
             return;
         }
@@ -120,7 +120,7 @@ public class ObjEntityValidator extends TreeNodeValidator {
 	}
 
 
-    protected void validateName(ObjEntity ent, Object[] path, Validator validator) {
+    protected void validateName(ObjEntity ent, ProjectPath path, Validator validator) {
         String name = ent.getName();
 
         // Must have name
@@ -129,7 +129,7 @@ public class ObjEntityValidator extends TreeNodeValidator {
             return;
         }
 
-        DataMap map = (DataMap) ProjectPath.objectParentFromPath(path);
+        DataMap map = (DataMap) path.getObjectParent();
         if (map == null) {
             return;
         }

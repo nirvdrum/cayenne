@@ -64,6 +64,8 @@ import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.Util;
 
 /**
+ * Validator for DataMaps.
+ * 
  * @author Andrei Adamchik
  */
 public class DataMapValidator extends TreeNodeValidator {
@@ -75,16 +77,16 @@ public class DataMapValidator extends TreeNodeValidator {
         super();
     }
 
-    public void validateObject(Object[] path, Validator validator) {
-        DataMap map = (DataMap) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        DataMap map = (DataMap) path.getObject();
         validateName(map, path, validator);
 
         // check if data map is not attached to any nodes
         validateNodeLinks(map, path, validator);
     }
 
-    protected void validateNodeLinks(DataMap map, Object[] path, Validator validator) {
-        DataDomain domain = (DataDomain) ProjectPath.objectParentFromPath(path);
+    protected void validateNodeLinks(DataMap map, ProjectPath path, Validator validator) {
+        DataDomain domain = (DataDomain) path.getObjectParent();
         if (domain == null) {
             return;
         }
@@ -106,7 +108,7 @@ public class DataMapValidator extends TreeNodeValidator {
         }
     }
 
-    protected void validateName(DataMap map, Object[] path, Validator validator) {
+    protected void validateName(DataMap map, ProjectPath path, Validator validator) {
         String name = map.getName();
 
         if (Util.isEmptyString(name)) {
@@ -114,7 +116,7 @@ public class DataMapValidator extends TreeNodeValidator {
             return;
         }
 
-        DataDomain domain = (DataDomain) ProjectPath.objectParentFromPath(path);
+        DataDomain domain = (DataDomain) path.getObjectParent();
         if (domain == null) {
             return;
         }

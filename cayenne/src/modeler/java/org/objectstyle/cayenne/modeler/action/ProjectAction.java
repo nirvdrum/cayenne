@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.view.UnsavedChangesDialog;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
 
 /**
@@ -121,7 +122,7 @@ public class ProjectAction extends CayenneAction {
     /**
      * Always returns true.
      */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         return true;
     }
 }

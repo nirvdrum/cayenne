@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /** 
@@ -153,17 +154,12 @@ public class SaveAction extends CayenneAction {
     * Returns <code>true</code> if path contains a Project object 
     * and the project is modified.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof Project) {
-                return ((Project)path[i]).isModified();
-            }
-        }
-
-        return false;
+        Project project = (Project)path.firstInstanceOf(Project.class);
+        return project != null  && project.isModified();
     }
 }

@@ -76,8 +76,8 @@ public class DbAttributeValidator extends TreeNodeValidator {
     /**
      * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
      */
-    public void validateObject(Object[] path, Validator validator) {
-        DbAttribute attribute = (DbAttribute) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        DbAttribute attribute = (DbAttribute) path.getObject();
         // Must have name
         if (Util.isEmptyString(attribute.getName())) {
             validator.registerError("Unnamed DbAttribute.", path);

@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
@@ -188,14 +189,14 @@ public class ActionController extends ModelerController {
     /**
      * Updates actions "on/off" state for the selected project path.
      */
-    protected void updateActions(Object[] objectPath) {
+    protected void updateActions(ProjectPath objectPath) {
         Object[] keys = getTopModel().getActionMap().allKeys();
         int len = keys.length;
         for (int i = 0; i < len; i++) {
             CayenneAction action =
                 (CayenneAction) getTopModel().getActionMap().get(keys[i]);
 
-            action.setEnabled(action.enableForObjectPath(objectPath));
+            action.setEnabled(action.enableForPath(objectPath));
         }
     }
 

@@ -73,10 +73,10 @@ public class DomainValidator extends TreeNodeValidator {
         super();
     }
 
-    public void validateObject(Object[] path, Validator validator) {
+    public void validateObject(ProjectPath path, Validator validator) {
 
         // check for empty name
-        DataDomain domain = (DataDomain) ProjectPath.objectFromPath(path);
+        DataDomain domain = (DataDomain) path.getObject();
         String name = domain.getName();
         if (Util.isEmptyString(name)) {
             validator.registerError("Unnamed DataDomain.", path);
@@ -85,7 +85,7 @@ public class DomainValidator extends TreeNodeValidator {
             return;
         }
 
-        Configuration config = (Configuration) ProjectPath.objectParentFromPath(path);
+        Configuration config = (Configuration) path.getObjectParent();
         if (config == null) {
             return;
         }

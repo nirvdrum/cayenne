@@ -59,6 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -90,7 +91,7 @@ public class ExitAction extends ProjectAction {
     /**
     * Always returns true.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         return true;
     }
 }

@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 
 /**
@@ -105,17 +106,11 @@ public class ObjEntitySyncAction extends CayenneAction {
 	/**
      * Returns <code>true</code> if path contains a ObjEntity object.
      */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof ObjEntity) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(ObjEntity.class) != null;
     }
 }

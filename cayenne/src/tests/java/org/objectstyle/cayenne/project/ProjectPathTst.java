@@ -76,18 +76,22 @@ public class ProjectPathTst extends CayenneTestCase {
         assertSame(path, pp.getPath());
     }
 
-    public void testObjectFromPath1() throws Exception {
+    public void testGetObject1() throws Exception {
         Object[] path = new Object[] { new Object(), new Object()};
-        assertSame(path[1], ProjectPath.objectFromPath(path));
+        ProjectPath p = new ProjectPath(path);
+        assertSame(path[1], p.getObject());
     }
 
-    public void testObjectFromPath2() throws Exception {
+    public void testGetObject2() throws Exception {
         Object[] path = new Object[] { new Object()};
-        assertSame(path[0], ProjectPath.objectFromPath(path));
+        ProjectPath p = new ProjectPath(path);
+        assertSame(path[0], p.getObject());
     }
 
-    public void testObjectFromPath3() throws Exception {
-        assertNull(ProjectPath.objectFromPath(new Object[] {}));
+    public void testGetObject3() throws Exception {
+        Object[] path = new Object[] {};
+        ProjectPath p = new ProjectPath(path);
+        assertNull(p.getObject());
     }
 
     public void testAppendToPath1() throws Exception {
@@ -105,7 +109,7 @@ public class ProjectPathTst extends CayenneTestCase {
         ProjectPath path = new ProjectPath();
         path = path.appendToPath(new Object());
         path = path.appendToPath(new Object());
-        
+
         Object obj1 = new Object();
         path = path.appendToPath(obj1);
 
@@ -115,13 +119,24 @@ public class ProjectPathTst extends CayenneTestCase {
         assertSame(obj1, p[2]);
     }
 
-    public void testObjectParentFromPath1() throws Exception {
+    public void testGetObjectParent1() throws Exception {
         Object[] path = new Object[] { new Object(), new Object()};
-        assertSame(path[0], ProjectPath.objectParentFromPath(path));
+        assertSame(path[0], new ProjectPath(path).getObjectParent());
     }
 
-    public void testObjectParentFromPath2() throws Exception {
+    public void testGetObjectParent2() throws Exception {
         Object[] path = new Object[] { new Object()};
-        assertNull(ProjectPath.objectParentFromPath(path));
+        assertNull(new ProjectPath(path).getObjectParent());
+    }
+
+    public void testFirstInstanceOf1() throws Exception {
+        ProjectPath path = new ProjectPath(new Object());
+        assertNull(path.firstInstanceOf(String.class));
+    }
+
+    public void testFirstInstanceOf2() throws Exception {
+        String str = "sdsadsad";
+        ProjectPath path = new ProjectPath(str);
+        assertEquals(str, path.firstInstanceOf(String.class));
     }
 }

@@ -63,6 +63,7 @@ import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -108,17 +109,11 @@ public class CreateObjEntityAction extends CayenneAction {
     /**
     * Returns <code>true</code> if path contains a DataMap object.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof DataMap) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(DataMap.class) != null;
     }
 }

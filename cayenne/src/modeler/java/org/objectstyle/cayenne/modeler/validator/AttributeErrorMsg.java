@@ -84,7 +84,7 @@ public class AttributeErrorMsg extends ValidationDisplayHandler {
     public AttributeErrorMsg(ValidationResult result) {
         super(result);
 
-        Object[] path = result.getTreeNodePath();
+        Object[] path = result.getTreeNodePath().getPath();
         int len = path.length;
 
         if (len >= 1) {

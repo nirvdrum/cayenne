@@ -115,7 +115,7 @@ public class Validator {
      * <code>result</code> parameter has a higher severity then the current value. 
      * Leaves current value unchanged otherwise.
      */
-    public void registerValidated(int severity, String message, Object[] treeNodePath) {
+    public void registerValidated(int severity, String message, ProjectPath treeNodePath) {
         ValidationResult result = new ValidationResult(severity, message, treeNodePath);
         validationResults.add(result);
         if (maxSeverity < severity) {
@@ -123,11 +123,11 @@ public class Validator {
         }
     }
 
-    public void registerError(String message, Object[] treeNodePath) {
+    public void registerError(String message, ProjectPath treeNodePath) {
         registerValidated(ValidationResult.ERROR, message, treeNodePath);
     }
 
-    public void registerWarning(String message, Object[] treeNodePath) {
+    public void registerWarning(String message, ProjectPath treeNodePath) {
         registerValidated(ValidationResult.WARNING, message, treeNodePath);
     }
 
@@ -148,7 +148,7 @@ public class Validator {
 
         Iterator it = project.treeNodes();
         while (it.hasNext()) {
-            TreeNodeValidator.validate(((ProjectPath) it.next()).getPath(), this);
+            TreeNodeValidator.validate((ProjectPath) it.next(), this);
         }
 
         return getMaxSeverity();

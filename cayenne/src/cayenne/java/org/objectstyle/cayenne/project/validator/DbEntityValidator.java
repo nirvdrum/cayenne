@@ -75,11 +75,8 @@ public class DbEntityValidator extends TreeNodeValidator {
         super();
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
-     */
-    public void validateObject(Object[] path, Validator validator) {
-        DbEntity ent = (DbEntity) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        DbEntity ent = (DbEntity) path.getObject();
         validateName(ent, path, validator);
 
         if ((ent instanceof DerivedDbEntity)
@@ -90,7 +87,7 @@ public class DbEntityValidator extends TreeNodeValidator {
         }
     }
 
-    protected void validateName(DbEntity ent, Object[] path, Validator validator) {
+    protected void validateName(DbEntity ent, ProjectPath path, Validator validator) {
         String name = ent.getName();
 
         // Must have name
@@ -100,7 +97,7 @@ public class DbEntityValidator extends TreeNodeValidator {
         } 
         
         
-        DataMap map = (DataMap) ProjectPath.objectParentFromPath(path);
+        DataMap map = (DataMap) path.getObjectParent();
         if (map == null) {
             return;
         }

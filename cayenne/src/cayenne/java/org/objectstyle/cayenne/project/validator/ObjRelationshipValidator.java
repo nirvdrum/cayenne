@@ -76,8 +76,8 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
         super();
     }
 
-    public void validateObject(Object[] path, Validator validator) {
-        ObjRelationship rel = (ObjRelationship) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        ObjRelationship rel = (ObjRelationship) path.getObject();
         if (Util.isEmptyString(rel.getName())) {
             validator.registerError("Unnamed ObjRelationship.", path);
         }

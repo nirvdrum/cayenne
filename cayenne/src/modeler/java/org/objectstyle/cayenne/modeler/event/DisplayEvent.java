@@ -65,19 +65,19 @@ import org.objectstyle.cayenne.project.ProjectTraversal;
  */
 public class DisplayEvent extends EventObject {
     protected boolean changed;
-    protected Object[] path;
+    protected ProjectPath path;
 
     /**
      * Constructor for DisplayEvent.
      * @param source
      */
-    public DisplayEvent(Object source, Object[] path) {
+    public DisplayEvent(Object source, ProjectPath path) {
         super(source);
         changed = true;
         this.path = path;
     }
 
-    public Object[] getPath() {
+    public ProjectPath getPath() {
         return path;
     }
 
@@ -85,7 +85,7 @@ public class DisplayEvent extends EventObject {
     * Returns the last object in the path.
     */
     public Object getObject() {
-        return ProjectPath.objectFromPath(getPath());
+        return getPath().getObject();
     }
 
     /**

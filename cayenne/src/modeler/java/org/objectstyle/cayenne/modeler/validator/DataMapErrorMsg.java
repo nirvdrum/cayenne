@@ -80,7 +80,7 @@ public class DataMapErrorMsg extends ValidationDisplayHandler {
     public DataMapErrorMsg(ValidationResult result) {
         super(result);
 
-        Object[] path = result.getTreeNodePath();
+        Object[] path = result.getTreeNodePath().getPath();
         int len = path.length;
 
         if (len >= 1) {

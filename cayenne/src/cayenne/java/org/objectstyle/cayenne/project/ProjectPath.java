@@ -85,31 +85,6 @@ public class ProjectPath {
 
     protected Object[] path;
 
-    /**
-     * Expands path array, appending a treeNode at the end.
-     */
-    public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
-        ProjectPath path = new ProjectPath(parentTreeNodePath);
-        return path.appendToPath(treeNode).getPath();
-    }
-
-    /**
-     * Returns an object corresponding to the node represented
-     * by the path. This is the last object in the path.
-     */
-    public static Object objectFromPath(Object[] treeNodePath) {
-        return new ProjectPath(treeNodePath).getObject();
-    }
-
-    /**
-     * Returns an object corresponding to the parent node 
-     * of the node represented by the path. This is the object 
-     * next to last object in the path.
-     */
-    public static Object objectParentFromPath(Object[] treeNodePath) {
-        return new ProjectPath(treeNodePath).getObjectParent();
-    }
-
     public ProjectPath() {
         path = EMPTY_PATH;
     }
@@ -118,8 +93,7 @@ public class ProjectPath {
      * Constructor for ProjectPath.
      */
     public ProjectPath(Object object) {
-        this();
-        appendToPath(object);
+        path = new Object[] { object };
     }
 
     /**
@@ -134,10 +108,24 @@ public class ProjectPath {
     }
 
     /**
+     * Scans path, looking for the first element that
+     * is an instanceof <code>aClass</code>.
+     */
+    public Object firstInstanceOf(Class aClass) {
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] != null && aClass.isAssignableFrom(path[i].getClass())) {
+                return path[i];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Returns a ne winstance of the path, expanding this one by 
      * appending an object at the end.
      */
-    public ProjectPath appendToPath(Object object) {    	
+    public ProjectPath appendToPath(Object object) {
         if (object != null) {
             Object[] newPath = new Object[path.length + 1];
 
@@ -146,9 +134,8 @@ public class ProjectPath {
             }
             newPath[path.length] = object;
             return new ProjectPath(newPath);
-        }
-        else {
-        	return new ProjectPath();
+        } else {
+            return new ProjectPath();
         }
     }
 

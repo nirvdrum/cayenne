@@ -68,25 +68,25 @@ public class ValidationResult {
     public static final int WARNING = 1;
     public static final int ERROR = 2;
 
-    protected Object[] treeNodePath;
+    protected ProjectPath treeNodePath;
     protected String message;
     protected int severity;
 
     /**
      * Constructor for ProjectValidationError.
      */
-    public ValidationResult(int severity, String message, Object[] treeNodePath) {
+    public ValidationResult(int severity, String message, ProjectPath treeNodePath) {
         this.severity = severity;
         this.message = message;
         this.treeNodePath = treeNodePath;
     }
 
     public Object getValidatedObject() {
-        return ProjectPath.objectFromPath(treeNodePath);
+        return treeNodePath.getObject();
     }
 
     public Object getValidatedObjectParent() {
-        return ProjectPath.objectParentFromPath(treeNodePath);
+        return treeNodePath.getObjectParent();
     }
 
     public String toString() {
@@ -111,9 +111,8 @@ public class ValidationResult {
 
     /**
      * Returns the treeNodePath.
-     * @return Object[]
      */
-    public Object[] getTreeNodePath() {
+    public ProjectPath getTreeNodePath() {
         return treeNodePath;
     }
 }

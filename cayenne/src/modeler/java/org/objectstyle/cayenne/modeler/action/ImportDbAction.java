@@ -83,6 +83,7 @@ import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.event.ModelerEvent;
 import org.objectstyle.cayenne.modeler.util.YesNoToAllDialog;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /** 
  * Action that imports database structure into a DataMap.
@@ -277,6 +278,17 @@ public class ImportDbAction extends CayenneAction {
         importDb();
     }
 
+    /**
+     * Returns <code>true</code> if path contains a DataDomain object.
+     */
+    public boolean enableForPath(ProjectPath path) {
+        if (path == null) {
+            return false;
+        }
+
+        return path.firstInstanceOf(DataDomain.class) != null;
+    }
+
     class LoaderDelegate implements DbLoaderDelegate {
         protected EventController mediator;
         protected int duplicate = YesNoToAllDialog.UNDEFINED;
@@ -359,22 +371,5 @@ public class ImportDbAction extends CayenneAction {
                     new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
             }
         }
-    }
-
-    /**
-    * Returns <code>true</code> if path contains a DataDomain object.
-    */
-    public boolean enableForObjectPath(Object[] path) {
-        if (path == null) {
-            return false;
-        }
-
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof DataDomain) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

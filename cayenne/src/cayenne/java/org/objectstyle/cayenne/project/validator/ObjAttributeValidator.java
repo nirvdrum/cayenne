@@ -71,8 +71,8 @@ public class ObjAttributeValidator extends TreeNodeValidator {
         super();
     }
 
-    public void validateObject(Object[] path, Validator validator) {
-        ObjAttribute attribute = (ObjAttribute) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        ObjAttribute attribute = (ObjAttribute) path.getObject();
 
         // Must have name
         if (Util.isEmptyString(attribute.getName())) {

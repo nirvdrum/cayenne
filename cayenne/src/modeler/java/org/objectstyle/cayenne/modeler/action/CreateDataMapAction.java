@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * Action that creates new DataMap in the project.
@@ -98,17 +99,11 @@ public class CreateDataMapAction extends CayenneAction {
     /**
     * Returns <code>true</code> if path contains a DataDomain object.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof DataDomain) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(DataDomain.class) != null;
     }
 }

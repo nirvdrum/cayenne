@@ -60,6 +60,7 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -96,17 +97,11 @@ public class DerivedEntitySyncAction extends CayenneAction {
     /**
     * Returns <code>true</code> if path contains a DerivedDbEntity object.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof DerivedDbEntity) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(DerivedDbEntity.class) != null;
     }
 }

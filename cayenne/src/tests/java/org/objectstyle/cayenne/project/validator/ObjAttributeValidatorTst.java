@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.project.validator;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -80,14 +81,14 @@ public class ObjAttributeValidatorTst extends ValidatorTestBase {
         ObjAttribute oa1 = buildValidObjAttribute(m1, "a1");
         validator.reset();
         new ObjAttributeValidator().validateObject(
-            new Object[] { conf, d1, m1, oa1.getEntity(), oa1 },
+            new ProjectPath(new Object[] { conf, d1, m1, oa1.getEntity(), oa1 }),
             validator);
         assertValidator(ValidationResult.VALID);
 
         oa1.setDbAttribute(null);
         validator.reset();
         new ObjAttributeValidator().validateObject(
-            new Object[] { conf, d1, m1, oa1.getEntity(), oa1 },
+            new ProjectPath(new Object[] { conf, d1, m1, oa1.getEntity(), oa1 }),
             validator);
         assertValidator(ValidationResult.WARNING);
     }

@@ -96,8 +96,8 @@ public abstract class TreeNodeValidator {
      * Validates an object, appending any validation messages 
      * to the validator provided.
      */
-    public static void validate(Object[] path, Validator validator) {
-        Object validatedObj = ProjectPath.objectFromPath(path);
+    public static void validate(ProjectPath path, Validator validator) {
+        Object validatedObj = path.getObject();
         TreeNodeValidator validatorObj = null;
         if (validatedObj instanceof ObjAttribute) {
             validatorObj = objAttrValidator;
@@ -141,5 +141,5 @@ public abstract class TreeNodeValidator {
      * Concrete implementations would expect an object of a specific type.
      * Otherwise, ClassCastException will be thrown.
      */
-    public abstract void validateObject(Object[] treeNodePath, Validator validator);
+    public abstract void validateObject(ProjectPath treeNodePath, Validator validator);
 }

@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainEvent;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -108,17 +109,11 @@ public class CreateDomainAction extends CayenneAction {
     /**
     * Returns <code>true</code> if path contains a ApplicationProject object.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof ApplicationProject) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(ApplicationProject.class) != null;
     }
 }

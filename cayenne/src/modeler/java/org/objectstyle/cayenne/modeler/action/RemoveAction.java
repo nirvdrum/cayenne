@@ -261,12 +261,12 @@ public class RemoveAction extends CayenneAction {
      * Returns <code>true</code> if last object in the path contains
      * a removable object.
      */
-    public boolean enableForObjectPath(Object[] path) {
-        if (path == null || path.length == 0) {
+    public boolean enableForPath(ProjectPath path) {
+        if (path == null) {
             return false;
         }
 
-        Object lastObject = ProjectPath.objectFromPath(path);
+        Object lastObject = path.getObject();
 
         if (lastObject instanceof DataDomain) {
             return true;

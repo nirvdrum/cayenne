@@ -77,15 +77,15 @@ public class DataNodeValidator extends TreeNodeValidator {
         super();
     }
 
-    public void validateObject(Object[] path, Validator validator) {
-        DataNode node = (DataNode) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        DataNode node = (DataNode) path.getObject();
         validateName(node, path, validator);
         validateConnection(node, path, validator);
     }
 
     protected void validateConnection(
         DataNode node,
-        Object[] path,
+        ProjectPath path,
         Validator validator) {
         String factory = node.getDataSourceFactory();
 
@@ -104,7 +104,7 @@ public class DataNodeValidator extends TreeNodeValidator {
         }
     }
 
-    protected void validateName(DataNode node, Object[] path, Validator validator) {
+    protected void validateName(DataNode node, ProjectPath path, Validator validator) {
         String name = node.getName();
 
         if (Util.isEmptyString(name)) {
@@ -112,7 +112,7 @@ public class DataNodeValidator extends TreeNodeValidator {
             return;
         }
 
-        DataDomain domain = (DataDomain) ProjectPath.objectParentFromPath(path);
+        DataDomain domain = (DataDomain) path.getObjectParent();
         if (domain == null) {
             return;
         }

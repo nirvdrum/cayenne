@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.project.validator;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -74,13 +75,13 @@ public class DomainValidatorTst extends ValidatorTestBase {
         // should succeed
         validator.reset();
         DataDomain d1 = new DataDomain("abc");
-        new DomainValidator().validateObject(new Object[] { conf, d1 }, validator);
+        new DomainValidator().validateObject(new ProjectPath(new Object[] { conf, d1 }), validator);
         assertValidator(ValidationResult.VALID);
 
         // should complain about no name
         DataDomain d2 = new DataDomain();
         validator.reset();
-        new DomainValidator().validateObject(new Object[] { conf, d2 }, validator);
+        new DomainValidator().validateObject(new ProjectPath(new Object[] { conf, d2 }), validator);
         assertValidator(ValidationResult.ERROR);
 
         // should complain about duplicate name
@@ -89,7 +90,7 @@ public class DomainValidatorTst extends ValidatorTestBase {
         conf.addDomain(d1);
         d3.setName(d1.getName());
         validator.reset();
-        new DomainValidator().validateObject(new Object[] { conf, d3 }, validator);
+        new DomainValidator().validateObject(new ProjectPath(new Object[] { conf, d3 }), validator);
         assertValidator(ValidationResult.ERROR);
     }
 

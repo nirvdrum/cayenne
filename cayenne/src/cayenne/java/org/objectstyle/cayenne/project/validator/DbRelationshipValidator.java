@@ -74,8 +74,8 @@ public class DbRelationshipValidator extends TreeNodeValidator {
     /**
      * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
      */
-    public void validateObject(Object[] path, Validator validator) {
-        DbRelationship rel = (DbRelationship) ProjectPath.objectFromPath(path);
+    public void validateObject(ProjectPath path, Validator validator) {
+        DbRelationship rel = (DbRelationship) path.getObject();
         if (rel.getTargetEntity() == null) {
         	validator.registerError("DbRelationship has no target entity.", path);
         } else if (rel.getJoins().size() == 0) {

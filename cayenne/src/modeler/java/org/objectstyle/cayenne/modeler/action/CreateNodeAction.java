@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectDataSource;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
@@ -118,17 +119,11 @@ public class CreateNodeAction extends CayenneAction {
     /**
     * Returns <code>true</code> if path contains a DataDomain object.
     */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof DataDomain) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(DataDomain.class) != null;
     }
 }

@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.modeler.AddDataMapDialog;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /** 
  * Links DataMap to a DataNode.
@@ -93,18 +94,11 @@ public class AddDataMapAction extends CayenneAction {
     /**
      * Returns <code>true</code> if path contains a DataNode object.
      */
-    public boolean enableForObjectPath(Object[] path) {
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
 
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] instanceof DataNode) {
-                return true;
-            }
-        }
-
-        return false;
+        return path.firstInstanceOf(DataNode.class) != null;
     }
-
 }
