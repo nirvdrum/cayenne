@@ -97,7 +97,7 @@ public abstract class Entity extends MapObject {
      * Sets parent DataMap of this entity.
      */
     public void setDataMap(DataMap dataMap) {
-        setParent(dataMap);
+        this.setParent(dataMap);
     }
 
     /**
@@ -209,13 +209,7 @@ public abstract class Entity extends MapObject {
 	 * @deprecated Since 1.0 Beta1; use #getRelationships() instead.
 	 */
 	public List getRelationshipList() {
-		List list = new ArrayList();
-		Iterator it = relationships.keySet().iterator();
-		while (it.hasNext()) {
-			list.add(relationships.get(it.next()));
-		}
-
-		return list;
+		return new ArrayList(this.getRelationships());
 	}
 
 	/**

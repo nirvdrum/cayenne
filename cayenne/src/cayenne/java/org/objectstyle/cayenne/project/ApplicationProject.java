@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.ConfigStatus;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -108,14 +108,6 @@ public class ApplicationProject extends Project {
         this.config = config;
     }
 
-    public DataDomain[] getDomains() {
-        List domains = getConfig().getDomainList();
-        if (domains == null) {
-            return new DataDomain[0];
-        }
-        return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
-    }
-
     public void checkForUpgrades() {
         if (hasRenamedFiles()) {
             upgradeMessages.add("Some files require renaming");
@@ -126,7 +118,7 @@ public class ApplicationProject extends Project {
      * @see org.objectstyle.cayenne.project.Project#getChildren()
      */
     public List getChildren() {
-        return config.getDomainList();
+        return new ArrayList(this.getConfig().getDomains());
     }
 
     /**

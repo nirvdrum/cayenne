@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.conf;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
@@ -108,6 +109,7 @@ public abstract class Configuration {
 
     /** Lookup map that stores DataDomains with names as keys. */
     protected CayenneMap dataDomains = new CayenneMap(this);
+	protected Collection dataDomainsRef = Collections.unmodifiableCollection(dataDomains.values());
     protected DataSourceFactory overrideFactory;
     protected boolean ignoringLoadFailures;
     protected ConfigStatus loadStatus = new ConfigStatus();
@@ -134,7 +136,7 @@ public abstract class Configuration {
             locator.setSkipClasspath(false);
             locator.setSkipCurDir(true);
             locator.setSkipHomeDir(false);
-            configCommonLogging(locator.findResource(LOGGING_PROPS));
+			Configuration.configCommonLogging(locator.findResource(LOGGING_PROPS));
         }
     }
 
@@ -186,7 +188,7 @@ public abstract class Configuration {
       * instantiated and assigned to a singleton instance of
       * Configuration. */
     public static void initSharedConfig() {
-        initSharedConfig(DEFAULT_CONFIG_CLASS);
+        Configuration.initSharedConfig(DEFAULT_CONFIG_CLASS);
     }
 
     /** Creates and initializes shared Configuration object with
@@ -203,7 +205,7 @@ public abstract class Configuration {
             throw new RuntimeException("Error initializing shared Configuration");
         }
 
-        initSharedConfig(conf);
+		Configuration.initSharedConfig(conf);
     }
 
     /** Sets shared Configuration object to a new Configuration object.
@@ -310,8 +312,7 @@ public abstract class Configuration {
         if (size == 0) {
             return null;
         } else if (size == 1) {
-            Iterator it = dataDomains.keySet().iterator();
-            return (DataDomain) dataDomains.get(it.next());
+			return (DataDomain)dataDomains.values().iterator().next();
         } else {
             throw new CayenneRuntimeException("More then 1 domain is configured, use 'getDomain(String name)' instead.");
         }
@@ -325,15 +326,20 @@ public abstract class Configuration {
         dataDomains.remove(name);
     }
 
-    /** Returns a list of registered DataDomain objects. */
-    public List getDomainList() {
-        List list = new ArrayList();
-        Iterator it = dataDomains.keySet().iterator();
-        while (it.hasNext()) {
-            list.add(dataDomains.get(it.next()));
-        }
-        return list;
-    }
+	/**
+	 * Returns a list of registered DataDomain objects.
+	 * @deprecated Since 1.0 beta1; use #getDomains() instead.
+	 */
+	public List getDomainList() {
+		return new ArrayList(this.getDomains());
+	}
+
+	/**
+	 * Returns an unmodifiable collection of registered DataDomain objects.
+	 */
+	public Collection getDomains() {
+		return dataDomainsRef;
+	}
 
     /**
      * Returns the ignoringLoadFailures.

@@ -124,7 +124,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
                 return ((DataDomain) input).getName();
             }
         };
-        return new TransformIterator(config.getDomainList().iterator(), tr);
+        return new TransformIterator(config.getDomains().iterator(), tr);
     }
 
     public String mapLocation(String domainName, String mapName) {
