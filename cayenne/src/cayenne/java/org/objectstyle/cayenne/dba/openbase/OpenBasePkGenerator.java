@@ -105,6 +105,11 @@ public class OpenBasePkGenerator extends JdbcPkGenerator {
      */
     public Object generatePkForDbEntity(DataNode node, DbEntity entity)
         throws Exception {
+        // check for binary pk
+        Object binPK = binaryPK(entity);
+        if (binPK != null) {
+            return binPK;
+        }
         return new Integer(pkFromDatabase(node, entity));
     }
 
