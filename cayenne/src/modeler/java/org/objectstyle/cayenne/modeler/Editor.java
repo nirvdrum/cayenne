@@ -98,7 +98,6 @@ import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
-import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.control.TopController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -109,8 +108,6 @@ import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbRelationshipDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
@@ -137,7 +134,6 @@ import org.scopemvc.util.UIStrings;
 public class Editor
     extends JFrame
     implements
-        DomainDisplayListener,
         DataNodeDisplayListener,
         DataMapDisplayListener,
         ObjEntityDisplayListener,
@@ -392,18 +388,6 @@ public class Editor
         }
     }
 
-    public void currentDomainChanged(DomainDisplayEvent e) {
-        if (e.getDomain() == null) {
-            // this is a temporary hack till all event handling is removed out
-            // of Editor
-            controller.getActionController().handleControl(
-                new Control(ModelerController.PROJECT_OPENED_ID));
-        } else {
-            enableDomainMenu();
-            getAction(RemoveAction.ACTION_NAME).setName("Remove Domain");
-        }
-    }
-
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         enableDataNodeMenu();
         getAction(RemoveAction.ACTION_NAME).setName("Remove DataNode");
@@ -452,24 +436,16 @@ public class Editor
         }
     }
 
-    private void enableDomainMenu() {
-        // this is a temporary hack till all event handling is removed out
-        // of Editor
-        controller.getActionController().handleControl(
-            new Control(ModelerController.PROJECT_OPENED_ID));
-
-        getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
-        getAction(RemoveAction.ACTION_NAME).setEnabled(true);
-        getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
-        getAction(ImportDbAction.ACTION_NAME).setEnabled(true);
-        getAction(ImportEOModelAction.ACTION_NAME).setEnabled(true);
-    }
-
     private void enableDataMapMenu() {
         if (controller.getEventController().getCurrentDataNode() != null)
             enableDataNodeMenu();
-        else
-            enableDomainMenu();
+        else {
+            // Andrus: Temp hack till moved to controller
+            controller.getActionController().handleControl(
+                new Control(
+                    ModelerController.DATA_DOMAIN_SELECTED_ID,
+                    controller.getEventController().getCurrentDataDomain()));
+        }
 
         getAction(PackageMenuAction.ACTION_NAME).setEnabled(true);
         getAction(GenerateClassesAction.ACTION_NAME).setEnabled(true);
@@ -498,7 +474,11 @@ public class Editor
     }
 
     private void enableDataNodeMenu() {
-        enableDomainMenu();
+        // Andrus: Temp hack till moved to controller
+        controller.getActionController().handleControl(
+            new Control(
+                ModelerController.DATA_DOMAIN_SELECTED_ID,
+                controller.getEventController().getCurrentDataDomain()));
         getAction(AddDataMapAction.ACTION_NAME).setEnabled(true);
     }
 

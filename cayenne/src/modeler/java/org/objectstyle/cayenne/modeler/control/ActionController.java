@@ -55,8 +55,20 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
+import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
+import org.objectstyle.cayenne.modeler.action.ImportDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
@@ -80,20 +92,67 @@ public class ActionController extends ModelerController {
      */
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(PROJECT_OPENED_ID)) {
-            enableProjectActions();
+            projectOpened();
         } else if (control.matchesID(PROJECT_CLOSED_ID)) {
             projectClosed();
+        } else if (control.matchesID(DATA_DOMAIN_SELECTED_ID)) {
+            domainSelected((DataDomain) control.getParameter());
         }
+    }
+
+    protected void domainSelected(DataDomain domain) {
+        enableDomainActions(domain);
+        updateRemoveAction(domain);
+    }
+
+    protected void projectOpened() {
+        enableProjectActions();
+        updateRemoveAction(null);
     }
 
     protected void projectClosed() {
         disableAllActions();
         getAction(ProjectAction.ACTION_NAME).setEnabled(false);
-        getAction(RemoveAction.ACTION_NAME).setName("Remove");
         getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
+
+        updateRemoveAction(null);
     }
 
+    /**
+     * Updates the name of "Remove" action based on the current model state.
+     */
+    protected void updateRemoveAction(Object selected) {
+        String name = null;
+
+        if (selected == null) {
+            name = "Remove";
+        } else if (selected instanceof DataDomain) {
+            name = "Remove DataDomain";
+        } else if (selected instanceof DataMap) {
+            name = "Remove DataMap";
+        } else if (selected instanceof DbEntity) {
+            name = "Remove DbEntity";
+        } else if (selected instanceof ObjEntity) {
+            name = "Remove ObjEntity";
+        } else if (selected instanceof DbAttribute) {
+            name = "Remove DbAttribute";
+        } else if (selected instanceof ObjAttribute) {
+            name = "Remove ObjAttribute";
+        } else if (selected instanceof DbRelationship) {
+            name = "Remove DbRelationship";
+        } else if (selected instanceof ObjRelationship) {
+            name = "Remove ObjRelationship";
+        } else {
+            name = "Remove";
+        }
+
+        getAction(RemoveAction.ACTION_NAME).setName(name);
+    }
+
+    /**
+     * Returns an action object for the specified key.
+     */
     protected CayenneAction getAction(String key) {
         return (CayenneAction) getTopModel().getActionMap().get(key);
     }
@@ -116,13 +175,28 @@ public class ActionController extends ModelerController {
         }
     }
 
+    /**
+     * Configures actions to support an active project.
+     */
     protected void enableProjectActions() {
         disableAllActions();
-        
-        getAction(RemoveAction.ACTION_NAME).setName("Remove");
-        
         getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
         getAction(ProjectAction.ACTION_NAME).setEnabled(true);
+    }
+
+    /**
+     * Configures actions to support an active DataDomain.
+     */
+    protected void enableDomainActions(DataDomain domain) {
+        enableProjectActions();
+
+        if (domain != null) {
+            getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
+            getAction(RemoveAction.ACTION_NAME).setEnabled(true);
+            getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
+            getAction(ImportDbAction.ACTION_NAME).setEnabled(true);
+            getAction(ImportEOModelAction.ACTION_NAME).setEnabled(true);
+        }
     }
 }

@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.modeler;
 
@@ -77,74 +77,80 @@ import org.objectstyle.cayenne.modeler.event.DomainEvent;
  * 
  * @author Michael Misha Shengaout 
  */
-public class DomainDetailView extends JPanel 
-implements DocumentListener, DomainDisplayListener
-{
-	EventController mediator;
-	
-	JLabel		nameLabel;
-	JTextField	name;
-	String		oldName;
-	/** Cludge to prevent marking domain as dirty during initial load. */
-	private boolean ignoreChange = false;
-	
-	public DomainDetailView(EventController temp_mediator) {
-		super();		
-		mediator = temp_mediator;
-		mediator.addDomainDisplayListener(this);
-		// Create and layout components
-		init();
-		// Add listeners
-		name.getDocument().addDocumentListener(this);
-	}
+public class DomainDetailView
+    extends JPanel
+    implements DocumentListener, DomainDisplayListener {
+    EventController mediator;
 
-	private void init(){
-		SpringLayout layout = new SpringLayout();
-		this.setLayout(layout);
+    JLabel nameLabel;
+    JTextField name;
+    String oldName;
+    /** Cludge to prevent marking domain as dirty during initial load. */
+    private boolean ignoreChange = false;
 
-		nameLabel 	= new JLabel("Domain name: ");
-		name 		= new JTextField(20);
+    public DomainDetailView(EventController temp_mediator) {
+        super();
+        mediator = temp_mediator;
+        mediator.addDomainDisplayListener(this);
+        // Create and layout components
+        init();
+        // Add listeners
+        name.getDocument().addDocumentListener(this);
+    }
 
-		Component[] left_comp = new Component[1];
-		left_comp[0] = nameLabel;
-		Component[] right_comp = new Component[1];
-		right_comp[0] = name;
-		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
-		Spring pad = Spring.constant(5);
-		Spring ySpring = pad;
-		add(temp);
-		SpringLayout.Constraints cons = layout.getConstraints(temp);
-		cons.setY(ySpring);
-		cons.setX(pad);
-	}
+    private void init() {
+        SpringLayout layout = new SpringLayout();
+        this.setLayout(layout);
 
-	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }
-	public void changedUpdate(DocumentEvent e) { textFieldChanged(e); }
-	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
+        nameLabel = new JLabel("Domain name: ");
+        name = new JTextField(20);
 
-	private void textFieldChanged(DocumentEvent e) {
-		if (ignoreChange)
-			return;
-		String new_name = name.getText();
-		DataDomain domain = mediator.getCurrentDataDomain();
-		// If name hasn't changed, do nothing
-		if (new_name.equals(domain.getName()))
-			return;
-		domain.setName(new_name);
-		DomainEvent event;
-		event = new DomainEvent(this, domain, oldName);
-		mediator.fireDomainEvent(event);
-		oldName = new_name;
+        Component[] left_comp = new Component[1];
+        left_comp[0] = nameLabel;
+        Component[] right_comp = new Component[1];
+        right_comp[0] = name;
+        JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
+        Spring pad = Spring.constant(5);
+        Spring ySpring = pad;
+        add(temp);
+        SpringLayout.Constraints cons = layout.getConstraints(temp);
+        cons.setY(ySpring);
+        cons.setX(pad);
+    }
 
-	}
-	
-	public void currentDomainChanged(DomainDisplayEvent e) {
-		DataDomain domain = e.getDomain();
-		if (null == domain)
-			return;
-		oldName = domain.getName();
-		ignoreChange = true;
-		name.setText(oldName);
-		ignoreChange = false;
-	}
+    public void insertUpdate(DocumentEvent e) {
+        textFieldChanged(e);
+    }
+    public void changedUpdate(DocumentEvent e) {
+        textFieldChanged(e);
+    }
+    public void removeUpdate(DocumentEvent e) {
+        textFieldChanged(e);
+    }
+
+    private void textFieldChanged(DocumentEvent e) {
+        if (ignoreChange)
+            return;
+        String new_name = name.getText();
+        DataDomain domain = mediator.getCurrentDataDomain();
+        // If name hasn't changed, do nothing
+        if (new_name.equals(domain.getName()))
+            return;
+        domain.setName(new_name);
+        DomainEvent event;
+        event = new DomainEvent(this, domain, oldName);
+        mediator.fireDomainEvent(event);
+        oldName = new_name;
+
+    }
+
+    public void currentDomainChanged(DomainDisplayEvent e) {
+        DataDomain domain = e.getDomain();
+        if (null == domain)
+            return;
+        oldName = domain.getName();
+        ignoreChange = true;
+        name.setText(oldName);
+        ignoreChange = false;
+    }
 }

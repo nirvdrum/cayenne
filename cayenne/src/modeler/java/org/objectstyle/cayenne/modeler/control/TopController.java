@@ -79,13 +79,13 @@ public class TopController extends ModelerController {
     protected ActionController actionController;
 
     // should refactor to SPanel
-    protected Editor view;
+    protected Editor mainFrame;
 
     /**
      * Constructor for TopController.
      */
     public TopController(Editor view) {
-        this.view = view;
+        this.mainFrame = view;
         setModel(new TopModel());
 
         statusController = new StatusBarController(this);
@@ -98,15 +98,15 @@ public class TopController extends ModelerController {
      */
     protected void projectClosed(Control control) {
         // --- update view
-        view.getRecentFileMenu().rebuildFromPreferences();
-        if (view.getView() != null) {
-            view.getContentPane().remove(view.getView());
-            view.setView(null);
+        mainFrame.getRecentFileMenu().rebuildFromPreferences();
+        if (mainFrame.getView() != null) {
+            mainFrame.getContentPane().remove(mainFrame.getView());
+            mainFrame.setView(null);
         }
         // repaint is needed, since sometimes there is a 
         // trace from menu left on the screen
-        view.repaint();
-        view.updateTitle();
+        mainFrame.repaint();
+        mainFrame.updateTitle();
 
         // --- update model
         getTopModel().setCurrentProject(null);
@@ -122,6 +122,10 @@ public class TopController extends ModelerController {
         statusController.handleControl(control);
     }
 
+    /**
+     * Handles project opening control. Updates main frame, then delegates
+     * control to child controllers.
+     */
     protected void projectOpened(Control control) {
         // sanity check 
         if (!(control.getParameter() instanceof Project)) {
@@ -134,14 +138,12 @@ public class TopController extends ModelerController {
         getTopModel().setCurrentProject(project);
 
         // update main view
-        view.setView(new EditorView(eventController));
-        view.getContentPane().add(view.getView(), BorderLayout.CENTER);
-        view.validate();
-
-        view.updateTitle();
+        mainFrame.setView(new EditorView(eventController));
+        mainFrame.getContentPane().add(mainFrame.getView(), BorderLayout.CENTER);
+        mainFrame.validate();
+        mainFrame.updateTitle();
 
         // --- propagate control to child controllers
-
         control.markUnmatched();
         eventController.handleControl(control);
 
@@ -161,6 +163,9 @@ public class TopController extends ModelerController {
             projectOpened(control);
         } else if (control.matchesID(PROJECT_CLOSED_ID)) {
             projectClosed(control);
+        } else if (control.matchesID(DATA_DOMAIN_SELECTED_ID)) {
+            control.markUnmatched();
+            actionController.handleControl(control);
         }
     }
 

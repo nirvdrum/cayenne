@@ -148,7 +148,6 @@ public class EventController extends ModelerController {
             reset();
         } else if (control.matchesID(PROJECT_OPENED_ID)) {
             setDirty(((Project) control.getParameter()).isLocationUndefined());
-            addDomainDisplayListener(Editor.getFrame());
             addDataNodeDisplayListener(Editor.getFrame());
             addDataMapDisplayListener(Editor.getFrame());
             addObjEntityDisplayListener(Editor.getFrame());
@@ -158,6 +157,15 @@ public class EventController extends ModelerController {
             addObjRelationshipDisplayListener(Editor.getFrame());
             addDbRelationshipDisplayListener(Editor.getFrame());
         }
+    }
+    
+    /**
+     * Sends control to parent controller.
+     */
+    protected void sendControlToParent(String id, Object parameter) {
+    	if(getParent() != null) {
+    		getParent().handleControl(new Control(id, parameter));
+    	}
     }
 
     public void reset() {
@@ -300,6 +308,9 @@ public class EventController extends ModelerController {
             DomainDisplayListener temp = (DomainDisplayListener) list[i];
             temp.currentDomainChanged(e);
         }
+        
+        // also send control to parent
+        sendControlToParent(DATA_DOMAIN_SELECTED_ID, currentDomain);
     }
 
     /** Informs all listeners of the DomainEvent. 
