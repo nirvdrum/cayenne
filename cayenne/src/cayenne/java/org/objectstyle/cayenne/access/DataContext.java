@@ -85,8 +85,8 @@ import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.event.ObserverManager;
-import org.objectstyle.cayenne.event.ObserverSubject;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -117,9 +117,9 @@ public class DataContext implements QueryEngine, Serializable {
     private static Logger logObj = Logger.getLogger(DataContext.class);
 
 	// DataContext events
-	public static final ObserverSubject WILL_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextWillCommit");
-	public static final ObserverSubject DID_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextDidCommit");
-	public static final ObserverSubject DID_ROLLBACK = ObserverSubject.getSubject(DataContext.class, "DataContextDidRollback");
+	public static final EventSubject WILL_COMMIT = EventSubject.getSubject(DataContext.class, "DataContextWillCommit");
+	public static final EventSubject DID_COMMIT = EventSubject.getSubject(DataContext.class, "DataContextDidCommit");
+	public static final EventSubject DID_ROLLBACK = EventSubject.getSubject(DataContext.class, "DataContextDidRollback");
 
 	// event posting default for new DataContexts
 	private static boolean postDataContextTransactionEventsDefault = true;
@@ -829,11 +829,11 @@ public class DataContext implements QueryEngine, Serializable {
 						delObjects);
 
 			// post event: WILL_COMMIT
-			ObserverManager eventMgr = ObserverManager.getDefaultManager();
+			EventManager eventMgr = EventManager.getDefaultManager();
 			DataContextEvent commitChangesEvent = null;
 			if (this.postDataContextTransactionEvents) {
 				commitChangesEvent = new DataContextEvent(this);
-				eventMgr.postObserverEvent(WILL_COMMIT, commitChangesEvent);
+				eventMgr.postEvent(commitChangesEvent, WILL_COMMIT);
 			}
 
 			this.getParent().performQueries(queryList, result);
@@ -843,7 +843,7 @@ public class DataContext implements QueryEngine, Serializable {
 			else if (result.isTransactionRolledback()) {
 				// post event: DID_ROLLBACK
 				if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
-					eventMgr.postObserverEvent(DID_ROLLBACK, commitChangesEvent);
+					eventMgr.postEvent(commitChangesEvent, DID_ROLLBACK);
 				}
 				throw new CayenneRuntimeException("Transaction was rolled back.");
 			}
@@ -863,7 +863,7 @@ public class DataContext implements QueryEngine, Serializable {
 
 			// post event: DID_COMMIT
 			if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
-				eventMgr.postObserverEvent(DID_COMMIT, commitChangesEvent);
+				eventMgr.postEvent(commitChangesEvent, DID_COMMIT);
 			}
 
 			// this makes sure the ContextCommitObserver isn't GC'ed prematurely

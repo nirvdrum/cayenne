@@ -74,9 +74,9 @@ import org.objectstyle.cayenne.access.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
-import org.objectstyle.cayenne.access.event.DataContextEventListener;
+import org.objectstyle.cayenne.access.event.DataContextTransactionEventListener;
 import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
-import org.objectstyle.cayenne.event.ObserverManager;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -87,7 +87,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class ContextCommitObserver
 	extends DefaultOperationObserver
-	implements DataContextEventListener
+	implements DataContextTransactionEventListener
 {
 
     protected List updObjects;
@@ -202,10 +202,10 @@ public class ContextCommitObserver
 
 	protected void registerForDataContextEvents() {
 		try {
-			ObserverManager mgr = ObserverManager.getDefaultManager();
-			mgr.addObserver(this, DataContextEvent.class, "dataContextWillCommit", DataContext.WILL_COMMIT); 
-			mgr.addObserver(this, DataContextEvent.class, "dataContextDidCommit", DataContext.DID_COMMIT); 
-			mgr.addObserver(this, DataContextEvent.class, "dataContextDidRollback", DataContext.DID_ROLLBACK); 
+			EventManager mgr = EventManager.getDefaultManager();
+			mgr.addListener(this, DataContextEvent.class, "dataContextWillCommit", DataContext.WILL_COMMIT); 
+			mgr.addListener(this, DataContextEvent.class, "dataContextDidCommit", DataContext.DID_COMMIT); 
+			mgr.addListener(this, DataContextEvent.class, "dataContextDidRollback", DataContext.DID_ROLLBACK); 
 		}
 
 		catch (NoSuchMethodException nsm) {
@@ -215,10 +215,10 @@ public class ContextCommitObserver
 	}
 
 	protected void unregisterFromDataContextEvents() {
-		ObserverManager mgr = ObserverManager.getDefaultManager();
-		mgr.removeObserver(this, DataContext.WILL_COMMIT); 
-		mgr.removeObserver(this, DataContext.DID_COMMIT);
-		mgr.removeObserver(this, DataContext.DID_ROLLBACK);
+		EventManager mgr = EventManager.getDefaultManager();
+		mgr.removeListener(this, DataContext.WILL_COMMIT); 
+		mgr.removeListener(this, DataContext.DID_COMMIT);
+		mgr.removeListener(this, DataContext.DID_ROLLBACK);
 	}
 
 	public void dataContextWillCommit(DataContextEvent event) {

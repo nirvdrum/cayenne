@@ -63,32 +63,32 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 import junit.framework.Assert;
 
-public class ObserverInvocationTst extends CayenneTestCase {
+public class InvocationTst extends CayenneTestCase {
 	private Method _method;
 
-	public ObserverInvocationTst(String arg0) throws NoSuchMethodException {
+	public InvocationTst(String arg0) throws NoSuchMethodException {
 		super(arg0);
 		_method = this.getClass().getMethod("method", null);
 	}
 
 	public void testReflexive() throws Exception {
-		ObserverInvocation inv = new ObserverInvocation(this, _method);		
+		Invocation inv = new Invocation(this, _method);		
 
 		Assert.assertEquals(inv, inv);
 	}
 
 	public void testSymmetric() throws Exception {
-		ObserverInvocation inv = new ObserverInvocation(this, _method);
-		ObserverInvocation inv2 = new ObserverInvocation(this, _method);
+		Invocation inv = new Invocation(this, _method);
+		Invocation inv2 = new Invocation(this, _method);
 		
 		Assert.assertEquals(inv, inv2);
 		Assert.assertEquals(inv2, inv);
 	}
 
 	public void testTransitive() throws Exception {
-		ObserverInvocation inv = new ObserverInvocation(this, _method);
-		ObserverInvocation inv2 = new ObserverInvocation(this, _method);
-		ObserverInvocation inv3 = new ObserverInvocation(this, _method);
+		Invocation inv = new Invocation(this, _method);
+		Invocation inv2 = new Invocation(this, _method);
+		Invocation inv3 = new Invocation(this, _method);
 		
 		Assert.assertEquals(inv, inv2);
 		Assert.assertEquals(inv2, inv3);
@@ -96,15 +96,15 @@ public class ObserverInvocationTst extends CayenneTestCase {
 	}
 
 	public void testNull() {
-		ObserverInvocation inv = new ObserverInvocation(this, _method);
+		Invocation inv = new Invocation(this, _method);
 		Assert.assertTrue(inv.equals(null) == false);
 	}
 
 	public void testDifferentMethods() throws Exception  {
 		Method m2 = this.getClass().getMethod("anotherMethod", null);
 
-		ObserverInvocation inv = new ObserverInvocation(this, _method);
-		ObserverInvocation inv2 = new ObserverInvocation(this, m2);
+		Invocation inv = new Invocation(this, _method);
+		Invocation inv2 = new Invocation(this, m2);
 
 		Assert.assertTrue(inv.equals(inv2) == false);
 	}
@@ -112,7 +112,7 @@ public class ObserverInvocationTst extends CayenneTestCase {
 	public void testAddToSet() throws Exception {
 		HashSet set = new HashSet();
 		
-		ObserverInvocation inv = new ObserverInvocation(this, _method);
+		Invocation inv = new Invocation(this, _method);
 		set.add(inv);
 		set.add(inv);
 		Assert.assertEquals(1, set.size());
@@ -121,8 +121,8 @@ public class ObserverInvocationTst extends CayenneTestCase {
 	public void testAddTwo() {
 		HashSet set = new HashSet();
 		
-		ObserverInvocation inv = new ObserverInvocation(this, _method);
-		ObserverInvocation inv2 = new ObserverInvocation(this, _method);
+		Invocation inv = new Invocation(this, _method);
+		Invocation inv2 = new Invocation(this, _method);
 		
 		set.add(inv);
 		set.add(inv2);
@@ -130,14 +130,14 @@ public class ObserverInvocationTst extends CayenneTestCase {
 	}
 
 	public void testGarbageCollection() throws NoSuchMethodException {
-		// create an invocation with an observer that will be garbage collected
-		ObserverInvocation inv = new ObserverInvocation(new String(), String.class.getMethod("toString", null));
+		// create an invocation with an listener that will be garbage collected
+		Invocation inv = new Invocation(new String(), String.class.getMethod("toString", null));
 		
-		// (hopefully) make the observer go away
+		// (hopefully) make the listener go away
 		System.gc();
 		System.gc();
 
-		Assert.assertEquals(false, inv.fire(new ObserverEvent(this)));
+		Assert.assertEquals(false, inv.fire(new CayenneEvent(this)));
 	}
 	
 	// these methods exist for the test of Invocation equality
