@@ -5,19 +5,11 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>December 22, 2002:</i></strong> <strong>Cayenne 1.0a5 Released.</strong></u></p>
+        <p><u><strong><i>January 5, 2003:</i></strong> <strong>Cayenne 1.0a5-1 Released.</strong></u></p>
         
-        <p>The main highlights of this release are: 
-        <ul>
-        	<li>Added flattened relationships (direct many-to-many relationships).</li>
-		<li>Introduced type-safe queries using Java Class as a root</li>
-		<li>Project structure update. Project map and node files now have predefined extensions. 
-		An upgrade from the old format can be done via CayenneModeler. Old format is compatible 
-		with Cayenne runtime.</li>
-		<li>Significantly improved and updated "User Guide". Created "Developer Guide" for contributors.</li>
-		<li>Usual Bug fixes, code cleanup and refactoring.</li>
-        </ul>
-         Download the release 
+        <p>This is a bugfix release for Alpha 5. Upgrade is recommended, especially if Alpha 5
+        is used. See the release notes <a href="RELEASE-NOTES-1.0a5-1.txt">here</a>. 
+        Download the release 
         	<a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
         here</a>. 
         </p>

@@ -1,0 +1,18 @@
+   Cayenne Release Notes 1.0a5-1 (Alpha 5-1)
+                 Date: Jan 5, 2003
+         ============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+Changes in this release:
+============================================
+
+This is a bugfix release addressing certain issues in Alpha 5.
+The most important bug fixes are:
+
+1. Queries related to flattened relationships are not executed properly
+
+2. Linked DataMaps do not show in CayenneModeler.
+
+3. Class generation fails on partial ObjEntities.
