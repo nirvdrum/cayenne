@@ -1,0 +1,12 @@
+Cayenne Release Notes 1.2 Milesone (M1)
+Date: November 22, 2007
+============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+To browse individual bug reports, see 
+http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
+
+
+Bugs Fixed:

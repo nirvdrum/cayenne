@@ -67,32 +67,34 @@ import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
- * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/">
- * HSQLDB RDBMS</a>. Sample <a target="_top" 
- * href="../../../../../../../developerguide/unit-tests.html">connection 
- * settings</a> to use with HSQLDB are shown below:
+ * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/"> HSQLDB RDBMS
+ * </a>. Sample <a target="_top"
+ * href="../../../../../../../developerguide/unit-tests.html">connection settings </a> to
+ * use with HSQLDB are shown below:
  * 
-<pre>
-test-hsqldb.cayenne.adapter = org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter
-test-hsqldb.jdbc.username = test
-test-hsqldb.jdbc.password = secret
-test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
-test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
-</pre>
- *
+ * <pre>
+ * 
+ *  test-hsqldb.cayenne.adapter = org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter
+ *  test-hsqldb.jdbc.username = test
+ *  test-hsqldb.jdbc.password = secret
+ *  test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
+ *  test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
+ *  
+ * </pre>
+ * 
  * @author Holger Hoffstaette
  */
 public class HSQLDBAdapter extends JdbcAdapter {
 
     /**
-     * Returns a DDL string to create a unique constraint over a set 
-     * of columns.
+     * Returns a DDL string to create a unique constraint over a set of columns.
      * 
      * @since 1.1
      */
     public String createUniqueConstraint(DbEntity source, Collection columns) {
         if (columns == null || columns.isEmpty()) {
-            throw new CayenneRuntimeException("Can't create UNIQUE constraint - no columns specified.");
+            throw new CayenneRuntimeException(
+                    "Can't create UNIQUE constraint - no columns specified.");
         }
 
         String srcName = source.getFullyQualifiedName();
@@ -124,6 +126,7 @@ public class HSQLDBAdapter extends JdbcAdapter {
 
     /**
      * Adds an ADD CONSTRAINT clause to a relationship constraint.
+     * 
      * @see JdbcAdapter#createFkConstraint(DbRelationship)
      */
     public String createFkConstraint(DbRelationship rel) {
@@ -170,5 +173,20 @@ public class HSQLDBAdapter extends JdbcAdapter {
         buf.append(" ON DELETE CASCADE");
 
         return buf.toString();
+    }
+
+    /**
+     * Uses "CREATE CACHED TABLE" instead of "CREATE TABLE".
+     * 
+     * @since 1.2
+     */
+    public String createTable(DbEntity ent) {
+        String sql = super.createTable(ent);
+
+        if (sql != null && sql.toUpperCase().startsWith("CREATE TABLE ")) {
+            sql = "CREATE CACHED TABLE " + sql.substring("CREATE TABLE ".length());
+        }
+
+        return sql;
     }
 }
