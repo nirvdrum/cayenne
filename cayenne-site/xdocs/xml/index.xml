@@ -6,6 +6,18 @@
         <!-- News section -->
         <section name="Cayenne News">
         
+        <p><u><i>[April 14, 2004]</i></u> <strong>Cayenne Success Story - AccessPoint Inc.</strong></p>
+         <p>A story submitted by Bret Gregory: "I work for <a href="http://www.accesspointinc.com/" target="_new">AccessPoint 
+         Inc.</a>, a privately-held CLEC offering 
+        integrated communications services to small- and medium-sized businesses.  We use Cayenne for 
+        our internal accounting and reconciliation application.  This application allows us to recognize 
+        uncaptured revenue streams as well as accounting margins and billing errors.  In addition, Cayenne 
+        is used in our internal reporting application.  These applications and thus Cayenne are central to the 
+        financial health of the company." </p>
+        
+        <p><a href="poweredby.html">More success stories...</a>
+         </p>
+        
          <p><u><i>[April 14, 2004]</i></u> <strong>M5 - Cayenne 1.1 Milestone  Release</strong></p>
          <p>This release includes two major new features - optimistic locking and entity inheritance, and also
          a number of bug fixes and other enhancements. For details see <a href=

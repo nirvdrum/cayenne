@@ -29,6 +29,17 @@
         pooling system and the other data access methods.
         </p>
         
+		<p><strong>AccessPoint Inc.</strong> 
+        (<a href="http://www.accesspointinc.com/" target="_new">http://www.accesspointinc.com/</a>)</p>
+        
+        <p>A story submitted by Bret Gregory: "I work for AccessPoint Inc., a privately-held CLEC offering 
+        integrated communications services to small- and medium-sized businesses.  We use Cayenne for 
+        our internal accounting and reconciliation application.  This application allows us to recognize 
+        uncaptured revenue streams as well as accounting margins and billing errors.  In addition, Cayenne 
+        is used in our internal reporting application.  These applications and thus Cayenne are central to the 
+        financial health of the company."
+        </p>
+        
         <p></p>
         <panel name="Powered by Cayenne">If your site or project uses Cayenne as its Object-Relational engine, 
         please drop a note to cayenne-user list or directly to "andrus at objectstyle.org". 

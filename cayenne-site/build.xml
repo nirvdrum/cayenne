@@ -86,6 +86,8 @@
 				<filter token="LICENSE" value="${license.text}"/>
 			</filterset>
 		</copy>
+		
+		<antcall target="rsync-prompt"/>
     </target>
     
 	<!-- ============================================= -->
@@ -111,6 +113,14 @@
 				<filter token="LICENSE" value="${license.text}"/>
 			</filterset>
 		</copy>
+		
+		<antcall target="rsync-prompt"/>
+    </target>
+    
+    <target name="rsync-prompt">
+    	<echo>==== To synchronize with the site, run something like this:
+		# cd ${dist.base}/${project.name}-${project.version}/
+		# rsync -az -e ssh cayenne www.objectstyle.org:/var/sites/objectstyle/html/</echo>
     </target>
     
  
