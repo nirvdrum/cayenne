@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.RelationshipDataSource;
@@ -697,15 +698,15 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         if (queryList.size() > 0) {
-            CommitProcessor result =
-                new CommitProcessor(logLevel, insObjects, updObjects, delObjects);
+            ContextCommitObserver result =
+                new ContextCommitObserver(logLevel, this, insObjects, updObjects, delObjects);
             parent.performQueries(queryList, result);
             if (!result.isTransactionCommitted())
                 throw new CayenneRuntimeException("Error committing transaction.");
             else if (result.isTransactionRolledback())
                 throw new CayenneRuntimeException("Transaction was rolledback.");
 
-            // reregister objects whose id's where updated
+            // re-register objects whose id's where updated
             Iterator idIt = updatedIds.keySet().iterator();
             while (idIt.hasNext()) {
                 ObjectId oldId = (ObjectId) idIt.next();
@@ -1063,98 +1064,6 @@ public class DataContext implements QueryEngine, Serializable {
         // note that object registration did not changed (new id is not attached to context, only to temp. oid)
         tempId.setPermId(permId);
         return permId;
-    }
-
-    /** OperationObserver for update, insert and delete queries. It
-     *  establishes transaction for the whole execution batch.
-     *  If transaction succeeds, it updates the state of all objects
-     *  accordingly.
-     */
-    class CommitProcessor extends DefaultOperationObserver {
-        private List updObjects;
-        private List delObjects;
-        private List insObjects;
-
-        public CommitProcessor(
-            Level logLevel,
-            List insObjects,
-            List updObjects,
-            List delObjects) {
-            super.setLoggingLevel(logLevel);
-            this.insObjects = insObjects;
-            this.updObjects = updObjects;
-            this.delObjects = delObjects;
-        }
-
-        public boolean useAutoCommit() {
-            return false;
-        }
-
-        /** Update the state of all objects we were synchronizing
-         *  in this transaction.
-         */
-        public void transactionCommitted() {
-            super.transactionCommitted();
-
-            Iterator insIt = insObjects.iterator();
-
-            synchronized (objectStore) {
-                while (insIt.hasNext()) {
-
-                    // replace temp id's w/perm.
-                    DataObject nextObject = (DataObject) insIt.next();
-                    TempObjectId tempId = (TempObjectId) nextObject.getObjectId();
-                    ObjectId permId = tempId.getPermId();
-
-                    objectStore.changeObjectKey(tempId, permId);
-                    nextObject.setObjectId(permId);
-                    Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
-                    objectStore.addSnapshot(permId, snapshot);
-
-                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
-                }
-            }
-
-            Iterator delIt = delObjects.iterator();
-            while (delIt.hasNext()) {
-                DataObject nextObject = (DataObject) delIt.next();
-                ObjectId anId = nextObject.getObjectId();
-
-                objectStore.removeObject(anId);
-                nextObject.setPersistenceState(PersistenceState.TRANSIENT);
-                nextObject.setDataContext(null);
-            }
-
-            Iterator updIt = updObjects.iterator();
-            while (updIt.hasNext()) {
-                DataObject nextObject = (DataObject) updIt.next();
-                // refresh this object's snapshot, check if id data has changed
-                Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
-
-                DataContext.this.objectStore.addSnapshot(
-                    nextObject.getObjectId(),
-                    snapshot);
-                nextObject.setPersistenceState(PersistenceState.COMMITTED);
-            }
-        }
-
-        public void nextQueryException(Query query, Exception ex) {
-            super.nextQueryException(query, ex);
-            throw new CayenneRuntimeException("Raising from query exception.", ex);
-        }
-
-        public void nextGlobalException(Exception ex) {
-            super.nextGlobalException(ex);
-            throw new CayenneRuntimeException(
-                "Raising from underlyingQueryEngine exception.",
-                ex);
-        }
-
-        /** Will do query sorting to try to satisfy DB ref. integrity rules */
-        public List orderQueries(DataNode aNode, List queryList) {
-            OperationSorter sorter = aNode.getAdapter().getOpSorter(aNode);
-            return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
-        }
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {

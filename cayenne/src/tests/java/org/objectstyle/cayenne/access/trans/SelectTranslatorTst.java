@@ -382,7 +382,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
             SelectTranslator transl = buildTranslator(con);
             String generatedSql = transl.createSqlString();
-            logObj.warn("Query: " + generatedSql);
+            // logObj.warn("Query: " + generatedSql);
 
             // do some simple assertions to make sure all parts are in
             assertNotNull(generatedSql);
