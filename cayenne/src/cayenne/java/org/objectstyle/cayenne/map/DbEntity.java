@@ -56,13 +56,13 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
+import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -71,10 +71,11 @@ import org.objectstyle.cayenne.query.Query;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbEntity extends Entity implements DbAttributeListener{
+public class DbEntity extends Entity implements DbAttributeListener {
     protected String catalog;
     protected String schema;
 	protected List primaryKey;
+	protected List primaryKeyRef;
 	protected DbKeyGenerator primaryKeyGenerator;
 
     /**
@@ -82,7 +83,8 @@ public class DbEntity extends Entity implements DbAttributeListener{
      */
     public DbEntity() {
     	super();
-    	this.updatePrimaryKey();
+    	this.primaryKey = new ArrayList(4);
+    	this.primaryKeyRef = Collections.unmodifiableList(primaryKey);
     }
 
     /**
@@ -138,7 +140,7 @@ public class DbEntity extends Entity implements DbAttributeListener{
      * primary key of the table described by this DbEntity.
      */
 	public List getPrimaryKey() {
-		return primaryKey;
+		return primaryKeyRef;
 	}
 
     public String toString() {
@@ -174,7 +176,7 @@ public class DbEntity extends Entity implements DbAttributeListener{
 	public void addAttribute(Attribute attr)
 	{
 		super.addAttribute(attr);
-		this.dbAttributeAdded(new AttributeEvent(this, attr, this));
+		this.dbAttributeAdded(new AttributeEvent(this, attr, this, MapEvent.ADD));
 	}
 
     /**
@@ -210,13 +212,13 @@ public class DbEntity extends Entity implements DbAttributeListener{
         }
 
         super.removeAttribute(attrName);
-        this.dbAttributeRemoved(new AttributeEvent(this, attr, this));
+        this.dbAttributeRemoved(new AttributeEvent(this, attr, this, MapEvent.REMOVE));
     }
 
 	public void clearAttributes() {
 		super.clearAttributes();
 		// post dummy event for no specific attribute
-		this.dbAttributeRemoved(new AttributeEvent(this, null, this));
+		this.dbAttributeRemoved(new AttributeEvent(this, null, this, MapEvent.REMOVE));
 	}
 
     protected void validateQueryRoot(Query query) throws IllegalArgumentException {
@@ -237,44 +239,60 @@ public class DbEntity extends Entity implements DbAttributeListener{
     }
 
 	public void dbAttributeAdded(AttributeEvent e) {
-		this.updatePrimaryKey();
+		this.handlePrimaryKeyUpdate(e);
 	}
 
 	public void dbAttributeChanged(AttributeEvent e) {
-		this.updatePrimaryKey();
+		this.handlePrimaryKeyUpdate(e);
 	}
 
 	public void dbAttributeRemoved(AttributeEvent e) {
-		this.updatePrimaryKey();
+		this.handlePrimaryKeyUpdate(e);
 	}
 
-	private void updatePrimaryKey() {
-		Collection attrs = this.getAttributes();
-
-		if (attrs.isEmpty()) {
-			this.primaryKey = Collections.EMPTY_LIST;
+	private void handlePrimaryKeyUpdate(AttributeEvent e) {
+		if ((e == null) || (e.getEntity() != this)) {
+			// not our concern
 			return;
 		}
 
-		List pk = new ArrayList();
-		Iterator it = this.getAttributes().iterator();
-
-		while (it.hasNext()) {
-			DbAttribute dba = (DbAttribute) it.next();
-			if (dba.isPrimaryKey()) {
-				pk.add(dba);
-			}
+		// catch clearing (event with null ('any') DbAttribute)
+		Attribute attr = e.getAttribute();
+		if ((attr == null) && (this.attributes.isEmpty())) {
+			this.primaryKey.clear();
+			return;
 		}
 
-		switch (pk.size()) {
-			case 0:
-				this.primaryKey = Collections.EMPTY_LIST;
+		// make sure we handle a DbAttribute
+		if (!(attr instanceof DbAttribute)) {
+			return;
+		}
+
+		DbAttribute dbAttr = (DbAttribute)attr;
+		if (!(this.primaryKey.contains(dbAttr)) && !(dbAttr.isPrimaryKey())) {
+			// no reason to do anything
+			return;
+		}
+
+		switch (e.getId()) {
+			case MapEvent.ADD:
+				this.primaryKey.add(attr);
 				break;
-			case 1:
-				this.primaryKey = Collections.singletonList(pk.get(0));
+
+			case MapEvent.REMOVE:
+				this.primaryKey.remove(attr);
 				break;
+
 			default:
-				this.primaryKey = pk;
+				// generic update
+				this.primaryKey.clear();
+				Iterator it = this.getAttributes().iterator();
+				while (it.hasNext()) {
+					DbAttribute dba = (DbAttribute) it.next();
+					if (dba.isPrimaryKey()) {
+						this.primaryKey.add(dba);
+					}
+				}
 		}
 	}
 
