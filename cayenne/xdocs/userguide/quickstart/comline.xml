@@ -66,7 +66,7 @@
     			driver information of the test database.</li>
     		</ul>         	
     		</p>
-    	    <img src="/images/tutorial-cfg-node.gif" width="639" height="503" border="0" align="middle"
+    	    <img src="/images/modelerguide/select-adapter.jpg" width="520" height="336" border="0" align="middle"
 			alt="Configure Node Panel"/>
     	</subsection>
     	
@@ -81,7 +81,7 @@
     		Use CayenneModeler to generate Java classes for DataObjects by going to 
     		<strong>"Tools -> Generate Classes"</strong> and selecting the newly created
     		"java" directory in the opened popup:</p>
-    		<img src="/images/classgen.gif" width="546" height="489" border="0" align="middle"
+    		<img src="/images/modelerguide/generate-classes.jpg" width="520" height="416" border="0" align="middle"
 			alt="Generate Classes Dialog"/>
 			
     		<p>After the generation 

@@ -95,7 +95,7 @@
     			driver information of the test database.  Do this by editing the Data Source Info section of data node properties page</li>
     		</ul>         	
     		</p>
-    	    <img src="/images/tutorial-cfg-node.gif" width="639" height="503" border="0" align="middle"
+    	    <img src="/images/modelerguide/select-adapter.jpg" width="520" height="336" border="0" align="middle"
 			alt="Configure Node Panel"/>
     	</subsection>
     	
