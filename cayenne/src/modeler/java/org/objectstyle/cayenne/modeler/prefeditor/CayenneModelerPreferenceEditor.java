@@ -53,94 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.dialog.prefs;
+package org.objectstyle.cayenne.modeler.prefeditor;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.List;
-
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
-import org.scopemvc.core.Selector;
-import org.scopemvc.model.basic.BasicModel;
-import org.scopemvc.model.collection.ListModel;
+import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceEditor;
+import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceService;
+import org.objectstyle.cayenne.pref.PreferenceDetail;
 
 /**
- * A Scope model for classpath configuration.
+ * Specialized preferences editor for CayenneModeler.
  * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-public class ConfigureClasspathModel extends BasicModel {
-    public static final Selector CUSTOM_CLASSPATH_SELECTOR =
-        Selector.fromString("customClasspath");
-    public static final Selector SELECTED_ENTRY_SELECTOR =
-        Selector.fromString("selectedEntry");
+public class CayenneModelerPreferenceEditor extends HSQLEmbeddedPreferenceEditor {
 
-    protected ListModel customClasspath;
-    protected File selectedEntry;
-    protected ModelerClassLoader classLoader;
+    protected boolean refreshingClassLoader;
+    protected Application application;
 
-    public ConfigureClasspathModel(ModelerClassLoader classLoader) {
-        this.classLoader = classLoader;
-        this.customClasspath = new ListModel();
-        this.customClasspath.addAll(classLoader.getPathFiles());
-        this.customClasspath.addModelChangeListener(this);
+    public CayenneModelerPreferenceEditor(Application application) {
+        super((HSQLEmbeddedPreferenceService) application.getPreferenceService());
+        this.application = application;
     }
 
-    public List getCustomClasspath() {
-        return customClasspath;
+    public boolean isRefreshingClassLoader() {
+        return refreshingClassLoader;
     }
 
-    public File getSelectedEntry() {
-        return selectedEntry;
+    public void setRefreshingClassLoader(boolean refreshingClassLoader) {
+        this.refreshingClassLoader = refreshingClassLoader;
     }
 
-    public void setSelectedEntry(File selectedEntry) {
-        this.selectedEntry = selectedEntry;
-    }
+    public void save() {
+        super.save();
 
-    public void save() throws MalformedURLException, IOException {
-        classLoader.setPathFiles(customClasspath);
-        classLoader.store();
-    }
-
-    /**
-     * Adds a new file classpath entry above the currently selected
-     * one. If no current selection exists, adds it at the end of the 
-     * list.
-     */
-    public void addEntry(File newEntry) {
-        newEntry = newEntry.getAbsoluteFile();
-
-        synchronized (customClasspath) {
-            // don't add duplicates
-            if (customClasspath.contains(newEntry)) {
-                return;
-            }
-
-            if (selectedEntry == null) {
-                customClasspath.add(newEntry);
-            }
-            else {
-                int index = customClasspath.indexOf(selectedEntry);
-                if (index >= 0) {
-                    customClasspath.add(index, newEntry);
-                }
-                else {
-                    customClasspath.add(newEntry);
-                }
-            }
+        if (isRefreshingClassLoader()) {
+            application.initClassLoader();
+            refreshingClassLoader = false;
         }
     }
 
-    public boolean removeSelectedEntry() {
-        if (selectedEntry == null) {
-            return false;
-        }
+    public PreferenceDetail createDetail(Domain domain, String key) {
+        changeInDomain(domain);
+        return super.createDetail(domain, key);
+    }
 
-        synchronized (customClasspath) {
-            return customClasspath.remove(selectedEntry);
+    public PreferenceDetail deleteDetail(Domain domain, String key) {
+        changeInDomain(domain);
+        return super.deleteDetail(domain, key);
+    }
+
+    protected void changeInDomain(Domain domain) {
+        if (!refreshingClassLoader
+                && domain != null
+                && ModelerClassLoader.class.getName().equals(domain.getName())) {
+            refreshingClassLoader = true;
         }
     }
 }

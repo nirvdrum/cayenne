@@ -59,14 +59,16 @@ import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Window;
 import java.io.File;
+import java.util.Collection;
 
 import javax.swing.ActionMap;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.ConfigureClasspathAction;
 import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
@@ -97,9 +99,9 @@ import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
 import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.pref.DomainPreference;
 import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceEditor;
 import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceService;
-import org.objectstyle.cayenne.pref.PreferenceEditor;
 import org.objectstyle.cayenne.pref.PreferenceService;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
@@ -131,12 +133,19 @@ public class Application {
     // TODO: implement cleaner IoC approach to avoid using this singleton...
     protected static Application instance;
 
+    protected ModelerClassLoader modelerClassLoader;
     protected HSQLEmbeddedPreferenceService preferenceService;
     protected CayenneModelerController frameController;
     protected ActionMap actionMap;
     protected File initialProject;
     protected String name;
     protected String preferencesDB;
+
+    public static Application getInstance() {
+        return instance;
+    }
+
+    // static methods that should probabaly go away eventually...
 
     public static CayenneModelerFrame getFrame() {
         return (CayenneModelerFrame) getInstance().getFrameController().getView();
@@ -146,8 +155,11 @@ public class Application {
         return getInstance().getFrameController().getCurrentProject();
     }
 
-    public static Application getInstance() {
-        return instance;
+    /**
+     * Returns a singleton ModelerClassLoader.
+     */
+    public static ModelerClassLoader getClassLoader() {
+        return getInstance().getModelerClassLoader();
     }
 
     public Application(File initialProject) {
@@ -165,6 +177,10 @@ public class Application {
 
     public String getName() {
         return name;
+    }
+
+    public ModelerClassLoader getModelerClassLoader() {
+        return modelerClassLoader;
     }
 
     /**
@@ -193,17 +209,8 @@ public class Application {
      */
     public void startup() {
         // init subsystems
-
-        // ...preferences
-        HSQLEmbeddedPreferenceService service = new HSQLEmbeddedPreferenceService(
-                preferencesDB,
-                "pref",
-                getName());
-        service.stopOnShutdown();
-        this.preferenceService = service;
-        this.preferenceService.startService();
-
-        // ...actions
+        initPreferences();
+        initClassLoader();
         initActions();
 
         // ...Scope
@@ -213,24 +220,14 @@ public class Application {
         UIStrings.setPropertiesName(ModelerConstants.DEFAULT_MESSAGE_BUNDLE);
         ViewContext.clearThreadContext();
 
-        // ...start main frame
+        // ...create main frame
         this.frameController = new CayenneModelerController(this, initialProject);
 
         // update Scope to work nicely with main frame
         ViewContext.setGlobalContext(new ModelerContext(frameController.getFrame()));
 
+        // open up
         frameController.startupAction();
-    }
-
-    /**
-     * Returns application preferences editor. A new editor instance is created every
-     * time.
-     */
-    public PreferenceEditor getPreferenceEditor() {
-        HSQLEmbeddedPreferenceEditor editor = new HSQLEmbeddedPreferenceEditor(
-                preferenceService);
-        editor.setDelegate(PreferencesDelegate.sharedInstance);
-        return editor;
     }
 
     /**
@@ -245,6 +242,44 @@ public class Application {
      */
     public Domain getApplicationPreferences() {
         return getPreferenceService().getDomain(getName(), true);
+    }
+
+    /**
+     * Reinitializes ModelerClassLoader from preferences.
+     */
+    public void initClassLoader() {
+        ModelerClassLoader classLoader = new ModelerClassLoader();
+
+        // init from preferences...
+        Domain classLoaderDomain = getApplicationPreferences().getSubdomain(
+                ModelerClassLoader.class);
+
+        Collection details = classLoaderDomain.getPreferences();
+        if (details.size() > 0) {
+
+            // transform preference to file...
+            Transformer transformer = new Transformer() {
+
+                public Object transform(Object object) {
+                    DomainPreference pref = (DomainPreference) object;
+                    return new File(pref.getKey());
+                }
+            };
+
+            classLoader.setPathFiles(CollectionUtils.collect(details, transformer));
+        }
+
+        this.modelerClassLoader = classLoader;
+    }
+
+    protected void initPreferences() {
+        HSQLEmbeddedPreferenceService service = new HSQLEmbeddedPreferenceService(
+                preferencesDB,
+                "pref",
+                getName());
+        service.stopOnShutdown();
+        this.preferenceService = service;
+        this.preferenceService.startService();
     }
 
     protected void initActions() {
@@ -277,7 +312,6 @@ public class Application {
         registerAction(new ImportEOModelAction(this));
         registerAction(new GenerateDbAction(this));
         registerAction(new AboutAction(this)).setAlwaysOn(true);
-        registerAction(new ConfigureClasspathAction(this)).setAlwaysOn(true);
         registerAction(new ConfigurePreferencesAction(this)).setAlwaysOn(true);
         registerAction(new ExitAction(this)).setAlwaysOn(true);
     }

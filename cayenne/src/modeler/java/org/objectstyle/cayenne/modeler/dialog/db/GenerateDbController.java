@@ -75,7 +75,6 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
@@ -235,7 +234,7 @@ public class GenerateDbController extends BasicController {
                 continue;
             }
             try {
-                Class adapterClass = ModelerClassLoader.getClassLoader().loadClass(
+                Class adapterClass = Application.getClassLoader().loadClass(
                         dataSourceInfo.getAdapterClassName());
 
                 this.adapter = (DbAdapter) adapterClass.newInstance();

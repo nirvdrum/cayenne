@@ -64,15 +64,15 @@ import org.apache.commons.collections.ExtendedProperties;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 
-/** 
- * ModelerPreferences class supports persistent user preferences. 
- * Preferences are saved in the user home directory in 
- * "<code>$HOME/.cayenne/modeler.preferences</code>" file.
+/**
+ * ModelerPreferences class supports persistent user preferences. Preferences are saved in
+ * the user home directory in "<code>$HOME/.cayenne/modeler.preferences</code>" file.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class ModelerPreferences extends ExtendedProperties {
+
     private static final Logger logObj = Logger.getLogger(ModelerPreferences.class);
 
     /** Name of the preferences file. */
@@ -93,20 +93,17 @@ public class ModelerPreferences extends ExtendedProperties {
     public static final String LAST_PROJ_FILES = "Editor.lastSeveralProjectFiles";
 
     /** The directory of the last generated classes. */
-    public static final String LAST_GENERATED_CLASSES_DIR =
-        "gui.datamap.GenerateClassDialog.lastDir";
+    public static final String LAST_GENERATED_CLASSES_DIR = "gui.datamap.GenerateClassDialog.lastDir";
 
     /**
      * @since 1.1
      */
-    public static final String LAST_CLASS_GENERATION_TEMPLATE =
-        "gui.datamap.GenerateClassDialog.lastTemplate";
+    public static final String LAST_CLASS_GENERATION_TEMPLATE = "gui.datamap.GenerateClassDialog.lastTemplate";
 
     /**
      * @since 1.1
      */
-    public static final String LAST_CLASSPATH_SELECTION_DIR =
-        "gui.datamap.ConfigureClasspathDialog.lastDir";
+    public static final String LAST_CLASSPATH_SELECTION_DIR = "gui.datamap.ConfigureClasspathDialog.lastDir";
 
     /** User name */
     public static final String USER_NAME = "DbLoginPanel.unInput";
@@ -123,10 +120,7 @@ public class ModelerPreferences extends ExtendedProperties {
     /** GUI layout */
     public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";
     public static final String EDITOR_THEMENAME = "Editor.theme";
-    public static final String EDITOR_FRAME_WIDTH = "Editor.frameWidth";
-    public static final String EDITOR_FRAME_HEIGHT = "Editor.frameHeight";
-    public static final String EDITOR_FRAME_X = "Editor.frameX";
-    public static final String EDITOR_FRAME_Y = "Editor.frameY";
+
     public static final String EDITOR_TREE_WIDTH = "Editor.treeWidth";
 
     /** Log file */
@@ -150,25 +144,25 @@ public class ModelerPreferences extends ExtendedProperties {
         return sharedInstance;
     }
 
-    /** 
-     * Returns preferences directory <code>$HOME/.cayenne</code>. 
-     * If such directory does not exist, it is created as a side 
-     * effect of this method.
+    /**
+     * Returns preferences directory <code>$HOME/.cayenne</code>. If such directory
+     * does not exist, it is created as a side effect of this method.
      */
     public File preferencesDirectory() {
         return CayenneUserDir.getInstance().getDirectory();
     }
 
-    /** 
+    /**
      * Saves preferences. Preferences stored in
-     * <code>$HOME/.cayenne/modeler.preferences</code> file. 
+     * <code>$HOME/.cayenne/modeler.preferences</code> file.
      */
     public void storePreferences() {
         File prefFile = new File(preferencesDirectory(), PREFERENCES_NAME);
         try {
             if (!prefFile.exists()) {
-                logObj.debug(
-                    "Cannot save preferences - file " + prefFile + " does not exist");
+                logObj.debug("Cannot save preferences - file "
+                        + prefFile
+                        + " does not exist");
                 return;
             }
             save(new FileOutputStream(prefFile), "");
@@ -178,9 +172,8 @@ public class ModelerPreferences extends ExtendedProperties {
         }
     }
 
-    /** 
-     * Loads preferences from <code>$HOME/.cayenne/modeler.preferences</code> 
-     * file.
+    /**
+     * Loads preferences from <code>$HOME/.cayenne/modeler.preferences</code> file.
      */
     public void loadPreferences() {
         try {

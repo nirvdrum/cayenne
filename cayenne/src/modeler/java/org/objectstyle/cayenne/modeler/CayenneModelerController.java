@@ -68,8 +68,10 @@ import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
+import org.objectstyle.cayenne.modeler.pref.ComponentGeometry;
 import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
+import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
 
@@ -115,6 +117,7 @@ public class CayenneModelerController extends CayenneController {
 
     protected void initBindings() {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
         frame.addWindowListener(new WindowAdapter() {
 
             public void windowClosing(WindowEvent e) {
@@ -122,6 +125,11 @@ public class CayenneModelerController extends CayenneController {
                         .exit();
             }
         });
+
+        Domain prefDomain = application.getApplicationPreferences().getSubdomain(
+                frame.getClass());
+        ComponentGeometry geometry = ComponentGeometry.getPreference(prefDomain);
+        geometry.bind(frame, 650, 550, 30);
     }
 
     public void dataDomainSelectedAction(DataDomain domain) {

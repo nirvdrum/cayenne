@@ -89,7 +89,6 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
 import org.objectstyle.cayenne.modeler.swing.PanelFactory;
 import org.objectstyle.cayenne.util.Util;
@@ -282,7 +281,7 @@ public class GenerateDbDialog extends CayenneDialog {
     protected void generateDBSchema() {
         try {
             // use modeler custom class loader
-            Class driverClass = ModelerClassLoader.getClassLoader().loadClass(
+            Class driverClass = Application.getClassLoader().loadClass(
                     dsi.getJdbcDriver());
             Driver driver = (Driver) driverClass.newInstance();
             DataSource dataSource = new DriverDataSource(

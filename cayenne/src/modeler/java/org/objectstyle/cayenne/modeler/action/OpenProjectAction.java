@@ -67,7 +67,6 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
@@ -141,7 +140,7 @@ public class OpenProjectAction extends ProjectAction {
     /** Opens specified project file. File must already exist. */
     public void openProject(File file) {
         // Using fresh ModelerClassLoader, as we need to support custom adapters
-        ConfigurationHack.setResourceLoader(ModelerClassLoader
+        ConfigurationHack.setResourceLoader(Application
                 .getClassLoader()
                 .createClassLoader());
 

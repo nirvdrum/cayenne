@@ -57,12 +57,8 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -76,7 +72,6 @@ import javax.swing.JToolBar;
 
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.ConfigureClasspathAction;
 import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
@@ -152,51 +147,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         initMenus();
         initToolbar();
         initStatusBar();
-
-        final ModelerPreferences prefs = ModelerPreferences.getPreferences();
-
-        this.addComponentListener(new ComponentAdapter() {
-
-            public void componentResized(ComponentEvent e) {
-                if (e.getComponent() == CayenneModelerFrame.this) {
-                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_WIDTH, String
-                            .valueOf(CayenneModelerFrame.this.getWidth()));
-                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_HEIGHT, String
-                            .valueOf(CayenneModelerFrame.this.getHeight()));
-                }
-            }
-
-            public void componentMoved(ComponentEvent e) {
-                if (e.getComponent() == CayenneModelerFrame.this) {
-                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_X, String
-                            .valueOf(CayenneModelerFrame.this.getX()));
-                    prefs.setProperty(ModelerPreferences.EDITOR_FRAME_Y, String
-                            .valueOf(CayenneModelerFrame.this.getY()));
-                }
-            }
-        });
-
-        int newWidth = prefs.getInt(ModelerPreferences.EDITOR_FRAME_WIDTH, 650);
-        int newHeight = prefs.getInt(ModelerPreferences.EDITOR_FRAME_HEIGHT, 550);
-
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-        if (newHeight > screenSize.height) {
-            newHeight = screenSize.height;
-        }
-
-        if (newWidth > screenSize.width) {
-            newWidth = screenSize.width;
-        }
-
-        this.setSize(newWidth, newHeight);
-
-        int defaultX = (screenSize.width - newWidth) / 2;
-        int newX = prefs.getInt(ModelerPreferences.EDITOR_FRAME_X, defaultX);
-        int defaultY = (screenSize.height - newHeight) / 2;
-        int newY = prefs.getInt(ModelerPreferences.EDITOR_FRAME_Y, defaultY);
-
-        setLocation(newX, newY);
     }
 
     /**
@@ -256,7 +206,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         toolMenu.add(getAction(GenerateClassesAction.getActionName()).buildMenu());
         toolMenu.add(getAction(GenerateDbAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
-        toolMenu.add(getAction(ConfigureClasspathAction.getActionName()).buildMenu());
         toolMenu.add(getAction(ConfigurePreferencesAction.getActionName()).buildMenu());
 
         helpMenu.add(getAction(AboutAction.getActionName()).buildMenu());

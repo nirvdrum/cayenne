@@ -70,9 +70,8 @@ import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.db.DbLoaderHelper;
 import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectDataSource;
@@ -170,7 +169,7 @@ public class ImportDbAction extends CayenneAction {
     public DbAdapter createAdapter(DataSourceInfo dsi) {
         // load adapter
         try {
-            Class adapterClass = ModelerClassLoader.getClassLoader().loadClass(
+            Class adapterClass = Application.getClassLoader().loadClass(
                     dsi.getAdapterClassName());
 
             return (DbAdapter) adapterClass.newInstance();
@@ -191,7 +190,7 @@ public class ImportDbAction extends CayenneAction {
 
         try {
             // load driver via custom ClassLoader
-            Class driverClass = ModelerClassLoader.getClassLoader().loadClass(
+            Class driverClass = Application.getClassLoader().loadClass(
                     driverClassName);
             Driver driver = (Driver) driverClass.newInstance();
 

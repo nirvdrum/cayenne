@@ -78,9 +78,8 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
@@ -457,7 +456,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
         DbAdapter newAdapter = null;
         if (adapterName != null && adapterName.trim().length() > 0) {
             try {
-                Class adapterClass = ModelerClassLoader.getClassLoader().loadClass(
+                Class adapterClass = Application.getClassLoader().loadClass(
                         adapterName);
                 newAdapter = (DbAdapter) adapterClass.newInstance();
             }

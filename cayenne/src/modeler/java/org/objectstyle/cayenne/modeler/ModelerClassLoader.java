@@ -55,77 +55,47 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.project.CayenneUserDir;
 
 /**
- * A facade to CayenneModeler specialized ClassLoader that allows to load jar files dynamically 
- * from non-classpath locations. Singleton instance of ModelerClassLoader can be obtained by 
- * calling static method {@link #getClassLoader()}. Default list of locations is loaded 
- * from ~/.cayenne/modeler.classpath. When ModelerClassLoader's URL list is modified, 
- * it is being saved back to this file. 
+ * A facade to CayenneModeler specialized ClassLoader that allows to load jar files
+ * dynamically from non-classpath locations.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class ModelerClassLoader {
+
     private static Logger logObj = Logger.getLogger(ModelerClassLoader.class);
-
-    public static final String CLASSPATH_FILE = "modeler.classpath";
-
-    // create class loader with default classpath file location
-    private static final ModelerClassLoader defaultLoader =
-        new ModelerClassLoader(CayenneUserDir.getInstance().resolveFile(CLASSPATH_FILE));
-
-    protected File classpathFile;
-    protected long loadedAt;
 
     private FileClassLoader classLoader;
     protected List pathFiles;
 
-    /**
-     * Returns a singleton ModelerClassLoader.
-     */
-    public static ModelerClassLoader getClassLoader() {
-        return defaultLoader;
-    }
-
-    protected ModelerClassLoader(File classpathFile) {
-        this.classpathFile = classpathFile;
+    public ModelerClassLoader() {
         this.pathFiles = new ArrayList(15);
-        load();
     }
 
     /**
      * Returns class for a given name, loading it if needed from configured locations.
      */
     public synchronized Class loadClass(String className) throws ClassNotFoundException {
-        load();
         return nonNullClassLoader().loadClass(className);
     }
-    
+
     /**
      * Returns a ClassLoader based on the current configured CLASSPATH settings.
      */
     public ClassLoader createClassLoader() {
-        load();
         return nonNullClassLoader();
     }
 
@@ -136,7 +106,7 @@ public class ModelerClassLoader {
         return Collections.unmodifiableList(pathFiles);
     }
 
-    public synchronized void setPathFiles(List files) throws MalformedURLException {
+    public synchronized void setPathFiles(Collection files) {
 
         pathFiles.clear();
         classLoader = null;
@@ -150,7 +120,7 @@ public class ModelerClassLoader {
     /**
      * Adds a new location to the list of configured locations.
      */
-    private void addFile(File file) throws MalformedURLException {
+    private void addFile(File file) {
         file = file.getAbsoluteFile();
 
         if (pathFiles.contains(file)) {
@@ -158,7 +128,13 @@ public class ModelerClassLoader {
         }
 
         if (classLoader != null) {
-            classLoader.addURL(file.toURL());
+            try {
+                classLoader.addURL(file.toURL());
+            }
+            catch (MalformedURLException ex) {
+                logObj.warn("Invalid classpath entry, ignoring: " + file);
+                return;
+            }
         }
 
         pathFiles.add(file);
@@ -174,113 +150,9 @@ public class ModelerClassLoader {
         return classLoader;
     }
 
-    /**
-     * Loads classpath configuration file from preconfigured location. Failures are
-     * quetly ignored.
-     */
-    protected synchronized void load() {
-        if (classpathFile == null || loadedAt > classpathFile.lastModified()) {
-            return;
-        }
-
-        // read one line at a time and create URLs
-        Set files = new HashSet(15);
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(classpathFile));
-
-            try {
-                String line;
-                while ((line = in.readLine()) != null) {
-                    line = line.trim();
-
-                    // skip comments
-                    if (line.length() == 0
-                        || line.startsWith("#")
-                        || line.startsWith("//")) {
-                        continue;
-                    }
-
-                    files.add(new File(line).getAbsoluteFile());
-                }
-            }
-            finally {
-                try {
-                    in.close();
-                }
-                catch (IOException ioex) {
-                    // don't let closing exception mask other failures
-                }
-
-                loadedAt = System.currentTimeMillis();
-            }
-
-            // no failures, use loaded data
-
-            pathFiles.clear();
-            classLoader = null;
-
-            Iterator it = files.iterator();
-            while (it.hasNext()) {
-                File file = (File) it.next();
-                if (file.canRead()) {
-                    pathFiles.add(file);
-                    logObj.debug("Added CLASSPATH entry...: " + file);
-                }
-                else {
-                    logObj.info("Invalid CLASSPATH entry, ignoring...: " + file);
-                }
-            }
-        }
-        catch (IOException ioex) {
-            logObj.warn("*** Failed to load classpath file: " + classpathFile, ioex);
-        }
-    }
-
-    /**
-     * Stores classpath configuration into a file at preconfigured location.
-     * Uses a temp file to store locations to avoid corrupting the main file.
-     */
-    public synchronized void store() throws IOException {
-        if (classpathFile == null) {
-            return;
-        }
-
-        File dir = classpathFile.getParentFile();
-        if (!dir.isDirectory()) {
-            return;
-        }
-
-        File temp = File.createTempFile("modeler", ".classpath", dir);
-        BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-
-        try {
-            // write header
-            out.write("# CayenneModeler Custom Classpath; " + new Date());
-            out.newLine();
-            out.newLine();
-
-            Iterator it = pathFiles.iterator();
-            while (it.hasNext()) {
-                File file = (File) it.next();
-                out.write(file.getAbsolutePath());
-                out.newLine();
-            }
-        }
-        finally {
-            out.close();
-        }
-
-        // move temp file to perm
-        classpathFile.delete();
-
-        if (temp.renameTo(classpathFile)) {
-            loadedAt = classpathFile.lastModified();
-        }
-
-    }
-
     // URLClassLoader with addURL method exposed.
     static class FileClassLoader extends URLClassLoader {
+
         FileClassLoader(ClassLoader parent) {
             super(new URL[0], parent);
         }
