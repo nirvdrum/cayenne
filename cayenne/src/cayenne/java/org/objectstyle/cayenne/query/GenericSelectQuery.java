@@ -56,67 +56,70 @@
 package org.objectstyle.cayenne.query;
 
 /**
- * Interface that defines API of a generic SELECT query 
- * from a DataContext perspective. It allows DataContext to
- * run different select queries that can be Cayenne based or use 
- * raw SQL.
+ * Interface that defines API of a generic SELECT query from a DataContext perspective. It
+ * allows DataContext to run different select queries that can be Cayenne based or use raw
+ * SQL.
  * 
  * @author Andrei Adamchik
  */
 public interface GenericSelectQuery extends Query {
-    public static final String FETCH_LIMIT_PROPERTY =
-        "cayenne.GenericSelectQuery.fetchLimit";
+
+    public static final String FETCH_LIMIT_PROPERTY = "cayenne.GenericSelectQuery.fetchLimit";
     public static final int FETCH_LIMIT_DEFAULT = 0;
 
     public static final String PAGE_SIZE_PROPERTY = "cayenne.GenericSelectQuery.pageSize";
     public static final int PAGE_SIZE_DEFAULT = 0;
 
-    public static final String FETCHING_DATA_ROWS_PROPERTY =
-        "cayenne.GenericSelectQuery.fetchingDataRows";
+    public static final String FETCHING_DATA_ROWS_PROPERTY = "cayenne.GenericSelectQuery.fetchingDataRows";
     public static final boolean FETCHING_DATA_ROWS_DEFAULT = false;
 
-    public static final String REFRESHING_OBJECTS_PROPERTY =
-        "cayenne.GenericSelectQuery.refreshingObjects";
+    public static final String REFRESHING_OBJECTS_PROPERTY = "cayenne.GenericSelectQuery.refreshingObjects";
     public static final boolean REFRESHING_OBJECTS_DEFAULT = true;
 
-    public static final String RESOLVING_INHERITED_PROPERTY =
-        "cayenne.GenericSelectQuery.resolvingInherited";
+    public static final String RESOLVING_INHERITED_PROPERTY = "cayenne.GenericSelectQuery.resolvingInherited";
     public static final boolean RESOLVING_INHERITED_DEFAULT = true;
 
     /**
-     * Returns <code>true</code> if this query 
-     * should produce a list of data rows as opposed
-     * to DataObjects, <code>false</code> for DataObjects. 
-     * This is a hint to QueryEngine executing this query.
+     * Returns <code>true</code> if this query should produce a list of data rows as
+     * opposed to DataObjects, <code>false</code> for DataObjects. This is a hint to
+     * QueryEngine executing this query.
      */
     public boolean isFetchingDataRows();
 
     /**
-     * Returns <code>true</code> if the query results should replace
-     * any currently cached values, returns <code>false</code> otherwise.
-     * If {@link #isFetchingDataRows()} returns <code>true</code>, this
-     * setting is not applicable and has no effect.
+     * Returns <code>true</code> if the query results should replace any currently
+     * cached values, returns <code>false</code> otherwise. If
+     * {@link #isFetchingDataRows()} returns <code>true</code>, this setting is not
+     * applicable and has no effect.
      * 
      * @since 1.1
      */
     public boolean isRefreshingObjects();
 
     /**
-     * Returns true if objects fetched via this query should be fully
-     * resolved according to the inheritance hierarchy.
+     * Returns true if objects fetched via this query should be fully resolved according
+     * to the inheritance hierarchy.
      * 
      * @since 1.1
      */
     public boolean isResolvingInherited();
 
     /**
-     * Returns query page size. Page size is a hint
-     * to Cayenne that query should be performed page by
-     * page, instead of retrieveing all results at once.
-     * If the value returned is less than or equal to zero,
-     * no paging should occur.
+     * Returns query page size. Page size is a hint to Cayenne that query should be
+     * performed page by page, instead of retrieveing all results at once. If the value
+     * returned is less than or equal to zero, no paging should occur.
      */
     public int getPageSize();
 
+    /**
+     * Returns the limit on the maximium number of records that can be returned by this
+     * query. If the actual number of rows in the result exceeds the fetch limit, they will
+     * be discarded. One possible use of fetch limit is using it as a safeguard against
+     * large result sets that may lead to the application running out of memory, etc. If
+     * a fetch limit is greater or equal to zero, all rows will be returned.
+     * 
+     * @return the limit on the maximium number of records that can be returned by this
+     *         query
+     */
     public int getFetchLimit();
 }
