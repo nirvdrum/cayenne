@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -63,8 +64,14 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
+import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
 
 /**
  * Test suite for testing behavior of multiple DataContexts that share the same 
@@ -87,6 +94,61 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         artist.setArtistName("version1");
         artist.setDateOfBirth(new Date());
         context.commitChanges();
+    }
+
+    /**
+      * Test case to prove that refreshing snapshots as a result of the database fetch
+      * will be propagated accross DataContexts. 
+      * 
+      * @throws Exception
+      */
+    public void testSnapshotChangePropagationOnSelect() throws Exception {
+        String originalName = artist.getArtistName();
+        final String newName = "version2";
+
+        DataContext context = artist.getDataContext();
+
+        // create alternative context making sure that no cache is flushed
+        DataContext altContext = context.getParentDataDomain().createDataContext(true);
+
+        // update artist using raw SQL
+        SqlModifyQuery update =
+            new SqlModifyQuery(
+                Artist.class,
+                "UPDATE ARTIST SET ARTIST_NAME = '"
+                    + newName
+                    + "' WHERE ARTIST_NAME = '"
+                    + originalName
+                    + "'");
+        context.performQueries(
+            Collections.singletonList(update),
+            new DefaultOperationObserver());
+
+        // fetch updated artist into the new context, and see if the original one gets updated
+        Expression qual = ExpressionFactory.matchExp("artistName", newName);
+        List artists = altContext.performQuery(new SelectQuery(Artist.class, qual));
+        assertEquals(1, artists.size());
+        Artist altArtist = (Artist) artists.get(0);
+
+        // check underlying cache
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId());
+        assertNotNull(freshSnapshot);
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+
+        // check both artists
+        assertEquals(newName, altArtist.getArtistName());
+
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(
+                    "Peer object state wasn't refreshed on fetch",
+                    newName,
+                    artist.getArtistName());
+            }
+        };
+        helper.assertWithTimeout(3000);
     }
 
     /**
@@ -293,14 +355,14 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertNotNull(id);
         assertNotNull(id.getValueForAttribute(Artist.ARTIST_ID_PK_COLUMN));
         assertFalse(id.isTemporary());
-       
+
         altContext.commitChanges();
-        
+
         // create independent context and fetch artist in it
         DataContext context3 = getDomain().createDataContext(false);
         List artists = context3.performQuery(QueryUtils.selectObjectForId(id));
         assertEquals(1, artists.size());
-        Artist artist3 = (Artist)artists.get(0);
+        Artist artist3 = (Artist) artists.get(0);
         assertEquals(id, artist3.getObjectId());
     }
 

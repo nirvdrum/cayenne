@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -116,7 +118,12 @@ public class DataRowStore implements Serializable {
     protected String name;
     protected LRUMap snapshots;
     protected boolean notifyingRemoteListeners;
-    protected EventBridge remoteNotificationsHandler;
+    
+    protected transient EventBridge remoteNotificationsHandler;
+    
+    // IMPORTANT: EventSubject must be an ivar to avoid its deallocation
+    // too early, and thus disabling events.
+    protected transient EventSubject eventSubject;
 
     /**
      * Creates new named DataRowStore with default configuration.
@@ -138,7 +145,12 @@ public class DataRowStore implements Serializable {
         }
 
         this.name = name;
+        this.eventSubject = createSubject();
         initFromProperties(properties);
+    }
+    
+    private EventSubject createSubject() {
+        return EventSubject.getSubject(this.getClass(), name);
     }
 
     protected void initFromProperties(Map properties) {
@@ -295,7 +307,7 @@ public class DataRowStore implements Serializable {
      * changes.
      */
     public EventSubject getSnapshotEventSubject() {
-        return EventSubject.getSubject(this.getClass(), name);
+        return eventSubject;
     }
 
     /**
@@ -448,4 +460,15 @@ public class DataRowStore implements Serializable {
     public void setNotifyingRemoteListeners(boolean notifyingRemoteListeners) {
         this.notifyingRemoteListeners = notifyingRemoteListeners;
     }
+
+    // deserialization support
+    private void readObject(ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+
+        // restore subject
+        this.eventSubject = createSubject();
+    }
+
 }

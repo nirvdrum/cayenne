@@ -259,8 +259,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Updates underlying SnapshotCache. If <code>refresh</code> is true, all
-     * snapshots in <code>snapshots</code> will be loaded into SnapshotCache,
+     * Updates underlying DataRowStore. If <code>refresh</code> is true, all
+     * snapshots in <code>snapshots</code> will be loaded into DataRowStore,
      * regardless of the existing cache state. If <code>refresh</code> is
      * false, only missing snapshots are loaded. This method is normally called
      * by Cayenne internally to synchronized snapshots of recently fetched
@@ -299,12 +299,18 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             ObjectId oid = object.getObjectId();
 
             // add snapshots if refresh is forced, or if a snapshot is missing
-            if (refresh || getSnapshot(oid) == null) {
+            DataRow cachedSnapshot = getCachedSnapshot(oid);
+            if (refresh || cachedSnapshot == null) {
                 if (modified == null) {
                     modified = new HashMap();
                 }
 
-                modified.put(oid, snapshots.get(i));
+                DataRow newSnapshot = (DataRow) snapshots.get(i);
+                if (cachedSnapshot != null) {
+                    newSnapshot.setReplacesVersion(cachedSnapshot.getVersion());
+                }
+
+                modified.put(oid, newSnapshot);
             }
         }
 
@@ -646,12 +652,16 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
         if (event.getRootSource() == this || event.getSource() == this) {
-            logObj.debug("SnapshotEvent by this ObjectStore, ignoring: " + event);
+            if (logObj.isDebugEnabled()) {
+                logObj.debug("SnapshotEvent by this ObjectStore, ignoring: " + event);
+            }
             return;
         }
 
         // merge objects with changes in event...
-        logObj.debug("new SnapshotEvent: " + event);
+        if (logObj.isDebugEnabled()) {
+            logObj.debug("new SnapshotEvent: " + event);
+        }
 
         synchronized (this) {
             processUpdatedSnapshots(event.modifiedDiffs());
