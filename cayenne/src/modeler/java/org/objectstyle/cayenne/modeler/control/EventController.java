@@ -148,6 +148,15 @@ public class EventController extends ModelerController {
             reset();
         } else if (control.matchesID(PROJECT_OPENED_ID)) {
             setDirty(((Project) control.getParameter()).isLocationUndefined());
+            addDomainDisplayListener(Editor.getFrame());
+            addDataNodeDisplayListener(Editor.getFrame());
+            addDataMapDisplayListener(Editor.getFrame());
+            addObjEntityDisplayListener(Editor.getFrame());
+            addDbEntityDisplayListener(Editor.getFrame());
+            addObjAttributeDisplayListener(Editor.getFrame());
+            addDbAttributeDisplayListener(Editor.getFrame());
+            addObjRelationshipDisplayListener(Editor.getFrame());
+            addDbRelationshipDisplayListener(Editor.getFrame());
         }
     }
 

@@ -373,27 +373,6 @@ public class Editor
         }
     }
 
-    public void projectOpened() {
-        EventController evController = controller.getEventController();
-        view = new EditorView(evController);
-        getContentPane().add(view, BorderLayout.CENTER);
-
-        evController.addDomainDisplayListener(this);
-        evController.addDataNodeDisplayListener(this);
-        evController.addDataMapDisplayListener(this);
-        evController.addObjEntityDisplayListener(this);
-        evController.addDbEntityDisplayListener(this);
-        evController.addObjAttributeDisplayListener(this);
-        evController.addDbAttributeDisplayListener(this);
-        evController.addObjRelationshipDisplayListener(this);
-        evController.addDbRelationshipDisplayListener(this);
-
-        enableProjectMenu();
-        validate();
-
-        updateTitle();
-    }
-
     /** 
      * Adds asterisk to the title of the window to indicate 
      * it is dirty. 
@@ -415,7 +394,10 @@ public class Editor
 
     public void currentDomainChanged(DomainDisplayEvent e) {
         if (e.getDomain() == null) {
-            enableProjectMenu();
+            // this is a temporary hack till all event handling is removed out
+            // of Editor
+            controller.getActionController().handleControl(
+                new Control(ModelerController.PROJECT_OPENED_ID));
         } else {
             enableDomainMenu();
             getAction(RemoveAction.ACTION_NAME).setName("Remove Domain");
@@ -470,19 +452,11 @@ public class Editor
         }
     }
 
-    private void enableProjectMenu() {
+    private void enableDomainMenu() {
         // this is a temporary hack till all event handling is removed out
         // of Editor
         controller.getActionController().handleControl(
-            new Control(ModelerController.PROJECT_CLOSED_ID));
-            
-            
-        getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
-        getAction(ProjectAction.ACTION_NAME).setEnabled(true);
-    }
-
-    private void enableDomainMenu() {
-        enableProjectMenu();
+            new Control(ModelerController.PROJECT_OPENED_ID));
 
         getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
         getAction(RemoveAction.ACTION_NAME).setEnabled(true);
@@ -568,7 +542,7 @@ public class Editor
     public RecentFileMenu getRecentFileMenu() {
         return recentFileMenu;
     }
-    
+
     /**
      * Sets the view.
      * @param view The view to set

@@ -79,10 +79,9 @@ public class ActionController extends ModelerController {
      * Performs control handling, invoking appropriate action method.
      */
     protected void doHandleControl(Control control) throws ControlException {
-    	if (control.matchesID(PROJECT_OPENED_ID)) {
-            // do nothing for now...
-        }
-        else if (control.matchesID(PROJECT_CLOSED_ID)) {
+        if (control.matchesID(PROJECT_OPENED_ID)) {
+            enableProjectActions();
+        } else if (control.matchesID(PROJECT_CLOSED_ID)) {
             projectClosed();
         }
     }
@@ -115,5 +114,15 @@ public class ActionController extends ModelerController {
 
             getTopModel().getActionMap().get(keys[i]).setEnabled(false);
         }
+    }
+
+    protected void enableProjectActions() {
+        disableAllActions();
+        
+        getAction(RemoveAction.ACTION_NAME).setName("Remove");
+        
+        getAction(SaveAction.ACTION_NAME).setEnabled(false);
+        getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
+        getAction(ProjectAction.ACTION_NAME).setEnabled(true);
     }
 }

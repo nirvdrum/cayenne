@@ -55,8 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
+import java.awt.BorderLayout;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.EditorView;
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.Project;
@@ -69,8 +72,8 @@ import org.scopemvc.core.ControlException;
  * @author Andrei Adamchik
  */
 public class TopController extends ModelerController {
-	private static Logger logObj = Logger.getLogger(TopController.class);
-	
+    private static Logger logObj = Logger.getLogger(TopController.class);
+
     protected StatusBarController statusController;
     protected EventController eventController;
     protected ActionController actionController;
@@ -111,7 +114,7 @@ public class TopController extends ModelerController {
         // --- propagate control to child controllers
         control.markUnmatched();
         eventController.handleControl(control);
-        
+
         control.markUnmatched();
         actionController.handleControl(control);
 
@@ -120,16 +123,25 @@ public class TopController extends ModelerController {
     }
 
     protected void projectOpened(Control control) {
+        // sanity check 
+        if (!(control.getParameter() instanceof Project)) {
+            return;
+        }
+
         Project project = (Project) control.getParameter();
 
         // update model
         getTopModel().setCurrentProject(project);
 
         // update main view
-        view.projectOpened();
+        view.setView(new EditorView(eventController));
+        view.getContentPane().add(view.getView(), BorderLayout.CENTER);
+        view.validate();
+
+        view.updateTitle();
 
         // --- propagate control to child controllers
-      
+
         control.markUnmatched();
         eventController.handleControl(control);
 
