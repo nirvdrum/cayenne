@@ -106,6 +106,7 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
 import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.Project;
 
 /** 
  * Tree of domains, data maps, data nodes (sources) and entities. 
@@ -147,7 +148,7 @@ public class BrowseView
         mediator = data_map_editor;
         setViewportView(browseTree);
         browseTree.setCellRenderer(new BrowseViewRenderer());
-        load();
+        load(Editor.getProject());
 
         // listen for mouse events
         MouseListener ml = new MouseAdapter() {
@@ -186,8 +187,11 @@ public class BrowseView
 
     /** Traverses domains, nodes, maps and entities and populates tree.
      */
-    private void load() {
-        rootNode = new DefaultMutableTreeNode(((ApplicationProject) Editor.getProject()).getConfig(), true);
+    private void load(Project p) {
+        rootNode =
+            new DefaultMutableTreeNode(
+                ((ApplicationProject) Editor.getProject()).getConfig(),
+                true);
         // create tree model with root objects
         model = new DefaultTreeModel(rootNode);
         // Populate obj tree
@@ -215,42 +219,44 @@ public class BrowseView
         } // End level
     }
 
-    private DefaultMutableTreeNode loadDomain(DataDomain temp_domain) {
-        DefaultMutableTreeNode domain_ele = new DefaultMutableTreeNode(temp_domain, true);
-        List map_list = temp_domain.getMapList();
-        Iterator map_iter = map_list.iterator();
-        while (map_iter.hasNext()) {
-            DefaultMutableTreeNode map_ele = loadMap((DataMap) map_iter.next());
-            domain_ele.add(map_ele);
+    private DefaultMutableTreeNode loadDomain(DataDomain domain) {
+        // wrap in a tree node
+        DefaultMutableTreeNode domainTreeNode = new DefaultMutableTreeNode(domain, true);
+
+        Iterator mapIt = domain.getMapList().iterator();
+        while (mapIt.hasNext()) {
+            DefaultMutableTreeNode mapTreeNode = loadMap((DataMap) mapIt.next());
+            domainTreeNode.add(mapTreeNode);
         }
-        DataNode[] nodes = temp_domain.getDataNodes();
-        for (int node_count = 0; node_count < nodes.length; node_count++) {
-            DefaultMutableTreeNode node_ele = loadNode(nodes[node_count]);
-            domain_ele.add(node_ele);
+        Iterator nodeIt = domain.getDataNodeList().iterator();
+        while (nodeIt.hasNext()) {
+            DefaultMutableTreeNode nodeTreeNode = loadNode((DataNode)nodeIt.next());
+            domainTreeNode.add(nodeTreeNode);
         }
-        return domain_ele;
+        return domainTreeNode;
     }
 
     private DefaultMutableTreeNode loadMap(DataMap map) {
-        DefaultMutableTreeNode map_ele;
-        map_ele = new DefaultMutableTreeNode(map, true);
-        List obj_entities = map.getObjEntitiesAsList();
-        Iterator obj_iter = obj_entities.iterator();
-        while (obj_iter.hasNext()) {
-            Entity entity = (Entity) obj_iter.next();
-            DefaultMutableTreeNode obj_entity_ele =
+        DefaultMutableTreeNode mapTreeNode = new DefaultMutableTreeNode(map, true);
+        
+        Iterator oeIt = map.getObjEntitiesAsList().iterator();
+        while (oeIt.hasNext()) {
+            Entity entity = (Entity) oeIt.next();
+            DefaultMutableTreeNode oeTreeNode =
                 new DefaultMutableTreeNode(entity, false);
-            map_ele.add(obj_entity_ele);
-        } // End obj entities
+            mapTreeNode.add(oeTreeNode);
+        } 
+                
         List db_entities = map.getDbEntitiesAsList();
         Iterator db_iter = db_entities.iterator();
         while (db_iter.hasNext()) {
             Entity entity = (Entity) db_iter.next();
             DefaultMutableTreeNode db_entity_ele;
             db_entity_ele = new DefaultMutableTreeNode(entity, false);
-            map_ele.add(db_entity_ele);
-        } // End db entities
-        return map_ele;
+            mapTreeNode.add(db_entity_ele);
+        }
+        
+        return mapTreeNode;
     }
 
     private DefaultMutableTreeNode loadNode(DataNode node) {
@@ -662,11 +668,13 @@ public class BrowseView
         return null;
     }
 
-    private DefaultMutableTreeNode getDataSourceNode(DataDomain domain, DataNode dataNode) {
+    private DefaultMutableTreeNode getDataSourceNode(
+        DataDomain domain,
+        DataNode dataNode) {
         if (dataNode == null) {
             return null;
         }
-        
+
         DefaultMutableTreeNode domain_node = getDomainNode(domain);
         if (null == domain_node)
             return null;

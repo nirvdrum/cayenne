@@ -66,10 +66,7 @@ import org.objectstyle.cayenne.map.Entity;
 
 /**
  * ProjectTraversal allows to traverse Cayenne project tree in a
- * "depth-first" order starting from DataDomains and down to
- * attributes and relationships. Iterator elements are of type 
- * Object[] and contain a sequence of objects defining a "path" 
- * from the top of the tree to current node.
+ * "depth-first" order starting from an arbitrary level to its children. 
  * 
  * <p><i>Current implementation is not very efficient
  * and would actually first read the whole tree, before returning 

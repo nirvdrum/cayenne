@@ -113,8 +113,9 @@ public class ProjectTypeSelectDialog extends SPanel {
         panel.setBorder(BorderFactory.createTitledBorder(border, name));
 
         // set description
-        JTextArea descArea = new JTextArea(5, 40);
+        JTextArea descArea = new JTextArea(5, 50);
         descArea.setText(desc);
+        descArea.setFont(descArea.getFont().deriveFont((float)11));
         descArea.setEditable(false);
         descArea.setEnabled(!disabled);
         descArea.setLineWrap(true);
