@@ -96,7 +96,7 @@ public class ImportEOModelAction extends CayenneAction {
 	/**
 	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
 	 */
-	public void actionPerformed(ActionEvent event) {
+	public void performAction(ActionEvent event) {
 		importEOModel();
 	}
 

@@ -1,8 +1,8 @@
 /* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
  *
- * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002 The ObjectStyle Group
+ * Copyright (c) 2002 The ObjectStyle Group 
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne"
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
+ *    from this software without prior written permission. For written 
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,54 +53,21 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui;
 
-package org.objectstyle.cayenne.gui.action;
-
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
-
-import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.GUIErrorHandler;
+import javax.swing.JDialog;
 
 /**
- * Superclass of CayenneModeler actions that implements support 
- * for some common functionality, exception handling, etc.
+ * Superclass of CayenneModeler dialogs.
  * 
  * @author Andrei Adamchik
  */
-public abstract class CayenneAction extends AbstractAction {
-	protected Mediator mediator;
-
-    /**
-     * Subclasses must implement this method instead of <code>actionPerformed</code>
-     * to allow for exception handling.
-     */
-    public abstract void performAction(ActionEvent e);
-    
-	/**
-	 * Creates new CayenneAction, initalizing it with mediator.
-	 */
-	public CayenneAction(Mediator mediator) {
-		this.mediator = mediator;
+public class CayenneDialog extends JDialog {
+	public CayenneDialog(Editor frame, String title, boolean modal) {
+		super(frame, title, modal);
 	}
 
-	/** 
-	 * Returns mediator associated with this action.
-	 */
-	public Mediator getMediator() {
-		return mediator;
-	}
-
-	/**
-	 * Internally calls <code>performAction</code>.
-	 * Traps exceptions that ocurred during action processing.
-	 */
-	public void actionPerformed(ActionEvent e) {
-		try {
-			performAction(e);
-		} catch (Throwable th) {
-			GUIErrorHandler.guiException(th);
-		}
+	public Editor getParentEditor() {
+		return (Editor) super.getParent();
 	}
 }

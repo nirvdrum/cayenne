@@ -88,7 +88,7 @@ public class RemoveAction extends CayenneAction
 		super(mediator);
 	}
 	
-	public void actionPerformed(ActionEvent e) {
+	public void performAction(ActionEvent e) {
 		remove();
 	}
 	

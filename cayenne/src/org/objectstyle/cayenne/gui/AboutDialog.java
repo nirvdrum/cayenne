@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,9 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */
+ 
+package org.objectstyle.cayenne.gui;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,7 +74,7 @@ import org.objectstyle.cayenne.gui.util.GUIUtil;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class AboutDialog extends JDialog implements ActionListener {
+public class AboutDialog extends CayenneDialog implements ActionListener {
 	private static final int WIDTH = 523;
 	private static final int HEIGHT = 450;
 	private static String licenseString;
@@ -109,10 +111,6 @@ public class AboutDialog extends JDialog implements ActionListener {
 		this.getContentPane().doLayout();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setVisible(true);
-	}
-
-	public Editor getParentEditor() {
-		return (Editor) super.getParent();
 	}
 
 	/** 

@@ -160,7 +160,7 @@ public class GenerateDbAction extends CayenneAction {
 
 
 	
-	public void actionPerformed(ActionEvent e) {
+	public void performAction(ActionEvent e) {
 		generateDb();
 	}
 }

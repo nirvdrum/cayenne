@@ -348,7 +348,7 @@ public class SaveAction extends CayenneAction {
         }
 	}
 	
-	public void actionPerformed(ActionEvent e) {
+	public void performAction(ActionEvent e) {
 		saveAll();
 	}
 }

@@ -81,7 +81,7 @@ public class AddDataMapAction extends CayenneAction {
 		super(mediator);
 	}
 	
-	public void actionPerformed(ActionEvent e) {
+	public void performAction(ActionEvent e) {
 		addDataMap();
 	}
 	

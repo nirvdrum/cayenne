@@ -137,7 +137,7 @@ public class CreateDataMapAction extends CayenneAction {
         return relative_location;
 	}
 	
-	public void actionPerformed(ActionEvent e) {
+	public void performAction(ActionEvent e) {
 		createDataMap();
 	}
 }
