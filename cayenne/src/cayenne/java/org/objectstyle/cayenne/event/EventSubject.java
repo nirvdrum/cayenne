@@ -77,11 +77,11 @@ public class EventSubject extends Object {
 	
 	public static EventSubject getSubject(Class subjectOwner, String subjectName) {
 		if (subjectOwner == null) {
-			throw new IllegalArgumentException("sender class must not be null");
+			throw new IllegalArgumentException("owner class must not be null");
 		}
 
 		if ((subjectName == null) || (subjectName.length() == 0)) {
-			throw new IllegalArgumentException("subjectName must not be empty");
+			throw new IllegalArgumentException("subject name must not be empty");
 		}
 
 		return new EventSubject(subjectOwner.getName() + "." + subjectName);
