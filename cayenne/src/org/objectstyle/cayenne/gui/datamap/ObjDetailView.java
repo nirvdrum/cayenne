@@ -97,7 +97,7 @@ implements ChangeListener, ObjEntityDisplayListener
 		tab.addChangeListener(this);
 	}
 	
-	/** AMong other things reset "Remove" button when tab changes. */
+	/** Among other things reset "Remove" button when tab changes. */
 	public void stateChanged(ChangeEvent e)	
 	{
 		ExistingSelectionProcessor proc;

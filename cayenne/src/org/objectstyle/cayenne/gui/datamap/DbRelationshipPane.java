@@ -89,7 +89,7 @@ public class DbRelationshipPane
 
 	Mediator mediator;
 
-	JTable table;
+	CayenneTable table;
 	JButton resolve;
 
 	public DbRelationshipPane(Mediator temp_mediator) {
@@ -128,7 +128,8 @@ public class DbRelationshipPane
 	public void tableChanged(TableModelEvent e) {
 		DbRelationship rel = null;
 		if (table.getSelectedRow() >= 0) {
-			DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
+			DbRelationshipTableModel model =
+				(DbRelationshipTableModel) table.getModel();
 			rel = model.getRelationship(table.getSelectedRow());
 			if (rel.getTargetEntity() != null)
 				resolve.setEnabled(true);
@@ -149,6 +150,7 @@ public class DbRelationshipPane
 				resolve.setEnabled(false);
 		} else
 			resolve.setEnabled(false);
+
 		RelationshipDisplayEvent ev =
 			new RelationshipDisplayEvent(
 				this,
@@ -156,7 +158,7 @@ public class DbRelationshipPane
 				mediator.getCurrentDbEntity(),
 				mediator.getCurrentDataMap(),
 				mediator.getCurrentDataDomain());
-				
+
 		mediator.fireDbRelationshipDisplayEvent(ev);
 	}
 
@@ -203,7 +205,8 @@ public class DbRelationshipPane
 	}
 
 	protected void rebuildTable(DbEntity dbEnt) {
-		DbRelationshipTableModel model = new DbRelationshipTableModel(dbEnt, mediator, this);
+		DbRelationshipTableModel model =
+			new DbRelationshipTableModel(dbEnt, mediator, this);
 		model.addTableModelListener(this);
 		table.setModel(model);
 		table.setRowHeight(25);
@@ -236,6 +239,7 @@ public class DbRelationshipPane
 
 	public void dbEntityChanged(EntityEvent e) {
 	}
+
 	public void dbEntityAdded(EntityEvent e) {
 		reloadEntityList(e);
 	}
@@ -245,6 +249,7 @@ public class DbRelationshipPane
 
 	public void dbRelationshipChanged(RelationshipEvent e) {
 		if (e.getSource() != this) {
+			table.select(e.getRelationship());
 			DbRelationshipTableModel model =
 				(DbRelationshipTableModel) table.getModel();
 			model.fireTableDataChanged();
@@ -253,12 +258,14 @@ public class DbRelationshipPane
 
 	public void dbRelationshipAdded(RelationshipEvent e) {
 		rebuildTable((DbEntity) e.getEntity());
+		table.select(e.getRelationship());
 	}
 
 	public void dbRelationshipRemoved(RelationshipEvent e) {
-		DbRelationshipTableModel model;
-		model = (DbRelationshipTableModel) table.getModel();
+		DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
+		int ind = model.getObjectList().indexOf(e.getRelationship());
 		model.removeRelationship(e.getRelationship());
+		table.select(ind);
 	}
 
 	/** Refresh the list of db entities (targets). 

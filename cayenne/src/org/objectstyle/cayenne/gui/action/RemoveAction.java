@@ -97,9 +97,6 @@ public class RemoveAction extends CayenneAction {
 
 	private void remove() {
 		Mediator mediator = getMediator();
-		if (mediator.getCurrentDbRelationship() != null) {
-			logObj.fine("current Db Rel is not null");
-		}
 
 		Object src = Editor.getFrame();
 		if (mediator.getCurrentObjAttribute() != null) {
@@ -193,14 +190,6 @@ public class RemoveAction extends CayenneAction {
 				AttributeEvent.REMOVE);
 		mediator.fireObjAttributeEvent(e);
 		AttributeDisplayEvent ev;
-		ev =
-			new AttributeDisplayEvent(
-				Editor.getFrame(),
-				null,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
-		mediator.fireObjAttributeDisplayEvent(ev);
 	}
 
 	protected void removeDbAttribute() {
@@ -217,15 +206,6 @@ public class RemoveAction extends CayenneAction {
 				entity,
 				AttributeEvent.REMOVE);
 		mediator.fireDbAttributeEvent(e);
-		AttributeDisplayEvent ev;
-		ev =
-			new AttributeDisplayEvent(
-				Editor.getFrame(),
-				null,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
-		mediator.fireDbAttributeDisplayEvent(ev);
 	}
 
 	protected void removeObjRelationship() {
@@ -240,15 +220,6 @@ public class RemoveAction extends CayenneAction {
 				entity,
 				RelationshipEvent.REMOVE);
 		mediator.fireObjRelationshipEvent(e);
-		RelationshipDisplayEvent ev;
-		ev =
-			new RelationshipDisplayEvent(
-				Editor.getFrame(),
-				null,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
-		mediator.fireObjRelationshipDisplayEvent(ev);
 	}
 
 	protected void removeDbRelationship() {
@@ -265,14 +236,6 @@ public class RemoveAction extends CayenneAction {
 				entity,
 				RelationshipEvent.REMOVE);
 		mediator.fireDbRelationshipEvent(e);
-		RelationshipDisplayEvent ev =
-			new RelationshipDisplayEvent(
-				Editor.getFrame(),
-				null,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
-		mediator.fireDbRelationshipDisplayEvent(ev);
 	}
 
 	protected void removeDataMapFromDataNode() {

@@ -88,7 +88,7 @@ public class ObjRelationshipPane
 		TableModelListener {
 	Mediator mediator;
 
-	JTable table;
+	CayenneTable table;
 	JButton resolve;
 
 	public ObjRelationshipPane(Mediator temp_mediator) {
@@ -282,15 +282,19 @@ public class ObjRelationshipPane
 	}
 
 	public void objRelationshipChanged(RelationshipEvent e) {
+		table.select(e.getRelationship());
 	}
+	
 	public void objRelationshipAdded(RelationshipEvent e) {
 		rebuildTable((ObjEntity) e.getEntity());
+		table.select(e.getRelationship());
 	}
 
-	public void objRelationshipRemoved(RelationshipEvent e) {
-		ObjRelationshipTableModel model;
-		model = (ObjRelationshipTableModel) table.getModel();
+	public void objRelationshipRemoved(RelationshipEvent e) {		
+		ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
+		int ind = model.getObjectList().indexOf(e.getRelationship());
 		model.removeRelationship(e.getRelationship());
+		table.select(ind);
 	}
 
 	/** Refresh the list of obj entities (targets). 

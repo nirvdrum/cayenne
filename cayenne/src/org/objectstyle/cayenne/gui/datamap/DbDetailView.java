@@ -125,7 +125,7 @@ implements ChangeListener, DbEntityDisplayListener
 	public void currentDbAttributeChanged(AttributeDisplayEvent e) {
 		if (e.getEntity() == null)
 			return;
-		// Display relationship tab
+		// Display attribute tab
 		tab.setSelectedIndex(1);
 	}	
 }

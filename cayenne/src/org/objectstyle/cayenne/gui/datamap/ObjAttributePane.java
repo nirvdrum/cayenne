@@ -88,7 +88,7 @@ public class ObjAttributePane
 	static Logger logObj = Logger.getLogger(ObjAttributePane.class.getName());
 
 	Mediator mediator;
-	JTable table;
+	CayenneTable table;
 
 	public ObjAttributePane(Mediator temp_mediator) {
 		super();
@@ -130,15 +130,19 @@ public class ObjAttributePane
 	}
 
 	public void objAttributeChanged(AttributeEvent e) {
+		table.select(e.getAttribute());
 	}
 
 	public void objAttributeAdded(AttributeEvent e) {
 		rebuildTable((ObjEntity) e.getEntity());
+		table.select(e.getAttribute());
 	}
 
-	public void objAttributeRemoved(AttributeEvent e) {
+	public void objAttributeRemoved(AttributeEvent e) {		
 		ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
-		model.removeAttribute(e.getAttribute());
+		int ind = model.getObjectList().indexOf(e.getAttribute());
+		model.removeRow(e.getAttribute());
+		table.select(ind);
 	}
 
 	private void stopEditing() {

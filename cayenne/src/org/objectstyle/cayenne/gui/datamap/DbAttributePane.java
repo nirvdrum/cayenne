@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -82,11 +83,13 @@ public class DbAttributePane
 		ListSelectionListener,
 		DbAttributeListener,
 		ExistingSelectionProcessor,
-		ActionListener,
-		TableModelListener {
+		ActionListener
+ {
+
+	static Logger logObj = Logger.getLogger(DbAttributePane.class.getName());
 
 	protected Mediator mediator;
-	protected JTable table;
+	protected CayenneTable table;
 	protected JButton editParams;
 
 	public DbAttributePane(Mediator temp_mediator) {
@@ -122,20 +125,13 @@ public class DbAttributePane
 				DbAttribute attr =
 					((DbAttributeTableModel) table.getModel()).getAttribute(
 						row);
-						
+
 				EditDerivedParamsDialog dialog =
-					new EditDerivedParamsDialog((DerivedDbAttribute)attr);
+					new EditDerivedParamsDialog((DerivedDbAttribute) attr);
 				dialog.show();
 				dialog.dispose();
 			}
 		}
-	}
-
-	/**
-	 * @see javax.swing.event.TableModelListener#tableChanged(TableModelEvent)
-	 */
-	public void tableChanged(TableModelEvent e) {
-		processExistingSelection();
 	}
 
 	public void valueChanged(ListSelectionEvent e) {
@@ -143,6 +139,7 @@ public class DbAttributePane
 	}
 
 	public void processExistingSelection() {
+
 		DbAttribute att = null;
 		if (table.getSelectedRow() >= 0) {
 			DbAttributeTableModel model =
@@ -150,27 +147,30 @@ public class DbAttributePane
 			att = model.getAttribute(table.getSelectedRow());
 			editParams.setEnabled(att instanceof DerivedDbAttribute);
 		}
-		AttributeDisplayEvent ev =
-			new AttributeDisplayEvent(
+		
+		mediator.fireDbAttributeDisplayEvent(new AttributeDisplayEvent(
 				this,
 				att,
 				mediator.getCurrentDbEntity(),
 				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain());
-
-		mediator.fireDbAttributeDisplayEvent(ev);
+				mediator.getCurrentDataDomain()));
 	}
+	
 
 	public void dbAttributeChanged(AttributeEvent e) {
+		table.select(e.getAttribute());
 	}
 
 	public void dbAttributeAdded(AttributeEvent e) {
 		rebuildTable((DbEntity) e.getEntity());
+		table.select(e.getAttribute());
 	}
 
 	public void dbAttributeRemoved(AttributeEvent e) {
 		DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
+		int ind = model.getObjectList().indexOf(e.getAttribute());
 		model.removeRow(e.getAttribute());
+		table.select(ind);
 	}
 
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
@@ -203,6 +203,5 @@ public class DbAttributePane
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 
 		table.getSelectionModel().addListSelectionListener(this);
-		model.addTableModelListener(this);
 	}
 }
