@@ -55,7 +55,9 @@ package org.objectstyle.cayenne;
  *
  */
 
-import java.util.logging.Level;
+import java.math.BigDecimal;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.objectstyle.art.*;
@@ -93,24 +95,21 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         assertEquals(paintingName, p2.getPaintingTitle());
     }
 
-
     /** Tests how primary key is propagated from one new object to another. */
     public void testNewAdd2() throws Exception {
         Artist a1 = this.newArtist();
         Gallery g1 = this.newGallery();
         Exhibit e1 = this.newExhibit(g1);
-        
+
         ArtistExhibit ae1 = this.newAritistExhibit();
         ae1.setToArtist(a1);
         ae1.setToExhibit(e1);
 
-
         // do save 
-        
+
         // *** TESTING THIS *** 
         ctxt.commitChanges();
-    } 
-    
+    }
 
     public void testReplace() throws Exception {
         String altPaintingName = "alt painting";
@@ -153,7 +152,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         assertEquals(paintingName, p3.getPaintingTitle());
         assertSame(pi3, p3.getToPaintingInfo());
 
-        // test that object id was updated 
+        // test that object id was updated.
         assertEquals(pi2oid, pi3.getObjectId());
 
     }
