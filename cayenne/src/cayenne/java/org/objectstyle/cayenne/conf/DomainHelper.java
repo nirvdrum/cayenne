@@ -57,7 +57,11 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -73,7 +77,13 @@ import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.AbstractHandler;
 import org.objectstyle.cayenne.util.Util;
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -178,7 +188,7 @@ public class DomainHelper {
 	  * false - if at least one non-fatal failure ocurred.
 	  */
 	public boolean loadDomains(InputStream in, DataSourceFactory factory)
-		throws java.lang.Exception {
+		throws Exception {
 		this.factory = factory;
 
 		logObj.log(logLevel, "start configuration loading.");
