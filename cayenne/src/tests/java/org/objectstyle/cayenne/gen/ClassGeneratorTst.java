@@ -107,7 +107,6 @@ public class ClassGeneratorTst extends CayenneTestCase {
         out.close();
 
         String classCode = out.toString();
-        System.out.println(classCode);
 
         assertNotNull(classCode);
         assertTrue(classCode.length() > 0);
