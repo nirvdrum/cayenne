@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,23 +70,22 @@ import org.objectstyle.cayenne.query.Query;
 /**
  * EntityResolver encapsulates resolving between ObjEntities, DbEntities, 
  * DataObject Classes, and Entity names. An instance is typically obtained 
- * from a QueryEngine by getEntityResolver.
+ * from a QueryEngine by getEntityResolver. EntityResolver is thread-safe.
  * 
  * @author Craig Miskell
+ * @author Andrei Adamchik
  */
 public class EntityResolver {
     protected Map dbEntityCache;
     protected Map objEntityCache;
     protected List maps;
-    
 
     public EntityResolver() {
-    	this.maps = new ArrayList();
-    	this.dbEntityCache = new HashMap();
-    	this.objEntityCache = new HashMap();
+        this.maps = new ArrayList();
+        this.dbEntityCache = new HashMap();
+        this.objEntityCache = new HashMap();
     }
-    
-    
+
     /**
      * Constructor for EntityResolver.
      */
@@ -95,6 +93,26 @@ public class EntityResolver {
         this();
         maps.addAll(dataMaps); //Take a copy
         this.constructCache();
+    }
+
+    public synchronized void addDataMap(DataMap map) {
+        if (!maps.contains(map)) {
+            maps.add(map);
+            constructCache();
+        }
+    }
+
+    public synchronized void removeDataMap(DataMap map) {
+        if(maps.remove(map)) {
+        	constructCache();
+        }
+    }
+
+    /**
+     * Returns a list of internal DataMaps by copy.
+     */
+    public synchronized List getDataMapsList() {
+        return new ArrayList(maps);
     }
 
     /** 
@@ -156,7 +174,7 @@ public class EntityResolver {
         if (object instanceof DbEntity) {
             return (DbEntity) object;
         }
-        
+
         DbEntity result = (DbEntity) dbEntityCache.get(object);
         if (result == null) {
             // reconstruct cache just in case some of the datamaps 
@@ -186,7 +204,7 @@ public class EntityResolver {
         if (object instanceof ObjEntity) {
             return (ObjEntity) object;
         }
-        
+
         ObjEntity result = (ObjEntity) objEntityCache.get(object);
         if (result == null) {
             // reconstruct cache just in case some of the datamaps 
