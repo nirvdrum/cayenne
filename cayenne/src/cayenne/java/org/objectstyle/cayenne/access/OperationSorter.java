@@ -108,20 +108,6 @@ public class OperationSorter {
 		queryComparator = new QueryComparator(queryEngine, sortedEntityNames);
 	}
 
-	/**
-	 * Creates a new OperationSorted which will sort entities for insert in the order
-	 * specified by the insOrderOfEntNames list
-	 */
-	/*
-	 * TODO: if this method is still required both constructors should be made
-	 * into appropriately named static factory methods, so that the method
-	 * signatures do not conflict.
-	 * 
-	public OperationSorter(QueryEngine queryEngine, List insOrderOfEntNames) {
-		queryComparator = new QueryComparator(queryEngine, insOrderOfEntNames);
-	}
-	*/
-
 	/** 
 	  *  Returns a new list containing all the DbEntities in <code>entities</code>,
 	  *  in the correct order for inserting objects int,o or creating the tables of, those entities.
