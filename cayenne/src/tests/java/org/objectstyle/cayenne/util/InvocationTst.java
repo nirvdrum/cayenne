@@ -54,7 +54,7 @@
  *
  */ 
 
-package org.objectstyle.cayenne.event;
+package org.objectstyle.cayenne.util;
 
 import java.util.HashSet;
 import java.util.Set;

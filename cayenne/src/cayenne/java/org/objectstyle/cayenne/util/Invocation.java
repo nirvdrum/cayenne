@@ -54,7 +54,7 @@
  *
  */ 
 
-package org.objectstyle.cayenne.event;
+package org.objectstyle.cayenne.util;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -68,19 +68,31 @@ public class Invocation extends Object {
 	private Method _method;
 	private Class[] _parameterTypes;
 
+	/**
+	 * @HH: writeme!
+	 */
 	private Invocation() {
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public Invocation(Object target, String methodName)
 		throws NoSuchMethodException {
 		this(target, methodName, (Class[])null);
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public Invocation(Object target, String methodName, Class parameterType)
 		throws NoSuchMethodException {
 		this(target, methodName, new Class[]{parameterType});
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public Invocation(Object target, String methodName, Class[] parameterTypes)
 		throws NoSuchMethodException {
 		super();
@@ -111,14 +123,23 @@ public class Invocation extends Object {
 		_target = new WeakReference(target);
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public boolean fire() {
 		return this.fire((Object[])null);
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public boolean fire(Object argument) {
 		return this.fire(new Object[]{argument});
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public boolean fire(Object[] arguments) {
 		boolean success = false;
 
@@ -156,6 +177,9 @@ public class Invocation extends Object {
 		return success;
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public boolean equals(Object obj) {
 		if ((obj != null) && (obj.getClass().equals(this.getClass()))) {
 			Invocation otherInvocation = (Invocation)obj;
@@ -183,6 +207,9 @@ public class Invocation extends Object {
 		}
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public int hashCode() {
 		int hash = 42, hashMultiplier = 59;
 		hash = hash * hashMultiplier + _method.hashCode();
@@ -194,14 +221,23 @@ public class Invocation extends Object {
 		return hash;
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public Method getMethod() {
 		return _method;
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public Object getTarget() {
 		return _target.get();
 	}
 
+	/**
+	 * @HH: writeme!
+	 */
 	public Class[] getParameterTypes() {
 		return _parameterTypes;
 	}
