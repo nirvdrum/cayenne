@@ -299,6 +299,13 @@ $tag
        		#foreach ( $subitem in $item.getChildren("item"))
        		   #set ($subname = $subitem.getAttributeValue("name"))
        		   &nbsp;#menuprojectanchor($subname $subitem.getAttributeValue("href"))<br>
+       		   
+       		   #if($subname == $root.getChild("toc").getAttributeValue("subchapter"))
+       		   #foreach ( $subchapteritem in $subitem.getChildren("item"))
+       		   #set ($subchaptername = $subchapteritem.getAttributeValue("name"))
+       		   &nbsp;&nbsp;#menuprojectanchor($subchaptername $subchapteritem.getAttributeValue("href"))<br>
+       		   #end
+       		   #end
        		#end
        		#end</p>
     	 #end

@@ -16,7 +16,7 @@
         	</p>
         	
         	        	
-			<subsection name="Cayenne 1.1 - Milestones">
+			<subsection name="Current Release: Cayenne 1.1 Beta">
         	    <ul>
                 	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1B2.tar.gz">Cayenne</a></li>
 					<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-src-1.1a-pre2.tar.gz">Examples</a></li>
@@ -24,7 +24,7 @@
 				</ul>
         	</subsection>
         	
-        	<subsection name="Cayenne 1.0 - Stable Release">
+        	<subsection name="Old Stable Release: Cayenne 1.0">
         	    <ul>
                 	<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-src-1.0.7.tar.gz">Cayenne</a></li>
 					<li><a href="http://prdownloads.sourceforge.net/cayenne/cayenne-examples-src-1.0.3.tar.gz">Examples</a></li>
