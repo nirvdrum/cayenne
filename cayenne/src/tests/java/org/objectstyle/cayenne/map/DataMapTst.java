@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /** 
@@ -179,7 +180,6 @@ public class DataMapTst extends CayenneTestCase {
 		assertTrue(map.isDependentOn(map3));
 	}
 	
-	
 	public void testAddDependency3() throws Exception {
 		map.setName("m1");
 		DataMap map2 = new DataMap("m2");
@@ -209,4 +209,46 @@ public class DataMapTst extends CayenneTestCase {
 			// exception expected
 		}
 	}
+
+	// make sure deleting a DbEntity & other entity's relationships to it
+	// works & does not cause a ConcurrentModificationException
+	public void testDeleteDbEntity() {
+
+		// create a twisty maze of intermingled relationships.
+		DbEntity e1 = (DbEntity)NamedObjectFactory.createObject(DbEntity.class, map);
+		e1.setName("e1");
+
+		DbEntity e2 = (DbEntity)NamedObjectFactory.createObject(DbEntity.class, map);
+		e2.setName("e2");
+
+		DbRelationship r1 = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, e1);
+		r1.setName("r1");
+		r1.setTargetEntity(e2);
+
+		DbRelationship r2 = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, e2);
+		r2.setName("r2");
+		r2.setTargetEntity(e1);
+
+		DbRelationship r3 = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, e1);
+		r3.setName("r3");
+		r3.setTargetEntity(e2);
+
+		e1.addRelationship(r1);
+		e1.addRelationship(r2);
+		e1.addRelationship(r3);
+
+		e2.addRelationship(r1);
+		e2.addRelationship(r2);
+		e2.addRelationship(r3);
+
+		map.addDbEntity(e1);
+		map.addDbEntity(e2);
+
+		// now actually test something
+		map.deleteDbEntity(e1.getName());
+		assertNull(map.getDbEntity(e1.getName()));
+		map.deleteDbEntity(e2.getName());
+		assertNull(map.getDbEntity(e2.getName()));
+	}
+
 }
