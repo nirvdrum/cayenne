@@ -26,7 +26,7 @@
 
     <menu name="Developer">
         <item name="CVS"  href="/developer.html"/>
-        <item name="Mailing Lists"  href="/lists.html"/>
+        <item name="Mailing Lists"  href="http://objectstyle.org/cayenne/lists.html"/>
     </menu>
     
     <menu name="Other">
