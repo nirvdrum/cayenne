@@ -155,11 +155,15 @@ public class DbLoader {
     public List getCatalogs() throws SQLException {
         List catalogs = new ArrayList();
         ResultSet rs = getMetaData().getCatalogs();
-        while (rs.next()) {
-            String catalog_name = rs.getString(1);
-            catalogs.add(catalog_name);
+
+        try {
+            while (rs.next()) {
+                String catalog_name = rs.getString(1);
+                catalogs.add(catalog_name);
+            }
+        } finally {
+            rs.close();
         }
-        rs.close();
         return catalogs;
     }
 
@@ -171,11 +175,15 @@ public class DbLoader {
     public List getSchemas() throws SQLException {
         List schemas = new ArrayList();
         ResultSet rs = getMetaData().getSchemas();
-        while (rs.next()) {
-            String schema_name = rs.getString(1);
-            schemas.add(schema_name);
+
+        try {
+            while (rs.next()) {
+                String schema_name = rs.getString(1);
+                schemas.add(schema_name);
+            }
+        } finally {
+            rs.close();
         }
-        rs.close();
         return schemas;
     }
 
@@ -188,10 +196,14 @@ public class DbLoader {
     public List getTableTypes() throws SQLException {
         List types = new ArrayList();
         ResultSet rs = getMetaData().getTableTypes();
-        while (rs.next()) {
-            types.add(rs.getString("TABLE_TYPE").trim());
+
+        try {
+            while (rs.next()) {
+                types.add(rs.getString("TABLE_TYPE").trim());
+            }
+        } finally {
+            rs.close();
         }
-        rs.close();
         return types;
     }
 
@@ -249,14 +261,17 @@ public class DbLoader {
                 tableNamePattern,
                 types);
 
-        while (rs.next()) {
-            String cat = rs.getString("TABLE_CAT");
-            String schema = rs.getString("TABLE_SCHEM");
-            String name = rs.getString("TABLE_NAME");
-            Table info = new Table(cat, schema, name);
-            tables.add(info);
+        try {
+            while (rs.next()) {
+                String cat = rs.getString("TABLE_CAT");
+                String schema = rs.getString("TABLE_SCHEM");
+                String name = rs.getString("TABLE_NAME");
+                Table info = new Table(cat, schema, name);
+                tables.add(info);
+            }
+        } finally {
+            rs.close();
         }
-        rs.close();
         return tables;
     }
 
@@ -323,35 +338,38 @@ public class DbLoader {
                     table.getName(),
                     "%");
 
-            while (rs.next()) {
-                // gets attribute's (column's) information
-                String columnName = rs.getString("COLUMN_NAME");
-                boolean allowNulls = rs.getBoolean("NULLABLE");
-                int columnType = rs.getInt("DATA_TYPE");
-                int columnSize = rs.getInt("COLUMN_SIZE");
+            try {
+                while (rs.next()) {
+                    // gets attribute's (column's) information
+                    String columnName = rs.getString("COLUMN_NAME");
+                    boolean allowNulls = rs.getBoolean("NULLABLE");
+                    int columnType = rs.getInt("DATA_TYPE");
+                    int columnSize = rs.getInt("COLUMN_SIZE");
 
-                // ignore precision of non-decimal columns
-                int decimalDigits = -1;
-                if (TypesMapping.isDecimal(columnType)) {
-                    decimalDigits = rs.getInt("DECIMAL_DIGITS");
-                    if (rs.wasNull()) {
-                        decimalDigits = -1;
+                    // ignore precision of non-decimal columns
+                    int decimalDigits = -1;
+                    if (TypesMapping.isDecimal(columnType)) {
+                        decimalDigits = rs.getInt("DECIMAL_DIGITS");
+                        if (rs.wasNull()) {
+                            decimalDigits = -1;
+                        }
                     }
-                }
 
-                // create attribute delegating this task to adapter
-                DbAttribute attr =
-                    adapter.buildAttribute(
-                        columnName,
-                        columnType,
-                        columnSize,
-                        decimalDigits,
-                        allowNulls);
-                attr.setEntity(dbEntity);
-                dbEntity.addAttribute(attr);
+                    // create attribute delegating this task to adapter
+                    DbAttribute attr =
+                        adapter.buildAttribute(
+                            columnName,
+                            columnType,
+                            columnSize,
+                            decimalDigits,
+                            allowNulls);
+                    attr.setEntity(dbEntity);
+                    dbEntity.addAttribute(attr);
+                }
+            } finally {
+                rs.close();
             }
 
-            rs.close();
             map.addDbEntity(dbEntity);
 
             // notify delegate
@@ -367,12 +385,18 @@ public class DbLoader {
             String tableName = dbEntity.getName();
             ResultSet rs =
                 metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
-            while (rs.next()) {
-                String keyName = rs.getString(4);
-                ((DbAttribute) dbEntity.getAttribute(keyName)).setPrimaryKey(
-                    true);
+
+            try {
+                while (rs.next()) {
+                    String keyName = rs.getString(4);
+                    (
+                        (DbAttribute) dbEntity.getAttribute(
+                            keyName)).setPrimaryKey(
+                        true);
+                }
+            } finally {
+                rs.close();
             }
-            rs.close();
         }
         return ret_code;
     }
@@ -450,61 +474,64 @@ public class DbLoader {
                     pkEnt.getCatalog(),
                     pkEnt.getSchema(),
                     pkEnt.getName());
-            if (!rs.next())
-                continue;
+            try {
+                if (!rs.next())
+                    continue;
 
-            // these will be initailzed every time a new target entity
-            // is found in the result set (which should be ordered by table name among other things)
-            DbRelationship fwdRel = null;
-            DbRelationship backRel = null;
-            DbEntity fkEnt = null;
+                // these will be initailzed every time a new target entity
+                // is found in the result set (which should be ordered by table name among other things)
+                DbRelationship fwdRel = null;
+                DbRelationship backRel = null;
+                DbEntity fkEnt = null;
 
-            do {
-                short keySeq = rs.getShort("KEY_SEQ");
-                if (keySeq == 1) {
-                    // reinit variables for the new traget entity
-                    String fkEntName = rs.getString("FKTABLE_NAME");
+                do {
+                    short keySeq = rs.getShort("KEY_SEQ");
+                    if (keySeq == 1) {
+                        // reinit variables for the new traget entity
+                        String fkEntName = rs.getString("FKTABLE_NAME");
 
-                    fkEnt = map.getDbEntity(fkEntName);
+                        fkEnt = map.getDbEntity(fkEntName);
 
-                    if (fkEnt == null) {
-                        logObj.debug(
-                            "FK warning: no entity found for name '"
-                                + fkEntName
-                                + "'");
-                    } else {
-                        fwdRel =
-                            new DbRelationship(
-                                uniqueDbRelName(pkEnt, fkEntName, true));
-                        fwdRel.setToMany(true);
-                        fwdRel.setSourceEntity(pkEnt);
-                        fwdRel.setTargetEntity(fkEnt);
-                        pkEnt.addRelationship(fwdRel);
+                        if (fkEnt == null) {
+                            logObj.debug(
+                                "FK warning: no entity found for name '"
+                                    + fkEntName
+                                    + "'");
+                        } else {
+                            fwdRel =
+                                new DbRelationship(
+                                    uniqueDbRelName(pkEnt, fkEntName, true));
+                            fwdRel.setToMany(true);
+                            fwdRel.setSourceEntity(pkEnt);
+                            fwdRel.setTargetEntity(fkEnt);
+                            pkEnt.addRelationship(fwdRel);
 
-                        backRel =
-                            new DbRelationship(
-                                uniqueDbRelName(fkEnt, pkEntName, false));
-                        backRel.setToMany(false);
-                        backRel.setSourceEntity(fkEnt);
-                        backRel.setTargetEntity(pkEnt);
-                        fkEnt.addRelationship(backRel);
+                            backRel =
+                                new DbRelationship(
+                                    uniqueDbRelName(fkEnt, pkEntName, false));
+                            backRel.setToMany(false);
+                            backRel.setSourceEntity(fkEnt);
+                            backRel.setTargetEntity(pkEnt);
+                            fkEnt.addRelationship(backRel);
+                        }
                     }
-                }
 
-                if (fkEnt != null) {
-                    // Create and append joins
-                    DbAttribute pkAtt =
-                        (DbAttribute) pkEnt.getAttribute(
-                            rs.getString("PKCOLUMN_NAME"));
-                    DbAttribute fkAtt =
-                        (DbAttribute) fkEnt.getAttribute(
-                            rs.getString("FKCOLUMN_NAME"));
+                    if (fkEnt != null) {
+                        // Create and append joins
+                        DbAttribute pkAtt =
+                            (DbAttribute) pkEnt.getAttribute(
+                                rs.getString("PKCOLUMN_NAME"));
+                        DbAttribute fkAtt =
+                            (DbAttribute) fkEnt.getAttribute(
+                                rs.getString("FKCOLUMN_NAME"));
 
-                    fwdRel.addJoin(new DbAttributePair(pkAtt, fkAtt));
-                    backRel.addJoin(new DbAttributePair(fkAtt, pkAtt));
-                }
-            } while (rs.next());
-            rs.close();
+                        fwdRel.addJoin(new DbAttributePair(pkAtt, fkAtt));
+                        backRel.addJoin(new DbAttributePair(fkAtt, pkAtt));
+                    }
+                } while (rs.next());
+            } finally {
+                rs.close();
+            }
         }
     }
 
