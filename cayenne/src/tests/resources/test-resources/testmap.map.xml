@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data-map project-version="1.0">
-	<procedure name="cayenne_tst_upd_proc">
-		<procedure-parameter name="paintingPrice" type="INTEGER" direction="in"/>
+	<procedure name="cayenne_tst_out_proc">
+		<procedure-parameter name="in_param" type="INTEGER" direction="in"/>
+		<procedure-parameter name="out_param" type="INTEGER" direction="out"/>
 	</procedure>
 	<procedure name="cayenne_tst_select_proc">
 		<procedure-parameter name="aName" type="VARCHAR" direction="in"/>
 		<procedure-parameter name="paintingPrice" type="INTEGER" direction="in"/>
 	</procedure>
-	<procedure name="cayenne_tst_out_proc">
-		<procedure-parameter name="in_param" type="INTEGER" direction="in"/>
-		<procedure-parameter name="out_param" type="INTEGER" direction="out"/>
+	<procedure name="cayenne_tst_upd_proc">
+		<procedure-parameter name="paintingPrice" type="INTEGER" direction="in"/>
 	</procedure>
 	<db-entity name="ARTGROUP">
 		<db-attribute name="GROUP_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -32,6 +32,10 @@
 	<db-entity name="BLOB_TEST">
 		<db-attribute name="BLOB_COL" type="BLOB"/>
 		<db-attribute name="BLOB_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="CHAR_PK_TEST">
+		<db-attribute name="OTHER_COL" type="CHAR" length="10"/>
+		<db-attribute name="PK_COL" type="CHAR" isPrimaryKey="true" isMandatory="true" length="10"/>
 	</db-entity>
 	<db-entity name="CLOB_TEST">
 		<db-attribute name="CLOB_COL" type="CLOB"/>
@@ -140,6 +144,10 @@
 	</obj-entity>
 	<obj-entity name="BlobTest" className="org.objectstyle.art.BlobTest" dbEntityName="BLOB_TEST">
 		<obj-attribute name="blobCol" type="byte[]" db-attribute-path="BLOB_COL"/>
+	</obj-entity>
+	<obj-entity name="CharPkTest" className="org.objectstyle.art.CharPkTest" dbEntityName="CHAR_PK_TEST">
+		<obj-attribute name="otherCol" type="java.lang.String" db-attribute-path="OTHER_COL"/>
+		<obj-attribute name="pkCol" type="java.lang.String" db-attribute-path="PK_COL"/>
 	</obj-entity>
 	<obj-entity name="ClobTest" className="org.objectstyle.art.ClobTest" dbEntityName="CLOB_TEST">
 		<obj-attribute name="clobCol" type="java.lang.String" db-attribute-path="CLOB_COL"/>

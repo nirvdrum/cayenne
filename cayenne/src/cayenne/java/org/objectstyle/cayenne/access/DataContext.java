@@ -380,11 +380,15 @@ public class DataContext implements QueryEngine, Serializable {
 	 * is determined from ObjEntity. Object class must have a default constructor.
 	 */
 	public DataObject createAndRegisterNewObject(String objEntityName) {
-		String objClassName =
-			this
-				.getEntityResolver()
-				.lookupObjEntity(objEntityName)
-				.getClassName();
+		ObjEntity entity =
+			this.getEntityResolver().lookupObjEntity(objEntityName);
+
+		if (entity == null) {
+			throw new IllegalArgumentException(
+				"Invalid entity name: " + objEntityName);
+		}
+
+		String objClassName = entity.getClassName();
 		DataObject dobj = null;
 		try {
 			dobj = newDataObject(objClassName);
@@ -712,7 +716,7 @@ public class DataContext implements QueryEngine, Serializable {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
 
-        // prevent multiple commits occuring simulteneously 
+		// prevent multiple commits occuring simulteneously 
 		synchronized (objectStore) {
 			// is there anything to do?
 			if (this.hasChanges() == false) {
