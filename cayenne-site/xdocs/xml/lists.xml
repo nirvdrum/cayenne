@@ -99,6 +99,20 @@
             <list-arch name="cayenne-devel"/>
             </table>
         </subsection>
+
+        <subsection name="cayenne-cvs">
+        	<p><strong>cayenne-cvs</strong> is a mailing list that receives all of the Cayenne CVS commit messages.
+        	You can subscribe to this list to keep track of changes to the Cayenne CVS repository.
+        	</p>
+        	
+        	<p>To <strong>subscribe</strong> send empty email to
+        	<a href="mailto:cayenne-cvs-subscribe@objectstyle.org">cayenne-cvs-subscribe@objectstyle.org</a>.
+        	</p>
+
+        	<p>To <strong>unsubscribe</strong> send empty email to
+        	<a href="mailto:cayenne-cvs-unsubscribe@objectstyle.org">cayenne-cvs-unsubscribe@objectstyle.org</a>.
+        	</p>
+        </subsection>
         </section>
     </body>
 </document>
