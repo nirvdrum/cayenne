@@ -78,8 +78,8 @@ public class DomainValidatorTst extends ValidatorTestBase {
 
         // should complain about duplicate name
         DataDomain d3 = new DataDomain("xyz");
-        project.getConfig().addDomain(d3);
-        project.getConfig().addDomain(d1);
+        project.getConfiguration().addDomain(d3);
+        project.getConfiguration().addDomain(d1);
         d3.setName(d1.getName());
         validator.reset();
         new DomainValidator().validateObject(new ProjectPath(new Object[] { project, d3 }), validator);

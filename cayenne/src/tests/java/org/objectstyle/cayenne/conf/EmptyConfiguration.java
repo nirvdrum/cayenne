@@ -56,15 +56,47 @@
 
 package org.objectstyle.cayenne.conf;
 
-import org.objectstyle.cayenne.access.DataDomain;
+import java.io.File;
 
-/** Configuration object used for tests that does not require "cayenne.xml". */
+import org.objectstyle.cayenne.ConfigurationException;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.util.ResourceLocator;
+
+/**
+ * Configuration object used for tests that does not require "cayenne.xml".
+ */
 public class EmptyConfiguration extends DefaultConfiguration {
+
 	public EmptyConfiguration() {
-	    ignoringLoadFailures = true;
+		super();
 	}
-	
-    public void addDomain(DataDomain domain) {
-        // noop
-    }
+
+	protected boolean shouldInitialize() {
+		boolean should = super.shouldInitialize();
+		
+		if (!should) {
+			throw new ConfigurationException("shouldInitialize unexpectedly returned false?!");
+		}
+
+		// get the already configured ResourceLocator
+		ResourceLocator locator = this.getResourceLocator();
+
+		// add current directory
+		File directory = new File(locator.findDirectoryResource(".").getPath());
+		locator.addFilesystemPath(directory);
+
+		// add "test-resources" directory
+		directory = new File(locator.findDirectoryResource("test-resources").getPath());
+		locator.addFilesystemPath(directory);
+
+		// ignore any loading failures
+		this.setIgnoringLoadFailures(true);
+
+		return should;	    
+	}
+
+	public void addDomain(DataDomain domain) {
+		// noop
+	}
+
 }

@@ -80,7 +80,7 @@ public class CayenneGenerator extends Task {
 
     static {
        // init logging properties
-       Configuration.configCommonLogging();	
+       Configuration.configureCommonLogging();	
     }
     
 	protected File map;

@@ -84,26 +84,34 @@ public class ConfigurationTst extends CayenneTestCase {
         assertSame(factory, cfg.getOverrideFactory());
 	}
 
-	public void testDefaultConfigurationConstructorWithNullFile() {
-		Configuration c = new DefaultConfiguration(null);
-		assertNotNull(c.getResourceLocator());
+	public void testFileConfigurationConstructorWithNullFile() {
+		Configuration c = new FileConfiguration(null);
+		assertNull(c.getResourceLocator());
 	}
 
 
     /** Concrete Configuration subclass used for tests. */
     public static class Config extends Configuration {
 
+		protected boolean shouldInitialize() {
+			return true;
+		}
+
+		protected void initialize() throws Exception {
+		}
+
+		protected void didInitialize() {
+		}
+
 		public ResourceLocator getResourceLocator() {
 			return null;
 		}
 
-        public InputStream getDomainConfiguration() {
+		protected InputStream getDomainConfiguration() {
             return null;
         }
 
-        /** Returns DataMap configuration from a specified location or null if it
-          * can not be found. */
-        public InputStream getMapConfiguration(String location) {
+		protected InputStream getMapConfiguration(String location) {
             return null;
         }
     }

@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.util.Util;
 public class DeploymentConfigurator extends Task {
     static {
         // init logging properties
-        Configuration.configCommonLogging();
+        Configuration.configureCommonLogging();
     }
 
     protected ProjectConfigInfo info;

@@ -163,7 +163,7 @@ public class DeploymentConfiguratorTst extends CayenneTestCase {
 		assertTrue(dest.isFile());
 
 		ZipUtil.unzip(dest, project.getBaseDir());
-		File newRoot = new File(project.getBaseDir(), "cayenne.xml");
+		File newRoot = new File(project.getBaseDir(), Configuration.DEFAULT_DOMAIN_FILE);
 		assertTrue(newRoot.isFile());
 		assertEquals(altFile.length(), newRoot.length());
 	}
@@ -182,7 +182,7 @@ public class DeploymentConfiguratorTst extends CayenneTestCase {
 		assertTrue(dest.isFile());
 
 		ZipUtil.unzip(dest, project.getBaseDir());
-		File newRoot = new File(project.getBaseDir(), "cayenne.xml");
+		File newRoot = new File(project.getBaseDir(), Configuration.DEFAULT_DOMAIN_FILE);
 
 		String fileContents = Util.stringFromFile(newRoot);
 		assertTrue(fileContents.indexOf(node.getName()) >= 0);

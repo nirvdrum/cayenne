@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -86,6 +87,6 @@ public class ApplicationProjectFileTst extends CayenneTestCase {
     }
     
     public void testGetFileName() throws Exception {
-    	assertEquals("cayenne.xml", rpf.getLocation());
+    	assertEquals(Configuration.DEFAULT_DOMAIN_FILE, rpf.getLocation());
     }
 }

@@ -60,6 +60,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -74,7 +75,7 @@ public class ApplicationProjectTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        f = new File("cayenne.xml");
+        f = new File(Configuration.DEFAULT_DOMAIN_FILE);
         p = new ApplicationProject(f);
     }
 
@@ -82,7 +83,7 @@ public class ApplicationProjectTst extends CayenneTestCase {
     	DataNode node = new DataNode("dn");
     	DataDomain dm = new DataDomain();
     	dm.addNode(node);
-    	p.getConfig().addDomain(dm);
+    	p.getConfiguration().addDomain(dm);
     	
         ProjectFile pf = p.projectFileForObject(node);
         assertNull(pf);
@@ -95,7 +96,7 @@ public class ApplicationProjectTst extends CayenneTestCase {
 
 
     public void testConfig() throws Exception {
-        assertNotNull(p.getConfig());
+        assertNotNull(p.getConfiguration());
     }
 
     public void testConstructor() throws Exception {
@@ -122,7 +123,7 @@ public class ApplicationProjectTst extends CayenneTestCase {
         n1.addDataMap(m1);
 
         // initialize project 
-        p.getConfig().addDomain(d1);
+        p.getConfiguration().addDomain(d1);
 
         // make assertions
         List files = p.buildFileList();

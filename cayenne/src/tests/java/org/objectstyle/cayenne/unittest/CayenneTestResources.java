@@ -105,7 +105,7 @@ public class CayenneTestResources {
             return;
         }
         initDone = true;
-        Configuration.configCommonLogging();
+        Configuration.configureCommonLogging();
         probeJDKVersion();
         startDbConnections();
     }

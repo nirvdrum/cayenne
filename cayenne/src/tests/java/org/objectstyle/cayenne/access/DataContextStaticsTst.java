@@ -96,24 +96,34 @@ public class DataContextStaticsTst extends CayenneTestCase {
         protected Configuration savedConfig;
 
         public TestConfig(DataDomain domain) {
-            savedConfig = Configuration.sharedConfig;
-            Configuration.sharedConfig = this;
+            savedConfig = Configuration.sharedConfiguration;
+            Configuration.sharedConfiguration = this;
             addDomain(domain);
         }
 
         public void restoreConfig() {
-            Configuration.sharedConfig = savedConfig;
+            Configuration.sharedConfiguration = savedConfig;
         }
+
+		protected boolean shouldInitialize() {
+			return true;
+		}
+
+		protected void initialize() throws Exception {
+		}
+
+		protected void didInitialize() {
+		}
 
 		public ResourceLocator getResourceLocator() {
 			return null;
 		}
 
-        public InputStream getDomainConfiguration() {
+        protected InputStream getDomainConfiguration() {
             return null;
         }
 
-        public InputStream getMapConfiguration(String location) {
+        protected InputStream getMapConfiguration(String location) {
             return null;
         }
     }
