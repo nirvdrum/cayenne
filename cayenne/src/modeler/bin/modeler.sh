@@ -55,11 +55,19 @@ if [ ! -f $JAVACMD ] ; then
 	JAVACMD=$JAVA_HOME/jre/bin/java
 fi
 
-OPTIONS="-classpath $CAYENNE_HOME/lib/modeler/cayenne-modeler.jar"
+
+CAYENNE_MODELER_JAR_PATH="${CAYENNE_HOME}/lib/modeler/cayenne-modeler.jar"
+if [ "$cygwin" = "true" ] ; then 
+    CAYENNE_CLASSPATH=`cygpath -w $CAYENNE_MODELER_JAR_PATH`
+else 
+    CAYENNE_CLASSPATH=$CAYENNE_MODELER_JAR_PATH
+fi
+    
+OPTIONS="-classpath $CAYENNE_CLASSPATH"
 if [ "$CLASSPATH" != "" ] ; then
 	OPTIONS="$OPTIONS$PATH_SEPARATOR$CLASSPATH"
 fi
 
-$JAVACMD $OPTIONS $MAIN_CLASS $1 $2 $3 & 
 
+$JAVACMD $OPTIONS $MAIN_CLASS $1 $2 $3 &
 
