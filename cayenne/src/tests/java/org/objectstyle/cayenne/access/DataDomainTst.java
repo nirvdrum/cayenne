@@ -213,4 +213,29 @@ public class DataDomainTst extends CayenneTestCase {
             c1.getObjectStore().getDataRowCache());
     }
 
+    public void testCreatedataContextValidation() throws Exception {
+        Map properties = new HashMap();
+        properties.put(
+            DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
+            Boolean.toString(true));
+
+        DataDomain domain = new DataDomain("d1", properties);
+        assertTrue(domain.isValidatingObjectsOnCommit());
+
+        DataContext c1 = domain.createDataContext(true);
+        assertTrue(c1.isValidatingObjectsOnCommit());
+    }
+
+    public void testCreatedataContextNoValidation() throws Exception {
+        Map properties = new HashMap();
+        properties.put(
+            DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
+            Boolean.toString(false));
+
+        DataDomain domain = new DataDomain("d1", properties);
+        assertFalse(domain.isValidatingObjectsOnCommit());
+
+        DataContext c1 = domain.createDataContext(true);
+        assertFalse(c1.isValidatingObjectsOnCommit());
+    }
 }

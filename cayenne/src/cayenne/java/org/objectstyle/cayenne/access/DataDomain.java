@@ -88,9 +88,13 @@ import org.objectstyle.cayenne.query.Query;
 public class DataDomain implements QueryEngine {
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
-    public static final String SHARED_CACHE_ENABLED_PROPERTY = "cayenne.DataDomain.sharedCache";
+    public static final String SHARED_CACHE_ENABLED_PROPERTY =
+        "cayenne.DataDomain.sharedCache";
     public static final boolean SHARED_CACHE_ENABLED_DEFAULT = true;
-    
+
+    public static final String VALIDATING_OBJECTS_ON_COMMIT_PROPERTY =
+        "cayenne.DataDomain.validatingObjectsOnCommit";
+    public static final boolean VALIDATING_OBJECTS_ON_COMMIT_DEFAULT = true;
 
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
@@ -107,9 +111,11 @@ public class DataDomain implements QueryEngine {
     protected Map maps = Collections.synchronizedMap(new TreeMap());
     protected Map mapsRef = Collections.unmodifiableMap(maps);
 
-    /** Stores mapping of data nodes to ObjEntity names.
-      * Its goal is to speed up lookups for data operation
-      * switching. */
+    /** 
+     * Stores mapping of DataNodes to ObjEntity names.
+     * Its goal is to speed up lookups for data operation
+     * switching. 
+     */
     protected Map nodesByEntityName = Collections.synchronizedMap(new HashMap());
     protected Map nodesByProcedureName = Collections.synchronizedMap(new HashMap());
 
@@ -119,6 +125,7 @@ public class DataDomain implements QueryEngine {
     protected TransactionDelegate transactionDelegate;
     protected String name;
     protected boolean sharedCacheEnabled;
+    protected boolean validatingObjectsOnCommit;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -144,7 +151,7 @@ public class DataDomain implements QueryEngine {
         setName(name);
         initFromProperties(properties);
     }
-    
+
     /**
      * @since 1.1
      */
@@ -158,6 +165,8 @@ public class DataDomain implements QueryEngine {
         this.properties = localMap;
 
         Object sharedCacheEnabled = localMap.get(SHARED_CACHE_ENABLED_PROPERTY);
+        Object validatingObjectsOnCommit =
+            localMap.get(VALIDATING_OBJECTS_ON_COMMIT_PROPERTY);
 
         if (logObj.isDebugEnabled()) {
             logObj.debug(
@@ -165,6 +174,11 @@ public class DataDomain implements QueryEngine {
                     + SHARED_CACHE_ENABLED_PROPERTY
                     + " = "
                     + sharedCacheEnabled);
+            logObj.debug(
+                "DataDomain property "
+                    + VALIDATING_OBJECTS_ON_COMMIT_PROPERTY
+                    + " = "
+                    + validatingObjectsOnCommit);
 
         }
 
@@ -173,8 +187,11 @@ public class DataDomain implements QueryEngine {
             (sharedCacheEnabled != null)
                 ? "true".equalsIgnoreCase(sharedCacheEnabled.toString())
                 : SHARED_CACHE_ENABLED_DEFAULT;
+        this.validatingObjectsOnCommit =
+            (validatingObjectsOnCommit != null)
+                ? "true".equalsIgnoreCase(validatingObjectsOnCommit.toString())
+                : VALIDATING_OBJECTS_ON_COMMIT_DEFAULT;
     }
-
 
     /** Returns "name" property value. */
     public String getName() {
@@ -200,6 +217,26 @@ public class DataDomain implements QueryEngine {
 
     public void setSharedCacheEnabled(boolean sharedCacheEnabled) {
         this.sharedCacheEnabled = sharedCacheEnabled;
+    }
+
+    /**
+     * Returns whether child DataContexts default behavior is to perform 
+     * object validation before commit is executed.
+     * 
+     * @since 1.1
+     */
+    public boolean isValidatingObjectsOnCommit() {
+        return validatingObjectsOnCommit;
+    }
+
+    /**
+     * Sets the property defining whether child DataContexts should perform 
+     * object validation before commit is executed.
+     * 
+     * @since 1.1
+     */
+    public void setValidatingObjectsOnCommit(boolean flag) {
+        this.validatingObjectsOnCommit = flag;
     }
 
     /**
@@ -397,10 +434,9 @@ public class DataDomain implements QueryEngine {
      * Otherwise a new instance of DataRowStore will be used as its local cache.
      */
     public DataContext createDataContext() {
-       return createDataContext(isSharedCacheEnabled());
+        return createDataContext(isSharedCacheEnabled());
     }
-    
-    
+
     /**
      * Creates a new DataContext. 
      * 
@@ -418,11 +454,13 @@ public class DataDomain implements QueryEngine {
                 ? getSharedSnapshotCache()
                 : new DataRowStore(name, properties);
 
-        return new DataContext(this, snapshotCache);
+        DataContext context = new DataContext(this, snapshotCache);
+        context.setValidatingObjectsOnCommit(isValidatingObjectsOnCommit());
+        return context;
     }
 
     /**
-     * Creates an returns a new inactive transaction, serving as a factory method.
+     * Creates and returns a new inactive transaction, serving as a factory method.
      * If there is a TransactionDelegate, adds the delegate to the newly
      * created Transaction.
      * 

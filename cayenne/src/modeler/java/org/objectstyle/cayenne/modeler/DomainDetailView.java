@@ -100,7 +100,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
 
     protected JTextField name;
     protected JTextField cacheSize;
-    protected JTextField cacheExpiration;
+    protected JCheckBox objectValidation;
     protected JCheckBox sharedCache;
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
@@ -119,8 +119,8 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         this.setLayout(new BorderLayout());
 
         this.name = CayenneWidgetFactory.createTextField();
+        this.objectValidation = new JCheckBox();
         this.cacheSize = CayenneWidgetFactory.createTextField(10);
-        this.cacheExpiration = CayenneWidgetFactory.createTextField(10);
         this.sharedCache = new JCheckBox();
         this.remoteUpdates = new JCheckBox();
         this.configRemoteUpdates = new JButton("Configure");
@@ -135,10 +135,10 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
 
         builder.appendSeparator("DataDomain Info");
         builder.append("DataDomain Name:", name, 3);
+        builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
 
         builder.appendSeparator("Cache Configuration");
         builder.append("Max. Number of Objects:", cacheSize, 3);
-        builder.append("Entry Expiration, sec.:", cacheExpiration, 3);
         builder.append("Use Shared Cache:", sharedCache, 3);
         builder.append(
             "Remote Change Notifications:",
@@ -155,9 +155,18 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         InputVerifier inputCheck = new FieldVerifier();
         name.setInputVerifier(inputCheck);
         cacheSize.setInputVerifier(inputCheck);
-        cacheExpiration.setInputVerifier(inputCheck);
 
         // add action listener to checkboxes
+        objectValidation.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String value = objectValidation.isSelected() ? "true" : "false";
+                setDomainProperty(
+                    DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
+                    value,
+                    Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT));
+            }
+        });
+
         sharedCache.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String value = sharedCache.isSelected() ? "true" : "false";
@@ -267,10 +276,10 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
                 DataRowStore.SNAPSHOT_CACHE_SIZE_PROPERTY,
                 Integer.toString(DataRowStore.SNAPSHOT_CACHE_SIZE_DEFAULT)));
 
-        cacheExpiration.setText(
-            getDomainProperty(
-                DataRowStore.SNAPSHOT_EXPIRATION_PROPERTY,
-                Long.toString(DataRowStore.SNAPSHOT_EXPIRATION_DEFAULT)));
+        objectValidation.setSelected(
+            getDomainBooleanProperty(
+                DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
+                Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT)));
 
         sharedCache.setSelected(
             getDomainBooleanProperty(
@@ -282,7 +291,8 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
                 DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
                 Boolean.toString(DataRowStore.REMOTE_NOTIFICATION_DEFAULT)));
         remoteUpdates.setEnabled(sharedCache.isSelected());
-        configRemoteUpdates.setEnabled(remoteUpdates.isEnabled() && remoteUpdates.isSelected());
+        configRemoteUpdates.setEnabled(
+            remoteUpdates.isEnabled() && remoteUpdates.isSelected());
     }
 
     class FieldVerifier extends InputVerifier {
@@ -292,9 +302,6 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
             }
             else if (input == cacheSize) {
                 return verifyCacheSize();
-            }
-            else if (input == cacheExpiration) {
-                return verifyCacheExpiration();
             }
             else {
                 return true;
@@ -348,25 +355,6 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
                 text,
                 Integer.toString(DataRowStore.SNAPSHOT_CACHE_SIZE_DEFAULT));
             return validationSuccess(cacheSize);
-        }
-
-        protected boolean verifyCacheExpiration() {
-            String text = cacheExpiration.getText().trim();
-
-            if (text.length() > 0) {
-                try {
-                    Integer.parseInt(text);
-                }
-                catch (NumberFormatException ex) {
-                    return validationWarning(cacheExpiration);
-                }
-            }
-
-            setDomainProperty(
-                DataRowStore.SNAPSHOT_EXPIRATION_PROPERTY,
-                text,
-                Long.toString(DataRowStore.SNAPSHOT_EXPIRATION_DEFAULT));
-            return validationSuccess(cacheExpiration);
         }
 
         protected boolean validationWarning(JTextField field) {
