@@ -258,6 +258,8 @@ public class DbLoader {
             dbEntity.setSchema(table.getSchema());
             dbEntity.setCatalog(table.getCatalog());
 
+
+            // --  Create DbAttributes from column information  --
             ResultSet rs =
                 getMetaData().getColumns(
                     table.getCatalog(),

@@ -164,11 +164,12 @@ public class DbLoaderTst extends TestCase {
         DbAttribute varcharAttr = (DbAttribute) dbe.getAttribute("PAINTING_TITLE");
 
         // check decimal
-        // commented out until forward engineering precision bug is fixed (563136)
-        /*   assertEquals(
-               msgForTypeMismatch(Types.DECIMAL, decimalAttr),
-               Types.DECIMAL,
-               decimalAttr.getType()); */
+        assertEquals(
+            msgForTypeMismatch(Types.DECIMAL, decimalAttr),
+            Types.DECIMAL,
+            decimalAttr.getType());
+
+        assertEquals(2, decimalAttr.getPrecision());
 
         // check varchar
         assertEquals(

@@ -221,8 +221,7 @@ public class TypesMapping {
      */
     public static boolean supportsLength(int type) {
         return !(type == Types.LONGVARBINARY 
-        || type == Types.LONGVARCHAR
-        || isNumeric(type));
+        || type == Types.LONGVARCHAR);
     }
 
     /** 

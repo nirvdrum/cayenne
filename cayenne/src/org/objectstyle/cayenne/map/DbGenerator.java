@@ -181,10 +181,24 @@ public class DbGenerator {
 
             buf.append(at.getName()).append(' ').append(type);
 
+            // append size and precision (if applicable)
             if (TypesMapping.supportsLength(at.getType())) {
                 int len = at.getMaxLength();
+                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
+
+                // sanity check
+                if (prec > len) {
+                    prec = -1;
+                }
+
                 if (len > 0) {
-                    buf.append('(').append(len).append(')');
+                    buf.append('(').append(len);
+                    
+                    if (prec >= 0) {
+                        buf.append(", ").append(prec);
+                    }
+                    
+                    buf.append(')');
                 }
             }
 
