@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.dba.db2;
 
@@ -87,129 +87,133 @@ test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
  */
 public class DB2Adapter extends JdbcAdapter {
 
-	/**
-	 * Creates a DB2 specific PK Generator.
-	 */
-	protected PkGenerator createPkGenerator() {
-		return new DB2PkGenerator();
-	}
+    /**
+     * Creates a DB2 specific PK Generator.
+     */
+    protected PkGenerator createPkGenerator() {
+        return new DB2PkGenerator();
+    }
 
-	protected void configureExtendedTypes(ExtendedTypeMap map) {
-		super.configureExtendedTypes(map);
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+        super.configureExtendedTypes(map);
 
-		// create specially configured CharType handler
-		map.registerType(new CharType(true, true));
-	}
+        // create specially configured CharType handler
+        map.registerType(new CharType(true, true));
+    }
 
-	/**
-	  * Returns a SQL string that can be used to create database table
-	  * corresponding to <code>ent</code> parameter.
-	  */
-	 public String createTable(DbEntity ent) {
-		 // later we may support view creation
-		 // for derived DbEntities
-		 if (ent instanceof DerivedDbEntity) {
-			 throw new CayenneRuntimeException(
-				 "Can't create table for derived DbEntity '" + ent.getName() + "'.");
-		 }
+    /**
+      * Returns a SQL string that can be used to create database table
+      * corresponding to <code>ent</code> parameter.
+      */
+    public String createTable(DbEntity ent) {
+        // later we may support view creation
+        // for derived DbEntities
+        if (ent instanceof DerivedDbEntity) {
+            throw new CayenneRuntimeException(
+                "Can't create table for derived DbEntity '"
+                    + ent.getName()
+                    + "'.");
+        }
 
-		 StringBuffer buf = new StringBuffer();
-		 buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
+        StringBuffer buf = new StringBuffer();
+        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(
+            " (");
 
-		 // columns
-		 Iterator it = ent.getAttributes().iterator();
-		 boolean first = true;
-		 while (it.hasNext()) {
-			 if (first) {
-				 first = false;
-			 }
-			 else {
-				 buf.append(", ");
-			 }
+        // columns
+        Iterator it = ent.getAttributes().iterator();
+        boolean first = true;
+        while (it.hasNext()) {
+            if (first) {
+                first = false;
+            } else {
+                buf.append(", ");
+            }
 
-			 DbAttribute at = (DbAttribute) it.next();
+            DbAttribute at = (DbAttribute) it.next();
 
-			 // attribute may not be fully valid, do a simple check
-			 if (at.getType() == TypesMapping.NOT_DEFINED) {
-				 throw new CayenneRuntimeException(
-					 "Undefined type for attribute '"
-						 + ent.getFullyQualifiedName()
-						 + "."
-						 + at.getName()
-						 + "'.");
-			 }
+            // attribute may not be fully valid, do a simple check
+            if (at.getType() == TypesMapping.NOT_DEFINED) {
+                throw new CayenneRuntimeException(
+                    "Undefined type for attribute '"
+                        + ent.getFullyQualifiedName()
+                        + "."
+                        + at.getName()
+                        + "'.");
+            }
 
-			 String[] types = externalTypesForJdbcType(at.getType());
-			 if (types == null || types.length == 0) {
-				 throw new CayenneRuntimeException(
-					 "Undefined type for attribute '"
-						 + ent.getFullyQualifiedName()
-						 + "."
-						 + at.getName()
-						 + "': "
-						 + at.getType());
-			 }
+            String[] types = externalTypesForJdbcType(at.getType());
+            if (types == null || types.length == 0) {
+                throw new CayenneRuntimeException(
+                    "Undefined type for attribute '"
+                        + ent.getFullyQualifiedName()
+                        + "."
+                        + at.getName()
+                        + "': "
+                        + at.getType());
+            }
 
-			 String type = types[0];
-			 buf.append(at.getName()).append(' ').append(type);
+            String type = types[0];
+            buf.append(at.getName()).append(' ').append(type);
 
-			 // append size and precision (if applicable)
-			 if (TypesMapping.supportsLength(at.getType())) {
-				 int len = at.getMaxLength();
-				 int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
+            // append size and precision (if applicable)
+            if (TypesMapping.supportsLength(at.getType())) {
+                int len = at.getMaxLength();
+                int prec =
+                    TypesMapping.isDecimal(at.getType())
+                        ? at.getPrecision()
+                        : -1;
 
-				 // sanity check
-				 if (prec > len) {
-					 prec = -1;
-				 }
+                // sanity check
+                if (prec > len) {
+                    prec = -1;
+                }
 
-				 if (len > 0) {
-					 buf.append('(').append(len);
+                if (len > 0) {
+                    buf.append('(').append(len);
 
-					 if (prec >= 0) {
-						 buf.append(", ").append(prec);
-					 }
+                    if (prec >= 0) {
+                        buf.append(", ").append(prec);
+                    }
 
-					 buf.append(')');
-				 }
-			 }
+                    buf.append(')');
+                }
+            }
 
-			 if (at.isMandatory()) {
-				 buf.append(" NOT NULL");
-			 }
-		 }
+            if (at.isMandatory()) {
+                buf.append(" NOT NULL");
+            }
+        }
 
-		 // primary key clause
-		 Iterator pkit = ent.getPrimaryKey().iterator();
-		 if (pkit.hasNext()) {
-			 if (first)
-				 first = false;
-			 else
-				 buf.append(", ");
+        // primary key clause
+        Iterator pkit = ent.getPrimaryKey().iterator();
+        if (pkit.hasNext()) {
+            if (first)
+                first = false;
+            else
+                buf.append(", ");
 
-			 buf.append("PRIMARY KEY (");
-			 boolean firstPk = true;
-			 while (pkit.hasNext()) {
-				 if (firstPk)
-					 firstPk = false;
-				 else
-					 buf.append(", ");
+            buf.append("PRIMARY KEY (");
+            boolean firstPk = true;
+            while (pkit.hasNext()) {
+                if (firstPk)
+                    firstPk = false;
+                else
+                    buf.append(", ");
 
-				 DbAttribute at = (DbAttribute) pkit.next();
-				 buf.append(at.getName());
-			 }
-			 buf.append(')');
-		 }
-		 buf.append(')');
-		 return buf.toString();
-	 }
+                DbAttribute at = (DbAttribute) pkit.next();
+                buf.append(at.getName());
+            }
+            buf.append(')');
+        }
+        buf.append(')');
+        return buf.toString();
+    }
 
-	/**
-	 * Returns a trimming translator.
-	 */
-	public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-		return new DB2QualifierTranslator(queryAssembler, "RTRIM");
-	}
+    /**
+     * Returns a trimming translator.
+     */
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+        return new DB2QualifierTranslator(queryAssembler, "RTRIM");
+    }
 
 }
-

@@ -147,7 +147,7 @@ public class DB2PkGenerator extends JdbcPkGenerator {
 		StringBuffer buf = new StringBuffer();
 		buf.append("CREATE SEQUENCE ")
 			.append(this.sequenceName(ent))
-			.append(" START WITH 1")
+			.append(" START WITH 200")
 			.append(" INCREMENT BY ").append(getPkCacheSize())
 			.append(" NO MAXVALUE ")
 			.append(" NO CYCLE ")

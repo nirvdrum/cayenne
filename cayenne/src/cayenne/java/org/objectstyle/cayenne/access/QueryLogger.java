@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -162,11 +163,9 @@ public class QueryLogger {
                 buf.append("...");
             }
             buf.append('>');
-        }
-        else if (anObject instanceof Boolean) {
+        } else if (anObject instanceof Boolean) {
             buf.append('\'').append(anObject).append('\'');
-        }
-        else {
+        } else {
             // unknown
             buf
                 .append("[")
@@ -180,7 +179,9 @@ public class QueryLogger {
     /**
      * Prints a byte value to a StringBuffer as a double digit hex value.
      */
-    protected static void appendFormattedByte(StringBuffer buf, byte byteValue) {
+    protected static void appendFormattedByte(
+        StringBuffer buf,
+        byte byteValue) {
 
         String hexDecode = "0123456789ABCDEF";
 
@@ -258,8 +259,7 @@ public class QueryLogger {
 
                 buf.append("\n\tLogin: ").append(dsi.getUserName());
                 buf.append("\n\tPassword: *******");
-            }
-            else {
+            } else {
                 buf.append(" pool information unavailable");
             }
 
@@ -318,8 +318,13 @@ public class QueryLogger {
     /**
      * @deprecated Since 1.0 Beta3 use "logQueryParameters(Level,String,List)"
      */
-    public static void logBatchQueryParameters(Level logLevel, BatchQuery batch) {
-        logQueryParameters(logLevel, "batch params", batch.getValuesForUpdateParameters());
+    public static void logBatchQueryParameters(
+        Level logLevel,
+        BatchQuery batch) {
+        logQueryParameters(
+            logLevel,
+            "batch params",
+            batch.getValuesForUpdateParameters());
     }
 
     public static void logQueryParameters(
@@ -354,8 +359,7 @@ public class QueryLogger {
 
             if (count == 1) {
                 buf.append("=== returned 1 row.");
-            }
-            else {
+            } else {
                 buf.append("=== returned ").append(count).append(" rows.");
             }
 
@@ -370,7 +374,9 @@ public class QueryLogger {
     public static void logUpdateCount(Level logLevel, int count) {
         if (isLoggable(logLevel)) {
             String countStr =
-                (count == 1) ? "=== updated 1 row." : "=== updated " + count + " rows.";
+                (count == 1)
+                    ? "=== updated 1 row."
+                    : "=== updated " + count + " rows.";
             logObj.log(logLevel, countStr);
         }
     }
@@ -389,6 +395,14 @@ public class QueryLogger {
         }
 
         logObj.log(logLevel, "*** error.", th);
+
+        if (th instanceof SQLException) {
+            SQLException sqlException = ((SQLException) th).getNextException();
+            while (sqlException != null) {
+                logObj.log(logLevel, "*** nested SQL error.", sqlException);
+                sqlException = sqlException.getNextException();
+            }
+        }
     }
 
     public static void logQueryStart(Level logLevel, int count) {
