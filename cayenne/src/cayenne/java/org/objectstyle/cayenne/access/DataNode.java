@@ -99,7 +99,8 @@ public class DataNode implements QueryEngine {
     protected RefIntegritySupport refIntegritySupport;
 
     /** Creates unnamed DataNode */
-    public DataNode() {}
+    public DataNode() {
+    }
 
     /** Creates DataNode and assigns <code>name</code> to it. */
     public DataNode(String name) {
@@ -200,7 +201,11 @@ public class DataNode implements QueryEngine {
      * returns null otherwise.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null) ? this : null;
+        return (
+            this.getEntityResolver().lookupObjEntity(objEntity.getName())
+                != null)
+            ? this
+            : null;
     }
 
     /** Run multiple queries using one of the pooled connections. */
@@ -244,26 +249,31 @@ public class DataNode implements QueryEngine {
                 try {
                     BatchInterpreter interpreter = null;
                     switch (nextQuery.getQueryType()) {
-                      case Query.INSERT_BATCH_QUERY:
-                        interpreter = getAdapter().getInsertBatchInterpreter();
-                        break;
-                      case Query.UPDATE_BATCH_QUERY:
-                        interpreter = getAdapter().getUpdateBatchInterpreter();
-                        break;
-                      case Query.DELETE_BATCH_QUERY:
-                        interpreter = getAdapter().getDeleteBatchInterpreter();
-                        break;
+                        case Query.INSERT_BATCH_QUERY :
+                            interpreter =
+                                getAdapter().getInsertBatchInterpreter();
+                            break;
+                        case Query.UPDATE_BATCH_QUERY :
+                            interpreter =
+                                getAdapter().getUpdateBatchInterpreter();
+                            break;
+                        case Query.DELETE_BATCH_QUERY :
+                            interpreter =
+                                getAdapter().getDeleteBatchInterpreter();
+                            break;
                     }
                     if (interpreter != null) {
-                      interpreter.execute((BatchQuery)nextQuery, con);
-                      continue;
+                        interpreter.execute((BatchQuery) nextQuery, con);
+                        continue;
                     }
                     // translate query
-                    QueryTranslator transl = getAdapter().getQueryTranslator(nextQuery);
+                    QueryTranslator transl =
+                        getAdapter().getQueryTranslator(nextQuery);
                     transl.setEngine(this);
                     transl.setCon(con);
 
-                    PreparedStatement prepStmt = transl.createStatement(logLevel);
+                    PreparedStatement prepStmt =
+                        transl.createStatement(logLevel);
 
                     // if ResultIterator is returned to the user,
                     // DataNode is not responsible for closing the connections
@@ -278,8 +288,12 @@ public class DataNode implements QueryEngine {
 
                     if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                         runSelect(opObserver, prepStmt, transl);
-                    } else {
+                    } else if (
+                        nextQuery.getQueryType()
+                            != Query.STORED_PROCEDURE_QUERY) {
                         runUpdate(opObserver, prepStmt, transl);
+                    } else {
+                        runProcedure(opObserver, prepStmt, transl);
                     }
 
                 } catch (Exception queryEx) {
@@ -360,8 +374,14 @@ public class DataNode implements QueryEngine {
         SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
         DefaultResultIterator it =
             (assembler.getFetchLimit() > 0)
-                ? new LimitedResultIterator(prepStmt, this.getAdapter(), assembler)
-                : new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+                ? new LimitedResultIterator(
+                    prepStmt,
+                    this.getAdapter(),
+                    assembler)
+                : new DefaultResultIterator(
+                    prepStmt,
+                    this.getAdapter(),
+                    assembler);
 
         // note that we don't need to close ResultIterator
         // since "dataRows" will do it internally
@@ -387,7 +407,11 @@ public class DataNode implements QueryEngine {
 
         try {
             SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-            it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+            it =
+                new DefaultResultIterator(
+                    prepStmt,
+                    this.getAdapter(),
+                    assembler);
 
             it.setClosingConnection(true);
             observer.nextDataRows(transl.getQuery(), it);
@@ -421,6 +445,33 @@ public class DataNode implements QueryEngine {
         }
     }
 
+    /**
+        * Executes StoredProcedure.
+        */
+    protected void runProcedure(
+        OperationObserver observer,
+        PreparedStatement prepStmt,
+        QueryTranslator transl)
+        throws Exception {
+
+        try {
+        	// ProcedureTranslator procTransl = (ProcedureTranslator)transl;
+        	// Procedure proc = procTransl.getProcedure();
+        	
+            // execute procedure
+            prepStmt.execute();
+            
+            // process result
+            // List columns = proc.getResultAttributesList();
+            
+            
+            // ignore OUT params for now...
+            
+        } finally {
+            prepStmt.close();
+        }
+    }
+
     public void performQuery(Query query, OperationObserver opObserver) {
         List qWrapper = new ArrayList(1);
         qWrapper.add(query);
@@ -435,18 +486,21 @@ public class DataNode implements QueryEngine {
     }
 
     public Iterator dataMapIterator() {
-      return this.getDataMapsAsList().iterator();
+        return this.getDataMapsAsList().iterator();
     }
 
     public void resetReferentialIntegritySupport() throws CayenneException {
-      if (refIntegritySupport == null) {
-        if (adapter.supportsFkConstraints())
-          refIntegritySupport = new RefIntegritySupport(this);
-      } else refIntegritySupport.reset(this);
+        if (refIntegritySupport == null) {
+            if (adapter.supportsFkConstraints())
+                refIntegritySupport = new RefIntegritySupport(this);
+        } else
+            refIntegritySupport.reset(this);
     }
 
-    public RefIntegritySupport getReferentialIntegritySupport() throws CayenneException {
-      if (refIntegritySupport == null) resetReferentialIntegritySupport();
-      return refIntegritySupport;
+    public RefIntegritySupport getReferentialIntegritySupport()
+        throws CayenneException {
+        if (refIntegritySupport == null)
+            resetReferentialIntegritySupport();
+        return refIntegritySupport;
     }
 }

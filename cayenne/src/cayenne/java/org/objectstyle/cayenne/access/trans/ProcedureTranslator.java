@@ -99,7 +99,7 @@ public class ProcedureTranslator extends QueryTranslator {
      */
     protected String createSqlString() {
         Procedure proc = getProcedure();
-        List params = proc.getParams();
+        List params = proc.getCallParamsList();
 
         StringBuffer buf = new StringBuffer();
         buf.append("{call ").append(proc.getName());
@@ -120,7 +120,7 @@ public class ProcedureTranslator extends QueryTranslator {
     }
 
     protected void initValues() {
-        List params = getProcedure().getParams();
+        List params = getProcedure().getCallParamsList();
         Map queryValues = getProcedureQuery().getParams();
 
         // match values with parameters in the correct order.
@@ -137,7 +137,7 @@ public class ProcedureTranslator extends QueryTranslator {
 
     protected void initStatement(CallableStatement stmt) throws Exception {
         if (values != null && values.size() > 0) {
-            List params = getProcedure().getParams();
+            List params = getProcedure().getCallParamsList();
             
             int len = values.size();
             for (int i = 0; i < len; i++) {

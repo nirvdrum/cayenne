@@ -119,11 +119,6 @@ public class ProcedureSelectQuery
     }
 
     public void setProcedure(Procedure storedProcedure) {
-        if (storedProcedure != null && !storedProcedure.isReturningRows()) {
-            throw new IllegalArgumentException(
-                "StoredProcedure for SelectStoredProcedureQuery "
-                    + "must return a ResultSet.");
-        }
         super.setProcedure(storedProcedure);
     }
 
@@ -148,12 +143,5 @@ public class ProcedureSelectQuery
 
     public void clearResultParams() {
         resultParams.clear();
-    }
-
-    /**
-     * Returns Query.SELECT_QUERY.
-     */
-    public int getQueryType() {
-        return SELECT_QUERY;
     }
 }

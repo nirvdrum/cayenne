@@ -60,49 +60,88 @@ package org.objectstyle.cayenne.map;
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureParam extends MapObject {
-    protected int type;
+public class ProcedureParam extends DbAttribute {
+
+    public static final int IN_PARAM = 1;
+    public static final int OUT_PARAM = 2;
+    public static final int IN_OUT_PARAM = 3;
+
+    /** 
+     * Defines a stored procedure parameter with unknown direction.
+     */
+    public static final int VOID_PARAM = 4;
+
+    protected int direction = VOID_PARAM;
+    protected boolean returned;
 
     /**
-     * Constructor for StoredProcedureParam.
+     * Constructor for ProcedureParam.
      */
     public ProcedureParam() {
         super();
     }
 
+    public ProcedureParam(String name) {
+        super(name);
+    }
+
+    public ProcedureParam(
+        String name,
+        int type,
+        int direction) {
+        super(name);
+        setType(type);
+        setDirection(direction);
+    }
+
     /**
-     * Constructor for StoredProcedureParam.
+     * Throws an exception if the entity is not a Procedure.
      */
-    public ProcedureParam(String name, int type) {
-        this.objName = name;
-        this.type = type;
+    public void setEntity(Entity entity) {
+        if (entity != null && !(entity instanceof Procedure)) {
+            throw new IllegalArgumentException("Only Procedure can be a parent of ProcedureParam.");
+        }
+
+        super.setEntity(entity);
     }
 
-    /** 
-     * Returns the StoredProcedure owning this parameter.
+    /**
+     * Returns the direction.
+     * @return int
      */
-    public Procedure getStoredProcedure() {
-        return (Procedure) getParent();
+    public int getDirection() {
+        return direction;
     }
 
-    /** Sets the StoredProcedure that owns this parameter. */
-    public void setStoredProcedure(Procedure storedProc) {
-        setParent(storedProc);
+    /**
+     * Sets the direction.
+     * @param direction The direction to set
+     */
+    public void setDirection(int direction) {
+        if (direction != IN_PARAM
+            && direction != OUT_PARAM
+            && direction != IN_OUT_PARAM
+            && direction != VOID_PARAM) {
+            throw new IllegalArgumentException(
+                "Unknown parameter type: " + direction);
+        }
+
+        this.direction = direction;
     }
     
     /**
-     * Returns the type.
-     * @return int
+     * Returns the returned.
+     * @return boolean
      */
-    public int getType() {
-        return type;
+    public boolean isReturned() {
+        return returned;
     }
 
     /**
-     * Sets the type.
-     * @param type The type to set
+     * Sets the returned.
+     * @param returned The returned to set
      */
-    public void setType(int type) {
-        this.type = type;
+    public void setReturned(boolean returned) {
+        this.returned = returned;
     }
 }

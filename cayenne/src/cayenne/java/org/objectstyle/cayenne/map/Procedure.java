@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -63,12 +64,7 @@ import java.util.List;
  * 
  * @author Andrei Adamchik
  */
-public class Procedure {
-    protected String name;
-    protected String schema;
-    protected boolean returningRows;
-    protected List params = new ArrayList();
-    protected List resultAttrs = new ArrayList();
+public class Procedure extends DbEntity {
 
     /**
      * Default constructor for StoredProcedure.
@@ -76,117 +72,66 @@ public class Procedure {
     public Procedure() {
         super();
     }
-    
+
     public Procedure(String name) {
-        this.name = name;
+        super(name);
     }
-
     /**
-     * Creates an instance of StoredProcedure with the specified name and select
-     * behaviour.
-     */
-    public Procedure(String schema, String name, boolean returningRows) {
-        this.schema = schema;
-        this.name = name;
-        this.returningRows = returningRows;
-    }
-
-    /**
-     * Returns StoredProcedure's name. This is also a database name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets the name of the StoredProcedure.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-      * Returns the schema.
-      * @return String
+      * Returns a list of all parameters that are not part of the ResultSet, and
+      * are one of IN, OUT, INOUT, VOID parameters.
+      *
+      * @return List
       */
-    public String getSchema() {
-        return schema;
-    }
+     public List getCallParamsList() {
+         List list = new ArrayList();
+
+         Iterator it = attributes.keySet().iterator();
+         while (it.hasNext()) {
+             Attribute attr = (Attribute) attributes.get(it.next());
+             if (attr instanceof ProcedureParam) {
+                 list.add(attr);
+             }
+         }
+
+         return list;
+     }
 
     /**
-     * Sets the schema.
-     * @param schema The schema to set
+     * Returns a list of all attributes that describe the result retirned by
+     * this procedure.
+     *
+     * @return List
      */
-    public void setSchema(String schema) {
-        this.schema = schema;
-    }
+    public List getResultAttributesList() {
+        List list = new ArrayList();
 
-    /**
-     * Returns <code>true</code> if the StoredProcedure is expected to return a
-     * ResultSet, <code>false</code> otherwise.
-     */
-    public boolean isReturningRows() {
-        return returningRows;
-    }
-
-    /**
-     * Sets whether the StoredProcedure returns a ResultSet.
-     */
-    public void setReturningRows(boolean returningRows) {
-        this.returningRows = returningRows;
-    }
-
-    /**
-     * Adds a DbAttribute describing returned ResultSet.
-     */
-    public void addResultAttr(DbAttribute attr) {
-        if (attr == null) {
-            throw new IllegalArgumentException("Attempt to add a null DbAttribute.");
+        Iterator it = attributes.keySet().iterator();
+        while (it.hasNext()) {
+            Attribute attr = (Attribute) attributes.get(it.next());
+            if (!(attr instanceof ProcedureParam)) {
+                list.add(attr);
+            }
         }
 
-        resultAttrs.add(attr);
+        return list;
     }
 
-    public void removeResultAttr(DbAttribute attr) {
-        resultAttrs.remove(attr);
-    }
-
-    public List getResultAttrs() {
-        return resultAttrs;
-    }
-
-    public void clearResultAttrs() {
-        resultAttrs.clear();
-    }
 
     /**
-     * Creates and adds a StoredProcedureParam to the list of parameters.
+     * Returns parameter describing the return value of the StoredProcedure. 
      */
-    public void addParam(String name, int type) {
-        addParam(new ProcedureParam(name, type)); 
-    }
-    
-    /**
-      * Adds a StoredProcedureParam to the list of parameters.
-      */
-    public void addParam(ProcedureParam param) {
-        if (param == null) {
-            throw new IllegalArgumentException("Attempt to add a null StoredProcedureParam.");
+    public ProcedureParam getResultParam() {
+
+        Iterator it = this.getAttributeList().iterator();
+        while (it.hasNext()) {
+            Attribute attr = (Attribute) it.next();
+            if (attr instanceof ProcedureParam) {
+                ProcedureParam param = (ProcedureParam) attr;
+                if (param.isReturned()) {
+                    return param;
+                }
+            }
         }
-
-        params.add(param);
-        param.setStoredProcedure(this);
-    }
-
-    public void removeParam(ProcedureParam param) {
-        params.remove(param);
-    }
-
-    public List getParams() {
-        return params;
-    }
-
-    public void clearParams() {
-        params.clear();
+        return null;
     }
 }

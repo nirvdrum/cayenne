@@ -78,7 +78,7 @@ public class OracleDelegate extends DatabaseSetupDelegate {
     }
 
     public boolean supportsStoredProcedures() {
-        return true;
+        return false;
     }
 
     /**

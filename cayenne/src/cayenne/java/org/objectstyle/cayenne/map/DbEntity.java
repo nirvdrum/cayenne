@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.query.Query;
 public class DbEntity extends Entity {
     protected String catalog;
     protected String schema;
-    private DbKeyGenerator primaryKeyGenerator;
+    protected DbKeyGenerator primaryKeyGenerator;
 
 
     /**
