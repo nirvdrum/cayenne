@@ -66,7 +66,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -87,24 +86,6 @@ public class TypesHandler {
 
     protected Map typesMap;
 
-    /** 
-     * Returns TypesHandler using XML file located in the package of
-     * <code>adapterClass</code>.
-     * 
-     * @deprecated Since 1.1 use {@link #getHandler(URL)}
-     */
-    public static TypesHandler getHandler(Class adapterClass) {
-        return getHandler(Util.getPackagePath(adapterClass.getName()) + "/types.xml");
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #getHandler(URL)}
-     */
-    public static TypesHandler getHandler(String filePath) {
-        URL url = ResourceLocator.findURLInClasspath(filePath);
-        return getHandler(url);
-    }
-
     /**
      * @since 1.1
      */
@@ -119,16 +100,6 @@ public class TypesHandler {
 
             return handler;
         }
-    }
-
-    /**
-     * Creates new TypesHandler loading configuration info from the XML
-     * file specified as <code>typesConfigPath</code> parameter.
-     * 
-     * @deprecated Since 1.1 use {@link #TypesHandler(URL)}
-     */
-    public TypesHandler(String typesConfigPath) {
-        this(ResourceLocator.findURLInClasspath(typesConfigPath));
     }
 
     /**

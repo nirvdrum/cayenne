@@ -73,13 +73,11 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.util.IDUtil;
@@ -260,20 +258,6 @@ public class JdbcPkGenerator implements PkGenerator {
         } finally {
             con.close();
         }
-    }
-
-    /**
-     * Runs arbitrary SQL over the DataNode.
-     *
-     * @deprecated Unused since 1.1 
-     */
-    protected List runSelect(DataNode node, String sql) throws Exception {
-        SQLTemplate q = new SQLTemplate(true);
-        q.setDefaultTemplate(sql);
-
-        SelectObserver observer = new SelectObserver();
-        node.performQueries(Collections.singletonList(q), observer);
-        return observer.getResults(q);
     }
 
     public String generatePkForDbEntityString(DbEntity ent) {

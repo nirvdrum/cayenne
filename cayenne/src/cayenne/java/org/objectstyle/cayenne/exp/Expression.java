@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.Transformer;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.parser.ExpressionParser;
 import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.util.ConversionUtil;
@@ -81,7 +80,6 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * API for expressions use.
  */
 public abstract class Expression implements Serializable, XMLSerializable {
-    private final static Logger logObj = Logger.getLogger(Expression.class);
     
     private final static Object nullValue = new Object();
 
@@ -440,15 +438,6 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * Operand indexing starts at 0.
      */
     public abstract void setOperand(int index, Object value);
-
-    /** 
-     * Method for in-memory evaluation of expressions. 
-     * 
-     * @deprecated Since 1.1 use {@link #evaluate(Object)} or {@link #match(Object)}.
-     */
-    public boolean eval(Object o) {
-        return match(o);
-    }
 
     /**
      * Calculates expression value with object as a context for 

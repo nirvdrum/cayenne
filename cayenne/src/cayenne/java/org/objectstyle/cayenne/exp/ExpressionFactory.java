@@ -62,7 +62,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.parser.ASTAdd;
 import org.objectstyle.cayenne.exp.parser.ASTAnd;
 import org.objectstyle.cayenne.exp.parser.ASTBetween;
@@ -96,8 +95,6 @@ import org.objectstyle.cayenne.exp.parser.SimpleNode;
  * @author Andrei Adamchik
  */
 public class ExpressionFactory {
-    private static Logger logObj = Logger.getLogger(ExpressionFactory.class);
-
     private static Class[] typeLookup;
 
     static {
@@ -282,19 +279,6 @@ public class ExpressionFactory {
      * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
      * specific factory methods.
      */
-    public static Expression listExp(int type, List operands) {
-        Expression exp = expressionOfType(type);
-        for (int i = 0; i < operands.size(); i++) {
-            exp.setOperand(i, operands.get(i));
-        }
-
-        return exp;
-    }
-
-    /** 
-     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
-     * specific factory methods.
-     */
     public static Expression binaryExp(
         int type,
         Object leftOperand,
@@ -325,22 +309,6 @@ public class ExpressionFactory {
             type,
             unaryExp(Expression.DB_PATH, pathSpec),
             wrapPathOperand(value));
-    }
-
-    /** 
-     * @deprecated Since 1.1 use {@link Expression#fromString(String)} or one of the more 
-     * specific factory methods.
-     */
-    public static Expression ternaryExp(
-        int type,
-        Object firstOperand,
-        Object secondOperand,
-        Object thirdOperand) {
-        Expression exp = expressionOfType(type);
-        exp.setOperand(0, firstOperand);
-        exp.setOperand(1, secondOperand);
-        exp.setOperand(2, thirdOperand);
-        return exp;
     }
 
     /** 
