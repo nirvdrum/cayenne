@@ -106,7 +106,10 @@
             <fileset dir="${root}/xdocs/images">
                 <include name="**/spacer.gif"/>
                 <include name="**/cayenne_logo.gif"/>
-                <include name="**/os_logo.gif"/>                
+                <include name="**/cccc99.gif"/>   
+                <include name="**/778899.gif"/>
+                <include name="**/os_logo.gif"/>
+                <include name="**/redline.gif"/>              
                 <include name="**/objectstyle.css"/>
             </fileset>
         </copy>
@@ -119,12 +122,12 @@
         <anakia basedir="xdocs" 
              destdir="${dist}/doc"
              extension=".html" 
-             style="xdocs/stylesheets/cayenne.vsl"
+             style="cayenne.vsl"
              excludes="**/stylesheets/**"
              includes="**/*.xml"
              lastModifiedCheck="true"
              projectFile="stylesheets/project.xml"
-             templatePath="${root}"/>
+             templatePath="${root}/xdocs/stylesheets"/>
     </target>
 
 

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="Cayenne" href="http://objectstyle.org/cayenne/">
-
+<project name="Cayenne Examples" href="http://objectstyle.org/cayenne/">
     <title>Cayenne Examples</title>
-    <author>Andrei Adamchik</author>
     
-    <spacer href="/images/spacer.gif"/>
-    <logo href="/images/cayenne_logo.gif"/>
-    <oslogo href="/images/os_logo.gif"/>
-    <css href="/images/objectstyle.css"/>
+    
+   	<menu name="CAYENNE EXAMPLES">
+        <item name="Home"  href="/index.html"/>
+        <item name="Data-Port"  href="/data-port/index.html"/>
+    </menu>
 </project>

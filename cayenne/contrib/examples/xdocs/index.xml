@@ -4,7 +4,7 @@
     <section name="Cayenne Examples">        
 	<p>Each example is located in its own folder. All examples contain source code
 	in <code>[name]/src</code> folder and compiled binary under <code>[name]/lib</code> 
-	folder. All examples require <code>cayenne.jar</code>.
+	folder. All examples require <code>cayenne.jar</code> (version 1.0).
 	</p>
 	
 	<p>The following Cayenne examples are available:</p>
