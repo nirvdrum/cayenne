@@ -422,7 +422,6 @@ public class DbRelationship extends Relationship {
      * same, except for the name, and whether they operate on a toMany or a toOne.
      */
     private Map srcSnapshotWithTargetSnapshot(Map targetSnapshot) {
-        Map idMap;
         int len = joins.size();
 
         // optimize for the most common single column join
@@ -433,35 +432,32 @@ public class DbRelationship extends Relationship {
                 throw new CayenneRuntimeException(
                         "Some parts of FK are missing in snapshot, join: " + join);
             }
-            else {
-                idMap = Collections.singletonMap(join.getSourceName(), val);
-            }
+
+            return Collections.singletonMap(join.getSourceName(), val);
+
         }
+        
         // general case
-        else {
-            idMap = new HashMap(len * 2);
-            for (int i = 0; i < len; i++) {
-                DbJoin join = (DbJoin) joins.get(i);
-                Object val = targetSnapshot.get(join.getTargetName());
-                if (val == null) {
-                    throw new CayenneRuntimeException(
-                            "Some parts of FK are missing in snapshot, join: " + join);
-                }
-                else {
-                    idMap.put(join.getSourceName(), val);
-                }
+        Map idMap = new HashMap(len * 2);
+        for (int i = 0; i < len; i++) {
+            DbJoin join = (DbJoin) joins.get(i);
+            Object val = targetSnapshot.get(join.getTargetName());
+            if (val == null) {
+                throw new CayenneRuntimeException(
+                        "Some parts of FK are missing in snapshot, join: " + join);
             }
+
+            idMap.put(join.getSourceName(), val);
         }
 
         return idMap;
     }
 
-    /** 
-     * Creates a snapshot of foreign key attributes of a source
-     * object of this relationship based on a snapshot of a target.
-     * Only "to-one" relationships are supported.
-     * Throws CayenneRuntimeException if relationship is "to many" or
-     * if snapshot is missing id components.
+    /**
+     * Creates a snapshot of foreign key attributes of a source object of this
+     * relationship based on a snapshot of a target. Only "to-one" relationships are
+     * supported. Throws CayenneRuntimeException if relationship is "to many" or if
+     * snapshot is missing id components.
      */
     public Map srcFkSnapshotWithTargetSnapshot(Map targetSnapshot) {
 

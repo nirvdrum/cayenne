@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -240,15 +241,35 @@ public class PrimaryKeyHelper {
                         .toString(), dbRel.getName()));
             }
 
-            // make sure we do not override any keys set by user already
-            Iterator fk = dbRel
-                    .srcFkSnapshotWithTargetSnapshot(targetKeyMap)
-                    .entrySet()
-                    .iterator();
-            while (fk.hasNext()) {
-                Map.Entry next = (Map.Entry) fk.next();
-                if (!idMap.containsKey(next.getKey())) {
-                    idMap.put(next.getKey(), next.getValue());
+            if (supportsGeneratedKeys) {
+                // DbRelationship logic currently throws an exception when some key is
+                // missing... so have to implement a similar code here that is more
+                // tolerant to the deferred keys. TODO: refactor this redundant code.
+
+                Iterator joins = dbRel.getJoins().iterator();
+                while (joins.hasNext()) {
+                    DbJoin join = (DbJoin) joins.next();
+                    Object value = targetKeyMap.get(join.getTargetName());
+                    if (value == null && !join.getTarget().isGenerated()) {
+                        throw new CayenneRuntimeException(
+                                "Some parts of FK are missing in snapshot, join: " + join);
+                    }
+
+                    idMap.put(join.getSourceName(), value);
+                }
+            }
+            else {
+                // make sure we do not override any keys set by user already
+                Iterator fk = dbRel
+                        .srcFkSnapshotWithTargetSnapshot(targetKeyMap)
+                        .entrySet()
+                        .iterator();
+
+                while (fk.hasNext()) {
+                    Map.Entry next = (Map.Entry) fk.next();
+                    if (!idMap.containsKey(next.getKey())) {
+                        idMap.put(next.getKey(), next.getValue());
+                    }
                 }
             }
 
