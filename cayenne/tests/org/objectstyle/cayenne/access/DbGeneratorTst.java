@@ -61,7 +61,6 @@ import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 
-import build.classes.org.objectstyle.cayenne.access.*;
 
 /** Test cases for DbGenerator.
   *
