@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.ArrayList;
 
@@ -63,31 +63,28 @@ import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 
-
 public class PkGeneratorTst extends TestCase {
-    protected JdbcPkGenerator pkGen;
+    protected PkGenerator pkGen;
     protected DataNode node;
     protected DbEntity paintEnt;
-    
+
     public PkGeneratorTst(String name) {
         super(name);
     }
-    
-    
-    protected void setUp() throws java.lang.Exception {     
+
+    protected void setUp() throws java.lang.Exception {
         TestMain.getSharedDatabaseSetup().cleanTableData();
-           
-        pkGen = new JdbcPkGenerator();
+
         node = TestMain.getSharedDomain().getDataNodes()[0];
+        pkGen = node.getAdapter().getPkGenerator();
         paintEnt = node.lookupEntity("Painting").getDbEntity();
         pkGen.createAutoPkSupportForDbEntity(node, paintEnt);
     }
-    
-    
+
     public void testGeneratePkForDbEntity() throws java.lang.Exception {
         ArrayList pkList = new ArrayList();
-        
-        for(int i = 0; i < 6; i++) {
+
+        for (int i = 0; i < 6; i++) {
             Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
             assertNotNull(pk);
             assertTrue(!pkList.contains(pk));
