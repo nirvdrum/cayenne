@@ -6,8 +6,8 @@
     </properties>
     
 <body>
-    <section name="4. Cayenne and WebObjects">
-        <subsection name="4.1 Introduction" anchor="intro">
+    <section name="5. Cayenne and WebObjects">
+        <subsection name="5.1 Introduction" anchor="intro">
             <p>For those who have never heard what WebObjects is, here is a little
             introduction. WebObjects is one of the first and one of the best
             web application development frameworks. It was created by NeXT (now
@@ -34,15 +34,15 @@
             for any kind of Java applications.</p>
         </subsection>
         
-        <subsection name="4.2 Feature Comparison" anchor="feature">
+        <subsection name="5.2 Feature Comparison" anchor="feature">
             <p> To Be Done </p>
         </subsection>
         
-        <subsection name="4.3 Working Together" anchor="together">
+        <subsection name="5.3 Working Together" anchor="together">
             <p> To Be Done </p>
         </subsection>
         
-        <subsection name="4.4 Terms Translation" anchor="terms">
+        <subsection name="5.4 Terms Translation" anchor="terms">
             <p>Some design patterns used in Cayenne may be familiar to EOF folk. 
             This section is intended to make Cayenne understanding 
             easier if you have WebObjects/EOF background. Below Cayenne 
@@ -63,8 +63,5 @@
             <p><cite>Expression </cite>: EOQualifier</p>
         </subsection>
     </section>
-
-
-
 </body>
 </document>

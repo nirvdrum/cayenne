@@ -10,7 +10,7 @@
            </p>
 
             <p>Usually, a persistence framework creates
-            an interface from your program to the relational database. Such interface
+            an interface from your program to the relational database. Such interfaces
             make database access more "transparent", since it is based on object concepts 
             rather than thinly wrapped SQL. Cayenne provides this and more. First,
             "transparent" does not mean that you can't do what you used to do with SQL. 

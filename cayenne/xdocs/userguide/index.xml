@@ -2,8 +2,8 @@
 <title>User Guide</title>
 <body>
     <section name="Table of Contents">
-        <p><i>Please note that User Guide is still under development. Any additions, fixes
-        and contributions are welcome.</i></p>
+        <p><i>Please note that User Guide is still under development. Additions, fixes
+        and other contributions are welcomed.</i></p>
         
         <ul>
             <li><a href="intro.html">1. Introduction</a>
@@ -30,13 +30,21 @@
                 <li><a href="design.html#config">3.4 Configuration</a></li>
             </ul></li>
             
-
-           <li><a href="webobjects.html">4. Cayenne and WebObjects</a>
+            <li><a href="appguide.html">4. Writing Cayenne Applications</a>
             <ul>
-                <li><a href="webobjects.html#intro">4.1 Introduction</a></li>
-                <li><a href="webobjects.html#feature">4.2 Feature Comparison</a></li>
-                <li><a href="webobjects.html#together">4.3 Working Together</a></li>
-                <li><a href="webobjects.html#terms">4.4 Terms Translation</a></li>
+                <li><a href="appguide.html#intro">4.1 Introduction</a></li>
+                <li><a href="appguide.html#datamap">4.2 Create DataMap</a></li>
+                <li><a href="appguide.html#javagen">4.3 Generate Java Classes</a></li>
+                <li><a href="appguide.html#cayenne">4.4 Using Cayenne Classes</a></li>
+                <li><a href="appguide.html#deploy">4.5 Deployment</a></li>
+            </ul></li>
+            
+           <li><a href="webobjects.html">5. Cayenne and WebObjects</a>
+            <ul>
+                <li><a href="webobjects.html#intro">5.1 Introduction</a></li>
+                <li><a href="webobjects.html#feature">5.2 Feature Comparison</a></li>
+                <li><a href="webobjects.html#together">5.3 Working Together</a></li>
+                <li><a href="webobjects.html#terms">5.4 Terms Translation</a></li>
             </ul></li>
         </ul>
     </section>

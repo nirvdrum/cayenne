@@ -3,7 +3,7 @@
 <body>
     <section name="2. Installation">
         <subsection name="2.1 System Requirements" anchor="sys_req">
-            <p>In short, Cayenne, including GUI tools, is written in 100% Java,
+            <p>Cayenne, including GUI tools, is written in 100% Java,
             and therefore should run out of the box on any Java-compatible platform. 
             More detailed requirements are listed below:</p>
             
@@ -16,19 +16,22 @@
             Linux, Solaris and Windows 95 / 98 / ME / 2000 / NT 4.0. MacOS support should be coming soon.</p>
                 
             <p><strong>- Access to a relational database and JDBC driver for 
-            this database :</strong>
-            Note that to run Cayenne unit tests you will need "CREATE TABLE" and 
-            "DROP TABLE" database privileges since tests supplied with 
-            Cayenne will create all the tables on the fly.
-            Also note that out of the box, Cayenne would 
+            this database :</strong> Out of the box, Cayenne would 
             support Oracle, Sybase, MySQL and PostgreSQL databases. 
             Certain level of support exists for any other database that has a 
-            JDBC driver available but this is untested and not guaranteed.</p>
+            JDBC driver available but this is untested and not guaranteed. List of
+            available JDBC drivers can be found at 
+            <a href="http://industry.java.sun.com/products/jdbc/drivers">
+            http://industry.java.sun.com/products/jdbc/drivers</a>
+            <i>Note that to run Cayenne unit tests you will need "CREATE TABLE" and 
+            "DROP TABLE" database privileges since tests supplied with 
+            Cayenne will create all the tables on the fly.</i>
+            </p>
             
             <p><strong>- (Optional) Ant 1.4.1 :</strong> Users who downloaded source or binary distribution
             WILL NOT need Ant. Only if you checked out Cayenne from CVS and plan to 
-            build Cayenne from the source, you will need Ant (version 1.4.1 or newer, 
-            older versions will not work). You can download it from 
+            build it yourself, you will need Ant (version 1.4.1 or newer, 
+            older versions will not work). Ant can be downloaded from 
             <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.</p>
         </subsection>
 
@@ -40,7 +43,7 @@
             "http://objectstyle.org/cayenne/download.html">
             http://objectstyle.org/cayenne/download.html</a>. 
             Choose the type of download that fits your needs. If you need
-            a stable version, download source or binary <strong>release build</strong>.
+            a stable version, download source or binary <strong>release</strong>.
             To get the latest features, download source or binary <strong>milestone or nightly
             build</strong>. This way you will be able to use the latest features, but this comes with
             all the risks of using development code. Downloaded file is called something like 
@@ -49,17 +52,17 @@
             
             <p>Unpack <code>cayenne-[release-suffix].tar.gz</code> into the target installation
             directory. On Windows you can use <a href=
-            "http://www.winzip.com/">WinZip</a> unpack the distribution. 
-            (WinZip supports UNIX .tar.gz archives, therefore Cayenne is not provided as a zip file). 
+            "http://www.winzip.com/">WinZip</a> to unpack the distribution. 
+            WinZip supports UNIX .tar.gz archives, therefore Cayenne is not provided as a zip file. 
             On UNIX, run the following command:</p>
             
-            <source># gz -dc &lt;filename&gt;.tar.gz | tar xf -</source>
+            <source># gz -dc [filename].tar.gz | tar xf -</source>
                 
             <p>or if you happen to have GNU tar</p>
                 
-            <source># tar xzf &lt;filename&gt;.tar.gz</source>
+            <source># tar xzf [filename].tar.gz</source>
             
-            <p>Make sure that <code>[cayenne install dir]/lib/cayenne.jar</code> is accessible by your 
+            <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by your 
             applications that use Cayenne. This can be done in many different ways depending on
             what you are planning to use Cayenne for. The simplest way is to copy
             <code>cayenne.jar</code> to your JRE extensions directory 
@@ -91,19 +94,26 @@
             <source>$CAYENNE_HOME/bin/runtests.sh</source>
                 
             <p>Test runner will present a graphic login panel:</p>
-            <img src="/images/login.jpg" width="350" height="176" border="0" align="middle" alt="Cayenne Login Panel"/>
+            <img src="/images/login.jpg" width="350" height="199" border="0" align="middle" alt="Cayenne Login Panel"/>
             
             <panel name="Note:">
             Use &quot;-nogui&quot; flag when calling runtests.sh if you need 
-            to run tests in 100% command line mode, for example, for remote installations.
+            to run tests in command line mode with no GUI (for example, for remote installations). 
+            For things like automated unit tests "-xml [filename]" can be supplied on the command line
+            to allow test script to read database info from an XML file.
             </panel>
                 
             <p>Enter you
 			database login information, JDBC driver class and database URL.
-			Note that JDBC driver class must be accessible by Java
+			JDBC driver class must be accessible by Java
 			Virtual Machine. For example you can put a database vendor JAR
-			file with the driver in $JAVA_HOME/jre/lib/ext directory. Test results will 
-            be printed in a terminal window.</p>
+			file containing the driver in $JAVA_HOME/jre/lib/ext directory. 
+	        Note that there is a combo box in the top left corner of the login panel
+	        that allows user to select a canned driver and URL information. Of course you are
+	        free to overwrite any of the canned data.
+			</p>
+			
+			<p>Test results will be printed in a terminal window.</p>
         </subsection>
 
     </section>
