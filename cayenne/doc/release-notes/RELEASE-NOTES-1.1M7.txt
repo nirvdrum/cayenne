@@ -1,0 +1,20 @@
+Cayenne Release Notes 1.1 M7
+Date: ...
+============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+To browse individual bug reports, see 
+http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
+
+Changes, Features And Improvements:
+
+- DataContext.performQueries(Collection, OperationObserver, Transaction) will no longer generate
+  prefetch queries. Instead this is done upstream in performQuery(GenericSelectQuery). If you subclassed
+  DataContext for whatever reason, check if this affects your subclass.
+
+Bugs Fixed:
+
+
+
