@@ -199,8 +199,9 @@ public class ImportDbAction extends CayenneAction {
     }
 
     public Connection openConnection(DataSourceInfo dsi) {
+        String driverClassName = dsi.getJdbcDriver();
         try {
-            Class.forName(dsi.getJdbcDriver()).newInstance();
+            Class.forName(driverClassName).newInstance();
             return DriverManager.getConnection(
                 dsi.getDataSourceUrl(),
                 dsi.getUserName(),
@@ -226,7 +227,7 @@ public class ImportDbAction extends CayenneAction {
                 e);
             JOptionPane.showMessageDialog(
                 Editor.getFrame(),
-                e.getMessage(),
+                "Class not found: " + driverClassName,
                 "Error Loading Driver",
                 JOptionPane.ERROR_MESSAGE);
             return null;
