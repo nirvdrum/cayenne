@@ -1,6 +1,5 @@
 <document>
 <title>User Guide - Quick Start</title>
-
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
@@ -16,7 +15,7 @@
     	Cayenne Applications"</a> section. This tutorial follows these steps:
     	
     	<ul>
-    		<li><a href="#1">Create Tutorial Directory Structure.</a></li>
+    		<li><a href="#1">Tutorial Setup.</a></li>
     		<li><a href="#2">Prepare Tutorial Database.</a></li>
     		<li><a href="#3">Create Cayenne Configuration Files.</a></li>
     		<li><a href="#4">Generate Java Code for DataObjects.</a></li>
@@ -25,7 +24,11 @@
     	</ul>
     	</p>
     	
-       	<subsection name="3.1 Create Tutorial Directory Structure" anchor="1">
+       	<subsection name="3.1 Tutorial Setup" anchor="1">
+       		<p>- Follow steps outlined in the <a href="../install/index.html">Cayenne 
+       		installation instructions</a>. In particular, JSDK 1.4 must be installed.
+       		</p>
+       		
     		<p>- Copy cayenne.jar file that is a part of Cayenne distribution to
     		the JRE extensions directory (normally a directory like $JAVA_HOME/jre/lib/ext) 
     		or make it otherwise accessible in the CLASSPATH of the application.</p>
@@ -44,7 +47,8 @@
     		<p>To run this tutorial user must have access to a relational database with 
     		privileges sufficient to perform tables creation, select, insert and update queries. 
     		Run the following script to create test tables (script is tested on MySQL, 
-    		but it should be easy to port to any other RDBMS): <a href="#">tutorial1.sql</a>.</p>
+    		but it should be easy to port to any other RDBMS): 
+    		<a href="../../tutorial/0/tutorialdb.sql">tutorialdb.sql</a>.</p>
     	</subsection>
     	
     	<subsection name="3.3 Create Cayenne Configuration Files" anchor="3">
@@ -53,9 +57,9 @@
     		Sample files used for this tutorial can be downloaded from here:
     		
     		<ul>
-    			<li><a href="#">cayenne.xml</a></li>
-    			<li><a href="#">datamap.xml</a></li>
-    			<li><a href="#">driverinfo.xml</a></li>
+    			<li><a href="../../tutorial/0/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorial/0/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorial/0/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
     		These XML files should be copied to the project directory. DataSource connection info

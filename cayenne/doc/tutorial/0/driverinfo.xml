@@ -1,0 +1,4 @@
+<driver class="null">
+	<url value="null"/>
+	<connectionPool min="1" max="1" />
+</driver>
