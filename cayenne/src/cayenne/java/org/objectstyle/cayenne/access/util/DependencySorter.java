@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.access.util;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.QueryEngine;
@@ -69,36 +68,23 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public interface DependencySorter {
-	/**
-	 * Initialzes a sorter with a QueryEngine that provides all the mapping
-	 * information.
-	 */
-	public void initSorter(QueryEngine queryEngine);
-	
-	/**
-	 * Returns a comparator for sorting DbEntities to satisfy their
-	 * dependencies.
-	 * 
-	 * @param dependentFirst If set to <code>true</code>, this comparator will
-	 * place dependent objects before the the objects they depend upon.
-	 * 
-	 * @return Comparator
-	 */
-    public Comparator getDbEntityComparator(boolean dependentFirst);
+    /**
+     * Sorts a list of DbEntities.
+     */
+    public void sortDbEntities(List dbEntities, boolean deleteOrder);
 
     /**
-     * Returns a comparator for sorting ObjEntities to satisfy their
-     * dependencies.
-     *
-     * @param dependentFirst If set to <code>true</code>, this comparator will
-     * place dependent objects before the the objects they depend upon.
-     *
-     * @return Comparator
+     * Sorts a list of ObjEntities.
      */
-    public Comparator getObjEntityComparator(boolean dependentFirst);
+    public void sortObjEntities(List objEntities, boolean deleteOrder);
     
     /**
      * Sorts a list of objects belonging to the ObjEntity. 
      */
-    public void sortObjectsForEntity(ObjEntity entity, List objects, boolean dependentFirst);
+    public void sortObjectsForEntity(ObjEntity entity, List objects, boolean deleteOrder);
+    
+    /**
+     * Reindexes sorter for the query engine.
+     */
+    public void indexSorter(QueryEngine queryEngine);
 }

@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
-import org.objectstyle.cayenne.access.util.SortHandler;
+import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -281,8 +281,8 @@ class ContextCommit {
             return;
         }
 
-        SortHandler sorter = commitHelper.getNode().getSortHandler();
-        sorter.sortObjEntitiesInInsertOrder(entities);
+        DependencySorter sorter = commitHelper.getNode().getDependencySorter();
+        sorter.sortObjEntities(entities, false);
 
         for (Iterator i = entities.iterator(); i.hasNext();) {
             ObjEntity entity = (ObjEntity) i.next();
@@ -290,7 +290,7 @@ class ContextCommit {
                 (List) newObjectsByObjEntity.get(entity.getClassName());
 
             // sort objects for entity
-            sorter.sortObjectsInInsertOrder(entity, objects);
+            sorter.sortObjectsForEntity(entity, objects, false);
 
             InsertBatchQuery batch =
                 new InsertBatchQuery(entity.getDbEntity(), objects.size());
@@ -320,15 +320,15 @@ class ContextCommit {
             return;
         }
 
-        SortHandler sorter = commitHelper.getNode().getSortHandler();
-        sorter.sortObjEntitiesInDeleteOrder(entities);
+        DependencySorter sorter = commitHelper.getNode().getDependencySorter();
+        sorter.sortObjEntities(entities, true);
 
         for (Iterator i = entities.iterator(); i.hasNext();) {
             ObjEntity entity = (ObjEntity) i.next();
             List objects =
                 (List) objectsToDeleteByObjEntity.get(entity.getClassName());
 
-            sorter.sortObjectsInDeleteOrder(entity, objects);
+            sorter.sortObjectsForEntity(entity, objects, true);
             DeleteBatchQuery batch =
                 new DeleteBatchQuery(entity.getDbEntity(), objects.size());
             batch.setLoggingLevel(logLevel);

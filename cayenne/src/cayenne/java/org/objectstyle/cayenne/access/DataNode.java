@@ -68,7 +68,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.access.util.SortHandler;
+import org.objectstyle.cayenne.access.util.DefaultSorter;
+import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -95,15 +96,17 @@ public class DataNode implements QueryEngine {
     protected String dataSourceLocation;
     protected String dataSourceFactory;
     protected EntityResolver entityResolver = new EntityResolver();
-    protected SortHandler sortHandler = new SortHandler(this);
+    protected DependencySorter dependencySorter;
 
     /** Creates unnamed DataNode */
     public DataNode() {
+    	this(null);
     }
 
     /** Creates DataNode and assigns <code>name</code> to it. */
     public DataNode(String name) {
         this.name = name;
+        this.dependencySorter = new DefaultSorter(this);
     }
 
     // setters/getters
@@ -154,7 +157,7 @@ public class DataNode implements QueryEngine {
 
     public void setDataMaps(List dataMaps) {
         entityResolver.setDataMaps(dataMaps);
-        sortHandler.indexSorter();
+        dependencySorter.indexSorter(this);
     }
 
     /**
@@ -162,14 +165,14 @@ public class DataNode implements QueryEngine {
      */
     public void addDataMap(DataMap map) {
         entityResolver.addDataMap(map);
-        sortHandler.indexSorter();
+        dependencySorter.indexSorter(this);
     }
 
     public void removeDataMap(String mapName) {
         DataMap map = entityResolver.getDataMap(mapName);
         if (map != null) {
             entityResolver.removeDataMap(map);
-            sortHandler.indexSorter();
+            dependencySorter.indexSorter(this);
         }
     }
 
@@ -475,7 +478,7 @@ public class DataNode implements QueryEngine {
         return entityResolver;
     }
 
-    public SortHandler getSortHandler() {
-        return sortHandler;
+    public DependencySorter getDependencySorter() {
+        return dependencySorter;
     }
 }

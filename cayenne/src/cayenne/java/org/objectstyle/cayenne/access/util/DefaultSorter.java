@@ -86,7 +86,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.Query;
 
 /**
  * DefaultSorter is a default implementation of DependencySorter based on
@@ -96,7 +95,6 @@ import org.objectstyle.cayenne.query.Query;
  *
  * @author Andriy Shapochka
  */
-
 public class DefaultSorter implements DependencySorter {
     private static Logger logObj = Logger.getLogger(DefaultSorter.class);
 
@@ -111,11 +109,30 @@ public class DefaultSorter implements DependencySorter {
     protected DbEntityComparator dbEntityComparator;
     protected ObjEntityComparator objEntityComparator;
 
-    public DefaultSorter() {
+    // used for lazy initialization
+    protected boolean dirty;
+
+    public DefaultSorter(QueryEngine queryEngine) {
+        indexSorter(queryEngine);
     }
 
-    public void initSorter(QueryEngine queryEngine) {
+    /**
+      * Marks this instance as "dirty", so that it will be indexed lazily on
+      * the next invocation.
+      */
+    public void indexSorter(QueryEngine queryEngine) {
+        this.dirty = true;
         this.queryEngine = queryEngine;
+    }
+
+    /**
+     * Reindexes internal sorter.
+     */
+    protected synchronized void _indexSorter() {
+        if (!dirty) {
+            return;
+        }
+
         Collection tables = new ArrayList();
         dbEntityToTableMap = new HashMap();
         reflexiveDbEntities = new HashMap();
@@ -163,55 +180,25 @@ public class DefaultSorter implements DependencySorter {
         tableComparator = new TableComparator();
         dbEntityComparator = new DbEntityComparator();
         objEntityComparator = new ObjEntityComparator();
+
+        // clear dirty flag
+        this.dirty = false;
     }
 
-    private void fillInMetadata(Table table, DbEntity entity) {
-        //in this case quite a dummy
-        short keySequence = 1;
-        Iterator i = entity.getRelationshipMap().values().iterator();
-
-        while (i.hasNext()) {
-            DbRelationship candidate = (DbRelationship) i.next();
-            if ((!candidate.isToMany() && !candidate.isToDependentPK())
-                || candidate.isToMasterPK()) {
-
-                DbEntity target = (DbEntity) candidate.getTargetEntity();
-                boolean newReflexive = entity.equals(target);
-                Iterator j = candidate.getJoins().iterator();
-                while (j.hasNext()) {
-                    DbAttributePair join = (DbAttributePair) j.next();
-                    DbAttribute targetAttribute = join.getTarget();
-                    if (targetAttribute.isPrimaryKey()) {
-                        ForeignKey fk = new ForeignKey();
-                        fk.setPkTableCatalog(target.getCatalog());
-                        fk.setPkTableSchema(target.getSchema());
-                        fk.setPkTableName(target.getName());
-                        fk.setPkColumnName(targetAttribute.getName());
-                        fk.setColumnName(join.getSource().getName());
-                        fk.setKeySequence(keySequence++);
-                        table.addForeignKey(fk);
-
-                        if (newReflexive) {
-                            List reflexiveRels =
-                                (List) reflexiveDbEntities.get(entity);
-                            if (reflexiveRels == null) {
-                                reflexiveRels = new ArrayList(1);
-                                reflexiveDbEntities.put(entity, reflexiveRels);
-                            }
-                            reflexiveRels.add(candidate);
-                            newReflexive = false;
-                        }
-                    }
-                }
-            }
-        }
+    public void sortDbEntities(List dbEntities, boolean deleteOrder) {
+        _indexSorter();
+        Collections.sort(dbEntities, getDbEntityComparator(deleteOrder));
     }
-    
+
+    public void sortObjEntities(List objEntities, boolean deleteOrder) {
+        _indexSorter();
+        Collections.sort(objEntities, getObjEntityComparator(deleteOrder));
+    }
 
     public void sortObjectsForEntity(
         ObjEntity objEntity,
         List objects,
-        boolean dependentFirst) {
+        boolean deleteOrder) {
 
         DbEntity dbEntity = objEntity.getDbEntity();
 
@@ -219,6 +206,9 @@ public class DefaultSorter implements DependencySorter {
         if (!isReflexive(dbEntity)) {
             return;
         }
+
+        // don't forget to index the sorter
+        _indexSorter();
 
         int size = objects.size();
         List reflexiveRels = (List) reflexiveDbEntities.get(dbEntity);
@@ -287,7 +277,7 @@ public class DefaultSorter implements DependencySorter {
 
         IndegreeTopologicalSort sorter =
             new IndegreeTopologicalSort(objectDependencyGraph);
-            
+
         while (sorter.hasNext()) {
             DataObject o = (DataObject) sorter.next();
             if (o == null)
@@ -303,9 +293,51 @@ public class DefaultSorter implements DependencySorter {
         // may come up with something cleaner later
         objects.clear();
         objects.addAll(sorted);
-        
-        if(dependentFirst) {
-        	Collections.reverse(objects);
+
+        if (deleteOrder) {
+            Collections.reverse(objects);
+        }
+    }
+
+    protected void fillInMetadata(Table table, DbEntity entity) {
+        //in this case quite a dummy
+        short keySequence = 1;
+        Iterator i = entity.getRelationshipMap().values().iterator();
+
+        while (i.hasNext()) {
+            DbRelationship candidate = (DbRelationship) i.next();
+            if ((!candidate.isToMany() && !candidate.isToDependentPK())
+                || candidate.isToMasterPK()) {
+
+                DbEntity target = (DbEntity) candidate.getTargetEntity();
+                boolean newReflexive = entity.equals(target);
+                Iterator j = candidate.getJoins().iterator();
+                while (j.hasNext()) {
+                    DbAttributePair join = (DbAttributePair) j.next();
+                    DbAttribute targetAttribute = join.getTarget();
+                    if (targetAttribute.isPrimaryKey()) {
+                        ForeignKey fk = new ForeignKey();
+                        fk.setPkTableCatalog(target.getCatalog());
+                        fk.setPkTableSchema(target.getSchema());
+                        fk.setPkTableName(target.getName());
+                        fk.setPkColumnName(targetAttribute.getName());
+                        fk.setColumnName(join.getSource().getName());
+                        fk.setKeySequence(keySequence++);
+                        table.addForeignKey(fk);
+
+                        if (newReflexive) {
+                            List reflexiveRels =
+                                (List) reflexiveDbEntities.get(entity);
+                            if (reflexiveRels == null) {
+                                reflexiveRels = new ArrayList(1);
+                                reflexiveDbEntities.put(entity, reflexiveRels);
+                            }
+                            reflexiveRels.add(candidate);
+                            newReflexive = false;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -329,7 +361,7 @@ public class DefaultSorter implements DependencySorter {
         return null;
     }
 
-    public Comparator getDbEntityComparator(boolean dependantFirst) {
+    protected Comparator getDbEntityComparator(boolean dependantFirst) {
         Comparator c = dbEntityComparator;
         if (dependantFirst) {
             c = new ReverseComparator(c);
@@ -337,7 +369,7 @@ public class DefaultSorter implements DependencySorter {
         return c;
     }
 
-    public Comparator getObjEntityComparator(boolean dependantFirst) {
+    protected Comparator getObjEntityComparator(boolean dependantFirst) {
         Comparator c = objEntityComparator;
         if (dependantFirst) {
             c = new ReverseComparator(c);
@@ -345,40 +377,17 @@ public class DefaultSorter implements DependencySorter {
         return c;
     }
 
-    public Comparator getTableComparator() {
-        return tableComparator;
+    protected Table getTable(DbEntity dbEntity) {
+        return (dbEntity != null)
+            ? (Table) dbEntityToTableMap.get(dbEntity)
+            : null;
     }
 
-    public Table getTable(DbEntity dbEntity) {
-        return (
-            dbEntity != null ? (Table) dbEntityToTableMap.get(dbEntity) : null);
-    }
-
-    public Table getTable(ObjEntity objEntity) {
+    protected Table getTable(ObjEntity objEntity) {
         return getTable(objEntity.getDbEntity());
     }
 
-    public int getIndex(Table table) {
-        return ((ComponentRecord) components.get(table)).index;
-    }
-
-    public Table getTable(DataObject dataObject) {
-        Class objEntityClass = dataObject.getObjectId().getObjClass();
-        ObjEntity objEntity =
-            queryEngine.getEntityResolver().lookupObjEntity(objEntityClass);
-        if (objEntity == null)
-            return null;
-        DbEntity dbEntity = objEntity.getDbEntity();
-        return getTable(dbEntity);
-    }
-
-    public Table getTable(Query query) {
-        DbEntity dbEntity =
-            queryEngine.getEntityResolver().lookupDbEntity(query);
-        return getTable(dbEntity);
-    }
-
-    public boolean isReflexive(DbEntity metadata) {
+    protected boolean isReflexive(DbEntity metadata) {
         return reflexiveDbEntities.containsKey(metadata);
     }
 
