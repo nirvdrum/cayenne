@@ -30,6 +30,7 @@
         <fileset dir=".">
             <include name="config_files/**"/>
             <include name="test_resources/**"/>
+            <exclude name="**/*.eomodeld~/**"/>
         </fileset>
     </copy>
 

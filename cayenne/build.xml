@@ -227,7 +227,7 @@
     <!-- Build optional JAR files.                  -->
     <!-- ========================================== -->
     <target name="jar-other" depends="prepare,compile_subprojects">
-        <jar jarfile="${dist}/lib/cayenne_tests.jar" manifest="tests/MANIFEST.MF">
+        <jar jarfile="${dist}/lib/cayenne-tests.jar" manifest="tests/MANIFEST.MF">
             <fileset dir="tests/${build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>

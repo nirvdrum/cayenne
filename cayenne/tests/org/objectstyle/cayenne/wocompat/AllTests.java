@@ -55,12 +55,12 @@ package org.objectstyle.cayenne.wocompat;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
+import junit.framework.TestSuite;
 
 public class AllTests {
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("WebObjects Compatibility (org.objectstyle.cayenne.wocompat)");
+		suite.addTestSuite(EOModelProcessorTst.class);
 		return suite;
 	}
 }

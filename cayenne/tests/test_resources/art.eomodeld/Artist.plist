@@ -18,13 +18,14 @@
             allowsNull = Y; 
             columnName = DATE_OF_BIRTH; 
             externalType = datetime; 
+            internalInfo = {_nameInObjectStore = DATE_OF_BIRTH; }; 
             name = dateOfBirth; 
             valueClassName = NSCalendarDate; 
         }
     ); 
     attributesUsedForLocking = (artistId); 
     className = org.objectstyle.art.Artist; 
-    classProperties = (artistName, dateOfBirth, artistExhibitArray, paintingArray); 
+    classProperties = (artistName, dateOfBirth, artistExhibitArray, paintingArray, exhibitArray); 
     externalName = ARTIST; 
     fetchSpecificationDictionary = {}; 
     name = Artist; 
@@ -39,6 +40,12 @@
             name = artistExhibitArray; 
             ownsDestination = Y; 
             propagatesPrimaryKey = Y; 
+        }, 
+        {
+            definition = artistExhibitArray.toExhibit; 
+            internalInfo = {_nameInObjectStore = artistExhibitArray_toExhibit; }; 
+            joinSemantic = EOInnerJoin; 
+            name = exhibitArray; 
         }, 
         {
             deleteRule = EODeleteRuleCascade; 

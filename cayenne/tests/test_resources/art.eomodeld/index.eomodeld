@@ -1,7 +1,7 @@
 {
     EOModelVersion = 2.1; 
-    adaptorName = Sybase; 
-    connectionDictionary = {databaseName = cayenne; hostName = noise; password = smarty; userName = sa; }; 
+    adaptorName = None; 
+    connectionDictionary = {}; 
     entities = (
         {className = org.objectstyle.art.Artist; name = Artist; }, 
         {className = org.objectstyle.art.ArtistExhibit; name = ArtistExhibit; }, 

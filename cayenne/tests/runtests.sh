@@ -19,5 +19,5 @@ fi
 
 mkdir testrun
 cd testrun
-$JAVA_HOME/bin/java -jar $CAYENNE_HOME/lib/cayenne_tests.jar $@
+$JAVA_HOME/bin/java -jar $CAYENNE_HOME/lib/cayenne-tests.jar $@
 cd ..

@@ -56,17 +56,20 @@ package org.objectstyle.util;
  */
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Logger;
 
-/** Utility class to find resources (usually files) using most common Java approaches.
+/** 
+  * Utility class to find resources (usually files) using most common Java approaches.
   * Some ideas were inspired by Velocity ResourceLoader classes (Copyright: Apache 
   * Software Foundation).
   *
   * @author Andrei Adamchik
   */
 public class ResourceLocator {
-    static Logger logObj = Logger.getLogger(ResourceLocator.class.getName());
+    protected boolean skipHomeDir;
+    protected boolean skipCurDir;
+    protected boolean skipClasspath;
 
     /** Returns a resource as InputStream if it is found in CLASSPATH. 
       * Returns null otherwise. Lookup is normally performed in all JAR and
@@ -95,30 +98,156 @@ public class ResourceLocator {
         }
     }
 
-    /** Looks up for a file in the filesystem.
-     *  @see #findResourceInFileSystem()
+    /** Looks up a file in the filesystem. 
+     *  First looks in the user home directory, then in the current directory.
+     *  
+     *  @return file object matching the name, or null if file can not be found
+     *  or if it is not readable.
+     * 
+     *  @see #findFileInHomeDir(String)
+     *  @see #findFileInCurDir(String)
      */
     public static File findFileInFileSystem(String name) {
+        File f = findFileInHomeDir(name);
+        return (f != null) ? f : findFileInCurDir(name);
+    }
+
+    /** Looks up a file in the user home directory.
+     *  
+     *  @return file object matching the name, or null if file can not be found
+     *  or if it is not readable.
+     */
+    public static File findFileInHomeDir(String name) {
         // look in home directory
         String homeDirPath = System.getProperty("user.home") + File.separator + name;
         File file = new File(homeDirPath);
-
-        if (file.canRead())
-            return file;
-
-        // look in current directory
-        String curDirPath = '.' + File.separator + name;
-        file = new File(curDirPath);
-        if (file.canRead())
-            return file;
-        return null;
+        return file.exists() && file.canRead() ? file : null;
     }
 
-
-    /** Looks up for resource in CLASSPATH.
-     *  @see #findResourceInClasspath()
+    /** Looks up a file in the current directory.
+     *  
+     *  @return file object matching the name, or null if file can not be found
+     *  or if it is not readable.
      */
+    public static File findFileInCurDir(String name) {
+        // look in current directory
+        File file = new File('.' + File.separator + name);
+        return file.exists() && file.canRead() ? file : null;
+    }
+
+    /** Looks up for resource in CLASSPATH. */
     public static URL findURLInClasspath(String name) {
         return ResourceLocator.class.getClassLoader().getResource(name);
     }
+
+    /** Creates new ResourceLocator with default lookup policy including
+     *  user home directory, current directory and CLASSPATH. */
+    public ResourceLocator() {}
+
+    /** Returns resource URL using lookup strategy configured for this object or
+     *  null if no readable resource can be found for name. */
+    public URL findResource(String name) {
+
+        if (!isSkipHomeDir()) {
+            File f = findFileInHomeDir(name);
+            if (f != null) {
+
+                try {
+                    return f.toURL();
+                }
+                catch (MalformedURLException ex) {
+                    ex.printStackTrace();
+
+                    // ignoring...
+                }
+            }
+        }
+
+        if (!isSkipCurDir()) {
+            File f = findFileInCurDir(name);
+            if (f != null) {
+
+                try {
+                    return f.toURL();
+                }
+                catch (MalformedURLException ex) {
+                    ex.printStackTrace();
+
+                    // ignoring...
+                }
+            }
+        }
+
+        if (!isSkipClasspath()) {
+            return findURLInClasspath(name);
+        }
+
+        return null;
+    }
+
+    /** Returns resource URL using lookup strategy configured for this object or
+     *  null if no readable resource can be found for name. Resource returned is
+     *  assumed to be a directory, so URL returned will be in a directory format 
+     *  (with "/" at the end. */
+    public URL findDirectoryResource(String name) {
+        URL url = findResource(name);
+        if (url == null) {
+            return null;
+        }
+
+        String urlSt = url.toExternalForm();
+
+        try {
+            return (urlSt.endsWith("/")) ? url : new URL(urlSt + "/");
+        }
+        catch (MalformedURLException ex) {
+            ex.printStackTrace();
+
+            // ignoring...
+            return null;
+        }
+    }
+
+    /**
+     * Returns true if no lookups are performed in the user home directory.
+     */
+    public boolean isSkipHomeDir() {
+        return skipHomeDir;
+    }
+
+    /**
+     * Sets "skipHomeDir" property.
+     */
+    public void setSkipHomeDir(boolean skipHomeDir) {
+        this.skipHomeDir = skipHomeDir;
+    }
+
+    /**
+     * Returns true if no lookups are performed in the current directory.
+     */
+    public boolean isSkipCurDir() {
+        return skipCurDir;
+    }
+
+    /**
+     * Sets "skipCurDir" property.
+     */
+    public void setSkipCurDir(boolean skipCurDir) {
+        this.skipCurDir = skipCurDir;
+    }
+
+    /**
+     * Returns true if no lookups are performed in the classpath.
+     */
+    public boolean isSkipClasspath() {
+        return skipClasspath;
+    }
+
+    /**
+     * Sets "skipClasspath" property.
+     */
+    public void setSkipClasspath(boolean skipClasspath) {
+        this.skipClasspath = skipClasspath;
+    }
+
 }

@@ -92,14 +92,14 @@ public class ObjAttribute extends Attribute {
 
 
 	/** Return the corresponding database table column.
-    *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
+     *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
     public DbAttribute getDbAttribute() {
         return dbAttribute;
     }
 
 
 	/** Set the corresponding database table column.
-    *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
+     *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
     public void setDbAttribute(DbAttribute dbAttribute) {
         this.dbAttribute = dbAttribute;
     }
