@@ -52,49 +52,46 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.gui.validator;
 
 import javax.swing.JFrame;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.gui.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.map.*;
 
-public class EntityErrorMsg implements ErrorMsg
-{
-	private String errMsg;
-	private int severity = ErrorMsg.ERROR;
-	private DataDomain domain;
+/**
+ * DataDomain validation message.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class EntityErrorMsg extends ErrorMsg {
 	private DataMap map;
 	private Entity entity;
-	
-	public EntityErrorMsg(String temp_msg, int temp_severity
-						  , DataDomain temp_domain, DataMap temp_map
-						  , Entity temp_entity)
-	{
-		domain = temp_domain;
-		map = temp_map;
-		entity = temp_entity;
-		errMsg = temp_msg;
-		severity = temp_severity;
+
+	public EntityErrorMsg(
+		String message,
+		int severity,
+		DataDomain domain,
+		DataMap map,
+		Entity entity) {
+
+		super(message, severity, domain);
+		this.map = map;
+		this.entity = entity;
 	}
-	
-	public String getMessage() { return errMsg; }
-	
-	public void displayField(Mediator mediator, JFrame frame){
+
+	public void displayField(Mediator mediator, JFrame frame) {
 		EntityDisplayEvent event;
 		event = new EntityDisplayEvent(frame, entity, map, domain, true);
-		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
+		if (entity instanceof ObjEntity) {
 			mediator.fireObjEntityDisplayEvent(event);
-		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
+		} else if (entity instanceof DbEntity) {
 			mediator.fireDbEntityDisplayEvent(event);
+		}
 	}
-	
-	public int getSeverity() {return severity;}
-	
-	public String toString() {return getMessage();}
 }

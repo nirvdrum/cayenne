@@ -52,32 +52,69 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
 
 package org.objectstyle.cayenne.gui.validator;
 
 import javax.swing.JFrame;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.Mediator;
 
 /** 
- * Interface for error messages found by Validator.
+ * Superclass of CayenneModeler validation messages.
  * 
  * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
  */
-public interface ErrorMsg
-{
+public abstract class ErrorMsg {
 	public static final int NO_ERROR = 0;
-	public static final int WARNING  = 1;
-	public static final int ERROR    = 2;
+	public static final int WARNING = 1;
+	public static final int ERROR = 2;
+
+	protected String message;
+	protected int severity;
+	protected DataDomain domain;
+
+	public ErrorMsg(String message, int severity, DataDomain domain) {
+		this.message = message;
+		this.severity = severity;
+		this.domain = domain;
+	}
+
+	/** 
+	 * Fires event to display the screen where error should be corrected. 
+	 */
+	public abstract void displayField(Mediator mediator, JFrame frame);
 
 	/** Returns the text of the error message. */
-	public String getMessage();
-	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	/** Returns the severity of the error message.*/
-	public int getSeverity();
-	
-	/** Fires event to display the screen where error should be corrected. */
-	public void displayField(Mediator mediator, JFrame frame);
+	public int getSeverity() {
+		return severity;
+	}
+
+	public void setSeverity(int severity) {
+		this.severity = severity;
+	}
+
+
+	public DataDomain getDomain() {
+		return domain;
+	}
+
+	public void setDomain(DataDomain domain) {
+		this.domain = domain;
+	}
+
+	public String toString() {
+		return getMessage();
+	}
 }

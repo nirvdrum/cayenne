@@ -52,52 +52,48 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.gui.validator;
 
 import javax.swing.JFrame;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.map.*;
 
-public class RelationshipErrorMsg implements ErrorMsg
-{
-	private String errMsg;
-	private int severity = ErrorMsg.ERROR;
-	private DataDomain domain;
+/**
+ * Relationship validation message.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class RelationshipErrorMsg extends ErrorMsg {
 	private DataMap map;
 	private Entity entity;
 	private Relationship rel;
-	
-	public RelationshipErrorMsg(String temp_msg, int temp_severity
-						  , DataDomain temp_domain, DataMap temp_map
-						  , Relationship temp_rel)
-	{ 
-		domain = temp_domain;
-		map = temp_map;
-		rel = temp_rel;
-		entity = rel.getSourceEntity();
-		errMsg = temp_msg;
-		severity = temp_severity;
+
+	public RelationshipErrorMsg(
+		String message,
+		int severity,
+		DataDomain domain,
+		DataMap map,
+		Relationship rel) {
+
+		super(message, severity, domain);
+		this.map = map;
+		this.rel = rel;
+		this.entity = rel.getSourceEntity();
 	}
-	
-	public String getMessage() { return errMsg; }
-	
-	public void displayField(Mediator mediator, JFrame frame){
+
+	public void displayField(Mediator mediator, JFrame frame) {
 		RelationshipDisplayEvent event;
 		event = new RelationshipDisplayEvent(frame, rel, entity, map, domain);
-		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
+		if (entity instanceof ObjEntity) {
 			mediator.fireObjRelationshipDisplayEvent(event);
-		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
+		} else if (entity instanceof DbEntity) {
 			mediator.fireDbRelationshipDisplayEvent(event);
+		}
 	}
-	
-	public int getSeverity() {return severity;}
-	
-	public String toString() {return getMessage();}
 }

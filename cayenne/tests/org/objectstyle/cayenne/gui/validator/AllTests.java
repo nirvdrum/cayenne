@@ -53,31 +53,21 @@
  * <http://objectstyle.org/>.
  *
  */
-
 package org.objectstyle.cayenne.gui.validator;
 
-import javax.swing.JFrame;
+import junit.framework.TestSuite;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.gui.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.gui.event.Mediator;
+public class AllTests {
+	public static TestSuite suite() {
+		TestSuite suite = new TestSuite("GUI Package Tests");
 
-/**
- * DataDomain validation message.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
- */
-public class DomainErrorMsg extends ErrorMsg {
+		// don't test GUI if no graphics environment present
+		if (!org.objectstyle.TestMain.noGui()) {
+			// add gui tests here
+		}
 
-	public DomainErrorMsg(String message, int severity, DataDomain domain) {
-		super(message, severity, domain);
+		// continue with noGUI tests
+		suite.addTestSuite(ErrorMsgTst.class);
+		return suite;
 	}
-
-	public void displayField(Mediator mediator, JFrame frame) {
-		DomainDisplayEvent event;
-		event = new DomainDisplayEvent(frame, domain);
-		mediator.fireDomainDisplayEvent(event);
-	}
-
 }

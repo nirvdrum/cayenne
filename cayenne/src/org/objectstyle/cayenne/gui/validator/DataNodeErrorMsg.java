@@ -52,43 +52,40 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
- package org.objectstyle.cayenne.gui.validator;
+ */
+
+package org.objectstyle.cayenne.gui.validator;
 
 import javax.swing.JFrame;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
 
-public class DataNodeErrorMsg implements ErrorMsg
-{
-	private String errMsg;
-	private int severity = ErrorMsg.ERROR;
-	private DataDomain domain;
+/**
+ * DataNode validation message.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class DataNodeErrorMsg extends ErrorMsg {
 	private DataNode node;
-	
-	public DataNodeErrorMsg(String temp_msg, int temp_severity
-						  , DataDomain temp_domain, DataNode temp_node)
-	{ 
-		domain = temp_domain;
-		node = temp_node;
-		errMsg = temp_msg;
-		severity = temp_severity;
+
+	public DataNodeErrorMsg(
+		String message,
+		int severity,
+		DataDomain domain,
+		DataNode node) {
+			
+		super(message, severity, domain);
+		this.node = node;
 	}
-	
-	public String getMessage() { return errMsg; }
-	
-	public void displayField(Mediator mediator, JFrame frame){
+
+	public void displayField(Mediator mediator, JFrame frame) {
 		DataNodeDisplayEvent event;
 		event = new DataNodeDisplayEvent(frame, domain, node);
 		mediator.fireDataNodeDisplayEvent(event);
 	}
-	
-	public int getSeverity() {return severity;}
 
-	public String toString() {return getMessage();}	
 }

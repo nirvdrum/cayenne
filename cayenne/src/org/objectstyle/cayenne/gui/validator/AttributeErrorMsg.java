@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.gui.validator;
 
@@ -65,39 +65,38 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Attribute;
 
-public class AttributeErrorMsg implements ErrorMsg
-{
-	private String errMsg;
-	private int severity = ErrorMsg.ERROR;
-	private DataDomain domain;
+/**
+ * Attribute validation message.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class AttributeErrorMsg extends ErrorMsg {
 	private DataMap map;
 	private Entity entity;
 	private Attribute attribute;
-	
-	public AttributeErrorMsg(String temp_msg, int temp_severity
-						  , DataDomain temp_domain, DataMap temp_map
-						  , Attribute temp_rel)
-	{ 
-		domain = temp_domain;
-		map = temp_map;
-		attribute = temp_rel;
-		entity = attribute.getEntity();
-		errMsg = temp_msg;
-		severity = temp_severity;
-	}
-	
-	public String getMessage() { return errMsg; }
 
-	public void displayField(Mediator mediator, JFrame frame){
+	public AttributeErrorMsg(
+		String message,
+		int severity,
+		DataDomain domain,
+		DataMap map,
+		Attribute attribute) {
+
+		super(message, severity, domain);
+
+		this.map = map;
+		this.attribute = attribute;
+		this.entity = attribute.getEntity();
+	}
+
+	public void displayField(Mediator mediator, JFrame frame) {
 		AttributeDisplayEvent event;
-		event = new AttributeDisplayEvent(frame, attribute, entity, map, domain);
+		event =
+			new AttributeDisplayEvent(frame, attribute, entity, map, domain);
 		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
 			mediator.fireObjAttributeDisplayEvent(event);
 		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
 			mediator.fireDbAttributeDisplayEvent(event);
 	}
-	
-	public int getSeverity() {return severity;}
-	
-	public String toString() {return getMessage();}
 }

@@ -57,27 +57,60 @@
 package org.objectstyle.cayenne.gui.validator;
 
 import javax.swing.JFrame;
+import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.gui.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
 
 /**
- * DataDomain validation message.
+ * JUnit tests for ErrorMsg class.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DomainErrorMsg extends ErrorMsg {
+public class ErrorMsgTst extends TestCase {
 
-	public DomainErrorMsg(String message, int severity, DataDomain domain) {
-		super(message, severity, domain);
+	/**
+	 * Constructor for ErrorMsgTst.
+	 */
+	public ErrorMsgTst(String name) {
+		super(name);
 	}
 
-	public void displayField(Mediator mediator, JFrame frame) {
-		DomainDisplayEvent event;
-		event = new DomainDisplayEvent(frame, domain);
-		mediator.fireDomainDisplayEvent(event);
+	public void testMessage() throws Exception {
+		ErrorMsg msg = new ConcreteErrorMsg(null, ErrorMsg.ERROR, null);
+
+		String message = "abc";
+		assertNull(msg.getMessage());
+		msg.setMessage(message);
+		assertSame(message, msg.getMessage());
 	}
 
+	public void testSeverity() throws Exception {
+		ErrorMsg msg = new ConcreteErrorMsg(null, ErrorMsg.ERROR, null);
+
+		assertEquals(ErrorMsg.ERROR, msg.getSeverity());
+		msg.setSeverity(ErrorMsg.NO_ERROR);
+		assertEquals(ErrorMsg.NO_ERROR, msg.getSeverity());
+	}
+
+	public void testDomain() throws Exception {
+		ErrorMsg msg = new ConcreteErrorMsg(null, ErrorMsg.ERROR, null);
+
+		DataDomain dom = new DataDomain();
+		assertNull(msg.getDomain());
+		msg.setDomain(dom);
+		assertSame(dom, msg.getDomain());
+	}
+
+	class ConcreteErrorMsg extends ErrorMsg {
+		public ConcreteErrorMsg(
+			String message,
+			int severity,
+			DataDomain domain) {
+			super(message, severity, domain);
+		}
+
+		public void displayField(Mediator mediator, JFrame frame) {
+		}
+	}
 }
