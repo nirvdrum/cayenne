@@ -1,12 +1,13 @@
-Cayenne Release Notes 1.0a1 (Alpha 1)
-============================================
+           Cayenne Release Notes 1.0a1 (Alpha 1)
+                       June 16, 2002
+         ============================================
 
 For the latest information go to the project 
 web site at http://objectstyle.org/cayenne/
 
 
 This is the first "official" release of Cayenne. It has "alpha" status, 
-meaning that before the final 1.0 release there may be some new feature
+meaning that before the final 1.0 release there may be some critical features
 additions and minor API changes.
 
 Included in this release:
