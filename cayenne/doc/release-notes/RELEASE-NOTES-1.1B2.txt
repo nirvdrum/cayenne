@@ -17,8 +17,17 @@ Changes, Features And Improvements:
 - Better support for custom DbAdapters in CayenneModeler. Custom DbAdapter is no longer 
   required to be in the modeler CLASSPATH. Rather CLASSPATH settings configured via 
   "Tools -> Configure ClassPath" are taken into account.
+  
+CAY-140	Precise "import" statements generation in default DataObject subclass template.
+CAY-172	Thread-Bound DataContext Support (standalone and in web applications).
+CAY-130	Supporting mapping of read/write frlattened relationships in wider range of schemas,
+  e.g. now Cayenne allows join tables to have their own PK and other attributes.
 
 Bugs Fixed:
 
+CAY-169	Import EOModel - Incorrect Join src/target names are created
+CAY-2	Renamed/Added entries in the Modeler left-hand project tree are sorted correctly.
+CAY-160	Improved handling of database reconnects	, fixed leaking connections bug.
 
+... Lots of other unreported Modeler bugs.
 

@@ -5,35 +5,78 @@
      <section name="12. Deployment">
            
            <subsection name="12.2 Web Applications" anchor="web">
-               <p>When deploying an application in a web container, it is still possible 
-               to use the procedure described for the standalone applications. Just make sure that
-               all Cayenne project XML files are in the location accessible to the ClassLoader 
-               (e.g. /WEB-INF/classes").
-               </p>
-               
-               <p>In addition Cayenne provides an ability to store and locate XML files 
-               in "/WEB-INF/" directory. This is done via <a href=
-               "../../api/cayenne/org/objectstyle/cayenne/conf/BasicServletConfiguration.html"
-               >BasicServletConfiguration</a> subclass of Configuration. It does <code>cayenne.xml</code>
-               and datamap files lookup relative to the WEB-INF directory of a deployed application.
-               Since WEB-INF is a standard place to put configuration files, this approach makes
-               configuration cleaner and more maintainable. 
-               </p>
-               
-               <p>
-               To get access to the resources under WEB-INF directory, Cayenne configuration object
-               must get a hold of javax.servlet.ServletContext instance of the current application.
-               There are a few different ways to achieve that:
-               </p>
-               
-               <subsection name="12.2.1 Initialization Servlet"> 
-               <p>This is the most common approach
-               - use <code>init</code> method of the very first servlet loaded
-               in the application. Sometimes a special initialization servlet is created
-               solely for the purpose of application initialization. 
-               Here is the steps to setup Cayenne.</p>
 
-<p>Startup servlet initialization code:</p>
+               <p>When deploying an application in a web container it is possible to use the procedure described earlier for the standalone 
+				applications, as long as all Cayenne project XML files are placed in the location accessible to the application ClassLoader 
+				(e.g. "mywebapp/WEB-INF/classes/"). In addition Cayenne provides the following configuration features that take 
+				advantage of the environment provided by the Java web container. These features make Cayenne use with web applications easier 
+				and more consistent.
+               </p>
+
+				<ul>
+					<li><strong>Storing cayenne.xml and other project files in WEB-INF/ directory.</strong> "mywebapp/WEB-INF/" is a conventional
+					location for various web application configuration files. Letting Cayenne use this location instead of CLASSPATH provides 
+					extra consistency.</li>
+					<li><strong>Automatic creation of a session DataContext and binding it to an HttpSession.</strong> As DataContext usually has 
+					a session scope, Cayenne can be configured via a web application deployment descriptor (web.xml) to create a session DataContext 
+					automatically, making it accessible as a session attribute.</li>
+					<li><strong>Binding of a session DataContext to the request thread.</strong> Some object persistence code may be written to 
+					be intentionally unaware of the web environment, with the goal of being reused in both web and standalone applications. At the same time
+					it is nice to be able to provide an appropriate DataContext to such code without explicitly passing DataContext refrence around. 
+					To solve this problem, Cayenne can be configured via web.xml to bind a session DataContext to the current request thread. Thread-bound
+					DataContext can be retrieved at any time by persistence code without knowing anything about the environment.
+					</li>
+				</ul>
+
+				<panel name="Shared Locations Warning!">It is strongly advised against putting either cayenne.jar or cayenne XML 
+				files in the shared locations in the web container, as this confuses nested application ClassLoader, and actually requires
+				special "bootstrapping" code to make it work. Recommended location for cayenne.jar is "mywebapp/WEB-INF/lib/".
+				Recommended location for cayenne.xml is one of the following: "mywebapp/WEB-INF/classes/", "mywebapp/WEB-INF/lib/mywebapp.jar" 
+				or "mywebapp/WEB-INF/".
+				</panel>
+
+               <p>Further we will discuss container requirements and steps needed to take advantage of the features above.
+               </p>
+
+				<panel name="Servlet Specification Versions">Cayenne web application configuration options evolved together
+				with Servlet Specification. So while it is possible to use Cayenne in a container with any level of Servlet Specification support,
+				some of the features are only available starting at a certain Servlet Specification version, as indicated below. Check your
+				container documentation to determine the version that you have. For example Tomcat 3.* supports specification version 
+				2.2, Tomcat 4.* - 2.3, Tomcat 5.* - 2.4.
+				</panel>
+               
+               <subsection name="12.2.1 Initialization Servlet">
+				<table>
+				<tr>
+					<th>Description:</th>
+					<td>This configuration approach is based on setting up BasicServletConfiguration instance as a shared configuration object
+					within a custom "initialization servlet" init() method on application startup. Later session DataContext is created on
+					demand and retrieved via BasicServletConfiguration.getDefaultContext(..) static method.</td>
+				</tr>
+				<tr>
+					<th>Servlet Spec. Compatibility:</th>
+					<td>Any</td>
+				</tr>
+				<tr>
+					<th>Participating classes:</th>
+					<td>org.objectstyle.cayenne.conf.BasicServletConfiguration, javax.servlet.HttpServlet</td>
+				</tr>
+				<tr>
+					<th>Allows cayenne.xml in WEB-INF/:</th>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<th>Session-bound DataContext:</th>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<th>Request thread-bound DataContext:</th>
+					<td>No</td>
+				</tr>
+				</table>
+               
+
+<p>Sample initialization servlet code:</p>
 <source>
 package com.somepackage;
 
@@ -53,66 +96,124 @@ public class MyServlet extends HttpServlet {
 ...
 </source>
             
-<p>Configuring startup servlet in <code>web.xml</code>: </p>      
-<source>...
-
-&amp;lt;servlet&amp;gt;
+<p>Sample <code>web.xml</code> snippet: </p>      
+<source>&amp;lt;servlet&amp;gt;
     &amp;lt;servlet-name&amp;gt;myservl&amp;lt;/servlet-name&amp;gt;
     &amp;lt;servlet-class&amp;gt;com.somepackage.MyServlet&amp;lt;/servlet-class&amp;gt;
     &amp;lt;load-on-startup&amp;gt;0&amp;lt;/load-on-startup&amp;gt;
-&amp;lt;/servlet&amp;gt; 
+&amp;lt;/servlet&amp;gt;</source>
 
-...
-</source>
-			</subsection>
-			<subsection name="12.2.2 Using Context and Session Listeners">   
-               <p>Servlet Specification 2.3
-               introduces a set of container events that can be sent to the interested
-               listeners. Cayenne implements such listener that would automatically configure 
-               BasicServletConfiguration: 
-               <a href=
-               "../../api/cayenne/org/objectstyle/cayenne/conf/WebApplicationListener.html"
-               >WebApplicationListener</a> that implements container listener interfaces
-               and can be registered as a listener to initialize Cayenne on context 
-               startup and to assign a new DataContext object to every new session
-               created.</p>
-               
-               <panel name="Note:">
-               Check if your container supports Servlet Specification 2.3. For instance Tomcat >= 4.0
-               does, while Tomcat 3.3 only supports 2.2
-               </panel> 
-
-<p>Registering listener in <code>web.xml</code>: </p>      
-<source>...
-
-&amp;lt;listener&amp;gt;
-   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.WebApplicationListener&amp;lt;/listener-class&amp;gt;
-&amp;lt;/listener&amp;gt; 
-
-...
-</source>
-		</subsection>
-		
-		<subsection name="12.2.3 Obtaining Session DataContext">      
-        <p>Recommended way to use Cayenne in web applications is to have
-        one DataContext per HttpSession. 
-        No matter how the web application was configured (using default configuration
-        and CLASSPATH, initialization servlet, or WebApplicationListener), DataContext
-        can be obtained from the session in a consistent way by calling BasicServletConfiguration 
-        static method:        
-        </p> 
+<p>Sample DataContext retrieval code: </p>  
 <source>
+import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import javax.servlet.http.HttpServletRequest;
 ...
 
-// assume this exists
+// this code is executed within requrest, so assume we have access to request object
 HttpServletRequest r;
 
 // get session DataContext to perform database queries
-DataContext ctxt = BasicServletConfiguration.getDefaultContext(r.getSession());
+DataContext context = BasicServletConfiguration.getDefaultContext(r.getSession());
 </source>
-	</subsection>
+			</subsection>
+
+
+			<subsection name="12.2.2 WebApplicationListener">
+				<table>
+				<tr>
+					<th>Description:</th>
+					<td>This configuration approach is based on setting up a WebApplicationListener as a listener for servlet context 
+					and session events. Session DataContext is retrieved via BasicServletConfiguration.getDefaultContext(..) static method.
+					Listener approach is 100% configuration-based and removes a need for special initialization servlet.</td>
+				</tr>
+				<tr>
+					<th>Servlet Spec. Compatibility:</th>
+					<td>Version 2.3 and newer</td>
+				</tr>
+				<tr>
+					<th>Participating classes:</th>
+					<td>org.objectstyle.cayenne.conf.BasicServletConfiguration, org.objectstyle.cayenne.conf.WebApplicationListener</td>
+				</tr>
+				<tr>
+					<th>Allows cayenne.xml in WEB-INF/:</th>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<th>Session-bound DataContext:</th>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<th>Request thread-bound DataContext:</th>
+					<td>No</td>
+				</tr>
+				</table>
+
+<p>Sample <code>web.xml</code> snippet: </p>      
+<source>&amp;lt;listener&amp;gt;
+   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.WebApplicationListener&amp;lt;/listener-class&amp;gt;
+&amp;lt;/listener&amp;gt; 
+</source>
+<p>Sample DataContext retrieval code: </p>  
+<source>
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+import javax.servlet.http.HttpServletRequest;
+...
+
+// this code is executed within requrest, so assume we have access to request object
+HttpServletRequest r;
+
+// get session DataContext to perform database queries
+DataContext context = BasicServletConfiguration.getDefaultContext(r.getSession());
+</source>
+		</subsection>
+		
+		
+			<subsection name="12.2.3 WebApplicationContextProvider">
+				<table>
+				<tr>
+					<th>Description:</th>
+					<td>This configuration approach is based on setting up a WebApplicationContextProvider as a listener for servlet context, 
+					session, and also request events. On each request session DataContext is rebound to the request worker thread, and can be 
+					obtained via DataContext.getThreadDataContext().
+					Listener approach allows to remove any Servlet API dependencies from the context retrieval code.</td>
+				</tr>
+				<tr>
+					<th>Servlet Spec. Compatibility:</th>
+					<td>Version 2.4 and newer</td>
+				</tr>
+				<tr>
+					<th>Participating classes:</th>
+					<td>org.objectstyle.cayenne.conf.BasicServletConfiguration, org.objectstyle.cayenne.conf.WebApplicationContextProvider</td>
+				</tr>
+				<tr>
+					<th>Allows cayenne.xml in WEB-INF/:</th>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<th>Session-bound DataContext:</th>
+					<td>Yes</td>
+				</tr>
+				<tr>
+					<th>Request thread-bound DataContext:</th>
+					<td>No</td>
+				</tr>
+				</table>
+
+<p>Sample <code>web.xml</code> snippet: </p>      
+<source>&amp;lt;listener&amp;gt;
+   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.WebApplicationContextProvider&amp;lt;/listener-class&amp;gt;
+&amp;lt;/listener&amp;gt; 
+</source>
+<p>Sample DataContext retrieval code: </p>  
+<source>
+import org.objectstyle.cayenne.access.DataContext;
+...
+// get session DataContext bound to the current request thread
+DataContext context = DataContext.getThreadDataContext();
+</source>
+		</subsection>
 </subsection>    
     </section>
 </body>
