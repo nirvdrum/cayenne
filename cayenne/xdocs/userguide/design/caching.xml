@@ -3,15 +3,13 @@
 <toc name="toc-user-guide" chapter="4. Design"/>
 <body>
     <section name="4. Design">
-        <subsection name="4.8 Understanding Caching">
-            <p>As of version 1.1, Cayenne implements a two-tier caching of persistent data.
-            Lower level of caching, represented by DataRowStore class, stores snapshots as 
-            DataRow objects. Higher level - ObjectStore - caches DataObjects. The most common cache
-            configuration is to have a single DataRowStore per DataDomain, and have a single 
-            ObjectStore per each DataContext. This configuration is used in Cayenne by default.
+        <subsection name="4.9 Understanding Caching">
+            <p>Cayenne implements advanced caching mechanism that has a goal of improving
+            application performance and ensuring data consistency across Java applications
+            and sessions within the same application. The following classes participate in the caching 
+            mechanism:
             </p>
             
-            <p>The following classes are involved in caching mechanism:
             <ul>
             <li><b>DataObject</b><br/>
             Any persistent object, tracks the version of snapshot it was last updated with.
@@ -33,15 +31,49 @@
             <p></p>
             </li>
             </ul>
-            </p>
             
-            <subsection name="4.8.1 Synchronizing ObjectStores using SnapshotEvents.">
-            <p>SnapshotCache posts SnapshotEvents for any changes made to the cache. User classes 
-            can take advantage of these events by implementing SnapshotEventListener
-            interface and registering with EventManager:</p>
+            <subsection name="4.9.1 Levels of Caching">
+        	 <p>Cayenne implements the following levels of caching:</p>
+        	 
+        	 <ul>
+        	 	<li><b>Level 1 - No Cache Sharing</b><br/>
+        	 	 DataContext keeps its own cache - data fetched from the database via a given DataContext 
+        	 	 is never shared with other local or remote DataContexts. Changes made on commit are not 
+        	 	 propagated to other DataContexts.
+ 				<p><img src="../../images/userguide/cache-level1.gif" width="400" height="150" alt="Cache Level 1"/></p>
+            	</li>
+            	
+            	<li><b>Level 2 - Local VM Cache Sharing</b><br/>
+             	Each DataDomain keeps the cache shared by all DataContexts in the same VM. Changes made 
+             	via one of the DataContexts are propagated via a SnapshotEvent to other DataContexts in the same VM.
+             	<p><img src="../../images/userguide/cache-level2.gif" width="400" height="149" alt="Cache Level 2"/></p>
+            	</li>
+
+				<li><b>Level 3 - Cross-VM Cache Sharing</b><br/>
+				Behaves just like Level 2, but also synchronizes caches across JVMs. SnapshotEvents are 
+				sent remotely via a preconfigured transport mechanism. Notification channels are using 
+				DataDomain name to identify which remote domains should receive the event.
+     			<p><img src="../../images/userguide/cache-level3.gif" width="415" height="320" alt="Cache Level 3"/></p>
+            	</li>
+            </ul>
+            
+            <panel name="Note:">
+            Cayenne 1.0 implements only Level 1 caching, Cayenne 1.1 supports all three of them.
+            </panel>
+            
+            <p>Caching properties are configured using CayenneModeler for each application DataDomain.
+            Application code is normally independent from a chosen level, i.e. it does not have to be changed when
+            caching is reconfigured. Details on caching configuration are provided in the Modeler Guide.</p>
+        	 </subsection>
+            
+            <subsection name="4.9.2 Synchronizing ObjectStores using SnapshotEvents.">
+            <p>DataRowStore posts SnapshotEvents for any changes made to the cache. ObjectStore(s) using 
+            a give DataRowStore are automatically registered as listeners for SnapshotEvents and update their
+            state accordingly. Application objects can also take advantage of the events by implementing
+            SnapshotEventListener interface and registering with EventManager:</p>
 <source>
 SnapshotEventListener customListener;
-SnapshotCache cache;
+DataRowStore cache;
 ...
 EventManager.getDefaultManager().addListener(
                 customListener,
@@ -50,40 +82,10 @@ EventManager.getDefaultManager().addListener(
                 cache.getSnapshotEventSubject(),
                 cache);
 </source>
-
-			<p>DataRowStore can be configured to add all child ObjectStores (that happen
-			to implement SnapshotEventListener interface) to the list of SnapshotEvent listeners.
-			This would allow ObjectStores to update their state on any changes made to the 
-			database originating from peer ObjectStores. To enable these notifications, 
-			<code>notifyingObjectStores</code> property must be set to <code>true</code>:
-			</p>
-			
-<source>
-SnapshotCache cache;
-...
-// enable notifications for all added ObjectStores
-cache.setNotifyingObjectStores(true);
-</source>
-			<p>Automatic notifications of this kind are ideal for
-			client-server applications to synchronize multiple ObjectStores 
-			in real time.</p>
-			
-			<panel name="Note:">"notifyingObjectStores" property is "false" by default, 
-			since sending SnapshotEvents may not be always a desired or useful behavior. 
-			First, constant synchronization adds performance overhead. Second, ObjectStores
-			may not always be available to receive the events. E.g. a J2EE container may serialize
-			ObjectStores associated with session DataContexts after the response
-			processing and deserialize them again on subsequent requests.
-			In this case any events posted between requests will not reach their destination
-			ObjectStore.
-			</panel>
             </subsection>
             
-            <subsection name="4.8.2 Explicitly Synchronizing ObjectStores by Calling 'synchronizeWithCache()'.">
             
-            </subsection>
-            
-            <subsection name="4.8.3 Concurrently Updating the Same DataObject.">
+            <subsection name="4.9.3 Concurrent Updates of the Same DataObject.">
             <p>If two or more users update their local copies of the same object,
             Cayenne implements the following behavior:
             
@@ -92,23 +94,11 @@ cache.setNotifyingObjectStores(true);
             	snapshot is "retained" by ObjectStore, so that any changes to the underlying
             	DataRowStore could not affect modification process of this object.</li>
             	
-            	<li>On commit, if the version of retained snapshot 
-            	and the version
-            	of the currently stored snapshot differ (meaning that someone else has
-            	modified the object, or maybe that the snapshot has been refreshed
-            	without modification), DataContext consults a delegate how to
-            	proceed, by calling <code>snapshotChangedInDataRowStore</code> 
-            	Delegate can allow or abort commit, or perform object merging.
-            	</li>
-            	
             	<li>On commit an UPDATE query is built based on retained snapshot, and not the one
             	currently cached in DataRowStore (this may or may not be the same DataRow). 
             	If the changes were made to a different set of attributes, this allows concurrent 
             	modification of the same object by different users without overwriting each 
-            	other's changes. If the same attributes were 
-            	modified, it is up to a delegate (see above) to resolve the conflict in its
-            	<code>snapshotChangedInDataRowStore</code> method. By default 
-            	the last committer will determine what data is saved.
+            	other's changes.
             	</li>
             	
             	<li>Due to concurrency issues discussed above, if a snapshot versions
@@ -116,17 +106,6 @@ cache.setNotifyingObjectStores(true);
             	to avoid dealing with concurrency effects on merging. 
             	</li>
             </ul>             
-            </p>
-            </subsection>
-            
-            <subsection name="4.8.4 Synchronization Issues with Deleted Objects.">
-            <p>When a DataRowStore is notified that an object is deleted, it will remove
-            a corresponding snapshot from the cache. On the other hand it is not clear 
-            what to do with DataObjects registered with ObjectStores if they were deleted
-            outside of a given ObjectStore. Cayenne does not attempt to handle this issue.
-            DataRowStore will send an event out, leaving it up its listeners
-            to do the right thing. A user can register custom listeners that update the UI
-            and underlying DataObjects appropriately.
             </p>
             </subsection>
         </subsection>
