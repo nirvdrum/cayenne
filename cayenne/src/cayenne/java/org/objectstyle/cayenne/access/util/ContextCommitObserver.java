@@ -235,14 +235,14 @@ public class ContextCommitObserver
     public void dataContextWillCommit(DataContextEvent event) {
         Iterator iter = objectsToNotify.iterator();
         while (iter.hasNext()) {
-            ((DataObjectTransactionEventListener) iter.next()).willCommit();
+            ((DataObjectTransactionEventListener) iter.next()).willCommit(event);
         }
     }
 
     public void dataContextDidCommit(DataContextEvent event) {
         Iterator iter = objectsToNotify.iterator();
         while (iter.hasNext()) {
-            ((DataObjectTransactionEventListener) iter.next()).didCommit();
+            ((DataObjectTransactionEventListener) iter.next()).didCommit(event);
         }
     }
 
