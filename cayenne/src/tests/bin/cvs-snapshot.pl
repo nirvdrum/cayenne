@@ -39,8 +39,8 @@ $min = "0$min" if $min < 10;
 $hour = "0$hour" if $hour < 10;
 my $label = "$year-$mon-$mday-$hour$min";	
 $label = "$label-$opt_l" if $opt_l;
-my $out_file = "$ENV{'HOME'}/cayenne-cvs-snapshot-$label.txt";
-unlink $out_file if -f $out_file;
+# my $out_file = "$ENV{'HOME'}/cayenne-cvs-snapshot-$label.txt";
+# unlink $out_file if -f $out_file;
 
 # Upload path on the server
 my $rel_path = "/var/sites/objectstyle/html/downloads/cayenne/cvs-snapshots";
@@ -94,25 +94,18 @@ sub get_source() {
 sub run_command() {
 	my $command = shift;
 	print_line("# $command\n");
-	return system("$command >> $out_file 2>&1");
+	return system("$command");
 }
 
 sub print_line() {
 	my $line = shift;
-	open(COUT, ">> $out_file") or die_with_email("Can't append to $out_file");
-	print COUT $line;
-	close COUT;
+	print $line;
 }
 
 
 
 sub die_with_email() {
 	my $msg = shift;
-
- 	if(open(COUT, ">> $out_file")) {
-		print COUT $msg;
-		close COUT;
-	}	
 
 	if($opt_m) {
 		open(MAIL, "| mail -s 'Subject: Cayenne Build Failed ($mon/$mday/$year)' $opt_m") 
