@@ -71,6 +71,9 @@ public class DbJoin implements XMLSerializable {
     protected String sourceName;
     protected String targetName;
 
+    protected DbJoin() {
+    }
+
     public DbJoin(DbRelationship relationship) {
         this.relationship = relationship;
     }
@@ -81,10 +84,12 @@ public class DbJoin implements XMLSerializable {
         this.targetName = targetName;
     }
 
+    /**
+     * Returns a "reverse" join. Join source relationship is not set
+     * and must be initialized by the caller.
+     */
     public DbJoin createReverseJoin() {
-        DbRelationship r = getNonNullRelationship();
-
-        DbJoin reverse = new DbJoin(r.getReverseRelationship());
+        DbJoin reverse = new DbJoin();
         reverse.setTargetName(sourceName);
         reverse.setSourceName(targetName);
         return reverse;

@@ -64,14 +64,12 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
-public class EOModelProcessorTst extends CayenneTestCase {
-    private static final PrintWriter out = new NullPrintWriter();
-
+public class EOModelProcessorTst extends BasicTestCase {
     protected EOModelProcessor processor;
 
-    public void setUp() throws java.lang.Exception {
+    public void setUp() throws Exception {
         processor = new EOModelProcessor();
     }
 
@@ -81,21 +79,21 @@ public class EOModelProcessorTst extends CayenneTestCase {
         assertOneWayRelationships(map);
     }
 
-    public void testLoadModelWIthDependencies() throws Exception {
+    public void testLoadModelWithDependencies() throws Exception {
         DataMap map =
             processor.loadEOModel(
                 "test-resources/wotests/cross-model-relationships.eomodeld");
 
         ObjEntity entity = map.getObjEntity("CrossModelRelTest");
         assertNotNull(entity);
-        
+
         ObjAttribute a1 = (ObjAttribute) entity.getAttribute("testAttribute");
         assertNotNull(a1);
 
         DbAttribute da1 = a1.getDbAttribute();
         assertNotNull(da1);
         assertSame(da1, entity.getDbEntity().getAttribute("TEST_ATTRIBUTE"));
-        
+
         // for now cross model relationships are simply ignored
         // eventually we must handle those...
         assertEquals(0, entity.getRelationships().size());
@@ -162,10 +160,11 @@ public class EOModelProcessorTst extends CayenneTestCase {
         assertEquals(2, frel.getDbRelationships().size());
 
         // storing data map may uncover some inconsistencies
-        map.encodeAsXML(out);
+        PrintWriter mockupWriter = new NullPrintWriter();
+        map.encodeAsXML(mockupWriter);
     }
 
-    static class NullPrintWriter extends PrintWriter {
+    class NullPrintWriter extends PrintWriter {
         public NullPrintWriter() {
             super(System.out);
         }

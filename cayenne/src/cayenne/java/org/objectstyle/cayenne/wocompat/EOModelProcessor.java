@@ -118,16 +118,14 @@ public class EOModelProcessor {
             makeAttributes(helper, e);
         }
 
-        // after all entities are loaded, 
-        // process relationships
+        // after all entities are loaded, process relationships
         it = helper.modelNames();
         while (it.hasNext()) {
             String name = (String) it.next();
             makeRelationships(helper, dataMap.getObjEntity(name));
         }
 
-        // after all normal relationships are loaded, 
-        // process falttened relationships
+        // after all normal relationships are loaded, process falttened relationships
         it = helper.modelNames();
         while (it.hasNext()) {
             String name = (String) it.next();
@@ -139,7 +137,11 @@ public class EOModelProcessor {
         it = helper.modelNames();
         while (it.hasNext()) {
             String name = (String) it.next();
-            makeReverseDbRelationships(dataMap.getObjEntity(name).getDbEntity());
+            DbEntity dbEntity = dataMap.getObjEntity(name).getDbEntity();
+
+            if (dbEntity != null) {
+                makeReverseDbRelationships(dbEntity);
+            }
         }
 
         return dataMap;
@@ -175,23 +177,25 @@ public class EOModelProcessor {
         EOModelHelper helper,
         String name,
         boolean generateClientClass) {
+
         DataMap dataMap = helper.getDataMap();
+        Map entityPlist = helper.entityPListMap(name);
 
         // create ObjEntity
         EOObjEntity objEntity = new EOObjEntity(name);
         objEntity.setIsClientEntity(generateClientClass);
-        String parent = (String) helper.entityPListMap(name).get("parent");
+        String parent = (String) entityPlist.get("parent");
         objEntity.setClassName(helper.entityClass(name, generateClientClass));
         if (parent != null) {
             objEntity.setHasSuperClass(true);
             objEntity.setSuperClassName(helper.entityClass(parent, generateClientClass));
         }
         // add flag whether this entity is set as abstract in the model
-        objEntity.setIsAbstractEntity(
-            "Y".equals(helper.entityPListMap(name).get("isAbstractEntity")));
+        objEntity.setIsAbstractEntity("Y".equals(entityPlist.get("isAbstractEntity")));
+
         // create DbEntity...since EOF allows the same table to be 
         // associated with multiple EOEntities, check for name duplicates
-        String dbEntityName = (String) helper.entityPListMap(name).get("externalName");
+        String dbEntityName = (String) entityPlist.get("externalName");
 
         if (dbEntityName != null) {
             int i = 0;
@@ -200,14 +204,14 @@ public class EOModelProcessor {
                 dbEntityName = dbEntityBaseName + i++;
             }
 
+            objEntity.setDbEntityName(dbEntityName);
             DbEntity de = new DbEntity(dbEntityName);
             dataMap.addDbEntity(de);
-            objEntity.setDbEntity(de);
         }
 
-        // set readOnly flag of Entity
-        String isReadOnlyString = (String) helper.entityPListMap(name).get("isReadOnly");
-        objEntity.setReadOnly("Y".equals(isReadOnlyString));
+        // set various flags
+        objEntity.setReadOnly("Y".equals(entityPlist.get("isReadOnly")));
+        objEntity.setSuperEntityName((String) entityPlist.get("parent"));
 
         dataMap.addObjEntity(objEntity);
 
@@ -379,9 +383,11 @@ public class EOModelProcessor {
 
             DbEntity dbTarget = target.getDbEntity();
             DbRelationship dbRel = null;
+
             // process underlying DbRelationship
-            // Note - there is no flattened rel. support here....
-            if (dbTarget != null) {
+            // Note: there is no flattened rel. support here....
+            // Note: source maybe null, e.g. an abstract entity.
+            if (dbSrc != null && dbTarget != null) {
                 dbRel = new DbRelationship();
                 dbRel.setSourceEntity(dbSrc);
                 dbRel.setTargetEntity(dbTarget);
@@ -424,6 +430,9 @@ public class EOModelProcessor {
      * @since 1.0.5
      */
     protected void makeReverseDbRelationships(DbEntity dbEntity) {
+        if (dbEntity == null) {
+            throw new NullPointerException("Attempt to create reverse relationships for the null DbEntity.");
+        }
 
         // iterate over a copy of the collection, since in case of 
         // reflexive relationships, we may modify source entity relationship map
@@ -504,7 +513,7 @@ public class EOModelProcessor {
                 e.addRelationship(flatRel);
             }
             else {
-                throw new CayenneRuntimeException("relationship in path was null!");
+                throw new CayenneRuntimeException("relationship in the path was null!");
             }
         }
 

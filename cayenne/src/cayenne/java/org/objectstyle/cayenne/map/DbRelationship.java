@@ -197,7 +197,9 @@ public class DbRelationship extends Relationship {
         Iterator it = joins.iterator();
         while (it.hasNext()) {
             DbJoin join = (DbJoin) it.next();
-            reverse.addJoin(join.createReverseJoin());
+            DbJoin reverseJoin = join.createReverseJoin();
+            reverseJoin.setRelationship(reverse);
+            reverse.addJoin(reverseJoin);
         }
 
         return reverse;

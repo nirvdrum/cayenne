@@ -1,0 +1,16 @@
+{
+    EOModelVersion = "2.1"; 
+    adaptorName = None; 
+    entities = (
+        {className = AbstractEntityClass; name = AbstractEntity; }, 
+        {
+            className = ConcreteEntityClass; 
+            name = ConcreteEntityOne; 
+            parent = AbstractEntity; 
+        }, 
+        {className = DetailEntityClass; name = DetailEntity; }
+    ); 
+    internalInfo = {
+        "_deletedEntityNamesInObjectStore" = ("CONCRETE_SUBENTITY", "CONCRETE_SUBENTITY"); 
+    }; 
+}
