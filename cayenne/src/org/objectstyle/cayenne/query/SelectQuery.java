@@ -63,9 +63,10 @@ import org.objectstyle.cayenne.exp.Expression;
 public class SelectQuery extends QualifiedQuery {
     static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
     
-    private ArrayList orderings = new ArrayList();  
-    private boolean distinct;
-    private ArrayList prefetches = new ArrayList();
+    protected ArrayList orderings = new ArrayList();  
+    protected ArrayList prefetches = new ArrayList();
+    protected boolean distinct;
+    protected boolean fetchingDataRows;
     
     /** Creates empty SelectQuery. */
     public SelectQuery() {}
@@ -133,4 +134,20 @@ public class SelectQuery extends QualifiedQuery {
     public void addPrefetch(String relPath) {
         prefetches.add(relPath);
     }
+    
+	/**
+	 * Returns <code>true</code> if this query 
+	 * should produce a list of data rows as opposed
+	 * to DataObjects, <code>false</code> for DataObjects. 
+	 * This is a hint to QueryEngine executing this query.
+	 */
+	public boolean isFetchingDataRows() {
+		return fetchingDataRows;
+	}
+
+
+	/**	 */
+	public void setFetchingDataRows(boolean dataRowsResult) {
+		this.fetchingDataRows = dataRowsResult;
+	}
 }

@@ -100,14 +100,15 @@ public class SelectQueryBasicsTst extends TestCase {
     }
     
     
-    public void testDistinct1() throws Exception {
-        SelectQuery q = new SelectQuery();
-        assertTrue(!q.isDistinct());
-    }
-    
-    public void testDistinct2() throws Exception {
-        SelectQuery q = new SelectQuery();
+    public void testDistinct() throws Exception {
+    	assertTrue(!q.isDistinct());
         q.setDistinct(true);
         assertTrue(q.isDistinct());
+    }
+    
+    public void testFetchingDataRows() {
+    	assertTrue(!q.isFetchingDataRows());
+    	q.setFetchingDataRows(true);
+    	assertTrue(q.isFetchingDataRows());
     }
 }
