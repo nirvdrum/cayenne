@@ -8,8 +8,7 @@
         	in 1.1 release:</p>
         	
         	<subsection name="1.1.1 Additions to cayenne.xml Format.">
-            <p>Be careful - saving Cayenne projects with Modeler 1.1 will render them uneditable
-            with Modeler 1.0.</p>
+            <p>Be careful - saving Cayenne projects with Modeler 1.1 will render them uneditable with Modeler 1.0.</p>
             </subsection>
             
         	<subsection name="1.1.2 Advanced Local and Distributed Caching">
@@ -17,16 +16,24 @@
             JVM and across JVMs. The following chapters in the user guide describe this feature:</p>
             
             <ul>
-            <li><a href="../design/dataobjects-datarows.html">How Information Is Stored in Cayenne</a></li>
-            <li><a href="../design/caching.html">Understanding Caching</a></li>
+           	 	<li><a href="../design/dataobjects-datarows.html">How Information Is Stored in Cayenne</a></li>
+            	<li><a href="../design/caching.html">Understanding Caching</a></li>
             </ul>
             </subsection>
             
             <subsection name="1.1.3 Data Views and DVModeler">
-            <p></p>
+            <p><a href="../dataview/index.html">Data Views</a> is a completely new addition to Cayenne. 
+            This is a framework and a Swing modeler tool to quickly build Swing applications based on Cayenne.</p>
             </subsection>
             
-            <subsection name="1.1.4 DataObjects Validation">
+            <subsection name="1.1.4 Generic Multithreaded and Distributed Events Mechanism">
+            <p>Cayenne now includes a <a href="../design/events.html">powerful generic package</a> 
+            "org.objectstyle.cayenne.event" for registering listeners 
+            and sending events, both locally and remotely. It supports both blocking and non-blocking
+            listeners and dispatches. Supported remote transports include JMS and JavaGroups.</p>
+            </subsection>
+            
+            <subsection name="1.1.5 DataObjects Validation">
             <p>DataContext now performs validation of DataObjects before committing them.
             There is a set of default validation checks being executed, based on the DataMap
             information. Developers can override DataObject validation methods to provide custom validation
@@ -37,15 +44,15 @@
             <p>Original implementation was submitted by Fabricio Voznika.</p>
             </subsection>
             
-            <subsection name="1.1.5 SnapshotEvents">
+            <subsection name="1.1.6 SnapshotEvents">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.6 DataContextDelegate">
+            <subsection name="1.1.7 DataContextDelegate">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.7 Explicit Transaction API">
+            <subsection name="1.1.8 Explicit Transaction API">
             <p>Cayenne implements explicit transaction API that allows better external control over 
             transaction processing, e.g. in a J2EE container. The following user guide chapter explains new Transaction
             API in details:</p>
@@ -55,7 +62,7 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.8 Lazy Relationship Creation">
+            <subsection name="1.1.9 Lazy Relationship Creation">
             <p></p>
             </subsection>
             

@@ -46,7 +46,7 @@
             and copied to the JRE extensions directory ($JRE_HOME/lib/ext).</p>
             
             <p><strong>- (Optional) Ant 1.4.1 or newer.</strong> Ant can be downloaded from
-            <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.
+            <a href="http://jakarta.apache.org/ant/index.html" target="_new">http://jakarta.apache.org/ant/index.html</a>.
             Ant is needed for:
             <ul>
             	<li><a href="../appguide/javagen.html#javagen"><code>cgen</code> Ant task</a>
@@ -56,6 +56,16 @@
             	changing Cayenne source code to customize it for your project.</li>
 			</ul>
 			</p>
+			
+			<p><strong>- (Optional) JavaGroups.</strong> If you plan to use remote notifications via JavaGroups 
+			transport, javagroups-*.jar must be available at runtime. It can be downloaded 
+			<a href="http://www.jgroups.org/javagroupsnew/docs/index.html" target="_new">from here</a>.
+			Cayenne has been tested with JavaGroups 2.1.1.
+            </p>
+            
+            <p><strong>- (Optional) JMS.</strong> If you plan to use remote notifications via JMS 
+			transport, J2EE libraries must be available at runtime, and JMS services must be running.
+            </p>
         </subsection>
     </section>
 </body>

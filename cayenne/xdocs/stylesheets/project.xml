@@ -61,6 +61,7 @@
     		<item name="4.8 How Information Is Stored in Cayenne"  href="/userguide/design/dataobjects-datarows.html"/>
     		<item name="4.9 Understanding Caching"  href="/userguide/design/caching.html"/>
     		<item name="4.10 Understanding Transactions"  href="/userguide/design/transactions.html"/>
+    		<item name="4.11 Event Package"  href="/userguide/design/events.html"/>
     	</item>
     	
     	<item name="5. Generating Classes with Ant"  href="/userguide/javagen.html"/>

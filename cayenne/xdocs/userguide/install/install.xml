@@ -48,7 +48,6 @@
                 is undefined, scripts can still guess it as long as they are run from their own directory
                 (<code>cayenne-[release-suffix]/bin/</code>)</li>
                     
-
             </ul>
             
             <i>Note that these variables are only necessary to use the scripts in the <code>bin</code>
