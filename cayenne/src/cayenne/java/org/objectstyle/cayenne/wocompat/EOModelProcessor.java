@@ -121,7 +121,6 @@ public class EOModelProcessor {
         return dataMap;
     }
 
-
     /** 
      * Creates an returns new EOModelHelper to process EOModel.
      * Exists mostly for the benefit of subclasses. 
@@ -129,7 +128,7 @@ public class EOModelProcessor {
     protected EOModelHelper makeHelper(String path) throws Exception {
         return new EOModelHelper(path);
     }
-    
+
     /** 
      *  Creates and returns a new ObjEntity linked to a corresponding DbEntity.
      */
@@ -139,8 +138,7 @@ public class EOModelProcessor {
         e.setClassName(helper.entityClass(name));
 
         // create DbEntity
-        DbEntity de =
-            new DbEntity((String) helper.entityInfo(name).get("externalName"));
+        DbEntity de = new DbEntity((String) helper.entityInfo(name).get("externalName"));
         e.setDbEntity(de);
 
         return e;
@@ -218,13 +216,6 @@ public class EOModelProcessor {
             DbEntity dbSrc = e.getDbEntity();
             DbEntity dbTarget = target.getDbEntity();
 
-            ObjRelationship rel = new ObjRelationship();
-            rel.setName(relName);
-            rel.setSourceEntity(e);
-            rel.setTargetEntity(target);
-            rel.setToMany(toMany);
-            e.addRelationship(rel);
-
             // process underlying DbRelationship
             // Note - there is no flattened rel. support here....
             DbRelationship dbRel = new DbRelationship();
@@ -234,7 +225,6 @@ public class EOModelProcessor {
             dbRel.setName(relName);
             dbRel.setToDependentPK(toDependentPK);
             dbSrc.addRelationship(dbRel);
-            rel.addDbRelationship(dbRel);
 
             List joins = (List) relMap.get("joins");
             Iterator jIt = joins.iterator();
@@ -243,12 +233,26 @@ public class EOModelProcessor {
                 String srcAttrName = (String) joinMap.get("sourceAttribute");
                 String targetAttrName = (String) joinMap.get("destinationAttribute");
 
-                DbAttribute srcAttr = EODbAttribute.findForEOAttributeName(dbSrc, srcAttrName);
+                DbAttribute srcAttr =
+                    EODbAttribute.findForEOAttributeName(dbSrc, srcAttrName);
                 DbAttribute targetAttr =
                     EODbAttribute.findForEOAttributeName(dbTarget, targetAttrName);
 
                 DbAttributePair join = new DbAttributePair(srcAttr, targetAttr);
                 dbRel.addJoin(join);
+            }
+
+            // only create obj relationship if it is a class property
+            Map entityMap = helper.entityInfo(e.getName());
+            List classProps = (List) entityMap.get("classProperties");
+            if (classProps != null && classProps.contains(relName)) {
+                ObjRelationship rel = new ObjRelationship();
+                rel.setName(relName);
+                rel.setSourceEntity(e);
+                rel.setTargetEntity(target);
+                rel.setToMany(toMany);
+                e.addRelationship(rel);
+                rel.addDbRelationship(dbRel);
             }
         }
     }
@@ -283,9 +287,10 @@ public class EOModelProcessor {
             ObjRelationship lastRel = null;
             while (path.hasNext()) {
                 lastRel = (ObjRelationship) path.next();
-                
+
                 // expecting 1 step relationships
-                DbRelationship dbRel = (DbRelationship)lastRel.getDbRelationshipList().get(0);
+                DbRelationship dbRel =
+                    (DbRelationship) lastRel.getDbRelationshipList().get(0);
                 flatRel.addDbRelationship(dbRel);
 
                 if (firstRel == null) {
@@ -293,17 +298,16 @@ public class EOModelProcessor {
                 }
             }
 
-			if ((firstRel != null) && (lastRel != null)) {
-	            boolean toMany = firstRel.isToMany();
-	            flatRel.setSourceEntity(e);
-	            flatRel.setTargetEntity(lastRel.getTargetEntity());
-	            flatRel.setToMany(toMany);
-	
-	            e.addRelationship(flatRel);
-			}
-			else {
-				throw new CayenneRuntimeException("relationship in path was null!");
-			}
+            if ((firstRel != null) && (lastRel != null)) {
+                boolean toMany = firstRel.isToMany();
+                flatRel.setSourceEntity(e);
+                flatRel.setTargetEntity(lastRel.getTargetEntity());
+                flatRel.setToMany(toMany);
+
+                e.addRelationship(flatRel);
+            } else {
+                throw new CayenneRuntimeException("relationship in path was null!");
+            }
         }
     }
 

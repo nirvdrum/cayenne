@@ -1,4 +1,4 @@
-           Cayenne Release Notes 1.0a5 (Alpha 1)
+           Cayenne Release Notes 1.0a5 (Alpha 5)
                  Date: Dec 22, 2002
          ============================================
 
