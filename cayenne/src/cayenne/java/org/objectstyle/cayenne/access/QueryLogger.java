@@ -184,7 +184,7 @@ public class QueryLogger {
         String userName,
         String password) {
         if (isLoggable(logLevel)) {
-            StringBuffer buf = new StringBuffer("Opening connection:");
+            StringBuffer buf = new StringBuffer("Opening connection -");
 
             buf.append("\n\tDatabase URL: ").append(url);
             buf.append("\n\tLogin: ").append(userName);
@@ -195,34 +195,42 @@ public class QueryLogger {
     }
 
     /**
-     * Logs database connection event.
+     * @deprecated Since 1.0 Beta 1, use logPoolCreated
      */
     public static void logConnect(Level logLevel, DataSourceInfo dsi) {
+        logPoolCreated(logLevel, dsi);
+    }
+    
+    /**
+     * Logs database connection event.
+     */
+    public static void logPoolCreated(Level logLevel, DataSourceInfo dsi) {
         if (isLoggable(logLevel)) {
             StringBuffer buf =
-                new StringBuffer("Connecting. DataSource information:");
+                new StringBuffer("Created connection pool -");
 
             if (dsi != null) {
-                buf.append("\nDriver class: ").append(dsi.getJdbcDriver());
 
                 if (dsi.getAdapterClassName() != null) {
-                    buf.append("\nCayenne DbAdapter: ").append(
+                    buf.append("\n\tCayenne DbAdapter: ").append(
                         dsi.getAdapterClassName());
                 }
+                
+                buf.append("\n\tDriver class: ").append(dsi.getJdbcDriver());
 
                 if (dsi.getMinConnections() >= 0) {
-                    buf.append("\nMin. Pool Size: ").append(
+                    buf.append("\n\tMin. connections in the pool: ").append(
                         dsi.getMinConnections());
                 }
                 if (dsi.getMaxConnections() >= 0) {
-                    buf.append("\nMax. Pool Size: ").append(
+                    buf.append("\n\tMax. connections in the pool: ").append(
                         dsi.getMaxConnections());
                 }
-                buf.append("\nDatabase URL: ").append(dsi.getDataSourceUrl());
-                buf.append("\nLogin: ").append(dsi.getUserName());
-                buf.append("\nPassword: *******");
+                buf.append("\n\tDatabase URL: ").append(dsi.getDataSourceUrl());
+                buf.append("\n\tLogin: ").append(dsi.getUserName());
+                buf.append("\n\tPassword: *******");
             } else {
-                buf.append(" unavailable");
+                buf.append(" pool information unavailable");
             }
 
             logObj.log(logLevel, buf.toString());

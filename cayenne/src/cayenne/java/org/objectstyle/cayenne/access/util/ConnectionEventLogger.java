@@ -80,7 +80,7 @@ public class ConnectionEventLogger implements ConnectionEventLoggingDelegate {
     }
 
     public void logPoolCreated(DataSourceInfo info) {
-        QueryLogger.logConnect(logLevel, info);
+        QueryLogger.logPoolCreated(logLevel, info);
     }
 
 }
