@@ -9,9 +9,10 @@
 #   3. qmail
 #
 # Command line:
-#     cvs-snapshot.pl -c checkoutfolder [-m email@example.com] 
+#     cvs-snapshot.pl -c checkoutfolder [-l label] [-m email@example.com] 
 #            -c - checkout folder that should already contain "cayenne" and "sandbox"
 #                 modules checked out from CVS
+#            -l - label, e.g. "STABLE"
 #
 # Crontab:
 #
@@ -25,8 +26,8 @@ use Getopt::Std;
 use Cwd;
 
 
-our ($opt_c, $opt_m);
-getopts('m:c:');
+our ($opt_c, $opt_m, $opt_l);
+getopts('m:c:l:');
 
 die_with_email("Cayenne checkout folder must be defined using -c option") unless $opt_c;
 die_with_email("Cayenne checkout folder does not exist: $opt_c") unless -d $opt_c;
@@ -37,6 +38,7 @@ $mon = 1 + $mon;
 $min = "0$min" if $min < 10;
 $hour = "0$hour" if $hour < 10;
 my $label = "$year-$mon-$mday-$hour$min";	
+$label = "$label-$opt_l" if $opt_l;
 my $out_file = "$ENV{'HOME'}/cayenne-cvs-snapshot-$label.txt";
 unlink $out_file if -f $out_file;
 
