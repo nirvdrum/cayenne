@@ -97,11 +97,29 @@ public class DbGenerator {
 
 
     /** Creates database tables using the information from the
-      * <code>map</code>. */
+      * <code>map</code>. Does not drop any existsing tables. */
     public void createTables(DataMap map) throws SQLException {
+        createTables(map, false);
+    }
+
+    /** Creates database tables using the information from the
+      * <code>map</code>. Depending on <code>drop</code> flag
+      * value may also drop existing tables. */
+    public void createTables(DataMap map, boolean drop) throws SQLException {
         Statement stmt = con.createStatement();
 
         try {
+            // DROP TABLE
+            if(drop) {
+                Iterator it = map.getDbEntitiesAsList().iterator();
+                while(it.hasNext()) {
+                    String q = adapter.dropTable((DbEntity)it.next());
+                    QueryLogger.logQuery(Level.INFO, q, null);
+                    stmt.execute(q);
+                }
+            }
+
+            // CREATE TABLE
             Iterator it = map.getDbEntitiesAsList().iterator();
             while(it.hasNext()) {
                 String q = createTableQuery((DbEntity)it.next());

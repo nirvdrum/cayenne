@@ -92,6 +92,12 @@ public class JdbcAdapter implements DbAdapter {
         return true;
     }
 
+    /** Returns a query string to drop a table corresponding
+      * to <code>ent</code> DbEntity. */
+    public String dropTable(DbEntity ent) {
+        return "DROP TABLE " + ent.getName();
+    }
+    
     /** Returns a SQL string that can be used to create
       * a foreign key constraint for the relationship. */
     public String createFkConstraint(DbRelationship rel) {

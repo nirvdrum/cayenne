@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
@@ -72,9 +72,15 @@ public interface DbAdapter {
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
 
+    /** Returns a SQL string that can be used to drop
+      * a database table corresponding to <code>ent</code> parameter. */
+    public String dropTable(DbEntity ent);
+
+
     /** Returns a SQL string that can be used to create
       * a foreign key constraint for the relationship. */
     public String createFkConstraint(DbRelationship rel);
+
 
     /** Creates necessary database objects to do primary key generation. */
     public void createAutoPkSupport(DataNode dataNode) throws Exception;
@@ -96,8 +102,8 @@ public interface DbAdapter {
     /** Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
       * Valid types are defined in java.sql.Types. */
     public String[] externalTypesForJdbcType(int type);
-    
-    
+
+
     /** Returns an operation sorter or null if no sorting
       * is required. Operation sorter is needed for databases
       * (like Sybase) that do not have deferred constraint checking
