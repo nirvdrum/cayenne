@@ -60,6 +60,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
+ * Contains a set of static methods for the most common validation tasks.
+ * 
  * @author Fabricio Voznika
  * @since 1.1
  */
@@ -139,11 +141,11 @@ public class Validator {
     }
 
 
-    public static String createMessage(String attribute, String mes) {
-        StringBuffer message = new StringBuffer(mes.length() + attribute.length() + 5);
-        message.append(toNiceAttributeName(attribute, ' ', false));
-        message.append(mes);
-        return message.toString();
+    public static String createMessage(String attribute, String message) {
+        StringBuffer buffer = new StringBuffer(message.length() + attribute.length() + 5);
+        buffer.append(toNiceAttributeName(attribute, ' ', false));
+        buffer.append(message);
+        return buffer.toString();
     }
 
     private static String toNiceAttributeName(

@@ -80,7 +80,8 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
         
         store.validateUncommittedObjects();
         
-        assertTrue(deleted.validatedForSave);
+        // validateForSave should not be called on deleted
+        assertFalse(deleted.validatedForSave);
         assertTrue(deleted.validatedForDelete);
         
         assertTrue(inserted.validatedForSave);
@@ -105,10 +106,12 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
 
         public void validateForDelete(ValidationResult validationResult) {
             validatedForDelete = true;
+            super.validateForDelete(validationResult);
         }
 
         public void validateForInsert(ValidationResult validationResult) {
             validatedForInsert = true;
+            super.validateForInsert(validationResult);
         }
 
         public void validateForSave(ValidationResult validationResult) {
@@ -117,6 +120,7 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
 
         public void validateForUpdate(ValidationResult validationResult) {
             validatedForUpdate = true;
+            super.validateForUpdate(validationResult);
         }
     }
 }

@@ -742,15 +742,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             DataObject dataObject = (DataObject) it.next();
             switch (dataObject.getPersistenceState()) {
                 case PersistenceState.NEW :
-                    dataObject.validateForSave(validationResult);
                     dataObject.validateForInsert(validationResult);
                     break;
                 case PersistenceState.MODIFIED :
-                    dataObject.validateForSave(validationResult);
                     dataObject.validateForUpdate(validationResult);
                     break;
                 case PersistenceState.DELETED :
-                    dataObject.validateForSave(validationResult);
                     dataObject.validateForDelete(validationResult);
                     break;
             }

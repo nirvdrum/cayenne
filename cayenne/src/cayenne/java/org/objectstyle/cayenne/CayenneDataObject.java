@@ -612,25 +612,26 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * This implementation does nothing. CayenneDataObject subclasses may override
-     * it providing validation logic that should be executed for the newly created
-     * objects before saving them.
+     * Calls {@link #validateForSave(ValidationResult)}. 
+     * CayenneDataObject subclasses may override it providing validation 
+     * logic that should be executed for the newly created objects before 
+     * saving them.
      * 
      * @since 1.1
      */
     public void validateForInsert(ValidationResult validationResult) {
-        // does nothing...
+        validateForSave(validationResult);
     }
 
     /**
-     * This implementation does nothing. CayenneDataObject subclasses may override
-     * it providing validation logic that should be executed for the modified
-     * objects before saving them.
+     * Calls {@link #validateForSave(ValidationResult)}. CayenneDataObject 
+     * subclasses may override it providing validation logic that should 
+     * be executed for the modified objects before saving them.
      * 
      * @since 1.1
      */
     public void validateForUpdate(ValidationResult validationResult) {
-        // does nothing
+        validateForSave(validationResult);
     }
 
     /**
