@@ -64,3 +64,6 @@ public API is deprecated.
 
 19. ToManyList no longer uses WeakReference to hold relationship data,
 since it breaks when relationships are modified.
+
+20. Added "readNestedProperty" to CayenneDataObject to facilitate
+advanced key-value coding access.

@@ -55,12 +55,9 @@
  */ 
 package org.objectstyle.cayenne;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import java.util.*;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -133,6 +130,54 @@ public class CayenneDataObject implements DataObject {
         persistenceState = newState;
     }
 
+    /**
+     * Convenience method to read a "nested" property. 
+     * Dot-separated path is used to traverse object relationships
+     * until the final object is found. If a null object found
+     * while traversing path, null is returned. If a list is encountered
+     * in the middle of the path, CayenneRuntimeException is thrown.
+     * 
+     * <p>Examples:</p>
+     * <ul>
+     *    <li>Read this object property: 
+     *    <code>String name = (String)artist.readNestedProperty("name");</code></li>
+     *    <li>Read an object related to this object: 
+     *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code></li>     
+     *    <li>Read a property of an object related to this object: 
+     *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code></li>
+     *    <li>Read to-many relationship list: 
+     *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code></li>
+     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>: 
+     *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code></li>
+     * </ul>
+     * 
+     */
+    public Object readNestedProperty(String path) {
+		StringTokenizer toks = new StringTokenizer(path, ".");
+		
+		Object obj = null;
+		CayenneDataObject dataObj = this;
+		boolean terminal = false;
+		while(toks.hasMoreTokens()) {
+			if(terminal) {
+				throw new CayenneRuntimeException("Invalid path: " + path);
+			}
+			String pathComp = toks.nextToken();
+			obj = dataObj.readProperty(pathComp);
+			
+			if(obj == null) {
+				return null;
+			}
+			else if(obj instanceof CayenneDataObject) {
+				dataObj = (CayenneDataObject)obj;
+			}
+			else {
+				terminal = true;
+			}
+		}
+		
+		return obj;
+	}	
 
     protected Object readProperty(String propName) {
         if(persistenceState == PersistenceState.HOLLOW) {

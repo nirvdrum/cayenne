@@ -71,6 +71,32 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         super(name);
     }
     
+    private void prepareNestedProperties() throws Exception {
+    	Artist a1 = super.newArtist();
+    	Painting p1 = super.newPainting();
+    	PaintingInfo pi1 = super.newPaintingInfo();
+    	Gallery g1 = super.newGallery();
+    	
+    	p1.setToArtist(a1);
+    	p1.setToPaintingInfo(pi1);
+    	p1.setToGallery(g1);
+    	ctxt.commitChanges();
+    	resetContext();
+    }
+    
+    public void testReadNestedProperty1() throws Exception {
+    	prepareNestedProperties();
+    	
+    	Painting p1 = fetchPainting();
+    	assertEquals(artistName, p1.readNestedProperty("toArtist.artistName"));
+    }
+    
+    public void testReadNestedProperty2() throws Exception {
+    	prepareNestedProperties();
+    	
+    	Painting p1 = fetchPainting();
+    	assertTrue(p1.getToArtist().readNestedProperty("paintingArray") instanceof List);
+    }
     
     public void testReciprocalRel1() throws Exception {
         TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {paintingName}, false);
