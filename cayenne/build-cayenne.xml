@@ -7,6 +7,7 @@
 	<property name="core.dist.src" value="${dist}/src/cayenne"/>
 	<property name="core.build" value="build/cayenne"/>
 	<property name="core.build.deps" value="${core.build}/deps"/>
+	<property name="core.build.properties" value="${core.build}/properties"/>
 	<property name="core.src" value="src/cayenne/java"/>
 	<property name="core.bin" value="src/cayenne/bin"/>
 	<property name="core.resources" value="src/cayenne/resources"/>
@@ -60,13 +61,17 @@
 	<!-- ========================================== -->
     <!-- Build "lean" JAR file without dependencies.-->
     <!-- ========================================== -->
-    <target name="jar-nodeps" depends="compile">
+    <target name="jar-nodeps" depends="compile,prepare-properties">
         <jar jarfile="${dist}/lib/cayenne-nodeps.jar">
  			<fileset dir="${core.build}/classes"/>
 			<fileset dir="${core.src}">
 				<include name="**/*.xml"/>
             	<include name="**/*.gif"/>
         		<include name="**/*.jpg"/>
+			</fileset>
+			
+			<fileset dir="${core.build.properties}">
+				<include name="**/*.properties"/>
 			</fileset>
 		
 			<fileset dir="${core.resources}">
@@ -91,7 +96,7 @@
     <!-- ========================================== -->
     <!-- Build "fat" JAR file with dependencies.    -->
     <!-- ========================================== -->
-    <target name="jar" depends="compile,prepare-deps">
+    <target name="jar" depends="compile,prepare-deps,prepare-properties">
         <jar jarfile="${dist}/lib/cayenne.jar">
  			<fileset dir="${core.build}/classes"/>
 			<fileset dir="${core.src}">
@@ -100,10 +105,15 @@
         		<include name="**/*.jpg"/>
 			</fileset>
 		
+			<fileset dir="${core.build.properties}">
+				<include name="**/*.properties"/>
+			</fileset>
+			
 			<fileset dir="${core.resources}">
 				<include name=".cayenne/**"/>
             	<include name="dotemplates/**"/>
 			</fileset>
+			
 			<fileset dir="${core.build.deps}"/>
             
             <metainf dir="doc/licenses" includes="**"/>
@@ -164,4 +174,21 @@
     <target name="check-deps">
 		<available file="${core.build.deps}/org" type="dir" property="core.deps.exist"/>
     </target>
+    
+    
+    <!-- ========================================== -->
+    <!-- Performs replacements in property files.   -->
+    <!-- ========================================== -->
+    <target name="prepare-properties">
+    	<tstamp/>
+		<copy todir="${core.build.properties}" overwrite="yes">
+			<fileset dir="${core.src}" >
+				<include name="**/*.properties"/>
+			</fileset>
+			<filterset>
+				<filter token="CAYENNE_BUILD_DATE" value="${TODAY}" />
+				<filter token="CAYENNE_VERSION" value="${project.version}"/>
+			</filterset>
+		</copy>
+	</target>
 </project>

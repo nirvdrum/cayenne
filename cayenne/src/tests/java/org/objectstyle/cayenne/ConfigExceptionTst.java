@@ -55,37 +55,38 @@
  */
 package org.objectstyle.cayenne;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ConfigExceptionTst extends CayenneTestCase {
+public class ConfigExceptionTst extends TestCase {
 
-	public void testConstructor1() throws Exception {
-		ConfigurationException ex = new ConfigurationException();
-		assertNull(ex.getCause());
-		assertNull(ex.getMessage());
-	}
+    public void testConstructor1() throws Exception {
+        ConfigurationException ex = new ConfigurationException();
+        assertNull(ex.getCause());
+        assertTrue(ex.getMessage().startsWith(CayenneException.getExceptionLabel()));
+    }
 
-	public void testConstructor2() throws Exception {
-		ConfigurationException ex = new ConfigurationException("abc");
-		assertNull(ex.getCause());
-		assertEquals("abc", ex.getMessage());
-	}
+    public void testConstructor2() throws Exception {
+        ConfigurationException ex = new ConfigurationException("abc");
+        assertNull(ex.getCause());
+        assertEquals(CayenneException.getExceptionLabel() + "abc", ex.getMessage());
+    }
 
-	public void testConstructor3() throws Exception {
-		Throwable cause = new Throwable();
-		ConfigurationException ex = new ConfigurationException(cause);
-		assertSame(cause, ex.getCause());
-		assertEquals(cause.toString(), ex.getMessage());
-	}
+    public void testConstructor3() throws Exception {
+        Throwable cause = new Throwable();
+        ConfigurationException ex = new ConfigurationException(cause);
+        assertSame(cause, ex.getCause());
+        assertEquals(
+            CayenneException.getExceptionLabel() + cause.toString(),
+            ex.getMessage());
+    }
 
-	public void testConstructor4() throws Exception {
-	    Throwable cause = new Throwable();
-		ConfigurationException ex = new ConfigurationException("abc", cause);
-		assertSame(cause, ex.getCause());
-		assertSame("abc", ex.getMessage());
-	}
+    public void testConstructor4() throws Exception {
+        Throwable cause = new Throwable();
+        ConfigurationException ex = new ConfigurationException("abc", cause);
+        assertSame(cause, ex.getCause());
+        assertEquals(CayenneException.getExceptionLabel() + "abc", ex.getMessage());
+    }
 }
-

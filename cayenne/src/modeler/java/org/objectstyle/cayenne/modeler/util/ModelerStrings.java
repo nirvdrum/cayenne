@@ -91,7 +91,7 @@ public class ModelerStrings {
         }
     }
 
-    protected static ResourceBundle getBundle() {
+    protected synchronized static ResourceBundle getBundle() {
         if (bundle == null) {
             try {
                 bundle = ResourceBundle.getBundle(DEFAULT_MESSAGE_BUNDLE);

@@ -66,37 +66,44 @@ package org.objectstyle.cayenne;
  * @author Andrei Adamchik
  */
 public class CayenneRuntimeException extends RuntimeException {
-	private Throwable cause;
+    private Throwable cause;
 
-	/** Creates new <code>CayenneRuntimeException</code> without detail message. */
-	public CayenneRuntimeException() {
-	}
+    /** Creates new <code>CayenneRuntimeException</code> without detail message. */
+    public CayenneRuntimeException() {
+    }
 
-	/**
-	 * Constructs an <code>CayenneRuntimeException</code> with the specified detail message.
-	 * @param msg the detail message.
-	 */
-	public CayenneRuntimeException(String msg) {
-		super(msg);
-	}
+    /**
+     * Constructs an <code>CayenneRuntimeException</code> with the specified detail message.
+     * @param msg the detail message.
+     */
+    public CayenneRuntimeException(String msg) {
+        super(msg);
+    }
 
-	/**
-	 * Constructs an <code>CayenneRuntimeException</code> that 
-	 * wraps <code>exception</code> thrown elsewhere.
-	 */
-	public CayenneRuntimeException(Throwable th) {
-		this(th == null ? (String)null : th.toString(), th);
-	}
+    /**
+     * Constructs an <code>CayenneRuntimeException</code> that 
+     * wraps <code>exception</code> thrown elsewhere.
+     */
+    public CayenneRuntimeException(Throwable th) {
+        this(th == null ? (String) null : th.toString(), th);
+    }
 
-	public CayenneRuntimeException(String msg, Throwable th) {
+    public CayenneRuntimeException(String msg, Throwable th) {
         super(msg);
         this.cause = th;
-	}
+    }
 
-	/**
-	 * @see java.lang.Throwable#getCause()
-	 */
-	public Throwable getCause() {
-		return cause;
-	}
+    /**
+     * @see java.lang.Throwable#getCause()
+     */
+    public Throwable getCause() {
+        return cause;
+    }
+
+	public String getMessage() {
+		 String message = super.getMessage();
+		 return (message != null)
+			 ? CayenneException.getExceptionLabel() + message
+			 : CayenneException.getExceptionLabel() + "(no message)";
+	 }
 }

@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002-2003 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002-2003 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,69 +53,57 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+package org.objectstyle.cayenne.util;
 
-import junit.framework.TestCase;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import org.apache.log4j.Logger;
+
+// TODO: Merge with ModelerStrings (avoid code duplication). Allow
+// customizable bundle location.
 
 /**
+ * Provides access to various modeler resources (mainly strings)
+ * obtained via a ResourceBundle.
+ * 
  * @author Andrei Adamchik
  */
-public class CayenneRuntimeExceptionTst extends TestCase {
+public class LocalizedStringsHandler {
+    static final Logger logObj = Logger.getLogger(LocalizedStringsHandler.class);
 
-    public void testConstructor1() throws Exception {
-        CayenneRuntimeException ex = new CayenneRuntimeException();
-        assertNull(ex.getCause());
-        assertTrue(ex.getMessage().startsWith(CayenneException.getExceptionLabel()));
-    }
+    public static final String DEFAULT_MESSAGE_BUNDLE =
+        "org.objectstyle.cayenne.cayenne-strings";
 
-    public void testConstructor2() throws Exception {
-        CayenneRuntimeException ex = new CayenneRuntimeException("abc");
-        assertNull(ex.getCause());
-        assertEquals(CayenneException.getExceptionLabel() + "abc", ex.getMessage());
-    }
+    protected static ResourceBundle bundle;
 
-    public void testConstructor3() throws Exception {
-        Throwable cause = new Throwable();
-        CayenneRuntimeException ex = new CayenneRuntimeException(cause);
-        assertSame(cause, ex.getCause());
-        assertEquals(
-            CayenneException.getExceptionLabel() + cause.toString(),
-            ex.getMessage());
-    }
-
-    public void testConstructor4() throws Exception {
-        Throwable cause = new Throwable();
-        CayenneRuntimeException ex = new CayenneRuntimeException("abc", cause);
-        assertSame(cause, ex.getCause());
-        assertEquals(CayenneException.getExceptionLabel() + "abc", ex.getMessage());
-    }
-
-    public void testThrow1() throws Exception {
-        try {
-            throw new CayenneRuntimeException();
+    /**
+     * Returns localized string for the given key.
+     */
+    public static String getString(String key) {
+        if (getBundle() == null) {
+            return "";
         }
-        catch (CayenneRuntimeException rtex) {
-            StringWriter w = new StringWriter();
-            rtex.printStackTrace(new PrintWriter(w));
+
+        try {
+            return getBundle().getString(key);
+        }
+        catch (Throwable e) {
+            logObj.info("Error getting resource: " + key, e);
+            return "";
         }
     }
 
-    public void testThrow2() throws Exception {
-        try {
+    protected synchronized static ResourceBundle getBundle() {
+        if (bundle == null) {
             try {
-                throw new Throwable("Test Cause");
+                bundle = ResourceBundle.getBundle(DEFAULT_MESSAGE_BUNDLE);
             }
-            catch (Throwable th) {
-                throw new CayenneRuntimeException(th);
+            catch (MissingResourceException e) {
+                logObj.error("Can't load properties: " + DEFAULT_MESSAGE_BUNDLE, e);
             }
         }
-        catch (CayenneRuntimeException rtex) {
-            StringWriter w = new StringWriter();
-            rtex.printStackTrace(new PrintWriter(w));
-        }
+        return bundle;
     }
-
 }

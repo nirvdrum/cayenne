@@ -52,8 +52,10 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
+
+import org.objectstyle.cayenne.util.LocalizedStringsHandler;
 
 /**
  * A CayenneException is a generic exception that 
@@ -66,15 +68,32 @@ package org.objectstyle.cayenne;
  * @author Andrei Adamchik
  */
 public class CayenneException extends Exception {
+    private static String exceptionLabel;
+
+    static {
+        String version = LocalizedStringsHandler.getString("cayenne.version");
+        String date = LocalizedStringsHandler.getString("cayenne.build.date");
+
+        if (version != null || date != null) {
+			exceptionLabel = "[v." + version + " " + date + "] ";
+        }
+        else {
+            exceptionLabel = "";
+        }
+    }
+
+    public static String getExceptionLabel() {
+        return exceptionLabel;
+    }
+
     private Throwable cause;
-    	
+
     /**
      * Creates new <code>CayenneException</code> without detail message.
      */
     public CayenneException() {
     }
-    
-    
+
     /**
      * Constructs an <code>CayenneException</code> with the specified detail message.
      * @param msg the detail message.
@@ -82,27 +101,31 @@ public class CayenneException extends Exception {
     public CayenneException(String msg) {
         super(msg);
     }
-    
-    
+
     /**
      * Constructs an <code>CayenneException</code> that wraps <code>exception</code>
      * thrown elsewhere.
      */
     public CayenneException(Throwable th) {
-        this(th == null ? (String)null : th.toString(), th);
+        this(th == null ? (String) null : th.toString(), th);
     }
-    
+
     public CayenneException(String msg, Throwable th) {
         super(msg);
         this.cause = th;
     }
-    
+
     /**
-	 * @see java.lang.Throwable#getCause()
-	 */
-	public Throwable getCause() {
-		return cause;
-	}
+     * @see java.lang.Throwable#getCause()
+     */
+    public Throwable getCause() {
+        return cause;
+    }
+
+    public String getMessage() {
+        String message = super.getMessage();
+        return (message != null)
+            ? getExceptionLabel() + message
+            : getExceptionLabel() + "(no message)";
+    }
 }
-
-
