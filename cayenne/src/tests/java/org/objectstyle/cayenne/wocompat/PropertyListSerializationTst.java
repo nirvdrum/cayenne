@@ -170,6 +170,21 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 		assertTrue(readList instanceof List);
 		assertTrue(list.equals(readList));
 	}
+	
+    public void testStringWithSlashes() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-slashes.plist");
+        List list = new ArrayList();
+        list.add("s/t\\r");
+        list.add(new Integer(5));
+
+        assertTrue(!plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, list);
+        assertTrue(plistFile.exists());
+
+        Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readList instanceof List);
+        assertTrue(list.equals(readList));
+    }
 
 }
 

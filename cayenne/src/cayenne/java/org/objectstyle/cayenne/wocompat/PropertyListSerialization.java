@@ -207,7 +207,7 @@ public class PropertyListSerialization {
 	}
 
 	/** 
-	 * Escapes all doublequotes.
+	 * Escapes all doublequotes and backslashes.
 	 */
 	protected static String escapeString(String str) {
 		char[] chars = str.toCharArray();
@@ -215,9 +215,9 @@ public class PropertyListSerialization {
 		StringBuffer buf = new StringBuffer(len + 3);
 
 		for (int i = 0; i < len; i++) {
-			if (chars[i] == '\"') {
+			if (chars[i] == '\"' || chars[i] == '\\') {
 				buf.append('\\');
-			}
+			}			
 			buf.append(chars[i]);
 		}
 
@@ -233,7 +233,7 @@ public class PropertyListSerialization {
 		boolean shouldQuote = false;
 		
 		// scan string for special chars
-		String special = " \"{}();,";
+		String special = " \\\"{}();,";
 		char[] chars = str.toCharArray();
 		int len = chars.length;
 		for (int i = 0; i < len; i++) {
