@@ -243,12 +243,21 @@ public class QualifierTranslator
             case Expression.IN :
                 buf.append(" IN ");
                 break;
+			case Expression.NOT_IN :
+				buf.append(" NOT IN ");
+				break;
             case Expression.LIKE :
                 buf.append(" LIKE ");
                 break;
+			case Expression.NOT_LIKE :
+				buf.append(" NOT LIKE ");
+				break;
             case Expression.LIKE_IGNORE_CASE :
                 buf.append(") LIKE UPPER(");
                 break;
+			case Expression.NOT_LIKE_IGNORE_CASE :
+				buf.append(") NOT LIKE UPPER(");
+				break;
             case Expression.ADD :
                 buf.append(" + ");
                 break;
@@ -267,6 +276,12 @@ public class QualifierTranslator
                 else if (childIndex == 1)
                     buf.append(" AND ");
                 break;
+			case Expression.NOT_BETWEEN :
+				if (childIndex == 0)
+					buf.append(" NOT BETWEEN ");
+				else if (childIndex == 1)
+					buf.append(" AND ");
+				break;
         }
 
         if (matchingObject) {

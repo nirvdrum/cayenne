@@ -110,7 +110,11 @@ public class ExpressionFactory {
                 Expression.SUM,
                 Expression.AVG,
                 Expression.MIN,
-                Expression.MAX };
+                Expression.MAX,
+                Expression.NOT_BETWEEN,
+                Expression.NOT_IN,
+                Expression.NOT_LIKE,
+                Expression.NOT_LIKE_IGNORE_CASE };
 
         int max = 0;
         int min = 0;
@@ -139,6 +143,7 @@ public class ExpressionFactory {
 
         // ternary types
         typeLookup[Expression.BETWEEN] = TernaryExpression.class;
+		typeLookup[Expression.NOT_BETWEEN] = TernaryExpression.class;
 
         // binary types
         typeLookup[Expression.EQUAL_TO] = BinaryExpression.class;
@@ -148,8 +153,11 @@ public class ExpressionFactory {
         typeLookup[Expression.LESS_THAN_EQUAL_TO] = BinaryExpression.class;
         typeLookup[Expression.GREATER_THAN_EQUAL_TO] = BinaryExpression.class;
         typeLookup[Expression.IN] = BinaryExpression.class;
+		typeLookup[Expression.NOT_IN] = BinaryExpression.class;
         typeLookup[Expression.LIKE] = BinaryExpression.class;
         typeLookup[Expression.LIKE_IGNORE_CASE] = BinaryExpression.class;
+		typeLookup[Expression.NOT_LIKE] = BinaryExpression.class;
+		typeLookup[Expression.NOT_LIKE_IGNORE_CASE] = BinaryExpression.class;
         typeLookup[Expression.ADD] = BinaryExpression.class;
         typeLookup[Expression.SUBTRACT] = BinaryExpression.class;
         typeLookup[Expression.MULTIPLY] = BinaryExpression.class;
@@ -497,6 +505,13 @@ public class ExpressionFactory {
     public static Expression inExp(String pathSpec, List values) {
         return binaryPathExp(Expression.IN, pathSpec, wrapPathOperand(values));
     }
+    
+	/**
+	 * A convenience shortcut for building NOT_IN expression.
+	 */
+	public static Expression notInExp(String pathSpec, List values) {
+		return binaryPathExp(Expression.NOT_IN, pathSpec, wrapPathOperand(values));
+	}
 
     /**
      * A convenience shortcut for building BETWEEN expressions.
@@ -508,6 +523,17 @@ public class ExpressionFactory {
         Expression path = unaryExp(Expression.OBJ_PATH, pathSpec);
         return ternaryExp(Expression.BETWEEN, path, value1, value2);
     }
+    
+	/**
+	 * A convenience shortcut for building NOT_BETWEEN expressions.
+	 */
+	public static Expression notBetweenExp(
+			String pathSpec,
+			Object value1,
+			Object value2) {
+			Expression path = unaryExp(Expression.OBJ_PATH, pathSpec);
+		return ternaryExp(Expression.NOT_BETWEEN, path, value1, value2);
+	}
 
     /**
      * A convenience shortcut for <code>binaryPathExp(Expression.LIKE, pathSpec,
@@ -516,6 +542,14 @@ public class ExpressionFactory {
     public static Expression likeExp(String pathSpec, Object value) {
         return binaryPathExp(Expression.LIKE, pathSpec, value);
     }
+    
+	/**
+	 * A convenience shortcut for <code>binaryPathExp(Expression.NOT_LIKE, pathSpec,
+	 * value)</code>.
+	 */
+	public static Expression notLikeExp(String pathSpec, Object value) {
+		return binaryPathExp(Expression.NOT_LIKE, pathSpec, value);
+	}
 
     /**
      * A convenience shortcut for <code>binaryPathExp(Expression.
@@ -524,6 +558,14 @@ public class ExpressionFactory {
     public static Expression likeIgnoreCaseExp(String pathSpec, Object value) {
         return binaryPathExp(Expression.LIKE_IGNORE_CASE, pathSpec, value);
     }
+    
+	/**
+	 * A convenience shortcut for <code>binaryPathExp(Expression.
+	 * NOT_LIKE_IGNORE_CASE, pathSpec, value)</code>.
+	 */
+	public static Expression notLikeIgnoreCaseExp(String pathSpec, Object value) {
+		return binaryPathExp(Expression.NOT_LIKE_IGNORE_CASE, pathSpec, value);
+	}
     
 
     /** 

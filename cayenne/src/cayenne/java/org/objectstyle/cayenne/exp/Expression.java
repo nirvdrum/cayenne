@@ -160,7 +160,12 @@ public abstract class Expression implements Serializable {
     public static final int MAX = 33;
     /** Interpreted as an aggregate min function. */
     public static final int MIN = 34;
-
+    
+    public static final int NOT_BETWEEN = 35;
+	public static final int NOT_IN = 36;
+	public static final int NOT_LIKE = 37;
+	public static final int NOT_LIKE_IGNORE_CASE = 38;
+	
     protected int type;
 
     /**
@@ -202,6 +207,14 @@ public abstract class Expression implements Serializable {
                 return "DB_PATH";
             case LIST :
                 return "LIST";
+            case NOT_BETWEEN:
+                return "NOT BETWEEN";
+			case NOT_IN:
+				return "NOT IN"; 
+			case NOT_LIKE:
+				return "NOT LIKE"; 
+			case NOT_LIKE_IGNORE_CASE:
+				return "NOT LIKE IGNORE CASE"; 
             default :
                 return "other";
         }
