@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.util;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.util;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -62,48 +62,59 @@ import java.io.InputStream;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ResourceLocatorTst extends CayenneTestCase {
-    private File fTmpFileInCurrentDir;
-    private String fTmpFileName;
+	private File fTmpFileInCurrentDir;
+	private String fTmpFileName;
 
-    protected void setUp() throws java.lang.Exception {
-        fTmpFileName = System.currentTimeMillis() + ".tmp";
-        fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);
+	protected void setUp() throws java.lang.Exception {
+		fTmpFileName = System.currentTimeMillis() + ".tmp";
+		fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);
 
-        // right some garbage to the temp file, so that it is not empty
-        FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
-        fout.write("This is total grabage..");
-        fout.close();
-    }
+		// right some garbage to the temp file, so that it is not empty
+		FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
+		fout.write("This is total garbage..");
+		fout.close();
+	}
 
-    protected void tearDown() throws java.lang.Exception {
-        if (!fTmpFileInCurrentDir.delete())
-            throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
-    }
+	protected void tearDown() throws java.lang.Exception {
+		if (!fTmpFileInCurrentDir.delete())
+			throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
+	}
 
-    public void testFindResourceInCurDir() throws java.lang.Exception {
-        InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
-        try {
-            assertNotNull(in);
-        }
-        finally {
-            in.close();
-        }
-    }
+	public void testFindResourceInCurrentDirectory() throws java.lang.Exception {
+		InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
+		try {
+			assertNotNull(in);
+		}
+		finally {
+			in.close();
+		}
+	}
 
-    public void testClassBaseUrl() throws java.lang.Exception {
-        String me = ResourceLocator.classBaseUrl(this.getClass());
-        assertNotNull(me);
-        assertTrue("Expected 'jar:' or 'file:' URL, got " + me, me.startsWith("jar:") || me.startsWith("file:"));
-    }
+	public void testClassBaseUrl() throws java.lang.Exception {
+		String me = ResourceLocator.classBaseUrl(this.getClass());
+		assertNotNull(me);
+		assertTrue("Expected 'jar:' or 'file:' URL, got " + me,
+					me.startsWith("jar:") || me.startsWith("file:"));
+	}
 
-    public void testFindResourceWithJarUrl() throws java.lang.Exception {
-        InputStream in =
-            ResourceLocator.findResourceInClasspath("test-resources/testfile1.txt");
-        try {
-            assertNotNull(in);
-        }
-        finally {
-            in.close();
-        }
-    }
+	public void testFindResourceInClasspath() throws java.lang.Exception {
+		InputStream in =
+			ResourceLocator.findResourceInClasspath("test-resources/testfile1.txt");
+		try {
+			assertNotNull(in);
+		}
+		finally {
+			in.close();
+		}
+	}
+
+	public void testFindResourceWithCustomClassPath() throws java.lang.Exception {
+		ResourceLocator l = new ResourceLocator();
+		l.setSkipAbsolutePath(true);
+		l.setSkipCurrentDirectory(true);
+		l.setSkipHomeDirectory(true);
+		l.addClassPath("test-resources");
+		assertNotNull(l.findResource("testfile1.txt"));
+	}
+
 }
