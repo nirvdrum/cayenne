@@ -65,6 +65,7 @@ import javax.swing.table.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
@@ -132,8 +133,7 @@ implements ActionListener, DbEntityDisplayListener
 		col.setMinWidth(150);
 		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_TYPE);
 		col.setMinWidth(90);
-		// FIXME!!! Need to put actual data types in here
-		JComboBox comboBox = new JComboBox(Util.getDatabaseTypes());
+		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());
 		comboBox.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 	}
