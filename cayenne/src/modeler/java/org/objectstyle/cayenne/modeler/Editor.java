@@ -177,7 +177,7 @@ public class Editor
     protected JMenuItem aboutMenu = new JMenuItem("About");
 
     protected XmlFilter xmlFilter = new XmlFilter();
-    protected TopController controller = new TopController();
+    protected TopController controller = new TopController(this);
 
     /** Returns an editor singleton object. */
     public static Editor getFrame() {
@@ -475,7 +475,7 @@ public class Editor
             view = null;
         }
 
-        setMediator(null);
+        mediator.reset();
         controller.getTopModel().setCurrentProject(null);
 
         disableMenu();
@@ -493,7 +493,7 @@ public class Editor
         updateTitle();
     }
 
-    public void projectOpened(Project project) {
+    public void projectOpened(Project project) {    	
         view = new EditorView(mediator);
         getContentPane().add(view, BorderLayout.CENTER);
 
@@ -511,16 +511,6 @@ public class Editor
         validate();
 
         updateTitle();
-
-        // do this after title is set
-        if (project.isLocationUndefined()) {
-            mediator.setDirty(true);
-            controller.handleControl(
-                new Control(TopModel.STATUS_MESSAGE_KEY, "New project created..."));
-        } else {
-            controller.handleControl(
-                new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
-        }
     }
 
     /** 

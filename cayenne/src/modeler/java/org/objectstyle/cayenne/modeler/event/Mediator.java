@@ -55,9 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.Iterator;
 
 import javax.swing.event.EventListenerList;
 
@@ -72,6 +70,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.model.TopModel;
 
 /** 
  * Implementation of event dispatching in CayenneModeler using <code>Mediator</code>
@@ -94,6 +93,7 @@ public class Mediator {
     protected static Logger logObj = Logger.getLogger(Mediator.class);
 
     protected EventListenerList listenerList;
+    protected TopModel model;
 
     DataDomain currentDomain = null;
     DataNode currentNode = null;
@@ -108,8 +108,21 @@ public class Mediator {
     /** Changes have been made, need to be saved. */
     protected boolean dirty;
 
-    public Mediator() {
-        listenerList = new EventListenerList();
+    public Mediator(TopModel model) {
+        this.listenerList = new EventListenerList();
+        this.model = model;
+    }
+
+    public void reset() {
+        currentDomain = null;
+        currentNode = null;
+        currentMap = null;
+        currentObjEntity = null;
+        currentDbEntity = null;
+        currentObjAttr = null;
+        currentDbAttr = null;
+        currentObjRel = null;
+        currentDbRel = null;
     }
 
     public boolean isDirty() {

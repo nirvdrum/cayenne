@@ -134,8 +134,7 @@ public class OpenProjectAction extends ProjectAction {
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             } else {
-                setMediator(new Mediator());
-                Editor.getFrame().projectOpened(project);
+            	Editor.getFrame().getController().projectOpened(project);
             }
         } catch (Exception ex) {
             logObj.warn("Error loading project file.", ex);

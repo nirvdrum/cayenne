@@ -99,15 +99,11 @@ public class NewProjectAction extends ProjectAction {
 
     public void newAppProject() {
         Project project = new ApplicationProject(null);
-        Editor.getFrame().getController().getTopModel().setCurrentProject(project);
-        setMediator(new Mediator());
-        Editor.getFrame().projectOpened(project);
+        Editor.getFrame().getController().projectOpened(project);
     }
 
     public void newMapProject() {
         Project project = new DataMapProject(null);
-        Editor.getFrame().getController().getTopModel().setCurrentProject(project);
-        setMediator(new Mediator());
-        Editor.getFrame().projectOpened(project);
+        Editor.getFrame().getController().projectOpened(project);
     }
 }

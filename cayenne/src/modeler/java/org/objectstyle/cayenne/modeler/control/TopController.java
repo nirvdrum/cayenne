@@ -55,25 +55,57 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
+import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
+import org.objectstyle.cayenne.project.Project;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
 /**
+ * TopController is the main controller object of the CayenneModeler.
+ *  
  * @author Andrei Adamchik
  */
 public class TopController extends BasicController {
     protected StatusBarController statusController;
+    protected Mediator eventController;
+
+    // should refactor to SPanel
+    protected Editor view;
 
     /**
      * Constructor for TopController.
      */
-    public TopController() {
+    public TopController(Editor view) {
+        this.view = view;
+        
         TopModel model = new TopModel();
         statusController = new StatusBarController(model);
+        eventController = new Mediator(model);
         setModel(model);
+        
+        view.setMediator(eventController);
+    }
+
+    public void projectOpened(Project project) {
+    	// update model
+        getTopModel().setCurrentProject(project);
+        
+        // update main view
+        view.projectOpened(project);
+        
+        // update bottom status bar
+        if (project.isLocationUndefined()) {
+            eventController.setDirty(true);
+            statusController.handleControl(
+                new Control(TopModel.STATUS_MESSAGE_KEY, "New project created..."));
+        } else {
+            statusController.handleControl(
+                new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
+        }
     }
 
     public void setStatusBarView(StatusBarView view) {
@@ -85,9 +117,9 @@ public class TopController extends BasicController {
     }
 
     protected void doHandleControl(Control control) throws ControlException {
-    	// pass control to the child that knows how to handle it
+        // pass control to the child that knows how to handle it
         if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
-        	control.markUnmatched();
+            control.markUnmatched();
             statusController.doHandleControl(control);
         }
     }
