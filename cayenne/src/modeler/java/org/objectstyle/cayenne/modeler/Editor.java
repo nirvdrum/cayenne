@@ -58,10 +58,7 @@ package org.objectstyle.cayenne.modeler;
 
 import java.io.File;
 
-/** 
- * Main frame of CayenneModeler. Responsibilities include 
- * coordination of enabling/disabling of menu and toolbar.
- * 
+/**
  * @deprecated Since 1.1 Main and CayenneModelerFrame supercede this class
  */
 public class Editor extends CayenneModelerFrame {
@@ -70,23 +67,27 @@ public class Editor extends CayenneModelerFrame {
      * Main method that starts the CayenneModeler.
      */
     public static void main(String[] args) {
+        System.err.println("**** WARNING: "
+                + Editor.class.getName()
+                + " is deprecated. Change your startup script to use "
+                + Main.class.getName());
         Main.main(args);
     }
 
-    /** 
-     * Configures Log4J appenders to perform logging to 
-     * $HOME/.cayenne/modeler.log.
+    /**
+     * Configures Log4J appenders to perform logging to $HOME/.cayenne/modeler.log.
      */
     public static void configureLogging() {
         new Main().configureLogging();
     }
 
-    /** 
+    /**
      * Returns a file correspinding to $HOME/.cayenne/modeler.log
      */
     public static File getLogFile() {
         return new Main().getLogFile();
     }
 
-    public Editor() {}
+    public Editor() {
+    }
 }
