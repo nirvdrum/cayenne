@@ -64,7 +64,7 @@ public class TernaryExpression implements Expression {
     protected Object operand2;
     protected int type;
 
-    protected TernaryExpression() {}
+    public TernaryExpression() {}
 
     public TernaryExpression(int type) {
         this.type = type;
