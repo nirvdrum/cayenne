@@ -65,20 +65,21 @@ import java.sql.ResultSet;
  * @author Andrei Adamchik
  */
 public interface ExtendedType {
-    /** Returns a full name of Java class that this converter supports. */
+    /** 
+     * Returns a full name of Java class that this ExtendedType supports.
+     */
     public String getClassName();
 
     /** 
-     * Converts an object of class returned by 'className' to a corresponding
-     * Java type from 'java.lang.*' package that could be used to map to
-     * <code>type</code> JDBC type.
-     * 
      * @deprecated Since 1.0 Beta1 'setJdbcObject' is used instead.
      * @throws Exception if an object is of incorrect type, or if JDBC type is
      * incompatible with object. 
      */
     public Object toJdbcObject(Object val, int type) throws Exception;
 
+    /**
+     * Initializes a single parameter of a PreparedStatement with object value. 
+     */
     public void setJdbcObject(
         PreparedStatement st,
         Object val,
@@ -86,13 +87,14 @@ public interface ExtendedType {
         int type,
         int precision)
         throws Exception;
-        
 
-    /** Reads an object from JDBC ResultSet column converting it to class
-      * returned by 'getClassName' method.
-      *
-      * @throws Exception if read error ocurred, or an object can't be converted
-      * to a target Java class. */
+    /** 
+     * Reads an object from JDBC ResultSet column converting it to class
+     * returned by 'getClassName' method.
+     *
+     * @throws Exception if read error ocurred, or an object can't be converted
+     * to a target Java class.
+     */
     public Object materializeObject(ResultSet rs, int index, int type)
         throws Exception;
 }

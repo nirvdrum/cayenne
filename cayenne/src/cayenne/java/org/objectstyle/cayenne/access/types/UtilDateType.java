@@ -60,8 +60,8 @@ import java.sql.ResultSet;
 import java.sql.Types;
 
 /**
- * ExtendedType that allows Java application to use java.util.Date for all three
- * database date/time types: TIME, DATE, TIMESTAMP.
+ * ExtendedType that allows Java application to use java.util.Date
+ * transparently for all three database date/time types: TIME, DATE, TIMESTAMP.
  * 
  * @author Andrei Adamchik
  */
