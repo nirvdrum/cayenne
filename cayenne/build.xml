@@ -126,6 +126,8 @@
             <fileset dir="tests" includes="org/**"/>
         </copy>
         
+        <copy file="src/resources/scripts/build.xml.dist" tofile="${dist}/src/build.xml"/>
+
         <tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar">
             <tarfileset dir="${dist.base}">
                 <include name="${project.name}-${project.version}/**"/>
@@ -239,6 +241,9 @@
         
         <!-- Ant JAR is required for the Ant-specific tests to run. -->
         <copy file="otherlib/ant.jar" todir="${dist}/lib"/>
+        
+        <!-- Servlet JAR is required to complie Cayenne from src distro. -->
+        <copy file="otherlib/servlet.jar" todir="${dist}/lib"/>
     </target>
     
     

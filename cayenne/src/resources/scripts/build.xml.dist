@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+
+<!-- ================================================== -->
+<!-- Buildfile to compile Cayenne from source           -->
+<!-- distribution.                                      -->
+<!--                                                    -->
+<!-- Notes:                                             -->
+<!-- 1. The JAR files built will be called              -->
+<!-- cayenne-cust.jar and cayenne-tests-cust.jar.       -->
+<!-- DO NOT DELETE THE "OFFICIAL"  cayenne.jar FILE     -->
+<!-- in "lib" directory, since it is                   -->
+<!-- used as a source of bundled 3-rd party classes.    -->
+<!--                                                    -->
+<!-- 2. YOU WILL NEED TO COMPILE CAYENNE YOURSELF ONLY  -->
+<!-- IF YOU MADE CHANGES TO SOURCE. Standard            -->
+<!-- distribution already has cayenne.jar included.     -->
+<!--                                                    -->
+<!-- Author: Andrei Adamchik                            -->
+<!-- ================================================== -->
+
+<project name="cayenne-src" default="jar">
+     <property name="src" value="."/>
+     <property name="build" value="../build"/>
+     <property name="lib" value="../lib"/>
+    
+     <target name="clean">
+         <delete dir="${build}"/>
+         <delete file="${lib}/cayenne-cust.jar"/>
+         <delete file="${lib}/cayenne-tests-cust.jar"/>
+     </target>
+
+     <target name="prepare">
+         <mkdir dir="${build}/cayenne"/>
+         <mkdir dir="${build}/tests"/>
+         <mkdir dir="${build}/deps"/>
+     </target>     
+
+     <target name="compile" depends="prepare,find-official-jar,prepare-dependencies,no-dependencies">
+         <echo> Java home: ${java.home}</echo>
+          <path id="classpath">
+              <pathelement path="${lib}/servlet.jar"/>
+              <pathelement path="${build}/deps"/>
+          </path>
+     
+          <path id="classpath-tests">
+             <path refid="classpath"/>
+             <pathelement path="${build}/cayenne"/>
+          </path>
+     
+          <javac srcdir="${src}/cayenne" destdir="${build}/cayenne">
+              <classpath refid="classpath"/>
+          </javac>
+          <javac srcdir="${src}/tests" destdir="${build}/tests">
+              <classpath refid="classpath-tests"/>
+          </javac>
+     </target>
+
+     <target name="jar" depends="compile">
+          <jar jarfile="${lib}/cayenne-cust.jar" manifest="${build}/deps/META-INF/MANIFEST.MF">
+             <fileset dir="${build}/deps">
+             	<exclude name="**/MANIFEST.MF"/>
+             </fileset>
+             <fileset dir="${build}/cayenne"/>
+          </jar>     
+          
+          <jar jarfile="${lib}/cayenne-tests-cust.jar">
+             <fileset dir="${build}/tests"/>
+          </jar>     
+     </target>     
+     
+     <!-- ============================================= -->
+     <!-- Extract any dependencies needed to compile    -->
+     <!-- Cayenne from the "official" JAR into "deps"   -->
+     <!-- directory.                                    -->
+     <!-- ============================================= -->
+     <target name="prepare-dependencies" if="official-jar">
+         <unjar src="${official-jar}" dest="${build}/deps"/>
+         <delete includeEmptyDirs="true">
+         	<fileset dir="${build}/deps">
+         	    <include name="org/objectstyle/**/*.class"/>
+         	</fileset>
+         </delete>
+     </target>
+     
+     <target name="no-dependencies" unless="official-jar">
+         <fail message="No 'official' Cayenne JAR file found."/>
+     </target>
+     
+     <target name="find-official-jar">
+         <available property="official-jar" 
+                    value="${lib}/cayenne.jar" 
+                    classname="org.apache.velocity.app.Velocity">
+  		    <classpath>
+    	                <pathelement location="${lib}/cayenne.jar"/>
+  		    </classpath>
+         </available>
+     </target>
+</project>
