@@ -85,6 +85,15 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.Query;
 
+/**
+ * RefIntegritySupport resolves referential constraints per data node.
+ * Presently it works for acyclic database schemas with possible
+ * multi-reflexive tables. The class uses topological sorting from ASHWOOD.
+ * It is mainly used by ContextCommit.
+ *
+ * @author Andriy Shapochka
+ */
+
 public class RefIntegritySupport {
     private DataNode supportedNode;
     private Map dbEntityToTableMap;

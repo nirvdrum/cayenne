@@ -1529,4 +1529,40 @@ public class DataContext implements QueryEngine, Serializable {
       worker.commit(logLevel);
     }
 
+  void fireWillCommit() {
+    // post event: WILL_COMMIT
+    EventManager eventMgr = EventManager.getDefaultManager();
+    if (this.postDataContextTransactionEvents) {
+      //result.registerForDataContextEvents();
+      DataContextEvent commitChangesEvent = new DataContextEvent(this);
+      eventMgr.postEvent(commitChangesEvent, DataContext.WILL_COMMIT);
+    }
+  }
+
+  void fireTransactionRolledback() {
+    // post event: DID_ROLLBACK
+    EventManager eventMgr = EventManager.getDefaultManager();
+    if ((this.postDataContextTransactionEvents)) {
+      DataContextEvent commitChangesEvent = new DataContextEvent(this);
+      eventMgr.postEvent(commitChangesEvent, DataContext.DID_ROLLBACK);
+    }
+  }
+
+  void fireTransactionCommitted() {
+    // post event: DID_COMMIT
+    EventManager eventMgr = EventManager.getDefaultManager();
+    if ((this.postDataContextTransactionEvents)) {
+      DataContextEvent commitChangesEvent = new DataContextEvent(this);
+      eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
+    }
+  }
+
+  Map getFlattenedInserts() {
+    return flattenedInserts;
+  }
+
+  Map getFlattenedDeletes() {
+    return flattenedDeletes;
+  }
+
 }

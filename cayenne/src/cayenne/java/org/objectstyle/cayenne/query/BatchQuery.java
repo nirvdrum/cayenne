@@ -59,6 +59,16 @@ import java.util.List;
 
 import org.objectstyle.cayenne.map.DbEntity;
 
+/**
+ * BatchQuery and its descendants allow to group similar data for the
+ * following massive database modifications. Mainly the data are grouped
+ * by modification type (INSERT/DELETE/UPDATE) and DbEntity. Additional
+ * conditions may be used too. Generally batches are utilized in ContextCommit
+ * and performed by DataNodes.
+ *
+ * @author Andriy Shapochka
+ */
+
 public abstract class BatchQuery extends AbstractQuery {
   protected DbEntity metadata;
 

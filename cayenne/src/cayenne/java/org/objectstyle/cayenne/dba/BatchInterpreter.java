@@ -66,6 +66,14 @@ import org.objectstyle.cayenne.access.types.*;
 import org.objectstyle.cayenne.access.trans.*;
 import org.objectstyle.cayenne.query.*;
 
+/**
+ * BatchInterpreter performs BatchQueries in a JDBC specific fashion
+ * Its descendants may even employ some RDBS specific features for
+ * the sake of batch efficiency. It is mostly used by DataNodes.
+ *
+ * @author Andriy Shapochka
+ */
+
 public class BatchInterpreter {
   private DbAdapter adapter;
   private BatchQueryBuilder queryBuilder;

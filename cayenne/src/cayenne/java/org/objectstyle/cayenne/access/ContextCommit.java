@@ -78,12 +78,27 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.BatchUtils;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
+
+/**
+ * ContextCommit implements commit logic. It is used internally by
+ * DataContext as a commit delegate.
+ * Currently ContextCommit resolves primary key dependencies,
+ * referential integrity dependencies including multi-reflexive entities,
+ * generates primary keys, creates batches for massive data modifications,
+ * assignes operations to data nodes. It indirectly relies on graph
+ * algorithms provided by ASHWOOD.
+ *
+ * @author Andriy Shapochka
+ */
 
 class ContextCommit {
     private DataContext context;
@@ -434,6 +449,30 @@ class ContextCommit {
                 objectsForObjEntity);
         }
         objectsForObjEntity.add(o);
+    }
+
+    private void categorizeFlattenedInserts() {
+        Map flattenedInserts = context.getFlattenedInserts();
+        for (Iterator i = flattenedInserts.entrySet().iterator(); i.hasNext();) {
+            Map.Entry fientry = (Map.Entry)i.next();
+            DataObject source = (DataObject)fientry.getKey();
+            Map insertsForObject = (Map)fientry.getValue();
+            if (insertsForObject == null || insertsForObject.isEmpty()) continue;
+            ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+            DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+            for (Iterator j = insertsForObject.entrySet().iterator(); j.hasNext();) {
+                Map.Entry ioentry = (Map.Entry)i.next();
+                String relName = (String)ioentry.getKey();
+                List insertedObjectsForRel = (List)ioentry.getValue();
+                if (insertedObjectsForRel == null || insertedObjectsForRel.isEmpty()) continue;
+                ObjRelationship flattenedRel = (ObjRelationship)sourceEntity.getRelationship(relName);
+                DbRelationship firstDbRel = (DbRelationship)flattenedRel.getDbRelationshipList().get(0);
+                DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
+                for (Iterator k = insertedObjectsForRel.iterator(); k.hasNext();) {
+                    DataObject destination = (DataObject)k.next();
+                }
+            }
+        }
     }
 
     private ObjectId updatedId(ObjectId id, UpdateQuery query) {

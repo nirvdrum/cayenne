@@ -65,6 +65,11 @@ import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
+/**
+ *
+ * @author Andriy Shapochka
+ */
+
 public class InsertBatchQuery extends BatchQuery {
   private List dataObjectSnapshots;
   private List dbAttributes;

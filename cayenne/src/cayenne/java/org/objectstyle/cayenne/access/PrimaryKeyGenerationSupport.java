@@ -63,6 +63,16 @@ import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.dba.*;
 
+/**
+ * PrimaryKeyGenerationSupport resolves primary key dependencies for entities
+ * related to the supported query engine via topological sorting. It is
+ * directly based on ASHWOOD. In addition it provides means for primary key
+ * generation relying on DbAdapter in this. PrimaryKeyGenerationSupport is
+ * used by ContextCommit.
+ *
+ * @author Andriy Shapochka
+ */
+
 class PrimaryKeyGenerationSupport {
   private Map indexedDbEntities;
   private QueryEngine supportedQueryEngine;

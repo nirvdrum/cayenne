@@ -59,6 +59,11 @@ package org.objectstyle.cayenne.access.trans;
 import org.objectstyle.cayenne.dba.*;
 import org.objectstyle.cayenne.query.*;
 
+/**
+ *
+ * @author Andriy Shapochka
+ */
+
 public abstract class BatchQueryBuilder {
   protected DbAdapter adapter;
 

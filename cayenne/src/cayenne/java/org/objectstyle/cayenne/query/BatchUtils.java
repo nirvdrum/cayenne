@@ -60,6 +60,11 @@ import java.util.*;
 import org.apache.commons.lang.builder.*;
 import org.objectstyle.cayenne.*;
 
+/**
+ *
+ * @author Andriy Shapochka
+ */
+
 public class BatchUtils {
 
   private BatchUtils() {

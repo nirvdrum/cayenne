@@ -63,6 +63,11 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
+/**
+ *
+ * @author Andriy Shapochka
+ */
+
 public class DeleteBatchQueryBuilder extends BatchQueryBuilder {
     public DeleteBatchQueryBuilder(DbAdapter adapter) {
         super.setAdapter(adapter);
