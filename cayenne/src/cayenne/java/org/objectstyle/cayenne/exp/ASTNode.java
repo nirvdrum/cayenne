@@ -226,6 +226,7 @@ abstract class ASTNode {
             else {
                 throw new ExpressionException(
                     "Error evaluating expression.",
+                    this.toString(),
                     Util.unwindException(th));
             }
         }

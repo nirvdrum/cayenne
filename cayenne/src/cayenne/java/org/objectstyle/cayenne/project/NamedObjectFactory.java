@@ -362,7 +362,7 @@ public abstract class NamedObjectFactory {
 
     static class ObjAttributeFactory extends NamedObjectFactory {
         protected String nameBase() {
-            return "UntitledAttr";
+            return "untitledAttr";
         }
 
         protected Object create(String name, Object namingContext) {
@@ -434,7 +434,7 @@ public abstract class NamedObjectFactory {
          */
         protected String nameBase() {
             if (target == null) {
-                return "UntitledRel";
+                return "untitledRel";
             }
 
             String name = target.getName();
@@ -460,7 +460,7 @@ public abstract class NamedObjectFactory {
          */
         protected String nameBase() {
             if (target == null) {
-                return "UntitledRel";
+                return "untitledRel";
             }
 
             String name = target.getName();

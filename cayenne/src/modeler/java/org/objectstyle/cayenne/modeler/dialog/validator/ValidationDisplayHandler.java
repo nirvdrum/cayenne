@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
  * Superclass of CayenneModeler validation messages.
@@ -114,6 +115,9 @@ public abstract class ValidationDisplayHandler {
         }
         else if (validatedObj instanceof ProcedureParameter) {
             msg = new ProcedureParameterErrorMsg(result);
+        }
+        else if (validatedObj instanceof Query) {
+            msg = new QueryErrorMsg(result);
         }
         else {
             // do nothing ... this maybe a project node that is not displayed

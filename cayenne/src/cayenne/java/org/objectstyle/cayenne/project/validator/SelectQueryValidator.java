@@ -57,8 +57,16 @@ package org.objectstyle.cayenne.project.validator;
 
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.EntityResolver;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
@@ -71,10 +79,74 @@ import org.objectstyle.cayenne.util.Util;
  */
 public class SelectQueryValidator extends TreeNodeValidator {
 
+    private static Logger logObj = Logger.getLogger(SelectQueryValidator.class);
+
     public void validateObject(ProjectPath treeNodePath, Validator validator) {
         SelectQuery query = (SelectQuery) treeNodePath.getObject();
+
         validateName(query, treeNodePath, validator);
-     
+
+        // Resolve root to Entity for further validation
+        Entity root = validateRoot(query, treeNodePath, validator);
+
+        // validate path-based parts
+        if (root != null) {
+            validateQualifier(root, query.getQualifier(), treeNodePath, validator);
+
+            Iterator orderings = query.getOrderings().iterator();
+            while (orderings.hasNext()) {
+                validateOrdering(
+                    root,
+                    (Ordering) orderings.next(),
+                    treeNodePath,
+                    validator);
+            }
+
+            Iterator prefecthes = query.getPrefetches().iterator();
+            while (prefecthes.hasNext()) {
+                validatePrefetch(
+                    root,
+                    (String) prefecthes.next(),
+                    treeNodePath,
+                    validator);
+            }
+        }
+    }
+
+    protected Entity validateRoot(Query query, ProjectPath path, Validator validator) {
+        DataMap map = (DataMap) path.getObjectParent();
+
+        if (query.getRoot() == null && map != null) {
+            validator.registerWarning("Query has no root", path);
+            return null;
+        }
+
+        if (query.getRoot() == map) {
+            // map-level query... everything is clean
+            return null;
+        }
+
+        if (map == null) {
+            // maybe standalone entity, otherwise bail...
+            return (query.getRoot() instanceof Entity) ? (Entity) query.getRoot() : null;
+        }
+
+        // resolve entity
+        EntityResolver resolver = new EntityResolver();
+        resolver.addDataMap(map);
+        Entity entity = resolver.lookupObjEntity(query);
+
+        if (entity == null) {
+            entity = resolver.lookupDbEntity(query);
+        }
+
+        // if no entity is found register warning and return null
+        if (entity == null) {
+            validator.registerWarning("Unknown query root.", path);
+            return null;
+        }
+
+        return entity;
     }
 
     protected void validateName(Query query, ProjectPath path, Validator validator) {
@@ -82,7 +154,7 @@ public class SelectQueryValidator extends TreeNodeValidator {
 
         // Must have name
         if (Util.isEmptyString(name)) {
-            validator.registerError("Unnamed Procedure.", path);
+            validator.registerError("Unnamed SelectQuery.", path);
             return;
         }
 
@@ -105,7 +177,97 @@ public class SelectQueryValidator extends TreeNodeValidator {
             }
         }
     }
-    
-    
 
+    protected void validateQualifier(
+        Entity entity,
+        Expression qualifier,
+        ProjectPath path,
+        Validator validator) {
+
+        try {
+            testExpression(entity, qualifier);
+        }
+        catch (ExpressionException e) {
+            validator.registerWarning(
+                buildValidationMessage(e, "Invalid path in qualifier"),
+                path);
+        }
+    }
+
+    protected void validateOrdering(
+        Entity entity,
+        Ordering ordering,
+        ProjectPath path,
+        Validator validator) {
+
+        if (ordering == null) {
+            return;
+        }
+
+        try {
+            testExpression(entity, ordering.getSortSpec());
+        }
+        catch (ExpressionException e) {
+            validator.registerWarning(
+                buildValidationMessage(e, "Invalid ordering"),
+                path);
+        }
+    }
+
+    protected void validatePrefetch(
+        Entity entity,
+        String prefetch,
+        ProjectPath path,
+        Validator validator) {
+
+        if (prefetch == null) {
+            return;
+        }
+
+        try {
+            testExpression(entity, ExpressionFactory.expFromString(prefetch));
+        }
+        catch (ExpressionException e) {
+            validator.registerWarning(
+                buildValidationMessage(e, "Invalid prefetch"),
+                path);
+        }
+    }
+
+    private void testExpression(Entity rootEntity, Expression exp)
+        throws ExpressionException {
+
+        if (exp != null) {
+            exp.traverse(new EntityExpressionValidator(rootEntity));
+        }
+    }
+
+    private String buildValidationMessage(ExpressionException e, String prefix) {
+        StringBuffer buffer = new StringBuffer(prefix);
+        if (e.getExpressionString() != null) {
+            buffer.append(": '").append(e.getExpressionString()).append("'");
+        }
+
+        buffer.append(".");
+        return buffer.toString();
+    }
+
+    final class EntityExpressionValidator extends TraversalHelper {
+        Entity rootEntity;
+
+        EntityExpressionValidator(Entity rootEntity) {
+            this.rootEntity = rootEntity;
+        }
+
+        public void startUnaryNode(Expression node, Expression parentNode) {
+            // check if path nodes are compatibe with root entity
+            if (node.getType() == Expression.OBJ_PATH
+                || node.getType() == Expression.DB_PATH) {
+                Iterator it = (Iterator) node.evaluate(rootEntity);
+                while (it.hasNext()) {
+                    it.next();
+                }
+            }
+        }
+    }
 }

@@ -283,13 +283,16 @@ public abstract class Entity extends MapObject {
     // An iterator resolving mapping components represented by the path string.
     // This entity is assumed to be the root of the path.
     final class PathIterator implements Iterator {
+        
         private StringTokenizer toks;
         private Entity currentEnt;
+        private String path;
 
         PathIterator(String path) {
             super();
             this.currentEnt = Entity.this;
             this.toks = new StringTokenizer(path, PATH_SEPARATOR);
+            this.path = path;
         }
 
         public boolean hasNext() {
@@ -307,7 +310,9 @@ public abstract class Entity extends MapObject {
                     throw new ExpressionException(
                         "Attribute must be the last component of the path: '"
                             + pathComp
-                            + "'.");
+                            + "'.",
+                        path,
+                        null);
                 }
 
                 return attr;
@@ -327,7 +332,7 @@ public abstract class Entity extends MapObject {
                 .append('.')
                 .append(pathComp)
                 .append("].");
-            throw new ExpressionException(buf.toString());
+            throw new ExpressionException(buf.toString(), path, null);
         }
 
         public void remove() {

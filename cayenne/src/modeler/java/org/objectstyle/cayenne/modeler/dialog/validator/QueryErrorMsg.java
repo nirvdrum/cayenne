@@ -53,63 +53,35 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.modeler.dialog.validator;
 
-package org.objectstyle.cayenne.exp;
+import javax.swing.JFrame;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
+import org.objectstyle.cayenne.query.Query;
 
-/** 
- * RuntimeException subclass thrown in cases of errors during 
- * expressions creation/parsing.
- * 
+/**
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class ExpressionException extends CayenneRuntimeException {
-    protected String expressionString;
+public class QueryErrorMsg extends ValidationDisplayHandler {
 
-    /**
-     * Constructor for ExpressionException.
-     */
-    public ExpressionException() {
-        super();
+    public QueryErrorMsg(ValidationInfo validationInfo) {
+        super(validationInfo);
     }
 
-    /**
-     * Constructor for ExpressionException.
-     * @param msg
-     */
-    public ExpressionException(String msg) {
-        super(msg);
-    }
+    public void displayField(EventController mediator, JFrame frame) {
+        ProjectPath path = super.validationInfo.getPath();
+        DataDomain domain = (DataDomain) path.firstInstanceOf(DataDomain.class);
+        DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);
+        Query query = (Query) path.firstInstanceOf(Query.class);
 
-    /**
-     * Constructor for ExpressionException.
-     * @param th
-     */
-    public ExpressionException(Throwable th) {
-        super(th);
-    }
-
-    /**
-     * Constructor for ExpressionException.
-     * @param msg
-     * @param th
-     */
-    public ExpressionException(String msg, Throwable th) {
-        super(msg, th);
-    }
-
-    /**
-     * Constructor for ExpressionException.
-     * 
-     * @since 1.1
-     */
-    public ExpressionException(String msg, String expressionString, Throwable th) {
-        super(msg, th);
-        this.expressionString = expressionString;
-    }
-
-    public String getExpressionString() {
-        return expressionString;
+        QueryDisplayEvent event = new QueryDisplayEvent(frame, query, map, domain);
+        mediator.fireQueryDisplayEvent(event);
     }
 }
