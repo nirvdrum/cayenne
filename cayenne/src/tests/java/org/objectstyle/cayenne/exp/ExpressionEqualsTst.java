@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ExpressionEqualsTst extends CayenneTestCase {
+public class ExpressionEqualsTst extends TestCase {
     /**
      * @deprecated
      */
@@ -94,5 +94,4 @@ public class ExpressionEqualsTst extends CayenneTestCase {
         assertEquals(e1, e2);
         assertFalse(e2.equals(e3));
     }
-
 }
