@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <data-map project-version="1.0">
 	<procedure name="cayenne_tst_out_proc">
 		<procedure-parameter name="in_param" type="INTEGER" direction="in"/>
