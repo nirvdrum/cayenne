@@ -75,7 +75,7 @@
 	<!-- ======================================= -->
 	<!-- Data Sets -->
 	<!-- ======================================= -->	
-	<bean id="testJointPrefetch1" class="java.util.ArrayList">
+	<bean id="testPrefetch1" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
 				<ref bean="G1"/>

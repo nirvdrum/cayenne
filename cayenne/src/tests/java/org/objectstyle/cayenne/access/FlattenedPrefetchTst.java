@@ -69,8 +69,14 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  */
 public class FlattenedPrefetchTst extends CayenneTestCase {
 
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        deleteTestData();
+    }
+
     public void testJointManyToMany() throws Exception {
-        createTestData("testJointPrefetch1");
+        createTestData("testPrefetch1");
 
         SelectQuery q = new SelectQuery(Artist.class);
         q.addJointPrefetch(Artist.GROUP_ARRAY_PROPERTY);
