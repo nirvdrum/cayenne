@@ -53,38 +53,58 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.validation;
+package org.objectstyle.cayenne.modeler.editor;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 
 /**
- * An exception thrown on unsuccessful validation.
+ * A tabbed view for configuring a select query.
  * 
- * @author Fabricio Voznika
- * @since 1.1
+ * @author Andrei Adamchik
  */
-public class ValidationException extends CayenneRuntimeException {
+public class SelectQueryTabbedView extends JTabbedPane {
 
-    private ValidationResult result;
+    protected EventController mediator;
+    protected SelectQueryMainTab mainTab;
+    protected SelectQueryPrefetchTab prefetchTab;
+    protected SelectQueryOrderingTab orderingTab;
 
-    public ValidationException(String message) {
-        super(message);
-    }
-    
-    public ValidationException(ValidationResult result) {
-        this("Validation has failed.", result);
-    }
+    public SelectQueryTabbedView(EventController mediator) {
+        this.mediator = mediator;
 
-    public ValidationException(String message, ValidationResult result) {
-        super(message);
-        this.result = result;
+        initView();
+        initController();
     }
 
-    public ValidationResult getValidationResult() {
-        return result;
+    private void initView() {
+        setTabPlacement(JTabbedPane.TOP);
+
+        this.mainTab = new SelectQueryMainTab(mediator);
+        addTab("Select Query", new JScrollPane(mainTab));
+
+        this.orderingTab = new SelectQueryOrderingTab(mediator);
+        addTab("Orderings", new JScrollPane(orderingTab));
+
+        this.prefetchTab = new SelectQueryPrefetchTab(mediator);
+        addTab("Prefetches", new JScrollPane(prefetchTab));
     }
 
-    public String toString() {
-        return super.toString() + System.getProperty("line.separator") + this.result;
+    private void initController() {
+        mediator.addQueryDisplayListener(new QueryDisplayListener() {
+
+            public void currentQueryChanged(QueryDisplayEvent e) {
+                if (e.getQuery() == null)
+                    SelectQueryTabbedView.this.setVisible(false);
+                else {
+                    SelectQueryTabbedView.this.setSelectedIndex(0);
+                    SelectQueryTabbedView.this.setVisible(true);
+                }
+            }
+        });
     }
 }

@@ -101,6 +101,15 @@ public class CayenneRuntimeException extends RuntimeException {
     public Throwable getCause() {
         return cause;
     }
+    
+    /**
+     * Returns exception message without Cayenne version label.
+     * 
+     * @since 1.1
+     */
+    public String getUnlabeledMessage() {
+        return super.getMessage();
+    }
 
     /**
      * Returns message that includes Cayenne version label and 

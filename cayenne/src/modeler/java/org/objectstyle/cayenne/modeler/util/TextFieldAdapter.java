@@ -53,38 +53,79 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.validation;
+package org.objectstyle.cayenne.modeler.util;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import java.awt.Color;
+
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
+
+import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
- * An exception thrown on unsuccessful validation.
+ * A validating adapter for JTextField. Override {@link #initModel(String)}to initialize
+ * model on text change.
  * 
- * @author Fabricio Voznika
- * @since 1.1
+ * @author Andrei Adamchik
  */
-public class ValidationException extends CayenneRuntimeException {
+public abstract class TextFieldAdapter extends InputVerifier {
 
-    private ValidationResult result;
+    protected Color defaultBGColor;
+    protected Color errorColor;
+    protected JTextField textField;
+    protected String defaultToolTip;
 
-    public ValidationException(String message) {
-        super(message);
-    }
-    
-    public ValidationException(ValidationResult result) {
-        this("Validation has failed.", result);
-    }
-
-    public ValidationException(String message, ValidationResult result) {
-        super(message);
-        this.result = result;
+    public TextFieldAdapter() {
+        this(CayenneWidgetFactory.createTextField());
     }
 
-    public ValidationResult getValidationResult() {
-        return result;
+    public TextFieldAdapter(int columns) {
+        this(CayenneWidgetFactory.createTextField(columns));
     }
 
-    public String toString() {
-        return super.toString() + System.getProperty("line.separator") + this.result;
+    public TextFieldAdapter(JTextField textField) {
+        this.errorColor = ValidatorDialog.WARNING_COLOR;
+        this.defaultBGColor = textField.getBackground();
+        this.defaultToolTip = textField.getToolTipText();
+        this.textField = textField;
+
+        textField.setInputVerifier(this);
     }
+
+    public JTextField getTextField() {
+        return textField;
+    }
+
+    /**
+     * Sets the text of the underlying text field.
+     */
+    public void setText(String text) {
+        clear();
+        textField.setText(text);
+    }
+
+    public boolean verify(JComponent c) {
+        try {
+            initModel(textField.getText());
+            clear();
+        }
+        catch (ValidationException vex) {
+
+            textField.setBackground(errorColor);
+            textField.setToolTipText(vex.getUnlabeledMessage());
+        }
+
+        // release focus after coloring the field...
+        return true;
+    }
+
+    protected void clear() {
+        textField.setBackground(defaultBGColor);
+        textField.setToolTipText(defaultToolTip);
+    }
+
+    protected abstract void initModel(String text) throws ValidationException;
+
 }

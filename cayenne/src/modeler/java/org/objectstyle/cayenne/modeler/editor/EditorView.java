@@ -57,11 +57,12 @@ package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -83,22 +84,13 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 
-/** 
- * Panel for the Editor window.
- * 
- *  @author Michael Misha Shengaout
- *  @author Andrei Adamchik
+/**
+ * Main display area split into the project navigation tree on the right and selected
+ * object editor on the left.
  */
-public class EditorView
-    extends JPanel
-    implements
-        ObjEntityDisplayListener,
-        DbEntityDisplayListener,
-        DomainDisplayListener,
-        DataMapDisplayListener,
-        DataNodeDisplayListener,
-        ProcedureDisplayListener,
-        QueryDisplayListener,
+public class EditorView extends JPanel implements ObjEntityDisplayListener,
+        DbEntityDisplayListener, DomainDisplayListener, DataMapDisplayListener,
+        DataNodeDisplayListener, ProcedureDisplayListener, QueryDisplayListener,
         PropertyChangeListener {
 
     private static final int INIT_DIVIDER_LOCATION = 170;
@@ -111,20 +103,19 @@ public class EditorView
     private static final String DB_VIEW = "DbView";
     private static final String PROCEDURE_VIEW = "ProcedureView";
     private static final String QUERY_VIEW = "QueryView";
-    
 
     protected EventController eventController;
     protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     protected ProjectTreeView treePanel;
-    protected JPanel detailPanel;
-    protected JPanel emptyPanel;
-    protected DataDomainView domainView;
-    protected DataNodeView nodeView;
-    protected DataMapView dataMapView;
-    protected ObjEntityTabbedView objDetailView;
-    protected DbEntityTabbedView dbDetailView;
-    protected ProcedureTabbedView procedureView;
-    protected QueryDetailView queryView;
+    protected Container detailPanel;
+    protected Component emptyPanel;
+    protected Component domainView;
+    protected Component nodeView;
+    protected Component dataMapView;
+    protected Component objDetailView;
+    protected Component dbDetailView;
+    protected Component procedureView;
+    protected Component queryView;
 
     protected CardLayout detailLayout;
     protected ModelerPreferences prefs;
@@ -145,8 +136,9 @@ public class EditorView
         treePanel.setMinimumSize(new Dimension(INIT_DIVIDER_LOCATION, 200));
 
         prefs = ModelerPreferences.getPreferences();
-        int preferredSize =
-            prefs.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
+        int preferredSize = prefs.getInt(
+                ModelerPreferences.EDITOR_TREE_WIDTH,
+                INIT_DIVIDER_LOCATION);
         splitPane.setDividerLocation(preferredSize);
 
         detailLayout = new CardLayout();
@@ -154,38 +146,38 @@ public class EditorView
 
         // some but not all panels must be wrapped in a scroll pane
         addPanelToDetailView(new JPanel(), EMPTY_VIEW);
-        
+
         domainView = new DataDomainView(eventController);
         addPanelToDetailView(new JScrollPane(domainView), DOMAIN_VIEW);
-        
+
         nodeView = new DataNodeView(eventController);
         addPanelToDetailView(new JScrollPane(nodeView), NODE_VIEW);
-        
+
         dataMapView = new DataMapView(eventController);
         addPanelToDetailView(new JScrollPane(dataMapView), DATA_MAP_VIEW);
-        
+
         procedureView = new ProcedureTabbedView(eventController);
         addPanelToDetailView(procedureView, PROCEDURE_VIEW);
-        
-        queryView = new QueryDetailView(eventController);
+
+        queryView = new SelectQueryTabbedView(eventController);
         addPanelToDetailView(new JScrollPane(queryView), QUERY_VIEW);
-        
+
         objDetailView = new ObjEntityTabbedView(eventController);
         addPanelToDetailView(objDetailView, OBJ_VIEW);
-        
+
         dbDetailView = new DbEntityTabbedView(eventController);
         addPanelToDetailView(dbDetailView, DB_VIEW);
 
-		eventController.addDomainDisplayListener(this);
-		eventController.addDataNodeDisplayListener(this);
-		eventController.addDataMapDisplayListener(this);
-		eventController.addObjEntityDisplayListener(this);
-		eventController.addDbEntityDisplayListener(this);
-		eventController.addProcedureDisplayListener(this);
+        eventController.addDomainDisplayListener(this);
+        eventController.addDataNodeDisplayListener(this);
+        eventController.addDataMapDisplayListener(this);
+        eventController.addObjEntityDisplayListener(this);
+        eventController.addDbEntityDisplayListener(this);
+        eventController.addProcedureDisplayListener(this);
         eventController.addQueryDisplayListener(this);
     }
 
-    protected void addPanelToDetailView(JComponent panel, String name) {
+    protected void addPanelToDetailView(Component panel, String name) {
         detailPanel.add(panel, name);
     }
 
@@ -230,7 +222,7 @@ public class EditorView
         else
             detailLayout.show(detailPanel, DB_VIEW);
     }
-    
+
     public void currentQueryChanged(QueryDisplayEvent e) {
         if (e.getQuery() == null)
             detailLayout.show(detailPanel, EMPTY_VIEW);
@@ -240,9 +232,8 @@ public class EditorView
 
     public void propertyChange(PropertyChangeEvent e) {
         if (e.getSource() == splitPane) {
-            prefs.put(
-                ModelerPreferences.EDITOR_TREE_WIDTH,
-                String.valueOf(splitPane.getDividerLocation()));
+            prefs.put(ModelerPreferences.EDITOR_TREE_WIDTH, String.valueOf(splitPane
+                    .getDividerLocation()));
         }
     }
 }

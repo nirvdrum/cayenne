@@ -53,38 +53,20 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.validation;
+package org.objectstyle.cayenne.modeler.editor;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import javax.swing.JPanel;
+
+import org.objectstyle.cayenne.modeler.EventController;
 
 /**
- * An exception thrown on unsuccessful validation.
- * 
- * @author Fabricio Voznika
- * @since 1.1
+ * @author Andrei Adamchik
  */
-public class ValidationException extends CayenneRuntimeException {
+public class SelectQueryOrderingTab extends JPanel {
 
-    private ValidationResult result;
+    protected EventController mediator;
 
-    public ValidationException(String message) {
-        super(message);
-    }
-    
-    public ValidationException(ValidationResult result) {
-        this("Validation has failed.", result);
-    }
-
-    public ValidationException(String message, ValidationResult result) {
-        super(message);
-        this.result = result;
-    }
-
-    public ValidationResult getValidationResult() {
-        return result;
-    }
-
-    public String toString() {
-        return super.toString() + System.getProperty("line.separator") + this.result;
+    public SelectQueryOrderingTab(EventController mediator) {
+        this.mediator = mediator;
     }
 }

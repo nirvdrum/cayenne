@@ -121,6 +121,15 @@ public class CayenneException extends Exception {
     public Throwable getCause() {
         return cause;
     }
+    
+    /**
+     * Returns exception message without Cayenne version label.
+     * 
+     * @since 1.1
+     */
+    public String getUnlabeledMessage() {
+        return super.getMessage();
+    }
 
     public String getMessage() {
         String message = super.getMessage();
