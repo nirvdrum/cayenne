@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.util.Util;
 
 public class DataSourceInfoTst extends TestCase {
     
-    private DataSourceInfoSubclass dsi;
+    private DataSourceInfo dsi;
     
     public DataSourceInfoTst(String name) {
         super(name);
@@ -70,7 +70,7 @@ public class DataSourceInfoTst extends TestCase {
     
     
     public void setUp() throws java.lang.Exception {
-        dsi = new DataSourceInfoSubclass();
+        dsi = new DataSourceInfo();
         dsi.setUserName("a");
         dsi.setPassword("b");
         dsi.setMinConnections(1);
@@ -89,7 +89,7 @@ public class DataSourceInfoTst extends TestCase {
     
     
     public void testClone() throws java.lang.Exception {
-        DataSourceInfo dsiClone = (DataSourceInfo)dsi.clone();
+        DataSourceInfo dsiClone = dsi.cloneInfo();
         assertEquals(dsi, dsiClone);
         assertTrue(dsi != dsiClone);
     }

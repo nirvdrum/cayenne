@@ -56,29 +56,15 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.logging.Logger;
-import java.io.*;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import javax.swing.AbstractAction;
+
 import javax.swing.JOptionPane;
 
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.Preferences;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.GuiDataSource;
-import org.objectstyle.cayenne.gui.InteractiveLogin;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateDbDialog;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
-import org.objectstyle.cayenne.gui.validator.*;
-
 
 /** 
  * Action that generates database tables from a DataMap.
@@ -89,50 +75,61 @@ import org.objectstyle.cayenne.gui.validator.*;
 public class GenerateDbAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(GenerateDbAction.class.getName());
 	public static final String ACTION_NAME = "Generate Database Schema";
-		
+
 	public GenerateDbAction() {
 		super(ACTION_NAME);
 	}
 
+	public void performAction(ActionEvent e) {
+		generateDb();
+	}
+
 	protected void generateDb() {
-        DataSourceInfo dsi = new DataSourceInfo();
-        DbAdapter adapter = null;
-        
-        // Get connection info
-        while (true) {
-	        InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
-	        loginObj.collectLoginInfo();
-	        
-	        // connect
-	        dsi = loginObj.getDataSrcInfo();
-	        if (null == dsi) {
-	        	return;
-	        }
-	        if (dsi.getAdapterClass() == null 
-	        	|| dsi.getAdapterClass().trim().length() == 0) {
-	        	JOptionPane.showMessageDialog(Editor.getFrame(), "Must specify DB Adapter");
-	        	continue;
-	        }
-	        try {
-		        adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
-		        break;
+		DataSourceInfo dsi = null;
+		DbAdapter adapter = null;
+
+		// Get connection info
+		while (true) {
+			dsi = getDataSourceInfo();
+			if (dsi == null) {
+				return;
+			}
+			if (dsi.getAdapterClass() == null
+				|| dsi.getAdapterClass().trim().length() == 0) {
+				JOptionPane.showMessageDialog(
+					Editor.getFrame(),
+					"Must specify DB Adapter");
+				continue;
+			}
+			try {
+				adapter =
+					(DbAdapter) Class
+						.forName(dsi.getAdapterClass())
+						.newInstance();
+				break;
 			} catch (InstantiationException e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(Editor.getFrame()
-							, e.getMessage(), "Error creating DbAdapter"
-							, JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(
+					Editor.getFrame(),
+					e.getMessage(),
+					"Error creating DbAdapter",
+					JOptionPane.ERROR_MESSAGE);
 				continue;
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(Editor.getFrame()
-							, e.getMessage(), "Error creating DbAdapter"
-							, JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(
+					Editor.getFrame(),
+					e.getMessage(),
+					"Error creating DbAdapter",
+					JOptionPane.ERROR_MESSAGE);
 				continue;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(Editor.getFrame()
-							, e.getMessage(), "Error creating DbAdapter"
-							, JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(
+					Editor.getFrame(),
+					e.getMessage(),
+					"Error creating DbAdapter",
+					JOptionPane.ERROR_MESSAGE);
 				continue;
 			}
 		}
@@ -141,10 +138,25 @@ public class GenerateDbAction extends CayenneAction {
 		dialog.dispose();
 	}
 
+	protected DataSourceInfo getDataSourceInfo() {
+		DataNode currentNode = getMediator().getCurrentDataNode();
+		DataSourceInfo dsi = null;
+		if (currentNode != null) {
+			dsi =
+				((GuiDataSource) currentNode.getDataSource())
+					.getDataSourceInfo()
+					.cloneInfo();
+			if (currentNode.getAdapter() != null) {
+				dsi.setAdapterClass(
+					currentNode.getAdapter().getClass().getName());
+			}
+		} else {
+			dsi = new DataSourceInfo();
+		}
 
-	
-	public void performAction(ActionEvent e) {
-		generateDb();
+		InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
+		loginObj.collectLoginInfo();
+		return loginObj.getDataSrcInfo();
+
 	}
 }
-

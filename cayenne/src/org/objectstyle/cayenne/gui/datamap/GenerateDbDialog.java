@@ -92,7 +92,7 @@ public class GenerateDbDialog
 
 	protected JTextArea sql;
 	protected JButton generate = new JButton("Generate");
-	protected JButton cancel = new JButton("Cancel");
+	protected JButton cancel = new JButton("Close");
 	protected JButton saveSql = new JButton("Save SQL");
 
 	protected JCheckBox dropTables;
@@ -129,6 +129,7 @@ public class GenerateDbDialog
 		this.centerWindow();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	}
+	
 
 	private void init() {
 		Container contentPane = this.getContentPane();
@@ -183,7 +184,7 @@ public class GenerateDbDialog
 
 		JPanel btnPanel =
 			PanelFactory.createButtonPanel(
-				new JButton[] { generate, cancel, saveSql });
+				new JButton[] { generate, saveSql, cancel });
 		contentPane.add(btnPanel, BorderLayout.SOUTH);
 
 		initStatements();
