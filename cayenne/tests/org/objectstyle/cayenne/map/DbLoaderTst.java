@@ -53,13 +53,16 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.*;
-import java.util.logging.*;
-import junit.framework.*;
-import org.objectstyle.*;
-import java.sql.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.dba.TypesMapping;
 
 public class DbLoaderTst extends TestCase {
     static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
@@ -74,29 +77,34 @@ public class DbLoaderTst extends TestCase {
         loader = new DbLoader(TestMain.getSharedConnection());
     }
 
-    /** Map loading is in one big test method, since breaking it in
-      * individual tests would require multiple reads of metatdata 
-      * which is extremely slow on some RDBMS (Sybase).
-      * TODO: need to break to a bunch of private methods that test individual aspects. */
+    /** 
+     * DataMap loading is in one big test method, since breaking it in
+     * individual tests would require multiple reads of metatdata 
+     * which is extremely slow on some RDBMS (Sybase).
+     * TODO: need to break to a bunch of private methods that test individual aspects. 
+     */
     public void testLoad() throws Exception {
-        boolean supportsFK = TestMain.getSharedNode().getAdapter().supportsFkConstraints();
+        boolean supportsFK =
+            TestMain.getSharedNode().getAdapter().supportsFkConstraints();
 
         DataMap map = new DataMap();
 
         // *** TESTING THIS ***
-        loader.loadDbEntities(map, loader.getTables(null, null, "%", new String[] {"TABLE"}));
+        loader.loadDbEntities(
+            map,
+            loader.getTables(null, null, "%", new String[] { "TABLE" }));
         DbEntity dae = map.getDbEntity("ARTIST");
-        
+
         // sometimes table names get converted to lowercase
-        if(dae == null) {
+        if (dae == null) {
             dae = map.getDbEntity("artist");
         }
-        
+
         assertNotNull(dae);
         assertEquals("ARTIST", dae.getName().toUpperCase());
-        assertTrue(((DbAttribute)dae.getAttribute("ARTIST_ID")).isPrimaryKey());
+        assertTrue(((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
 
-        if(supportsFK) {
+        if (supportsFK) {
             // *** TESTING THIS ***
             loader.loadDbRelationships(map);
             List rels = dae.getRelationshipList();
@@ -114,12 +122,64 @@ public class DbLoaderTst extends TestCase {
         // assert primary key is not an attribute
         assertNull(ae.getAttribute("artistId"));
 
-        if(supportsFK) {
-            // *** TESTING THIS***
+        if (supportsFK) {
+            // *** TESTING THIS ***
             loader.loadObjRelationships(map);
             List rels = ae.getRelationshipList();
             assertNotNull(rels);
             assertTrue(rels.size() > 0);
         }
+
+        // now when the map is loaded, test 
+        // various things
+        
+        /* This test fails on almost any database, used primarily for debugging. */
+        // checkDBEntities(map);
+    }
+
+    private DataMap originalMap() {
+        return TestMain.getSharedNode().getDataMaps()[0];
+    }
+
+    public void checkDBEntities(DataMap map) {
+        Iterator entIt = originalMap().getDbEntitiesAsList().iterator();
+        while (entIt.hasNext()) {
+            DbEntity origEnt = (DbEntity) entIt.next();
+            DbEntity newEnt = map.getDbEntity(origEnt.getName());
+
+            Iterator it = origEnt.getAttributeList().iterator();
+            while (it.hasNext()) {
+                DbAttribute origAttr = (DbAttribute) it.next();
+                DbAttribute newAttr = (DbAttribute) newEnt.getAttribute(origAttr.getName());
+                assertNotNull("No matching DbAttribute for '" + origAttr.getName(), newAttr);
+                  assertEquals(
+                      msgForTypeMismatch(origAttr, newAttr),
+                      origAttr.getType(),
+                      newAttr.getType());
+                // length and precision doesn't have to be the same
+                // it must be greater or equal
+                assertTrue(origAttr.getMaxLength() <= newAttr.getMaxLength());
+                assertTrue(origAttr.getPrecision() <=  newAttr.getPrecision());
+            }
+        }
+    }
+
+    private String msgForTypeMismatch(DbAttribute origAttr, DbAttribute newAttr) {
+        String ot = TypesMapping.getSqlNameByType(origAttr.getType());
+        String nt = TypesMapping.getSqlNameByType(newAttr.getType());
+        return attrMismatch(
+            origAttr.getName(),
+            "expected type: <" + ot + ">, but was <" + nt + ">");
+    }
+
+    private String attrMismatch(String attrName, String msg) {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("[Error loading attribute '")
+            .append(attrName)
+            .append("': ")
+            .append(msg)
+            .append("]");
+        return buf.toString();
     }
 }

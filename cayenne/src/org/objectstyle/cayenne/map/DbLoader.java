@@ -254,6 +254,10 @@ public class DbLoader {
                 String columnName = rs.getString("COLUMN_NAME");
                 int columnType = rs.getInt("DATA_TYPE");
                 int columnSize = rs.getInt("COLUMN_SIZE");
+               
+               /*
+                logObj.severe("label for " + TypesMapping.getSqlNameByType(columnType) + " = " + rs.getString("TYPE_NAME"));
+              */
 
                 // FIXME!!! Need to ignore this param for the param types
                 // for which it is not applicable
