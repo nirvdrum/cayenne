@@ -29,14 +29,14 @@ public class ArtGroup extends org.objectstyle.cayenne.CayenneDataObject {
         return (List)readProperty("artistArray");
     }
     
-    public void addToChildGroupsArray(Artist obj) {
-        addToManyTarget("toChildGroups", obj, true);
+    public void addToChildGroupsArray(ArtGroup obj) {
+        addToManyTarget("childGroupsArray", obj, true);
     }
-    public void removeFromChildGroupsArray(Artist obj) {
-        removeToManyTarget("toChildGroups", obj, true);
+    public void removeFromChildGroupsArray(ArtGroup obj) {
+        removeToManyTarget("childGroupsArray", obj, true);
     }
-    public List getChildGroupstArray() {
-        return (List)readProperty("toChildGroups");
+    public List getChildGroupsArray() {
+        return (List)readProperty("childGroupsArray");
     }
 
 }

@@ -76,6 +76,7 @@ import javax.swing.table.TableColumn;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.modeler.Editor;
@@ -280,7 +281,7 @@ public class ObjRelationshipPane
 	}
 
 	/** Create DefaultComboBoxModel with all obj entity names. */
-	private DefaultComboBoxModel createComboModel() {
+	private DefaultComboBoxModel createObjEntityComboModel() {
 		DataMap map = mediator.getCurrentDataMap();
 		Vector elements = new Vector();
 		java.util.List obj_entities = map.getObjEntitiesAsList(true);
@@ -291,6 +292,16 @@ public class ObjRelationshipPane
 			elements.add(name);
 		}
 
+		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
+		return model;
+	}
+	
+	/** Create DefaultComboBoxModel with all delete rule names. */
+	private DefaultComboBoxModel createDeleteRuleComboModel() {
+		Vector elements = new Vector();
+		elements.add(DeleteRule.deleteRuleName(DeleteRule.NULLIFY));
+		elements.add(DeleteRule.deleteRuleName(DeleteRule.CASCADE));
+		elements.add(DeleteRule.deleteRuleName(DeleteRule.DENY));
 		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
 		return model;
 	}
@@ -338,7 +349,7 @@ public class ObjRelationshipPane
 				ObjRelationshipTableModel.REL_TARGET);
 		DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
 		JComboBox combo = (JComboBox) editor.getComponent();
-		combo.setModel(createComboModel());
+		combo.setModel(createObjEntityComboModel());
 		ObjRelationshipTableModel model;
 		model = (ObjRelationshipTableModel) table.getModel();
 		model.fireTableDataChanged();
@@ -351,18 +362,30 @@ public class ObjRelationshipPane
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);
+		
 		TableColumn col = table.getColumnModel().getColumn(model.REL_NAME);
 		col.setMinWidth(150);
+		
 		col = table.getColumnModel().getColumn(model.REL_TARGET);
 		col.setMinWidth(150);
-		JComboBox combo = new JComboBox(createComboModel());
+		JComboBox combo = new JComboBox(createObjEntityComboModel());
 		combo.setEditable(false);
 		combo.setSelectedIndex(-1);
 		DefaultCellEditor editor = new DefaultCellEditor(combo);
 		editor.setClickCountToStart(1);
 		col.setCellEditor(editor);
+		
 		col = table.getColumnModel().getColumn(model.REL_CARDINALITY);
 		col.setMinWidth(150);
 		table.getSelectionModel().addListSelectionListener(this);
+
+		col = table.getColumnModel().getColumn(model.REL_DELETERULE);
+		col.setMinWidth(60);
+		combo = new JComboBox(createDeleteRuleComboModel());
+		combo.setEditable(false);
+		combo.setSelectedIndex(0); //Default to the first value
+		editor = new DefaultCellEditor(combo);
+		editor.setClickCountToStart(1);
+		col.setCellEditor(editor);
 	}
 }

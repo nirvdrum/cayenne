@@ -30,16 +30,16 @@
 	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="true" toMany="false">
+	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
 	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true">
+	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true" deleteRule="Cascade">
 		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
 	</obj-relationship>
-	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false">
+	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>
 	</obj-relationship>
 </data-map>

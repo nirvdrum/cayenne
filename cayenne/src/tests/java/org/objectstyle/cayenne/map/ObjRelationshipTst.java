@@ -218,4 +218,24 @@ public class ObjRelationshipTst extends CayenneTestCase {
      	assertTrue(theRel.isFlattened());
      	assertTrue(!theRel.isReadOnly());
     }
+    
+    public void testBadDeleteRuleValue() {
+    	try {
+    		rel.setDeleteRule(999);
+    		fail("Should have failed with IllegalArgumentException");
+    	} catch (IllegalArgumentException e) {
+    		//Good... it should throw an exception
+    	}
+    }
+    
+    public void testOkDeleteRuleValue() {
+    	try {
+    		rel.setDeleteRule(DeleteRule.CASCADE);
+    		rel.setDeleteRule(DeleteRule.DENY);
+    		rel.setDeleteRule(DeleteRule.NULLIFY);
+    	} catch (IllegalArgumentException e) {
+    		e.printStackTrace();
+    		fail("Should not have thrown an exception :"+e.getMessage());
+    	}
+    }
 }

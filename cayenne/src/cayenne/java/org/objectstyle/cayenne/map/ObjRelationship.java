@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
@@ -73,7 +73,12 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  *  of the database entity relationships.
  *  The ObjRelationship objects are stored in the ObjEntitys. */
 public class ObjRelationship extends Relationship {
-	
+
+	//What to do with any inverse relationship when the source object
+	// is deleted
+	//Default value if none is specified is Nullify.
+	private int deleteRule = DeleteRule.NULLIFY;
+
 	//Not flattened initially - will be set when dbRels are added that make it flattened
 	private boolean isFlattened = false;
 
@@ -83,102 +88,109 @@ public class ObjRelationship extends Relationship {
 
 	private List dbRelationships = new ArrayList();
 
-    public ObjRelationship() {}
-    
-    public ObjRelationship(String name) {
-        super(name);
-    }
+	public ObjRelationship() {
+	}
 
-	public ObjRelationship(ObjEntity source, ObjEntity target, boolean toMany){
+	public ObjRelationship(String name) {
+		super(name);
+	}
+
+	public ObjRelationship(
+		ObjEntity source,
+		ObjEntity target,
+		boolean toMany) {
 		setSourceEntity(source);
 		setTargetEntity(target);
 		setToMany(toMany);
-        if(toMany)
-            setName(target.getName() + "Array");
-        else
-            setName("to" + target.getName());
+		if (toMany)
+			setName(target.getName() + "Array");
+		else
+			setName("to" + target.getName());
 	}
-    
-    public Entity getTargetEntity() {
-    	if(getTargetEntityName() == null) {
-    		return null;
-    	}
-    	 
-      	Entity src = getSourceEntity();
-    	if(src == null) {
-    		return null;
-    	}
-    	
-    	DataMap map = src.getDataMap();
-    	if(map == null) {
-    		return null;
-    	}
-    	
-        return map.getObjEntity(getTargetEntityName(), true);
-    }
-    
-    /** Returns true if underlying DbRelationships point to dependent entity. */
-    public boolean isToDependentEntity() {
-        return ((DbRelationship)dbRelationships.get(0)).isToDependentPK();
-    }
-    
-    /** Returns ObjRelationship that is the opposite of this ObjRelationship.
-    * returns null if no such relationship exists. */
-    public ObjRelationship getReverseRelationship() {
-        Entity target = getTargetEntity();
-        Entity src = getSourceEntity();
 
-        // reverse the list
-        List reversed = new ArrayList();
-        Iterator rit = getDbRelationshipList().iterator();
-        while(rit.hasNext()) {
-            DbRelationship rel = (DbRelationship)rit.next();
-            DbRelationship reverse = rel.getReverseRelationship();
-            if(reverse == null)
-                return null;
+	public Entity getTargetEntity() {
+		if (getTargetEntityName() == null) {
+			return null;
+		}
 
-            reversed.add(0, reverse);
-        }
+		Entity src = getSourceEntity();
+		if (src == null) {
+			return null;
+		}
 
-        Iterator it = target.getRelationshipList().iterator();
-        while(it.hasNext()) {
-            ObjRelationship rel = (ObjRelationship)it.next();
-            if(rel.getTargetEntity() != src)
-                continue;
+		DataMap map = src.getDataMap();
+		if (map == null) {
+			return null;
+		}
 
-            List otherRels = rel.getDbRelationshipList();
-            if(reversed.size() != otherRels.size())
-                continue;
+		return map.getObjEntity(getTargetEntityName(), true);
+	}
 
-            int len = reversed.size();
-            boolean relsMatch = true;
-            for(int i = 0; i < len; i++) {
-                if(otherRels.get(i) != reversed.get(i)) {
-                    relsMatch = false;
-                    break;
-                }
-            }
+	/** Returns true if underlying DbRelationships point to dependent entity. */
+	public boolean isToDependentEntity() {
+		return ((DbRelationship) dbRelationships.get(0)).isToDependentPK();
+	}
 
-            if(relsMatch)
-                return rel;
-        }
+	/** Returns ObjRelationship that is the opposite of this ObjRelationship.
+	* returns null if no such relationship exists. */
+	public ObjRelationship getReverseRelationship() {
+		Entity target = getTargetEntity();
+		Entity src = getSourceEntity();
 
-        return null;
-    }
+		// reverse the list
+		List reversed = new ArrayList();
+		Iterator rit = getDbRelationshipList().iterator();
+		while (rit.hasNext()) {
+			DbRelationship rel = (DbRelationship) rit.next();
+			DbRelationship reverse = rel.getReverseRelationship();
+			if (reverse == null)
+				return null;
 
-    /** Returns a list of underlying DbRelationships */
-    public List getDbRelationshipList() {
-        return Collections.unmodifiableList(dbRelationships);
-    }
+			reversed.add(0, reverse);
+		}
 
+		Iterator it = target.getRelationshipList().iterator();
+		while (it.hasNext()) {
+			ObjRelationship rel = (ObjRelationship) it.next();
+			if (rel.getTargetEntity() != src)
+				continue;
+
+			List otherRels = rel.getDbRelationshipList();
+			if (reversed.size() != otherRels.size())
+				continue;
+
+			int len = reversed.size();
+			boolean relsMatch = true;
+			for (int i = 0; i < len; i++) {
+				if (otherRels.get(i) != reversed.get(i)) {
+					relsMatch = false;
+					break;
+				}
+			}
+
+			if (relsMatch)
+				return rel;
+		}
+
+		return null;
+	}
+
+	/** Returns a list of underlying DbRelationships */
+	public List getDbRelationshipList() {
+		return Collections.unmodifiableList(dbRelationships);
+	}
 
 	/** Appends a DbRelationship to the existing list of DbRelationships.*/
 	public void addDbRelationship(DbRelationship dbRel) {
 		//Adding a second is creating a flattened relationship.
 		//Ensure that the new relationship properly continues on the flattened path
 		if (dbRelationships.size() > 0) {
-			DbRelationship lastRel = (DbRelationship) dbRelationships.get(dbRelationships.size() - 1);
-			if (!lastRel.getTargetEntityName().equals(dbRel.getSourceEntity().getName())) {
+			DbRelationship lastRel =
+				(DbRelationship) dbRelationships.get(
+					dbRelationships.size() - 1);
+			if (!lastRel
+				.getTargetEntityName()
+				.equals(dbRel.getSourceEntity().getName())) {
 				throw new CayenneRuntimeException(
 					"Error adding db relationship "
 						+ dbRel
@@ -186,27 +198,27 @@ public class ObjRelationship extends Relationship {
 						+ this
 						+ " because the source of the newly added relationship is not the target of the previous relationship in the chain");
 			}
-			isFlattened = true; //Now there will be more than one dbRel - this is a flattened relationship
+			isFlattened = true;
+			//Now there will be more than one dbRel - this is a flattened relationship
 		}
 		dbRelationships.add(dbRel);
 		this.isReadOnly = this.newReadOnlyValue();
 	}
 
-
-    /** Removes a relationship <code>dbRel</code> from the list of relationships. */
-    public void removeDbRelationship(DbRelationship dbRel) {
-        dbRelationships.remove(dbRel);
-        //If we removed all but one dbRel, then it's no longer flattened
+	/** Removes a relationship <code>dbRel</code> from the list of relationships. */
+	public void removeDbRelationship(DbRelationship dbRel) {
+		dbRelationships.remove(dbRel);
+		//If we removed all but one dbRel, then it's no longer flattened
 		if (dbRelationships.size() <= 1) {
-			isFlattened = false;			
+			isFlattened = false;
 		}
 		this.isReadOnly = this.newReadOnlyValue();
-    }
+	}
 
-    public void clearDbRelationships() {
-    	dbRelationships.clear();
-    }
-    
+	public void clearDbRelationships() {
+		dbRelationships.clear();
+	}
+
 	//Implements logic to calculate a new readonly value after having added/removed dbRelationships
 	private boolean newReadOnlyValue() {
 		//Quickly filter the single dbrel case
@@ -232,20 +244,24 @@ public class ObjRelationship extends Relationship {
 		DataMap map = firstRel.getTargetEntity().getDataMap();
 		if (map == null) {
 			throw new CayenneRuntimeException(
-				this.getClass().getName() + " could not obtain a DataMap for the destination of " + firstRel.getName());
+				this.getClass().getName()
+					+ " could not obtain a DataMap for the destination of "
+					+ firstRel.getName());
 		}
-		DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName(), true);
+		DbEntity intermediateEntity =
+			map.getDbEntity(firstRel.getTargetEntityName(), true);
 		List pkAttribs = intermediateEntity.getPrimaryKey();
 		List allAttribs = intermediateEntity.getAttributeList();
 		int i;
 		for (i = 0; i < allAttribs.size(); i++) {
 			if (!pkAttribs.contains(allAttribs.get(i))) {
-				return true; //one of the attributes of intermediate entity is not in the pk.  Must be readonly
+				return true;
+				//one of the attributes of intermediate entity is not in the pk.  Must be readonly
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns true if the relationship is a "flattened" relationship.
 	 * This means that the ObjRelationship represents a series of DbRelationships (a relationship path)
@@ -265,6 +281,37 @@ public class ObjRelationship extends Relationship {
 	 */
 	public boolean isReadOnly() {
 		return isReadOnly;
+	}
+
+	/**
+	 * Returns the deleteRule.
+	 * The delete rule is a constant from the DeleteRule class, and specifies
+	 * what should happen to the destination object when the source object is 
+	 * deleted.
+	 * @return int a constant from DeleteRule
+	 * @see #setDeleteRule
+	 */
+	public int getDeleteRule() {
+		return deleteRule;
+	}
+
+	/**
+	 * Sets the deleteRule.
+	 * @param deleteRule The deleteRule to set
+	 * @see #getDeleteRule
+	 * @throws IllegalArgumentException if the value is not a known value.
+	 */
+	public void setDeleteRule(int value) {
+		if ((value != DeleteRule.CASCADE)
+			&& (value != DeleteRule.DENY)
+			&& (value != DeleteRule.NULLIFY)) {
+
+			throw new IllegalArgumentException(
+				"Delete rule value "
+					+ value
+					+ " is not a constant from the DeleteRule class");
+		}
+		this.deleteRule = value;
 	}
 
 }

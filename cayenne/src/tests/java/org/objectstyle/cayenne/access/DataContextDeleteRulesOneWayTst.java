@@ -53,37 +53,53 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.art;
+package org.objectstyle.cayenne.access;
 
-import java.math.BigDecimal;
-
-import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.art.oneway.Gallery;
+import org.objectstyle.art.oneway.Painting;
+import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
+import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 
 /**
- * @author Andrei Adamchik
+ * 
+ * @author Craig Miskell
  */
-public class ArtistAssets extends CayenneDataObject {
-	public void setEstimatedPrice(BigDecimal estimatedPrice) {
-		writeProperty("estimatedPrice", estimatedPrice);
+public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
+	private DataContext context;
+
+	/**
+	 * Constructor for DataContextDeleteRulesOneWayTst.
+	 * @param name
+	 */
+	public DataContextDeleteRulesOneWayTst(String name) {
+		super(name);
 	}
-	
-	public BigDecimal getEstimatedPrice() {
-		return (BigDecimal) readProperty("estimatedPrice");
+
+	public void setUp() throws java.lang.Exception {
+		CayenneTestDatabaseSetup setup = getDatabaseSetup();
+		setup.cleanTableData();
+
+		DataDomain dom = getDomain();
+		setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
+
+		context = dom.createDataContext();
 	}
-	
-	public void setPaintingsCount(Integer paintingsCount) {
-		writeProperty("paintingsCount", paintingsCount);
+
+	public void testNullifyToOne() {
+		Painting aPainting =
+			(Painting) context.createAndRegisterNewObject("Painting");
+		Gallery aGallery=(Gallery) context.createAndRegisterNewObject("Gallery");
+		
+		aPainting.setToGallery(aGallery);
+		
+		try {
+			context.deleteObject(aPainting);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should not have thrown an exception");
+		}
+		
+		//There's no reverse relationship, so there's nothing else to test
 	}
-	
-	public Integer getPaintingsCount() {
-		return (Integer) readProperty("paintingsCount");
-	}
-	
-	public void setToArtist(Artist toArtist) {
-        setToOneTarget("toArtist", toArtist, true);
-    }
-    
-    public Artist getToArtist() {
-        return (Artist)readProperty("toArtist");
-    } 
+
 }

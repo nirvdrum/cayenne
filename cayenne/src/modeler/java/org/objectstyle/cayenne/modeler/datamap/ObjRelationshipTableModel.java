@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
@@ -78,6 +79,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 	static final int REL_NAME = 0;
 	static final int REL_TARGET = 1;
 	static final int REL_CARDINALITY = 2;
+	static final int REL_DELETERULE = 3;
 
 	protected ObjEntity entity;
 
@@ -98,7 +100,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 	}
 
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	public String getColumnName(int column) {
@@ -108,6 +110,8 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 			return "Target";
 		else if (column == REL_CARDINALITY)
 			return "To many";
+		else if (column == REL_DELETERULE)
+			return "Delete rule";
 		else
 			return "";
 	}
@@ -130,17 +134,20 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 	public Object getValueAt(int row, int column) {
 		ObjRelationship rel = getRelationship(row);
 		// If name column
-		if (column == REL_NAME)
+		if (column == REL_NAME) {
 			return rel.getName();
 		// If target column
-		else if (column == REL_TARGET) {
+		} else if (column == REL_TARGET) {
 			if (null == rel.getTargetEntity())
 				return null;
 			return rel.getTargetEntity().getName();
-		} else if (column == REL_CARDINALITY)
+		} else if (column == REL_CARDINALITY) {
 			return new Boolean(rel.isToMany());
-		else
+		} else if (column == REL_DELETERULE) {
+			return DeleteRule.deleteRuleName(rel.getDeleteRule());
+		} else {
 			return "";
+		}
 	}
 
 	public void setUpdatedValueAt(Object aValue, int row, int column) {
@@ -184,6 +191,11 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 		} else if (column == REL_CARDINALITY) {
 			Boolean temp = (Boolean) aValue;
 			rel.setToMany(temp.booleanValue());
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
+			mediator.fireObjRelationshipEvent(e);
+		} else if (column == REL_DELETERULE) {
+			String temp = (String)aValue;
+			rel.setDeleteRule(DeleteRule.deleteRuleForName(temp));
 			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireObjRelationshipEvent(e);
 		}

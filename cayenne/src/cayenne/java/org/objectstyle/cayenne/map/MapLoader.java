@@ -573,6 +573,10 @@ public class MapLoader extends DefaultHandler {
             out.print(" source=\"" + srcEnt.getName() + '\"');
             out.print(" target=\"" + targetEnt.getName() + '\"');
             out.print(" toMany=\"" + (rel.isToMany() ? TRUE : FALSE) + '\"');
+			out.print(
+				" deleteRule=\""
+					+ DeleteRule.deleteRuleName(rel.getDeleteRule())
+					+ '\"');
             out.println('>');
             storeDbRelationshipRef(out, rel);
             out.println("\t</obj-relationship>");
@@ -953,8 +957,18 @@ public class MapLoader extends DefaultHandler {
                     + " Unable to parse target. Attributes:\n"
                     + printAttributes(atts).toString());
         }
+        
+        int deleteRule;
+		String deleteRuleName=atts.getValue("", "deleteRule");
+		if(null==deleteRuleName) {
+			deleteRule=DeleteRule.NULLIFY;
+		} else {
+			deleteRule=DeleteRule.deleteRuleForName(deleteRuleName);
+		}
+		
         objRelationship = new ObjRelationship(source, target, to_many);
         objRelationship.setName(name);
+        objRelationship.setDeleteRule(deleteRule);
         source.addRelationship(objRelationship);
     }
 
