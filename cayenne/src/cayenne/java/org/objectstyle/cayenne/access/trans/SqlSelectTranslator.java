@@ -67,12 +67,12 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /**
  * Class works as a translator of raw SELECT queries to JDBC statements.
  *
- * @author Andrei Adamchik
+ * @deprecated Since 1.1. This translator was intended for SqlSelectQuery 
+ * that is deprecated in favor of {@link SQLTemplate}.
  */
 public class SqlSelectTranslator
     extends QueryAssembler
@@ -150,8 +150,8 @@ public class SqlSelectTranslator
         throw new RuntimeException("db relationships not supported");
     }
 
-    private SqlSelectQuery getRawQuery() {
-        return (SqlSelectQuery) query;
+    private org.objectstyle.cayenne.query.SqlSelectQuery getRawQuery() {
+        return (org.objectstyle.cayenne.query.SqlSelectQuery) query;
     }
 
     /**

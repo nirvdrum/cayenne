@@ -82,6 +82,7 @@
 			<sysproperty key="ant.home" value="${ant.home}"/>
 			<sysproperty key="dist" value="${dist}"/>
 			<sysproperty key="test.filter" value="${test.filter}"/>
+			<sysproperty key="test.exclude" value="${test.exclude}"/>
 			<classpath refid="classpath"/>
     	</java>
     </target>    
@@ -119,9 +120,7 @@
                
             <formatter type="xml" usefile="true"/>
             <batchtest todir="${test.output}">
-                <fileset dir="${test.build}/classes">
-                    <include name="${test.filter}"/>
-                </fileset>
+                <fileset dir="${test.build}/classes" includes="${test.filter}" excludes="${test.exclude}"/>
             </batchtest>
         </junit>
     </target>

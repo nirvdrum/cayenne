@@ -64,8 +64,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * A Query object that contains a SQL select statement. It is being sent to
  * the database without any further translaion by Cayenne. SqlSelectQuery 
  * intention is to allow programmers to access database-specific features 
- * not addressed by Object Relational Mapping. One of the drawabacks of using 
+ * not addressed by Object Relational Mapping. One of the drawbacks of using 
  * SqlSelectQuery is loss of portability accross databases. 
+ * 
+ * @deprecated Since 1.1 use {@link SQLTemplate}.
  */
 public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery {
     protected String sqlString;

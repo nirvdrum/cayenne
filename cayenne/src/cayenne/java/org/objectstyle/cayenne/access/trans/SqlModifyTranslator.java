@@ -52,31 +52,31 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.access.trans;
 
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 
-
-/** Class works as a translator of raw SELECT queries to JDBC statements. */
+/** 
+ * Class works as a translator of raw SELECT queries to JDBC statements.
+ * 
+ * @deprecated Since 1.1. This translator was intended for SqlModifyQuery 
+ * that is deprecated in favor of {@link SQLTemplate}.
+ */
 public class SqlModifyTranslator extends QueryAssembler {
 
-    public String createSqlString() throws java.lang.Exception {
-        return ((SqlModifyQuery)query).getSqlString();
+    public String createSqlString() throws Exception {
+        return ((org.objectstyle.cayenne.query.SqlModifyQuery) query).getSqlString();
     }
-
 
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");
     }
 
-
     public void dbRelationshipAdded(DbRelationship dbRel) {
         throw new RuntimeException("db relationships not supported");
     }
-
 
     public boolean supportsTableAliases() {
         return false;

@@ -64,6 +64,8 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * It is intended to allow programmers to access database-specific features
  * not covered by Cayenne. Queries created using SqlModifyQuery are very
  * likely not portable accross database engines.
+ * 
+ * @deprecated Since 1.1 use {@link SQLTemplate}.
  */
 public class SqlModifyQuery extends AbstractQuery {
     protected String sqlString;

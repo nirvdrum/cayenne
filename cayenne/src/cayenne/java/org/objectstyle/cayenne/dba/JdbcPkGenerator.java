@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.util.IDUtil;
@@ -262,13 +263,13 @@ public class JdbcPkGenerator implements PkGenerator {
     }
 
     /**
-     * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
-     * to track the results of the execution.
+     * Runs arbitrary SQL over the DataNode.
      *
-     * @throws java.lang.Exception in case of query failure. */
+     * @deprecated Unused since 1.1 
+     */
     protected List runSelect(DataNode node, String sql) throws Exception {
-        SqlSelectQuery q = new SqlSelectQuery();
-        q.setSqlString(sql);
+        SQLTemplate q = new SQLTemplate(true);
+        q.setDefaultTemplate(sql);
 
         SelectObserver observer = new SelectObserver();
         node.performQueries(Collections.singletonList(q), observer);

@@ -55,25 +55,28 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
  * @author Andrei Adamchik
  */
 public class SQLSmallSelectTest extends CayenneSmallSelectTest {
 
-	/**
-	 * Constructor for SQLSmallSelectTest.
-	 * @param name
-	 */
-	public SQLSmallSelectTest(String name) {
-		super(name);
-	}
+    /**
+     * Constructor for SQLSmallSelectTest.
+     * @param name
+     */
+    public SQLSmallSelectTest(String name) {
+        super(name);
+    }
 
-	protected GenericSelectQuery buildQuery(int i) {
-		return new SqlSelectQuery(
-			"Artist",
-			"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
-	}
+    protected GenericSelectQuery buildQuery(int i) {
+        SQLTemplate template = new SQLTemplate(Artist.class, false);
+        template.setDefaultTemplate(
+            "SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST "
+                + "WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
+        return template;
+    }
 }

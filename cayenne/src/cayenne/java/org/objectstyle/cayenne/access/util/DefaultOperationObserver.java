@@ -72,11 +72,12 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * Simple implementation of OperationObserver interface.
- * Useful as a superclass of other implementations of OperationObserver. This implementation only 
- * tracks transaction events and exceptions. Also it performs basic logging.
- *
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
+ * Useful as a superclass of other implementations of OperationObserver. 
+ * This implementation only tracks transaction events and exceptions. 
+ * 
+ * <p><i>This operation observer is unsafe to use in application, since it doesn't
+ * rethrow the exceptions immediately, and may cause the database to hang. 
+ * Use {@link org.objectstyle.cayenne.access.QueryResult} instead.</i></p>
  *
  * @author Andrei Adamchik
  */
