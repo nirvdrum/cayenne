@@ -65,9 +65,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
@@ -80,7 +82,7 @@ import org.objectstyle.cayenne.query.SQLTemplate;
 // TODO: it is very likely that there will be an ExecutionPlan interface 
 // soon, and all query types will be run by an execution plan instead of
 // a DataNode. Then ExecutionPlan will become a true Strategy pattern...
-public class SQLTemplateExecutionPlan {
+public class SQLTemplateExecutionPlan implements SQLExecutionPlan {
 
     protected DbAdapter adapter;
 
@@ -94,28 +96,48 @@ public class SQLTemplateExecutionPlan {
     public DbAdapter getAdapter() {
         return adapter;
     }
+    
+    /**
+     * @deprecated Since 1.1 a generic "execute" is used.
+     */
+    public void execute(
+            Connection connection,
+            SQLTemplate query,
+            OperationObserver observer)
+            throws SQLException, Exception {
+        this.execute(connection, (Query) query, observer);
+    }
 
     /**
      * Runs a SQLTemplate query as an update.
+     * 
+     * @since 1.1 SQLExecutionPlan implementation.
      */
     public void execute(
         Connection connection,
-        SQLTemplate query,
+        Query query,
         OperationObserver observer)
         throws SQLException, Exception {
+        
+        if (!(query instanceof SQLTemplate)) {
+            throw new CayenneException("Query unsupported by the execution plan: "
+                    + query);
+        }
+        
+        SQLTemplate sqlTemplate = (SQLTemplate) query;
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
-        String template = query.getTemplate(adapter.getClass().getName());
+        String template = sqlTemplate.getTemplate(adapter.getClass().getName());
 
-        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
-        int size = query.parametersSize();
+        boolean loggable = QueryLogger.isLoggable(sqlTemplate.getLoggingLevel());
+        int size = sqlTemplate.parametersSize();
 
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
         int[] counts = new int[size > 0 ? size : 1];
         Iterator it =
             (size > 0)
-                ? query.parametersIterator()
+                ? sqlTemplate.parametersIterator()
                 : IteratorUtils.singletonIterator(Collections.EMPTY_MAP);
         for (int i = 0; i < counts.length; i++) {
             Map nextParameters = (Map) it.next();
@@ -125,9 +147,9 @@ public class SQLTemplateExecutionPlan {
 
             if (loggable) {
                 QueryLogger.logQuery(
-                    query.getLoggingLevel(),
-                    compiled.getSql(),
-                    Arrays.asList(compiled.getBindings()));
+                        sqlTemplate.getLoggingLevel(),
+                        compiled.getSql(),
+                        Arrays.asList(compiled.getBindings()));
             }
 
             // TODO: we may cache prep statements for this loop, using merged string as a key
@@ -136,14 +158,14 @@ public class SQLTemplateExecutionPlan {
             try {
                 bind(statement, compiled.getBindings());
                 counts[i] = statement.executeUpdate();
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), counts[i]);
+                QueryLogger.logUpdateCount(sqlTemplate.getLoggingLevel(), counts[i]);
             }
             finally {
                 statement.close();
             }
         }
 
-        observer.nextBatchCount(query, counts);
+        observer.nextBatchCount(sqlTemplate, counts);
     }
 
     /**

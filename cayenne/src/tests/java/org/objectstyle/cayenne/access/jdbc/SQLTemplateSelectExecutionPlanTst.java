@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.MockOperationObserver;
@@ -103,7 +104,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
 
         try {
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
         }
         finally {
             c.close();
@@ -141,7 +142,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
 
         try {
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
         }
         finally {
             c.close();
@@ -178,7 +179,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
 
         try {
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
         }
         finally {
             c.close();
@@ -215,7 +216,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
 
         try {
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
         }
         finally {
             c.close();

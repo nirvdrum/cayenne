@@ -53,68 +53,26 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
-package org.objectstyle.cayenne.unit;
+package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * Superclass of test cases that require JDBC Connection facilities. Contains
- * setup and cleanup methods to release connections, etc.
+ * SQLExecutionPlan defines an API for query execution strategy over JDBC connection (as
+ * in Strategy Pattern).
  * 
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public abstract class JDBCAccessTestCase extends CayenneTestCase {
-    protected Connection connection;
-    protected PreparedStatement st;
-    protected QueryTranslator translator;
-    protected SelectQuery query;
-
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        connection = null;
-        st = null;
-        translator = null;
-        query = null;
-
-        deleteTestData();
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-    }
-
-    /** 
-     * Initializes internal state.
-     */
-    protected void init() throws Exception {
-        connection = getConnection();
-
-        query = new SelectQuery(Artist.class);
-        query.addOrdering("artistName", true);
-
-        translator = getNode().getAdapter().getQueryTranslator(query);
-        translator.setEntityResolver(getNode().getEntityResolver());
-        translator.setConnection(connection);
-
-        st = translator.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
-    }
+public interface SQLExecutionPlan {
 
     /**
-     * Closes all open resources (connections, statements, etc.)
+     * Executes a query using a strategy defined by the implementation.
      */
-    protected void cleanup() throws Exception {
-        if (st != null) {
-            st.close();
-        }
-
-        if (connection != null) {
-            connection.close();
-        }
-    }
+    public void execute(Connection connection, Query query, OperationObserver observer)
+            throws SQLException, Exception;
 }

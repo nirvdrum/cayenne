@@ -73,7 +73,7 @@ public class DefaultResultIteratorTst extends JDBCAccessTestCase {
 
         it =
             new DefaultResultIterator(
-                translator.getCon(),
+                translator.getConnection(),
                 st,
                 rs,
                 assembler.getResultDescriptor(rs),

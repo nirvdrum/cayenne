@@ -161,13 +161,13 @@ public class ProcedureTranslator
 
             QueryLogger.logQuery(logLevel, sqlStr, loggableParameters, time);
         }
-        CallableStatement stmt = con.prepareCall(sqlStr);
+        CallableStatement stmt = connection.prepareCall(sqlStr);
         initStatement(stmt);
         return stmt;
     }
 
     public Procedure getProcedure() {
-        return engine.getEntityResolver().lookupProcedure(query);
+        return getEntityResolver().lookupProcedure(query);
     }
 
     public ProcedureQuery getProcedureQuery() {

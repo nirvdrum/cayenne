@@ -53,68 +53,78 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.access.jdbc;
 
-package org.objectstyle.cayenne.unit;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.access.DefaultResultIterator;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
- * Superclass of test cases that require JDBC Connection facilities. Contains
- * setup and cleanup methods to release connections, etc.
+ * A convenience abstract superclass of SQLExecutionPlan implementations.
  * 
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public abstract class JDBCAccessTestCase extends CayenneTestCase {
-    protected Connection connection;
-    protected PreparedStatement st;
-    protected QueryTranslator translator;
-    protected SelectQuery query;
+public abstract class AbstractExecutionPlan implements SQLExecutionPlan {
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    protected DbAdapter adapter;
+    protected EntityResolver entityResolver;
 
-        connection = null;
-        st = null;
-        translator = null;
-        query = null;
-
-        deleteTestData();
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+    public AbstractExecutionPlan(DbAdapter adapter, EntityResolver entityResolver) {
+        this.adapter = adapter;
+        this.entityResolver = entityResolver;
     }
 
-    /** 
-     * Initializes internal state.
-     */
-    protected void init() throws Exception {
-        connection = getConnection();
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
 
-        query = new SelectQuery(Artist.class);
-        query.addOrdering("artistName", true);
-
-        translator = getNode().getAdapter().getQueryTranslator(query);
-        translator.setEntityResolver(getNode().getEntityResolver());
-        translator.setConnection(connection);
-
-        st = translator.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 
     /**
-     * Closes all open resources (connections, statements, etc.)
+     * Helper method to process a ResultSet.
      */
-    protected void cleanup() throws Exception {
-        if (st != null) {
-            st.close();
-        }
+    protected void readResultSet(
+            ResultSet resultSet,
+            ResultDescriptor descriptor,
+            GenericSelectQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
 
-        if (connection != null) {
-            connection.close();
+        long t1 = System.currentTimeMillis();
+        DefaultResultIterator resultReader = new DefaultResultIterator(
+                null,
+                null,
+                resultSet,
+                descriptor,
+                query.getFetchLimit());
+
+        if (!delegate.isIteratedResult()) {
+            List resultRows = resultReader.dataRows(false);
+            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
+                    .currentTimeMillis()
+                    - t1);
+
+            delegate.nextDataRows(query, resultRows);
+        }
+        else {
+            try {
+                resultReader.setClosingConnection(true);
+                delegate.nextDataRows(query, resultReader);
+            }
+            catch (Exception ex) {
+                resultReader.close();
+                throw ex;
+            }
         }
     }
 }

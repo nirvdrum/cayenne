@@ -134,7 +134,7 @@ public abstract class QueryAssembler extends QueryTranslator {
             sqlStr,
             values,
             System.currentTimeMillis() - t1);
-        PreparedStatement stmt = con.prepareStatement(sqlStr);
+        PreparedStatement stmt = connection.prepareStatement(sqlStr);
         initStatement(stmt);
         return stmt;
     }

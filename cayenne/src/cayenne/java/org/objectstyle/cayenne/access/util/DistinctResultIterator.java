@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.access.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
@@ -75,10 +76,10 @@ import org.objectstyle.cayenne.map.DbEntity;
  * "nextObjectId()" is called for the first time), it can't be used to read data rows
  * again. This is pretty sensible for most things in Cayenne.
  * 
- * @since 1.1
+ * @since 1.2 Prior to 1.2 this was a non-public class in access package.
  * @author Andrei Adamchik
  */
-class DistinctResultIterator implements ResultIterator {
+public class DistinctResultIterator implements ResultIterator {
 
     protected ResultIterator wrappedIterator;
     protected Set fetchedIds;

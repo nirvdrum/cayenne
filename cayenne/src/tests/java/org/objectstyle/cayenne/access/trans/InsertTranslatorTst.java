@@ -83,7 +83,7 @@ public class InsertTranslatorTst extends CayenneTestCase {
 		q.setObjectId(new ObjectId(MeaningfulPKTest1.class, id));
 		
 		InsertTranslator transl = new InsertTranslator();
-		transl.setEngine(getNode());
+		transl.setEntityResolver(getNode().getEntityResolver());
 		transl.setQuery(q);
 		transl.prepareLists();
 		

@@ -68,9 +68,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
@@ -83,11 +81,9 @@ import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
 import org.objectstyle.cayenne.access.trans.LOBInsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBUpdateBatchQueryBuilder;
-import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
@@ -107,59 +103,33 @@ public class OracleDataNode extends DataNode {
     public OracleDataNode(String name) {
         super(name);
     }
+    
+    /**
+     * @since 1.2
+     */
+    protected void runStoredProcedure(
+            Connection con,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
+
+        new OracleProcedureExecutionPlan(getAdapter(), getEntityResolver()).execute(
+                con,
+                query,
+                observer);
+    }
 
     /**
      * Implements Oracle-specific handling of StoredProcedure OUT parameters reading.
+     * 
+     * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
      */
     protected void readStoredProcedureOutParameters(
             CallableStatement statement,
             ResultDescriptor descriptor,
             Query query,
             OperationObserver delegate) throws SQLException, Exception {
-
-        long t1 = System.currentTimeMillis();
-
-        int resultSetType = OracleAdapter.getOracleCursorType();
-        int resultWidth = descriptor.getResultWidth();
-        if (resultWidth > 0) {
-            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
-            ExtendedType[] converters = descriptor.getConverters();
-            int[] jdbcTypes = descriptor.getJdbcTypes();
-            String[] names = descriptor.getNames();
-            int[] outParamIndexes = descriptor.getOutParamIndexes();
-
-            // process result row columns,
-            for (int i = 0; i < outParamIndexes.length; i++) {
-                int index = outParamIndexes[i];
-
-                if (jdbcTypes[index] == resultSetType) {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
-                    // else
-                    ResultSet rs = (ResultSet) statement.getObject(index + 1);
-                    ResultDescriptor nextDesc = ResultDescriptor.createDescriptor(
-                            rs,
-                            getAdapter().getExtendedTypes());
-
-                    readResultSet(rs, nextDesc, (GenericSelectQuery) query, delegate);
-                }
-                else {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
-                    // else
-                    Object val = converters[index].materializeObject(
-                            statement,
-                            index + 1,
-                            jdbcTypes[index]);
-                    dataRow.put(names[index], val);
-                }
-            }
-
-            if (!dataRow.isEmpty()) {
-                QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
-                        .currentTimeMillis()
-                        - t1);
-                delegate.nextDataRows(query, Collections.singletonList(dataRow));
-            }
-        }
+        new OracleProcedureExecutionPlan(getAdapter(), getEntityResolver())
+                .readStoredProcedureOutParameters(statement, descriptor, query, delegate);
     }
 
     public void runBatchUpdateWithLOBColumns(
@@ -454,4 +424,6 @@ public class OracleDataNode extends DataNode {
                     .unwindException(e));
         }
     }
+
+    
 }

@@ -62,15 +62,16 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * Defines API for translation Cayenne queries to JDBC
- * PreparedStatements. 
- * 
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
+/**
+ * Defines API for translation Cayenne queries to JDBC PreparedStatements.
+ * <p>
+ * <i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide. </a> </i>
+ * </p>
  * 
  * @author Andrei Adamchik
  */
@@ -79,14 +80,28 @@ public abstract class QueryTranslator {
     /** Query being translated. */
     protected Query query;
 
-    /** JDBC database connection needed to create PreparedStatement. */
-    protected Connection con;
+    /** 
+     * JDBC database connection needed to create PreparedStatement. 
+     * Prior to 1.2 this property was called "con".
+     */
+    protected Connection connection;
 
-    /** Used mainly for name resolution. */
+    /** 
+     * Used mainly for name resolution. 
+     * 
+     * @deprecated Since 1.2 entityResolver property is used.
+     */
     protected QueryEngine engine;
 
     /** Adapter helping to do SQL literal conversions, etc. */
     protected DbAdapter adapter;
+    
+    /**
+     * Provides access to Cayenne mapping info.
+     * 
+     * @since 1.2
+     */
+    protected EntityResolver entityResolver;
 
     /** 
      * Creates PreparedStatement. <code>logLevel</code> 
@@ -104,20 +119,48 @@ public abstract class QueryTranslator {
         this.query = query;
     }
 
-    /** Returns Connection object used by this assembler. */
+    /** 
+     * Returns Connection object used by this translator.
+     * 
+     * @since 1.2 
+     */
+    public Connection getConnection() {
+        return connection;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+    
+    /**
+     * @deprecated Since 1.2 use getConnection().
+     */
     public Connection getCon() {
-        return con;
+        return getConnection();
     }
 
+    /**
+     * @deprecated since 1.2 use setConnection().
+     */
     public void setCon(Connection con) {
-        this.con = con;
+        setConnection(con);
     }
 
-    /** Returns QueryEngine used by this assembler. */
+    /** 
+     * Returns QueryEngine used by this translator.
+     * 
+     * @deprecated Since 1.2 use "getEntityResolver()"
+     */
     public QueryEngine getEngine() {
         return engine;
     }
 
+    /**
+     * @deprecated Since 1.2 use "setEntityResolver()"
+     */
     public void setEngine(QueryEngine engine) {
         this.engine = engine;
     }
@@ -136,7 +179,7 @@ public abstract class QueryTranslator {
      * @since 1.1
      */
     public EntityInheritanceTree getRootInheritanceTree() {
-        return engine.getEntityResolver().lookupInheritanceTree(getRootEntity());
+        return getEntityResolver().lookupInheritanceTree(getRootEntity());
     }
 
     public ObjEntity getRootEntity() {
@@ -144,10 +187,24 @@ public abstract class QueryTranslator {
             return null;
         }
 
-        return engine.getEntityResolver().lookupObjEntity(query);
+        return getEntityResolver().lookupObjEntity(query);
     }
 
     public DbEntity getRootDbEntity() {
-        return engine.getEntityResolver().lookupDbEntity(query);
+        return getEntityResolver().lookupDbEntity(query);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void setEntityResolver(EntityResolver entityResolver) {
+        this.entityResolver = entityResolver;
     }
 }

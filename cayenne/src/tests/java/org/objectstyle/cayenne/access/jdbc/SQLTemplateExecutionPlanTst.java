@@ -64,6 +64,7 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -97,7 +98,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -133,7 +134,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -169,7 +170,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.execute(c, template, observer);
+            plan.execute(c, (Query) template, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);

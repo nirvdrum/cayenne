@@ -73,14 +73,14 @@ import javax.sql.DataSource;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.jdbc.ProcedureExecutionPlan;
+import org.objectstyle.cayenne.access.jdbc.SQLExecutionPlan;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateExecutionPlan;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectExecutionPlan;
+import org.objectstyle.cayenne.access.jdbc.SelectExecutionPlan;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
-import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
-import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
-import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.conn.PoolManager;
@@ -88,6 +88,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.AshwoodEntitySorter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -315,7 +316,7 @@ public class DataNode implements QueryEngine {
                 // figure out query type and call appropriate worker method
                 if (nextQuery instanceof SQLTemplate) {
                     SQLTemplate sqlTemplate = (SQLTemplate) nextQuery;
-                    SQLTemplateExecutionPlan executionPlan = (sqlTemplate.isSelecting())
+                    SQLExecutionPlan executionPlan = (sqlTemplate.isSelecting())
                             ? new SQLTemplateSelectExecutionPlan(getAdapter())
                             : new SQLTemplateExecutionPlan(getAdapter());
                     executionPlan.execute(connection, sqlTemplate, resultConsumer);
@@ -352,60 +353,14 @@ public class DataNode implements QueryEngine {
     /**
      * Executes select query.
      */
-    protected void runSelect(Connection connection, Query query, OperationObserver delegate)
+    protected void runSelect(Connection connection, Query query, OperationObserver observer)
         throws SQLException, Exception {
 
-        long t1 = System.currentTimeMillis();
-
-        QueryTranslator translator = getAdapter().getQueryTranslator(query);
-        translator.setEngine(this);
-        translator.setCon(connection);
-
-        PreparedStatement prepStmt = translator.createStatement(query.getLoggingLevel());
-        ResultSet rs = prepStmt.executeQuery();
-
-        SelectQueryTranslator assembler = (SelectQueryTranslator) translator;
-        DefaultResultIterator workerIterator = new DefaultResultIterator(
+        // TODO: execution plans will be created by adapter in the future...
+        new SelectExecutionPlan(getAdapter(), getEntityResolver()).execute(
                 connection,
-                prepStmt,
-                rs,
-                assembler.getResultDescriptor(rs),
-                ((GenericSelectQuery) query).getFetchLimit());
-
-        ResultIterator it = workerIterator;
-
-        // wrap result iterator if distinct has to be suppressed
-        if (assembler instanceof SelectTranslator) {
-            SelectTranslator customTranslator = (SelectTranslator) assembler;
-            if (customTranslator.isSuppressingDistinct()) {
-                it = new DistinctResultIterator(workerIterator, customTranslator
-                        .getRootDbEntity());
-            }
-        }
-        
-        // TODO: Should do something about closing ResultSet and PreparedStatement in this
-        // method, instead of relying on DefaultResultIterator to do that later
-
-        if (!delegate.isIteratedResult()) {
-            // note that we don't need to close ResultIterator
-            // since "dataRows" will do it internally
-            List resultRows = it.dataRows(true);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
-
-            delegate.nextDataRows(query, resultRows);
-        }
-        else {
-            try {
-                workerIterator.setClosingConnection(true);
-                delegate.nextDataRows(translator.getQuery(), it);
-            }
-            catch (Exception ex) {
-                it.close();
-                throw ex;
-            }
-        }
+                query,
+                observer);
     }
 
     /**
@@ -415,8 +370,8 @@ public class DataNode implements QueryEngine {
         throws SQLException, Exception {
 
         QueryTranslator transl = getAdapter().getQueryTranslator(query);
-        transl.setEngine(this);
-        transl.setCon(con);
+        transl.setEntityResolver(this.getEntityResolver());
+        transl.setConnection(con);
 
         PreparedStatement prepStmt = transl.createStatement(query.getLoggingLevel());
 
@@ -605,52 +560,16 @@ public class DataNode implements QueryEngine {
         OperationObserver delegate)
         throws SQLException, Exception {
 
-        ProcedureTranslator transl =
-            (ProcedureTranslator) getAdapter().getQueryTranslator(query);
-        transl.setEngine(this);
-        transl.setCon(con);
-
-        CallableStatement statement =
-            (CallableStatement) transl.createStatement(query.getLoggingLevel());
-
-        // stored procedure may contain a mixture of update counts and result sets,
-        // and out parameters. Read out parameters first, then
-        // iterate until we exhaust all results
-        boolean hasResultSet = statement.execute();
-
-        // read out parameters
-        readStoredProcedureOutParameters(
-            statement,
-            transl.getProcedureResultDescriptor(),
-            query,
-            delegate);
-
-        // read the rest of the query
-        while (true) {
-            if (hasResultSet) {
-                ResultSet rs = statement.getResultSet();
-
-                readResultSet(
-                    rs,
-                    transl.getResultDescriptor(rs),
-                    (GenericSelectQuery) query,
-                    delegate);
-            }
-            else {
-                int updateCount = statement.getUpdateCount();
-                if (updateCount == -1) {
-                    break;
-                }
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
-                delegate.nextCount(query, updateCount);
-            }
-
-            hasResultSet = statement.getMoreResults();
-        }
+        new ProcedureExecutionPlan(getAdapter(), getEntityResolver()).execute(
+                con,
+                query,
+                delegate);
     }
 
     /**
      * Helper method that reads OUT parameters of a CallableStatement.
+     * 
+     * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
      */
     protected void readStoredProcedureOutParameters(
         CallableStatement statement,
@@ -659,21 +578,18 @@ public class DataNode implements QueryEngine {
         OperationObserver delegate)
         throws SQLException, Exception {
 
-        long t1 = System.currentTimeMillis();
-        Map row = DefaultResultIterator.readProcedureOutParameters(statement, descriptor);
-
-        if (!row.isEmpty()) {
-            // treat out parameters as a separate data row set
-            QueryLogger.logSelectCount(
-                query.getLoggingLevel(),
-                1,
-                System.currentTimeMillis() - t1);
-            delegate.nextDataRows(query, Collections.singletonList(row));
-        }
+        // method is deprecated, so keep this ugly piece here as a placeholder
+        new TempStrategy().readStoredProcedureOutParameters(
+                statement,
+                descriptor,
+                query,
+                delegate);
     }
 
     /**
      * Helper method that reads a ResultSet.
+     * 
+     * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
      */
     protected void readResultSet(
         ResultSet resultSet,
@@ -682,40 +598,14 @@ public class DataNode implements QueryEngine {
         OperationObserver delegate)
         throws SQLException, Exception {
 
-        long t1 = System.currentTimeMillis();
-        DefaultResultIterator resultReader =
-            new DefaultResultIterator(
-                null,
-                null,
-                resultSet,
-                descriptor,
-                query.getFetchLimit());
-
-        if (!delegate.isIteratedResult()) {
-            List resultRows = resultReader.dataRows(false);
-            QueryLogger.logSelectCount(
-                query.getLoggingLevel(),
-                resultRows.size(),
-                System.currentTimeMillis() - t1);
-
-            delegate.nextDataRows(query, resultRows);
-        }
-        else {
-            try {
-                resultReader.setClosingConnection(true);
-                delegate.nextDataRows(query, resultReader);
-            }
-            catch (Exception ex) {
-                resultReader.close();
-                throw ex;
-            }
-        }
+        // method is deprecated, so keep this ugly piece here as a placeholder
+        new TempStrategy().readResultSet(resultSet, descriptor, query, delegate);
     }
 
     /**
      * Returns EntityResolver that handles DataMaps of this node.
      */
-    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
+    public EntityResolver getEntityResolver() {
         return entityResolver;
     }
 
@@ -778,6 +668,39 @@ public class DataNode implements QueryEngine {
 
         public void setDataMaps(Collection dataMaps) {
 
+        }
+    }
+    
+    // this class exists to provide deprecated DataNode methods with access to 
+    // various ExecutionPlan implementations. It will be removed once corresponding
+    // DataNode methods are removed
+    final class TempStrategy extends ProcedureExecutionPlan {
+
+        public TempStrategy() {
+            super(DataNode.this.adapter, DataNode.this.entityResolver);
+        }
+
+        // changing access to public
+        public void readStoredProcedureOutParameters(
+                CallableStatement statement,
+                ResultDescriptor descriptor,
+                Query query,
+                OperationObserver delegate) throws SQLException, Exception {
+            super
+                    .readStoredProcedureOutParameters(
+                            statement,
+                            descriptor,
+                            query,
+                            delegate);
+        }
+
+        // changing access to public
+        public void readResultSet(
+                ResultSet resultSet,
+                ResultDescriptor descriptor,
+                GenericSelectQuery query,
+                OperationObserver delegate) throws SQLException, Exception {
+            super.readResultSet(resultSet, descriptor, query, delegate);
         }
     }
 }

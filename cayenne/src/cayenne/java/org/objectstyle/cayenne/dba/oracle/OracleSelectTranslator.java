@@ -129,7 +129,7 @@ public class OracleSelectTranslator extends SelectTranslator {
     public PreparedStatement createStatement(Level logLevel) throws Exception {
         String sqlStr = createSqlString();
         QueryLogger.logQuery(logLevel, sqlStr, values);
-        PreparedStatement stmt = con.prepareStatement(sqlStr);
+        PreparedStatement stmt = connection.prepareStatement(sqlStr);
 
         initStatement(stmt);
 

@@ -66,11 +66,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
@@ -90,21 +92,28 @@ public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
      */
     public void execute(
         Connection connection,
-        SQLTemplate query,
+        Query query,
         OperationObserver observer)
         throws SQLException, Exception {
 
+        if (!(query instanceof SQLTemplate)) {
+            throw new CayenneException("Query unsupported by the execution plan: "
+                    + query);
+        }
+        
+        SQLTemplate sqlTemplate = (SQLTemplate) query;
+        
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
-        String template = query.getTemplate(adapter.getClass().getName());
+        String template = sqlTemplate.getTemplate(adapter.getClass().getName());
         boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
 
-        int size = query.parametersSize();
+        int size = sqlTemplate.parametersSize();
 
         // zero size indicates a one-shot query with no parameters
         // so fake a single entry batch...
         Iterator it =
             (size > 0)
-                ? query.parametersIterator()
+                ? sqlTemplate.parametersIterator()
                 : IteratorUtils.singletonIterator(Collections.EMPTY_MAP);
         while (it.hasNext()) {
             Map nextParameters = (Map) it.next();
@@ -141,7 +150,7 @@ public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
                     statement,
                     rs,
                     descriptor,
-                    query.getFetchLimit());
+                    sqlTemplate.getFetchLimit());
 
             if (!observer.isIteratedResult()) {
                 // note that we don't need to close ResultIterator

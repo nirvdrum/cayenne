@@ -88,8 +88,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
     private SelectTranslator buildTranslator(Connection con) throws Exception {
         SelectTranslator transl =
             (SelectTranslator) getNode().getAdapter().getQueryTranslator(q);
-        transl.setEngine(getNode());
-        transl.setCon(con);
+        transl.setEntityResolver(getNode().getEntityResolver());
+        transl.setConnection(con);
 
         return transl;
     }
