@@ -59,28 +59,33 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
 
-/** Defines basic methods for a class to be able to represent persistent objects in Cayenne.
+/** 
+ * Defines basic methods for a persistent object in Cayenne.
  *
  * <p>For better control over serialization of DataObjects, 
  * implement <code>private void writeObject(ObjectOutputStream s)</code>
- * and <code>private void readObject(ObjectInputStream s)</code> methods. For details see
- * <a href="http://java.sun.com/docs/books/tutorial/essential/io/providing.html">this tutorial
- * from Sun</a>.
+ * and <code>private void readObject(ObjectInputStream s)</code> methods. 
+ * For details see <a href=
+ * "http://java.sun.com/docs/books/tutorial/essential/io/providing.html">this 
+ * tutorial</a> from Sun.
+ * 
+ * @author Andrei Adamchik
  *
-*/
+ */
 public interface DataObject extends java.io.Serializable {
     
-   /** Returns a data context this object is registered with, or null
-    *  if this object has no associated DataContext
+   /** 
+    * Returns a data context this object is registered with, or null
+    * if this object has no associated DataContext.
     */
     public DataContext getDataContext();
     
-    /** Sets object data context */
+    /** Sets object data context. */
     public void setDataContext(DataContext ctxt);
     
-    /** Returns ObjectId for this data object - piece that
-     *  uniquely identifies this data object for persistence
-     *  purposes.
+    /** 
+     * Returns ObjectId for this data object - piece that
+     * uniquely identifies this data object for persistence purposes.
      */
     public ObjectId getObjectId();
     
