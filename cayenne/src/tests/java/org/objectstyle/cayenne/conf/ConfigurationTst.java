@@ -84,6 +84,11 @@ public class ConfigurationTst extends CayenneTestCase {
         assertSame(factory, cfg.getOverrideFactory());
 	}
 
+	public void testDefaultConfigurationConstructorWithNullFile() {
+		Configuration c = new DefaultConfiguration(null);
+		assertNotNull(c.getResourceLocator());
+	}
+
 
     /** Concrete Configuration subclass used for tests. */
     public static class Config extends Configuration {
