@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.*;
 
-
 /** 
  * Default primary key generator implementation. Uses a lookup table named
  * "AUTO_PK_SUPPORT" to search and increment primary keys for tables.  
@@ -77,6 +76,9 @@ public class JdbcPkGenerator implements PkGenerator {
 
     private static final ObjAttribute[] resultDesc =
         new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
+
+    protected HashMap pkCache = new HashMap();
+    protected int pkCacheSize = 10;
 
     /** Generates database objects to provide
      *  automatic primary key support. This implementation will create
@@ -129,10 +131,10 @@ public class JdbcPkGenerator implements PkGenerator {
             shouldDrop = tables.next();
         }
         finally {
-            if(tables != null) {
+            if (tables != null) {
                 tables.close();
             }
-            
+
             // return connection to the pool
             con.close();
         }
@@ -215,24 +217,35 @@ public class JdbcPkGenerator implements PkGenerator {
     }
 
     /**
-     *  <p>Generate new (unique and non-repeating) primary key for specified dbEntity.</p>
+     * <p>Generates new (unique and non-repeating) primary key for specified 
+     * dbEntity.</p>
      *
-     *  <p>This implementation is naive and can have problems with high volume databases,
-     *  when multiple applications can use this to get a primary key value. There is a
-     *  possiblity that 2 clients will recieve the same value of primary key. So database
-     *  specific implementations should be created for cleaner approach (like Oracle
-     *  sequences, for example).</p>
-     *
-     *  @param dbEntity DbEntity that needs an auto PK support
+     * <p>This implementation is naive and can have problems with high 
+     * volume databases, when multiple applications can use this to get 
+     * a primary key value. There is a possiblity that 2 clients will 
+     * recieve the same value of primary key. So database specific 
+     * implementations should be created for cleaner approach (like Oracle
+     * sequences, for example).</p>
      */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
+    public Object generatePkForDbEntity(DataNode node, DbEntity ent)
         throws Exception {
+        return pkFromDatabase(node, ent).getNextPrimaryKey();
+    }
+    
+    /** 
+     * Performs primary key generation ignoring cache. This method is called 
+     * internally from "generatePkForDbEntity" and then saved in cache 
+     * for performance. Subclasses that implement different primary key 
+     * generation solutions should override this method, not 
+     * "generatePkForDbEntity".
+     */
+    protected PkRange pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
         ArrayList queries = new ArrayList(2);
 
         StringBuffer b1 = new StringBuffer();
         b1
             .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = '")
-            .append(dbEntity.getName())
+            .append(ent.getName())
             .append("'");
 
         SqlSelectQuery sel = new SqlSelectQuery();
@@ -245,14 +258,32 @@ public class JdbcPkGenerator implements PkGenerator {
         SqlModifyQuery upd = new SqlModifyQuery();
         queries.add(upd);
 
-        PkRetrieveProcessor pkProcessor =
-            new PkRetrieveProcessor(upd, dbEntity.getName());
-        dataNode.performQueries(queries, pkProcessor);
+        PkRetrieveProcessor pkProcessor = new PkRetrieveProcessor(upd, ent.getName());
+        node.performQueries(queries, pkProcessor);
 
-        if (!pkProcessor.successFlag)
+        if (!pkProcessor.successFlag) {
             throw new CayenneRuntimeException("Error generating PK.");
-        else
-            return pkProcessor.nextId;
+        }
+        else {
+            int val = pkProcessor.nextId.intValue();
+            PkRange range = new PkRange(val, val);
+            return range;
+        }
+    }
+
+    /**
+     * Returns a size of the entity primary key cache.
+     * 10 is default, 0 means no caching.
+     */
+    public int getPkCacheSize() {
+        return pkCacheSize;
+    }
+
+    /**
+     * Sets the size of the entity primary key cache.
+     */
+    public void setPkCacheSize(int pkCacheSize) {
+        this.pkCacheSize = pkCacheSize;
     }
 
     /** OperationObserver for primary key retrieval. */
@@ -284,8 +315,9 @@ public class JdbcPkGenerator implements PkGenerator {
 
             Map lastPk = (Map) resultObjects.get(0);
             nextId = (Integer) lastPk.get("nextId");
-            if (nextId == null)
+            if (nextId == null) {
                 throw new CayenneRuntimeException("Error generating PK : null nextId.");
+            }
 
             // while transaction is still in progress, modify update query that will be executed next
 
