@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,7 +53,10 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -67,131 +69,150 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * This class encapsulates resolving between ObjEntities, DbEntities, DataObject Classes, and Entity names.
- * An instance is typically obtained from a QueryEngine by getEntityResolver.
+ * EntityResolver encapsulates resolving between ObjEntities, DbEntities, 
+ * DataObject Classes, and Entity names. An instance is typically obtained 
+ * from a QueryEngine by getEntityResolver.
+ * 
  * @author Craig Miskell
  */
-
 public class EntityResolver {
-	private Map dbEntityCache;
-	private Map objEntityCache;
-	private List maps;
-	/**
-	 * Constructor for EntityResolver.
-	 */
-	public EntityResolver(List dataMaps) {
-		super();
-		this.maps = new ArrayList(dataMaps); //Take a copy
-		this.constructCache(this.maps);
-	}
+    protected Map dbEntityCache;
+    protected Map objEntityCache;
+    protected List maps;
+    
 
-	/** Reads the dataMaps and caches DbEntities by ObjEntity, DataObject class, and ObjEntity name*/
-	private void constructCache(List dataMaps) {
-		dbEntityCache = new HashMap();
-		objEntityCache = new HashMap();
+    public EntityResolver() {
+    	this.maps = new ArrayList();
+    	this.dbEntityCache = new HashMap();
+    	this.objEntityCache = new HashMap();
+    }
+    
+    
+    /**
+     * Constructor for EntityResolver.
+     */
+    public EntityResolver(List dataMaps) {
+        this();
+        maps.addAll(dataMaps); //Take a copy
+        this.constructCache();
+    }
 
-		Iterator mapIterator = dataMaps.iterator();
-		while (mapIterator.hasNext()) {
-			int i;
-			DataMap thisMap = (DataMap) mapIterator.next();
+    /** 
+     * Creates caches of DbEntities by ObjEntity, 
+     * DataObject class, and ObjEntity name using internal 
+     * list of maps.
+     */
+    protected synchronized void constructCache() {
+        dbEntityCache.clear();
+        objEntityCache.clear();
 
-			ObjEntity[] objEntities = thisMap.getObjEntities();
+        Iterator mapIterator = maps.iterator();
+        while (mapIterator.hasNext()) {
+            int i;
+            DataMap thisMap = (DataMap) mapIterator.next();
 
-			for (i = 0; i < objEntities.length; i++) {
-				ObjEntity oe = objEntities[i];
-				DbEntity de = oe.getDbEntity();
-				dbEntityCache.put(oe, de);
-				Class entityClass;
-				try {
-					//CTM Should this be using  Configuration.getResourceLoader().loadClass(oe.getClassName()) ???
-					entityClass = Class.forName(oe.getClassName());
-				} catch (ClassNotFoundException e) {
-					throw new CayenneRuntimeException("Cannot find class " + oe.getClassName());
-				}
+            ObjEntity[] objEntities = thisMap.getObjEntities();
 
-				if (objEntityCache.get(entityClass) != null) {
-					throw new CayenneRuntimeException(
-						getClass().getName()
-							+ ": More than one ObjEntity ("
-							+ oe.getName()
-							+ " and "
-							+ ((ObjEntity) objEntityCache.get(entityClass)).getName()
-							+ ") uses the class "
-							+ entityClass.getName());
-				}
+            for (i = 0; i < objEntities.length; i++) {
+                ObjEntity oe = objEntities[i];
+                DbEntity de = oe.getDbEntity();
+                dbEntityCache.put(oe, de);
+                Class entityClass;
+                try {
+                    //CTM Should this be using  Configuration.getResourceLoader().loadClass(oe.getClassName()) ???
+                    entityClass = Class.forName(oe.getClassName());
+                } catch (ClassNotFoundException e) {
+                    throw new CayenneRuntimeException(
+                        "Cannot find class " + oe.getClassName());
+                }
 
-				dbEntityCache.put(entityClass, de);
-				objEntityCache.put(entityClass, oe);
-				dbEntityCache.put(oe.getName(), de);
-				objEntityCache.put(oe.getName(), oe);
-			}
-		}
-	}
+                if (objEntityCache.get(entityClass) != null) {
+                    throw new CayenneRuntimeException(
+                        getClass().getName()
+                            + ": More than one ObjEntity ("
+                            + oe.getName()
+                            + " and "
+                            + ((ObjEntity) objEntityCache.get(entityClass)).getName()
+                            + ") uses the class "
+                            + entityClass.getName());
+                }
 
-	/**
-	 * Looks in the DataMap's that this object was created with for theDbEntity that maps to the
-	 * specified object.  Object may be a Entity name, ObjEntity, or DataObject class (Class object for a class which 
-	 * implements the DataObject interface)
-	 * @return the required DbEntity, or null if none matches the specifier
-	 */
-	public DbEntity lookupDbEntity(Object object) {
-		if (object instanceof DbEntity) {
-			return (DbEntity) object;
-		}
-		DbEntity result = (DbEntity) dbEntityCache.get(object);
-		if (result == null) {
-			//reconstruct cache just in case some of the datamaps have changed and now contain the 
-			//required information
-			this.constructCache(this.maps);
-			result = (DbEntity) dbEntityCache.get(object);
-		}
-		return result;
-	}
+                dbEntityCache.put(entityClass, de);
+                objEntityCache.put(entityClass, oe);
+                dbEntityCache.put(oe.getName(), de);
+                objEntityCache.put(oe.getName(), oe);
+            }
+        }
+    }
 
-	/**
-	 * Looks up the DbEntity for the given query by using the query's getRoot method and passing to lookupDbEntity
-	 * @return the root DbEntity of the query
-	 */
-	public DbEntity lookupDbEntity(Query q) {
-		return this.lookupDbEntity(q.getRoot());
-	}
+    /**
+     * Looks in the DataMap's that this object was created with for theDbEntity that maps to the
+     * specified object.  Object may be a Entity name, ObjEntity, or DataObject class 
+     * (Class object for a class which implements the DataObject interface)
+     * 
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+    public synchronized DbEntity lookupDbEntity(Object object) {
+        if (object instanceof DbEntity) {
+            return (DbEntity) object;
+        }
+        
+        DbEntity result = (DbEntity) dbEntityCache.get(object);
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps 
+            // have changed and now contain the required information
+            constructCache();
+            result = (DbEntity) dbEntityCache.get(object);
+        }
+        return result;
+    }
 
-	/**
-	 * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
-	 * specified object.  Object may be a Entity name, or DataObject class (Class object for a class which 
-	 * implements the DataObject interface)
-	 * @return the required ObjEntity or null if there is none that matches the specifier
-	 */
-	public ObjEntity lookupObjEntity(Object object) {
-		if (object instanceof ObjEntity) {
-			return (ObjEntity) object;
-		}
-		ObjEntity result = (ObjEntity) objEntityCache.get(object);
-		if (result == null) {
-			//reconstruct cache just in case some of the datamaps have changed and now contain the 
-			//required information
-			this.constructCache(this.maps);
-			result = (ObjEntity) objEntityCache.get(object);
-		}
-		return result;
-	}
+    /**
+     * Looks up the DbEntity for the given query by using the query's getRoot method and passing to lookupDbEntity
+     * @return the root DbEntity of the query
+     */
+    public DbEntity lookupDbEntity(Query q) {
+        return this.lookupDbEntity(q.getRoot());
+    }
 
-	/**
-	 * Looks up the ObjEntity for the given query by using the query's getRoot method and passing to lookupObjEntity
-	 * @return the root ObjEntity of the query
-	 * @throws CayenneRuntimeException if the root of the query is a DbEntity (it is not reliably possible to map 
-	 * from a DbEntity to an ObjEntity as a DbEntity may be the source for multiple ObjEntities.  It is not safe
-	 * to rely on such behaviour).
-	 */
-	public ObjEntity lookupObjEntity(Query q) {
-		Object root = q.getRoot();
-		if (root instanceof DbEntity) {
-			throw new CayenneRuntimeException(
-				"Cannot safely resolve the ObjEntity for the query "
-					+ q
-					+ " because the root of the query is a DbEntity");
-		}
-		return this.lookupObjEntity(root);
-	}
+    /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity that maps to the
+     * specified object. Object may be a Entity name, or DataObject class (Class object for a class which 
+     * implements the DataObject interface)
+     * 
+     * @return the required ObjEntity or null if there is none that matches the specifier
+     */
+    public synchronized ObjEntity lookupObjEntity(Object object) {
+        if (object instanceof ObjEntity) {
+            return (ObjEntity) object;
+        }
+        
+        ObjEntity result = (ObjEntity) objEntityCache.get(object);
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps 
+            // have changed and now contain the required information
+            constructCache();
+            result = (ObjEntity) objEntityCache.get(object);
+        }
+        return result;
+    }
+
+    /**
+     * Looks up the ObjEntity for the given query by using the query's getRoot method and passing to lookupObjEntity
+     * @return the root ObjEntity of the query
+     * @throws CayenneRuntimeException if the root of the query is a DbEntity (it is not reliably possible to map 
+     * from a DbEntity to an ObjEntity as a DbEntity may be the source for multiple ObjEntities.  It is not safe
+     * to rely on such behaviour).
+     */
+    public ObjEntity lookupObjEntity(Query q) {
+        Object root = q.getRoot();
+        if (root instanceof DbEntity) {
+            throw new CayenneRuntimeException(
+                "Cannot safely resolve the ObjEntity for the query "
+                    + q
+                    + " because the root of the query is a DbEntity");
+        }
+        return this.lookupObjEntity(root);
+    }
 
 }
