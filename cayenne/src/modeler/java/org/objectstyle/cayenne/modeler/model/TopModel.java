@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
@@ -121,6 +122,9 @@ public class TopModel {
         CayenneAction openProjectAction = new OpenProjectAction();
         openProjectAction.setAlwaysOn(true);
         actionMap.put(openProjectAction.getKey(), openProjectAction);
+
+        CayenneAction importMapAction = new ImportDataMapAction();
+        actionMap.put(importMapAction.getKey(), importMapAction);
 
         CayenneAction saveAction = new SaveAction();
         actionMap.put(saveAction.getKey(), saveAction);

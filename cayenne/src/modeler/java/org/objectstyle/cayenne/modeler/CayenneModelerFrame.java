@@ -88,6 +88,7 @@ import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
 import org.objectstyle.cayenne.modeler.action.GenerateDbAction;
+import org.objectstyle.cayenne.modeler.action.ImportDataMapAction;
 import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
@@ -277,6 +278,7 @@ public class CayenneModelerFrame
         fileMenu.add(getAction(NewProjectAction.getActionName()).buildMenu());
         fileMenu.add(getAction(OpenProjectAction.getActionName()).buildMenu());
         fileMenu.add(getAction(ProjectAction.getActionName()).buildMenu());
+        fileMenu.add(getAction(ImportDataMapAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
         fileMenu.add(getAction(SaveAction.getActionName()).buildMenu());
         fileMenu.addSeparator();

@@ -243,24 +243,21 @@ public class MapLoader extends DefaultHandler {
     }
 
     /**
-     * Loads the array a DataMap for the map file URI.
-     * This is a convenience method that would resolve string URI
-     * to InputSource and then call <code>loadDataMap</code>.
+     * Loads DataMap from file specified by <code>uri</code> parameter.
      *
      * @throws DataMapException if source URI does not resolve to a valid map files
-     * @throws NullPointerException if <code>src</code> parameter is null.
      */
-    public DataMap loadDataMap(String src) throws DataMapException {
+    public DataMap loadDataMap(String uri) throws DataMapException {
         // configure resource locator
         ResourceLocator locator = configLocator();
-        InputStream in = locator.findResourceStream(src);
+        InputStream in = locator.findResourceStream(uri);
         if (in == null) {
-            throw new DataMapException("Can't find data map " + src);
+            throw new DataMapException("Can't find data map " + uri);
         }
 
         try {
             InputSource inSrc = new InputSource(in);
-            inSrc.setSystemId(src);
+            inSrc.setSystemId(uri);
             return loadDataMap(inSrc);
         }
         finally {

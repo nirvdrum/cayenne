@@ -134,6 +134,12 @@ public class ApplicationProject extends Project {
             conf.initialize();
             conf.didInitialize();
         }
+        
+        // set default version 
+        if (conf.getProjectVersion() == null) {
+            conf.setProjectVersion(
+                ApplicationUpgradeHandler.sharedHandler().supportedVersion());
+        }
 
         this.configuration = conf;
     }
