@@ -250,7 +250,8 @@ public class ResolveDbRelationshipDialog
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
+		DbAttributePairTableModel model =
+			(DbAttributePairTableModel) table.getModel();
 
 		if (src == add) {
 			model.addRow();
@@ -316,22 +317,48 @@ public class ResolveDbRelationshipDialog
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 			return;
-		} // If new DbRelationship was created, add it to the source.
+		}
+
+		// If new DbRelationship was created, add it to the source.
 		if (isDbRelNew) {
 			start.addRelationship(dbRel);
-		} // If new reverse DbRelationship was created, add it to the target
+		}
+
+		// If new reverse DbRelationship was created, add it to the target
 		if (hasReverseDbRel.isSelected()) {
 			if (reverseDbRel == null) {
 				// Check if there is an existing relationship with the same joins
 				reverseDbRel = dbRel.getReverseRelationship();
-			} // If didn't find anything, create reverseDbRel
+			}
+
+			// If didn't find anything, create reverseDbRel
 			if (reverseDbRel == null) {
 				reverseDbRel = new DbRelationship();
 				reverseDbRel.setSourceEntity(dbRel.getTargetEntity());
 				reverseDbRel.setTargetEntity(dbRel.getSourceEntity());
 				reverseDbRel.setToMany(!dbRel.isToMany());
 			}
-			reverseDbRel.setJoins(getReverseJoins());
+
+			java.util.List revJoins = getReverseJoins();
+			reverseDbRel.setJoins(revJoins);
+
+			// check if joins map to a primary key of this entity
+			if (!dbRel.isToDependentPK()) {
+				Iterator it = revJoins.iterator();
+				if (it.hasNext()) {
+					boolean toDepPK = true;
+					while (it.hasNext()) {
+						DbAttributePair join = (DbAttributePair) it.next();
+						if (!join.getTarget().isPrimaryKey()) {
+							toDepPK = false;
+							break;
+						}
+					}
+
+					reverseDbRel.setToDependentPK(toDepPK);
+				}
+			}
+
 			reverseDbRel.setName(reverseName.getText());
 			if (isReverseDbRelNew) {
 				end.addRelationship(reverseDbRel);
