@@ -83,7 +83,7 @@ public class DataContext implements QueryEngine {
 	static Logger logObj = Logger.getLogger(DataContext.class.getName());
 
 	protected QueryEngine parent;
-	protected HashMap registeredMap = new HashMap();
+	protected Map registeredMap = Collections.synchronizedMap(new HashMap());
 	protected HashMap committedSnapshots = new HashMap();
 	protected RelationshipDataSource relDataSource = new RelationshipDataSource();
 
