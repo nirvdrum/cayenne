@@ -106,24 +106,22 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * In most cases this is the only access class directly used in the application.
  * 
  * <p>
- * Most common DataContext utilization pattern is to
- * create one DataContext per session. "Session" may be a an HttpSesession in a 
- * web application, or any other similar concept in a multiuser application.
+ * Most common DataContext use pattern is to create one DataContext per session. 
+ * "Session" may be a an HttpSesession in a web application, or any other similar 
+ * concept in a multiuser application.
  * 
  * </p><p>
- * All persistent objects (DataObjects) are registered with DataContext either
- * <strong>implicitly</strong> when they are fetched via a query, or read via a relationship 
- * from another object, 
- * or <strong>explicitly</strong> via calling {@link #createAndRegisterNewObject(String)
- * createAndRegisterNewObject(String entityName)} during new DataObject creation.
- * DataContext tracks changes made to its DataObjects in memory, and flushes them to the
- * database when {@link #commitChanges()
- * commitChanges()} is called. Until DataContext is committed, changes made to its objects
- * are not visible in other DataContexts.</p><p>
+ * DataObjects are registered with DataContext either <i>implicitly</i> when they are 
+ * fetched via a query, or read via a relationship from another object, 
+ * or <i>explicitly</i> via calling {@link #createAndRegisterNewObject(Class)} during 
+ * new DataObject creation. DataContext tracks changes made to its DataObjects in memory, 
+ * and flushes them to the database when {@link #commitChanges()} is called. Until 
+ * DataContext is committed, changes made to its objects are not visible in other 
+ * DataContexts.</p><p>
  * 
  * Each DataObject can belong only to a single DataContext. To create a replica of an object
- * from a different DataContext in a local context, use {@link #localObjects(java.util.List)
- * localObjects(List objects)} method.
+ * from a different DataContext in a local context, use {@link #localObjects(java.util.List)} 
+ * method.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
@@ -279,9 +277,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * Creates a DataContext with parent QueryEngine and a DataRowStore that 
+     * should be used by the ObjectStore.
+     * 
      * @since 1.1
-     * @param parent
-     * @param snapshotCache
+     * @param parent parent QueryEngine used to communicate with the data source.
+     * @param snapshotCache DataRowStore used by DataContext's ObjectStore.
      */
     public DataContext(QueryEngine parent, DataRowStore snapshotCache) {
         setParent(parent);
