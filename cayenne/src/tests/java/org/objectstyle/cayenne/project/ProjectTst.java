@@ -61,13 +61,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.project.validator.Validator;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

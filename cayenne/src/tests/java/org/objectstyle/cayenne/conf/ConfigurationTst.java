@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class ConfigurationTst extends CayenneTestCase {

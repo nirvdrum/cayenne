@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access.types;
 
 import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class ExtendedTypeMapTst extends CayenneTestCase {

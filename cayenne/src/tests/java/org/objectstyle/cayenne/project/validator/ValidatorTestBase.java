@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.project.validator;
 import java.io.File;
 import java.sql.Types;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -69,6 +68,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.TstProject;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

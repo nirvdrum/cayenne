@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.map;
 
 import java.sql.Types;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne;
 
+import org.objectstyle.cayenne.unittest.*;
+
 /**
  * @author Andrei Adamchik
  */

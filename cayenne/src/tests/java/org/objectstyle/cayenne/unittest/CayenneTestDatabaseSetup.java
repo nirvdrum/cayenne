@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.unittest;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

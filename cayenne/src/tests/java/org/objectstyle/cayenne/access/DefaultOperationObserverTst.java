@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.access;
 
 import org.apache.log4j.Level;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.gen;
 import java.io.StringWriter;
 import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ClassGeneratorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(ClassGeneratorTst.class.getName());

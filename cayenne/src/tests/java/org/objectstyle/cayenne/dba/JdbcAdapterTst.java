@@ -60,8 +60,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class JdbcAdapterTst extends CayenneTestCase {
 	protected JdbcAdapter adapter;

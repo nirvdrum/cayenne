@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.*;
 
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     static Logger logObj =

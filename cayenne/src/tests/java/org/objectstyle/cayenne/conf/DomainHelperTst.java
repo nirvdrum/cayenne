@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.conf;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * Test cases for DomainHelper class.

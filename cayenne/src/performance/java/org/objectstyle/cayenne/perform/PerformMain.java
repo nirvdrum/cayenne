@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.perform;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneTestResources;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -69,6 +68,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.unittest.CayenneTestResources;
 import org.objectstyle.perform.PerformanceTest;
 import org.objectstyle.perform.PerformanceTestRunner;
 import org.objectstyle.perform.PerformanceTestSuite;

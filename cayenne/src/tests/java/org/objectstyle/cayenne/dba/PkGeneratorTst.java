@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.dba;
 
 import java.util.ArrayList;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class PkGeneratorTst extends CayenneTestCase {
     protected PkGenerator pkGen;

@@ -61,7 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

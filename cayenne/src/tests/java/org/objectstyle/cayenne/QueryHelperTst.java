@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.*;
 
 public class QueryHelperTst extends CayenneTestCase {
     public QueryHelperTst(String name) {

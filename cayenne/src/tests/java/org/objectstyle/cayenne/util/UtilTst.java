@@ -62,7 +62,7 @@ import java.io.InputStream;
 import java.net.URL;
 import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class UtilTst extends CayenneTestCase {

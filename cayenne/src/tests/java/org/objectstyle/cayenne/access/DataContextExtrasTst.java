@@ -63,7 +63,6 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /** 
  * "Lightweight" test cases for DataContext. These

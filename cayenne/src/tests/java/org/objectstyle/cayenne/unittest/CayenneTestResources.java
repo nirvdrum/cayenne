@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.unittest;
 
 import java.io.File;
 import java.sql.Connection;
@@ -61,6 +61,7 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;

@@ -59,8 +59,8 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

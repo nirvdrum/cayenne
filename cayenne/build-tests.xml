@@ -40,17 +40,7 @@
         </copy>
 	</target>
 
-	<target name="dist-bin" depends="jar">
-	    <copy todir="${dist}/bin">
-            <fileset dir="${test.bin}" includes="*.bat,*.sh"/>
-        </copy>
-
-        <chmod perm="gu+x">
-            <fileset dir="${dist}/bin">
-                <include name="**/*.sh"/>
-            </fileset>
-        </chmod>
-        
+	<target name="dist-bin" depends="jar">        
         <!-- JUnit JAR is required for the tests to run. -->
         <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
 	</target>

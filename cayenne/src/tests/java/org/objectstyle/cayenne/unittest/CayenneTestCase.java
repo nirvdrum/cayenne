@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.unittest;
 
 import java.io.File;
 import java.sql.Connection;
@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared

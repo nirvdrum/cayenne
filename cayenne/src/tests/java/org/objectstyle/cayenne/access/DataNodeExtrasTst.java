@@ -56,9 +56,9 @@
 
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 public class DataNodeExtrasTst extends CayenneTestCase {
 

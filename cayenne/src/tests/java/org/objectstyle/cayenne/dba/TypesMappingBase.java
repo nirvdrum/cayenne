@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.dba;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class TypesMappingBase extends CayenneTestCase {
     public TypesMappingBase(String name) {

@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class UtilExtTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(UtilExtTst.class);

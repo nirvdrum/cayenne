@@ -55,8 +55,8 @@
  */ 
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class ObjRelationshipTst extends CayenneTestCase {

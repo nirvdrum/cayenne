@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.*;
 
 public class CayenneDOTestBase extends CayenneTestCase {    
     static final String artistName = "artist with one painting";

@@ -58,6 +58,8 @@ package org.objectstyle.cayenne;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import org.objectstyle.cayenne.unittest.*;
+
 public class TestCaseDataFactory {
 
     public static void createArtistWithPainting(

@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.map;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;

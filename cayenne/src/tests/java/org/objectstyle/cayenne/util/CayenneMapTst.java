@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.util;
 
 import java.util.HashMap;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

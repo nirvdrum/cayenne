@@ -59,10 +59,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

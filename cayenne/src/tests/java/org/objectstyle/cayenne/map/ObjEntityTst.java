@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.map;
 
 import java.util.HashMap;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ObjEntityTst extends CayenneTestCase {
 	protected ObjEntity ent;

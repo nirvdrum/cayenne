@@ -70,8 +70,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TestOperationObserver;
@@ -81,6 +79,8 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 public class DataContextTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DataContextTst.class.getName());

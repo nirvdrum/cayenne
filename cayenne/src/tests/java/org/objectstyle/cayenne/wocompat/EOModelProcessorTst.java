@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.wocompat;
 
 import java.io.PrintWriter;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class EOModelProcessorTst extends CayenneTestCase {
     private static final PrintWriter out = new NullPrintWriter();

@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public abstract class SelectQueryBase extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(SelectQueryBase.class.getName());

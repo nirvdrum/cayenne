@@ -63,7 +63,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SelectTranslatorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(SelectTranslatorTst.class.getName());

@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.project.validator;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.TstProject;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * Test cases for the Validator class.

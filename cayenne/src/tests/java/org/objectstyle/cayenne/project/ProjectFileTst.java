@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.PrintWriter;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

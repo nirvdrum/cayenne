@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class TernaryExpressionTst extends CayenneTestCase {

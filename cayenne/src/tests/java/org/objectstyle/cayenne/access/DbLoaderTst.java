@@ -60,12 +60,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class DbLoaderTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());

@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.util;
  *
  */ 
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class NameConverterTst extends CayenneTestCase {

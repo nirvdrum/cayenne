@@ -57,11 +57,11 @@ package org.objectstyle.cayenne.access.trans;
 
 import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.TranslationTestCase;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class OrderingTranslatorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class.getName());
