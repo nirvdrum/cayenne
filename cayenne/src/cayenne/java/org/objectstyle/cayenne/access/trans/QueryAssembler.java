@@ -64,6 +64,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -99,7 +100,7 @@ public abstract class QueryAssembler extends QueryTranslator {
     public String aliasForTable(DbEntity ent, DbRelationship rel) {
         return aliasForTable(ent); //Default implementation
     }
-    
+
     /** 
      * Returns a name that can be used as column alias.
      * This can be one of the following:
@@ -133,7 +134,11 @@ public abstract class QueryAssembler extends QueryTranslator {
     public PreparedStatement createStatement(Level logLevel) throws Exception {
         long t1 = System.currentTimeMillis();
         String sqlStr = createSqlString();
-        QueryLogger.logQuery(logLevel, sqlStr, values, System.currentTimeMillis() - t1);
+        QueryLogger.logQuery(
+            logLevel,
+            sqlStr,
+            values,
+            System.currentTimeMillis() - t1);
         PreparedStatement stmt = con.prepareStatement(sqlStr);
         initStatement(stmt);
         return stmt;
@@ -165,12 +170,27 @@ public abstract class QueryAssembler extends QueryTranslator {
                     if (val == null)
                         stmt.setNull(i + 1, type);
                     else {
-                        ExtendedType map =
+                        ExtendedType typeConverter =
                             adapter.getTypeConverter().getRegisteredType(
                                 val.getClass().getName());
                         Object jdbcVal =
-                            (map == null) ? val : map.toJdbcObject(val, type);
-                        stmt.setObject(i + 1, jdbcVal, type, precision);
+                            (typeConverter == null)
+                                ? val
+                                : typeConverter.toJdbcObject(val, type);
+
+                        try {
+                            stmt.setObject(i + 1, jdbcVal, type, precision);
+                        } catch (Exception ex) {
+                            // log error information
+                            logObj.warn(
+                                "Error setting value '"
+                                    + jdbcVal
+                                    + "' as "
+                                    + TypesMapping.getSqlNameByType(type)
+                                    + ", type converter used:"
+                                    + typeConverter);
+                            throw ex;
+                        }
                     }
                 }
             }

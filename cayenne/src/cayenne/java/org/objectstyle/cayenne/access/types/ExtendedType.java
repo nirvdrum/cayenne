@@ -64,7 +64,7 @@ import java.sql.ResultSet;
  * and write as parameters of PreparedStatements. 
  */
 public interface ExtendedType {
-    /** Returns a full name of Java class that this map supports. */
+    /** Returns a full name of Java class that this converter supports. */
     public String getClassName();
 
     /** Converts an object of class returned by 'className' to a corresponding

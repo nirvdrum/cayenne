@@ -65,7 +65,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 
-
 /** Handles Java types mapped to JDBC types in JDBC sepcification. */
 public class DefaultType implements ExtendedType {
     private static Logger logObj = Logger.getLogger(DefaultType.class);
@@ -76,24 +75,52 @@ public class DefaultType implements ExtendedType {
     static {
         try {
             Class rsClass = ResultSet.class;
-            Class[] paramTypes = new Class[] {Integer.TYPE};
-            readMethods.put(TypesMapping.JAVA_LONG, rsClass.getMethod("getLong", paramTypes));
-            readMethods.put(TypesMapping.JAVA_BIGDECIMAL, rsClass.getMethod("getBigDecimal", paramTypes));
-            readMethods.put(TypesMapping.JAVA_BOOLEAN, rsClass.getMethod("getBoolean", paramTypes));
-            readMethods.put(TypesMapping.JAVA_BYTE, rsClass.getMethod("getByte", paramTypes));
-            readMethods.put(TypesMapping.JAVA_BYTES, rsClass.getMethod("getBytes", paramTypes));
-            readMethods.put(TypesMapping.JAVA_SQLDATE, rsClass.getMethod("getDate", paramTypes));
-            readMethods.put(TypesMapping.JAVA_DOUBLE, rsClass.getMethod("getDouble", paramTypes));
-            readMethods.put(TypesMapping.JAVA_FLOAT, rsClass.getMethod("getFloat", paramTypes));
-            readMethods.put(TypesMapping.JAVA_INTEGER, rsClass.getMethod("getInt", paramTypes));
-            readMethods.put(TypesMapping.JAVA_SHORT, rsClass.getMethod("getShort", paramTypes));
-            readMethods.put(TypesMapping.JAVA_STRING, rsClass.getMethod("getString", paramTypes));
-            readMethods.put(TypesMapping.JAVA_TIME, rsClass.getMethod("getTime", paramTypes));
-            readMethods.put(TypesMapping.JAVA_TIMESTAMP, rsClass.getMethod("getTimestamp", paramTypes));
+            Class[] paramTypes = new Class[] { Integer.TYPE };
+            readMethods.put(
+                TypesMapping.JAVA_LONG,
+                rsClass.getMethod("getLong", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_BIGDECIMAL,
+                rsClass.getMethod("getBigDecimal", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_BOOLEAN,
+                rsClass.getMethod("getBoolean", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_BYTE,
+                rsClass.getMethod("getByte", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_BYTES,
+                rsClass.getMethod("getBytes", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_SQLDATE,
+                rsClass.getMethod("getDate", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_DOUBLE,
+                rsClass.getMethod("getDouble", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_FLOAT,
+                rsClass.getMethod("getFloat", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_INTEGER,
+                rsClass.getMethod("getInt", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_SHORT,
+                rsClass.getMethod("getShort", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_STRING,
+                rsClass.getMethod("getString", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_TIME,
+                rsClass.getMethod("getTime", paramTypes));
+            readMethods.put(
+                TypesMapping.JAVA_TIMESTAMP,
+                rsClass.getMethod("getTimestamp", paramTypes));
 
             readObjectMethod = rsClass.getMethod("getObject", paramTypes);
-        } catch(Exception ex) {
-            throw new CayenneRuntimeException("Error initializing read methods.", ex);
+        } catch (Exception ex) {
+            throw new CayenneRuntimeException(
+                "Error initializing read methods.",
+                ex);
         }
     }
 
@@ -106,7 +133,6 @@ public class DefaultType implements ExtendedType {
     protected Method readMethod;
     protected Object[] args = new Object[1];
 
-
     /** CreatesDefaultType to read objects from ResultSet
       * using "getObject" method. */
     public DefaultType() {
@@ -116,13 +142,14 @@ public class DefaultType implements ExtendedType {
 
     public DefaultType(String className) {
         this.className = className;
-        readMethod = (Method)readMethods.get(className);
+        readMethod = (Method) readMethods.get(className);
 
-        if(readMethod == null)
+        if (readMethod == null)
             throw new CayenneRuntimeException(
-                "Unsupported default class: " + className
-                + ". If you want a non-standard class to map to JDBC type,"
-                + " you will need to implement ExtendedType interface yourself.");
+                "Unsupported default class: "
+                    + className
+                    + ". If you want a non-standard class to map to JDBC type,"
+                    + " you will need to implement ExtendedType interface yourself.");
     }
 
     public String getClassName() {
@@ -133,10 +160,20 @@ public class DefaultType implements ExtendedType {
         return val;
     }
 
-
-    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+    public Object materializeObject(ResultSet rs, int index, int type)
+        throws Exception {
         args[0] = new Integer(index);
         Object val = readMethod.invoke(rs, args);
         return (rs.wasNull()) ? null : val;
+    }
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("ExtendedType [")
+            .append(getClass().getName())
+            .append("], handling ")
+            .append(getClassName());
+        return buf.toString();
     }
 }

@@ -59,7 +59,7 @@ import java.sql.ResultSet;
 import java.sql.Types;
 
 public class UtilDateType implements ExtendedType {
-	
+
     public String getClassName() {
         return java.util.Date.class.getName();
     }
@@ -73,10 +73,13 @@ public class UtilDateType implements ExtendedType {
             return new java.sql.Timestamp(((java.util.Date) val).getTime());
         else
             throw new IllegalArgumentException(
-                "Only date/time types can be used for '" + getClassName() + "'.");
+                "Only date/time types can be used for '"
+                    + getClassName()
+                    + "'.");
     }
 
-    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+    public Object materializeObject(ResultSet rs, int index, int type)
+        throws Exception {
         Object val = rs.getObject(index);
 
         // all sql time/date classes are subclasses of java.util.Date,
@@ -88,4 +91,13 @@ public class UtilDateType implements ExtendedType {
             : new java.util.Date(((java.util.Date) val).getTime());
     }
 
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("ExtendedType [")
+            .append(getClass().getName())
+            .append("], handling ")
+            .append(getClassName());
+        return buf.toString();
+    }
 }
