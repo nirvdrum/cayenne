@@ -587,7 +587,7 @@ public class CayenneDataObject implements DataObject {
             Object value = this.readPropertyDirectly(objAttribute.getName());
             if (dbAttribute.isMandatory()) {
                 ValidationFailure failure =
-                    BeanValidationFailure.validateMandatory(
+                    BeanValidationFailure.validateNotNull(
                         this,
                         objAttribute.getName(),
                         value);
