@@ -3,7 +3,10 @@
 <toc name="toc-modeler-guide" chapter="2. Object/Relational Modeling"/>
 <body>
  	 <section name="2. Object/Relational Modeling">
-		<p>A few scenarios are shown below that describe the most common cases that a
+		<p>This chapter shows how modeling approach should be chosen based on the project
+		requirements and other factors. It contains links to technical aspects of modeling
+		that are discussed elsewhere. A few scenarios are shown below that describe 
+		the most common cases that a
 		development team may encounter on a typical O/R project. Lets assume an 
 		imaginary company called "Some Company" that sells services to consumers as its
 		main business, but also sells consumer products, and works with business customers.

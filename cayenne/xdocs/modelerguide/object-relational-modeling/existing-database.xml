@@ -4,50 +4,24 @@
 <body>
 	<section name="2. Object/Relational Modeling">
  	 <subsection name="2.1 Java Interface to an Existing Database">
- 	 	<p><b>To be rewritten...</b></p>
+ 	 	<p>To quickly start a new project based on an existing database, CayenneModeler
+ 	 	"reverse engineering" functionality is used. Cayenne will create an exact model
+ 	 	of the database schema, and extrapolate it to the object layer. DataMaps created 
+		during reverse engineering will contain metadata for Java business layer.
+ 	 	The names of classes and their properties
+ 	 	will be compatible with Java naming conventions. E.g for a table 
+ 	 	called "USER_TYPE", a class named "UserType" will be created in the mapping.
+ 	 	</p>
  	 	
-
-		<ol>
-				<li>Start CayenneModeler</li>
-		<li>Click File->New Project.
-			System will prompt you to choose the project location -
-			folder which will be the root for all other project files.
-		</li>
-		<li>Select folder and click Save.
-			If there is already a project (cayenne.xml file) in the folder you
-			selected, system will ask you if you want to overwrite existing
-			project.</li>
-		<li>Once you have successfully created the project, the system will
-		split the screen in two panes. Right pane is the Browse View used to
-		navigate through domains, data nodes, data maps and entities. Left pane
-		is the Detail view showing the details of the item currently selected in
-		the Browse view.</li>
-		<li>Click Project->Create Domain. The system will show the new domain
-		selected in the Browse view and detail information (only name) in the
-		Detail view.</li>
-		<li>Rename the domain by typing Domain1 in the detail view.
-		</li>
-		<li>Click Tools->Reverse Engineer Database.
-			System will bring up Enter JDBC Information dialog.</li>
-		<li>Type in the connection information for the database and click
-		Ok.
-			In my case (I am connecting to the MySQL database).
-			Make sure JDBC driver is in your Classpath or in jre\lib\ext.
-			Also make sure you select RDBMS Adapter for your
-			database.
-			The adapter determines the generation of the SQL.</li>
-		<li>If the database has multiple schemas,
-			it will bring the Select schema dialog.
-			Select the desired schema and click Ok.</li>
-		<li>System may take several minutes to reverse engineer the database
-		depending on its size.
-			Once it is finished, it will add a new data map to the Domain.
-			The new data map will have Db Entity generated per each DB table and
-			Obj Entity generated per each Db Entity.
-			If you database does not support foreign keys (like MySQL),
-			no relationships will be generated.</li>
-		</ol>
-		</subsection>
+ 	 	<p>See the following topics explaining how to reverse engineer a database into a
+ 	 	Cayenne model:</p>
+ 	 	
+ 	 	<ul>
+ 	 		<li><a href="../common-tasks/create-project.html">Create New Project</a></li>
+ 	 		<li><a href="../common-tasks/create-data-node.html">Create DataNode</a></li>
+ 	 		<li><a href="../common-tasks/reverse-engineer.html">Create New DataMap by reverse engineering database</a></li>
+ 	 	</ul>
+ 	 </subsection>
     </section>
 </body>
 </document>

@@ -1,8 +1,8 @@
 <document>
 <title>CayenneModeler Guide</title>
-<toc name="toc-modeler-guide" chapter="4. Modeling Tips"/>
+<toc name="toc-modeler-guide" chapter="7. Modeling Tips"/>
 <body>
-        <section name="4. Modeling Tips">
+        <section name="7. Modeling Tips">
         	<p>This section contains a few unorganized tips on Object/Relational modeling in Cayenne. 
         	Some of these tips may become obsolete in the future as the Modeler evolves, making
         	many things more transparent to the user.</p>

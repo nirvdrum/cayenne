@@ -11,6 +11,12 @@
       		<li><a href="http://sourceforge.net/tracker/?func=add&amp;group_id=48132&amp;atid=452068">Submit New Bug</a></li>
       		<li><a href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068">Browse Open Bugs</a></li>
       	</ul>
+      	
+      	<panel name="Note:">
+      	To see bugs that are fixed but are not included in the official release yet, follow "Browse" link above and
+      	select "Pending" from the "Status" dropdown list. Nightly builds may already contain such fixes.
+      	</panel>
+      	
         </section>
     </body>
 </document>

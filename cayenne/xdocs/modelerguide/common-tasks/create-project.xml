@@ -1,0 +1,44 @@
+<document>
+<title>CayenneModeler Guide</title>
+<toc name="toc-modeler-guide" chapter="4. Common Modeling Tasks"/>
+<body>
+	<section name="4. Common Modeling Tasks">
+	<subsection name="4.1 Create New Project">
+ 	 	<p><strong>Start CayenneModeler</strong>. Start CayenneModeler as described
+ 	 	<a href="../modeler-intro/runmodeler.html">earlier</a>.</p>
+ 	 	
+ 	    <p><strong>Start New Project</strong>. Select "File -> New Project" menu item or click
+ 	    on new project icon:</p>
+ 	    
+        <img src="/images/modelerguide/new-project.jpg" width="400" height="240" border="0" align="middle"
+		alt="Create Project"/>
+ 	 	
+		<p>From a list of project types displayed select "Create Application"
+		(the only one available now). A new project will be created.
+		</p>
+		
+		<p><strong>Create New DataDomain</strong>. First thing to create in a new project
+		is a new DataDomain. Most projects will only have
+		a single DataDomain. Select "Project -> Create DataDomain" menu item or click
+ 	    on new domain icon:</p>
+ 	    
+        <img src="/images/modelerguide/new-domain.jpg" width="400" height="240" border="0" align="middle"
+		alt="Create DataDomain"/>
+ 	 	
+		<p>After the domain is created you can assign it any name you want instead of the default
+		"UntitledDomain1".
+		</p>
+		
+		
+        <p><strong>Save New Project</strong>. When saving a new project you will be prompted to specify
+        location. Main project file, "cayenne.xml", will be saved in a directory that you choose. Locations
+        of project DataMap and DataNode files will be relative to the main project directory.</p>
+        </subsection>
+    </section>
+</body>
+</document>
+
+
+
+
+

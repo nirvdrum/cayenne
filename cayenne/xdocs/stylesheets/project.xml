@@ -128,9 +128,24 @@
     		<item name="2.3 Converting an Existing Java Business Framework"  href="/modelerguide/object-relational-modeling/existing-java-framework.html"/>
     	</item>
     	
-        <item name="3. Generating Primary Key Support"  href="/modelerguide/pksupport.html"/>
+    	<item name="3. Cayenne Model Structure"  href="/modelerguide/model-structure/index.html"/>
     	
-    	<item name="4. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
+    	<item name="4. Common Modeling Tasks"  href="/modelerguide/common-tasks/index.html">
+    		<item name="4.1 Create New Project"  href="/modelerguide/common-tasks/create-project.html"/>
+    		<item name="4.2 Create DataNode"  href="/modelerguide/common-tasks/create-data-node.html"/>
+    		<item name="4.3 Reverse Engineer Database"  href="/modelerguide/common-tasks/reverse-engineer.html"/>
+    		<item name="4.4 Generate Java Classes"  href="/modelerguide/common-tasks/generate-java.html"/>
+    		<item name="4.5 Generate Database Schema"  href="/modelerguide/common-tasks/generate-db.html"/>
+    		<item name="4.6 Generate Primary Key Support"  href="/modelerguide/common-tasks/pksupport.html"/>
+    	</item>
+    	
+    	<item name="5. Modeling Database Layer"  href="/modelerguide/modeling-db-layer/index.html">
+    		<item name="5.1 &quot;To Dep PK&quot; Checkbox" href="/modelerguide/modeling-db-layer/to-dep-pk.html"/>
+    	</item>
+    	
+    	<item name="6. Modeling Object Layer"  href="/modelerguide/modeling-object-layer/index.html"/>
+    	
+    	<item name="7. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
     </toc-modeler-guide>
     
     
