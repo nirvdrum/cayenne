@@ -94,7 +94,7 @@ public class DataContextTst extends CayenneTestCase {
 		TestMain.getSharedDatabaseSetup().cleanTableData();
 		populateTables();
 
-		DataDomain dom = TestMain.getSharedDomain();
+		DataDomain dom = getSharedDomain();
 		dom.getDataNodes()[0].createPkSupportForMapEntities();
 
 		ctxt = dom.createDataContext();
@@ -349,7 +349,7 @@ public class DataContextTst extends CayenneTestCase {
 		String insertArtist =
 			"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
 
-		Connection conn = TestMain.getSharedConnection();
+		Connection conn = getSharedConnection();
 
 		try {
 			conn.setAutoCommit(false);
@@ -391,7 +391,7 @@ public class DataContextTst extends CayenneTestCase {
 		String insertPaint =
 			"INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (?,?,?, ?)";
 
-		Connection conn = TestMain.getSharedConnection();
+		Connection conn = getSharedConnection();
 
 		try {
 			conn.setAutoCommit(false);

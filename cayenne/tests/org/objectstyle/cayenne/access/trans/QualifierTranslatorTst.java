@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.util.logging.Logger;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -65,84 +64,79 @@ import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
 
 public class QualifierTranslatorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(QualifierTranslatorTst.class.getName());
+	static Logger logObj =
+		Logger.getLogger(QualifierTranslatorTst.class.getName());
 
-    protected TstQueryAssembler qa;
+	protected TstQueryAssembler qa;
 
-    public QualifierTranslatorTst(String name) {
-        super(name);
-    }
+	public QualifierTranslatorTst(String name) {
+		super(name);
+	}
 
-    protected void setUp() throws java.lang.Exception {
-        qa =
-            TstQueryAssembler.assembler(TestMain.getSharedDomain(), Query.SELECT_QUERY);
-    }
+	protected void setUp() throws java.lang.Exception {
+		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
+	}
 
-    public void testNonQualifiedQuery() throws java.lang.Exception {
-        qa.dispose();
-        qa =
-            TstQueryAssembler.assembler(TestMain.getSharedDomain(), Query.INSERT_QUERY);
+	public void testNonQualifiedQuery() throws java.lang.Exception {
+		qa.dispose();
+		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.INSERT_QUERY);
 
-        try {
-            new QualifierTranslator(qa).doTranslation();
-            fail();
-        }
-        catch (ClassCastException ccex) {
-            // exception expected
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+		try {
+			new QualifierTranslator(qa).doTranslation();
+			fail();
+		} catch (ClassCastException ccex) {
+			// exception expected
+		} finally {
+			qa.dispose();
+		}
+	}
 
-    public void testNullQualifier() throws java.lang.Exception {
-        try {
-            assertNull(new QualifierTranslator(qa).doTranslation());
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+	public void testNullQualifier() throws java.lang.Exception {
+		try {
+			assertNull(new QualifierTranslator(qa).doTranslation());
+		} finally {
+			qa.dispose();
+		}
+	}
 
-    public void testUnary() throws java.lang.Exception {
-        doExpressionTest(new TstUnaryExpSuite());
-    }
+	public void testUnary() throws java.lang.Exception {
+		doExpressionTest(new TstUnaryExpSuite());
+	}
 
-    public void testBinary() throws java.lang.Exception {
-        doExpressionTest(new TstBinaryExpSuite());
-    }
+	public void testBinary() throws java.lang.Exception {
+		doExpressionTest(new TstBinaryExpSuite());
+	}
 
-    public void testTernary() throws java.lang.Exception {
-        doExpressionTest(new TstTernaryExpSuite());
-    }
+	public void testTernary() throws java.lang.Exception {
+		doExpressionTest(new TstTernaryExpSuite());
+	}
 
-    private void doExpressionTest(TstExpressionSuite suite)
-        throws java.lang.Exception {
+	private void doExpressionTest(TstExpressionSuite suite)
+		throws java.lang.Exception {
 
-        try {
-            TstExpressionCase[] cases = suite.cases();
+		try {
+			TstExpressionCase[] cases = suite.cases();
 
-            int len = cases.length;
-            for (int i = 0; i < len; i++) {
-                try {
-                    ((QualifiedQuery) qa.getQuery()).setQualifier(cases[i].getCayenneExp());
-                    ObjEntity ent =
-                        org.objectstyle.TestMain.getSharedDomain().lookupEntity(
-                            cases[i].getRootEntity());
-                    assertNotNull(ent);
-                    qa.getQuery().setObjEntityName(ent.getName());
-                    cases[i].assertTranslatedWell(
-                        new QualifierTranslator(qa).doTranslation(),
-                        false);
-                }
-                catch (Exception ex) {
-                    System.out.println("Failed case: [" + i + "]: " + cases[i]);
-                    throw ex;
-                }
-            }
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+			int len = cases.length;
+			for (int i = 0; i < len; i++) {
+				try {
+					((QualifiedQuery) qa.getQuery()).setQualifier(
+						cases[i].getCayenneExp());
+					ObjEntity ent =
+						getSharedDomain().lookupEntity(
+							cases[i].getRootEntity());
+					assertNotNull(ent);
+					qa.getQuery().setObjEntityName(ent.getName());
+					cases[i].assertTranslatedWell(
+						new QualifierTranslator(qa).doTranslation(),
+						false);
+				} catch (Exception ex) {
+					System.out.println("Failed case: [" + i + "]: " + cases[i]);
+					throw ex;
+				}
+			}
+		} finally {
+			qa.dispose();
+		}
+	}
 }

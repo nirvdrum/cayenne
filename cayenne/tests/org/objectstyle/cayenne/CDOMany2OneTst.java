@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,12 +53,14 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.objectstyle.art.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;

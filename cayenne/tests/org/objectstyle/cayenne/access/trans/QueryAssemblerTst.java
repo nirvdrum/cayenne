@@ -63,50 +63,44 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.Query;
 
 public class QueryAssemblerTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(QueryAssemblerTst.class.getName());
+	static Logger logObj = Logger.getLogger(QueryAssemblerTst.class.getName());
 
-    protected TstQueryAssembler qa;
+	protected TstQueryAssembler qa;
 
-    public QueryAssemblerTst(String name) {
-        super(name);
-    }
+	public QueryAssemblerTst(String name) {
+		super(name);
+	}
 
-    protected void setUp() throws java.lang.Exception {
-        qa =
-            TstQueryAssembler.assembler(
-                org.objectstyle.TestMain.getSharedDomain(),
-                Query.SELECT_QUERY);
-    }
+	protected void setUp() throws java.lang.Exception {
+		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
+	}
 
-    public void testGetQuery() throws java.lang.Exception {
-        try {
-            assertNotNull(qa.getQuery());
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+	public void testGetQuery() throws java.lang.Exception {
+		try {
+			assertNotNull(qa.getQuery());
+		} finally {
+			qa.dispose();
+		}
+	}
 
-    public void testAddToParamList() throws java.lang.Exception {
-        try {
-            assertEquals(0, qa.getAttributes().size());
-            assertEquals(0, qa.getValues().size());
+	public void testAddToParamList() throws java.lang.Exception {
+		try {
+			assertEquals(0, qa.getAttributes().size());
+			assertEquals(0, qa.getValues().size());
 
-            qa.addToParamList(new DbAttribute(), new Object());
-            assertEquals(1, qa.getAttributes().size());
-            assertEquals(1, qa.getValues().size());
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+			qa.addToParamList(new DbAttribute(), new Object());
+			assertEquals(1, qa.getAttributes().size());
+			assertEquals(1, qa.getValues().size());
+		} finally {
+			qa.dispose();
+		}
+	}
 
-    public void testCreateStatement() throws java.lang.Exception {
-        try {
-            assertNotNull(qa.createStatement(Level.INFO));
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+	public void testCreateStatement() throws java.lang.Exception {
+		try {
+			assertNotNull(qa.createStatement(Level.INFO));
+		} finally {
+			qa.dispose();
+		}
+	}
 }

@@ -88,7 +88,7 @@ public class ClassGeneratorTst extends CayenneTestCase {
 
         // final template test
         StringWriter out = new StringWriter();
-        ObjEntity pe = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Painting");
+        ObjEntity pe = getSharedDomain().lookupEntity("Painting");
         cgen.generateClass(out, pe);
         out.flush();
         out.close();

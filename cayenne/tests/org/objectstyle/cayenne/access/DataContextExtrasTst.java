@@ -85,7 +85,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 	}
 
 	protected void setUp() throws java.lang.Exception {
-		ctxt = TestMain.getSharedDomain().createDataContext();
+		ctxt = getSharedDomain().createDataContext();
 	}
 
 	public void testHasChangesNew() throws Exception {

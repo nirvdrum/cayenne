@@ -64,72 +64,70 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class OrderingTranslatorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class.getName());
+	static Logger logObj =
+		Logger.getLogger(OrderingTranslatorTst.class.getName());
 
-    protected TstQueryAssembler qa;
-    protected SelectQuery q;
+	protected TstQueryAssembler qa;
+	protected SelectQuery q;
 
-    public OrderingTranslatorTst(String name) {
-        super(name);
-    }
+	public OrderingTranslatorTst(String name) {
+		super(name);
+	}
 
-    protected void setUp() throws java.lang.Exception {
-        qa =
-            TstQueryAssembler.assembler(
-                org.objectstyle.TestMain.getSharedDomain(),
-                Query.SELECT_QUERY);
-        q = (SelectQuery) qa.getQuery();
-    }
+	protected void setUp() throws java.lang.Exception {
+		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
+		q = (SelectQuery) qa.getQuery();
+	}
 
-    public void testDoTranslation1() throws java.lang.Exception {
-        try {
-            TranslationTestCase tstCase =
-                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
-            q.setObjEntityName("Artist");
-            q.addOrdering("artistName", Ordering.ASC);
-            String orderBySql = new OrderingTranslator(qa).doTranslation();
+	public void testDoTranslation1() throws java.lang.Exception {
+		try {
+			TranslationTestCase tstCase =
+				new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
+			q.setObjEntityName("Artist");
+			q.addOrdering("artistName", Ordering.ASC);
+			String orderBySql = new OrderingTranslator(qa).doTranslation();
 
-            assertNotNull(orderBySql);
-            tstCase.assertTranslatedWell(orderBySql, true);
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+			assertNotNull(orderBySql);
+			tstCase.assertTranslatedWell(orderBySql, true);
+		} finally {
+			qa.dispose();
+		}
+	}
 
-    public void testDoTranslation2() throws java.lang.Exception {
-        try {
-            TranslationTestCase tstCase =
-                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME DESC");
-            q.setObjEntityName("Artist");
-            q.addOrdering("artistName", Ordering.DESC);
-            String orderBySql = new OrderingTranslator(qa).doTranslation();
+	public void testDoTranslation2() throws java.lang.Exception {
+		try {
+			TranslationTestCase tstCase =
+				new TranslationTestCase(
+					"Artist",
+					null,
+					"<ta.>ARTIST_NAME DESC");
+			q.setObjEntityName("Artist");
+			q.addOrdering("artistName", Ordering.DESC);
+			String orderBySql = new OrderingTranslator(qa).doTranslation();
 
-            assertNotNull(orderBySql);
-            tstCase.assertTranslatedWell(orderBySql, true);
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+			assertNotNull(orderBySql);
+			tstCase.assertTranslatedWell(orderBySql, true);
+		} finally {
+			qa.dispose();
+		}
+	}
 
-    public void testDoTranslation3() throws java.lang.Exception {
-        try {
-            TranslationTestCase tstCase =
-                new TranslationTestCase(
-                    "Artist",
-                    null,
-                    "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
-            q.setObjEntityName("Artist");
-            q.addOrdering("artistName", Ordering.DESC);
-            q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
-            String orderBySql = new OrderingTranslator(qa).doTranslation();
+	public void testDoTranslation3() throws java.lang.Exception {
+		try {
+			TranslationTestCase tstCase =
+				new TranslationTestCase(
+					"Artist",
+					null,
+					"<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
+			q.setObjEntityName("Artist");
+			q.addOrdering("artistName", Ordering.DESC);
+			q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
+			String orderBySql = new OrderingTranslator(qa).doTranslation();
 
-            assertNotNull(orderBySql);
-            tstCase.assertTranslatedWell(orderBySql, true);
-        }
-        finally {
-            qa.dispose();
-        }
-    }
+			assertNotNull(orderBySql);
+			tstCase.assertTranslatedWell(orderBySql, true);
+		} finally {
+			qa.dispose();
+		}
+	}
 }

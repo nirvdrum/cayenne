@@ -82,7 +82,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
     
     public void setUp() throws java.lang.Exception {
         TestMain.getSharedDatabaseSetup().cleanTableData();        
-        DataDomain dom = TestMain.getSharedDomain();
+        DataDomain dom = getSharedDomain();
         Level oldLevel = QueryLogger.getLogLevel();
         QueryLogger.setLogLevel(Level.SEVERE);
         dom.getDataNodes()[0].createPkSupportForMapEntities();
@@ -91,7 +91,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
     }
     
     protected void resetContext() {
-        ctxt = org.objectstyle.TestMain.getSharedDomain().createDataContext();
+        ctxt = getSharedDomain().createDataContext();
     }
     
     protected Exhibit newExhibit(Gallery gallery) {

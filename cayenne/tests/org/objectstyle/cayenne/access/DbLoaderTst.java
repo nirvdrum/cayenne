@@ -80,8 +80,8 @@ public class DbLoaderTst extends CayenneTestCase {
 	public void setUp() throws Exception {
 		loader =
 			new DbLoader(
-				TestMain.getSharedConnection(),
-				TestMain.getSharedNode().getAdapter());
+				getSharedConnection(),
+				getSharedNode().getAdapter());
 	}
 
 	/** 

@@ -71,7 +71,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
     
     public void testGetReverseRel1() throws Exception {
-        DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
+        DataDomain dom = getSharedDomain();
         ObjEntity artistEnt = dom.lookupEntity("Artist");
         ObjEntity paintingEnt = dom.lookupEntity("Painting");
         
@@ -84,7 +84,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
     }
     
     public void testGetReverseRel2() throws Exception {
-        DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
+        DataDomain dom = getSharedDomain();
         ObjEntity artistEnt = dom.lookupEntity("Artist");
         ObjEntity paintingEnt = dom.lookupEntity("Painting");
         

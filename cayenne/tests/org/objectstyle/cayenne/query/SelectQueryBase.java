@@ -83,7 +83,7 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     
     protected void performQuery() throws java.lang.Exception {
         // run query
-        TestMain.getSharedDomain().performQuery(getQuery(), opObserver);
+        getSharedDomain().performQuery(getQuery(), opObserver);
         
         // check query errors
         opObserver.assertAllExceptions();

@@ -100,7 +100,7 @@ public class SqlModifyQueryInContextTst extends SelectQueryBase {
     protected void insertArtists() throws java.lang.Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        Connection conn = getSharedConnection();
 
         try {
             conn.setAutoCommit(false);

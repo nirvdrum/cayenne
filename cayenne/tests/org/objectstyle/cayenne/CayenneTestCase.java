@@ -60,6 +60,7 @@ import java.sql.Connection;
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -80,19 +81,23 @@ public class CayenneTestCase extends TestCase {
 		super(arg0);
 	}
 
-	public static Connection getSharedConnection() {
+	public Connection getSharedConnection() {
 		return TestMain.getResources().getSharedConnection();
 	}
 
-	public static DataDomain getSharedDomain() {
+	public DataDomain getSharedDomain() {
 		return TestMain.getResources().getSharedDomain();
 	}
 
-	public static DataNode getSharedNode() {
+	public DataNode getSharedNode() {
 		return TestMain.getResources().getSharedNode();
 	}
 
-	public static DataSourceInfo getFreshConnInfo() throws Exception {
+	public DataSourceInfo getFreshConnInfo() throws Exception {
 		return TestMain.getResources().getFreshConnInfo();
+	}
+	
+	public DataContext createDataContext() {
+		return getSharedDomain().createDataContext();
 	}
 }

@@ -60,7 +60,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.map.ObjEntity;
 
@@ -86,7 +85,7 @@ public class JdbcAdapterTst extends CayenneTestCase {
 	public void testCreateTable() throws Exception {
 		// an attempt to create a derived table must generate an exception
 		try {
-			ObjEntity e = TestMain.getSharedDomain().lookupEntity("ArtistAssets");
+			ObjEntity e = getSharedDomain().lookupEntity("ArtistAssets");
 			adapter.createTable(e.getDbEntity());
 			fail("Derived tables shouldn't be allowed in 'create'."); 
 		} catch (Exception ex) {

@@ -86,7 +86,7 @@ public class TypesMappingTst extends TypesMappingBase {
     public void testTypeInfoCompleteness() throws java.lang.Exception {
         // check counts 
         // since more then 1 database type can map to a single JDBC type
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        Connection conn = getSharedConnection();
         int len = 0;
         try {
             DatabaseMetaData md = conn.getMetaData();

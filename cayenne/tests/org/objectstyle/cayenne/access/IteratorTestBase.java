@@ -93,7 +93,7 @@ public class IteratorTestBase extends CayenneTestCase {
      * Initializes internal state.
      */
 	protected void init() throws Exception {
-		conn = TestMain.getSharedConnection();
+		conn = getSharedConnection();
 
 		SelectQuery q = new SelectQuery("Artist");
 		q.addOrdering("artistName", true);

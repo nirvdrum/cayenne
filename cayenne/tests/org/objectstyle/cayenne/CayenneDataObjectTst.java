@@ -67,7 +67,7 @@ public class CayenneDataObjectTst extends CayenneTestCase {
     }
     
     public void setUp() throws java.lang.Exception {
-        ctxt = org.objectstyle.TestMain.getSharedDomain().createDataContext();
+        ctxt = getSharedDomain().createDataContext();
     }
     
     

@@ -93,7 +93,7 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 	public void testCreatePkSupportForMapEntities()
 		throws java.lang.Exception {
 		TestMain.getSharedDatabaseSetup().cleanTableData();
-		DataNode node = TestMain.getSharedDomain().getDataNodes()[0];
+		DataNode node = getSharedDomain().getDataNodes()[0];
 		node.createPkSupportForMapEntities();
 
 		DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();

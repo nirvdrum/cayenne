@@ -82,21 +82,20 @@ public class SelectTranslatorTst extends CayenneTestCase {
 
 	protected void setUp() throws Exception {
 		q = new SelectQuery();
-		artistEnt =
-			TestMain.getSharedDomain().lookupEntity("Artist").getDbEntity();
+		artistEnt = getSharedDomain().lookupEntity("Artist").getDbEntity();
 	}
 
 	private SelectTranslator buildTranslator(Connection con) throws Exception {
 		SelectTranslator t = new SelectTranslator();
-		t.setAdapter(TestMain.getSharedNode().getAdapter());
+		t.setAdapter(getSharedNode().getAdapter());
 		t.setCon(con);
-		t.setEngine(TestMain.getSharedDomain());
+		t.setEngine(getSharedDomain());
 		t.setQuery(q);
 		return t;
 	}
 
 	public void testCreateSqlString1() throws Exception {
-		Connection con = TestMain.getSharedConnection();
+		Connection con = getSharedConnection();
 
 		try {
 			// query with qualifier and ordering
@@ -126,7 +125,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 	}
 
 	public void testCreateSqlString2() throws java.lang.Exception {
-		Connection con = TestMain.getSharedConnection();
+		Connection con = getSharedConnection();
 		try {
 			// query with "distinct" set
 			q.setObjEntityName("Artist");
@@ -143,7 +142,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 	}
 
 	public void testBuildColumnList1() throws Exception {
-		Connection con = TestMain.getSharedConnection();
+		Connection con = getSharedConnection();
 
 		try {
 			// configure query with entity that maps one-to-one to DbEntity
@@ -166,7 +165,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 	}
 
 	public void testBuildColumnList2() throws Exception {
-		Connection con = TestMain.getSharedConnection();
+		Connection con = getSharedConnection();
 
 		try {
 			// configure query with custom attributes
@@ -191,7 +190,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 	}
 
 	public void testBuildColumnList3() throws Exception {
-		Connection con = TestMain.getSharedConnection();
+		Connection con = getSharedConnection();
 
 		try {
 			// configure query with entity that maps to a subset of DbEntity
@@ -202,19 +201,19 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			List columns = transl.getColumnList();
 
 			ObjEntity subPainting =
-				TestMain.getSharedDomain().lookupEntity("SubPainting");
+				getSharedDomain().lookupEntity("SubPainting");
 
-            // assert that the number of attributes in the query is right
-            // 1 (obj attr) + 1 (pk) = 2 
+			// assert that the number of attributes in the query is right
+			// 1 (obj attr) + 1 (pk) = 2 
 			assertEquals(2, columns.size());
 
 		} finally {
 			con.close();
 		}
 	}
-	
+
 	public void testBuildColumnList4() throws Exception {
-		Connection con = TestMain.getSharedConnection();
+		Connection con = getSharedConnection();
 
 		try {
 			// configure query with derived entity that maps to a subset of DbEntity
@@ -225,11 +224,10 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			List columns = transl.getColumnList();
 
 			ObjEntity countsEnt =
-				TestMain.getSharedDomain().lookupEntity("ArtistPaintingCounts");
+				getSharedDomain().lookupEntity("ArtistPaintingCounts");
 
-
-            // assert that the number of attributes in the query is right
-            // 1 (obj attr) + 1 (pk) = 2 
+			// assert that the number of attributes in the query is right
+			// 1 (obj attr) + 1 (pk) = 2 
 			assertEquals(2, columns.size());
 
 		} finally {
