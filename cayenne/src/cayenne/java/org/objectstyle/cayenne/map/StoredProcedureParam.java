@@ -53,42 +53,40 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.query;
-
-import java.util.List;
-
-import org.objectstyle.cayenne.map.DbEntity;
+package org.objectstyle.cayenne.map;
 
 /**
- * BatchQuery and its descendants allow to group similar data for the
- * following massive database modifications. Mainly the data are grouped
- * by modification type (INSERT/DELETE/UPDATE) and DbEntity. Additional
- * conditions may be used too. Generally batches are utilized in ContextCommit
- * and performed by DataNodes.
- *
- * @author Andriy Shapochka
+ * A descriptor for the StoredProcedure parameter.
+ * 
+ * @author Andrei Adamchik
  */
+public class StoredProcedureParam extends MapObject {
+    protected int type;
 
-public abstract class BatchQuery extends AbstractQuery {
-  protected DbEntity metadata;
+    /**
+     * Constructor for StoredProcedureParam.
+     */
+    public StoredProcedureParam() {
+        super();
+    }
 
-  public BatchQuery(DbEntity dbEntity) {
-    metadata = dbEntity;
-  }
+    /**
+     * Constructor for StoredProcedureParam.
+     */
+    public StoredProcedureParam(String name, int type) {
+        this.objName = name;
+        this.type = type;
+    }
 
-  public DbEntity getMetadata() {
-    return metadata;
-  }
+    /** 
+     * Returns the StoredProcedure owning this parameter.
+     */
+    public StoredProcedure getStoredProcedure() {
+        return (StoredProcedure) getParent();
+    }
 
-  public abstract List getDbAttributes();
-
-  public abstract void reset();
-
-  public abstract boolean next();
-
-  public abstract Object getObject(int valueIndex);
-
-  public abstract int size();
-
-  public abstract boolean isEmpty();
+    /** Sets the StoredProcedure that owns this parameter. */
+    public void setStoredProcedure(StoredProcedure storedProc) {
+        setParent(storedProc);
+    }
 }

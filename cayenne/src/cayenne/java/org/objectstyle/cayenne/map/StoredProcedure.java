@@ -53,42 +53,111 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.map;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.map.DbEntity;
-
 /**
- * BatchQuery and its descendants allow to group similar data for the
- * following massive database modifications. Mainly the data are grouped
- * by modification type (INSERT/DELETE/UPDATE) and DbEntity. Additional
- * conditions may be used too. Generally batches are utilized in ContextCommit
- * and performed by DataNodes.
- *
- * @author Andriy Shapochka
+ * A mapping descriptor for the database stored procedure.
+ * 
+ * @author Andrei Adamchik
  */
+public class StoredProcedure {
+    protected String name;
+    protected boolean returningRows;
+    protected List params = new ArrayList();
+    protected List resultAttrs = new ArrayList();
 
-public abstract class BatchQuery extends AbstractQuery {
-  protected DbEntity metadata;
+    /**
+     * Default constructor for StoredProcedure.
+     */
+    public StoredProcedure() {
+        super();
+    }
 
-  public BatchQuery(DbEntity dbEntity) {
-    metadata = dbEntity;
-  }
+    /**
+     * Creates an instance of StoredProcedure with the specified name and select
+     * behaviour.
+     */
+    public StoredProcedure(String name, boolean returningRows) {
+        this.name = name;
+        this.returningRows = returningRows;
+    }
 
-  public DbEntity getMetadata() {
-    return metadata;
-  }
+    /**
+     * Returns StoredProcedure's name. This is also a database name.
+     */
+    public String getName() {
+        return name;
+    }
 
-  public abstract List getDbAttributes();
+    /**
+     * Returns <code>true</code> if the StoredProcedure is expected to return a
+     * ResultSet, <code>false</code> otherwise.
+     */
+    public boolean isReturningRows() {
+        return returningRows;
+    }
 
-  public abstract void reset();
+    /**
+     * Sets the name of the StoredProcedure.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public abstract boolean next();
+    /**
+     * Sets whether the StoredProcedure returns a ResultSet.
+     */
+    public void setReturningRows(boolean returningRows) {
+        this.returningRows = returningRows;
+    }
 
-  public abstract Object getObject(int valueIndex);
+    /**
+     * Adds a DbAttribute describing returned ResultSet.
+     */
+    public void addResultAttr(DbAttribute attr) {
+        if (attr == null) {
+            throw new IllegalArgumentException("Attempt to add a null DbAttribute.");
+        }
 
-  public abstract int size();
+        resultAttrs.add(attr);
+    }
 
-  public abstract boolean isEmpty();
+    public void removeResultAttr(DbAttribute attr) {
+        resultAttrs.remove(attr);
+    }
+
+    public List getResultAttrs() {
+        return resultAttrs;
+    }
+
+    public void clearResultAttrs() {
+        resultAttrs.clear();
+    }
+
+    /**
+      * Adds a StoredProcedureParam to the list of parameters.
+      */
+    public void addParam(StoredProcedureParam param) {
+        if (param == null) {
+            throw new IllegalArgumentException("Attempt to add a null StoredProcedureParam.");
+        }
+
+        params.add(param);
+        param.setStoredProcedure(this);
+    }
+
+    public void removeParam(StoredProcedureParam param) {
+        params.remove(param);
+    }
+
+    public List getParams() {
+        return params;
+    }
+
+    public void clearParams() {
+        params.clear();
+    }
 }
