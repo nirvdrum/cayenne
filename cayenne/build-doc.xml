@@ -17,7 +17,6 @@
     <!-- Deploys Cayenne web site in a local directory -->
     <!-- ============================================= -->
     <target name="release-site" depends="nositedir,prepare,doc,api">
-    	 <delete dir="${site.dir}/cayenne"/>
          <mkdir dir="${site.dir}/cayenne"/>         
          
          <!-- copy all but HTML -->
