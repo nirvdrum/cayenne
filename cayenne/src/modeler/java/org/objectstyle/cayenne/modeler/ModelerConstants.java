@@ -55,12 +55,18 @@
  */
 package org.objectstyle.cayenne.modeler;
 
+import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
+
 /**
  * Defines constants used in the modeler.
  * 
  * @author Andrei Adamchik
  */
 public interface ModelerConstants {
-    public static final String TITLE = "CayenneModeler";
+
+	public static final String TITLE = "CayenneModeler";
+	public static final String DEFAULT_LAF_NAME = PlasticXPLookAndFeel.class.getName();
+	public static final String DEFAULT_THEME_NAME = "Desert Blue";
 
 }
+

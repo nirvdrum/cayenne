@@ -111,6 +111,7 @@ public class ModelerPreferences extends ExtendedProperties {
 
 	/** GUI layout */
 	public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";
+	public static final String EDITOR_THEMENAME = "Editor.theme";
 	public static final String EDITOR_FRAME_WIDTH = "Editor.frameWidth";
 	public static final String EDITOR_FRAME_HEIGHT = "Editor.frameHeight";
 	public static final String EDITOR_FRAME_X  = "Editor.frameX";

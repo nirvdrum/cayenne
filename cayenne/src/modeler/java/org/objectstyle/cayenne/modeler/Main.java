@@ -56,8 +56,13 @@
 
 package org.objectstyle.cayenne.modeler;
 
+import com.jgoodies.plaf.plastic.PlasticLookAndFeel;
+import com.jgoodies.plaf.plastic.PlasticTheme;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -70,8 +75,6 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 
-import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
-
 /** 
  * Main class responsible for starting CayenneModeler.
  * 
@@ -80,7 +83,7 @@ import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
  */
 public class Main {
     private static Logger logObj = Logger.getLogger(Main.class);
-
+    
     /**
      * Main method that starts the CayenneModeler.
      */
@@ -88,33 +91,8 @@ public class Main {
         // if configured, redirect all logging to the log file
         configureLogging();
 
-        // get preferences
-        ModelerPreferences prefs = ModelerPreferences.getPreferences();
-
-        // get L&F
-        String laf = prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
-        
-        try {
-        	// set L&F
-            UIManager.setLookAndFeel(laf);
-        } catch (Exception e) {
-            logObj.warn("Could not set selected LookAndFeel '" + laf + "'" + "- using default.");
-        } finally {
-			// JGoodies plastic L&F is default
-			laf = PlasticXPLookAndFeel.class.getName();
-			
-			// re-try with default
-			try {
-				UIManager.setLookAndFeel(laf);
-			} catch (Exception e) {
-				// give up
-			}
-
-			// remember L&F
-            prefs.setProperty(
-                ModelerPreferences.EDITOR_LAFNAME,
-                UIManager.getLookAndFeel().getClass().getName());
-        }
+        // set up UI
+        configureLookAndFeel();
 
         // check jdk version
         try {
@@ -211,6 +189,84 @@ public class Main {
                 logObj.warn("Error setting logging.", ioex);
             }
         }
+    }
+
+    /**
+     * Set up the UI Look & Feel according to $HOME/.cayenne/modeler.preferences
+     */
+    public static void configureLookAndFeel()
+    {
+		// get preferences
+		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+
+		// get L&F name
+		String lfName = prefs.getString(ModelerPreferences.EDITOR_LAFNAME,
+											ModelerConstants.DEFAULT_LAF_NAME);
+		// get UI theme name
+		String themeName = prefs.getString(ModelerPreferences.EDITOR_THEMENAME,
+											ModelerConstants.DEFAULT_THEME_NAME);
+
+		try {
+			// only install theme if L&F is Plastic;
+			// bomb out if the L&F class cannot be found at all.
+			Class lf = Class.forName(lfName);
+			if (PlasticLookAndFeel.class.isAssignableFrom(lf)) {
+				PlasticTheme foundTheme = themeWithName(themeName);
+				if (foundTheme == null) {
+					logObj.warn("Could not set selected theme '" +
+								themeName +
+								"' - using default '" +
+								ModelerConstants.DEFAULT_THEME_NAME +
+								"'.");
+
+					themeName = ModelerConstants.DEFAULT_THEME_NAME;
+					foundTheme = themeWithName(themeName);
+				}
+
+				// try to configure theme
+				PlasticLookAndFeel.setMyCurrentTheme(foundTheme);
+			}
+
+			// try to set set L&F
+			UIManager.setLookAndFeel(lfName);
+		} catch (Exception e) {
+			logObj.warn("Could not set selected LookAndFeel '" +
+						lfName +
+						"' - using default '" +
+						ModelerConstants.DEFAULT_LAF_NAME +
+						"'.");
+
+			// re-try with defaults
+			lfName = ModelerConstants.DEFAULT_LAF_NAME;
+			themeName = ModelerConstants.DEFAULT_THEME_NAME;
+			PlasticTheme defaultTheme = themeWithName(themeName);
+			PlasticLookAndFeel.setMyCurrentTheme(defaultTheme);
+
+			try {
+				UIManager.setLookAndFeel(lfName);
+			} catch (Exception retry) {
+				// give up, continue as-is
+			}
+		} finally {
+			// remember L&F settings
+			prefs.setProperty(
+					ModelerPreferences.EDITOR_LAFNAME,
+					UIManager.getLookAndFeel().getClass().getName());
+
+			prefs.setProperty(ModelerPreferences.EDITOR_THEMENAME,
+								themeName);
+		}
+    }
+    
+    private static PlasticTheme themeWithName(String themeName) {
+		List availableThemes = PlasticLookAndFeel.getInstalledThemes();
+		for (Iterator i = availableThemes.iterator(); i.hasNext();) {
+			PlasticTheme aTheme = (PlasticTheme)i.next();
+			if (themeName.equals(aTheme.getName())) {
+				return aTheme;
+			}
+		}
+		return null;
     }
 
     /** 
