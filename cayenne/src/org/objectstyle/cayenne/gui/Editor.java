@@ -24,10 +24,13 @@ import org.objectstyle.cayenne.gui.datamap.*;
 public class Editor extends JFrame
 implements ActionListener
 , DomainDisplayListener, DataNodeDisplayListener, DataMapDisplayListener
+, ObjEntityDisplayListener, DbEntityDisplayListener
 {
 
     EditorView view;
     Mediator mediator;
+    /** The object last selected in BrowseView. */
+    Object context;
 
     JMenuBar  menuBar    = new JMenuBar();
     JMenu  fileMenu    = new JMenu("File");
@@ -37,6 +40,7 @@ implements ActionListener
     JMenuItem createDataSourceMenu= new JMenuItem("New Data Source");
     JMenuItem createObjEntityMenu = new JMenuItem("New Object Entity");
     JMenuItem createDbEntityMenu = new JMenuItem("New DB Entity");
+    JMenuItem removeMenu = new JMenuItem("Remove");
     JMenuItem  openProjectMenu  = new JMenuItem("Open Project");
     JMenuItem  openDataMapMenu  = new JMenuItem("Open Data Map");
     JMenuItem  closeProjectMenu  = new JMenuItem("Close Project");
@@ -67,6 +71,7 @@ implements ActionListener
         createDataSourceMenu.addActionListener(this);
         createObjEntityMenu.addActionListener(this);
         createDbEntityMenu.addActionListener(this);
+        removeMenu.addActionListener(this);
         openProjectMenu.addActionListener(this);
         openDataMapMenu.addActionListener(this);
         closeProjectMenu.addActionListener(this);
@@ -105,6 +110,8 @@ implements ActionListener
         fileMenu.add(createObjEntityMenu);
         fileMenu.add(createDbEntityMenu);
         fileMenu.addSeparator();
+        fileMenu.add(removeMenu);
+        fileMenu.addSeparator();
         fileMenu.add(openProjectMenu);
         fileMenu.add(openDataMapMenu);
         fileMenu.addSeparator();
@@ -128,11 +135,7 @@ implements ActionListener
         } else if (src == openProjectMenu) {
             openProject();
         } else if (src == closeProjectMenu) {
-            getContentPane().remove(view);
-            view = null;
-            mediator = null;
-            this.repaint();
-            disableMenu();
+        	closeProject();
         } else if (src == saveMapAsMenu) {
             saveMapAs(mediator.getCurrentDataMap());
         } else if (src == createProjectMenu) {
@@ -147,6 +150,8 @@ implements ActionListener
         	createObjEntity();
         } else if (src == createDbEntityMenu) {
         	createDbEntity();
+        } else if (src == removeMenu) {
+        	remove();
         } else if (src == saveMapMenu) {
             saveDataMap(mediator.getCurrentDataMap());
         } else if (src == saveProjectMenu) {
@@ -158,6 +163,20 @@ implements ActionListener
         }
     }
 
+	private void remove()
+	{
+		if (context instanceof DataDomain) {
+		} else if (context instanceof DataNode) {
+		} else if (context instanceof DataMap) {
+			mediator.removeDataMap(this, (DataMap)context);
+		} else if (context instanceof DbEntity) {
+			mediator.removeDbEntity(this, (DbEntity)context);
+		} else if (context instanceof ObjEntity) {
+			mediator.removeObjEntity(this, (ObjEntity)context);
+		}
+		
+	}
+
 	private void generateClasses() {
 		GenerateClassDialog dialog;
 		dialog = new GenerateClassDialog(this, mediator);
@@ -166,6 +185,15 @@ implements ActionListener
 	}
 
 
+	private void closeProject()
+	{
+        getContentPane().remove(view);
+        view = null;
+        mediator = null;
+        repaint();
+        disableMenu();
+        removeMenu.setText("Remove");
+	}
 
 	private void importDb() {
         DataSourceInfo dsi = new DataSourceInfo();
@@ -294,11 +322,11 @@ implements ActionListener
 			pw.flush();
 			pw.close();
 			fw.close();
-            GuiConfiguration.setProjFile(proj_file);
+            GuiConfiguration.initSharedConfig(proj_file);
 			Configuration.initSharedConfig("org.objectstyle.cayenne.gui.GuiConfiguration");
             GuiConfiguration config;
-            config = (GuiConfiguration)Configuration.getSharedConfig();
-            MediatorImpl mediator = new MediatorImpl(config);
+            config = GuiConfiguration.getGuiConfig();
+            MediatorImpl mediator = MediatorImpl.getMediator(config);
             project(mediator);
         } catch (Exception e) {
             System.out.println("Error loading project file, " + e.getMessage());
@@ -320,11 +348,10 @@ implements ActionListener
             file = fileChooser.getSelectedFile();
 	
 			System.out.println("File path is " + file.getAbsolutePath());
-            GuiConfiguration.setProjFile(file);
-			Configuration.initSharedConfig("org.objectstyle.cayenne.gui.GuiConfiguration");
+			GuiConfiguration.initSharedConfig(file);
             GuiConfiguration config;
-            config = (GuiConfiguration)Configuration.getSharedConfig();
-            MediatorImpl mediator = new MediatorImpl(config);
+            config = GuiConfiguration.getGuiConfig();
+            MediatorImpl mediator = MediatorImpl.getMediator(config);
             project(mediator);
 
         } catch (Exception e) {
@@ -342,6 +369,8 @@ implements ActionListener
         mediator.addDomainDisplayListener(this);
         mediator.addDataNodeDisplayListener(this);
         mediator.addDataMapDisplayListener(this);
+        mediator.addObjEntityDisplayListener(this);
+        mediator.addDbEntityDisplayListener(this);
         createDomainMenu.setEnabled(true);
         closeProjectMenu.setEnabled(true);
         this.validate();
@@ -489,15 +518,37 @@ implements ActionListener
 	
 	public void currentDomainChanged(DomainDisplayEvent e){
 		enableDomainMenu();
+		removeMenu.setText("Remove Domain");
+		context = e.getDomain();
 	}
 
 	public void currentDataNodeChanged(DataNodeDisplayEvent e){
 		enableDomainMenu();
+		removeMenu.setText("Remove Data Node");
+		context = e.getDataNode();
 	}
 
 	public void currentDataMapChanged(DataMapDisplayEvent e){
 		enableDataMapMenu();
+		removeMenu.setText("Remove Data Map");
+		context = e.getDataMap();
 	}
+
+   	public void currentObjEntityChanged(EntityDisplayEvent e)
+   	{
+		enableDataMapMenu();
+		removeMenu.setText("Remove Obj Entity");
+		context = e.getEntity();
+   	}
+
+
+   	public void currentDbEntityChanged(EntityDisplayEvent e)
+   	{
+		enableDataMapMenu();
+		removeMenu.setText("Remove Db Entity");
+		context = e.getEntity();
+   	}
+
 
     /** Disables all menu  for the case when no project is open.
       * The only menu-s never disabled are "New Project", "Open Project" 
@@ -621,12 +672,18 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
 
    	public void currentDomainChanged(DomainDisplayEvent e)
    	{
-   		detailLayout.show(detailPanel, DOMAIN_VIEW);
+   		if (e.getDomain() == null)
+	   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   		else
+	   		detailLayout.show(detailPanel, DOMAIN_VIEW);
    	}
 
    	public void currentDataNodeChanged(DataNodeDisplayEvent e)
    	{
-   		detailLayout.show(detailPanel, NODE_VIEW);
+   		if (e.getDataNode() == null)
+	   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   		else
+   			detailLayout.show(detailPanel, NODE_VIEW);
    	}
     
 
@@ -638,12 +695,18 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
     
    	public void currentObjEntityChanged(EntityDisplayEvent e)
    	{
-   		detailLayout.show(detailPanel, OBJ_VIEW);
+   		if (e.getEntity() == null)
+	   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   		else
+	   		detailLayout.show(detailPanel, OBJ_VIEW);
    	}
 
 
    	public void currentDbEntityChanged(EntityDisplayEvent e)
    	{
-   		detailLayout.show(detailPanel, DB_VIEW);
+   		if (e.getEntity() == null)
+	   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   		else
+	   		detailLayout.show(detailPanel, DB_VIEW);
    	}
 }

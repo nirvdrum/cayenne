@@ -84,6 +84,7 @@ public interface Mediator
 
 	public DataDomain[] getDomains();
 	
+	public void removeDomain(Object src, DataDomain domain);
 	public void removeObjEntity(Object event_src, ObjEntity entity);
 	public void removeDbEntity(Object event_src, DbEntity entity);
 	public void removeDataMap(Object event_src, DataMap map);

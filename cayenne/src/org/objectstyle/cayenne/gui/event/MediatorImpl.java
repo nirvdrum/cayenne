@@ -26,19 +26,35 @@ public class MediatorImpl implements Mediator
 	ArrayList dirtyDomains = new ArrayList();
 	/** The list of changed data maps.*/
 	ArrayList dirtyMaps = new ArrayList();
+	/** The list of changed data nodes.*/
+	ArrayList dirtyNodes = new ArrayList();
 	
 	GuiConfiguration config;
 	/** Changes have been made, need to be saved. */
 	boolean dirty;
+	private static MediatorImpl mediator;
 	
-	public MediatorImpl()	{
+	private MediatorImpl()	{
 		listenerList = new EventListenerList();
 	}
 	
 
-	public MediatorImpl(GuiConfiguration temp_config) {
+	private MediatorImpl(GuiConfiguration temp_config) {
 		this();
 		config = temp_config;
+	}
+	
+	public static MediatorImpl getMediator() {
+		if (mediator == null) {
+			mediator = new MediatorImpl();
+		}
+		return mediator;
+	}
+	
+
+	public static MediatorImpl getMediator(GuiConfiguration gui_config) {
+		mediator = new MediatorImpl(gui_config);
+		return mediator;
 	}
 	
 	public GuiConfiguration getConfig() {
@@ -237,7 +253,6 @@ public class MediatorImpl implements Mediator
 	/** Informs all listeners of the DataNodeEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDataNodeEvent(DataNodeEvent e) {
-		dirty = true;
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DataNodeListener");
 		for (int i = 0; i < list.length; i++) {
@@ -245,12 +260,16 @@ public class MediatorImpl implements Mediator
 			switch(e.getId()) {
 				case DataNodeEvent.ADD:
 					temp.dataNodeAdded(e);
+					setDirty(e.getDataNode());
 					break;
 				case DataNodeEvent.CHANGE:
 					temp.dataNodeChanged(e);
+					setDirty(currentDomain);
+					setDirty(e.getDataNode());
 					break;
 				case DataNodeEvent.REMOVE:
 					temp.dataNodeRemoved(e);
+					dirtyNodes.remove(e.getDataNode());
 					break;
 				default:
 					throw new IllegalArgumentException(
@@ -281,7 +300,6 @@ public class MediatorImpl implements Mediator
 	/** Informs all listeners of the DataMapEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDataMapEvent(DataMapEvent e) {
-		dirty = true;
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DataMapListener");
 		for (int i = 0; i < list.length; i++) {
@@ -289,12 +307,16 @@ public class MediatorImpl implements Mediator
 			switch(e.getId()) {
 				case DataMapEvent.ADD:
 					temp.dataMapAdded(e);
+					setDirty(e.getDataMap());
+					setDirty(currentDomain);
 					break;
 				case DataMapEvent.CHANGE:
 					temp.dataMapChanged(e);
+					setDirty(e.getDataMap());
 					break;
 				case DataMapEvent.REMOVE:
 					temp.dataMapRemoved(e);
+					dirtyMaps.remove(e.getDataMap());
 					break;
 				default:
 					throw new IllegalArgumentException(
@@ -307,7 +329,7 @@ public class MediatorImpl implements Mediator
 	/** Informs all listeners of the EntityEvent. 
 	  * Does not send the event to its originator. */
 	public void fireObjEntityEvent(EntityEvent e) {
-		dirty = true;
+		setDirty(currentMap);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.ObjEntityListener");
 		for (int i = 0; i < list.length; i++) {
@@ -333,7 +355,7 @@ public class MediatorImpl implements Mediator
 	  * Does not send the event to its originator. */
 	public void fireDbEntityEvent(EntityEvent e) 
 	{
-		dirty = true;
+		setDirty(currentMap);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DbEntityListener");
 		for (int i = 0; i < list.length; i++) {
@@ -387,7 +409,6 @@ public class MediatorImpl implements Mediator
 	/** Notifies all listeners of the change(add, remove) and does the change.*/
 	public void fireDbAttributeEvent(AttributeEvent e) 
 	{
-		dirty = true;
 		setDirty(currentMap);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DbAttributeListener");
@@ -414,7 +435,6 @@ public class MediatorImpl implements Mediator
 	/** Notifies all listeners of the change (add, remove) and does the change.*/
 	public void fireObjAttributeEvent(AttributeEvent e) 
 	{
-		dirty = true;
 		setDirty(currentMap);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeListener");
@@ -440,7 +460,6 @@ public class MediatorImpl implements Mediator
 	/** Notifies all listeners of the change(add, remove) and does the change.*/
 	public void fireDbRelationshipEvent(RelationshipEvent e) 
 	{
-		dirty = true;
 		setDirty(currentMap);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipListener");
@@ -466,7 +485,6 @@ public class MediatorImpl implements Mediator
 	/** Notifies all listeners of the change(add, remove) and does the change.*/
 	public void fireObjRelationshipEvent(RelationshipEvent e) 
 	{
-		dirty = true;
 		setDirty(currentMap);
 		EventListener[] list;
 		list = getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipListener");
@@ -497,15 +515,14 @@ public class MediatorImpl implements Mediator
 	  * hide the detail views by sending <code>null</code> as current entity.
 	  * Otherwise select another current entity. */
 	public void removeObjEntity(Object src, ObjEntity entity) {
-		if (!dirtyMaps.contains(currentMap))
-			dirtyMaps.add(currentMap);
 		java.util.List list = currentMap.getObjEntitiesAsList();
 		int index = list.indexOf(entity);
 		currentMap.deleteObjEntity(entity.getName());
 		if (entity != currentObjEntity)
 			return;
-		// If no more entities hide detail view by firing event with no entity
-		if (list.size() == 0)
+		// If no more entities (1 - the one that was deleted),
+		// hide detail view by firing event with no entity
+		if (list.size() <= 1)
 			fireObjEntityDisplayEvent(new EntityDisplayEvent(this
 													, null
 													, currentMap
@@ -521,6 +538,7 @@ public class MediatorImpl implements Mediator
 													, currentDomain
 													, currentNode));
 		}
+		fireObjEntityEvent(new EntityEvent(src, entity, EntityEvent.REMOVE));
 	}
 
 	/** Clean remove of the DbEntity from map and all views. 
@@ -529,15 +547,14 @@ public class MediatorImpl implements Mediator
 	  * hide the detail views by sending <code>null</code> as current entity.
 	  * Otherwise select another current entity. */
 	public void removeDbEntity(Object src, DbEntity entity) {
-		if (!dirtyMaps.contains(currentMap))
-			dirtyMaps.add(currentMap);
 		java.util.List list = currentMap.getDbEntitiesAsList();
 		int index = list.indexOf(entity);
 		currentMap.deleteDbEntity(entity.getName());
 		if (entity != currentDbEntity)
 			return;
-		// If no more entities hide detail view by firing event with no entity
-		if (list.size() == 0)
+		// If no more entities (1 - the one that was deleted),
+		// hide detail view by firing event with no entity
+		if (list.size() <= 1)
 			fireDbEntityDisplayEvent(new EntityDisplayEvent(src
 													, null
 													, currentMap
@@ -553,11 +570,12 @@ public class MediatorImpl implements Mediator
 													, currentDomain
 													, currentNode));
 		}
+		fireDbEntityEvent(new EntityEvent(src, entity, EntityEvent.REMOVE));
 	}	
 	
 	public void removeDataMap(Object src, DataMap map) {
 		currentDomain.removeMap(map.getName());
-		dirtyMaps.remove(map);
+		fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.REMOVE));
 		fireDataMapDisplayEvent(new DataMapDisplayEvent(src
 												, null
 												, currentDomain
@@ -572,27 +590,32 @@ public class MediatorImpl implements Mediator
 	public void addDataMap(Object src, DataMap map, boolean make_current)
 	{
 		currentDomain.addMap(map);
-		dirtyMaps.add(map);
-		dirtyDomains.add(currentDomain);
 		fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.ADD));
-		if (make_current) {
+		if (make_current)
 			fireDataMapDisplayEvent(new DataMapDisplayEvent(src
 												, map
 												, currentDomain
 												, currentNode));
-		}
 	}
 
 
 	public void removeDomain(Object src, DataDomain domain) {
 		config.removeDomain(domain.getName());
 		dirtyDomains.remove(domain);
+		dirty = true;
 		java.util.List list = domain.getMapList();
 		Iterator iter = list.iterator();
 		while (iter.hasNext())
 			dirtyMaps.remove(iter.next());
 		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.REMOVE));
 		fireDomainDisplayEvent(new DomainDisplayEvent(src, null));
+	}
+
+
+	public void removeDataNode(Object src, DataNode node) {
+		currentDomain.removeDataNode(node.getName());
+		fireDataNodeEvent(new DataNodeEvent(src, node, DataNodeEvent.REMOVE));
+		fireDataNodeDisplayEvent(new DataNodeDisplayEvent(src, currentDomain, null));
 	}
 	
 	public void addDomain(Object src, DataDomain domain) {
@@ -602,7 +625,6 @@ public class MediatorImpl implements Mediator
 	public void addDomain(Object src, DataDomain domain, boolean make_current) 
 	{
 		config.addDomain(domain);
-		dirtyDomains.add(domain);
 		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.ADD));
 		if (make_current)
 			fireDomainDisplayEvent(new DomainDisplayEvent(src, domain));
@@ -630,13 +652,40 @@ public class MediatorImpl implements Mediator
 	}
 	
 	public void setDirty(DataMap map) {
+		if (dirtyMaps.contains(map))
+			return;
 		dirtyMaps.add(map);
 		dirty = true;
 	}
 
+	public void setDirty(DataNode node) {
+		if (dirtyNodes.contains(node))
+			return;
+		dirtyNodes.add(node);
+		dirty = true;
+	}
+
 	public void setDirty(DataDomain domain) {
+		if (dirtyDomains.contains(domain))
+			return;
 		dirtyDomains.add(domain);
 		dirty = true;
 	}
+	
+	public ArrayList getDirtyDataMaps()
+	{
+		return dirtyMaps;
+	}
+
+	public ArrayList getDirtyDataNodes()
+	{
+		return dirtyNodes;
+	}
+
+	public ArrayList getDirtyDomains()
+	{
+		return dirtyDomains;
+	}
+
 
 }

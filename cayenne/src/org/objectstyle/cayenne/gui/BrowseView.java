@@ -368,13 +368,16 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	{ entityChanged(e);}
 	public void objEntityAdded(EntityEvent e)
 	{ entityAdded(e); }
-	public void objEntityRemoved(EntityEvent e){}
+	public void objEntityRemoved(EntityEvent e)
+	{entityRemoved(e);}
 
 	public void dbEntityChanged(EntityEvent e)
 	{ entityChanged(e);}
 	public void dbEntityAdded(EntityEvent e)
 	{ entityAdded(e); }
-	public void dbEntityRemoved(EntityEvent e){}
+	public void dbEntityRemoved(EntityEvent e)
+	{entityRemoved(e);}
+
 
 
 	/** Makes Entity visible and selected.
@@ -431,6 +434,19 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	public void entityRemoved(EntityEvent e) {
 		if (e.getSource() == this)
 			return;
+
+		DefaultMutableTreeNode temp;
+		temp = getEntityNode(mediator.getCurrentDataDomain()
+							, mediator.getCurrentDataMap()
+							, e.getEntity());
+		if (null != temp)
+			model.removeNodeFromParent(temp);
+		temp = getEntityNode(mediator.getCurrentDataDomain()
+							, mediator.getCurrentDataNode()
+							, mediator.getCurrentDataMap()
+							, e.getEntity());
+		if (null != temp)
+			model.removeNodeFromParent(temp);
 	}
 
 
@@ -555,6 +571,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		browseTree.scrollPathToVisible(path);
 		browseTree.setSelectionPath(path);
 	}
+	
+	
 	
 	/** Called when different node is selected. 
 	  * Changes current node and causes reloading of the corresponding

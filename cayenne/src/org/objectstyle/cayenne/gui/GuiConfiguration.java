@@ -66,26 +66,39 @@ import java.io.*;
 
 /**
  * Subclass of Configuration that uses System CLASSPATH to locate resources.
+ * It also stores project file location.
  *
- * @author Andrei Adamchik
+ * @author Misha Shengaout
  */
 public class GuiConfiguration extends DefaultConfiguration {
     static Logger logObj = Logger.getLogger(DefaultConfiguration.class.getName());
     
-    static File projFile;
+    private File projFile;
+    private static GuiConfiguration guiConfig;
+
+	private GuiConfiguration(){}
+
+
+    public static void initSharedConfig(File proj_file) throws Exception {
+    	guiConfig = new GuiConfiguration();
+    	guiConfig.projFile = proj_file;
+    	guiConfig.init();
+    }
     
+    /** Should never be called before initSharedConfig(). */
+    public static GuiConfiguration getGuiConfig()
+    {
+    	return guiConfig;
+    }
 
-	public static void setProjFile(File proj_file) {
-		projFile = proj_file;
-	}
-
-
-	public static File getProjFile() {
+	public File getProjFile() {
 		return projFile;
 	}
 
 	/** Returns project directory (without terminating separator). */
-	public static String getProjDir() {
+	public String getProjDir() {
+		if (null == projFile)
+			return null;
 		return projFile.getParent();
 	}
 
