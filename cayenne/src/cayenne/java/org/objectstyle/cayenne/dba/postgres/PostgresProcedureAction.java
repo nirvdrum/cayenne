@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -34,7 +34,7 @@
  *    or "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their
  *    names without prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
@@ -53,68 +53,24 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.unit;
+package org.objectstyle.cayenne.dba.postgres;
 
-import java.sql.Connection;
-import java.sql.Types;
-import java.util.Collection;
-
-import org.objectstyle.cayenne.access.DataContextProcedureQueryTst;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.dba.sqlserver.SQLServerProcedureAction;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 /**
+ * Current implementation simply relies on SQLServerProcedureAction superclass behavior.
+ * Namely that CallableStatement.execute() rewinds result set pointer so
+ * CallableStatement.getMoreResults() shouldn't be invoked until the first result set is
+ * processed.
+ * 
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class PostgresStackAdapter extends AccessStackAdapter {
+class PostgresProcedureAction extends SQLServerProcedureAction {
 
-    public PostgresStackAdapter(DbAdapter adapter) {
-        super(adapter);
-    }
-
-    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop)
-            throws Exception {
-        // avoid dropping constraints...
-    }
-
-    public boolean supportsLobs() {
-        return true;
-    }
-
-    public boolean supportsStoredProcedures() {
-        return true;
-    }
-    
-    public boolean canMakeObjectsOutOfProcedures() {
-        // we are a victim of CAY-148 - column capitalization...
-        return false;
-    }
-
-    public void createdTables(Connection con, DataMap map) throws Exception {
-        if (map.getProcedureMap().containsKey("cayenne_tst_select_proc")) {
-            executeDDL(con, super.ddlFile("postgresql", "create-select-sp.sql"));
-            executeDDL(con, super.ddlFile("postgresql", "create-update-sp.sql"));
-            executeDDL(con, super.ddlFile("postgresql", "create-out-sp.sql"));
-        }
-    }
-
-    public void tweakProcedure(Procedure proc) {
-        if (DataContextProcedureQueryTst.OUT_STORED_PROCEDURE.equals(proc.getName())
-                && proc.getCallParameters().size() == 2) {
-
-            proc.clearCallParameters();
-            proc.addCallParameter(new ProcedureParameter(
-                    "out_param",
-                    Types.INTEGER,
-                    ProcedureParameter.OUT_PARAMETER));
-
-            proc.addCallParameter(new ProcedureParameter(
-                    "in_param",
-                    Types.INTEGER,
-                    ProcedureParameter.IN_PARAMETER));
-            proc.setReturningValue(true);
-        }
+    PostgresProcedureAction(DbAdapter adapter, EntityResolver entityResolver) {
+        super(adapter, entityResolver);
     }
 }

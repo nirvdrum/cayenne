@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -109,8 +110,7 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
 
         // since stored procedure commits its stuff, we must use an explicit
         // non-committing transaction
-        Transaction.externalTransaction(null).performQueries(
-                ctxt,
+        Transaction.externalTransaction(null).performQueries(ctxt,
                 Collections.singletonList(q),
                 observer);
 
@@ -144,7 +144,9 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         DataRow artistRow = (DataRow) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class, artistRow, false);
+        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class,
+                uppercaseConverter(artistRow),
+                false);
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
@@ -171,7 +173,9 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         DataRow artistRow = (DataRow) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class, artistRow, false);
+        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class,
+                uppercaseConverter(artistRow),
+                false);
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
@@ -200,7 +204,9 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         DataRow artistRow = (DataRow) artists.get(0);
-        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class, artistRow, false);
+        Artist a = (Artist) ctxt.objectFromDataRow(Artist.class,
+                uppercaseConverter(artistRow),
+                false);
         Painting p = (Painting) a.getPaintingArray().get(0);
 
         // invalidate painting, it may have been updated in the proc
@@ -222,18 +228,21 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         assertEquals(1, rows.size());
         Object row = rows.get(0);
         assertNotNull(row);
-        assertTrue(
-                "Unexpected row class: " + row.getClass().getName(),
+        assertTrue("Unexpected row class: " + row.getClass().getName(),
                 row instanceof Map);
         Map outParams = (Map) row;
         Number price = (Number) outParams.get("out_param");
-        assertNotNull(price);
+        assertNotNull("Null result... row content: " + row, price);
         assertEquals(40, price.intValue());
     }
 
-    public void testSelectdataObject() throws Exception {
+    public void testSelectDataObject() throws Exception {
         // Don't run this on MySQL
         if (!getAccessStackAdapter().supportsStoredProcedures()) {
+            return;
+        }
+        
+        if(!getAccessStackAdapter().canMakeObjectsOutOfProcedures()) {
             return;
         }
 
@@ -258,12 +267,14 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
     }
 
     protected List runProcedureSelect(ProcedureQuery q) throws Exception {
-        // Sybase blows whenever a transaction wraps a SP, so turn of transactions
+        // Sybase blows whenever a transaction wraps a SP, so turn off transactions
+
         boolean transactionsFlag = ctxt
                 .getParentDataDomain()
                 .isUsingExternalTransactions();
 
         ctxt.getParentDataDomain().setUsingExternalTransactions(true);
+
         try {
             return ctxt.performQuery(q);
         }
@@ -283,5 +294,20 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         a.addToPaintingArray(p);
 
         ctxt.commitChanges();
+    }
+
+    /**
+     * An ugly hack - converting row keys to uppercase ... Tracked via CAY-148.
+     */
+    protected DataRow uppercaseConverter(DataRow row) {
+        DataRow converted = new DataRow(row.size());
+
+        Iterator it = row.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            converted.put(entry.getKey().toString().toUpperCase(), entry.getValue());
+        }
+
+        return converted;
     }
 }

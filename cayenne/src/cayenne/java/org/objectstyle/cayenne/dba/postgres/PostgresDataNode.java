@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,93 +53,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
-package org.objectstyle.cayenne.unit;
+package org.objectstyle.cayenne.dba.postgres;
 
 import java.sql.Connection;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.sql.SQLException;
 
-import org.objectstyle.cayenne.access.DataContextProcedureQueryTst;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
 /**
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class OracleStackAdapter extends AccessStackAdapter {
+public class PostgresDataNode extends DataNode {
 
-    /**
-     * Constructor for OracleDelegate.
-     * @param adapter
-     */
-    public OracleStackAdapter(DbAdapter adapter) {
-        super(adapter);
+    public PostgresDataNode() {
+        super();
     }
 
-    public boolean supportsStoredProcedures() {
-        return true;
-    }
-
-    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop) throws Exception {
-        // avoid dropping constraints...  
+    public PostgresDataNode(String name) {
+        super(name);
     }
 
     /**
-     * Oracle 8i does not support more then 1 "LONG xx" column per table
-     * PAINTING_INFO need to be fixed.
+     * Executes stored procedure with PostgreSQL specific action.
      */
-    public void willCreateTables(Connection con, DataMap map) {
-        DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
+    protected void runStoredProcedure(
+            Connection con,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
 
-        if (paintingInfo != null) {
-            DbAttribute textReview =
-                (DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
-            textReview.setType(Types.VARCHAR);
-            textReview.setMaxLength(255);
-        }
+        new PostgresProcedureAction(getAdapter(), getEntityResolver()).performAction(con,
+                query,
+                observer);
     }
-
-    public void createdTables(Connection con, DataMap map) throws Exception {
-        if (map.getProcedureMap().containsKey("cayenne_tst_select_proc")) {
-            executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
-            executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
-            executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
-            executeDDL(con, super.ddlFile("oracle", "create-out-sp.sql"));
-        }
-    }
-
-    public boolean supportsLobs() {
-        return true;
-    }
-
-    public void tweakProcedure(Procedure proc) {
-        if (DataContextProcedureQueryTst.SELECT_STORED_PROCEDURE.equals(proc.getName())
-            && proc.getCallParameters().size() == 2) {
-            List params = new ArrayList(proc.getCallParameters());
-
-            proc.clearCallParameters();
-            proc.addCallParameter(
-                new ProcedureParameter(
-                    "result",
-                    OracleAdapter.getOracleCursorType(),
-                    ProcedureParameter.OUT_PARAMETER));
-            Iterator it = params.iterator();
-            while (it.hasNext()) {
-                ProcedureParameter param = (ProcedureParameter) it.next();
-                proc.addCallParameter(param);
-            }
-
-            proc.setReturningValue(true);
-        }
-    }
-
 }

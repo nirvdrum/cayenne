@@ -77,20 +77,21 @@ import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Defines API and a common superclass for testing various database features.
- * Different databases support different feature sets that need to be tested
- * differently. Many things implemented in subclasses may become future
- * candidates for inclusin in the corresponding adapter code.
+ * Defines API and a common superclass for testing various database features. Different
+ * databases support different feature sets that need to be tested differently. Many
+ * things implemented in subclasses may become future candidates for inclusin in the
+ * corresponding adapter code.
  * 
  * @author Andrei Adamchik
  */
 public class AccessStackAdapter {
+
     private static Logger logObj = Logger.getLogger(AccessStackAdapter.class);
 
     protected DbAdapter adapter;
 
     public AccessStackAdapter(DbAdapter adapter) {
-        if(adapter == null) {
+        if (adapter == null) {
             throw new CayenneRuntimeException("Null adapter.");
         }
         this.adapter = adapter;
@@ -99,16 +100,16 @@ public class AccessStackAdapter {
     public DbAdapter getAdapter() {
         return adapter;
     }
-    
+
     public void unchecked(CayenneTestResources resources) {
-        
+
     }
 
     /**
      * Drops all table constraints.
      */
     public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop)
-        throws Exception {
+            throws Exception {
 
         if (adapter.supportsFkConstraints()) {
             Map constraintsMap = getConstraints(conn, map, tablesToDrop);
@@ -127,9 +128,11 @@ public class AccessStackAdapter {
                 while (cit.hasNext()) {
                     Object constraint = cit.next();
                     StringBuffer drop = new StringBuffer();
-                    drop.append("ALTER TABLE ").append(tableName).append(
-                        " DROP CONSTRAINT ").append(
-                        constraint);
+                    drop
+                            .append("ALTER TABLE ")
+                            .append(tableName)
+                            .append(" DROP CONSTRAINT ")
+                            .append(constraint);
                     executeDDL(conn, drop.toString());
                 }
             }
@@ -141,8 +144,7 @@ public class AccessStackAdapter {
     }
 
     /**
-     * Callback method that allows Delegate to customize
-     * test procedure.
+     * Callback method that allows Delegate to customize test procedure.
      */
     public void tweakProcedure(Procedure proc) {
     }
@@ -159,8 +161,15 @@ public class AccessStackAdapter {
     }
 
     /**
-     * Returns true if the target database has support for large objects (BLOB,
-     * CLOB).
+     * Returns false if stored procedures are not supported or if it is a victim of
+     * CAY-148 (column name capitalization).
+     */
+    public boolean canMakeObjectsOutOfProcedures() {
+        return supportsStoredProcedures();
+    }
+
+    /**
+     * Returns true if the target database has support for large objects (BLOB, CLOB).
      */
     public boolean supportsLobs() {
         return false;
@@ -177,7 +186,7 @@ public class AccessStackAdapter {
     public boolean supportsCaseSensitiveLike() {
         return true;
     }
-    
+
     public boolean supportsCaseInsensitiveOrder() {
         return true;
     }
@@ -203,17 +212,12 @@ public class AccessStackAdapter {
     }
 
     /**
-     * Returns a file under test resources DDL directory for the specified
-     * database.
+     * Returns a file under test resources DDL directory for the specified database.
      */
     protected File ddlFile(String database, String name) {
-        return new File(
-            new File(
-                new File(
-                    CayenneTestResources.getResources().getTestResourcesDir(),
-                    "ddl"),
-                database),
-            name);
+        return new File(new File(new File(CayenneTestResources
+                .getResources()
+                .getTestResourcesDir(), "ddl"), database), name);
     }
 
     public boolean handlesNullVsEmptyLOBs() {
@@ -221,11 +225,11 @@ public class AccessStackAdapter {
     }
 
     /**
-     * Returns a map of database constraints with DbEntity names used as keys,
-     * and Collections of constraint names as values.
+     * Returns a map of database constraints with DbEntity names used as keys, and
+     * Collections of constraint names as values.
      */
     protected Map getConstraints(Connection conn, DataMap map, Collection includeTables)
-        throws SQLException {
+            throws SQLException {
         Map constraintMap = new HashMap();
 
         DatabaseMetaData metadata = conn.getMetaData();
@@ -238,11 +242,8 @@ public class AccessStackAdapter {
             }
 
             // Get all constraints for the table
-            ResultSet rs =
-                metadata.getExportedKeys(
-                    entity.getCatalog(),
-                    entity.getSchema(),
-                    entity.getName());
+            ResultSet rs = metadata.getExportedKeys(entity.getCatalog(), entity
+                    .getSchema(), entity.getName());
             try {
                 while (rs.next()) {
                     String fk = rs.getString("FK_NAME");

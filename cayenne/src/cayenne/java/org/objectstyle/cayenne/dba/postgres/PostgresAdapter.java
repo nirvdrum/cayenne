@@ -60,6 +60,7 @@ import java.sql.Types;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
@@ -104,6 +105,18 @@ public class PostgresAdapter extends JdbcAdapter {
         // create specially configured ByteArrayType handler
         map.registerType(new PostgresByteArrayType(true, false));
     }
+
+    /**
+     * Returns an instance of PostgresDataNode.
+     * 
+     * @since 1.2
+     */
+    public DataNode createDataNode(String name) {
+        DataNode node = new PostgresDataNode(name);
+        node.setAdapter(this);
+        return node;
+    }
+
     
     public DbAttribute buildAttribute(
         String name,

@@ -109,6 +109,10 @@ public class DataContextPerformQueryAPITst extends CayenneTestCase {
         if (!getAccessStackAdapter().supportsStoredProcedures()) {
             return;
         }
+        
+        if(!getAccessStackAdapter().canMakeObjectsOutOfProcedures()) {
+            return;
+        }
 
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");

@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.query.Query;
  * @since 1.2
  * @author Andrei Adamchik
  */
-class SQLServerProcedureAction extends ProcedureAction {
+public class SQLServerProcedureAction extends ProcedureAction {
 
     public SQLServerProcedureAction(DbAdapter adapter, EntityResolver entityResolver) {
         super(adapter, entityResolver);
