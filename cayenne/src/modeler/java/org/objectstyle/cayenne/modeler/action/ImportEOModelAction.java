@@ -207,10 +207,13 @@ public class ImportEOModelAction extends CayenneAction {
 
                 DataSourceInfo dsi = ((ProjectDataSource) node.getDataSource())
                         .getDataSourceInfo();
-                dsi.setDataSourceUrl((String) connection.get("URL"));
-                dsi.setJdbcDriver((String) connection.get("driver"));
-                dsi.setPassword((String) connection.get("password"));
-                dsi.setUserName((String) connection.get("username"));
+                
+                
+                
+                dsi.setDataSourceUrl(keyAsString(connection, "URL"));
+                dsi.setJdbcDriver(keyAsString(connection, "driver"));
+                dsi.setPassword(keyAsString(connection, "password"));
+                dsi.setUserName(keyAsString(connection, "username"));
             }
 
             // send events after the node creation is complete
@@ -220,6 +223,13 @@ public class ImportEOModelAction extends CayenneAction {
                     new DataNodeDisplayEvent(this, getProjectController()
                             .getCurrentDataDomain(), node));
         }
+    }
+    
+    // CAY-246 - if user name or password is all numeric, it will
+    // be returned as number, so we can't cast dictionary keys to String
+    private String keyAsString(Map map, String key) {
+        Object value = map.get(key);
+        return (value != null) ? value.toString() : null;
     }
 
     /**
