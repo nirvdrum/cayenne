@@ -60,8 +60,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.ComparatorUtils;
+import org.apache.commons.collections.comparators.ReverseComparator;
 import org.objectstyle.ashwood.dbutil.DbUtils;
 import org.objectstyle.ashwood.dbutil.Table;
 import org.objectstyle.ashwood.graph.CollectionFactory;
@@ -69,8 +72,6 @@ import org.objectstyle.ashwood.graph.Digraph;
 import org.objectstyle.ashwood.graph.IndegreeTopologicalSort;
 import org.objectstyle.ashwood.graph.MapDigraph;
 import org.objectstyle.ashwood.graph.StrongConnection;
-import org.apache.commons.collections.ComparatorUtils;
-import org.apache.commons.collections.comparators.ReverseComparator;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
@@ -113,7 +114,7 @@ public class DefaultSorter implements DependencySorter {
         queryComparator = new QueryComparator();
     }
 
-    public void initSorter(QueryEngine queryEngine, DataMap[] maps) {
+    public void initSorter(QueryEngine queryEngine, List maps) {
         this.queryEngine = queryEngine;
         Collection tables = new ArrayList();
         dbEntityToTableMap = new HashMap();
@@ -122,10 +123,11 @@ public class DefaultSorter implements DependencySorter {
             return;
         }
 
-        for (int i = 0; i < maps.length; i++) {
-            DbEntity[] entitiesToConvert = maps[i].getDbEntities();
-            for (int j = 0; j < entitiesToConvert.length; j++) {
-                DbEntity entity = entitiesToConvert[j];
+		Iterator mapIter = maps.iterator();
+		while (mapIter.hasNext()) {
+            Iterator entitiesToConvert = ((DataMap)mapIter.next()).getDbEntitiesAsList().iterator();
+            while (entitiesToConvert.hasNext()) {
+                DbEntity entity = (DbEntity)entitiesToConvert.next();
                 Table table =
                     new Table(
                         entity.getCatalog(),
