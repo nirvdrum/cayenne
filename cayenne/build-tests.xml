@@ -64,7 +64,7 @@
     <!-- ============================================= -->
     <!-- Runs and reports on tests.                    -->
     <!-- ============================================= -->
-    <target name="test" depends="compile">
+    <target name="test" depends="check-connection,compile">
     	<!-- Run Java on itself to avoid classloader weirdness in JUnit -->
     	<java fork="true" classname="org.apache.tools.ant.Main" failonerror="true">
     		<arg value="-f"/>
@@ -126,6 +126,12 @@
 		
 		
         <fail message="Cayenne tests failed, see files in ${test.output} for details"/>
+    </target>
+    
+    <!-- This is a simple property check, misspelled property can still -->
+    <!-- lead to failed connection to the test database. -->
+    <target name="check-connection" unless="cayenne.test.connection">
+    	<fail>'cayenne.test.connection' property must be defined to point to a named connection entry.</fail>
     </target>
 </project>
 
