@@ -116,8 +116,4 @@ public class DeleteBatchQuery extends BatchQuery {
     private void prepareMetadata() {
         dbAttributes = getDbEntity().getPrimaryKey();
     }
-
-    public int getQueryType() {
-        return Query.DELETE_QUERY;
-    }
 }

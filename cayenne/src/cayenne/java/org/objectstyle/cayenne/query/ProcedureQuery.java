@@ -129,15 +129,6 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         encoder.println("</query>");
     }
 
-    /**
-     * Returns <code>Query.UNKNOWN_QUERY</code>. StoredProcedure can perform any kind
-     * of database operations, not directly controlled by the O/R layer. Therefore in
-     * general it is impossible to categorize procedure as a particular query type.
-     */
-    public int getQueryType() {
-        return UNKNOWN_QUERY;
-    }
-
     public Map getParams() {
         return params;
     }

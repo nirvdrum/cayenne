@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.query;
 
 import java.util.Map;
@@ -60,54 +60,52 @@ import java.util.Map;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-/** Describes insert database operation.
- * InsertQuery is initialized with object values snapshot and ObjectId. */
+/**
+ * Describes insert database operation. InsertQuery is initialized with object values
+ * snapshot and ObjectId.
+ */
 public class InsertQuery extends AbstractQuery {
+
     protected ObjectId objectId;
     protected Map objectSnapshot;
-    
+
     /** Creates empty InsertQuery. */
-    public InsertQuery() {}
-    
+    public InsertQuery() {
+    }
+
     /** Creates InsertQuery with the <code>rootEntity</code> as the root object */
     public InsertQuery(ObjEntity rootEntity) {
-    	this.setRoot(rootEntity);
+        this.setRoot(rootEntity);
     }
 
     /** Creates InsertQuery with the <code>rootClass</code> as the root object */
     public InsertQuery(Class rootClass) {
-    	this.setRoot(rootClass);
+        this.setRoot(rootClass);
     }
-    
-	/** Creates InsertQuery with the <code>rootClass</code> as the root object */
-	public InsertQuery(Class rootClass, Map dataRow) {
-		this.setRoot(rootClass);
-		this.setObjectSnapshot(dataRow);
-	}
-    
+
+    /** Creates InsertQuery with the <code>rootClass</code> as the root object */
+    public InsertQuery(Class rootClass, Map dataRow) {
+        this.setRoot(rootClass);
+        this.setObjectSnapshot(dataRow);
+    }
+
     /** Creates InsertQuery with <code>objEntityName</code> parameter. */
     public InsertQuery(String objEntityName) {
         this.setRoot(objEntityName);
     }
-    
-    public int getQueryType() {
-        return INSERT_QUERY;
-    }
-    
-    
+
     public Map getObjectSnapshot() {
         return objectSnapshot;
     }
-    
+
     public void setObjectSnapshot(Map objectSnapshot) {
         this.objectSnapshot = objectSnapshot;
     }
-    
-    
+
     public ObjectId getObjectId() {
         return objectId;
     }
-    
+
     public void setObjectId(ObjectId objectId) {
         this.objectId = objectId;
     }

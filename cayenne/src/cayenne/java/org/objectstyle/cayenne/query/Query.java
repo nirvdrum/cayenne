@@ -65,10 +65,29 @@ import org.apache.log4j.Level;
 public interface Query {
 	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
+	/**
+	 * @deprecated Since 1.1 Query type is no longer relevant.
+	 */
 	public static final int SELECT_QUERY = 1;
+	
+	/**
+	 * @deprecated Since 1.1 Query type is no longer relevant.
+	 */
 	public static final int INSERT_QUERY = 2;
+	
+	/**
+	 * @deprecated Since 1.1 Query type is no longer relevant.
+	 */
 	public static final int UPDATE_QUERY = 3;
+	
+	/**
+	 * @deprecated Since 1.1 Query type is no longer relevant.
+	 */
 	public static final int DELETE_QUERY = 4;
+	
+	/**
+	 * @deprecated Since 1.1 Query type is no longer relevant.
+	 */
 	public static final int UNKNOWN_QUERY = 5;
 
     /**
@@ -97,6 +116,8 @@ public interface Query {
 	/**
 	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY,
 	 * UPDATE_QUERY, DELETE_QUERY
+	 * 
+	 * @deprecated Since 1.1 Query type is no longer relevant.
 	 */
     public int getQueryType();
 

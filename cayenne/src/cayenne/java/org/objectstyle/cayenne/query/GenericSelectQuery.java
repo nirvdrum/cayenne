@@ -56,45 +56,62 @@
 package org.objectstyle.cayenne.query;
 
 /**
- * Interface that defines API of a generic SELECT query from a DataContext perspective. It
- * allows DataContext to run different select queries that can be Cayenne based or use raw
- * SQL.
+ * A query that returns result set. Concrete implementations can be object queries, raw
+ * sql queries, stored procedure queries, etc. The most commonly used GenericSelectQueries
+ * are {@link SelectQuery},{@link SQLTemplate}and {@link ProcedureQuery}.
  * 
  * @author Andrei Adamchik
  */
 public interface GenericSelectQuery extends Query {
-    
+
     /**
+     * A cache policy that disables caching of query results.
+     * 
      * @since 1.1
      */
     public static final String NO_CACHE = "nocache";
-    
+
     /**
+     * A cache policy ruling that query results shall be cached separately for each
+     * DataContext.
+     * 
      * @since 1.1
      */
     public static final String LOCAL_CACHE = "localcache";
-    
+
     /**
+     * A cache policy ruling that query results shall be stored in a shared cache
+     * accessible by all DataContexts.
+     * 
      * @since 1.1
      */
     public static final String SHARED_CACHE = "sharedcache";
 
     /**
+     * Defines the name of the property for the query {@link #getFetchLimit() fetch limit}.
+     * 
      * @since 1.1
      */
     public static final String FETCH_LIMIT_PROPERTY = "cayenne.GenericSelectQuery.fetchLimit";
-    
+
     /**
+     * Defines default query fetch limit, which is zero, meaning that all matching rows
+     * should be fetched.
+     * 
      * @since 1.1
      */
     public static final int FETCH_LIMIT_DEFAULT = 0;
 
     /**
+     * Defines the name of the property for the query {@link #getPageSize() page size}.
+     * 
      * @since 1.1
      */
     public static final String PAGE_SIZE_PROPERTY = "cayenne.GenericSelectQuery.pageSize";
-    
+
     /**
+     * Defines default query page size, which is zero for no pagination.
+     * 
      * @since 1.1
      */
     public static final int PAGE_SIZE_DEFAULT = 0;
@@ -103,7 +120,7 @@ public interface GenericSelectQuery extends Query {
      * @since 1.1
      */
     public static final String FETCHING_DATA_ROWS_PROPERTY = "cayenne.GenericSelectQuery.fetchingDataRows";
-    
+
     /**
      * @since 1.1
      */
@@ -113,7 +130,7 @@ public interface GenericSelectQuery extends Query {
      * @since 1.1
      */
     public static final String REFRESHING_OBJECTS_PROPERTY = "cayenne.GenericSelectQuery.refreshingObjects";
-    
+
     /**
      * @since 1.1
      */
@@ -123,23 +140,27 @@ public interface GenericSelectQuery extends Query {
      * @since 1.1
      */
     public static final String RESOLVING_INHERITED_PROPERTY = "cayenne.GenericSelectQuery.resolvingInherited";
-    
+
     /**
      * @since 1.1
      */
     public static final boolean RESOLVING_INHERITED_DEFAULT = true;
-    
+
     /**
      * @since 1.1
      */
     public static final String CACHE_POLICY_PROPERTY = "cayenne.GenericSelectQuery.cachePolicy";
-    
+
     /**
      * @since 1.1
      */
     public static final String CACHE_POLICY_DEFAULT = NO_CACHE;
-    
+
     /**
+     * Returns query cache policy, which can be one of {@link #NO_CACHE},
+     * {@link #LOCAL_CACHE}, or {@link #SHARED_CACHE}. NO_CACHE is generally a default
+     * policy.
+     * 
      * @since 1.1
      */
     public String getCachePolicy();
@@ -154,7 +175,7 @@ public interface GenericSelectQuery extends Query {
     /**
      * Returns <code>true</code> if the query results should replace any currently
      * cached values, returns <code>false</code> otherwise. If
-     * {@link #isFetchingDataRows()} returns <code>true</code>, this setting is not
+     * {@link #isFetchingDataRows()}returns <code>true</code>, this setting is not
      * applicable and has no effect.
      * 
      * @since 1.1
@@ -178,10 +199,10 @@ public interface GenericSelectQuery extends Query {
 
     /**
      * Returns the limit on the maximium number of records that can be returned by this
-     * query. If the actual number of rows in the result exceeds the fetch limit, they will
-     * be discarded. One possible use of fetch limit is using it as a safeguard against
-     * large result sets that may lead to the application running out of memory, etc. If
-     * a fetch limit is greater or equal to zero, all rows will be returned.
+     * query. If the actual number of rows in the result exceeds the fetch limit, they
+     * will be discarded. One possible use of fetch limit is using it as a safeguard
+     * against large result sets that may lead to the application running out of memory,
+     * etc. If a fetch limit is greater or equal to zero, all rows will be returned.
      * 
      * @return the limit on the maximium number of records that can be returned by this
      *         query

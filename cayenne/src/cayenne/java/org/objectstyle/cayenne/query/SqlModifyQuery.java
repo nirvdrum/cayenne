@@ -141,10 +141,6 @@ public class SqlModifyQuery extends AbstractQuery {
         init(objEntityName, sqlString);
     }
 
-    public int getQueryType() {
-        return UNKNOWN_QUERY;
-    }
-
     public void setSqlString(String sqlString) {
         if (sqlString != null) {
             sqlString = sqlString.trim();

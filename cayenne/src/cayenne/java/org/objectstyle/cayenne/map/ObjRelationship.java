@@ -158,8 +158,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns ObjRelationship that is the opposite of this ObjRelationship. returns null
-     * if no such relationship exists.
+     * Returns a "complimentary" ObjRelationship going in the opposite direction.
+     * Returns null if no such relationship is found.
      */
     public ObjRelationship getReverseRelationship() {
         // reverse the list

@@ -90,7 +90,9 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -333,20 +335,21 @@ public class DataNode implements QueryEngine {
                 // figure out query type and call appropriate worker method
                 if (nextQuery instanceof SQLTemplate) {
                     SQLTemplate sqlTemplate = (SQLTemplate) nextQuery;
-                    SQLTemplateExecutionPlan executionPlan =
-                        (sqlTemplate.isSelecting())
+                    SQLTemplateExecutionPlan executionPlan = (sqlTemplate.isSelecting())
                             ? new SQLTemplateSelectExecutionPlan(getAdapter())
                             : new SQLTemplateExecutionPlan(getAdapter());
                     executionPlan.execute(connection, sqlTemplate, resultConsumer);
                 }
-                else if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                else if (nextQuery instanceof ProcedureQuery) {
+                    runStoredProcedure(connection, nextQuery, resultConsumer);
+                }
+                // Important: check for GenericSelectQuery AFTER all specific
+                // implementations are checked...
+                else if (nextQuery instanceof GenericSelectQuery) {
                     runSelect(connection, nextQuery, resultConsumer);
                 }
                 else if (nextQuery instanceof BatchQuery) {
                     runBatchUpdate(connection, (BatchQuery) nextQuery, resultConsumer);
-                }
-                else if (nextQuery instanceof ProcedureQuery) {
-                    runStoredProcedure(connection, nextQuery, resultConsumer);
                 }
                 else {
                     runUpdate(connection, nextQuery, resultConsumer);
@@ -458,19 +461,17 @@ public class DataNode implements QueryEngine {
         // create BatchInterpreter
         // TODO: move all query translation logic to adapter.getQueryTranslator()
         BatchQueryBuilder queryBuilder;
-        switch (query.getQueryType()) {
-            case Query.INSERT_QUERY :
-                queryBuilder = new InsertBatchQueryBuilder(getAdapter());
-                break;
-            case Query.UPDATE_QUERY :
-                queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
-                break;
-            case Query.DELETE_QUERY :
-                queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
-                break;
-            default :
-                throw new CayenneException(
-                    "Unsupported batch type: " + query.getQueryType());
+        if (query instanceof InsertBatchQuery) {
+            queryBuilder = new InsertBatchQueryBuilder(getAdapter());
+        }
+        else if (query instanceof UpdateBatchQuery) {
+            queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
+        }
+        else if (query instanceof DeleteBatchQuery) {
+            queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
+        }
+        else {
+            throw new CayenneException("Unsupported batch query: " + query);
         }
 
         // run batch

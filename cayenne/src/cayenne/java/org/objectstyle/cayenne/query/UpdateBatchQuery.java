@@ -234,8 +234,4 @@ public class UpdateBatchQuery extends BatchQuery {
     public Map getCurrentQualifier() {
         return currentQualifier;
     }
-
-    public int getQueryType() {
-        return Query.UPDATE_QUERY;
-    }
 }

@@ -143,10 +143,6 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
         init(objEntityName, sqlString);
     }
 
-    public int getQueryType() {
-        return SELECT_QUERY;
-    }
-
     public void setSqlString(String sqlString) {
         if (sqlString != null) {
             sqlString = sqlString.trim();

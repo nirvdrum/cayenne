@@ -84,16 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- * 
- *  
- *   
- *    
- *     
- *         SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a=
- *      
- *     
- *    
- *   
+ *         SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  *  
  * </pre>
  * 
@@ -376,14 +367,6 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
 
     public void setResolvingInherited(boolean b) {
         selectProperties.setResolvingInherited(b);
-    }
-
-    /**
-     * Returns query type as select or unknowns depending on whether result columns are
-     * defined.
-     */
-    public int getQueryType() {
-        return isSelecting() ? SELECT_QUERY : UNKNOWN_QUERY;
     }
 
     /**

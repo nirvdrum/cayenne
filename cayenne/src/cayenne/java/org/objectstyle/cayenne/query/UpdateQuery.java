@@ -122,11 +122,6 @@ public class UpdateQuery extends QualifiedQuery {
         init(objEntityName, qualifier);
     }
     
-    
-    public int getQueryType() {
-        return UPDATE_QUERY;
-    }
-    
     public void addUpdAttribute(String attrName, Object updatedValue) {
         updAttributes.put(attrName, updatedValue);
     }

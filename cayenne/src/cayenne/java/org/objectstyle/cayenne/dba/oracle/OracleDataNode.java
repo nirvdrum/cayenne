@@ -88,7 +88,9 @@ import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -169,24 +171,22 @@ public class OracleDataNode extends DataNode {
         throws SQLException, Exception {
 
         LOBBatchQueryBuilder queryBuilder;
-        switch (query.getQueryType()) {
-            case Query.INSERT_QUERY :
-                queryBuilder = new LOBInsertBatchQueryBuilder(getAdapter());
-                break;
-            case Query.UPDATE_QUERY :
-                queryBuilder = new LOBUpdateBatchQueryBuilder(getAdapter());
-                break;
-            default :
-                throw new CayenneException(
-                    "Unsupported batch type for special LOB processing: "
-                        + query.getQueryType());
+        if (query instanceof InsertBatchQuery) {
+            queryBuilder = new LOBInsertBatchQueryBuilder(getAdapter());
+        }
+        else if (query instanceof UpdateBatchQuery) {
+            queryBuilder = new LOBUpdateBatchQueryBuilder(getAdapter());
+        }
+        else {
+            throw new CayenneException(
+                    "Unsupported batch type for special LOB processing: " + query);
         }
 
         queryBuilder.setTrimFunction(OracleAdapter.TRIM_FUNCTION);
         queryBuilder.setNewBlobFunction(OracleAdapter.NEW_BLOB_FUNCTION);
         queryBuilder.setNewClobFunction(OracleAdapter.NEW_CLOB_FUNCTION);
 
-        // no batching is done, queries are translated 
+        // no batching is done, queries are translated
         // for each batch set, since prepared statements
         // may be different depending on whether LOBs are NULL or not..
 

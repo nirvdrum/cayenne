@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access.trans;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.TranslationTestCase;
 import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -68,7 +67,7 @@ public class OrderingTranslatorTst extends CayenneTestCase {
     protected SelectQuery q;
 
     protected void setUp() throws Exception {
-        qa = TstQueryAssembler.assembler(getNode(), Query.SELECT_QUERY);
+        qa = new TstQueryAssembler(getNode(), new SelectQuery());
         q = (SelectQuery) qa.getQuery();
     }
 

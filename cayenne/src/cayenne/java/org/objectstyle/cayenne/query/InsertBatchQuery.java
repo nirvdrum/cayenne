@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.map.DbEntity;
  * 
  * @author Andriy Shapochka
  */
-
 public class InsertBatchQuery extends BatchQuery {
     private List dataObjectSnapshots;
     private List dbAttributes;
@@ -116,9 +115,5 @@ public class InsertBatchQuery extends BatchQuery {
 
     private void prepareMetadata() {
         dbAttributes = new ArrayList(this.getDbEntity().getAttributes());
-    }
-
-    public int getQueryType() {
-        return Query.INSERT_QUERY;
     }
 }

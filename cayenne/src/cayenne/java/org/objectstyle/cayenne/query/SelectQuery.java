@@ -294,7 +294,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
 
     /**
-     * A shortcut for {@link #queryWithParameters(Map, boolean)}.
+     * A shortcut for {@link #queryWithParameters(Map, boolean)} that prunes
+     * parts of qualifier that have no parameter value set.
      */
     public SelectQuery queryWithParameters(Map parameters) {
         return queryWithParameters(parameters, true);
@@ -329,13 +330,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         }
 
         return query;
-    }
-
-    /**
-     * Returns <code>Query.SELECT_QUERY</code> type.
-     */
-    public int getQueryType() {
-        return SELECT_QUERY;
     }
 
     /**
