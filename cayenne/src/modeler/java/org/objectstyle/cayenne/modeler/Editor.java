@@ -71,6 +71,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
@@ -156,8 +158,7 @@ public class Editor
     protected static Editor frame;
 
     protected EditorView view;
-    protected RecentFileMenu recentFileMenu =
-        new RecentFileMenu("Recent Files");
+    protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
     protected TopController controller;
 
     /** Returns an editor singleton object. */
@@ -169,8 +170,26 @@ public class Editor
      * Main method that starts the CayenneModeler.
      */
     public static void main(String[] args) {
-        // redirect all logging to the log file
-        configLogging();
+		// redirect all logging to the log file
+		configLogging();
+
+		// set L&F
+		try {
+			ModelerPreferences prefs = ModelerPreferences.getPreferences();
+			String laf = (String)prefs.get(ModelerPreferences.EDITOR_LAFNAME);
+			LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
+
+			for (int i = 0; i < installed.length; i++) {
+				LookAndFeelInfo lif = installed[i];
+				if (lif.getName().equals(laf)) {
+					UIManager.setLookAndFeel(lif.getClassName());
+					break;
+				}
+			}
+		}
+		catch(Exception e){
+			logObj.warn("Could not set selected LookAndFeel - using default.", e);
+		}
 
         // check jdk version
         try {
@@ -194,19 +213,6 @@ public class Editor
         }
 
         Editor frame = new Editor();
-        //Center the window
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension frameSize = frame.getSize();
-        if (frameSize.height > screenSize.height) {
-            frameSize.height = screenSize.height;
-        }
-        if (frameSize.width > screenSize.width) {
-            frameSize.width = screenSize.width;
-        }
-        frame.setLocation(
-            (screenSize.width - frameSize.width) / 2,
-            (screenSize.height - frameSize.height) / 2);
-        frame.setVisible(true);
 
         logObj.info("Started CayenneModeler.");
 
@@ -224,7 +230,7 @@ public class Editor
                 openAction.openProject(f);
             }
         }
-    }
+   }
 
     /** 
      * Configures Log4J appenders to perform logging to 
@@ -294,14 +300,38 @@ public class Editor
         initToolbar();
         initStatusBar();
 
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(650, 550);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        this.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                ((ExitAction) getAction(ExitAction.ACTION_NAME)).exit();
-            }
-        });
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				((ExitAction) getAction(ExitAction.ACTION_NAME)).exit();
+			}
+		});
+
+		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+
+		int newWidth = prefs.getInt(ModelerPreferences.EDITOR_FRAME_WIDTH, 650);
+		int newHeight = prefs.getInt(ModelerPreferences.EDITOR_FRAME_HEIGHT, 550);
+
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+		if (newHeight > screenSize.height) {
+			newHeight = screenSize.height;
+		}
+
+		if (newWidth > screenSize.width) {
+			newWidth = screenSize.width;
+		}
+
+		this.setSize(newWidth, newHeight);
+
+		int defaultX = (screenSize.width - newWidth) / 2;
+		int newX = prefs.getInt(ModelerPreferences.EDITOR_FRAME_X, defaultX);
+		int defaultY = (screenSize.height - newHeight) / 2;
+		int newY = prefs.getInt(ModelerPreferences.EDITOR_FRAME_Y, defaultY);
+
+		frame.setLocation(newX, newY);
+		frame.setVisible(true);
 
         controller.startup();
     }
