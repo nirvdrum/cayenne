@@ -66,7 +66,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
@@ -86,7 +85,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        ctxt = getDomain().createDataContext();
+        ctxt = createDataContext();
     }
 
     public void testHasChangesNew() throws Exception {
@@ -103,45 +102,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertTrue(ctxt.newObjects().contains(a1));
     }
 
-    public void testUnregisterObject() throws Exception {
-        Map row = new HashMap();
-        row.put("ARTIST_ID", new Integer(1));
-        row.put("ARTIST_NAME", "ArtistXYZ");
-        row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
-        ObjectId oid = obj.getObjectId();
 
-        assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-        assertSame(ctxt, obj.getDataContext());
-        assertSame(obj, ctxt.getObjectStore().getObject(oid));
-
-        ctxt.unregisterObject(obj);
-
-        assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
-        assertNull(obj.getDataContext());
-        assertNull(obj.getObjectId());
-        assertNull(ctxt.getObjectStore().getObject(oid));
-    }
-
-    public void testInvalidateObject() throws Exception {
-        Map row = new HashMap();
-        row.put("ARTIST_ID", new Integer(1));
-        row.put("ARTIST_NAME", "ArtistXYZ");
-        row.put("DATE_OF_BIRTH", new Date());
-        DataObject obj = ctxt.objectFromDataRow("Artist", row);
-        ObjectId oid = obj.getObjectId();
-
-        assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-        assertSame(ctxt, obj.getDataContext());
-        assertSame(obj, ctxt.getObjectStore().getObject(oid));
-
-        ctxt.invalidateObject(obj);
-
-        assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-        assertSame(ctxt, obj.getDataContext());
-        assertSame(oid, obj.getObjectId());
-        assertNull(ctxt.getObjectStore().getSnapshot(oid));
-    }
 
     public void testIdObjectFromDataRow() throws Exception {
         Map row = new HashMap();
