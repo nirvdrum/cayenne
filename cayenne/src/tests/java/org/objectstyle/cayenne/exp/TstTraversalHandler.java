@@ -77,6 +77,24 @@ public class TstTraversalHandler
     protected int ternaryNodesStarted;
     protected int leafs;
 
+    /**
+     * Performs independent traversal of two expressions,
+     * comparing the results. If expressions structure is different,
+     * throws an exception.
+     */
+    public static void compareExps(Expression exp1, Expression exp2) {
+        TstTraversalHandler handler1 = new TstTraversalHandler();
+        handler1.traverseExpression(exp1);
+
+        TstTraversalHandler handler2 = new TstTraversalHandler();
+        handler2.traverseExpression(exp2);
+
+        Assert.assertEquals(handler1.unaryNodes, handler2.unaryNodes);
+        Assert.assertEquals(handler1.binaryNodes, handler2.binaryNodes);
+        Assert.assertEquals(handler1.ternaryNodes, handler2.ternaryNodes);
+        Assert.assertEquals(handler1.listNodes, handler2.listNodes);
+    }
+
     public TstTraversalHandler() {
         setHandler(this);
     }

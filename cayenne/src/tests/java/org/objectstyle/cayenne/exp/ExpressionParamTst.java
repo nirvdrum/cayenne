@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,62 +53,26 @@
  * <http://objectstyle.org/>.
  *
  */
-
+ 
 package org.objectstyle.cayenne.exp;
 
-/** 
- * Generic unary expression. 
- * Describes expression in a form: "<tt>operation operand</tt>". 
- * SQL example of unary expression is NOT expression.
- * 
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+
+/**
  * @author Andrei Adamchik
  */
-public class UnaryExpression extends Expression {
-    protected Object operand;
+public class ExpressionParamTst extends CayenneTestCase {
 
-    public UnaryExpression() {
+    /**
+     * Constructor for ExpressionParamTst.
+     * @param name
+     */
+    public ExpressionParamTst(String name) {
+        super(name);
     }
-
-    public UnaryExpression(int type) {
-        this.type = type;
-    }
-
-    public final int getOperandCount() {
-        return 1;
-    }
-
-    public Object getOperand(int index) {
-        if (index == 0)
-            return operand;
-
-        throw new IllegalArgumentException(
-            "Invalid operand index for UnaryExpression: " + index);
-    }
-
-    public void setOperand(int index, Object value) {
-        if (index == 0) {
-            operand = value;
-            return;
-        }
-
-        throw new IllegalArgumentException(
-            "Invalid operand index for UnaryExpression: " + index);
-    }
-
-    public String toString() {
-        if (type == DB_PATH) {
-            return "DB_PATH(" + operand + ")";
-        } else if (type == OBJ_PATH) {
-            return "OBJ_PATH(" + operand + ")";
-        }
-
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("<UnaryExpression type='")
-            .append(type)
-            .append("' operand='")
-            .append(operand)
-            .append("'>");
-        return buf.toString();
+    
+    public void testConstructor() throws Exception {
+    	ExpressionParam p = new ExpressionParam("abc");
+    	assertEquals("abc", p.getName());
     }
 }

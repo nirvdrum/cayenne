@@ -122,6 +122,10 @@ public class ListExpression extends Expression {
     public void appendOperands(Collection operands) {
         this.operands.addAll(operands);
     }
+    
+    public void removeOperand(Object value) {
+        operands.remove(value);
+    }
 
     /**
      * In case requested expression type is the same as internal type,
