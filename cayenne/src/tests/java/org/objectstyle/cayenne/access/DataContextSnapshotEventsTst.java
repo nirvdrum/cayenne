@@ -73,14 +73,14 @@ public class DataContextSnapshotEventsTst extends MultiContextTestCase {
         DataContext altContext = mirrorDataContext(context);
         Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
-		assertNotNull(altArtist);
+        assertNotNull(altArtist);
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
         // test update propagation
-		artist.setArtistName("version2");
-		context.commitChanges();
-		
-		// assertEquals(artist.getArtistName(), altArtist.getArtistName());
+        artist.setArtistName("version2");
+        context.commitChanges();
+
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
     }
 }

@@ -63,8 +63,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
+import org.objectstyle.cayenne.access.event.SnapshotEventListener;
+import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.util.Util;
 import org.shiftone.cache.Cache;
@@ -101,9 +104,9 @@ public class SnapshotCache implements Serializable {
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
-    	this.name = name;
+        this.name = name;
     }
 
     public Map getSnapshot(ObjectId oid) {
@@ -116,19 +119,38 @@ public class SnapshotCache implements Serializable {
     public EventSubject getSnapshotEventSubject() {
         return EventSubject.getSubject(this.getClass(), name);
     }
-    
+
+    protected void unregisterSnapshotEventListener(SnapshotEventListener listener) {
+        EventManager.getDefaultManager().removeListener(listener);
+    }
+
+    protected void registerSnapshotEventListener(SnapshotEventListener listener) {
+        try {
+            EventManager.getDefaultManager().addListener(
+                listener,
+                "snapshotsChanged",
+                SnapshotEvent.class,
+                getSnapshotEventSubject(),
+                this);
+        }
+        catch (NoSuchMethodException e) {
+            logObj.warn("Error adding listener.", e);
+            throw new CayenneRuntimeException("Error adding listener.", e);
+        }
+    }
+
     /**
      * Expires and removes all stored snapshots without sending any notification events.
      */
     public void clear() {
-    	snapshots.clear();
+        snapshots.clear();
     }
-    
+
     /**
      * Evicts a snapshot from cache without generating any SnapshotEvents.
      */
     public void forgetSnapshot(ObjectId id) {
-		snapshots.remove(id);
+        snapshots.remove(id);
     }
 
     /**
@@ -168,9 +190,9 @@ public class SnapshotCache implements Serializable {
                 // we also might send notifications for added ...
                 // but sending notifications for truly new or recently fetched 
                 // objects will result in serious performance degradation...
-                
+
                 // so we need to keep track of expired ids somehow...
-                
+
                 if (oldSnapshot != null) {
                     Map diff = buildSnapshotDiff((ObjectId) key, newSnapshot);
                     if (!diff.isEmpty()) {
@@ -194,9 +216,9 @@ public class SnapshotCache implements Serializable {
 
         // now notify children;
         // create a chained event so that its source is SnapshotCache.
-        // EventManager.getDefaultManager().postEvent(
-        //     SnapshotEvent.createEvent(this, event),
-        //   snapshotEventSubject);
+        EventManager.getDefaultManager().postEvent(
+            SnapshotEvent.createEvent(this, event),
+			getSnapshotEventSubject());
     }
 
     /**

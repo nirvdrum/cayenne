@@ -130,13 +130,13 @@ public class DataDomain implements QueryEngine {
     public void setName(String name) {
         this.snapshotCache.setName(name);
     }
-    
+
     public SnapshotCache getSnapshotCache() {
-    	return snapshotCache;
+        return snapshotCache;
     }
-    
+
     public void setSnapshotCache(SnapshotCache snapshotCache) {
-    	this.snapshotCache = snapshotCache;
+        this.snapshotCache = snapshotCache;
     }
 
     /** Registers new DataMap with this domain. */

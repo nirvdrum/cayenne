@@ -245,6 +245,112 @@ public class SnapshotManager {
 
     }
 
+    public static void mergeObjectsWithSnapshotDiffs(
+        ObjectStore objectStore,
+        Map diffs) {
+
+        if (diffs != null && !diffs.isEmpty()) {
+            Iterator oids = diffs.keySet().iterator();
+
+            while (oids.hasNext()) {
+                ObjectId oid = (ObjectId) oids.next();
+                DataObject object = objectStore.getObject(oid);
+
+                // no object, or HOLLOW object require no processing
+                if (object == null
+                    || object.getPersistenceState() == PersistenceState.HOLLOW) {
+                    continue;
+                }
+
+                // we are lazy, just turn COMMITTED object into HOLLOW instead of 
+                // actually updating it
+                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
+                    object.setPersistenceState(PersistenceState.HOLLOW);
+                    continue;
+                }
+
+                // merge modified and deleted
+                if (object.getPersistenceState() == PersistenceState.DELETED
+                    || object.getPersistenceState() == PersistenceState.MODIFIED) {
+
+                    ObjEntity entity =
+                        object.getDataContext().getEntityResolver().lookupObjEntity(
+                            object);
+                    forceMergeWithSnapshot(entity, object, (Map) diffs.get(oid));
+                }
+            }
+        }
+    }
+
+    private static void forceMergeWithSnapshot(
+        ObjEntity entity,
+        DataObject anObject,
+        Map snapshot) {
+
+        DataContext context = anObject.getDataContext();
+        Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
+
+        // attributes
+        Map attrMap = entity.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
+
+            //processing compound attributes correctly
+            String dbAttrPath = attr.getDbAttributePath();
+
+            // supports merging of partial snapshots...
+            // check for null is cheaper than double lookup 
+            // for a key... so check for partial snapshot
+            // only if the value is null
+			Object newVal = snapshot.get(dbAttrPath);
+            if (newVal == null && !snapshot.containsKey(dbAttrPath)) {
+                continue;
+            }
+
+            Object curVal = anObject.readPropertyDirectly(attrName);
+            Object oldVal = oldSnap.get(dbAttrPath);
+            
+
+            // if value not modified, update it from snapshot,
+            // otherwise leave it alone
+            if (Util.nullSafeEquals(curVal, oldVal)
+                && !Util.nullSafeEquals(newVal, curVal)) {
+                anObject.writePropertyDirectly(attrName, newVal);
+            }
+        }
+
+        // merge to-one relationships
+        Iterator rit = entity.getRelationships().iterator();
+        while (rit.hasNext()) {
+            ObjRelationship rel = (ObjRelationship) rit.next();
+            if (rel.isToMany()) {
+                continue;
+            }
+
+            // TODO: will this work for flattened, how do we save snapshots for them?
+
+            // if value not modified, update it from snapshot,
+            // otherwise leave it alone
+            if (!isToOneTargetModified(rel, anObject, oldSnap)
+                && isJoinAttributesModified(rel, snapshot, oldSnap)) {
+
+                DbRelationship dbRelationship =
+                    (DbRelationship) rel.getDbRelationships().get(0);
+
+                ObjectId id =
+                    targetObjectId(
+                        ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
+                        dbRelationship,
+                        snapshot);
+                DataObject target = (id != null) ? context.registeredObject(id) : null;
+
+                anObject.writePropertyDirectly(rel.getName(), target);
+            }
+        }
+    }
+
     /**
      * Merges changes reflected in snapshot map to the object. Changes
      * made to attributes and to-one relationships will be merged. 
@@ -265,59 +371,7 @@ public class SnapshotManager {
             refreshObjectWithSnapshot(entity, anObject, snapshot, false);
         }
         else {
-            DataContext context = anObject.getDataContext();
-            Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
-
-            // attributes
-            Map attrMap = entity.getAttributeMap();
-            Iterator it = attrMap.keySet().iterator();
-            while (it.hasNext()) {
-                String attrName = (String) it.next();
-                ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-
-                //processing compound attributes correctly
-                String dbAttrPath = attr.getDbAttributePath();
-                Object curVal = anObject.readPropertyDirectly(attrName);
-                Object oldVal = oldSnap.get(dbAttrPath);
-                Object newVal = snapshot.get(dbAttrPath);
-
-                // if value not modified, update it from snapshot,
-                // otherwise leave it alone
-                if (Util.nullSafeEquals(curVal, oldVal)
-                    && !Util.nullSafeEquals(newVal, curVal)) {
-                    anObject.writePropertyDirectly(attrName, newVal);
-                }
-            }
-
-            // merge to-one relationships
-            Iterator rit = entity.getRelationships().iterator();
-            while (rit.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) rit.next();
-                if (rel.isToMany()) {
-                    continue;
-                }
-
-                // TODO: will this work for flattened, how do we save snapshots for them?
-
-                // if value not modified, update it from snapshot,
-                // otherwise leave it alone
-                if (!isToOneTargetModified(rel, anObject, oldSnap)
-                    && isJoinAttributesModified(rel, snapshot, oldSnap)) {
-
-                    DbRelationship dbRelationship =
-                        (DbRelationship) rel.getDbRelationships().get(0);
-
-                    ObjectId id =
-                        targetObjectId(
-                            ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
-                            dbRelationship,
-                            snapshot);
-                    DataObject target =
-                        (id != null) ? context.registeredObject(id) : null;
-
-                    anObject.writePropertyDirectly(rel.getName(), target);
-                }
-            }
+            forceMergeWithSnapshot(entity, anObject, snapshot);
         }
     }
 

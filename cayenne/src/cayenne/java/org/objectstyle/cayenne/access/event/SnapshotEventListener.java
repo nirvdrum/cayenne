@@ -55,9 +55,11 @@
  */
 package org.objectstyle.cayenne.access.event;
 
+import java.util.EventListener;
+
 /**
  * @author Andrei Adamchik
  */
-public interface SnapshotEventListener {
+public interface SnapshotEventListener extends EventListener {
     public void snapshotsChanged(SnapshotEvent event);
 }

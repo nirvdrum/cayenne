@@ -98,7 +98,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     public ObjectStore(SnapshotCache snapshotCache) {
-        this.snapshotCache = snapshotCache;
+        setSnapshotCache(snapshotCache);
     }
 
     /**
@@ -109,7 +109,15 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     public void setSnapshotCache(SnapshotCache snapshotCache) {
+        if (this.snapshotCache != null) {
+            this.snapshotCache.unregisterSnapshotEventListener(this);
+        }
+
         this.snapshotCache = snapshotCache;
+
+        if (snapshotCache != null) {
+            snapshotCache.registerSnapshotEventListener(this);
+        }
     }
 
     /**
@@ -439,7 +447,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized void removeObject(ObjectId id) {
         if (id != null) {
             objectMap.remove(id);
-			removeSnapshot(id);
+            removeSnapshot(id);
         }
     }
 
@@ -513,8 +521,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Processes snapshot change event, updating DataObjects whose
-     * snapshots have changed.
+     * Processes snapshot change event, updating DataObjects
+     * that have the changes.
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
@@ -523,6 +531,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             return;
         }
 
+        // merge objects with changes in event...
         logObj.debug("Processing snapshot event: " + event);
+
+        SnapshotManager.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
+        
+        // TODO: what should we do with deleted objects?
+        // I suggest to turn them into TRANSIENT and notify a delegate...
     }
 }
