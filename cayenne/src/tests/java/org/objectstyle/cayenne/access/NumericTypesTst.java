@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.art.BitNumberTest;
 import org.objectstyle.art.BitTest;
 import org.objectstyle.art.SmallintTest;
 import org.objectstyle.art.TinyintTest;

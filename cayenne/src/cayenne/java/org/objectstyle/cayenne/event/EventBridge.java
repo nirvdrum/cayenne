@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.event;
 
 import java.util.EventListener;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.IDUtil;
 
 /**
@@ -81,7 +80,7 @@ import org.objectstyle.cayenne.util.IDUtil;
 public abstract class EventBridge implements EventListener {
     public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
     public static final String VM_ID_PROPERRTY = "VM_ID";
-    
+
     public static final int RECEIVE_LOCAL = 1;
     public static final int RECEIVE_EXTERNAL = 2;
     public static final int RECEIVE_LOCAL_EXTERNAL = 3;
@@ -106,7 +105,7 @@ public abstract class EventBridge implements EventListener {
 
         return new String(chars);
     }
-    
+
     public EventBridge(EventSubject localSubject, String externalSubject) {
         this.localSubject = localSubject;
         this.externalSubject = externalSubject;
@@ -160,17 +159,12 @@ public abstract class EventBridge implements EventListener {
         this.mode = mode;
 
         if (receivesLocalEvents()) {
-            try {
-                eventManager.addListener(
-                    this,
-                    "onLocalEvent",
-                    CayenneEvent.class,
-                    localSubject,
-                    eventsSource);
-            } catch (RuntimeException ex) {
-                // this should never happen
-                throw new CayenneRuntimeException("Can't install EventBridge.");
-            }
+            eventManager.addListener(
+                this,
+                "onLocalEvent",
+                CayenneEvent.class,
+                localSubject,
+                eventsSource);
         }
 
         startupExternal();
@@ -203,14 +197,15 @@ public abstract class EventBridge implements EventListener {
      */
     public void onExternalEvent(CayenneEvent event) {
         if (eventManager != null) {
-            
+
             // event may have been deserialized with null source
-            if(event.getSource() == null) {
+            if (event.getSource() == null) {
                 event.setSource(this);
             }
-            
+
             eventManager.postEvent(event, localSubject);
-        } else {
+        }
+        else {
             throw new IllegalStateException(
                 "Can't post events. EventBridge was not started properly. "
                     + "EventManager is null.");

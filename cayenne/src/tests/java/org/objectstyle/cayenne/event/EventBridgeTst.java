@@ -117,7 +117,7 @@ public class EventBridgeTst extends CayenneTestCase {
 
         SnapshotEvent event = new SnapshotEvent(this, this, null, null);
 
-		manager.postEvent(event, local, true);
+		manager.postNonBlockingEvent(event, local);
         assertSame(event, bridge.lastLocalEvent);
 
     }

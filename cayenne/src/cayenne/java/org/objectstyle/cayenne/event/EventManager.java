@@ -164,14 +164,17 @@ public class EventManager extends Object {
         if (subject == null) {
             throw new IllegalArgumentException("Subject must not be null.");
         }
-        
-        logObj.debug("adding listener: " + listener.getClass().getName() + "." + methodName);
+
+        logObj.debug(
+            "adding listener: " + listener.getClass().getName() + "." + methodName);
 
         try {
-	        Invocation invocation = new Invocation(listener, methodName, eventParameterClass);
-	        dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
-        } catch (NoSuchMethodException nsm) {
-        	throw new RuntimeException(nsm.getMessage());
+            Invocation invocation =
+                new Invocation(listener, methodName, eventParameterClass);
+            dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
+        }
+        catch (NoSuchMethodException nsm) {
+            throw new RuntimeException(nsm.getMessage());
         }
     }
 
@@ -239,10 +242,7 @@ public class EventManager extends Object {
      * @return <code>true</code> if <code>listener</code> could be removed for
      * the given subject, else returns <code>false</code>.
      */
-    public boolean removeListener(
-        Object listener,
-        EventSubject subject,
-        Object sender) {
+    public boolean removeListener(Object listener, EventSubject subject, Object sender) {
         if (listener == null || subject == null) {
             return false;
         }
@@ -257,54 +257,34 @@ public class EventManager extends Object {
 
     /**
      * Sends an event to all registered objects about a particular subject.
-     * Event is sent asynchronously. Event is queued by EventManager, and then
-     * this method returns. Later an event dispatch thread wakes up and dispatches 
-     * the event.
+     * Event is sent synchronously, so the sender thread is blocked until all
+     * the listeners finish processing the event.
      * 
      * @param event the event to be posted to the observers
      * @param subject the subject about which observers will be notified
      * @throws IllegalArgumentException if event or subject are null
      */
     public void postEvent(EventObject event, EventSubject subject) {
-        postEvent(event, subject, false);
+        dispatchEvent(new Dispatch(event, subject));
     }
 
     /**
      * Sends an event to all registered objects about a particular subject.
-     * <code>dispatchImmediately</code> argument 
+     * Event is queued by EventManager, releasing the sender thread, and is
+     * later dispatched in a separate thread.
      * 
      * @param event the event to be posted to the observers
      * @param subject the subject about which observers will be notified
-     * @param dispatchImmediately control whether the even dispatched from
-     * this method, blocking this thread until all listeners have processed 
-     * the event, or should be queued for asynchronous notification.
      * 
      * @throws IllegalArgumentException if event or subject are null
+     * @since 1.1
      */
-    public void postEvent(
-        EventObject event,
-        EventSubject subject,
-        boolean dispatchImmediately) {
+    public void postNonBlockingEvent(EventObject event, EventSubject subject) {
 
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
-
-        if (subject == null) {
-            throw new IllegalArgumentException("subject must not be null");
-        }
-
-        Dispatch dispatch = new Dispatch(event, subject);
-
-        if (dispatchImmediately) {
-            dispatchEvent(dispatch);
-        } else {
-
-            // add dispatch to the queue and return
-            synchronized (eventQueue) {
-                eventQueue.add(dispatch);
-                eventQueue.notifyAll();
-            }
+        // add dispatch to the queue and return
+        synchronized (eventQueue) {
+            eventQueue.add(new Dispatch(event, subject));
+            eventQueue.notifyAll();
         }
     }
 
@@ -365,8 +345,10 @@ public class EventManager extends Object {
                         EventManager.this.dispatchEvent(dispatch);
                     }
                     catch (Throwable th) {
-                       // ignoring exception
-                       logObj.debug("Event dispatch error, ignoring.", Util.unwindException(th));
+                        // ignoring exception
+                        logObj.debug(
+                            "Event dispatch error, ignoring.",
+                            Util.unwindException(th));
                     }
                 }
             }
