@@ -136,6 +136,7 @@ public class ServletConfiguration extends Configuration
       * on application startup. */
     public void contextInitialized(ServletContextEvent sce) {
         this.servletContext = sce.getServletContext();
+        servletContext.log("*************** app created");
         Configuration.initSharedConfig(this);
     }
 
@@ -152,7 +153,8 @@ public class ServletConfiguration extends Configuration
       * is a part of HttpSessionListener interface and is called every time
       * when a new session is created. */
     public void sessionCreated(HttpSessionEvent se) {
-        se.getSession().setAttribute(DATA_CONTEXT_KEY, servletContext);
+        servletContext.log("*************** session created");
+        se.getSession().setAttribute(DATA_CONTEXT_KEY, getDomain().createDataContext());
     }
 
 

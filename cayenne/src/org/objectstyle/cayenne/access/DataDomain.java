@@ -210,19 +210,7 @@ public class DataDomain implements QueryEngine {
     /** Returns DataNode that should handle database operations for
       * a specified <code>objEntityName</code>. */
     public DataNode dataNodeForObjEntityName(String objEntityName) {
-        Collection nodes = dataNodes.values();
-        Iterator it = nodes.iterator();
-        while (it.hasNext()) {
-            DataNode nextNode = (DataNode)it.next();
-            DataMap[] maps = nextNode.getDataMaps();
-            int mapLen = maps.length;
-            for (int i = 0; i < mapLen; i++) {
-                ObjEntity anEntity = maps[i].getObjEntity(objEntityName);
-                if (anEntity != null)
-                    return nextNode;
-            }
-        }
-        return null;
+        return dataNodeForObjEntity(lookupEntity(objEntityName));
     }
 
     /** Returns DataNode that should handle database operations for
