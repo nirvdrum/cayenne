@@ -69,15 +69,11 @@
 		
 		<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
 		
-		<tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar">
+		<tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar.gz" compression="gzip">
 			<tarfileset dir="${dist.base}">
 				<include name="${project.name}-${project.version}/**"/>
 			</tarfileset>
 		</tar>
-		
-        <gzip src="${dist.base}/${project.name}-src-${project.version}.tar" 
-              zipfile="${dist.base}/${project.name}-src-${project.version}.tar.gz"/>  
-        <delete file="${dist.base}/${project.name}-src-${project.version}.tar"/>
     </target>
     
     
