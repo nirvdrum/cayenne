@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.tools;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.tools;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -82,15 +82,16 @@ public class CayenneGeneratorTst extends CayenneTestCase {
     private static final Project project = new Project();
     private static final File baseDir = new File(".");
     private static final File map = new File(baseDir, "antmap.xml");
-
+    private static final File template = new File(baseDir, "velotemplate.vm");
+    
     static {
-        extractMap();
+        extractFiles();
         project.setBaseDir(baseDir);
     }
 
     protected CayenneGenerator task;
 
-    private static void extractMap() {
+    private static void extractFiles() {
     	ResourceLocator locator = new ResourceLocator();
 		locator.setSkipAbsPath(true);
 		locator.setSkipClasspath(false);
@@ -104,8 +105,10 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 		locator.setClassLoader(Configuration.getResourceLoader());
 		
 		
-        URL url = locator.findResource("test_resources/testmap.xml");
-        Util.copy(url, map);
+        URL url1 = locator.findResource("test_resources/testmap.xml");
+        Util.copy(url1, map);
+        URL url2 = locator.findResource("test_resources/testtemplate.vm");
+        Util.copy(url2, template);
     }
 
     public CayenneGeneratorTst(String name) {
@@ -119,7 +122,32 @@ public class CayenneGeneratorTst extends CayenneTestCase {
         task.setLocation(Location.UNKNOWN_LOCATION);
     }
 
-    /** Test single classes generation including full package path. */
+    /** Test single classes with a non-standard template. */
+    public void testSingleClassesCustTemplate() throws Exception {
+        // prepare destination directory
+        File mapDir = new File(baseDir, "single-classes-custtempl");
+        assertTrue(mapDir.mkdirs());
+
+        // setup task
+        task.setDestDir(mapDir);
+        task.setMap(map);
+        task.setMakepairs(false);
+        task.setUsepkgpath(true);
+        task.setTemplate(template);
+
+        // run task
+        task.execute();
+
+        // check results
+        File a = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+        assertTrue(a.isFile());
+        assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
+
+        File _a = new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
+        assertTrue(!_a.exists());
+    }
+    
+     /** Test single classes generation including full package path. */
     public void testSingleClasses1() throws Exception {
         // prepare destination directory
         File mapDir = new File(baseDir, "single-classes-tree");

@@ -264,7 +264,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
     */
     protected String getTemplateForSingles() throws IOException {
         return (template != null)
-            ? template.getCanonicalPath()
+            ? template.getPath()
             : defaultSingleClassTemplate();
     }
 
@@ -274,7 +274,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
      */
     protected String getTemplateForPairs() throws IOException {
         return (template != null)
-            ? template.getCanonicalPath()
+            ? template.getPath()
             : defaultSubclassTemplate();
     }
 
@@ -284,7 +284,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
      */
     protected String getSupertemplateForPairs() throws IOException {
         return (superTemplate != null)
-            ? superTemplate.getCanonicalPath()
+            ? superTemplate.getPath()
             : defaultSuperclassTemplate();
     }
 
