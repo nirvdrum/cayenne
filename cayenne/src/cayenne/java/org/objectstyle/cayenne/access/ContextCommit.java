@@ -582,16 +582,32 @@ class ContextCommit {
     private void appendOptimisticLockingAttributes(
             Map qualifierSnapshot,
             DataObject dataObject,
-            List qualifierAttributes) throws CayenneException {
+            List qualifierAttributes)  {
 
-        Map snapshot = dataObject.getDataContext().getObjectStore().getCachedSnapshot(
-                dataObject.getObjectId());
+        Map snapshot = null;
 
         Iterator it = qualifierAttributes.iterator();
         while (it.hasNext()) {
             DbAttribute attribute = (DbAttribute) it.next();
             String name = attribute.getName();
             if (!qualifierSnapshot.containsKey(name)) {
+
+                // get cached snapshot on demand ...
+                if (snapshot == null) {
+                    snapshot = dataObject
+                            .getDataContext()
+                            .getObjectStore()
+                            .getCachedSnapshot(dataObject.getObjectId());
+
+                    // sanity check...
+                    if (snapshot == null) {
+                        throw new CayenneRuntimeException(
+                                "Can't build qualifier for optimistic locking, "
+                                        + "no snapshot for id "
+                                        + dataObject.getObjectId());
+                    }
+                }
+                
                 qualifierSnapshot.put(name, snapshot.get(name));
             }
         }

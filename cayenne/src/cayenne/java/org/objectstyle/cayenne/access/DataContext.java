@@ -88,7 +88,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -889,158 +888,12 @@ public class DataContext implements QueryEngine, Serializable {
      * are processed according to delete rules, i.e. relationships can be unset ("nullify" rule), 
      * deletion operation is cascaded (cascade rule).
      * 
-     * @param anObject data object that we want to delete.
+     * @param object data object that we want to delete.
      * @throws DeleteDenyException if a DENY delete rule is applicable for object deletion.
-     * @throws NullPointerException if anObject is null.
+     * @throws NullPointerException if object is null.
      */
-    public void deleteObject(DataObject anObject) {
-        if (anObject.getPersistenceState() == PersistenceState.DELETED
-                || anObject.getPersistenceState() == PersistenceState.TRANSIENT) {
-
-            // Drop out... especially in case of DELETED we might be about to get
-            // into a horrible
-            // recursive loop due to CASCADE delete rules.
-            // Assume that everything must have been done correctly already
-            // and *don't* do it again
-            return;
-        }
-
-        // must resolve HOLLOW objects before delete... Right now this is needed
-        // to process relationships, but when we add optimistic locking, this will
-        // be a requirement...
-        anObject.resolveFault();
-
-        // Save the current state in case of a deny, in which case it should be reset.
-        // We cannot delay setting it to deleted, as Cascade deletes might cause
-        // recursion, and the "deleted" state is the best way we have of noticing that and
-        // bailing out (see above)
-        int oldState = anObject.getPersistenceState();
-        int newState = (oldState == PersistenceState.NEW)
-                ? PersistenceState.TRANSIENT
-                : PersistenceState.DELETED;
-        anObject.setPersistenceState(newState);
-
-        // Apply delete rules to the related objects...
-        ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
-        Iterator relationshipIterator = entity.getRelationships().iterator();
-        while (relationshipIterator.hasNext()) {
-            ObjRelationship relationship = (ObjRelationship) relationshipIterator.next();
-
-            boolean processFlattened = relationship.isFlattened()
-                    && relationship.isToDependentEntity();
-
-            // first check for no action... bail out if no flattened processing is needed
-            if (relationship.getDeleteRule() == DeleteRule.NO_ACTION && !processFlattened) {
-                continue;
-            }
-
-            List relatedObjects = Collections.EMPTY_LIST;
-            if (relationship.isToMany()) {
-
-                List toMany = (List) anObject.readNestedProperty(relationship.getName());
-
-                if (toMany.size() > 0) {
-                    // Get a copy of the list so that deleting objects doesn't
-                    // result in concurrent modification exceptions
-                    relatedObjects = new ArrayList(toMany);
-                }
-            }
-            else {
-                Object relatedObject = anObject
-                        .readNestedProperty(relationship.getName());
-
-                if (relatedObject != null) {
-                    relatedObjects = Collections.singletonList(relatedObject);
-                }
-            }
-
-            // no related object, bail out
-            if (relatedObjects.size() == 0) {
-                continue;
-            }
-
-            // process DENY rule first...
-            if (relationship.getDeleteRule() == DeleteRule.DENY) {
-                // Clean up - we shouldn't be deleting this object
-                anObject.setPersistenceState(oldState);
-
-                String message = relatedObjects.size() == 1
-                        ? "1 related object"
-                        : relatedObjects.size() + " related objects";
-                throw new DeleteDenyException(anObject, relationship, message);
-            }
-
-            // process flattened with dependent join tables...
-            // joins must be removed even if they are non-existent or ignored in the
-            // object graph
-            if (processFlattened) {
-                ObjectStore objectStore = getObjectStore();
-                Iterator iterator = relatedObjects.iterator();
-                while (iterator.hasNext()) {
-                    DataObject relatedObject = (DataObject) iterator.next();
-                    objectStore.flattenedRelationshipUnset(anObject, relationship, relatedObject);
-                }
-            }
-
-            // process remaining rules
-            switch (relationship.getDeleteRule()) {
-                case DeleteRule.NO_ACTION:
-                    break;
-                case DeleteRule.NULLIFY:
-                    ObjRelationship inverseRelationship = relationship
-                            .getReverseRelationship();
-
-                    if (inverseRelationship == null) {
-                        // nothing we can do here
-                        break;
-                    }
-
-                    if (inverseRelationship.isToMany()) {
-                        Iterator iterator = relatedObjects.iterator();
-                        while (iterator.hasNext()) {
-                            DataObject relatedObject = (DataObject) iterator.next();
-                            relatedObject.removeToManyTarget(inverseRelationship
-                                    .getName(), anObject, true);
-                        }
-                    }
-                    else {
-                        // Inverse is to-one - find all related objects and
-                        // nullify the reverse relationship
-                        Iterator iterator = relatedObjects.iterator();
-                        while (iterator.hasNext()) {
-                            DataObject relatedObject = (DataObject) iterator.next();
-                            relatedObject.setToOneTarget(
-                                    inverseRelationship.getName(),
-                                    null,
-                                    true);
-                        }
-                    }
-                    
-                    break;
-                case DeleteRule.CASCADE:
-                    //Delete all related objects
-                    Iterator iterator = relatedObjects.iterator();
-                    while (iterator.hasNext()) {
-                        DataObject relatedObject = (DataObject) iterator.next();
-                        this.deleteObject(relatedObject);
-                    }
-                    
-                    break;
-                default:
-                    // Does this ever happen???
-
-                    // Clean up - we shouldn't be deleting this object
-                    anObject.setPersistenceState(oldState);
-                    throw new CayenneRuntimeException("Unknown type of delete rule "
-                            + relationship.getDeleteRule());
-            }
-        }
-
-        // if an object was NEW, we must throw it out of the ObjectStore
-        if (oldState == PersistenceState.NEW) {
-            getObjectStore().objectsUnregistered(Collections.singletonList(anObject));
-            anObject.setDataContext(null);
-        }
+    public void deleteObject(DataObject object) throws DeleteDenyException {
+        new ObjectDeleteHandler(object).performDelete();
     }
 
     /**
