@@ -62,12 +62,7 @@ import junit.framework.TestSuite;
 public class AllTests {
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("GUI Validator Package Tests");
-
-		// don't test GUI if no graphics environment present
-		if (!org.objectstyle.TestMain.noGui()) {
-			// add gui tests here
-		}
-
+		
 		// continue with noGUI tests
 		suite.addTestSuite(ValidationDisplayHandlerTst.class);
 		return suite;

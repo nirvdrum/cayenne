@@ -93,25 +93,16 @@ public class TestMain implements TestConstants {
     static Logger logObj = Logger.getLogger(TestMain.class.getName());
 
     private static TestResources resources = new TestResources();
-    private static boolean noGui;
 
     public static TestResources getResources() {
         return resources;
     }
 
-    public static boolean noGui() {
-        return noGui;
-    }
-
     public static void main(String[] args) {
-        // check for "-nogui" flag
-        noGui = false;
+
         boolean xmlDataSource = false;
         if (args != null && args.length > 0) {
-            if ("-nogui".equals(args[0]))
-                noGui = true;
-            else if ("-xml".equals(args[0])) {
-                noGui = true;
+            if ("-xml".equals(args[0])) {
                 xmlDataSource = true;
             }
         }
@@ -131,9 +122,7 @@ public class TestMain implements TestConstants {
         // initialize shared resources
         try {
             DataSourceInfo dsi =
-                (xmlDataSource)
-                    ? new ConnectionSetup(false, false).buildConnectionInfo()
-                    : new ConnectionSetup(true, !noGui).buildConnectionInfo();
+                new ConnectionSetup(!xmlDataSource).buildConnectionInfo();
 
             resources.setSharedConnInfo(dsi);
         } catch (Exception ex) {

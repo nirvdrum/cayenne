@@ -84,7 +84,6 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
 		suites.add(org.objectstyle.cayenne.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.project.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.project.validator.AllTests.suite());
-		suites.add(org.objectstyle.cayenne.gui.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.gui.util.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.gui.validator.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.gui.event.AllTests.suite());

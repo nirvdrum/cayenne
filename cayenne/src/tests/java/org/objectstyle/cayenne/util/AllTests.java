@@ -52,13 +52,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.util;
 
 import junit.framework.TestSuite;
 
 public class AllTests {
-	public static TestSuite suite() {
+    public static TestSuite suite() {
         TestSuite suite = new TestSuite("Util Package Tests");
         suite.addTestSuite(UtilTst.class);
         suite.addTestSuite(UtilExtTst.class);

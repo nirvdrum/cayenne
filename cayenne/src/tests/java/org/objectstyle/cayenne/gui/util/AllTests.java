@@ -61,12 +61,6 @@ public class AllTests {
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("GUI Util Package Tests");
 
-		// don't test GUI if no graphics environment present
-		if (!org.objectstyle.TestMain.noGui()) {
-			// put GUI widget tests here
-			// ....
-		}
-
 		suite.addTestSuite(EOModelFileFilterTst.class);
 		suite.addTestSuite(ProjectFileFilterTst.class);
 		suite.addTestSuite(EntityWrapperTst.class);

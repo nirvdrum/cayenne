@@ -81,11 +81,9 @@ public class ConnectionSetup implements TestConstants {
     static Logger logObj = Logger.getLogger(ConnectionSetup.class.getName());
 
     private boolean interactive;
-    private boolean allowGui;
-
-    public ConnectionSetup(boolean interactive, boolean allowGui) {
+ 
+    public ConnectionSetup(boolean interactive) {
         this.interactive = interactive;
-        this.allowGui = allowGui;
     }
 
     public DataSourceInfo buildConnectionInfo() throws Exception {
@@ -117,15 +115,7 @@ public class ConnectionSetup implements TestConstants {
 
 
     private DataSourceInfo getInfoInteractively() {
-        InteractiveLogin loginObj = (allowGui)
-                                    ? TestLogin.getTestGuiLoginObject()
-                                    : InteractiveLogin.getLoginObject(new DataSourceInfo());
-
-        if(!allowGui) {
-            System.out.println("*********************************************");
-            System.out.println("Collecting database connection information...");
-        }
-
+        InteractiveLogin loginObj = TestLogin.getTestGuiLoginObject();
         loginObj.collectLoginInfo();
         return loginObj.getDataSrcInfo();
     }

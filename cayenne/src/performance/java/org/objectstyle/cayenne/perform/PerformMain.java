@@ -185,7 +185,7 @@ public class PerformMain implements TestConstants {
 
     public static void prepareDomain() {
         try {
-            DataSourceInfo dsi = new ConnectionSetup(true, true).buildConnectionInfo();
+            DataSourceInfo dsi = new ConnectionSetup(true).buildConnectionInfo();
 
             PoolDataSource poolDS =
                 new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
