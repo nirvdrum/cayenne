@@ -140,7 +140,7 @@ public class DefaultOperationObserver implements OperationObserver {
     }
     
     public void nextDataRows(ResultIterator it, Query q) {
-    	throw new RuntimeException("Not implemented.");
+        logObj.fine("result: (iterator)");
     }
     
     

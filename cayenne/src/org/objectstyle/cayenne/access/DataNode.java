@@ -225,7 +225,7 @@ public class DataNode implements QueryEngine {
 
 				// catch exceptions for each individual query
 				try {
-					// 1. translate query
+					// translate query
 					QueryTranslator queryTranslator =
 						getAdapter().getQueryTranslator(nextQuery);
 					queryTranslator.setEngine(this);
@@ -235,34 +235,9 @@ public class DataNode implements QueryEngine {
 
 					try {
 						if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-							// 2.a execute query
-							ResultSet rs = prepStmt.executeQuery();
-
-							SelectQueryAssembler assembler =
-								(SelectQueryAssembler) queryTranslator;
-							DefaultResultIterator it =
-								new DefaultResultIterator(
-									rs,
-									this.getAdapter(),
-									assembler);
-
-							List resultSnapshots = it.dataRows();
-							QueryLogger.logSelectCount(
-								logLevel,
-								resultSnapshots.size());
-							rs.close();
-
-							// 3.a send results back to consumer
-							opObserver.nextDataRows(
-								nextQuery,
-								resultSnapshots);
+							runSelect(opObserver, prepStmt, queryTranslator);
 						} else {
-							// 2.b execute update
-							int count = prepStmt.executeUpdate();
-							QueryLogger.logUpdateCount(logLevel, count);
-
-							// 3.b send results back to consumer
-							opObserver.nextCount(nextQuery, count);
+							runUpdate(opObserver, prepStmt, queryTranslator);
 						}
 					} finally {
 						// important - prepared statement must be closed 
@@ -334,16 +309,67 @@ public class DataNode implements QueryEngine {
 		}
 	}
 
+	/** 
+	 * Executes prebuilt SELECT PreparedStatement.
+	 */
+	protected void runSelect(
+		OperationObserver observer,
+		PreparedStatement prepStmt,
+		QueryTranslator transl)
+		throws Exception {
+		ResultSet rs = null;
+
+		try {
+			rs = prepStmt.executeQuery();
+
+			SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
+			DefaultResultIterator it =
+				new DefaultResultIterator(rs, this.getAdapter(), assembler);
+
+			List resultSnapshots = it.dataRows();
+			QueryLogger.logSelectCount(
+				observer.queryLogLevel(),
+				resultSnapshots.size());
+
+			observer.nextDataRows(transl.getQuery(), resultSnapshots);
+
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+		}
+	}
+
+	/** 
+	 * Executes prebuilt UPDATE, DELETE or INSERT PreparedStatement.
+	 */
+	protected void runUpdate(
+		OperationObserver observer,
+		PreparedStatement prepStmt,
+		QueryTranslator transl)
+		throws Exception {
+
+		// 2.b execute update
+		int count = prepStmt.executeUpdate();
+		QueryLogger.logUpdateCount(observer.queryLogLevel(), count);
+
+		// 3.b send results back to consumer
+		observer.nextCount(transl.getQuery(), count);
+	}
+	
+
 	public void performQuery(Query query, OperationObserver opObserver) {
 		ArrayList qWrapper = new ArrayList(1);
 		qWrapper.add(query);
 		this.performQueries(qWrapper, opObserver);
 	}
 
-	/** Creates primary key support for all node DbEntities.
-	 *  Will use its facilities provided by DbAdapter to generate
-	 *  any necessary database objects and data for primary
-	 *  key support. */
+	/** 
+	 * Creates primary key support for all node DbEntities.
+	 * Will use its facilities provided by DbAdapter to generate
+	 * any necessary database objects and data for primary
+	 * key support.
+	 */
 	public void createPkSupportForMapEntities() throws Exception {
 		// generate common PK support
 		adapter.getPkGenerator().createAutoPkSupport(this);

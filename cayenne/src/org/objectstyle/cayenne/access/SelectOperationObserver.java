@@ -142,7 +142,7 @@ public class SelectOperationObserver extends DefaultOperationObserver {
     
     /** 
      * Overrides superclass implementation to rethrow an exception
-     *  immediately. 
+     * immediately. 
      */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
