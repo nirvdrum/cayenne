@@ -57,12 +57,16 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
+
 /**
  * @author Andrei Adamchik
  */
 public class CreateAttributeAction extends CayenneAction {
 	public static final String ACTION_NAME = "Create Attribute";
-	
+
 	/**
 	 * Constructor for CreateAttributeAction.
 	 * @param name
@@ -74,12 +78,39 @@ public class CreateAttributeAction extends CayenneAction {
 	public String getIconName() {
 		return "images/icon-attribute.gif";
 	}
-	
+
 	/**
 	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
 	 */
 	public void performAction(ActionEvent e) {
+		ObjEntity objEnt = getMediator().getCurrentObjEntity();
+		if (objEnt != null) {
+			createObjAttribute(objEnt);
+		} else {
+			DbEntity dbEnt = getMediator().getCurrentDbEntity();
+			if (dbEnt != null) {
+				createDbAttribute(dbEnt);
+			}
+		}
 	}
 
+	public void createObjAttribute(ObjEntity objEnt) {
+	}
+	
+	public void createDbAttribute(DbEntity dbEnt) {
+		Mediator mediator = getMediator();
+		DbAttribute attr =
+			(DbAttribute) NamedObjectFactory.createObject(
+				DbAttribute.class,
+				dbEnt);
+		dbEnt.addAttribute(attr);
+		mediator.fireDbAttributeEvent(
+			new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
+		mediator.fireDbAttributeDisplayEvent(new AttributeDisplayEvent(
+				this,
+				attr,
+				dbEnt,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain()));
+	}
 }
-

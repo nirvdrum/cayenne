@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -75,11 +73,11 @@ import org.objectstyle.cayenne.map.DbEntity;
  * Detail view of the DbEntity attributes. 
  * 
  * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
  */
 public class DbAttributePane
 	extends JPanel
 	implements
-		ActionListener,
 		DbEntityDisplayListener,
 		ListSelectionListener,
 		DbAttributeListener,
@@ -87,7 +85,6 @@ public class DbAttributePane
 	Mediator mediator;
 
 	JTable table;
-	JButton add;
 
 	public DbAttributePane(Mediator temp_mediator) {
 		super();
@@ -96,8 +93,6 @@ public class DbAttributePane
 		mediator.addDbAttributeListener(this);
 		// Create and layout components
 		init();
-		// Add listeners
-		add.addActionListener(this);
 	}
 
 	private void init() {
@@ -105,24 +100,15 @@ public class DbAttributePane
 
 		// Create table with two columns and no rows.
 		table = new CayenneTable();
-		add = new JButton("Add");
-		JPanel panel =
-			PanelFactory.createTablePanel(table, new JButton[] { add });
+		JPanel panel = PanelFactory.createTablePanel(table, null);
 		add(panel, BorderLayout.CENTER);
-	}
-
-	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
-		if (src == add) {
-			model.addRow();
-		}
 	}
 
 	public void processExistingSelection() {
 		DbAttribute att = null;
 		if (table.getSelectedRow() >= 0) {
-			DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
+			DbAttributeTableModel model =
+				(DbAttributeTableModel) table.getModel();
 			att = model.getAttribute(table.getSelectedRow());
 		}
 		AttributeDisplayEvent ev;
@@ -151,13 +137,13 @@ public class DbAttributePane
 
 	public void dbAttributeChanged(AttributeEvent e) {
 	}
-	
+
 	public void dbAttributeAdded(AttributeEvent e) {
+		rebuildTable((DbEntity)e.getEntity());
 	}
-	
+
 	public void dbAttributeRemoved(AttributeEvent e) {
-		DbAttributeTableModel model;
-		model = (DbAttributeTableModel) table.getModel();
+		DbAttributeTableModel model = (DbAttributeTableModel) table.getModel();
 		model.removeAttribute(e.getAttribute());
 	}
 
@@ -165,9 +151,13 @@ public class DbAttributePane
 		DbEntity entity = (DbEntity) e.getEntity();
 		if (entity == null || !e.isEntityChanged())
 			return;
-			
-		// Display Obj Entity Attrib
-		DbAttributeTableModel model = new DbAttributeTableModel(entity, mediator, this);
+
+		rebuildTable(entity);
+	}
+	
+	protected void rebuildTable(DbEntity ent) {
+		DbAttributeTableModel model =
+			new DbAttributeTableModel(ent, mediator, this);
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);

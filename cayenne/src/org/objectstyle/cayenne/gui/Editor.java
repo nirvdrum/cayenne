@@ -299,7 +299,7 @@ public class Editor
 		});
 	}
 
-    /** Initializes main toolbar. */
+	/** Initializes main toolbar. */
 	protected void initToolbar() {
 		ClassLoader cl = Editor.class.getClassLoader();
 
@@ -380,7 +380,7 @@ public class Editor
 
 		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
 		getAction(SaveAction.ACTION_NAME).setEnabled(false);
-		closeProjectMenu.setEnabled(true);
+		closeProjectMenu.setEnabled(false);
 
 		this.validate();
 	}
@@ -584,14 +584,19 @@ public class Editor
 		// disable everything we can
 		Object[] keys = actionMap.allKeys();
 		int len = keys.length;
-		for(int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++) {
+			// "save" button has its own rules
+			if (keys[i].equals(SaveAction.ACTION_NAME)) {
+				continue;
+			}
+
 			actionMap.get(keys[i]).setEnabled(false);
 		}
-		
+
 		// explicitly disable "legacy" menus
 		generateMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);
-		
+
 		// these are always on
 		exitMenu.setEnabled(true);
 		getAction(NewProjectAction.ACTION_NAME).setEnabled(true);
@@ -614,11 +619,10 @@ public class Editor
 			enableDataNodeMenu();
 		else
 			enableDomainMenu();
-			
-		// enable "legacy" menus
+
 		setPackageMenu.setEnabled(true);
 		generateMenu.setEnabled(true);
-		
+
 		getAction(CreateObjEntityAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateDbEntityAction.ACTION_NAME).setEnabled(true);
 		getAction(GenerateDbAction.ACTION_NAME).setEnabled(true);

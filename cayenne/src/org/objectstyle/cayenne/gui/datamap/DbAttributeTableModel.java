@@ -243,23 +243,6 @@ class DbAttributeTableModel extends CayenneTableModel {
 		mediator.fireDbAttributeEvent(e);
 	}
 
-
-	/** 
-	 * Adds new attribute to the model and the table. 
-	 * Broadcasts AttributeEvent.
-	 */
-	public void addRow() {
-		DbAttribute temp =
-			(DbAttribute) NamedObjectFactory.createObject(
-				DbAttribute.class,
-				entity);
-		objectList.add(temp);
-		entity.addAttribute(temp);
-		mediator.fireDbAttributeEvent(
-			new AttributeEvent(eventSource, temp, entity, AttributeEvent.ADD));
-		fireTableDataChanged();
-	}
-
 	public void removeRow(int row) {
 		if (row < 0)
 			return;
