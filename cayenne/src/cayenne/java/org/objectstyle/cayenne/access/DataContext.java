@@ -461,20 +461,20 @@ public class DataContext implements QueryEngine, Serializable {
      * @param anObject data object that we want to delete.
      */
 	public void deleteObject(DataObject anObject) {
-		if(anObject.getPersistenceState()==PersistenceState.DELETED) {
+		/*if(anObject.getPersistenceState()==PersistenceState.DELETED) {
 			//Drop out... we might be about to get into a horrible
 			// recursive loop due to CASCADE delete rules.  
 			// Assume that everything must have been done correctly already
 			// and *don't* do it again
 			return;
-		}
+		}*/
 		
 		//TODO - figure out what to do when an object is still in 
 		//PersistenceState.NEW (unregister maybe?)
 		anObject.setPersistenceState(PersistenceState.DELETED);
 
 		//Do the right thing with all the relationships of the deleted object
-		ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
+		/*ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
 		Iterator relationshipIterator = entity.getRelationshipList().iterator();
 		while (relationshipIterator.hasNext()) {
 			ObjRelationship thisRelationship =
@@ -571,7 +571,7 @@ public class DataContext implements QueryEngine, Serializable {
 						"Unknown type of delete rule "
 							+ thisRelationship.getDeleteRule());
 			}
-		}
+		}*/
 	}
 
 	/** 
