@@ -114,6 +114,7 @@ public class ObjectStoreTst extends CayenneTestCase {
                 this,
                 Collections.singletonMap(object.getObjectId(), row),
                 Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST);
 
         assertSame(object, objectStore.getObject(oid));
@@ -139,6 +140,7 @@ public class ObjectStoreTst extends CayenneTestCase {
         objectStore.getDataRowCache().processSnapshotChanges(
                 this,
                 Collections.singletonMap(object.getObjectId(), row),
+                Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST,
                 Collections.EMPTY_LIST);
         assertSame(object, objectStore.getObject(oid));
