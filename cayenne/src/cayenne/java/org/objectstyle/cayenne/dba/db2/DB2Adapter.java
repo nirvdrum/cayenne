@@ -61,7 +61,6 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -209,7 +208,7 @@ public class DB2Adapter extends JdbcAdapter {
 	 * Returns a trimming translator.
 	 */
 	public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-		return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
+		return new DB2QualifierTranslator(queryAssembler, "RTRIM");
 	}
 
 }
