@@ -141,6 +141,17 @@ public class MySQLPkGenerator extends JdbcPkGenerator {
 		parent.setNextException(exception);
 		return parent;
 	}
+    
+    protected String pkTableCreateString() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("CREATE TABLE AUTO_PK_SUPPORT (")
+            .append("  TABLE_NAME CHAR(100) NOT NULL,")
+            .append("  NEXT_ID INTEGER NOT NULL, UNIQUE (TABLE_NAME)")
+            .append(")");
+
+        return buf.toString();
+    }
 
 	protected int getPrimaryKey(Statement statement, String entityName)
 		throws SQLException {
