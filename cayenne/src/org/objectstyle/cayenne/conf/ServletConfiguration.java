@@ -90,8 +90,11 @@ import org.objectstyle.cayenne.access.DataContext;
      &lt;listener-class&gt;org.objectstyle.cayenne.conf.ServletConfiguration&lt;/listener-class&gt;
 &lt;/listener&gt;</pre>
   *
-  * <p>Note that to set ServletContext as a listener, you must use servlet containers 
-  * compatible with Servlet Specification 2.3 (such as Tomcat 4.0).</p>
+  * <p>Note that to set ServletConfiguration as a listener of web application events, 
+  *  you must use servlet containers 
+  * compatible with Servlet Specification 2.3 (such as Tomcat 4.0). Listeners were only added 
+  * to servlet specification in 2.3. If you are using an older container. You will need
+  * to configure Cayenne in you code.</p>
   *
   * @author Andrei Adamchik
   */
