@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!DOCTYPE taglib
+
+  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+
+  "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+
+
+
+<taglib>
+
+
+
+  <tlibversion>1.0</tlibversion>
+
+  <jspversion>1.1</jspversion>
+
+  <shortname>Artist Application Tag Library</shortname>
+
+  <uri>http://objectstyle.org/cayenne</uri>
+
+  <info>
+
+    This tag library contains functionality specific to Cayenne Web App Example
+
+  </info>
+
+
+ 
+    
+
+  <tag>
+
+    <name>objectIdTag</name>
+
+    <tagclass>tag.ObjectIdTag</tagclass>
+
+    <info>
+
+      Blah Blah
+
+      objectId     - Object Id Object being iterated over
+
+
+
+      page     - Context-relative URL of the generated link
+
+    </info>
+
+    <attribute>
+
+      <name>objectId</name>
+
+      <required>false</required>
+
+      <rtexprvalue>true</rtexprvalue>
+
+    </attribute>
+
+    <attribute>
+
+      <name>page</name>
+
+      <required>false</required>
+
+      <rtexprvalue>true</rtexprvalue>
+
+    </attribute>
+
+  </tag>
+
+</taglib>
+
