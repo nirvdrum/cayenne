@@ -166,7 +166,6 @@
         		<include name="jdbc/**"/>
         		<include name="jmx/**"/>
         		<include name="lf5/**"/>
-        		<include name="varia/**"/>
         	</fileset>
         </delete>
     </target>

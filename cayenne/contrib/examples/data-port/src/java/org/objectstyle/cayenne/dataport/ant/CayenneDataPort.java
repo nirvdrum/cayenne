@@ -60,6 +60,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.varia.NullAppender;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -80,11 +82,18 @@ public class CayenneDataPort extends Task
   protected String destNode;
   protected String includeTables;
   protected String excludeTables;
-  protected boolean cleanDest;
+  protected boolean cleanDest = true;
 
   public void execute() throws BuildException
   {
     validateParameters();
+
+    // suppress Cayenne logging
+    // in the future do something smarter 
+    // (like redirecting Log4J logging to the Ant log)
+	Configuration.setLoggingConfigured(true);
+	Logger.getRootLogger().removeAllAppenders();
+	Logger.getRootLogger().addAppender(new NullAppender());
 
     FileConfiguration configuration = new FileConfiguration();
     configuration.addFilesystemPath(projectFile.getParentFile());
@@ -103,6 +112,8 @@ public class CayenneDataPort extends Task
       throw new BuildException(
         "destNode not found in the project: " + destNode);
     }
+    
+    log("Porting from '" + srcNode + "' to '" + destNode + "'.");
 
     AntDataPortDelegate portDelegate =
       new AntDataPortDelegate(this, maps, includeTables, excludeTables);
@@ -118,7 +129,7 @@ public class CayenneDataPort extends Task
     }
     catch (Exception e)
     {
-      throw new BuildException("Error porting data.", e);
+      throw new BuildException("Error porting data: " + e.getMessage(), e);
     }
   }
 

@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.oro.text.perl.Perl5Util;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.dataport.DataPort;
 import org.objectstyle.cayenne.dataport.DataPortDelegate;
@@ -236,7 +237,7 @@ public class AntDataPortDelegate implements DataPortDelegate
 
   public void willPortEntity(DataPort portTool, DbEntity entity)
   {
-    parentTask.log("Porting table: " + entity.getName());
+    parentTask.log("Porting '" + entity.getName() + "'");
     lastEntity = entity;
     timestamp = System.currentTimeMillis();
   }
@@ -252,7 +253,8 @@ public class AntDataPortDelegate implements DataPortDelegate
 
     String label = (rowCount == 1) ? "1 row" : rowCount + " rows";
     parentTask.log(
-      "Ported " + label + "for table: " + entity.getName() + timestampLabel);
+      "Ported " + label + " to " + entity.getName() + timestampLabel,
+      Project.MSG_DEBUG);
   }
 
   public List willCleanData(DataPort portTool, List entities)
@@ -262,7 +264,7 @@ public class AntDataPortDelegate implements DataPortDelegate
 
   public void willCleanData(DataPort portTool, DbEntity entity)
   {
-    parentTask.log("Deleting data from table: " + entity.getName());
+    parentTask.log("Deleting data from " + entity.getName(), Project.MSG_DEBUG);
     lastEntity = entity;
     timestamp = System.currentTimeMillis();
   }
@@ -278,6 +280,7 @@ public class AntDataPortDelegate implements DataPortDelegate
 
     String label = (rowCount == 1) ? "1 row" : rowCount + " rows";
     parentTask.log(
-      "Deleted " + label + "from table: " + entity.getName() + timestampLabel);
+      "Deleted " + label + " to " + entity.getName() + timestampLabel,
+      Project.MSG_DEBUG);
   }
 }
