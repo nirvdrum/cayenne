@@ -127,4 +127,10 @@ public interface DataObject extends java.io.Serializable {
     
     /** Returns a snapshot of object current values. */
     public Map getCurrentSnapshot();
+    
+    /**
+     * Notification method called by DataContext after the object 
+     * was read from the database.
+     */
+    public void fetchFinished();
 }

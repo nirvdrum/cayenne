@@ -397,7 +397,8 @@ public class DataContext implements QueryEngine {
 	 * Creates and returns a DataObject from a data row (snapshot).
 	 * Newly created object is registered with this DataContext.
 	 * 
-	 * <p>Internally this method calls <code>objectFromDataRow(ObjEntity, Map, boolean)</code>
+	 * <p>Internally this method calls 
+	 * <code>objectFromDataRow(ObjEntity, Map, boolean)</code>
 	 * with <code>false</code> "refersh" parameter.</p>
 	 */
 	public DataObject objectFromDataRow(String entityName, Map dataRow) {
@@ -424,6 +425,9 @@ public class DataContext implements QueryEngine {
 			// we are asked to refresh an existing object with new values
 			mergeObjectWithSnapshot(objEntity, obj, dataRow);
 			committedSnapshots.put(anId, dataRow);
+			
+			// notify object that it was fetched
+			obj.fetchFinished();
 		}
 
 		return obj;
@@ -444,6 +448,9 @@ public class DataContext implements QueryEngine {
 
 		if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
 			refreshObjectWithSnapshot(objEntity, obj, dataRow);
+			
+			// notify object that it was fetched
+			obj.fetchFinished();
 		}
 
 		return obj;

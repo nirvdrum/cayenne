@@ -380,4 +380,12 @@ public class CayenneDataObject implements DataObject {
     public String toString() {
         return toStringBuffer(new StringBuffer(), true).toString();
     }
+    
+    
+	/**
+	 * Default implementation does nothing.
+	 * 
+	 * @see org.objectstyle.cayenne.DataObject#fetchFinished()
+	 */
+	public void fetchFinished() {}
 }
