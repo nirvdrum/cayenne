@@ -117,6 +117,32 @@ public class DbRelationship extends Relationship {
 
 		return map.getDbEntity(getTargetEntityName(), true);
 	}
+    
+    /**
+     * Creates a new relationship with the same set of joins,
+     * but going in the opposite direction.
+     * 
+     * @since 1.0.5
+     * @return
+     */
+    public DbRelationship createReverseRelationship() {
+        DbRelationship reverse = new DbRelationship();
+        reverse.setSourceEntity(getTargetEntity());
+        reverse.setTargetEntityName(getSourceEntity().getName());
+        
+        // TODO: must set toDepPK correctly
+        //       must set toMany correctly
+        
+        reverse.setToMany(!toMany);
+        
+        Iterator it = joins.iterator();
+        while(it.hasNext()) {
+            DbAttributePair join = (DbAttributePair) it.next();
+            reverse.addJoin(join.createReverseJoin());
+        }
+        
+        return reverse;
+    }
 
 	/** 
 	 * Returns DbRelationship that is the opposite of this DbRelationship.

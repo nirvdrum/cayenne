@@ -2,13 +2,13 @@
     attributes = (
         {
             allowsNull = Y; 
-            columnName = IMAGE_BLOB; 
+            columnName = "IMAGE_BLOB"; 
             externalType = image; 
             name = imageBlob; 
             valueClassName = NSData; 
         }, 
         {
-            columnName = PAINTING_ID; 
+            columnName = "PAINTING_ID"; 
             externalType = int; 
             name = paintingId; 
             valueClassName = NSNumber; 
@@ -16,16 +16,16 @@
         }, 
         {
             allowsNull = Y; 
-            columnName = TEXT_REVIEW; 
+            columnName = "TEXT_REVIEW"; 
             externalType = text; 
             name = textReview; 
             valueClassName = NSString; 
         }
     ); 
     attributesUsedForLocking = (paintingId); 
-    className = org.objectstyle.art.PaintingInfo; 
+    className = "org.objectstyle.art.PaintingInfo"; 
     classProperties = (imageBlob, textReview, painting); 
-    externalName = PAINTING_INFO; 
+    externalName = "PAINTING_INFO"; 
     fetchSpecificationDictionary = {}; 
     name = PaintingInfo; 
     primaryKeyAttributes = (paintingId); 

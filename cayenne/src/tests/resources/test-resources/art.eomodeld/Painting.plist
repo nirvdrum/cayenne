@@ -2,7 +2,7 @@
     attributes = (
         {
             allowsNull = Y; 
-            columnName = ARTIST_ID; 
+            columnName = "ARTIST_ID"; 
             externalType = int; 
             name = artistId; 
             valueClassName = NSNumber; 
@@ -10,7 +10,7 @@
         }, 
         {
             allowsNull = Y; 
-            columnName = ESTIMATED_PRICE; 
+            columnName = "ESTIMATED_PRICE"; 
             externalType = money; 
             name = estimatedPrice; 
             valueClassName = NSDecimalNumber; 
@@ -18,21 +18,21 @@
         }, 
         {
             allowsNull = Y; 
-            columnName = GALLERY_ID; 
+            columnName = "GALLERY_ID"; 
             externalType = int; 
             name = galleryId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
-            columnName = PAINTING_ID; 
+            columnName = "PAINTING_ID"; 
             externalType = int; 
             name = paintingId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
-            columnName = PAINTING_TITLE; 
+            columnName = "PAINTING_TITLE"; 
             externalType = varchar; 
             name = paintingTitle; 
             valueClassName = NSString; 
@@ -40,7 +40,7 @@
         }
     ); 
     attributesUsedForLocking = (artistId, galleryId, paintingId); 
-    className = org.objectstyle.art.Painting; 
+    className = "org.objectstyle.art.Painting"; 
     classProperties = (estimatedPrice, toGallery, toArtist, toPaintingInfo, paintingTitle); 
     externalName = PAINTING; 
     fetchSpecificationDictionary = {}; 

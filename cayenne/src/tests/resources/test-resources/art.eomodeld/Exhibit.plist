@@ -1,40 +1,62 @@
 {
     attributes = (
         {
-            columnName = CLOSING_DATE; 
+            allowsNull = Y; 
+            columnName = "EXHIBIT_TYPE_ID"; 
+            externalType = int; 
+            name = exhibitTypeId; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            columnName = "CLOSING_DATE"; 
             externalType = datetime; 
             name = closingDate; 
             valueClassName = NSCalendarDate; 
         }, 
         {
-            columnName = EXHIBIT_ID; 
+            columnName = "EXHIBIT_ID"; 
             externalType = int; 
             name = exhibitId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
-            columnName = GALLERY_ID; 
+            columnName = "GALLERY_ID"; 
             externalType = int; 
             name = galleryId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
-            columnName = OPENING_DATE; 
+            columnName = "OPENING_DATE"; 
             externalType = datetime; 
             name = openingDate; 
             valueClassName = NSCalendarDate; 
         }
     ); 
-    attributesUsedForLocking = (exhibitId, galleryId); 
-    className = org.objectstyle.art.Exhibit; 
-    classProperties = (closingDate, openingDate, toGallery, artistExhibitArray); 
+    attributesUsedForLocking = (exhibitId, galleryId, exhibitTypeId); 
+    className = "org.objectstyle.art.Exhibit"; 
+    classProperties = (
+        closingDate, 
+        openingDate, 
+        toGallery, 
+        artistExhibitArray, 
+        exhibitTypeId, 
+        toExhibitType
+    ); 
     externalName = EXHIBIT; 
     fetchSpecificationDictionary = {}; 
     name = Exhibit; 
     primaryKeyAttributes = (exhibitId); 
     relationships = (
+        {
+            destination = ExhibitType; 
+            isToMany = N; 
+            joinSemantic = EOInnerJoin; 
+            joins = ({destinationAttribute = exhibitTypeId; sourceAttribute = exhibitTypeId; }); 
+            name = toExhibitType; 
+        }, 
         {
             deleteRule = EODeleteRuleCascade; 
             destination = ArtistExhibit; 

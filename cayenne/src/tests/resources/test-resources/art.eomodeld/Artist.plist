@@ -1,14 +1,14 @@
 {
     attributes = (
         {
-            columnName = ARTIST_ID; 
+            columnName = "ARTIST_ID"; 
             externalType = int; 
             name = artistId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
-            columnName = ARTIST_NAME; 
+            columnName = "ARTIST_NAME"; 
             externalType = varchar; 
             name = artistName; 
             valueClassName = NSString; 
@@ -16,15 +16,15 @@
         }, 
         {
             allowsNull = Y; 
-            columnName = DATE_OF_BIRTH; 
+            columnName = "DATE_OF_BIRTH"; 
             externalType = datetime; 
-            internalInfo = {_nameInObjectStore = DATE_OF_BIRTH; }; 
+            internalInfo = {"_nameInObjectStore" = "DATE_OF_BIRTH"; }; 
             name = dateOfBirth; 
             valueClassName = NSCalendarDate; 
         }
     ); 
     attributesUsedForLocking = (artistId); 
-    className = org.objectstyle.art.Artist; 
+    className = "org.objectstyle.art.Artist"; 
     classProperties = (artistName, dateOfBirth, artistExhibitArray, paintingArray, exhibitArray); 
     externalName = ARTIST; 
     fetchSpecificationDictionary = {}; 
@@ -42,8 +42,8 @@
             propagatesPrimaryKey = Y; 
         }, 
         {
-            definition = artistExhibitArray.toExhibit; 
-            internalInfo = {_nameInObjectStore = artistExhibitArray_toExhibit; }; 
+            definition = "artistExhibitArray.toExhibit"; 
+            internalInfo = {"_nameInObjectStore" = "artistExhibitArray_toExhibit"; }; 
             joinSemantic = EOInnerJoin; 
             name = exhibitArray; 
         }, 

@@ -1,14 +1,14 @@
 {
     attributes = (
         {
-            columnName = ARTIST_ID; 
+            columnName = "ARTIST_ID"; 
             externalType = int; 
             name = artistId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
-            columnName = EXHIBIT_ID; 
+            columnName = "EXHIBIT_ID"; 
             externalType = int; 
             name = exhibitId; 
             valueClassName = NSNumber; 
@@ -16,11 +16,11 @@
         }
     ); 
     attributesUsedForLocking = (artistId, exhibitId); 
-    className = org.objectstyle.art.ArtistExhibit; 
+    className = "org.objectstyle.art.ArtistExhibit"; 
     classProperties = (toExhibit, toArtist); 
-    externalName = ARTIST_EXHIBIT; 
+    externalName = "ARTIST_EXHIBIT"; 
     fetchSpecificationDictionary = {}; 
-    internalInfo = {_nameInObjectStore = ARTIST_EXIBIT; }; 
+    internalInfo = {"_nameInObjectStore" = "ARTIST_EXIBIT"; }; 
     name = ArtistExhibit; 
     primaryKeyAttributes = (artistId, exhibitId); 
     relationships = (

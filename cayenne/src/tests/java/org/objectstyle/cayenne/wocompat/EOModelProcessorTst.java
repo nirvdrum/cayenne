@@ -79,11 +79,27 @@ public class EOModelProcessorTst extends CayenneTestCase {
     public void testLoadModel() throws Exception {
         DataMap map = processor.loadEOModel("test-resources/art.eomodeld");
         assertLoaded("art", map);
+        assertOneWayRelationships(map);
     }
-    
+
     public void testLoadBrokenModel() throws Exception {
         DataMap map = processor.loadEOModel("test-resources/art-with-errors.eomodeld");
         assertLoaded("art-with-errors", map);
+    }
+
+    protected void assertOneWayRelationships(DataMap map) throws Exception {
+        // assert that one way relationships are loaded properly 
+        // - Db loaded as two-way, obj - as one-way
+
+        ObjEntity exhibitEntity = map.getObjEntity("Exhibit");
+        ObjRelationship toTypeObject =
+            (ObjRelationship) exhibitEntity.getRelationship("toExhibitType");
+        DbRelationship toTypeDB =
+            (DbRelationship) exhibitEntity.getDbEntity().getRelationship("toExhibitType");
+        assertNotNull(toTypeObject);
+        assertNotNull(toTypeDB);
+        assertNull(toTypeObject.getReverseRelationship());
+        assertNotNull(toTypeDB.getReverseRelationship());
     }
 
     protected void assertLoaded(String mapName, DataMap map) throws Exception {
@@ -101,20 +117,19 @@ public class EOModelProcessorTst extends CayenneTestCase {
         assertSame(artistDE, artistDE1);
 
         // check attributes
-        ObjAttribute a1 = (ObjAttribute)artistE.getAttribute("artistName");
+        ObjAttribute a1 = (ObjAttribute) artistE.getAttribute("artistName");
         assertNotNull(a1);
-        
-        DbAttribute da1 =  a1.getDbAttribute();
+
+        DbAttribute da1 = a1.getDbAttribute();
         assertNotNull(da1);
         assertSame(da1, artistDE.getAttribute("ARTIST_NAME"));
-        
-        
+
         // check ObjRelationships
         ObjRelationship rel =
             (ObjRelationship) artistE.getRelationship("artistExhibitArray");
         assertNotNull(rel);
         assertEquals(1, rel.getDbRelationships().size());
-        
+
         // check DbRelationships
         DbRelationship drel =
             (DbRelationship) artistDE.getRelationship("artistExhibitArray");
@@ -122,12 +137,10 @@ public class EOModelProcessorTst extends CayenneTestCase {
         assertSame(drel, rel.getDbRelationships().get(0));
 
         // flattened relationships
-        ObjRelationship frel =
-            (ObjRelationship) artistE.getRelationship("exhibitArray");
+        ObjRelationship frel = (ObjRelationship) artistE.getRelationship("exhibitArray");
         assertNotNull(frel);
         assertEquals(2, frel.getDbRelationships().size());
-        
-        
+
         // storing data map may uncover some inconsistencies
         MapLoader loader = new MapLoader();
         loader.storeDataMap(out, map);
@@ -138,13 +151,20 @@ public class EOModelProcessorTst extends CayenneTestCase {
             super(System.out);
         }
 
-        public void close() {}
-        public void flush() {}
+        public void close() {
+        }
+        public void flush() {
+        }
 
-        public void write(char[] arg0, int arg1, int arg2) {}
-        public void write(char[] arg0) {}
-        public void write(int arg0) {}
-        public void write(String arg0, int arg1, int arg2) {}
-        public void write(String arg0) {}
+        public void write(char[] arg0, int arg1, int arg2) {
+        }
+        public void write(char[] arg0) {
+        }
+        public void write(int arg0) {
+        }
+        public void write(String arg0, int arg1, int arg2) {
+        }
+        public void write(String arg0) {
+        }
     }
 }

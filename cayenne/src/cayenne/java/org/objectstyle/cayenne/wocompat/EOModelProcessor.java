@@ -129,6 +129,14 @@ public class EOModelProcessor {
             String name = (String) it.next();
             makeFlatRelationships(helper, dataMap.getObjEntity(name));
         }
+        
+        // now create missing reverse DB (but not OBJ) relationships 
+        // since Cayenne requires them
+        it = helper.modelNames();
+        while (it.hasNext()) {
+            String name = (String) it.next();
+            makeReverseDbRelationships(dataMap.getObjEntity(name).getDbEntity());
+        }
 
         return dataMap;
     }
@@ -389,6 +397,25 @@ public class EOModelProcessor {
                 if (dbRel != null) {
                     rel.addDbRelationship(dbRel);
                 }
+            }
+        }
+    }
+    
+    /** 
+     * Create reverse DbRelationships that were not created so far, since 
+     * Cayenne requires them.
+     * 
+     * @since 1.0.5
+     */
+    protected void makeReverseDbRelationships(DbEntity dbEntity) {
+        Iterator it = dbEntity.getRelationships().iterator();
+        while (it.hasNext()) {
+            DbRelationship relationship = (DbRelationship) it.next();
+
+            if (relationship.getReverseRelationship() == null) {
+                DbRelationship reverse = relationship.createReverseRelationship();
+                reverse.setName(relationship.getName() + "Reverse");
+                relationship.getTargetEntity().addRelationship(reverse);
             }
         }
     }
