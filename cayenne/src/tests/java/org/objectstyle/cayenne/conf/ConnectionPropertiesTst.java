@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,16 +52,43 @@ package org.objectstyle.cayenne.conf;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.conf;
 
-import junit.framework.TestSuite;
+import java.util.Iterator;
+import java.util.List;
 
-public class AllTests {
-	public static TestSuite suite() {
-        TestSuite suite = new TestSuite("Configuration Package (org.objectstyle.cayenne.conf)");
-        suite.addTestSuite(ConfigurationTst.class); 
-        suite.addTestSuite(DomainHelperTst.class); 
-        suite.addTestSuite(ConnectionPropertiesTst.class); 
-		return suite;
-	}
+import junit.framework.TestCase;
+
+import org.apache.commons.collections.ExtendedProperties;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class ConnectionPropertiesTst extends TestCase {
+
+    /**
+     * Constructor for ConnectionPropertiesTst.
+     * @param arg0
+     */
+    public ConnectionPropertiesTst(String arg0) {
+        super(arg0);
+    }
+
+    public void testGetNames() throws Exception {
+        ConnectionProperties ps = new ConnectionProperties(new ExtendedProperties());
+
+        ExtendedProperties props = new ExtendedProperties();
+        props.setProperty("a.1", "a");
+        props.setProperty("a.2", "a");
+        props.setProperty("b.3", "a");
+        props.setProperty("c.4", "a");
+
+        List names = ps.getNames(props);
+        assertNotNull(names);
+        assertEquals(3, names.size());
+        assertTrue(names.contains("a"));
+        assertTrue(names.contains("b"));
+        assertTrue(names.contains("c"));
+    }
 }
