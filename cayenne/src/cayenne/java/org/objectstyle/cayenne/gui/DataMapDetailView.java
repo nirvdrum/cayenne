@@ -66,11 +66,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.gui.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.gui.event.DataMapEvent;
@@ -171,13 +178,18 @@ public class DataMapDetailView
         }
 
         DataMap map = mediator.getCurrentDataMap();
+        DataDomain domain = mediator.getCurrentDataDomain();
         DataMapEvent event;
         if (e.getDocument() == name.getDocument()) {
             String new_name = name.getText();
             // If name hasn't changed, do nothing
             if (oldName != null && new_name.equals(oldName))
                 return;
+            
+            domain.removeMap(map.getName());
             map.setName(new_name);
+            domain.addMap(map);
+            
             event = new DataMapEvent(this, map, oldName);
             mediator.fireDataMapEvent(event);
             oldName = new_name;
