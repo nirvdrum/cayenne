@@ -2,11 +2,12 @@
 <!-- DataMap DTD file                           -->
 <!-- Author: Michael Shengaout                  -->
 <!-- Author: Andrei Adamchik                    -->
+<!-- Author: Andriy Shapochka                   -->
 <!-- ========================================== -->
 
 <!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*)>
 
-<!ELEMENT db-entity (db-attribute+, db-attribute-derived+)>
+<!ELEMENT db-entity (db-attribute+, db-attribute-derived+, db-key-generator?)>
 <!ATTLIST db-entity
 	name CDATA #REQUIRED
 	schema CDATA #IMPLIED
@@ -34,6 +35,78 @@
 	isGroupBy (true | false) "false"
 	spec CDATA #IMPLIED
 >
+
+<!--
+This optional tag is used to install the Automatic Sequence/Key
+Generation facility
+
+Used in: db-entity
+
+Example:
+  <db-key-generator>
+    <db-generator-type>ORACLE</db-generator-type>
+    <db-generator-name>test_sequence</db-generator-name>
+    <db-key-cache-size>10</db-key-cache-size>
+  </db-key-generator>
+
+Notes: This feature is intended for use with Simple (non-Compound)
+       Integral Primary Keys.
+-->
+
+<!ELEMENT db-key-generator (
+    db-generator-type,
+    db-generator-name?,
+    db-key-cache-size?
+)>
+
+<!--
+Specifies the Key Generation Method that will be employed
+  'ORACLE'               - use Oracle's SEQUENCE
+  'NAMED_SEQUENCE_TABLE' - use USER designated SEQUENCE TABLE
+                               User specifies the name of a DBMS Table
+                               with the schema (sequence INT)
+                               which will be used to hold sequence values
+                               (not supported yet)
+
+Used in: db-key-generator
+-->
+
+<!ELEMENT db-generator-type (#PCDATA)>
+
+<!--
+If this is DBMS Key Generation,
+Then this may be used to specify the Name of the Generator,
+  e.g. for <db-generator-type>ORACLE
+           <db-generator-name> would be the name of the ORACLE SEQUENCE to use.
+                             the SEQUENCE is assumed to already exist in the Database.
+
+If this is <db-generator-type>NAMED_SEQUENCE_TABLE Key Generation,
+Then this would be used to specify the name of the SEQUENCE TABLE to use.
+ the NAMED_SEQUENCE_TABLE is assumed to already exist in the Database
+ with 1 row.
+
+Used in: db-key-generator
+
+-->
+
+<!ELEMENT db-generator-name (#PCDATA)>
+
+<!--
+Optional size of key cache.
+For <db-generator-type>ORACLE , this value MUST match the
+  Oracle SEQUENCE  INCREMENT value.  If there is a mismatch
+  between this value and the Oracle SEQUENCE INCREMENT value,
+  then there will likely be duplicate key problems.
+
+For <db-generator-type>NAMED_SEQUENCE_TABLE , this tells how many keys
+  the Container will fetch in a single DBMS call
+
+Used in: db-key-generator
+
+-->
+
+<!ELEMENT db-key-cache-size (#PCDATA)>
+
 
 <!ELEMENT db-attribute-ref EMPTY>
 <!ATTLIST db-attribute
