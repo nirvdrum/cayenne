@@ -162,6 +162,7 @@ public class OperationSorter {
 	 *  violated when a batch is executed.
 	 *
 	 * @param queries an array of queries that need to be ordered.
+	 * @deprecated use sortedQueries
 	 */
 	public void sortQueries(Object[] queries) {
 		Arrays.sort(queries, queryComparator);
@@ -173,7 +174,6 @@ public class OperationSorter {
 	 */
 	public List sortedQueries(List unsortedQueries) {
 		Object[] qs = unsortedQueries.toArray();
-		;
 		Arrays.sort(qs, queryComparator);
 		return Arrays.asList(qs);
 	}
