@@ -73,7 +73,8 @@ public class TestLoginPanel extends DbLoginPanel {
         super(frame);
     }
 
-    protected void initMessagePanel(JPanel panel) {
+    protected JPanel initMessagePanel() {
+    	JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 
         panel.setLayout(new BorderLayout());
@@ -85,6 +86,8 @@ public class TestLoginPanel extends DbLoginPanel {
         // add combo box
         dbCfgList = new JComboBox();
         panel.add(dbCfgList, BorderLayout.EAST);
+        
+        return panel;
     }
 
 

@@ -52,115 +52,28 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-package org.objectstyle.cayenne.gui.datamap;
+ */
+
+package org.objectstyle.cayenne.gui.util;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.swing.*;
-
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.util.GUIUtil;
-
-/** 
- * Dialog that allows to select schema of the database. 
+/**
+ * Collection of GUI utility methods that didn't fit anywhere else.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ChooseSchemaDialog extends JDialog
-implements ActionListener
-{
-	public static final int SELECT 	= 0;
-	public static final int CANCEL 	= 1;
-
-	private List schemaList = new ArrayList();
-	private String	  schemaName = null;
+public class GUIUtil {
 	
-	JComboBox schemaSelect;
-	JButton select		= new JButton("Select");
-	JButton cancel		= new JButton("Cancel");
-	private int choice  = CANCEL;
-
-	public ChooseSchemaDialog(List schema_list) {
-		super(Editor.getFrame(), "Select Schema", true);
-		schemaList = schema_list;
-				
-		init();
-		
-		setSize(380, 150);
-		Point point = Editor.getFrame().getLocationOnScreen();
-		this.setLocation(point);
-		
-		// display dialog in the center
-		GUIUtil.centerWindow(this);
+	/** 
+	 * Centers a window on the screen. 
+	 */
+	public static void centerWindow(Window win) {
+		int width = win.getWidth();
+		int height = win.getHeight();
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screen.width - width) / 2;
+		int y = (screen.height - height) / 2;
+		win.setBounds(x, y, width, height);
 	}
-	
-	/** Set up the graphical components. */
-	private void init() {
-		getContentPane().setLayout(new BorderLayout());
-		
-		// Name text field
-		JPanel temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		JLabel label = new JLabel("Schema list: ");
-		Object[] arr = new Object[schemaList.size()];
-		arr = schemaList.toArray(arr);
-		schemaSelect = new JComboBox(arr);
-		temp.add(label);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(schemaSelect);
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp, BorderLayout.NORTH);		
-				
-		temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		temp.add(select);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(cancel);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp, BorderLayout.SOUTH);
-				
-		select.addActionListener(this);
-		cancel.addActionListener(this);
-	}// End init()
-	
-	
-	public String getSchemaName() {
-		if (getChoice() != SELECT)
-			return null;
-		return schemaName;
-	}
-
-
-	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		if (src == select) {
-			processSelect();
-		} else if (src == cancel) {
-			processCancel();
-		}
-	}
-
-	public int getChoice() {
-		return choice;
-	}
-
-	private void processSelect() {
-		schemaName = (String)schemaSelect.getSelectedItem();
-		choice = SELECT;
-		hide();
-	}
-
-	private void processCancel() {
-		schemaName = null;
-		choice = CANCEL;
-		hide();
-	}	
 }

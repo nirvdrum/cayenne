@@ -66,6 +66,7 @@ import javax.swing.text.Keymap;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.gui.util.GUIUtil;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
 import org.objectstyle.util.Preferences;
 
@@ -96,8 +97,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		Container pane = this.getContentPane();
 		pane.setLayout(new BorderLayout());
 
-		JPanel messagePanel = new JPanel();
-		initMessagePanel(messagePanel);
+		JPanel messagePanel = initMessagePanel();
 		pane.add(messagePanel, BorderLayout.NORTH);
 
 		// input fields go here
@@ -112,12 +112,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		this.pack();
 
 		// center the dialog on the screen
-		int width = this.getWidth();
-		int height = this.getHeight();
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		int x = (screen.width - width) / 2;
-		int y = (screen.height - height) / 2;
-		this.setBounds(x, y, width, height);
+		GUIUtil.centerWindow(this);
 	}
 
 	protected void disableVKEvents(JTextComponent txtField) {
@@ -127,9 +122,9 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 	}
 
 	protected void disableVKEvents(PreferenceField prefField) {
-        // I have no idea how to trap "ENTER" hit on a combo box
-        // this should be something faily easy.
-        // Anyone can implement that to trigger this Dialog default button?
+		// I have no idea how to trap "ENTER" hit on a combo box
+		// this should be something faily easy.
+		// Anyone can implement that to trigger this Dialog default button?
 	}
 
 	public DataSourceInfo getDataSrcInfo() {
@@ -222,12 +217,14 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		return ok;
 	}
 
-	protected void initMessagePanel(JPanel panel) {
+	protected JPanel initMessagePanel() {
+		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
 		JLabel lbl = new JLabel("Enter JDBC Information");
 		lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN, 18));
 		lbl.setForeground(Color.red);
 		panel.add(lbl);
+		return panel;
 	}
 
 	public void actionPerformed(ActionEvent e) {
