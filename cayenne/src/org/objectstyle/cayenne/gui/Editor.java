@@ -342,41 +342,69 @@ public class Editor
 
 	private void initToolBar() {
 		ClassLoader cl = Editor.class.getClassLoader();
-		URL url = cl.getResource(RESOURCE_PATH + "images/domain24.gif");
+		
+		ImageIcon newIcon = new ImageIcon(cl.getResource(RESOURCE_PATH + "images/icon-new.gif"));
+		JButton newBtn = new JButton(newIcon);
+		newBtn.setToolTipText("new project");
+		toolBar.add(newBtn);
+		
+		ImageIcon openIcon = new ImageIcon(cl.getResource(RESOURCE_PATH + "images/icon-open.gif"));
+		JButton openBtn = new JButton(openIcon);
+		openBtn.setToolTipText("open project");
+		toolBar.add(openBtn);
+		
+		ImageIcon saveIcon = new ImageIcon(cl.getResource(RESOURCE_PATH + "images/icon-save.gif"));
+		JButton saveBtn = new JButton(saveIcon);
+		saveBtn.setToolTipText("save project");
+		toolBar.add(saveBtn);
+		
+		ImageIcon removeIcon = new ImageIcon(cl.getResource(RESOURCE_PATH + "images/icon-trash.gif"));
+		removeBtn = new JButton(removeIcon);
+		removeBtn.setToolTipText("remove current");
+		toolBar.add(removeBtn);
+		
+		toolBar.addSeparator();
+		
+		URL url = cl.getResource(RESOURCE_PATH + "images/icon-dom.gif");
 		ImageIcon domainIcon = new ImageIcon(url);
 		createDomainBtn = new JButton(domainIcon);
-		createDomainBtn.setToolTipText("Create new domain");
+		createDomainBtn.setToolTipText("create new domain");
 		toolBar.add(createDomainBtn);
 
-		url = cl.getResource(RESOURCE_PATH + "images/map24.gif");
-		ImageIcon mapIcon = new ImageIcon(url);
-		createDataMapBtn = new JButton(mapIcon);
-		createDataMapBtn.setToolTipText("Create new data map");
-		toolBar.add(createDataMapBtn);
-
-		url = cl.getResource(RESOURCE_PATH + "images/node24.gif");
+		url = cl.getResource(RESOURCE_PATH + "images/icon-node.gif");
 		ImageIcon nodeIcon = new ImageIcon(url);
 		createDataSourceBtn = new JButton(nodeIcon);
-		createDataSourceBtn.setToolTipText("Create new data node");
+		createDataSourceBtn.setToolTipText("create new data node");
 		toolBar.add(createDataSourceBtn);
+		
+		url = cl.getResource(RESOURCE_PATH + "images/icon-datamap.gif");
+		ImageIcon mapIcon = new ImageIcon(url);
+		createDataMapBtn = new JButton(mapIcon);
+		createDataMapBtn.setToolTipText("create new data map");
+		toolBar.add(createDataMapBtn);
 
-		url = cl.getResource(RESOURCE_PATH + "images/objentity24.gif");
-		ImageIcon objEntityIcon = new ImageIcon(url);
-		createObjEntityBtn = new JButton(objEntityIcon);
-		createObjEntityBtn.setToolTipText("Create new obj entity");
-		toolBar.add(createObjEntityBtn);
-
-		url = cl.getResource(RESOURCE_PATH + "images/dbentity24.gif");
+		url = cl.getResource(RESOURCE_PATH + "images/icon-dbentity.gif");
 		ImageIcon dbEntityIcon = new ImageIcon(url);
 		createDbEntityBtn = new JButton(dbEntityIcon);
-		createDbEntityBtn.setToolTipText("Create new db entity");
+		createDbEntityBtn.setToolTipText("create new db entity");
 		toolBar.add(createDbEntityBtn);
 
-		url = cl.getResource(RESOURCE_PATH + "images/remove24.gif");
-		ImageIcon removeIcon = new ImageIcon(url);
-		removeBtn = new JButton(removeIcon);
-		removeBtn.setToolTipText("Remove current");
-		toolBar.add(removeBtn);
+		url = cl.getResource(RESOURCE_PATH + "images/icon-objentity.gif");
+		ImageIcon objEntityIcon = new ImageIcon(url);
+		createObjEntityBtn = new JButton(objEntityIcon);
+		createObjEntityBtn.setToolTipText("create new obj entity");
+		toolBar.add(createObjEntityBtn);
+
+		ImageIcon attrIcon = new ImageIcon(cl.getResource(RESOURCE_PATH + "images/icon-attribute.gif"));
+		JButton attrBtn = new JButton(attrIcon);
+		attrBtn.setToolTipText("create attribute");
+		toolBar.add(attrBtn);
+		
+		ImageIcon relIcon = new ImageIcon(cl.getResource(RESOURCE_PATH + "images/icon-relationship.gif"));
+		JButton relBtn = new JButton(relIcon);
+		relBtn.setToolTipText("create relationship");
+		toolBar.add(relBtn);
+
 
 		getContentPane().add(toolBar, BorderLayout.NORTH);
 	}

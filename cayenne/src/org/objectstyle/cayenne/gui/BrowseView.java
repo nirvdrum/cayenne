@@ -904,21 +904,21 @@ public class BrowseView
 		public BrowseViewRenderer() {
 			ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
 			URL url =
-				cl.getResource(Editor.RESOURCE_PATH + "images/domain16.jpg");
+				cl.getResource(Editor.RESOURCE_PATH + "images/icon-dom.gif");
 			domainIcon = new ImageIcon(url);
 
-			url = cl.getResource(Editor.RESOURCE_PATH + "images/node16.gif");
+			url = cl.getResource(Editor.RESOURCE_PATH + "images/icon-node.gif");
 			nodeIcon = new ImageIcon(url);
 
-			url = cl.getResource(Editor.RESOURCE_PATH + "images/map16.jpg");
+			url = cl.getResource(Editor.RESOURCE_PATH + "images/icon-datamap.gif");
 			mapIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(Editor.RESOURCE_PATH + "images/dbentity16.gif");
+				cl.getResource(Editor.RESOURCE_PATH + "images/icon-dbentity.gif");
 			dbEntityIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(Editor.RESOURCE_PATH + "images/objentity16.jpg");
+				cl.getResource(Editor.RESOURCE_PATH + "images/icon-objentity.gif");
 			objEntityIcon = new ImageIcon(url);
 		}
 
