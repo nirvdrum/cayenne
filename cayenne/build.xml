@@ -202,7 +202,6 @@
     <target name="jar" depends="prepare,compile_subprojects">
         <mkdir dir="src/${build}/unjar"/>
         <unjar src="${velocity.jar}" dest="src/${build}/unjar"/>
-        <unjar src="${commons-collections.jar}" dest="src/${build}/unjar"/>
         <delete dir="src/${build}/unjar/META-INF"/>
 
         <jar jarfile="${dist}/lib/cayenne.jar">
