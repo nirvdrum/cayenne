@@ -31,14 +31,15 @@ unhandled types.
 8. DbAdapter.getTypeConverter is renamed to "getExtendedTypes', since the original
 method name is confusing. 'getTypeConverter' is deprecated.
 
-9. ExtendedType.toJdbcObject is deprected and replaced with 'setJdbcObject'
+9. ExtendedType.toJdbcObject is deprecated and replaced with 'setJdbcObject'
 to give ExtendedType more control over setting JDBC values.
 
 10. Changed DataContext.commitChanges() to use a different, much more efficient, 
 algorithm for committing changes. In its core is Ashwood graph library
-(http://objectstyle.org/ashwood/) used to order operations according to the database 
-constraints. Another major performance improvment is using JDBC batch update feature for all
-DataContext update operations.
+(http://objectstyle.org/ashwood/) used to order operations according to the
+database  constraints. Another major performance improvement is using JDBC batch
+update feature for all DataContext update operations. Also a lot less temporary
+objects are created during most operations.
 
 11. DbAdapter.getQualifierFactory is deprecated and replaced with "getQualifierTranslator"
 to remove unneeded indirection. QualifierTranslatorFactory class itself is deprecated.
@@ -47,8 +48,13 @@ to remove unneeded indirection. QualifierTranslatorFactory class itself is depre
 with correct implementation: org.objectstyle.cayenne.access.util.DefaultSorter, based
 on Ashwood library. 
 
-13. DbAdapter is now serves as a factory of DataNodes. This allows adapters to create
+13. DbAdapter now serves as a factory of DataNodes. This allows adapters to create
 their own DataNode implementations. This opens the way for implementations interfacing
 with non-JDBC data sources, such as LDAP.
 
+14. Configuration is now significantly easier to use and subclass;
+DefaultConfiguration now properly handles files in packages or other paths.
+
+15. significantly better logging in ResourceLocator; this should help when
+diagnosing e.g. Configuration loading problems.
 
