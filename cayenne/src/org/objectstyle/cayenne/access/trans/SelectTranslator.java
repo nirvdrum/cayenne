@@ -84,14 +84,7 @@ public class SelectTranslator extends SelectQueryAssembler {
      *  settings where. This flag can be set when joins are created
      *  using "to-many" relationships. */
     private boolean forceDistinct;
-
-    public SelectTranslator(
-        QueryEngine engine,
-        Connection con,
-        DbAdapter adapter,
-        Query query) {
-        super(engine, con, adapter, query);
-    }
+    
 
     /** Returns ordered list of names that should be assigned as keys
      * for values fetched from the database. ResultSet column names are ignored, 

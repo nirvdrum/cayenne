@@ -58,9 +58,11 @@ package org.objectstyle.cayenne.dba;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.trans.*;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * A generic DbAdapter implementation. 
@@ -89,12 +91,45 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator createPkGenerator() {
         return new JdbcPkGenerator();
     }
-    
+
     /** Returns primary key generator associated with this DbAdapter. */
     public PkGenerator getPkGenerator() {
         return pkGenerator;
     }
-    
+
+    public QueryTranslator getQueryTranslator(Query query) throws Exception {
+        QueryTranslator t = null;
+        
+        if (query == null) {
+            throw new NullPointerException("Null query.");
+        }
+        else if (query instanceof SelectQuery) {
+            t = new SelectTranslator();
+        }
+        else if (query instanceof UpdateQuery) {
+            t = new UpdateTranslator();
+        }
+        else if (query instanceof InsertQuery) {
+            t = new InsertTranslator(); 
+        }
+        else if (query instanceof DeleteQuery) {
+            t = new DeleteTranslator();
+        }
+        else if (query instanceof SqlSelectQuery) {
+            t = new SqlSelectTranslator();
+        }
+        else if (query instanceof SqlModifyQuery) {
+            t = new SqlModifyTranslator();
+        }
+        else {
+            throw new CayenneRuntimeException(
+                "Unrecognized query class..." + query.getClass().getName());
+        }
+        
+        t.setQuery(query);
+        t.setAdapter(this);
+        return t;
+    }
 
     /** Returns true. */
     public boolean supportsFkConstraints() {

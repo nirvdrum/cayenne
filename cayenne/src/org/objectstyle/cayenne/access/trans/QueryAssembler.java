@@ -83,34 +83,6 @@ public abstract class QueryAssembler extends QueryTranslator {
     /** PreparedStatement attributes matching entries in <code>values</code> list.. */
     protected ArrayList attributes = new ArrayList();
 
-    /** Query being translated. */
-    protected Query query;
-
-    /** JDBC database connection needed to create PreparedStatement. */
-    protected Connection con;
-
-    /** Used mainly for name resolution. */
-    protected QueryEngine engine;
-
-    /** Adapter helping to do SQL literal conversions, etc. */
-    protected DbAdapter adapter;
-
-    public QueryAssembler(
-        QueryEngine engine,
-        Connection con,
-        DbAdapter adapter,
-        Query query) {
-        this.engine = engine;
-        this.con = con;
-        this.query = query;
-        this.adapter = adapter;
-    }
-
-    /** Returns query object being processed. */
-    public Query getQuery() {
-        return query;
-    }
-
     /** Processes a join being added. */
     public abstract void dbRelationshipAdded(DbRelationship dbRel);
 
@@ -132,17 +104,6 @@ public abstract class QueryAssembler extends QueryTranslator {
      */
     public abstract String aliasForTable(DbEntity dbEnt);
 
-
-    /** Returns Connection object used by this assembler. */
-    public Connection getCon() {
-        return con;
-    }
-
-
-    /** Returns QueryEngine used by this assembler. */
-    public QueryEngine getEngine() {
-        return engine;
-    }
 
     public ObjEntity getRootEntity() {
         return engine.lookupEntity(query.getObjEntityName());

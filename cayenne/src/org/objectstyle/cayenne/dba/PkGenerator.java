@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,12 +54,13 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
+package org.objectstyle.cayenne.dba;
+
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
- * Interface that defines methods for automatic primary key generation
- * support. 
+ * Defines methods to support automatic primary key generation. 
  * 
  * @author Andrei Adamchik
  */

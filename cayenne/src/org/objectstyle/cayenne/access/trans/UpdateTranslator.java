@@ -77,10 +77,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
 public class UpdateTranslator extends QueryAssembler {
     static Logger logObj = Logger.getLogger(UpdateTranslator.class.getName());
 
-    public UpdateTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
-        super(engine, con, adapter, query);
-    }
-
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");
     }

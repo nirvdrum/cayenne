@@ -78,10 +78,6 @@ public class InsertTranslator extends QueryAssembler {
 
     private ArrayList columnList = new ArrayList();
 
-    public InsertTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
-        super(engine, con, adapter, query);
-    }
-
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");
     }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,17 +54,30 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
+package org.objectstyle.cayenne.dba;
+
+import java.sql.Connection;
+
+import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.Query;
 
-/** Defines API needed to handle differences between
-  * various databases accessed via JDBC. Implementing classed are 
-  * intended to be pluggable database specific adapters.
-  *
-  * @author Andrei Adamchik 
-  */
+/** 
+ * Defines API needed to handle differences between various 
+ * databases accessed via JDBC. Implementing classed are 
+ * intended to be pluggable database-specific adapters. 
+ * DbAdapter-based architecture is introduced to solve the 
+ * following problems:
+ * 
+ * <ul>
+ * <li>Make Cayenne code independent from SQL syntax differences
+ * between different RDBMS.
+ * <li>Allow for vendor-specific tuning of JDBC access.
+ * </ul>
+ *
+ * @author Andrei Adamchik 
+ */
 public interface DbAdapter {
 
     public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
@@ -77,7 +89,6 @@ public interface DbAdapter {
         "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
     public static final String POSTGRES =
         "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
-
 
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
@@ -102,4 +113,16 @@ public interface DbAdapter {
 
     /** Returns primary key generator associated with this DbAdapter. */
     public PkGenerator getPkGenerator();
+
+
+    /** 
+     * Creates and returns a QueryTranslator appropriate for the 
+     * specified <code>query</code> parameter. Sets translator
+     * "query" and "adapter" property.
+     * 
+     * <p>This factory method allows subclasses to specify their
+     * own translators that implement vendor-specific optimizations.
+     * </p>
+     */
+    public QueryTranslator getQueryTranslator(Query query) throws Exception;
 }

@@ -80,13 +80,14 @@ public class SelectTranslatorTst extends TestCase {
         q = new SelectQuery();
     }
 
-    private SelectTranslator buildTranslator(Connection con)
-        throws java.lang.Exception {
-        return new SelectTranslator(
-            TestMain.getSharedDomain(),
-            con,
-            TestMain.getSharedNode().getAdapter(),
-            q);
+    private SelectTranslator buildTranslator(Connection con) throws Exception {
+        SelectTranslator t = new SelectTranslator();
+        t.setAdapter(TestMain.getSharedNode().getAdapter());
+        t.setCon(con);
+        t.setEngine(TestMain.getSharedDomain());
+        t.setQuery(q);
+
+        return t;
     }
 
     public void testCreateSqlString1() throws java.lang.Exception {

@@ -69,10 +69,6 @@ import org.objectstyle.cayenne.query.Query;
  *  that are delegated tasks of building query parts. */
 public abstract class SelectQueryAssembler extends QueryAssembler {
 
-    public SelectQueryAssembler(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
-        super(engine, con, adapter, query);
-    }
-
 
     /** Returns ordered list of names that should be assigned as keys
     * for values in the ResultSet */

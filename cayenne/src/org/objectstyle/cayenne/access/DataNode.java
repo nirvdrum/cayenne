@@ -221,8 +221,9 @@ public class DataNode implements QueryEngine {
                 // catch exceptions for each individual query
                 try {
                     // 1. translate query
-                    QueryTranslator queryTranslator =
-                        QueryTranslator.queryTranslator(this, con, getAdapter(), nextQuery);
+                    QueryTranslator queryTranslator = getAdapter().getQueryTranslator(nextQuery);
+                    queryTranslator.setEngine(this);
+                    queryTranslator.setCon(con);
                     PreparedStatement prepStmt = queryTranslator.createStatement(logLevel);
 
                     try {

@@ -72,11 +72,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class DeleteTranslator extends QueryAssembler {
     static Logger logObj = Logger.getLogger(DeleteTranslator.class.getName());
-    
-    public DeleteTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
-        super(engine, con, adapter, query);
-    }
-    
+        
     
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");

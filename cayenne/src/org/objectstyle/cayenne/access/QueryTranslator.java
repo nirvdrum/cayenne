@@ -53,52 +53,78 @@ package org.objectstyle.cayenne.access;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.trans.*;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.query.Query;
 
-
-/** Defines API for translation Cayenne queries to JDBC
-  * PreparedStatements. Also serves as a factory for concrete 
-  * translators.
-  *
-  * @author Andrei Adamchik
-  */
+/** 
+ * Defines API for translation Cayenne queries to JDBC
+ * PreparedStatements. 
+ * 
+ * @author Andrei Adamchik
+ */
 public abstract class QueryTranslator {
     static Logger logObj = Logger.getLogger(QueryTranslator.class.getName());
 
-    /** This method will check what kind of query we have and
-     *  call an appropriate translation method */
-    public static QueryTranslator queryTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) throws Exception {
-        if(query == null)
-            throw new NullPointerException("Null query.");
-        else if(query instanceof SelectQuery)
-            return new SelectTranslator(engine, con, adapter, query);
-        else if(query instanceof UpdateQuery)
-            return new UpdateTranslator(engine, con, adapter, query);
-        else if(query instanceof InsertQuery)
-            return new InsertTranslator(engine, con, adapter, query);
-        else if(query instanceof DeleteQuery)
-            return new DeleteTranslator(engine, con, adapter, query);
-        else if(query instanceof SqlSelectQuery)
-            return new SqlSelectTranslator(engine, con, adapter, query);
-        else if(query instanceof SqlModifyQuery)
-            return new SqlModifyTranslator(engine, con, adapter, query);
-        else
-            throw new CayenneRuntimeException("Unrecognized query class..." + query.getClass().getName());
+    /** Query being translated. */
+    protected Query query;
+
+    /** JDBC database connection needed to create PreparedStatement. */
+    protected Connection con;
+
+    /** Used mainly for name resolution. */
+    protected QueryEngine engine;
+
+    /** Adapter helping to do SQL literal conversions, etc. */
+    protected DbAdapter adapter;
+
+    
+    /** 
+     * Creates PreparedSatatement. <code>logLevel</code> 
+     * parameter is supplied to allow
+     * control of logging of produced SQL. 
+     */
+    public abstract PreparedStatement createStatement(Level logLevel)
+        throws Exception;
+
+    /** Returns query object being processed. */
+    public Query getQuery() {
+        return query;
     }
 
-    /** Creates PreparedSatatement. <code>logLevel</code> parameter is supplied to allow
-      * control of logging of produced SQL. */
-    public abstract PreparedStatement createStatement(Level logLevel) throws java.lang.Exception;
+    public void setQuery(Query query) {
+        this.query = query;
+    }
 
+    /** Returns Connection object used by this assembler. */
+    public Connection getCon() {
+        return con;
+    }
+
+    public void setCon(Connection con) {
+        this.con = con;
+    }
+
+    /** Returns QueryEngine used by this assembler. */
+    public QueryEngine getEngine() {
+        return engine;
+    }
+
+    public void setEngine(QueryEngine engine) {
+        this.engine = engine;
+    }
+
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
+
+    public void setAdapter(DbAdapter adapter) {
+        this.adapter = adapter;
+    }
 }

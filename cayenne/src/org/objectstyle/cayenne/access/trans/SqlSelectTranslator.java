@@ -76,10 +76,6 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
 public class SqlSelectTranslator extends SelectQueryAssembler {
     static Logger logObj = Logger.getLogger(SqlSelectTranslator.class.getName());
 
-    public SqlSelectTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
-        super(engine, con, adapter, query);
-    }
-
     public String createSqlString() throws java.lang.Exception {
         return getRawQuery().getSqlString();
     }

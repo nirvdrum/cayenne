@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,11 +54,14 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
+package org.objectstyle.cayenne.access.trans;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -88,10 +90,10 @@ public class TstQueryAssembler extends QueryAssembler {
     }
 
     public TstQueryAssembler(QueryEngine e, Query q) {
-        super(e, 
-        org.objectstyle.TestMain.getSharedConnection(), 
-        org.objectstyle.TestMain.getSharedNode().getAdapter(), 
-        q);
+        super.setAdapter(TestMain.getSharedNode().getAdapter());
+        super.setCon(TestMain.getSharedConnection());
+        super.setEngine(e);
+        super.setQuery(q);
     }
 
     public void dispose() throws SQLException {
