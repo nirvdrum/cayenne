@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -79,8 +78,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
-    private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
-
     // used for dependent to one relationships
     // to indicate that destination relationship was fetched and is null
     private static final CayenneDataObject nullValue = new CayenneDataObject();
