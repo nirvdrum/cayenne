@@ -267,7 +267,7 @@ public class DataMap {
 
     /**
      * Returns a by copy array of object entities.
-     * @deprecated since b1; use #getObjEntitiesAsList() instead.
+     * @deprecated Since 1.0 Beta1; use #getObjEntitiesAsList() instead.
      */
     public ObjEntity[] getObjEntities() {
         Collection objEnts = getObjEntityMap().values();
@@ -283,7 +283,7 @@ public class DataMap {
 
     /**
      * Return an array of database entities (by copy)
-     * @deprecated since b1; use #getDbEntitiesAsList() instead.
+     * @deprecated Since 1.0 Beta1; use #getDbEntitiesAsList() instead.
      */
 	public DbEntity[] getDbEntities() {
         Collection dbEnts = getDbEntityMap().values();
@@ -442,50 +442,48 @@ public class DataMap {
         dbEntityMap.remove(dbEntityName);
     }
 
-    /** Clean remove of the DbEntity from the data map.
-     *  If there are any ObjEntities or ObjRelationship entities
-     *  referencing given entity, removes them as well. No relationships
-     *  are re-established. Also, if the ObjEntity is removed, all the
-     *  ObjRelationships referencing it are removed as well.
+    /**
+     * Clean remove of the DbEntity from the data map.
+     * If there are any ObjEntities or ObjRelationship entities
+     * referencing given entity, removes them as well.
+     * No relationships are re-established. Also, if the ObjEntity is removed,
+     * all the ObjRelationships referencing it are removed as well.
      */
     public void deleteDbEntity(String dbEntityName) {
-        DbEntity db_entity = getDbEntity(dbEntityName);
+        DbEntity dbEntityToDelete = getDbEntity(dbEntityName);
         // No db entity to remove? return.
-        if (null == db_entity) {
+        if (null == dbEntityToDelete) {
             return;
         }
 
         dbEntityMap.remove(dbEntityName);
 
-        Iterator db_entity_iter = this.getDbEntitiesAsList().iterator();
-        while (db_entity_iter.hasNext()) {
-        	DbEntity ent = (DbEntity)db_entity_iter.next();
-            Iterator rel_iter = ent.getRelationshipList().iterator();
-            while (rel_iter.hasNext()) {
-                DbRelationship rel = (DbRelationship)rel_iter.next();
-                if (rel.getTargetEntity() == db_entity) {
-                    ent.removeRelationship(rel.getName());
+        Iterator dbEnts = this.getDbEntitiesAsList().iterator();
+        while (dbEnts.hasNext()) {
+        	DbEntity dbEnt = (DbEntity)dbEnts.next();
+            Iterator rels = dbEnt.getRelationships().iterator();
+            while (rels.hasNext()) {
+                DbRelationship rel = (DbRelationship)rels.next();
+                if (rel.getTargetEntity() == dbEntityToDelete) {
+                    dbEnt.removeRelationship(rel.getName());
                 }
             }
         }
 
         // Remove all obj relationships referencing removed DbRelationships.
-        Collection obj_entity_coll = objEntityMap.values();
-        Iterator obj_entity_iter = obj_entity_coll.iterator();
-        while (obj_entity_iter.hasNext()) {
-            ObjEntity temp = (ObjEntity) obj_entity_iter.next();
-            if (temp.getDbEntity() == db_entity) {
-                temp.clearDbMapping();
+        Iterator objEnts = this.getObjEntityMap().values().iterator();
+        while (objEnts.hasNext()) {
+            ObjEntity objEnt = (ObjEntity)objEnts.next();
+            if (objEnt.getDbEntity() == dbEntityToDelete) {
+                objEnt.clearDbMapping();
             } else {
-                Iterator iter = temp.getRelationshipList().iterator();
+                Iterator iter = objEnt.getRelationships().iterator();
                 while (iter.hasNext()) {
                     ObjRelationship rel = (ObjRelationship) iter.next();
-                    Iterator db_rel_iter =
-                        rel.getDbRelationshipList().iterator();
-                    while (db_rel_iter.hasNext()) {
-                        DbRelationship db_rel =
-                            (DbRelationship) db_rel_iter.next();
-                        if (db_rel.getTargetEntity() == db_entity) {
+                    Iterator dbRels = rel.getDbRelationships().iterator();
+                    while (dbRels.hasNext()) {
+                        DbRelationship dbRel = (DbRelationship) dbRels.next();
+                        if (dbRel.getTargetEntity() == dbEntityToDelete) {
                             rel.clearDbRelationships();
                             break;
                         }
@@ -507,15 +505,16 @@ public class DataMap {
 
         objEntityMap.remove(objEntityName);
 
-        Iterator obj_entity_iter = this.getObjEntitiesAsList().iterator();
-        while (obj_entity_iter.hasNext()) {
-        	ObjEntity ent = (ObjEntity)obj_entity_iter.next();
-            Iterator rel_iter = ent.getRelationshipList().iterator();
-            while (rel_iter.hasNext()) {
-                ObjRelationship rel = (ObjRelationship)rel_iter.next();
-                if (rel.getTargetEntity() == entity
-                    || rel.getSourceEntity() == entity) {
-                    ent.removeRelationship(rel.getName());
+        Iterator entities = this.getObjEntityMap().values().iterator();
+        while (entities.hasNext()) {
+        	ObjEntity ent = (ObjEntity)entities.next();
+        	// take a copy since we're going to modifiy the entity
+			Iterator rels = new ArrayList(ent.getRelationships()).iterator();
+            while (rels.hasNext()) {
+                ObjRelationship rel = (ObjRelationship)rels.next();
+                if (objEntityName.equals(rel.getTargetEntityName())
+                	|| objEntityName.equals(rel.getTargetEntityName())) {
+	                	ent.removeRelationship(rel.getName());
                 }
             }
         }

@@ -116,7 +116,27 @@ public class DataMapTst extends CayenneTestCase {
 		map.removeObjEntity(e.getName());
 		map.addObjEntity(e);
 	}
-	
+
+	// make sure deleting an ObjEntity & other entity's relationships to it
+	// works & does not cause a ConcurrentModificationException
+	public void testDelete() {
+		ObjEntity e1 = new ObjEntity("1");
+		ObjEntity e2 = new ObjEntity("2");
+		e1.addRelationship(new ObjRelationship(e1, e2, false));
+		e1.addRelationship(new ObjRelationship(e2, e1, false));
+		e2.addRelationship(new ObjRelationship(e1, e2, false));
+		e2.addRelationship(new ObjRelationship(e2, e1, false));
+		map.addObjEntity(e1);
+		map.addObjEntity(e2);
+
+		map.deleteObjEntity("1");
+		assertNull(map.getObjEntity("1"));
+		assertEquals(1, e2.getRelationships().size());
+
+		map.deleteObjEntity("2");
+		assertNull(map.getObjEntity("2"));
+	}
+
 	//Now possible to have more than one objEntity with a null class name. 
 	//This test proves it
 	public void testMultipleNullClassNames() {
