@@ -75,12 +75,12 @@ public class TestOperationObserver extends DefaultOperationObserver {
     
     public void assertAllExceptions() {
         assertGlobalExceptions();
-        Assert.assertEquals(0, queryExceptions.size());
+        Assert.assertEquals("No exceptions expected", 0, queryExceptions.size());
     }
     
     
     public void assertGlobalExceptions() {
-        Assert.assertEquals(0, globalExceptions.size());
+        Assert.assertEquals("No exceptions expected", 0, globalExceptions.size());
     }
     
     

@@ -117,7 +117,6 @@ public class SelectQueryTst extends SelectQueryBase {
 
         // check query results
         List objects = opObserver.objectsForQuery(query);
-        assertNotNull(objects);
         assertEquals(1, objects.size());
     }
 
@@ -129,9 +128,21 @@ public class SelectQueryTst extends SelectQueryBase {
 
         // check query results
         List objects = opObserver.objectsForQuery(query);
-        assertNotNull(objects);
         assertEquals(_artistCount - 1, objects.size());
     }
+    
+    public void testSelectNotLikeIgnoreCaseSingleWildcardMatch() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual =
+            ExpressionFactory.notLikeIgnoreCaseExp("artistName", "aRtIsT11%");
+        query.setQualifier(qual);
+        performQuery();
+
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertEquals(_artistCount - 1, objects.size());
+    }
+    
 
     public void testSelectLikeSingleWildcardMatch() throws Exception {
         query.setRoot(Artist.class);

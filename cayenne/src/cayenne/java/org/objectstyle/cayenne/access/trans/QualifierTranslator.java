@@ -311,10 +311,14 @@ public class QualifierTranslator
         // binary nodes are the only ones that currently require this
         detectObjectMatch(node);
 
-        if (parenthesisNeeded(node, parentNode))
+        if (parenthesisNeeded(node, parentNode)) {
             qualBuf.append('(');
-        if (node.getType() == Expression.LIKE_IGNORE_CASE)
+        }
+
+        if (node.getType() == Expression.LIKE_IGNORE_CASE
+            || node.getType() == Expression.NOT_LIKE_IGNORE_CASE) {
             qualBuf.append("UPPER(");
+        }
     }
 
     public void startTernaryNode(Expression node, Expression parentNode) {
@@ -335,8 +339,11 @@ public class QualifierTranslator
 
         if (parenthesisNeeded(node, parentNode))
             qualBuf.append(')');
-        if (node.getType() == Expression.LIKE_IGNORE_CASE)
+            
+        if (node.getType() == Expression.LIKE_IGNORE_CASE
+            || node.getType() == Expression.NOT_LIKE_IGNORE_CASE) {
             qualBuf.append(')');
+        }
     }
 
     public void endTernaryNode(Expression node, Expression parentNode) {
