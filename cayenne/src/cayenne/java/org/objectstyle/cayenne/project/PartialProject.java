@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.conf.ConfigStatus;
  * @author Andrei Adamchik
  */
 public class PartialProject extends Project {
-    protected List domains;
+    protected Map domains;
     protected ConfigLoaderDelegate loadDelegate;
 
     /**
@@ -99,14 +99,16 @@ public class PartialProject extends Project {
 
     protected void postInit(File projectFile) {
         loadDelegate = new LoadDelegate();
-        domains = new ArrayList();
+        domains = new HashMap();
 
         try {
             FileInputStream in = new FileInputStream(projectFile);
             try {
                 new ConfigLoader(loadDelegate).loadDomains(in);
             } catch (Exception ex) {
-                throw new ProjectException("Error creating PartialProject.", ex);
+                throw new ProjectException(
+                    "Error creating PartialProject.",
+                    ex);
             } finally {
                 in.close();
             }
@@ -118,13 +120,12 @@ public class PartialProject extends Project {
     }
 
     public List getChildren() {
-        return domains;
+        return new ArrayList(domains.values());
     }
 
     public void checkForUpgrades() {
         // do nothing...
     }
-    
 
     /**
      * @see org.objectstyle.cayenne.project.Project#buildFileList()
@@ -152,7 +153,7 @@ public class PartialProject extends Project {
         return projectFile;
     }
 
-    class DomainMetaData {
+    protected class DomainMetaData {
         protected String name;
         protected List nodes = new ArrayList();
         protected List maps = new ArrayList();
@@ -163,9 +164,25 @@ public class PartialProject extends Project {
         }
     }
 
+    protected class NodeMetaData {
+        protected String name;
+        protected String dataSource;
+        protected String adapter;
+        protected String factory;
+        protected List maps = new ArrayList();
+
+        public NodeMetaData(String name) {
+            this.name = name;
+        }
+    }
+
     class LoadDelegate implements ConfigLoaderDelegate {
         protected ConfigStatus status = new ConfigStatus();
 
+        public void startedLoading() {
+        	domains.clear();
+        }
+        
         public void finishedLoading() {
         }
 
@@ -185,7 +202,7 @@ public class PartialProject extends Project {
         }
 
         public void shouldLoadDataDomain(String name) {
-            domains.add(new DomainMetaData(name));
+            domains.put(name, new DomainMetaData(name));
         }
 
         public void shouldLoadDataMap(
@@ -201,9 +218,13 @@ public class PartialProject extends Project {
             String dataSource,
             String adapter,
             String factory) {
-        }
 
-        public void startedLoading() {
+            NodeMetaData node = new NodeMetaData(nodeName);
+            node.adapter = adapter;
+            node.factory = factory;
+            node.dataSource = dataSource;
+            DomainMetaData domain = (DomainMetaData) domains.get(domainName);
+            domain.nodes.add(node);
         }
     }
 

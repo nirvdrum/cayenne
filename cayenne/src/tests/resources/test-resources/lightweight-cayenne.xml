@@ -11,7 +11,7 @@
 </domain>
 <domain name="d2">
 	<map name="mm" location="mm.map.xml"/>
-        <node name="n2"
+        <node name="n1"
 		 datasource="n1.driver.xml"
 		 adapter="org.objectstyle.cayenne.dba.mysql.MySQLAdapter"
 		 factory="org.objectstyle.cayenne.conf.DriverDataSourceFactory">

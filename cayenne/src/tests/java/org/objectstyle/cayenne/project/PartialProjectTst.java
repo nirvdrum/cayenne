@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
@@ -122,8 +123,15 @@ public class PartialProjectTst extends CayenneTestCase {
             handler.findFile(handler).resolveFile(),
             handler.getMainFile());
     }
-    
+
     public void testDomains() throws Exception {
-    	assertEquals(2, handler.getChildren().size());
+        assertEquals(2, handler.getChildren().size());
+    }
+
+    public void testNodes() throws Exception {
+        PartialProject.DomainMetaData d2 =
+            (PartialProject.DomainMetaData) handler.domains.get("d2");
+        assertNotNull(d2);
+        assertEquals(2, d2.nodes.size());
     }
 }
