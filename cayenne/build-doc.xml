@@ -109,6 +109,7 @@
             <fileset dir="xdocs/images">
                 <include name="**/*.gif"/>
                 <include name="**/*.jpeg"/>
+                <include name="**/*.png"/>
                 <include name="**/*.jpg"/>
                 <include name="**/*.css"/>
             </fileset>

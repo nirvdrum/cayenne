@@ -13,83 +13,162 @@
 	Flattened relationships take a sequence (or path) of Object level 
 	relationships, and "flatten" them into the root entity.  For example if we
 	had an Employee entity, with a toOne relationship "toDept" to the Department 
-	entity; and the Department entity has a toOne relationship "toManager" to the 
-	Employee entity, indicating the manager for that department.  We could create
-	a flattened relationship from Employee to Employee, following toDept.toManager
-	The generated class files for Employee would then contain a getToManager() 
-	method, which when called will return the manager for the department to which
-	this employee belongs.  The class will also contain a setToManager() method,
+	entity; and the Department entity has a toOne relationship "toCorporateUnit" to the 
+	CorporateUnit entity, indicating the unit the department belongs to.  We could create
+	a flattened relationship from Employee to CorporateUnit, following toDept.toCorporateUnit
+	relationship path.
+	The generated class files for Employee would then contain a getToCorporateUnit() 
+	method, which when called will return the Unit for the Department to which
+	this employee belongs.  The class will also contain a setToCorporateUnit() method,
 	but this will throw an exception if used, as the relationship is considered
 	read-only.  The slight advantage of this setup would come if you did not
 	intend on touching Department very often, and would much more likely be wanting
-	to find an Employee's manager.  When this relationship is touched
+	to find an Employee's CorporateUnit.  When an employee is fetched, it's corporate unit object 
+	will be in the HOLLOW state.  When an attribute of that object is read, the object itself is 
+	transparently fetched.
 	</p>
+	<p>
+	These flattened relationships work across any particular combination of toOne and toMany DbRelationships.
+	If all the relationships are toOne, then the resultant flattened relationship is toOne.  If any are toMany, the result
+	is toMany.  Most of the possible combinations are read only, but a certain particularly useful subset are read-write:
+	Many-to-many (n:m) relationships.
+	</p>
+	<p>
+	Scenario:<BR/>
+	Assume that we have an employee who can work on several projects and each project can have several Employees. 
+	Our database data model would look like:
+	</p>
+	<img src="/images/nmlink.png" width="497" height="103" border="0" 
+        align="middle"/>
+    <p>
+	The database creation DDL would be:
+	</p>
+	<source>
+	create table EMPLOYEES 
+	( 	id       integer      primary key, 
+		fullname varchar(100));
 
+	create table PROJECTS
+	( 	id       integer      primary key, 
+		name     varchar(100));
+
+	create table PRJ_EMP
+	( 	emp_id   integer,
+		prj_id   integer);
+	</source>
+	
+	<p>
+	Our object model would look like:
+	</p>
+	<img src="/images/nmlinkobjmodel.png" width="391" height="121" border="0" 
+        align="middle" />
+	<p>
+	Cayenne Modeler:<BR/>
+	The first step is to recreate these models in the Cayenne modeler. There are several ways of accomplishing this 
+	and these are described in the user manual. I leave it up to you which one you pick. 
+	However, in this example, we will create the database tables, and reengineer the database schema. 
+
+	There are a couple of changes to be made after such an import:
+
+	<ol>
+		<li>Remove the ObjectEntity PrjEmp
+This object contains only identifiers, no business logic and is of no further use in our programming later.  In fact, one of the big
+advantages of Cayenne's support for n:m relationships is the lack of a requirement to have the intermediate ObjEntity lying 
+around cluttering up your model and your class hierarchy.</li>
+		<li>Mark the attributes of DbEntity emp_prj as primary key.
+If you leave this step out, your code will result in a CayenneRuntimeException: <br/>
+Cannot modify (add to) the read-only relationship [name relationship].  <br/>
+The reason for this is that Cayenne determines that a flattened relationship is read-write if and only if the first relationship
+is toMany, the second is toOne, and the intermediate table (the destination of the first relationship) consists solely of primary
+key attributes.  If any other attributes are present in the intermediate table, then it would not be valid for Cayenne to
+automatically create/delete records in that table.
+		</li>
+		<li>Verify that there are no primary key elements in your object model. 
+Normally, there should be no need for identifiers in the object model, so they can be removed.
+		</li>
+		<li>Rename the Objects Projects and Employees in the object model (not the database model!) to Project and Employee.
+		</li>
+		<li>Create the following relationships between the Db Entities:<BR/>
+	<code>
+   EMPLOYEES |(1:n)| EMP_PROJ<BR/>
+   PROJECTS  |(1:n)| EMP_PROJ<BR/>
+   PRJ_EMP   |(n:1)| EMPLOYEES<BR/>
+   PRJ_EMP   |(n:1)| PROJECTS<BR/>
+	</code>
+		</li>
+	</ol>
+	
+	Besides the removal of the intermediate Object PrjEmp and the primary key marking of the emp_prj table, 
+	we have not done anything yet to enable usage of the many-to-may relationships. 
+	This is done in our object model. There are two relationships to be defined in the object model:<BR/>
+	<code>
+	Project  | (n:m) |  Employee<BR/>
+	Employee | (n:m) |  Project<BR/>
+	</code>
+	First we define the Project to Employee relationship. In the modeler, a toMany relationship should 
+	be created from Project to  Employee:<BR/>
+	</p>
+	<img src="/images/flatrelscrshot1.png" width="650" height="205" border="0" 
+        align="middle" />
+	<p>
+	When selecting the underlying database relationship take note that the relationship is going from the table 
+	prj_emp to employees: 
+	</p>
+	<img src="/images/flatrelscrshot2.png" width="415" height="116" border="0" 
+        align="middle" />
+     <p>
+     The definition of the Employee to Project relationship works exactly the same way, only in reverse.
+     After this we can finally generate our classes .
+     </p><p>
+     <h4>Java coding</h4>
+		So, now we have our database model and our Object Model. 
+		After inserting a couple of employees and projects we should attempt to link them. 
+		Since this example only seeks to show how to use flattened relationships, we insert the projects and employees 
+		directly using the sql client:<BR/>
+		</p>
+		<source>
+		insert into employees values ( 1,  'Scott');
+		insert into projects values  ( 10, 'Cayenne');
+		</source>
+		<p>
+		Next we will link Scott to the Cayenne Project. The steps we have to perform is first to get an instance of Scott, 
+		then we would have to get an instance of Cayenne and finally we would have to add Scott to Cayenne.
+		</p>
+		<source>
+		[..]
+    DataContext mContext =      
+      Configuration.getSharedConfig().getDomain().createDataContext();
+
+    // Get the first Employee you can find (Scott)
+    SelectQuery qry = new SelectQuery (Employee.class);   
+    List emps       = mContext.performQuery(qry);       
+    Employee emp    = (Employee) emps.get(0);
+    
+    // Get the first Project you can find (Cayenne)
+    qry             = new SelectQuery (Project.class);   
+    List prjs       = mContext.performQuery(qry);       
+    Project prj     = (Project) prjs.get(1);
+
+    // Add Scott to the Cayenne project
+    emp.addToProjects(prj);
+    
+    // Commit changes.
+    mContext.commitChanges();
+[..]	
+		</source>
+		<p>
+		That's it! Now you can query your database and see what happened there (mysql output below):
+		</p>
 <source>
-import java.math.BigDecimal;
-import java.util.List;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.art.Painting;
-import org.objectstyle.art.Artist;
-...
-
-// assume this exists and initialized
-DataContext ctxt;
-...
-Expression e = 
-  ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, 
-                        "estimatedPrice", 
-                        new BigDecimal(100000.0));
-SelectQuery q = new SelectQuery(Painting.class, e);
-List realExpensiveArt = ctxt.performQuery(q);
-
-if(realExpensiveArt.size() > 0) {
-  Painting firstPainting = (Painting)realExpensiveArt.get(0);
-
-  // double the price
-  double oldPrice = firstPainting.getEstimatedPrice().doubleValue();
-  firstPainting.setEstimatedPrice(new BigDecimal(oldPrice * 2.00));
-
-  // create new painting and register it with DataContext
-  // "Painting" string is a name of ObjEntity in the DataMap
-  Painting newPainting = (Painting)ctxt.createAndRegisterNewObject("Painting");
-  newPainting.setPaintingTitle("Sunset as it is");
-
-  // price it as unreasonable as other paintings
-  newPainting.setEstimatedPrice(new BigDecimal(5000000.0));
-            
-  // get artist via relationship
-  Artist artist = firstPainting.getToArtist();
-
-  // assign new painting to an artist
-  artist.addToPaintingArray(newPainting);
-
-  // save all the changes we've made so far
-  ctxt.commitChanges();
-}
-...
+mysql> select * from prj_emp;
++--------+--------+
+| emp_id | prj_id |
++--------+--------+
+|      1 |     10 |
++--------+--------+
+1 row in set (0.00 sec)
 </source>
 
-		<p>If SQL tracing is turned on, and depending on the preexisting data in the database,
-		the following SQL statements might be printed to console during the
-		commit phase:</p>
-
-<source>
-[main 12-22 15:50:19] QueryLogger: --- will run 2 queries.
-[main 12-22 15:50:19] QueryLogger: INSERT INTO PAINTING 
-                                   (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE, ARTIST_ID) 
-                                   VALUES (?, ?, ?, ?) 
-                                   [params: 200, 'Sunset as it is', 5000000, 10]
-[main 12-22 15:50:19] QueryLogger: === updated 1 row.
-[main 12-22 15:50:19] QueryLogger: UPDATE PAINTING SET ESTIMATED_PRICE = ? 
-                                   WHERE PAINTING_ID = ? 
-                                   [params: 2000000, 34]
-[main 12-22 15:50:19] QueryLogger: === updated 1 row.
-[main 12-22 15:50:19] QueryLogger: +++ transaction committed.
-</source>
 	</subsection>
     </section>
 </body>
