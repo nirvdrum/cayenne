@@ -99,20 +99,6 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
         return sqlString;
     }
 
-    /**  
-     * @deprecated use setObjDescriptors
-     */
-    public void setResultDesc(ObjAttribute[] resultDesc) {
-        setObjDescriptors(resultDesc);
-    }
-
-    /**
-     * @deprecated use getObjDescriptors.
-     */
-    public ObjAttribute[] getResultDesc() {
-        return getObjDescriptors();
-    }
-
     /**
      * Returns the fetchLimit.
      * @return int
