@@ -1,7 +1,5 @@
 package org.objectstyle.art;
 
-import java.util.List;
-import org.objectstyle.cayenne.*;
 
 public class CompoundFkTest extends org.objectstyle.cayenne.CayenneDataObject {
 
