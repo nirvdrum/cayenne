@@ -81,11 +81,11 @@ public class ObjEntity extends Entity {
     protected boolean readOnly;
 
     public ObjEntity() {
-    	super();
+        super();
     }
 
     public ObjEntity(String name) {
-    	this();
+        this();
         this.setName(name);
     }
 
@@ -149,7 +149,7 @@ public class ObjEntity extends Entity {
     public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRel) {
         Iterator it = getRelationshipMap().values().iterator();
         while (it.hasNext()) {
-            ObjRelationship objRel = (ObjRelationship)it.next();
+            ObjRelationship objRel = (ObjRelationship) it.next();
             List relList = objRel.getDbRelationships();
             if (relList.size() != 1)
                 continue;
@@ -169,13 +169,14 @@ public class ObjEntity extends Entity {
         Map idMap = new HashMap();
         Iterator it = getDbEntity().getPrimaryKey().iterator();
         while (it.hasNext()) {
-            DbAttribute attr = (DbAttribute)it.next();
+            DbAttribute attr = (DbAttribute) it.next();
             Object val = objectSnapshot.get(attr.getName());
             if (val == null) {
                 throw new CayenneRuntimeException(
-                    "Invalid snapshot value for '"
+                    "Null value for '"
                         + attr.getName()
-                        + "'. Must be present and not null.");
+                        + "'. Snapshot: "
+                        + objectSnapshot);
             }
 
             idMap.put(attr.getName(), val);
@@ -212,7 +213,7 @@ public class ObjEntity extends Entity {
 
         Iterator rels = this.getRelationships().iterator();
         while (rels.hasNext()) {
-            ((ObjRelationship)rels.next()).clearDbRelationships();
+            ((ObjRelationship) rels.next()).clearDbRelationships();
         }
 
         dbEntity = null;
@@ -269,10 +270,14 @@ public class ObjEntity extends Entity {
             ObjAttribute objAttr = (ObjAttribute) it.next();
             objAttr.validate();
 
-            if (!readOnly &&
-                objAttr.isCompound() &&
-                !objAttr.mapsToDependentDbEntity()) {
-                throw new CayenneException(head + "ObjAttribute: " + objAttr.getName() + " compound, read only.");
+            if (!readOnly
+                && objAttr.isCompound()
+                && !objAttr.mapsToDependentDbEntity()) {
+                throw new CayenneException(
+                    head
+                        + "ObjAttribute: "
+                        + objAttr.getName()
+                        + " compound, read only.");
             }
         }
     }
