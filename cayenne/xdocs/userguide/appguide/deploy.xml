@@ -193,6 +193,9 @@ DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
 </source>
            </subsection>
            
+           <subsection name="4.6.3 EJB Applications" anchor="ejb">
+           <p>To Be Done...</p>
+           </subsection>
       
         </subsection>
     </section>
