@@ -56,7 +56,10 @@
 
 package org.objectstyle.cayenne.gen;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.DataMap;
@@ -105,8 +108,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
             String t = getTemplateForPairs();
             String st = getSupertemplateForPairs();
             generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
-        }
-        else {
+        } else {
             generateSingleClasses(getTemplateForSingles());
         }
     }
@@ -192,8 +194,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
         return (outFile != null) ? new FileWriter(outFile) : null;
     }
 
-    protected File fileForSuperclass(String pkgName, String className)
-        throws Exception {
+    protected File fileForSuperclass(String pkgName, String className) throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
 
@@ -205,12 +206,11 @@ public class DefaultClassGenerator extends MapClassGenerator {
         return dest;
     }
 
-    protected File fileForClass(String pkgName, String className)
-        throws Exception {
+    protected File fileForClass(String pkgName, String className) throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
-        if (dest.exists()) {
 
+        if (dest.exists()) {
             // no overwrite of subclasses
             if (makePairs) {
                 return null;
@@ -221,8 +221,11 @@ public class DefaultClassGenerator extends MapClassGenerator {
                 return null;
             }
 
-            // ignore newer files
-            if (!isOld(dest)) {
+            // Ignore if the destination is newer than the map
+            // (internal timestamp), i.e. has been generated after the map was
+            // last saved AND the template is older than the destination file
+            if (!isOld(dest)
+                && (template == null || template.lastModified() < dest.lastModified())) {
                 return null;
             }
         }
@@ -263,9 +266,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
     *  when generating single classes. 
     */
     protected String getTemplateForSingles() throws IOException {
-        return (template != null)
-            ? template.getPath()
-            : defaultSingleClassTemplate();
+        return (template != null) ? template.getPath() : defaultSingleClassTemplate();
     }
 
     /** 
@@ -273,9 +274,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
      *  when generating class pairs. 
      */
     protected String getTemplateForPairs() throws IOException {
-        return (template != null)
-            ? template.getPath()
-            : defaultSubclassTemplate();
+        return (template != null) ? template.getPath() : defaultSubclassTemplate();
     }
 
     /** 
