@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -74,7 +75,7 @@ import org.objectstyle.cayenne.ObjectId;
  * 
  * @author Andrei Adamchik
  */
-public class ToManyList implements List {
+public class ToManyList implements List, Serializable {
     private ObjectId srcObjectId;
     private String relName;
     private List objectList;
