@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.parser.ASTDbPath;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -797,7 +797,9 @@ public class ObjEntity extends Entity {
             // convert obj_path to db_path
 
             String converted = toDbPath(resolvePathComponents(expression));
-            return new ASTDbPath(converted);
+            Expression exp = ExpressionFactory.expressionOfType(Expression.DB_PATH);
+            exp.setOperand(0, converted);
+            return exp;
         }
     }
 }
