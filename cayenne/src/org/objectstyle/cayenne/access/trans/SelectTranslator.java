@@ -79,6 +79,12 @@ public class SelectTranslator extends SelectQueryAssembler {
     private ArrayList aliasList = new ArrayList();
     private ArrayList dbRelList = new ArrayList();
     private int aliasCounter;
+    
+    /** If set to <code>true</code>, indicates that distinct
+     *  select query is required no matter what the original query 
+     *  settings where. This flag can be set when joins are created
+     *  using "to-many" relationships. */
+    private boolean forceDistinct;
 
 
     public SelectTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
@@ -117,6 +123,8 @@ public class SelectTranslator extends SelectQueryAssembler {
     }
 
     public String createSqlString() throws java.lang.Exception {
+        forceDistinct = false;
+        
         // build column list
         buildColumnList();
 
@@ -130,8 +138,9 @@ public class SelectTranslator extends SelectQueryAssembler {
         StringBuffer queryBuf = new StringBuffer();
         queryBuf.append("SELECT ");
 
-        if(getSelectQuery().isDistinct())
+        if(forceDistinct || getSelectQuery().isDistinct()) {
             queryBuf.append("DISTINCT ");
+        }
 
         // append columns (unroll the loop's first element)
         int columnCount = columnList.size();
@@ -239,10 +248,16 @@ public class SelectTranslator extends SelectQueryAssembler {
 
 
 
-    /** Stores a new relationship in an internal list.
-     * Later it will be used to create joins to relationship destination
-     * table  */
+    /** 
+     * Stores a new relationship in an internal list.
+     * Later it will be used to create joins to relationship 
+     * destination table.
+     */
     public void dbRelationshipAdded(DbRelationship rel) {
+        if(rel.isToMany()) {
+            forceDistinct = true;
+        }
+        
         String existAlias = (String)aliasLookup.get(rel);
 
         if(existAlias == null) {

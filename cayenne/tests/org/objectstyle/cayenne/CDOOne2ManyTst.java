@@ -90,7 +90,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         SelectQuery q = new SelectQuery("Artist", e);
 
         // *** TESTING THIS *** 
-        List artists = ctxt.performQuery(q, Level.SEVERE);
+        List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
         assertSame(a1, artists.get(0));
     }

@@ -90,6 +90,30 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         assertSame(p1, paints.get(0));
     }
     
+    public void testSelectViaMultiRelationship() throws Exception {
+
+        // setup test
+        Artist a1 = newArtist();
+        Painting p1 = newPainting();
+        Painting p2 = newPainting();
+        Gallery g1 = newGallery();
+        a1.addToPaintingArray(p1);
+        a1.addToPaintingArray(p2);
+        p1.setToGallery(g1);
+        p2.setToGallery(g1);
+        ctxt.commitChanges();
+
+        // do select
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingArray.toGallery", g1);
+        SelectQuery q = new SelectQuery("Artist", e);
+
+        // *** TESTING THIS *** 
+        List artists = ctxt.performQuery(q);
+        assertEquals(1, artists.size());
+        assertSame(a1, artists.get(0));
+    }
+    
 
     public void testNewAdd() throws Exception {
         Artist a1 = newArtist();

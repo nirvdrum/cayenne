@@ -62,13 +62,14 @@ import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.*;
 
+
 /** Translates parts of the query to SQL.
  * Always works in the context of parent Translator. */
 public abstract class QueryAssemblerHelper {
     static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class.getName());
 
     protected QueryAssembler queryAssembler;
-
+    
     /** Creates QueryAssemblerHelper. Sets queryAssembler property. */
     public QueryAssemblerHelper(QueryAssembler queryAssembler) {
         this.queryAssembler = queryAssembler;
