@@ -1,0 +1,2 @@
+# Ignore generated grammars - it is derived from .jjt
+*.jj

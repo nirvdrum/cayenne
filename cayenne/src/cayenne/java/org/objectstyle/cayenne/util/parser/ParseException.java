@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.wocompat.parser;
+package org.objectstyle.cayenne.util.parser;
 
 /**
  * This exception is thrown when parse errors are encountered.

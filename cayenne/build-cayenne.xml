@@ -12,9 +12,9 @@
 	<property name="core.bin" value="src/cayenne/bin"/>
 	<property name="core.resources" value="src/cayenne/resources"/>
 	
-	<property name="plist.parser" value="${core.src}/org/objectstyle/cayenne/wocompat/parser"/>
-	<property name="plist.grammar" value="${plist.parser}/Parser.jj"/>
-    
+	<property name="parser.dir" value="${core.src}/org/objectstyle/cayenne/util/parser"/>
+	<property name="parser.base.plist" value="PlistParser"/>
+	<property name="parser.base.exp" value="ExpressionParser"/>
     
 	<!-- ========================================== -->
     <!-- Build targets.                             -->
@@ -26,14 +26,17 @@
 		</ant>
 	</target>
 	
-	
 	<target name="javacc">
 		<ant antfile="build-subproj.xml" target="javacc">
-			<property name="javacc.grammar" value="${plist.grammar}"/>
-			<property name="javacc.dir" value="${plist.parser}"/>
+			<property name="parser.dir" value="${parser.dir}"/>
+			<property name="parser.base" value="${parser.base.plist}"/>
+		</ant>
+		
+		<ant antfile="build-subproj.xml" target="javacc">
+			<property name="parser.dir" value="${parser.dir}"/>
+			<property name="parser.base" value="${parser.base.exp}"/>
 		</ant>
 	</target>
-
 
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">

@@ -2,7 +2,7 @@ options {
 	STATIC = false;
 }
 
-PARSER_BEGIN(Parser)
+PARSER_BEGIN(PlistParser)
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -58,49 +58,45 @@ PARSER_BEGIN(Parser)
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.wocompat.parser;
+package org.objectstyle.cayenne.util.parser;
 import java.io.*; 
 import java.util.*;
-
+import org.apache.log4j.Logger;
 
 /**
-  * Apple/NeXT Property List format parser. Creates Java collections out of a property list (.plist).
-  * 
-  * <p>Originally contributed by Jeff Martin <reportmill@yahoo.com>  and Josh from Report Mill - 
-  * http://www.reportmill.com/
-  */
-public class Parser {
-   public Hashtable parseStrings;
+ * Apple/NeXT Property List format parser. Creates Java collections out of a property list (*.plist).
+ * 
+ * <p>Originally contributed by Jeff Martin <reportmill@yahoo.com>  and Josh from Report Mill - 
+ * http://www.reportmill.com/
+ *
+ * @since 1.1
+ */
+public class PlistParser {
+    private static Logger logObj = Logger.getLogger(PlistParser.class);
    
-public Parser() {
-    this(System.in);
+    public PlistParser() {
+        this(System.in);
     }
 
-public Parser(String filename) throws FileNotFoundException {
-    this(new FileInputStream(filename));
+    public PlistParser(String filename) throws FileNotFoundException {
+        this(new FileInputStream(filename));
     }
 
-public Parser(File f) throws FileNotFoundException {
-    this(new FileInputStream(f));
+    public PlistParser(File f) throws FileNotFoundException {
+        this(new FileInputStream(f));
     }
 
-public Object propertyList() {
-  try {
-    return object();
+    public Object propertyList() {
+        try {
+            return object();
+        }
+        catch (ParseException pe) {
+            logObj.info("Error parsing property list, ignoring.", pe);
+            return null;
+        }
     }
-  catch (ParseException pe) {
-    System.err.println("Error parsing property list file: "+pe);
-    return null;
-    }
-  }
-
-public static void main(String args[]) {
-  Parser r = new Parser();
-  Object o = r.propertyList();
-  System.out.println(o);
-  }
 }
-PARSER_END(Parser)
+PARSER_END(PlistParser)
 
 
 SKIP :

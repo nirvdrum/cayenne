@@ -68,32 +68,28 @@
 		<mkdir dir="${dist}/doc/api/${subproj}"/>
 	</target>
 	
-
-	<!-- ================================================= -->
-	<!-- JavaCC is normally run expicitly, so no need to   -->
-	<!-- check timestamps.                                 -->
-	<!-- ================================================= -->
-	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">
-		<delete>
-			<fileset dir="${javacc.dir}" includes="**/*.java"/>
-		</delete>
-		
-		<java dir="${basedir}" fork="true" classname="javacc">
+	
+	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">	
+		<java dir="${basedir}" fork="true" classname="jjtree" failonerror="true">
 			<classpath refid="javacc-classpath"/>
-			<arg value="-OUTPUT_DIRECTORY=${javacc.dir}"/>
-			<arg value="${javacc.grammar}"/>
+			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
+			<arg value="${parser.dir}/${parser.base}.jjt"/>
+		</java>
+		
+		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
+			<classpath refid="javacc-classpath"/>
+			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
+			<arg value="${parser.dir}/${parser.base}.jj"/>
 		</java>
 	</target>
 	
-	
-	<target name="javacc-nodir" unless="javacc.dir">
-		<fail>"javacc.dir" is undefined.</fail>
+	<target name="javacc-nodir" unless="parser.dir">
+		<fail>"parser.dir" is undefined.</fail>
 	</target>
 	
-	<target name="javacc-nogrammar" unless="javacc.grammar">
-		<fail>"javacc.grammar" is undefined.</fail>
+	<target name="javacc-nogrammar" unless="parser.base">
+		<fail>"parser.base" is undefined.</fail>
 	</target>
-
 
 	<target name="compile" depends="nosubproj,prepare">
 		<javac	srcdir="src/${subproj}/java" 

@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.wocompat.parser;
+package org.objectstyle.cayenne.util.parser;
 
 /**
  * An implementation of interface CharStream, where the stream is assumed to
