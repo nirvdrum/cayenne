@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.map;
 
 import junit.framework.*;
 
-/** DataMap unit tests.  fdgfdgfdg
+/** DataMap unit tests.
   * @author Andrei Adamchik */
 public class DataMapTst extends TestCase {
     

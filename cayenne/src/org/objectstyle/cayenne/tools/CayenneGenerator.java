@@ -55,20 +55,185 @@ package org.objectstyle.cayenne.tools;
  *
  */
 
+import java.io.File;
+import java.io.Writer;
+
+import org.xml.sax.InputSource;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+
+import org.objectstyle.cayenne.map.*;
 
 /** Ant task to perform class generation from data map.
  *
  *  @author Andrei Adamchik
  */
 public class CayenneGenerator extends Task {
+    protected File map;
+    protected File destDir;
+    protected File superDestDir;
+    protected boolean overwrite;
+    protected boolean makepairs = true;
+    protected File template;
+    protected File supertemplate;
+
+    /** Classes are generated only for files that are older 
+     * than the map. <code>mapTimestamp</code> is used to track that. 
+     */
+    protected long mapTimestamp;
 
     /** The method executing the task. It will be called
      *  by ant framework. */
     public void execute() throws BuildException {
-        
+        validateAttributes();
+
+        try {
+            InputSource in = new InputSource(map.getCanonicalPath());
+            DataMap dataMap = new MapLoaderImpl().loadDataMap(in);
+
+            AntClassGenerator gen = new AntClassGenerator(dataMap);
+
+            if (makepairs) {
+                String t =
+                    (template != null)
+                        ? template.getCanonicalPath()
+                        : MapClassGenerator.SUBCLASS_TEMPLATE;
+
+                String st =
+                    (supertemplate != null)
+                        ? supertemplate.getCanonicalPath()
+                        : MapClassGenerator.SUPERCLASS_TEMPLATE;
+                gen.generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
+            }
+            else {
+                String t =
+                    (template != null)
+                        ? template.getCanonicalPath()
+                        : MapClassGenerator.SINGLE_CLASS_TEMPLATE;
+                gen.generateSingleClasses(t);
+            }
+        }
+        catch (Exception ex) {
+            super.log("Error generating classes.");
+            throw new BuildException("Error generating classes.", ex);
+        }
+    }
+    
+
+    /** Validates atttribute combinatins. Throws BuildException if
+     *  attributes are invalid. 
+     */
+    protected void validateAttributes() throws BuildException {
+        if (map == null) {
+            throw new BuildException("'map' attribute is missing.");
+        }
+
+        if (destDir == null) {
+            throw new BuildException("'destDir' attribute is missing.");
+        }
+
+        if (!map.canRead()) {
+            throw new BuildException("Can't read the map from " + map);
+        }
+
+        if (!destDir.isDirectory()) {
+            throw new BuildException("'destDir' is not a directory.");
+        }
+
+        if (!destDir.canWrite()) {
+            throw new BuildException("Do not have write permissions for " + destDir);
+        }
+
+        if (template != null && !template.canRead()) {
+            throw new BuildException("Can't read template from " + template);
+        }
+
+        if (makepairs && superDestDir != null) {
+            if (!superDestDir.isDirectory()) {
+                throw new BuildException("'superDestDir' is not a directory.");
+            }
+
+            if (!superDestDir.canWrite()) {
+                throw new BuildException("Do not have write permissions for " + superDestDir);
+            }
+        }
+
+        if (makepairs && supertemplate != null && !supertemplate.canRead()) {
+            throw new BuildException("Can't read super template from " + supertemplate);
+        }
     }
 
+    /**
+     * Sets the map.
+     * @param map The map to set
+     */
+    public void setMap(File map) {
+        this.map = map;
+    }
 
+    /**
+     * Sets the destDir.
+     * @param destDir The destDir to set
+     */
+    public void setDestDir(File destDir) {
+        this.destDir = destDir;
+    }
+
+    /**
+     * Sets the superDestDir.
+     * @param superDestDir The superDestDir to set
+     */
+    public void setSuperDestDir(File superDestDir) {
+        this.superDestDir = superDestDir;
+    }
+
+    /**
+     * Sets the overwrite.
+     * @param overwrite The overwrite to set
+     */
+    public void setOverwrite(boolean overwrite) {
+        this.overwrite = overwrite;
+    }
+
+    /**
+     * Sets the makepairs.
+     * @param makepairs The makepairs to set
+     */
+    public void setMakepairs(boolean makepairs) {
+        this.makepairs = makepairs;
+    }
+
+    /**
+     * Sets the template.
+     * @param template The template to set
+     */
+    public void setTemplate(File template) {
+        this.template = template;
+    }
+
+    /**
+     * Sets the supertemplate.
+     * @param supertemplate The supertemplate to set
+     */
+    public void setSupertemplate(File supertemplate) {
+        this.supertemplate = supertemplate;
+    }
+
+    /** Concrete subclass of MapClassGenerator that performs the actual
+     * class generation. */
+    class AntClassGenerator extends MapClassGenerator {
+
+        public AntClassGenerator(DataMap map) {
+            super(map);
+        }
+
+        public void closeWriter(Writer out) throws Exception {
+            out.close();
+        }
+
+        public Writer openWriter(ObjEntity entity, String className) throws Exception {
+            return null;
+        }
+    }
 }
