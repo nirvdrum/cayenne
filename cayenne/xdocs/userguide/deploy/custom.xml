@@ -97,7 +97,7 @@ conf.addFilesystemPath("/another/absolute/path");
 conf.addFilesystemPath(new File("/some/path/that/must/exist/"));
 Configuration.initializeSharedConfiguration(conf);
 </source>
-				<p>The difference betwen the <code>String</code> and <code>File</code> arguments
+				<p>The difference between the <code>String</code> and <code>File</code> arguments
 				is that the latter are checked for existence. Both variants can be absolute or
 				relative, and are evaluated in the order in which they are added to the Configuration.
 				</p>
