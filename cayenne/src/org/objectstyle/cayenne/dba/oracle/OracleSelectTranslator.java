@@ -79,7 +79,11 @@ public class OracleSelectTranslator extends SelectTranslator {
     static Logger logObj = Logger.getLogger(OracleSelectTranslator.class.getName());
 
     private static boolean testedDriver;
+    private static boolean useOptimizations;
     private static Method statementDefineColumnType;
+    private static Method statementSetRowPrefetch;
+    private static final Object[] rowPrefetchArgs =
+        new Object[] { new Integer(100)};
 
     /** 
      * Determines if we can use Oracle optimizations.
@@ -98,11 +102,20 @@ public class OracleSelectTranslator extends SelectTranslator {
         testedDriver = true;
 
         try {
-            // search for matching method in class and its superclasses
-            Class[] args = new Class[] { Integer.TYPE, Integer.TYPE };
-            statementDefineColumnType = st.getClass().getMethod("defineColumnType", args);
+            // search for matching methods in class and its superclasses
+            Class[] args1 = new Class[] { Integer.TYPE, Integer.TYPE };
+            statementDefineColumnType = st.getClass().getMethod("defineColumnType", args1);
+
+            Class[] args2 = new Class[] { Integer.TYPE };
+            statementSetRowPrefetch = st.getClass().getMethod("setRowPrefetch", args2);
+
+            useOptimizations = true;
         }
         catch (Exception ex) {
+            useOptimizations = false;
+            statementSetRowPrefetch = null;
+            statementDefineColumnType = null;
+
             StringBuffer buf = new StringBuffer();
             buf
                 .append("Unknown Oracle statement type: [")
@@ -128,8 +141,10 @@ public class OracleSelectTranslator extends SelectTranslator {
             testDriver(stmt);
         }
 
-        if (statementDefineColumnType != null) {
+        if (useOptimizations) {
             // apply Oracle optimization of the statement
+
+            // 1. name result columns
             List columns = getColumnList();
             int len = columns.size();
             Object[] args = new Object[2];
@@ -139,8 +154,18 @@ public class OracleSelectTranslator extends SelectTranslator {
                 args[1] = new Integer(attr.getType());
                 statementDefineColumnType.invoke(stmt, args);
             }
-        }
 
+            // 2. prefetch bigger batches of rows
+            // [This optimization didn't give any measurable performance
+            // increase. Keeping it for the future research]
+           
+            // Note that this is done by statement,
+            // instead of Connection, since we do not want to mess 
+            // with Connection that is potentially used by
+            // other people.
+            statementSetRowPrefetch.invoke(stmt, rowPrefetchArgs);
+        }
+        
         return stmt;
     }
 }
