@@ -25,150 +25,86 @@
 		</subsection>
 		
 		<subsection name="3.2 DataDomain">
+		
+		<p></p>
 		<img src="/images/modeler/icon-dom.gif" width="16" height="16"/>
+		
+		<p>Each <strong>DataDomain</strong> is an abstraction of a logical
+		data source, possibly spreading multiple physical databases.
+		<code>cayenne.xml</code> file lists DataDomains present in the project. 
+		Most projects will contain only a single domain.
+		</p>
 		</subsection>
 		
 		<subsection name="3.3 DataNode">
+		
+		<p></p>
 		<img src="/images/modeler/icon-node.gif" width="16" height="16"/>
+		
+		<p>
+		<strong>DataNode</strong> is an object that corresponds to a single physical data source, normally a database.
+		Currently there are two types of DataNodes:
+			    
+			<ul>
+				 <li>Based on DataSource obtained via JNDI from the container (e.g. a WebLogic or Tomcat server).</li>
+				 <li>Based on JDBC driver. In this case Cayenne provides its own connection pooling and other functions 
+				 expected from a DataSource.</li>
+			</ul>
+			
+		DataNode references zero or more DataMaps defined under DataDomain.
+		</p>
 		</subsection>
 		
 		<subsection name="3.4 DataMap">
+		
+		<p></p>
 		<img src="/images/modeler/icon-datamap.gif" width="16" height="16"/>
+		
+		<p><strong>DataMap</strong> is a collection of Object/Relational mapping information linking Java object layer
+		with the relational database. DataMaps are created within DataDomains and can be later linked to DataNodes.
+		</p>
 		</subsection>
 		
 		<subsection name="3.5 Entities">
+		
+		<p></p>
 		<img src="/images/modeler/icon-dbentity.gif" width="16" height="16"/>
 		<img src="/images/modeler/icon-derived-dbentity.gif" width="16" height="16"/>
 		<img src="/images/modeler/icon-objentity.gif" width="16" height="16"/>
+		
+		<p>There are two types of entities in Cayenne DataMaps: <strong>ObjEntities</strong>, reflecting the structure of the object layer, 
+		and <strong>DbEntities</strong> that describe database tables and views. In other words, ObjEntity is a descriptor of a persistent Java 
+		class, and DbEntity is a descriptor of a database table or view. Each ObjEntity is based on a DbEntity, but there can be DbEntities
+		that do not have a corresponding ObjEntity.
+		</p>
+		
+		<p>There is a special kind of DbEntity - <strong>DerivedDbEntity</strong> - that has limited capabilities of defining "virtual" 
+		database views.
+		</p>
 		</subsection>
 		
 		<subsection name="3.7 Attributes">
+		
+		<p></p>
 		<img src="/images/modeler/icon-attribute.gif" width="16" height="16"/>
+		
+		<p>Attributes define simple data fields. <strong>ObjAttributes</strong> are descriptors for Java class
+		persistent properties, <strong>DbAttributes</strong> are descriptors for table or view columns. ObjAttributes
+		map to DbAttributes.
+		</p>
 		</subsection>
 		
 		<subsection name="3.8 Relationships">
+		
+		<p></p>
 		<img src="/images/modeler/icon-relationship.gif" width="16" height="16"/>
+		<p>Relationships define how different entities relate to each other. <strong>ObjRelationships</strong> describe
+		an association between two persistent Java classes (e.g. "Artist object has one or more Painting objects"), 
+		<strong>DbRelationships</strong> model the same
+		concept in the database world (Primary Key - Foreign Key association). ObjRelationship consists of one or more DbRelationships.
+		</p>
 		</subsection>
 		
-		
-		<table width="100%" border="1">
-		<tr valign="top">
-			<th width="28%">Cayenne mapping concept</th>
-			<th width="78%">Definition</th>
-		</tr>
-		<tr valign="top">
-			<td>DbEntity</td>
-			<td>Database table or view.</td>
-		</tr>
-		<tr valign="top">
-			<td>DbAttribute</td>
-			<td>Column of the database table or view.</td>
-		</tr>
-		<tr valign="top">
-			<td>DbRelationship</td>
-			<td>PK-FK relationship between two database tables.</td>
-		</tr>
-		<tr valign="top">
-			<td>ObjEntity</td>
-			<td>Java data access class. Normally includes a reference to the
-				underlying database table (DbEntity).
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>ObjAttribute</td>
-			<td>Java class property (a pair of set/get methods).
-				May include reference to the underlying database column (DbAttribute)
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>ObjRelationship</td>
-			<td>A relationship between two persistent Java classes. 
-			In the java class modeled as a pair of set/get methods for
-			the relationship destination object.
-		    May include reference to the underlying relationship
-		    between database tables (DbRelationship). 
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>DataMap</td>
-			<td>Collection of the entities, attributes and relationships (Db and
-			Obj) describing a mapping of a set of database tables to a
-			set of Java classes.
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>DataNode</td>
-			<td>Description of a single physical data source, normally a database.
-			    Currently there are two types of DataNodes:<br/>
-				<strong>JNDI-based</strong> - node accessible via
-				JNDI DataSource provided by the container (e.g. your WebLogic or Tomcat server).<br/>
-				<strong>JDBC Driver-based</strong> - node accessible using provided
-				JDBC connection information. In this case Cayenne will provide its own pooling 
-				facilities using configured JDBC driver.
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>DataDomain</td>
-			<td>Virtual data source.
-				Cayenne's way to treat multiple databases as if they are a single
-				data source. Each domain contains data maps and data nodes. Most
-				projects will need only a single domain.
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>Project</td>
-			<td>A collection of domains used together. As mentioned earlier, normally 
-			only a single domain is used, but there may be cases (Application Service
-			Provider applications, for instance) when more than one domain may be desirable.</td>
-		</tr>
-		</table>
-
-		<br/><br/>
-		<p>
-		The Cayenne data model is created as a set of the .xml file.
-		Here are the types of files it may have:
-		</p>
-
-		<table>
-		<tr valign="top">
-			<th>Type of file</th>
-			<th>Description</th>
-		</tr>
-		<tr>
-			<td>Project file</td>
-			<td>One per project.
-				Contains all the domains for the project.
-				Always called <strong>cayenne.xml</strong>.
-				Located in the project directory.
-				All other files are located under project directory.
-				All paths used in this and other files are relative to the
-				project directory.
-			</td>
-		</tr>
-		<tr>
-			<td>DataNode file</td>
-			<td>One per JDBC Driver-based DataNode
-				(see earlier in the section definitions of JDBC Driver-based and JNDI DataNodes).
-				JNDI data node information, as well as data node to data map
-				association
-				is stored directly in the project file.
-			</td>
-		</tr>
-		<tr>
-			<td>DataMap file</td>
-			<td>One per data map.</td>
-		</tr>
-		</table>
-
-		<p>
-		CayenneModeler supports three scenarios of use:
-		<ol>
-		<li>	Creating the Data Map and generating database schema from it</li>
-		<li>	Using existing database schema to create Data Map </li>
-		<li>	Combination of 1 and 2. </li>
-		</ol>
-		This document will concentrate on scenarios 1 and 2.
-		</p>
     </section>
 </body>
 </document>
