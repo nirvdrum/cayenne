@@ -38,7 +38,7 @@
 	<li><code>public void <b>performQueries</b>(java.util.List queries, OperationObserver resultConsumer)</code> and 
 	<br/><code>public void <b>performQuery</b>(Query query, OperationObserver resultConsumer)</code><br/>
         These two methods are the implementation of QueryEngine interface and are used by the framework 
-	internally. They are rearely used directly in the application code.
+	internally. They are rarely used directly in the application code.
 	<p></p>
 	</li>
 	</ul>

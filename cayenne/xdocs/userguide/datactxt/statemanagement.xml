@@ -12,6 +12,68 @@
     <section name="6. Using DataContext">
 	<subsection name="6.3 DataObject State Management">
 	
+	<p>Second and most important function of DataContext (first being performing queries) is 
+	keeping track of changes made to the registered DataObjects. Each object 
+	should be registered with DataContext to become "persistent".</p>
+	
+	<subsection name="6.3.1 Registering DataObjects">
+	<p>There are two ways for objects to get registered.
+	Any objects fetched via query API are automatically registered with DataContext  using their
+	ObjectId as a key. Newly created objects must be registered with DataContext explicitly:</p>
+	
+<source>
+import org.objectstyle.cayenne.access.DataContext;
+...
+DataContext ctxt; // assume this exists
+
+// artist inherits from CayenneDataObject...
+Artist artist = new Artist();
+
+ctxt.registerNewObject(artist);
+
+// after the line above is executed
+// artist object aquired "persistent" behavior
+// and is managed by DataContext
+</source>
+
+	<p>To reduce the amount of code needed to make new objects persistent, DataContext provides a 
+	shortcut to create and register DataObjects in one method call. This requires a default no-argument constructor
+	in the DataObject class.</p>
+<source>
+import org.objectstyle.cayenne.access.DataContext;
+...
+DataContext ctxt; // assume this exists
+
+// here "Artist" string is the name of ObjEntity that maps to the Artist class
+Artist artist = (Artist)ctxt.createAndRegisterNewObject("Artist");
+</source>
+		</subsection>
+		
+		<subsection name="6.3.2 Checking the State of Registered DataObjects">
+		<p>DataObjects states from persistence point of view are discussed in
+		"Design" chapter. State of each individual object is described by an integer
+		constant obtained via a call to <code>DataObject.getPeristenceState()</code>
+		Allowed states are defined as static variables in <a href=
+		"../../api/cayenne/org/objectstyle/cayenne/PersistenceState.html">PersistenceState</a> class.</p>
+		
+		
+		<p>DataContext is said to have changes if it has one or more registered objects in a state
+		<code>PersistenceState.MODIFIED</code>, <code>PersistenceState.NEW</code> or <code>PersistenceState.DELETED</code>. 
+		To check if a DataContext has changes, <code>hasChanges()</code> method is used. There
+		is also a way to obtain a list of changed objects in each one of the above states:</p>
+		
+		<ul>
+			<li><code>public java.util.Collection <b>newObjects</b>()</code></li>
+			<li><code>public java.util.Collection <b>deletedObjects</b>()</code></li>
+			<li><code>public java.util.Collection <b>modifiedObjects</b>()</code></li>
+		</ul>
+		</subsection>
+		
+		<subsection name="6.3.3 Committing All Modified DataObjects">
+		</subsection>
+		
+	        <subsection name="6.3.3 Undoing All Uncommitted Changes">
+		</subsection>
 	</subsection>
     </section>
 </body>
