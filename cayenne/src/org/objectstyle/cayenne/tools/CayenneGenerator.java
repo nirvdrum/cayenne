@@ -250,6 +250,7 @@ public class CayenneGenerator extends Task {
                 return null;
             }
 
+            log("Generating class file: " + dest.getCanonicalPath());
             return new FileWriter(dest);
         }
 
@@ -260,23 +261,24 @@ public class CayenneGenerator extends Task {
                     destDir.getPath() + File.separator + className + ".java");
 
             if (dest.exists()) {
-                
+
                 // no overwrite of subclasses
-                if(makepairs) {
+                if (makepairs) {
                     return null;
                 }
-                
+
                 // skip if said so
                 if (!overwrite) {
                     return null;
                 }
-                
+
                 // ignore newer files
                 if (dest.lastModified() > CayenneGenerator.this.mapTimestamp) {
                     return null;
                 }
             }
 
+            log("Generating class file :" + dest.getCanonicalPath());
             return new FileWriter(dest);
         }
     }
