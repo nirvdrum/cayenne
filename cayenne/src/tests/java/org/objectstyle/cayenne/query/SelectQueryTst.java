@@ -78,8 +78,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(7, objects.size());
     }
 
-    public void testSelectAllObjectsRootEntityName()
-        throws java.lang.Exception {
+    public void testSelectAllObjectsRootEntityName() throws java.lang.Exception {
         query.setRoot(Artist.class);
         performQuery();
 
@@ -99,11 +98,9 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
-    public void testSelectAllObjectsRootObjEntity()
-        throws java.lang.Exception {
+    public void testSelectAllObjectsRootObjEntity() throws java.lang.Exception {
         //Crude technique to obtain the Artist ObjEntity, but it works
-        query.setRoot(
-            this.getDomain().getEntityResolver().lookupObjEntity(Artist.class));
+        query.setRoot(this.getDomain().getEntityResolver().lookupObjEntity(Artist.class));
         performQuery();
 
         // check query results
@@ -112,62 +109,59 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
-	public void testSelectLikeExactMatch() throws Exception {
+    public void testSelectLikeExactMatch() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual =
+            ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist1");
+        query.setQualifier(qual);
+        performQuery();
+
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(1, objects.size());
+    }
+
+	public void testSelectNotLikeSingleWildcardMatch() throws Exception {
 		query.setRoot(Artist.class);
-		Expression qual =
-			ExpressionFactory.binaryPathExp(
-				Expression.LIKE,
-				"artistName",
-				"artist1");
+		Expression qual = ExpressionFactory.notLikeExp("artistName", "artist11%");
 		query.setQualifier(qual);
 		performQuery();
 
 		// check query results
 		List objects = opObserver.objectsForQuery(query);
 		assertNotNull(objects);
-		assertEquals(1, objects.size());
+		assertEquals(_artistCount - 1, objects.size());
 	}
+	
+    public void testSelectLikeSingleWildcardMatch() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual = ExpressionFactory.likeExp("artistName", "artist11%");
+        query.setQualifier(qual);
+        performQuery();
 
-	public void testSelectLikeSingleWildcardMatch() throws Exception {
-		query.setRoot(Artist.class);
-		Expression qual =
-			ExpressionFactory.binaryPathExp(
-				Expression.LIKE,
-				"artistName",
-				"artist11%");
-		query.setQualifier(qual);
-		performQuery();
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(1, objects.size());
+    }
 
-		// check query results
-		List objects = opObserver.objectsForQuery(query);
-		assertNotNull(objects);
-		assertEquals(1, objects.size());
-	}
+    public void testSelectLikeMultipleWildcardMatch() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual = ExpressionFactory.likeExp("artistName", "artist1%");
+        query.setQualifier(qual);
+        performQuery();
 
-	public void testSelectLikeMultipleWildcardMatch() throws Exception {
-		query.setRoot(Artist.class);
-		Expression qual =
-			ExpressionFactory.binaryPathExp(
-				Expression.LIKE,
-				"artistName",
-				"artist1%");
-		query.setQualifier(qual);
-		performQuery();
-
-		// check query results
-		List objects = opObserver.objectsForQuery(query);
-		assertNotNull(objects);
-		assertEquals(11, objects.size());
-	}
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(11, objects.size());
+    }
 
     /** Test how "like ignore case" works when using uppercase parameter. */
     public void testSelectLikeIgnoreCaseObjects1() throws Exception {
         query.setRoot(Artist.class);
-        Expression qual =
-            ExpressionFactory.binaryPathExp(
-                Expression.LIKE_IGNORE_CASE,
-                "artistName",
-                "ARTIST%");
+        Expression qual = ExpressionFactory.likeIgnoreCaseExp("artistName", "ARTIST%");
         query.setQualifier(qual);
         performQuery();
 
@@ -180,11 +174,7 @@ public class SelectQueryTst extends SelectQueryBase {
     /** Test how "like ignore case" works when using lowercase parameter. */
     public void testSelectLikeIgnoreCaseObjects2() throws Exception {
         query.setRoot(Artist.class);
-        Expression qual =
-            ExpressionFactory.binaryPathExp(
-                Expression.LIKE_IGNORE_CASE,
-                "artistName",
-                "artist%");
+        Expression qual = ExpressionFactory.likeIgnoreCaseExp("artistName", "artist%");
         query.setQualifier(qual);
         performQuery();
 
@@ -222,15 +212,14 @@ public class SelectQueryTst extends SelectQueryBase {
             for (int i = 1; i <= _artistCount; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, "artist" + i);
-                stmt.setDate(
-                    3,
-                    new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
             }
 
             stmt.close();
             conn.commit();
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }

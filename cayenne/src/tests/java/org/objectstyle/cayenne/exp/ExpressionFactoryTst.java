@@ -75,8 +75,7 @@ public class ExpressionFactoryTst extends CayenneTestCase {
     public void testBinaryExp() throws Exception {
         Object o1 = new Object();
         Object o2 = new Object();
-        Expression e1 =
-            ExpressionFactory.binaryExp(Expression.EQUAL_TO, o1, o2);
+        Expression e1 = ExpressionFactory.binaryExp(Expression.EQUAL_TO, o1, o2);
         assertTrue(e1 instanceof BinaryExpression);
         assertSame(o1, e1.getOperand(0));
         assertSame(o2, e1.getOperand(1));
@@ -87,8 +86,7 @@ public class ExpressionFactoryTst extends CayenneTestCase {
         Object o1 = new Object();
         Object o2 = new Object();
         Object o3 = new Object();
-        Expression e1 =
-            ExpressionFactory.ternaryExp(Expression.BETWEEN, o1, o2, o3);
+        Expression e1 = ExpressionFactory.ternaryExp(Expression.BETWEEN, o1, o2, o3);
         assertTrue(e1 instanceof TernaryExpression);
         assertSame(o1, e1.getOperand(0));
         assertSame(o2, e1.getOperand(1));
@@ -98,11 +96,9 @@ public class ExpressionFactoryTst extends CayenneTestCase {
 
     public void testExpressionOfType() throws java.lang.Exception {
         assertTrue(
-            ExpressionFactory.expressionOfType(Expression.AND)
-                instanceof ListExpression);
+            ExpressionFactory.expressionOfType(Expression.AND) instanceof ListExpression);
         assertTrue(
-            ExpressionFactory.expressionOfType(Expression.OR)
-                instanceof ListExpression);
+            ExpressionFactory.expressionOfType(Expression.OR) instanceof ListExpression);
 
         assertTrue(
             ExpressionFactory.expressionOfType(Expression.NOT)
@@ -123,8 +119,7 @@ public class ExpressionFactoryTst extends CayenneTestCase {
             ExpressionFactory.expressionOfType(Expression.LESS_THAN_EQUAL_TO)
                 instanceof BinaryExpression);
         assertTrue(
-            ExpressionFactory.expressionOfType(
-                Expression.GREATER_THAN_EQUAL_TO)
+            ExpressionFactory.expressionOfType(Expression.GREATER_THAN_EQUAL_TO)
                 instanceof BinaryExpression);
         assertTrue(
             ExpressionFactory.expressionOfType(Expression.BETWEEN)
@@ -207,7 +202,8 @@ public class ExpressionFactoryTst extends CayenneTestCase {
         try {
             ExpressionFactory.expressionOfType(badType);
             fail();
-        } catch (ExpressionException ex) {
+        }
+        catch (ExpressionException ex) {
             // exception expected   
         }
     }
@@ -218,6 +214,14 @@ public class ExpressionFactoryTst extends CayenneTestCase {
         Expression exp = ExpressionFactory.betweenExp("abc", v1, v2);
         assertEquals(Expression.BETWEEN, exp.getType());
     }
+    
+	public void testNotBetweenExp() throws Exception {
+		 Object v1 = new Object();
+		 Object v2 = new Object();
+		 Expression exp = ExpressionFactory.notBetweenExp("abc", v1, v2);
+		 assertEquals(Expression.NOT_BETWEEN, exp.getType());
+	 }
+
 
     public void testGreaterExp() throws Exception {
         Object v = new Object();
@@ -260,10 +264,16 @@ public class ExpressionFactoryTst extends CayenneTestCase {
         Expression exp = ExpressionFactory.likeExp("abc", v);
         assertEquals(Expression.LIKE, exp.getType());
     }
-    
+
     public void testLikeIgnoreCaseExp() throws Exception {
         String v = "abc";
         Expression exp = ExpressionFactory.likeIgnoreCaseExp("abc", v);
         assertEquals(Expression.LIKE_IGNORE_CASE, exp.getType());
+    }
+
+    public void testNotLikeIgnoreCaseExp() throws Exception {
+        String v = "abc";
+        Expression exp = ExpressionFactory.notLikeIgnoreCaseExp("abc", v);
+        assertEquals(Expression.NOT_LIKE_IGNORE_CASE, exp.getType());
     }
 }
