@@ -168,7 +168,10 @@ public class IncrementalFaultList extends AbstractList {
 
         int readFrom = fromIndex * pageSize;
         int readTo = toIndex * pageSize;
-
+        
+        // log query range
+        QueryLogger.logQueryRange(query.getLoggingLevel(), readFrom, readTo);
+        
         try {
 
             ResultIterator it = dataContext.performIteratedQuery(query);

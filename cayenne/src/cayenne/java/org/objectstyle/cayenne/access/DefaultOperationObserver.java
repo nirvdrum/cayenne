@@ -80,7 +80,7 @@ public class DefaultOperationObserver implements OperationObserver {
 	static Logger logObj =
 		Logger.getLogger(DefaultOperationObserver.class.getName());
 
-	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+	public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
 
 	protected ArrayList globalExceptions = new ArrayList();
 	protected HashMap queryExceptions = new HashMap();

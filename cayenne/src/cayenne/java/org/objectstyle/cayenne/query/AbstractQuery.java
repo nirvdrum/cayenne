@@ -68,7 +68,7 @@ public abstract class AbstractQuery implements Query {
     
     /** Name of the ObjEntity that is the base of this query. */
     protected String objEntityName;
-    protected Level logLevel;    
+    protected Level logLevel = DEFAULT_LOG_LEVEL;    
     
     public void setObjEntityName(String objEntityName) {
         this.objEntityName = objEntityName;

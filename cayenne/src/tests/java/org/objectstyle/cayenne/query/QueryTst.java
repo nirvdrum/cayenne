@@ -77,7 +77,7 @@ public class QueryTst extends CayenneTestCase {
     
     public void testLoggingLevel() throws Exception {
         Query query = new TstUnqualifiedQuery();
-        assertNull(query.getLoggingLevel());
+        assertEquals(Query.DEFAULT_LOG_LEVEL, query.getLoggingLevel());
         
         query.setLoggingLevel(Level.ERROR);
         assertSame(Level.ERROR, query.getLoggingLevel());

@@ -63,6 +63,8 @@ import org.apache.log4j.Level;
  * @author Andrei Adamchik
  */
 public interface Query {
+	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+	
 	public static final int SELECT_QUERY = 1;
 	public static final int INSERT_QUERY = 2;
 	public static final int UPDATE_QUERY = 3;
