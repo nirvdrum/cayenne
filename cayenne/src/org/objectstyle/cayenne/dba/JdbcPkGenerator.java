@@ -270,7 +270,7 @@ public class JdbcPkGenerator implements PkGenerator {
 
         SelectOperationObserver observer = new SelectOperationObserver();
         node.performQuery(q, observer);
-        return observer.getResults();
+        return observer.getResults(q);
     }
 
     /**

@@ -504,9 +504,9 @@ public class DataContext implements QueryEngine {
 
     /** Performs a single database select query. */
     public List performQuery(SelectQuery query, Level logLevel) {
-        SelectProcessor result = new SelectProcessor(logLevel);
-        performQuery(query, result);
-        return result.getLastResult();
+        SelectProcessor observer = new SelectProcessor(logLevel);
+        performQuery(query, observer);
+        return observer.getResults(query);
     }
 
     /** Delegates node lookup to parent QueryEngine. */
@@ -812,37 +812,32 @@ public class DataContext implements QueryEngine {
         }
     }
 
-    /** OperationObserver for select queries. Will register bacthes of fetched objects
-     *  with this DataContext
+    /** 
+     * OperationObserver for select queries. Will register bacthes of 
+     * fetched objects with this DataContext.
      */
-    class SelectProcessor extends DefaultOperationObserver {
-        private List lastResult;
-        private Level logLevel;
-
+    class SelectProcessor extends SelectOperationObserver {
         SelectProcessor(Level logLevel) {
-            this.logLevel =
-                (logLevel != null) ? logLevel : DefaultOperationObserver.DEFAULT_LOG_LEVEL;
+            super.setQueryLogLevel(logLevel);
         }
 
-        public Level queryLogLevel() {
-            return logLevel;
-        }
-
-        public List getLastResult() {
-            return lastResult;
-        }
-
-        /** Register newly fetched objects with parent instance of DataContext */
+        /** 
+         * Ovwerrides superclass behavior to convert each  
+         * snapshot to a real object. Registers objects with 
+         * parent DataContext.
+         */
         public void nextSnapshots(Query query, List resultSnapshots) {
-            lastResult = new ArrayList();
+            ArrayList result = new ArrayList();
             if (resultSnapshots != null && resultSnapshots.size() > 0) {
                 ObjEntity ent = DataContext.this.lookupEntity(query.getObjEntityName());
                 Iterator it = resultSnapshots.iterator();
                 while (it.hasNext()) {
-                    lastResult.add(
+                    result.add(
                         DataContext.this.registerFetchedSnapshot(ent, (Map) it.next(), true));
                 }
             }
+            
+            super.nextSnapshots(query, result);
         }
     }
 

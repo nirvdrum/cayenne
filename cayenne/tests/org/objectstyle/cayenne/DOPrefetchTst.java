@@ -74,7 +74,7 @@ public class DOPrefetchTst extends CayenneDOTestBase {
     }
 
     public void testPrefetchToMany() throws Exception {
-      /*  Artist a1 = super.newArtist();
+        Artist a1 = super.newArtist();
         Painting p1 = super.newPainting();
         p1.setToArtist(a1);
         ctxt.commitChanges();
@@ -86,8 +86,9 @@ public class DOPrefetchTst extends CayenneDOTestBase {
         // ** TESTING THIS **
         q.addPrefetch("paintingArray");
         
-        List artists = ctxt.performQuery(q, Level.SEVERE);
+        List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
-        Artist a2 = (Artist)artists.get(0);  */
+        Artist a2 = (Artist)artists.get(0);
+        
     }
 }

@@ -56,13 +56,13 @@ package org.objectstyle.cayenne.access;
  */
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 public class DataContextExtrasTst extends TestCase {
     protected DataContext ctxt;
@@ -102,6 +102,36 @@ public class DataContextExtrasTst extends TestCase {
         }
         finally {
             DefaultOperationObserver.logObj.setLevel(oldLevel);
+        }
+    }
+
+    /** 
+     * Testing behavior of Cayenne when a database exception
+     * is thrown in SELECT query.
+     */
+    public void testSelectException() throws Exception {
+        SqlSelectQuery q =
+            new SqlSelectQuery("Artist", "SELECT * FROM NON_EXISTENT_TABLE");
+
+        // disable logging for thrown exceptions
+        Level oldLevel = DefaultOperationObserver.logObj.getLevel();
+        DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+        try {
+            ctxt.performQuery(q, new DataContextExtended().getSelectObserver());
+            fail("Query was invalid and was supposed to fail.");
+        }
+        catch (RuntimeException ex) {
+            // exception expected
+        }
+        finally {
+            DefaultOperationObserver.logObj.setLevel(oldLevel);
+        }
+    }
+
+    /** Helper class to get access to DataContext inner classes. */
+    class DataContextExtended extends DataContext {
+        public OperationObserver getSelectObserver() {
+            return new SelectProcessor(Level.FINEST);
         }
     }
 }

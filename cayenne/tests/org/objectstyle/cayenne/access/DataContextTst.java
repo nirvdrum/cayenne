@@ -161,7 +161,7 @@ public class DataContextTst extends TestCase {
         assertNotNull(ctxt.lookupEntity("Artist"));
         assertNull(ctxt.lookupEntity("NonExistent"));
     }
-    
+
     /** 
      * Tests how CHAR field is handled during fetch.
      * Some databases (Oracle...) would pad a CHAR column
@@ -171,10 +171,10 @@ public class DataContextTst extends TestCase {
     public void testCharFetch() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
         List artists = ctxt.performQuery(q);
-        Artist a = (Artist)artists.get(0);
+        Artist a = (Artist) artists.get(0);
         assertEquals(a.getArtistName().trim(), a.getArtistName());
     }
-    
+
     /** 
      * Tests how CHAR field is handled during fetch in the WHERE clause.
      * Some databases (Oracle...) would pad a CHAR column
@@ -182,7 +182,8 @@ public class DataContextTst extends TestCase {
      * should trim it.
      */
     public void testCharInQualifier() throws Exception {
-        Expression e = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
         SelectQuery q = new SelectQuery("Artist", e);
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
@@ -203,7 +204,7 @@ public class DataContextTst extends TestCase {
         ctxt.performQuery(q, o);
         assertEquals(2, o.getSelectCount());
     }
-    
+
     /** 
      * Test that all queries specified in prefetch are executed
      * in a more complex prefetch scenario. 
@@ -221,6 +222,7 @@ public class DataContextTst extends TestCase {
         ctxt.performQuery(q, o);
         assertEquals(4, o.getSelectCount());
     }
+
 
     public void testPerformQueries() throws Exception {
         SelectQuery q1 = new SelectQuery();

@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.access;
  *
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
@@ -72,7 +71,7 @@ import org.objectstyle.cayenne.query.Query;
  *  @author Andrei Adamchik
  */
 public class SelectOperationObserver extends DefaultOperationObserver {
-    protected ArrayList results = new ArrayList();
+    protected HashMap results = new HashMap();
     protected int selectCount;
 
     /** 
@@ -84,9 +83,19 @@ public class SelectOperationObserver extends DefaultOperationObserver {
         return selectCount;
     }
     
-    /** Returns query results accumulated during query execution with this
-     * object as an operation observer. */
-    public List getResults() {
+    /** 
+     * Returns a list of result snapshots for the specified query,
+     * or null if this query has never produced any results.
+     */
+    public List getResults(Query q) {
+        return (List)results.get(q);
+    }
+    
+    /** 
+     * Returns query results accumulated during query execution with this
+     * object as an operation observer. 
+     */
+    public Map getResults() {
         return results;
     }
 
@@ -97,28 +106,33 @@ public class SelectOperationObserver extends DefaultOperationObserver {
     }
     
 
-    /** Stores all objects in <code>resultSnapshots</code> in an internal
+    /** 
+     * Stores all objects in <code>resultSnapshots</code> in an internal
      * result list. 
      */
     public void nextSnapshots(Query query, List resultSnapshots) {
         super.nextSnapshots(query, resultSnapshots);
         if(resultSnapshots != null) {
-            results.addAll(resultSnapshots);
+            results.put(query, resultSnapshots);
         }
         
         selectCount++;
     }
     
-    /** Overrides superclass implementation to rethrow an exception
-     *  immediately. */
+    /** 
+     * Overrides superclass implementation to rethrow an exception
+     *  immediately. 
+     */
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
         throw new CayenneRuntimeException("Query exception.", ex);
     }
     
     
-    /** Overrides superclass implementation to rethrow an exception
-     *  immediately. */
+    /** 
+     * Overrides superclass implementation to rethrow an exception
+     *  immediately. 
+     */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
         throw new CayenneRuntimeException("Global exception.", ex);
