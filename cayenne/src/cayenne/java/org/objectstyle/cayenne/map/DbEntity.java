@@ -374,7 +374,7 @@ public class DbEntity extends Entity implements DbAttributeListener {
         String translatePath(String path) {
             
             // algorithm to determine the translated path:
-            // 1. If relationship path equals to input, travel to source and back.
+            // 1. If relationship path equals to input, travel one step back, and then one step forward.
             // 2. If input completely includes relationship path, use input's remaining
             // tail.
             // 3. If relationship path and input have none or some leading components in
@@ -389,11 +389,18 @@ public class DbEntity extends Entity implements DbAttributeListener {
                 LinkedList finalPath = new LinkedList();
                 Iterator it = resolvePathComponents(path);
 
+                // just do one step back and one step forward to create correct joins...
+                // find last rel...
+                DbRelationship lastDBR = null;
+                
                 while (it.hasNext()) {
                     // relationship path components must be DbRelationships
-                    DbRelationship nextDBR = (DbRelationship) it.next();
-                    prependReversedPath(finalPath, nextDBR);
-                    appendPath(finalPath, nextDBR);
+                    lastDBR = (DbRelationship) it.next();
+                }
+                
+                if(lastDBR != null) {
+                    prependReversedPath(finalPath, lastDBR);
+                    appendPath(finalPath, lastDBR);
                 }
 
                 return convertToPath(finalPath);

@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjEntityTst extends CayenneTestCase {
+
     protected ObjEntity entity;
 
     public void setUp() throws Exception {
@@ -79,12 +80,12 @@ public class ObjEntityTst extends CayenneTestCase {
 
     public void testDbEntity() throws Exception {
         DbEntity dbentity = new DbEntity("dbe");
-        
+
         // need a container
         DataMap dataMap = new DataMap();
         dataMap.addObjEntity(entity);
         dataMap.addDbEntity(dbentity);
-        
+
         assertNull(entity.getDbEntity());
 
         entity.setDbEntity(dbentity);
@@ -92,7 +93,7 @@ public class ObjEntityTst extends CayenneTestCase {
 
         entity.setDbEntity(null);
         assertNull(entity.getDbEntity());
-        
+
         entity.setDbEntityName("dbe");
         assertSame(dbentity, entity.getDbEntity());
     }
@@ -125,10 +126,10 @@ public class ObjEntityTst extends CayenneTestCase {
         ObjEntity ae = getObjEntity("Artist");
         DbEntity dae = ae.getDbEntity();
 
-        assertNull(
-            ae.getAttributeForDbAttribute((DbAttribute) dae.getAttribute("ARTIST_ID")));
-        assertNotNull(
-            ae.getAttributeForDbAttribute((DbAttribute) dae.getAttribute("ARTIST_NAME")));
+        assertNull(ae.getAttributeForDbAttribute((DbAttribute) dae
+                .getAttribute("ARTIST_ID")));
+        assertNotNull(ae.getAttributeForDbAttribute((DbAttribute) dae
+                .getAttribute("ARTIST_NAME")));
     }
 
     public void testRelationshipForDbRelationship() throws Exception {
@@ -136,9 +137,8 @@ public class ObjEntityTst extends CayenneTestCase {
         DbEntity dae = ae.getDbEntity();
 
         assertNull(ae.getRelationshipForDbRelationship(new DbRelationship()));
-        assertNotNull(
-            ae.getRelationshipForDbRelationship(
-                (DbRelationship) dae.getRelationship("paintingArray")));
+        assertNotNull(ae.getRelationshipForDbRelationship((DbRelationship) dae
+                .getRelationship("paintingArray")));
     }
 
     public void testReadOnly() throws Exception {
@@ -151,64 +151,56 @@ public class ObjEntityTst extends CayenneTestCase {
         ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
 
         Expression e1 = Expression.fromString("paintingArray");
-        Expression translated =
-            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
-        assertEquals(
-            "failure: " + translated,
-            Expression.fromString("db:toArtist.paintingArray"),
-            translated);
+        Expression translated = artistE
+                .translateToRelatedEntity(e1, "artistExhibitArray");
+        assertEquals("failure: " + translated, Expression
+                .fromString("db:toArtist.paintingArray"), translated);
     }
 
     public void testTranslateToRelatedEntityTrimmedPath() throws Exception {
         ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
 
         Expression e1 = Expression.fromString("artistExhibitArray.toExhibit");
-        Expression translated =
-            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        Expression translated = artistE
+                .translateToRelatedEntity(e1, "artistExhibitArray");
         assertEquals(
-            "failure: " + translated,
-            Expression.fromString("db:toExhibit"),
-            translated);
+                "failure: " + translated,
+                Expression.fromString("db:toExhibit"),
+                translated);
     }
 
     public void testTranslateToRelatedEntitySplitHalfWay() throws Exception {
         ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
 
         Expression e1 = Expression.fromString("paintingArray.toPaintingInfo.textReview");
-        Expression translated =
-            artistE.translateToRelatedEntity(e1, "paintingArray.toGallery");
-        assertEquals(
-            "failure: " + translated,
-            Expression.fromString("db:paintingArray.toPaintingInfo.TEXT_REVIEW"),
-            translated);
+        Expression translated = artistE.translateToRelatedEntity(
+                e1,
+                "paintingArray.toGallery");
+        assertEquals("failure: " + translated, Expression
+                .fromString("db:paintingArray.toPaintingInfo.TEXT_REVIEW"), translated);
     }
 
     public void testTranslateToRelatedEntityMatchingPath() throws Exception {
         ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
-
         Expression e1 = Expression.fromString("artistExhibitArray.toExhibit");
-
-        try {
-            artistE.translateToRelatedEntity(e1, "artistExhibitArray.toExhibit");
-            fail();
-        }
-        catch (CayenneRuntimeException e) {
-            // expected
-        }
+        Expression translated = artistE.translateToRelatedEntity(
+                e1,
+                "artistExhibitArray.toExhibit");
+        assertEquals("failure: " + translated, Expression
+                .fromString("db:artistExhibitArray.toExhibit"), translated);
     }
 
     public void testTranslateToRelatedEntityMultiplePaths() throws Exception {
         ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
 
-        Expression e1 =
-            Expression.fromString(
-                "paintingArray = $p and artistExhibitArray.toExhibit.closingDate = $d");
-        Expression translated =
-            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        Expression e1 = Expression
+                .fromString("paintingArray = $p and artistExhibitArray.toExhibit.closingDate = $d");
+        Expression translated = artistE
+                .translateToRelatedEntity(e1, "artistExhibitArray");
         assertEquals(
-            "failure: " + translated,
-            Expression.fromString(
-                "db:toArtist.paintingArray = $p and db:toExhibit.CLOSING_DATE = $d"),
-            translated);
+                "failure: " + translated,
+                Expression
+                        .fromString("db:toArtist.paintingArray = $p and db:toExhibit.CLOSING_DATE = $d"),
+                translated);
     }
 }

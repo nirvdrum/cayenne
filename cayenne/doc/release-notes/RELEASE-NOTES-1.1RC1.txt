@@ -28,6 +28,7 @@ Changes, Features And Improvements:
 Bugs Fixed:
 
 CAY-162	Cayenne Modeler doesn't remember custom class templates
+CAY-12 Prefetching on entity used in qualifier
 
 
 New Modeler Jar Files:
