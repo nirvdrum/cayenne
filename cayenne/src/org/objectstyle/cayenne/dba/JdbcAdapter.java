@@ -132,12 +132,12 @@ public class JdbcAdapter implements DbAdapter {
      *  automatic primary key support. This implementation will create
      *  a lookup table like that:
      * 
-     *<code><pre>
-     *CREATE TABLE AUTO_PK_SUPPORT (
-     *TABLE_NAME           CHAR(100) NOT NULL,
-     *NEXT_ID              INTEGER NOT NULL
-     *)
-     *</pre></code>
+     *<pre>
+     * CREATE TABLE AUTO_PK_SUPPORT (
+     *    TABLE_NAME  CHAR(100) NOT NULL,
+     *    NEXT_ID INTEGER NOT NULL
+     * )
+     *</pre>
      *
      *  @param dataNode node that provides access to a DataSource.
      */

@@ -60,23 +60,152 @@ import java.util.HashMap;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DbEntity;
 
-
-/** DbAdapter implementation for <a href="http://www.sybase.com">Sybase RDBMS</a>.
-  *
-  * @author Andrei Adamchik
-  */
+/** 
+ * DbAdapter implementation for 
+ * <a href="http://www.sybase.com">Sybase RDBMS</a>.
+ *
+ * @author Andrei Adamchik
+ */
 public class SybaseAdapter extends JdbcAdapter {
     protected HashMap sorters = new HashMap();
-    
+
     public OperationSorter getOpSorter(DataNode node) {
-        synchronized(sorters) {
-            OperationSorter sorter = (OperationSorter)sorters.get(node);
-            if(sorter == null) {
+        synchronized (sorters) {
+            OperationSorter sorter = (OperationSorter) sorters.get(node);
+            if (sorter == null) {
                 sorter = new OperationSorter(node, node.getDataMaps());
                 sorters.put(node, sorter);
             }
             return sorter;
         }
     }
+
+    /** Generates database objects to provide
+     *  automatic primary key support. Method will execute the following
+     *  SQL statements:
+     * 
+     * <p>1. Executed only if a corresponding table does not exist in the
+     * database.</p>
+     * 
+     * <pre>
+     *    CREATE TABLE AUTO_PK_SUPPORT (
+     *       TABLE_NAME VARCHAR(32) NOT NULL,
+     *       NEXT_ID INTEGER NOT NULL
+     *    )
+     * </pre>
+     * 
+     * <p>2. Executed under any circumstances. </p>
+     * 
+     * <pre> 
+     * if (select count(*) from sysobjects where name = 'auto_pk_for_table') = 1
+     * BEGIN
+     *    DROP PROCEDURE auto_pk_for_table 
+     * END
+     * 
+     * <p>3. Executed under any circumstances. </p>
+     * CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32) AS
+     * BEGIN
+     *      BEGIN TRANSACTION
+     *         UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + 1 
+     *         WHERE TABLE_NAME = @tname
+     * 
+     *         SELECT NEXT_ID from AUTO_PK_SUPPORT where NEXT_ID = @tname
+     *      COMMIT
+     * END
+     * </pre>
+     *
+     *  @param node node that provides access to a DataSource.
+     */
+    public void createAutoPkSupport(DataNode node) throws Exception {
+        
+        // need to drop procedure first
+        pkGen.runSchemaUpdate(node, safePkProcDrop());
+        
+        // create objects
+        super.createAutoPkSupport(node);
+        pkGen.runSchemaUpdate(node, unsafePkProcCreate());
+    }
+    
+
+    /** 
+     * Drops database objects related to automatic primary
+     * key support. Method will execute the following SQL
+     * statements:
+     * 
+     * <pre>
+     * if exists (SELECT * FROM sysobjects WHERE name = 'AUTO_PK_SUPPORT')
+     * BEGIN
+     *    DROP TABLE AUTO_PK_SUPPORT
+     * END
+     * 
+     * 
+     * if exists (SELECT * FROM sysobjects WHERE name = 'auto_pk_for_table')
+     * BEGIN
+     *    DROP PROCEDURE auto_pk_for_table 
+     * END
+     * </pre>
+     *
+     *  @param node node that provides access to a DataSource.
+     */
+    public void dropAutoPkSupport(DataNode node) throws Exception {
+        pkGen.runSchemaUpdate(node, safePkProcDrop());
+        pkGen.runSchemaUpdate(node, safePkTableDrop());
+    }
+
+    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
+        throws Exception {
+        return super.generatePkForDbEntity(dataNode, dbEntity);
+    }
+
+    private String safePkTableCreate() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("if (SELECT count(*) FROM sysobjects WHERE name = 'AUTO_PK_SUPPORT') = 0")
+            .append(" BEGIN ")
+            .append(" CREATE TABLE AUTO_PK_SUPPORT (")
+            .append(" TABLE_NAME VARCHAR(32) NOT NULL,")
+            .append(" NEXT_ID INTEGER NOT NULL")
+            .append(" )")
+            .append(" END");
+
+        return buf.toString();
+    }
+
+    private String safePkTableDrop() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("if exists (SELECT * FROM sysobjects WHERE name = 'AUTO_PK_SUPPORT')")
+            .append(" BEGIN ")
+            .append(" DROP TABLE AUTO_PK_SUPPORT")
+            .append(" END");
+
+        return buf.toString();
+    }
+
+    private String unsafePkProcCreate() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append(" CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32) AS")
+            .append(" BEGIN")
+            .append(" BEGIN TRANSACTION")
+            .append(" UPDATE AUTO_PK_SUPPORT set NEXT_ID = NEXT_ID + 1")
+            .append(" WHERE TABLE_NAME = @tname")
+            .append(" SELECT NEXT_ID from AUTO_PK_SUPPORT where NEXT_ID = @tname")
+            .append(" COMMIT")
+            .append(" END");
+        return buf.toString();
+    }
+
+    private String safePkProcDrop() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("if exists (SELECT * FROM sysobjects WHERE name = 'auto_pk_for_table')")
+            .append(" BEGIN")
+            .append(" DROP PROCEDURE auto_pk_for_table")
+            .append(" END");
+        return buf.toString();
+    }
+
 }

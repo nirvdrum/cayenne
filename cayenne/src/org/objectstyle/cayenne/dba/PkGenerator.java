@@ -182,11 +182,13 @@ public class PkGenerator {
         }
     }
 
-    /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
+    /** 
+     * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
      * to track the results of the execution.
      * 
-     * @throws java.lang.Exception in case of query failure. */
-    private void runSchemaUpdate(DataNode node, String sql) throws Exception {
+     * @throws java.lang.Exception in case of query failure. 
+     */
+    public void runSchemaUpdate(DataNode node, String sql) throws Exception {
         SqlModifyQuery q = new SqlModifyQuery();
         q.setSqlString(sql);
 
