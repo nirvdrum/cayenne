@@ -62,7 +62,6 @@ import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -78,25 +77,7 @@ public class ProcedureQueryValidator extends TreeNodeValidator {
 
         validateName(query, treeNodePath, validator);
         validateRoot(query, treeNodePath, validator);
-    }
-
-    protected void validateDefaultSQL(
-            SQLTemplate query,
-            ProjectPath path,
-            Validator validator) {
-        if (Util.isEmptyString(query.getDefaultTemplate())) {
-            // see if there is at least one adapter-specific template...
-
-            Iterator it = query.getTemplateKeys().iterator();
-            while (it.hasNext()) {
-                String key = (String) it.next();
-                if (!Util.isEmptyString(query.getCustomTemplate(key))) {
-                    return;
-                }
-            }
-
-            validator.registerWarning("Query has no default SQL template", path);
-        }
+        validateResultType(query, treeNodePath, validator);
     }
 
     protected void validateRoot(Query query, ProjectPath path, Validator validator) {
@@ -113,7 +94,8 @@ public class ProcedureQueryValidator extends TreeNodeValidator {
 
             // procedure may have been deleted...
             if (map != null && map.getProcedure(procedure.getName()) != procedure) {
-                validator.registerWarning("Invalid Procedure Root - " + procedure.getName(), path);
+                validator.registerWarning("Invalid Procedure Root - "
+                        + procedure.getName(), path);
             }
 
             return;
@@ -155,4 +137,17 @@ public class ProcedureQueryValidator extends TreeNodeValidator {
         }
     }
 
+    protected void validateResultType(
+            ProcedureQuery query,
+            ProjectPath path,
+            Validator validator) {
+
+        if (query.isSelecting()
+                && !query.isFetchingDataRows()
+                && query.getResultClassName() == null) {
+            validator.registerWarning(
+                    "Missing result entity for Procedure query fetching DataObjects.",
+                    path);
+        }
+    }
 }

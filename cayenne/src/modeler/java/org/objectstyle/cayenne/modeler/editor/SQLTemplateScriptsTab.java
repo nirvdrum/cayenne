@@ -196,7 +196,8 @@ public class SQLTemplateScriptsTab extends JPanel {
     }
 
     SQLTemplate getQuery() {
-        return (SQLTemplate) mediator.getCurrentQuery();
+        Query query = mediator.getCurrentQuery();
+        return (query instanceof SQLTemplate) ? (SQLTemplate) query : null;
     }
 
     /**
