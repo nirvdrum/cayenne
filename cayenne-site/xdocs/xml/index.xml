@@ -14,31 +14,19 @@
         
         <section name="Project News">
         
+        <p><u><i>[June 2, 2004]</i></u> <strong>Cayenne Article on TheServerSide.com</strong></p>
+		<p><img align="left" width="73" height="45" hspace="3" src="images/other/cayenne_tss.gif"/>  TheServerSide.com <a target="_blank" href="http://theserverside.com/articles/article.tss?l=Cayenne">published 
+		an article</a>  by Andrus Adamchik and Eric Schneider introducing
+		Cayenne and its productivity tools.  Discuss this article on <a target="_blank" 
+		href="http://theserverside.com/news/thread.tss?thread_id=26325">TheServerSide forum</a>.
+		<br/><br/><br/><br/></p>
+		
 		<p><u><i>[April 25, 2004]</i></u> <strong>M6 - Cayenne 1.1 Milestone  Release</strong></p>
 		<p>This release includes SQLTemplate, a scriptable raw SQL query, and also a number of 
 		bug fixes and other enhancements. For details see <a href="release-notes/RELEASE-NOTES-1.1M6.txt">release
 		notes</a> and <a href="upgrade/UPGRADE-1.1M6.txt">upgrade instructions</a>.
 		</p>
-         
-        <p><u><i>[April 14, 2004]</i></u> <strong>Cayenne Success Story - AccessPoint Inc.</strong></p>
-		<p>A story submitted by Bret Gregory: "I work for <a href="http://www.accesspointinc.com/" target="_new">AccessPoint 
-         Inc.</a>, a privately-held CLEC offering 
-        integrated communications services to small- and medium-sized businesses.  We use Cayenne for 
-        our internal accounting and reconciliation application.  This application allows us to recognize 
-        uncaptured revenue streams as well as accounting margins and billing errors.  In addition, Cayenne 
-        is used in our internal reporting application.  These applications and thus Cayenne are central to the 
-        financial health of the company." </p>
-        
-        <p><a href="poweredby.html">More success stories...</a>
-         </p>
-        
-         <p><u><i>[April 14, 2004]</i></u> <strong>M5 - Cayenne 1.1 Milestone  Release</strong></p>
-         <p>This release includes two major new features - optimistic locking and entity inheritance, and also
-         a number of bug fixes and other enhancements. For details see <a href=
-         "release-notes/RELEASE-NOTES-1.1M5.txt">release notes</a> and 
-         <a href="upgrade/UPGRADE-1.1M5.txt">upgrade instructions</a>.
-         </p>
-         
+
          <p><u><i>[November 1, 2003]</i></u> <strong>Cayenne in "The Best Freeware And Shareware" of DB Magazine, Japan</strong></p>
          <p><img align="left" hspace="3" src="images/other/db-mag-cover-small.jpg"/> 
          A December 2003 edition of the DB Magazine, a 250-page software tecnology magazine published in Japanese, includes 
