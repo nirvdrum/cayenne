@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
+import junit.framework.TestSuite;
 
 /** Combines test cases from org.objectstyle.cayenne.map package to 
   * a test suite. 
@@ -76,8 +75,6 @@ public class AllTests {
         suite.addTestSuite(ObjRelationshipTst.class);
         suite.addTestSuite(DbRelationshipTst.class);
         suite.addTestSuite(DbEntityTst.class);
-        suite.addTestSuite(DbLoaderTst.class);
-        suite.addTestSuite(DbGeneratorTst.class);
 		return suite;
 	}
 }

@@ -64,13 +64,13 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.InteractiveLogin;
 import org.objectstyle.cayenne.gui.datamap.ChooseSchemaDialog;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbLoader;
 
 
 /** 

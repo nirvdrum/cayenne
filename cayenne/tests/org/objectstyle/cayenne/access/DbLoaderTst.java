@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
 
 import java.sql.Types;
 import java.util.Iterator;
@@ -64,6 +64,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.*;
 
 public class DbLoaderTst extends TestCase {
     static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());

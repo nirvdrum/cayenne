@@ -55,8 +55,7 @@ schema information
 
 17. Added support of schemas in queries.
 
-18. DbGenerator API has changed to allow more flexibility in defining how the 
-generation should work.
-
+18. DbGenerator is moved to "access" package, its API has changed 
+to allow more flexibility in defining how the generation should work.
 
 

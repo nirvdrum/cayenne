@@ -66,10 +66,10 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
-import org.objectstyle.cayenne.map.DbGenerator;
 
 /** 
  * Wizard for generating the database from the data map.

@@ -54,17 +54,16 @@
  *
  */
 
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.access;
 
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.*;
 
 /** Utility class that does forward engineering of the database.
   * It can generate database schema using the data map. It is a 
@@ -77,7 +76,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
  */
 public class DbGenerator {
 
-	protected DbAdapter adapter;
+    protected DataNode node;
 	protected DataMap map;
 
 	protected HashMap dropTables;
@@ -92,8 +91,11 @@ public class DbGenerator {
 
 	/** Creates and initializes new DbGenerator. */
 	public DbGenerator(DbAdapter adapter, DataMap map) {
-		this.adapter = adapter;
 		this.map = map;
+	    this.node = new DataNode("internal");
+		node.setAdapter(adapter);
+		node.addDataMap(map);
+		
 
 		resetToDefaults();
 		buildStatements();
@@ -117,6 +119,7 @@ public class DbGenerator {
 		createTables = new HashMap();
 		createFK = new HashMap();
 
+        DbAdapter adapter = getAdapter();
 		Iterator it = map.getDbEntitiesAsList().iterator();
 		boolean supportsFK = adapter.supportsFkConstraints();
 		while (it.hasNext()) {
@@ -138,7 +141,7 @@ public class DbGenerator {
 
 	/** Returns DbAdapter associated with this DbGenerator. */
 	public DbAdapter getAdapter() {
-		return adapter;
+		return node.getAdapter();
 	}
 
 	/**
@@ -165,7 +168,7 @@ public class DbGenerator {
 			}
 		}
 
-		if (shouldCreateFKConstraints && adapter.supportsFkConstraints()) {
+		if (shouldCreateFKConstraints && getAdapter().supportsFkConstraints()) {
 			Iterator it = orderedEnts.iterator();
 			while (it.hasNext()) {
 				DbEntity ent = (DbEntity)it.next();
@@ -212,7 +215,7 @@ public class DbGenerator {
 				}
 			}
 
-			if (shouldCreateTables && shouldCreateFKConstraints && adapter.supportsFkConstraints()) {
+			if (shouldCreateTables && shouldCreateFKConstraints && getAdapter().supportsFkConstraints()) {
 				Iterator it = orderedEnts.iterator();
 				while (it.hasNext()) {
 					DbEntity ent = (DbEntity)it.next();
@@ -255,7 +258,7 @@ public class DbGenerator {
 			}
 
 			DbAttribute at = (DbAttribute) it.next();
-			String type = adapter.externalTypesForJdbcType(at.getType())[0];
+			String type = getAdapter().externalTypesForJdbcType(at.getType())[0];
 
 			buf.append(at.getName()).append(' ').append(type);
 
@@ -318,7 +321,7 @@ public class DbGenerator {
 	 * for a particular DbEntity. Throws CayenneRuntimeException, if called
 	 * for adapter that does not support FK constraints. */
 	public List createFkConstraintsQueries(DbEntity dbEnt) {
-		if (!adapter.supportsFkConstraints()) {
+		if (!getAdapter().supportsFkConstraints()) {
 			throw new CayenneRuntimeException("FK constraints are not supported by adapter.");
 		}
 
@@ -327,7 +330,7 @@ public class DbGenerator {
 		while (it.hasNext()) {
 			DbRelationship rel = (DbRelationship) it.next();
 			if (!rel.isToMany() && !rel.isToDependentPK()) {
-				list.add(adapter.createFkConstraint(rel));
+				list.add(getAdapter().createFkConstraint(rel));
 			}
 		}
 		return list;
@@ -412,7 +415,7 @@ public class DbGenerator {
     private List dbEntitiesInInsertOrder() {
         List list = map.getDbEntitiesAsList();
 
-        OperationSorter sorter = adapter.getOpSorter(null);
+        OperationSorter sorter = getAdapter().getOpSorter(node);
         if (sorter != null) {
             sorter.sortEntitiesInInsertOrder(list);
         }

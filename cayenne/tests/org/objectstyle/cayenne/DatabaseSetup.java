@@ -61,6 +61,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;

@@ -54,19 +54,19 @@
  *
  */
 
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.access;
 
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.NameConverter;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** Utility class that does reverse engineering of the database. 
   * It can create DataMaps using database meta data obtained via JDBC driver.

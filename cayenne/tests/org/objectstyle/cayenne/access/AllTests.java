@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.access;
 
 import junit.framework.TestSuite;
 
+
+
 public class AllTests {
     public static TestSuite suite() {
         TestSuite suite = new TestSuite("Access (org.objectstyle.cayenne.access)");
@@ -70,6 +72,8 @@ public class AllTests {
         suite.addTestSuite(DataSourceInfoTst.class);
         suite.addTestSuite(DefaultResultIteratorTst.class);
         suite.addTestSuite(DefaultOperationObserverTst.class);
+        suite.addTestSuite(DbLoaderTst.class);
+        suite.addTestSuite(DbGeneratorTst.class);
         return suite;
     }
 }

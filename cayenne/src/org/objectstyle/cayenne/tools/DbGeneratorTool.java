@@ -57,11 +57,12 @@ package org.objectstyle.cayenne.tools;
 
 import java.sql.Connection;
 
-import org.xml.sax.InputSource;
-
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoaderImpl;
+import org.xml.sax.InputSource;
 
 
 /** Utility class for generating database  schema from a DataMap.

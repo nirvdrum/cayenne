@@ -53,13 +53,15 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.access;
 
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
+
+import build.classes.org.objectstyle.cayenne.access.*;
 
 /** Test cases for DbGenerator.
   *

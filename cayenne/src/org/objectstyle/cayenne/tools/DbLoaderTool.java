@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.tools;
 import java.io.PrintWriter;
 import java.sql.*;
 
+import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.InteractiveLogin;
