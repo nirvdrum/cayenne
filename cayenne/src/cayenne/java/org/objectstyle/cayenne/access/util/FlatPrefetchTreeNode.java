@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,8 +67,13 @@ import java.util.TreeMap;
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbJoin;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
@@ -82,20 +88,35 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  */
 class FlatPrefetchTreeNode {
 
+    // tree linking
     FlatPrefetchTreeNode parent;
     ObjEntity entity;
     ObjRelationship incoming;
     Collection children;
     boolean phantom;
 
-    SourceTargetTuple[] rowMapping;
-    int rowCapacity;
+    // column mapping
+    String[] sources;
+    String[] targets;
     int[] idIndices;
+    int rowCapacity;
 
+    // processing results
     Map partitionedByParent;
-    Map fetchedObjects;
+    Map resolved;
 
-    FlatPrefetchTreeNode() {
+    /**
+     * Creates new FlatPrefetchTreeNode.
+     */
+    FlatPrefetchTreeNode(ObjEntity entity, Collection jointPrefetchKeys) {
+        this();
+        buildTree(entity, jointPrefetchKeys);
+    }
+
+    /**
+     * Creates new FlatPrefetchTreeNode.
+     */
+    private FlatPrefetchTreeNode() {
         Factory listFactory = new Factory() {
 
             public Object create() {
@@ -104,7 +125,7 @@ class FlatPrefetchTreeNode {
         };
 
         this.partitionedByParent = MapUtils.lazyMap(new HashMap(), listFactory);
-        this.fetchedObjects = new HashMap();
+        this.resolved = new HashMap();
     }
 
     ObjEntity getEntity() {
@@ -148,43 +169,39 @@ class FlatPrefetchTreeNode {
     }
 
     /**
-     * Builds a prefetch tree for a cartesian product of joined DataRows from multiple
-     * entities.
+     * Returns a source label for a given target label.
      */
-    void buildTree(ObjEntity entity, Collection jointPrefetchKeys) {
-
-        this.phantom = false;
-        this.entity = entity;
-
-        // assemble tree...
-        Iterator i1 = jointPrefetchKeys.iterator();
-        while (i1.hasNext()) {
-            String prefetchPath = (String) i1.next();
-            addChildWithPath(entity, prefetchPath);
-        }
-
-        // create descriptors of non-phantom nodes
-        Closure c = new Closure() {
-
-            public void execute(Object input) {
-                FlatPrefetchTreeNode resolver = (FlatPrefetchTreeNode) input;
-                if (!resolver.isPhantom()) {
-                    resolver.buildRowMapping();
+    String sourceForTarget(String targetColumn) {
+        if (targetColumn != null && sources != null && targets != null) {
+            for (int i = 0; i < targets.length; i++) {
+                if (targetColumn.equals(targets[i])) {
+                    return sources[i];
                 }
             }
-        };
-        executeDepthFirst(c);
+        }
+
+        return null;
     }
 
-    DataObject getFetchedObject(Map id) {
-        return (DataObject) fetchedObjects.get(id);
+    /**
+     * Looks up a previously resolved object using an ObjectId map as a key. Returns null
+     * if no matching object exists.
+     */
+    DataObject getResolved(Map id) {
+        return (DataObject) resolved.get(id);
     }
 
-    void putFetchedObject(Map id, DataObject object, DataObject parent) {
-        fetchedObjects.put(id, object);
+    /**
+     * Registers an object in a map of resolved objects, connects this object to parent if
+     * parent exists.
+     */
+    void objectResolved(Map id, DataObject object, DataObject parent) {
+        resolved.put(id, object);
 
-        List peers = (List) partitionedByParent.get(parent);
-        peers.add(object);
+        if (parent != null) {
+            List peers = (List) partitionedByParent.get(parent);
+            peers.add(object);
+        }
     }
 
     /**
@@ -198,8 +215,8 @@ class FlatPrefetchTreeNode {
 
         Map id = new TreeMap();
         for (int i = 0; i < idIndices.length; i++) {
-            Object value = flatRow.get(rowMapping[idIndices[i]].source);
-            id.put(rowMapping[idIndices[i]].target, value);
+            Object value = flatRow.get(sources[idIndices[i]]);
+            id.put(targets[idIndices[i]], value);
         }
 
         return id;
@@ -212,18 +229,174 @@ class FlatPrefetchTreeNode {
         DataRow row = new DataRow(rowCapacity);
 
         // extract subset of flat row columns, recasting to the target keys
-        for (int i = 0; i < rowMapping.length; i++) {
-            row.put(rowMapping[i].target, flatRow.get(rowMapping[i].source));
+        for (int i = 0; i < sources.length; i++) {
+            row.put(targets[i], flatRow.get(sources[i]));
         }
 
         return row;
     }
 
     /**
-     * Configures row metadat for this node entity.
+     * Builds a prefetch tree for a cartesian product of joined DataRows from multiple
+     * entities.
+     */
+    private void buildTree(ObjEntity entity, Collection jointPrefetchKeys) {
+
+        this.phantom = false;
+        this.entity = entity;
+
+        // assemble tree...
+        Iterator i1 = jointPrefetchKeys.iterator();
+        while (i1.hasNext()) {
+            String prefetchPath = (String) i1.next();
+            addChildWithPath(entity, prefetchPath);
+        }
+
+        // tree is complete; now create descriptors of non-phantom nodes
+        Closure c = new Closure() {
+
+            public void execute(Object input) {
+                FlatPrefetchTreeNode resolver = (FlatPrefetchTreeNode) input;
+                if (!resolver.isPhantom()) {
+                    resolver.buildRowMapping();
+                    resolver.buildPKIndex();
+                }
+            }
+        };
+        executeDepthFirst(c);
+    }
+
+    /**
+     * Configures row metadata for this node entity.
      */
     private void buildRowMapping() {
-        // TODO me.
+        Map targetBySourceColumn = new TreeMap();
+        String prefix = buildPrefix(new StringBuffer()).toString();
+
+        // find propagated keys, assuming that only one-step joins
+        // share their column(s) with parent
+
+        if (getParent() != null
+                && !getParent().isPhantom()
+                && getIncoming() != null
+                && !getIncoming().isFlattened()) {
+
+            DbRelationship r = (DbRelationship) getIncoming().getDbRelationships().get(0);
+            Iterator it = r.getJoins().iterator();
+            while (it.hasNext()) {
+                DbJoin join = (DbJoin) it.next();
+                String source = getParent().sourceForTarget(join.getSourceName());
+
+                if (source == null) {
+                    throw new CayenneRuntimeException(
+                            "Propagated column value is not configured for parent node. Join: "
+                                    + join);
+                }
+
+                targetBySourceColumn.put(source, join.getTargetName());
+            }
+        }
+
+        // add class attributes
+        Iterator attributes = getEntity().getAttributes().iterator();
+        while (attributes.hasNext()) {
+            ObjAttribute attribute = (ObjAttribute) attributes.next();
+            String source = attribute.getDbAttributePath();
+
+            // processing compound attributes correctly
+            if (!targetBySourceColumn.containsKey(source)) {
+                targetBySourceColumn.put(source, prefix + source);
+            }
+        }
+
+        // add relationships
+        Iterator relationships = entity.getRelationships().iterator();
+        while (relationships.hasNext()) {
+            ObjRelationship rel = (ObjRelationship) relationships.next();
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+            Iterator dbAttributes = dbRel.getSourceAttributes().iterator();
+
+            while (dbAttributes.hasNext()) {
+                DbAttribute attribute = (DbAttribute) dbAttributes.next();
+                String source = attribute.getName();
+
+                // processing compound attributes correctly
+                if (!targetBySourceColumn.containsKey(source)) {
+                    targetBySourceColumn.put(source, prefix + source);
+                }
+            }
+        }
+
+        // add unmapped PK
+        Iterator pks = getEntity().getDbEntity().getPrimaryKey().iterator();
+        while (pks.hasNext()) {
+            DbAttribute pk = (DbAttribute) pks.next();
+            if (!targetBySourceColumn.containsKey(pk.getName())) {
+                targetBySourceColumn.put(pk.getName(), prefix + pk.getName());
+            }
+        }
+
+        int size = targetBySourceColumn.size();
+        this.rowCapacity = (int) Math.ceil(size / 0.75);
+        this.sources = new String[size];
+        this.targets = new String[size];
+
+        // 'sourceByTargetColumn' map is ordered so splitting it in two arrays should
+        // preserve the key/value relative ordering.
+        targetBySourceColumn.keySet().toArray(sources);
+        targetBySourceColumn.values().toArray(targets);
+    }
+
+    /**
+     * Recursively prepends "prefix" to provided buffer. Prefix is DB path from the first
+     * non-phantom parent node in the tree.
+     */
+    private StringBuffer buildPrefix(StringBuffer buffer) {
+
+        if (this.getIncoming() == null || getParent() == null) {
+            return buffer;
+        }
+
+        if (getIncoming() != null) {
+            String subpath = getIncoming().getDbRelationshipPath();
+            buffer.insert(0, '.');
+            buffer.insert(0, subpath);
+        }
+
+        if (parent != null && parent.isPhantom()) {
+            parent.buildPrefix(buffer);
+        }
+
+        return buffer;
+    }
+
+    /**
+     * Creates an internal index of PK columns in the result.
+     */
+    private void buildPKIndex() {
+        // index PK
+        List pks = getEntity().getDbEntity().getPrimaryKey();
+        this.idIndices = new int[pks.size()];
+
+        // this is needed for checking that a valid index is made
+        Arrays.fill(idIndices, -1);
+
+        for (int i = 0; i < idIndices.length; i++) {
+            DbAttribute pk = (DbAttribute) pks.get(i);
+
+            for (int j = 0; j < targets.length; j++) {
+                if (pk.getName().equals(targets[j])) {
+                    idIndices[i] = j;
+                    break;
+                }
+            }
+
+            // sanity check
+            if (idIndices[i] == -1) {
+                throw new CayenneRuntimeException("PK column is not part of result row: "
+                        + pk.getName());
+            }
+        }
     }
 
     /**
@@ -297,11 +470,5 @@ class FlatPrefetchTreeNode {
         }
 
         return child;
-    }
-
-    final class SourceTargetTuple {
-
-        String source;
-        String target;
     }
 }

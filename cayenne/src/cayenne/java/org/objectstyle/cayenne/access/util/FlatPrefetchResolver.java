@@ -67,22 +67,17 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.DataContext;
 
 /**
- * An object that encapsulates resolving of a cartesian product result set. Works together
- * with FlatPrefetchResolver tree that contains descriptors of the entities involved, and
- * resolving inntermediate results.
+ * Encapsulates resolving of a cartesian product result set. Uses FlatPrefetchTreeNode
+ * tree to obtain each entity metadata and store intermediary results.
  * 
  * @since 1.2
  * @author Andrei Adamchik
  */
 final class FlatPrefetchResolver {
 
-    FlatPrefetchTreeNode rootNode;
-    List results;
     DataContext dataContext;
     boolean refresh;
     boolean resolveHierarchy;
-
-    private DataRow currentRow;
 
     /**
      * Create and configure an operation.
@@ -108,37 +103,54 @@ final class FlatPrefetchResolver {
             capacity = capacity / 2;
         }
 
-        this.results = new ArrayList(capacity);
-        this.currentRow = null;
-        this.rootNode = rootNode;
+        List results = new ArrayList(capacity);
 
         // run
         int len = flatRows.size();
         for (int i = 0; i < len; i++) {
 
-            this.currentRow = (DataRow) flatRows.get(i);
+            DataRow flatRow = (DataRow) flatRows.get(i);
 
-            // pass each row through the tree, allowing nodes to extract their part and
-            // establish connections ... that's sort of like an informal visitor
-            // pattern...
+            // pass each row through the tree
 
-            traverseTree(rootNode, null);
+            DataObject object = resolveRow(flatRow, rootNode, null);
+
+            // null will be returned for duplicates...
+            if (object != null) {
+                results.add(object);
+            }
         }
 
         return results;
     }
 
-    private void traverseTree(FlatPrefetchTreeNode node, DataObject parentObject) {
+    /**
+     * Recursively resolves a flat row by processing it for each tree node, going
+     * depth-first. Returns a root object of the hierarchy, or null if this object is a
+     * duplicate of a previously resolved one.
+     */
+    private DataObject resolveRow(
+            DataRow flatRow,
+            FlatPrefetchTreeNode node,
+            DataObject parentObject) {
 
-        // existing check maybe disabled for efficiency for the root objects that are
-        // checked elsewhere..
+        boolean existing = true;
         DataObject object = null;
 
-        if (node.isPhantom()) {
-            object = resolveRowForNode(node, parentObject);
+        // resolve for a given node...
+        if (!node.isPhantom()) {
+            // find existing object, if found skip further processing
+            Map id = node.idFromFlatRow(flatRow);
+            object = node.getResolved(id);
+
+            if (object == null) {
+                existing = false;
+                object = objectFromFlatRow(flatRow, node);
+                node.objectResolved(id, object, parentObject);
+            }
         }
 
-        // process children
+        // recursively resolve for children
         Collection children = node.getChildren();
         if (children != null) {
 
@@ -148,36 +160,21 @@ final class FlatPrefetchResolver {
             Iterator it = children.iterator();
             while (it.hasNext()) {
                 FlatPrefetchTreeNode child = (FlatPrefetchTreeNode) it.next();
-                traverseTree(child, parentOfChildren);
+                resolveRow(flatRow, child, parentOfChildren);
             }
         }
+
+        // return root object if it was newly resolved
+        return (existing) ? null : object;
     }
 
-    private DataObject resolveRowForNode(FlatPrefetchTreeNode node, DataObject parentObject) {
-        // find existing object
-        Map id = node.idFromFlatRow(currentRow);
-        DataObject object = node.getFetchedObject(id);
-
-        if (object != null) {
-            return object;
-        }
-
-        // create using operation parameters ..
-        // this should probably be optimized - DataContext.objectsFromDataRows does
-        // some batching that we can do here (e.g. synchronization blocks, etc.)
-        DataRow row = node.rowFromFlatRow(currentRow);
+    private DataObject objectFromFlatRow(DataRow flatRow, FlatPrefetchTreeNode node) {
+        // TODO: this should be optimized - DataContext.objectsFromDataRows does
+        // some batching that we should do once instead of N * M times (e.g.
+        // synchronization blocks, etc.)
+        DataRow row = node.rowFromFlatRow(flatRow);
         List objects = dataContext.objectsFromDataRows(node.getEntity(), Collections
                 .singletonList(row), refresh, resolveHierarchy);
-        object = (DataObject) objects.get(0);
-
-        // populate node only if this is a new object...
-        node.putFetchedObject(id, object, parentObject);
-
-        // register in results if root
-        if (node == rootNode) {
-            results.add(object);
-        }
-
-        return object;
+        return (DataObject) objects.get(0);
     }
 }

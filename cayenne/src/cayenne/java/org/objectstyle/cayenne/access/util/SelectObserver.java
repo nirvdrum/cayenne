@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,29 +68,28 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
-/** 
- * OperationObserver that accumulates select query results provided 
- * by callback methods. Later the results can be retrieved
- * via different <code>getResults</code> methods. Also supports instantiating
- * DataObjects within a provided DataContext.
- * 
- * <p>This class is used as a default OperationObserver by DataContext.
- * Also it can serve as a helper for classes that work with 
- * DataNode directly, bypassing DataContext.
+/**
+ * OperationObserver that accumulates select query results provided by callback methods.
+ * Later the results can be retrieved via different <code>getResults</code> methods.
+ * Also supports instantiating DataObjects within a provided DataContext.
+ * <p>
+ * This class is used as a default OperationObserver by DataContext. Also it can serve as
+ * a helper for classes that work with DataNode directly, bypassing DataContext.
+ * </p>
+ * <p>
+ * If exceptions happen during the execution, they are immediately rethrown.
+ * </p>
+ * <p>
+ * <i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide. </a> </i>
  * </p>
  * 
- * <p>If exceptions happen during the execution, they are immediately rethrown.
- * </p>
- * 
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- * 
- *  @author Andrei Adamchik
+ * @author Andrei Adamchik
  */
 public class SelectObserver extends DefaultOperationObserver {
-    
 
     protected Map results = new HashMap();
     protected int selectCount;
@@ -102,26 +102,25 @@ public class SelectObserver extends DefaultOperationObserver {
         super.setLoggingLevel(logLevel);
     }
 
-    /** 
-     * Returns a count of select queries that returned results
-     * since the last time "clear" was called, or since this object
-     * was created.
+    /**
+     * Returns a count of select queries that returned results since the last time "clear"
+     * was called, or since this object was created.
      */
     public int getSelectCount() {
         return selectCount;
     }
 
-    /** 
-     * Returns a list of result snapshots for the specified query,
-     * or null if this query has never produced any results.
+    /**
+     * Returns a list of result snapshots for the specified query, or null if this query
+     * has never produced any results.
      */
     public List getResults(Query q) {
         return (List) results.get(q);
     }
 
-    /** 
-     * Returns query results accumulated during query execution with this
-     * object as an operation observer. 
+    /**
+     * Returns query results accumulated during query execution with this object as an
+     * operation observer.
      */
     public Map getResults() {
         return results;
@@ -133,9 +132,8 @@ public class SelectObserver extends DefaultOperationObserver {
         results.clear();
     }
 
-    /** 
-     * Stores all objects in <code>dataRows</code> in an internal
-     * result list. 
+    /**
+     * Stores all objects in <code>dataRows</code> in an internal result list.
      */
     public void nextDataRows(Query query, List dataRows) {
 
@@ -146,22 +144,23 @@ public class SelectObserver extends DefaultOperationObserver {
         selectCount++;
     }
 
-    /** 
-      * Returns results for a given query object as DataObjects. <code>rootQuery</code> argument
-      * is assumed to be the root query, and the rest are either independent queries or queries
-      * prefetching relationships for the root query. 
-      * 
-      * <p>If no results are found, an empty immutable list is returned. Most common case for this
-      * is when a delegate has blocked the query from execution.
-      * </p>
-      * 
-      * <p>Side effect of this method call is that all data rows currently stored in this
-      * SelectObserver are loaded as objects to a given DataContext (thus resolving
-      * prefetched to-one relationships). Any to-many relationships for the root query
-      * are resolved as well.</p>
-      * 
-      * @since 1.1
-      */
+    /**
+     * Returns results for a given query object as DataObjects. <code>rootQuery</code>
+     * argument is assumed to be the root query, and the rest are either independent
+     * queries or queries prefetching relationships for the root query.
+     * <p>
+     * If no results are found, an empty immutable list is returned. Most common case for
+     * this is when a delegate has blocked the query from execution.
+     * </p>
+     * <p>
+     * Side effect of this method call is that all data rows currently stored in this
+     * SelectObserver are loaded as objects to a given DataContext (thus resolving
+     * prefetched to-one relationships). Any to-many relationships for the root query are
+     * resolved as well.
+     * </p>
+     * 
+     * @since 1.1
+     */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
         ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
 
@@ -180,8 +179,42 @@ public class SelectObserver extends DefaultOperationObserver {
                 ? ((GenericSelectQuery) rootQuery).isResolvingInherited()
                 : false;
 
+        // prepare prefetch resolver ... it can be used in two different ways
+        // depending on whether we also have joint prefetches.
+        // TODO: this logic needs to be streamlined...
         PrefetchResolver tree = new PrefetchResolver();
         tree.buildTree(entity, rootQuery, results);
+
+        // TODO: extend this to SQLTemplate
+        if (rootQuery instanceof SelectQuery) {
+            SelectQuery rootSelect = (SelectQuery) rootQuery;
+            Collection jointPrefetches = rootSelect.getJointPrefetches();
+            if (!jointPrefetches.isEmpty()) {
+                FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
+                        entity,
+                        jointPrefetches);
+
+                FlatPrefetchResolver flatPrefetchResolver = new FlatPrefetchResolver(
+                        dataContext,
+                        refresh,
+                        resolveHierarchy);
+
+                List objects = flatPrefetchResolver.resolveObjectTree(
+                        flatPrefetchTree,
+                        getResults(rootQuery));
+
+                // attach normal prefetches to the list of main objects that is already
+                // resolved...
+                tree.resolveObjectTree(
+                        dataContext,
+                        refresh,
+                        resolveHierarchy,
+                        objects,
+                        true);
+                return objects;
+            }
+        }
+
         return tree.resolveObjectTree(dataContext, entity, refresh, resolveHierarchy);
     }
 
@@ -193,9 +226,8 @@ public class SelectObserver extends DefaultOperationObserver {
         throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
     }
 
-    /** 
-     * Overrides superclass implementation to rethrow an exception
-     * immediately. 
+    /**
+     * Overrides superclass implementation to rethrow an exception immediately.
      */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);

@@ -187,7 +187,7 @@ class PrefetchResolver {
     }
 
     /**
-     * Resolves root objects from internally stored DataRows.
+     * Recursively resolves a hierarchy of prefetched data rows.
      */
     List resolveObjectTree(
             DataContext dataContext,
@@ -208,7 +208,12 @@ class PrefetchResolver {
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 PrefetchResolver node = (PrefetchResolver) entry.getValue();
-                node.resolveObjectTree(dataContext, refresh, resolveHierarchy, objects);
+                node.resolveObjectTree(
+                        dataContext,
+                        refresh,
+                        resolveHierarchy,
+                        objects,
+                        false);
             }
         }
 
@@ -216,18 +221,21 @@ class PrefetchResolver {
     }
 
     /**
-     * Main worker method that resolves this node objects and all child prefetches.
+     * Recursively resolves a hierarchy of prefetched data rows starting from a child tree
+     * node. Allows to skip the resolution of this node and only do children. This is
+     * useful in chaining various prefetch resolving strategies.
      */
     void resolveObjectTree(
             DataContext dataContext,
             boolean refresh,
             boolean resolveHierarchy,
-            List parentObjects) {
+            List parentObjects,
+            boolean skipSelf) {
 
         List objects = null;
 
         // skip most operations on a "phantom" node that had no prefetch query
-        if (dataRows != null) {
+        if (!skipSelf && dataRows != null) {
             // resolve objects;
             objects = dataContext.objectsFromDataRows((ObjEntity) incoming
                     .getTargetEntity(), dataRows, refresh, resolveHierarchy);
@@ -256,7 +264,12 @@ class PrefetchResolver {
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 PrefetchResolver node = (PrefetchResolver) entry.getValue();
-                node.resolveObjectTree(dataContext, refresh, resolveHierarchy, objects);
+                node.resolveObjectTree(
+                        dataContext,
+                        refresh,
+                        resolveHierarchy,
+                        objects,
+                        false);
             }
         }
     }
