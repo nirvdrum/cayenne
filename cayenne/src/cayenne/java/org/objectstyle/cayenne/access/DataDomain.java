@@ -641,7 +641,9 @@ public class DataDomain implements QueryEngine {
             }
 
             if (aNode == null) {
-                throw new CayenneRuntimeException("No suitable DataNode to handle query.");
+                throw new CayenneRuntimeException(
+                    "No suitable DataNode to handle query with root: "
+                        + nextQuery.getRoot());
             }
 
             List nodeQueries = (List) queryMap.get(aNode);
