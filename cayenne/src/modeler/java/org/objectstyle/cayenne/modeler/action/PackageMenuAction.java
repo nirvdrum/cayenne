@@ -68,7 +68,8 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class PackageMenuAction extends CayenneAction {
-    public static final String ACTION_NAME = "Set Package Name for Obj Entities";
+    public static final String ACTION_NAME =
+        "Set Package Name for Obj Entities";
 
     /**
      * Constructor for PackageMenuAction.
@@ -90,7 +91,8 @@ public class PackageMenuAction extends CayenneAction {
             return;
         }
         String package_name;
-        package_name = JOptionPane.showInputDialog(this, "Enter the new package name");
+        package_name =
+            JOptionPane.showInputDialog(this, "Enter the new package name");
         if (null == package_name || package_name.trim().length() == 0)
             return;
         // Append period to the end of package name, if it is not there.
@@ -104,6 +106,12 @@ public class PackageMenuAction extends CayenneAction {
         ObjEntity[] entities = map.getObjEntities();
         for (int i = 0; i < entities.length; i++) {
             String name = entities[i].getClassName();
+
+            // there may be entities with no class selected yet
+            if (name == null) {
+                continue;
+            }
+
             int idx = name.lastIndexOf('.');
             if (idx > 0) {
                 name =
