@@ -234,14 +234,23 @@ public class DataContext implements QueryEngine {
 			.newInstance();
 	}
 
+	protected void refreshObjectWithSnapshot(
+		DataObject anObject,
+		Map snapshot) {
+		refreshObjectWithSnapshot(
+			lookupEntity(anObject.getObjectId().getObjEntityName()),
+			anObject,
+			snapshot);
+	}
+	
 	/** 
 	 * Replaces all object attribute values with snapshot values. 
 	 * Sets object state to COMMITTED.
 	 */
 	protected void refreshObjectWithSnapshot(
+		ObjEntity ent,
 		DataObject anObject,
 		Map snapshot) {
-		ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
 
 		Map attrMap = ent.getAttributeMap();
 		Iterator it = attrMap.keySet().iterator();
@@ -294,13 +303,22 @@ public class DataContext implements QueryEngine {
 
 	/** Merge a potentially modified object with provided data row values. */
 	protected void mergeObjectWithSnapshot(DataObject anObject, Map snapshot) {
+		mergeObjectWithSnapshot(
+			lookupEntity(anObject.getObjectId().getObjEntityName()),
+			anObject,
+			snapshot);
+	}
+
+	protected void mergeObjectWithSnapshot(
+		ObjEntity ent,
+		DataObject anObject,
+		Map snapshot) {
 		if (anObject.getPersistenceState() == PersistenceState.HOLLOW) {
-			refreshObjectWithSnapshot(anObject, snapshot);
+			refreshObjectWithSnapshot(ent, anObject, snapshot);
 			return;
 		}
 
 		Map oldSnap = getCommittedSnapshot(anObject);
-		ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
 
 		Map attrMap = ent.getAttributeMap();
 		Iterator it = attrMap.keySet().iterator();
@@ -412,7 +430,7 @@ public class DataContext implements QueryEngine {
 
 		if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
 			// we are asked to refresh an existing object with new values
-			mergeObjectWithSnapshot(obj, dataRow);
+			mergeObjectWithSnapshot(objEntity, obj, dataRow);
 			committedSnapshots.put(anId, dataRow);
 		}
 
@@ -433,7 +451,7 @@ public class DataContext implements QueryEngine {
 		DataObject obj = registeredObject(anId);
 
 		if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-			refreshObjectWithSnapshot(obj, dataRow);
+			refreshObjectWithSnapshot(objEntity, obj, dataRow);
 		}
 
 		return obj;
