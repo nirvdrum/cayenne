@@ -59,7 +59,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
  * @author Andrei Adamchik
@@ -69,14 +71,14 @@ public class SnapshotManagerTst extends DataContextTestBase {
         String n1 = "changed";
         String n2 = "changed again";
 
-        Artist a1 = fetchArtist("artist1");
+        Artist a1 = fetchArtist("artist1", false);
         a1.setArtistName(n1);
 
         Map s2 = new HashMap();
         s2.put("ARTIST_NAME", n2);
         s2.put("DATE_OF_BIRTH", new java.util.Date());
-        ObjEntity e = ctxt.getEntityResolver().lookupObjEntity(a1);
-        ctxt.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
+        ObjEntity e = context.getEntityResolver().lookupObjEntity(a1);
+        context.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
 
         // name was modified, so it should not change during merge
         assertEquals(n1, a1.getArtistName());
@@ -85,4 +87,71 @@ public class SnapshotManagerTst extends DataContextTestBase {
         assertEquals(s2.get("DATE_OF_BIRTH"), a1.getDateOfBirth());
     }
 
+    public void testIsToOneTargetModified() throws Exception {
+        ObjEntity paintingEntity =
+            context.getEntityResolver().lookupObjEntity(Painting.class);
+        ObjRelationship toArtist =
+            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+
+        Painting painting = insertPaintingInContext("p");
+        Artist artist = fetchArtist("artist1", false);
+        assertNotSame(artist, painting.getToArtist());
+
+        Map map = new HashMap();
+        map.put(
+            "ARTIST_ID",
+            painting.getToArtist().getObjectId().getValueForAttribute(
+                "ARTIST_ID"));
+
+        assertFalse(
+            context.getSnapshotManager().isToOneTargetModified(
+                toArtist,
+                painting,
+                map));
+
+        painting.setToArtist(artist);
+
+        assertTrue(
+            context.getSnapshotManager().isToOneTargetModified(
+                toArtist,
+                painting,
+                map));
+    }
+
+    public void testIsJoinAttributesModified() throws Exception {
+        ObjEntity paintingEntity =
+            context.getEntityResolver().lookupObjEntity(Painting.class);
+        ObjRelationship toArtist =
+            (ObjRelationship) paintingEntity.getRelationship("toArtist");
+
+        Map stored = new HashMap();
+        stored.put("ARTIST_ID", new Integer(1));
+
+        Map nullified = new HashMap();
+        nullified.put("ARTIST_ID", null);
+
+        Map updated = new HashMap();
+        updated.put("ARTIST_ID", new Integer(2));
+
+        Map same = new HashMap();
+        same.put("ARTIST_ID", new Integer(1));
+
+        assertFalse(
+            context.getSnapshotManager().isJoinAttributesModified(
+                toArtist,
+                stored,
+                same));
+
+        assertTrue(
+            context.getSnapshotManager().isJoinAttributesModified(
+                toArtist,
+                stored,
+                nullified));
+
+        assertTrue(
+            context.getSnapshotManager().isJoinAttributesModified(
+                toArtist,
+                stored,
+                updated));
+    }
 }

@@ -80,16 +80,16 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testCreatePermId1() throws Exception {
         Artist artist = new Artist();
-        ctxt.registerNewObject(artist);
-        ObjectId id = ctxt.createPermId(artist);
+        context.registerNewObject(artist);
+        ObjectId id = context.createPermId(artist);
         assertNotNull(id);
     }
 
     public void testCreatePermId2() throws Exception {
         Artist artist = new Artist();
-        ctxt.registerNewObject(artist, "Artist");
-        ObjectId id1 = ctxt.createPermId(artist);
-        ObjectId id2 = ctxt.createPermId(artist);
+        context.registerNewObject(artist, "Artist");
+        ObjectId id1 = context.createPermId(artist);
+        ObjectId id2 = context.createPermId(artist);
         //Must not fail on second call
 
         assertNotNull(id1);
@@ -98,19 +98,19 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testTakeObjectsSnapshot1() throws Exception {
-        Artist artist = fetchArtist("artist1");
-        Map snapshot = ctxt.takeObjectSnapshot(artist);
+        Artist artist = fetchArtist("artist1", false);
+        Map snapshot = context.takeObjectSnapshot(artist);
         assertEquals(artist.getArtistName(), snapshot.get("ARTIST_NAME"));
         assertEquals(artist.getDateOfBirth(), snapshot.get("DATE_OF_BIRTH"));
     }
 
     public void testTakeObjectsSnapshot2() throws Exception {
         // test  null values
-        Artist artist = fetchArtist("artist1");
+        Artist artist = fetchArtist("artist1", false);
         artist.setArtistName(null);
         artist.setDateOfBirth(null);
 
-        Map snapshot = ctxt.takeObjectSnapshot(artist);
+        Map snapshot = context.takeObjectSnapshot(artist);
         assertTrue(snapshot.containsKey("ARTIST_NAME"));
         assertNull(snapshot.get("ARTIST_NAME"));
 
@@ -120,20 +120,20 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testTakeObjectsSnapshot3() throws Exception {
         // test FK relationship snapshotting
-        Artist a1 = fetchArtist("artist1");
+        Artist a1 = fetchArtist("artist1", false);
 
         Painting p1 = new Painting();
-        ctxt.registerNewObject(p1);
+        context.registerNewObject(p1);
         p1.setToArtist(a1);
 
-        Map s1 = ctxt.takeObjectSnapshot(p1);
+        Map s1 = context.takeObjectSnapshot(p1);
         Map idMap = a1.getObjectId().getIdSnapshot();
         assertEquals(idMap.get("ARTIST_ID"), s1.get("ARTIST_ID"));
     }
 
     public void testLookupEntity() throws Exception {
-        assertNotNull(ctxt.getEntityResolver().lookupObjEntity(Artist.class));
-        assertNull(ctxt.getEntityResolver().lookupObjEntity("NonExistent"));
+        assertNotNull(context.getEntityResolver().lookupObjEntity(Artist.class));
+        assertNull(context.getEntityResolver().lookupObjEntity("NonExistent"));
     }
 
     /**
@@ -144,7 +144,7 @@ public class DataContextTst extends DataContextTestBase {
      */
     public void testCharFetch() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
-        List artists = ctxt.performQuery(q);
+        List artists = context.performQuery(q);
         Artist a = (Artist) artists.get(0);
         assertEquals(a.getArtistName().trim(), a.getArtistName());
     }
@@ -159,7 +159,7 @@ public class DataContextTst extends DataContextTestBase {
         Expression e =
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
         SelectQuery q = new SelectQuery("Artist", e);
-        List artists = ctxt.performQuery(q);
+        List artists = context.performQuery(q);
         assertEquals(1, artists.size());
     }
 
@@ -174,7 +174,7 @@ public class DataContextTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery("Painting");
         q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
         q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(4)));
-        List results = ctxt.performQuery(q);
+        List results = context.performQuery(q);
 
         assertEquals(2, results.size());
     }
@@ -191,7 +191,7 @@ public class DataContextTst extends DataContextTestBase {
             ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
         q.orQualifier(
             ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
-        List results = ctxt.performQuery(q);
+        List results = context.performQuery(q);
 
         assertEquals(2, results.size());
     }
@@ -216,7 +216,7 @@ public class DataContextTst extends DataContextTestBase {
             ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
         q.setLoggingLevel(Level.INFO);
 
-        ArtistAssets a1 = (ArtistAssets) ctxt.performQuery(q).get(0);
+        ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
     }
 
@@ -243,7 +243,7 @@ public class DataContextTst extends DataContextTestBase {
             ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
         q.setLoggingLevel(Level.INFO);
 
-        ArtistAssets a1 = (ArtistAssets) ctxt.performQuery(q).get(0);
+        ArtistAssets a1 = (ArtistAssets) context.performQuery(q).get(0);
         assertEquals(1, a1.getPaintingsCount().intValue());
     }
 
@@ -256,7 +256,7 @@ public class DataContextTst extends DataContextTestBase {
         List qs = new ArrayList();
         qs.add(q1);
         qs.add(q2);
-        ctxt.performQueries(qs, opObserver);
+        context.performQueries(qs, opObserver);
 
         // check query results
         List o1 = opObserver.objectsForQuery(q1);
@@ -270,7 +270,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testSelectDate() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
-        List objects = ctxt.performQuery(query);
+        List objects = context.performQuery(query);
 
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
@@ -281,7 +281,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testPerformSelectQuery1() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
-        List objects = ctxt.performQuery(query);
+        List objects = context.performQuery(query);
 
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
@@ -302,7 +302,7 @@ public class DataContextTst extends DataContextTestBase {
                 "Artist",
                 ExpressionFactory.joinExp(Expression.OR, expressions));
         query.setLoggingLevel(Level.ERROR);
-        List objects = ctxt.performQuery(query);
+        List objects = context.performQuery(query);
 
         assertNotNull(objects);
         assertEquals(3, objects.size());
@@ -313,7 +313,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testPerformQuery() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
-        ctxt.performQuery(query, opObserver);
+        context.performQuery(query, opObserver);
         List objects = opObserver.objectsForQuery(query);
 
         assertNotNull(objects);
@@ -323,7 +323,7 @@ public class DataContextTst extends DataContextTestBase {
     public void testPerformPagedQuery() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
         query.setPageSize(5);
-        List objects = ctxt.performQuery(query);
+        List objects = context.performQuery(query);
         assertNotNull(objects);
         assertTrue(objects instanceof IncrementalFaultList);
 
@@ -334,7 +334,7 @@ public class DataContextTst extends DataContextTestBase {
     public void testPerformDataRowQuery() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
         query.setFetchingDataRows(true);
-        List objects = ctxt.performQuery(query);
+        List objects = context.performQuery(query);
 
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());
@@ -344,11 +344,11 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testCommitChangesRO1() throws Exception {
-        ROArtist a1 = (ROArtist) ctxt.createAndRegisterNewObject("ROArtist");
+        ROArtist a1 = (ROArtist) context.createAndRegisterNewObject("ROArtist");
         a1.setArtistName("abc");
 
         try {
-            ctxt.commitChanges();
+            context.commitChanges();
             fail("Inserting a 'read-only' object must fail.");
         }
         catch (Exception ex) {
@@ -362,7 +362,7 @@ public class DataContextTst extends DataContextTestBase {
         a1.setArtistName("abc");
 
         try {
-            ctxt.commitChanges();
+            context.commitChanges();
             fail("Updating a 'read-only' object must fail.");
         }
         catch (Exception ex) {
@@ -373,10 +373,10 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testCommitChangesRO3() throws Exception {
         ROArtist a1 = fetchROArtist("artist1");
-        ctxt.deleteObject(a1);
+        context.deleteObject(a1);
 
         try {
-            ctxt.commitChanges();
+            context.commitChanges();
             fail("Deleting a 'read-only' object must fail.");
         }
         catch (Exception ex) {
@@ -388,7 +388,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testPerformIteratedQuery1() throws Exception {
         SelectQuery q1 = new SelectQuery("Artist");
-        ResultIterator it = ctxt.performIteratedQuery(q1);
+        ResultIterator it = context.performIteratedQuery(q1);
 
         try {
             int count = 0;
@@ -408,7 +408,7 @@ public class DataContextTst extends DataContextTestBase {
         populatePaintings();
 
         SelectQuery q1 = new SelectQuery("Artist");
-        ResultIterator it = ctxt.performIteratedQuery(q1);
+        ResultIterator it = context.performIteratedQuery(q1);
 
         // just for this test increase pool size
         changeMaxConnections(1);
@@ -418,7 +418,7 @@ public class DataContextTst extends DataContextTestBase {
                 Map row = it.nextDataRow();
 
                 // try instantiating an object and fetching its relationships
-                Artist obj = (Artist) ctxt.objectFromDataRow("Artist", row);
+                Artist obj = (Artist) context.objectFromDataRow("Artist", row);
                 List paintings = obj.getPaintingArray();
                 assertNotNull(paintings);
                 assertEquals(1, paintings.size());
@@ -434,20 +434,20 @@ public class DataContextTst extends DataContextTestBase {
 
     public void changeMaxConnections(int delta) {
         DataNode node =
-            (DataNode) ((DataDomain) ctxt.getParent()).getDataNodes().iterator().next();
+            (DataNode) ((DataDomain) context.getParent()).getDataNodes().iterator().next();
         PoolManager manager = (PoolManager) node.getDataSource();
         manager.setMaxConnections(manager.getMaxConnections() + delta);
     }
 
     public void testRollbackNewObject() {
         String artistName = "revertTestArtist";
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
 
-        ctxt.rollbackChanges();
+        context.rollbackChanges();
 
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
-        ctxt.commitChanges();
+        context.commitChanges();
         //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been persisted to the db
 
@@ -468,15 +468,15 @@ public class DataContextTst extends DataContextTestBase {
     public void testRollbackWithMultipleNewObjects() {
         String artistName = "rollbackTestArtist";
         String paintingTitle = "rollbackTestPainting";
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
 
-        Painting painting = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        Painting painting = (Painting) context.createAndRegisterNewObject("Painting");
         painting.setPaintingTitle(paintingTitle);
         painting.setToArtist(artist);
 
         try {
-            ctxt.rollbackChanges();
+            context.rollbackChanges();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -485,7 +485,7 @@ public class DataContextTst extends DataContextTestBase {
         }
 
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
-        ctxt.commitChanges();
+        context.commitChanges();
         //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been persisted to the db
 
@@ -503,17 +503,17 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testRollbackDeletedObject() {
         String artistName = "deleteTestArtist";
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
-        ctxt.commitChanges();
+        context.commitChanges();
         //Save... cayenne doesn't yet handle deleting objects that are uncommitted
-        ctxt.deleteObject(artist);
-        ctxt.rollbackChanges();
+        context.deleteObject(artist);
+        context.rollbackChanges();
 
         //Now check everything is as it should be
         assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
 
-        ctxt.commitChanges();
+        context.commitChanges();
         //The commit should have made no changes, so
         //perform a fetch to ensure that this artist hasn't been deleted from the db
 
@@ -531,19 +531,19 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testRollbackModifiedObject() {
         String artistName = "initialTestArtist";
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         artist.setArtistName("a new value");
 
-        ctxt.rollbackChanges();
+        context.rollbackChanges();
 
         //Make sure the inmemory changes have been rolled back
         assertEquals(artistName, artist.getArtistName());
 
         //Commit what's in memory...
-        ctxt.commitChanges();
+        context.commitChanges();
 
         //.. and ensure that the correct data is in the db
         DataContext freshContext = getDomain().createDataContext();
@@ -562,21 +562,21 @@ public class DataContextTst extends DataContextTestBase {
     public void testRollbackRelationshipModification() {
         String artistName = "relationshipModArtist";
         String paintingTitle = "relationshipTestPainting";
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
-        Painting painting = (Painting) ctxt.createAndRegisterNewObject("Painting");
+        Painting painting = (Painting) context.createAndRegisterNewObject("Painting");
         painting.setPaintingTitle(paintingTitle);
         painting.setToArtist(artist);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         painting.setToArtist(null);
-        ctxt.rollbackChanges();
+        context.rollbackChanges();
 
         assertEquals(artist, painting.getToArtist());
 
         //Check that the reverse relationship was handled
         assertEquals(1, artist.getPaintingArray().size());
-        ctxt.commitChanges();
+        context.commitChanges();
 
         DataContext freshContext = getDomain().createDataContext();
         SelectQuery query = new SelectQuery(Painting.class);
@@ -600,12 +600,12 @@ public class DataContextTst extends DataContextTestBase {
      */
     public void testHasChangesUnrealModify() {
         String artistName = "ArtistName";
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         artist.setArtistName(artistName); //Set again to *exactly* the same value
-        assertFalse(ctxt.hasChanges());
+        assertFalse(context.hasChanges());
     }
 
     /**
@@ -613,12 +613,12 @@ public class DataContextTst extends DataContextTestBase {
      * and the property is simply set to the same value (an unreal modification) 
      */
     public void testHasChangesRealModify() {
-        Artist artist = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("ArtistName");
-        ctxt.commitChanges();
+        context.commitChanges();
 
         artist.setArtistName("Something different");
-        assertTrue(ctxt.hasChanges());
+        assertTrue(context.hasChanges());
     }
 
 }

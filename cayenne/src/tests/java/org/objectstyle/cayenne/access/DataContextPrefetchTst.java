@@ -88,7 +88,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         SelectObserver o = new SelectObserver();
-        ctxt.performQuery(q, o);
+        context.performQuery(q, o);
 
         assertEquals(2, o.getSelectCount());
     }
@@ -105,7 +105,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("artistExhibitArray.toExhibit");
 
         SelectObserver o = new SelectObserver();
-        ctxt.performQuery(q, o);
+        context.performQuery(q, o);
 
         assertEquals(4, o.getSelectCount());
     }
@@ -117,7 +117,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      */
     public void testPrefetch2b() throws Exception {
         this.populatePaintings();
-        EntityResolver er = ctxt.getEntityResolver();
+        EntityResolver er = context.getEntityResolver();
         ObjEntity paintingEntity = er.lookupObjEntity(Painting.class);
         ObjEntity galleryEntity = er.lookupObjEntity(Gallery.class);
         ObjEntity artistExhibitEntity = er.lookupObjEntity(ArtistExhibit.class);
@@ -145,7 +145,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("artistExhibitArray.toExhibit");
         SelectObserver o = new SelectObserver();
         try {
-            ctxt.performQuery(q, o);
+            context.performQuery(q, o);
         }
         finally {
             paintingEntity.addRelationship(paintingToArtistRel);
@@ -169,7 +169,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.setLoggingLevel(Level.WARN);
         q.addPrefetch("paintingArray");
 
-        List artists = ctxt.performQuery(q);
+        List artists = context.performQuery(q);
         assertEquals(2, artists.size());
 
         Artist a1 = (Artist) artists.get(0);
@@ -199,7 +199,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         populatePaintings();
 
         ObjEntity paintingEntity =
-            ctxt.getEntityResolver().lookupObjEntity(Painting.class);
+            context.getEntityResolver().lookupObjEntity(Painting.class);
         ObjRelationship relationship =
             (ObjRelationship) paintingEntity.getRelationship("toArtist");
         paintingEntity.removeRelationship("toArtist");
@@ -208,7 +208,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         try {
-            CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+            CayenneDataObject a1 = (CayenneDataObject) context.performQuery(q).get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
 
@@ -233,7 +233,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         populatePaintings();
 
         ObjEntity paintingEntity =
-            ctxt.getEntityResolver().lookupObjEntity(Painting.class);
+            context.getEntityResolver().lookupObjEntity(Painting.class);
         ObjRelationship relationship =
             (ObjRelationship) paintingEntity.getRelationship("toArtist");
         paintingEntity.removeRelationship("toArtist");
@@ -243,7 +243,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         try {
-            CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+            CayenneDataObject a1 = (CayenneDataObject) context.performQuery(q).get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
 
@@ -269,7 +269,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery("Painting");
         q.addPrefetch("toArtist");
 
-        CayenneDataObject p1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+        CayenneDataObject p1 = (CayenneDataObject) context.performQuery(q).get(0);
         CayenneDataObject a1 = (CayenneDataObject) p1.readPropertyDirectly("toArtist");
 
         assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
@@ -286,7 +286,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
         q.addPrefetch("toArtist");
 
-        List results = ctxt.performQuery(q);
+        List results = context.performQuery(q);
         assertEquals(1, results.size());
     }
 
@@ -300,7 +300,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
         q.addPrefetch("toArtist");
 
-        List results = ctxt.performQuery(q);
+        List results = context.performQuery(q);
         assertEquals(1, results.size());
     }
 
@@ -308,20 +308,20 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test prefetching with the prefetch on a reflexive relationship
      */
     public void testPrefetch7() throws Exception {
-        ArtGroup parent = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
+        ArtGroup parent = (ArtGroup) context.createAndRegisterNewObject("ArtGroup");
         parent.setName("parent");
-        ArtGroup child = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
+        ArtGroup child = (ArtGroup) context.createAndRegisterNewObject("ArtGroup");
         child.setName("child");
         child.setToParentGroup(parent);
-        ctxt.commitChanges();
+        context.commitChanges();
 
         SelectQuery q = new SelectQuery("ArtGroup");
         q.setQualifier(ExpressionFactory.matchExp("name", "child"));
         q.addPrefetch("toParentGroup");
 
-        ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+        ContextSelectObserver o = new ContextSelectObserver(context, Level.WARN);
         try {
-            ctxt.performQuery(q, o);
+            context.performQuery(q, o);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -352,9 +352,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         SelectQuery q = new SelectQuery(Painting.class, exp);
 
         q.addPrefetch("toArtist");
-        ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+        ContextSelectObserver o = new ContextSelectObserver(context, Level.WARN);
         try {
-            ctxt.performQuery(q, o);
+            context.performQuery(q, o);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -382,7 +382,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         Expression artistExp =
             ExpressionFactory.matchExp("artistName", this.artistName(1));
         SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
-        Artist artist1 = (Artist) ctxt.performQuery(artistQuery).get(0);
+        Artist artist1 = (Artist) context.performQuery(artistQuery).get(0);
 
         //Try and find the painting matching the artist
         Expression exp = ExpressionFactory.matchExp("toArtist", artist1);

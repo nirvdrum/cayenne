@@ -89,6 +89,23 @@ public class ObjEntity extends Entity {
         this.setName(name);
     }
 
+    /**
+     * Returns Java class of persistent objects described by this entity.
+     * Casts any thrown exceptions into CayenneRuntimeException.
+     */
+    public Class getJavaClass() {
+        try {
+            return Class.forName(this.getClassName());
+        } catch (ClassNotFoundException e) {
+            throw new CayenneRuntimeException(
+                "Failed to load class for name '"
+                    + this.getClassName()
+                    + "': "
+                    + e.getMessage(),
+                e);
+        }
+    }
+
     /** Returns the name of the corresponding data object class */
     public String getClassName() {
         return className;
@@ -166,7 +183,7 @@ public class ObjEntity extends Entity {
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
      */
-	public Map idSnapshotMapFromSnapshot(Map objectSnapshot) {
+    public Map idSnapshotMapFromSnapshot(Map objectSnapshot) {
         Map idMap = new HashMap();
         Iterator it = getDbEntity().getPrimaryKey().iterator();
         while (it.hasNext()) {
@@ -182,16 +199,16 @@ public class ObjEntity extends Entity {
 
             idMap.put(attr.getName(), val);
         }
-		return idMap;
-	}
-	
+        return idMap;
+    }
+
     /**
      * Creates an object id from the values in object snapshot.
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
      */
     public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-		Map idMap=this.idSnapshotMapFromSnapshot(objectSnapshot);
+        Map idMap = this.idSnapshotMapFromSnapshot(objectSnapshot);
         Class objClass;
         try {
             objClass = Class.forName(this.getClassName());
