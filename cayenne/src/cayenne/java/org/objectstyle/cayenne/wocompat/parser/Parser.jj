@@ -1,7 +1,7 @@
 /**
-* Courtesy of Jeff Martin <reportmill@yahoo.com>  and Josh from Report Mill
-* http://www.reportmill.com/
-*/
+ * Courtesy of Jeff Martin <reportmill@yahoo.com>  and Josh from Report Mill
+ * http://www.reportmill.com/
+ */
 
 
 options {
@@ -135,8 +135,24 @@ TOKEN :
 |	"{"
 |	"}"
 |	","
-|       ";"
+|   ";"
 }
+
+SKIP :
+{
+  "//" : WithinComment
+}
+
+<WithinComment> SKIP :
+{
+  <["\n", "\r"]> : DEFAULT
+}
+
+<WithinComment> MORE :
+{
+  <~["\n" ,"\r"]>
+}
+
 
 TOKEN :
 {
@@ -195,19 +211,16 @@ SKIP :
   < QUOTED_STRING: "\"" > { image.setLength(image.length()-1); matchedToken.image = image.toString(); } : DEFAULT
 }
 
-
-
-
-
 Object object() :
-{Object node;}
 {
-    node=array()
-	{ return node; }
-|   node=dictionary() 
-        { return node; }
-|   node=leaf()
-        { return node; }
+	Object node;
+}
+{
+		node=array() { return node; }
+	|   
+		node=dictionary() { return node; }
+	|   
+		node=leaf() { return node; }
 }
 
 Object leaf() :
@@ -220,14 +233,33 @@ Object leaf() :
 }
 
 HashMap dictionary() : 
-{ HashMap h;
-  Object key, val;
+{ 
+	HashMap h;
+	Object key, val;
 }
 {
-  "{" {h = new HashMap();} (
-    key=object() "=" val=object() ";" { h.put(key,val); }
-    )*
-  "}" { return h; }
+	"{"  {h = new HashMap(); }
+	 (
+		keyValuePair(h)
+		(
+			LOOKAHEAD(2) ";" keyValuePair(h)
+    	)* 
+    	
+    	// last semicolon is optional
+    	( ";" )?
+    )?
+    
+	"}" { return h; }
+}
+
+void keyValuePair(Map map) :
+{
+	Object key, val;
+}
+{
+		key = object() 
+		"=" 
+		val = object() { map.put(key, val); }
 }
 
 ArrayList  array() : 
