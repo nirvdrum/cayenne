@@ -1,0 +1,54 @@
+Cayenne Release Notes 1.0a1 (Alpha 1)
+============================================
+
+For the latest information go to the project 
+web site at http://objectstyle.org/cayenne/
+
+
+This is the first "official" release of Cayenne. It has "alpha" status, 
+meaning that before the final 1.0 release there may be some new feature
+additions and minor API changes.
+
+Included in this release:
+============================================
+1. Cayenne Object Relational Java framework
+2. CayenneModeler GUI application used for modeling and deployment
+3. User Guide documentation in HTML format (also mirrored on the website)
+4. Source code of all Cayenne classes.
+
+
+Known issues:
+============================================
+Notes: 
+
+- bug id's refer to SourceForge bug tracking system at 
+  http://sourceforge.net/tracker/?group_id=48132&atid=452068 
+
+- only issues that affect the ability to use Cayenne are listed.
+  Things like general interface improvement requests are not shown.
+============================================
+
+1. Incomplete documentation .
+   Some chapters of the UserGuide are just placeholders and still need to 
+   be written. Some require more work.
+
+   Workaround: use Cayenne mailing lists http://objectstyle.org/cayenne/lists.html 
+   for any questions.
+---------------------------------------------
+
+2. Bug ID 554689. CayenneModeler database login panel doesn't save 
+   entered values between the sessions.
+
+   Workaround: all the values need to be typed again in a new session.
+---------------------------------------------
+
+3. Bug ID 562527. Toolbar "delete" button doesn't work for relationships 
+   and attributes.
+   
+   Workaround: Use "delete" button on the screen.
+---------------------------------------------
+
+4. Bug ID 549101. When data node and data map file locations are 
+   changed, old file are not removed.
+   
+   Workaround: Remove old files manually or ignore them.

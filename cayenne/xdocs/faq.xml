@@ -19,8 +19,8 @@
  			<p><strong>A.:</strong> Most likely this happened due to the fact that application 
  			classes and Cayenne classes are loaded by different ClassLoaders
  			and Cayenne configuration package can't access configuration
- 			files accessible to application ClassLoader. Typical scenario
- 			when this can happen is when cayenne.jar is placed in extensions
+ 			files accessible to application ClassLoader. 
+ 			Typical reason for that is when cayenne.jar is placed in extensions
  			directory of the JVM ($JRE_HOME/lib/ext directory). In this case
  			programmer must explicitly bootstrap Cayenne to look for configuration
  			files in the right place. This can be done by the following code
@@ -34,7 +34,7 @@ Configuration.bootstrapSharedConfig(MyClass.class);
 			</subsection>
 			
 			
-			<subsection name=" How do I log an output of a single query.">
+			<subsection name="How do I log an output of a single query.">
  			<p><strong>Q.:</strong>  How do I log an output of a single query.</p>
  			
  			<p><strong>A.:</strong> Cayenne allows to control logging levels of 
@@ -48,6 +48,17 @@ List objects = dataContext.performQuery(selectQuery, Level.SEVERE);
 <source>
 dataContext.commitChanges(Level.SEVERE);	
 </source>
+			</subsection>
+			
+			<subsection name="How do I report a bug I found in Cayenne.">
+ 			<p><strong>Q.:</strong>  How do I report a bug I found in Cayenne.</p>
+ 			
+ 			<p><strong>A.:</strong> Cayenne is using SourceForge bug tracking system. 
+ 			Go to <a href=
+ 			"http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068">http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068</a> 
+ 			to submit Cayenne-related bugs. Reporting bugs is the most valuable contribution
+ 			Cayenne users can provide for the development team.
+			</p>
 			</subsection>
     </section>
 </body>
