@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -70,11 +71,31 @@ public class ProjectSet {
     protected List projects = Collections.synchronizedList(new ArrayList());
     protected Project currentProject;
 
+    /**
+     * Returns the first project matching the name, if any.
+     */
+    public Project getProject(String name) {
+    	if(name == null) {
+    		return null;
+    	}
+    	
+        synchronized (projects) {
+            Iterator it = projects.iterator();
+            while (it.hasNext()) {
+            	Project p = (Project)it.next();
+            	if(name.equals(p.getName())) {
+            		return p;
+            	}
+            }
+        }
+        return null;
+    }
+
     public void addProject(Project project) {
         if (project == null) {
             throw new NullPointerException("Null project.");
         }
-        
+
         synchronized (projects) {
             projects.add(project);
         }
@@ -112,23 +133,23 @@ public class ProjectSet {
     public void setCurrentProject(Project currentProject) {
         synchronized (projects) {
             this.currentProject = currentProject;
-            if(currentProject !=  null && !projects.contains(currentProject)) {
-            	projects.add(currentProject);
+            if (currentProject != null && !projects.contains(currentProject)) {
+                projects.add(currentProject);
             }
         }
     }
-    
+
     /**
      * Factory method to create new projects.
      */
     public Project createProject(String name, File f, boolean makeCurrent) {
-    	Project project = new Project(name, f);
-    	
-    	addProject(project);
-    	if(makeCurrent) {
-    		setCurrentProject(project);
-    	}
-    	
-    	return project;    	
+        Project project = new Project(name, f);
+
+        addProject(project);
+        if (makeCurrent) {
+            setCurrentProject(project);
+        }
+
+        return project;
     }
 }

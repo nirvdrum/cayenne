@@ -68,8 +68,7 @@ import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
- * Subclass of Configuration that uses System CLASSPATH to locate resources.
- * It also stores project file location.
+ * Subclass of Configuration used in the project model.
  *
  * @author Misha Shengaout
  * @author Andrei Adamchik

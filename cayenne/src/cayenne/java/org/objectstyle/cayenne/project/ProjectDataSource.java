@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 
 /**
  * ProjectDataSource is a DataSource implementation used by 
- * the project classes.
+ * the project model.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik

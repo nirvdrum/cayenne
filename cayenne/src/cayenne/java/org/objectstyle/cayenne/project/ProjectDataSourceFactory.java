@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
 /** 
- * Factory of DataSource objects used by the project classes. 
+ * Factory of DataSource objects used by the project model. 
  * Always tries to locate file with direct connection info.
  * 
  * @author Misha Shengaout

@@ -123,14 +123,6 @@ public class Project {
         return name;
     }
 
-    /**
-     * Sets the name.
-     * @param name The name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public DataDomain[] getDomains() {
         List domains = getConfig().getDomainList();
         if (domains == null) {
