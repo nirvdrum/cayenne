@@ -56,15 +56,26 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputVerifier;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
-import org.objectstyle.cayenne.modeler.model.QueryModel;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.Comparators;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.query.Query;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
@@ -78,9 +89,8 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class QueryDetailView extends JPanel implements QueryDisplayListener {
     protected EventController eventController;
-
-    protected QueryModel model;
     protected JTextField name;
+    protected JComboBox queryRoot;
 
     public QueryDetailView(EventController eventController) {
         this.eventController = eventController;
@@ -92,23 +102,95 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
     private void initView() {
         // create widgets
         name = CayenneWidgetFactory.createTextField();
+        queryRoot = CayenneWidgetFactory.createComboBox();
+        queryRoot.setRenderer(CellRenderers.listRendererWithIcons());
 
         // assemble
         this.setLayout(new BorderLayout());
         FormLayout layout =
-            new FormLayout(
-                "right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150",
-                "");
+            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.append("Query Name:", name, 3);
+        builder.appendSeparator("Query Configuration");
+        builder.append("Query Name:", name);
+
+        // for now only allow ObjEntities in queries
+        // in the future this will be expanded...
+        builder.append("Query Root:", queryRoot);
 
         this.add(builder.getPanel());
     }
 
-    protected void initController() {
+    private void initController() {
         eventController.addQueryDisplayListener(this);
+
+        name.setInputVerifier(new InputVerifier() {
+            public boolean verify(JComponent input) {
+                String text = name.getText();
+                if (text != null) {
+                    text = text.trim();
+                }
+
+                DataMap map = eventController.getCurrentDataMap();
+                Query query = eventController.getCurrentQuery();
+
+                Query matchingQuery = map.getQuery(text);
+
+                if (matchingQuery == null) {
+                    // completely new name, set new name for entity
+                    QueryEvent e = new QueryEvent(this, query, query.getName());
+                    MapUtil.setQueryName(map, query, text);
+                    eventController.fireQueryEvent(e);
+                    return true;
+                }
+                else if (matchingQuery == query) {
+                    // no name changes, just return
+                    return true;
+                }
+                else {
+                    // there is an entity with the same name
+                    return false;
+                }
+            }
+        });
+
+        queryRoot.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                Query query = eventController.getCurrentQuery();
+                if (query != null) {
+                    query.setRoot(queryRoot.getModel().getSelectedItem());
+                }
+            }
+        });
+    }
+
+    /**
+     * Updates the view from the current model state.
+     * Invoked when a currently displayed query is changed.
+     */
+    private void initFromModel(Query query) {
+        // init query name
+        name.setText(query.getName());
+
+        // init root choices
+
+        DataMap map = eventController.getCurrentDataMap();
+        Object[] entities = map.getObjEntities().toArray();
+
+        // add data map to the front
+        Object[] objects = new Object[entities.length + 1];
+        objects[0] = map;
+
+        // now add the entities
+        if (entities.length > 0) {
+            System.arraycopy(entities, 0, objects, 1, entities.length);
+        }
+        Arrays.sort(objects, Comparators.getDataMapChildrenComparator());
+
+        DefaultComboBoxModel model = new DefaultComboBoxModel(objects);
+        model.setSelectedItem(query.getRoot());
+        queryRoot.setModel(model);
     }
 
     /**
@@ -116,13 +198,10 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
      */
     public void currentQueryChanged(QueryDisplayEvent e) {
         Query query = e.getQuery();
-        if (query == null || (model != null && model.getQuery() == query)) {
+        if (query == null) {
             return;
         }
 
-        model = new QueryModel(query);
-
-        // extract values from the new query object
-        name.setText(model.getName());
+        initFromModel(query);
     }
 }

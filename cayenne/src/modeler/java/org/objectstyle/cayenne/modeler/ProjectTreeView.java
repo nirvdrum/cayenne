@@ -55,33 +55,25 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.Component;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
@@ -98,7 +90,6 @@ import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureListener;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.map.event.QueryListener;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
@@ -113,7 +104,9 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
+import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.query.Query;
 
 /** 
@@ -150,7 +143,7 @@ public class ProjectTreeView
         this.mediator = mediator;
 
         browseTree = new ProjectTree(CayenneModelerFrame.getProject());
-        browseTree.setCellRenderer(new BrowseViewRenderer());
+        browseTree.setCellRenderer(CellRenderers.treeRenderer());
         setViewportView(browseTree);
 
         // listen for mouse events
@@ -838,7 +831,10 @@ public class ProjectTreeView
             }
 
             // ObjEntities go before DbEntities
-            if (MapObjectsComparator.compare(object, node.getUserObject()) <= 0) {
+            if (Comparators
+                .getDataMapChildrenComparator()
+                .compare(object, node.getUserObject())
+                <= 0) {
                 ins = i;
             }
         }
@@ -859,129 +855,5 @@ public class ProjectTreeView
         browseTree.getProjectModel().insertNodeInto(entityNode, parent, ins);
     }
 
-    static class MapObjectsComparator {
 
-        public static int compare(Object o1, Object o2) {
-            int delta = getClassWeight(o1) - getClassWeight(o2);
-            if (delta != 0) {
-                return delta;
-            }
-
-            try {
-                String name1 = (String) PropertyUtils.getSimpleProperty(o1, "name");
-                String name2 = (String) PropertyUtils.getSimpleProperty(o2, "name");
-
-                if (name1 == null) {
-                    return (name2 != null) ? -1 : 0;
-                }
-                else if (name2 == null) {
-                    return 1;
-                }
-                else {
-                    return name1.compareTo(name2);
-                }
-            }
-            catch (Exception ex) {
-                throw new CayenneRuntimeException("Comparator error.", ex);
-            }
-        }
-
-        protected static int getClassWeight(Object o) {
-
-            if (o instanceof ObjEntity) {
-                return 1;
-            }
-            else if (o instanceof DbEntity) {
-                return 2;
-            }
-            else if (o instanceof Procedure) {
-                return 3;
-            }
-            else if (o instanceof Query) {
-                return 4;
-            }
-            else {
-                // this should trap nulls among other things
-                return Integer.MAX_VALUE;
-            }
-        }
-    }
-
-    static class BrowseViewRenderer extends DefaultTreeCellRenderer {
-        ImageIcon domainIcon;
-        ImageIcon nodeIcon;
-        ImageIcon mapIcon;
-        ImageIcon dbEntityIcon;
-        ImageIcon objEntityIcon;
-        ImageIcon derivedDbEntityIcon;
-        ImageIcon procedureIcon;
-        ImageIcon queryIcon;
-
-        public BrowseViewRenderer() {
-            domainIcon = buildIcon("icon-dom.gif");
-            nodeIcon = buildIcon("icon-node.gif");
-            mapIcon = buildIcon("icon-datamap.gif");
-            dbEntityIcon = buildIcon("icon-dbentity.gif");
-            objEntityIcon = buildIcon("icon-objentity.gif");
-            derivedDbEntityIcon = buildIcon("icon-derived-dbentity.gif");
-            procedureIcon = buildIcon("icon-stored-procedure.gif");
-            queryIcon = buildIcon("icon-query.gif");
-        }
-
-        private ImageIcon buildIcon(String path) {
-            ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
-            URL url = cl.getResource(CayenneAction.RESOURCE_PATH + path);
-            return new ImageIcon(url);
-        }
-
-        public Component getTreeCellRendererComponent(
-            JTree tree,
-            Object value,
-            boolean sel,
-            boolean expanded,
-            boolean leaf,
-            int row,
-            boolean hasFocus) {
-
-            super.getTreeCellRendererComponent(
-                tree,
-                value,
-                sel,
-                expanded,
-                leaf,
-                row,
-                hasFocus);
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            Object obj = node.getUserObject();
-            if (obj instanceof DataDomain) {
-                setIcon(domainIcon);
-            }
-            else if (obj instanceof DataNode) {
-                setIcon(nodeIcon);
-            }
-            else if (obj instanceof DataMap) {
-                setIcon(mapIcon);
-            }
-            else if (obj instanceof Entity) {
-                Entity ent = (Entity) obj;
-                if (ent instanceof DerivedDbEntity) {
-                    setIcon(derivedDbEntityIcon);
-                }
-                else if (ent instanceof DbEntity) {
-                    setIcon(dbEntityIcon);
-                }
-                else if (ent instanceof ObjEntity) {
-                    setIcon(objEntityIcon);
-                }
-            }
-            else if (obj instanceof Procedure) {
-                setIcon(procedureIcon);
-            }
-            else if (obj instanceof Query) {
-                setIcon(queryIcon);
-            }
-
-            return this;
-        }
-    }
 }

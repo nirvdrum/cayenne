@@ -55,44 +55,101 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import org.objectstyle.cayenne.access.DataNode;
+import java.util.Comparator;
 
-/** 
- * GUI wrapper for DataNode. Used to put DataNodes into the 
- * JTree and any other place where toString() method must 
- * return DataNode's name.
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.query.Query;
+
+/**
+ * A collection of useful Comparators used by the modeler.
+ * 
+ * @since 1.1
+ * @author Andrei Adamchik
  */
-public class DataNodeWrapper implements Comparable {
-    protected DataNode node;
+public class Comparators {
+    private static final Comparator dataMapChildrenComparator =
+        new DataMapChildrenComparator();
 
-    public DataNodeWrapper() {
+    private static final Comparator namedObjectComparator = new NamedObjectComparator();
+
+    /**
+     * Returns a comparator to order DataMap children of mixed types, such as
+     * ObjEntities, DbEntities, Procedures and Queries.
+     */
+    public static Comparator getDataMapChildrenComparator() {
+        return dataMapChildrenComparator;
     }
 
-    public DataNodeWrapper(DataNode node) {
-        this.node = node;
+    /**
+     * Returns a comparator to order java beans according to their 
+     * "name" property.
+     */
+    public static Comparator getNamedObjectComparator() {
+        return namedObjectComparator;
     }
 
-    public String toString() {
-        return (node != null && node.getName() != null) ? node.getName() : "";
-    }
+    final static class NamedObjectComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
 
-    public DataNode getDataNode() {
-        return node;
-    }
+            String name1 = ModelerUtil.getObjectName(o1);
+            String name2 = ModelerUtil.getObjectName(o2);
 
-    public int compareTo(Object o) {
-     
-        if (o instanceof DataNodeWrapper) {
-			DataNodeWrapper otherWrapper = (DataNodeWrapper) o;
-			
-			// 'toString' is implemented to never return null
-			String name = toString();
-            String otherName = otherWrapper.toString();
-            return name.compareTo(otherName);
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
         }
-        else {
-            return -1;
-        }
     }
 
+    final static class DataMapChildrenComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            int delta = getClassWeight(o1) - getClassWeight(o2);
+            if (delta != 0) {
+                return delta;
+            }
+
+            String name1 = ModelerUtil.getObjectName(o1);
+            String name2 = ModelerUtil.getObjectName(o2);
+
+            if (name1 == null) {
+                return (name2 != null) ? -1 : 0;
+            }
+            else if (name2 == null) {
+                return 1;
+            }
+            else {
+                return name1.compareTo(name2);
+            }
+        }
+
+        private static int getClassWeight(Object o) {
+            if (o instanceof DataMap) {
+                return 1;
+            }
+            else if (o instanceof ObjEntity) {
+                return 2;
+            }
+            else if (o instanceof DbEntity) {
+                return 3;
+            }
+            else if (o instanceof Procedure) {
+                return 4;
+            }
+            else if (o instanceof Query) {
+                return 5;
+            }
+            else {
+                // this should trap nulls among other things
+                return Integer.MAX_VALUE;
+            }
+        }
+    }
 }

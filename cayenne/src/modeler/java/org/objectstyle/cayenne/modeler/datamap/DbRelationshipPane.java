@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,7 +80,6 @@ import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.CayenneActionPanel;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
@@ -95,8 +95,9 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
  * @author Andrei Adamchik
  */
 public class DbRelationshipPane
-    extends CayenneActionPanel
+    extends JPanel
     implements
+        ActionListener,
         DbEntityDisplayListener,
         DbEntityListener,
         DbRelationshipListener,
@@ -128,7 +129,7 @@ public class DbRelationshipPane
         add(panel, BorderLayout.CENTER);
     }
 
-    public void performAction(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         if (src == resolve) {
             resolveRelationship();

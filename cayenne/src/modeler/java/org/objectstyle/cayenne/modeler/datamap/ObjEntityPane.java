@@ -59,10 +59,7 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.Arrays;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
@@ -73,6 +70,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -82,7 +80,8 @@ import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.EntityWrapper;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -97,7 +96,9 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class ObjEntityPane
     extends JPanel
-    implements ActionListener, ObjEntityDisplayListener, ExistingSelectionProcessor, ItemListener {
+    implements ObjEntityDisplayListener, ExistingSelectionProcessor {
+
+    private static Logger logObj = Logger.getLogger(ObjEntityPane.class);
 
     protected EventController mediator;
     protected JTextField name;
@@ -108,35 +109,21 @@ public class ObjEntityPane
     protected JButton tableLabel;
     protected JCheckBox readOnly;
 
-    /** Cludge to prevent marking data map as dirty during initial load. */
-    private boolean ignoreChange = false;
-
     public ObjEntityPane(EventController mediator) {
         this.mediator = mediator;
-        mediator.addObjEntityDisplayListener(this);
-
-        // Create and layout components
-        init();
-
-        // Add listeners
-        InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
-        className.setInputVerifier(inputCheck);
-        superClassName.setInputVerifier(inputCheck);
-
-        dbName.addActionListener(this);
-        tableLabel.addActionListener(this);
+        initView();
+        initController();
     }
 
-    private void init() {
+    private void initView() {
         // create widgets
         name = CayenneWidgetFactory.createTextField();
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
         dbName = CayenneWidgetFactory.createComboBox();
+        dbName.setRenderer(CellRenderers.listRendererWithIcons());
 
         readOnly = new JCheckBox();
-        readOnly.addItemListener(this);
         tableLabel = CayenneWidgetFactory.createLabelButton("Table name:");
 
         // assemble
@@ -156,6 +143,68 @@ public class ObjEntityPane
         add(builder.getPanel(), BorderLayout.CENTER);
     }
 
+    private void initController() {
+        // initialize events processing and tracking of UI updates...
+
+        mediator.addObjEntityDisplayListener(this);
+        InputVerifier inputCheck = new FieldVerifier();
+        name.setInputVerifier(inputCheck);
+        className.setInputVerifier(inputCheck);
+        superClassName.setInputVerifier(inputCheck);
+
+        dbName.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Change DbEntity for current ObjEntity
+                ObjEntity entity = mediator.getCurrentObjEntity();
+                entity.setDbEntity((DbEntity) dbName.getSelectedItem());
+                mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+            }
+        });
+
+        tableLabel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Jump to DbEntity of the current ObjEntity
+                DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
+                if (entity != null) {
+                    DataDomain dom = mediator.getCurrentDataDomain();
+                    DataMap map = dom.getMapForDbEntity(entity.getName());
+                    mediator.fireDbEntityDisplayEvent(
+                        new EntityDisplayEvent(this, entity, map, dom));
+                }
+            }
+        });
+
+        readOnly.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ObjEntity entity = mediator.getCurrentObjEntity();
+                if (entity != null) {
+                    entity.setReadOnly(readOnly.isSelected());
+                    mediator.fireObjEntityEvent(new EntityEvent(this, entity));
+                }
+            }
+        });
+    }
+
+    /**
+     * Updates the view from the current model state.
+     * Invoked when a currently displayed ObjEntity is changed.
+     */
+    private void initFromModel(ObjEntity entity) {
+        name.setText(entity.getName());
+        superClassName.setText(
+            entity.getSuperClassName() != null ? entity.getSuperClassName() : "");
+        className.setText(entity.getClassName() != null ? entity.getClassName() : "");
+        readOnly.setSelected(entity.isReadOnly());
+
+        DataMap map = mediator.getCurrentDataMap();
+        Object[] entities = map.getDbEntities().toArray();
+        Arrays.sort(entities, Comparators.getDataMapChildrenComparator());
+
+        DefaultComboBoxModel model = new DefaultComboBoxModel(entities);
+        model.setSelectedItem(entity.getDbEntity());
+        dbName.setModel(model);
+    }
+
     public void processExistingSelection() {
         EntityDisplayEvent e =
             new EntityDisplayEvent(
@@ -166,92 +215,13 @@ public class ObjEntityPane
         mediator.fireObjEntityDisplayEvent(e);
     }
 
-    public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
-
-        if (src == dbName) {
-            // Change DbEntity for current ObjEntity
-            ObjEntity entity = mediator.getCurrentObjEntity();
-            EntityWrapper wrap = (EntityWrapper) dbName.getSelectedItem();
-            entity.setDbEntity((DbEntity) wrap.getEntity());
-            mediator.fireObjEntityEvent(new EntityEvent(this, entity));
-        }
-        else if (tableLabel == src) {
-            // Jump to DbEntity of the current ObjEntity
-            DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
-            if (entity != null) {
-                DataDomain dom = mediator.getCurrentDataDomain();
-                DataMap map = dom.getMapForDbEntity(entity.getName());
-                mediator.fireDbEntityDisplayEvent(
-                    new EntityDisplayEvent(this, entity, map, dom));
-            }
-        }
-    }
-
     public void currentObjEntityChanged(EntityDisplayEvent e) {
         ObjEntity entity = (ObjEntity) e.getEntity();
         if (entity == null || !e.isEntityChanged()) {
             return;
         }
 
-        ignoreChange = true;
-        name.setText(entity.getName());
-        superClassName.setText(
-            entity.getSuperClassName() != null ? entity.getSuperClassName() : "");
-        className.setText(entity.getClassName() != null ? entity.getClassName() : "");
-        readOnly.setSelected(entity.isReadOnly());
-
-        // Display DbEntity name in select box
-        dbName.setModel(createComboBoxModel(entity.getDbEntity()));
-        ignoreChange = false;
-    }
-
-    /** 
-     * Creates DefaultComboBoxModel from the list of DbEntities.
-     * Model contains <code>DbEntityWrapper's</code>.
-     * 
-     * @param select DbEntity to make selected. If null, empty 
-     * element is selected.
-     */
-    private DefaultComboBoxModel createComboBoxModel(DbEntity select) {
-        EntityWrapper selected_entry = null;
-
-        Vector combo_entries = new Vector();
-        DataMap map = mediator.getCurrentDataMap();
-        Iterator iter = map.getDbEntities().iterator();
-        // First add empty element.
-        EntityWrapper wrap = new EntityWrapper(null);
-        selected_entry = wrap;
-        combo_entries.add(wrap);
-        while (iter.hasNext()) {
-            DbEntity entity = (DbEntity) iter.next();
-            wrap = new EntityWrapper(entity);
-            if (select == entity) {
-                selected_entry = wrap;
-            }
-            combo_entries.add(wrap);
-        }
-
-        DefaultComboBoxModel model = new DefaultComboBoxModel(combo_entries);
-        model.setSelectedItem(selected_entry);
-        return model;
-    }
-
-    /**
-     * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
-     */
-    public void itemStateChanged(ItemEvent e) {
-        if (ignoreChange) {
-            return;
-        }
-
-        if (e.getSource() == readOnly) {
-            ObjEntity ent = mediator.getCurrentObjEntity();
-            if (ent != null) {
-                ent.setReadOnly(readOnly.isSelected());
-                mediator.fireObjEntityEvent(new EntityEvent(this, ent));
-            }
-        }
+        initFromModel(entity);
     }
 
     class FieldVerifier extends InputVerifier {

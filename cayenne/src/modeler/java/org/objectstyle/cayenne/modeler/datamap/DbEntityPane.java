@@ -85,6 +85,7 @@ import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -152,6 +153,7 @@ public class DbEntityPane
         parentLabel = CayenneWidgetFactory.createLabelButton("Parent DbEntity: ");
         parentLabel.setEnabled(false);
         parentEntities = CayenneWidgetFactory.createComboBox();
+        parentEntities.setRenderer(CellRenderers.listRendererWithIcons());
         parentEntities.setEditable(false);
         parentEntities.setEnabled(false);
 

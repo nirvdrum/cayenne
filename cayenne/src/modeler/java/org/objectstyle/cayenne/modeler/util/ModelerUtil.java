@@ -62,18 +62,49 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
 import org.objectstyle.cayenne.modeler.control.EventController;
 
 /**
+ * Various unorganized utility methods used by CayenneModeler.
+ * 
  * @author Andrei Adamchik
  */
-public class ModelerUtil {
+public final class ModelerUtil {
+
+    /**
+     * Returns the "name" property of the object.
+     * 
+     * @since 1.1
+     */
+    public static String getObjectName(Object object) {
+        if (object == null) {
+            return null;
+        }
+        else if (object instanceof MapObject) {
+            return ((MapObject) object).getName();
+        }
+        else if (object instanceof String) {
+            return (String) object;
+        }
+        else {
+            try {
+                // use reflection
+                return (String) PropertyUtils.getSimpleProperty(object, "name");
+            }
+            catch (Exception ex) {
+                return null;
+            }
+        }
+    }
+
     /**
      * Builds a consistent title that starts with the application name.
      */

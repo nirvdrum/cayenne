@@ -57,15 +57,13 @@ package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
 import javax.swing.JCheckBox;
@@ -84,7 +82,8 @@ import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
@@ -96,43 +95,159 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class DataMapDetailView
-    extends CayenneActionPanel
-    implements DataMapDisplayListener, ItemListener {
+public class DataMapDetailView extends JPanel implements DataMapDisplayListener {
 
     protected EventController eventController;
 
     protected JTextField name;
-
     protected JLabel location;
     protected JPanel depMapsPanel;
     protected JComboBox nodeSelector;
-
     protected Map mapLookup = new HashMap();
 
+    private ActionListener mapCheckboxListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            JCheckBox src = (JCheckBox) e.getSource();
+            DataMap map = (DataMap) mapLookup.get(src);
+
+            if (map != null) {
+                DataMap curMap = eventController.getCurrentDataMap();
+                if (src.isSelected()) {
+                    curMap.addDependency(map);
+                }
+                else {
+                    curMap.removeDependency(map);
+                }
+
+                eventController.fireDataMapEvent(new DataMapEvent(this, curMap));
+            }
+        }
+    };
+
     public DataMapDetailView(EventController eventController) {
-        super();
         this.eventController = eventController;
 
-        // Create and layout components
-        init();
-
-        // Add listeners
-        eventController.addDataMapDisplayListener(this);
-        nodeSelector.addActionListener(this);
-        InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
+        initView();
+        initController();
     }
 
-    protected void init() {
+    protected void initView() {
         // create widgets
         name = CayenneWidgetFactory.createTextField();
         location = CayenneWidgetFactory.createLabel("");
         nodeSelector = CayenneWidgetFactory.createComboBox();
+        nodeSelector.setRenderer(CellRenderers.listRendererWithIcons());
 
         // assemble
         this.setLayout(new BorderLayout());
         add(buildTopPanel(), BorderLayout.NORTH);
+    }
+
+    protected void initController() {
+        eventController.addDataMapDisplayListener(this);
+        name.setInputVerifier(new FieldVerifier());
+
+        nodeSelector.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                DataNode node = (DataNode) nodeSelector.getSelectedItem();
+                DataMap map = eventController.getCurrentDataMap();
+
+                // no change?
+                if (node != null && node.getDataMaps().contains(map)) {
+                    return;
+                }
+
+                boolean hasChanges = false;
+
+                // unlink map from any nodes
+                Iterator nodes =
+                    eventController.getCurrentDataDomain().getDataNodes().iterator();
+
+                while (nodes.hasNext()) {
+                    DataNode nextNode = (DataNode) nodes.next();
+
+                    // Theoretically only one node may contain a datamap at each given time.
+                    // Being paranoid, we will still scan through all.
+                    if (nextNode != node && nextNode.getDataMaps().contains(map)) {
+                        nextNode.removeDataMap(map.getName());
+
+                        // announce DataNode change
+                        eventController.fireDataNodeEvent(
+                            new DataNodeEvent(this, nextNode));
+
+                        hasChanges = true;
+                    }
+                }
+
+                // link to a selected node
+                if (node != null) {
+                    node.addDataMap(map);
+                    hasChanges = true;
+
+                    // announce DataNode change
+                    eventController.fireDataNodeEvent(new DataNodeEvent(this, node));
+                }
+
+                if (hasChanges) {
+                    // TODO: maybe reindexing is an overkill in the modeler?
+                    eventController.getCurrentDataDomain().reindexNodes();
+                }
+            }
+        });
+    }
+
+    /**
+     * Updates the view from the current model state.
+     * Invoked when a currently displayed ObjEntity is changed.
+     */
+    private void initFromModel(DataMap map) {
+        name.setText(map.getName());
+        String locationText = map.getLocation();
+        location.setText((locationText != null) ? locationText : "(no file)");
+
+        // rebuild data node list
+        Object nodes[] = eventController.getCurrentDataDomain().getDataNodes().toArray();
+
+        // add an empty item to the front
+        Object[] objects = new Object[nodes.length + 1];
+        // objects[0] = null;
+
+        // now add the entities
+        if (nodes.length > 0) {
+            Arrays.sort(nodes, Comparators.getNamedObjectComparator());
+            System.arraycopy(nodes, 0, objects, 1, nodes.length);
+        }
+
+        DefaultComboBoxModel model = new DefaultComboBoxModel(objects);
+
+        // find selected node
+        for (int i = 0; i < nodes.length; i++) {
+            DataNode node = (DataNode) nodes[i];
+            if (node.getDataMaps().contains(map)) {
+                model.setSelectedItem(node);
+                break;
+            }
+        }
+
+        nodeSelector.setModel(model);
+
+        // rebuild dependency list
+
+        if (depMapsPanel != null) {
+            remove(depMapsPanel);
+            depMapsPanel = null;
+        }
+
+        mapLookup.clear();
+
+        // add a list of dependencies
+        Collection maps = eventController.getCurrentDataDomain().getDataMaps();
+
+        if (maps.size() > 1) {
+            depMapsPanel = buildMapsPanel(map, maps);
+            add(depMapsPanel, BorderLayout.CENTER);
+            validate();
+        }
     }
 
     private JPanel buildTopPanel() {
@@ -162,8 +277,7 @@ public class DataMapDetailView
                 JCheckBox check = new JCheckBox();
                 JLabel label = CayenneWidgetFactory.createLabel(nextMap.getName());
                 builder.append(check, label);
-
-                check.addItemListener(this);
+                check.addActionListener(mapCheckboxListener);
                 if (nextMap.isDependentOn(selectedMap)) {
                     check.setEnabled(false);
                     label.setEnabled(false);
@@ -180,142 +294,17 @@ public class DataMapDetailView
         return builder.getPanel();
     }
 
-    /** 
-       * Creates DefaultComboBoxModel for linked DataNode selection
-       */
-    protected ComboBoxModel createComboBoxModel(DataMap map) {
-
-        Collection nodes = eventController.getCurrentDataDomain().getDataNodes();
-        int len = nodes.size();
-        Object[] nodesModel = new Object[len + 1];
-
-        // First add empty element.
-        nodesModel[0] = new DataNodeWrapper();
-        Object currentSelection = nodesModel[0];
-
-        // go via an iterator in an indexed loop, since
-        // we already obtained the size 
-        // (and index is required to initialize array)
-        Iterator nodesIt = nodes.iterator();
-        for (int i = 1; i <= len; i++) {
-            DataNode node = (DataNode) nodesIt.next();
-            nodesModel[i] = new DataNodeWrapper(node);
-
-            if (node.getDataMaps().contains(map)) {
-                currentSelection = nodesModel[i];
-            }
-        }
-
-        Arrays.sort(nodesModel);
-        DefaultComboBoxModel model = new DefaultComboBoxModel(nodesModel);
-        model.setSelectedItem(currentSelection);
-        return model;
-    }
-
     /**
      * Refreshes the view, rebuilds the list of other DataMaps that this one 
      * may depend upon. 
      */
     public void currentDataMapChanged(DataMapDisplayEvent e) {
         DataMap map = e.getDataMap();
-
         if (null == map) {
             return;
         }
 
-        name.setText(map.getName());
-        String locationText = map.getLocation();
-        location.setText((locationText != null) ? locationText : "(no file)");
-
-        // rebuild data node list
-        nodeSelector.setModel(createComboBoxModel(map));
-
-        // rebuild dependency list
-
-        if (depMapsPanel != null) {
-            remove(depMapsPanel);
-            depMapsPanel = null;
-        }
-
-        mapLookup.clear();
-
-        // add a list of dependencies
-        Collection maps = eventController.getCurrentDataDomain().getDataMaps();
-
-        if (maps.size() > 1) {
-            depMapsPanel = buildMapsPanel(map, maps);
-            add(depMapsPanel, BorderLayout.CENTER);
-            validate();
-        }
-    }
-
-    /**
-     * ItemListener implementation. Processes (un)selection of dependent DataMaps.
-     */
-    public void itemStateChanged(ItemEvent e) {
-        JCheckBox src = (JCheckBox) e.getSource();
-        DataMap map = (DataMap) mapLookup.get(src);
-
-        if (map != null) {
-            DataMap curMap = eventController.getCurrentDataMap();
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                curMap.addDependency(map);
-            }
-            else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                curMap.removeDependency(map);
-            }
-
-            eventController.fireDataMapEvent(new DataMapEvent(this, curMap));
-        }
-    }
-
-    public void performAction(ActionEvent e) {
-        if (e.getSource() == nodeSelector) {
-
-            DataNodeWrapper wrapper = (DataNodeWrapper) nodeSelector.getSelectedItem();
-            DataNode node = (wrapper != null) ? wrapper.getDataNode() : null;
-            DataMap map = eventController.getCurrentDataMap();
-
-            // no change?
-            if (node != null && node.getDataMaps().contains(map)) {
-                return;
-            }
-
-            boolean hasChanges = false;
-
-            // unlink map from any nodes
-            Iterator nodes =
-                eventController.getCurrentDataDomain().getDataNodes().iterator();
-
-            while (nodes.hasNext()) {
-                DataNode nextNode = (DataNode) nodes.next();
-
-                // Theoretically only one node may contain a datamap at each given time.
-                // Being paranoid, we will still scan through all.
-                if (nextNode != node && nextNode.getDataMaps().contains(map)) {
-                    nextNode.removeDataMap(map.getName());
-
-                    // announce DataNode change
-                    eventController.fireDataNodeEvent(new DataNodeEvent(this, nextNode));
-
-                    hasChanges = true;
-                }
-            }
-
-            // link to a selected node
-            if (node != null) {
-                node.addDataMap(map);
-                hasChanges = true;
-
-                // announce DataNode change
-                eventController.fireDataNodeEvent(new DataNodeEvent(this, node));
-            }
-
-            if (hasChanges) {
-                // TODO: maybe reindexing is an overkill in the modeler?
-                eventController.getCurrentDataDomain().reindexNodes();
-            }
-        }
+        initFromModel(map);
     }
 
     class FieldVerifier extends InputVerifier {

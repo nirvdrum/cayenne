@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
@@ -169,6 +170,23 @@ public class MapUtil {
         procedure.setName(newName);
         map.removeProcedure(oldName);
         map.addProcedure(procedure);
+    }
+    
+    public static void setQueryName(
+        DataMap map,
+        Query query,
+        String newName) {
+
+        String oldName = query.getName();
+
+        // If name hasn't changed, just return
+        if (Util.nullSafeEquals(oldName, newName)) {
+            return;
+        }
+
+        query.setName(newName);
+        map.removeQuery(oldName);
+        map.addQuery(query);
     }
 
     public static void setObjEntityName(DataMap map, ObjEntity entity, String newName) {
