@@ -80,7 +80,7 @@
                <attribute name="Implementation-Version" value="${project.version}"/>
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.dataview.dvmodeler.Main"/>
-               <attribute name="Class-Path" value="jdom-b9.jar forms-1.0.2.jar forms-extras-1.0.2.jar plastic-1.1.2.jar"/>
+               <attribute name="Class-Path" value="${jdom.jar} ${jgoodies.forms.jar} ${scope.jar} ${jgoodies.looks.jar}"/>
             </manifest>
         </jar>
     </target>  
