@@ -14,11 +14,9 @@
 		<p>This section shows how to write and a deploy a web application
     	using Cayenne.</p>
     	
-    	<ul>
-    		<li><strong><a href=
-    		"http://objectstyle.org/cayenne/tutorial/cayenne-web-app.tar.gz">Download
-    		full tutorial source</a></strong></li>
-    	</ul>
+   	    <panel name="Note:">
+    		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
+    	</panel>
 
    	<p>Tutorial steps:</p>
     	
@@ -37,17 +35,17 @@
        		</p>
        		
        		<p>- Install a web container. This tutorial was tested with <a href=
-    		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.0.3.
+    		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.1.10.
        		It should work with any other container that is compliant with Servlet 2.3
-       		specification (older containers should also work, but you will not be able
-       		to use some of ServletConfiguration features discussed below). All
-       		references to Tomcat below should apply in some form to other web containers
+       		specification (older containers will also work, but you will not be able
+       		to use some of ServletConfiguration features discussed below). 
+       		All references to Tomcat below should apply in some form to other web containers
        		as well.</p>
     		
-    		<p>- Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>)
-    		anywhere in the filesystem. A new directory named <code>cayenne-web-app</code>
-    		will be created. This directory is referred to as "project directory" further in 
-    		this tutorial.</p>
+    		<p>- Create a new folder named <code>cayenne-web-app</code> 
+    		anywhere in the filesystem. This directory is referred to as 
+    		"project directory" further in this chapter. For a sample project
+    		layout look at the tutorial source distributed with Cayenne.</p>
     		
     		<p>- Copy <code>cayenne.jar</code> to the <code>WEB-INF/lib</code> subdirectory of 
     		the tutorial project directory.</p>
@@ -99,7 +97,7 @@
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
-    		<p>Run <a href="../../tutorial/cayenne-web-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		<p>Run <a href="../../tutorials/cayenne-web-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
     		script located in the project directory to create test tables. 
     		This script is tested on MySQL, but it should be easy to port to any other RDBMS. Also
     		note that if you already tried "Command Line Application" tutorial in
@@ -112,9 +110,9 @@
     		<p>Configuration files included in this tutorial are:
     		
     		<ul>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/driverinfo.xml">driverinfo.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
     		Open <code>cayenne.xml</code> 
@@ -152,12 +150,12 @@
     		project directory:
     		
     		<ul>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/_Artist.java">_Artist.java</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/Artist.java">Artist.java</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/_Painting.java">_Painting.java</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/Painting.java">Painting.java</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/_Gallery.java">_Gallery.java</a></li>
-    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/Gallery.java">Gallery.java</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/classes/webtest/_Artist.java">_Artist.java</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/classes/webtest/Artist.java">Artist.java</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/classes/webtest/_Painting.java">_Painting.java</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/classes/webtest/Painting.java">Painting.java</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/classes/webtest/_Gallery.java">_Gallery.java</a></li>
+    			<li><a href="../../tutorials/cayenne-web-app/WEB-INF/classes/webtest/Gallery.java">Gallery.java</a></li>
     		</ul>
     		</p>    	
     	</subsection>
@@ -171,14 +169,14 @@
 cayenne-web-app> cd WEB-INF\classes
 cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;[servlet.jar] 
 cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;..\lib\struts.jar;..\lib\cayenne.jar
-cayenne-web-app\WEB-INF\classes> %JAVA_HOME%\bin\javac test\*.java formbean\*.java action\*.java
+cayenne-web-app\WEB-INF\classes> %JAVA_HOME%\bin\javac webtest\*.java formbean\*.java action\*.java
 </source>
 
     		<p>On UNIX:</p>
 <source>
 cayenne-web-app# cd WEB-INF/classes
 cayenne-web-app# export CLASSPATH=$CLASSPATH:[servlet.jar]:../lib/struts.jar:../lib/cayenne.jar
-cayenne-web-app# $JAVA_HOME/bin/javac test/*.java formbean/*.java action/*.java
+cayenne-web-app# $JAVA_HOME/bin/javac webtest/*.java formbean/*.java action/*.java
 </source>
 
 			<p>To deploy, simply copy <code>cayenne-web-app</code> directory to Tomcat 
