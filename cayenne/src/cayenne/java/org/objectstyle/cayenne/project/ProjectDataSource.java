@@ -61,7 +61,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 
 /**
  * ProjectDataSource is a DataSource implementation used by 

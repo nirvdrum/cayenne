@@ -59,8 +59,8 @@ package org.objectstyle.cayenne.regression;
 import java.util.Properties;
 
 import org.apache.commons.collections.ExtendedProperties;
-import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.ConnectionProperties;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.unittest.CayenneTestResources;
 
 /**

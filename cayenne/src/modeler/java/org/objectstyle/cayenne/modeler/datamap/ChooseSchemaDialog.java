@@ -69,8 +69,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DbLoader;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;

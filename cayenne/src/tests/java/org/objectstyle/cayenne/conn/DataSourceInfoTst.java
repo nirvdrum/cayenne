@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */ 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.conn;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;

@@ -73,9 +73,9 @@ import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;

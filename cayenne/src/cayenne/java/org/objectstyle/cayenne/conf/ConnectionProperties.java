@@ -68,7 +68,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 
 /**

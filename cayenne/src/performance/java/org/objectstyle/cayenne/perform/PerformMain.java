@@ -63,8 +63,8 @@ import javax.sql.DataSource;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;

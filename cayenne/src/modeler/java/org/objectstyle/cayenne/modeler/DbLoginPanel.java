@@ -77,7 +77,7 @@ import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 

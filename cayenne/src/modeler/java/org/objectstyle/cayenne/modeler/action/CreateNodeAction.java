@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;

@@ -65,7 +65,7 @@ import javax.sql.DataSource;
 
 /**
  * DriverDataSource is a simple DataSource implementation
- * on top of a JDBC driver. 
+ * wrapping a JDBC driver. 
  * 
  * @author Andrei Adamchik
  */
@@ -73,26 +73,70 @@ public class DriverDataSource implements DataSource {
     private int loginTimeout;
     protected String connectionUrl;
     protected String jdbcDriver;
+    protected ConnectionEventLoggingDelegate logger;
 
     /** Creates new DriverDataSource */
-    public DriverDataSource(String jdbcDriver, String connectionUrl) throws SQLException {
+    public DriverDataSource(String jdbcDriver, String connectionUrl)
+        throws SQLException {
         this.connectionUrl = connectionUrl;
         this.jdbcDriver = jdbcDriver;
 
         try {
             Class.forName(jdbcDriver).newInstance();
-        } catch(Exception ex) {
-            throw new SQLException("Can not load JDBC driver named '" + jdbcDriver + "': " + ex.getMessage());
+        } catch (Exception ex) {
+            throw new SQLException(
+                "Can not load JDBC driver named '"
+                    + jdbcDriver
+                    + "': "
+                    + ex.getMessage());
         }
 
     }
 
     public Connection getConnection() throws java.sql.SQLException {
-        return DriverManager.getConnection(connectionUrl);
+        try {
+            if (logger != null) {
+                logger.logConnect(connectionUrl, null, null);
+            }
+
+            Connection c = DriverManager.getConnection(connectionUrl);
+
+            if (logger != null) {
+                logger.logConnectSuccess();
+            }
+
+            return c;
+        } catch (SQLException sqlex) {
+            if (logger != null) {
+                logger.logConnectFailure(sqlex);
+            }
+
+            throw sqlex;
+        }
     }
 
-    public Connection getConnection(String username, String password)  throws java.sql.SQLException {
-        return DriverManager.getConnection(connectionUrl, username, password);
+    public Connection getConnection(String username, String password)
+        throws java.sql.SQLException {
+        try {
+            if (logger != null) {
+                logger.logConnect(connectionUrl, username, password);
+            }
+
+            Connection c =
+                DriverManager.getConnection(connectionUrl, username, password);
+
+            if (logger != null) {
+                logger.logConnectSuccess();
+            }
+
+            return c;
+        } catch (SQLException sqlex) {
+            if (logger != null) {
+                logger.logConnectFailure(sqlex);
+            }
+
+            throw sqlex;
+        }
     }
 
     public int getLoginTimeout() throws java.sql.SQLException {
@@ -111,4 +155,11 @@ public class DriverDataSource implements DataSource {
         DriverManager.setLogWriter(out);
     }
 
+    public ConnectionEventLoggingDelegate getLogger() {
+        return logger;
+    }
+
+    public void setLogger(ConnectionEventLoggingDelegate delegate) {
+        logger = delegate;
+    }
 }

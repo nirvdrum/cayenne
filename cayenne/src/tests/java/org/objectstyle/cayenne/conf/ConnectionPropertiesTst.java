@@ -60,7 +60,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.commons.collections.ExtendedProperties;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 
 /**
  * @author Andrei Adamchik

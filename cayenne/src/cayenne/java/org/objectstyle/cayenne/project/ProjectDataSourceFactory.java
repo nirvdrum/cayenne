@@ -62,8 +62,8 @@ import javax.sql.DataSource;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ConfigurationException;
-import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 
 /** 
  * Factory of DataSource objects used by the project model. 

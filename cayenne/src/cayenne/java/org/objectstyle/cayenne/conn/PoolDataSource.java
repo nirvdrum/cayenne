@@ -63,8 +63,6 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
-import org.apache.log4j.Logger;
-
 /**
  * <p>PoolDataSource allows to generate pooled connections.</p>
  *
@@ -76,13 +74,10 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class PoolDataSource implements ConnectionPoolDataSource {
-	private static Logger logObj = Logger.getLogger(PoolDataSource.class);
-
 	private DataSource nonPooledDatasource;
 
 	/** Creates new PoolDataSource */
 	public PoolDataSource(DataSource nonPooledDatasource) {
-		logObj.debug("Init new datasource");
 		this.nonPooledDatasource = nonPooledDatasource;
 	}
 

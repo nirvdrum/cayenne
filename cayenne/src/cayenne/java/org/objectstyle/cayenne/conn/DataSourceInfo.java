@@ -54,7 +54,7 @@
  *
  */
 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.conn;
 
 import java.io.Serializable;
 

@@ -59,6 +59,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conn.*;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -143,8 +144,13 @@ public class QueryLogger {
         } else if (anObject instanceof Boolean) {
             buf.append('\'').append(anObject).append('\'');
         } else {
-        	// unknown
-            buf.append("[").append(anObject.getClass().getName()).append(": ").append(anObject).append("]");
+            // unknown
+            buf
+                .append("[")
+                .append(anObject.getClass().getName())
+                .append(": ")
+                .append(anObject)
+                .append("]");
         }
     }
 
@@ -169,6 +175,22 @@ public class QueryLogger {
     public static void logConnect(Level logLevel, String dataSource) {
         if (isLoggable(logLevel)) {
             logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
+        }
+    }
+
+    public static void logConnect(
+        Level logLevel,
+        String url,
+        String userName,
+        String password) {
+        if (isLoggable(logLevel)) {
+            StringBuffer buf = new StringBuffer("Opening connection:");
+
+            buf.append("\n\tDatabase URL: ").append(url);
+            buf.append("\n\tLogin: ").append(userName);
+            buf.append("\n\tPassword: *******");
+
+            logObj.log(logLevel, buf.toString());
         }
     }
 
@@ -316,10 +338,10 @@ public class QueryLogger {
     }
 
     public static void logQueryError(Level logLevel, Throwable th) {
-        if(th != null) {
+        if (th != null) {
             th = Util.unwindException(th);
         }
-        
+
         logObj.log(logLevel, "*** error.", th);
     }
 
@@ -336,4 +358,5 @@ public class QueryLogger {
     public static boolean isLoggable(Level logLevel) {
         return logObj.isEnabledFor(logLevel);
     }
+
 }

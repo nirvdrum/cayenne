@@ -63,7 +63,7 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared

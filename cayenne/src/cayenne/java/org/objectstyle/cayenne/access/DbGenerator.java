@@ -72,6 +72,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.conn.*;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;

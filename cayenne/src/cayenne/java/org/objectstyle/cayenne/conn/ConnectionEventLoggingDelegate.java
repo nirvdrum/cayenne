@@ -52,43 +52,21 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
+ */ 
+package org.objectstyle.cayenne.conn;
+
+/**
+ * Defines API to log connection events.
+ * 
+ * @author Andrei Adamchik
  */
-package org.objectstyle.cayenne.modeler;
-
-import org.objectstyle.cayenne.conn.DataSourceInfo;
-
-/** Class that can collect login information via GUI or command line interface.  */
-public class InteractiveLogin {
-    protected DataSourceInfo dataSrcInfo;
-
-    /** Creates login handler object for GUI login */
-    public static InteractiveLogin getGuiLoginObject(DataSourceInfo dataSrcInfo) {
-        InteractiveLogin loginObj = new InteractiveLogin();
-        loginObj.setDataSrcInfo(dataSrcInfo);
-        return loginObj;
-    }
-
-    public void setDataSrcInfo(DataSourceInfo dataSrcInfo) {
-        this.dataSrcInfo = dataSrcInfo;
-    }
-
-    public DataSourceInfo getDataSrcInfo() {
-        return dataSrcInfo;
-    }
-
-    private Editor getFrame() {
-        Editor frame = Editor.getFrame();
-        return (frame != null) ? frame : new Editor();
-    }
-
-    public void collectLoginInfo() {
-        Editor frame = getFrame();
-        DbLoginPanel loginPanel = new DbLoginPanel(frame);
-        loginPanel.setDataSrcInfo(dataSrcInfo);
-
-        // call to show will block until user closes the dialog
-        loginPanel.show();
-        dataSrcInfo = loginPanel.getDataSrcInfo();
-        loginPanel.dispose();
-    }
+public interface ConnectionEventLoggingDelegate {
+    
+    public void logPoolCreated(DataSourceInfo info);
+    
+    public void logConnect(String url, String userName, String password);
+    
+    public void logConnectSuccess();
+    
+    public void logConnectFailure(Throwable th);
 }
