@@ -443,11 +443,12 @@ public class DataRowStore implements Serializable {
 
         // MODIFIED: replace/add snapshots, generate diffs for event
         if (!updatedSnapshots.isEmpty()) {
-            Iterator it = updatedSnapshots.keySet().iterator();
+            Iterator it = updatedSnapshots.entrySet().iterator();
             while (it.hasNext()) {
-
-                ObjectId key = (ObjectId) it.next();
-                DataRow newSnapshot = (DataRow) updatedSnapshots.get(key);
+                Map.Entry entry = (Map.Entry) it.next();
+                
+                ObjectId key = (ObjectId) entry.getKey();
+                DataRow newSnapshot = (DataRow) entry.getValue();
                 DataRow oldSnapshot = (DataRow) snapshots.put(key, newSnapshot);
 
                 // generate diff for the updated event, if this not a new
@@ -472,7 +473,11 @@ public class DataRowStore implements Serializable {
                     // case 4 above... have to throw out the snapshot since
                     // no good options exist to tell how to merge the two.
                     if (oldSnapshot.getVersion() != newSnapshot.getReplacesVersion()) {
-                        logObj.debug("snapshot version changed... don't know what to do");
+                        logObj
+                                .debug("snapshot version changed, don't know what to do... Old: "
+                                        + oldSnapshot
+                                        + ", New: "
+                                        + newSnapshot);
                         forgetSnapshot(key);
                         continue;
                     }

@@ -147,30 +147,39 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * 
      * @since 1.1
      */
-    public synchronized void retainSnapshot(DataObject dataObject) {
-        ObjectId oid = dataObject.getObjectId();
+    public synchronized void retainSnapshot(DataObject object) {
+        ObjectId oid = object.getObjectId();
         DataRow snapshot = getCachedSnapshot(oid);
 
-        // if cached snapshot is different or absent, use snapshot built from
-        // object
-        if (snapshot == null
-            || snapshot.getVersion() != dataObject.getSnapshotVersion()) {
-            snapshot = dataObject.getDataContext().currentSnapshot(dataObject);
+        if (snapshot == null) {
+            snapshot = object.getDataContext().currentSnapshot(object);
+        }
+        // if a snapshot has changed underneath, try a merge...
+        else if (snapshot.getVersion() != object.getSnapshotVersion()) {
+            DataContextDelegate delegate = object.getDataContext().nonNullDelegate();
+            if (delegate.shouldMergeChanges(object, snapshot)) {
+                ObjEntity entity = object
+                        .getDataContext()
+                        .getEntityResolver()
+                        .lookupObjEntity(object);
+                DataRowUtils.forceMergeWithSnapshot(entity, object, snapshot);
+                object.setSnapshotVersion(snapshot.getVersion());
+                delegate.finishedMergeChanges(object);
+            }
         }
 
-        retainSnapshot(dataObject, snapshot);
+        retainSnapshot(object, snapshot);
     }
 
     /**
-     * Stores provided DataRow as a snapshot to be used to build UPDATE queries
-     * for an object. Updates object's snapshot version with the version of the
-     * new retained snapshot.
+     * Stores provided DataRow as a snapshot to be used to build UPDATE queries for an
+     * object. Updates object's snapshot version with the version of the new retained
+     * snapshot.
      * 
      * @since 1.1
      */
-    public synchronized void retainSnapshot(DataObject object, DataRow snapshot) {
+    protected synchronized void retainSnapshot(DataObject object, DataRow snapshot) {
         this.retainedSnapshotMap.put(object.getObjectId(), snapshot);
-        object.setSnapshotVersion(snapshot.getVersion());
     }
 
     /**
@@ -393,6 +402,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @param refresh
      *            controls whether existing cached snapshots should be replaced
      *            with the new ones.
+     * 
+     * @since 1.1
      */
     public void snapshotsUpdatedForObjects(
         List objects,
@@ -421,15 +432,24 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 // missing
                 DataRow cachedSnapshot = getCachedSnapshot(oid);
                 if (refresh || cachedSnapshot == null) {
+
+                    DataRow newSnapshot = (DataRow) snapshots.get(i);
+                    
+                    if (cachedSnapshot != null) {
+                        // use old snapshot if no changes occurred
+                        if (cachedSnapshot.equals(newSnapshot)) {
+                            object.setSnapshotVersion(cachedSnapshot.getVersion());
+                            continue;
+                        }
+                        else {
+                            newSnapshot.setReplacesVersion(cachedSnapshot.getVersion());
+                        }
+                    }
+
                     if (modified == null) {
                         modified = new HashMap();
                     }
-
-                    DataRow newSnapshot = (DataRow) snapshots.get(i);
-                    if (cachedSnapshot != null) {
-                        newSnapshot.setReplacesVersion(cachedSnapshot.getVersion());
-                    }
-
+                    
                     modified.put(oid, newSnapshot);
                 }
             }

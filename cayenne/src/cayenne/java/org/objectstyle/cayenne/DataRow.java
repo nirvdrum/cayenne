@@ -223,9 +223,8 @@ public class DataRow extends HashMap {
     }
 
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("version", version)
-            .append("values", super.toString())
-            .toString();
+        return new ToStringBuilder(this).append("version", version).append(
+                " replaces",
+                replacesVersion).append(" values", super.toString()).toString();
     }
 }
