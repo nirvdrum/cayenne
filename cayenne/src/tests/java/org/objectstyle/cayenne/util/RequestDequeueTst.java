@@ -91,8 +91,14 @@ public class RequestDequeueTst extends CayenneTestCase {
 
     public void testTimedOut() throws Exception {
         RequestDequeue dequeue = new RequestDequeue();
-        dequeue.setDequeueEventCode(RequestDequeue.WAIT_TIMED_OUT);
+        dequeue.setDequeueEventCode(RequestDequeue.TIMED_OUT);
         assertTrue(dequeue.isTimedOut());
+    }
+
+    public void testInterrupted() throws Exception {
+        RequestDequeue dequeue = new RequestDequeue();
+        dequeue.setDequeueEventCode(RequestDequeue.INTERRUPTED);
+        assertTrue(dequeue.isInterrupted());
     }
 
     public void testDequeueEventObject() throws Exception {

@@ -64,7 +64,8 @@ package org.objectstyle.cayenne.util;
 public class RequestDequeue {
     public static final int DEQUEUE_SUCCESS = 1;
     public static final int QUEUE_FULL = 2;
-    public static final int WAIT_TIMED_OUT = 3;
+    public static final int TIMED_OUT = 3;
+    public static final int INTERRUPTED = 4;
 
     protected Object dequeueEventObject;
     protected int dequeueEventCode;
@@ -110,6 +111,24 @@ public class RequestDequeue {
     }
 
     public boolean isTimedOut() {
-        return WAIT_TIMED_OUT == dequeueEventCode;
+        return TIMED_OUT == dequeueEventCode;
+    }
+
+    public boolean isInterrupted() {
+        return INTERRUPTED == dequeueEventCode;
+    }
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append('[').append(getClass().getName()).append(": ");
+        if (isDequeueSuccess()) {
+            buf.append("success");
+        } else if (isQueueFull()) {
+            buf.append("queue full");
+        } else if (isTimedOut()) {
+            buf.append("timeout or interrupted");
+        }
+        buf.append(']');
+        return buf.toString();
     }
 }

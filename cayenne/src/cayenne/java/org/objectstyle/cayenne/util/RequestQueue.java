@@ -81,13 +81,20 @@ public class RequestQueue {
     /**
      * Constructor for RequestQueue.
      * 
-     * @param maxSize - maximum allowed number of 
-     * threads in the queue.
+     * @param maxSize - maximum allowed number of threads in the queue.
+     * @param timeout - timeout in milliseconds that determines maximum possible 
+     * wait time in the queue.
      */
     public RequestQueue(int maxSize, int timeout) {
         this.maxSize = maxSize;
         this.timeout = timeout;
         this.queue = Collections.synchronizedList(new ArrayList());
+    }
+
+    public int getSize() {
+        synchronized (queue) {
+            return queue.size();
+        }
     }
 
     /**
@@ -114,19 +121,22 @@ public class RequestQueue {
 
         // wait
         synchronized (result) {
+        	boolean interrupted = false;
             try {
                 // release lock and wait
                 result.wait(timeout);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            	interrupted = true;
+            }
 
             // wait is over, remove itself from the queue
-
             if (result.getDequeueEventCode() != RequestDequeue.DEQUEUE_SUCCESS) {
 
-                // timeout
+                // timeout or interrupted
                 synchronized (queue) {
                     queue.remove(result);
-                    result.setDequeueEventCode(RequestDequeue.WAIT_TIMED_OUT);
+                    int code = (interrupted) ? RequestDequeue.INTERRUPTED : RequestDequeue.TIMED_OUT;
+                    result.setDequeueEventCode(code);
                 }
             }
 
@@ -148,9 +158,8 @@ public class RequestQueue {
                     first.notifyAll();
                 }
                 return true;
-            }
-            else {
-            	return false;
+            } else {
+                return false;
             }
         }
     }

@@ -66,6 +66,7 @@ public class AllTests {
         suite.addTestSuite(ResourceLocatorTst.class);
         suite.addTestSuite(CayenneMapTst.class);
         suite.addTestSuite(RequestDequeueTst.class);
+        suite.addTestSuite(RequestQueueTst.class);
         return suite;
     }
 }
