@@ -141,6 +141,9 @@ public interface DbAdapter {
      * is required. Operation sorter is needed for databases
      * (like Sybase) that do not have deferred constraint checking
      * and need appropriate operation ordering within transactions.
+     * 
+     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
+     * sorting. It is no longer adapter dependent.
      */
     public OperationSorter getOpSorter(DataNode node);
 

@@ -62,8 +62,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.BatchInterpreter;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
@@ -134,17 +132,6 @@ public class OracleAdapter extends JdbcAdapter {
      */
     protected PkGenerator createPkGenerator() {
         return new OraclePkGenerator();
-    }
-
-    public OperationSorter getOpSorter(DataNode node) {
-        synchronized (sorters) {
-            OperationSorter sorter = (OperationSorter) sorters.get(node);
-            if (sorter == null) {
-                sorter = new OperationSorter(node, node.getDataMapsAsList());
-                sorters.put(node, sorter);
-            }
-            return sorter;
-        }
     }
 
     /**

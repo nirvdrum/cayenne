@@ -79,14 +79,18 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.conf.Configuration;
 
 /**
- * Class provides a set of sorting utilities for Cayenne.
- * For instance it supports sorting of database operations to
- * satisfy database referential integrity consraints.
+ * Class provides a set of sorting utilities for Cayenne. For instance it
+ * supports sorting of database operations to satisfy database referential
+ * integrity consraints.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
- *
+ * 
  * @author Andrei Adamchik
+ * 
+ * @deprecated Since 1.0 Beta 1 Ashwood based dependency sorting algorithms are
+ * used. This class has serious deficiencies in the basic algorithm and should
+ * not be used.
  */
 public class OperationSorter {
 	private static Logger logObj = Logger.getLogger(OperationSorter.class);

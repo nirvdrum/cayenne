@@ -392,7 +392,12 @@ public class JdbcAdapter implements DbAdapter {
         return typesHandler.externalTypesForJdbcType(type);
     }
 
-    /** Returns null - by default no operation sorter is used. */
+    /**
+     * Returns null.
+     * 
+     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
+     * sorting. It is no longer adapter dependent.
+     */
     public OperationSorter getOpSorter(DataNode node) {
         return null;
     }

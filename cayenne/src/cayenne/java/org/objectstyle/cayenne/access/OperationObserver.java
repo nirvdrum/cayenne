@@ -123,15 +123,11 @@ public interface OperationObserver extends OperationHints {
     public void transactionRolledback();
     
     
-    /** This method may be called by DataNode. It gives a chance to OperationObserver to order 
-     *  queries to satisfy database referential integrity constraints.
-     *
-     *  @param aNode data node that is about to run a list of queries...
-     *  @param queryList a list of queries being executed by QueryEngine as a single transaction
-     *
-     *  @return ordered query list (of course some implementations may just return unmodified original
-     *  query list if they do not care about ordering)
-     *
+    /** 
+     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
+     * sorting. In the future we may implement other types of delegate methods
+     * to notify of the query processing start. This method is no longer called
+     * by the DataNode.
      */
     public List orderQueries(DataNode aNode, List queryList);
 }

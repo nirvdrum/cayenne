@@ -69,7 +69,6 @@ import java.util.ListIterator;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbGenerator;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -298,10 +297,7 @@ public class CayenneTestDatabaseSetup {
         }
 
         DataNode node = resources.getSharedNode();
-        OperationSorter sorter = node.getAdapter().getOpSorter(node);
-        if (sorter != null) {
-            list = sorter.sortedEntitiesInInsertOrder(list);
-        }
+        node.getDependencySorter().sortDbEntities(list, false);
         return list;
     }
 

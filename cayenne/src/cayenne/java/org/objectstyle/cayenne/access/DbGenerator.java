@@ -439,10 +439,7 @@ public class DbGenerator {
 	    }
 
         // sort the list
-		OperationSorter sorter = getAdapter().getOpSorter(node);
-		if (sorter != null) {
-		    filteredList = sorter.sortedEntitiesInInsertOrder(filteredList);
-		}
+		node.getDependencySorter().sortDbEntities(filteredList, false);
 		return filteredList;
 	}
 

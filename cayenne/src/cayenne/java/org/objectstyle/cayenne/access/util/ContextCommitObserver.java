@@ -69,10 +69,8 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.ObjectStore;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.event.DataContextTransactionEventListener;
 import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
@@ -188,14 +186,6 @@ public class ContextCommitObserver
         throw new CayenneRuntimeException(
             "Raising from underlyingQueryEngine exception.",
             ex);
-    }
-
-    /** 
-     * Performs query sorting to satisfy DB referential integrity rules.
-     */
-    public List orderQueries(DataNode aNode, List queryList) {
-        OperationSorter sorter = aNode.getAdapter().getOpSorter(aNode);
-        return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
     }
 
     public void registerForDataContextEvents() {

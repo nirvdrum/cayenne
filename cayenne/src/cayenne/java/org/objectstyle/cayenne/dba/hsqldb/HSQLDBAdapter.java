@@ -61,8 +61,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -135,21 +133,5 @@ public class HSQLDBAdapter extends JdbcAdapter {
 
 		return buf.toString();
 	}
-
-	/**
-	 * Returns an OperationSorter to handle constraints.
-	 * @see JdbcAdapter#getOpSorter(DataNode)
-	 */
-	public OperationSorter getOpSorter(DataNode node) {
-		synchronized (sorters) {
-			OperationSorter sorter = (OperationSorter) sorters.get(node);
-			if (sorter == null) {
-				sorter = new OperationSorter(node, node.getDataMapsAsList());
-				sorters.put(node, sorter);
-			}
-			return sorter;
-		}
-	}
-
 }
 

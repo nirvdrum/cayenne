@@ -178,7 +178,8 @@ public class DefaultOperationObserver implements OperationObserver {
 
     public void nextQueryException(Query query, Exception ex) {
         if (logObj.isEnabledFor(Level.WARN)) {
-        	String queryClass = (query != null) ? query.getClass().getName() : "<null>";
+            String queryClass =
+                (query != null) ? query.getClass().getName() : "<null>";
             logObj.log(Level.WARN, "Query exception: " + queryClass, ex);
         }
         queryExceptions.put(query, ex);
@@ -205,7 +206,12 @@ public class DefaultOperationObserver implements OperationObserver {
         return true;
     }
 
-    /** Returns query list without altering its ordering. */
+    /**
+     * @deprecated Since 1.0 Beta 1, Ashwood-based implementation is used for
+     * sorting. In the future we may implement other types of delegate methods
+     * to notify of the query processing start. This method is no longer called
+     * by the DataNode.
+     */
     public List orderQueries(DataNode aNode, List queryList) {
         return queryList;
     }

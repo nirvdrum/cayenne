@@ -58,8 +58,6 @@ package org.objectstyle.cayenne.dba.sybase;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -96,16 +94,5 @@ public class SybaseAdapter extends JdbcAdapter {
      */
     protected PkGenerator createPkGenerator() {
         return new SybasePkGenerator();
-    }
-
-    public OperationSorter getOpSorter(DataNode node) {
-        synchronized (sorters) {
-            OperationSorter sorter = (OperationSorter) sorters.get(node);
-            if (sorter == null) {
-                sorter = new OperationSorter(node, node.getDataMapsAsList());
-                sorters.put(node, sorter);
-            }
-            return sorter;
-        }
     }
 }

@@ -251,12 +251,6 @@ public class DataNode implements QueryEngine {
                 con.setAutoCommit(usesAutoCommit);
             }
 
-            // give a chance to order queries
-            queries = opObserver.orderQueries(this, queries);
-
-            // just in case, recheck list size....
-            listSize = queries.size();
-
             for (int i = 0; i < listSize; i++) {
                 Query nextQuery = (Query) queries.get(i);
 

@@ -681,10 +681,6 @@ class ContextCommit {
             super(logLevel, context, insObjects, updObjects, delObjects);
         }
 
-        public List orderQueries(DataNode aNode, List queryList) {
-            return queryList;
-        }
-
         public void transactionCommitted() {
             logObj.debug("transaction committed");
             transactionCommitted = true;
