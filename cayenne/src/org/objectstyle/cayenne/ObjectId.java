@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * An ObjectId is a class that uniquely identifies a 
@@ -111,9 +112,6 @@ public class ObjectId {
 
 	protected void setIdKeys(Map idKeys) {
 		this.idKeys = idKeys;
-
-		int mapId = (idKeys != null) ? idKeys.hashCode() : 0;
-		this.hash = 10 + mapId + objEntityName.hashCode();
 	}
 
 	public int hashCode() {
@@ -128,7 +126,7 @@ public class ObjectId {
 			return true;
 
 		ObjectId id = (ObjectId) object;
-		return id.hash == this.hash && objEntityName.equals(id.objEntityName);
+		return objEntityName.equals(id.objEntityName) && Util.nullSafeEquals(id.idKeys, this.idKeys);
 	}
 
 	/** Returns a map of id components. 

@@ -123,6 +123,25 @@ public class ObjectIdTst extends CayenneTestCase {
 		assertEquals(ref, oid);
 	}
 
+    /**
+     * This is a test case reproducing conditions for the bug "8458963".
+     */
+	public void testEquals5() throws Exception {
+		String nm = "12345";
+
+		HashMap hm1 = new HashMap();
+		hm1.put("key1",  new Integer(1));
+		hm1.put("key2",  new Integer(11));
+
+		HashMap hm2 = new HashMap();
+		hm2.put("key1", new Integer(11));
+		hm2.put("key2",  new Integer(1));
+
+		ObjectId ref = new ObjectId(nm, hm1);
+		ObjectId oid = new ObjectId(nm, hm2);
+		assertTrue(!ref.equals(oid));
+	}
+
 	public void testIdAsMapKey() throws Exception {
 		HashMap map = new HashMap();
 		Object o1 = new Object();
