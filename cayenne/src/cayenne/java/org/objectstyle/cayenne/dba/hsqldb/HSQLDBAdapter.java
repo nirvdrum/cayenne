@@ -69,7 +69,18 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
- * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/">HSQLDB RDBMS</a>.
+ * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/">
+ * HSQLDB RDBMS</a>. Sample <a target="_top" 
+ * href="../../../../../../../developer.html#unit">connection 
+ * settings</a> to use with HSQLDB adapter are shown below:
+ * 
+<pre>
+test-hsqldb.cayenne.adapter = org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter
+test-hsqldb.jdbc.username = test
+test-hsqldb.jdbc.password = secret
+test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
+test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
+</pre>
  */
 public class HSQLDBAdapter extends JdbcAdapter {
 	private static Logger logObj = Logger.getLogger(HSQLDBAdapter.class);
@@ -77,7 +88,7 @@ public class HSQLDBAdapter extends JdbcAdapter {
 	protected Map sorters = new HashMap();
 
 	/**
-	 * Adds an ADD CONSTRAINT ... clause to a relationship constraint.
+	 * Adds an ADD CONSTRAINT clause to a relationship constraint.
 	 * @see JdbcAdapter#createFkConstraint(DbRelationship)
 	 */
 	public String createFkConstraint(DbRelationship rel) {
