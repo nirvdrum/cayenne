@@ -57,9 +57,13 @@ package org.objectstyle.cayenne.tools;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LoggingEvent;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
@@ -78,18 +82,22 @@ import org.xml.sax.InputSource;
  */
 public class CayenneGenerator extends Task {
 
-    static {
-        // init logging properties
-        Configuration.configureCommonLogging();
-    }
-
     protected File map;
-    protected File[] mapDeps;
     protected DefaultClassGenerator generator;
 
     public CayenneGenerator() {
         bootstrapVelocity();
         generator = createGenerator();
+    }
+
+    /**
+     * Sets up logging to be in line with the Ant logging system.
+     * 
+     * @since 1.1
+     */
+    protected void configureLogging() {
+        Configuration.setLoggingConfigured(true);
+        BasicConfigurator.configure(new AntAppender());
     }
 
     /** 
@@ -111,6 +119,7 @@ public class CayenneGenerator extends Task {
      * Executes the task. It will be called by ant framework. 
      */
     public void execute() throws BuildException {
+        configureLogging();
         validateAttributes();
 
         try {
@@ -169,10 +178,6 @@ public class CayenneGenerator extends Task {
         generator.setDestDir(destDir);
     }
 
-    public void setMapDeps(String mapDeps) {
-        this.mapDeps = new MapDependencies(mapDeps).getMaps();
-    }
-
     /**
      * Sets <code>overwrite</code> property.
      */
@@ -215,25 +220,46 @@ public class CayenneGenerator extends Task {
         generator.setSuperPkg(superpkg);
     }
 
-    class MapDependencies {
-        File[] maps;
+    class AntAppender extends AppenderSkeleton {
 
-        public MapDependencies(String str) {
-            if (str != null) {
-                StringTokenizer toks = new StringTokenizer(str, ",");
-                int len = toks.countTokens();
-                maps = new File[len];
-                for (int i = 0; i < len; i++) {
-                    maps[i] = new File(toks.nextToken());
+        protected void append(LoggingEvent event) {
+            Object message = event.getMessage();
+            if (message == null) {
+                return;
+            }
+
+            // pass message to Ant logging subsystem
+
+            int logLevel = Project.MSG_INFO;
+
+            Level log4jLevel = event.getLevel();
+            if (log4jLevel != null) {
+                switch (log4jLevel.toInt()) {
+                    case Level.DEBUG_INT :
+                        logLevel = Project.MSG_DEBUG;
+                        break;
+                    case Level.ERROR_INT :
+                    case Level.FATAL_INT :
+                        logLevel = Project.MSG_ERR;
+                        break;
+                    case Level.INFO_INT :
+                        logLevel = Project.MSG_INFO;
+                        break;
+                    case Level.WARN_INT :
+                        logLevel = Project.MSG_WARN;
+                        break;
                 }
             }
-            else {
-                maps = new File[0];
-            }
+
+            log(message.toString(), logLevel);
         }
 
-        public File[] getMaps() {
-            return maps;
+        public void close() {
+
+        }
+
+        public boolean requiresLayout() {
+            return false;
         }
     }
 }
