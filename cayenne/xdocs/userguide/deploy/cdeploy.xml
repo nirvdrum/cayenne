@@ -62,7 +62,7 @@
 					<td valign="top">altProjectFile</td>
 					<td valign="top">An alternative location of <i>cayenne.xml</i>
 					file. User can specify an arbitrary file. This file will be used as
-					the main project file, replace any existing
+					the main project file, replacing any existing
 					cayenne.xml in the source jar. This gives the users an ultimate
 					flexibility in configuring deployment libraries. For instance this feature
 					can be used to deploy standalone DataMaps.</td>
