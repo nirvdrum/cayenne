@@ -156,9 +156,7 @@ public class SnapshotManager {
             ObjRelationship rel = (ObjRelationship) rit.next();
             if (rel.isToMany()) {
                 // "to many" relationships have no information to collect from snapshot
-                // rather we need to check if a relationship list exists, if not -
-                // create an empty one.
-
+                // simply initialize a new empty list...
                 ToManyList relList =
                     new ToManyList(
                         relDataSource,
