@@ -69,19 +69,19 @@ import java.util.HashMap;
 // TODO: Maybe implement "locking" of snapshot after it has been created,
 // since snapshots are expected to be immutable 
 public class Snapshot extends HashMap {
-    protected long lastUpdated;
+	
+	// "volatile" is supposed to ensure consistency in read and increment operations;
+	// is this universally true?
+	private static volatile long currentVersion = Long.MIN_VALUE;
+	
+    protected long version;
 
     public Snapshot(int initialCapacity) {
-        super(initialCapacity, System.currentTimeMillis());
-    }
-
-    public Snapshot(int initialCapacity, long lastUpdated) {
         super(initialCapacity);
-
-        this.lastUpdated = lastUpdated;
+		version = currentVersion++;
     }
 
-    public long getLastUpdated() {
-        return lastUpdated;
+    public long getVersion() {
+        return version;
     }
 }

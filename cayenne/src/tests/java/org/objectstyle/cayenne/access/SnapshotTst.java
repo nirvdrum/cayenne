@@ -61,8 +61,12 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class SnapshotTst extends CayenneTestCase {
-    public void testLastUpdated() throws Exception {
-         Snapshot snapshot = new Snapshot(10, 1000);
-         assertEquals(1000, snapshot.getLastUpdated());
+    public void testVersion() throws Exception {
+        Snapshot s1 = new Snapshot(10);
+        Snapshot s2 = new Snapshot(10);
+        Snapshot s3 = new Snapshot(10);
+        assertFalse(s1.getVersion() == s2.getVersion());
+		assertFalse(s2.getVersion() == s3.getVersion());
+		assertFalse(s3.getVersion() == s1.getVersion());
     }
 }

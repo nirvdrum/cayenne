@@ -104,8 +104,6 @@ public class DefaultResultIterator implements ResultIterator {
     protected int fetchedSoFar;
     protected int fetchLimit;
 
-    protected long fetchStartTimestamp;
-
     /**
      * Utility method to read stored procedure out parameters as a map. 
      * Returns an empty map if no out parameters exist.
@@ -169,11 +167,6 @@ public class DefaultResultIterator implements ResultIterator {
     protected void checkNextRow() throws SQLException, CayenneException {
         nextRow = false;
         if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit) && resultSet.next()) {
-
-            if (fetchedSoFar == 0) {
-                fetchStartTimestamp = System.currentTimeMillis();
-            }
-
             nextRow = true;
             fetchedSoFar++;
         }
@@ -235,7 +228,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readDataRow() throws SQLException, CayenneException {
         try {
-            Map dataRow = new Snapshot(mapCapacity, fetchStartTimestamp);
+            Map dataRow = new Snapshot(mapCapacity);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();
@@ -268,7 +261,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readIdRow() throws SQLException, CayenneException {
         try {
-            Map idRow = new Snapshot(idMapCapacity, fetchStartTimestamp);
+            Map idRow = new Snapshot(idMapCapacity);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();
@@ -310,7 +303,6 @@ public class DefaultResultIterator implements ResultIterator {
         if (!isClosed) {
 
             nextRow = false;
-            fetchStartTimestamp = 0;
 
             StringWriter errors = new StringWriter();
             PrintWriter out = new PrintWriter(errors);
