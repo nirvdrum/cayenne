@@ -212,7 +212,8 @@ public class CayenneDataObject implements DataObject {
         }
 
         // need to fetch
-		SelectQuery sel = QueryHelper.selectRelationshipObjects(dataContext, this, relName);
+        SelectQuery sel =
+            QueryHelper.selectRelationshipObjects(dataContext, this, relName);
         List results = dataContext.performQuery(sel);
 
         // unexpected
@@ -234,19 +235,27 @@ public class CayenneDataObject implements DataObject {
         return dobj;
     }
 
-    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
-		ObjRelationship relationship = this.getRelationshipNamed(relName);
-		//Only delete the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
-		//This kind of doubles up the meaning of that flag, so we may need to add another?
-		if (relationship.isFlattened() && setReverse) {
-			if (relationship.isReadOnly()) {
-				throw new CayenneRuntimeException("Cannot modify (remove from) the read-only relationship " + relName);
-			}
-			//Handle removing from a flattened relationship
-			dataContext.registerFlattenedRelationshipDelete(this, relationship, val);
-		}
+    public void removeToManyTarget(
+        String relName,
+        DataObject val,
+        boolean setReverse) {
+        ObjRelationship relationship = this.getRelationshipNamed(relName);
+        //Only delete the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
+        //This kind of doubles up the meaning of that flag, so we may need to add another?
+        if (relationship.isFlattened() && setReverse) {
+            if (relationship.isReadOnly()) {
+                throw new CayenneRuntimeException(
+                    "Cannot modify (remove from) the read-only relationship "
+                        + relName);
+            }
+            //Handle removing from a flattened relationship
+            dataContext.registerFlattenedRelationshipDelete(
+                this,
+                relationship,
+                val);
+        }
 
-		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
+        //Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.remove(val);
         if (persistenceState == PersistenceState.COMMITTED) {
@@ -258,31 +267,39 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
-    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
-		if ((val!=null) && (dataContext != val.getDataContext())) {
-			throw new CayenneRuntimeException(
-				"Cannot add object to relationship "
-					+ relName
-					+ " because it is in a different DataContext");
-		}
-		ObjRelationship relationship = this.getRelationshipNamed(relName);
-		if (relationship == null) {
-			throw new CayenneRuntimeException(
-				"Cannot add object to relationship "
-					+ relName
-					+ " because there is no relationship by that name");
-		}
-		//Only create the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
-		//This kind of doubles up the meaning of that flag, so we may need to add another?
-		if (relationship.isFlattened() && setReverse) {
-			if (relationship.isReadOnly()) {
-				throw new CayenneRuntimeException("Cannot modify (add to) the read-only relationship " + relName);
-			}
-			//Handle adding to a flattened relationship
-			dataContext.registerFlattenedRelationshipInsert(this, relationship, val);
-		}
+    public void addToManyTarget(
+        String relName,
+        DataObject val,
+        boolean setReverse) {
+        if ((val != null) && (dataContext != val.getDataContext())) {
+            throw new CayenneRuntimeException(
+                "Cannot add object to relationship "
+                    + relName
+                    + " because it is in a different DataContext");
+        }
+        ObjRelationship relationship = this.getRelationshipNamed(relName);
+        if (relationship == null) {
+            throw new CayenneRuntimeException(
+                "Cannot add object to relationship "
+                    + relName
+                    + " because there is no relationship by that name");
+        }
+        //Only create the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
+        //This kind of doubles up the meaning of that flag, so we may need to add another?
+        if (relationship.isFlattened() && setReverse) {
+            if (relationship.isReadOnly()) {
+                throw new CayenneRuntimeException(
+                    "Cannot modify (add to) the read-only relationship "
+                        + relName);
+            }
+            //Handle adding to a flattened relationship
+            dataContext.registerFlattenedRelationshipInsert(
+                this,
+                relationship,
+                val);
+        }
 
-		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
+        //Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.add(val);
         if (persistenceState == PersistenceState.COMMITTED) {
@@ -300,22 +317,25 @@ public class CayenneDataObject implements DataObject {
         setToOneTarget(relName, val, true);
     }
 
-    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
-    	//Three reasons that may mean a check is not needed:
-    	// 1: val==null... dataContext of value is unobtainable, and hence irrelevant
-    	// 2: val==nullValue... the relationship is a toOneDependent, this is functionally
-    	//		equivalent to the first condition
-    	// 3: this==nullValue... when setting the reverse direction of a toOneDependent
-    	// 		that is being set to null, this will be nullValue.
-		if ((val != null)
-			&& (val != nullValue)
-			&& (this != nullValue)
-			&& (dataContext != val.getDataContext())) {
-			throw new CayenneRuntimeException(
-				"Cannot set object as destination of relationship "
-					+ relName
-					+ " because it is in a different DataContext");
-		}
+    public void setToOneTarget(
+        String relName,
+        DataObject val,
+        boolean setReverse) {
+        //Three reasons that may mean a check is not needed:
+        // 1: val==null... dataContext of value is unobtainable, and hence irrelevant
+        // 2: val==nullValue... the relationship is a toOneDependent, this is functionally
+        //		equivalent to the first condition
+        // 3: this==nullValue... when setting the reverse direction of a toOneDependent
+        // 		that is being set to null, this will be nullValue.
+        if ((val != null)
+            && (val != nullValue)
+            && (this != nullValue)
+            && (dataContext != val.getDataContext())) {
+            throw new CayenneRuntimeException(
+                "Cannot set object as destination of relationship "
+                    + relName
+                    + " because it is in a different DataContext");
+        }
 
         DataObject oldTarget = (DataObject) readPropertyDirectly(relName);
         if (oldTarget == val) {
@@ -335,9 +355,12 @@ public class CayenneDataObject implements DataObject {
         writeProperty(relName, val);
     }
 
-	private ObjRelationship getRelationshipNamed(String relName) {
-		return (ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(this).getRelationship(relName);
-	}
+    private ObjRelationship getRelationshipNamed(String relName) {
+        return (ObjRelationship) dataContext
+            .getEntityResolver()
+            .lookupObjEntity(this)
+            .getRelationship(relName);
+    }
 
     /**
      * Initializes reverse relationship from object <code>val</code>
@@ -347,7 +370,11 @@ public class CayenneDataObject implements DataObject {
      * to <code>val</code>.
      */
     protected void setReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjClass()).getRelationship(relName);
+        ObjRelationship rel =
+            (ObjRelationship) dataContext
+                .getEntityResolver()
+                .lookupObjEntity(objectId.getObjClass())
+                .getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
             if (revRel.isToMany())
@@ -357,13 +384,22 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
-    /** Remove current object from reverse relationship of object <code>val</code> to this object.
-      * @param relName name of relationship from this object to <code>val</code>. */
+    /** 
+     * Removes current object from reverse relationship of object
+     * <code>val</code> to this object.
+     */
     protected void unsetReverseRelationship(String relName, DataObject val) {
-        Class clazz = objectId.getObjClass();
+        Class aClass = objectId.getObjClass();
         EntityResolver resolver = dataContext.getEntityResolver();
-        ObjEntity entity = resolver.lookupObjEntity(clazz);
-        ObjRelationship rel=(ObjRelationship) entity.getRelationship(relName);
+        ObjEntity entity = resolver.lookupObjEntity(aClass);
+
+        if (entity == null) {
+            String className = (aClass != null) ? aClass.getName() : "<null>";
+            throw new IllegalStateException(
+                "DataObject's class is unmapped: " + className);
+        }
+
+        ObjRelationship rel = (ObjRelationship) entity.getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
             if (revRel.isToMany())
@@ -431,7 +467,8 @@ public class CayenneDataObject implements DataObject {
      *
      * @see org.objectstyle.cayenne.DataObject#fetchFinished()
      */
-    public void fetchFinished() {}
+    public void fetchFinished() {
+    }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(persistenceState);
