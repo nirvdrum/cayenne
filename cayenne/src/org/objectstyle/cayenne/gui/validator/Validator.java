@@ -586,7 +586,7 @@ public class Validator {
 						rel));
 			}
 			
-			if (rel.getName() == null) {
+			if (rel.getName() == null || rel.getName().trim().length() == 0) {
 				addErrorMessage(
 					new RelationshipErrorMsg(
 						"Relationship has no name",
@@ -594,9 +594,7 @@ public class Validator {
 						domain,
 						map,
 						rel));
-			}
-			
-			
+			}			
 		}
 	}
 }

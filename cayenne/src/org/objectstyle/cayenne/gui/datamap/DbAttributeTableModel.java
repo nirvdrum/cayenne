@@ -68,10 +68,15 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 import org.objectstyle.cayenne.util.PropertyComparator;
 
-/** Model for the Db Entity attributes.
- *  Allows adding/removing attributes, modifying the types and the names.
- *  Add/remove changes are cached and saved into DbEntity only when commit()
- *  is called.*/
+/** 
+ * Model for the Db Entity attributes.
+ * Allows adding/removing attributes, modifying types 
+ * and names. Add/remove changes are cached and saved 
+ * into DbEntity only when commit() is called.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 class DbAttributeTableModel extends AbstractTableModel {
 	protected Mediator mediator;
 	protected Object src;
@@ -89,9 +94,9 @@ class DbAttributeTableModel extends AbstractTableModel {
 	static final int DB_ATTRIBUTE_NAME = 0;
 	static final int DB_ATTRIBUTE_TYPE = 1;
 	static final int DB_ATTRIBUTE_PRIMARY_KEY = 2;
-	static final int DB_ATTRIBUTE_PRECISION = 3;
-	static final int DB_ATTRIBUTE_MANDATORY = 4;
-	static final int DB_ATTRIBUTE_MAX = 5;
+	static final int DB_ATTRIBUTE_MANDATORY = 3;
+	static final int DB_ATTRIBUTE_MAX = 4;
+	static final int DB_ATTRIBUTE_PRECISION = 5;
 
 	/** To provide reference to String class. */
 	private String string = new String();
