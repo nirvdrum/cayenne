@@ -64,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
@@ -90,8 +89,6 @@ import org.objectstyle.cayenne.map.DbKeyGenerator;
  * @author Andrei Adamchik
  */
 public class OraclePkGenerator extends JdbcPkGenerator {
-    private static Logger logObj = Logger.getLogger(OraclePkGenerator.class);
-
     private static final String _SEQUENCE_PREFIX = "pk_";
 
     public void createAutoPk(DataNode node, List dbEntities) throws Exception {
