@@ -74,7 +74,7 @@ public class ASTNotEqual extends ConditionNode {
     }
 
     /**
-     * Creates "Equal To" expression.
+     * Creates "Not Equal To" expression.
      */
     public ASTNotEqual(ASTPath path, Object value) {
         super(ExpressionParserTreeConstants.JJTNOTEQUAL);
