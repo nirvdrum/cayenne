@@ -274,7 +274,7 @@ public class JdbcAdapter implements DbAdapter {
 			.append(") REFERENCES ")
 			.append(rel.getTargetEntity().getName())
 			.append(" (")
-			.append(refBuf)
+			.append(refBuf.toString())
 			.append(')');
 		return buf.toString();
 	}
