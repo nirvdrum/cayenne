@@ -122,7 +122,7 @@
 <source>
 &amp;lt;taskdef name="cdeploy" classname="org.objectstyle.cayenne.tools.DeploymentConfigurator"/&amp;gt;
 &amp;lt;cdeploy src="business.jar"&amp;gt;
-    &amp;lt;node name="main-node" file="alt.driver.xml"/&amp;gt;
+    &amp;lt;node name="main-node" driverFile="alt.driver.xml"/&amp;gt;
 &amp;lt;/cdeploy&amp;gt;
 </source>
 
