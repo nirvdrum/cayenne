@@ -82,7 +82,7 @@
     </copy>
     
      <!-- Copy properties -->
-    <copy todir="${build}/classes/org/objectstyle/cayenne/gui">
+    <copy todir="${build}/classes/org/objectstyle/cayenne/gui" overwrite="yes">
        <fileset dir="${src}/resources" >
            <include name="gui.properties"/>
        </fileset>
