@@ -250,13 +250,9 @@ public abstract class Configuration {
 	 * custom Configuration subclass.
 	 */
 	public static void initializeSharedConfiguration(Class configClass) {
-		Configuration conf = null;
-
-		// separate instantiation exceptions from the
-		// possible runtime exceptions thrown in initSharedConfig
 		try {
-			conf = (Configuration)configClass.newInstance();
-			Configuration.initializeSharedConfiguration(conf);
+			Configuration conf = (Configuration)configClass.newInstance();
+			Configuration.setSharedConfiguration(conf);
 		} catch (Exception ex) {
 			logObj.error("Error initializing shared Configuration", ex);
 			throw new ConfigurationException("Error initializing shared Configuration");
@@ -266,23 +262,17 @@ public abstract class Configuration {
 	/**
 	 * Sets shared Configuration object to a new Configuration object.
 	 * calls <code>init</code> method of <code>conf</code> object.
-	 * @deprecated Since 1.0 Beta1; use #initSharedConfiguration(Class) instead.
+	 * @deprecated Since 1.0 Beta1; use #setSharedConfiguration(Configuration) instead.
 	 */
 	public static void initSharedConfig(Configuration conf) {
-		Configuration.initializeSharedConfiguration(conf);
+		Configuration.setSharedConfiguration(conf);
 	}
 
 	/**
-	 * Sets shared Configuration object to a new Configuration object.
-	 * Calls the <code>initialize</code> method of <code>conf</code>.
+	 * Sets the shared Configuration object to a new Configuration object.
 	 */
-	public static void initializeSharedConfiguration(Configuration conf) {
-		try {
-			sharedConfiguration = conf;
-			// sharedConfiguration.initialize();
-		} catch (Exception ex) {
-			throw new ConfigurationException("Error initializing shared Configuration", ex);
-		}
+	public static void setSharedConfiguration(Configuration conf) {
+		sharedConfiguration = conf;
 	}
 
 	/**
