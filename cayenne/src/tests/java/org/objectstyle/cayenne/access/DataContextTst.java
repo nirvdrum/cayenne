@@ -55,14 +55,17 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
+import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -217,14 +220,14 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(id1, id2); //Must be the same,
     }
 
-    public void testTakeObjectsSnapshot1() throws Exception {
+    public void testCurrentSnapshot1() throws Exception {
         Artist artist = fetchArtist("artist1", false);
         Map snapshot = context.currentSnapshot(artist);
         assertEquals(artist.getArtistName(), snapshot.get("ARTIST_NAME"));
         assertEquals(artist.getDateOfBirth(), snapshot.get("DATE_OF_BIRTH"));
     }
 
-    public void testTakeObjectsSnapshot2() throws Exception {
+    public void testCurrentSnapshot2() throws Exception {
         // test null values
         Artist artist = fetchArtist("artist1", false);
         artist.setArtistName(null);
@@ -238,7 +241,7 @@ public class DataContextTst extends DataContextTestBase {
         assertNull(snapshot.get("DATE_OF_BIRTH"));
     }
 
-    public void testTakeObjectsSnapshot3() throws Exception {
+    public void testCurrentSnapshot3() throws Exception {
         // test FK relationship snapshotting
         Artist a1 = fetchArtist("artist1", false);
 
@@ -249,6 +252,33 @@ public class DataContextTst extends DataContextTestBase {
         Map s1 = context.currentSnapshot(p1);
         Map idMap = a1.getObjectId().getIdSnapshot();
         assertEquals(idMap.get("ARTIST_ID"), s1.get("ARTIST_ID"));
+    }
+    
+    /**
+     * Testing snapshot with to-one fault. This was a bug CAY-96.
+     */
+    public void testCurrentSnapshotWithToOneFault() throws Exception {
+
+        // Exhibit with Gallery as Fault must still include Gallery 
+        // Artist and Exhibit (Exhibit has unresolved to-one to gallery as in the 
+        // CAY-96 bug report)
+
+        // first prepare test fixture
+        populateGalleries();
+        populateExhibits();
+
+        ObjectId eId = new ObjectId(Exhibit.class, Exhibit.EXHIBIT_ID_PK_COLUMN, 2);
+        Exhibit e =
+            (Exhibit) context.performQuery(QueryUtils.selectObjectForId(eId)).get(0);
+
+        assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
+
+        DataRow snapshot = context.currentSnapshot(e);
+
+        // assert that after taking a snapshot, we have FK in, but the relationship 
+        // is still a Fault
+        assertTrue(e.readPropertyDirectly(Exhibit.TO_GALLERY_PROPERTY) instanceof Fault);
+        assertEquals(new Integer(2), snapshot.get("GALLERY_ID"));
     }
 
     public void testLookupEntity() throws Exception {

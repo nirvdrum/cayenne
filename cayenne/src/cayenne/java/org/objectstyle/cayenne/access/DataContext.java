@@ -90,6 +90,7 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
@@ -506,15 +507,42 @@ public class DataContext implements QueryEngine, Serializable {
                 continue;
             }
 
+            // dependent relationship key is part of PK
+            // and will be handled downstream 
             if (rel.isToDependentEntity()) {
                 continue;
             }
 
             Object targetObject = anObject.readPropertyDirectly(relName);
-            if (targetObject == null || (targetObject instanceof Fault)) {
+            if (targetObject == null) {
+                continue;
+            }
+            
+            // if target is Fault, get id attributes from stored snapshot
+            // to avoid unneeded fault triggering
+            if (targetObject instanceof Fault) {
+                DataRow storedSnapshot =
+                    getObjectStore().getSnapshot(anObject.getObjectId(), this);
+                if (storedSnapshot == null) {
+                    throw new CayenneRuntimeException(
+                        "No matching objects found for ObjectId "
+                            + anObject.getObjectId()
+                            + ". Object may have been deleted externally.");
+                }
+                
+                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+                Iterator joins = dbRel.getJoins().iterator();
+                while(joins.hasNext()) {
+                    DbAttributePair join = (DbAttributePair)joins.next();
+                    String key = join.getSource().getName();
+                    snapshot.put(key, storedSnapshot.get(key));
+                }
+                
                 continue;
             }
 
+            // target is resolved regular to-one, so extract 
+            // FK from PK of the target object
             DataObject target = (DataObject) targetObject;
             Map idParts = target.getObjectId().getIdSnapshot();
 

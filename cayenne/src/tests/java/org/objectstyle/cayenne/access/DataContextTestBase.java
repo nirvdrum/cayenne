@@ -59,12 +59,15 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.ROArtist;
 import org.objectstyle.cayenne.ObjectId;
@@ -75,6 +78,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
@@ -156,7 +160,7 @@ public class DataContextTestBase extends CayenneTestCase {
         // something in the range that we are unlikely to hit
         return 33000 + i;
     }
-
+    
     /** Give each artist a single painting. */
     public void populatePaintings() throws Exception {
         String insertPaint =
@@ -180,6 +184,47 @@ public class DataContextTestBase extends CayenneTestCase {
             stmt.close();
             conn.commit();
         } finally {
+            conn.close();
+        }
+    }
+    
+    public void populateGalleries() throws Exception {
+        List galleries = new ArrayList(2);
+        galleries.add(
+            new SqlModifyQuery(
+                Gallery.class,
+                "insert into GALLERY (GALLERY_ID, GALLERY_NAME) values (1, 'g1')"));
+        galleries.add(
+            new SqlModifyQuery(
+                Gallery.class,
+                "insert into GALLERY (GALLERY_ID, GALLERY_NAME) values (2, 'g2')"));
+        context.performQueries(galleries, new DefaultOperationObserver());
+    }
+
+    public void populateExhibits() throws Exception {
+        String insertPaint =
+            "INSERT INTO EXHIBIT (EXHIBIT_ID, GALLERY_ID, OPENING_DATE, CLOSING_DATE) VALUES (?, ?, ?, ?)";
+
+        Connection conn = getConnection();
+
+        try {
+            conn.setAutoCommit(false);
+
+            PreparedStatement stmt = conn.prepareStatement(insertPaint);
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+
+            for (int i = 1; i <= 2; i++) {
+                stmt.setInt(1, i);
+                stmt.setInt(2, i);
+                stmt.setTimestamp(3, now);
+                stmt.setTimestamp(4, now);
+                stmt.executeUpdate();
+            }
+
+            stmt.close();
+            conn.commit();
+        }
+        finally {
             conn.close();
         }
     }
