@@ -55,57 +55,17 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.query;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JButton;
-import javax.swing.JTabbedPane;
-
-import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.scopemvc.view.swing.SAction;
-import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SPanel;
-import org.scopemvc.view.swing.SwingView;
 
 /**
- * Dialog for SelectQuery configuration.
+ * A panel for configuring SelectQuery ordering.
  * 
- * @since 1.1 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class SelectQueryDialog extends SPanel {
+public class SelectQueryOrderingPanel extends SPanel {
 
-    public SelectQueryDialog() {
-        initView();
-    }
+    public SelectQueryOrderingPanel() {
 
-    protected void initView() {
-        // create widgets
-        SelectQueryMainPanel mainPanel = new SelectQueryMainPanel();
-        SelectQueryOrderingPanel orderingPanel = new SelectQueryOrderingPanel();
-        SelectQueryPrefetchPanel prefetchPanel = new SelectQueryPrefetchPanel();
-
-        SButton saveButton = new SButton(new SAction(SelectQueryController.SAVE_CONTROL));
-        saveButton.setEnabled(true);
-
-        SButton cancelButton =
-            new SButton(new SAction(SelectQueryController.CANCEL_CONTROL));
-        cancelButton.setEnabled(true);
-        
-        // assemble
-        setLayout(new BorderLayout());
-
-        JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
-        tab.addTab("Select Query", mainPanel);
-        tab.addTab("Ordering", orderingPanel);
-        tab.addTab("Prefetch", prefetchPanel);
-
-        add(tab, BorderLayout.CENTER);
-        add(
-            PanelFactory.createButtonPanel(new JButton[] { saveButton, cancelButton }),
-            BorderLayout.SOUTH);
-
-        // decorate
-        setDisplayMode(SwingView.MODAL_DIALOG);
-        setTitle("Configure Select Query");
     }
 }

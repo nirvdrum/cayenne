@@ -141,7 +141,7 @@ void simpleCondition() : {}
 	  comparisonCondition()
 	| 
 	  negatedCondition()
-	)
+	)?
 }
 
 void equalityCondition() : {} 

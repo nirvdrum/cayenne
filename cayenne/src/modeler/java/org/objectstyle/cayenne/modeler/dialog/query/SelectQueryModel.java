@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.query;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -81,6 +84,8 @@ public class SelectQueryModel extends QueryModel {
     protected boolean refreshingObjects;
     protected boolean fetchingDataRows;
     protected boolean distinct;
+    protected List orderings;
+    protected List prefetches;
 
     public SelectQueryModel(Query query) {
         super(query);
@@ -101,6 +106,9 @@ public class SelectQueryModel extends QueryModel {
         this.refreshingObjects = selectQuery.isRefreshingObjects();
         this.fetchingDataRows = selectQuery.isFetchingDataRows();
         this.qualifier = selectQuery.getQualifier();
+
+        this.orderings = new ArrayList(selectQuery.getOrderings());
+        this.prefetches = new ArrayList(selectQuery.getPrefetches());
     }
 
     public void updateQuery() {
@@ -113,6 +121,12 @@ public class SelectQueryModel extends QueryModel {
         selectQuery.setRefreshingObjects(refreshingObjects);
         selectQuery.setFetchingDataRows(fetchingDataRows);
         selectQuery.setDistinct(distinct);
+
+        selectQuery.clearOrderings();
+        selectQuery.addOrderings(orderings);
+
+        selectQuery.clearPrefetches();
+        selectQuery.addPrefetches(prefetches);
     }
 
     public boolean isDistinct() {

@@ -53,59 +53,92 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JButton;
-import javax.swing.JTabbedPane;
+import javax.swing.Icon;
 
-import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.scopemvc.view.swing.SAction;
-import org.scopemvc.view.swing.SButton;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
+import org.scopemvc.view.swing.SCheckBox;
+import org.scopemvc.view.swing.SLabel;
 import org.scopemvc.view.swing.SPanel;
-import org.scopemvc.view.swing.SwingView;
+import org.scopemvc.view.swing.STextField;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * Dialog for SelectQuery configuration.
+ * Main panel of SelectQuery edit dialog.
  * 
- * @since 1.1 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class SelectQueryDialog extends SPanel {
+public class SelectQueryMainPanel extends SPanel {
 
-    public SelectQueryDialog() {
+    protected SLabel rootLabel;
+
+    public SelectQueryMainPanel() {
         initView();
     }
 
     protected void initView() {
         // create widgets
-        SelectQueryMainPanel mainPanel = new SelectQueryMainPanel();
-        SelectQueryOrderingPanel orderingPanel = new SelectQueryOrderingPanel();
-        SelectQueryPrefetchPanel prefetchPanel = new SelectQueryPrefetchPanel();
+        STextField name = ScopeWidgetFactory.createTextField(40);
+        name.setSelector(QueryModel.NAME_SELECTOR);
 
-        SButton saveButton = new SButton(new SAction(SelectQueryController.SAVE_CONTROL));
-        saveButton.setEnabled(true);
+        STextField qualifier = ScopeWidgetFactory.createTextField(40);
+        qualifier.setSelector(SelectQueryModel.QUALIFIER_SELECTOR);
 
-        SButton cancelButton =
-            new SButton(new SAction(SelectQueryController.CANCEL_CONTROL));
-        cancelButton.setEnabled(true);
-        
+        SCheckBox distinct = new SCheckBox();
+        distinct.setSelector(SelectQueryModel.DISTINCT_SELECTOR);
+
+        SCheckBox dataRows = new SCheckBox();
+        dataRows.setSelector(SelectQueryModel.FETCHING_DATA_ROWS_SELECTOR);
+
+        SCheckBox refreshesResults = new SCheckBox();
+        refreshesResults.setSelector(SelectQueryModel.REFRESHING_OBJECTS_SELECTOR);
+
+        STextField fetchLimit = ScopeWidgetFactory.createTextField(7);
+        fetchLimit.setSelector(SelectQueryModel.FETCH_LIMIT_SELECTOR);
+
+        STextField pageSize = ScopeWidgetFactory.createTextField(7);
+        pageSize.setSelector(SelectQueryModel.PAGE_SIZE_SELECTOR);
+
+        rootLabel = new SLabel();
+        rootLabel.setSelector(QueryModel.ROOT_NAME_SELECTOR);
+
         // assemble
         setLayout(new BorderLayout());
 
-        JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
-        tab.addTab("Select Query", mainPanel);
-        tab.addTab("Ordering", orderingPanel);
-        tab.addTab("Prefetch", prefetchPanel);
+        FormLayout layout =
+            new FormLayout("right:max(50dlu;pref), 3dlu, left:max(200dlu;pref)", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+        builder.appendSeparator("SelectQuery Settings");
+        builder.append("Query Root:", rootLabel);
+        builder.append("Query Name:", name);
+        builder.append("Qualifier:", qualifier);
+        builder.appendSeparator();
+        builder.append("Distinct:", distinct);
+        builder.append("Fetch Data Rows:", dataRows);
+        builder.append("Refresh Objects:", refreshesResults);
+        builder.append("Fetch Limit, Rows:", fetchLimit);
+        builder.append("Page Size:", pageSize);
 
-        add(tab, BorderLayout.CENTER);
-        add(
-            PanelFactory.createButtonPanel(new JButton[] { saveButton, cancelButton }),
-            BorderLayout.SOUTH);
+        add(builder.getPanel(), BorderLayout.CENTER);
+    }
 
-        // decorate
-        setDisplayMode(SwingView.MODAL_DIALOG);
-        setTitle("Configure Select Query");
+    public void setBoundModel(Object model) {
+        super.setBoundModel(model);
+
+        // init root icon
+        if (model instanceof QueryModel) {
+            Object root = ((QueryModel) model).getRoot();
+            Icon icon = CellRenderers.iconForObject(root);
+            rootLabel.setIcon(icon);
+        }
     }
 }
