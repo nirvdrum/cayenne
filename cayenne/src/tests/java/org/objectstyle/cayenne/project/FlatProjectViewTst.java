@@ -79,16 +79,16 @@ public class FlatProjectViewTst extends CayenneTestCase {
         List view = new FlatProjectView().flattenProjectTree(map);
         assertNotNull(view);
         assertEquals(1, view.size());
-        Object[] path10 = (Object[])view.get(0);
-        assertSame(map, path10[0]);
+        ProjectPath path10 = (ProjectPath)view.get(0);
+        assertSame(map, path10.getPath()[0]);
         
         ObjEntity ent = new ObjEntity("e1");
         map.addObjEntity(ent);
         List view1 = new FlatProjectView().flattenProjectTree(map);
         assertNotNull(view1);
         assertEquals(2, view1.size());
-        Object[] path21 = (Object[])view1.get(1);
-        assertSame(map, path21[0]);
-        assertSame(ent, path21[1]);
+        ProjectPath path21 = (ProjectPath)view1.get(1);
+        assertSame(map, path21.getPath()[0]);
+        assertSame(ent, path21.getPath()[1]);
     }
 }

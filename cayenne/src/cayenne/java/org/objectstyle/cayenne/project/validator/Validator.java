@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectPath;
 
 /** 
  * Used for validating Cayenne projects.
@@ -147,7 +148,7 @@ public class Validator {
 
         Iterator it = project.treeNodes();
         while (it.hasNext()) {
-            TreeNodeValidator.validate((Object[]) it.next(), this);
+            TreeNodeValidator.validate(((ProjectPath) it.next()).getPath(), this);
         }
 
         return getMaxSeverity();

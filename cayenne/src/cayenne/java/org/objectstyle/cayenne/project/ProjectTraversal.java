@@ -113,8 +113,12 @@ public class ProjectTraversal {
     /**
      * Performs traversal starting from Configuration node.
      */
-    public void traverseConfig(Configuration config, Object[] path) {
-        Object[] configPath = ProjectPath.buildPath(config, path);
+    public void traverseConfig(Configuration config, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
+        ProjectPath configPath = path.appendToPath(config);
         handler.projectNode(configPath);
 
         if (handler.shouldReadChildren(config, path)) {
@@ -125,11 +129,15 @@ public class ProjectTraversal {
     /**
       * Performs traversal starting from a list of domains.
       */
-    public void traverseDomains(List domains, Object[] path) {
+    public void traverseDomains(List domains, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
-            Object[] domainPath = ProjectPath.buildPath(domain, path);
+            ProjectPath domainPath = path.appendToPath(domain);
             handler.projectNode(domainPath);
 
             if (handler.shouldReadChildren(domain, path)) {
@@ -139,18 +147,26 @@ public class ProjectTraversal {
         }
     }
 
-    public void traverseNodes(List nodes, Object[] path) {
+    public void traverseNodes(List nodes, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
-            handler.projectNode(ProjectPath.buildPath(it.next(), path));
+            handler.projectNode(path.appendToPath(it.next()));
         }
     }
 
-    public void traverseMaps(List maps, Object[] path) {
+    public void traverseMaps(List maps, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
         Iterator it = maps.iterator();
         while (it.hasNext()) {
             DataMap map = (DataMap) it.next();
-            Object[] mapPath = ProjectPath.buildPath(map, path);
+            ProjectPath mapPath = path.appendToPath(map);
             handler.projectNode(mapPath);
 
             if (handler.shouldReadChildren(map, path)) {
@@ -160,11 +176,15 @@ public class ProjectTraversal {
         }
     }
 
-    public void traverseEntities(List entities, Object[] path) {
+    public void traverseEntities(List entities, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             Entity ent = (Entity) it.next();
-            Object[] entPath = ProjectPath.buildPath(ent, path);
+            ProjectPath entPath = path.appendToPath(ent);
             handler.projectNode(entPath);
 
             if (handler.shouldReadChildren(ent, path)) {
@@ -174,17 +194,25 @@ public class ProjectTraversal {
         }
     }
 
-    public void traverseAttributes(List attributes, Object[] path) {
+    public void traverseAttributes(List attributes, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
-            handler.projectNode(ProjectPath.buildPath(it.next(), path));
+            handler.projectNode(path.appendToPath(it.next()));
         }
     }
 
-    public void traverseRelationships(List relationships, Object[] path) {
+    public void traverseRelationships(List relationships, ProjectPath path) {
+        if (path == null) {
+            path = new ProjectPath();
+        }
+
         Iterator it = relationships.iterator();
         while (it.hasNext()) {
-            handler.projectNode(ProjectPath.buildPath(it.next(), path));
+            handler.projectNode(path.appendToPath(it.next()));
         }
     }
 }

@@ -96,14 +96,14 @@ public class FlatProjectView {
             this.nodes = nodes;
         }
 
-        public void projectNode(Object[] path) {
+        public void projectNode(ProjectPath path) {
             nodes.add(path);
         }
 
         /**
          * Always returns true.
          */
-        public boolean shouldReadChildren(Object node, Object[] parentPath) {
+        public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
             return true;
         }
     }

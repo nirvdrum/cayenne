@@ -74,14 +74,14 @@ public class TstProjectTraversalHelper implements ProjectTraversalHandler {
     /**
      * @see org.objectstyle.cayenne.project.ProjectTraversalHandler#projectNode(Object[])
      */
-    public void projectNode(Object[] nodePath) {
-        nodes.add(nodePath[nodePath.length - 1]);   
+    public void projectNode(ProjectPath nodePath) {
+        nodes.add(nodePath.getObject());   
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectTraversalHandler#shouldReadChildren(Object, Object[])
      */
-    public boolean shouldReadChildren(Object node, Object[] parentPath) {
+    public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
         return true;
     }
 

@@ -178,9 +178,9 @@ public class ProjectTreeModel extends DefaultTreeModel {
             return rootNode;
         }
 
-        public void projectNode(Object[] nodePath) {
-            Object parent = ProjectPath.objectParentFromPath(nodePath);
-            Object nodeObj = ProjectPath.objectFromPath(nodePath);
+        public void projectNode(ProjectPath nodePath) {
+            Object parent = nodePath.getObjectParent();
+            Object nodeObj = nodePath.getObject();
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
 
             if (parent == null) {
@@ -194,7 +194,7 @@ public class ProjectTreeModel extends DefaultTreeModel {
             nodesMap.put(nodeObj, node);
         }
 
-        public boolean shouldReadChildren(Object node, Object[] parentPath) {
+        public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
             return (node instanceof Configuration)
                 || (node instanceof DataDomain)
                 || (node instanceof DataMap);
