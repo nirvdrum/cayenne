@@ -57,9 +57,10 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
@@ -79,6 +80,7 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
+import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.ChooseSchemaDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -199,13 +201,19 @@ public class ImportDbAction extends CayenneAction {
 
     public Connection openConnection(DataSourceInfo dsi) {
         String driverClassName = dsi.getJdbcDriver();
+        Properties connectProperties = new Properties();
+        connectProperties.put("user", dsi.getUserName());
+        connectProperties.put("password", dsi.getPassword());
+        
         try {
-            Class.forName(driverClassName).newInstance();
-            return DriverManager.getConnection(
-                dsi.getDataSourceUrl(),
-                dsi.getUserName(),
-                dsi.getPassword());
-        } catch (SQLException e) {
+            // connect directly via driver to avoid weird DriverManager errors
+            // due to a specialized classloader
+            Class driverClass =
+                ModelerClassLoader.getClassLoader().loadClass(driverClassName);
+            Driver driver = (Driver) driverClass.newInstance();
+            return driver.connect(dsi.getDataSourceUrl(), connectProperties);
+        }
+        catch (SQLException e) {
             logObj.warn("Can't open database connection.", e);
             SQLException ex = e.getNextException();
             if (ex != null) {
