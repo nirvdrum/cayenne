@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
+import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -116,7 +117,7 @@ public class DataContext implements QueryEngine, Serializable {
     //Must be deserialized slightly differently - see read/writeObject
     protected transient Map registeredMap = Collections.synchronizedMap(new HashMap());
     protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
-    protected RelationshipDataSource relDataSource = new RelationshipDataSource();
+    protected RelationshipDataSource relDataSource = new RelationshipDataSource(this);
 
     public DataContext() {
         this(null);
@@ -1229,22 +1230,6 @@ public class DataContext implements QueryEngine, Serializable {
         while (it.hasNext()) {
             DataObject obj = (DataObject) it.next();
             obj.setDataContext(this);
-        }
-    }
-
-    class RelationshipDataSource implements ToManyListDataSource, Serializable {
-        public void updateListData(ToManyList list) {
-            if (list.getSrcObjectId().isTemporary())
-                list.setObjectList(new ArrayList());
-            else {
-                SelectQuery sel =
-                    QueryHelper.selectRelationshipObjects(
-                        DataContext.this,
-                        list.getSrcObjectId(),
-                        list.getRelName());
-                List results = performQuery(sel);
-                list.setObjectList(results);
-            }
         }
     }
 }
