@@ -87,7 +87,7 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Query;
@@ -287,7 +287,7 @@ public class RemoveAction extends CayenneAction {
         DbEntity entity = mediator.getCurrentDbEntity();
         DbAttribute attrib = mediator.getCurrentDbAttribute();
         entity.removeAttribute(attrib.getName());
-        MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
+        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
         AttributeEvent e =
             new AttributeEvent(
@@ -317,7 +317,7 @@ public class RemoveAction extends CayenneAction {
         DbEntity entity = mediator.getCurrentDbEntity();
         DbRelationship rel = mediator.getCurrentDbRelationship();
         entity.removeRelationship(rel.getName());
-        MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
+        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
         RelationshipEvent e =
             new RelationshipEvent(

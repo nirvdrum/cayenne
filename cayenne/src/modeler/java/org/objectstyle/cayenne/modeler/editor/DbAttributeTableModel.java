@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
 /** 
  * Model for DbEntity attributes. Allows adding/removing 
@@ -273,7 +273,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
     public void setAttributeName(String newVal, DbAttribute attr) {
         String newName = newVal.trim();
-        MapUtil.setAttributeName(attr, newName);
+        ProjectUtil.setAttributeName(attr, newName);
     }
 
     public void setAttributeType(String newVal, DbAttribute attr) {
@@ -305,8 +305,8 @@ public class DbAttributeTableModel extends CayenneTableModel {
         // make sure "to-dep-pk" relationships are fixed when the primary key is unset.
         if (!flag) {
             Collection relationships =
-                MapUtil.getRelationshipsUsingAttributeAsTarget(attr);
-            relationships.addAll(MapUtil.getRelationshipsUsingAttributeAsSource(attr));
+                ProjectUtil.getRelationshipsUsingAttributeAsTarget(attr);
+            relationships.addAll(ProjectUtil.getRelationshipsUsingAttributeAsSource(attr));
 
             if (relationships.size() > 0) {
                 Iterator it = relationships.iterator();

@@ -82,20 +82,14 @@ import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
-/** 
- * Provides utility methods to perform complex actions on objects
- * in the org.objectstyle.cayenne.map package.
- * 
- * <p>TODO: this class is a good candidate to be included in the map package.</p> 
- * 
- * @author Misha Sengaout
- * @author Andrei Adamchik
+/**
+ * Provides utility methods to perform various manipulations with project objects.
  */
-public class MapUtil {
+public class ProjectUtil {
 
     public static void setProcedureParameterName(
-        ProcedureParameter parameter,
-        String newName) {
+            ProcedureParameter parameter,
+            String newName) {
 
         String oldName = parameter.getName();
 
@@ -141,9 +135,9 @@ public class MapUtil {
     }
 
     public static void setDataDomainName(
-        Configuration configuration,
-        DataDomain domain,
-        String newName) {
+            Configuration configuration,
+            DataDomain domain,
+            String newName) {
 
         String oldName = domain.getName();
         // If name hasn't changed, just return
@@ -156,10 +150,14 @@ public class MapUtil {
         configuration.addDomain(domain);
     }
 
-    public static void setProcedureName(
-        DataMap map,
-        Procedure procedure,
-        String newName) {
+    public static void setDataNodeName(DataDomain domain, DataNode node, String newName) {
+        String oldName = node.getName();
+        node.setName(newName);
+        domain.removeDataNode(oldName);
+        domain.addNode(node);
+    }
+
+    public static void setProcedureName(DataMap map, Procedure procedure, String newName) {
 
         String oldName = procedure.getName();
 
@@ -171,10 +169,10 @@ public class MapUtil {
         procedure.setName(newName);
         map.removeProcedure(oldName);
         map.addProcedure(procedure);
-        
+
         // important - clear parent namespace:
         MappingNamespace ns = map.getNamespace();
-        if(ns instanceof EntityResolver) {
+        if (ns instanceof EntityResolver) {
             ((EntityResolver) ns).clearCache();
         }
     }
@@ -191,10 +189,10 @@ public class MapUtil {
         query.setName(newName);
         map.removeQuery(oldName);
         map.addQuery(query);
-        
+
         // important - clear parent namespace:
         MappingNamespace ns = map.getNamespace();
-        if(ns instanceof EntityResolver) {
+        if (ns instanceof EntityResolver) {
             ((EntityResolver) ns).clearCache();
         }
     }
@@ -210,10 +208,10 @@ public class MapUtil {
         entity.setName(newName);
         map.removeObjEntity(oldName, false);
         map.addObjEntity(entity);
-        
+
         // important - clear parent namespace:
         MappingNamespace ns = map.getNamespace();
-        if(ns instanceof EntityResolver) {
+        if (ns instanceof EntityResolver) {
             ((EntityResolver) ns).clearCache();
         }
     }
@@ -229,10 +227,10 @@ public class MapUtil {
         entity.setName(newName);
         map.removeDbEntity(oldName, false);
         map.addDbEntity(entity);
-        
+
         // important - clear parent namespace:
         MappingNamespace ns = map.getNamespace();
-        if(ns instanceof EntityResolver) {
+        if (ns instanceof EntityResolver) {
             ((EntityResolver) ns).clearCache();
         }
     }
@@ -246,10 +244,7 @@ public class MapUtil {
     }
 
     /** Changes the name of the attribute in all places in DataMap. */
-    public static void setRelationshipName(
-        Entity entity,
-        Relationship rel,
-        String newName) {
+    public static void setRelationshipName(Entity entity, Relationship rel, String newName) {
 
         if (rel == null || rel != entity.getRelationship(rel.getName())) {
             return;
@@ -261,9 +256,8 @@ public class MapUtil {
     }
 
     /**
-     * Cleans any mappings of ObjEntities, ObjAttributes, 
-     * ObjRelationship to the corresponding Db* objects that not longer
-     * exist.
+     * Cleans any mappings of ObjEntities, ObjAttributes, ObjRelationship to the
+     * corresponding Db* objects that not longer exist.
      */
     public static void cleanObjMappings(DataMap map) {
         Iterator ents = map.getObjEntities().iterator();
@@ -299,8 +293,8 @@ public class MapUtil {
                     DbRelationship dbRel = (DbRelationship) dbRels.next();
                     Entity srcEnt = dbRel.getSourceEntity();
                     if (srcEnt == null
-                        || map.getDbEntity(srcEnt.getName()) != srcEnt
-                        || srcEnt.getRelationship(dbRel.getName()) != dbRel) {
+                            || map.getDbEntity(srcEnt.getName()) != srcEnt
+                            || srcEnt.getRelationship(dbRel.getName()) != dbRel) {
                         rel.removeDbRelationship(dbRel);
                     }
                 }
@@ -309,10 +303,9 @@ public class MapUtil {
         }
     }
 
-    /** 
-     * Clears all the mapping between this obj entity and 
-     * its current db entity. Clears mapping between 
-     * entities, attributes and relationships. 
+    /**
+     * Clears all the mapping between this obj entity and its current db entity. Clears
+     * mapping between entities, attributes and relationships.
      */
     public static void clearDbMapping(ObjEntity entity) {
         DbEntity db_entity = entity.getDbEntity();
@@ -338,12 +331,11 @@ public class MapUtil {
     }
 
     /**
-      * Returns true if one of relationship joins uses a given attribute
-      * as a source.
-      */
+     * Returns true if one of relationship joins uses a given attribute as a source.
+     */
     public static boolean containsSourceAttribute(
-        DbRelationship relationship,
-        DbAttribute attribute) {
+            DbRelationship relationship,
+            DbAttribute attribute) {
         if (attribute.getEntity() != relationship.getSourceEntity()) {
             return false;
         }
@@ -360,12 +352,11 @@ public class MapUtil {
     }
 
     /**
-     * Returns true if one of relationship joins uses a given attribute
-     * as a target.
+     * Returns true if one of relationship joins uses a given attribute as a target.
      */
     public static boolean containsTargetAttribute(
-        DbRelationship relationship,
-        DbAttribute attribute) {
+            DbRelationship relationship,
+            DbAttribute attribute) {
         if (attribute.getEntity() != relationship.getTargetEntity()) {
             return false;
         }
@@ -382,8 +373,7 @@ public class MapUtil {
     }
 
     /**
-     * Returns a collection of DbRelationships that use
-     * this attribute as a source.
+     * Returns a collection of DbRelationships that use this attribute as a source.
      */
     public static Collection getRelationshipsUsingAttributeAsSource(DbAttribute attribute) {
         Entity parent = attribute.getEntity();
@@ -397,7 +387,7 @@ public class MapUtil {
         Iterator it = parentRelationships.iterator();
         while (it.hasNext()) {
             DbRelationship relationship = (DbRelationship) it.next();
-            if (MapUtil.containsSourceAttribute(relationship, attribute)) {
+            if (ProjectUtil.containsSourceAttribute(relationship, attribute)) {
                 relationships.add(relationship);
             }
         }
@@ -405,8 +395,7 @@ public class MapUtil {
     }
 
     /**
-     * Returns a collection of DbRelationships that use
-     * this attribute as a source.
+     * Returns a collection of DbRelationships that use this attribute as a source.
      */
     public static Collection getRelationshipsUsingAttributeAsTarget(DbAttribute attribute) {
         Entity parent = attribute.getEntity();
@@ -433,7 +422,7 @@ public class MapUtil {
             Iterator relationshipsIt = entityRelationships.iterator();
             while (relationshipsIt.hasNext()) {
                 DbRelationship relationship = (DbRelationship) relationshipsIt.next();
-                if (MapUtil.containsTargetAttribute(relationship, attribute)) {
+                if (ProjectUtil.containsTargetAttribute(relationship, attribute)) {
                     relationships.add(relationship);
                 }
             }

@@ -85,7 +85,7 @@ import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -199,7 +199,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
                     if (parent != derived.getParentEntity()) {
                         derived.setParentEntity(parent);
                         derived.resetToParentView();
-                        MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
+                        ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
                         EntityEvent event = new EntityEvent(this, current);
                         mediator.fireDbEntityEvent(event);
@@ -355,7 +355,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         else if (entity.getDataMap().getDbEntity(newName) == null) {
             // completely new name, set new name for entity
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
-            MapUtil.setDbEntityName(entity.getDataMap(), entity, newName);
+            ProjectUtil.setDbEntityName(entity.getDataMap(), entity, newName);
             mediator.fireDbEntityEvent(e);
         }
         else {

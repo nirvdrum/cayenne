@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -428,7 +428,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         else if (entity.getDataMap().getObjEntity(newName) == null) {
             // completely new name, set new name for entity
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
-            MapUtil.setObjEntityName(entity.getDataMap(), entity, newName);
+            ProjectUtil.setObjEntityName(entity.getDataMap(), entity, newName);
             mediator.fireObjEntityEvent(e);
         }
         else {

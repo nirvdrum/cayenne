@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
 /**
  * Table model for DbRelationship table.
@@ -161,7 +161,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
         if (column == NAME) {
             String text = (String) aValue;
             String old_name = rel.getName();
-            MapUtil.setRelationshipName(entity, rel, text);
+            ProjectUtil.setRelationshipName(entity, rel, text);
             RelationshipEvent e = new RelationshipEvent(
                     eventSource,
                     rel,

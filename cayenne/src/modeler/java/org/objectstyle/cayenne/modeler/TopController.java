@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
-import org.objectstyle.cayenne.modeler.editor.*;
+import org.objectstyle.cayenne.modeler.editor.EditorView;
+import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
 import org.scopemvc.core.Control;
@@ -94,11 +95,15 @@ public class TopController extends ModelerController {
      */
     protected void projectClosed(Control control) {
         // --- update view
-        mainFrame.getRecentFileMenu().rebuildFromPreferences();
+        RecentFileMenu recentFileMenu = mainFrame.getRecentFileMenu();
+        recentFileMenu.rebuildFromPreferences();
+        recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
+        
         if (mainFrame.getView() != null) {
             mainFrame.getContentPane().remove(mainFrame.getView());
             mainFrame.setView(null);
         }
+        
         // repaint is needed, since sometimes there is a 
         // trace from menu left on the screen
         mainFrame.repaint();

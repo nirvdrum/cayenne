@@ -88,7 +88,7 @@ import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -318,7 +318,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         // handle name update
         if (!name.getText().equals(relationship.getName())) {
             String oldName = relationship.getName();
-            MapUtil.setRelationshipName(
+            ProjectUtil.setRelationshipName(
                     relationship.getSourceEntity(),
                     relationship,
                     name.getText());

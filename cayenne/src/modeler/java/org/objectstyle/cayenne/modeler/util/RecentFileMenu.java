@@ -66,9 +66,8 @@ import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 
 /**
- * Menu that contains a list of previously used files.
- * It is built from CayenneModeler preferences by calling 
- * <code>rebuildFromPreferences</code>.
+ * Menu that contains a list of previously used files. It is built from CayenneModeler
+ * preferences by calling <code>rebuildFromPreferences</code>.
  * 
  * @author Andrei Adamchik
  */
@@ -88,9 +87,9 @@ public class RecentFileMenu extends JMenu {
         return (RecentFileMenuItem) super.add(menuItem);
     }
 
-    /** 
-     * Rebuilds internal menu items list with the files stored in
-     * CayenneModeler properences.
+    /**
+     * Rebuilds internal menu items list with the files stored in CayenneModeler
+     * properences.
      */
     public void rebuildFromPreferences() {
         ModelerPreferences pref = ModelerPreferences.getPreferences();
@@ -111,7 +110,8 @@ public class RecentFileMenu extends JMenu {
                 // update existing one
                 RecentFileMenuItem item = (RecentFileMenuItem) comps[i];
                 item.setText(name);
-            } else {
+            }
+            else {
                 // add a new one
                 RecentFileMenuItem item = new RecentFileMenuItem(name);
                 item.setAction(findAction());
@@ -126,7 +126,8 @@ public class RecentFileMenu extends JMenu {
     }
 
     protected Action findAction() {
-        return CayenneModelerFrame.getFrame().getAction(
-            OpenProjectAction.getActionName());
+        return CayenneModelerFrame
+                .getFrame()
+                .getAction(OpenProjectAction.getActionName());
     }
 }

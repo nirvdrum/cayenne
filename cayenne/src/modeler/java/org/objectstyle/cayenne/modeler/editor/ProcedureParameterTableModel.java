@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
 /**
  * @author Andrei Adamchik
@@ -208,7 +208,7 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
     }
 
     protected void setParameterName(String newVal, ProcedureParameter parameter) {
-        MapUtil.setProcedureParameterName(parameter, newVal.trim());
+        ProjectUtil.setProcedureParameterName(parameter, newVal.trim());
     }
 
     public Class getElementsClass() {

@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
@@ -212,7 +212,7 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 
         if (column == OBJ_ATTRIBUTE) {
             event.setOldName(attribute.getName());
-            MapUtil.setAttributeName(
+            ProjectUtil.setAttributeName(
                 attribute,
                 value != null ? value.toString().trim() : null);
             fireTableCellUpdated(row, column);

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -204,7 +204,7 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
         else if (procedure.getDataMap().getProcedure(newName) == null) {
             // completely new name, set new name for entity
             ProcedureEvent e = new ProcedureEvent(this, procedure, procedure.getName());
-            MapUtil.setProcedureName(procedure.getDataMap(), procedure, newName);
+            ProjectUtil.setProcedureName(procedure.getDataMap(), procedure, newName);
             eventController.fireProcedureEvent(e);
         }
         else {

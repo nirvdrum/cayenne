@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.modeler.dialog.datadomain.CacheSyncConfigControll
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.util.Util;
@@ -328,7 +328,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         if (matchingDomain == null) {
             // completely new name, set new name for domain
             DomainEvent e = new DomainEvent(this, domain, domain.getName());
-            MapUtil.setDataDomainName(configuration, domain, text);
+            ProjectUtil.setDataDomainName(configuration, domain, text);
             eventController.fireDomainEvent(e);
         }
         else if (matchingDomain != domain) {

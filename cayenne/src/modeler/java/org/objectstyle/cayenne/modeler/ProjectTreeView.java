@@ -55,11 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -69,7 +66,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -103,39 +99,24 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
-import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
+/**
  * Panel displaying Cayenne project as a tree.
  */
-public class ProjectTreeView
-    extends JScrollPane
-    implements
-        DomainDisplayListener,
-        DomainListener,
-        DataMapDisplayListener,
-        DataMapListener,
-        DataNodeDisplayListener,
-        DataNodeListener,
-        ObjEntityListener,
-        ObjEntityDisplayListener,
-        DbEntityListener,
-        DbEntityDisplayListener,
-        QueryListener,
-        QueryDisplayListener,
-        ProcedureListener,
+public class ProjectTreeView extends JScrollPane implements DomainDisplayListener,
+        DomainListener, DataMapDisplayListener, DataMapListener, DataNodeDisplayListener,
+        DataNodeListener, ObjEntityListener, ObjEntityDisplayListener, DbEntityListener,
+        DbEntityDisplayListener, QueryListener, QueryDisplayListener, ProcedureListener,
         ProcedureDisplayListener {
-
-    private static final Logger logObj = Logger.getLogger(ProjectTreeView.class);
 
     protected EventController mediator;
     protected ProjectTree browseTree;
     protected DefaultMutableTreeNode currentNode;
-
-    protected boolean reorderOnFocus;
+    protected TreeSelectionListener treeSelectionListener;
 
     public ProjectTreeView(EventController mediator) {
         super();
@@ -145,37 +126,16 @@ public class ProjectTreeView
         browseTree.setCellRenderer(CellRenderers.treeRenderer());
         setViewportView(browseTree);
 
-        // listen for mouse events
-        browseTree.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                int selRow = browseTree.getRowForLocation(e.getX(), e.getY());
-                if (selRow != -1) {
-                    if (e.getClickCount() >= 1) {
-                        processSelection(
-                            browseTree.getPathForLocation(e.getX(), e.getY()));
-                    }
-                }
-            }
-        });
-
         // listen to tree events (since not all selections
         // are done by clicking tree with mouse)
-        browseTree.addTreeSelectionListener(new TreeSelectionListener() {
+        treeSelectionListener = new TreeSelectionListener() {
+
             public void valueChanged(TreeSelectionEvent e) {
                 processSelection(e.getPath());
             }
-        });
+        };
 
-        // listen to focus events to reorder list
-        browseTree.addFocusListener(new FocusListener() {
-            public void focusGained(FocusEvent e) {
-                fixOrdering();
-            }
-
-            public void focusLost(FocusEvent e) {
-                fixOrdering();
-            }
-        });
+        browseTree.addTreeSelectionListener(treeSelectionListener);
 
         mediator.addDomainListener(this);
         mediator.addDomainDisplayListener(this);
@@ -198,28 +158,36 @@ public class ProjectTreeView
             return;
         }
 
-        showNode(new Object[] { e.getDomain()});
+        showNode(new Object[] {
+            e.getDomain()
+        });
     }
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         if (e.getSource() == this || !e.isDataNodeChanged())
             return;
 
-        showNode(new Object[] { e.getDomain(), e.getDataNode()});
+        showNode(new Object[] {
+                e.getDomain(), e.getDataNode()
+        });
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         if (e.getSource() == this || !e.isProcedureChanged())
             return;
 
-        showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getProcedure()});
+        showNode(new Object[] {
+                e.getDomain(), e.getDataMap(), e.getProcedure()
+        });
     }
 
     public void currentDataMapChanged(DataMapDisplayEvent e) {
         if (e.getSource() == this || !e.isDataMapChanged())
             return;
 
-        showNode(new Object[] { e.getDomain(), e.getDataMap()});
+        showNode(new Object[] {
+                e.getDomain(), e.getDataMap()
+        });
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {
@@ -234,7 +202,9 @@ public class ProjectTreeView
         if (e.getSource() == this || !e.isEntityChanged()) {
             return;
         }
-        showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getEntity()});
+        showNode(new Object[] {
+                e.getDomain(), e.getDataMap(), e.getEntity()
+        });
     }
 
     public void procedureAdded(ProcedureEvent e) {
@@ -242,11 +212,10 @@ public class ProjectTreeView
             return;
         }
 
-        DefaultMutableTreeNode node =
-            browseTree.getProjectModel().getNodeForObjectPath(
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] {
-                    mediator.getCurrentDataDomain(),
-                    mediator.getCurrentDataMap()});
+                        mediator.getCurrentDataDomain(), mediator.getCurrentDataMap()
+                });
 
         if (node == null) {
             return;
@@ -254,21 +223,20 @@ public class ProjectTreeView
 
         Procedure procedure = e.getProcedure();
         currentNode = new DefaultMutableTreeNode(procedure, false);
-        fixEntityPosition(node, currentNode);
+        positionNode(node, currentNode, Comparators.getDataMapChildrenComparator());
         showNode(currentNode);
     }
 
     public void procedureChanged(ProcedureEvent e) {
-        Object[] path =
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataMap(),
-                e.getProcedure()};
-
-        updateNode(path);
-
         if (e.isNameChange()) {
-            reorderOnFocus = true;
+            Object[] path = new Object[] {
+                    mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
+                    e.getProcedure()
+            };
+
+            updateNode(path);
+            positionNode(path, Comparators.getDataMapChildrenComparator());
+            showNode(path);
         }
     }
 
@@ -277,11 +245,10 @@ public class ProjectTreeView
             return;
         }
 
-        removeNode(
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataMap(),
-                e.getProcedure()});
+        removeNode(new Object[] {
+                mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
+                e.getProcedure()
+        });
     }
 
     public void queryAdded(QueryEvent e) {
@@ -289,11 +256,10 @@ public class ProjectTreeView
             return;
         }
 
-        DefaultMutableTreeNode node =
-            browseTree.getProjectModel().getNodeForObjectPath(
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] {
-                    mediator.getCurrentDataDomain(),
-                    mediator.getCurrentDataMap()});
+                        mediator.getCurrentDataDomain(), mediator.getCurrentDataMap()
+                });
 
         if (node == null) {
             return;
@@ -301,21 +267,21 @@ public class ProjectTreeView
 
         Query query = e.getQuery();
         currentNode = new DefaultMutableTreeNode(query, false);
-        fixEntityPosition(node, currentNode);
+        positionNode(node, currentNode, Comparators.getDataMapChildrenComparator());
         showNode(currentNode);
     }
 
     public void queryChanged(QueryEvent e) {
-        Object[] path =
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataMap(),
-                e.getQuery()};
-
-        updateNode(path);
 
         if (e.isNameChange()) {
-            reorderOnFocus = true;
+            Object[] path = new Object[] {
+                    mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
+                    e.getQuery()
+            };
+
+            updateNode(path);
+            positionNode(path, Comparators.getDataMapChildrenComparator());
+            showNode(path);
         }
     }
 
@@ -324,37 +290,36 @@ public class ProjectTreeView
             return;
         }
 
-        removeNode(
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataMap(),
-                e.getQuery()});
+        removeNode(new Object[] {
+                mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
+                e.getQuery()
+        });
     }
 
     public void currentQueryChanged(QueryDisplayEvent e) {
         if (e.getSource() == this || !e.isQueryChanged())
             return;
 
-        showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getQuery()});
+        showNode(new Object[] {
+                e.getDomain(), e.getDataMap(), e.getQuery()
+        });
     }
 
     public void domainChanged(DomainEvent e) {
         if (e.getSource() == this)
             return;
 
-        updateNode(new Object[] { e.getDomain()});
-
-        if (e.isNameChange()) {
-            reorderOnFocus = true;
-        }
+        updateNode(new Object[] {
+            e.getDomain()
+        });
     }
 
     public void domainAdded(DomainEvent e) {
         if (e.getSource() == this)
             return;
-        browseTree.insertObject(
-            e.getDomain(),
-            (DefaultMutableTreeNode) browseTree.getProjectModel().getRoot());
+        browseTree.getProjectModel().insertObject(e.getDomain(), (DefaultMutableTreeNode) browseTree
+                .getProjectModel()
+                .getRoot());
     }
 
     public void domainRemoved(DomainEvent e) {
@@ -362,74 +327,93 @@ public class ProjectTreeView
             return;
         }
 
-        removeNode(new Object[] { e.getDomain()});
+        removeNode(new Object[] {
+            e.getDomain()
+        });
     }
 
     public void dataNodeChanged(DataNodeEvent e) {
         if (e.getSource() == this)
             return;
 
-        if (e.isNameChange()) {
-            reorderOnFocus = true;
-        }
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] {
+                        mediator.getCurrentDataDomain(), e.getDataNode()
+                });
 
-        DefaultMutableTreeNode node =
-            browseTree.getProjectModel().getNodeForObjectPath(
-                new Object[] { mediator.getCurrentDataDomain(), e.getDataNode()});
+        if (node != null) {
 
-        if (null != node) {
-            browseTree.getProjectModel().nodeChanged(node);
-            List maps = new ArrayList(e.getDataNode().getDataMaps());
-            int mapCount = maps.size();
-            // If added map to this node
-            if (mapCount > node.getChildCount()) {
-                // Find map not already under node and add it
-                for (int i = 0; i < mapCount; i++) {
-                    boolean found = false;
-                    for (int j = 0; j < node.getChildCount(); j++) {
-                        DefaultMutableTreeNode child =
-                            (DefaultMutableTreeNode) node.getChildAt(j);
-                        if (maps.get(i) == child.getUserObject()) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        browseTree.insertObject(maps.get(i), node);
-                        break;
-                    }
-                } // End for(i)
+            if (e.isNameChange()) {
+                positionNode((DefaultMutableTreeNode) node.getParent(), node, Comparators
+                        .getDataDomainChildrenComparator());
+                showNode(node);
             }
-            else if (mapCount < node.getChildCount()) {
-                for (int j = 0; j < node.getChildCount(); j++) {
-                    boolean found = false;
-                    DefaultMutableTreeNode child;
-                    child = (DefaultMutableTreeNode) node.getChildAt(j);
-                    Object obj = child.getUserObject();
+            else {
+
+                browseTree.getProjectModel().nodeChanged(node);
+                List maps = new ArrayList(e.getDataNode().getDataMaps());
+                int mapCount = maps.size();
+
+                // If added map to this node
+                if (mapCount > node.getChildCount()) {
+
+                    // Find DataMap not already under node and add it
                     for (int i = 0; i < mapCount; i++) {
-                        if (maps.get(i) == obj) {
-                            found = true;
+                        boolean found = false;
+                        for (int j = 0; j < node.getChildCount(); j++) {
+                            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node
+                                    .getChildAt(j);
+                            if (maps.get(i) == child.getUserObject()) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            browseTree.getProjectModel().insertObject(maps.get(i), node);
                             break;
                         }
                     }
-                    if (!found) {
-                        removeNode(child);
-                        break;
+                }
+                else if (mapCount < node.getChildCount()) {
+                    for (int j = 0; j < node.getChildCount(); j++) {
+                        boolean found = false;
+                        DefaultMutableTreeNode child;
+                        child = (DefaultMutableTreeNode) node.getChildAt(j);
+                        Object obj = child.getUserObject();
+                        for (int i = 0; i < mapCount; i++) {
+                            if (maps.get(i) == obj) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            removeNode(child);
+                            break;
+                        }
                     }
                 }
             }
-
         }
     }
 
     public void dataNodeAdded(DataNodeEvent e) {
-        if (e.getSource() == this)
+        if (e.getSource() == this) {
             return;
-        DefaultMutableTreeNode parent =
-            browseTree.getProjectModel().getNodeForObjectPath(
-                new Object[] { mediator.getCurrentDataDomain()});
+        }
 
-        browseTree.insertObject(e.getDataNode(), parent);
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] {
+                    mediator.getCurrentDataDomain()
+                });
+
+        if (node == null) {
+            return;
+        }
+
+        DataNode dataNode = e.getDataNode();
+        currentNode = new DefaultMutableTreeNode(dataNode, false);
+        positionNode(node, currentNode, Comparators.getDataDomainChildrenComparator());
+        showNode(currentNode);
     }
 
     public void dataNodeRemoved(DataNodeEvent e) {
@@ -437,7 +421,9 @@ public class ProjectTreeView
             return;
         }
 
-        removeNode(new Object[] { mediator.getCurrentDataDomain(), e.getDataNode()});
+        removeNode(new Object[] {
+                mediator.getCurrentDataDomain(), e.getDataNode()
+        });
     }
 
     public void dataMapChanged(DataMapEvent e) {
@@ -445,24 +431,36 @@ public class ProjectTreeView
             return;
         }
 
-        updateNode(new Object[] { mediator.getCurrentDataDomain(), e.getDataMap()});
+        Object[] path = new Object[] {
+                mediator.getCurrentDataDomain(), e.getDataMap()
+        };
+
+        updateNode(path);
 
         if (e.isNameChange()) {
-            reorderOnFocus = true;
+            positionNode(path, Comparators.getDataDomainChildrenComparator());
+            showNode(path);
         }
     }
 
     public void dataMapAdded(DataMapEvent e) {
-        if (e.getSource() == this)
+        if (e.getSource() == this) {
             return;
-        DefaultMutableTreeNode parent =
-            browseTree.getProjectModel().getNodeForObjectPath(
-                new Object[] { mediator.getCurrentDataDomain()});
+        }
 
-        if (null == parent)
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                new Object[] {
+                    mediator.getCurrentDataDomain()
+                });
+
+        if (node == null) {
             return;
+        }
 
-        browseTree.insertObject(e.getDataMap(), parent);
+        DataMap dataMap = e.getDataMap();
+        currentNode = new DefaultMutableTreeNode(dataMap, false);
+        positionNode(node, currentNode, Comparators.getDataDomainChildrenComparator());
+        showNode(currentNode);
     }
 
     public void dataMapRemoved(DataMapEvent e) {
@@ -473,12 +471,16 @@ public class ProjectTreeView
         DataMap map = e.getDataMap();
         DataDomain domain = mediator.getCurrentDataDomain();
 
-        removeNode(new Object[] { domain, map });
+        removeNode(new Object[] {
+                domain, map
+        });
 
         // Clean up map from the nodes
         Iterator nodes = new ArrayList(domain.getDataNodes()).iterator();
         while (nodes.hasNext()) {
-            removeNode(new Object[] { domain, nodes.next(), map });
+            removeNode(new Object[] {
+                    domain, nodes.next(), map
+            });
         }
     }
 
@@ -497,43 +499,39 @@ public class ProjectTreeView
     public void dbEntityChanged(EntityEvent e) {
         entityChanged(e);
     }
+
     public void dbEntityAdded(EntityEvent e) {
         entityAdded(e);
     }
+
     public void dbEntityRemoved(EntityEvent e) {
         entityRemoved(e);
     }
 
-    /** Makes Entity visible and selected.
-     * 
-     *  <ul>
-     *  <li>If entity is from the current node, refreshes the node making sure 
-     *      changes in the entity name are reflected.</li>
-     *  <li>If entity is in a different node, makes that node visible and 
-     *      selected.</li>
-     *  </ul>
+    /**
+     * Makes Entity visible and selected.
+     * <ul>
+     * <li>If entity is from the current node, refreshes the node making sure changes in
+     * the entity name are reflected.</li>
+     * <li>If entity is in a different node, makes that node visible and selected.</li>
+     * </ul>
      */
     protected void entityChanged(EntityEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
+        if (e.getSource() != this && e.isNameChange()) {
+            Object[] path = new Object[] {
+                    mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
+                    e.getEntity()
+            };
 
-        Object[] path =
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataMap(),
-                e.getEntity()};
-
-        updateNode(path);
-
-        if (e.isNameChange()) {
-            reorderOnFocus = true;
+            updateNode(path);
+            positionNode(path, Comparators.getDataMapChildrenComparator());
+            showNode(path);
         }
     }
 
-    /** 
-     * Event handler for ObjEntity and DbEntity additions.
-     * Adds a tree node for the entity and make it selected. 
+    /**
+     * Event handler for ObjEntity and DbEntity additions. Adds a tree node for the entity
+     * and make it selected.
      */
     protected void entityAdded(EntityEvent e) {
         if (e.getSource() == this) {
@@ -544,40 +542,42 @@ public class ProjectTreeView
 
         // Add a node and make it selected.
         if (mediator.getCurrentDataNode() != null) {
-            DefaultMutableTreeNode mapNode =
-                browseTree.getProjectModel().getNodeForObjectPath(
-                    new Object[] {
-                        mediator.getCurrentDataDomain(),
-                        mediator.getCurrentDataNode(),
-                        mediator.getCurrentDataMap()});
+            DefaultMutableTreeNode mapNode = browseTree
+                    .getProjectModel()
+                    .getNodeForObjectPath(
+                            new Object[] {
+                                    mediator.getCurrentDataDomain(),
+                                    mediator.getCurrentDataNode(),
+                                    mediator.getCurrentDataMap()
+                            });
 
             if (mapNode != null) {
                 currentNode = new DefaultMutableTreeNode(entity, false);
                 browseTree.getProjectModel().insertNodeInto(
-                    currentNode,
-                    mapNode,
-                    mapNode.getChildCount());
+                        currentNode,
+                        mapNode,
+                        mapNode.getChildCount());
             }
         }
 
-        DefaultMutableTreeNode mapNode =
-            browseTree.getProjectModel().getNodeForObjectPath(
-                new Object[] {
-                    mediator.getCurrentDataDomain(),
-                    mediator.getCurrentDataMap()});
+        DefaultMutableTreeNode mapNode = browseTree
+                .getProjectModel()
+                .getNodeForObjectPath(new Object[] {
+                        mediator.getCurrentDataDomain(), mediator.getCurrentDataMap()
+                });
 
         if (mapNode == null) {
             return;
         }
 
         currentNode = new DefaultMutableTreeNode(entity, false);
-        fixEntityPosition(mapNode, currentNode);
+        positionNode(mapNode, currentNode, Comparators.getDataMapChildrenComparator());
         showNode(currentNode);
     }
 
-    /** 
-     * Event handler for ObjEntity and DbEntity removals.
-     * Removes a tree node for the entity and selects its sibling. 
+    /**
+     * Event handler for ObjEntity and DbEntity removals. Removes a tree node for the
+     * entity and selects its sibling.
      */
     protected void entityRemoved(EntityEvent e) {
         if (e.getSource() == this) {
@@ -585,24 +585,21 @@ public class ProjectTreeView
         }
 
         // remove from DataMap tree
-        removeNode(
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataMap(),
-                e.getEntity()});
+        removeNode(new Object[] {
+                mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
+                e.getEntity()
+        });
 
         // remove from DataMap *reference* tree
-        removeNode(
-            new Object[] {
-                mediator.getCurrentDataDomain(),
-                mediator.getCurrentDataNode(),
-                mediator.getCurrentDataMap(),
-                e.getEntity()});
+        removeNode(new Object[] {
+                mediator.getCurrentDataDomain(), mediator.getCurrentDataNode(),
+                mediator.getCurrentDataMap(), e.getEntity()
+        });
     }
 
-    /** 
-     * Removes current node from the tree. 
-     * Selects a new node adjacent to the currently selected node instead.
+    /**
+     * Removes current node from the tree. Selects a new node adjacent to the currently
+     * selected node instead.
      */
     protected void removeNode(DefaultMutableTreeNode toBeRemoved) {
 
@@ -638,7 +635,7 @@ public class ProjectTreeView
         browseTree.getProjectModel().removeNodeFromParent(toBeRemoved);
     }
 
-    /** Makes node current, visible and selected.*/
+    /** Makes node current, visible and selected. */
     protected void showNode(DefaultMutableTreeNode node) {
         currentNode = node;
         TreePath path = new TreePath(currentNode.getPath());
@@ -651,8 +648,8 @@ public class ProjectTreeView
             return;
         }
 
-        DefaultMutableTreeNode node =
-            browseTree.getProjectModel().getNodeForObjectPath(path);
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                path);
 
         if (node == null) {
             return;
@@ -666,8 +663,8 @@ public class ProjectTreeView
             return;
         }
 
-        DefaultMutableTreeNode node =
-            browseTree.getProjectModel().getNodeForObjectPath(path);
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                path);
         if (node != null) {
             browseTree.getProjectModel().nodeChanged(node);
         }
@@ -678,17 +675,16 @@ public class ProjectTreeView
             return;
         }
 
-        DefaultMutableTreeNode node =
-            browseTree.getProjectModel().getNodeForObjectPath(path);
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                path);
         if (node != null) {
             removeNode(node);
         }
     }
 
-    /** 
-     * Processes node selection regardless of whether 
-     * a new node was selected, or an already selected node
-     * was clicked again. Normally called from event listener
+    /**
+     * Processes node selection regardless of whether a new node was selected, or an
+     * already selected node was clicked again. Normally called from event listener
      * methods.
      */
     public void processSelection(TreePath path) {
@@ -707,21 +703,19 @@ public class ProjectTreeView
 
         Object obj = data[data.length - 1];
         if (obj instanceof DataDomain) {
-            mediator.fireDomainDisplayEvent(
-                new DomainDisplayEvent(this, (DataDomain) obj));
+            mediator
+                    .fireDomainDisplayEvent(new DomainDisplayEvent(this, (DataDomain) obj));
         }
         else if (obj instanceof DataMap) {
             if (data.length == 3) {
-                mediator.fireDataMapDisplayEvent(
-                    new DataMapDisplayEvent(
+                mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(
                         this,
                         (DataMap) obj,
                         (DataDomain) data[data.length - 3],
                         (DataNode) data[data.length - 2]));
             }
             else if (data.length == 2) {
-                mediator.fireDataMapDisplayEvent(
-                    new DataMapDisplayEvent(
+                mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(
                         this,
                         (DataMap) obj,
                         (DataDomain) data[data.length - 2]));
@@ -729,8 +723,7 @@ public class ProjectTreeView
         }
         else if (obj instanceof DataNode) {
             if (data.length == 2) {
-                mediator.fireDataNodeDisplayEvent(
-                    new DataNodeDisplayEvent(
+                mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(
                         this,
                         (DataDomain) data[data.length - 2],
                         (DataNode) obj));
@@ -757,8 +750,7 @@ public class ProjectTreeView
             }
         }
         else if (obj instanceof Procedure) {
-            ProcedureDisplayEvent e =
-                new ProcedureDisplayEvent(
+            ProcedureDisplayEvent e = new ProcedureDisplayEvent(
                     this,
                     (Procedure) obj,
                     (DataMap) data[data.length - 2],
@@ -766,8 +758,7 @@ public class ProjectTreeView
             mediator.fireProcedureDisplayEvent(e);
         }
         else if (obj instanceof Query) {
-            QueryDisplayEvent e =
-                new QueryDisplayEvent(
+            QueryDisplayEvent e = new QueryDisplayEvent(
                     this,
                     (Query) obj,
                     (DataMap) data[data.length - 2],
@@ -776,8 +767,10 @@ public class ProjectTreeView
         }
     }
 
-    /** Gets array of the user objects ending with this and starting with one under root. 
-      * That is the array of actual objects rather than wrappers.*/
+    /**
+     * Returns array of the user objects ending with this and starting with one under
+     * root. That is the array of actual objects rather than wrappers.
+     */
     private Object[] getUserObjects(DefaultMutableTreeNode node) {
         List list = new ArrayList();
         while (!node.isRoot()) {
@@ -787,29 +780,34 @@ public class ProjectTreeView
         return list.toArray();
     }
 
-    private synchronized void fixOrdering() {
-        if (reorderOnFocus) {
-            logObj.warn("View items names have changed, must reorder the view..");
-
-            // TODO: (andrus) implements ordering procedure that actually works
-            // browseTree.reorder();
-            reorderOnFocus = false;
-        }
-    }
-
-    /** 
-     * Inserts entity node in alphabetical order. 
-     * Assumes that the tree is already ordered, except for one node. 
-     */
-    private void fixEntityPosition(
-        DefaultMutableTreeNode parent,
-        DefaultMutableTreeNode entityNode) {
-
-        if (parent == null || entityNode == null) {
+    private void positionNode(Object[] path, Comparator comparator) {
+        if (path == null) {
             return;
         }
 
-        Object object = entityNode.getUserObject();
+        DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
+                path);
+        if (node == null) {
+            return;
+        }
+
+        positionNode((DefaultMutableTreeNode) node.getParent(), node, comparator);
+    }
+
+    /**
+     * Inserts entity node in alphabetical order. Assumes that the tree is already
+     * ordered, except for one node.
+     */
+    private void positionNode(
+            DefaultMutableTreeNode parent,
+            DefaultMutableTreeNode treeNode,
+            Comparator comparator) {
+
+        if (parent == null || treeNode == null) {
+            return;
+        }
+
+        Object object = treeNode.getUserObject();
 
         int len = parent.getChildCount();
         int ins = -1;
@@ -819,7 +817,7 @@ public class ProjectTreeView
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
 
             // remember to remove node
-            if (node == entityNode) {
+            if (node == treeNode) {
                 rm = i;
                 continue;
             }
@@ -830,10 +828,7 @@ public class ProjectTreeView
             }
 
             // ObjEntities go before DbEntities
-            if (Comparators
-                .getDataMapChildrenComparator()
-                .compare(object, node.getUserObject())
-                <= 0) {
+            if (comparator.compare(object, node.getUserObject()) <= 0) {
                 ins = i;
             }
         }
@@ -842,17 +837,23 @@ public class ProjectTreeView
             ins = len;
         }
 
-        // remove
-        if (rm >= 0) {
-            browseTree.getProjectModel().removeNodeFromParent(entityNode);
-            if (rm < ins) {
-                ins--;
+        // suppress events while we order the node..
+        browseTree.removeTreeSelectionListener(treeSelectionListener);
+        try {
+
+            // remove
+            if (rm >= 0) {
+                browseTree.getProjectModel().removeNodeFromParent(treeNode);
+                if (rm < ins) {
+                    ins--;
+                }
             }
+
+            // insert
+            browseTree.getProjectModel().insertNodeInto(treeNode, parent, ins);
         }
-
-        // insert
-        browseTree.getProjectModel().insertNodeInto(entityNode, parent, ins);
+        finally {
+            browseTree.addTreeSelectionListener(treeSelectionListener);
+        }
     }
-
-
 }

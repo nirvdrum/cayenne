@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -372,7 +372,7 @@ public class DataMapView extends JPanel {
         if (matchingMap == null) {
             // completely new name, set new name for domain
             DataMapEvent e = new DataMapEvent(this, map, map.getName());
-            MapUtil.setDataMapName(domain, map, text);
+            ProjectUtil.setDataMapName(domain, map, text);
             eventController.fireDataMapEvent(e);
         }
         else if (matchingMap != map) {

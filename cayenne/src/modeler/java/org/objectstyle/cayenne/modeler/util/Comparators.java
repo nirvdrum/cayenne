@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.util.Comparator;
 
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -73,43 +74,53 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class Comparators {
-    private static final Comparator dataMapChildrenComparator =
-        new DataMapChildrenComparator();
 
-    private static final Comparator entityChildrenComparator =
-        new EntityChildrenComparator();
+    private static final Comparator dataDomainChildrenComparator = new DataDomainChildrenComparator();
+
+    private static final Comparator dataMapChildrenComparator = new DataMapChildrenComparator();
+
+    private static final Comparator entityChildrenComparator = new EntityChildrenComparator();
 
     private static final Comparator namedObjectComparator = new NamedObjectComparator();
 
     /**
-     * Returns a comparator to order DataMap objects of mixed types. 
-     * Objects of the same type are ordered based on "name" property.
-     * Objects of different types are ordered based on the following
-     * prcedence: DataMap, ObjEntity, DbEntity, Procedure and Query.
+     * Returns a comparator to order DataMap objects of mixed types. Objects of the same
+     * type are ordered based on "name" property. Objects of different types are ordered
+     * based on the following precedence: DataMap, DataNode.
+     */
+    public static Comparator getDataDomainChildrenComparator() {
+        return dataDomainChildrenComparator;
+    }
+
+    /**
+     * Returns a comparator to order DataMap objects of mixed types. Objects of the same
+     * type are ordered based on "name" property. Objects of different types are ordered
+     * based on the following precedence: DataMap, ObjEntity, DbEntity, Procedure and
+     * Query.
      */
     public static Comparator getDataMapChildrenComparator() {
         return dataMapChildrenComparator;
     }
-    
+
     /**
      * Returns a comparator to order Entity properties such as Attributes and
-     * Relationships. Objects of the same type are ordered based on "name" 
-     * property. Objects of different types are ordered based on the following
-     * prcedence: Attribute, Relationship.
+     * Relationships. Objects of the same type are ordered based on "name" property.
+     * Objects of different types are ordered based on the following precedence:
+     * Attribute, Relationship.
      */
     public static Comparator getEntityChildrenComparator() {
         return entityChildrenComparator;
     }
 
     /**
-     * Returns a comparator to order java beans according to their 
-     * "name" property.
+     * Returns a comparator to order java beans according to their "name" property.
      */
     public static Comparator getNamedObjectComparator() {
         return namedObjectComparator;
     }
 
     static class NamedObjectComparator implements Comparator {
+
         public int compare(Object o1, Object o2) {
 
             String name1 = ModelerUtil.getObjectName(o1);
@@ -127,7 +138,34 @@ public class Comparators {
         }
     }
 
+    final static class DataDomainChildrenComparator extends NamedObjectComparator {
+
+        public int compare(Object o1, Object o2) {
+            int delta = getClassWeight(o1) - getClassWeight(o2);
+            if (delta != 0) {
+                return delta;
+            }
+            else {
+                return super.compare(o1, o2);
+            }
+        }
+
+        private static int getClassWeight(Object o) {
+            if (o instanceof DataMap) {
+                return 1;
+            }
+            else if (o instanceof DataNode) {
+                return 2;
+            }
+            else {
+                // this should trap nulls among other things
+                return Integer.MAX_VALUE;
+            }
+        }
+    }
+
     final static class DataMapChildrenComparator extends NamedObjectComparator {
+
         public int compare(Object o1, Object o2) {
             int delta = getClassWeight(o1) - getClassWeight(o2);
             if (delta != 0) {
@@ -162,6 +200,7 @@ public class Comparators {
     }
 
     final static class EntityChildrenComparator extends NamedObjectComparator {
+
         public int compare(Object o1, Object o2) {
             int delta = getClassWeight(o1) - getClassWeight(o2);
             if (delta != 0) {

@@ -286,6 +286,7 @@ public class CayenneModelerFrame
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();
+        recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
         fileMenu.add(recentFileMenu);
 
         fileMenu.addSeparator();

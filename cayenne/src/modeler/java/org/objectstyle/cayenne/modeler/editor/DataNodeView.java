@@ -61,14 +61,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
@@ -82,55 +81,35 @@ import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
+import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.project.ProjectDataSource;
+import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * Detail view of the DataNode and DataSourceInfo.
- * 
- * @author Michael Misha Shengaout
- * @author Andrei Adamchik
+ * A panel for DataNode configuration.
  */
-public class DataNodeView extends JPanel implements DocumentListener, ActionListener,
-        DataNodeDisplayListener {
-
-    private static Logger logObj = Logger.getLogger(DataNodeView.class);
+public class DataNodeView extends JPanel implements DocumentListener {
 
     protected EventController mediator;
     protected DataNode node;
 
-    protected JLabel nameLabel;
-    protected JTextField name;
-    protected String oldName;
+    protected TextFieldAdapter name;
 
-    protected JLabel locationLabel;
     protected JTextField location;
-
-    protected JLabel jndiLabel;
-    protected JTextField jndiLocation;
-
-    protected JLabel factoryLabel;
     protected JComboBox factory;
-
-    protected JLabel adapterLabel;
     protected JComboBox adapter;
 
-    protected JLabel userNameLabel;
     protected PreferenceField userName;
-    protected JLabel passwordLabel;
     protected JPasswordField password;
-    protected JLabel driverLabel;
     protected PreferenceField driver;
-    protected JLabel urlLabel;
     protected PreferenceField url;
-    protected JLabel minConnectionsLabel;
 
-    // FIXME!!! Need to restrict only to numbers
     protected JTextField minConnections;
-    protected JLabel maxConnectionsLabel;
-    // FIXME!!! Need to restrict only to numbers
     protected JTextField maxConnections;
 
     protected JPanel driverPanel;
@@ -138,101 +117,178 @@ public class DataNodeView extends JPanel implements DocumentListener, ActionList
     /** Cludge to prevent marking domain as dirty during initial load. */
     private boolean ignoreChange;
 
-    public DataNodeView(EventController temp_mediator) {
-        super();
-        mediator = temp_mediator;
-        mediator.addDataNodeDisplayListener(this);
-        // Create and layout components
-        init();
+    public DataNodeView(EventController mediator) {
+        this.mediator = mediator;
+        initView();
+        initController();
+    }
 
-        // Add listeners
+    private void initView() {
+        // create widgets
+
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+
+            protected void initModel(String text) {
+                setDataNodeName(text);
+            }
+        };
+
+        location = CayenneWidgetFactory.createTextField();
+        location.setEditable(false);
+
+        factory = CayenneWidgetFactory.createComboBox();
+        factory.setEditable(true);
+
+        adapter = CayenneWidgetFactory.createComboBox();
+        adapter.setEditable(true);
+
+        userName = CayenneWidgetFactory
+                .createPreferenceField(ModelerPreferences.USER_NAME);
+
+        password = new JPasswordField(20);
+        driver = CayenneWidgetFactory
+                .createPreferenceField(ModelerPreferences.JDBC_DRIVER);
+
+        url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
+
+        minConnections = CayenneWidgetFactory.createTextField();
+        maxConnections = CayenneWidgetFactory.createTextField();
+
+        // assemble
+
+        DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
+                "right:max(70dlu;pref), 3dlu, fill:200dlu",
+                ""));
+        topPanelBuilder.setDefaultDialogBorder();
+
+        topPanelBuilder.appendSeparator("DataNode Configuration");
+        topPanelBuilder.append("DataNode Name:", name.getTextComponent());
+        topPanelBuilder.append("DataSource Factory", factory);
+        topPanelBuilder.append("Location:", location);
+        topPanelBuilder.append("DB Adapter:", adapter);
+
+        DefaultFormBuilder driverPanelBuilder = new DefaultFormBuilder(new FormLayout(
+                "right:max(70dlu;pref), 3dlu, fill:200dlu",
+                ""));
+        driverPanelBuilder.setDefaultDialogBorder();
+
+        driverPanelBuilder.appendSeparator("Data Source Info");
+        driverPanelBuilder.append("User Name:", userName);
+        driverPanelBuilder.append("Password:", password);
+        driverPanelBuilder.append("Driver Class:", driver);
+        driverPanelBuilder.append("Database URL:", url);
+        driverPanelBuilder.append("Min. Connections:", minConnections);
+        driverPanelBuilder.append("Max. Connections:", maxConnections);
+
+        setLayout(new BorderLayout());
+        add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
+
+        driverPanel = driverPanelBuilder.getPanel();
+        add(driverPanel, BorderLayout.CENTER);
+    }
+
+    private void initController() {
+        mediator.addDataNodeDisplayListener(new DataNodeDisplayListener() {
+
+            public void currentDataNodeChanged(DataNodeDisplayEvent e) {
+                DataNode node = e.getDataNode();
+                if (node != null) {
+                    initFromModel(node);
+                }
+            }
+        });
+
         location.getDocument().addDocumentListener(this);
-        name.getDocument().addDocumentListener(this);
         userName.getDocument().addDocumentListener(this);
         password.getDocument().addDocumentListener(this);
         driver.getDocument().addDocumentListener(this);
         url.getDocument().addDocumentListener(this);
         minConnections.getDocument().addDocumentListener(this);
         maxConnections.getDocument().addDocumentListener(this);
-        factory.addActionListener(this);
-        adapter.addActionListener(this);
+
+        factory.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                setFactoryName((String) factory.getModel().getSelectedItem());
+            }
+        });
+
+        adapter.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                setAdapterName((String) adapter.getModel().getSelectedItem());
+            }
+        });
+
+        userName.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                ignoreChange = true;
+                userName.storePreferences();
+                ignoreChange = false;
+            }
+        });
+
+        driver.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                ignoreChange = true;
+                driver.storePreferences();
+                ignoreChange = false;
+            }
+        });
+        url.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                ignoreChange = true;
+                url.storePreferences();
+                ignoreChange = false;
+            }
+        });
+
     }
 
-    protected void init() {
-        // create widgets
-        nameLabel = CayenneWidgetFactory.createLabel("DataNode Name:");
-        name = CayenneWidgetFactory.createTextField();
+    private void initFromModel(DataNode node) {
+        if (this.node == node) {
+            return;
+        }
 
-        locationLabel = CayenneWidgetFactory.createLabel("Location:");
-        location = CayenneWidgetFactory.createTextField();
-        location.setEditable(false);
+        this.node = node;
 
-        factoryLabel = CayenneWidgetFactory.createLabel("DataSource Factory:");
-        factory = CayenneWidgetFactory.createComboBox();
-        factory.setEditable(true);
-        DefaultComboBoxModel model = new DefaultComboBoxModel(new String[] {
-                JNDIDataSourceFactory.class.getName(),
-                DriverDataSourceFactory.class.getName()
-        });
-        factory.setModel(model);
-        factory.setSelectedIndex(-1);
+        ignoreChange = true;
 
-        adapterLabel = CayenneWidgetFactory.createLabel("DB Adapter:");
-        adapter = CayenneWidgetFactory.createComboBox(
-                DbAdapterInfo.getStandardAdapters(),
-                false);
-        adapter.setEditable(true);
-        adapter.setSelectedIndex(-1);
+        name.setText(node.getName());
 
-        userNameLabel = CayenneWidgetFactory.createLabel("User Name:");
-        userName = CayenneWidgetFactory
-                .createPreferenceField(ModelerPreferences.USER_NAME);
-        userName.addActionListener(this);
-        passwordLabel = CayenneWidgetFactory.createLabel("Password:");
-        password = new JPasswordField(20);
-        driverLabel = CayenneWidgetFactory.createLabel("Driver Class:");
-        driver = CayenneWidgetFactory
-                .createPreferenceField(ModelerPreferences.JDBC_DRIVER);
-        driver.addActionListener(this);
-        urlLabel = CayenneWidgetFactory.createLabel("Database URL:");
-        url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
-        url.addActionListener(this);
-        minConnectionsLabel = CayenneWidgetFactory.createLabel("Min Connections:");
-        minConnections = CayenneWidgetFactory.createTextField();
-        maxConnectionsLabel = CayenneWidgetFactory.createLabel("Max Connections:");
-        maxConnections = CayenneWidgetFactory.createTextField();
+        initFactory(node.getDataSourceFactory());
+        initForFactoryType(node.getDataSourceFactory());
 
-        // assemble
-        this.setLayout(new BorderLayout());
+        DbAdapter adapter = node.getAdapter();
+        initDbAdapter(adapter != null ? adapter.getClass().getName().trim() : null);
 
-        DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
-                "right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)",
-                ""));
-        topPanelBuilder.setDefaultDialogBorder();
+        ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+        DataSourceInfo info = src.getDataSourceInfo();
+        initDataSourceInfo(info);
 
-        topPanelBuilder.appendSeparator("DataNode Configuration");
-        topPanelBuilder.append(nameLabel, name);
-        topPanelBuilder.append(factoryLabel, factory);
-        topPanelBuilder.append(locationLabel, location);
-        topPanelBuilder.append(adapterLabel, adapter);
+        // Must be last in order not to be reset when data src factory is set.
+        location.setText(node.getDataSourceLocation());
 
-        add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
+        ignoreChange = false;
+    }
 
-        DefaultFormBuilder driverPanelBuilder = new DefaultFormBuilder(new FormLayout(
-                "right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)",
-                ""));
-        driverPanelBuilder.setDefaultDialogBorder();
+    private void initForFactoryType(String factoryName) {
+        boolean showDriverInfo = DriverDataSourceFactory.class.getName().equals(
+                factoryName);
+        boolean makeLocationEditable = JNDIDataSourceFactory.class.getName().equals(
+                factoryName);
 
-        driverPanelBuilder.appendSeparator("Data Source Info");
-        driverPanelBuilder.append(userNameLabel, userName);
-        driverPanelBuilder.append(passwordLabel, password);
-        driverPanelBuilder.append(driverLabel, driver);
-        driverPanelBuilder.append(urlLabel, url);
-        driverPanelBuilder.append(minConnectionsLabel, minConnections);
-        driverPanelBuilder.append(maxConnectionsLabel, maxConnections);
+        location.setEditable(makeLocationEditable);
 
-        driverPanel = driverPanelBuilder.getPanel();
-        add(driverPanel, BorderLayout.CENTER);
+        if (showDriverInfo) {
+            ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+            initDataSourceInfo(src.getDataSourceInfo());
+        }
+
+        driverPanel.setVisible(showDriverInfo);
     }
 
     public void insertUpdate(DocumentEvent e) {
@@ -255,24 +311,7 @@ public class DataNodeView extends JPanel implements DocumentListener, ActionList
         ProjectDataSource src = (ProjectDataSource) node.getDataSource();
         DataSourceInfo info = src.getDataSourceInfo();
 
-        if (e.getDocument() == name.getDocument()) {
-
-            String newName = name.getText();
-            // If name hasn't changed, do nothing
-            if (oldName != null && oldName.equals(newName)) {
-                return;
-            }
-
-            node.setName(newName);
-
-            mediator.getCurrentDataDomain().removeDataNode(oldName);
-            mediator.getCurrentDataDomain().addNode(node);
-
-            mediator.fireDataNodeEvent(new DataNodeEvent(this, node, oldName));
-            oldName = newName;
-
-        }
-        else if (e.getDocument() == location.getDocument()) {
+        if (e.getDocument() == location.getDocument()) {
 
             if (node.getDataSourceLocation() != null
                     && node.getDataSourceLocation().equals(location.getText()))
@@ -335,171 +374,142 @@ public class DataNodeView extends JPanel implements DocumentListener, ActionList
 
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (ignoreChange || node == null) {
+    private void setDataNodeName(String newName) {
+        if (newName == null || newName.trim().length() == 0) {
+            throw new ValidationException("Enter name for DataNode");
+        }
+
+        DataNode node = mediator.getCurrentDataNode();
+        DataDomain domain = mediator.getCurrentDataDomain();
+
+        if (node == null || newName.equals(node.getName())) {
             return;
         }
 
-        Object src = e.getSource();
-        DataNode aNode = mediator.getCurrentDataNode();
+        DataNode matchingNode = domain.getNode(newName);
 
-        // node factory changed
-        if (src == factory) {
-            String ele = (String) factory.getModel().getSelectedItem();
-            if (ele != null && ele.trim().length() > 0) {
-                if (ele.equals(DriverDataSourceFactory.class.getName())) {
-                    location.setEditable(false);
-                    showDiverInfo(true);
-                }
-                else {
-                    location.setEditable(true);
-                    showDiverInfo(false);
-                }
-
-                if (!ele.equals(aNode.getDataSourceFactory())) {
-                    aNode.setDataSourceFactory(ele);
-                    mediator.setDirty(true);
-                }
-            }
-            else {
-                if (aNode.getDataSourceFactory() != null) {
-                    aNode.setDataSourceFactory(null);
-                    mediator.setDirty(true);
-                }
-            }
-
+        if (matchingNode == null) {
+            // completely new name, set new name
+            DataNodeEvent e = new DataNodeEvent(this, node, node.getName());
+            ProjectUtil.setDataNodeName(domain, node, newName);
+            mediator.fireDataNodeEvent(e);
         }
-        else if (src == adapter) {
-            // DBAdapter changed
-            String adapterName = (String) adapter.getModel().getSelectedItem();
+        else if (matchingNode != node) {
 
-            DbAdapter newAdapter = null;
-            if (adapterName != null && adapterName.trim().length() > 0) {
-                try {
-                    newAdapter = (DbAdapter) Class
-                            .forName(adapterName)
-                            .getDeclaredConstructors()[0].newInstance(new Object[0]);
-                }
-                catch (Exception ex) {
-                    logObj.warn("Error.", ex);
-                    adapter.setSelectedIndex(-1);
-                    return;
-                }
-            }
-
-            mediator.getCurrentDataNode().setAdapter(newAdapter);
-            mediator.setDirty(true);
-        }
-        else if (src == driver) {
-            ignoreChange = true;
-            driver.storePreferences();
-            ignoreChange = false;
-        }
-        else if (src == url) {
-            ignoreChange = true;
-            url.storePreferences();
-            ignoreChange = false;
-        }
-        else if (src == userName) {
-            ignoreChange = true;
-            userName.storePreferences();
-            ignoreChange = false;
+            // there is an entity with the same name
+            throw new ValidationException("There is another DataNode named '"
+                    + newName
+                    + "'. Use a different name.");
         }
     }
 
-    public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-        node = e.getDataNode();
+    private void setFactoryName(String factoryName) {
+        DataNode node = mediator.getCurrentDataNode();
 
         if (node == null) {
             return;
         }
 
-        ProjectDataSource src = (ProjectDataSource) node.getDataSource();
-        oldName = node.getName();
-        ignoreChange = true;
-        name.setText(oldName);
-        populateFactory(node.getDataSourceFactory());
-        DbAdapter adapter = node.getAdapter();
-        if (adapter != null)
-            populateDbAdapter(adapter.getClass().getName().trim());
-        else
-            populateDbAdapter("");
-        DataSourceInfo info = src.getDataSourceInfo();
-        populateDataSourceInfo(info);
-        // Must be last in order not to be reset when data src factory is set.
-        location.setText(node.getDataSourceLocation());
-        ignoreChange = false;
+        if (factoryName != null && factoryName.trim().length() == 0) {
+            factoryName = null;
+        }
+
+        if (Util.nullSafeEquals(factoryName, node.getDataSourceFactory())) {
+            return;
+        }
+
+        node.setDataSourceFactory(factoryName);
+        mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+
+        initForFactoryType(factoryName);
     }
 
-    private void populateDbAdapter(String selected_class) {
-        DefaultComboBoxModel model = (DefaultComboBoxModel) adapter.getModel();
-        if (selected_class != null && selected_class.length() > 0) {
-            boolean found = false;
-            for (int i = 0; i < model.getSize(); i++) {
-                String ele = (String) model.getElementAt(i);
-                if (ele.equals(selected_class)) {
-                    model.setSelectedItem(ele);
-                    found = true;
-                    break;
-                }
-            }
+    private void setAdapterName(String adapterName) {
 
-            if (!found) {
-                model.addElement(selected_class);
-                model.setSelectedItem(selected_class);
+        DbAdapter newAdapter = null;
+        if (adapterName != null && adapterName.trim().length() > 0) {
+            try {
+                newAdapter = (DbAdapter) Class
+                        .forName(adapterName)
+                        .getDeclaredConstructors()[0].newInstance(new Object[0]);
+            }
+            catch (Exception ex) {
+
+                // TODO: show validation dialog, or just store adapter string...
+                adapter.setSelectedIndex(-1);
+                return;
             }
         }
+
+        mediator.getCurrentDataNode().setAdapter(newAdapter);
+        mediator.setDirty(true);
     }
 
-    protected void populateFactory(String selected_class) {
-        DefaultComboBoxModel model = (DefaultComboBoxModel) factory.getModel();
-        if (selected_class != null && selected_class.length() > 0) {
+    private void initDbAdapter(String adapterClass) {
+        DefaultComboBoxModel model = new DefaultComboBoxModel(DbAdapterInfo
+                .getStandardAdapters());
+
+        if (adapterClass != null && adapterClass.trim().length() > 0) {
             boolean found = false;
             for (int i = 0; i < model.getSize(); i++) {
-                String ele = (String) model.getElementAt(i);
-                if (ele.equals(selected_class)) {
-                    model.setSelectedItem(ele);
+                String adapter = (String) model.getElementAt(i);
+                if (adapter.equals(adapterClass)) {
                     found = true;
-                    // If direct connection,
-                    // show File button and disable text field.
-                    // Otherwise hide File button and enable text field.
-                    if (selected_class.equals(DriverDataSourceFactory.class.getName())) {
-                        location.setEditable(false);
-                        showDiverInfo(true);
-                    }
-                    else {
-                        location.setEditable(true);
-                        showDiverInfo(false);
-                    }
-
                     break;
                 }
             }
 
             if (!found) {
-                model.addElement(selected_class);
-                model.setSelectedItem(selected_class);
+                model.addElement(adapterClass);
             }
-        } // End if there is factory to select
-        else
-            model.setSelectedItem(null);
+
+            model.setSelectedItem(adapterClass);
+        }
+        else {
+            // needed to display an empty field with no selection
+            model.setSelectedItem("");
+        }
+
+        adapter.setModel(model);
     }
 
-    protected void populateDataSourceInfo(DataSourceInfo info) {
+    private void initFactory(String factoryName) {
+        DefaultComboBoxModel model = new DefaultComboBoxModel(new String[] {
+                DriverDataSourceFactory.class.getName(),
+                JNDIDataSourceFactory.class.getName(),
+        });
+
+        if (factoryName != null && factoryName.length() > 0) {
+            boolean found = false;
+            for (int i = 0; i < model.getSize(); i++) {
+                String factory = (String) model.getElementAt(i);
+                if (factory.equals(factoryName)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            // custom factory...
+            if (!found) {
+                model.addElement(factoryName);
+            }
+
+            model.setSelectedItem(factoryName);
+        }
+        else {
+            // needed to display an empty field with no selection
+            model.setSelectedItem("");
+        }
+
+        factory.setModel(model);
+    }
+
+    private void initDataSourceInfo(DataSourceInfo info) {
         userName.setText(info.getUserName());
         password.setText(info.getPassword());
         driver.setText(info.getJdbcDriver());
         url.setText(info.getDataSourceUrl());
         minConnections.setText(String.valueOf(info.getMinConnections()));
         maxConnections.setText(String.valueOf(info.getMaxConnections()));
-    }
-
-    protected void showDiverInfo(boolean show) {
-
-        if (show && driverPanel.isVisible()) {
-            ProjectDataSource src = (ProjectDataSource) node.getDataSource();
-            populateDataSourceInfo(src.getDataSourceInfo());
-        }
-        driverPanel.setVisible(show);
     }
 }

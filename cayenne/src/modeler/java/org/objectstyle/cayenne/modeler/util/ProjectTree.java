@@ -155,15 +155,5 @@ public class ProjectTree extends JTree {
             logObj.warn("Exception reading property 'name', class " + objectClass, e);
             return "";
         }
-
     }
-
-    public String getName() {
-        return "";
-    }
-
-    public void insertObject(Object obj, DefaultMutableTreeNode parent) {
-        getProjectModel().insertObject(obj, parent);
-    }
-
 }

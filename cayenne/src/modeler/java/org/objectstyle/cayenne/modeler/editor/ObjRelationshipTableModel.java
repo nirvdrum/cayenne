@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
@@ -184,7 +184,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
         if (column == REL_NAME) {
             String text = (String) value;
             event.setOldName(relationship.getName());
-            MapUtil.setRelationshipName(entity, relationship, text);
+            ProjectUtil.setRelationshipName(entity, relationship, text);
             fireTableCellUpdated(row, column);
         }
         else if (column == REL_TARGET) {
