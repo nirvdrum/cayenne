@@ -56,8 +56,7 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
-import java.util.*;
+import java.util.Map;
 
 /** ObjectId for data objects in "New" state.
  *  When such objects are committed to the database, this id is

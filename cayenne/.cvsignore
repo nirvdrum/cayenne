@@ -2,3 +2,6 @@ bin
 lib
 dist
 velocity.log
+tmp
+.classpath
+.project

@@ -55,13 +55,12 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import java.lang.ref.*;
 import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.util.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 
 /**

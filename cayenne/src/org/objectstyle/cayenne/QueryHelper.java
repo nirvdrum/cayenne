@@ -56,12 +56,13 @@ package org.objectstyle.cayenne;
  */ 
 
 import java.util.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.util.*;
-import java.util.logging.*;
+import org.objectstyle.cayenne.query.*;
 
 /**
  *

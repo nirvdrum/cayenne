@@ -56,9 +56,7 @@ package org.objectstyle.cayenne;
  */ 
 
 import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.logging.Logger;
 
 
 /** Each data object has an id uniquely identifying it. 
