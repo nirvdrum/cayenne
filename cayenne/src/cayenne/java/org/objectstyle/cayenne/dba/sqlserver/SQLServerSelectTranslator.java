@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,57 +55,64 @@
  */
 package org.objectstyle.cayenne.dba.sqlserver;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
-import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
+import java.sql.Types;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.access.trans.SelectTranslator;
+import org.objectstyle.cayenne.map.DbAttribute;
 
 /**
- * Cayenne DbAdapter implementation for <a
- * href="http://www.microsoft.com/sql/default.asp"Microsoft SQL Server </a> engine. Sample
- * <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection
- * settings </a> to use with MS SQL Server are shown below:
- * 
- * <pre>
- * 
- *  sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
- *  sqlserver.jdbc.username = test
- *  sqlserver.jdbc.password = secret
- *  sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
- *  sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
- *  
- * </pre>
- * 
- * <p>
- * <i>Note on case-sensitive LIKE: if your application requires case-sensitive LIKE
- * support, ask your DBA to configure the database to use a case-senstitive collation (one
- * with "CS" in symbolic collation name instead of "CI", e.g.
- * "SQL_Latin1_general_CP1_CS_AS"). </i>
- * </p>
- * 
  * @author Andrei Adamchik
- * @since 1.1
  */
-public class SQLServerAdapter extends SybaseAdapter {
+class SQLServerSelectTranslator extends SelectTranslator {
 
-    public static final String TRIM_FUNCTION = "RTRIM";
+    private static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
+            Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR
+    };
 
-    /**
-     * Returns a trimming translator.
-     */
-    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new TrimmingQualifierTranslator(
-                queryAssembler,
-                SQLServerAdapter.TRIM_FUNCTION);
+    protected static boolean isUnsupportedForDistinct(int type) {
+        for (int i = 0; i < UNSUPPORTED_DISTINCT_TYPES.length; i++) {
+            if (UNSUPPORTED_DISTINCT_TYPES[i] == type) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    boolean suppressingDistinct;
+
+    public SQLServerSelectTranslator() {
+        super();
+    }
+
+    public String createSqlString() throws Exception {
+        suppressingDistinct = false;
+
+        String string = super.createSqlString();
+
+        if (string.startsWith("SELECT DISTINCT ")) {
+            // check columns
+            Iterator it = getColumns().iterator();
+            while (it.hasNext()) {
+                DbAttribute attribute = (DbAttribute) it.next();
+                if (attribute != null && isUnsupportedForDistinct(attribute.getType())) {
+
+                    suppressingDistinct = true;
+                    string = "SELECT " + string.substring("SELECT DISTINCT ".length());
+                    break;
+                }
+            }
+        }
+
+        return string;
     }
 
     /**
-     * Returns SQLServerDataNode instance.
+     * Returns whether DISTINCT was explicitly suppressed. This method can be invoked only
+     * after "createSqlString()", as before that this information is unknown.
      */
-    public DataNode createDataNode(String name) {
-        DataNode node = new SQLServerDataNode(name);
-        node.setAdapter(this);
-        return node;
+    boolean isSuppressingDistinct() {
+        return suppressingDistinct;
     }
 }

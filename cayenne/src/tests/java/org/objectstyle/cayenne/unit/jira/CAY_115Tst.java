@@ -53,59 +53,54 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.sqlserver;
+package org.objectstyle.cayenne.unit.jira;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
-import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
+import java.util.List;
+
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.testdo.relationship.ClobMaster;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
- * Cayenne DbAdapter implementation for <a
- * href="http://www.microsoft.com/sql/default.asp"Microsoft SQL Server </a> engine. Sample
- * <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection
- * settings </a> to use with MS SQL Server are shown below:
- * 
- * <pre>
- * 
- *  sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
- *  sqlserver.jdbc.username = test
- *  sqlserver.jdbc.password = secret
- *  sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
- *  sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
- *  
- * </pre>
- * 
- * <p>
- * <i>Note on case-sensitive LIKE: if your application requires case-sensitive LIKE
- * support, ask your DBA to configure the database to use a case-senstitive collation (one
- * with "CS" in symbolic collation name instead of "CI", e.g.
- * "SQL_Latin1_general_CP1_CS_AS"). </i>
- * </p>
- * 
  * @author Andrei Adamchik
- * @since 1.1
  */
-public class SQLServerAdapter extends SybaseAdapter {
+public class CAY_115Tst extends RelationshipTestCase {
 
-    public static final String TRIM_FUNCTION = "RTRIM";
-
-    /**
-     * Returns a trimming translator.
-     */
-    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new TrimmingQualifierTranslator(
-                queryAssembler,
-                SQLServerAdapter.TRIM_FUNCTION);
+    protected void setUp() throws Exception {
+        super.setUp();
+        deleteTestData();
     }
 
-    /**
-     * Returns SQLServerDataNode instance.
-     */
-    public DataNode createDataNode(String name) {
-        DataNode node = new SQLServerDataNode(name);
-        node.setAdapter(this);
-        return node;
+    public void testDistinctClobFetch() throws Exception {
+        super.createTestData("testDistinctClobFetch");
+
+        DataContext context = createDataContext();
+
+        SelectQuery noDistinct = new SelectQuery(ClobMaster.class);
+        noDistinct.addOrdering(ClobMaster.NAME_PROPERTY, true);
+
+        SelectQuery distinct = new SelectQuery(ClobMaster.class);
+        distinct.setDistinct(true);
+        distinct.addOrdering(ClobMaster.NAME_PROPERTY, true);
+
+        List noDistinctResult = context.performQuery(noDistinct);
+        List distinctResult = context.performQuery(distinct);
+
+        assertEquals(3, noDistinctResult.size());
+        assertEquals(noDistinctResult, distinctResult);
+    }
+
+    public void testDistinctClobFetchWithToManyJoin() throws Exception {
+        super.createTestData("testDistinctClobFetchWithToManyJoin");
+
+        DataContext context = createDataContext();
+
+        Expression qual = Expression.fromString("details.name like 'cd%'");
+        SelectQuery query = new SelectQuery(ClobMaster.class, qual);
+        List result = context.performQuery(query);
+
+        assertEquals(3, result.size());
     }
 }

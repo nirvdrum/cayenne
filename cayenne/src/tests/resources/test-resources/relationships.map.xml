@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-map project-version="1.1">
 	<property name="defaultPackage" value="org.objectstyle.cayenne.testdo.relationship"/>
+	<db-entity name="CLOB_DETAIL">
+		<db-attribute name="CLOB_DETAIL_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="CLOB_MASTER_ID" type="INTEGER"/>
+		<db-attribute name="NAME" type="VARCHAR" length="254"/>
+	</db-entity>
+	<db-entity name="CLOB_MASTER">
+		<db-attribute name="CLOB_COLUMN" type="CLOB"/>
+		<db-attribute name="CLOB_MASTER_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" length="254"/>
+	</db-entity>
 	<db-entity name="COMPLEX_JOIN">
 		<db-attribute name="EXTRA_COLUMN" type="VARCHAR" length="50"/>
 		<db-attribute name="FT1_FK" type="INTEGER"/>
@@ -53,6 +63,13 @@
 	<db-entity name="TO_ONEFK2">
 		<db-attribute name="TO_ONEFK2_PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<obj-entity name="ClobDetail" className="org.objectstyle.cayenne.testdo.relationship.ClobDetail" dbEntityName="CLOB_DETAIL">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="ClobMaster" className="org.objectstyle.cayenne.testdo.relationship.ClobMaster" dbEntityName="CLOB_MASTER">
+		<obj-attribute name="clobColumn" type="java.lang.String" db-attribute-path="CLOB_COLUMN"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
 	<obj-entity name="DeleteRuleTest1" className="org.objectstyle.cayenne.testdo.relationship.DeleteRuleTest1" dbEntityName="DELETE_RULE_TEST1">
 	</obj-entity>
 	<obj-entity name="DeleteRuleTest2" className="org.objectstyle.cayenne.testdo.relationship.DeleteRuleTest2" dbEntityName="DELETE_RULE_TEST2">
@@ -81,6 +98,12 @@
 	</obj-entity>
 	<obj-entity name="ToOneFK2" className="org.objectstyle.cayenne.testdo.relationship.ToOneFK2" dbEntityName="TO_ONEFK2">
 	</obj-entity>
+	<db-relationship name="master" source="CLOB_DETAIL" target="CLOB_MASTER" toMany="false">
+		<db-attribute-pair source="CLOB_MASTER_ID" target="CLOB_MASTER_ID"/>
+	</db-relationship>
+	<db-relationship name="details" source="CLOB_MASTER" target="CLOB_DETAIL" toMany="true">
+		<db-attribute-pair source="CLOB_MASTER_ID" target="CLOB_MASTER_ID"/>
+	</db-relationship>
 	<db-relationship name="toFT1" source="COMPLEX_JOIN" target="FLATTENED_TEST_1" toMany="false">
 		<db-attribute-pair source="FT1_FK" target="FT1_ID"/>
 	</db-relationship>
@@ -144,6 +167,8 @@
 	<db-relationship name="toOneToFK" source="TO_ONEFK2" target="TO_ONEFK1" toMany="false">
 		<db-attribute-pair source="TO_ONEFK2_PK" target="TO_ONEFK1_FK"/>
 	</db-relationship>
+	<obj-relationship name="master" source="ClobDetail" target="ClobMaster" db-relationship-path="master"/>
+	<obj-relationship name="details" source="ClobMaster" target="ClobDetail" db-relationship-path="details"/>
 	<obj-relationship name="test2" source="DeleteRuleTest1" target="DeleteRuleTest2" deleteRule="Deny" db-relationship-path="test2"/>
 	<obj-relationship name="deleteRuleTest3Array" source="DeleteRuleTest2" target="DeleteRuleTest3" db-relationship-path="deleteRuleTest3Array"/>
 	<obj-relationship name="test1Array" source="DeleteRuleTest2" target="DeleteRuleTest1" deleteRule="Nullify" db-relationship-path="test1Array"/>
