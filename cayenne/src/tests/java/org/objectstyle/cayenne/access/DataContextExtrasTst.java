@@ -123,6 +123,26 @@ public class DataContextExtrasTst extends CayenneTestCase {
 		assertNull(ctxt.registeredMap.get(oid));
     }
     
+    public void testInvalidateObject() throws Exception {
+    	Map row = new HashMap();
+		row.put("ARTIST_ID", new Integer(1));
+		row.put("ARTIST_NAME", "ArtistXYZ");
+		row.put("DATE_OF_BIRTH", new Date());
+		DataObject obj = ctxt.objectFromDataRow("Artist", row);
+		ObjectId oid = obj.getObjectId();
+		
+		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
+		assertSame(ctxt, obj.getDataContext());
+		assertSame(obj, ctxt.registeredExistingObject(oid));
+		
+		ctxt.invalidateObject(obj);
+		
+	    assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+		assertSame(ctxt, obj.getDataContext());
+		assertSame(oid, obj.getObjectId());
+		assertNull(ctxt.committedSnapshots.get(oid));
+    }
+    
 	public void testIdObjectFromDataRow() throws Exception {
 		Map row = new HashMap();
 		row.put("ARTIST_ID", new Integer(1));

@@ -542,6 +542,22 @@ public class DataContext implements QueryEngine {
     	dataObj.setObjectId(null);
     	dataObj.setPersistenceState(PersistenceState.TRANSIENT);
     }
+    
+    /**
+     * "Invalidates" a DataObject, changing it to a HOLLOW state.
+     * This would remove object's snapshot
+     * and change its state to HOLLOW. 
+     * On the next access to this object, it will be refeched.
+     */
+    public void invalidateObject(DataObject dataObj) {
+    	// we don't care about objects that are not ours    
+    	// we don't care about uncomitted objects		
+    	if(dataObj.getDataContext() != this || dataObj.getPersistenceState() == PersistenceState.NEW) {
+    		return;
+    	}
+    	committedSnapshots.remove(dataObj.getObjectId());
+    	dataObj.setPersistenceState(PersistenceState.HOLLOW);
+    }
 
     /** 
      * Notifies data context that a registered object need to be deleted on
