@@ -47,20 +47,22 @@ cayenneConfiguration.loadDataView(dataView);
 DataView dataView = ...;
 
 JTable featureTable = ...;
-//This is a descendant of javax.swing.table.AbstractTableModel
-DOTableModel tableModel = new DOTableModel();
 ObjEntityView featureView = dataView.getObjEntityView("ProductFeatureView");
 
-//Retrieve a list of data objects (with SelectQuery, say)
-//and initialize the model with it
+// This is a descendant of javax.swing.table.AbstractTableModel
+DOTableModel tableModel = new DOTableModel();
+tableModel.setView(featureView);
+
+// Retrieve a list of data objects (with SelectQuery, say)
+// and initialize the model with it
 DataObjectList featureDataObjects = ...;
 tableModel.setDataObjects(matrixEntries);
+
 featureTable.setModel(tableModel);
 
-//set the apropriate TableCellRenderers and Editors
+// set the apropriate TableCellRenderers and Editors
 new CellRenderers().installRenderers(featureTable);
 new CellEditors().installEditors(featureTable);
-//Ready to fly? Yes, sir!
             </source>
             <p>
             In fact, there is many more cool things you could do with DataViews to build your 
