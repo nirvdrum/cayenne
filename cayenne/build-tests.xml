@@ -167,8 +167,8 @@
     </target>
 
     <target name="use-specified-connection" if="cayenne.test.connection">
-        <path refid="classpath">
-          <pathelement path="agnostic-classpath"/>
+        <path id="classpath">
+          <path refid="agnostic-classpath"/>
         </path>
     </target>
 
