@@ -270,8 +270,15 @@ public class Editor
 				String logfilePath = prefs.getString(ModelerPreferences.EDITOR_LOGFILE, defaultPath);
 				File logfile = new File(logfilePath);
 
-	            if ((logfile != null) && (logfile.exists())) {
-	            	// remember working path
+	            if (logfile != null) {
+	            	if (!logfile.exists()) {
+	            		if (!logfile.createNewFile()) {
+						   logObj.warn("Can't create log file, ignoring.");
+						   return;
+	            		}
+					}
+
+					// remember working path
 					prefs.setProperty(ModelerPreferences.EDITOR_LOGFILE, logfilePath);
 	
 	                // replace appenders to just log to a file.
@@ -286,10 +293,9 @@ public class Editor
 	                p1.removeAllAppenders();
 	                p1.addAppender(
 	                    new FileAppender(layout, logfile.getCanonicalPath(), true));
-	            } else {
-	                logObj.warn("Can't create log file, ignoring.");
 	            }
-	        } catch (IOException ioex) {
+			}
+	        catch (IOException ioex) {
 	            logObj.warn("Error setting logging.", ioex);
 	        }
 		}
