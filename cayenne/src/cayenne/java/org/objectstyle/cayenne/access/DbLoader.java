@@ -303,7 +303,7 @@ public class DbLoader {
                 try {
                     if (delegate.overwriteDbEntity(oldEnt)) {
                         logObj.debug("Overwrite: " + oldEnt.getName());
-                        map.deleteDbEntity(oldEnt.getName());
+                        map.removeDbEntity(oldEnt.getName(), true);
                         delegate.dbEntityRemoved(oldEnt);
                     } else {
                         logObj.debug("Keep old: " + oldEnt.getName());

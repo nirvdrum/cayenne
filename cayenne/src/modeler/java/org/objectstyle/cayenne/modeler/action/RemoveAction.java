@@ -99,9 +99,9 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class RemoveAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Remove";
-	}
+    public static String getActionName() {
+        return "Remove";
+    }
 
     public RemoveAction() {
         super(getActionName());
@@ -122,7 +122,6 @@ public class RemoveAction extends CayenneAction {
     private void remove() {
         EventController mediator = getMediator();
 
-      
         if (mediator.getCurrentObjAttribute() != null) {
             removeObjAttribute();
         }
@@ -166,7 +165,8 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDomain() {
-        ApplicationProject project = (ApplicationProject) CayenneModelerFrame.getProject();
+        ApplicationProject project =
+            (ApplicationProject) CayenneModelerFrame.getProject();
         EventController mediator = getMediator();
         DataDomain domain = mediator.getCurrentDataDomain();
         project.getConfiguration().removeDomain(domain.getName());
@@ -200,7 +200,7 @@ public class RemoveAction extends CayenneAction {
         EventController mediator = getMediator();
         DbEntity ent = mediator.getCurrentDbEntity();
         DataMap map = mediator.getCurrentDataMap();
-        map.deleteDbEntity(ent.getName());
+        map.removeDbEntity(ent.getName(), true);
         mediator.fireDbEntityEvent(
             new EntityEvent(CayenneModelerFrame.getFrame(), ent, MapEvent.REMOVE));
     }
@@ -215,7 +215,10 @@ public class RemoveAction extends CayenneAction {
         DataMap map = mediator.getCurrentDataMap();
         map.removeProcedure(procedure.getName());
         mediator.fireProcedureEvent(
-            new ProcedureEvent(CayenneModelerFrame.getFrame(), procedure, MapEvent.REMOVE));
+            new ProcedureEvent(
+                CayenneModelerFrame.getFrame(),
+                procedure,
+                MapEvent.REMOVE));
     }
 
     /** 
@@ -224,9 +227,9 @@ public class RemoveAction extends CayenneAction {
     protected void removeObjEntity() {
         EventController mediator = getMediator();
         ObjEntity ent = mediator.getCurrentObjEntity();
-        
+
         DataMap map = mediator.getCurrentDataMap();
-        map.deleteObjEntity(ent.getName());
+        map.removeObjEntity(ent.getName(), true);
         mediator.fireObjEntityEvent(
             new EntityEvent(CayenneModelerFrame.getFrame(), ent, MapEvent.REMOVE));
     }
@@ -236,7 +239,10 @@ public class RemoveAction extends CayenneAction {
         ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
         mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
         ProcedureParameterEvent e =
-            new ProcedureParameterEvent(CayenneModelerFrame.getFrame(), parameter, MapEvent.REMOVE);
+            new ProcedureParameterEvent(
+                CayenneModelerFrame.getFrame(),
+                parameter,
+                MapEvent.REMOVE);
         mediator.fireProcedureParameterEvent(e);
     }
 
@@ -244,10 +250,14 @@ public class RemoveAction extends CayenneAction {
         EventController mediator = getMediator();
         ObjEntity entity = mediator.getCurrentObjEntity();
         ObjAttribute attrib = mediator.getCurrentObjAttribute();
-        
+
         entity.removeAttribute(attrib.getName());
         AttributeEvent e =
-            new AttributeEvent(CayenneModelerFrame.getFrame(), attrib, entity, MapEvent.REMOVE);
+            new AttributeEvent(
+                CayenneModelerFrame.getFrame(),
+                attrib,
+                entity,
+                MapEvent.REMOVE);
         mediator.fireObjAttributeEvent(e);
     }
 
@@ -259,7 +269,11 @@ public class RemoveAction extends CayenneAction {
         MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
         AttributeEvent e =
-            new AttributeEvent(CayenneModelerFrame.getFrame(), attrib, entity, MapEvent.REMOVE);
+            new AttributeEvent(
+                CayenneModelerFrame.getFrame(),
+                attrib,
+                entity,
+                MapEvent.REMOVE);
         mediator.fireDbAttributeEvent(e);
     }
 
@@ -270,7 +284,7 @@ public class RemoveAction extends CayenneAction {
         entity.removeRelationship(rel.getName());
         RelationshipEvent e =
             new RelationshipEvent(
-        CayenneModelerFrame.getFrame(),
+                CayenneModelerFrame.getFrame(),
                 rel,
                 entity,
                 RelationshipEvent.REMOVE);
@@ -286,7 +300,7 @@ public class RemoveAction extends CayenneAction {
 
         RelationshipEvent e =
             new RelationshipEvent(
-        CayenneModelerFrame.getFrame(),
+                CayenneModelerFrame.getFrame(),
                 rel,
                 entity,
                 RelationshipEvent.REMOVE);
@@ -300,7 +314,8 @@ public class RemoveAction extends CayenneAction {
         node.removeDataMap(map.getName());
 
         // Force reloading of the data node in the browse view
-        mediator.fireDataNodeEvent(new DataNodeEvent(CayenneModelerFrame.getFrame(), node));
+        mediator.fireDataNodeEvent(
+            new DataNodeEvent(CayenneModelerFrame.getFrame(), node));
     }
 
     /**

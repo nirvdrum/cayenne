@@ -61,11 +61,11 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /** 
- * Allows to send "raw" SQL select statements to the database 
- * using Cayenne connection layer. Its intention is to allow 
- * programmers to access database-specific features not covered 
- * by Cayenne. Queries created using SqlSelectQuery are very likely 
- * not portable accross database engines. 
+ * A Query object that contains a SQL select statement. It is being sent to
+ * the database without any further translaion by Cayenne. SqlSelectQuery 
+ * intention is to allow programmers to access database-specific features 
+ * not addressed by Object Relational Mapping. One of the drawabacks of using 
+ * SqlSelectQuery is loss of portability accross databases. 
  */
 public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery {
     protected String sqlString;

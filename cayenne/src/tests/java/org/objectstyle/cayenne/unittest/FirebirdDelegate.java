@@ -83,8 +83,8 @@ public class FirebirdDelegate extends DatabaseSetupDelegate {
 
         // modify DataMap
 
-        map.removeDbEntity("BINARY_PK_TEST1");
-        map.removeDbEntity("BINARY_PK_TEST2");
+        map.removeDbEntity("BINARY_PK_TEST1", false);
+        map.removeDbEntity("BINARY_PK_TEST2", false);
 
         super.willCreateTables(con, map);
     }

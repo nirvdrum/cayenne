@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.map;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
@@ -67,10 +66,9 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.CayenneMap;
 
 /**
- * DataMap is a central class in Cayenne Object Relational mapping design.
- * It contains a set of mapping descriptors, such as entities, attributes
- * and relationships, providing O/R mapping of a set of database tables
- * to a set of Java classes.
+ * Stores a collection of related mapping objects that describe database and object layers
+ * of an application. DataMap contains DbEntities mapping database tables, ObjEntities -
+ * mapping persistent Java classes, Procedures - mapping database stored procedures.
  *
  * @author Michael Shengaout
  * @author Andrei Adamchik  
@@ -82,69 +80,67 @@ public class DataMap {
     protected String name;
     protected String location;
 
-    /** 
-     * Contains a list of DataMaps that are used by this map.
-     */
-    protected List dependencies = new ArrayList();
-    // read-through reference for public access to the dependencies list
-    protected List dependenciesRef = Collections.unmodifiableList(dependencies);
+    // ====================================================
+    // DataMaps that provide dependencies for this DataMap
+    // ====================================================
+    private List dependencies = new ArrayList();
 
-    /** 
-     * ObjEntities representing the data object classes.
-     * The name of ObjEntity serves as a key. 
-     */
+    // read-through reference for public access
+    private List dependenciesRef = Collections.unmodifiableList(dependencies);
+
+    // ====================================================
+    // ObjEntities
+    // ====================================================
     private CayenneMap objEntityMap = new CayenneMap(this);
 
-    // read-through reference for public access to the entire objEntityMap
-    private SortedMap objEntityMapRef =
-        Collections.unmodifiableSortedMap(objEntityMap);
+    // read-through reference for public access
+    private SortedMap objEntityMapRef = Collections.unmodifiableSortedMap(objEntityMap);
 
     // read-through reference for public access to the ObjEntities
     private Collection objEntityValuesRef =
         Collections.unmodifiableCollection(objEntityMap.values());
 
-    /**
-     * DbEntities representing metadata for individual database tables.
-     * The name of DbEntity (which is also a database table name) serves
-     * as a key.
-     */
+    // ====================================================
+    // DbEntities
+    // ====================================================
     private CayenneMap dbEntityMap = new CayenneMap(this);
 
-    // read-through reference for public access to the entire dbEntityMap
-    private SortedMap dbEntityMapRef =
-        Collections.unmodifiableSortedMap(dbEntityMap);
+    // read-through reference for public access
+    private SortedMap dbEntityMapRef = Collections.unmodifiableSortedMap(dbEntityMap);
 
-    // read-through reference for public access to the DbEntities
+    // read-through reference for public access
     private Collection dbEntityValuesRef =
         Collections.unmodifiableCollection(dbEntityMap.values());
 
+    // ====================================================
+    // Procedures
+    // ====================================================
     private CayenneMap procedureMap = new CayenneMap(this);
 
-    // read-through reference for public access to the entire dbEntityMap
-    private SortedMap procedureMapRef =
-        Collections.unmodifiableSortedMap(procedureMap);
+    // read-through reference for public access
+    private SortedMap procedureMapRef = Collections.unmodifiableSortedMap(procedureMap);
 
-    // read-through reference for public access to the DbEntities
+    // read-through reference for public access
     private Collection procedureValuesRef =
         Collections.unmodifiableCollection(procedureMap.values());
 
-    /** Creates an empty DataMap */
+    /** 
+     * Creates an new unnamed DataMap. 
+     */
     public DataMap() {
-        this("unnamed");
     }
 
     /**
      * Creates an empty DataMap and assigns it a <code>name</code>.
      */
     public DataMap(String mapName) {
-        super();
         this.setName(mapName);
     }
-    
+
     public String toString() {
-    	StringBuffer buf = new StringBuffer();
-    	buf.append("DataMap '").append(name).append("'");
-    	return buf.toString();
+        StringBuffer buf = new StringBuffer();
+        buf.append("DataMap '").append(name).append("'");
+        return buf.toString();
     }
 
     /**
@@ -211,7 +207,9 @@ public class DataMap {
         dependencies.clear();
     }
 
-    /** Returns "name" property value. */
+    /** 
+     * Returns "name" property value. 
+     */
     public String getName() {
         return name;
     }
@@ -246,40 +244,39 @@ public class DataMap {
     }
 
     /**
-     * Returns "location" property value.
-     * Location is abstract and treated differently
-     * by different loaders. See Configuration class
-     * for more details on how location is resolved.
+     * Returns "location" property value. Location is abstract and can depend
+     * on how the DataMap was loaded. E.g. location can be a File on the filesystem
+     * or a location within a JAR.
      */
     public String getLocation() {
         return location;
     }
 
     /**
-     * Sets "location" property. Usually location is set by
-     * map loader when map is created from a XML file,
-     * or by a GUI tool when such a tool wants to change where 
-     * the map should be saved.
+     * Sets "location" property.
      */
     public void setLocation(String location) {
         this.location = location;
     }
 
+    /**
+     * Returns a sorted unmodifiable map of ObjEntities
+     * contained in this DataMap, keyed by ObjEntity name.
+     */
     public SortedMap getObjEntityMap() {
         return objEntityMapRef;
     }
 
     /**
-     * Returns sorted unmodifiable map of DbEntities
-     * contained in this DataMap. Keys are DbEntity
-     * names (same as database table names).
+     * Returns a sorted unmodifiable map of DbEntities
+     * contained in this DataMap, keyed by DbEntity name.
      */
     public SortedMap getDbEntityMap() {
         return dbEntityMapRef;
     }
 
     /** 
-     * Adds ObjEntity to the list of map entities.
+     * Adds a new ObjEntity to this DataMap.
      */
     public void addObjEntity(ObjEntity objEntity) {
         if (objEntity.getName() == null) {
@@ -290,9 +287,7 @@ public class DataMap {
     }
 
     /** 
-     * Adds DbEntity to the list of map entities.
-     * If there is another entity registered under the same name,
-     * throws an IllegalArgumentException.
+     * Adds a new DbEntity to this DataMap.
      */
     public void addDbEntity(DbEntity dbEntity) {
         if (dbEntity.getName() == null) {
@@ -314,10 +309,10 @@ public class DataMap {
      * from dependent maps if <code>includeDeps</code> is <code>true</code>.
      */
     public Collection getObjEntities(boolean includeDeps) {
-        if (!includeDeps
-            || (includeDeps && this.getDependencies().isEmpty())) {
+        if (!includeDeps || this.getDependencies().isEmpty()) {
             return objEntityValuesRef;
-        } else {
+        }
+        else {
             // create a copy until we can start to cache allObjEnts as well
             List allObjEnts = new ArrayList(objEntityValuesRef);
             Iterator dependentMaps = this.getDependencies().iterator();
@@ -341,10 +336,10 @@ public class DataMap {
      * from dependent maps if <code>includeDeps</code> is <code>true</code>.
      */
     public Collection getDbEntities(boolean includeDeps) {
-        if (!includeDeps
-            || (includeDeps && this.getDependencies().isEmpty())) {
+        if (!includeDeps || getDependencies().isEmpty()) {
             return dbEntityValuesRef;
-        } else {
+        }
+        else {
             // create a copy until we can start to cache allDbEnts as well
             List allDbEnts = new ArrayList(dbEntityValuesRef);
             Iterator dependentMaps = this.getDependencies().iterator();
@@ -381,9 +376,7 @@ public class DataMap {
         return this.getDbEntity(dbEntityName, false);
     }
 
-    public DbEntity getDbEntity(
-        String dbEntityName,
-        boolean searchDependencies) {
+    public DbEntity getDbEntity(String dbEntityName, boolean searchDependencies) {
         DbEntity ent = (DbEntity) dbEntityMap.get(dbEntityName);
         if (ent != null || !searchDependencies) {
             return ent;
@@ -408,9 +401,7 @@ public class DataMap {
         return (ObjEntity) objEntityMap.get(objEntityName);
     }
 
-    public ObjEntity getObjEntity(
-        String objEntityName,
-        boolean searchDependencies) {
+    public ObjEntity getObjEntity(String objEntityName, boolean searchDependencies) {
         ObjEntity ent = (ObjEntity) objEntityMap.get(objEntityName);
         if (ent != null || !searchDependencies) {
             return ent;
@@ -448,56 +439,67 @@ public class DataMap {
         return result;
     }
 
-    /** "Dirty" remove of the DbEntity from the data map. */
-    public void removeDbEntity(String dbEntityName) {
-        dbEntityMap.remove(dbEntityName);
-    }
-
-    /**
-     * Clean remove of the DbEntity from the data map.
-     * If there are any ObjEntities or ObjRelationship entities
-     * referencing given entity, removes them as well.
-     * No relationships are re-established. Also, if the ObjEntity is removed,
-     * all the ObjRelationships referencing it are removed as well.
+    /** 
+     * Removes DbEntity, also removing all DbRelationships and ObjRelationships
+     * that reference it. This method is a "clean" remove.
+     * 
+     * @deprecated Since 1.1 use {@link #removeDbEntity(String, boolean)}
      */
     public void deleteDbEntity(String dbEntityName) {
-        DbEntity dbEntityToDelete = getDbEntity(dbEntityName);
-        // No db entity to remove? return.
-        if (null == dbEntityToDelete) {
-            return;
-        }
+        removeDbEntity(dbEntityName, true);
+    }
 
-        dbEntityMap.remove(dbEntityName);
+    /** 
+     * "Dirty" remove of the DbEntity from the data map.
+     * 
+     * @deprecated Since 1.1 use {@link #removeDbEntity(String, boolean)}
+     */
+    public void removeDbEntity(String dbEntityName) {
+        removeDbEntity(dbEntityName, false);
+    }
 
-        Iterator dbEnts = this.getDbEntities().iterator();
-        while (dbEnts.hasNext()) {
-            DbEntity dbEnt = (DbEntity) dbEnts.next();
-            // take a copy since we're going to modifiy the entity
-            Iterator rels = new ArrayList(dbEnt.getRelationships()).iterator();
-            while (rels.hasNext()) {
-                DbRelationship rel = (DbRelationship) rels.next();
-                if (dbEntityName.equals(rel.getTargetEntityName())) {
-                    dbEnt.removeRelationship(rel.getName());
+    /** 
+     * Removes DbEntity from the DataMap. If <code>clearDependencies</code> is true,
+     * all DbRelationships that reference this entity are also removed. ObjEntities
+     * that rely on this entity are cleaned up.
+     * 
+     * @since 1.1
+     */
+    public void removeDbEntity(String dbEntityName, boolean clearDependencies) {
+        DbEntity dbEntityToDelete = (DbEntity) dbEntityMap.remove(dbEntityName);
+
+        if (dbEntityToDelete != null && clearDependencies) {
+            Iterator dbEnts = this.getDbEntities().iterator();
+            while (dbEnts.hasNext()) {
+                DbEntity dbEnt = (DbEntity) dbEnts.next();
+                // take a copy since we're going to modifiy the entity
+                Iterator rels = new ArrayList(dbEnt.getRelationships()).iterator();
+                while (rels.hasNext()) {
+                    DbRelationship rel = (DbRelationship) rels.next();
+                    if (dbEntityName.equals(rel.getTargetEntityName())) {
+                        dbEnt.removeRelationship(rel.getName());
+                    }
                 }
             }
-        }
 
-        // Remove all obj relationships referencing removed DbRelationships.
-        Iterator objEnts = this.getObjEntities().iterator();
-        while (objEnts.hasNext()) {
-            ObjEntity objEnt = (ObjEntity) objEnts.next();
-            if (objEnt.getDbEntity() == dbEntityToDelete) {
-                objEnt.clearDbMapping();
-            } else {
-                Iterator iter = objEnt.getRelationships().iterator();
-                while (iter.hasNext()) {
-                    ObjRelationship rel = (ObjRelationship) iter.next();
-                    Iterator dbRels = rel.getDbRelationships().iterator();
-                    while (dbRels.hasNext()) {
-                        DbRelationship dbRel = (DbRelationship) dbRels.next();
-                        if (dbRel.getTargetEntity() == dbEntityToDelete) {
-                            rel.clearDbRelationships();
-                            break;
+            // Remove all obj relationships referencing removed DbRelationships.
+            Iterator objEnts = this.getObjEntities().iterator();
+            while (objEnts.hasNext()) {
+                ObjEntity objEnt = (ObjEntity) objEnts.next();
+                if (objEnt.getDbEntity() == dbEntityToDelete) {
+                    objEnt.clearDbMapping();
+                }
+                else {
+                    Iterator iter = objEnt.getRelationships().iterator();
+                    while (iter.hasNext()) {
+                        ObjRelationship rel = (ObjRelationship) iter.next();
+                        Iterator dbRels = rel.getDbRelationships().iterator();
+                        while (dbRels.hasNext()) {
+                            DbRelationship dbRel = (DbRelationship) dbRels.next();
+                            if (dbRel.getTargetEntity() == dbEntityToDelete) {
+                                rel.clearDbRelationships();
+                                break;
+                            }
                         }
                     }
                 }
@@ -506,37 +508,47 @@ public class DataMap {
     }
 
     /** 
-     * Clean remove of the ObjEntity from the data map.
-     * Removes all ObjRelationships referencing this ObjEntity
+     * Removes ObjEntity, also removing all ObjRelationships that reference it.
+     * This method is a "clean" remove.
+     * 
+     * @deprecated Since 1.1 use {@link #removeObjEntity(String, boolean)}
      */
     public void deleteObjEntity(String objEntityName) {
-        ObjEntity entity = (ObjEntity) objEntityMap.get(objEntityName);
-        if (null == entity) {
-            return;
-        }
-
-        objEntityMap.remove(objEntityName);
-
-        Iterator entities = this.getObjEntityMap().values().iterator();
-        while (entities.hasNext()) {
-            ObjEntity ent = (ObjEntity) entities.next();
-            // take a copy since we're going to modifiy the entity
-            Iterator rels = new ArrayList(ent.getRelationships()).iterator();
-            while (rels.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) rels.next();
-                if (objEntityName.equals(rel.getTargetEntityName())
-                    || objEntityName.equals(rel.getTargetEntityName())) {
-                    ent.removeRelationship(rel.getName());
-                }
-            }
-        }
+        removeObjEntity(objEntityName, true);
     }
 
-    /** "Dirty" remove of the ObjEntity from the data map.*/
+    /** 
+     * "Dirty" remove of the ObjEntity from the data map.
+     * 
+     * @deprecated Since 1.1 use {@link #removeObjEntity(String, boolean)}
+     */
     public void removeObjEntity(String objEntityName) {
-        ObjEntity objEntity = (ObjEntity) objEntityMap.get(objEntityName);
-        if (objEntity != null) {
-            objEntityMap.remove(objEntityName);
+        removeObjEntity(objEntityName, false);
+    }
+
+    /** 
+     * Removes ObjEntity from the DataMap. If <code>clearDependencies</code> is true,
+     * all ObjRelationships that reference this entity are also removed.
+     * 
+     * @since 1.1
+     */
+    public void removeObjEntity(String objEntityName, boolean clearDependencies) {
+        ObjEntity entity = (ObjEntity) objEntityMap.remove(objEntityName);
+
+        if (entity != null && clearDependencies) {
+            Iterator entities = this.getObjEntityMap().values().iterator();
+            while (entities.hasNext()) {
+                ObjEntity ent = (ObjEntity) entities.next();
+                // take a copy since we're going to modifiy the entity
+                Iterator rels = new ArrayList(ent.getRelationships()).iterator();
+                while (rels.hasNext()) {
+                    ObjRelationship rel = (ObjRelationship) rels.next();
+                    if (objEntityName.equals(rel.getTargetEntityName())
+                        || objEntityName.equals(rel.getTargetEntityName())) {
+                        ent.removeRelationship(rel.getName());
+                    }
+                }
+            }
         }
     }
 
@@ -552,10 +564,10 @@ public class DataMap {
      * dependent maps if requested.
      */
     public Collection getProcedures(boolean includeDeps) {
-        if (!includeDeps
-            || (includeDeps && this.getDependencies().isEmpty())) {
+        if (!includeDeps || this.getDependencies().isEmpty()) {
             return procedureValuesRef;
-        } else {
+        }
+        else {
             // create a copy until we can start to cache allDbEnts as well
             List allProcedures = new ArrayList(procedureValuesRef);
             Iterator dependentMaps = this.getDependencies().iterator();
@@ -573,8 +585,7 @@ public class DataMap {
     public Procedure getProcedure(String name) {
         return getProcedure(name, false);
     }
-    
-    
+
     /** 
      * Adds stored procedure to the list of procedures.
      * If there is another procedure registered under the same name,
@@ -587,7 +598,7 @@ public class DataMap {
 
         procedureMap.put(procedure.getName(), procedure);
     }
-    
+
     public void removeProcedure(String name) {
         procedureMap.remove(name);
     }
@@ -613,55 +624,12 @@ public class DataMap {
         }
         return null;
     }
-    
-    public SortedMap getProcedureMap() {
-        return procedureMapRef;
-    }
-    
 
     /**
-     * Used as a comparator to infer DataMap ordering.
+     * Returns a sorted unmodifiable map of Procedures 
+     * in this DataMap keyed by name.
      */
-    public static final class MapComparator implements Comparator {
-
-        public final int compare(Object o1, Object o2) {
-            DataMap m1 = (DataMap) o1;
-            DataMap m2 = (DataMap) o2;
-            int result = compareMaps(m1, m2);
-
-            // resort to very bad and dumb alphabetic ordering
-            if (result == 0) {
-                result = m1.getName().compareTo(m2.getName());
-            }
-
-            return result;
-        }
-
-        /**
-         * Checks if these 2 DataMaps have a dependency on each other.
-         *
-         * @return
-         *  <ul>
-         *  <li> -1 when m2 depends on m1
-         *  <li> 1 when m1 depends on m2
-         *  <li> 0 when dependency is undefined
-         * </ul>
-         */
-        private final int compareMaps(DataMap m1, DataMap m2) {
-
-            boolean hasDependent1 = m1.isDependentOn(m2);
-            boolean hasDependent2 = m2.isDependentOn(m1);
-
-            // ok if 1 map has a dependency and another does not,
-            // the first one goes first
-            if (hasDependent1 && !hasDependent2)
-                return 1;
-
-            if (!hasDependent1 && hasDependent2)
-                return -1;
-
-            // do not know what to do...
-            return 0;
-        }
+    public SortedMap getProcedureMap() {
+        return procedureMapRef;
     }
 }

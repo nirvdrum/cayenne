@@ -77,7 +77,6 @@ public class DataMapTst extends TestCase {
     }
 
     public void testName() throws Exception {
-        assertNotNull(map.getName());
         String tstName = "tst_name";
         map.setName(tstName);
         assertEquals(tstName, map.getName());
@@ -118,7 +117,7 @@ public class DataMapTst extends TestCase {
         ObjEntity e = new ObjEntity("f");
         map.addObjEntity(e);
 
-        map.removeObjEntity(e.getName());
+        map.removeObjEntity(e.getName(), false);
         map.addObjEntity(e);
     }
 
@@ -134,11 +133,11 @@ public class DataMapTst extends TestCase {
         map.addObjEntity(e1);
         map.addObjEntity(e2);
 
-        map.deleteObjEntity("1");
+        map.removeObjEntity("1", true);
         assertNull(map.getObjEntity("1"));
         assertEquals(1, e2.getRelationships().size());
 
-        map.deleteObjEntity("2");
+        map.removeObjEntity("2", true);
         assertNull(map.getObjEntity("2"));
     }
 
@@ -156,7 +155,7 @@ public class DataMapTst extends TestCase {
         e.setClassName("f");
         map.addObjEntity(e);
 
-        map.removeObjEntity(e.getName());
+        map.removeObjEntity(e.getName(), false);
         map.addObjEntity(e);
     }
 
@@ -258,9 +257,9 @@ public class DataMapTst extends TestCase {
         map.addDbEntity(e2);
 
         // now actually test something
-        map.deleteDbEntity(e1.getName());
+        map.removeDbEntity(e1.getName(), true);
         assertNull(map.getDbEntity(e1.getName()));
-        map.deleteDbEntity(e2.getName());
+        map.removeDbEntity(e2.getName(), true);
         assertNull(map.getDbEntity(e2.getName()));
     }
 

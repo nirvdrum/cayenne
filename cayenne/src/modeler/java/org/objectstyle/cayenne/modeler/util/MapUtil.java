@@ -180,7 +180,7 @@ public class MapUtil {
         }
 
         entity.setName(newName);
-        map.removeObjEntity(oldName);
+        map.removeObjEntity(oldName, false);
         map.addObjEntity(entity);
     }
 
@@ -193,7 +193,7 @@ public class MapUtil {
         }
 
         entity.setName(newName);
-        map.removeDbEntity(oldName);
+        map.removeDbEntity(oldName, false);
         map.addDbEntity(entity);
     }
 

@@ -69,13 +69,12 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * Describes a database SELECT statement in object terms.
- * In other words, <code>SelectQuery</code> is a specification
- * that tells Cayenne how to generate SQL that will be eventually
- * sent to the database.
- * 
- * <p>SelectQuery defines ObjEntity that should be fetched and a set of conditions. 
- * It allows lots of fine tuning of the fetch process.</p>
+ * SelectQuery is a Query object describing what rows to retrieve from the 
+ * database and how to convert them to objects. SelectQuery is defined in
+ * terms of object mapping. During execution Cayenne transaclates it to
+ * SQL dialect of the target database. SelectQuery defines a set of parameters 
+ * for the fetch. Most important parameters are the "root", "qualifier", and 
+ * "ordering".
  * 
  * @author Andrei Adamchik
  */
