@@ -161,7 +161,9 @@
     		<item name="6.4 Delete Rules" href="/modelerguide/modeling-object-layer/delete-rules.html"/>
     	</item>
     	
-    	<item name="7. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
+    	<item name="7. Configure Deployment Settings"  href="/modelerguide/configure-deployment/index.html"/>
+    	
+    	<item name="8. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
     </toc-modeler-guide>
     
     
