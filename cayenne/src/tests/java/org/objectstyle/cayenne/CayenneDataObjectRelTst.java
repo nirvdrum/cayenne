@@ -303,6 +303,42 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 			}
 	}
 	
+	/* Catches a bug in the flattened relationship registration which just inserted/deleted willy-nilly, 
+	 * even if unneccessary */
+	public void testAddRemoveAddFlattenedRelationship() throws Exception {
+		String specialGroupName="Special Group2";
+		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {});
+		TestCaseDataFactory.createUnconnectedGroup(specialGroupName);
+		Artist a1 = fetchArtist();
+		
+		SelectQuery q =
+			new SelectQuery(ArtGroup.class, ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "name", specialGroupName));
+		List results = ctxt.performQuery(q);
+		assertEquals(1,results.size());
+		
+		ArtGroup group=(ArtGroup)results.get(0);
+		a1.addToGroupArray(group);
+		group.removeFromArtistArray(a1);
+		//a1.addToGroupArray(group);
+
+		try {
+			ctxt.commitChanges();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should not have thrown the exception "+e.getMessage());
+		}
+		
+		this.resetContext();
+		results = ctxt.performQuery(q);
+		assertEquals(1,results.size());
+		
+		group=(ArtGroup)results.get(0);
+		assertEquals(0, group.getArtistArray().size());
+		//a1 = fetchArtist();
+		//assertTrue(group.getArtistArray().contains(a1));
+	}
+
+	
 	public void testReflexiveRelationshipInsertOrder1() {
 		DataContext dc=this.createDataContext();
 		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");

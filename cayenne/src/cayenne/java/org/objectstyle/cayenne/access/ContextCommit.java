@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -459,90 +460,77 @@ class ContextCommit {
     }
 
     private Map categorizeFlattenedInsertsAndCreateBatches() {
-        Map flattenedInserts = context.getFlattenedInserts();
+         List flattenedInsertsList=context.getFlattenedInserts();
         Map flattenedBatches = new HashMap();
-        for (Iterator i = flattenedInserts.entrySet().iterator(); i.hasNext();) {
-            Map.Entry fientry = (Map.Entry)i.next();
-            DataObject source = (DataObject)fientry.getKey();
-            if (source.getPersistenceState() == PersistenceState.DELETED) continue;
-            Map insertsForObject = (Map)fientry.getValue();
-            if (insertsForObject == null || insertsForObject.isEmpty()) continue;
-            Map sourceId = source.getObjectId().getIdSnapshot();
-            ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
-            DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
-            Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
-            if (batchesByDbEntity == null) {
-                batchesByDbEntity = new HashMap();
-                flattenedBatches.put(responsibleNode, batchesByDbEntity);
-            }
-            for (Iterator j = insertsForObject.entrySet().iterator(); j.hasNext();) {
-                Map.Entry ioentry = (Map.Entry)j.next();
-                String relName = (String)ioentry.getKey();
-                List insertedObjectsForRel = (List)ioentry.getValue();
-                if (insertedObjectsForRel == null || insertedObjectsForRel.isEmpty()) continue;
-                ObjRelationship flattenedRel = (ObjRelationship)sourceEntity.getRelationship(relName);
-                List relList = flattenedRel.getDbRelationshipList();
-                DbRelationship firstDbRel = (DbRelationship)relList.get(0);
-                DbRelationship secondDbRel = (DbRelationship)relList.get(1);
-                DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
-                InsertBatchQuery relationInsertQuery = (InsertBatchQuery)batchesByDbEntity.get(flattenedEntity);
-                if (relationInsertQuery == null) {
-                    relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
-                    batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
-                }
-                for (Iterator k = insertedObjectsForRel.iterator(); k.hasNext();) {
-                    DataObject destination = (DataObject)k.next();
-                    if (destination.getPersistenceState() == PersistenceState.DELETED) continue;
-                    Map dstId = destination.getObjectId().getIdSnapshot();
-                    Map flattenedSnapshot = BatchUtils.buildFlattenedSnapshot(sourceId, dstId, firstDbRel, secondDbRel);
-                    relationInsertQuery.add(flattenedSnapshot);
-                }
-            }
-        }
+		for (Iterator i = flattenedInsertsList.iterator(); i.hasNext();) {
+			DataContext.FlattenedRelationshipInfo info=(FlattenedRelationshipInfo)i.next();
+			DataObject source=info.getSource();
+			if (source.getPersistenceState() == PersistenceState.DELETED) continue;
+			
+			Map sourceId = source.getObjectId().getIdSnapshot();
+			ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+			DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+			Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
+			if (batchesByDbEntity == null) {
+				batchesByDbEntity = new HashMap();
+				flattenedBatches.put(responsibleNode, batchesByDbEntity);
+			}
+
+			String relName = info.getBaseRelationship().getName();
+			ObjRelationship flattenedRel = info.getBaseRelationship();
+			List relList = flattenedRel.getDbRelationshipList();
+			DbRelationship firstDbRel = (DbRelationship)relList.get(0);
+			DbRelationship secondDbRel = (DbRelationship)relList.get(1);
+			DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
+			InsertBatchQuery relationInsertQuery = (InsertBatchQuery)batchesByDbEntity.get(flattenedEntity);
+			if (relationInsertQuery == null) {
+				relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
+				batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
+			}
+			DataObject destination = info.getDestination();
+			if (destination.getPersistenceState() == PersistenceState.DELETED) continue;
+			Map dstId = destination.getObjectId().getIdSnapshot();
+			Map flattenedSnapshot = BatchUtils.buildFlattenedSnapshot(sourceId, dstId, firstDbRel, secondDbRel);
+			relationInsertQuery.add(flattenedSnapshot);
+		}
         return flattenedBatches;
     }
 
     private Map categorizeFlattenedDeletesAndCreateBatches() {
-        Map flattenedDeletes = context.getFlattenedDeletes();
-        Map flattenedBatches = new HashMap();
-        for (Iterator i = flattenedDeletes.entrySet().iterator(); i.hasNext();) {
-            Map.Entry fdentry = (Map.Entry)i.next();
-            DataObject source = (DataObject)fdentry.getKey();
-            Map deletesForObject = (Map)fdentry.getValue();
-            if (deletesForObject == null || deletesForObject.isEmpty()) continue;
-            Map sourceId = source.getObjectId().getIdSnapshot();
-            if (sourceId == null) continue;
-            ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
-            DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
-            Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
-            if (batchesByDbEntity == null) {
-                batchesByDbEntity = new HashMap();
-                flattenedBatches.put(responsibleNode, batchesByDbEntity);
-            }
-            for (Iterator j = deletesForObject.entrySet().iterator(); j.hasNext();) {
-                Map.Entry doentry = (Map.Entry)j.next();
-                String relName = (String)doentry.getKey();
-                List deletedObjectsForRel = (List)doentry.getValue();
-                if (deletedObjectsForRel == null || deletedObjectsForRel.isEmpty()) continue;
-                ObjRelationship flattenedRel = (ObjRelationship)sourceEntity.getRelationship(relName);
-                List relList = flattenedRel.getDbRelationshipList();
-                DbRelationship firstDbRel = (DbRelationship)relList.get(0);
-                DbRelationship secondDbRel = (DbRelationship)relList.get(1);
-                DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
-                DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery)batchesByDbEntity.get(flattenedEntity);
-                if (relationDeleteQuery == null) {
-                    relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
-                    batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
-                }
-                for (Iterator k = deletedObjectsForRel.iterator(); k.hasNext();) {
-                    DataObject destination = (DataObject)k.next();
-                    Map dstId = destination.getObjectId().getIdSnapshot();
-                    if (dstId == null) continue;
-                    Map flattenedSnapshot = BatchUtils.buildFlattenedSnapshot(sourceId, dstId, firstDbRel, secondDbRel);
-                    relationDeleteQuery.add(flattenedSnapshot);
-                }
-            }
-        }
+    	List flattenedDeletes=context.getFlattenedDeletes();
+		Map flattenedBatches = new HashMap();
+		for (Iterator i = flattenedDeletes.iterator(); i.hasNext();) {
+			DataContext.FlattenedRelationshipInfo info=(FlattenedRelationshipInfo)i.next();
+			DataObject source = info.getSource();
+			Map sourceId = source.getObjectId().getIdSnapshot();
+			if (sourceId == null) continue;
+			
+			ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
+			DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+			Map batchesByDbEntity = (Map)flattenedBatches.get(responsibleNode);
+			if (batchesByDbEntity == null) {
+				batchesByDbEntity = new HashMap();
+				flattenedBatches.put(responsibleNode, batchesByDbEntity);
+			}
+			
+			String relName = info.getBaseRelationship().getName();
+			ObjRelationship flattenedRel = info.getBaseRelationship();
+			List relList = flattenedRel.getDbRelationshipList();
+			DbRelationship firstDbRel = (DbRelationship)relList.get(0);
+			DbRelationship secondDbRel = (DbRelationship)relList.get(1);
+			DbEntity flattenedEntity = (DbEntity)firstDbRel.getTargetEntity();
+			DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery)batchesByDbEntity.get(flattenedEntity);
+			if (relationDeleteQuery == null) {
+				relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
+				batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
+			}
+			
+			DataObject destination = info.getDestination();
+			Map dstId = destination.getObjectId().getIdSnapshot();
+			if (dstId == null) continue;
+			Map flattenedSnapshot = BatchUtils.buildFlattenedSnapshot(sourceId, dstId, firstDbRel, secondDbRel);
+			relationDeleteQuery.add(flattenedSnapshot);
+		}
         return flattenedBatches;
     }
 
