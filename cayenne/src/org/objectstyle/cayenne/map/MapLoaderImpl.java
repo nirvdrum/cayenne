@@ -326,11 +326,12 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		Iterator iter = db_attributes.iterator();
 		while (iter.hasNext()) {
 			DbAttribute temp = (DbAttribute) iter.next();
-			out.print("\t\t<db-attribute name=\"");
-			out.print(temp.getName());
-			out.print("\" type=\"");
-			out.print(TypesMapping.getSqlNameByType(temp.getType()));
-			out.print('\"');
+			out.print("\t\t<db-attribute name=\"" + temp.getName() + '\"');
+			
+			String type = TypesMapping.getSqlNameByType(temp.getType());
+			if(type != null) {
+			    out.print(" type=\"" + type + '\"');
+			}
 
 			// If attribute is part of primary key
 			if (temp.isPrimaryKey())

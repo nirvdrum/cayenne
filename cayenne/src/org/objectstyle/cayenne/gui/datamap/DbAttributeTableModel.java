@@ -55,15 +55,15 @@ package org.objectstyle.cayenne.gui.datamap;
  *
  */ 
 
-import java.util.*;
-import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.JOptionPane;
+import javax.swing.table.AbstractTableModel;
 
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.event.AttributeEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.NameGenerator;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
 
 
 /** Model for the Db Entity attributes.
@@ -267,16 +267,16 @@ class DbAttributeTableModel extends AbstractTableModel
     }// End setValueAt()
 
 	
-	/** Add new attribute to the model and the table. 
-	 *  Broadcast AttributeEvent.*/
+	/** 
+	 * Adds new attribute to the model and the table. 
+	 * Broadcasts AttributeEvent.
+	 */
 	public void addRow() {
 		String name = NameGenerator.getDbAttributeName();
-		DbAttribute temp = new DbAttribute(name, java.sql.Types.OTHER, entity);
-		AttributeEvent e;
-		e = new AttributeEvent(src, temp, entity, AttributeEvent.ADD);
+		DbAttribute temp = new DbAttribute(name, TypesMapping.NOT_DEFINED, entity);		
 		attributeList.add(temp);
 		entity.addAttribute(temp);
-		mediator.fireDbAttributeEvent(e);
+		mediator.fireDbAttributeEvent(new AttributeEvent(src, temp, entity, AttributeEvent.ADD));
 		fireTableDataChanged();
 	}
 

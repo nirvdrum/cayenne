@@ -1,4 +1,7 @@
 package org.objectstyle.cayenne.map;
+
+import org.objectstyle.cayenne.dba.TypesMapping;
+
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -88,8 +91,10 @@ TIMESTAMP           java.sql.Timestamp
 </pre>
  */
 public class DbAttribute extends Attribute {
-    // The type of the column.
-    private int type;
+    /** 
+     * The type of the column. 
+     */
+    private int type = TypesMapping.NOT_DEFINED;
 
     // Does this attribute allow null
     private boolean mandatory;

@@ -61,6 +61,7 @@ import java.util.*;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.*;
 
@@ -170,11 +171,7 @@ public class Validator {
 		HashMap name_map = new HashMap();
 
 		for (int i = 0; i < nodes.length; i++) {
-			String name = nodes[i].getName();
-			if (name == null)
-				name = "";
-			else
-				name = name.trim();
+			String name = (nodes[i].getName() != null) ? nodes[i].getName().trim() : "";
 			if (name.length() == 0) {
 				msg =
 					new DataNodeErrorMsg(
@@ -564,9 +561,24 @@ public class Validator {
 				errMsg.add(msg);
 				status = ErrorMsg.ERROR;
 			}
+			// all attributes must have type
+			else if (
+				attribute.getType() == TypesMapping.NOT_DEFINED) {
+				msg =
+					new AttributeErrorMsg(
+						"Attribute \""
+							+ attribute.getName()
+							+ "\" doesn't have a type selected",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						attribute);
+				errMsg.add(msg);
+				status = ErrorMsg.WARNING;
+			}
 			// VARCHAR and CHAR attributes must have max length
 			else if (
-				attribute.getMaxLength() == -1
+				attribute.getMaxLength() < 0
 					&& (attribute.getType() == java.sql.Types.VARCHAR
 						|| attribute.getType() == java.sql.Types.CHAR)) {
 				msg =
@@ -574,12 +586,12 @@ public class Validator {
 						"Attribute \""
 							+ attribute.getName()
 							+ "\" doesn't have max length",
-						ErrorMsg.ERROR,
+						ErrorMsg.WARNING,
 						domain,
 						map,
 						attribute);
 				errMsg.add(msg);
-				status = ErrorMsg.ERROR;
+				status = ErrorMsg.WARNING;
 			}
 		} // End while()
 

@@ -55,10 +55,15 @@
  */
 package org.objectstyle.cayenne.gui.validator;
 
+import java.sql.Types;
+
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.map.*;
 
 /**
  * Test cases for the Validator class.
@@ -74,14 +79,100 @@ public class ValidatorTst extends TestCase {
 	public ValidatorTst(String name) {
 		super(name);
 	}
-	
+
 	public void setUp() throws Exception {
 		validator = new Validator(Mediator.getMediator());
 	}
-	
+
 	public void testValidateDomains() throws Exception {
+		// should succeed
 		DataDomain d1 = new DataDomain("abc");
-		assertEquals(ErrorMsg.NO_ERROR, validator.validateDomains(new DataDomain[] {d1}));
+		assertEquals(
+			ErrorMsg.NO_ERROR,
+			validator.validateDomains(new DataDomain[] { d1 }));
+
+		// should complain about no name
+		DataDomain d2 = new DataDomain();
+		assertEquals(
+			ErrorMsg.ERROR,
+			validator.validateDomains(new DataDomain[] { d2 }));
+
+		// should complain about duplicate name
+		DataDomain d3 = new DataDomain(d1.getName());
+		assertEquals(
+			ErrorMsg.ERROR,
+			validator.validateDomains(new DataDomain[] { d1, d3 }));
+	}
+
+	public void testValidateDataNodes() throws Exception {
+		// should succeed
+		DataDomain d1 = new DataDomain("abc");
+		DataNode n1 = new DataNode("xyz");
+		n1.setAdapter(new JdbcAdapter());
+		n1.setDataSourceFactory("123");
+		assertEquals(
+			ErrorMsg.NO_ERROR,
+			validator.validateDataNodes(d1, new DataNode[] { n1 }));
+
+		// should complain about no name
+		DataNode n2 = new DataNode();
+		n2.setAdapter(new JdbcAdapter());
+		n2.setDataSourceFactory("123");
+		assertEquals(
+			ErrorMsg.ERROR,
+			validator.validateDataNodes(d1, new DataNode[] { n2 }));
+
+		// should complain about duplicate name
+		DataNode n3 = new DataNode(n1.getName());
+		n3.setAdapter(new JdbcAdapter());
+		n3.setDataSourceFactory("123");
+		assertEquals(
+			ErrorMsg.ERROR,
+			validator.validateDataNodes(d1, new DataNode[] { n1, n3 }));
+	}
+
+	public void testValidateDbAttributes() throws Exception {
+		// should succeed
+		DataDomain d1 = new DataDomain("abc");
+		DataMap m1 = new DataMap();
+		
+		DbAttribute a1 = new DbAttribute();
+		a1.setName("a1");
+		a1.setType(Types.CHAR);
+		a1.setMaxLength(2);
+		DbEntity e1 = new DbEntity("e1");
+		e1.addAttribute(a1);
+		assertEquals(
+			ErrorMsg.NO_ERROR,
+			validator.validateDbAttributes(d1, m1, e1));
+
+		// should complain about no name
+		DbAttribute a2 = new DbAttribute();
+		a2.setType(Types.CHAR);
+		a2.setMaxLength(2);
+		DbEntity e2 = new DbEntity("e2");
+		e2.addAttribute(a2);
+		assertEquals(
+			ErrorMsg.ERROR,
+			validator.validateDbAttributes(d1, m1, e2));
+
+		// should complain about no max length
+		DbAttribute a3 = new DbAttribute();
+		a3.setName("a3");
+		a3.setType(Types.CHAR);
+		DbEntity e3 = new DbEntity("e3");
+		e3.addAttribute(a3);
+		assertEquals(
+			ErrorMsg.WARNING,
+			validator.validateDbAttributes(d1, m1, e3));
+			
+		// should complain about no type
+		DbAttribute a4 = new DbAttribute();
+		a4.setName("a4");
+		DbEntity e4 = new DbEntity("e4");
+		e4.addAttribute(a4);
+		assertEquals(
+			ErrorMsg.WARNING,
+			validator.validateDbAttributes(d1, m1, e4));
 	}
 }
-
