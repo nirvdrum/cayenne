@@ -66,7 +66,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.ExtendedProperties;
-import org.apache.commons.collections.LRUMap;
+import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
@@ -246,7 +246,7 @@ public class DataRowStore implements Serializable {
      * Returns maximum allowed cache size.
      */
     public int maximumSize() {
-        return snapshots.getMaximumSize();
+        return snapshots.maxSize();
     }
 
     /**

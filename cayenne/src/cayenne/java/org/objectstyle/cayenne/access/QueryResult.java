@@ -61,7 +61,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.collections.SequencedHashMap;
+import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -80,7 +80,7 @@ public class QueryResult
     // something that is needed to return executed queries in 
     // the right order. (Java 1.4 adds LinkedHashMap that has
     // the same functionality, but we have to stay 1.3 comatible)
-    protected SequencedHashMap queries = new SequencedHashMap();
+    protected LinkedMap queries = new LinkedMap();
 
     /** Clears any previously collected information. */
     public void clear() {
@@ -91,7 +91,7 @@ public class QueryResult
      * Returns an iterator over all executed queries in the order they were executed.
      */
     public Iterator getQueries() {
-        return queries.iterator();
+        return queries.asList().iterator();
     }
 
     /**

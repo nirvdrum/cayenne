@@ -52,13 +52,13 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 
 package org.objectstyle.cayenne.event;
 
 import java.util.Map;
 
-import org.apache.commons.collections.ReferenceMap;
+import org.apache.commons.collections.map.ReferenceMap;
 
 /**
  * This class encapsulates the String that is used to identify the <em>subject</em> 
@@ -78,78 +78,80 @@ import org.apache.commons.collections.ReferenceMap;
 
 public class EventSubject extends Object {
 
-	// a Map that will allow the values to be GC'ed
-	private static Map _registeredSubjects = new ReferenceMap(ReferenceMap.HARD, ReferenceMap.WEAK);
+    // a Map that will allow the values to be GC'ed
+    private static Map _registeredSubjects =
+        new ReferenceMap(ReferenceMap.HARD, ReferenceMap.WEAK);
 
-	// Subject identifier in the form "com.foo.bar/SubjectName"
-	private String _fullyQualifiedSubjectName;
+    // Subject identifier in the form "com.foo.bar/SubjectName"
+    private String _fullyQualifiedSubjectName;
 
-	/**
-	 * Returns an event subject identified by the given owner and subject name.
-	 * 
-	 * @param subjectOwner the Class used for uniquely identifying this subject
-	 * @param subjectName a String used as name, e.g. "MyEventTopic"
-	 * @throws IllegalArgumentException if subjectOwner/subjectName are
-	 * <code>null</code> or subjectName is empty.
-	 */
-	public static EventSubject getSubject(Class subjectOwner, String subjectName) {
-		if (subjectOwner == null) {
-			throw new IllegalArgumentException("Owner class must not be null.");
-		}
+    /**
+     * Returns an event subject identified by the given owner and subject name.
+     * 
+     * @param subjectOwner the Class used for uniquely identifying this subject
+     * @param subjectName a String used as name, e.g. "MyEventTopic"
+     * @throws IllegalArgumentException if subjectOwner/subjectName are
+     * <code>null</code> or subjectName is empty.
+     */
+    public static EventSubject getSubject(Class subjectOwner, String subjectName) {
+        if (subjectOwner == null) {
+            throw new IllegalArgumentException("Owner class must not be null.");
+        }
 
-		if ((subjectName == null) || (subjectName.length() == 0)) {
-			throw new IllegalArgumentException("Subject name must not be null or empty.");
-		}
+        if ((subjectName == null) || (subjectName.length() == 0)) {
+            throw new IllegalArgumentException("Subject name must not be null or empty.");
+        }
 
-		String fullSubjectName = subjectOwner.getName() + "/" + subjectName;
-		EventSubject newSubject = (EventSubject)_registeredSubjects.get(fullSubjectName);
-		if (newSubject == null) {
-			newSubject = new EventSubject(fullSubjectName);
-			_registeredSubjects.put(newSubject.getSubjectName(), newSubject);
-		}
+        String fullSubjectName = subjectOwner.getName() + "/" + subjectName;
+        EventSubject newSubject = (EventSubject) _registeredSubjects.get(fullSubjectName);
+        if (newSubject == null) {
+            newSubject = new EventSubject(fullSubjectName);
+            _registeredSubjects.put(newSubject.getSubjectName(), newSubject);
+        }
 
-		return newSubject;
-	}
+        return newSubject;
+    }
 
-	/**
-	 * Private constructor to force use of #getSubject(Class, String)
-	 */
-	private EventSubject() {
-	}
+    /**
+     * Private constructor to force use of #getSubject(Class, String)
+     */
+    private EventSubject() {
+    }
 
-	/**
-	 * Protected constructor for new subjects.
-	 * 
-	 * @param subject the name of the new subject to be created
-	 */
-	protected EventSubject(String fullSubjectName) {
-		super();
-		_fullyQualifiedSubjectName = fullSubjectName;
-	}
+    /**
+     * Protected constructor for new subjects.
+     * 
+     * @param subject the name of the new subject to be created
+     */
+    protected EventSubject(String fullSubjectName) {
+        super();
+        _fullyQualifiedSubjectName = fullSubjectName;
+    }
 
-	public boolean equals(Object obj) {
-		if (obj instanceof EventSubject) {
-			return _fullyQualifiedSubjectName.equals(((EventSubject)obj).getSubjectName());
-		}
-		
-		return false;
-	}
+    public boolean equals(Object obj) {
+        if (obj instanceof EventSubject) {
+            return _fullyQualifiedSubjectName.equals(
+                ((EventSubject) obj).getSubjectName());
+        }
 
-	public int hashCode() {
-		return (super.hashCode() ^ _fullyQualifiedSubjectName.hashCode());
-	}
+        return false;
+    }
 
-	public String getSubjectName() {
-		return _fullyQualifiedSubjectName;
-	}
+    public int hashCode() {
+        return (super.hashCode() ^ _fullyQualifiedSubjectName.hashCode());
+    }
 
-	/**
-	 * @return a String in the form
-	 * <code>&lt;ClassName 0x123456&gt; SomeName</code>
-	 * 
-	 * @see Object#toString()
-	 */
-	public String toString() {
+    public String getSubjectName() {
+        return _fullyQualifiedSubjectName;
+    }
+
+    /**
+     * @return a String in the form
+     * <code>&lt;ClassName 0x123456&gt; SomeName</code>
+     * 
+     * @see Object#toString()
+     */
+    public String toString() {
         StringBuffer buf = new StringBuffer(64);
 
         buf.append("<");
@@ -158,8 +160,8 @@ public class EventSubject extends Object {
         buf.append(Integer.toHexString(System.identityHashCode(this)));
         buf.append("> ");
         buf.append(_fullyQualifiedSubjectName);
-        
+
         return buf.toString();
-	}
+    }
 
 }

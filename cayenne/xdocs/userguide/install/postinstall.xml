@@ -22,8 +22,8 @@
             They include:
             
             <ul>
-            	<li><a href="http:/objectstyle.org/ashwood/" target="_new">ObjectStyle Ashwood Graph Library</a>
-            	<i>(see a note about Ashwood below)</i></li>
+            	<li><a href="http:/objectstyle.org/ashwood/" target="_new">ObjectStyle Ashwood Graph Library</a>,
+            	version 1.1</li>
             	<li><a href="http://jakarta.apache.org/velocity/" target="_new">Jakarta Velocity Template 
             	Engine</a>, version 1.3</li>
 				<li><a href="http://jakarta.apache.org/oro/" target="_new">Jakarta ORO Regular Expressions 
@@ -33,7 +33,7 @@
 				<li><a href="http://jakarta.apache.org/commons/lang/" target="_new">Jakarta Commons Lang 
 				package</a>, version 2.0</li>
 				<li><a href="http://jakarta.apache.org/commons/collections/" target="_new">Jakarta Commons Collections 
-				package</a>, version 2.1</li>
+				package</a>, version 3.0</li>
 				<li><a href="http://jakarta.apache.org/commons/logging/" target="_new">Jakarta Commons Logging 
 				package</a>, version 1.0.3</li>
 				<li><a href="http://jakarta.apache.org/commons/beanutils/" target="_new">Jakarta Commons Beanutils 
@@ -45,22 +45,14 @@
             In this case all the dependencies must be installed manually.
             </p>
             
-            <p></p>
-            <panel name="Ashwood Library Note:">
-			The version of Ashwood library currently used with Cayenne is not officially released
-			as of this writing. In the meantime the correct version of ashwood.jar file can be downloaded
-			from Cayenne CVS, e.g. by using this URL: 
-			http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/cayenne/cayenne/otherlib/ashwood-28012003.jar
-			</panel>
-            
             <p><code>cayenne.jar</code> or <code>cayenne-nodeps.jar</code> should be accessible by 
 			the applications that use Cayenne. There are a few "standard" ways of doing it in Java,
 			like setting CLASSPATH variable, adding file to the WEB-INF/lib/ directory of the web
 			application, etc.</p>
             
             <panel name="Warning:">It is NOT recommended to put Cayenne JAR files under 
-            JRE extensions directory ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext),
-            though it will probably work for most cases.</panel>
+            JRE extensions directory ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext), or include 
+            cayenne.jar in a JVM bootstrap ClassLoader in any other way.</panel>
             
             <p>The reason for such warning is that classes loaded from extensions 
             directory have their own ClassLoader and can't directly 

@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
@@ -64,10 +63,8 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.TestBean;
 
@@ -100,18 +97,27 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         assertEquals(new Integer(-3), node.evaluate(b2));
     }
 
+ /*   public void testEvaluateOBJ_PATH_JavaBeanToMany() throws Exception {
+        ASTObjPath node = new ASTObjPath("collection.string");
+
+        TestBean b1 = TestBean.testFixtureWithCollection("r1", "rc1");
+        Object o1 = node.evaluate(b1);
+        assertTrue(o1 instanceof Collection);
+        Collection c1 = (Collection) o1;
+        assertEquals(10, c1.size());
+
+        Object first = c1.iterator().next();
+        assertTrue(first instanceof String);
+        assertEquals("rc10", first);
+    } */
+
     public void testEvaluateOBJ_PATH_ObjEntity() throws Exception {
         ASTObjPath node = new ASTObjPath("paintingArray.paintingTitle");
 
         ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
 
         Object target = node.evaluate(ae);
-        assertTrue(target instanceof Iterator);
-
-        Iterator it = (Iterator) target;
-        assertTrue(it.next() instanceof ObjRelationship);
-        assertTrue(it.next() instanceof ObjAttribute);
-        assertFalse(it.hasNext());
+        assertTrue(target instanceof ObjAttribute);
     }
 
     public void testEvaluateDB_PATH_DbEntity() throws Exception {
@@ -121,20 +127,10 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         DbEntity ade = ae.getDbEntity();
 
         Object objTarget = e.evaluate(ae);
-        assertTrue(objTarget instanceof Iterator);
-
-        Iterator it = (Iterator) objTarget;
-        assertTrue(it.next() instanceof DbRelationship);
-        assertTrue(it.next() instanceof DbAttribute);
-        assertFalse(it.hasNext());
+        assertTrue(objTarget instanceof DbAttribute);
 
         Object dbTarget = e.evaluate(ade);
-        assertTrue(dbTarget instanceof Iterator);
-
-        it = (Iterator) dbTarget;
-        assertTrue(it.next() instanceof DbRelationship);
-        assertTrue(it.next() instanceof DbAttribute);
-        assertFalse(it.hasNext());
+        assertTrue(dbTarget instanceof DbAttribute);
     }
 
     public void testEvaluateEQUAL_TO() throws Exception {

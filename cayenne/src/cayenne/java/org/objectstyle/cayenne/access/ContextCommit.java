@@ -65,7 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.apache.commons.collections.SequencedHashMap;
+import org.apache.commons.collections.map.LinkedMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
@@ -370,7 +370,7 @@ class ContextCommit {
         for (Iterator i = dbEntities.iterator(); i.hasNext();) {
             DbEntity dbEntity = (DbEntity) i.next();
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
-            Map batches = new SequencedHashMap();
+            Map batches = new LinkedMap();
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();

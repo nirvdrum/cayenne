@@ -66,7 +66,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.commons.collections.SequencedHashMap;
+import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.ashwood.graph.ArcIterator;
 import org.objectstyle.ashwood.graph.Digraph;
 import org.objectstyle.ashwood.graph.GraphUtils;
@@ -97,7 +97,7 @@ public class DataModificationRobot {
   private Roulette insertionRandomizer;
   private Roulette deletionRandomizer;
   private List objEntities;
-  private Map objectsByEntity = new SequencedHashMap();
+  private Map objectsByEntity = new LinkedMap();
   private Random randomizer;
 
   public DataModificationRobot(DataContext context, Random randomizer, int newObjectPerEntityCount, int deleteObjectPerEntityCount) {
