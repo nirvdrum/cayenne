@@ -55,6 +55,7 @@ package org.objectstyle.cayenne;
  *
  */
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.art.*;
@@ -94,7 +95,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
 
 
     /** Tests how primary key is propagated from one new object to another. */
-  /*  public void testNewAdd2() throws Exception {
+    public void testNewAdd2() throws Exception {
         Artist a1 = this.newArtist();
         Gallery g1 = this.newGallery();
         Exhibit e1 = this.newExhibit(g1);
@@ -108,7 +109,7 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         
         // *** TESTING THIS *** 
         ctxt.commitChanges();
-    } */
+    } 
     
 
     public void testReplace() throws Exception {

@@ -400,6 +400,7 @@ public class DataContext implements QueryEngine {
      *  org.objectstyle.cayenne.access.QueryLogger, query execution will be logged. */
     public void commitChanges(Level logLevel) throws CayenneRuntimeException {
         ArrayList queryList = new ArrayList();
+        ArrayList rawUpdObjects = new ArrayList();
         ArrayList updObjects = new ArrayList();
         ArrayList delObjects = new ArrayList();
         ArrayList insObjects = new ArrayList();
@@ -412,9 +413,6 @@ public class DataContext implements QueryEngine {
 
             // 1. deal with inserts
             if (objectState == PersistenceState.NEW) {
-                // create permanent object id
-                // it will be attached to temp. id till the transaction is committed
-                ObjectId permId = createPermId(nextObject);
                 insObjects.add(nextObject);
             }
             // 2. deal with deletes
@@ -424,25 +422,16 @@ public class DataContext implements QueryEngine {
             }
             // 3. deal with updates
             else if (objectState == PersistenceState.MODIFIED) {
-                UpdateQuery updateQuery = queryHelper.updateQuery(nextObject);
-                if (updateQuery != null) {
-                    queryList.add(updateQuery);
-                    updObjects.add(nextObject);
-
-                    ObjectId updId = updatedId(nextObject.getObjectId(), updateQuery);
-                    if (updId != null)
-                        updatedIds.put(nextObject.getObjectId(), updId);
-                }
-                else
-                    // object was not really modified,
-                    // put this object back in unmodified state right away
-                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
+                rawUpdObjects.add(nextObject);
             }
         }
 
-        // now when all inserted objects got their id's, 
-        // lets build insert queries
+        // prepare inserts (create id's, build queries) 
         if (insObjects.size() > 0) {
+            // create permanent id's
+            createPermIds(insObjects);
+
+            // create insert queries
             Iterator insIt = insObjects.iterator();
             while (insIt.hasNext()) {
                 DataObject nextObject = (DataObject) insIt.next();
@@ -453,6 +442,30 @@ public class DataContext implements QueryEngine {
             }
         }
 
+        // prepare updates (filter "fake" updates, update id's, build queries)
+        if (rawUpdObjects.size() > 0) {
+            Iterator updIt = rawUpdObjects.iterator();
+            while (updIt.hasNext()) {
+                DataObject nextObject = (DataObject) updIt.next();
+                UpdateQuery updateQuery = queryHelper.updateQuery(nextObject);
+                if (updateQuery != null) {
+                    queryList.add(updateQuery);
+                    updObjects.add(nextObject);
+
+                    ObjectId updId = updatedId(nextObject.getObjectId(), updateQuery);
+                    if (updId != null) {
+                        updatedIds.put(nextObject.getObjectId(), updId);
+                    }
+                }
+                else {
+                    // object was not really modified,
+                    // put this object back in unmodified state right away
+                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
+                }
+            }
+        }
+        
+
         if (queryList.size() > 0) {
             CommitProcessor result =
                 new CommitProcessor(logLevel, insObjects, updObjects, delObjects);
@@ -462,6 +475,7 @@ public class DataContext implements QueryEngine {
             else if (result.isTransactionRolledback())
                 throw new CayenneRuntimeException("Transaction was rolledback.");
 
+            // reregister objects whose id's where updated
             Iterator idIt = updatedIds.keySet().iterator();
             while (idIt.hasNext()) {
                 ObjectId oldId = (ObjectId) idIt.next();
@@ -505,9 +519,11 @@ public class DataContext implements QueryEngine {
         return domain.lookupEntity(objEntityName);
     }
 
-    // returns ObjectId if id needs to be updated 
-    // after UpdateQuery is committed,
-    // or null, if current id is good enough
+    /**
+     * Returns ObjectId if id needs to be updated 
+     * after UpdateQuery is committed,
+     * or null, if current id is good enough. 
+     */
     private ObjectId updatedId(ObjectId id, UpdateQuery upd) {
         Map idMap = id.getIdSnapshot();
 
@@ -531,6 +547,10 @@ public class DataContext implements QueryEngine {
             : null;
     }
 
+    /** 
+     *  Populates the <code>map</code> with ObjectId values from master objects 
+     *  related to this object. 
+     */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
         ObjEntity objEntity =
             getDomain().lookupEntity(dataObject.getObjectId().getObjEntityName());
@@ -576,6 +596,15 @@ public class DataContext implements QueryEngine {
         }
     }
 
+    /** Creates permanent ObjectId's for the list of new objects. */
+    private void createPermIds(List objects) {
+        OperationSorter.sortObjectsInInsertOrder(objects);
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            createPermId((DataObject) it.next());
+        }
+    }
+
     /** Creates permanent ObjectId for <code>anObject</code>.
      *  Object must already have a temporary ObjectId. 
      * 
@@ -585,8 +614,8 @@ public class DataContext implements QueryEngine {
      *  <ul>
      *     <li>Object attribute values are used.</li>
      *     <li>Values from ObjectId's propagated from master relationshop 
-     *         are used.
-     *     </li>
+     *     are used. <i>If master object does not have a permanent id 
+     *     created yet, an exception is thrown.</i></li>
      *     <li>Values generated from the database provided by DbAdapter. 
      *     <i>Autogeneration only works for a single column. If more than
      *     one column requires an autogenerated primary key, an exception is 

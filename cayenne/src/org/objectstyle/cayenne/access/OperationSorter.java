@@ -58,13 +58,15 @@ package org.objectstyle.cayenne.access;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
 
 /**
  *  Class provides sorting of database operations to
  *  satisfy database referential integrity consraints.
- *  It is created based on DataMap.
+ *  It works using DataMap information about entities 
+ *  and relationships.
  * 
  *  @author Andrei Adamchik
  *
@@ -95,11 +97,30 @@ public class OperationSorter {
         }
         queryComparator = new QueryComparator(queryEngine, entNames);
     }
+    
 
     public OperationSorter(QueryEngine queryEngine, List insOrderOfEntNames) {
         queryComparator = new QueryComparator(queryEngine, insOrderOfEntNames);
     }
 
+
+   /** 
+     *  Sorts an unsorted array of DbEntities in the right 
+     *  insert order. 
+     */
+    public static void sortEntitiesInInsertOrder(List entities) {
+        Collections.sort(entities, new EntityComparator());
+    }
+    
+    
+    /** 
+     *  Sorts an unsorted array of DataObjects in the right 
+     *  insert order. 
+     */
+    public static void sortObjectsInInsertOrder(List objects) {
+        Collections.sort(objects, new ObjectComparator());
+    }
+    
     /** Sorts queries to make sure that database constraints will not be
      *  violated when a batch is executed.
      *
@@ -118,14 +139,7 @@ public class OperationSorter {
         Arrays.sort(qs, queryComparator);
         return Arrays.asList(qs);
     }
-
-    /** 
-     *  Creates and returns an array of DbEntities
-     *  in the right insert sorting order from unsorted array. 
-     */
-    public void sortEntitiesInInsertOrder(List entities) {
-        Collections.sort(entities, new EntityComparator());
-    }
+    
 
     /** Used as a comparator to derive entity ordering */
     static final class EntityComparator implements Comparator {
@@ -313,6 +327,26 @@ public class OperationSorter {
                     (opType2 == Query.INSERT_QUERY) ? 1 : (opType1 == Query.UPDATE_QUERY) ? 2 : 3;
                 return op1Val - op2Val;
             }
+        }
+    }
+    
+    
+    /** 
+     * Used as a comparator to derive DataObject insert ordering. 
+     * Delegates its functions to internal EntityComparator.
+     */
+    static final class ObjectComparator implements Comparator {
+        private EntityComparator ecomp = new EntityComparator();
+
+        public final int compare(Object o1, Object o2) {
+            DbEntity e1 = lookupEntity((DataObject)o1);
+            DbEntity e2 = lookupEntity((DataObject)o2);
+            return ecomp.compare(e1, e2);
+        }
+        
+        private DbEntity lookupEntity(DataObject o) {
+            String name = o.getObjectId().getObjEntityName();
+            return o.getDataContext().lookupEntity(name).getDbEntity();
         }
     }
 }
