@@ -99,9 +99,9 @@ public class ResourceLocator {
 	protected ClassLoader classLoader;
 
 	/**
-	 * Returns a resource as InputStream if it is found in CLASSPATH. 
-	 * Returns null otherwise. Lookup is normally performed in all JAR and
-	 * ZIP files and directories available to CLassLoader.
+	 * Returns a resource as InputStream if it is found in CLASSPATH or
+	 * <code>null</code> otherwise. Lookup is normally performed
+	 * in all JAR and ZIP files and directories available to the ClassLoader.
 	 */
 	public static InputStream findResourceInClasspath(String name) {
 		try {
@@ -120,10 +120,10 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Returns a resource as InputStream if it is found in the filesystem.
- 	 * Returns null otherwise. Lookup is first performed relative to the user 
- 	 * home directory (as defined by "user.home" system property), and then
- 	 * relative to the current directory.
+	 * Returns a resource as InputStream if it is found in the filesystem or
+ 	 * <code>null</code> otherwise. Lookup is first performed relative
+ 	 * to the user's home directory (as defined by "user.home" system property),
+ 	 * and then relative to the current directory.
  	 */
 	public static InputStream findResourceInFileSystem(String name) {
 		try {
@@ -148,11 +148,11 @@ public class ResourceLocator {
 	 *  @return file object matching the name, or null if file can not be found
 	 *  or if it is not readable.
 	 * 
-	 *  @see #findFileInHomeDir(String)
-	 *  @see #findFileInCurDir(String)
+	 *  @see #findFileInHomeDirectory(String)
+	 *  @see #findFileInCurrentDirectory(String)
 	 */
 	public static File findFileInFileSystem(String name) {
-		File file = findFileInHomeDir(name);
+		File file = findFileInHomeDirectory(name);
 
 		if (file == null) {
 			file = findFileInCurrentDirectory(name);
@@ -171,10 +171,10 @@ public class ResourceLocator {
 	/**
 	 * Looks up a file in the user home directory.
 	 *  
-	 *  @return file object matching the name, or null if file can not be found
-	 *  or if it is not readable.
+	 * @return file object matching the name, or <code>null</code>
+	 * if <code>file</code> cannot be found or is not readable.
 	 */
-	public static File findFileInHomeDir(String name) {
+	public static File findFileInHomeDirectory(String name) {
 		// look in home directory
 		String homeDirPath = System.getProperty("user.home") + File.separator + name;
 		File file = new File(homeDirPath);
@@ -195,8 +195,8 @@ public class ResourceLocator {
 	/**
 	 * Looks up a file in the current directory.
 	 *  
-	 *  @return file object matching the name, or null if file can not be found
-	 *  or if it is not readable.
+	 * @return file object matching the name, or <code>null</code>
+	 * if <code>file</code> can not be found is not readable.
 	 */
 	public static File findFileInCurrentDirectory(String name) {
 		// look in current directory
@@ -214,7 +214,7 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Looks up for resource using this class ClassLoader.
+	 * Looks up the URL for the named resource using this class' ClassLoader.
 	 */
 	public static URL findURLInClasspath(String name) {
 		URL url = findURLInClassLoader(name, ResourceLocator.class.getClassLoader());
@@ -222,7 +222,7 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Looks up for resource using the specified ClassLoader.
+	 * Looks up the URL for the named resource using the specified ClassLoader.
 	 */
 	public static URL findURLInClassLoader(String name, ClassLoader loader) {
 		URL url = loader.getResource(name);
@@ -263,8 +263,9 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Returns resource URL using lookup strategy configured for this object or
-	 * null if no readable resource can be found for name.
+	 * Returns an InputStream on the found resource using the lookup strategy
+	 * configured for this ResourceLocator or <code>null</code> if no
+	 * readable resource can be found for the given name.
 	 */
 	public InputStream findResourceStream(String name) {
 		URL url = findResource(name);		
@@ -281,9 +282,9 @@ public class ResourceLocator {
 	}
 
 	/** 
-	 * Returns resource URL using lookup strategy configured 
-	 * for this object or null if no readable resource 
-	 * can be found for name. 
+	 * Returns a resource URL using the lookup strategy configured for this
+	 * Resourcelocator or <code>null</code> if no readable resource can be
+	 * found for the given name. 
 	 */
 	public URL findResource(String name) {
 		if (!willSkipAbsolutePath()) {
@@ -299,7 +300,7 @@ public class ResourceLocator {
 		}
 
 		if (!willSkipHomeDirectory()) {
-			File f = findFileInHomeDir(name);
+			File f = findFileInHomeDirectory(name);
 			if (f != null) {
 
 				try {
@@ -363,10 +364,10 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Returns resource URL using lookup strategy configured for this object or
-	 * null if no readable resource can be found for name. Resource returned is
-	 * assumed to be a directory, so URL returned will be in a directory format 
-	 * (with "/" at the end.
+	 * Returns a directory resource URL using the lookup strategy configured for
+	 * this ResourceLocator or <code>null</code> if no readable resource can be
+	 * found for the given name. The returned resource is assumed to be a directory,
+	 * so the returned URL will be in a directory format (with "/" at the end).
 	 */
 	public URL findDirectoryResource(String name) {
 		URL url = findResource(name);
@@ -394,7 +395,7 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Sets "skipHomeDir" property.
+	 * Sets "skipHomeDirectory" property.
 	 */
 	public void setSkipHomeDirectory(boolean skipHomeDir) {
 		this.skipHomeDirectory = skipHomeDir;
@@ -408,7 +409,7 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Sets "skipCurDir" property.
+	 * Sets "skipCurrentDirectory" property.
 	 */
 	public void setSkipCurrentDirectory(boolean skipCurDir) {
 		this.skipCurrentDirectory = skipCurDir;
@@ -436,8 +437,8 @@ public class ResourceLocator {
 	}
 
 	/** 
-	 * Sets ClassLoader used to locate resources. If null parameter
-	 * is passed, ClassLoader of ResourceLocator class will be used.
+	 * Sets ClassLoader used to locate resources. If <code>null</code> is
+	 * passed, the ClassLoader of the ResourceLocator class will be used.
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		if (classLoader != null) {

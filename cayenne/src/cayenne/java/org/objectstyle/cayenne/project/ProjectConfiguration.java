@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.conf.FileConfiguration;
 public class ProjectConfiguration extends FileConfiguration {
 
 	/**
-	 * @see FileConfiguration(File)
+	 * @see FileConfiguration#FileConfiguration(File)
 	 */
     public ProjectConfiguration(File projectFile) {
     	super(projectFile);

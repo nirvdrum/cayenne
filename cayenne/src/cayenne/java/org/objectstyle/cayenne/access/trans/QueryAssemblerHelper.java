@@ -331,7 +331,7 @@ public abstract class QueryAssemblerHelper {
     }
 
     /** 
-     *  @deprected Since 1.0Beta1 this method is no longer used.
+     *  @deprecated Since 1.0Beta1 this method is no longer used.
      */
     protected void processRelParts(ObjRelationship rel) {
         Iterator it = rel.getDbRelationships().iterator();

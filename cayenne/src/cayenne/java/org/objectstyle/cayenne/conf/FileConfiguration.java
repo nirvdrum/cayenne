@@ -76,7 +76,7 @@ public class FileConfiguration extends DefaultConfiguration {
 	protected File projectFile;
 
 	/**
-	 * Disabled default constructor to force FileConfiguration(File)
+	 * Disabled default constructor to force {@link FileConfiguration#FileConfiguration(File)}
 	 */
 	private FileConfiguration() {
 		super();
@@ -87,6 +87,7 @@ public class FileConfiguration extends DefaultConfiguration {
 	 * for the main project file, ignoring any other lookup strategies.
 	 * @throws ConfigurationException when projectFile is <code>null</code>,
 	 * a directory or not readable.
+	 * @see DefaultConfiguration#DefaultConfiguration()
 	 */
 	public FileConfiguration(File projectFile) {
 		this();
@@ -106,8 +107,8 @@ public class FileConfiguration extends DefaultConfiguration {
 	}
 
 	/**
-	 * Only returns <code>true</code> when #getProjectFile() does not
-	 * return <code>null</code>. If so, also creates a ResourceLocator
+	 * Only returns <code>true</code> when {@link #getProjectFile} does not
+	 * return <code>null</code>. If so, also creates a {@link ResourceLocator}
 	 * configured for files in the file system.
 	 */
 	protected boolean shouldInitialize() {
@@ -167,7 +168,7 @@ public class FileConfiguration extends DefaultConfiguration {
 
 	/**
 	 * Returns the directory of the current project file as
-	 * returned by #getProjectFile().
+	 * returned by {@link #getProjectFile}.
 	 */
 	public File getProjectDirectory() {
 		File pfile = this.getProjectFile();

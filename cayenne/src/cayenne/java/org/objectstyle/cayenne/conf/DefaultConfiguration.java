@@ -64,14 +64,11 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Subclass of Configuration that uses System CLASSPATH to locate resources.
+ * Subclass of Configuration that uses the System CLASSPATH to locate resources.
  * If Cayenne classes are loaded using a different ClassLoader from
  * the application classes, this configuration needs to be bootstrapped
- * by calling <code>Configuration.bootstrapSharedConfig(SomeClass.class)</code>.
+ * by calling {@link Configuration#bootstrapSharedConfiguration(Class)}</code>.
  * 
- * <p>Alternatively, DefaultConfiguration can be initialized with a config file directly.
- * </p>
- *
  * @author Andrei Adamchik
  */
 public class DefaultConfiguration extends Configuration {
@@ -81,15 +78,15 @@ public class DefaultConfiguration extends Configuration {
 	protected File projectFile;
 
 	/**
-	 * Default constructor. Simply calls Configuration().
-	 * @see Configuration()
+	 * Default constructor. Simply calls {@link Configuration#Configuration()}.
+	 * @see Configuration#Configuration()
 	 */
 	public DefaultConfiguration() {
 		super();
 	}
 
 	/**
-	 * Default implementation of Configuration#shouldInitialize().
+	 * Default implementation of {@link Configuration#shouldInitialize}.
 	 * Creates a ResourceLocator suitable for loading from the CLASSPATH,
 	 * unless it has already been set in a subclass.
 	 * Always returns <code>true</code>.
@@ -164,7 +161,7 @@ public class DefaultConfiguration extends Configuration {
 	}
 
 	/**
-	 * Default implementation of Configuration#didInitialize.
+	 * Default implementation of {@link Configuration#didInitialize}.
 	 * Currently does nothing except logging.
 	 */
 	protected void didInitialize() {
@@ -180,28 +177,26 @@ public class DefaultConfiguration extends Configuration {
 	}
 
 	/**
-	 * Sets the specified ResourceLocator.
-	 * Currently called from #initialize.
+	 * Sets the specified {@link ResourceLocator}.
+	 * Currently called from {@link #initialize}.
 	 */
 	protected void setResourceLocator(ResourceLocator locator) {
 		this.locator = locator;
 	}
 
 	/**
-	 * Returns domain configuration as a stream or null if it
-	 * can not be found. This method will look for "cayenne.xml"
-	 * file in locations accessible to ClassLoader (in Java CLASSPATH).
-	 * This can be a standalone file or an entry in a JAR file.
+	 * Returns the domain configuration as a stream or <code>null</code> if it
+	 * cannot be found. Uses the configured {@link ResourceLocator} to
+	 * find the file.
 	 */
 	protected InputStream getDomainConfiguration() {
 		return locator.findResourceStream(DEFAULT_DOMAIN_FILE);
 	}
 
 	/**
-	 * Returns DataMap configuration from a specified location or null if it
-	 * can not be found. This method will look for resource identified by
-	 * <code>location</code> in places accessible to ClassLoader (in Java CLASSPATH).
-	 * This can be a standalone file or an entry in a JAR file.
+	 * Returns the {@link org.objectstyle.cayenne.map.DataMap} configuration
+	 * from a specified location or <code>null</code> if it cannot be found.
+	 * Uses the configured {@link ResourceLocator} to find the file.
 	 */
 	protected InputStream getMapConfiguration(String location) {
 		return locator.findResourceStream(location);

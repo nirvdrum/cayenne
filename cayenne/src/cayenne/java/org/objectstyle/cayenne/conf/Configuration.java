@@ -75,13 +75,12 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 /**
  * This class is an entry point to Cayenne. It loads all 
  * configuration files and instantiates main Cayenne objects. Used as a 
- * singleton via the 'getSharedConfiguration' method.
+ * singleton via the {@link #getSharedConfiguration} method.
  *
  * <p>To use a custom subclass of Configuration, Java applications must
- * call "initializeSharedConfiguration" with the subclass as argument.
+ * call {@link #initializeSharedConfiguration} with the subclass as argument.
  * This will crate and initialize a Configuration singleton instance of the
- * specified class. By default org.objectstyle.cayenne.conf.DefaultConfiguration
- * is instantiated.
+ * specified class. By default {@link DefaultConfiguration} is instantiated.
  * </p>
  *
  * @author Andrei Adamchik
@@ -100,7 +99,7 @@ public abstract class Configuration {
     /** 
      * Defines a ClassLoader to use for resource lookup.
      * Configuration objects that are using ClassLoaders
-     * to locate reosurces may need to be bootstrapped
+     * to locate resources may need to be bootstrapped
      * explicitly.
      */
     private static ClassLoader resourceLoader = Configuration.class.getClassLoader();
@@ -113,7 +112,7 @@ public abstract class Configuration {
 	protected boolean ignoringLoadFailures = false;
 
 	/** 
-	 * @deprecated Since 1.0 Beta1; use #bootstrapSharedConfiguration(Class) instead.
+	 * @deprecated Since 1.0 Beta1; use {@link #bootstrapSharedConfiguration(Class)} instead.
 	 */
 	public static void bootstrapSharedConfig(Class cl) {
 		Configuration.bootstrapSharedConfiguration(cl);
@@ -183,7 +182,7 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @deprecated Since 1.0 Beta1; use #getSharedConfiguration() instead.
+	 * @deprecated Since 1.0 Beta1; use {@link #getSharedConfiguration} instead.
 	 */
 	public synchronized static Configuration getSharedConfig() {
 		return Configuration.getSharedConfiguration();
@@ -191,8 +190,8 @@ public abstract class Configuration {
 
 	/**
 	 * Use this method as an entry point to all Cayenne access objects.
-	 * <p>Note that if you want to provide custom Configuration,
-	 * make sure you call one of <code>initSharedConfig</code> methods
+	 * <p>Note that if you want to provide a custom Configuration,
+	 * make sure you call one of the {@link #initializeSharedConfiguration} methods
 	 * before your application code has a chance to call this method.
 	 */
 	public synchronized static Configuration getSharedConfiguration() {
@@ -228,7 +227,7 @@ public abstract class Configuration {
     }
 
 	/**
-	 * @deprecated Since 1.0 Beta1; use #initializeSharedConfiguration(Class) instead.
+	 * @deprecated Since 1.0 Beta1; use {@link #initializeSharedConfiguration(Class)} instead.
 	 */
 	public static void initSharedConfig(String configClass) {
 		try {
@@ -240,7 +239,7 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @deprecated Since 1.0 Beta1; use #setSharedConfiguration(Configuration) instead.
+	 * @deprecated Since 1.0 Beta1; use {@link #setSharedConfiguration(Configuration)} instead.
 	 */
 	public static void initSharedConfig(Configuration conf) {
 		Configuration.setSharedConfiguration(conf);
@@ -248,7 +247,7 @@ public abstract class Configuration {
 
 	/**
 	 * Creates and initializes shared Configuration object.
-	 * org.objectstyle.cayenne.conf.DefaultConfiguration will be 
+	 * By default {@link DefaultConfiguration} will be 
 	 * instantiated and assigned to a singleton instance of
 	 * Configuration.
 	 */
@@ -279,8 +278,8 @@ public abstract class Configuration {
 
 	/**
 	 * Default constructor for new Configuration instances.
-	 * First calls #configureLogging, then #shouldInitialize
-	 * and - if permitted - #initialize follwed by #didInitialize.
+	 * First calls {@link #configureLogging}, then {@link #shouldInitialize}
+	 * and - if permitted - {@link #initialize} follwed by {@link #didInitialize}.
 	 */
 	protected Configuration() {
 		super();
@@ -301,8 +300,8 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Indicate whether #initialize should be called.
-	 * Returning <code>false</code>> allows new instances to delay
+	 * Indicate whether {@link #initialize} should be called.
+	 * Returning <code>false</code> allows new instances to delay
 	 * the initialization process.
 	 */
 	protected abstract boolean shouldInitialize();
@@ -314,30 +313,30 @@ public abstract class Configuration {
 	protected abstract void initialize() throws Exception;
 
 	/**
-	 * Called after #initialize from the default constructor.
+	 * Called after {@link #initialize} from the default constructor.
 	 */
 	protected abstract void didInitialize();
 
 	/**
-	 * Returns the resource locator used for finding and loading resources 
+	 * Returns the resource locator used for finding and loading resources.
 	 */
 	public abstract ResourceLocator getResourceLocator();
 
 	/**
-	 * Returns domain configuration as a stream or null if it
-	 * can not be found.
+	 * Returns domain configuration as a stream or <code>null</code> if it
+	 * cannot be found.
 	 */
 	protected abstract InputStream getDomainConfiguration();
 
 	/**
 	 * Returns DataMap configuration from a specified location or
-	 * null if it can not be found.
+	 * <code>null</code> if it cannot be found.
 	 */
 	protected abstract InputStream getMapConfiguration(String location);
 
     /**
      * Configures log4J. This implementation calls
-     * <code>Configuration.configureCommonLogging</code>.
+     * {@link Configuration#configureCommonLogging}.
      */
     protected void configureLogging() {
         Configuration.configureCommonLogging();
@@ -368,7 +367,7 @@ public abstract class Configuration {
 
     /**
      * Returns registered domain matching <code>name</code>
-     * or null if no such domain is found.
+     * or <code>null</code> if no such domain is found.
      */
     public DataDomain getDomain(String name) {
         return (DataDomain) dataDomains.get(name);
@@ -376,10 +375,10 @@ public abstract class Configuration {
 
     /** 
      * Returns default domain of this configuration. If no domains are 
-     * configured, null is returned. If more then 1 domain exists in this
-     * configuration, a CayenneRuntimeException is thrown, indicating that
-     * domain name must be explicitly specified. In such cases
-     * <code>getDomain(String name)</code> method must be used instead.
+     * configured, <code>null</code> is returned. If more than one domain
+     * exists in this configuration, a CayenneRuntimeException is thrown,
+     * indicating that the domain name must be explicitly specified.
+     * In such cases {@link #getDomain(String name)} must be used instead.
      */
     public DataDomain getDomain() {
         int size = dataDomains.size();
@@ -388,7 +387,7 @@ public abstract class Configuration {
         } else if (size == 1) {
             return (DataDomain)dataDomains.values().iterator().next();
         } else {
-            throw new CayenneRuntimeException("More than 1 domain is configured; use 'getDomain(String name)' instead.");
+            throw new CayenneRuntimeException("More than one domain is configured; use 'getDomain(String name)' instead.");
         }
     }
 
@@ -405,21 +404,21 @@ public abstract class Configuration {
 
 	/**
 	 * Returns a list of registered DataDomain objects.
-	 * @deprecated Since 1.0 beta1; use #getDomains() instead.
+	 * @deprecated Since 1.0 beta1; use {@link #getDomains()} instead.
 	 */
 	public List getDomainList() {
 		return new ArrayList(this.getDomains());
 	}
 
 	/**
-	 * Returns an unmodifiable collection of registered DataDomain objects.
+	 * Returns an unmodifiable collection of registered {@link DataDomain} objects.
 	 */
 	public Collection getDomains() {
 		return dataDomainsRef;
 	}
 
     /**
-     * Returns the ignoringLoadFailures.
+     * Returns whether to ignore any failures during map loading or not.
      * @return boolean
      */
     public boolean isIgnoringLoadFailures() {
@@ -427,15 +426,15 @@ public abstract class Configuration {
     }
 
     /**
-     * Sets the ignoringLoadFailures.
-     * @param ignoringLoadFailures The ignoringLoadFailures to set
+     * Sets whether to ignore any failures during map loading or not.
+     * @param ignoringLoadFailures <code>true</code> or <code>false</code>
      */
     public void setIgnoringLoadFailures(boolean ignoringLoadFailures) {
         this.ignoringLoadFailures = ignoringLoadFailures;
     }
 
     /**
-     * Returns the loadStatus.
+     * Returns the load status.
      * @return ConfigStatus
      */
     public ConfigStatus getLoadStatus() {
@@ -445,6 +444,7 @@ public abstract class Configuration {
 	/**
 	 * Returns a delegate used for controlling the loading of
 	 * configuration elements.
+	 * By default a {@link RuntimeLoadDelegate} is used.
 	 */
 	public ConfigLoaderDelegate getLoaderDelegate() {
 		return new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
