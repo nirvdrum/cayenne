@@ -80,11 +80,12 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik  
  * @author Craig Miskell
  */
-public class DataMap implements XMLSerializable {
+public class DataMap implements XMLSerializable, EntityNamespace {
     private static Logger logObj = Logger.getLogger(DataMap.class);
 
     protected String name;
     protected String location;
+    protected EntityNamespace namespace;
 
     // ====================================================
     // DataMaps that provide dependencies for this DataMap
@@ -133,17 +134,17 @@ public class DataMap implements XMLSerializable {
     // ====================================================
     // Queries
     // ====================================================
-    protected CayenneMap queries = new CayenneMap(this);
+    private CayenneMap queryMap = new CayenneMap(this);
 
     // read-through reference for public access
-    private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queries);
+    private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queryMap);
 
     // read-through reference for public access
     private Collection queriesValuesRef =
-        Collections.unmodifiableCollection(queries.values());
+        Collections.unmodifiableCollection(queryMap.values());
 
     /** 
-     * Creates an new unnamed DataMap. 
+     * Creates an new DataMap. 
      */
     public DataMap() {
     }
@@ -387,7 +388,12 @@ public class DataMap implements XMLSerializable {
      * @since 1.1
      */
     public Query getQuery(String queryName) {
-        return (Query) queries.get(queryName);
+        Query query = (Query) queryMap.get(queryName);
+        if (query != null) {
+            return query;
+        }
+
+        return namespace != null ? namespace.getQuery(queryName) : null;
     }
 
     /**
@@ -404,7 +410,7 @@ public class DataMap implements XMLSerializable {
             throw new NullPointerException("Query name can't be null.");
         }
 
-        queries.put(query.getName(), query);
+        queryMap.put(query.getName(), query);
     }
 
     /**
@@ -413,14 +419,14 @@ public class DataMap implements XMLSerializable {
      * @since 1.1
      */
     public void removeQuery(String queryName) {
-        queries.remove(queryName);
+        queryMap.remove(queryName);
     }
 
     /**
      * @since 1.1
      */
     public void clearQueries() {
-        queries.clear();
+        queryMap.clear();
     }
 
     /**
@@ -535,7 +541,13 @@ public class DataMap implements XMLSerializable {
      * dependencies will be searched.
      */
     public DbEntity getDbEntity(String dbEntityName) {
-        return this.getDbEntity(dbEntityName, false);
+        DbEntity entity = (DbEntity) dbEntityMap.get(dbEntityName);
+
+        if (entity != null) {
+            return entity;
+        }
+
+        return namespace != null ? namespace.getDbEntity(dbEntityName) : null;
     }
 
     public DbEntity getDbEntity(String dbEntityName, boolean searchDependencies) {
@@ -579,10 +591,16 @@ public class DataMap implements XMLSerializable {
     }
 
     /**
-     * Returns an ObjEntity for a given name.
+     * Returns an ObjEntity for a given name. If it is not found in this
+     * DataMap, it will search a parent EntityNamespace.
      */
     public ObjEntity getObjEntity(String objEntityName) {
-        return (ObjEntity) objEntityMap.get(objEntityName);
+        ObjEntity entity = (ObjEntity) objEntityMap.get(objEntityName);
+        if (entity != null) {
+            return entity;
+        }
+
+        return namespace != null ? namespace.getObjEntity(objEntityName) : null;
     }
 
     public ObjEntity getObjEntity(String objEntityName, boolean searchDependencies) {
@@ -764,10 +782,17 @@ public class DataMap implements XMLSerializable {
     }
 
     /**
-     * Returns a named stored procedure or null if no such procedure exists in the map.
+     * Returns a Procedure for a given name or null if no such procedure exists.
+     * If Procedure is not found in this DataMap, a parent EntityNamcespace is 
+     * searched.
      */
-    public Procedure getProcedure(String name) {
-        return getProcedure(name, false);
+    public Procedure getProcedure(String procedureName) {
+        Procedure procedure = (Procedure) procedureMap.get(procedureName);
+        if (procedure != null) {
+            return procedure;
+        }
+
+        return namespace != null ? namespace.getProcedure(procedureName) : null;
     }
 
     /** 
@@ -815,5 +840,27 @@ public class DataMap implements XMLSerializable {
      */
     public SortedMap getProcedureMap() {
         return procedureMapRef;
+    }
+
+    /**
+     * Returns a parent namespace where this DataMap resides.
+     * Parent EntityNamespace is used to establish relationships
+     * with entities in other DataMaps.
+     * 
+     * @since 1.1
+     */
+    public EntityNamespace getNamespace() {
+        return namespace;
+    }
+
+    /**
+     * Sets a parent namespace where this DataMap resides.
+     * Parent EntityNamespace is used to establish relationships
+     * with entities in other DataMaps.
+     * 
+     * @since 1.1
+     */
+    public void setNamespace(EntityNamespace namespace) {
+        this.namespace = namespace;
     }
 }

@@ -66,9 +66,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
  * DataMap unit tests.
- * 
- * @author Andrei Adamchik 
- * @author Craig Miskell
  */
 public class DataMapTst extends TestCase {
     protected DataMap map;
@@ -114,9 +111,10 @@ public class DataMapTst extends TestCase {
         }
     }
 
-    //It should be possible to cleanly remove and then add the same entity again.
-    //Uncovered the need for this while testing modeller manually.
     public void testRemoveThenAddNullClassName() {
+        // It should be possible to cleanly remove and then add the same entity again.
+        // Uncovered the need for this while testing modeller manually.
+
         ObjEntity e = new ObjEntity("f");
         map.addObjEntity(e);
 
@@ -124,9 +122,10 @@ public class DataMapTst extends TestCase {
         map.addObjEntity(e);
     }
 
-    // make sure deleting an ObjEntity & other entity's relationships to it
-    // works & does not cause a ConcurrentModificationException
     public void testDeleteObjEntity() {
+        // make sure deleting an ObjEntity & other entity's relationships to it
+        // works & does not cause a ConcurrentModificationException
+
         ObjEntity e1 = new ObjEntity("1");
         ObjEntity e2 = new ObjEntity("2");
         e1.addRelationship(new ObjRelationship("r1", e1, e2));
@@ -144,9 +143,10 @@ public class DataMapTst extends TestCase {
         assertNull(map.getObjEntity("2"));
     }
 
-    //Now possible to have more than one objEntity with a null class name. 
-    //This test proves it
     public void testMultipleNullClassNames() {
+        // Now possible to have more than one objEntity with a null class name. 
+        // This test proves it
+
         ObjEntity e1 = new ObjEntity("g");
         ObjEntity e2 = new ObjEntity("h");
         map.addObjEntity(e1);
