@@ -73,28 +73,6 @@ public abstract class AbstractQuery implements Query {
     protected Level logLevel = DEFAULT_LOG_LEVEL;
 
     /**
-     * @deprecated use setRoot instead
-     */
-    public void setObjEntityName(String objEntityName) {
-        this.root = objEntityName;
-    }
-
-    /** Returns the name of root ObjEntity associated with the query.   Will return null if the query root
-     * is a DbEntity or a Class
-     * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
-     * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
-    public String getObjEntityName() {
-        //Handle the various cases... DbEntity is not able to be handled, and Class is dubious (we have no resolver here).
-        //However, code which uses this method should still be able to function ok because it'll be using entity names anyway
-        if (root instanceof String) {
-            return (String) root;
-        } else if (root instanceof ObjEntity) {
-            return ((ObjEntity) root).getName();
-        }
-        return null;
-    }
-
-    /**
      * Returns the <code>logLevel</code> property of this query.
      * Log level is a hint to QueryEngine that performs this query
      * to log execution with a certain priority.

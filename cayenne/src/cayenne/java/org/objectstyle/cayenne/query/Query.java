@@ -85,16 +85,6 @@ public interface Query {
 
 	public void setLoggingLevel(Level level);
 
-	/** Returns the name of root ObjEntity associated with the query.
-	 * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
-	 * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
-	public String getObjEntityName();
-
-    /** Sets the name of root ObjEntity associated with the query.
-     * @deprecated use setRoot instead
-     * */
-	public void setObjEntityName(String name);
-
 	/**
 	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY,
 	 * UPDATE_QUERY, DELETE_QUERY

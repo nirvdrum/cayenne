@@ -154,21 +154,6 @@ public class DataNode implements QueryEngine {
         return (DataMap[]) maps.toArray(mapsArray);
     }
 
-    /**
-     * @deprecated Use setDataMaps(List) instead.
-     */
-    public void setDataMaps(DataMap[] dataMaps) {
-        List mapsList = new ArrayList();
-
-        if (dataMaps != null) {
-            for (int i = 0; i < dataMaps.length; i++) {
-                mapsList.add(dataMaps[i]);
-            }
-        }
-
-        setDataMaps(mapsList);
-    }
-
     public void setDataMaps(List dataMaps) {
         refIntegritySupport = null;
         entityResolver.setDataMaps(dataMaps);
@@ -218,12 +203,6 @@ public class DataNode implements QueryEngine {
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null) ? this : null;
-    }
-
-    /** Lookup an entity by name across all node maps.
-     * @deprecated use getEntityResolver.lookupObjEntity()*/
-    public ObjEntity lookupEntity(String objEntityName) {
-        return this.getEntityResolver().lookupObjEntity(objEntityName);
     }
 
     /** Run multiple queries using one of the pooled connections. */

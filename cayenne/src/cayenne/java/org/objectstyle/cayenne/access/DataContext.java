@@ -225,36 +225,12 @@ public class DataContext implements QueryEngine, Serializable {
 	}
 
 	/**
-	 * Returns a collection of objects that are registered
-	 * with this DataContext, regardless of their persistence state.
-	 * Collection is returned by copy and can be modified by caller.
-	 *
-	 * @deprecated (Since 1.0 Alpha 4)
-	 * Use DataContext.getObjectStore().getObjects() instead
-	 */
-	public Collection registeredObjects() {
-		return objectStore.getObjects();
-	}
-
-	/**
 	 * Returns <code>true</code> if there are any modified,
 	 * deleted or new objects registered with this DataContext,
 	 * <code>false</code> otherwise.
 	 */
 	public boolean hasChanges() {
 		return objectStore.hasChanges();
-	}
-
-	/**
-	 * Returns a subset of registered objects that are in a
-	 * certian persistence state. Collection is returned by
-	 * copy.
-	 *
-	 * @deprecated (Since 1.0 Alpha 4)
-	 * Use DataContext.getObjectStore().objectsInState(int) instead
-	 */
-	public Collection objectsInState(int state) {
-		return objectStore.objectsInState(state);
 	}
 
 	/** Returns a list of objects that are registered
@@ -397,19 +373,6 @@ public class DataContext implements QueryEngine, Serializable {
 		}
 
 		return obj;
-	}
-
-	/**
-	 * Returns a snapshot of all object persistent field values as of last
-	 * commit or fetch operation.
-	 *
-	 * @return a map of object values with DbAttribute names as keys
-	 * corresponding to the latest value read from or committed to the database.
-	 *
-	 * @deprecated use getObjectStore().getCommittedSnapshot(ObjectId) instead.
-	 */
-	public Map getCommittedSnapshot(DataObject dataObject) {
-		return objectStore.getSnapshot(dataObject.getObjectId());
 	}
 
 	/**
@@ -1116,13 +1079,6 @@ public class DataContext implements QueryEngine, Serializable {
 		List qWrapper = new ArrayList(1);
 		qWrapper.add(query);
 		this.performQueries(qWrapper, resultConsumer);
-	}
-
-	/** Delegates entity name resolution to parent QueryEngine.
-	 * @deprecated use getEntityResolver.lookupObjEntity()
-	 */
-	public ObjEntity lookupEntity(String objEntityName) {
-		return this.getEntityResolver().lookupObjEntity(objEntityName);
 	}
 
 	/**

@@ -120,26 +120,6 @@ public class Ordering implements Comparator {
     }
 
     /** 
-     * Returns sortPathSpec OBJ_PATH specification used in ordering.
-     * 
-     * @deprecated Since ordering now supports expression types other than OBJ_PATH,
-     * this method is deprected. Use <code>getSortSpec().getOperand(0)</code> instead.
-        */
-    public String getSortPathSpec() {
-        return (String) getSortSpec().getOperand(0);
-    }
-
-    /** 
-     * Sets path of the sort specification. 
-     * 
-     * @deprecated Since ordering now supports expression types other than OBJ_PATH,
-     * this method is deprected. Use <code>setSortSpec()</code> instead.
-     */
-    public void setSortPathSpec(String sortPathSpec) {
-        setSortSpec(sortPathSpec);
-    }
-
-    /** 
      * Sets sortSpec to be OBJ_PATH expression. 
      * with path specified as <code>sortPathSpec</code>
      * parameter.

@@ -337,20 +337,16 @@ public class DataDomain implements QueryEngine {
 		return dataNodeForObjEntityName(objEntity.getName());
 	}
 
-	/** Returns ObjEntity whose name matches <code>name</code> parameter.
-     * @deprecated use getEntityResolver.lookupObjEntity()*/
-	public ObjEntity lookupEntity(String objEntityName) {
-		return this.getEntityResolver().lookupObjEntity(objEntityName);
-	}
-
+	/**
+	 * Returns DataNode that should handle database operations for
+	 * a specified <code>dbEntity</code>.
+	 */
 	public DataNode dataNodeForDbEntity(DbEntity dbEntity) {
 		return this.dataNodeForDbEntityName(dbEntity.getName());
 	}
 
 	public synchronized DataNode dataNodeForDbEntityName(String dbEntityName) {
-
         DataNode node = (DataNode) nodesByDbEntityName.get(dbEntityName);
-
         // if lookup fails, it may mean that internal index
         // in 'nodesByDbEntityName' need to be updated
         // do it and then try again.

@@ -82,16 +82,6 @@ public class CayenneDataObject implements DataObject {
     // to indicate that destination relationship was fetched and is null
     private static final CayenneDataObject nullValue = new CayenneDataObject();
 
-    /**
-     * Returns String label for persistence state.
-     * Used for debugging.
-     *
-     * @deprecated use PersistenceState.persistenceStateName() instead.
-     */
-    public static String persistenceStateString(int persistenceStateValue) {
-			return PersistenceState.persistenceStateName(persistenceStateValue);
-    }
-
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
     protected transient DataContext dataContext;

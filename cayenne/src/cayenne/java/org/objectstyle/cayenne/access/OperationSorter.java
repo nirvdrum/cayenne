@@ -117,16 +117,6 @@ public class OperationSorter {
 	}
 
 	/** 
-	  *  Sorts an unsorted array of DbEntities into the correct 
-	  *  insert order. 
-	  * @deprecated use OperationSorter.sortedEntitiesInInsertOrder instead.  This method is now rather inefficient
-	  */
-	public static void sortEntitiesInInsertOrder(List entities) {
-		List newList = InsertOrderSorter.sortedDbEntities(entities);
-		Collections.sort(entities, new PreSortedEntityComparator(newList));
-	}
-
-	/** 
 	  *  Returns a new list containing all the DbEntities in <code>entities</code>,
 	  *  in the correct order for inserting objects int,o or creating the tables of, those entities.
 	  */
@@ -142,13 +132,6 @@ public class OperationSorter {
 		List result = InsertOrderSorter.sortedDbEntities(entities);
 		Collections.reverse(result);
 		return result;
-	}
-
-	/** 
-	 * @deprecated Since 1.0a6. Use DataMap.sortMaps(List)
-	 */
-	public static void sortMaps(List maps) {
-	    DataMap.sortMaps(maps);
 	}
 
 	/** 
@@ -173,19 +156,10 @@ public class OperationSorter {
 		Collections.sort(objects, ObjectComparator.comparatorForDeleteOrder(objects));
 	}
 
-	/** Sorts queries to make sure that database constraints will not be
-	 *  violated when a batch is executed.
-	 *
-	 * @param queries an array of queries that need to be ordered.
-	 * @deprecated use sortedQueries
-	 */
-	public void sortQueries(Object[] queries) {
-		Arrays.sort(queries, queryComparator);
-	}
-
-	/** 
-	 *  Creates and returns an array of queries
-	 *  in the right sorting order from an unsorted array. 
+	/**
+	 * Creates and returns a List of queries from an unsorted List to make sure
+	 * that database constraints will not be violated when a batch is executed.
+	 * @param unsortedQueries a List of queries that need to be ordered.
 	 */
 	public List sortedQueries(List unsortedQueries) {
 		Object[] qs = unsortedQueries.toArray();

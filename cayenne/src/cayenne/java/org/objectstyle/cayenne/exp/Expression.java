@@ -146,15 +146,6 @@ public abstract class Expression implements Serializable {
      */
     public static final int DB_PATH = 27;
 
-    /** 
-     * Describes a table column name.
-     * DB_NAME expression is resolved relative to a root 
-     * DbEntity. 
-     * 
-     * @deprecated use DB_PATH instead
-     */
-    public static final int DB_NAME = DB_PATH;
-
     /** Interpreted as a comma-separated list of literals. */
     public static final int LIST = 28;
     /** Interpreted as a subquery within a parent query. */

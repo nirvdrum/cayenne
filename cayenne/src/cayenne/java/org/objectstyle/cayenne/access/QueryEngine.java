@@ -80,20 +80,12 @@ public interface QueryEngine {
      */
     public void performQueries(List queries, OperationObserver resultConsumer);
 
-
     /** Executes a single query. Will notify <code>resultConsumer</code>
      * about query progress and results.
      *
      * @see org.objectstyle.cayenne.access.OperationObserver
      */
     public void performQuery(Query query, OperationObserver resultConsumer);
-
-
-    /** Resolves entity name to ObjEntity.
-     *  @see org.objectstyle.cayenne.map.ObjEntity
-     *  @deprecated use getEntityResolver().lookupObjEntity() */
-   	public ObjEntity lookupEntity(String objEntityName);
-
 
    	/** Returns DataNode that should handle database operations for
       * a specified <code>objEntity</code>. */

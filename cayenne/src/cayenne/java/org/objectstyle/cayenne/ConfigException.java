@@ -77,24 +77,7 @@ public class ConfigException extends CayenneRuntimeException {
     public ConfigException(String msg) {
         super(msg);
     }
-    
-    /**
-     * Constructs an <code>ConfigException</code> that wraps <code>exception</code>
-     * thrown elsewhere.
-     * 
-     * @deprecated use constructor with "Throwbale" parameter
-     */
-    public ConfigException(Exception exception) {
-        super(exception);
-    }
-    
-    /**
-     * @deprecated use constructor with "Throwbale" parameter
-     */
-    public ConfigException(String msg, Exception exception) {
-        super(msg, exception);
-    }
-    
+
     /**
      * Constructs an <code>ConfigException</code> that wraps <code>exception</code>
      * thrown elsewhere.
