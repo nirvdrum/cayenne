@@ -56,10 +56,18 @@
 
 package org.objectstyle.cayenne.query;
 
-import java.util.*;
-import org.apache.commons.lang.builder.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
  *

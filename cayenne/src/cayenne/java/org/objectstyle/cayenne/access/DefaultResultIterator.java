@@ -85,7 +85,8 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @author Andrei Adamchik
  */
 public class DefaultResultIterator implements ResultIterator {
-    private static Logger logObj = Logger.getLogger(DefaultResultIterator.class);
+    private static Logger logObj =
+        Logger.getLogger(DefaultResultIterator.class);
 
     protected PreparedStatement prepStmt;
     protected ResultSet resultSet;
@@ -101,6 +102,9 @@ public class DefaultResultIterator implements ResultIterator {
     protected boolean isClosed;
 
     protected boolean nextRow;
+
+    protected int fetchedSoFar;
+    protected int fetchLimit;
 
     /** 
      * Creates new DefaultResultIterator. Initializes it
@@ -119,38 +123,41 @@ public class DefaultResultIterator implements ResultIterator {
         String[] rowTypes = assembler.getResultTypes(resultSet);
 
         resultSize = rowDescriptor.length;
-        
+
         // this list will hold positions of PK atributes
         List idIndexList = new ArrayList(resultSize);
 
         converters = new ExtendedType[resultSize];
         ExtendedTypeMap typeMap = adapter.getTypeConverter();
-        
+
         for (int i = 0; i < resultSize; i++) {
-        	// index id columns
-        	if(rowDescriptor[i].isPrimaryKey()) {
-        		idIndexList.add(new Integer(i));
-        	}
-        	
-        	// initialize converters
+            // index id columns
+            if (rowDescriptor[i].isPrimaryKey()) {
+                idIndexList.add(new Integer(i));
+            }
+
+            // initialize converters
             converters[i] = typeMap.getRegisteredType(rowTypes[i]);
         }
 
         int indexSize = idIndexList.size();
         idIndex = new int[indexSize];
-        for(int i = 0; i < indexSize; i++) {
-        	idIndex[i] = ((Integer)idIndexList.get(i)).intValue();
+        for (int i = 0; i < indexSize; i++) {
+            idIndex[i] = ((Integer) idIndexList.get(i)).intValue();
         }
-        
-        init(assembler);
+
+        // check fetch limit
+        int limit = assembler.getFetchLimit();
+        this.fetchLimit = (limit > 0) ? limit : Integer.MAX_VALUE;
+
+        checkNextRow();
     }
 
     /**
-     * Reads the first row of data.
+     * @deprecated since 1.0-Beta1 this method is no longer used.
      */
     protected void init(SelectQueryAssembler assembler)
         throws SQLException, CayenneException {
-        checkNextRow();
     }
 
     /** 
@@ -159,8 +166,9 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected void checkNextRow() throws SQLException, CayenneException {
         nextRow = false;
-        if (resultSet.next()) {
+        if (fetchedSoFar < fetchLimit && resultSet.next()) {
             nextRow = true;
+            fetchedSoFar++;
         }
     }
 
@@ -235,7 +243,9 @@ public class DefaultResultIterator implements ResultIterator {
             throw cex;
         } catch (Exception otherex) {
             logObj.warn("Error", otherex);
-            throw new CayenneException("Exception materializing column.", otherex);
+            throw new CayenneException(
+                "Exception materializing column.",
+                otherex);
         }
     }
 
@@ -246,14 +256,14 @@ public class DefaultResultIterator implements ResultIterator {
     protected Map readIdRow() throws SQLException, CayenneException {
         try {
             Map idRow = new HashMap();
-            
+
             int len = idIndex.length;
 
             for (int i = 0; i < len; i++) {
-            	
-            	// dereference column index
-            	int index = idIndex[i];
-            	
+
+                // dereference column index
+                int index = idIndex[i];
+
                 // note: jdbc column indexes start from 1, not 0 as in arrays
                 Object val =
                     converters[index].materializeObject(
@@ -269,10 +279,11 @@ public class DefaultResultIterator implements ResultIterator {
             throw cex;
         } catch (Exception otherex) {
             logObj.warn("Error", otherex);
-            throw new CayenneException("Exception materializing id column.", otherex);
+            throw new CayenneException(
+                "Exception materializing id column.",
+                otherex);
         }
     }
-
 
     /** 
      * Closes ResultIterator and associated ResultSet. This method must be
@@ -323,7 +334,8 @@ public class DefaultResultIterator implements ResultIterator {
             StringBuffer buf = errors.getBuffer();
 
             if (buf.length() > 0) {
-                throw new CayenneException("Error closing ResultIterator: " + buf);
+                throw new CayenneException(
+                    "Error closing ResultIterator: " + buf);
             }
 
             isClosed = true;

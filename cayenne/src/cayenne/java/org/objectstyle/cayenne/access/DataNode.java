@@ -372,15 +372,7 @@ public class DataNode implements QueryEngine {
 
         SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
         DefaultResultIterator it =
-            (assembler.getFetchLimit() > 0)
-                ? new LimitedResultIterator(
-                    prepStmt,
-                    this.getAdapter(),
-                    assembler)
-                : new DefaultResultIterator(
-                    prepStmt,
-                    this.getAdapter(),
-                    assembler);
+            new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
         // note that we don't need to close ResultIterator
         // since "dataRows" will do it internally
@@ -454,18 +446,17 @@ public class DataNode implements QueryEngine {
         throws Exception {
 
         try {
-        	// ProcedureTranslator procTransl = (ProcedureTranslator)transl;
-        	// Procedure proc = procTransl.getProcedure();
-        	
+            // ProcedureTranslator procTransl = (ProcedureTranslator)transl;
+            // Procedure proc = procTransl.getProcedure();
+
             // execute procedure
             prepStmt.execute();
-            
+
             // process result
             // List columns = proc.getResultAttributesList();
-            
-            
+
             // ignore OUT params for now...
-            
+
         } finally {
             prepStmt.close();
         }
