@@ -134,7 +134,7 @@ import javax.naming.spi.ObjectFactory;
  */
 
 public class ContainerPoolFactory implements ObjectFactory {
-    static Logger logObj = Logger.getLogger(DataSourceObjectFactory.class.getName());
+    static Logger logObj = Logger.getLogger(ContainerPoolFactory.class.getName());
 
 
     /**
