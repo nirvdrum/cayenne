@@ -49,6 +49,7 @@
     <target name="prepare">
         <tstamp/>
         <mkdir dir="${dist}/doc"/>
+        <mkdir dir="${dist}/doc/grammar"/>
         <mkdir dir="${dist}/doc/dtd"/>
     </target>    
 
@@ -69,7 +70,7 @@
     <!-- ========================================== -->
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare,doc-img">
+    <target name="doc" depends="prepare,doc-img,grammars">
         <!-- copy all licenses & release notes -->
         <copy todir="${dist}/doc">
             <fileset dir="doc/licenses">
@@ -100,7 +101,17 @@
                 <include name="**/*.dtd"/>
             </fileset>
         </copy>
-    </target>    
+    </target>
+    
+    <!-- ========================================== -->
+    <!-- Builds documentation for the JavaCC Grammars.               -->
+    <!-- ========================================== -->
+    <target name="grammars" depends="prepare">
+    	
+		<ant antfile="build-cayenne.xml" target="jjdoc">
+			<property name="parser.doc.dir" value="${dist}/doc/grammar"/>
+		</ant>
+    </target>
     
     <!-- ========================================== -->
     <!-- Copies documentation images in the target  -->

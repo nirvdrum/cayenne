@@ -41,6 +41,13 @@
 			<property name="parser.base" value="${parser.base.exp}"/>
 		</ant>
 	</target>
+	
+	<target name="jjdoc">
+		<ant antfile="build-subproj.xml" target="jjdoc">
+			<property name="parser.dir" value="${parser.dir.exp}"/>
+			<property name="parser.base" value="${parser.base.exp}"/>
+		</ant>
+	</target>
 
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">
