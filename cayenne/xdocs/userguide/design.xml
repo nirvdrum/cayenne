@@ -119,7 +119,43 @@
         </subsection>
         
         <subsection name="3.4 Configuration" anchor="config">
-            <p> To Be Done </p>
+            <p>Central piece in Cayenne configuration is 
+            <a href="../api/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
+            class. It creates DataDomain objects used later to access the database. Database
+            access is configured based
+            on the data found in Cayenne configuration files.
+            By default Configuration uses singleton model, i.e. normally there is only one 
+            instance of Configuration (or its subclass) that exists in the application. This
+            shared instance can be accessed via a static method like that:
+            </p>
+            
+<source>import org.objectstyle.cayenne.conf.Configuration;
+...           
+Configuration conf = Configuration.getSharedConfig();
+</source>
+            <p>By default shared object returned will be an instance of 
+            <a href="../api/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>.
+            User can create her own subclasses of Configuration and use them instead. Main reason for creating 
+            your own subclass is to load configuration files from non-standard locations.
+            For example, in addition to DefaultConfiguration, Cayenne framework provides
+            <a href="../api/org/objectstyle/cayenne/conf/ServletConfiguration.html">ServletConfiguration</a>
+            class that, among other things, is able to locate resources relative to WEB-INF directory
+            of a deployed web application.</p>
+            
+            <p>To make sure Cayenne 
+            uses configuration object of the right class, you should add the following code
+            somewhere in the application before any calls to Configuration where made: 
+            </p>
+            
+<source>import org.objectstyle.cayenne.conf.Configuration
+...
+String myConfigSubclass = "my.package.ConfigSubclass";
+Configuration.initSharedConfig(myConfigSubclass);
+</source>
+  
+            <p>After that any subsequent calls to "getSharedConfig" will return an instance of your 
+            class instead of DefaultConfiguration.
+            </p>
         </subsection>
     </section>
 </body>

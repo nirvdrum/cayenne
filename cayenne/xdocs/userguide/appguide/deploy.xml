@@ -8,7 +8,16 @@
 <body>
      <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
         <subsection name="4.5 Deployment" anchor="deploy">
-            <p>To Be Done</p>
+           <subsection name="4.5.1 Standalone Applications" anchor="standalone">
+               <p>To Be Done</p>
+           </subsection>
+           
+           <subsection name="4.5.2 Web Applications" anchor="standalone">
+               <p></p>
+               <p>To Be Done</p>
+           </subsection>
+           
+           
         </subsection>
     </section>
 </body>
