@@ -13,5 +13,8 @@ works if internal Cayenne connection pool is used.
 
 2. Changed arbitrary queue size in connection pool to unlimited.
 
+3. Modeler: Added preselection of database connection info on "reengineer database"
+when a DataNode is selected.
+
 
 
