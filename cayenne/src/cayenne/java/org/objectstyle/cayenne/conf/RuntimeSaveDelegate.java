@@ -62,7 +62,6 @@ import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 
@@ -128,7 +127,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         List maps = findDomain(domainName).getMapList();
 
         // sort to satisfy dependencies
-        OperationSorter.sortMaps(maps);
+        DataMap.sortMaps(maps);
 
         return new TransformIterator(maps.iterator(), tr);
     }

@@ -776,6 +776,7 @@ public class DataContext implements QueryEngine, Serializable {
         if (insObjects.size() > 0) {
             // create permanent id's and orders insObjects in the correct order for insertion
             // (which is very important with respect to dependent pk's and reflexive relationships)
+            OperationSorter.sortObjectsInInsertOrder(insObjects);
             createPermIds(insObjects);
         }
 
@@ -818,10 +819,6 @@ public class DataContext implements QueryEngine, Serializable {
         }
         // prepare inserts (create id's, build queries) 
         if (insObjects.size() > 0) {
-            // create permanent id's and orders insObjects in the correct order for insertion
-            // (which is very important with respect to dependent pk's and reflexive relationships)
-            //createPermIds(insObjects);
-
             // create insert queries
             Iterator insIt = insObjects.iterator();
             while (insIt.hasNext()) {
@@ -1202,11 +1199,10 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** Creates permanent ObjectId's for the list of new objects, 
-     * and orders the list of objects in the correct order for insertion. 
-     * The list is modified in-place*/
+    /** 
+     * Creates permanent ObjectId's for the list of new objects.
+     */
     private void createPermIds(List objects) {
-        OperationSorter.sortObjectsInInsertOrder(objects);
         Iterator it = objects.iterator();
         while (it.hasNext()) {
             createPermId((DataObject) it.next());

@@ -34,6 +34,9 @@ query definitions.
 8. "IN" expressions can now take both java.util.List and Object[] 
 operands.
 
+9. Moved DataMap sorting code to DataMap from OperationSorter, 
+deprecating the appropriate method.
+
 
 
 

@@ -145,11 +145,10 @@ public class OperationSorter {
 	}
 
 	/** 
-	 * Sorts an array of DataMaps in the right save order 
-	 * to satisfy inter-map dependencies. 
+	 * @deprecated Since 1.0a6. Use DataMap.sortMaps(List)
 	 */
 	public static void sortMaps(List maps) {
-		Collections.sort(maps, new MapComparator());
+	    DataMap.sortMaps(maps);
 	}
 
 	/** 
@@ -192,50 +191,6 @@ public class OperationSorter {
 		Object[] qs = unsortedQueries.toArray();
 		Arrays.sort(qs, queryComparator);
 		return Arrays.asList(qs);
-	}
-
-	/** Used as a comparator to infer DataMap ordering */
-	static final class MapComparator implements Comparator {
-
-		public final int compare(Object o1, Object o2) {
-			DataMap m1 = (DataMap) o1;
-			DataMap m2 = (DataMap) o2;
-			int result = compareMaps(m1, m2);
-
-			// resort to very bad and dumb alphabetic ordering
-			if (result == 0) {
-				result = m1.getName().compareTo(m2.getName());
-			}
-
-			return result;
-		}
-
-		/**
-		 * Checks if these 2 DataMaps have a dependency on each other.
-		 *
-		 * @return
-		 *  <ul>
-		 *  <li> -1 when m2 depends on m1
-		 *  <li> 1 when m1 depends on m2
-		 *  <li> 0 when dependency is undefined
-		 * </ul>
-		 */
-		private final int compareMaps(DataMap m1, DataMap m2) {
-
-			boolean hasDependent1 = m1.isDependentOn(m2);
-			boolean hasDependent2 = m2.isDependentOn(m1);
-
-			// ok if 1 map has a dependency and another does not, 
-			// the first one goes first
-			if (hasDependent1 && !hasDependent2)
-				return 1;
-
-			if (!hasDependent1 && hasDependent2)
-				return -1;
-
-			// do not know what to do...
-			return 0;
-		}
 	}
 
 	/** Used as a comparator to sort in place a list of entities into insert Order (based on a 
