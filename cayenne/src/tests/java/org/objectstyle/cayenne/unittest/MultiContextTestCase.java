@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.unittest;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.util.Util;
 
@@ -76,14 +75,12 @@ public abstract class MultiContextTestCase extends CayenneTestCase {
         // cleanup database data
         getDatabaseSetup().cleanTableData();
 
-        DataDomain domain = getDomain();
-
         // remove listeners for snapshot events
         EventManager.getDefaultManager().removeAllListeners(
-            domain.getSnapshotCache().getSnapshotEventSubject());
+            getDomain().getSnapshotCache().getSnapshotEventSubject());
 
         // initialize main DataContext
-        context = domain.createDataContext();
+        context = getDomain().createDataContext();
     }
 
     /**

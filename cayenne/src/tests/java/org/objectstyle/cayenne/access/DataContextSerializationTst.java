@@ -70,15 +70,10 @@ import org.objectstyle.cayenne.util.Util;
 public class DataContextSerializationTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(DataContextSerializationTst.class);
 
-    protected void setUp() {
-        // fix the environment - other unit tests may have messed up the shared domain
-        Configuration config = Configuration.getSharedConfiguration();
-        if (super.getDomain() != config.getDomain()) {
-            if (config.getDomain() != null) {
-                config.removeDomain(config.getDomain().getName());
-            }
-            config.addDomain(super.getDomain());
-        }
+    protected void setUp() throws Exception {
+        // IMPORTANT: call super to fix the environment - 
+        // other unit tests may have messed up the shared domain
+        super.setUp();
     }
 
     public void testSerializeNew() throws Exception {

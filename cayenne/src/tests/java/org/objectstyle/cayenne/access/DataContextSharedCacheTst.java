@@ -58,7 +58,9 @@ package org.objectstyle.cayenne.access;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 import org.objectstyle.cayenne.util.Util;
 
@@ -66,6 +68,8 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataContextSharedCacheTst extends MultiContextTestCase {
+    private static Logger logObj = Logger.getLogger(DataContextSharedCacheTst.class);
+
     protected Artist artist;
 
     protected void setUp() throws Exception {
@@ -83,10 +87,17 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         try {
             // prepare a second context
+			logObj.warn("initial domain BEFORE: " + Configuration.getSharedConfiguration().getDomain("domain"));
+			logObj.warn("expected domain BEFORE: " + getDomain());
             DataContext altContext = mirrorDataContext(context);
             Artist altArtist =
                 (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
             assertNotNull(altArtist);
+
+		
+            logObj.warn("initial domain: " + context.getParent());
+            logObj.warn("Cloned domain: " + altContext.getParent());
+			logObj.warn("expected domain: " + getDomain());
             assertFalse(altArtist == artist);
             assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
@@ -110,6 +121,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
+
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
         // test update propagation

@@ -212,6 +212,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     private final void awakeFromDeserialization() {
         if (parent == null && lazyInitParentDomainName != null) {
+
             this.parent =
                 Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName);
@@ -544,7 +545,19 @@ public class DataContext implements QueryEngine, Serializable {
      * @param dataObject new object that we want to make persistent.
      */
     public void registerNewObject(DataObject dataObject) {
+        if (dataObject == null) {
+            throw new NullPointerException("Can't register null object.");
+        }
+
         ObjEntity objEntity = getEntityResolver().lookupObjEntity(dataObject);
+
+        // sanity check 
+        if (objEntity == null) {
+            throw new CayenneRuntimeException(
+                "Can't find ObjEntity for DataObject class: "
+                    + dataObject.getClass().getName());
+        }
+
         registerNewObjectWithEntity(dataObject, objEntity);
     }
 

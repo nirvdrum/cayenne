@@ -63,6 +63,7 @@ import junit.framework.TestCase;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.event.EventManager;
 
@@ -83,6 +84,18 @@ public abstract class CayenneTestCase extends TestCase {
         return new File(
             new File(new File(new File("build"), "tests"), "deps"),
             "test-resources");
+    }
+
+    protected void setUp() throws Exception {
+        // make sure that the right domain is setup as shared, as some tests
+        // may overwrite that
+        Configuration config = Configuration.getSharedConfiguration();
+        if (getDomain() != config.getDomain()) {
+            if (config.getDomain() != null) {
+                config.removeDomain(config.getDomain().getName());
+            }
+            config.addDomain(getDomain());
+        }
     }
 
     /**

@@ -82,7 +82,6 @@ import org.objectstyle.cayenne.access.util.SnapshotUtils;
 public class ObjectStore implements Serializable, SnapshotEventListener {
     private static Logger logObj = Logger.getLogger(ObjectStore.class);
 
-    private long lastCachSync = System.currentTimeMillis();
     protected transient Map newObjectMap = null;
     protected Map objectMap = new HashMap();
 
@@ -115,8 +114,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * the current state of SnapshotCache.
      */
     public synchronized void synchronizeWithCache() {
-        this.lastCachSync = System.currentTimeMillis();
-
         // TODO: do the actual synchronization
     }
 
@@ -133,7 +130,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         Snapshot snapshot = getCachedSnapshot(oid);
 
         // if cached snapshot is newer or absent, use snapshot built from object
-        if (snapshot == null || snapshot.getLastUpdated() > this.lastCachSync) {
+        if (snapshot == null) {
             snapshot =
                 (Snapshot) dataObject.getDataContext().takeObjectSnapshot(dataObject);
         }
@@ -492,11 +489,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return getCachedSnapshot(id);
     }
 
-
-	/**
-	 * Returns a snapshot for ObjectId from the underlying snapshot cache.
-	 * If cache contains no snapshot, a null is returned.
-	 */
+    /**
+     * Returns a snapshot for ObjectId from the underlying snapshot cache.
+     * If cache contains no snapshot, a null is returned.
+     */
     public Snapshot getCachedSnapshot(ObjectId id) {
         return getSnapshotCache().getCachedSnapshot(id);
     }
@@ -609,7 +605,5 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         // TODO: what should we do with deleted objects?
         // I suggest to turn them into TRANSIENT and notify a delegate...
-
-        this.lastCachSync = event.getTimestamp();
     }
 }
