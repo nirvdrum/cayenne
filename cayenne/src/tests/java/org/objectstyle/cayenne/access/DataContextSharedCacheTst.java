@@ -61,6 +61,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -435,6 +436,68 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         helper.assertWithTimeout(3000);
 
         assertFalse(altContext.hasChanges());
+    }
+
+    /**
+     * Test case to prove that deleting an object in one ObjectStore
+     * and committed to the database will be reflected in the peer ObjectStore
+     * using the same DataRowCache, including proper processing of deleted object
+     * being held in to-many collections
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotDeletePropagationToManyRefresh() throws Exception {
+        DataContext context = artist.getDataContext();
+
+        Painting painting1 = (Painting) context.createAndRegisterNewObject("Painting");
+        painting1.setPaintingTitle("p1");
+        painting1.setToArtist(artist);
+
+        Painting painting2 = (Painting) context.createAndRegisterNewObject("Painting");
+        painting2.setPaintingTitle("p2");
+        painting2.setToArtist(artist);
+
+        context.commitChanges();
+
+        DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist and painting objects
+        // in the second context
+        final Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        final Painting altPainting1 =
+            (Painting) altContext.getObjectStore().getObject(painting1.getObjectId());
+        final Painting altPainting2 =
+            (Painting) altContext.getObjectStore().getObject(painting2.getObjectId());
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
+        assertEquals(painting1.getPaintingTitle(), altPainting1.getPaintingTitle());
+        assertEquals(painting2.getPaintingTitle(), altPainting2.getPaintingTitle());
+        assertEquals(2, altArtist.getPaintingArray().size());
+        assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, altPainting1.getPersistenceState());
+        assertEquals(PersistenceState.COMMITTED, altPainting2.getPersistenceState());
+
+        // Update Artist
+        context.deleteObject(painting1);
+        context.commitChanges();
+
+        // check underlying cache
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                painting1.getObjectId()));
+
+        // check peer artist
+        ThreadedTestHelper helper = new ThreadedTestHelper() {
+            protected void assertResult() throws Exception {
+                assertEquals(PersistenceState.TRANSIENT, altPainting1.getPersistenceState());
+                
+                ToManyList list = (ToManyList)altArtist.getPaintingArray();
+                assertFalse(list.needsFetch());
+                assertEquals(1, list.size());
+                assertFalse(list.contains(altPainting1));
+            }
+        };
+        helper.assertWithTimeout(3000);
     }
 
     /**

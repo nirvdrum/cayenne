@@ -73,8 +73,11 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -721,11 +724,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 }
 
                 DataContextDelegate delegate;
-                
+
                 // TODO: refactor "switch" to avoid code duplication
 
                 switch (object.getPersistenceState()) {
                     case PersistenceState.COMMITTED :
+                        // must remove object from to-many lists
+                        cleanDeletedObjectFromCollections(object, deletedIDs);
+
                     case PersistenceState.HOLLOW :
                     case PersistenceState.DELETED :
 
@@ -753,6 +759,79 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
                         break;
                 }
+            }
+        }
+    }
+
+    /**
+     * @since 1.1
+     */
+    void cleanDeletedObjectFromCollections(DataObject object, Collection deletedIDs) {
+        ObjEntity entity =
+            object.getDataContext().getEntityResolver().lookupObjEntity(object);
+        Iterator relationshipIterator = entity.getRelationships().iterator();
+
+        while (relationshipIterator.hasNext()) {
+            ObjRelationship relationship = (ObjRelationship) relationshipIterator.next();
+
+            // only deal with NULLIFY rules that have a reverse relationship
+            // as to-many.. the rest of the cases should be handled elsewhere
+            if (relationship.getDeleteRule() != DeleteRule.NULLIFY) {
+                continue;
+            }
+
+            ObjRelationship inverseRelationship = relationship.getReverseRelationship();
+            if (inverseRelationship == null || !inverseRelationship.isToMany()) {
+                continue;
+            }
+
+            List relatedObjects = null;
+            if (relationship.isToMany()) {
+                List toMany = (List) object.readPropertyDirectly(relationship.getName());
+
+                if (toMany.size() == 0) {
+                    continue;
+
+                }
+
+                // Get a copy of the list so that deleting objects doesn't 
+                // result in concurrent modification exceptions
+                relatedObjects = new ArrayList(toMany);
+            }
+            else {
+                Object relatedObject =
+                    object.readPropertyDirectly(relationship.getName());
+
+                if (relatedObject == null) {
+                    continue;
+                }
+
+                if (relatedObject instanceof RelationshipFault) {
+                    continue;
+                }
+
+                if (relatedObject instanceof DataObject) {
+                    int state = ((DataObject) relatedObject).getPersistenceState();
+                    if (state == PersistenceState.TRANSIENT
+                        || state == PersistenceState.HOLLOW) {
+                        continue;
+                    }
+                }
+
+                relatedObjects = Collections.singletonList(relatedObject);
+            }
+
+            Iterator related = relatedObjects.iterator();
+            while (related.hasNext()) {
+                DataObject relatedObject = (DataObject) related.next();
+                if (deletedIDs.contains(relatedObject.getObjectId())) {
+                    continue;
+                }
+
+                relatedObject.removeToManyTarget(
+                    inverseRelationship.getName(),
+                    object,
+                    true);
             }
         }
     }

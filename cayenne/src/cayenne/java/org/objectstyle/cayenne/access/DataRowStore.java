@@ -352,6 +352,9 @@ public class DataRowStore implements Serializable {
             logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
             return;
         }
+        
+        // TODO: for performance, we may check if this DataRowStore event subject has
+        // any listeners before attempting to build an event
 
         synchronized (this) {
 
