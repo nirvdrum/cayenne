@@ -62,7 +62,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Attribute;
@@ -83,7 +82,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class SelectTranslator extends SelectQueryAssembler {
-    private static Logger logObj = Logger.getLogger(SelectTranslator.class);
 
     private final Map aliasLookup = new HashMap();
     private final List columnList = new ArrayList();

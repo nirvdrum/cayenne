@@ -89,7 +89,6 @@ import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
  * ContextCommit implements commit logic. It is used internally by
@@ -708,12 +707,6 @@ class ContextCommit {
         for (Iterator i = flattenedBatches.values().iterator(); i.hasNext();) {
             commitHelper.addToQueries((Query) i.next());
         }
-    }
-
-    private ObjectId updatedId(ObjectId id, UpdateQuery query) {
-        Map idMap = id.getIdSnapshot();
-        Map updAttrs = query.getUpdAttributes();
-        return updatedId(id.getObjClass(), idMap, updAttrs);
     }
 
     private ObjectId updatedId(Class objEntityClass, Map idMap, Map updAttrs) {

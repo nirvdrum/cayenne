@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 
@@ -75,7 +74,6 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
-    private static Logger logObj = Logger.getLogger(SelectQuery.class);
 
     protected List custDbAttributes = new ArrayList();
     protected List orderings = new ArrayList();

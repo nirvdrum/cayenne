@@ -69,7 +69,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DefaultOperationObserver;
@@ -90,7 +89,6 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
  * @author Andrei Adamchik
  */
 public class JdbcPkGenerator implements PkGenerator {
-	private static Logger logObj = Logger.getLogger(JdbcPkGenerator.class);
 
 	private static final String NEXT_ID = "NEXT_ID";
 	private static final ObjAttribute[] objDesc =

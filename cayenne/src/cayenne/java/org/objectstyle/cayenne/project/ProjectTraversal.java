@@ -59,7 +59,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
@@ -78,8 +77,7 @@ import org.objectstyle.cayenne.map.Relationship;
  * @author Andrei Adamchik
  */
 public class ProjectTraversal {
-    private static Logger logObj = Logger.getLogger(ProjectTraversal.class);
-    
+
     protected ProjectTraversalHandler handler;
 
     public ProjectTraversal(ProjectTraversalHandler handler) {

@@ -62,7 +62,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -80,7 +79,6 @@ import org.objectstyle.cayenne.query.BatchQuery;
  */
 
 public class BatchInterpreter {
-    private static Logger logObj = Logger.getLogger(BatchInterpreter.class);
 
     protected DbAdapter adapter;
     protected BatchQueryBuilder queryBuilder;

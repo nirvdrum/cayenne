@@ -60,7 +60,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -70,7 +69,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class ProjectFile {
-	private static Logger logObj = Logger.getLogger(ProjectFile.class);
 
     protected String location;
     protected File tempFile;

@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.comparators.ReverseComparator;
-import org.apache.log4j.Logger;
 import org.objectstyle.ashwood.dbutil.DbUtils;
 import org.objectstyle.ashwood.dbutil.ForeignKey;
 import org.objectstyle.ashwood.dbutil.Table;
@@ -96,7 +95,6 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Andriy Shapochka
  */
 public class DefaultSorter implements DependencySorter {
-    private static Logger logObj = Logger.getLogger(DefaultSorter.class);
 
     protected QueryEngine queryEngine;
     protected Map dbEntityToTableMap;

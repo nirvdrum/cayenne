@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 
@@ -65,7 +64,6 @@ import org.objectstyle.cayenne.map.DbRelationship;
  *  @author Andrei Adamchik
  */
 public class DeleteTranslator extends QueryAssembler {
-    private static Logger logObj = Logger.getLogger(DeleteTranslator.class);
 
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");

@@ -66,13 +66,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import org.apache.log4j.Logger;
-
 /** 
  * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
  */
 public class CharType extends AbstractType {
-    private static Logger logObj = Logger.getLogger(CharType.class);
 
     private static final int BUF_SIZE = 8 * 1024;
 

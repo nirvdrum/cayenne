@@ -71,7 +71,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -90,7 +89,6 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
   * @author Andrei Adamchik
  */
 public class DbGenerator {
-    private static Logger logObj = Logger.getLogger(DbGenerator.class);
 
 	protected DataNode node;
 	protected DataMap map;

@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -90,7 +89,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultList implements List {
-    private static Logger logObj = Logger.getLogger(IncrementalFaultList.class);
 
     protected int pageSize;
     protected List elements;

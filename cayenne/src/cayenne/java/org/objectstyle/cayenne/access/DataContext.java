@@ -97,12 +97,9 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
-import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
 
 /** User-level Cayenne access class. Provides isolated object view of
   * the datasource to the application code. Normal use pattern is to
@@ -713,19 +710,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Throws an exception if <code>dataObj</code> parameter is
-     * mapped to a "read-only" entity.
-     */
-    private void filterReadOnly(DataObject dataObj)
-        throws CayenneRuntimeException {
-        ObjEntity oe = getEntityResolver().lookupObjEntity(dataObj);
-        if (oe.isReadOnly()) {
-            throw new CayenneRuntimeException(
-                "Attempt to commit a read-only object, " + oe.getName() + ".");
-        }
-    }
-
-    /**
      * Performs a single database select query.
      *
      * @return A list of DataObjects or a list of data rows
@@ -912,34 +896,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns ObjectId if id needs to be updated
-     * after UpdateQuery is committed,
-     * or null, if current id is good enough.
-     */
-    private ObjectId updatedId(ObjectId id, UpdateQuery upd) {
-        Map idMap = id.getIdSnapshot();
-
-        Map updAttrs = upd.getUpdAttributes();
-        Iterator it = updAttrs.keySet().iterator();
-
-        Map newIdMap = null;
-        while (it.hasNext()) {
-            Object key = it.next();
-            if (!idMap.containsKey(key))
-                continue;
-
-            if (newIdMap == null)
-                newIdMap = new HashMap(idMap);
-
-            newIdMap.put(key, updAttrs.get(key));
-        }
-
-        return (newIdMap != null)
-            ? new ObjectId(id.getObjClass(), newIdMap)
-            : null;
-    }
-
-    /**
      *  Populates the <code>map</code> with ObjectId values from master objects
      *  related to this object.
      */
@@ -988,16 +944,6 @@ public class DataContext implements QueryEngine, Serializable {
             }
 
             map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
-        }
-    }
-
-    /**
-     * Creates permanent ObjectId's for the list of new objects.
-     */
-    private void createPermIds(List objects) {
-        Iterator it = objects.iterator();
-        while (it.hasNext()) {
-            createPermId((DataObject) it.next());
         }
     }
 
@@ -1204,89 +1150,6 @@ public class DataContext implements QueryEngine, Serializable {
                 "This combination is not currently deleted... registering for deletes");
             flattenedDeletes.add(info);
         }
-    }
-
-    /**
-     * Returns a list of insert queries that should be performed in order
-     * to commit any new flattened relationships that have been created
-     * @return List a list of Query objects to be performed
-     */
-    private List getFlattenedInsertQueries() {
-        List result = new ArrayList();
-        /*
-        
-        int i;
-        
-        Iterator objectIterator;
-        
-        objectIterator = flattenedInserts.keySet().iterator();
-        while (objectIterator.hasNext()) {
-        	DataObject sourceObject = (DataObject) objectIterator.next();
-        	Map insertsForObject = (Map) flattenedInserts.get(sourceObject);
-        	Iterator relNameIterator = insertsForObject.keySet().iterator();
-        	while (relNameIterator.hasNext()) {
-        		String relName = (String) relNameIterator.next();
-        		List objects = (List) insertsForObject.get(relName);
-        		for (i = 0; i < objects.size(); i++) {
-        			result.add(
-        				new FlattenedRelationshipInsertQuery(
-        					sourceObject,
-        					(DataObject) objects.get(i),
-        					relName));
-        		}
-        	}
-        }*/
-        Iterator infoIterator = flattenedInserts.iterator();
-        while (infoIterator.hasNext()) {
-            FlattenedRelationshipInfo info =
-                (FlattenedRelationshipInfo) infoIterator.next();
-            result.add(
-                new FlattenedRelationshipInsertQuery(
-                    info.source,
-                    info.destination,
-                    info.baseRelationship.getName()));
-        }
-        return result;
-    }
-
-    /**
-     * Returns a list of delete queries that should be performed in order
-     * to commit any removed flattened relationships
-     * @return List a list of Query objects to be performed
-     */
-    private List getFlattenedDeleteQueries() {
-        List result = new ArrayList();
-        /*int i;
-        Iterator objectIterator;
-        
-        objectIterator = flattenedDeletes.keySet().iterator();
-        while (objectIterator.hasNext()) {
-        	DataObject sourceObject = (DataObject) objectIterator.next();
-        	Map deletesForObject = (Map) flattenedDeletes.get(sourceObject);
-        	Iterator relNameIterator = deletesForObject.keySet().iterator();
-        	while (relNameIterator.hasNext()) {
-        		String relName = (String) relNameIterator.next();
-        		List objects = (List) deletesForObject.get(relName);
-        		for (i = 0; i < objects.size(); i++) {
-        			result.add(
-        				new FlattenedRelationshipDeleteQuery(
-        					sourceObject,
-        					(DataObject) objects.get(i),
-        					relName));
-        		}
-        	}
-        }*/
-        Iterator infoIterator = flattenedDeletes.iterator();
-        while (infoIterator.hasNext()) {
-            FlattenedRelationshipInfo info =
-                (FlattenedRelationshipInfo) infoIterator.next();
-            result.add(
-                new FlattenedRelationshipDeleteQuery(
-                    info.source,
-                    info.destination,
-                    info.baseRelationship.getName()));
-        }
-        return result;
     }
 
     /**

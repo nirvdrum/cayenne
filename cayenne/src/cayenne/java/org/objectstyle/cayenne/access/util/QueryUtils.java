@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
@@ -92,7 +91,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  *
  */
 public class QueryUtils {
-    private static Logger logObj = Logger.getLogger(QueryUtils.class);
 
     private static Map putModifiedAttribute(
         Map aMap,
@@ -104,6 +102,7 @@ public class QueryUtils {
         aMap.put(name, value);
         return aMap;
     }
+
     /**
      * Returns a map of the properties of dataObject which have actually changed
      * compared to the objects commited snapshot.  Actual change is determined

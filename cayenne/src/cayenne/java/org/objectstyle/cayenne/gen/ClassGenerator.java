@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.gen;
 import java.io.Writer;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -74,7 +73,6 @@ import org.objectstyle.cayenne.util.ResourceLocator;
   * @author Andrei Adamchik
   */
 public class ClassGenerator {
-	private static Logger logObj = Logger.getLogger(ClassGenerator.class);
 	
 	private static boolean initDone;
 

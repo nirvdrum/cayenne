@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access.trans;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -72,7 +71,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
   * @author Andrei Adamchik
   */
 public class UpdateTranslator extends QueryAssembler {
-    private static Logger logObj = Logger.getLogger(UpdateTranslator.class);
 
     public String aliasForTable(DbEntity dbEnt) {
         throw new RuntimeException("aliases not supported");

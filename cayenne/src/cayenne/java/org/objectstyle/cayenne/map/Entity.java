@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.query.Query;
@@ -77,8 +76,6 @@ import org.objectstyle.cayenne.util.CayenneMap;
  * @author Andrei Adamchik
  */
 public abstract class Entity extends MapObject {
-    private static Logger logObj = Logger.getLogger(Entity.class);
-
     public static final String PATH_SEPARATOR = ".";
 
     protected CayenneMap attributes = new CayenneMap(this);

@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
@@ -79,7 +78,6 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Andrei Adamchik
  */
 public abstract class QueryAssemblerHelper {
-    private static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class);
 
     protected QueryAssembler queryAssembler;
 

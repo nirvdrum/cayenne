@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.query.Ordering;
@@ -71,7 +70,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Craig Miskell
  */
 public class OrderingTranslator extends QueryAssemblerHelper {
-    private static Logger logObj = Logger.getLogger(OrderingTranslator.class);
 
     public OrderingTranslator(QueryAssembler queryAssembler) {
         super(queryAssembler);

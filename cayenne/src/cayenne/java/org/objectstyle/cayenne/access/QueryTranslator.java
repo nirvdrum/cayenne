@@ -59,7 +59,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -75,7 +74,6 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public abstract class QueryTranslator {
-	private static Logger logObj = Logger.getLogger(QueryTranslator.class);
 
 	/** Query being translated. */
 	protected Query query;

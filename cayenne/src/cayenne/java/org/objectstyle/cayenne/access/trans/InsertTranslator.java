@@ -60,7 +60,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -74,7 +73,6 @@ import org.objectstyle.cayenne.query.InsertQuery;
   * @author Andrei Adamchik  
  */
 public class InsertTranslator extends QueryAssembler {
-	private static Logger logObj = Logger.getLogger(InsertTranslator.class);
 
 	protected List columnList = new ArrayList();
 

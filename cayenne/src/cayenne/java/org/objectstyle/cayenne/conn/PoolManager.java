@@ -70,7 +70,6 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.RequestDequeue;
 import org.objectstyle.cayenne.util.RequestQueue;
 
@@ -84,7 +83,6 @@ import org.objectstyle.cayenne.util.RequestQueue;
  * @author Andrei Adamchik
  */
 public class PoolManager implements DataSource, ConnectionEventListener {
-    private static Logger logObj = Logger.getLogger(PoolManager.class);
 
     /** 
      * Defines a maximum number of threads that could wait in the

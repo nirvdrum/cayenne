@@ -65,7 +65,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.access.util.DefaultSorter;
@@ -87,7 +86,6 @@ import org.objectstyle.cayenne.query.Query;
   * @author Andrei Adamchik
   */
 public class DataNode implements QueryEngine {
-    private static Logger logObj = Logger.getLogger(DataNode.class);
 
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
 

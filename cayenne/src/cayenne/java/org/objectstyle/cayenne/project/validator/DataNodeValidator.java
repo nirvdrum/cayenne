@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.project.validator;
 
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
@@ -68,7 +67,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class DataNodeValidator extends TreeNodeValidator {
-    private static Logger logObj = Logger.getLogger(DataNodeValidator.class);
 
     /**
      * Constructor for DataNodeValidator.
