@@ -122,7 +122,8 @@ public class ConfigureClasspathDialog extends SPanel {
         setTitle("Configure CayenneModeler ClassPath");
         setLayout(new BorderLayout());
 
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        JScrollPane scroller = new JScrollPane(table);
+        add(scroller, BorderLayout.CENTER);
 
         FormLayout layout = new FormLayout("fill:min(150dlu;pref)", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);

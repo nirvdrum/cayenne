@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
 import org.objectstyle.cayenne.modeler.action.CreateStoredProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
@@ -301,6 +302,8 @@ public class CayenneModelerFrame
             getAction(CreateDerivedDbEntityAction.getActionName()).buildMenu());
         projectMenu.add(
             getAction(CreateStoredProcedureAction.getActionName()).buildMenu());
+        projectMenu.add(
+                   getAction(CreateQueryAction.getActionName()).buildMenu());
         projectMenu.addSeparator();
         projectMenu.add(getAction(ObjEntitySyncAction.getActionName()).buildMenu());
         projectMenu.add(getAction(DerivedEntitySyncAction.getActionName()).buildMenu());
@@ -339,12 +342,16 @@ public class CayenneModelerFrame
         toolBar.add(getAction(CreateDomainAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateNodeAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateDataMapAction.getActionName()).buildButton());
+        
+        toolBar.addSeparator();
+        
         toolBar.add(getAction(CreateDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateDerivedDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateStoredProcedureAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateObjEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateAttributeAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateRelationshipAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateQueryAction.getActionName()).buildButton());
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }
@@ -480,6 +487,7 @@ public class CayenneModelerFrame
         getAction(CreateObjEntityAction.getActionName()).setEnabled(true);
         getAction(CreateDbEntityAction.getActionName()).setEnabled(true);
         getAction(CreateDerivedDbEntityAction.getActionName()).setEnabled(true);
+        getAction(CreateQueryAction.getActionName()).setEnabled(true);
         getAction(CreateStoredProcedureAction.getActionName()).setEnabled(true);
         getAction(GenerateDbAction.getActionName()).setEnabled(true);
 

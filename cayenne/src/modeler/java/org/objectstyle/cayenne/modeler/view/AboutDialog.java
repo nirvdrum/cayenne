@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.modeler.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -253,7 +254,6 @@ public class AboutDialog extends CayenneDialog {
         image.setBounds(4, 4, 4, 4);
 
         JEditorPane infoPanel = new JEditorPane("text/html", getInfoString());
-        infoPanel.setBackground(getParent().getBackground());
         infoPanel.setEditable(false);
         infoPanel.addHyperlinkListener(this);
 
@@ -269,7 +269,7 @@ public class AboutDialog extends CayenneDialog {
     private JComponent initLicensePanel() {
         JTextArea licenseText = new JTextArea(getLicenseString());
 
-        licenseText.setBackground(getParent().getBackground());
+        licenseText.setBackground(Color.WHITE);
         licenseText.setEditable(false);
         licenseText.setLineWrap(true);
         licenseText.setWrapStyleWord(true);
