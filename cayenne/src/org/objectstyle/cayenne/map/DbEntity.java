@@ -113,8 +113,7 @@ public class DbEntity  extends Entity {
         }
         return list;
     }
-
-
+        
     public String toString() {
         StringBuffer sb = new StringBuffer("DbEntity:");
         sb.append("\nTable name: ").append(name);
