@@ -112,6 +112,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		// Create and layout components
 		init();
 		// Add listeners
+		location.getDocument().addDocumentListener(this);
 		name.getDocument().addDocumentListener(this);
 		userName.getDocument().addDocumentListener(this);
 		password.getDocument().addDocumentListener(this);
@@ -252,12 +253,15 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			if (null != ele) {
 				if (ele.getClassName().equals(DataSourceFactory.DIRECT_FACTORY))
 					fileBtn.setEnabled(true);
-				else fileBtn.setEnabled(false);
+				else 
+					fileBtn.setEnabled(false);
+				mediator.getCurrentDataNode().setDataSourceFactory(ele.getClassName());
 			}
-		}// End factory
+		}
 	}// End actionPerformed()
 	
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
+		System.out.println("In currentDataNodeChanged() 1.0");
 		DataNode node = e.getDataNode();
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		oldName = node.getName();
@@ -266,6 +270,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		populateFactory(node.getDataSourceFactory());
 		DataSourceInfo info = src.getDataSourceInfo();
 		populateDataSourceInfo(info);
+		System.out.println("In currentDataNodeChanged() 2.0");
 	}
 	
 	private void populateFactory(String selected_class) {

@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
 
@@ -25,5 +26,13 @@ public class GuiDataSourceFactory extends DriverDataSourceFactory
         	System.out.println("No data source: " + e.getMessage());
         }
         return new GuiDataSource(getDriverInfo());
+    }
+    
+    protected DataSourceInfo getDriverInfo() {
+        DataSourceInfo temp = super.getDriverInfo();
+        if (null == temp) {
+        	temp = new DataSourceInfo();
+        }
+        return temp;
     }
 }

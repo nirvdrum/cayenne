@@ -571,8 +571,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	    Object obj = data[data.length-1];
 	    if (obj instanceof DataDomain) {
 	    	mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, (DataDomain)obj));
-	    }
-	    else if (obj instanceof DataMap) {
+	    } else if (obj instanceof DataMap) {
 	    	if (data.length == 3) {
 	    		mediator.fireDataMapDisplayEvent(
 	    								new DataMapDisplayEvent(this
@@ -584,6 +583,13 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	    								new DataMapDisplayEvent(this
 	    								    , (DataMap)obj
 	    								    , (DataDomain)data[data.length-2]));
+	    	}
+	    } else if (obj instanceof DataNode) {
+			if (data.length == 2){
+	    		mediator.fireDataNodeDisplayEvent(
+	    								new DataNodeDisplayEvent(this
+	    								    , (DataDomain)data[data.length-2]
+	    								    , (DataNode) obj));
 	    	}
 	    } else if (obj instanceof ObjEntity) {
 	    	if (data.length == 4) {

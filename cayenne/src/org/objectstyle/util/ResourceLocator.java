@@ -108,4 +108,25 @@ public class ResourceLocator {
         
         return null;
     }
+    
+    public static File findFileInFileSystem(String name) {
+        // look in home directory
+        String homeDirPath = System.getProperty("user.home") + File.separator + name;
+        File file = new File(homeDirPath);
+
+        if(file.canRead())
+            return file;
+
+        // look in current directory
+        String curDirPath = '.' + File.separator + name;
+        file = new File(curDirPath);
+        if(file.canRead())
+            return file;
+        return null;
+    }
+    
+    public static URL findURLInClasspath(String name) {
+        URL url = ResourceLocator.class.getClassLoader().getResource(name);
+        return (url != null) ? url : null;
+    }
 }
