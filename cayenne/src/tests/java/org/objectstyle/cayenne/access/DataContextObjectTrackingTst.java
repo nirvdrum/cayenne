@@ -72,52 +72,52 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class DataContextObjectTrackingTst extends CayenneTestCase {
 
-	protected DataContext ctxt;
+    protected DataContext ctxt;
 
-	protected void setUp() throws Exception {
-		ctxt = createDataContext();
-	}
+    protected void setUp() throws Exception {
+        ctxt = createDataContext();
+    }
 
-	public void testUnregisterObject() throws Exception {
-		Map row = new HashMap();
-		row.put("ARTIST_ID", new Integer(1));
-		row.put("ARTIST_NAME", "ArtistXYZ");
-		row.put("DATE_OF_BIRTH", new Date());
-		DataObject obj = ctxt.objectFromDataRow("Artist", row);
-		ObjectId oid = obj.getObjectId();
+    public void testUnregisterObject() throws Exception {
+        Map row = new HashMap();
+        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_NAME", "ArtistXYZ");
+        row.put("DATE_OF_BIRTH", new Date());
+        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        ObjectId oid = obj.getObjectId();
 
-		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-		assertSame(ctxt, obj.getDataContext());
-		assertSame(obj, ctxt.getObjectStore().getObject(oid));
+        assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
+        assertSame(ctxt, obj.getDataContext());
+        assertSame(obj, ctxt.getObjectStore().getObject(oid));
 
-		ctxt.unregisterObject(obj);
+        ctxt.unregisterObjects(Collections.singletonList(obj));
 
-		assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
-		assertNull(obj.getDataContext());
-		assertNull(obj.getObjectId());
-		assertNull(ctxt.getObjectStore().getObject(oid));
-		assertNull(ctxt.getObjectStore().getSnapshot(oid));
-	}
+        assertEquals(PersistenceState.TRANSIENT, obj.getPersistenceState());
+        assertNull(obj.getDataContext());
+        assertNull(obj.getObjectId());
+        assertNull(ctxt.getObjectStore().getObject(oid));
+        assertNull(ctxt.getObjectStore().getSnapshot(oid));
+    }
 
-	public void testInvalidateObject() throws Exception {
-		Map row = new HashMap();
-		row.put("ARTIST_ID", new Integer(1));
-		row.put("ARTIST_NAME", "ArtistXYZ");
-		row.put("DATE_OF_BIRTH", new Date());
-		DataObject obj = ctxt.objectFromDataRow("Artist", row);
-		ObjectId oid = obj.getObjectId();
+    public void testInvalidateObject() throws Exception {
+        Map row = new HashMap();
+        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_NAME", "ArtistXYZ");
+        row.put("DATE_OF_BIRTH", new Date());
+        DataObject obj = ctxt.objectFromDataRow("Artist", row);
+        ObjectId oid = obj.getObjectId();
 
-		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-		assertSame(ctxt, obj.getDataContext());
-		assertSame(obj, ctxt.getObjectStore().getObject(oid));
+        assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
+        assertSame(ctxt, obj.getDataContext());
+        assertSame(obj, ctxt.getObjectStore().getObject(oid));
 
-		ctxt.invalidateObjects(Collections.singletonList(obj));
+        ctxt.invalidateObjects(Collections.singletonList(obj));
 
-		assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-		assertSame(ctxt, obj.getDataContext());
-		assertSame(oid, obj.getObjectId());
-		assertNull(ctxt.getObjectStore().getSnapshot(oid));
-		assertNotNull(ctxt.getObjectStore().getObject(oid));
-	}
+        assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        assertSame(ctxt, obj.getDataContext());
+        assertSame(oid, obj.getObjectId());
+        assertNull(ctxt.getObjectStore().getSnapshot(oid));
+        assertNotNull(ctxt.getObjectStore().getObject(oid));
+    }
 
 }

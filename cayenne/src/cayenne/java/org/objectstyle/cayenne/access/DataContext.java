@@ -328,10 +328,7 @@ public class DataContext implements QueryEngine, Serializable {
 
             if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
                 // we are asked to refresh an existing object with new values
-                SnapshotManager.mergeObjectWithSnapshot(
-                    objEntity,
-                    obj,
-                    dataRow);
+                SnapshotManager.mergeObjectWithSnapshot(objEntity, obj, dataRow);
 
                 //The merge might leave the object in hollow state if
                 // dataRow was only partial.  If so, do not add the snapshot
@@ -362,10 +359,7 @@ public class DataContext implements QueryEngine, Serializable {
         DataObject obj = registeredObject(anId);
 
         if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-            SnapshotManager.refreshObjectWithSnapshot(
-                objEntity,
-                obj,
-                dataRow);
+            SnapshotManager.refreshObjectWithSnapshot(objEntity, obj, dataRow);
 
             // notify object that it was fetched
             obj.fetchFinished();
@@ -444,40 +438,40 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Unregisters a DataObject from the context.
-     * This would remove object from the internal cache,
-     * remove its snapshot, unset object's DataContext and ObjectId
-     * and change its state to TRANSIENT.
+     * @deprecated Since 1.1, use 
+     * {@link #unregisterObjects(java.util.Collection) unregisterObjects(Collections.singletonList(dataObject))}
+     * to invalidate a single object.
      */
-    public void unregisterObject(DataObject dataObj) {
-        // we don't care about objects that are not ours
-        if (dataObj.getDataContext() != this) {
-            return;
-        }
-
-        ObjectId oid = dataObj.getObjectId();
-        objectStore.removeObject(oid);
-
-        dataObj.setDataContext(null);
-        dataObj.setObjectId(null);
-        dataObj.setPersistenceState(PersistenceState.TRANSIENT);
+    public void unregisterObject(DataObject dataObject) {
+        unregisterObjects(Collections.singletonList(dataObject));
     }
 
     /**
-     * @deprecated Since 1.1, use DataContext.invalidateObjects(Collections.singletonList(dataObject))
+     * Unregisters a Collection of DataObjects from the DataContext 
+     * and the underlying ObjectStore. This operation also unsets 
+     * DataContext and ObjectId for each object and changes its state 
+     * to TRANSIENT.
+     */
+    public void unregisterObjects(Collection dataObjects) {
+        objectStore.objectsUnregistered(dataObjects);
+    }
+
+    /**
+     * @deprecated Since 1.1, use 
+     * {@link #invalidateObjects(java.util.Collection) invalidateObjects(Collections.singletonList(dataObject))}
      * to invalidate a single object.
      */
     public void invalidateObject(DataObject dataObject) {
-		invalidateObjects(Collections.singletonList(dataObject));
+        invalidateObjects(Collections.singletonList(dataObject));
     }
-    
-	/**
-	  * "Invalidates" a COllection of DataObject. This operation would remove 
-	  * each object's snapshot from cache and change object's state to HOLLOW.
-	  * On the next access to this object, it will be refeched.
-	  */
+
+    /**
+      * "Invalidates" a Collection of DataObject. This operation would remove 
+      * each object's snapshot from cache and change object's state to HOLLOW.
+      * On the next access to this object, it will be refeched.
+      */
     public void invalidateObjects(Collection dataObjects) {
-    	objectStore.objectsInvalidated(dataObjects);
+        objectStore.objectsInvalidated(dataObjects);
     }
 
     /**
@@ -635,13 +629,13 @@ public class DataContext implements QueryEngine, Serializable {
         List results;
         if (oid instanceof FlattenedObjectId) {
             FlattenedObjectId foid = (FlattenedObjectId) oid;
-			SelectQuery sel = QueryUtils.selectObjectForFlattenedObjectId(this, foid);
+            SelectQuery sel = QueryUtils.selectObjectForFlattenedObjectId(this, foid);
             FlattenedSelectObserver observer = new FlattenedSelectObserver(foid);
             this.performQueries(Collections.singletonList(sel), observer);
             results = observer.getResults(sel);
         }
         else {
-			SelectQuery sel = QueryUtils.selectObjectForId(oid);
+            SelectQuery sel = QueryUtils.selectObjectForId(oid);
             results = this.performQuery(sel);
         }
 
@@ -1345,10 +1339,7 @@ public class DataContext implements QueryEngine, Serializable {
                     // properly 
                     Map dataRow = (Map) it.next();
                     DataObject obj = registeredObject(this.oid);
-                    SnapshotManager.mergeObjectWithSnapshot(
-                        ent,
-                        obj,
-                        dataRow);
+                    SnapshotManager.mergeObjectWithSnapshot(ent, obj, dataRow);
                     obj.fetchFinished();
                     //Swizzle object ids as the old "flattened" one isn't suitable for later
                     // identification of this object

@@ -98,7 +98,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Invalidates a collection of DataObjects.
+     * Invalidates a collection of DataObjects. Changes objects
+     * state to HOLLOW.
      */
     public synchronized void objectsInvalidated(Collection objects) {
         if (objects.isEmpty()) {
@@ -123,7 +124,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Evicts a collection of DataObjects from this ObjectStore.
+     * Evicts a collection of DataObjects from this ObjectStore. Changes objects
+     * state to TRANSIENT.
      */
     public void objectsUnregistered(Collection objects) {
         if (objects.isEmpty()) {
@@ -136,6 +138,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
             // remove object and snapshot (for now)
             removeObject(object.getObjectId());
+            
+            object.setDataContext(null);
+            object.setObjectId(null);
+            object.setPersistenceState(PersistenceState.TRANSIENT);
         }
     }
 

@@ -69,14 +69,14 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class ObjectStoreTst extends CayenneTestCase {
-	protected DataContext context;
-	protected ObjectStore objectStore;
-	
+    protected DataContext context;
+    protected ObjectStore objectStore;
+
     protected void setUp() {
-    	this.context = createDataContext();
-    	
-    	// create ObjectStore outside of this DataContext
-    	this.objectStore = new ObjectStore();
+        this.context = createDataContext();
+
+        // create ObjectStore outside of this DataContext
+        this.objectStore = new ObjectStore();
     }
 
     public void testObjectsInvalidated() throws Exception {
@@ -86,45 +86,40 @@ public class ObjectStoreTst extends CayenneTestCase {
         row.put("DATE_OF_BIRTH", new Date());
         DataObject object = context.objectFromDataRow("Artist", row);
         ObjectId oid = object.getObjectId();
-		
-		
+
         // insert object into the ObjectStore
-		objectStore.addObject(object);
-		objectStore.addSnapshot(object.getObjectId(), row);
+        objectStore.addObject(object);
+        objectStore.addSnapshot(object.getObjectId(), row);
         assertSame(object, objectStore.getObject(oid));
-		assertNotNull(objectStore.getSnapshot(oid));
+        assertNotNull(objectStore.getSnapshot(oid));
 
-
-		objectStore.objectsInvalidated(Collections.singletonList(object));
+        objectStore.objectsInvalidated(Collections.singletonList(object));
 
         assertSame(oid, object.getObjectId());
         assertNull(objectStore.getSnapshot(oid));
-		assertSame(object, objectStore.getObject(oid));
+        assertSame(object, objectStore.getObject(oid));
     }
-    
-	public void testObjectsUnregistered() throws Exception {
-		Map row = new HashMap();
-		row.put("ARTIST_ID", new Integer(1));
-		row.put("ARTIST_NAME", "ArtistXYZ");
-		row.put("DATE_OF_BIRTH", new Date());
-		DataObject object = context.objectFromDataRow("Artist", row);
-		ObjectId oid = object.getObjectId();
-		
-		
-		// insert object into the ObjectStore
-		objectStore.addObject(object);
-		objectStore.addSnapshot(object.getObjectId(), row);
-		assertSame(object, objectStore.getObject(oid));
-		assertNotNull(objectStore.getSnapshot(oid));
 
+    public void testObjectsUnregistered() throws Exception {
+        Map row = new HashMap();
+        row.put("ARTIST_ID", new Integer(1));
+        row.put("ARTIST_NAME", "ArtistXYZ");
+        row.put("DATE_OF_BIRTH", new Date());
+        DataObject object = context.objectFromDataRow("Artist", row);
+        ObjectId oid = object.getObjectId();
 
-		objectStore.objectsUnregistered(Collections.singletonList(object));
+        // insert object into the ObjectStore
+        objectStore.addObject(object);
+        objectStore.addSnapshot(object.getObjectId(), row);
+        assertSame(object, objectStore.getObject(oid));
+        assertNotNull(objectStore.getSnapshot(oid));
 
-		assertSame(oid, object.getObjectId());
-		
-		// in the future this may not be the case
-		assertNull(objectStore.getSnapshot(oid));
-		
-		assertNull(objectStore.getObject(oid));
-	}
+        objectStore.objectsUnregistered(Collections.singletonList(object));
+
+        assertNull(object.getObjectId());
+        assertNull(objectStore.getObject(oid));
+
+        // in the future this may not be the case
+        assertNull(objectStore.getSnapshot(oid));
+    }
 }
