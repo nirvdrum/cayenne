@@ -123,6 +123,25 @@ public class DataMapTst extends CayenneTestCase {
 		}	
 	}
 
+	//It should be possible to cleanly remove and then add the same entity again.
+	//Uncovered the need for this while testing modeller manually.
+	public void testRemoveThenAddNullClassName() {
+		ObjEntity e = new ObjEntity("f");
+		map.addObjEntity(e);
+		
+		map.removeObjEntity(e.getName());
+		map.addObjEntity(e);
+	}
+	
+	public void testRemoveThenAddRealClassName() {
+		ObjEntity e = new ObjEntity("f");
+		e.setClassName("f");
+		map.addObjEntity(e);
+		
+		map.removeObjEntity(e.getName());
+		map.addObjEntity(e);
+	}
+
 	public void testAddDbEntity() throws Exception {
 		DbEntity e = new DbEntity("b");
 		map.addDbEntity(e);

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,93 +54,73 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
-/** 
- * Defines API for translation Cayenne queries to JDBC
- * PreparedStatements. 
- * 
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- * 
- * @author Andrei Adamchik
+/**
+ * @author cmiskell
  */
-public abstract class QueryTranslator {
-	static Logger logObj = Logger.getLogger(QueryTranslator.class.getName());
+public class FlattenedRelationshipInsertQuery extends AbstractQuery {
+	private DataObject source;
+	private DataObject destination;
+	private String relationshipName;
 
-	/** Query being translated. */
-	protected Query query;
-
-	/** JDBC database connection needed to create PreparedStatement. */
-	protected Connection con;
-
-	/** Used mainly for name resolution. */
-	protected QueryEngine engine;
-
-	/** Adapter helping to do SQL literal conversions, etc. */
-	protected DbAdapter adapter;
-
-	/** 
-	 * Creates PreparedSatatement. <code>logLevel</code> 
-	 * parameter is supplied to allow
-	 * control of logging of produced SQL. 
+	/**
+	 * Constructor for  FlattenedRelationshipInsertQuery.  Creates a query which will insert 
+	 * the required link records for the relationship called <code>relName</code> 
+	 * between <code>source</code>  and <code>destination</code> 
+	 * @param source the source Object of the relationship
+	 * @param destination the destination of the relationship
+	 * @param relName the name of the relationship
 	 */
-	public abstract PreparedStatement createStatement(Level logLevel) throws Exception;
+	public FlattenedRelationshipInsertQuery(DataObject source, DataObject destination, String relName) {
+		super();
+		this.source=source;
+		this.destination=destination;
+		this.relationshipName=relName;
+		ObjRelationship relationship = this.getRelationship();
+		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
+		this.setRoot((DbEntity)firstRel.getTargetEntity());
 
-	/** Returns query object being processed. */
-	public Query getQuery() {
-		return query;
-	}
-
-	public void setQuery(Query query) {
-		this.query = query;
-	}
-
-	/** Returns Connection object used by this assembler. */
-	public Connection getCon() {
-		return con;
-	}
-
-	public void setCon(Connection con) {
-		this.con = con;
-	}
-
-	/** Returns QueryEngine used by this assembler. */
-	public QueryEngine getEngine() {
-		return engine;
-	}
-
-	public void setEngine(QueryEngine engine) {
-		this.engine = engine;
-	}
-
-	public DbAdapter getAdapter() {
-		return adapter;
-	}
-
-	public void setAdapter(DbAdapter adapter) {
-		this.adapter = adapter;
-	}
-
-	public ObjEntity getRootEntity() {
-		return engine.getEntityResolver().lookupObjEntity(query);
 	}
 	
-	public DbEntity getRootDbEntity() {
-		return engine.getEntityResolver().lookupDbEntity(query);
+	private ObjEntity getSourceObjEntity() {
+		DataObject sourceObject = this.getSource();
+		return sourceObject.getDataContext().getEntityResolver().lookupObjEntity(sourceObject.getClass());
+	}
+	
+	private ObjRelationship getRelationship() {
+		return (ObjRelationship) this.getSourceObjEntity().getRelationship(this.getRelationshipName());
+	}
+	
+    public int getQueryType() {
+        return INSERT_QUERY;
+    }
+    
+    public DataObject getDestination() {
+		return destination;
+	}
+
+	public void setDestination(DataObject destination) {
+		this.destination = destination;
+	}
+
+	public String getRelationshipName() {
+		return relationshipName;
+	}
+
+	public void setRelationshipName(String relName) {
+		this.relationshipName = relName;
+	}
+
+	public DataObject getSource() {
+		return source;
+	}
+	
+	public void setSource(DataObject source) {
+		this.source = source;
 	}
 }

@@ -232,7 +232,7 @@ public class ObjRelationshipPane
 			return;
 		}
 
-		// Add DbRelationship to the ObjRedlationship list.
+		// Add DbRelationships to the ObjRelationship list.
 		Iterator iter = list.iterator();
 		while (iter.hasNext()) {
 			DbRelationship db_rel = (DbRelationship) iter.next();

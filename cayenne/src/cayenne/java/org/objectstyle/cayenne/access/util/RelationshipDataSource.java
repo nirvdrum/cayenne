@@ -83,10 +83,10 @@ public class RelationshipDataSource implements ToManyListDataSource, Serializabl
         if (list.getSrcObjectId().isTemporary())
             list.setObjectList(new ArrayList());
         else {
-            SelectQuery sel =
+             SelectQuery sel =
                 QueryHelper.selectRelationshipObjects(
                     context,
-                    list.getSrcObjectId(),
+                    context.registeredObject(list.getSrcObjectId()),
                     list.getRelName());
             List results = context.performQuery(sel);
             list.setObjectList(results);

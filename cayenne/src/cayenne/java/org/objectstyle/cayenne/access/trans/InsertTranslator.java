@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.query.Query;
 public class InsertTranslator extends QueryAssembler {
 	static Logger logObj = Logger.getLogger(InsertTranslator.class.getName());
 
-	private ArrayList columnList = new ArrayList();
+	protected ArrayList columnList = new ArrayList();
 
 	public String aliasForTable(DbEntity dbEnt) {
 		throw new RuntimeException("aliases not supported");
@@ -120,7 +120,7 @@ public class InsertTranslator extends QueryAssembler {
 	}
 
 	/** Creates 2 matching lists: columns names and values */
-	private void prepareLists() throws Exception {
+	protected void prepareLists() throws Exception {
 		DbEntity dbE = engine.getEntityResolver().lookupDbEntity(query);
 		ObjectId oid = insertQuery().getObjectId();
 		Map id = (oid != null) ? oid.getIdSnapshot() : null;

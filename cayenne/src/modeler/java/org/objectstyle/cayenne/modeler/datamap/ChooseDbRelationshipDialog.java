@@ -61,7 +61,10 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -73,6 +76,7 @@ import javax.swing.JPanel;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -108,7 +112,7 @@ implements ActionListener {
 	private DataMap map;
 	private DbEntity start;
 	private DbEntity end;
-	private DbRelationship dbRel;
+	private List dbRels;
 	private ArrayList relList = new ArrayList();
 	
 	JComboBox relSelect	= new JComboBox();
@@ -118,6 +122,50 @@ implements ActionListener {
 	JButton edit		= new JButton("Edit");
 	private int choice  = CANCEL;
 
+	//Looks for a direct relationship from start to end.
+	//Then looks at the destination of each direct relationship from start, and follows any 
+	//direct relationships from *that* entity (using recursion).  seenEntities is always updated
+	// to ensure that loops do not occur
+	private List findRelationshipPath(DbEntity start, DbEntity end, Set seenEntities, String indent) {
+		// Find matching relationship in the start DbEntity
+		List result=new ArrayList();
+		//Ensure we never come "back" to this entity
+		seenEntities.add(start);
+		
+		java.util.List list = start.getRelationshipList();
+		Iterator iter = list.iterator();
+		while (iter.hasNext()) {
+			DbRelationship db_rel = (DbRelationship)iter.next();
+			if (db_rel.getTargetEntity() == end) {
+				//System.out.println("WOO HOO... found it");
+				List aList=new ArrayList();
+				aList.add(db_rel);
+				result.add(aList);
+			} else {
+				//Not a direct relationship... recurse, but don't come back to this entity
+				if(!seenEntities.contains(db_rel.getTargetEntity())) {
+					List deeperRels=this.findRelationshipPath((DbEntity)db_rel.getTargetEntity(), end, seenEntities, indent+"  ");
+				
+					//deeperRels will be a list of relationship paths that make it from the targetEntity to the end
+					//Create a *new* list with the current relationship at the head of each of these lists
+					Iterator deeperIt=deeperRels.iterator();
+					while(deeperIt.hasNext()) {
+						List deeperRelList=(List)deeperIt.next();
+						List aList=new ArrayList();
+						aList.add(db_rel); //Start of with db_rel...
+						aList.addAll(deeperRelList); //..add the rest..
+						result.add(aList); //  ... and pop it into the result
+					}
+				}
+			}
+		}
+		return result;
+	}
+	
+	private void populateRelationshipList(DbEntity startEntity, DbEntity endEntity) {
+		relList.addAll(this.findRelationshipPath(startEntity, endEntity, new HashSet(), ""));
+	}
+	
 	public ChooseDbRelationshipDialog(DataMap temp_map, java.util.List db_rel_list
 				, DbEntity temp_start, DbEntity temp_end, boolean to_many)
 	{
@@ -126,19 +174,11 @@ implements ActionListener {
 		start = temp_start;
 		end = temp_end;
 		
-		// Find matching relationship in the start DbEntity
-		java.util.List list = temp_start.getRelationshipList();
-		Iterator iter = list.iterator();
-		while (iter.hasNext()) {
-			DbRelationship db_rel = (DbRelationship)iter.next();
-			if (db_rel.getTargetEntity() == temp_end) {
-				relList.add(db_rel);
-			}
-		}
-
+		this.populateRelationshipList(temp_start, temp_end);
+		
 		// If DbRelationship does not exist, create it.
 		if (null != db_rel_list && db_rel_list.size() > 0) {
-			dbRel = (DbRelationship)db_rel_list.get(0);
+			dbRels = new ArrayList(db_rel_list); //Copy
 		}
 		
 		init();
@@ -152,6 +192,19 @@ implements ActionListener {
 		edit.addActionListener(this);
 	}
 	
+	private boolean relListsSame(List relList1, List relList2) {
+		if(relList1.size()!=relList2.size()) {
+			return false;
+		}
+		int i;
+		for(i=0; i<relList1.size(); i++) {
+			if(!relList1.get(i).equals(relList2.get(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	
 	/** Sets up the graphical components. */
 	private void init() {
@@ -160,14 +213,14 @@ implements ActionListener {
 		relSelect.setBackground(Color.WHITE);		
 		
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		RelationshipWrapper sel_item = new RelationshipWrapper(null);
+		RelationshipWrapper sel_item = new RelationshipWrapper((Relationship)null);
 		model.addElement(sel_item);
 		Iterator iter = relList.iterator();
 		while (iter.hasNext()) {
-			DbRelationship db_rel = (DbRelationship) iter.next();
-			RelationshipWrapper wrap = new RelationshipWrapper(db_rel);
+			List db_rels= (List) iter.next();
+			RelationshipWrapper wrap = new RelationshipWrapper(db_rels);
 			model.addElement(wrap);
-			if (dbRel != null && db_rel == dbRel) {	
+			if (dbRels != null &&  relListsSame(db_rels, dbRels)) {	
 				sel_item = wrap;
 			}
 		}		
@@ -194,8 +247,8 @@ implements ActionListener {
 		if (getChoice() != SELECT && getChoice() != EDIT)
 			return null;
 		ArrayList list = new ArrayList();
-		if (dbRel != null)
-			list.add(dbRel);
+		if (dbRels != null)
+			list.addAll(dbRels);
 		return list;
 	}
 
@@ -221,10 +274,10 @@ implements ActionListener {
 	private void processSelect() {
 		RelationshipWrapper wrap;
 		wrap = (RelationshipWrapper)relSelect.getSelectedItem();
-		if (null != wrap && wrap.getRelationship() != null)
-			dbRel = (DbRelationship)wrap.getRelationship();
+		if (null != wrap && wrap.getRelationshipList() != null)
+			dbRels = wrap.getRelationshipList();
 		else
-			dbRel = null;
+			dbRels = null;
 	
 		choice = SELECT;
 		hide();
@@ -233,24 +286,24 @@ implements ActionListener {
 	private void processEdit() {
 		RelationshipWrapper wrap;
 		wrap = (RelationshipWrapper)relSelect.getSelectedItem();
-		if (null == wrap || wrap.getRelationship() == null) {
+		if (null == wrap || wrap.getRelationshipList() == null) {
 			JOptionPane.showMessageDialog(Editor.getFrame(),
 											"Select the relationship");
 			return;
 		}
-		dbRel = (DbRelationship)wrap.getRelationship();
+		dbRels = wrap.getRelationshipList();
 		choice = EDIT;
 		hide();
 	}
 	
 	private void processCancel() {
-		dbRel = null;
+		dbRels = null;
 		choice = CANCEL;
 		hide();
 	}
 	
 	private void processNew() {
-		dbRel = null;
+		dbRels = null;
 		choice = NEW;
 		hide();
 	}

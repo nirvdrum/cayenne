@@ -253,10 +253,22 @@ public final class QueryHelper {
 		return trans.getPeer(qual);
 	}
 
+	public static SelectQuery selectRelationshipObjects(QueryEngine e, DataObject source, String relName) {
+		SelectQuery sel = new SelectQuery();
+		ObjEntity ent = e.getEntityResolver().lookupObjEntity(source.getClass());
+		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
+		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
+		sel.setRoot(destEnt);
+		sel.setQualifier(
+			ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, rel.getReverseRelationship().getName(), source));
+		return sel;
+	}
+
 	/** 
 	 * Generates a SelectQuery that can be used to fetch 
 	 * relationship destination objects given a source object
 	 * of a to-many relationship. 
+	 * @deprecated use selectRelationshipObjects(QueryEngine, DataObject, String) instead
 	 */
 	public static SelectQuery selectRelationshipObjects(
 		QueryEngine e,

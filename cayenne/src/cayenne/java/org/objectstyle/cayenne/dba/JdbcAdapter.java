@@ -130,8 +130,12 @@ public class JdbcAdapter implements DbAdapter {
             return SelectTranslator.class;
         } else if (q instanceof UpdateQuery) {
             return UpdateTranslator.class;
+        } else if (q instanceof FlattenedRelationshipInsertQuery) {
+            return FlattenedRelationshipInsertTranslator.class;
         } else if (q instanceof InsertQuery) {
             return InsertTranslator.class;
+        } else if (q instanceof FlattenedRelationshipDeleteQuery) {
+            return FlattenedRelationshipDeleteTranslator.class;
         } else if (q instanceof DeleteQuery) {
             return DeleteTranslator.class;
         } else if (q instanceof SqlSelectQuery) {

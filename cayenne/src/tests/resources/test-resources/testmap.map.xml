@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data-map>
+	<db-entity name="ARTGROUP">
+		<db-attribute name="GROUP_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" isMandatory="true" length="100"/>
+	</db-entity>
 	<db-entity name="ARTIST">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="255"/>
@@ -8,6 +12,10 @@
 	<db-entity name="ARTIST_EXHIBIT">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="EXHIBIT_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="ARTIST_GROUP">
+		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="GROUP_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="EXHIBIT">
 		<db-attribute name="CLOSING_DATE" type="TIME" isMandatory="true"/>
@@ -53,6 +61,9 @@
 			<db-attribute-ref name="PAINTING_ID"/>
 		</db-attribute-derived>
 	</db-entity>
+	<obj-entity name="ArtGroup" className="org.objectstyle.art.ArtGroup" dbEntityName="ARTGROUP">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-name="NAME"/>
+	</obj-entity>
 	<obj-entity name="Artist" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
 		<obj-attribute name="dateOfBirth" type="java.sql.Time" db-attribute-name="DATE_OF_BIRTH"/>
@@ -102,6 +113,12 @@
 	<db-relationship name="artistExhibitArray" source="EXHIBIT" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
 	</db-relationship>
+	<db-relationship name="artistGroupArray" source="ARTGROUP" target="ARTIST_GROUP" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="GROUP_ID" target="GROUP_ID"/>
+	</db-relationship>
+	<db-relationship name="artistGroupArray" source="ARTIST" target="ARTIST_GROUP" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
 	<db-relationship name="exhibitArray" source="GALLERY" target="EXHIBIT" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
@@ -115,6 +132,9 @@
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
 	<db-relationship name="toArtist" source="ARTIST_EXHIBIT" target="ARTIST" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship name="toArtist" source="ARTIST_GROUP" target="ARTIST" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
 	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
@@ -135,9 +155,16 @@
 	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
+	<db-relationship name="toGroup" source="ARTIST_GROUP" target="ARTGROUP" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="GROUP_ID" target="GROUP_ID"/>
+	</db-relationship>
 	<db-relationship name="toPaintingInfo" source="PAINTING" target="PAINTING_INFO" toDependentPK="true" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
+	<obj-relationship name="artistArray" source="ArtGroup" target="Artist" toMany="true">
+		<db-relationship-ref source="ARTGROUP" target="ARTIST_GROUP" name="artistGroupArray"/>
+		<db-relationship-ref source="ARTIST_GROUP" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
 	<obj-relationship name="artistExhibitArray" source="Artist" target="ArtistExhibit" toMany="true">
 		<db-relationship-ref source="ARTIST" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
 	</obj-relationship>
@@ -146,6 +173,10 @@
 	</obj-relationship>
 	<obj-relationship name="exhibitArray" source="Gallery" target="Exhibit" toMany="true">
 		<db-relationship-ref source="GALLERY" target="EXHIBIT" name="exhibitArray"/>
+	</obj-relationship>
+	<obj-relationship name="groupArray" source="Artist" target="ArtGroup" toMany="true">
+		<db-relationship-ref source="ARTIST" target="ARTIST_GROUP" name="artistGroupArray"/>
+		<db-relationship-ref source="ARTIST_GROUP" target="ARTGROUP" name="toGroup"/>
 	</obj-relationship>
 	<obj-relationship name="painting" source="PaintingInfo" target="Painting" toMany="false">
 		<db-relationship-ref source="PAINTING_INFO" target="PAINTING" name="painting"/>

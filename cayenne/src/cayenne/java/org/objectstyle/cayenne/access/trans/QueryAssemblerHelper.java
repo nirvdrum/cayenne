@@ -103,7 +103,7 @@ public abstract class QueryAssemblerHelper {
     }
 
     public DbEntity getDbEntity() {
-        return getQueryAssembler().getRootEntity().getDbEntity();
+        return getQueryAssembler().getRootDbEntity();
     }
 
     /** Processes parts of the OBJ_PATH expression. */

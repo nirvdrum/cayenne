@@ -229,8 +229,7 @@ public class CayenneDataObject implements DataObject {
         }
 
         // need to fetch
-        SelectQuery sel =
-            QueryHelper.selectRelationshipObjects(dataContext, objectId, relName);
+		SelectQuery sel = QueryHelper.selectRelationshipObjects(dataContext, this, relName);
         List results = dataContext.performQuery(sel);
 
         // unexpected
@@ -253,6 +252,18 @@ public class CayenneDataObject implements DataObject {
     }
 
     public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
+		ObjRelationship relationship = this.getRelationshipNamed(relName);
+		//Only delete the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
+		//This kind of doubles up the meaning of that flag, so we may need to add another?
+		if (relationship.isFlattened() && setReverse) {
+			if (relationship.isReadOnly()) {
+				throw new CayenneRuntimeException("Cannot modify (remove from) the read-only relationship " + relName);
+			}
+			//Handle removing from a flattened relationship
+			dataContext.registerFlattenedRelationshipDelete(this, relName, val);
+		}
+		
+		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.remove(val);
 
@@ -262,6 +273,18 @@ public class CayenneDataObject implements DataObject {
     }
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
+		ObjRelationship relationship = this.getRelationshipNamed(relName);
+		//Only create the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
+		//This kind of doubles up the meaning of that flag, so we may need to add another?
+		if (relationship.isFlattened() && setReverse) {
+			if (relationship.isReadOnly()) {
+				throw new CayenneRuntimeException("Cannot modify (add to) the read-only relationship " + relName);
+			}
+			//Handle adding to a flattened relationship
+			dataContext.registerFlattenedRelationshipInsert(this, relName, val);
+		}
+		
+		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
         List relList = (List) readProperty(relName);
         relList.add(val);
 
@@ -294,6 +317,10 @@ public class CayenneDataObject implements DataObject {
 
         writeProperty(relName, val);
     }
+    
+	private ObjRelationship getRelationshipNamed(String relName) {
+		return (ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(this.getClass()).getRelationship(relName);
+	}
 
     /** 
      * Initializes reverse relationship from object <code>val</code> 

@@ -60,6 +60,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+
 /** Metadata for the navigational association between the data objects.
  *  For example, if class "Employee" you may need to get to the department
  *  entity by calling "employee.getDepartment()". In this case you navigate
@@ -71,6 +73,13 @@ import java.util.List;
  *  of the database entity relationships.
  *  The ObjRelationship objects are stored in the ObjEntitys. */
 public class ObjRelationship extends Relationship {
+	
+	//Not flattened initially - will be set when dbRels are added that make it flattened
+	private boolean isFlattened = false;
+
+	//Initially all relationships are read/write - a flattened relationship may be readonly (in certain circumstances)
+	//Will be set in that case
+	private boolean isReadOnly = false;
 
 	private List dbRelationships = new ArrayList();
 
@@ -165,16 +174,97 @@ public class ObjRelationship extends Relationship {
 
 	/** Appends a DbRelationship to the existing list of DbRelationships.*/
 	public void addDbRelationship(DbRelationship dbRel) {
+		//Adding a second is creating a flattened relationship.
+		//Ensure that the new relationship properly continues on the flattened path
+		if (dbRelationships.size() > 0) {
+			DbRelationship lastRel = (DbRelationship) dbRelationships.get(dbRelationships.size() - 1);
+			if (!lastRel.getTargetEntityName().equals(dbRel.getSourceEntity().getName())) {
+				throw new CayenneRuntimeException(
+					"Error adding db relationship "
+						+ dbRel
+						+ " to ObjRelationship "
+						+ this
+						+ " because the source of the newly added relationship is not the target of the previous relationship in the chain");
+			}
+			isFlattened = true; //Now there will be more than one dbRel - this is a flattened relationship
+		}
 		dbRelationships.add(dbRel);
+		this.isReadOnly = this.newReadOnlyValue();
 	}
 
 
     /** Removes a relationship <code>dbRel</code> from the list of relationships. */
     public void removeDbRelationship(DbRelationship dbRel) {
         dbRelationships.remove(dbRel);
+        //If we removed all but one dbRel, then it's no longer flattened
+		if (dbRelationships.size() <= 1) {
+			isFlattened = false;			
+		}
+		this.isReadOnly = this.newReadOnlyValue();
     }
 
     public void clearDbRelationships() {
     	dbRelationships.clear();
     }
+    
+	//Implements logic to calculate a new readonly value after having added/removed dbRelationships
+	private boolean newReadOnlyValue() {
+		//Quickly filter the single dbrel case
+		if (dbRelationships.size() < 2) {
+			return false;
+		}
+
+		//Also quickly filter any really complex db rel cases
+		if (dbRelationships.size() > 2) {
+			return true;
+		}
+
+		//Now check for a toMany -> toOne series (to return false)
+		DbRelationship firstRel = (DbRelationship) dbRelationships.get(0);
+		DbRelationship secondRel = (DbRelationship) dbRelationships.get(1);
+
+		//First toOne or second toMany means read only
+		if (!firstRel.isToMany() || secondRel.isToMany()) {
+			return true;
+		}
+
+		//Relationship type is in order, now we only have to check the intermediate table
+		DataMap map = firstRel.getTargetEntity().getDataMap();
+		if (map == null) {
+			throw new CayenneRuntimeException(
+				this.getClass().getName() + " could not obtain a DataMap for the destination of " + firstRel.getName());
+		}
+		DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName(), true);
+		List pkAttribs = intermediateEntity.getPrimaryKey();
+		List allAttribs = intermediateEntity.getAttributeList();
+		int i;
+		for (i = 0; i < allAttribs.size(); i++) {
+			if (!pkAttribs.contains(allAttribs.get(i))) {
+				return true; //one of the attributes of intermediate entity is not in the pk.  Must be readonly
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the relationship is a "flattened" relationship.
+	 * This means that the ObjRelationship represents a series of DbRelationships (a relationship path)
+	 * transparently.  All flattened relationships are "readable", but only those formed across a many-many link table
+	 * (with no custom attributes other than foreign keys) can be automatically written.  isReadOnly handles that 
+	 * @see #isReadOnly
+	 * @return flag indicating if the relationship is flattened or not
+	 */
+	public boolean isFlattened() {
+		return isFlattened;
+	}
+
+	/**
+	 * Returns true if the relationship is flattened, but is not of the single case that can have automatic write support
+	 * Otherwise, it returns false.
+	 * @return flag indicating if the relationship is read only or not
+	 */
+	public boolean isReadOnly() {
+		return isReadOnly;
+	}
+
 }

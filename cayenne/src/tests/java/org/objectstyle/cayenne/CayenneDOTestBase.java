@@ -77,6 +77,8 @@ public class CayenneDOTestBase extends CayenneTestCase {
     static final String galleryName = "my gallery";
     static final String textReview = "this painting sucks...";
     static final String paintingName = "painting about nothing";    
+    static final String groupName = "a group";
+
     static final byte[] paintingImage = new byte[] {2, 3, 4, 5};
     
     protected DataContext ctxt;

@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.util.CayenneMap;
  *
  * @author Michael Shengaout
  * @author Andrei Adamchik  
+ * @author Craig Miskell
  */
 public class DataMap {
 	static Logger logObj = Logger.getLogger(DataMap.class);
@@ -522,6 +523,10 @@ public class DataMap {
 
 	/** "Dirty" remove of the ObjEntity from the data map.*/
 	public void removeObjEntity(String entity_name) {
-		objEntityMap.remove(entity_name);
+		ObjEntity objEntity=(ObjEntity)objEntityMap.get(entity_name);
+		if(objEntity!=null) {
+			objEntityMap.remove(entity_name);
+			classNameObjEntityMap.remove(objEntity.getClassName());
+		}
 	}
 }

@@ -93,6 +93,8 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
+import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -110,6 +112,8 @@ import org.objectstyle.cayenne.util.Util;
   */
 public class DataContext implements QueryEngine, Serializable {
     static Logger logObj = Logger.getLogger(DataContext.class.getName());
+	private HashMap flattenedInserts = new HashMap();
+	private HashMap flattenedDeletes = new HashMap();
 
     protected transient QueryEngine parent;
     protected transient ObjectStore objectStore;
@@ -530,6 +534,8 @@ public class DataContext implements QueryEngine, Serializable {
                 }
             }
         }
+
+		queryList.addAll(this.getFlattenedUpdateQueries());
 
         if (queryList.size() > 0) {
             ContextCommitObserver result =
@@ -974,4 +980,102 @@ public class DataContext implements QueryEngine, Serializable {
    	public EntityResolver getEntityResolver() {
    		return parent.getEntityResolver();
    	}
+   	
+   	
+   	public void registerFlattenedRelationshipInsert(DataObject source, String relName, DataObject destination) {
+		//Register this combination (so we can remove it later if an insert occurs before commit)
+		HashMap insertsForObject = (HashMap) flattenedInserts.get(source);
+		HashMap deletesForObject = (HashMap) flattenedDeletes.get(source);
+
+		List insertedObjsForRel = (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
+		List deletedObjsForRel = (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
+		//Check to see if the value has been inserted, in which case simply don't insert it
+		if ((deletedObjsForRel != null) && (deletedObjsForRel.contains(destination))) {
+			deletedObjsForRel.remove(destination);
+		} else {
+			//Nope, val not already inserted.  Delete it for real
+			if (insertedObjsForRel == null) {
+				if (insertsForObject == null) {
+					insertsForObject = new HashMap();
+					flattenedInserts.put(source, insertsForObject);
+				}
+				insertedObjsForRel = new ArrayList();
+				insertsForObject.put(relName, insertedObjsForRel);
+			}
+			insertedObjsForRel.add(destination);
+		}
+	}
+
+	public void registerFlattenedRelationshipDelete(DataObject source, String relName, DataObject destination) {
+		//Register this combination (so we can remove it later if an insert occurs before commit)
+		HashMap insertsForObject = (HashMap) flattenedInserts.get(source);
+		HashMap deletesForObject = (HashMap) flattenedDeletes.get(source);
+
+		List insertedObjsForRel = (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
+		List deletedObjsForRel = (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
+		//Check to see if the value has been inserted, in which case simply don't insert it
+		if ((insertedObjsForRel != null) && (insertedObjsForRel.contains(destination))) {
+			insertedObjsForRel.remove(destination);
+		} else {
+			//Nope, val not already inserted.  Delete it for real
+			if (deletedObjsForRel == null) {
+				if (deletesForObject == null) {
+					deletesForObject = new HashMap();
+					flattenedDeletes.put(source, deletesForObject);
+				}
+				deletedObjsForRel = new ArrayList();
+				deletesForObject.put(relName, deletedObjsForRel);
+			}
+			deletedObjsForRel.add(destination);
+		}
+	}
+
+	/**
+	 * Returns a list of queries (typically insert/delete types) that should be performed in order
+	 * to commit any changes to flattened relationships that have occurred.
+	 * @return List a list of Query objects to be performed
+	 */
+	public List getFlattenedUpdateQueries() {
+		ArrayList result=new ArrayList();
+		int i;
+		Iterator objectIterator;
+		
+		objectIterator=flattenedInserts.keySet().iterator();
+		while(objectIterator.hasNext()) {
+			DataObject sourceObject=(DataObject)objectIterator.next();
+			HashMap insertsForObject=(HashMap)flattenedInserts.get(sourceObject);
+			Iterator relNameIterator=insertsForObject.keySet().iterator();
+			while(relNameIterator.hasNext()) {
+				String relName=(String)relNameIterator.next();
+				List objects=(List)insertsForObject.get(relName);
+				for(i=0; i<objects.size(); i++) {
+					result.add(new FlattenedRelationshipInsertQuery(sourceObject, (DataObject)objects.get(i), relName));
+				}
+			}
+		}
+
+		objectIterator=flattenedDeletes.keySet().iterator();
+		while(objectIterator.hasNext()) {
+			DataObject sourceObject=(DataObject)objectIterator.next();
+			HashMap deletesForObject=(HashMap)flattenedDeletes.get(sourceObject);
+			Iterator relNameIterator=deletesForObject.keySet().iterator();
+			while(relNameIterator.hasNext()) {
+				String relName=(String)relNameIterator.next();
+				List objects=(List)deletesForObject.get(relName);
+				for(i=0; i<objects.size(); i++) {
+					result.add(new FlattenedRelationshipDeleteQuery(sourceObject, (DataObject)objects.get(i), relName));
+				}
+			}
+		}		
+		return result;
+
+	}
+	/**
+	 * Should be called once the queries returned by getFlattenedUpdateQueries have been succesfully executed
+	 * ,or reverted and are no longer needed.
+	 */
+	public void clearFlattenedUpdateQueries() {
+		this.flattenedDeletes=new HashMap();
+		this.flattenedInserts=new HashMap();
+	}
 }
