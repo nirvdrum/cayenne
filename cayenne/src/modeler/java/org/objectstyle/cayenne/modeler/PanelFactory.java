@@ -79,6 +79,8 @@ import com.jgoodies.forms.layout.FormLayout;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
+
+// TODO: get rid of PanelFactory in favor of JGoodies Forms
 public class PanelFactory {
     
     /**

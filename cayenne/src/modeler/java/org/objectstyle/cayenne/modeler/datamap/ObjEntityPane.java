@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -79,7 +78,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
@@ -87,6 +85,9 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.EntityWrapper;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
  * Detail view of the ObjEntity properties. 
@@ -128,31 +129,31 @@ public class ObjEntityPane
     }
 
     private void init() {
-        setLayout(new BorderLayout());
-
+        // create widgets
         name = CayenneWidgetFactory.createTextField();
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
-
         dbName = CayenneWidgetFactory.createComboBox();
 
         readOnly = new JCheckBox();
         readOnly.addItemListener(this);
-
         tableLabel = CayenneWidgetFactory.createLabelButton("Table name:");
 
-        Component[] leftCol =
-            new Component[] {
-				CayenneWidgetFactory.createLabel("ObjEntity name: "),
-				CayenneWidgetFactory.createLabel("Java class: "),
-				CayenneWidgetFactory.createLabel("Super class name: "),
-                tableLabel,
-				CayenneWidgetFactory.createLabel("Read-only: ")};
+        // assemble
+        setLayout(new BorderLayout());
+        FormLayout layout =
+            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
 
-        Component[] rightCol =
-            new Component[] { name, className, superClassName, dbName, readOnly };
+        builder.appendSeparator("ObjEntity Configuration");
+        builder.append("ObjEntity Name:", name);
+        builder.append("Java Class:", className);
+        builder.append("Superclass:", superClassName);
+        builder.append(tableLabel, dbName);
+        builder.append("Read-only:", readOnly);
 
-        add(PanelFactory.createForm(leftCol, rightCol), BorderLayout.NORTH);
+        add(builder.getPanel(), BorderLayout.CENTER);
     }
 
     public void processExistingSelection() {
