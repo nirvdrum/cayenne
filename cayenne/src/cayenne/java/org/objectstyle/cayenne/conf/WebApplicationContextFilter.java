@@ -148,7 +148,7 @@ public class WebApplicationContextFilter implements Filter {
 
     public synchronized void init(FilterConfig config) throws ServletException {
         this.config = config;
-        ServletConfiguration.initializeConfiguration(config.getServletContext());
+        ServletUtil.initializeSharedConfiguration(config.getServletContext());
     }
 
     /**
@@ -170,7 +170,7 @@ public class WebApplicationContextFilter implements Filter {
 
         if (request instanceof HttpServletRequest) {
             HttpSession session = ((HttpServletRequest) request).getSession(true);
-            DataContext dataContext = ServletConfiguration.getDefaultContext(session);
+            DataContext dataContext = ServletUtil.getSessionContext(session);
 
             if (dataContext == null) {
                 logger.debug("DataContext was null. Throwing Exception");

@@ -79,9 +79,9 @@ import javax.servlet.http.HttpSessionListener;
  * </p>
  * 
  * <pre>
- * &lt;listener&gt;
- *  &lt;listener-class&gt;org.objectstyle.cayenne.conf.WebApplicationListener&lt;/listener-class&gt;
- *  &lt;/listener&gt;
+ *  &lt;listener&gt;
+ *   &lt;listener-class&gt;org.objectstyle.cayenne.conf.WebApplicationListener&lt;/listener-class&gt;
+ *   &lt;/listener&gt;
  * </pre>
  * 
  * <p>
@@ -96,16 +96,13 @@ import javax.servlet.http.HttpSessionListener;
 public class WebApplicationListener implements HttpSessionListener,
         ServletContextListener {
 
-    public WebApplicationListener() {
-    }
-
     /**
      * Establishes a Cayenne shared Configuration object that can later be obtained by
      * calling <code>Configuration.getSharedConfiguration()</code>. This method is a
      * part of ServletContextListener interface and is called on application startup.
      */
     public void contextInitialized(ServletContextEvent sce) {
-        setConfiguration(newConfiguration(sce.getServletContext()));
+        ServletUtil.initializeSharedConfiguration(sce.getServletContext());
     }
 
     /**
@@ -123,7 +120,7 @@ public class WebApplicationListener implements HttpSessionListener,
      */
     public void sessionCreated(HttpSessionEvent se) {
         se.getSession().setAttribute(
-                ServletConfiguration.DATA_CONTEXT_KEY,
+                ServletUtil.DATA_CONTEXT_KEY,
                 getConfiguration().getDomain().createDataContext());
     }
 
@@ -135,15 +132,19 @@ public class WebApplicationListener implements HttpSessionListener,
     }
 
     /**
-     * Return an instance of Configuration that will be initialized as the shared
+     * Returns an instance of Configuration that will be initialized as the shared
      * configuration. Provides an extension point for the developer to provide their own
      * custom configuration.
+     * 
+     * @deprecated since 1.2
      */
     protected Configuration newConfiguration(ServletContext sc) {
-        return new ServletConfiguration(sc);
+        return new BasicServletConfiguration(sc);
     }
 
-    /** Initializes the configuration. */
+    /**
+     * Initializes the configuration.
+     */
     protected void setConfiguration(Configuration configuration) {
         Configuration.initializeSharedConfiguration(configuration);
     }

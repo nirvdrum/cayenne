@@ -32,13 +32,13 @@ DataContext context = DataContext.createDataContext();</source>
         	Retrieving it from a session is done with the following code:</p>
 
 		<source>
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletUtil;
 import org.objectstyle.cayenne.access.DataContext;
 ...
 
 // assume this exists
 HttpSession session;
-DataContext context = ServletConfiguration.getDefaultContext(session);</source>
+DataContext context = ServletUtil.getSessionContext(session);</source>
 		</subsection>
 
 		<subsection name="6.1.3 Retrieving Thread-Bound DataContext.">

@@ -26,7 +26,7 @@ HttpSession session; // assume this exists
 List sharedUserTypes = (List) session.getServletContext().getAttribute("userTypes);
 
 // transfer shared
-DataContext sessionContext = ServletConfiguration.getDefaultContext(session);
+DataContext sessionContext = ServletUtil.getSessionContext(session);
 List localUserTypes = sessionContext.localObjects(sharedUserTypes);
 
 UserType type = (UserType) localUserTypes.get(0);

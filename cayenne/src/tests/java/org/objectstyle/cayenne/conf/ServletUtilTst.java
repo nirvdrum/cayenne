@@ -55,48 +55,31 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.WebApplicationResourceLocator;
+import org.objectstyle.cayenne.util.WebApplicationResourceLocatorAccess;
+
+import com.mockrunner.mock.web.MockServletContext;
 
 import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unit.util.MockConfiguration;
-
-import com.mockrunner.mock.web.MockHttpSession;
 
 /**
  * @author Andrei Adamchik
  */
-public class WebApplicationListenerTst extends TestCase {
+public class ServletUtilTst extends TestCase {
 
-    public void testSessionCreated() throws Exception {
-        HttpSession session = new MockHttpSession();
-        assertNull(session.getAttribute(ServletUtil.DATA_CONTEXT_KEY));
-        WebApplicationListener listener = createTestListener();
+    public void testCreateLocator() {
+        MockServletContext context = new MockServletContext();
+        context.setInitParameter(ServletUtil.CONFIGURATION_PATH_KEY, "/WEB-INF/xyz");
 
-        // testing this..
-        listener.sessionCreated(new HttpSessionEvent(session));
-
-        // session must have a DataContext now...
-
-        Object context = session.getAttribute(ServletUtil.DATA_CONTEXT_KEY);
+        ResourceLocator locator = ServletUtil.createLocator(context);
+        assertNotNull("Locator not initialized", locator);
         assertTrue(
-                "DataContext was expected to be created, instead iot was " + context,
-                context instanceof DataContext);
-    }
+                "Unexpected Locator type: " + locator.getClass().getName(),
+                locator instanceof WebApplicationResourceLocator);
+        WebApplicationResourceLocatorAccess accessor = new WebApplicationResourceLocatorAccess(
+                (WebApplicationResourceLocator) locator);
 
-    protected WebApplicationListener createTestListener() throws Exception {
-        // configure mockup objects for the web listener environment...
-
-        final Configuration config = new MockConfiguration();
-        config.addDomain(new DataDomain("mockup"));
-        return new WebApplicationListener() {
-
-            protected Configuration getConfiguration() {
-                return config;
-            }
-        };
+        assertTrue(accessor.getAdditionalContextPaths().contains("/WEB-INF/xyz"));
     }
 }

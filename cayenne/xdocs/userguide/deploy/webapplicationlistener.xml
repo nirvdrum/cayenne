@@ -6,7 +6,7 @@
            <subsection name="12.2 Web Applications" anchor="web">
                <subsection name="12.2.2 Servlet 2.3 Listener">
 <p>This configuration approach is based on setting up a WebApplicationListener as a listener for servlet context 
-					and session events. Session DataContext is retrieved via ServletConfiguration.getDefaultContext(..) static method.
+					and session events. Session DataContext is retrieved via ServletUtil.getSessionContext(..) static method.
 					Listener approach is 100% configuration-based and removes a need for special initialization servlet.</p>
 				<table>
 				<tr>
@@ -15,7 +15,7 @@
 				</tr>
 				<tr>
 					<th>Participating classes:</th>
-					<td>org.objectstyle.cayenne.conf.ServletConfiguration, org.objectstyle.cayenne.conf.WebApplicationListener</td>
+					<td>org.objectstyle.cayenne.conf.ServletUtil, org.objectstyle.cayenne.conf.WebApplicationListener</td>
 				</tr>
 				<tr>
 					<th>Allows cayenne.xml in WEB-INF/:</th>
@@ -39,7 +39,7 @@
 <p>Sample DataContext retrieval code: </p>  
 <source>
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletUtil;
 import javax.servlet.http.HttpServletRequest;
 ...
 
@@ -47,7 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 HttpServletRequest r;
 
 // get session DataContext to perform database queries
-DataContext context = ServletConfiguration.getDefaultContext(r.getSession());
+DataContext context = ServletUtil.getSessionContext(r.getSession());
 </source>
 		</subsection>
 </subsection>    

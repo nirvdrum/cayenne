@@ -21,7 +21,7 @@
 					files are placed in the location accessible to the 
 					application ClassLoader (e.g. "mywebapp/WEB-INF/classes/"). 
 					Session DataContext still can be obtained via 
-					ServletConfiguration, <a href="../datactxt/create.html">as 
+					ServletUtil, <a href="../datactxt/create.html">as 
 					described earlier</a>.</p>
 				<p>In addition Cayenne provides a number of configuration 
 					features that take advantage of the standard web container 

@@ -8,7 +8,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletUtil;
 
 import webtest.Gallery;
 import formbean.GalleryForm;
@@ -23,7 +23,7 @@ public class SaveGalleryAction extends Action {
         throws Exception {
 
         DataContext ctxt =
-            ServletConfiguration.getDefaultContext(request.getSession());
+            ServletUtil.getSessionContext(request.getSession());
 
         GalleryForm galleryForm = (GalleryForm) form;
 

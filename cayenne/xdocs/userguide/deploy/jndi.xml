@@ -15,13 +15,6 @@
                 </p>
                 
 <source>...
-
-&amp;lt;listener&amp;gt;
-   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.ServletConfiguration&amp;lt;/listener-class&amp;gt;
-&amp;lt;/listener&amp;gt; 
-
-...
-
 &amp;lt;resource-ref&amp;gt;
    &amp;lt;res-ref-name&gt;jdbc/mydb&amp;lt;/res-ref-name&amp;gt;
    &amp;lt;res-type&gt;javax.sql.DataSource&amp;lt;/res-type&amp;gt;

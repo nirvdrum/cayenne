@@ -53,69 +53,28 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.conf;
-
-import javax.servlet.ServletContext;
+package org.objectstyle.cayenne.util;
 
 import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.util.WebApplicationResourceLocator;
-import org.objectstyle.cayenne.util.WebApplicationResourceLocatorAccess;
 
 import com.mockrunner.mock.web.MockServletContext;
 
 /**
  * @author Andrei Adamchik
  */
-public class ServletConfigurationTst extends TestCase {
+public class WebApplicationResourceLocatorTst extends TestCase {
 
-    public void testContext() {
-        ServletContext context = new MockServletContext();
-        ServletConfiguration config = new ServletConfiguration();
+    public void testServletContext() {
+        MockServletContext context = new MockServletContext();
 
-        assertNull(config.getServletContext());
-        assertFalse(config.canInitialize());
-
-        config.setServletContext(context);
-        assertSame(context, config.getServletContext());
-        assertTrue(config.canInitialize());
-    }
-
-    public void testContext2() {
-        ServletContext context = new MockServletContext();
-        ServletConfiguration config = new ServletConfiguration(context);
-        assertSame(context, config.getServletContext());
-        assertTrue(config.canInitialize());
+        WebApplicationResourceLocator locator = new WebApplicationResourceLocator();
+        locator.setServletContext(context);
+        assertSame(context, locator.getServletContext());
     }
 
     public void testAddContextPath() {
-        ServletConfiguration config = new ServletConfiguration();
-
-        ResourceLocator locator = config.getResourceLocator();
-        assertTrue(locator instanceof WebApplicationResourceLocator);
-        WebApplicationResourceLocatorAccess accessor = new WebApplicationResourceLocatorAccess(
-                (WebApplicationResourceLocator) locator);
-
-        config.addContextPath("/WEB-INF/abc");
-        assertTrue(accessor.getAdditionalContextPaths().contains("/WEB-INF/abc"));
-    }
-
-    public void testInitParameter() {
-        MockServletContext context = new MockServletContext();
-        context.setInitParameter(
-                ServletConfiguration.CONFIGURATION_PATH_KEY,
-                "/WEB-INF/xyz");
-        ServletConfiguration config = new ServletConfiguration(context);
-
-        ResourceLocator locator = config.getResourceLocator();
-        assertNotNull("Locator not initialized", locator);
-        assertTrue(
-                "Unexpected Locator type: " + locator.getClass().getName(),
-                locator instanceof WebApplicationResourceLocator);
-        WebApplicationResourceLocatorAccess accessor = new WebApplicationResourceLocatorAccess(
-                (WebApplicationResourceLocator) locator);
-
-        assertTrue(accessor.getAdditionalContextPaths().contains("/WEB-INF/xyz"));
+        WebApplicationResourceLocator locator = new WebApplicationResourceLocator();
+        locator.addFilesystemPath("/WEB-INF/abc");
+        assertTrue(locator.additionalContextPaths.contains("/WEB-INF/abc"));
     }
 }

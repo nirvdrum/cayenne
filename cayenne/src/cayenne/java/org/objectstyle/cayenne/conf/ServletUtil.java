@@ -74,16 +74,16 @@ import org.objectstyle.cayenne.util.WebApplicationResourceLocator;
  * (though CLASSPATH locations such as "/WEB-INF/classes" and "/WEB-INF/lib/some.jar" are
  * supported as well). By default search for cayenne.xml is done in /WEB-INF/ folder. To
  * specify an arbitrary context path in the web application (e.g. "/WEB-INF/cayenne"), use
- * <code>cayenne.configuration.path</code> init parameters in <code>web.xml</code>.
+ * <code>cayenne.configuration.path</code> context parameters in <code>web.xml</code>.
  * </p>
  * 
  * @author Andrei Adamchik
  * @author Scott Finnerty
- * @since 1.2 renamed from BasicServletConfiguration.
+ * @since 1.2
  */
-public class ServletConfiguration extends DefaultConfiguration {
+public class ServletUtil {
 
-    private static Logger logObj = Logger.getLogger(ServletConfiguration.class);
+    private static Logger logObj = Logger.getLogger(ServletUtil.class);
 
     /**
      * A name of the web application initialization parameter used to specify extra paths
@@ -96,122 +96,72 @@ public class ServletConfiguration extends DefaultConfiguration {
      */
     public static final String DATA_CONTEXT_KEY = "cayenne.datacontext";
 
-    protected ServletContext servletContext;
-
     /**
      * Creates a new ServletConfiguration and sets is as a Configuration signleton.
      */
-    public synchronized static ServletConfiguration initializeConfiguration(
-            ServletContext ctxt) {
+    public synchronized static Configuration initializeSharedConfiguration(
+            ServletContext context) {
 
-        // check if this web application already has a servlet configuration
-        // sometimes multiple initializations are done by mistake...
+        // check if this web application is already configured
 
         // don't use static getter, since it will do initialization on demand!!!
-        Configuration oldConfiguration = Configuration.sharedConfiguration;
-        if (oldConfiguration instanceof ServletConfiguration) {
-            ServletConfiguration basicConfiguration = (ServletConfiguration) oldConfiguration;
-            if (basicConfiguration.getServletContext() == ctxt) {
-                logObj.info("BasicServletConfiguration is already initialized, reusing.");
-                return basicConfiguration;
+        Configuration oldConfig = Configuration.sharedConfiguration;
+        if (oldConfig instanceof DefaultConfiguration) {
+
+            ResourceLocator locator = ((DefaultConfiguration) oldConfig)
+                    .getResourceLocator();
+
+            if (locator instanceof WebApplicationResourceLocator) {
+                if (((WebApplicationResourceLocator) locator).getServletContext() == context) {
+                    logObj
+                            .info("Configuration is already initialized with this context, reusing.");
+                    return oldConfig;
+                }
             }
         }
 
-        ServletConfiguration conf = new ServletConfiguration(ctxt);
+        // create new shared configuration
+        DefaultConfiguration conf = new DefaultConfiguration(
+                Configuration.DEFAULT_DOMAIN_FILE,
+                createLocator(context));
         Configuration.initializeSharedConfiguration(conf);
 
         return conf;
     }
 
     /**
-     * Returns default Cayenne DataContext associated with the HttpSession, creating it on
-     * the spot if needed.
+     * A helper method to create default ResourceLocator.
      */
-    public static DataContext getDefaultContext(HttpSession session) {
-        synchronized (session) {
-            DataContext ctxt = (DataContext) session.getAttribute(DATA_CONTEXT_KEY);
-
-            if (ctxt == null) {
-                ctxt = DataContext.createDataContext();
-                session.setAttribute(ServletConfiguration.DATA_CONTEXT_KEY, ctxt);
-            }
-
-            return ctxt;
-        }
-    }
-
-    /**
-     * Constructs an uninitialized ServletConfiguration.
-     */
-    public ServletConfiguration() {
-        ResourceLocator locator = new WebApplicationResourceLocator();
+    protected static ResourceLocator createLocator(ServletContext context) {
+        WebApplicationResourceLocator locator = new WebApplicationResourceLocator();
         locator.setSkipAbsolutePath(true);
         locator.setSkipClasspath(false);
         locator.setSkipCurrentDirectory(true);
         locator.setSkipHomeDirectory(true);
 
-        setResourceLocator(locator);
+        locator.setServletContext(context);
+        String configurationPath = context.getInitParameter(CONFIGURATION_PATH_KEY);
+        if (configurationPath != null && configurationPath.trim().length() > 0) {
+            locator.addFilesystemPath(configurationPath.trim());
+        }
+
+        return locator;
     }
 
     /**
-     * Constructs new ServletConfiguration initializing it with web application
-     * ServletContext that is used to locate configuration files.
+     * Returns default Cayenne DataContext associated with the HttpSession, creating it on
+     * the fly and storing in the session if needed.
      */
-    public ServletConfiguration(ServletContext ctxt) {
-        this();
-        setServletContext(ctxt);
-    }
+    public static DataContext getSessionContext(HttpSession session) {
+        synchronized (session) {
+            DataContext ctxt = (DataContext) session.getAttribute(DATA_CONTEXT_KEY);
 
-    /**
-     * Adds a path under the web application context to look for Cayenne configuration
-     * files. This is analogous to what "cayenne.configuration.path" initialization
-     * property does. Example path - "/WEB-INF/cayenne".
-     */
-    public void addContextPath(String path) {
-        getResourceLocator().addFilesystemPath(path);
-    }
-
-    /**
-     * Sets a "servletContext" property of this configuration.
-     */
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
-
-        updateLocator();
-    }
-
-    /**
-     * Returns a "servletContext" property of this configuration that is normally
-     * initialized in constructor by the creators of this configuration.
-     */
-    public ServletContext getServletContext() {
-        return servletContext;
-    }
-
-    /**
-     * Returns true if the servlet context is set.
-     */
-    public boolean canInitialize() {
-        return getServletContext() != null;
-    }
-
-    /**
-     * Updates ResourceLocator with current ServletContext parameters.
-     */
-    protected void updateLocator() {
-        ResourceLocator locator = getResourceLocator();
-
-        // setup context for resolving resources...
-        // only know how to handle WebApplicationResourceLocator...
-        if (locator instanceof WebApplicationResourceLocator) {
-            WebApplicationResourceLocator webLocator = (WebApplicationResourceLocator) locator;
-
-            webLocator.setServletContext(servletContext);
-            String configurationPath = servletContext
-                    .getInitParameter(CONFIGURATION_PATH_KEY);
-            if (configurationPath != null && configurationPath.trim().length() > 0) {
-                webLocator.addFilesystemPath(configurationPath.trim());
+            if (ctxt == null) {
+                ctxt = DataContext.createDataContext();
+                session.setAttribute(ServletUtil.DATA_CONTEXT_KEY, ctxt);
             }
+
+            return ctxt;
         }
     }
 }

@@ -5,9 +5,10 @@
      <section name="12. Deployment">      
            <subsection name="12.2 Web Applications" anchor="web">
                <subsection name="12.2.1 Initialization Servlet">
-				<p>This configuration approach is based on setting up ServletConfiguration instance as a shared configuration object
-					within a custom "initialization servlet" init() method on application startup. Later session DataContext is created on
-					demand and retrieved via ServletConfiguration.getDefaultContext(..) static method.</p>
+				<p>This configuration approach is based on calling ServletUtil.initializeSharedConfiguration
+					 to initialize shared configuration object within a custom "initialization servlet" init() 
+					 method on application startup. Session DataContexts are created on
+					demand and retrieved via ServletUtil.getSessionContext(..) static method.</p>
 				<table>
 				<tr>
 					<th>Servlet Spec. Compatibility:</th>
@@ -15,7 +16,7 @@
 				</tr>
 				<tr>
 					<th>Participating classes:</th>
-					<td>org.objectstyle.cayenne.conf.ServletConfiguration, javax.servlet.HttpServlet</td>
+					<td>org.objectstyle.cayenne.conf.ServletUtil, javax.servlet.HttpServlet</td>
 				</tr>
 				<tr>
 					<th>Allows cayenne.xml in WEB-INF/:</th>
@@ -39,13 +40,13 @@ package com.somepackage;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletUtil;
 
 public class MyServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
   
-        ServletConfiguration.initializeConfiguration(config.getServletContext());
+        ServletUtil.initializeSharedConfiguration(config.getServletContext());
         
         // perfom any other application initialization...
     }
@@ -62,7 +63,7 @@ public class MyServlet extends HttpServlet {
 <p>Sample DataContext retrieval code: </p>  
 <source>
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletUtil;
 import javax.servlet.http.HttpServletRequest;
 ...
 
@@ -70,7 +71,7 @@ import javax.servlet.http.HttpServletRequest;
 HttpServletRequest r;
 
 // get session DataContext to perform database queries
-DataContext context = ServletConfiguration.getDefaultContext(r.getSession());
+DataContext context = ServletUtil.getSessionContext(r.getSession());
 </source>
 			</subsection>
 </subsection>    

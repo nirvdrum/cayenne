@@ -1,8 +1,8 @@
-Cayenne Upgrade Information 1.2 Milesone (M1)
-Date: November 22, 2004
+Cayenne Upgrade Information 1.2 Milesone (M2)
+Date: 
 ============================================
 
-WARNING !!!! Expect all API deprecated in 1.1 to be removed in one of the coming milestones.
+WARNING !!!! Most API deprecated in 1.1 is removed.
 
 
 1. General Upgrade Advise:

@@ -96,6 +96,18 @@ Configuration.initializeSharedConfiguration(conf);
 				</p>
 
 			</subsection>
+			<subsection name="12.3.3 Web Applications">
+				<p>If a web application was configured using one of the methods 
+					described in Web Application Deployment chapter, users can 
+					additionaly specify a subfolder of WEB-INF for locating configuration files. This is done via an 
+					initialization parameter in web.xml called <code>cayenne.configuration.path</code>:</p>
+<source>
+&amp;lt;context-param&amp;gt;
+    &amp;lt;param-name&amp;gt;cayenne.configuration.path&amp;lt;/param-name&amp;gt;
+    &amp;lt;param-value&amp;gt;/WEB-INF/config/cayenne-files&amp;lt;/param-value&amp;gt;
+&amp;lt;/context-param&amp;gt;
+</source>
+			</subsection>
 		</subsection>
     </section>
 </body>

@@ -94,7 +94,7 @@ public class WebApplicationContextFilterTst extends TestCase {
         // assemble session
         DataContext dataContext = new DataContext();
         HttpSession session = new MockHttpSession();
-        session.setAttribute(ServletConfiguration.DATA_CONTEXT_KEY, dataContext);
+        session.setAttribute(ServletUtil.DATA_CONTEXT_KEY, dataContext);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setSession(session);
         MockHttpServletResponse response = new MockHttpServletResponse();

@@ -105,25 +105,35 @@ public class DefaultConfiguration extends Configuration {
 		logObj.debug("using domain file name: " + domainConfigurationName);
 
 		// configure CLASSPATH-only locator
-		ResourceLocator l = new ResourceLocator();
-		l.setSkipAbsolutePath(true);
-		l.setSkipClasspath(false);
-		l.setSkipCurrentDirectory(true);
-		l.setSkipHomeDirectory(true);
+		ResourceLocator locator = new ResourceLocator();
+		locator.setSkipAbsolutePath(true);
+		locator.setSkipClasspath(false);
+		locator.setSkipCurrentDirectory(true);
+		locator.setSkipHomeDirectory(true);
 
 		// add the current Configuration subclass' package as additional path.
 		if (!(this.getClass().equals(DefaultConfiguration.class))) {
-			l.addClassPath(Util.getPackagePath(this.getClass().getName()));
+			locator.addClassPath(Util.getPackagePath(this.getClass().getName()));
 		}
 
 		// The Configuration superclass statically defines what
 		// ClassLoader to use for resources. This allows applications to
 		// control where resources are loaded from.
-		l.setClassLoader(Configuration.getResourceLoader());
+		locator.setClassLoader(Configuration.getResourceLoader());
 
-		// remember configured ResourceLocator
-		this.setResourceLocator(l);
+		setResourceLocator(locator);
 	}
+	
+	/**
+     * Creates DefaultConfiguration with specified cayenne project file name and
+     * ResourceLocator.
+     * 
+     * @since 1.2
+     */
+    public DefaultConfiguration(String domainConfigurationName, ResourceLocator locator) {
+        super(domainConfigurationName);
+        setResourceLocator(locator);
+    }
 
 	/**
 	 * Adds a custom path for class path lookups.
@@ -141,6 +151,20 @@ public class DefaultConfiguration extends Configuration {
 	public void addClassPath(String customPath) {
 		this.getResourceLocator().addClassPath(customPath);
 	}
+	
+
+	/**
+     * Adds the given String as a custom path for resource lookups. The path can be
+     * relative or absolute and is <i>not </i> checked for existence. Depending on the
+     * underlying ResourceLocator configuration this can for instance be a path in the web
+     * application context or a filesystem path.
+     * 
+     * @throws IllegalArgumentException if <code>path</code> is <code>null</code>.
+     * @since 1.2 moved from subclass - FileConfiguration.
+     */
+    public void addResourcePath(String path) {
+        this.getResourceLocator().addFilesystemPath(path);
+    }
 
 	/**
 	 * Default implementation of {@link Configuration#canInitialize}.
