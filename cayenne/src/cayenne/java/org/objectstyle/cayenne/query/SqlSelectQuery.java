@@ -67,101 +67,118 @@ import org.objectstyle.cayenne.map.ObjAttribute;
  * not portable accross database engines. 
  */
 public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery {
-	protected String sqlString;
-	protected DbAttribute[] resultDescriptors;
-	protected ObjAttribute[] objDescriptors;
-	protected int fetchLimit;
+    protected String sqlString;
+    protected DbAttribute[] resultDescriptors;
+    protected ObjAttribute[] objDescriptors;
+    protected int fetchLimit;
+    protected int pageSize;
 
-	/** Creates empty SqlSelectQuery. */
-	public SqlSelectQuery() {}
+    /** Creates empty SqlSelectQuery. */
+    public SqlSelectQuery() {}
 
-	/** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
-	public SqlSelectQuery(String objEntityName) {
-		setObjEntityName(objEntityName);
-	}
+    /** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
+    public SqlSelectQuery(String objEntityName) {
+        setObjEntityName(objEntityName);
+    }
 
-	/** Creates SqlSelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
-	public SqlSelectQuery(String objEntityName, String sqlString) {
-		setObjEntityName(objEntityName);
-		setSqlString(sqlString);
-	}
+    /** Creates SqlSelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+    public SqlSelectQuery(String objEntityName, String sqlString) {
+        setObjEntityName(objEntityName);
+        setSqlString(sqlString);
+    }
 
-	public int getQueryType() {
-		return SELECT_QUERY;
-	}
+    public int getQueryType() {
+        return SELECT_QUERY;
+    }
 
-	public void setSqlString(String sqlString) {
-		this.sqlString = sqlString;
-	}
+    public void setSqlString(String sqlString) {
+        this.sqlString = sqlString;
+    }
 
-	public String getSqlString() {
-		return sqlString;
-	}
+    public String getSqlString() {
+        return sqlString;
+    }
 
-	/**  
-	 * @deprecated use setObjDescriptors
-	 */
-	public void setResultDesc(ObjAttribute[] resultDesc) {
-		setObjDescriptors(resultDesc);
-	}
+    /**  
+     * @deprecated use setObjDescriptors
+     */
+    public void setResultDesc(ObjAttribute[] resultDesc) {
+        setObjDescriptors(resultDesc);
+    }
 
-	/**
-	 * @deprecated use getObjDescriptors.
-	 */
-	public ObjAttribute[] getResultDesc() {
-		return getObjDescriptors();
-	}
+    /**
+     * @deprecated use getObjDescriptors.
+     */
+    public ObjAttribute[] getResultDesc() {
+        return getObjDescriptors();
+    }
 
-	/**
-	 * Returns the fetchLimit.
-	 * @return int
-	 */
-	public int getFetchLimit() {
-		return fetchLimit;
-	}
+    /**
+     * Returns the fetchLimit.
+     * @return int
+     */
+    public int getFetchLimit() {
+        return fetchLimit;
+    }
 
-	/**
-	 * Sets the fetchLimit.
-	 * @param fetchLimit The fetchLimit to set
-	 */
-	public void setFetchLimit(int fetchLimit) {
-		this.fetchLimit = fetchLimit;
-	}
+    /**
+     * Sets the fetchLimit.
+     * @param fetchLimit The fetchLimit to set
+     */
+    public void setFetchLimit(int fetchLimit) {
+        this.fetchLimit = fetchLimit;
+    }
 
-	/** Always returns <code>true</code>. */
-	public boolean isFetchingDataRows() {
-		return true;
-	}
+    /** Always returns <code>true</code>. */
+    public boolean isFetchingDataRows() {
+        return true;
+    }
 
-	/**
-	 * Returns the resultDescriptors.
-	 * @return DbAttribute[]
-	 */
-	public DbAttribute[] getResultDescriptors() {
-		return resultDescriptors;
-	}
+    /**
+     * Returns the resultDescriptors.
+     * @return DbAttribute[]
+     */
+    public DbAttribute[] getResultDescriptors() {
+        return resultDescriptors;
+    }
 
-	/**
-	 * Sets the resultDescriptors.
-	 * @param resultDescriptors The resultDescriptors to set
-	 */
-	public void setResultDescriptors(DbAttribute[] resultDescriptors) {
-		this.resultDescriptors = resultDescriptors;
-	}
+    /**
+     * Sets the resultDescriptors.
+     * @param resultDescriptors The resultDescriptors to set
+     */
+    public void setResultDescriptors(DbAttribute[] resultDescriptors) {
+        this.resultDescriptors = resultDescriptors;
+    }
 
-	/**
-	 * Returns the objDescriptors.
-	 * @return ObjAttribute[]
-	 */
-	public ObjAttribute[] getObjDescriptors() {
-		return objDescriptors;
-	}
+    /**
+     * Returns the objDescriptors.
+     * @return ObjAttribute[]
+     */
+    public ObjAttribute[] getObjDescriptors() {
+        return objDescriptors;
+    }
 
-	/**
-	 * Sets the objDescriptors.
-	 * @param objDescriptors The objDescriptors to set
-	 */
-	public void setObjDescriptors(ObjAttribute[] objDescriptors) {
-		this.objDescriptors = objDescriptors;
-	}
+    /**
+     * Sets the objDescriptors.
+     * @param objDescriptors The objDescriptors to set
+     */
+    public void setObjDescriptors(ObjAttribute[] objDescriptors) {
+        this.objDescriptors = objDescriptors;
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.query.GenericSelectQuery#getPageSize()
+     */
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    /**
+     * Sets  <code>pageSize</code> property.
+     * 
+     * @param pageSize The pageSize to set
+     */
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
 }

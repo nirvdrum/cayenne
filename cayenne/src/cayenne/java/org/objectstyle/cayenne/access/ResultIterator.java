@@ -87,6 +87,11 @@ public interface ResultIterator {
 	 */
     public Map nextDataRow() throws CayenneException;
     
+    /**
+     * Skips current data row instead of reading it.
+     */
+    public void skipDataRow() throws CayenneException;
+    
     /** 
      * Closes ResultIterator and associated ResultSet. This method must be
      * called explicitly when the user is finished processing the records.

@@ -55,140 +55,61 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Map;
-
 import org.objectstyle.TestMain;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
 
-public class DefaultResultIteratorTst extends IteratorTestBase {
-	protected DefaultResultIterator it;
+/**
+ * @author Andrei Adamchik
+ */
+public class IncrementalFaultListTst extends CayenneTestCase {
+	protected IncrementalFaultList list;
+	protected GenericSelectQuery query;
 
-	public DefaultResultIteratorTst(String name) {
-		super(name);
-	}
+    /**
+     * Constructor for IncrementalFaultListTst.
+     * @param name
+     */
+    public IncrementalFaultListTst(String name) {
+        super(name);
+    }
+    
+    
+    /**
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception {
+        super.setUp();
+        TestMain.getSharedDatabaseSetup().cleanTableData();
+        new DataContextTst("Helper").populateTables();
+        
+        SelectQuery q = new SelectQuery("Artist");
+        q.setPageSize(5);
+        query = q;
+        list = new IncrementalFaultList(super.createDataContext(), query);
+    }
 
-	public void setUp() throws Exception {
-		super.setUp();
-		it = null;
-	}
 
-	protected void init() throws Exception {
-		super.init();
-		it =
-			new DefaultResultIterator(
-				st,
-				TestMain.getSharedNode().getAdapter(),
-				(SelectQueryAssembler) transl);
-	}
-	
-
-	protected void cleanup() throws Exception {
-		if (it != null) {
-			it.close();
-			st = null;
-		}
-
-		super.cleanup();
-	}
-
-	public void testClose1() throws Exception {
-		try {
-			init();
-			assertTrue(!conn.isClosed());
-
-			it.setClosingConnection(false);
-			it.close();
-
-			// caller must close the connection
-			assertTrue(!conn.isClosed());
-		} finally {
-			conn.close();
-		}
-	}
-
-	public void testClose2() throws Exception {
-		init();
-		assertTrue(!conn.isClosed());
-
-		it.setClosingConnection(true);
-		it.close();
-
-		// iterator must close the connection
-		assertTrue(conn.isClosed());
-	}
-
-	public void testCheckNextRow() throws Exception {
-		try {
-			init();
-
-			assertTrue(it.hasNextRow());
-			it.checkNextRow();
-			assertTrue(it.hasNextRow());
-
-		} finally {
-			cleanup();
-		}
-	}
-
-	public void testHasNextRow() throws java.lang.Exception {
-		try {
-			init();
-			assertTrue(it.hasNextRow());
-		} finally {
-			cleanup();
-		}
-	}
-
-	public void testNextDataRow() throws java.lang.Exception {
-		try {
-			init();
-
-			// must be as many rows as we have artists
-			// inserted in the database
-			for (int i = 0; i < DataContextTst.artistCount; i++) {
-				assertTrue(it.hasNextRow());
-				it.nextDataRow();
-			}
-
-			// rows must end here
-			assertTrue(!it.hasNextRow());
-
-		} finally {
-			cleanup();
-		}
-	}
-
-	public void testIsClosingConnection() throws java.lang.Exception {
-		try {
-			init();
-			assertTrue(!it.isClosingConnection());
-			it.setClosingConnection(true);
-			assertTrue(it.isClosingConnection());
-		} finally {
-			it.setClosingConnection(false);
-			cleanup();
-		}
-	}
-
-	public void testReadDataRow() throws java.lang.Exception {
-		try {
-			init();
-
-			// must be as many rows as we have artists
-			// inserted in the database
-			Map dataRow = null;
-			for (int i = 1; i <= DataContextTst.artistCount; i++) {
-				assertTrue(it.hasNextRow());
-				dataRow = it.nextDataRow();
-			}
-
-			assertEquals(
-				"Failed row: " + dataRow,
-				new DataContextTst("noop").artistName(9),
-				dataRow.get("ARTIST_NAME"));
-
-		} finally {
-			cleanup();
-		}
-	}
+    public void testSize() throws Exception {
+    	assertEquals(DataContextTst.artistCount, list.size());
+    }
+    
+    public void testPageIndex() throws Exception {
+    	assertEquals(0, list.pageIndex(0));
+    	assertEquals(0, list.pageIndex(1));
+    	assertEquals(1, list.pageIndex(5));
+    	assertEquals(13, list.pageIndex(69));
+    }
+    
+    public void testPagesRead1() throws Exception {
+    	assertEquals(1, list.getPagesRead());
+    	
+    	list.readUpToPage(1);
+    	assertEquals(2, list.getPagesRead());
+    	
+    	list.readUpToObject(6);
+    	assertEquals(2, list.getPagesRead());
+    } 
 }
+

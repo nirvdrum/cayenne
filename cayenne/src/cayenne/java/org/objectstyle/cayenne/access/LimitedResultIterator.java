@@ -101,10 +101,10 @@ public class LimitedResultIterator extends DefaultResultIterator {
 	}
 	
 	
-	protected void checkNextRow() throws SQLException, CayenneException {
-		dataRow = null;		
+	protected void checkNextRow() throws SQLException, CayenneException {		
+		nextRow = false;		
 		if (fetchedSoFar < fetchLimit && resultSet.next()) {
-			readDataRow();
+			nextRow = true;
 			fetchedSoFar++;
 		}
 	}

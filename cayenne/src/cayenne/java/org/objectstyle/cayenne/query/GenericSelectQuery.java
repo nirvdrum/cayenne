@@ -73,4 +73,13 @@ public interface GenericSelectQuery extends Query {
 	 * This is a hint to QueryEngine executing this query.
 	 */
 	public boolean isFetchingDataRows();
+	
+	/**
+	 * Returns query page size. Page size is a hint
+	 * to Cayenne that query should be performed page by
+	 * page, instead of retrieveing all results at once.
+	 * If the value returned is less than or equal to zero,
+	 * no paging should occur.
+	 */
+	public int getPageSize();
 }

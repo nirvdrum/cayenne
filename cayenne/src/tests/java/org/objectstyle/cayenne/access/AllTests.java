@@ -75,6 +75,7 @@ public class AllTests {
         suite.addTestSuite(DefaultOperationObserverTst.class);
         suite.addTestSuite(DbLoaderTst.class);
         suite.addTestSuite(DbGeneratorTst.class);
+        suite.addTestSuite(IncrementalFaultListTst.class);
         return suite;
     }
 }

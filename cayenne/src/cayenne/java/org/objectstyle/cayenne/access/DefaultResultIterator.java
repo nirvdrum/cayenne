@@ -91,13 +91,14 @@ public class DefaultResultIterator implements ResultIterator {
 	protected ResultSet resultSet;
 	protected Connection connection;
 
-	protected Map dataRow;
 	protected DbAttribute[] rowDescriptor;
 	protected ExtendedType[] converters;
 	protected int resultSize;
 
 	protected boolean closingConnection;
 	protected boolean isClosed;
+	
+	protected boolean nextRow;
 
 	/** 
 	 * Creates new DefaultResultIterator. Initializes it
@@ -139,9 +140,9 @@ public class DefaultResultIterator implements ResultIterator {
 	 * Checks if the next row is available.
 	 */
 	protected void checkNextRow() throws SQLException, CayenneException {
-		dataRow = null;
+		nextRow = false;
 		if (resultSet.next()) {
-			readDataRow();
+			nextRow = true;
 		}
 	}
 
@@ -150,7 +151,7 @@ public class DefaultResultIterator implements ResultIterator {
 	 * that can be read from the iterator.
 	 */
 	public boolean hasNextRow() {
-		return dataRow != null;
+		return nextRow;
 	}
 
 	/** 
@@ -161,15 +162,17 @@ public class DefaultResultIterator implements ResultIterator {
 			throw new CayenneException("An attempt to read uninitialized row or past the end of the iterator.");
 		}
 
-		Map row = dataRow;
-
 		try {
+			// read
+			Map row = readDataRow();
+			
+			// rewind
 			checkNextRow();
+			
+			return row;
 		} catch (SQLException sqex) {
 			throw new CayenneException("Exception reading ResultSet.", sqex);
 		}
-
-		return row;
 	}
 
 	/**
@@ -193,9 +196,9 @@ public class DefaultResultIterator implements ResultIterator {
 	 * Reads a row from the internal ResultSet at the current
 	 * cursor position.
 	 */
-	protected void readDataRow() throws SQLException, CayenneException {
+	protected Map readDataRow() throws SQLException, CayenneException {
 		try {
-			dataRow = new HashMap();
+			Map dataRow = new HashMap();
 
 			// process result row columns,
 			// set object properties right away,
@@ -210,6 +213,8 @@ public class DefaultResultIterator implements ResultIterator {
 						rowDescriptor[i].getType());
 				dataRow.put(rowDescriptor[i].getName(), val);
 			}
+			
+			return dataRow;
 		} catch (CayenneException cex) {
 			// rethrow unmodified
 			throw cex;
@@ -226,8 +231,8 @@ public class DefaultResultIterator implements ResultIterator {
 	 */
 	public void close() throws CayenneException {
 		if (!isClosed) {
-
-			dataRow = null;
+           
+            nextRow = false;
 
 			StringWriter errors = new StringWriter();
 			PrintWriter out = new PrintWriter(errors);
@@ -288,4 +293,20 @@ public class DefaultResultIterator implements ResultIterator {
 	public void setClosingConnection(boolean flag) {
 		this.closingConnection = flag;
 	}
+	
+	
+    /**
+     * @see org.objectstyle.cayenne.access.ResultIterator#skipDataRow()
+     */
+    public void skipDataRow() throws CayenneException {
+		if (!hasNextRow()) {
+			throw new CayenneException("An attempt to read uninitialized row or past the end of the iterator.");
+		}
+
+		try {
+			checkNextRow();
+		} catch (SQLException sqex) {
+			throw new CayenneException("Exception reading ResultSet.", sqex);
+		}
+    }
 }
