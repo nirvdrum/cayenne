@@ -75,7 +75,7 @@
     
     <!-- Copy graphics files -->
     <copy todir="${build}/classes/org/objectstyle/gui">
-       <fileset dir="${src}" >
+       <fileset dir="${src}/resources" >
           <include name="images/**/*.jpg"/>
           <include name="images/**/*.gif"/>
        </fileset>
