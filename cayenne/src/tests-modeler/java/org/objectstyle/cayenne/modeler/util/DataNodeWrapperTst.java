@@ -1,8 +1,8 @@
 /* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
  *
- * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group
+ * Copyright (c) 2002-2003 The ObjectStyle Group 
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne"
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
+ *    from this software without prior written permission. For written 
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,53 +53,53 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.action;
 
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
+package org.objectstyle.cayenne.modeler.util;
+
+import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.AddDataMapDialog;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.ProjectPath;
 
-/** 
- * Links DataMap to a DataNode.
- * 
- * @author Misha Shengaout
+/**
+ * @author Andrei Adamchik
  */
-public class AddDataMapAction extends CayenneAction {
-    public static final String ACTION_NAME = "Link DataMap to Node";
+public class DataNodeWrapperTst extends TestCase {
 
-    public AddDataMapAction() {
-        super(ACTION_NAME);
+    public DataNodeWrapperTst() {
+        super();
+        // TODO Auto-generated constructor stub
     }
 
-    public void performAction(ActionEvent e) {
-        addDataMap();
+    public void testToString1() throws Exception {
+        DataNodeWrapper wrapper = new DataNodeWrapper();
+        assertEquals("", wrapper.toString());
     }
 
-    /** 
-     * Adds a DataMap to the current data node. 
-     */
-    protected void addDataMap() {
-        EventController mediator = getMediator();
-        DataNode node = mediator.getCurrentDataNode();
-        List map_list = new ArrayList(mediator.getCurrentDataDomain().getDataMaps());
-        new AddDataMapDialog(node, map_list);
-        mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
+    public void testToString2() throws Exception {
+        DataNodeWrapper wrapper = new DataNodeWrapper(new DataNode(null));
+        assertEquals("", wrapper.toString());
     }
 
-    /**
-     * Returns <code>true</code> if path contains a DataNode object.
-     */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
-        }
+    public void testToString3() throws Exception {
+        DataNodeWrapper wrapper = new DataNodeWrapper(new DataNode("abc"));
+        assertEquals("abc", wrapper.toString());
+    }
 
-        return path.firstInstanceOf(DataNode.class) != null;
+    public void testCompareTo0() throws Exception {
+        DataNodeWrapper wrapper1 = new DataNodeWrapper();
+        assertEquals(-1, wrapper1.compareTo(new Object()));
+    }
+
+    public void testCompareTo1() throws Exception {
+        DataNodeWrapper wrapper1 = new DataNodeWrapper();
+        DataNodeWrapper wrapper2 = new DataNodeWrapper();
+        assertEquals(0, wrapper1.compareTo(wrapper2));
+    }
+
+    public void testCompareTo2() throws Exception {
+        DataNodeWrapper wrapper1 = new DataNodeWrapper();
+        DataNodeWrapper wrapper2 = new DataNodeWrapper(new DataNode("a"));
+        assertEquals(-1, wrapper1.compareTo(wrapper2));
+        assertEquals(1, wrapper2.compareTo(wrapper1));
     }
 }

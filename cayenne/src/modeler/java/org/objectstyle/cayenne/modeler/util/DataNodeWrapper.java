@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,28 +52,47 @@ package org.objectstyle.cayenne.modeler.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.modeler.util;
 
 import org.objectstyle.cayenne.access.DataNode;
 
-
-/** Wrapper for DataNode. 
- *  Used to put DataNodes into the JTree and any other place where 
- *  toString() method must return DataNode name.
+/** 
+ * GUI wrapper for DataNode. Used to put DataNodes into the 
+ * JTree and any other place where toString() method must 
+ * return DataNode's name.
  */
-public class DataNodeWrapper{
-	DataNode node = null;
-	
-	public DataNodeWrapper(DataNode temp_rel){
-		node = temp_rel;
-	}
-	
-	public String toString(){
-		if (null == node)
-			return "";
-		return node.getName();
-	}
+public class DataNodeWrapper implements Comparable {
+    protected DataNode node;
 
-	public DataNode getDataNode() { return node;}	
-}// End class DataNodeWrapper
-	
+    public DataNodeWrapper() {
+    }
+
+    public DataNodeWrapper(DataNode node) {
+        this.node = node;
+    }
+
+    public String toString() {
+        return (node != null && node.getName() != null) ? node.getName() : "";
+    }
+
+    public DataNode getDataNode() {
+        return node;
+    }
+
+    public int compareTo(Object o) {
+     
+        if (o instanceof DataNodeWrapper) {
+			DataNodeWrapper otherWrapper = (DataNodeWrapper) o;
+			
+			// 'toString' is implemented to never return null
+			String name = toString();
+            String otherName = otherWrapper.toString();
+            return name.compareTo(otherName);
+        }
+        else {
+            return -1;
+        }
+    }
+
+}

@@ -83,7 +83,6 @@ import org.apache.log4j.PatternLayout;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
@@ -441,7 +440,6 @@ public class Editor
         projectMenu.add(
             getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
         projectMenu.addSeparator();
-        projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(ObjEntitySyncAction.ACTION_NAME).buildMenu());
         projectMenu.add(
             getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
@@ -624,7 +622,6 @@ public class Editor
             new Control(
                 ModelerController.DATA_DOMAIN_SELECTED_ID,
                 controller.getEventController().getCurrentDataDomain()));
-        getAction(AddDataMapAction.ACTION_NAME).setEnabled(true);
     }
 
     public void updateTitle() {

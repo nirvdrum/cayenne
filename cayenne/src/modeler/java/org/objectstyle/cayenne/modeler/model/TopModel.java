@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler.model;
 import javax.swing.ActionMap;
 
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
@@ -156,9 +155,6 @@ public class TopModel {
 
         CayenneAction createRelAction = new CreateRelationshipAction();
         actionMap.put(createRelAction.getKey(), createRelAction);
-
-        CayenneAction addMapToNodeAction = new AddDataMapAction();
-        actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
 
         CayenneAction entSyncAction = new ObjEntitySyncAction();
         actionMap.put(entSyncAction.getKey(), entSyncAction);
