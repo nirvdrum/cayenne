@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.map;
 
 import java.io.Writer;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
@@ -66,7 +65,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 /** Generates Java classes source code using VTL (Velocity template engine) for
   * the ObjEntities in the DataMap. */
 public abstract class MapClassGenerator {
-    static Logger logObj = Logger.getLogger(MapClassGenerator.class.getName());
 
     public static final String SINGLE_CLASS_TEMPLATE = "dotemplates/singleclass.vm";
     public static final String SUBCLASS_TEMPLATE = "dotemplates/subclass.vm";

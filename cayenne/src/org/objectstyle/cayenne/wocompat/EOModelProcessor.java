@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.wocompat;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,186 +63,198 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.wocompat.parser.Parser;
 
-
 /**
  *  Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
  */
 public class EOModelProcessor {
     public static String eomodelNameForPath(String path) {
         // strip trailing "/" if needed
-        if(path.endsWith(File.separator))
+        if (path.endsWith(File.separator))
             path = path.substring(0, path.length() - 1);
-        
+
         int startInd = path.lastIndexOf(File.separator);
-        int endInd = (path.endsWith(".eomodeld")) ? path.length() - ".eomodeld".length() : path.length();
+        int endInd =
+            (path.endsWith(".eomodeld"))
+                ? path.length() - ".eomodeld".length()
+                : path.length();
         return path.substring(startInd + 1, endInd);
     }
-    
+
     /** Do some ObjC->Java data type conversion */
     public static String javaTypeForEOModelerType(String type) {
-        if(type.equals("NSString"))
+        if (type.equals("NSString"))
             return "java.lang.String";
-        if(type.equals("NSNumber"))
+        if (type.equals("NSNumber"))
             return "java.lang.Integer";
-        if(type.equals("NSCalendarDate"))
+        if (type.equals("NSCalendarDate"))
             return "java.sql.Time";
-        if(type.equals("NSDecimalNumber"))
+        if (type.equals("NSDecimalNumber"))
             return "java.math.BigDecimal";
-        if(type.equals("NSData"))
+        if (type.equals("NSData"))
             return "byte[]";
-        
+
         throw new IllegalArgumentException("Unknown data type: " + type);
     }
-    
-    
+
     // plist parser
     private Parser plistParser = new Parser();
-    
+
     // map of EO attribute names to external column names
     private Map attributeMap = new HashMap();
-    
+
     // map of EOModel relationship info with ObjEntities as keys
     private HashMap relationshipMap = new HashMap();
+
+    // map of EOModel flattened relationship info with ObjEntities as keys
+    private HashMap flatRelationshipMap = new HashMap();
     
     
     public void reset() {
         attributeMap.clear();
         relationshipMap.clear();
     }
-    
-    
+
     public DataMap loadEOModel(String path) throws java.lang.Exception {
         reset();
-        
+
         // strip trailing "/" if needed
-        if(path.endsWith(File.separator))
+        if (path.endsWith(File.separator))
             path = path.substring(0, path.length() - 1);
-        
+
         // fix path if needed....
-        if(!path.endsWith(".eomodeld"))
+        if (!path.endsWith(".eomodeld"))
             path = path + ".eomodeld";
-        
+
         File eomDir = new File(path);
         File indexFile = new File(eomDir, "index.eomodeld");
-        
-        if(!indexFile.exists())
+
+        if (!indexFile.exists())
             throw new IllegalArgumentException("No model found at '" + path + "'.");
-        
+
         plistParser.ReInit(new FileInputStream(indexFile));
-        Map indexMap = (Map)plistParser.propertyList();
-        List entities = (List)indexMap.get("entities");
-        
-        
+        Map indexMap = (Map) plistParser.propertyList();
+        List entities = (List) indexMap.get("entities");
+
         // do indiv. enitities
         DataMap dataMap = new DataMap("Untitled Map");
         Iterator it = entities.iterator();
-        while(it.hasNext()) {
-            Map entity = (Map)it.next();
-            String entName = (String)entity.get("name");
-            String javaClass = (String)entity.get("className");
-            
+        while (it.hasNext()) {
+            Map entity = (Map) it.next();
+            String entName = (String) entity.get("name");
+            String javaClass = (String) entity.get("className");
+
             ObjEntity objEntity = new ObjEntity(entName);
             objEntity.setClassName(javaClass);
             dataMap.addObjEntity(objEntity);
-            
+
             // load entity info
             processObjEntity(dataMap, objEntity, eomDir);
         }
-        
+
         // do relationships
         Iterator relIt = relationshipMap.keySet().iterator();
-        while(relIt.hasNext()) {
-            ObjEntity nextEnt = (ObjEntity)relIt.next();
-            List rels = (List)relationshipMap.get(nextEnt);
-            if(rels != null)
+        while (relIt.hasNext()) {
+            ObjEntity nextEnt = (ObjEntity) relIt.next();
+            List rels = (List) relationshipMap.get(nextEnt);
+            if (rels != null)
                 processEntityRelationships(dataMap, nextEnt, rels);
         }
-        
+
         return dataMap;
     }
-    
-    
+
     /** Take an ObjEntity stub and initialize it with the data from EntName.plist file.
      */
-    private void processObjEntity(DataMap map, ObjEntity entity, File modelDir) throws Exception {
+    private void processObjEntity(DataMap map, ObjEntity entity, File modelDir)
+        throws Exception {
         File entFile = new File(modelDir, entity.getName() + ".plist");
-        
-        if(!entFile.exists())
+
+        if (!entFile.exists())
             throw new IllegalArgumentException("No entity found at '" + entFile + "'.");
-        
+
         // parse plist file
         plistParser.ReInit(new FileInputStream(entFile));
-        Map entDetails = (Map)plistParser.propertyList();
-        
+        Map entDetails = (Map) plistParser.propertyList();
+
         // retrieve misc info
-        List pks = (List)entDetails.get("primaryKeyAttributes");
-        List classProps = (List)entDetails.get("classProperties");
-        
+        List pks = (List) entDetails.get("primaryKeyAttributes");
+        List classProps = (List) entDetails.get("classProperties");
+
         // create DbEntity
-        String dbEntName = (String)entDetails.get("externalName");
+        String dbEntName = (String) entDetails.get("externalName");
         DbEntity dbEntity = new DbEntity(dbEntName);
         entity.setDbEntity(dbEntity);
         map.addDbEntity(dbEntity);
-        
+
         // save relationship info for future use
         Object relInfo = entDetails.get("relationships");
-        if(relInfo != null)
+        if (relInfo != null)
             relationshipMap.put(entity, relInfo);
-        
+
         // process attribute list creating both Db and Obj attributes
-        List attributes = (List)entDetails.get("attributes");
+        List attributes = (List) entDetails.get("attributes");
         Iterator it = attributes.iterator();
-        while(it.hasNext()) {
-            Map attrMap = (Map)it.next();
-            String dbAttrName = (String)attrMap.get("columnName");
-            String attrName = (String)attrMap.get("name");
-            String attrType = (String)attrMap.get("valueClassName");
+        while (it.hasNext()) {
+            Map attrMap = (Map) it.next();
+            String dbAttrName = (String) attrMap.get("columnName");
+            String attrName = (String) attrMap.get("name");
+            String attrType = (String) attrMap.get("valueClassName");
             String javaType = javaTypeForEOModelerType(attrType);
-            
+
             // save mapping of external attr. name to internal name for future use
             attributeMap.put(attrName, dbAttrName);
-            
-            DbAttribute dbAttr = new DbAttribute(dbAttrName, TypesMapping.getSqlTypeByJava(javaType), dbEntity);
+
+            DbAttribute dbAttr =
+                new DbAttribute(dbAttrName, TypesMapping.getSqlTypeByJava(javaType), dbEntity);
             dbEntity.addAttribute(dbAttr);
-            
-            Integer width = (Integer)attrMap.get("width");
+
+            Integer width = (Integer) attrMap.get("width");
             if (width != null)
                 dbAttr.setMaxLength(width.intValue());
-            
-            if(pks.contains(attrName))
+
+            if (pks.contains(attrName))
                 dbAttr.setPrimaryKey(true);
-            
+
             Object allowsNull = attrMap.get("allowsNull");
             dbAttr.setMandatory(!"Y".equals(allowsNull));
-            if(classProps.contains(attrName)) {
+            if (classProps.contains(attrName)) {
                 ObjAttribute attr = new ObjAttribute(attrName, javaType, entity);
                 attr.setDbAttribute(dbAttr);
                 entity.addAttribute(attr);
             }
         }
     }
-    
-    private void processEntityRelationships(DataMap map, ObjEntity src, List entRels) {
+
+    private void processEntityRelationships(
+        DataMap map,
+        ObjEntity src,
+        List entRels) {
         Iterator it = entRels.iterator();
-        
-        
-        while(it.hasNext()) {
-            Map relMap = (Map)it.next();
-            String targetName = (String)relMap.get("destination");
-            String relName = (String)relMap.get("name");
+
+        while (it.hasNext()) {
+            Map relMap = (Map) it.next();
+            String targetName = (String) relMap.get("destination");
+            
+            // deal with flattened relationships later
+            if(targetName == null) {
+                flatRelationshipMap.put(src, relMap);
+                continue;
+            }
+            
+            String relName = (String) relMap.get("name");
             boolean toMany = "Y".equals(relMap.get("isToMany"));
             boolean toDependentPK = "Y".equals(relMap.get("propagatesPrimaryKey"));
             ObjEntity target = map.getObjEntity(targetName);
             DbEntity dbSrc = src.getDbEntity();
             DbEntity dbTarget = target.getDbEntity();
-            
+
             ObjRelationship rel = new ObjRelationship();
             rel.setName(relName);
             rel.setSourceEntity(src);
             rel.setTargetEntity(target);
             rel.setToMany(toMany);
             src.addRelationship(rel);
-            
+
             // process underlying DbRelationship
             // Note - there is no flattened rel. support here....
             DbRelationship dbRel = new DbRelationship();
@@ -252,18 +264,19 @@ public class EOModelProcessor {
             dbRel.setName(relName);
             dbRel.setToDependentPK(toDependentPK);
             rel.addDbRelationship(dbRel);
-            
-            List joins = (List)relMap.get("joins");
+
+            List joins = (List) relMap.get("joins");
             Iterator jIt = joins.iterator();
-            while(jIt.hasNext()) {
-                Map joinMap = (Map)jIt.next();
-                String srcAttrName = (String)joinMap.get("sourceAttribute");
-                String targetAttrName = (String)joinMap.get("destinationAttribute");
-                
-                
-                DbAttribute srcAttr = (DbAttribute)dbSrc.getAttribute((String)attributeMap.get(srcAttrName));
-                DbAttribute targetAttr = (DbAttribute)dbTarget.getAttribute((String)attributeMap.get(targetAttrName));
-                
+            while (jIt.hasNext()) {
+                Map joinMap = (Map) jIt.next();
+                String srcAttrName = (String) joinMap.get("sourceAttribute");
+                String targetAttrName = (String) joinMap.get("destinationAttribute");
+
+                DbAttribute srcAttr =
+                    (DbAttribute) dbSrc.getAttribute((String) attributeMap.get(srcAttrName));
+                DbAttribute targetAttr =
+                    (DbAttribute) dbTarget.getAttribute((String) attributeMap.get(targetAttrName));
+
                 DbAttributePair join = new DbAttributePair(srcAttr, targetAttr);
                 dbRel.addJoin(join);
             }

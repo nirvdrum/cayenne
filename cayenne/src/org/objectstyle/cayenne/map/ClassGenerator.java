@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.map;
 
 import java.io.Writer;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 
@@ -73,9 +73,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
   * @author Andrei Adamchik
   */
 public class ClassGenerator {
-    static Logger logObj = Logger.getLogger(ClassGenerator.class.getName());
-
-
     static {
         try {
             // use ClasspathResourceLoader for velocity templates lookup
