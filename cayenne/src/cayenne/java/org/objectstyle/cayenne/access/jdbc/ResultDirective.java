@@ -73,6 +73,7 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.parser.node.Node;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * A custom Velocity directive to describe a ResultSet column.
@@ -82,9 +83,15 @@ import org.apache.velocity.runtime.parser.node.Node;
  * #result(column_name) - e.g. #result('ARTIST_ID')
  * #result(column_name java_type) - e.g. #result('ARTIST_ID' 'String')
  * #result(column_name java_type column_alias) - e.g. #result('ARTIST_ID' 'String' 'ID')
+ * #result(column_name java_type column_alias data_row_key) - e.g. #result('ARTIST_ID' 'String' 'ID' 'toArtist.ID')
  * </pre>
  * 
- * <p>Note that most common Java types used in JDBC can be specified without 
+ * <p>'data_row_key' is needed if SQL 'column_alias' is not appropriate as a DataRow key on the Cayenne
+ * side. One common case when this happens is when a DataRow retrieved from a query is mapped
+ * using joint prefetch keys. In this case DataRow must use DB_PATH expressions for joint column keys,
+ * and their format is incompatible with most databases alias format.</p>
+ * 
+ * <p>Most common Java types used in JDBC can be specified without 
  * a package. This includes all numeric types, primitives, String, SQL dates, BigDecimal
  * and BigInteger.
  * </p>
@@ -141,7 +148,7 @@ public class ResultDirective extends Directive {
             ParseErrorException,
             MethodInvocationException {
 
-        Object column = getChild(context, node, 0);
+        String column = getChildAsString(context, node, 0);
         if (column == null) {
             throw new ParseErrorException("Column name expected at line "
                     + node.getLine()
@@ -149,24 +156,29 @@ public class ResultDirective extends Directive {
                     + node.getColumn());
         }
 
-        Object alias = getChild(context, node, 2);
+        String alias = getChildAsString(context, node, 2);
+        String dataRowKey = getChildAsString(context, node, 3);
+        
+        // determine what we want to name this column in a resulting DataRow...
+        String label = (!Util.isEmptyString(dataRowKey)) ? dataRowKey : (!Util
+                .isEmptyString(alias)) ? alias : null;
+  
 
         ColumnDescriptor columnDescriptor = new ColumnDescriptor();
-        columnDescriptor.setName(column.toString());
-
-        if (alias != null) {
-            columnDescriptor.setLabel(alias.toString());
-        }
-
-        Object type = getChild(context, node, 1);
+        columnDescriptor.setName(column);
+        columnDescriptor.setLabel(label);
+  
+        String type = getChildAsString(context, node, 1);
         if (type != null) {
             columnDescriptor.setJavaClass(guessType(type.toString()));
         }
 
-        writer.write(column.toString());
-        if (alias != null && !alias.equals(column)) {
+        writer.write(column);
+        
+        // append alias if needed
+        if (!Util.isEmptyString(alias) && !alias.equals(column)) {
             writer.write(" AS ");
-            writer.write(alias.toString());
+            writer.write(alias);
         }
 
         bindResult(context, columnDescriptor);
@@ -178,6 +190,17 @@ public class ResultDirective extends Directive {
         return (i >= 0 && i < node.jjtGetNumChildren())
             ? node.jjtGetChild(i).value(context)
             : null;
+    }
+    
+    /**
+     * Returns a directive argument at a given index converted to String. 
+     * 
+     * @since 1.2
+     */
+    protected String getChildAsString(InternalContextAdapter context, Node node, int i)
+            throws MethodInvocationException {
+        Object value = getChild(context, node, i);
+        return (value != null) ? value.toString() : null;
     }
 
     /**
