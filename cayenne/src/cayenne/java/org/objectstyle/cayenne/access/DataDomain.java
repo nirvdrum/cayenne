@@ -530,7 +530,7 @@ public class DataDomain implements QueryEngine {
 
  
     /**
-     * Returns a DataNode that should hanlde queries for all
+     * Returns a DataNode that should handle queries for all
      * entities in a DataMap.
      * 
      * @since 1.1

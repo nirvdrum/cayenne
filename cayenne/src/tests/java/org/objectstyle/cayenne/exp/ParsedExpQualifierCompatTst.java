@@ -132,14 +132,14 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
     public void testLessThan() throws Exception {
         populatePaintings();
         Expression parsed1 =
-            ExpressionFactory.expressionFromString("estimatedPrice < 2000");
+            ExpressionFactory.expressionFromString("estimatedPrice < 2000.0");
         assertEquals(1, execute(Painting.class, parsed1).size());
     }
 
     public void testLessThanEqualTo() throws Exception {
         populatePaintings();
         Expression parsed1 =
-            ExpressionFactory.expressionFromString("estimatedPrice <= 2000");
+            ExpressionFactory.expressionFromString("estimatedPrice <= 2000.0");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 
@@ -201,7 +201,7 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
         populatePaintings();
         Expression parsed1 =
             ExpressionFactory.expressionFromString(
-                "estimatedPrice between 2000 and 4000");
+                "estimatedPrice between 2000.0 and 4000.0");
         assertEquals(3, execute(Painting.class, parsed1).size());
     }
 
@@ -209,7 +209,7 @@ public class ParsedExpQualifierCompatTst extends DataContextTestBase {
         populatePaintings();
         Expression parsed1 =
             ExpressionFactory.expressionFromString(
-                "estimatedPrice not between 2000 and 4000");
+                "estimatedPrice not between 2000.0 and 4000.0");
         assertEquals(artistCount - 3, execute(Painting.class, parsed1).size());
     }
 

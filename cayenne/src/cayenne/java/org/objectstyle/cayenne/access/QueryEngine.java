@@ -111,7 +111,7 @@ public interface QueryEngine {
     public DataNode dataNodeForObjEntity(ObjEntity objEntity);
     
     /**
-     * Returns a DataNode that should hanlde queries for all
+     * Returns a DataNode that should handle queries for all
      * DataMap components.
      * 
      * @since 1.1
