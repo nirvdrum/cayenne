@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Attribute;
@@ -92,8 +94,7 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 		ObjEntity entity,
 		EventController mediator,
 		Object eventSource) {
-
-		super(mediator, eventSource, entity.getAttributeList());
+		super(mediator, eventSource, new ArrayList(entity.getAttributes())); // take a copy
 		this.entity = entity;
 		this.dbEntity = entity.getDbEntity();
 	}

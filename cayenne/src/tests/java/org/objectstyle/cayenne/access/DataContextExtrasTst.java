@@ -191,7 +191,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
 
         // this should cause PK generation exception in commit later
-        DataMap map = (DataMap)getNode().getDataMapsAsList().get(0);
+        DataMap map = (DataMap)getNode().getDataMaps().iterator().next();
 
         gen.dropAutoPk(getNode(), map.getDbEntitiesAsList());
 

@@ -113,19 +113,19 @@ public class EOModelProcessorTst extends CayenneTestCase {
         ObjRelationship rel =
             (ObjRelationship) artistE.getRelationship("artistExhibitArray");
         assertNotNull(rel);
-        assertEquals(1, rel.getDbRelationshipList().size());
+        assertEquals(1, rel.getDbRelationships().size());
         
         // check DbRelationships
         DbRelationship drel =
             (DbRelationship) artistDE.getRelationship("artistExhibitArray");
         assertNotNull(drel);
-        assertSame(drel, rel.getDbRelationshipList().get(0));
+        assertSame(drel, rel.getDbRelationships().get(0));
 
         // flattened relationships
         ObjRelationship frel =
             (ObjRelationship) artistE.getRelationship("exhibitArray");
         assertNotNull(frel);
-        assertEquals(2, frel.getDbRelationshipList().size());
+        assertEquals(2, frel.getDbRelationships().size());
         
         
         // storing data map may uncover some inconsistencies

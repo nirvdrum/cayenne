@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataNode;
@@ -86,7 +87,7 @@ public class AddDataMapAction extends CayenneAction {
     protected void addDataMap() {
         EventController mediator = getMediator();
         DataNode node = mediator.getCurrentDataNode();
-        List map_list = mediator.getCurrentDataDomain().getDataMapsAsList();
+        List map_list = new ArrayList(mediator.getCurrentDataDomain().getDataMaps());
         new AddDataMapDialog(node, map_list);
         mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
     }

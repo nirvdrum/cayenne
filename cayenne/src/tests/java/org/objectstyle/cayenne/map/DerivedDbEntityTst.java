@@ -122,8 +122,8 @@ public class DerivedDbEntityTst extends CayenneTestCase {
     	
     	ent.resetToParentView();
     	
-    	assertEquals(0, ent.getAttributeList().size());
-    	assertEquals(0, ent.getRelationshipList().size());
+    	assertEquals(0, ent.getAttributes().size());
+    	assertEquals(0, ent.getRelationships().size());
     }
     
     public void testResetToParentView2() throws Exception {
@@ -140,8 +140,8 @@ public class DerivedDbEntityTst extends CayenneTestCase {
     	
     	ent.resetToParentView();
     	
-    	assertEquals(1, ent.getAttributeList().size());
-    	assertEquals(1, ent.getRelationshipList().size());
+    	assertEquals(1, ent.getAttributes().size());
+    	assertEquals(1, ent.getRelationships().size());
     }
     
     protected void assignParent() {

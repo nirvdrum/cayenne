@@ -132,8 +132,7 @@ implements ActionListener {
 		//Ensure we never come "back" to this entity
 		seenEntities.add(start);
 		
-		java.util.List list = start.getRelationshipList();
-		Iterator iter = list.iterator();
+		Iterator iter = start.getRelationships().iterator();
 		while (iter.hasNext()) {
 			DbRelationship db_rel = (DbRelationship)iter.next();
 			if (db_rel.getTargetEntity() == end) {
@@ -242,7 +241,7 @@ implements ActionListener {
 	}
 	
 	
-	public java.util.List getDbRelationshipList() {
+	public List getDbRelationshipList() {
 		if (getChoice() != SELECT && getChoice() != EDIT)
 			return null;
 		List list = new ArrayList();

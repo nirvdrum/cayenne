@@ -59,8 +59,10 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -69,7 +71,6 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
@@ -144,17 +145,12 @@ public class EditDerivedParamsDialog
 			table.getColumnModel().getColumn(model.typeColumnInd());
 		typeCol.setMinWidth(90);
 
-		DbEntity parent =
-			((DerivedDbEntity) attr.getEntity()).getParentEntity();
-		java.util.List attrs = parent.getAttributeList();
+		DbEntity parent = ((DerivedDbEntity)attr.getEntity()).getParentEntity();
 
-		Object[] names = new Object[attrs.size() + 1];
-		names[0] = "";
-
-		for (int i = 0; i < attrs.size(); i++) {
-			names[i + 1] = ((Attribute) attrs.get(i)).getName();
-		}
-		
+		List list = new ArrayList(32);
+		list.add("");
+		list.addAll(parent.getAttributeMap().keySet());
+		String[] names = (String[])(list.toArray(new String[list.size()]));
 		Arrays.sort(names);
 
 		JComboBox comboBox = new JComboBox(names);

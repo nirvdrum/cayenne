@@ -63,6 +63,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
@@ -254,7 +255,7 @@ public class ResolveDbRelationshipDialog
 		cancel.addActionListener(this);
 	}
 
-	public java.util.List getDbRelList() {
+	public List getDbRelationships() {
 		return dbRelList;
 	}
 

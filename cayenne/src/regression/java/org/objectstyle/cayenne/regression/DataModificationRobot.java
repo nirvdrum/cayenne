@@ -56,14 +56,15 @@
 package org.objectstyle.cayenne.regression;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.apache.commons.collections.SequencedHashMap;
 import org.objectstyle.ashwood.graph.ArcIterator;
@@ -103,7 +104,7 @@ public class DataModificationRobot {
     this.context = context;
     this.randomizer = randomizer;
     objEntities = new ArrayList();
-    for (Iterator i = context.getDataMapsAsList().iterator(); i.hasNext();) {
+    for (Iterator i = context.getDataMaps().iterator(); i.hasNext();) {
       DataMap dataMap = (DataMap)i.next();
       objEntities.addAll(dataMap.getObjEntitiesAsList(false));
     }
@@ -133,7 +134,7 @@ public class DataModificationRobot {
           Map.Entry entry = (Map.Entry)i.next();
           ObjEntity entity = (ObjEntity)entry.getKey();
           List objects = (List)entry.getValue();
-          List relationships = entity.getRelationshipList();
+          Collection relationships = entity.getRelationships();
           ObjRelationship dependentPkRelation = null;
           for (Iterator k = relationships.iterator(); k.hasNext();) {
               ObjRelationship r = (ObjRelationship)k.next();
@@ -187,7 +188,7 @@ public class DataModificationRobot {
       int count = objects.size();
       if (count < 2) return;
       List reflexiveRels = new ArrayList(3);
-      List relationships = entity.getRelationshipList();
+      Collection relationships = entity.getRelationships();
       for (Iterator k = relationships.iterator(); k.hasNext();) {
           ObjRelationship r = (ObjRelationship)k.next();
           if (!r.isToMany() && entity.equals(r.getTargetEntity())) reflexiveRels.add(r.getName());
@@ -246,7 +247,7 @@ public class DataModificationRobot {
           int objectIndex = randomizer.nextInt(objects.size());
           DataObject objectToDelete = (DataObject)objects.remove(objectIndex);
           DataObject dependentsTakeOver = (DataObject)objects.get(0);
-          List relationships = entity.getRelationshipList();
+          Collection relationships = entity.getRelationships();
           for (Iterator i = relationships.iterator(); i.hasNext();) {
               ObjRelationship relation = (ObjRelationship)i.next();
               if (!relation.isToMany()) continue;

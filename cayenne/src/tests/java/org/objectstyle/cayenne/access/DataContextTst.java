@@ -924,12 +924,8 @@ public class DataContextTst extends CayenneTestCase {
 	}
 
 	public void changeMaxConnections(int delta) {
-		DataNode node =
-			(DataNode) ((DataDomain) ctxt.getParent())
-				.getDataNodesAsList()
-				.get(
-				0);
-		PoolManager manager = (PoolManager) node.getDataSource();
+		DataNode node = (DataNode)((DataDomain)ctxt.getParent()).getDataNodes().iterator().next();
+		PoolManager manager = (PoolManager)node.getDataSource();
 		manager.setMaxConnections(manager.getMaxConnections() + delta);
 	}
 

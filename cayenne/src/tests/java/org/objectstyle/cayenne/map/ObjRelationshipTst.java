@@ -125,13 +125,13 @@ public class ObjRelationshipTst extends CayenneTestCase {
     public void testSingleDbRelationship() {
     	DbRelationship r1 = new DbRelationship();
     	rel.addDbRelationship(r1);
-        assertEquals(1, rel.getDbRelationshipList().size());
-        assertEquals(r1, rel.getDbRelationshipList().get(0));
+        assertEquals(1, rel.getDbRelationships().size());
+        assertEquals(r1, rel.getDbRelationships().get(0));
         assertFalse(rel.isFlattened());
         assertFalse(rel.isReadOnly());
 
         rel.removeDbRelationship(r1);
-        assertEquals(0, rel.getDbRelationshipList().size());
+        assertEquals(0, rel.getDbRelationships().size());
      }
     
     public void testFlattenedRelationship() throws Exception {
@@ -148,16 +148,16 @@ public class ObjRelationshipTst extends CayenneTestCase {
 		
         rel.addDbRelationship(r1);
         rel.addDbRelationship(r2);
-        assertEquals(2, rel.getDbRelationshipList().size());
-        assertEquals(r1, rel.getDbRelationshipList().get(0));
-        assertEquals(r2, rel.getDbRelationshipList().get(1));
+        assertEquals(2, rel.getDbRelationships().size());
+        assertEquals(r1, rel.getDbRelationships().get(0));
+        assertEquals(r2, rel.getDbRelationships().get(1));
         
         assertTrue(rel.isFlattened());
         assertFalse(rel.isReadOnly());
         
         rel.removeDbRelationship(r1);
-        assertEquals(1, rel.getDbRelationshipList().size());
-        assertEquals(r2, rel.getDbRelationshipList().get(0));
+        assertEquals(1, rel.getDbRelationships().size());
+        assertEquals(r2, rel.getDbRelationships().get(0));
         assertFalse(rel.isFlattened());
         assertFalse(rel.isReadOnly());
     }

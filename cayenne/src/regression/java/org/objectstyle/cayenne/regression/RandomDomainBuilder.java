@@ -194,9 +194,9 @@ public class RandomDomainBuilder {
     generateDataMap(dir);
     Connection connection = null;
     try {
-      List nodes = domain.getDataNodesAsList();
+      Collection nodes = domain.getDataNodes();
       if (nodes == null || nodes.size() == 0) throw new CayenneException("No data nodes configured.");
-      DataNode node = (DataNode)nodes.get(0);
+      DataNode node = (DataNode)nodes.iterator().next();
       connection = node.getDataSource().getConnection();
       schemaGenerated = true;
       executeStatements(createTableStatements, connection);
@@ -215,9 +215,9 @@ public class RandomDomainBuilder {
   private void dropSchema() throws CayenneException {
     Connection connection = null;
     try {
-	  List nodes = domain.getDataNodesAsList();
+	  Collection nodes = domain.getDataNodes();
 	  if (nodes == null || nodes.size() == 0) throw new CayenneException("No data nodes configured.");
-      DataNode node = (DataNode)nodes.get(0);
+      DataNode node = (DataNode)nodes.iterator().next();
       connection = node.getDataSource().getConnection();
       executeAllStatements(dropTableStatements, connection);
       executeAllStatements(dropSequenceStatements, connection);
@@ -260,9 +260,9 @@ public class RandomDomainBuilder {
   }
 
   private void generateDataMap(File dir) throws CayenneException {
-	List nodes = domain.getDataNodesAsList();
+	Collection nodes = domain.getDataNodes();
 	if (nodes == null || nodes.size() == 0) throw new CayenneException("No data nodes configured.");
-	DataNode node = (DataNode)nodes.get(0);
+	DataNode node = (DataNode)nodes.iterator().next();
     Digraph refDigraph = randomSchema.getSchemaGraph();
     List tables = randomSchema.getTables();
     Map sequencesByTable = randomSchema.getSequencesByTable();

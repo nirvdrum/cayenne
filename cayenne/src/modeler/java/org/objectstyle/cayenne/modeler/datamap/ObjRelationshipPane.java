@@ -60,6 +60,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
@@ -212,7 +213,7 @@ public class ObjRelationshipPane
         ObjRelationship rel = model.getRelationship(row);
         DbEntity start = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
         DbEntity end = ((ObjEntity) rel.getTargetEntity()).getDbEntity();
-        java.util.List db_rel_list = rel.getDbRelationshipList();
+        List db_rel_list = rel.getDbRelationships();
 
         // Choose the relationship to resolve this obj relationship
         ChooseDbRelationshipDialog dg;
@@ -227,7 +228,7 @@ public class ObjRelationshipPane
         if (ChooseDbRelationshipDialog.CANCEL == dg.getChoice())
             return;
         else if (ChooseDbRelationshipDialog.SELECT == dg.getChoice()) {
-            copyDbRelationship(rel, dg.getDbRelationshipList());
+            this.copyDbRelationship(rel, dg.getDbRelationshipList());
             dg.dispose();
             return;
         }
@@ -248,13 +249,15 @@ public class ObjRelationshipPane
         dialog.setVisible(true);
         // If user pressed "Save"
         if (!dialog.isCancelPressed())
-            copyDbRelationship(rel, dialog.getDbRelList());
+            this.copyDbRelationship(rel, dialog.getDbRelationships());
         dialog.dispose();
     }
 
-    /** Set obj relationship to db relationships resolution.
-      * Clear old db relationships and put new ones in their place.*/
-    private void copyDbRelationship(ObjRelationship rel, java.util.List list) {
+    /**
+     * Set obj relationship to db relationships resolution.
+     * Clear old db relationships and put new ones in their place.
+     */
+    private void copyDbRelationship(ObjRelationship rel, List list) {
         rel.clearDbRelationships();
         if (list == null) {
             return;

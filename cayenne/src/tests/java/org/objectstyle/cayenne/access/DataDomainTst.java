@@ -76,11 +76,11 @@ public class DataDomainTst extends CayenneTestCase {
 
 	public void testNodes() throws java.lang.Exception {
 		DataDomain domain = new DataDomain("dom1");
-		assertEquals(0, domain.getDataNodesAsList().size());
+		assertEquals(0, domain.getDataNodes().size());
 		domain.addNode(new DataNode("1"));
-		assertEquals(1, domain.getDataNodesAsList().size());
+		assertEquals(1, domain.getDataNodes().size());
 		domain.addNode(new DataNode("2"));
-		assertEquals(2, domain.getDataNodesAsList().size());
+		assertEquals(2, domain.getDataNodes().size());
 	}
 
 	public void testNodeMaps() throws java.lang.Exception {
