@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
 import org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
+import org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
@@ -101,6 +102,7 @@ public class DatabaseSetupDelegate {
         delegates.put(HSQLDBAdapter.class, HSQLDBDelegate.class);
         delegates.put(OpenBaseAdapter.class, OpenBaseDelegate.class);
         delegates.put(DB2Adapter.class, DB2SetupDelegate.class);
+        delegates.put(SQLServerAdapter.class, SQLServerDelegate.class);
     }
 
     protected DbAdapter adapter;
