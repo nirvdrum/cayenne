@@ -21,6 +21,17 @@
         </ul>
         </p>
         
+        <p><u><strong><i>September 8, 2003:</i></strong> <strong>Cayenne-Examples 1.0b1 is Released</strong></u></p>
+        
+        <p>Initial release of cayenne-examples is available for download
+        from <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">SourceForge</a>.
+        It includes a demo tool called DataPort, demonstrating how Cayenne can be used 
+        to port relational data from one database to another. It shows the operation of the few 
+        internal parts of Cayenne, normally not used in the applications. DataPort also contains 
+        a working Ant task, so it has practical value for some database maintenance tasks. 
+        Documentation for cayenne-examples is bundled with the distribution and is not available 
+        from this site.
+        </p>
         
         <p>
         <u><strong><i>July 2003:</i></strong> <strong>New Website Design</strong></u></p>
