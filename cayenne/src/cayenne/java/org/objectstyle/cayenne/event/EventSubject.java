@@ -56,9 +56,13 @@
 
 package org.objectstyle.cayenne.event;
 
+import java.util.Map;
+
+import org.apache.commons.collections.ReferenceMap;
+
 /**
  * This class encapsulates the String that is used to identify the <em>subject</em> 
- * that a listener is  interested in. Using plain Strings causes several
+ * that a listener is  interested in. Using plain Strings causes several severe
  * problems:
  * <ul>
  * <li>it's easy to misspell a subject, leading to undesired behaviour at
@@ -73,10 +77,15 @@ package org.objectstyle.cayenne.event;
  */
 
 public class EventSubject extends Object {
-	private String _subject;
+
+	// a Map that will allow the values to be GC'ed
+	private static Map _registeredSubjects = new ReferenceMap(ReferenceMap.HARD, ReferenceMap.WEAK);
+
+	// Subject identifier in the form "com.foo.bar/SubjectName"
+	private String _fullyQualifiedSubjectName;
 
 	/**
-	 * Creates a new event subject.
+	 * Returns an event subject identified by the given owner and subject name.
 	 * 
 	 * @param subjectOwner the Class used for uniquely identifying this subject
 	 * @param subjectName a String used as name, e.g. "MyEventTopic"
@@ -85,36 +94,59 @@ public class EventSubject extends Object {
 	 */
 	public static EventSubject getSubject(Class subjectOwner, String subjectName) {
 		if (subjectOwner == null) {
-			throw new IllegalArgumentException("owner class must not be null");
+			throw new IllegalArgumentException("Owner class must not be null.");
 		}
 
 		if ((subjectName == null) || (subjectName.length() == 0)) {
-			throw new IllegalArgumentException("subject name must not be empty");
+			throw new IllegalArgumentException("Subject name must not be null or empty.");
 		}
 
-		return new EventSubject(subjectOwner.getName() + "." + subjectName);
+		String fullSubjectName = subjectOwner.getName() + "/" + subjectName;
+		EventSubject newSubject = (EventSubject)_registeredSubjects.get(fullSubjectName);
+		if (newSubject == null) {
+			newSubject = new EventSubject(fullSubjectName);
+			_registeredSubjects.put(newSubject.getSubjectName(), newSubject);
+		}
+
+		return newSubject;
 	}
 
 	/**
 	 * Private constructor to force use of #getSubject(Class, String)
 	 */
 	private EventSubject() {
-		super();
 	}
 
 	/**
-	 * Private constructor for new subjects.
+	 * Protected constructor for new subjects.
 	 * 
 	 * @param subject the name of the new subject to be created
 	 */
-	private EventSubject(String subject) {
-		this();
-		_subject = subject;
+	protected EventSubject(String fullSubjectName) {
+		super();
+		_fullyQualifiedSubjectName = fullSubjectName;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj instanceof EventSubject) {
+			return _fullyQualifiedSubjectName.equals(((EventSubject)obj).getSubjectName());
+		}
+		
+		return false;
+	}
+
+	public int hashCode() {
+		return (super.hashCode() | _fullyQualifiedSubjectName.hashCode());
+	}
+
+	public String getSubjectName() {
+		return _fullyQualifiedSubjectName;
 	}
 
 	/**
-	 * @return a String in the form <code>&lt;ClassName 0x123456&gt;
-	 * SomeName</code>
+	 * @return a String in the form
+	 * <code>&lt;ClassName 0x123456&gt; SomeName</code>
+	 * 
 	 * @see Object#toString()
 	 */
 	public String toString() {
@@ -125,7 +157,7 @@ public class EventSubject extends Object {
         buf.append(" 0x");
         buf.append(Integer.toHexString(System.identityHashCode(this)));
         buf.append("> ");
-        buf.append(_subject);
+        buf.append(_fullyQualifiedSubjectName);
         
         return buf.toString();
 	}

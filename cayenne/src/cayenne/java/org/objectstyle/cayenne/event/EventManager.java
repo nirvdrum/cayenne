@@ -134,15 +134,15 @@ public class EventManager extends Object {
 											Object sender)
 		throws NoSuchMethodException {
 		if (listener == null) {
-			throw new IllegalArgumentException("listener must not be null");
+			throw new IllegalArgumentException("Listener must not be null.");
 		}
 
 		if (eventParameterClass == null) {
-			throw new IllegalArgumentException("event class must not be null");
+			throw new IllegalArgumentException("Event class must not be null.");
 		}
 
 		if (subject == null) {
-			throw new IllegalArgumentException("subject must not be null");
+			throw new IllegalArgumentException("Subject must not be null.");
 		}
 
 		Invocation inv = new Invocation(listener, methodName, eventParameterClass);
