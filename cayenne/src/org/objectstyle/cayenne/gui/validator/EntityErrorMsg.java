@@ -86,7 +86,7 @@ public class EntityErrorMsg implements ErrorMsg
 	
 	public void displayField(Mediator mediator, JFrame frame){
 		EntityDisplayEvent event;
-		event = new EntityDisplayEvent(frame, entity, map, domain);
+		event = new EntityDisplayEvent(frame, entity, map, domain, true);
 		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
 			mediator.fireObjEntityDisplayEvent(event);
 		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)

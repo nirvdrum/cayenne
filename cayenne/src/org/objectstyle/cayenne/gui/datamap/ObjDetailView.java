@@ -107,7 +107,8 @@ implements ChangeListener, ObjEntityDisplayListener
 		if (e.getEntity() == null)
 			tab.setVisible(false);
 		else {
-			tab.setSelectedIndex(0);
+			if (e.isTabReset())
+				tab.setSelectedIndex(0);
 			tab.setVisible(true);
 		}
 	}

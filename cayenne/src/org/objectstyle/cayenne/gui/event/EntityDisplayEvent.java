@@ -70,21 +70,37 @@ public class EntityDisplayEvent extends EventObject
 	private DataMap dataMap;
 	private DataDomain domain;
 	private DataNode node;
+	/** Reset the tab display to tab 0 */
+	private boolean tabReset = false;
 	
 	/**  */
 	private EntityDisplayEvent(Object src, Entity temp_entity)
 	{
+		this (src, temp_entity, false);
+	}
+	
+	private EntityDisplayEvent(Object src, Entity temp_entity
+	, boolean temp_reset) {
 		super(src);
 		entity = temp_entity;
+		tabReset = temp_reset;
 	}
 
 	public EntityDisplayEvent (Object src, Entity temp_entity
 	, DataMap data_map, DataDomain temp_domain) 
 	{
-		this(src, temp_entity);
+		this(src, temp_entity, data_map, temp_domain, false);
+	}
+
+	public EntityDisplayEvent (Object src, Entity temp_entity
+	, DataMap data_map, DataDomain temp_domain, boolean temp_reset) 
+	{
+		this(src, temp_entity, temp_reset);
 		dataMap = data_map;
 		domain = temp_domain;
 	}
+	
+
 	
 	public EntityDisplayEvent (Object src, Entity temp_entity
 	, DataMap data_map, DataDomain temp_domain, DataNode temp_node)
@@ -104,5 +120,7 @@ public class EntityDisplayEvent extends EventObject
 
 	/** Get data node (data source) associated with this data map. */
 	public DataNode getDataNode() {return node;}
+	
+	public boolean isTabReset() { return tabReset;}
 
 }
