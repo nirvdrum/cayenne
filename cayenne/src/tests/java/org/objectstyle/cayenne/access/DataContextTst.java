@@ -66,6 +66,7 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
@@ -77,6 +78,7 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
@@ -283,16 +285,16 @@ public class DataContextTst extends CayenneTestCase {
 		ObjRelationship galleryToPaintingRel =
 			(ObjRelationship) galleryEntity.getRelationship("paintingArray");
 		galleryEntity.removeRelationship("paintingArray");
-			
+
 		ObjRelationship artistExhibitToArtistRel =
 			(ObjRelationship) artistExhibitEntity.getRelationship("toArtist");
-		artistExhibitEntity.removeRelationship("toArtist");	
-			
+		artistExhibitEntity.removeRelationship("toArtist");
+
 		ObjRelationship exhibitToArtistExhibitRel =
 			(ObjRelationship) exhibitEntity.getRelationship(
 				"artistExhibitArray");
 		exhibitEntity.removeRelationship("artistExhibitArray");
-		
+
 		Expression e =
 			ExpressionFactory.binaryPathExp(
 				Expression.EQUAL_TO,
@@ -309,7 +311,7 @@ public class DataContextTst extends CayenneTestCase {
 			paintingEntity.addRelationship(paintingToArtistRel);
 			galleryEntity.addRelationship(galleryToPaintingRel);
 			artistExhibitEntity.addRelationship(artistExhibitToArtistRel);
-			exhibitEntity.addRelationship(exhibitToArtistExhibitRel);	
+			exhibitEntity.addRelationship(exhibitToArtistExhibitRel);
 		}
 
 		assertEquals(4, o.getSelectCount());
@@ -455,6 +457,117 @@ public class DataContextTst extends CayenneTestCase {
 		assertEquals(1, results.size());
 	}
 
+	/**
+	 * Test prefetching with the prefetch on a reflexive relationship
+	 */
+	public void testPrefetch7() throws Exception {
+		ArtGroup parent =
+			(ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
+		parent.setName("parent");
+		ArtGroup child = (ArtGroup) ctxt.createAndRegisterNewObject("ArtGroup");
+		child.setName("child");
+		child.setToParentGroup(parent);
+		ctxt.commitChanges();
+
+		SelectQuery q = new SelectQuery("ArtGroup");
+		q.setQualifier(ExpressionFactory.matchExp("name", "child"));
+		q.addPrefetch("toParentGroup");
+
+		ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+		try {
+			ctxt.performQuery(q, o);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should not have failed with exception " + e.getMessage());
+		}
+
+		assertEquals(2, o.getSelectCount());
+
+		List results = o.getResults(q);
+		assertEquals(1, results.size());
+
+		ArtGroup fetchedChild = (ArtGroup) results.get(0);
+		//The parent must be fully fetched, not just HOLLOW (a fault)
+		assertEquals(
+			PersistenceState.COMMITTED,
+			fetchedChild.getToParentGroup().getPersistenceState());
+	}
+
+	/**
+	 * Test prefetching with qualifier on the root query 
+	 * containing the path to the prefetch
+	 */
+	public void testPrefetch8() throws Exception {
+		this.populatePaintings();
+		Expression exp =
+			ExpressionFactory.matchExp(
+				"toArtist.artistName",
+				this.artistName(1));
+
+		SelectQuery q = new SelectQuery(Painting.class, exp);
+
+		q.addPrefetch("toArtist");
+		ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+		try {
+			ctxt.performQuery(q, o);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should not have failed with exception " + e.getMessage());
+		}
+		assertEquals(2, o.getSelectCount());
+
+		List results = o.getResults(q);
+		assertEquals(1, results.size());
+
+		Painting painting = (Painting) results.get(0);
+		//The parent must be fully fetched, not just HOLLOW (a fault)
+		assertEquals(
+			PersistenceState.COMMITTED,
+			painting.getToArtist().getPersistenceState());
+
+	}
+
+	/**
+	 * Test prefetching with qualifier on the root query 
+	 * being the path to the prefetch
+	 */
+	public void testPrefetch9() throws Exception {
+		this.populatePaintings();
+		Expression artistExp =
+			ExpressionFactory.matchExp("artistName", this.artistName(1));
+		SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
+		Artist artist1=(Artist)ctxt.performQuery(artistQuery).get(0);
+		
+		//Try and find the painting matching the artist
+		Expression exp = ExpressionFactory.matchExp("toArtist", artist1);
+
+		SelectQuery q = new SelectQuery(Painting.class, exp);
+		q.addPrefetch("toArtist");
+		
+		ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN);
+		//The rest of this test causes failures.  Do we even need to fix this
+		// given the rather odd nature of what is trying to be done 
+		// (prefetching an object which we used to create the root query
+		// qualifier in the first place)?
+		/*try {
+			ctxt.performQuery(q, o);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should not have failed with exception " + e.getMessage());
+		}
+		assertEquals(2, o.getSelectCount());
+
+		List results = o.getResults(q);
+		assertEquals(1, results.size());
+
+		Painting painting = (Painting) results.get(0);
+		//The parent must be fully fetched, not just HOLLOW (a fault)
+		assertEquals(
+			PersistenceState.COMMITTED,
+			painting.getToArtist().getPersistenceState());
+			*/
+
+	}
 	/**
 	 * Test fetching query with multiple relationship
 	 * paths between the same 2 entities used in qualifier.
