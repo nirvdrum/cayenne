@@ -52,6 +52,7 @@
             no WebObjects analogue, closest thing is 
             com.webobjects.eoaccess.EODatabaseOperation</p>
             <p><cite>Expression </cite>: EOQualifier</p>
+            <p><cite>Ordering</cite> : EOSortOrdering</p>
         </subsection>
         </subsection>
     </section>
