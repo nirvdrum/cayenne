@@ -8,11 +8,21 @@
 <body>
      <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
         <subsection name="4.5 Deployment" anchor="deploy">
+           <p>As described in <a href="project.html">Cayenne Project</a>
+           chapter, a Cayenne application would need access to <code>cayenne.xml</code>
+           file, data map file(s) and (optionally) datasource file(s). These files are
+           located and loaded by the application 
+           <a href="../design.html#config">Configuration object</a>. Depending on which
+           concrete subclass of Configuration is used, configuration files are located 
+           differently. Below is a few standard deployment scenarious. Cayenne users
+           may subclass Configuration to define other loading strategies.
+           </p>
+           
            <subsection name="4.5.1 Standalone Applications" anchor="standalone">
                <p>To Be Done</p>
            </subsection>
            
-           <subsection name="4.5.2 Web Applications" anchor="standalone">
+           <subsection name="4.5.1 Web Applications" anchor="standalone">
                <p></p>
                <p>To Be Done</p>
            </subsection>

@@ -8,15 +8,15 @@
 <body>
     <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">
         <subsection name="4.1 Introduction" anchor="intro">
-            <p>The following steps (discussed in detail below) are needed
-            to write a Cayenne application:</p>
+            <p>The following steps are needed to write and deploy a Cayenne 
+            application. <i>Each one of the steps is discussed in detail in the 
+            following subsections.</i></p>
             
-            <p><strong>- Create DataMap : </strong> 
-            <a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
-            is stored in an XML file 
-            used to desribe your database schema and map it to the Java classes
-            in your application. DataMap can be created either manually or using
-            CayenneModeler GUI tool shipped with Cayenne.
+            <p><strong>- Create Cayenne Project : </strong> 
+            Cayenne project is a set of configuration files
+            needed for a Java application to work with Cayenne. All these
+            files are in XML format. They can either be edited by hand or
+            using CayenneModeler GUI tool.
             </p>
             
             <p><strong>- Generate Java classes : </strong> In Cayenne
@@ -34,12 +34,17 @@
             </p>
             
             <p><strong>- Configure deployment environment : </strong> 
-            Depending on how you deploy your application you may need different
-            approaches in configuring Cayenne. Possible deployment scenarious are: 
+            Depending on how you plan to deploy your application you may 
+            configure Cayenne in a few ways. Possible deployment scenarious include 
             standalone application, web application, EJB application.
             </p>
-            <p>Database schema used in examples in this chapter is shown below:</p>
+            
+            <p>Database schema used in all the examples later in this chapter is 
+            shown below:
+            </p>
+            
             <img src="/images/schema.jpg" width="500" height="309" border="0" align="middle" alt="Art Catalog Schema"/>
+        
         </subsection>
     </section>
 </body>

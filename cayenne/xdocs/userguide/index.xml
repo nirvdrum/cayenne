@@ -33,18 +33,23 @@
             <li><a href="appguide/index.html">4. Writing Cayenne Applications</a>
             <ul>
                 <li><a href="appguide/index.html#intro">4.1 Introduction</a></li>
-                <li><a href="appguide/datamap.html#datamap">4.2 Create DataMap</a></li>
-                <li><a href="appguide/javagen.html#javagen">4.3 Generate Java Classes</a></li>
-                <li><a href="appguide/cayenne.html#cayenne">4.4 Using Cayenne Classes</a></li>
+                <li><a href="appguide/project.html#datamap">4.2 Cayenne Project</a></li>
+                <li><a href="appguide/javagen.html#javagen">4.3 Generating Java Classes</a></li>
+                <li><a href="appguide/cayenne.html#cayenne">4.4 Using Cayenne</a></li>
                 <li><a href="appguide/deploy.html#deploy">4.5 Deployment</a></li>
             </ul></li>
             
-           <li><a href="webobjects.html">5. Cayenne and WebObjects</a>
+            <li><a href="modeler/index.html">5. CayenneModeler GUI Tool</a>
             <ul>
-                <li><a href="webobjects.html#intro">5.1 Introduction</a></li>
-                <li><a href="webobjects.html#feature">5.2 Feature Comparison</a></li>
-                <li><a href="webobjects.html#together">5.3 Working Together</a></li>
-                <li><a href="webobjects.html#terms">5.4 Terms Translation</a></li>
+                <li><a href="modeler/index.html#intro">5.1 Introduction</a></li>
+            </ul></li>
+            
+            <li><a href="webobjects.html">6. Cayenne and WebObjects</a>
+            <ul>
+                <li><a href="webobjects.html#intro">6.1 Introduction</a></li>
+                <li><a href="webobjects.html#feature">6.2 Feature Comparison</a></li>
+                <li><a href="webobjects.html#together">6.3 Working Together</a></li>
+                <li><a href="webobjects.html#terms">6.4 Terms Translation</a></li>
             </ul></li>
         </ul>
     </section>
