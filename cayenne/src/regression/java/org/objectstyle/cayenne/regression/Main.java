@@ -61,9 +61,12 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Random;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.ashwood.dbutil.RandomSchema;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 
@@ -78,7 +81,8 @@ public class Main {
     protected Preferences prefs;
 
     public static void main(String[] args) {
-//        QueryLogger.setLoggingLevel(Level.ALL);
+        QueryLogger.setLoggingLevel(Level.ALL);
+        QueryLogger.setLoggingLevel(null);
         System.out.println(
             "max memory, MB: "
                 + Runtime.getRuntime().maxMemory() / (1024 * 1024));

@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.art.CompoundPainting;
+import org.objectstyle.art.RWCompoundPainting;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -83,7 +84,6 @@ public class DataContextCompoundOETst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        populateTables();
         ctxt = getDomain().createDataContext();
     }
 
@@ -149,6 +149,7 @@ public class DataContextCompoundOETst extends CayenneTestCase {
 	}
 
     public void testSelectCompound1() throws Exception {
+        populateTables();
         SelectQuery query = new SelectQuery(CompoundPainting.class);
         List objects = ctxt.performQuery(query);
 
@@ -177,6 +178,7 @@ public class DataContextCompoundOETst extends CayenneTestCase {
 	}
 
     public void testSelectCompound2() throws Exception {
+        populateTables();
         SelectQuery query = new SelectQuery(
                 CompoundPainting.class,
                 ExpressionFactory.matchExp("artistName", "artist2"));

@@ -151,6 +151,11 @@
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="toGallery.GALLERY_NAME"/>
 		<obj-attribute name="textReview" type="java.lang.String" db-attribute-path="toPaintingInfo.TEXT_REVIEW"/>
 	</obj-entity>
+	<obj-entity name="RWCompoundPainting" className="org.objectstyle.art.RWCompoundPainting" dbEntityName="PAINTING">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
+		<obj-attribute name="textReview" type="java.lang.String" db-attribute-path="toPaintingInfo.TEXT_REVIEW"/>
+	</obj-entity>
 	<db-relationship name="artistExhibitArray" source="ARTIST" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>

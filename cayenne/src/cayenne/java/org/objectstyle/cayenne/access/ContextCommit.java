@@ -84,6 +84,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -281,34 +282,53 @@ class ContextCommit {
             return;
         }
 
+        List dbEntities = new ArrayList(entities.size());
+        Map objEntitiesByDbEntity = new HashMap(entities.size());
+        groupObjEntitiesBySpannedDbEntities(dbEntities,
+                objEntitiesByDbEntity,
+                entities);
+
         DependencySorter sorter = commitHelper.getNode().getDependencySorter();
-        sorter.sortObjEntities(entities, false);
+//        sorter.sortObjEntities(entities, false);
+        sorter.sortDbEntities(dbEntities, false);
 
-        for (Iterator i = entities.iterator(); i.hasNext();) {
-            ObjEntity entity = (ObjEntity) i.next();
-            List objects =
-                (List) newObjectsByObjEntity.get(entity.getClassName());
-
-            // sort objects for entity
-            sorter.sortObjectsForEntity(entity, objects, false);
-
+        for (Iterator i = dbEntities.iterator(); i.hasNext(); ) {
+            DbEntity dbEntity = (DbEntity)i.next();
+            List objEntitiesForDbEntity =
+                    (List)objEntitiesByDbEntity.get(dbEntity);
             InsertBatchQuery batch =
-                new InsertBatchQuery(entity.getDbEntity(), objects.size());
+                        new InsertBatchQuery(dbEntity, 27);
             batch.setLoggingLevel(logLevel);
-
             if (logObj.isDebugEnabled()) {
                 logObj.debug(
-                    "Creating InsertBatchQuery for DbEntity "
-                        + entity.getDbEntity().getName());
+                        "Creating InsertBatchQuery for DbEntity "
+                        + dbEntity.getName());
             }
+            for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
+                ObjEntity entity = (ObjEntity) j.next();
+                boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
+                DbRelationship masterDependentDbRel = (
+                        isMasterDbEntity ? null :
+                        findMasterToDependentDbRelationship(entity.getDbEntity(), dbEntity));
 
-            for (Iterator j = objects.iterator(); j.hasNext();) {
-                DataObject o = (DataObject) j.next();
-                batch.add(context.takeObjectSnapshot(o));
+                List objects =
+                        (List) newObjectsByObjEntity.get(entity.getClassName());
+
+                if (isMasterDbEntity)
+                    sorter.sortObjectsForEntity(entity, objects, false);
+
+                for (Iterator k = objects.iterator(); k.hasNext();) {
+                    DataObject o = (DataObject) k.next();
+//                    batch.add(context.takeObjectSnapshot(o));
+                    Map snapshot = BatchQueryUtils.buildSnapshotForInsert(entity, o,
+                            masterDependentDbRel);
+                    batch.add(snapshot);
+                }
+
+                if (isMasterDbEntity)
+                    insObjects.addAll(objects);
             }
-
             commitHelper.getQueries().add(batch);
-            insObjects.addAll(objects);
         }
     }
 
@@ -320,35 +340,56 @@ class ContextCommit {
             return;
         }
 
+        List dbEntities = new ArrayList(entities.size());
+        Map objEntitiesByDbEntity = new HashMap(entities.size());
+        groupObjEntitiesBySpannedDbEntities(dbEntities,
+                objEntitiesByDbEntity,
+                entities);
+
         DependencySorter sorter = commitHelper.getNode().getDependencySorter();
-        sorter.sortObjEntities(entities, true);
+//        sorter.sortObjEntities(entities, true);
+        sorter.sortDbEntities(dbEntities, true);
 
-        for (Iterator i = entities.iterator(); i.hasNext();) {
-            ObjEntity entity = (ObjEntity) i.next();
-            List objects =
-                (List) objectsToDeleteByObjEntity.get(entity.getClassName());
-
-            sorter.sortObjectsForEntity(entity, objects, true);
+        for (Iterator i = dbEntities.iterator(); i.hasNext(); ) {
+            DbEntity dbEntity = (DbEntity)i.next();
+            List objEntitiesForDbEntity =
+                    (List)objEntitiesByDbEntity.get(dbEntity);
             DeleteBatchQuery batch =
-                new DeleteBatchQuery(entity.getDbEntity(), objects.size());
+                new DeleteBatchQuery(dbEntity, 27);
             batch.setLoggingLevel(logLevel);
 
             if (logObj.isDebugEnabled())
                 logObj.debug(
                     "Creating DeleteBatchQuery for DbEntity "
-                        + entity.getDbEntity().getName());
+                        + dbEntity.getName());
 
-            Iterator it = objects.iterator();
-            while (it.hasNext()) {
-                DataObject o = (DataObject) it.next();
-                Map id = o.getObjectId().getIdSnapshot();
-                if (id != null && !id.isEmpty()) {
-                    batch.add(id);
+            for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
+                ObjEntity entity = (ObjEntity) j.next();
+                boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
+                DbRelationship masterDependentDbRel = (
+                        isMasterDbEntity ? null :
+                        findMasterToDependentDbRelationship(entity.getDbEntity(), dbEntity));
+
+                List objects =
+                        (List) objectsToDeleteByObjEntity.get(entity.getClassName());
+
+                if (isMasterDbEntity)
+                    sorter.sortObjectsForEntity(entity, objects, true);
+
+                for (Iterator k = objects.iterator(); k.hasNext();) {
+                    DataObject o = (DataObject) k.next();
+                    Map id = o.getObjectId().getIdSnapshot();
+                    if (id != null && !id.isEmpty()) {
+                        if (!isMasterDbEntity && masterDependentDbRel != null)
+                            id = masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(id);
+                        batch.add(id);
+                    }
                 }
-            }
 
+                if (isMasterDbEntity)
+                    delObjects.addAll(objects);
+            }
             commitHelper.getQueries().add(batch);
-            delObjects.addAll(objects);
         }
     }
 
@@ -359,51 +400,71 @@ class ContextCommit {
             return;
         }
 
-        for (Iterator i = entities.iterator(); i.hasNext();) {
-            ObjEntity entity = (ObjEntity) i.next();
-            List objects =
-                (List) objectsToUpdateByObjEntity.get(entity.getClassName());
+        List dbEntities = new ArrayList(entities.size());
+        Map objEntitiesByDbEntity = new HashMap(entities.size());
+        groupObjEntitiesBySpannedDbEntities(dbEntities,
+                objEntitiesByDbEntity,
+                entities);
+        for (Iterator i = dbEntities.iterator(); i.hasNext(); ) {
+            DbEntity dbEntity = (DbEntity)i.next();
+            List objEntitiesForDbEntity =
+                    (List)objEntitiesByDbEntity.get(dbEntity);
             Map batches = new SequencedHashMap();
-            
-            for (Iterator j = objects.iterator(); j.hasNext();) {
-                DataObject o = (DataObject) j.next();
-                Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(o);
-                
-                if (snapshot.isEmpty()) {
-                    o.setPersistenceState(PersistenceState.COMMITTED);
-                    continue;
-                }
-                
-                TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
-                
-                Integer hashCode =
-                    new Integer(BatchQueryUtils.hashCode(updatedAttributeNames));
-                    
-                UpdateBatchQuery batch =
-                    (UpdateBatchQuery) batches.get(hashCode);
-                if (batch == null) {
-                    batch =
-                        new UpdateBatchQuery(
-                            entity.getDbEntity(),
-                            new ArrayList(snapshot.keySet()),
-                            10);
-                    batch.setLoggingLevel(logLevel);                    
-                    batches.put(hashCode, batch);
-                }
-                Map idSnapshot = o.getObjectId().getIdSnapshot();
-                batch.add(idSnapshot, snapshot);
-                ObjectId updId =
-                    updatedId(
-                        o.getObjectId().getObjClass(),
-                        idSnapshot,
-                        snapshot);
-                if (updId != null) {
-                    updatedIds.put(o.getObjectId(), updId);
-                }
-                
-                updObjects.add(o);
-            }
 
+            for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
+                ObjEntity entity = (ObjEntity) j.next();
+                boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
+                DbRelationship masterDependentDbRel = (
+                        isMasterDbEntity ? null :
+                        findMasterToDependentDbRelationship(entity.getDbEntity(), dbEntity));
+                List objects =
+                        (List) objectsToUpdateByObjEntity.get(entity.getClassName());
+
+                for (Iterator k = objects.iterator(); k.hasNext();) {
+                    DataObject o = (DataObject) k.next();
+                    Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(entity, o,
+                            masterDependentDbRel);
+//                    Map snapshot = BatchUtils.buildSnapshotForUpdate(o);
+
+                    if (snapshot.isEmpty()) {
+                        o.setPersistenceState(PersistenceState.COMMITTED);
+                        continue;
+                    }
+
+                    TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
+
+                    Integer hashCode =
+                            new Integer(BatchQueryUtils.hashCode(updatedAttributeNames));
+
+                    UpdateBatchQuery batch =
+                            (UpdateBatchQuery) batches.get(hashCode);
+                    if (batch == null) {
+                        batch =
+                                new UpdateBatchQuery(
+                                dbEntity,
+                                new ArrayList(snapshot.keySet()),
+                                10);
+                        batch.setLoggingLevel(logLevel);
+                        batches.put(hashCode, batch);
+                    }
+                    Map idSnapshot = o.getObjectId().getIdSnapshot();
+                    if (!isMasterDbEntity && masterDependentDbRel != null)
+                            idSnapshot = masterDependentDbRel.targetPkSnapshotWithSrcSnapshot(idSnapshot);
+                    batch.add(idSnapshot, snapshot);
+                    if (isMasterDbEntity) {
+                        ObjectId updId =
+                                updatedId(
+                                o.getObjectId().getObjClass(),
+                                idSnapshot,
+                                snapshot);
+                        if (updId != null) {
+                            updatedIds.put(o.getObjectId(), updId);
+                        }
+
+                        updObjects.add(o);
+                    }
+                }
+            }
             commitHelper.getQueries().addAll(batches.values());
         }
     }
@@ -685,5 +746,51 @@ class ContextCommit {
             logObj.debug("transaction committed");
             transactionCommitted = true;
         }
+    }
+
+    private void groupObjEntitiesBySpannedDbEntities(
+            List dbEntities,
+            Map objEntitiesByDbEntity,
+            List objEntities) {
+        for (Iterator i = objEntities.iterator(); i.hasNext(); ) {
+            ObjEntity objEntity = (ObjEntity)i.next();
+            DbEntity dbEntity = objEntity.getDbEntity();
+            List objEntitiesForDbEntity = (List)objEntitiesByDbEntity.get(dbEntity);
+            if (objEntitiesForDbEntity == null) {
+                objEntitiesForDbEntity = new ArrayList(1);
+                dbEntities.add(dbEntity);
+                objEntitiesByDbEntity.put(dbEntity, objEntitiesForDbEntity);
+            }
+            if (!objEntitiesForDbEntity.contains(objEntity))
+                objEntitiesForDbEntity.add(objEntity);
+            for (Iterator j = objEntity.getAttributeMap().values().iterator();
+                 j.hasNext(); ) {
+                ObjAttribute objAttribute = (ObjAttribute)j.next();
+                if (!objAttribute.isCompound()) continue;
+                dbEntity = (DbEntity)objAttribute.getDbAttribute().getEntity();
+                objEntitiesForDbEntity = (List)objEntitiesByDbEntity.get(dbEntity);
+                if (objEntitiesForDbEntity == null) {
+                    objEntitiesForDbEntity = new ArrayList(1);
+                    dbEntities.add(dbEntity);
+                    objEntitiesByDbEntity.put(dbEntity, objEntitiesForDbEntity);
+                }
+                if (!objEntitiesForDbEntity.contains(objEntity))
+                    objEntitiesForDbEntity.add(objEntity);
+            }
+        }
+    }
+
+    private DbRelationship findMasterToDependentDbRelationship(
+            DbEntity masterDbEntity,
+            DbEntity dependentDbEntity) {
+        if (masterDbEntity.equals(dependentDbEntity)) return null;
+        for (Iterator i = masterDbEntity.getRelationshipMap().values().iterator();
+             i.hasNext(); ) {
+            DbRelationship rel = (DbRelationship)i.next();
+            if (dependentDbEntity.equals(rel.getTargetEntity()) &&
+                rel.isToDependentPK())
+                return rel;
+        }
+        return null;
     }
 }
