@@ -53,80 +53,37 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.view;
+package org.objectstyle.cayenne.modeler.util;
 
-import java.awt.Frame;
 import java.io.File;
 
-import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
-import org.objectstyle.cayenne.modeler.util.ApplicationFileFilter;
-import org.objectstyle.cayenne.modeler.util.DataMapFileFilter;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
+ * FileFilter used to select Cayenne Application project files.
+ * 
  * @author Andrei Adamchik
  */
-public class ProjectOpener extends JFileChooser {
+public class ApplicationFileFilter extends FileFilter {
+    protected static ApplicationFileFilter sharedInstance = new ApplicationFileFilter();
 
-    /**
-     * Constructor for ProjectOpener.
-     */
-    public ProjectOpener() {
-        super();
-    }
-
-    public File openProjectFile(Frame f) {
-
-        // configure dialog
-        setDialogTitle("Select Project File");
-        setFileSelectionMode(JFileChooser.FILES_ONLY);
-        setCurrentDirectory(getDefaultStartDir());
-
-        // configure filters
-        resetChoosableFileFilters();
-        addChoosableFileFilter(ApplicationFileFilter.getInstance());
-        addChoosableFileFilter(DataMapFileFilter.getInstance());
-        
-        // default to App projects
-        setFileFilter(ApplicationFileFilter.getInstance());
-
-        int status = showOpenDialog(f);
-        if (status != JFileChooser.APPROVE_OPTION) {
-            return null;
-        }
-
-        return getSelectedFile();
+    public static ApplicationFileFilter getInstance() {
+        return sharedInstance;
     }
 
     /**
-     * Builds a title that contains the name of the application.
+     * Accepts all directories and all cayenne.xml files.
      */
-    public void setDialogTitle(String dialogTitle) {
-        super.setDialogTitle(ModelerUtil.buildTitle(dialogTitle));
+    public boolean accept(File f) {
+        return f.isDirectory() || Configuration.DOMAIN_FILE.equals(f.getName());
     }
 
     /**
-     * Returns directory where file search should start. 
-     * This is either coming from saved preferences, or a current directory is
-     * used.
+     *  Returns description of this filter.
      */
-    public File getDefaultStartDir() {
-        File startDir = null;
-
-        // find start directory in preferences
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        String startDirStr = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
-        if (startDirStr != null) {
-            startDir = new File(startDirStr);
-        }
-
-        // not found or invalid, use current dir
-        if (startDir == null || !startDir.isDirectory()) {
-            startDir = new File(System.getProperty("user.dir"));
-        }
-
-        return startDir;
+    public String getDescription() {
+        return "Cayenne Applications (" + Configuration.DOMAIN_FILE + ")";
     }
 }

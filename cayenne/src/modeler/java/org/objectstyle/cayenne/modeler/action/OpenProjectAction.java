@@ -57,17 +57,15 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import javax.swing.JFileChooser;
+
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-import org.apache.log4j.Level;
+
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.event.Mediator;
-import org.objectstyle.cayenne.modeler.util.ProjectFileFilter;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
@@ -119,6 +117,8 @@ public class OpenProjectAction extends ProjectAction {
             logObj.warn("Error loading project file.", e);
         }
     }
+    
+    
     /** Opens specified project file. File must already exist. */
     protected void openProject(File file) {
         // Save and close (if needed) currently open project.

@@ -53,43 +53,47 @@
  * <http://objectstyle.org/>.
  *
  */
- package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import javax.swing.filechooser.FileFilter;
+
+import org.objectstyle.cayenne.project.DataMapFile;
 
 /**
+ * FileFilter used to select DataMap files.
+ * 
  * @author Andrei Adamchik
  */
-public class ProjectFileFilterTst extends TestCase {
-	protected ProjectFileFilter filter;
+public class DataMapFileFilter extends FileFilter {
+    protected static DataMapFileFilter sharedInstance = new DataMapFileFilter();
 
-	/**
-	 * Constructor for ProjectFileFilterTst.
-	 */
-	public ProjectFileFilterTst(String name) {
-		super(name);
-	}
-	
-	public void setUp() throws Exception {
-		filter = new ProjectFileFilter();
-	}
-	
-	public void testAcceptDir() throws Exception {
-		assertTrue(filter.accept(new File(".")));
-	}
-	
-	public void testAcceptCayenneXml() throws Exception {
-		assertTrue(filter.accept(new File("cayenne.xml")));
-	}
-	
-	public void testRejectOther() throws Exception {
-		assertTrue(!filter.accept(new File("somefile.txt")));
-	}
-	
-	public void testRejectBadCayenneXml() throws Exception {
-		assertTrue(!filter.accept(new File("bad_cayenne.xml")));
-	}
+    public static DataMapFileFilter getInstance() {
+        return sharedInstance;
+    }
+
+    /**
+     * Accepts all directories and all *.map.xml files.
+     */
+    public boolean accept(File f) {
+        if (f.isDirectory()) {
+            return true;
+        }
+
+        String name = f.getName();
+        if (name.endsWith(DataMapFile.LOCATION_SUFFIX)
+            && !name.equals(DataMapFile.LOCATION_SUFFIX)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     *  Returns description of this filter.
+     */
+    public String getDescription() {
+        return "DataMaps (*" + DataMapFile.LOCATION_SUFFIX + ")";
+    }
 }
-

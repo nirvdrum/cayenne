@@ -53,80 +53,50 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.view;
+package org.objectstyle.cayenne.modeler.util;
 
-import java.awt.Frame;
 import java.io.File;
 
-import javax.swing.JFileChooser;
-
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
-import org.objectstyle.cayenne.modeler.util.ApplicationFileFilter;
-import org.objectstyle.cayenne.modeler.util.DataMapFileFilter;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ProjectOpener extends JFileChooser {
+public class DataMapFileFilterTst extends TestCase {
+    protected DataMapFileFilter filter;
 
     /**
-     * Constructor for ProjectOpener.
+     * Constructor for DataMapFileFilterTst.
      */
-    public ProjectOpener() {
-        super();
+    public DataMapFileFilterTst(String name) {
+        super(name);
     }
 
-    public File openProjectFile(Frame f) {
-
-        // configure dialog
-        setDialogTitle("Select Project File");
-        setFileSelectionMode(JFileChooser.FILES_ONLY);
-        setCurrentDirectory(getDefaultStartDir());
-
-        // configure filters
-        resetChoosableFileFilters();
-        addChoosableFileFilter(ApplicationFileFilter.getInstance());
-        addChoosableFileFilter(DataMapFileFilter.getInstance());
-        
-        // default to App projects
-        setFileFilter(ApplicationFileFilter.getInstance());
-
-        int status = showOpenDialog(f);
-        if (status != JFileChooser.APPROVE_OPTION) {
-            return null;
-        }
-
-        return getSelectedFile();
+    public void setUp() throws Exception {
+        filter = new DataMapFileFilter();
     }
 
-    /**
-     * Builds a title that contains the name of the application.
-     */
-    public void setDialogTitle(String dialogTitle) {
-        super.setDialogTitle(ModelerUtil.buildTitle(dialogTitle));
+    public void testAcceptDir() throws Exception {
+        assertTrue(filter.accept(new File(".")));
     }
 
-    /**
-     * Returns directory where file search should start. 
-     * This is either coming from saved preferences, or a current directory is
-     * used.
-     */
-    public File getDefaultStartDir() {
-        File startDir = null;
+    public void testRejectCayenneXml() throws Exception {
+        assertTrue(!filter.accept(new File("cayenne.xml")));
+    }
 
-        // find start directory in preferences
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        String startDirStr = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
-        if (startDirStr != null) {
-            startDir = new File(startDirStr);
-        }
+    public void testRejectOther() throws Exception {
+        assertTrue(!filter.accept(new File("somefile.txt")));
+    }
 
-        // not found or invalid, use current dir
-        if (startDir == null || !startDir.isDirectory()) {
-            startDir = new File(System.getProperty("user.dir"));
-        }
-
-        return startDir;
+    public void testRejectHiddenMapXml() throws Exception {
+        assertTrue(!filter.accept(new File(".map.xml")));
+    }
+    
+    public void testAcceptMapXml() throws Exception {
+        assertTrue(filter.accept(new File("xyz.map.xml")));
+    }
+    
+    public void testRejectMixedCase() throws Exception {
+        assertTrue(!filter.accept(new File("xyz.MAP.xml")));
     }
 }

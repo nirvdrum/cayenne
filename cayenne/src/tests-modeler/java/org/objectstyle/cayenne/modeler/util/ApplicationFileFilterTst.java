@@ -52,32 +52,44 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-package org.objectstyle.cayenne.modeler.util;
+ */
+ package org.objectstyle.cayenne.modeler.util;
 
 import java.io.File;
 
-import javax.swing.filechooser.FileFilter;
-
-import org.objectstyle.cayenne.conf.Configuration;
+import junit.framework.TestCase;
 
 /**
- * FileFilter used to select Cayenne project files.
+ * @author Andrei Adamchik
  */
-public class ProjectFileFilter extends FileFilter {
-	
-  	/**
-  	 * Accepts all directories and all cayenne.xml files.
-  	 */
-  	public boolean accept(File f) {
-		return f.isDirectory() || Configuration.DOMAIN_FILE.equals(f.getName());
-	}
+public class ApplicationFileFilterTst extends TestCase {
+	protected ApplicationFileFilter filter;
 
-  	/**
-  	 *  Returns description of this filter.
-  	 */
-  	public String getDescription() {
-    	return "Cayenne Project Files";
-  	}
+	/**
+	 * Constructor for ApplicationFileFilter.
+	 */
+	public ApplicationFileFilterTst(String name) {
+		super(name);
+	}
+	
+	public void setUp() throws Exception {
+		filter = new ApplicationFileFilter();
+	}
+	
+	public void testAcceptDir() throws Exception {
+		assertTrue(filter.accept(new File(".")));
+	}
+	
+	public void testAcceptCayenneXml() throws Exception {
+		assertTrue(filter.accept(new File("cayenne.xml")));
+	}
+	
+	public void testRejectOther() throws Exception {
+		assertTrue(!filter.accept(new File("somefile.txt")));
+	}
+	
+	public void testRejectBadCayenneXml() throws Exception {
+		assertTrue(!filter.accept(new File("bad_cayenne.xml")));
+	}
 }
 
