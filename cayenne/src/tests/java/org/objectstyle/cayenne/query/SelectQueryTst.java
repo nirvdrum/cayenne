@@ -91,7 +91,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount, objects.size());
     }
 
-    public void testSelectLikeObjects() throws java.lang.Exception {
+   public void testOrderByIgnoreCase() throws Exception {
         query.setObjEntityName("Artist");
         Expression qual =
             ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist11");

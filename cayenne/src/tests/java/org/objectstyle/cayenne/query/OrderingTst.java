@@ -87,6 +87,16 @@ public class OrderingTst extends CayenneTestCase {
         ord.setAscending(Ordering.DESC);
         assertEquals(Ordering.DESC, ord.isAscending());
     }
+
+    public void testCaseInsensitive1() throws Exception {
+       Ordering ord=new Ordering("", Ordering.ASC, true);
+       assertEquals(true, ord.isCaseInsensitive());
+    }
+
+    public void testCaseInsensitive2() throws Exception {
+       Ordering ord=new Ordering("", Ordering.ASC, false);
+       assertEquals(false, ord.isCaseInsensitive());
+    }
     
     
     public void testAsending2() throws Exception {

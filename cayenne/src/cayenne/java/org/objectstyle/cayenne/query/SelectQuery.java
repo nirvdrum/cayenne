@@ -116,6 +116,11 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public void addOrdering(String sortPathSpec, boolean isAscending) {
 		addOrdering(new Ordering(sortPathSpec, isAscending));
 	}
+	
+	/** Adds ordering specification to this query orderings. */
+	public void addOrdering(String sortPathSpec, boolean isAscending, boolean ignoreCase) {
+		addOrdering(new Ordering(sortPathSpec, isAscending, ignoreCase));
+	}
 
 	/** Returns a list of orderings used by this query. */
 	public List getOrderingList() {
