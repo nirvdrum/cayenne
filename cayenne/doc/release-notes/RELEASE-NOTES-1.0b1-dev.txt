@@ -29,16 +29,30 @@ entity names. A few items below are related to this change.
 to appropriate entities.
 
 7. Deprecated QueryEngine.lookupEntity in favor of 
-QueryEngine.getEntityResolver().lookup...()
+QueryEngine.getEntityResolver().lookup...().
 
-8. Added support for flattened relationships.  Modeller now suggests all available
-paths from the source entity to the destination entity for selection.  For simple flattened 
-relationships that span a many-many link table consisting solely of fk's to the linked rows, 
-cayenne will automatically add/remove the link records.   In that case, there is no need to 
-have an ObjEntity for the link record, and this is in fact discouraged.  All other flattened
-relationships are set "readOnly" and cannot be modified.
+8. Added support for flattened relationships.  Modeller now suggests all
+available paths from the source entity to the destination entity for selection.
+For simple flattened  relationships that span a many-many link table consisting
+solely of foreign keys to the linked rows, Cayenne will automatically add/remove
+the link records.   In that case, there is no need to have an ObjEntity for the
+link record, and this is in fact discouraged.  All other flattened relationships
+are set "readOnly" and cannot be modified.
 
-9. Changed ObjectId to use a Class instead of the name of the ObjEntity.  Removed
-getObjEntityName() as a consequence
+9. Changed ObjectId to use a Class instead of the name of the ObjEntity.
+Removed getObjEntityName() as a consequence.
 
- 
+10. Deprecated OperationSorter.sortQueries(Object[]).
+
+11. PersistenceState is now a real class instead of an interface;
+CayenneDataObject.persistenceStateString() has been deprecated and moved into
+the PersistenceState class as persistenceStateName().
+
+12. Many general cleanups related to logging, potential NullPointerExceptions
+and other pitfalls as reported by jlint.
+
+13. Updated the dependent JARs to their most recent versions.
+
+14. Cleaned up the ant build files to better use property values instead of
+hardcoded file or directory names.
+
