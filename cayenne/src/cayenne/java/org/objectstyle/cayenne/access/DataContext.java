@@ -669,49 +669,23 @@ public class DataContext implements QueryEngine, Serializable {
                     DataObject object = registeredObject(anId);
 
                     // deal with object state
-                    if (refresh) {
-                        // make all COMMITTED objects HOLLOW
-                        if (object.getPersistenceState() == PersistenceState.COMMITTED) {
-                            // TODO: temporary hack - should do lazy conversion - make an
-                            // object HOLLOW
-                            // and resolve on first read... unfortunately lots of other
-                            // things break...
-
-                            DataRowUtils.mergeObjectWithSnapshot(
-                                    objectEntity,
+                    int state = object.getPersistenceState();
+                    switch (state) {
+                        case PersistenceState.COMMITTED:
+                        case PersistenceState.MODIFIED:
+                        case PersistenceState.DELETED:
+                            // process the above only if refresh is requested...
+                            if (!refresh) {
+                                break;
+                            }
+                        case PersistenceState.HOLLOW:
+                            DataRowUtils.mergeObjectWithSnapshot(objectEntity,
                                     object,
                                     dataRow);
-                            // object.setPersistenceState(PersistenceState.HOLLOW);
-                        }
-                        // merge all MODIFIED objects immediately
-                        else if (object.getPersistenceState() == PersistenceState.MODIFIED) {
-                            DataRowUtils.mergeObjectWithSnapshot(
-                                    objectEntity,
-                                    object,
-                                    dataRow);
-                        }
-                        // TODO: temporary hack - should do lazy conversion - keep an
-                        // object HOLLOW
-                        // and resolve on first read...unfortunately lots of other things
-                        // break...
-                        else if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                            DataRowUtils.mergeObjectWithSnapshot(
-                                    objectEntity,
-                                    object,
-                                    dataRow);
-                        }
+                        default:
+                            break;
                     }
-                    // TODO: temporary hack - this else clause must go... unfortunately
-                    // lots of other things break
-                    // at the moment...
-                    else {
-                        if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                            DataRowUtils.mergeObjectWithSnapshot(
-                                    objectEntity,
-                                    object,
-                                    dataRow);
-                        }
-                    }
+                   
 
                     object.setSnapshotVersion(dataRow.getVersion());
                     object.fetchFinished();
