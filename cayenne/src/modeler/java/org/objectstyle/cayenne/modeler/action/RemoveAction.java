@@ -122,6 +122,7 @@ public class RemoveAction extends CayenneAction {
     private void remove() {
         EventController mediator = getMediator();
 
+      
         if (mediator.getCurrentObjAttribute() != null) {
             removeObjAttribute();
         }
@@ -223,6 +224,9 @@ public class RemoveAction extends CayenneAction {
     protected void removeObjEntity() {
         EventController mediator = getMediator();
         ObjEntity ent = mediator.getCurrentObjEntity();
+        
+        logObj.debug("removing obj entity: " + ent.getName());
+        
         DataMap map = mediator.getCurrentDataMap();
         map.deleteObjEntity(ent.getName());
         mediator.fireObjEntityEvent(
@@ -242,6 +246,9 @@ public class RemoveAction extends CayenneAction {
         EventController mediator = getMediator();
         ObjEntity entity = mediator.getCurrentObjEntity();
         ObjAttribute attrib = mediator.getCurrentObjAttribute();
+        
+        logObj.debug("removing obj attribute: " + attrib.getName());
+        
         entity.removeAttribute(attrib.getName());
         AttributeEvent e =
             new AttributeEvent(Editor.getFrame(), attrib, entity, MapEvent.REMOVE);
