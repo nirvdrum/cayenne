@@ -122,7 +122,7 @@ public interface QueryEngine {
      * Returns a resolver for this query engine that is capable of resolving
      * between classes, entity names, and obj/db entities
      */
-    public EntityResolver getEntityResolver();
+    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver();
 
 	/** 
 	 * Returns a collection of DataMaps associated with this QueryEngine.

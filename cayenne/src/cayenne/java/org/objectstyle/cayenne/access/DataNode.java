@@ -112,7 +112,8 @@ public class DataNode implements QueryEngine {
     protected DbAdapter adapter;
     protected String dataSourceLocation;
     protected String dataSourceFactory;
-    protected EntityResolver entityResolver = new EntityResolver();
+    protected org.objectstyle.cayenne.map.EntityResolver entityResolver =
+        new org.objectstyle.cayenne.map.EntityResolver();
     protected DependencySorter dependencySorter = NullSorter.NULL_SORTER;
 
     /** Creates unnamed DataNode. */
@@ -705,7 +706,7 @@ public class DataNode implements QueryEngine {
     /**
      * Returns EntityResolver that handles DataMaps of this node.
      */
-    public EntityResolver getEntityResolver() {
+    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
         return entityResolver;
     }
 

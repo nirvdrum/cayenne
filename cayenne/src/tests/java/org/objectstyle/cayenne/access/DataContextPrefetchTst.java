@@ -131,7 +131,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      */
     public void testPrefetch2b() throws Exception {
         this.populatePaintings();
-        EntityResolver er = context.getEntityResolver();
+        org.objectstyle.cayenne.map.EntityResolver er = context.getEntityResolver();
         ObjEntity paintingEntity = er.lookupObjEntity(Painting.class);
         ObjEntity galleryEntity = er.lookupObjEntity(Gallery.class);
         ObjEntity artistExhibitEntity = er.lookupObjEntity(ArtistExhibit.class);

@@ -53,10 +53,10 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.PeopleTestCase;
 

@@ -286,8 +286,7 @@ public class QueryUtils {
         QueryEngine e,
         SelectQuery q,
         String prefetchPath) {
-        ObjEntity ent = e.getEntityResolver().lookupObjEntity(q);
-        return new PrefetchSelectQuery(ent, q, prefetchPath);
+        return new PrefetchSelectQuery(e.getEntityResolver(), q, prefetchPath);
     }
 
     /**

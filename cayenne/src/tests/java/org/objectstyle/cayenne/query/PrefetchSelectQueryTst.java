@@ -70,8 +70,6 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
 public class PrefetchSelectQueryTst extends CayenneTestCase {
 
     public void testPaintings1() throws Exception {
-        ObjEntity artistEntity =
-            getDomain().getEntityResolver().lookupObjEntity(Artist.class);
         ObjEntity paintingEntity =
             getDomain().getEntityResolver().lookupObjEntity(Painting.class);
         SelectQuery q =
@@ -80,7 +78,7 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
                 ExpressionFactory.matchExp("artistName", "abc"));
 
         PrefetchSelectQuery prefetch =
-            new PrefetchSelectQuery(artistEntity, q, "paintingArray");
+            new PrefetchSelectQuery(getDomain().getEntityResolver(), q, "paintingArray");
 
         assertSame(paintingEntity, prefetch.getRoot());
         assertEquals(
@@ -89,8 +87,6 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
     }
 
     public void testPrefetchPaintings2() throws Exception {
-        ObjEntity artistEntity =
-            getDomain().getEntityResolver().lookupObjEntity(Artist.class);
         ObjEntity paintingEntity =
             getDomain().getEntityResolver().lookupObjEntity(Painting.class);
 
@@ -100,7 +96,7 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
                 Expression.fromString("artistName = 'abc' or artistName = 'xyz'"));
 
         PrefetchSelectQuery prefetch =
-            new PrefetchSelectQuery(artistEntity, q, "paintingArray");
+            new PrefetchSelectQuery(getDomain().getEntityResolver(), q, "paintingArray");
 
         assertSame(paintingEntity, prefetch.getRoot());
         assertEquals(
@@ -110,8 +106,6 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
     }
 
     public void testGalleries() throws Exception {
-        ObjEntity artistEntity =
-            getDomain().getEntityResolver().lookupObjEntity(Artist.class);
         ObjEntity galleryEntity =
             getDomain().getEntityResolver().lookupObjEntity(Gallery.class);
         SelectQuery q =
@@ -120,7 +114,10 @@ public class PrefetchSelectQueryTst extends CayenneTestCase {
                 ExpressionFactory.matchExp("artistName", "abc"));
 
         PrefetchSelectQuery prefetch =
-            new PrefetchSelectQuery(artistEntity, q, "paintingArray.toGallery");
+            new PrefetchSelectQuery(
+                getDomain().getEntityResolver(),
+                q,
+                "paintingArray.toGallery");
 
         assertSame(galleryEntity, prefetch.getRoot());
         assertEquals(

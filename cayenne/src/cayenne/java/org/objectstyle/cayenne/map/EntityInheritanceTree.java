@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,6 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * A tree structure representing inheritance hierarchy 
@@ -81,27 +80,41 @@ public class EntityInheritanceTree {
     }
 
     /**
+     * Returns a qualifier Expression that matches root entity
+     * of this tree and all its subentities.
+     */
+    public Expression qualifierForEntityAndSubclasses() {
+        Expression qualifier = entity.getDeclaredQualifier();
+
+        if (qualifier == null) {
+            // match all
+            return null;
+        }
+
+        if (subentities != null) {
+            Iterator it = subentities.iterator();
+            while (it.hasNext()) {
+                EntityInheritanceTree child = (EntityInheritanceTree) it.next();
+                Expression childQualifier = child.qualifierForEntityAndSubclasses();
+
+                // if any child qualifier is null, just return null, since no filtering is possible
+                if (childQualifier == null) {
+                    return null;
+                }
+
+                qualifier = qualifier.orExp(childQualifier);
+            }
+        }
+
+        return qualifier;
+    }
+
+    /**
      * Returns the deepest possible entity in the inheritance hierarchy 
      * that can be used to create objects from a given DataRow.
      */
     public ObjEntity entityMatchingRow(DataRow row) {
-        boolean match = true;
-        
-        Expression qualifier = entity.getQualifier();
-
-        if (qualifier != null) {
-            if (normalizedQualifier == null) {
-                normalizedQualifier = entity.translateToDbPath(qualifier);
-            }
-
-            match = normalizedQualifier.match(row);
-        }
-
-        if (!match) {
-            // this entity doesn't match; don't look up children anymore
-            return null;
-        }
-
+        // match depth first
         if (subentities != null) {
             Iterator it = subentities.iterator();
             while (it.hasNext()) {
@@ -114,6 +127,16 @@ public class EntityInheritanceTree {
             }
         }
 
+        Expression qualifier = entity.getDeclaredQualifier();
+        if (qualifier != null) {
+            if (normalizedQualifier == null) {
+                normalizedQualifier = entity.translateToDbPath(qualifier);
+            }
+
+            return normalizedQualifier.match(row) ? entity : null;
+        }
+
+        // no qualifier ... matches all rows
         return entity;
     }
 

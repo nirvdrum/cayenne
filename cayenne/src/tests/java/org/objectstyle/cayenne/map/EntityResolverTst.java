@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
 import java.util.Collection;

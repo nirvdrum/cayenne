@@ -59,11 +59,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;

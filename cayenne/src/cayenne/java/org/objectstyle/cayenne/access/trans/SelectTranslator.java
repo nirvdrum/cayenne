@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -71,6 +70,7 @@ import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;

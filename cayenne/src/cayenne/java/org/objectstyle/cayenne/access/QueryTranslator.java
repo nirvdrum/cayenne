@@ -59,9 +59,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 

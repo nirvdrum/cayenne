@@ -59,6 +59,8 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
@@ -87,11 +89,16 @@ public class PrefetchSelectQuery extends SelectQuery {
      * @since 1.1
      */
     public PrefetchSelectQuery(
-        ObjEntity entity,
+        EntityResolver resolver,
         SelectQuery parentQuery,
         String prefetch) {
+
         setRootQuery(parentQuery);
         setPrefetchPath(prefetch);
+
+        ObjEntity entity = resolver.lookupObjEntity(parentQuery);
+        EntityInheritanceTree inheritanceTree = resolver.lookupInheritanceTree(entity);
+        
         Iterator it = entity.resolvePathComponents(prefetch);
 
         // find root entity
@@ -110,7 +117,12 @@ public class PrefetchSelectQuery extends SelectQuery {
 
         // chain query and entity qualifiers
         Expression queryQualifier = parentQuery.getQualifier();
-        Expression entityQualifier = entity.getQualifier();
+
+        Expression entityQualifier =
+            (inheritanceTree != null)
+                ? inheritanceTree.qualifierForEntityAndSubclasses()
+                : entity.getDeclaredQualifier();
+
         if (entityQualifier != null) {
             queryQualifier =
                 (queryQualifier != null)

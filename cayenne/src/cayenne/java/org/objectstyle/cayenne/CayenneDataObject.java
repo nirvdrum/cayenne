@@ -67,9 +67,9 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;

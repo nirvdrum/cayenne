@@ -79,7 +79,6 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
-import org.objectstyle.cayenne.access.util.EntityInheritanceTree;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -95,6 +94,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -1335,12 +1335,13 @@ public class DataContext implements QueryEngine, Serializable {
                 SelectQuery select = (SelectQuery) it.next();
                 Collection prefetchRels = select.getPrefetches();
                 if (prefetchRels.size() > 0) {
-                    ObjEntity entity = getEntityResolver().lookupObjEntity(select);
-                    Iterator prIt = prefetchRels.iterator();
-
-                    while (prIt.hasNext()) {
+                    Iterator prefetchIt = prefetchRels.iterator();
+                    while (prefetchIt.hasNext()) {
                         PrefetchSelectQuery prefetchQuery =
-                            new PrefetchSelectQuery(entity, select, (String) prIt.next());
+                            new PrefetchSelectQuery(
+                                getEntityResolver(),
+                                select,
+                                (String) prefetchIt.next());
 
                         // filter via a delegate
                         GenericSelectQuery filteredPrefetch =
@@ -1619,7 +1620,7 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Returns EntityResolver object used to resolve and route queries.
      */
-    public EntityResolver getEntityResolver() {
+    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }

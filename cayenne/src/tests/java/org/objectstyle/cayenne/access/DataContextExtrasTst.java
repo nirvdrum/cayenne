@@ -208,7 +208,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testEntityResolver() {
-        EntityResolver er = context.getEntityResolver();
+        org.objectstyle.cayenne.map.EntityResolver er = context.getEntityResolver();
         assertNotNull(er);
     }
 }

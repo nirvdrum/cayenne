@@ -41,7 +41,7 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
 	<obj-entity name="Employee" superEntityName="AbstractPerson" className="org.objectstyle.cayenne.testdo.inherit.Employee">
-		<qualifier><![CDATA[personType like "E%"]]></qualifier>
+		<qualifier><![CDATA[personType = "EE"]]></qualifier>
 		<obj-attribute name="salary" type="java.lang.Float" db-attribute-path="SALARY"/>
 	</obj-entity>
 	<obj-entity name="Manager" superEntityName="Employee" className="org.objectstyle.cayenne.testdo.inherit.Manager">

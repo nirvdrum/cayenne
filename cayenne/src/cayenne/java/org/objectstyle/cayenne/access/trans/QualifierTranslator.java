@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.TraversalHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -121,7 +122,13 @@ public class QualifierTranslator
         ObjEntity entity = getObjEntity();
 
         if (entity != null) {
-            Expression entityQualifier = entity.getQualifier();
+            EntityInheritanceTree tree =
+                queryAssembler.getEngine().getEntityResolver().lookupInheritanceTree(
+                    entity);
+            Expression entityQualifier =
+                (tree != null)
+                    ? tree.qualifierForEntityAndSubclasses()
+                    : entity.getDeclaredQualifier();
             if (entityQualifier != null) {
                 qualifier =
                     (qualifier != null)

@@ -234,29 +234,6 @@ public class ObjEntity extends Entity {
 
     /**
      * Returns a qualifier that imposes a restriction on what objects
-     * belong to this entity. Returned qualifier is a combination
-     * of qualifiers declared in this entity and all super entities.
-     * 
-     * @since 1.1
-     */
-    public Expression getQualifier() {
-        Expression chain = null;
-        ObjEntity entity = this;
-
-        while (entity != null) {
-            Expression entityQualifier = entity.getDeclaredQualifier();
-            if (entityQualifier != null) {
-                chain = (chain != null) ? chain.andExp(entityQualifier) : entityQualifier;
-            }
-            
-            entity = entity.getSuperEntity();
-        }
-
-        return chain;
-    }
-
-    /**
-     * Returns a qualifier that imposes a restriction on what objects
      * belong to this entity. Returned qualifier is the one declared
      * in this entity, and does not include qualifiers declared in
      * super entities.

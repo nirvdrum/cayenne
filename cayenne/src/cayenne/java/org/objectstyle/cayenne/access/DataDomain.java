@@ -115,7 +115,7 @@ public class DataDomain implements QueryEngine {
     protected Map maps = Collections.synchronizedMap(new TreeMap());
     protected Map mapsRef = Collections.unmodifiableMap(maps);
 
-    protected EntityResolver entityResolver;
+    protected org.objectstyle.cayenne.map.EntityResolver entityResolver;
     protected PrimaryKeyHelper primaryKeyHelper;
     protected DataRowStore sharedSnapshotCache;
     protected TransactionDelegate transactionDelegate;
@@ -733,9 +733,9 @@ public class DataDomain implements QueryEngine {
         this.performQueries(Collections.singletonList(query), operationObserver);
     }
 
-    public EntityResolver getEntityResolver() {
+    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
         if (entityResolver == null) {
-            entityResolver = new EntityResolver(this.getDataMaps());
+            entityResolver = new org.objectstyle.cayenne.map.EntityResolver(this.getDataMaps());
         }
 
         return entityResolver;
