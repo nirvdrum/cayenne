@@ -23,6 +23,13 @@
         	<p>UNIX:</p>
 
         	<source>$CAYENNE_HOME/bin/modeler.sh</source>
+        	
+        	<p></p>
+        	<panel name="Note:">If modeler is to be used for database reverse engineering, make
+        	sure that JDBC drivers for the target database are in the CLASSPATH.
+        	Alternatively you can modify the startup scripts mentioned above 
+        	to build appropriate CLASSPATH on the fly, that includes all drivers.
+        	</panel>
         	</subsection>
     </section>
 </body>
