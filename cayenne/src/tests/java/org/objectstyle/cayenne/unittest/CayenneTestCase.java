@@ -125,4 +125,8 @@ public class CayenneTestCase extends TestCase {
     public CayenneTestDatabaseSetup getDatabaseSetup() {
         return CayenneTestResources.getResources().getSharedDatabaseSetup();
     }
+    
+    public DatabaseSetupDelegate getDatabaseSetupDelegate() {
+        return CayenneTestResources.getResources().getSharedDatabaseSetup().getDelegate();
+    }
 }

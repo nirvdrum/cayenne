@@ -60,7 +60,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -72,7 +71,6 @@ import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
@@ -84,10 +82,12 @@ public class CayenneTestDatabaseSetup {
 
 	protected DataMap map;
 	protected CayenneTestResources resources;
+	protected DatabaseSetupDelegate delegate;
 
 	public CayenneTestDatabaseSetup(CayenneTestResources resources, DataMap map) throws Exception {
 		this.map = map;
 		this.resources = resources;
+		this.delegate = DatabaseSetupDelegate.createDelegate(resources.getSharedNode().getAdapter());
 	}
 
 	/** Deletes all data from the database tables mentioned in the DataMap. */
@@ -138,6 +138,8 @@ public class CayenneTestDatabaseSetup {
 		List list = dbEntitiesInInsertOrder();
 
 		try {
+		    delegate.willDropTables(map);
+		    
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet tables = md.getTables(null, null, "%", null);
 			List allTables = new ArrayList();
@@ -171,6 +173,8 @@ public class CayenneTestDatabaseSetup {
 						sqe);
 				}
 			}
+			
+		    delegate.droppedTables(map);
 		} finally {
 			conn.close();
 		}
@@ -184,6 +188,7 @@ public class CayenneTestDatabaseSetup {
 		Connection conn = resources.getSharedConnection();
 
 		try {
+			delegate.willCreateTables(map);
 			Statement stmt = conn.createStatement();
 			Iterator it = tableCreateQueries();
 			while (it.hasNext()) {
@@ -191,6 +196,7 @@ public class CayenneTestDatabaseSetup {
 				logObj.warn("Create table: " + query);
 				stmt.execute(query);
 			}
+		    delegate.createdTables(map);
 		} finally {
 			conn.close();
 		}
@@ -219,28 +225,11 @@ public class CayenneTestDatabaseSetup {
 		}
 	}
 
-	/** Oracle 8i does not support more then 1 "LONG xx" column per table
-	  * PAINTING_INFO need to be fixed. */
-	private void applyOracleHack() {
-		DbEntity paintingInfo = map.getDbEntity("PAINTING_INFO");
-		DbAttribute textReview =
-			(DbAttribute) paintingInfo.getAttribute("TEXT_REVIEW");
-		textReview.setType(Types.VARCHAR);
-		textReview.setMaxLength(255);
-	}
-
 	/** Returns iterator of preprocessed table create queries */
 	public Iterator tableCreateQueries() throws Exception {
 		List queries = new ArrayList();
 		DbAdapter adapter = resources.getSharedNode().getAdapter();
 		DbGenerator gen = new DbGenerator(adapter, map);
-
-		// Oracle 8i does not support more then 1 "LONG xx" column per table
-		// PAINTING_INFO need to be fixed
-		if (adapter
-			instanceof org.objectstyle.cayenne.dba.oracle.OracleAdapter) {
-			applyOracleHack();
-		}
 
 		// table definitions
 		Iterator it = dbEntitiesInInsertOrder().iterator();
@@ -282,6 +271,22 @@ public class CayenneTestDatabaseSetup {
 		}
 		return list;
 	}
+
+    /**
+     * Returns the delegate.
+     * @return DatabaseSetupDelegate
+     */
+    public DatabaseSetupDelegate getDelegate() {
+        return delegate;
+    }
+
+    /**
+     * Sets the delegate.
+     * @param delegate The delegate to set
+     */
+    public void setDelegate(DatabaseSetupDelegate delegate) {
+        this.delegate = delegate;
+    }
 
 }
 
