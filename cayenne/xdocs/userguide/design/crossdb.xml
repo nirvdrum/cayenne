@@ -6,7 +6,7 @@
 	<next>/userguide/design/autopk.html</next>
 </navigator>
 <body>
-    <section name="3. Design" toc="/userguide/index.html">
+    <section name="3. Design">
         <subsection name="3.5 Cross-Database Issues" anchor="crossdb">
         	<p>JDBC specification was created by Sun to provide a uniform
         	way of connecting to relational databases from the Java code.

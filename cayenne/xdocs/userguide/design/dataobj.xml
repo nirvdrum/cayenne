@@ -6,7 +6,7 @@
 	<next>/userguide/design/access.html</next>
 </navigator>
 <body>
-    <section name="3. Design" toc="/userguide/index.html">
+    <section name="3. Design">
         <subsection name="3.2 Data Objects" anchor="do">
             <p> To Be Done </p>
         </subsection>

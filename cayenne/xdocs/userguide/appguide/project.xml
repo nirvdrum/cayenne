@@ -10,7 +10,7 @@
 	<next>/userguide/appguide/javagen.html</next>
 </navigator>
 <body>
-    <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
+    <section name="4. Writing Cayenne Applications">        
         <subsection name="4.2 Cayenne Project" anchor="datamap">
             <p>Cayenne project is a set of XML configuration files
             needed for a Java application to work with Cayenne. While project

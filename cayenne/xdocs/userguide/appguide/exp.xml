@@ -10,7 +10,7 @@
 	<next>/userguide/appguide/deploy.html</next>
 </navigator>    
 <body>
-    <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
+    <section name="4. Writing Cayenne Applications">        
         <subsection name="4.5 Expressions" anchor="exp">
             <p>To Be Done.
             </p>

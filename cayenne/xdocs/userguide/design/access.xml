@@ -6,7 +6,7 @@
 	<next>/userguide/design/datasrc.html</next>
 </navigator>
 <body>
-    <section name="3. Design" toc="/userguide/index.html">
+    <section name="3. Design">
             <subsection name="3.3 Access Classes" anchor="access_classes">
             <p>Cayenne database access module consists of a stack of objects, 
             all implementing <a href=

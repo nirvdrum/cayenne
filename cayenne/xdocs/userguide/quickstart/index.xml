@@ -1,0 +1,17 @@
+<document>
+<title>User Guide - Quick Start</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/install.html</prev>
+	<next>/userguide/design/index.html</next>
+</navigator> 
+<body>
+    <section name="3. Quick Start">
+            <p>To Be Done.</p>
+    </section>
+</body>
+</document>

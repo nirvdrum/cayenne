@@ -6,7 +6,7 @@
 	<next>/userguide/design/crossdb.html</next>
 </navigator>
 <body>
-    <section name="3. Design" toc="/userguide/index.html">
+    <section name="3. Design">
         <subsection name="3.4 Cayenne DataSource" anchor="connect">
         
         	<p>Cayenne is designed to work with any javax.sql.DataSource implementation. 
