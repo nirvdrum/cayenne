@@ -1,23 +1,31 @@
-<!-- =================================================== -->
-<!-- Cayenne DataMap DTD, v 1.1                          -->
-<!--                                                     -->
-<!-- Copyright (c) 2002-2004 Andrei Adamchik and         -->
-<!-- individual authors. All rights reserved             -->
-<!--                                                     -->
-<!-- Author: Michael Shengaout                           -->
-<!-- Author: Andrei Adamchik                             -->
-<!-- Author: Andriy Shapochka                            -->
-<!--                                                     -->
-<!-- Defines format of Cayenne DataMaps (*.map.xml) that -->
-<!-- contain the mapping between DB schemas and Java     -->
-<!-- object structure.                                   -->
-<!-- =================================================== -->
+<?xml version="1.0" encoding="UTF-8" ?>
 
+<!-- ===================================================
+Cayenne DataMap DTD, v 1.1
+
+Copyright (c) 2002-2004 Andrei Adamchik and individual authors. All rights reserved
+
+Author: Michael Shengaout
+Author: Andrei Adamchik
+Author: Andriy Shapochka
+
+Defines format of Cayenne DataMap XML files (*.map.xml).  DataMap files contain
+the metadata needed for Cayenne object-relational features. Multiple DataMaps
+are usually combined in one shared namespace, so the elements of the DataMap
+may reference objects from other DataMaps. 
+-->
+
+<!-- ===================================================
+Root element.
+-->
 <!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*, procedure*, query*)>
 <!ATTLIST data-map
 	project-version CDATA #REQUIRED
 >
 
+<!-- ===================================================
+A descriptor of a DB table or view.
+-->
 <!ELEMENT db-entity (db-attribute+, db-attribute-derived+, db-key-generator?)>
 <!ATTLIST db-entity
 	name CDATA #REQUIRED
@@ -26,6 +34,9 @@
 	parentName CDATA #IMPLIED
 >
 
+<!-- ===================================================
+A descriptor of a DB table column.
+-->
 <!ELEMENT db-attribute EMPTY>
 <!ATTLIST db-attribute
 	name CDATA #REQUIRED
@@ -35,6 +46,10 @@
 	length CDATA #IMPLIED
 	precision CDATA #IMPLIED
 >
+
+<!-- ===================================================
+A descriptor of a column of a "dynamic view" defined via a derived DbEntity.
+-->
 <!ELEMENT db-attribute-derived (db-attribute-ref*)>
 <!ATTLIST db-attribute-derived
 	name CDATA #REQUIRED
@@ -46,7 +61,6 @@
 	isGroupBy (true | false) "false"
 	spec CDATA #IMPLIED
 >
-
 
 <!ELEMENT db-attribute-ref EMPTY>
 <!ATTLIST db-attribute
